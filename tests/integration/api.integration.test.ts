@@ -2,6 +2,25 @@ import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers
 import { ChildProcess, spawn } from 'child_process';
 import fetch from 'node-fetch';
 
+// Type definitions for API responses
+interface Item {
+  id: number;
+  name: string;
+  created_at: string;
+}
+
+interface GetItemsResponse {
+  items: Item[];
+}
+
+interface PostItemResponse {
+  item: Item;
+}
+
+interface ErrorResponse {
+  error: string;
+}
+
 describe('API Integration Tests', () => {
   let postgresContainer: StartedPostgreSqlContainer;
   let nextProcess: ChildProcess;
@@ -94,7 +113,7 @@ describe('API Integration Tests', () => {
     });
 
     expect(postResponse.status).toBe(201);
-    const postData: any = await postResponse.json();
+    const postData = await postResponse.json() as PostItemResponse;
     expect(postData.item).toBeDefined();
     expect(postData.item.name).toBe('Test Item');
     expect(postData.item.id).toBeDefined();
@@ -105,14 +124,14 @@ describe('API Integration Tests', () => {
     const getResponse = await fetch(`${baseUrl}/api/items`);
     expect(getResponse.status).toBe(200);
     
-    const getData: any = await getResponse.json();
+    const getData = await getResponse.json() as GetItemsResponse;
     expect(getData.items).toBeDefined();
     expect(Array.isArray(getData.items)).toBe(true);
     
     // Find our item
-    const foundItem = getData.items.find((item: any) => item.id === itemId);
+    const foundItem = getData.items.find((item) => item.id === itemId);
     expect(foundItem).toBeDefined();
-    expect(foundItem.name).toBe('Test Item');
+    expect(foundItem?.name).toBe('Test Item');
   });
 
   it('should return 400 for POST without name', async () => {
@@ -125,7 +144,7 @@ describe('API Integration Tests', () => {
     });
 
     expect(response.status).toBe(400);
-    const data: any = await response.json();
+    const data = await response.json() as ErrorResponse;
     expect(data.error).toBe('Name is required');
   });
 
@@ -135,7 +154,7 @@ describe('API Integration Tests', () => {
     });
 
     expect(response.status).toBe(405);
-    const data: any = await response.json();
+    const data = await response.json() as ErrorResponse;
     expect(data.error).toBe('Method not allowed');
   });
 });

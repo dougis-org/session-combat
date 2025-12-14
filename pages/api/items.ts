@@ -1,7 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Pool } from 'pg';
 
-// Reuse pool across hot reloads in development
+// Reuse pool across hot reloads in development to avoid connection leaks.
+// This is a common pattern for Next.js API routes. In serverless deployments,
+// each function instance maintains its own pool, and connection management
+// is handled by the underlying infrastructure.
 let pool: Pool | null = null;
 
 function getPool(): Pool {
