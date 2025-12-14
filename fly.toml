@@ -7,6 +7,13 @@ app = 'session-combat'
 primary_region = 'sjc'
 
 [build]
+  build-target = 'app'
+
+[build.args]
+  BUILD_VERSION = '1.0.0'
+
+[env]
+  NODE_ENV = 'production'
 
 [http_service]
   internal_port = 3000

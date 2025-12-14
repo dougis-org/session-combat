@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { storage } from '@/lib/storage';
+import { clientStorage } from '@/lib/clientStorage';
 import { Encounter, Monster } from '@/lib/types';
 
 export default function EncountersPage() {
@@ -11,21 +11,24 @@ export default function EncountersPage() {
   const [editingEncounter, setEditingEncounter] = useState<Encounter | null>(null);
 
   useEffect(() => {
-    const data = storage.load();
+    const data = clientStorage.load();
     setEncounters(data.encounters);
   }, []);
 
   const saveEncounters = (newEncounters: Encounter[]) => {
     setEncounters(newEncounters);
-    storage.saveEncounters(newEncounters);
+    clientStorage.saveEncounters(newEncounters);
   };
 
   const addEncounter = () => {
     const newEncounter: Encounter = {
       id: Date.now().toString(),
+      userId: 'default-user',
       name: 'New Encounter',
       description: '',
       monsters: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     setEditingEncounter(newEncounter);
     setIsAddingEncounter(true);
@@ -139,6 +142,7 @@ function EncounterEditor({
   const addMonster = () => {
     const newMonster: Monster = {
       id: Date.now().toString(),
+      userId: 'default-user',
       name: 'New Monster',
       hp: 10,
       maxHp: 10,

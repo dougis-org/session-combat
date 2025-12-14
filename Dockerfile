@@ -37,6 +37,14 @@ RUN npm prune --omit=dev
 # Final stage for app image
 FROM base
 
+# Set build arguments for version tracking
+ARG BUILD_VERSION=1.0.0
+ARG BUILD_TIME
+ENV BUILD_VERSION=${BUILD_VERSION}
+ENV BUILD_TIME=${BUILD_TIME}
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+
 # Copy built application
 COPY --from=build /app /app
 

@@ -1,0 +1,121 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+
+export interface AuthUser {
+  userId: string;
+  email: string;
+}
+
+export function useAuth() {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check if user is authenticated
+  const checkAuth = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/auth/me');
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUser({ userId: data.userId, email: data.email });
+        setError(null);
+      } else {
+        setUser(null);
+      }
+    } catch (err) {
+      console.error('Auth check failed:', err);
+      setUser(null);
+      setError('Failed to check authentication');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Check auth on mount
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  // Register function
+  const register = useCallback(async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      setUser({ userId: data.userId, email: data.email });
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Registration failed';
+      setError(message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Login function
+  const login = useCallback(async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      setUser({ userId: data.userId, email: data.email });
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Login failed';
+      setError(message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Logout function
+  const logout = useCallback(async () => {
+    try {
+      setLoading(true);
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setUser(null);
+      setError(null);
+    } catch (err) {
+      console.error('Logout failed:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return {
+    user,
+    loading,
+    error,
+    register,
+    login,
+    logout,
+    isAuthenticated: !!user,
+  };
+}

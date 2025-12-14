@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { storage } from '@/lib/storage';
+import { clientStorage } from '@/lib/clientStorage';
 import { Player } from '@/lib/types';
 
 export default function PlayersPage() {
@@ -11,18 +11,19 @@ export default function PlayersPage() {
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    const data = storage.load();
+    const data = clientStorage.load();
     setPlayers(data.players);
   }, []);
 
   const savePlayers = (newPlayers: Player[]) => {
     setPlayers(newPlayers);
-    storage.savePlayers(newPlayers);
+    clientStorage.savePlayers(newPlayers);
   };
 
   const addPlayer = () => {
     const newPlayer: Player = {
       id: Date.now().toString(),
+      userId: 'default-user',
       name: 'New Player',
       hp: 10,
       maxHp: 10,

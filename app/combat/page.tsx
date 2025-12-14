@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { storage } from '@/lib/storage';
+import { clientStorage } from '@/lib/clientStorage';
 import { CombatState, CombatantState, Encounter, Player, StatusCondition } from '@/lib/types';
 
 export default function CombatPage() {
@@ -12,7 +12,7 @@ export default function CombatPage() {
   const [selectedEncounterId, setSelectedEncounterId] = useState<string>('');
 
   useEffect(() => {
-    const data = storage.load();
+    const data = clientStorage.load();
     setEncounters(data.encounters);
     setPlayers(data.players);
     if (data.combatState) {
@@ -22,7 +22,7 @@ export default function CombatPage() {
 
   const saveCombatState = (state: CombatState | null) => {
     setCombatState(state);
-    storage.saveCombatState(state || undefined);
+    clientStorage.saveCombatState(state || undefined);
   };
 
   const startCombat = () => {
@@ -63,11 +63,14 @@ export default function CombatPage() {
 
     const newState: CombatState = {
       id: Date.now().toString(),
+      userId: 'default-user',
       encounterId: selectedEncounterId || undefined,
       combatants,
       currentRound: 1,
       currentTurnIndex: 0,
       isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     saveCombatState(newState);

@@ -1,7 +1,23 @@
 // Data types for the combat tracker
 
+// User and authentication
+export interface User {
+  _id?: string;
+  id?: string;
+  email: string;
+  passwordHash: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AuthPayload {
+  userId: string;
+  email: string;
+}
+
 export interface Monster {
   id: string;
+  userId: string;
   name: string;
   hp: number;
   maxHp: number;
@@ -11,6 +27,7 @@ export interface Monster {
 
 export interface Player {
   id: string;
+  userId: string;
   name: string;
   hp: number;
   maxHp: number;
@@ -20,9 +37,12 @@ export interface Player {
 
 export interface Encounter {
   id: string;
+  userId: string;
   name: string;
   description: string;
   monsters: Monster[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface StatusCondition {
@@ -51,11 +71,14 @@ export interface CombatantState {
 
 export interface CombatState {
   id: string;
+  userId: string;
   encounterId?: string;
   combatants: CombatantState[];
   currentRound: number;
   currentTurnIndex: number;
   isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface SessionData {

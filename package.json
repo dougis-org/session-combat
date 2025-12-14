@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "BUILD_VERSION=$(node -e \"console.log(require('./package.json').version)\") BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ') HOSTNAME=0.0.0.0 PORT=3000 next start",
     "lint": "next lint",
     "test:integration": "jest --config=jest.integration.config.js"
   },
@@ -14,6 +14,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.3.0",
     "next": "^16.0.10",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
@@ -21,8 +24,11 @@
   "devDependencies": {
     "@swc/jest": "^0.2.29",
     "@tailwindcss/postcss": "^4.1.18",
+    "@testcontainers/mongodb": "^10.3.1",
     "@testcontainers/postgresql": "^10.3.1",
+    "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^29.5.8",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^25.0.2",
     "@types/node-fetch": "^2.6.9",
     "@types/pg": "^8.10.9",
