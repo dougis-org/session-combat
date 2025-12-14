@@ -10,7 +10,7 @@ module.exports = {
           syntax: 'typescript',
           tsx: false,
         },
-        transform: null,
+        transform: {},
         target: 'es2017',
       },
       module: {

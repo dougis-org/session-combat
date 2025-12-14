@@ -45,7 +45,9 @@ export default async function handler(
   const client = getPool();
 
   try {
-    // Ensure the items table exists
+    // Ensure the items table exists. This is done on every request for simplicity
+    // in this example/test API. In a production application, you would use
+    // database migrations to set up tables during deployment.
     await client.query(`
       CREATE TABLE IF NOT EXISTS items (
         id SERIAL PRIMARY KEY,
