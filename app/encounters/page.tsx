@@ -315,7 +315,10 @@ function MonsterEditor({
           <input
             type="number"
             value={hp}
-            onChange={(e) => setHp(parseInt(e.target.value) || 0)}
+            onChange={(e) => {
+              const newHp = parseInt(e.target.value) || 0;
+              setHp(Math.min(newHp, maxHp));
+            }}
             className="w-full bg-gray-700 rounded px-2 py-1 text-sm"
           />
         </div>

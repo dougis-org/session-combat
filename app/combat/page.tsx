@@ -285,10 +285,32 @@ function CombatantCard({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showConditions, setShowConditions] = useState(false);
+  const [hpAdjustment, setHpAdjustment] = useState('');
 
   const adjustHp = (amount: number) => {
     const newHp = Math.max(0, Math.min(combatant.maxHp, combatant.hp + amount));
     onUpdate({ hp: newHp });
+  };
+
+  const handleHpAdjustmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setHpAdjustment(value);
+  };
+
+  const applyDamage = () => {
+    const amount = parseInt(hpAdjustment) || 0;
+    if (amount > 0) {
+      adjustHp(-amount);
+      setHpAdjustment('');
+    }
+  };
+
+  const applyHeal = () => {
+    const amount = parseInt(hpAdjustment) || 0;
+    if (amount > 0) {
+      adjustHp(amount);
+      setHpAdjustment('');
+    }
   };
 
   const addCondition = () => {
@@ -347,21 +369,39 @@ function CombatantCard({
             <div>
               <p className="text-xs text-gray-400">HP</p>
               <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={hpAdjustment}
+                  onChange={handleHpAdjustmentChange}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      if (e.shiftKey) {
+                        applyHeal();
+                      } else {
+                        applyDamage();
+                      }
+                    }
+                  }}
+                  className="w-14 bg-gray-700 rounded px-2 py-1 text-xs text-center"
+                />
                 <button
-                  onClick={() => adjustHp(-5)}
+                  onClick={applyDamage}
+                  title="Apply damage (Enter)"
                   className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
                 >
-                  -5
+                  Damage
+                </button>
+                <button
+                  onClick={applyHeal}
+                  title="Apply healing (Shift+Enter)"
+                  className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs"
+                >
+                  Heal
                 </button>
                 <span className="text-lg font-bold">
                   {combatant.hp}/{combatant.maxHp}
                 </span>
-                <button
-                  onClick={() => adjustHp(5)}
-                  className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs"
-                >
-                  +5
-                </button>
               </div>
             </div>
           </div>
