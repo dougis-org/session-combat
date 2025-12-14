@@ -108,7 +108,7 @@ export default function EncountersPage() {
                     <div key={monster.id} className="bg-gray-700 rounded p-2 text-sm">
                       <span className="font-medium">{monster.name}</span>
                       <span className="text-gray-400 ml-2">
-                        HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, Init: +{monster.initiativeBonus}
+                        HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, Init: {monster.initiativeBonus >= 0 ? '+' : ''}{monster.initiativeBonus}
                       </span>
                     </div>
                   ))}
@@ -222,7 +222,7 @@ function EncounterEditor({
               <div>
                 <span className="font-medium">{monster.name}</span>
                 <span className="text-gray-400 ml-2 text-sm">
-                  HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, Init: +{monster.initiativeBonus}
+                  HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, Init: {monster.initiativeBonus >= 0 ? '+' : ''}{monster.initiativeBonus}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -306,7 +306,7 @@ function MonsterEditor({
           <input
             type="number"
             value={ac}
-            onChange={(e) => setAc(parseInt(e.target.value))}
+            onChange={(e) => setAc(parseInt(e.target.value) || 0)}
             className="w-full bg-gray-700 rounded px-2 py-1 text-sm"
           />
         </div>
@@ -315,7 +315,7 @@ function MonsterEditor({
           <input
             type="number"
             value={hp}
-            onChange={(e) => setHp(parseInt(e.target.value))}
+            onChange={(e) => setHp(parseInt(e.target.value) || 0)}
             className="w-full bg-gray-700 rounded px-2 py-1 text-sm"
           />
         </div>
@@ -324,7 +324,7 @@ function MonsterEditor({
           <input
             type="number"
             value={maxHp}
-            onChange={(e) => setMaxHp(parseInt(e.target.value))}
+            onChange={(e) => setMaxHp(parseInt(e.target.value) || 0)}
             className="w-full bg-gray-700 rounded px-2 py-1 text-sm"
           />
         </div>
@@ -333,7 +333,7 @@ function MonsterEditor({
           <input
             type="number"
             value={initiativeBonus}
-            onChange={(e) => setInitiativeBonus(parseInt(e.target.value))}
+            onChange={(e) => setInitiativeBonus(parseInt(e.target.value) || 0)}
             className="w-full bg-gray-700 rounded px-2 py-1 text-sm"
           />
         </div>

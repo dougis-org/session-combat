@@ -88,7 +88,7 @@ export default function PlayersPage() {
                   <div className="text-gray-400 mt-2 space-y-1">
                     <p>HP: {player.hp}/{player.maxHp}</p>
                     <p>AC: {player.ac}</p>
-                    <p>Initiative Bonus: +{player.initiativeBonus}</p>
+                    <p>Initiative Bonus: {player.initiativeBonus >= 0 ? '+' : ''}{player.initiativeBonus}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -160,7 +160,7 @@ function PlayerEditor({
           <input
             type="number"
             value={ac}
-            onChange={(e) => setAc(parseInt(e.target.value))}
+            onChange={(e) => setAc(parseInt(e.target.value) || 0)}
             className="w-full bg-gray-700 rounded px-3 py-2"
           />
         </div>
@@ -170,7 +170,7 @@ function PlayerEditor({
           <input
             type="number"
             value={hp}
-            onChange={(e) => setHp(parseInt(e.target.value))}
+            onChange={(e) => setHp(parseInt(e.target.value) || 0)}
             className="w-full bg-gray-700 rounded px-3 py-2"
           />
         </div>
@@ -180,7 +180,7 @@ function PlayerEditor({
           <input
             type="number"
             value={maxHp}
-            onChange={(e) => setMaxHp(parseInt(e.target.value))}
+            onChange={(e) => setMaxHp(parseInt(e.target.value) || 0)}
             className="w-full bg-gray-700 rounded px-3 py-2"
           />
         </div>
@@ -190,7 +190,7 @@ function PlayerEditor({
           <input
             type="number"
             value={initiativeBonus}
-            onChange={(e) => setInitiativeBonus(parseInt(e.target.value))}
+            onChange={(e) => setInitiativeBonus(parseInt(e.target.value) || 0)}
             className="w-full bg-gray-700 rounded px-3 py-2"
           />
         </div>
