@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
+import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
+import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { MonsterTemplate } from '@/lib/types';
 
 function MonstersContent() {
@@ -60,16 +62,26 @@ function MonstersContent() {
       setError('Only administrators can create global monster templates');
       return;
     }
-    
+
     const newTemplate: MonsterTemplate = {
       id: '',
       userId: mode === 'global' ? 'GLOBAL' : '',
       name: 'New Monster',
+      size: 'medium',
+      type: 'humanoid',
+      ac: 10,
       hp: 10,
       maxHp: 10,
-      ac: 10,
-      initiativeBonus: 0,
-      dexterity: 10,
+      speed: '30 ft.',
+      challengeRating: 0,
+      abilityScores: {
+        strength: 10,
+        dexterity: 10,
+        constitution: 10,
+        intelligence: 10,
+        wisdom: 10,
+        charisma: 10,
+      },
       isGlobal: mode === 'global',
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -109,8 +121,10 @@ function MonstersContent() {
     if (!confirm('Are you sure you want to delete this monster template?')) return;
     try {
       setError(null);
+      // Use safe hardcoded endpoints only
       const endpoint = mode === 'global' ? '/api/monsters/global' : '/api/monsters';
-      const response = await fetch(`${endpoint}/${id}`, { method: 'DELETE' });
+      const url = `${endpoint}/${id}`;
+      const response = await fetch(url, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete monster template');
       await fetchTemplates();
     } catch (err) {
@@ -267,29 +281,21 @@ function MonsterTemplateCard({
 }) {
   return (
     <div className={`rounded-lg p-4 ${isGlobal ? 'bg-gray-800 border border-purple-600' : 'bg-gray-800'}`}>
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
+      <div className="flex justify-between items-start mb-4">
+        <div>
           <div className="flex items-center gap-2">
             <h3 className="text-xl font-semibold">{template.name}</h3>
             {isGlobal && <span className="px-2 py-1 bg-purple-600 text-xs rounded">Global</span>}
           </div>
-          <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-gray-300">
-            <div>
-              <span className="text-gray-400">HP:</span> {template.hp}/{template.maxHp}
-            </div>
-            <div>
-              <span className="text-gray-400">AC:</span> {template.ac}
-            </div>
-            <div>
-              <span className="text-gray-400">Initiative:</span> {template.initiativeBonus >= 0 ? '+' : ''}{template.initiativeBonus}
-            </div>
-            <div>
-              <span className="text-gray-400">Dexterity:</span> {template.dexterity}
-            </div>
-          </div>
+          {(template.size || template.type) && (
+            <p className="text-sm text-gray-400 mt-1">
+              {template.size} {template.type}
+              {template.challengeRating !== undefined && ` (CR ${template.challengeRating})`}
+            </p>
+          )}
         </div>
         {canEdit && (
-          <div className="flex gap-2 ml-4">
+          <div className="flex gap-2">
             <button
               onClick={onEdit}
               className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
@@ -305,6 +311,26 @@ function MonsterTemplateCard({
           </div>
         )}
       </div>
+      <CreatureStatBlock
+        abilityScores={template.abilityScores}
+        ac={template.ac}
+        acNote={template.acNote}
+        hp={template.hp}
+        maxHp={template.maxHp}
+        skills={template.skills}
+        savingThrows={template.savingThrows}
+        damageResistances={template.damageResistances}
+        damageImmunities={template.damageImmunities}
+        damageVulnerabilities={template.damageVulnerabilities}
+        conditionImmunities={template.conditionImmunities}
+        senses={template.senses}
+        languages={template.languages}
+        traits={template.traits}
+        actions={template.actions}
+        bonusActions={template.bonusActions}
+        reactions={template.reactions}
+        isCompact={true}
+      />
     </div>
   );
 }
@@ -323,26 +349,45 @@ function MonsterTemplateEditor({
   isGlobal: boolean;
 }) {
   const [name, setName] = useState(template.name);
-  const [hp, setHp] = useState(template.hp);
-  const [maxHp, setMaxHp] = useState(template.maxHp);
-  const [ac, setAc] = useState(template.ac);
-  const [initiativeBonus, setInitiativeBonus] = useState(template.initiativeBonus);
-  const [dexterity, setDexterity] = useState(template.dexterity);
+  const [size, setSize] = useState(template.size);
+  const [type, setType] = useState(template.type);
+  const [alignment, setAlignment] = useState(template.alignment || '');
+  const [speed, setSpeed] = useState(template.speed);
+  const [challengeRating, setChallengeRating] = useState(template.challengeRating);
+  const [source, setSource] = useState(template.source || '');
+  const [description, setDescription] = useState(template.description || '');
+  const [stats, setStats] = useState(template);
   const [saving, setSaving] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleSave = async () => {
+    setValidationError(null);
+
+    if (!name.trim()) {
+      setValidationError('Monster name is required');
+      return;
+    }
+
+    if (stats.hp > stats.maxHp) {
+      setValidationError('Current HP cannot be greater than Max HP');
+      return;
+    }
+
     setSaving(true);
     try {
-      await onSave({
-        ...template,
+      const updatedTemplate: MonsterTemplate = {
+        ...stats,
         name,
-        hp,
-        maxHp,
-        ac,
-        initiativeBonus,
-        dexterity,
+        size,
+        type,
+        alignment: alignment || undefined,
+        speed,
+        challengeRating,
+        source: source || undefined,
+        description: description || undefined,
         updatedAt: new Date(),
-      });
+      };
+      await onSave(updatedTemplate);
     } finally {
       setSaving(false);
     }
@@ -354,73 +399,122 @@ function MonsterTemplateEditor({
     <div className={`rounded-lg p-6 mb-6 border-2 ${isGlobal ? 'border-purple-500 bg-gray-800' : 'border-blue-500 bg-gray-800'}`}>
       <h3 className="text-2xl font-bold mb-4">{isNew ? `Create ${title}` : `Edit ${title}`}</h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label className="block mb-1 text-sm">Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-          />
+      {validationError && (
+        <div className="p-3 bg-red-900 border border-red-700 rounded text-red-200 mb-4">
+          {validationError}
         </div>
-        <div>
-          <label className="block mb-1 text-sm">AC</label>
-          <input
-            type="number"
-            value={ac}
-            onChange={(e) => setAc(parseInt(e.target.value) || 0)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-          />
-        </div>
-        <div>
-          <label className="block mb-1 text-sm">Current HP</label>
-          <input
-            type="number"
-            value={hp}
-            onChange={(e) => {
-              const newHp = parseInt(e.target.value) || 0;
-              setHp(Math.min(newHp, maxHp));
-            }}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-          />
-        </div>
-        <div>
-          <label className="block mb-1 text-sm">Max HP</label>
-          <input
-            type="number"
-            value={maxHp}
-            onChange={(e) => setMaxHp(parseInt(e.target.value) || 0)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-          />
-        </div>
-        <div>
-          <label className="block mb-1 text-sm">Initiative Bonus</label>
-          <input
-            type="number"
-            value={initiativeBonus}
-            onChange={(e) => setInitiativeBonus(parseInt(e.target.value) || 0)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-          />
-        </div>
-        <div>
-          <label className="block mb-1 text-sm">Dexterity</label>
-          <input
-            type="number"
-            value={dexterity}
-            onChange={(e) => setDexterity(parseInt(e.target.value) || 0)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-          />
+      )}
+
+      {/* Basic Monster Info */}
+      <div className="mb-6 pb-6 border-b border-gray-700">
+        <h4 className="font-bold text-gray-300 mb-4">Basic Info</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block mb-1 text-sm font-bold">Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+              disabled={saving}
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-bold">Size</label>
+            <select
+              value={size}
+              onChange={e => setSize(e.target.value as any)}
+              className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+              disabled={saving}
+            >
+              <option value="tiny">Tiny</option>
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+              <option value="huge">Huge</option>
+              <option value="gargantuan">Gargantuan</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-bold">Type</label>
+            <input
+              type="text"
+              value={type}
+              onChange={e => setType(e.target.value)}
+              placeholder="e.g., humanoid, beast"
+              className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+              disabled={saving}
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-bold">Alignment</label>
+            <input
+              type="text"
+              value={alignment}
+              onChange={e => setAlignment(e.target.value)}
+              placeholder="e.g., lawful evil"
+              className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+              disabled={saving}
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-bold">Speed</label>
+            <input
+              type="text"
+              value={speed}
+              onChange={e => setSpeed(e.target.value)}
+              placeholder="e.g., 30 ft., fly 60 ft."
+              className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+              disabled={saving}
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-bold">Challenge Rating</label>
+            <input
+              type="number"
+              value={challengeRating}
+              onChange={e => setChallengeRating(parseFloat(e.target.value) || 0)}
+              className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+              disabled={saving}
+              step="0.125"
+              min="0"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block mb-1 text-sm font-bold">Source</label>
+            <input
+              type="text"
+              value={source}
+              onChange={e => setSource(e.target.value)}
+              placeholder="e.g., Monster Manual"
+              className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+              disabled={saving}
+            />
+          </div>
+
+          <div className="md:col-span-3">
+            <label className="block mb-1 text-sm font-bold">Description / Notes</label>
+            <textarea
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+              disabled={saving}
+              rows={2}
+            />
+          </div>
         </div>
       </div>
 
-      <div className="flex gap-2">
+      {/* Creature Stats */}
+      <CreatureStatsForm stats={stats} onChange={(updatedStats) => setStats(prev => ({ ...prev, ...updatedStats }))} />
+
+      <div className="flex gap-2 mt-6">
         <button
           onClick={handleSave}
           disabled={saving || !name.trim()}

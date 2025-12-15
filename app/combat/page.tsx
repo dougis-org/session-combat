@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
+import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll } from '@/lib/types';
 
 function CombatContent() {
@@ -68,12 +69,14 @@ function CombatContent() {
 
     // Add characters
     characters.forEach(character => {
+      const dexterity = character.abilityScores?.dexterity || 10;
+      const dexModifier = Math.floor((dexterity - 10) / 2);
       combatants.push({
         id: `character-${character.id}`,
         name: character.name,
         type: 'player',
         initiative: 0,
-        dexterity: character.dexterity,
+        abilityScores: character.abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
         hp: character.hp,
         maxHp: character.maxHp,
         ac: character.ac,
@@ -86,12 +89,14 @@ function CombatContent() {
       const encounter = encounters.find(e => e.id === selectedEncounterId);
       if (encounter) {
         encounter.monsters.forEach((monster, idx) => {
+          const dexterity = monster.abilityScores?.dexterity || 10;
+          const dexModifier = Math.floor((dexterity - 10) / 2);
           combatants.push({
             id: `monster-${monster.id}-${idx}`,
             name: `${monster.name} ${idx + 1}`,
             type: 'monster',
             initiative: 0,
-            dexterity: monster.dexterity,
+            abilityScores: monster.abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             hp: monster.hp,
             maxHp: monster.maxHp,
             ac: monster.ac,
@@ -152,14 +157,17 @@ function CombatContent() {
   const getInitiativeBonus = (combatant: CombatantState): number => {
     if (combatant.type === 'player') {
       const character = characters.find(c => `character-${c.id}` === combatant.id);
-      return character?.initiativeBonus || 0;
+      // Calculate from DEX modifier
+      const dexterity = character?.abilityScores?.dexterity || 10;
+      return Math.floor((dexterity - 10) / 2);
     } else {
       // Extract initiative bonus from encounter monster
       if (combatState?.encounterId) {
         const encounter = encounters.find(e => e.id === combatState.encounterId);
         if (encounter) {
           const monster = encounter.monsters.find(m => combatant.id.includes(m.id));
-          return monster?.initiativeBonus || 0;
+          const dexterity = monster?.abilityScores?.dexterity || 10;
+          return Math.floor((dexterity - 10) / 2);
         }
       }
     }
@@ -172,8 +180,10 @@ function CombatContent() {
         return b.initiative - a.initiative;
       }
       // Secondary: Dexterity (descending)
-      if (a.dexterity !== b.dexterity) {
-        return b.dexterity - a.dexterity;
+      const aDex = a.abilityScores?.dexterity || 10;
+      const bDex = b.abilityScores?.dexterity || 10;
+      if (aDex !== bDex) {
+        return bDex - aDex;
       }
       // Tertiary: Player before monster
       if (a.type !== b.type) {
@@ -605,7 +615,7 @@ function CombatantCard({
             </div>
             <div>
               <p className="text-xs text-gray-400">DEX</p>
-              <p className="text-lg font-bold">{combatant.dexterity}</p>
+              <p className="text-lg font-bold">{combatant.abilityScores?.dexterity || 10}</p>
             </div>
           </div>
 

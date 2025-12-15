@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { Character } from '@/lib/types';
+import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
+import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
+import { Character, AbilityScores } from '@/lib/types';
 
 function CharactersContent() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -36,11 +38,17 @@ function CharactersContent() {
       id: '',
       userId: '',
       name: 'New Character',
+      ac: 10,
       hp: 10,
       maxHp: 10,
-      ac: 10,
-      initiativeBonus: 0,
-      dexterity: 10,
+      abilityScores: {
+        strength: 10,
+        dexterity: 10,
+        constitution: 10,
+        intelligence: 10,
+        wisdom: 10,
+        charisma: 10,
+      },
     };
     setEditingCharacter(newCharacter);
     setIsAdding(true);
@@ -134,16 +142,8 @@ function CharactersContent() {
             ) : (
               characters.map(character => (
                 <div key={character.id} className="bg-gray-800 rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h2 className="text-xl font-semibold">{character.name}</h2>
-                      <div className="text-gray-400 mt-2 space-y-1">
-                        <p>HP: {character.hp}/{character.maxHp}</p>
-                        <p>AC: {character.ac}</p>
-                        <p>Initiative Bonus: {character.initiativeBonus >= 0 ? '+' : ''}{character.initiativeBonus}</p>
-                        <p>Dexterity: {character.dexterity}</p>
-                      </div>
-                    </div>
+                  <div className="flex justify-between items-start mb-4">
+                    <h2 className="text-xl font-semibold">{character.name}</h2>
                     <div className="flex gap-2">
                       <button
                         onClick={() => {
@@ -162,6 +162,33 @@ function CharactersContent() {
                       </button>
                     </div>
                   </div>
+                  {character.class && (
+                    <div className="text-sm text-gray-400 mb-2">
+                      {character.class}
+                      {character.level && ` Level ${character.level}`}
+                      {character.race && ` - ${character.race}`}
+                    </div>
+                  )}
+                  <CreatureStatBlock
+                    abilityScores={character.abilityScores}
+                    ac={character.ac}
+                    acNote={character.acNote}
+                    hp={character.hp}
+                    maxHp={character.maxHp}
+                    skills={character.skills}
+                    savingThrows={character.savingThrows}
+                    damageResistances={character.damageResistances}
+                    damageImmunities={character.damageImmunities}
+                    damageVulnerabilities={character.damageVulnerabilities}
+                    conditionImmunities={character.conditionImmunities}
+                    senses={character.senses}
+                    languages={character.languages}
+                    traits={character.traits}
+                    actions={character.actions}
+                    bonusActions={character.bonusActions}
+                    reactions={character.reactions}
+                    isCompact={false}
+                  />
                 </div>
               ))
             )}
@@ -184,32 +211,36 @@ function CharacterEditor({
   isNew: boolean;
 }) {
   const [name, setName] = useState(character.name);
-  const [hp, setHp] = useState(character.hp);
-  const [maxHp, setMaxHp] = useState(character.maxHp);
-  const [ac, setAc] = useState(character.ac);
-  const [initiativeBonus, setInitiativeBonus] = useState(character.initiativeBonus);
-  const [dexterity, setDexterity] = useState(character.dexterity);
+  const [charClass, setCharClass] = useState(character.class || '');
+  const [level, setLevel] = useState(character.level || 1);
+  const [race, setRace] = useState(character.race || '');
+  const [alignment, setAlignment] = useState(character.alignment || '');
+  const [stats, setStats] = useState(character);
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleSave = async () => {
     setValidationError(null);
 
-    if (hp > maxHp) {
+    if (stats.hp > stats.maxHp) {
       setValidationError('Current HP cannot be greater than Max HP');
+      return;
+    }
+
+    if (!name.trim()) {
+      setValidationError('Character name is required');
       return;
     }
 
     setSaving(true);
     try {
       await onSave({
-        ...character,
+        ...stats,
         name,
-        hp,
-        maxHp,
-        ac,
-        initiativeBonus,
-        dexterity,
+        class: charClass || undefined,
+        level: level || undefined,
+        race: race || undefined,
+        alignment: alignment || undefined,
       });
     } finally {
       setSaving(false);
@@ -219,89 +250,80 @@ function CharacterEditor({
   return (
     <div className="bg-gray-800 rounded-lg p-6 mb-6 border-2 border-blue-500">
       <h2 className="text-2xl font-bold mb-4">{isNew ? 'Create Character' : 'Edit Character'}</h2>
-      
+
       {validationError && (
         <div className="p-3 bg-red-900 border border-red-700 rounded text-red-200 mb-4">
           {validationError}
         </div>
       )}
-      
-      <div className="grid md:grid-cols-2 gap-4 mb-4">
+
+      {/* Character Info */}
+      <div className="grid md:grid-cols-2 gap-4 mb-6 pb-6 border-b border-gray-700">
         <div>
-          <label className="block mb-1 text-sm">Name</label>
+          <label className="block mb-1 text-sm font-bold">Name</label>
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-          />
-        </div>
-        
-        <div>
-          <label className="block mb-1 text-sm">AC</label>
-          <input
-            type="number"
-            value={ac}
-            onChange={(e) => setAc(parseInt(e.target.value) || 0)}
+            onChange={e => setName(e.target.value)}
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
           />
         </div>
 
         <div>
-          <label className="block mb-1 text-sm">Current HP</label>
+          <label className="block mb-1 text-sm font-bold">Class</label>
           <input
-            type="number"
-            value={hp}
-            onChange={(e) => setHp(parseInt(e.target.value) || 0)}
+            type="text"
+            value={charClass}
+            onChange={e => setCharClass(e.target.value)}
+            placeholder="e.g., Fighter, Wizard"
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
           />
         </div>
 
         <div>
-          <label className="block mb-1 text-sm">Max HP</label>
+          <label className="block mb-1 text-sm font-bold">Level</label>
           <input
             type="number"
-            value={maxHp}
-            onChange={(e) => {
-              const newMaxHp = parseInt(e.target.value) || 0;
-              setMaxHp(newMaxHp);
-              // Cap current HP to new max HP if needed
-              if (hp > newMaxHp) {
-                setHp(newMaxHp);
-              }
-            }}
+            value={level}
+            onChange={e => setLevel(parseInt(e.target.value) || 1)}
+            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+            disabled={saving}
+            min="1"
+            max="20"
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1 text-sm font-bold">Race</label>
+          <input
+            type="text"
+            value={race}
+            onChange={e => setRace(e.target.value)}
+            placeholder="e.g., Human, Elf"
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
           />
         </div>
 
-        <div>
-          <label className="block mb-1 text-sm">Initiative Bonus</label>
+        <div className="md:col-span-2">
+          <label className="block mb-1 text-sm font-bold">Alignment</label>
           <input
-            type="number"
-            value={initiativeBonus}
-            onChange={(e) => setInitiativeBonus(parseInt(e.target.value) || 0)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 text-sm">Dexterity</label>
-          <input
-            type="number"
-            value={dexterity}
-            onChange={(e) => setDexterity(parseInt(e.target.value) || 0)}
+            type="text"
+            value={alignment}
+            onChange={e => setAlignment(e.target.value)}
+            placeholder="e.g., Lawful Good"
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
           />
         </div>
       </div>
 
-      <div className="flex gap-2">
+      {/* Creature Stats */}
+      <CreatureStatsForm stats={stats} onChange={setStats} />
+
+      <div className="flex gap-2 mt-6">
         <button
           onClick={handleSave}
           disabled={saving || !name.trim()}

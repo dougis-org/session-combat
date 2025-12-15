@@ -31,7 +31,31 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, hp, maxHp, ac, initiativeBonus, dexterity } = body;
+    const {
+      name,
+      hp,
+      maxHp,
+      ac,
+      acNote,
+      abilityScores,
+      savingThrows,
+      skills,
+      damageResistances,
+      damageImmunities,
+      damageVulnerabilities,
+      conditionImmunities,
+      senses,
+      languages,
+      traits,
+      actions,
+      bonusActions,
+      reactions,
+      class: classType,
+      level,
+      race,
+      background,
+      alignment,
+    } = body;
 
     if (!name || name.trim() === '') {
       return NextResponse.json(
@@ -48,8 +72,25 @@ export async function POST(request: NextRequest) {
       hp: hp || 0,
       maxHp: maxHp || 0,
       ac: ac || 10,
-      initiativeBonus: initiativeBonus || 0,
-      dexterity: dexterity || 10,
+      acNote: acNote || undefined,
+      abilityScores: abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      savingThrows: savingThrows || {},
+      skills: skills || {},
+      damageResistances: damageResistances || [],
+      damageImmunities: damageImmunities || [],
+      damageVulnerabilities: damageVulnerabilities || [],
+      conditionImmunities: conditionImmunities || [],
+      senses: senses || [],
+      languages: languages || [],
+      traits: traits || [],
+      actions: actions || [],
+      bonusActions: bonusActions || [],
+      reactions: reactions || [],
+      class: classType || undefined,
+      level: level || 1,
+      race: race || undefined,
+      background: background || undefined,
+      alignment: alignment || undefined,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

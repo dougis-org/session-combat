@@ -48,7 +48,31 @@ export async function PUT(
 
   try {
     const body = await request.json();
-    const { name, hp, maxHp, ac, initiativeBonus, dexterity } = body;
+    const {
+      name,
+      hp,
+      maxHp,
+      ac,
+      acNote,
+      abilityScores,
+      savingThrows,
+      skills,
+      damageResistances,
+      damageImmunities,
+      damageVulnerabilities,
+      conditionImmunities,
+      senses,
+      languages,
+      traits,
+      actions,
+      bonusActions,
+      reactions,
+      class: classType,
+      level,
+      race,
+      background,
+      alignment,
+    } = body;
 
     // Get the existing character to verify ownership
     const characters = await storage.loadCharacters(auth.userId);
@@ -74,8 +98,25 @@ export async function PUT(
       hp: hp !== undefined ? hp : existingCharacter.hp,
       maxHp: maxHp !== undefined ? maxHp : existingCharacter.maxHp,
       ac: ac !== undefined ? ac : existingCharacter.ac,
-      initiativeBonus: initiativeBonus !== undefined ? initiativeBonus : existingCharacter.initiativeBonus,
-      dexterity: dexterity !== undefined ? dexterity : existingCharacter.dexterity,
+      acNote: acNote !== undefined ? acNote : existingCharacter.acNote,
+      abilityScores: abilityScores !== undefined ? abilityScores : existingCharacter.abilityScores,
+      savingThrows: savingThrows !== undefined ? savingThrows : existingCharacter.savingThrows,
+      skills: skills !== undefined ? skills : existingCharacter.skills,
+      damageResistances: damageResistances !== undefined ? damageResistances : existingCharacter.damageResistances,
+      damageImmunities: damageImmunities !== undefined ? damageImmunities : existingCharacter.damageImmunities,
+      damageVulnerabilities: damageVulnerabilities !== undefined ? damageVulnerabilities : existingCharacter.damageVulnerabilities,
+      conditionImmunities: conditionImmunities !== undefined ? conditionImmunities : existingCharacter.conditionImmunities,
+      senses: senses !== undefined ? senses : existingCharacter.senses,
+      languages: languages !== undefined ? languages : existingCharacter.languages,
+      traits: traits !== undefined ? traits : existingCharacter.traits,
+      actions: actions !== undefined ? actions : existingCharacter.actions,
+      bonusActions: bonusActions !== undefined ? bonusActions : existingCharacter.bonusActions,
+      reactions: reactions !== undefined ? reactions : existingCharacter.reactions,
+      class: classType !== undefined ? classType : existingCharacter.class,
+      level: level !== undefined ? level : existingCharacter.level,
+      race: race !== undefined ? race : existingCharacter.race,
+      background: background !== undefined ? background : existingCharacter.background,
+      alignment: alignment !== undefined ? alignment : existingCharacter.alignment,
       updatedAt: new Date(),
     };
 
