@@ -1,6 +1,6 @@
 // MongoDB persistence utilities
 import { getDatabase } from './db';
-import { SessionData, Encounter, Character, CombatState } from './types';
+import { SessionData, Encounter, Character, CombatState, Party } from './types';
 
 /**
  * Server-side storage functions for MongoDB
@@ -51,19 +51,35 @@ export const storage = {
     }
   },
 
+  // Load parties for a user
+  async loadParties(userId: string): Promise<Party[]> {
+    try {
+      const db = await getDatabase();
+      const parties = await db
+        .collection<Party>('parties')
+        .find({ userId })
+        .toArray();
+      return parties;
+    } catch (error) {
+      console.error('Error loading parties:', error);
+      return [];
+    }
+  },
+
   // Load all session data for a user
   async load(userId: string): Promise<SessionData> {
     try {
-      const [encounters, characters, combatState] = await Promise.all([
+      const [encounters, characters, parties, combatState] = await Promise.all([
         this.loadEncounters(userId),
         this.loadCharacters(userId),
+        this.loadParties(userId),
         this.loadCombatState(userId),
       ]);
 
-      return { encounters, characters, combatState: combatState || undefined };
+      return { encounters, characters, parties, combatState: combatState || undefined };
     } catch (error) {
       console.error('Error loading session data:', error);
-      return { encounters: [], characters: [] };
+      return { encounters: [], characters: [], parties: [] };
     }
   },
 
@@ -151,8 +167,50 @@ export const storage = {
     try {
       const db = await getDatabase();
       await db.collection<Character>('characters').deleteOne({ id, userId });
+      // Also remove character from all parties
+      await db.collection<Party>('parties').updateMany(
+        { userId },
+        { $pull: { characterIds: id } }
+      );
     } catch (error) {
       console.error('Error deleting character:', error);
+      throw error;
+    }
+  },
+
+  // Save party
+  async saveParty(party: Party): Promise<void> {
+    try {
+      const db = await getDatabase();
+      await db
+        .collection<Party>('parties')
+        .updateOne({ id: party.id, userId: party.userId }, { $set: party }, { upsert: true });
+    } catch (error) {
+      console.error('Error saving party:', error);
+      throw error;
+    }
+  },
+
+  // Save multiple parties
+  async saveParties(parties: Party[]): Promise<void> {
+    try {
+      const db = await getDatabase();
+      for (const party of parties) {
+        await this.saveParty(party);
+      }
+    } catch (error) {
+      console.error('Error saving parties:', error);
+      throw error;
+    }
+  },
+
+  // Delete party
+  async deleteParty(id: string, userId: string): Promise<void> {
+    try {
+      const db = await getDatabase();
+      await db.collection<Party>('parties').deleteOne({ id, userId });
+    } catch (error) {
+      console.error('Error deleting party:', error);
       throw error;
     }
   },
@@ -164,6 +222,7 @@ export const storage = {
       await Promise.all([
         db.collection<Encounter>('encounters').deleteMany({ userId }),
         db.collection<Character>('characters').deleteMany({ userId }),
+        db.collection<Party>('parties').deleteMany({ userId }),
         db.collection<CombatState>('combatStates').deleteMany({ userId }),
       ]);
     } catch (error) {

@@ -98,8 +98,20 @@ export interface CombatState {
   updatedAt: Date;
 }
 
+export interface Party {
+  _id?: string;
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  characterIds: string[]; // ObjectId references to characters
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface SessionData {
   encounters: Encounter[];
   characters: Character[];
+  parties: Party[];
   combatState?: CombatState;
 }

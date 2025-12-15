@@ -2,7 +2,7 @@
 // This is a temporary client-side storage for the app
 // In production, should use API routes instead
 
-import { SessionData, Encounter, Character, CombatState } from './types';
+import { SessionData, Encounter, Character, CombatState, Party } from './types';
 
 export const clientStorage = {
   load(): SessionData {
@@ -14,7 +14,7 @@ export const clientStorage = {
     } catch (error) {
       console.error('Error loading from localStorage:', error);
     }
-    return { encounters: [], characters: [] };
+    return { encounters: [], characters: [], parties: [] };
   },
 
   saveEncounters(encounters: Encounter[]): void {
@@ -44,6 +44,16 @@ export const clientStorage = {
       localStorage.setItem('sessionData', JSON.stringify(data));
     } catch (error) {
       console.error('Error saving combat state:', error);
+    }
+  },
+
+  saveParties(parties: Party[]): void {
+    try {
+      const data = this.load();
+      data.parties = parties;
+      localStorage.setItem('sessionData', JSON.stringify(data));
+    } catch (error) {
+      console.error('Error saving parties:', error);
     }
   },
 };

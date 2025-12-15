@@ -37,7 +37,7 @@ function HomeContent() {
         </div>
         
         {/* Main Navigation */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
           <Link href="/encounters" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
             <h2 className="text-2xl font-semibold mb-2">Encounters</h2>
             <p className="text-gray-400">Manage encounters and monsters</p>
@@ -46,6 +46,11 @@ function HomeContent() {
           <Link href="/characters" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
             <h2 className="text-2xl font-semibold mb-2">Characters</h2>
             <p className="text-gray-400">Manage your characters and stats</p>
+          </Link>
+
+          <Link href="/parties" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
+            <h2 className="text-2xl font-semibold mb-2">Parties</h2>
+            <p className="text-gray-400">Group characters into parties</p>
           </Link>
 
           <Link href="/combat" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
