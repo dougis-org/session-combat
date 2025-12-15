@@ -16,6 +16,7 @@ export interface AuthPayload {
 }
 
 export interface Monster {
+  _id?: unknown;
   id: string;
   userId: string;
   name: string;
@@ -26,6 +27,7 @@ export interface Monster {
 }
 
 export interface Player {
+  _id?: unknown;
   id: string;
   userId: string;
   name: string;
@@ -33,9 +35,12 @@ export interface Player {
   maxHp: number;
   ac: number;
   initiativeBonus: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Encounter {
+  _id?: unknown;
   id: string;
   userId: string;
   name: string;
@@ -70,6 +75,7 @@ export interface CombatantState {
 }
 
 export interface CombatState {
+  _id?: unknown;
   id: string;
   userId: string;
   encounterId?: string;

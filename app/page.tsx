@@ -1,13 +1,42 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 
-export default function HomePage() {
+function HomeContent() {
+  const router = useRouter();
+  const { user, logout, loading } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8 text-center">D&D Session Combat Tracker</h1>
+        {/* Header with User Info and Logout */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold">D&D Session Combat Tracker</h1>
+          <div className="flex items-center gap-4">
+            {user && (
+              <span className="text-gray-300">
+                Welcome, <span className="font-semibold text-blue-400">{user.email}</span>
+              </span>
+            )}
+            <button
+              onClick={handleLogout}
+              disabled={loading}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded font-semibold transition-colors"
+            >
+              {loading ? 'Logging out...' : 'Logout'}
+            </button>
+          </div>
+        </div>
         
+        {/* Main Navigation */}
         <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           <Link href="/encounters" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
             <h2 className="text-2xl font-semibold mb-2">Encounters</h2>
@@ -30,5 +59,13 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <ProtectedRoute>
+      <HomeContent />
+    </ProtectedRoute>
   );
 }

@@ -2,27 +2,64 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { clientStorage } from '@/lib/clientStorage';
+import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CombatState, CombatantState, Encounter, Player, StatusCondition } from '@/lib/types';
 
-export default function CombatPage() {
+function CombatContent() {
   const [combatState, setCombatState] = useState<CombatState | null>(null);
   const [encounters, setEncounters] = useState<Encounter[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedEncounterId, setSelectedEncounterId] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const data = clientStorage.load();
-    setEncounters(data.encounters);
-    setPlayers(data.players);
-    if (data.combatState) {
-      setCombatState(data.combatState);
-    }
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [encountersRes, playersRes, combatRes] = await Promise.all([
+          fetch('/api/encounters'),
+          fetch('/api/players'),
+          fetch('/api/combat'),
+        ]);
+
+        if (!encountersRes.ok || !playersRes.ok || !combatRes.ok) {
+          throw new Error('Failed to load data');
+        }
+
+        const encountersData = await encountersRes.json();
+        const playersData = await playersRes.json();
+        const combatData = await combatRes.json();
+
+        setEncounters(encountersData || []);
+        setPlayers(playersData || []);
+        setCombatState(combatData || null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
-  const saveCombatState = (state: CombatState | null) => {
-    setCombatState(state);
-    clientStorage.saveCombatState(state || undefined);
+  const saveCombatState = async (state: CombatState | null) => {
+    try {
+      setError(null);
+      if (state) {
+        const response = await fetch('/api/combat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state),
+        });
+        if (!response.ok) throw new Error('Failed to save combat state');
+      }
+      setCombatState(state);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save combat state');
+    }
   };
 
   const startCombat = () => {
@@ -62,8 +99,8 @@ export default function CombatPage() {
     }
 
     const newState: CombatState = {
-      id: Date.now().toString(),
-      userId: 'default-user',
+      id: crypto.randomUUID(),
+      userId: '',
       encounterId: selectedEncounterId || undefined,
       combatants,
       currentRound: 1,
@@ -175,6 +212,16 @@ export default function CombatPage() {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-400">Loading combat data...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!combatState) {
     return (
       <div className="min-h-screen bg-gray-900 text-white">
@@ -186,6 +233,12 @@ export default function CombatPage() {
             </Link>
           </div>
 
+          {error && (
+            <div className="p-4 bg-red-900 border border-red-700 rounded text-red-200 mb-6">
+              {error}
+            </div>
+          )}
+
           <div className="bg-gray-800 rounded-lg p-6 max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold mb-4">Start New Combat</h2>
             
@@ -194,7 +247,7 @@ export default function CombatPage() {
               <select
                 value={selectedEncounterId}
                 onChange={(e) => setSelectedEncounterId(e.target.value)}
-                className="w-full bg-gray-700 rounded px-3 py-2"
+                className="w-full bg-gray-700 rounded px-3 py-2 text-white"
               >
                 <option value="">No encounter</option>
                 {encounters.map(encounter => (
@@ -214,10 +267,14 @@ export default function CombatPage() {
 
             <button
               onClick={startCombat}
-              className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded text-lg font-semibold"
+              disabled={players.length === 0}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-6 py-3 rounded text-lg font-semibold"
             >
               Start Combat
             </button>
+            {players.length === 0 && (
+              <p className="text-red-400 text-sm mt-2">You must create at least one player before starting combat</p>
+            )}
           </div>
         </div>
       </div>
@@ -258,6 +315,12 @@ export default function CombatPage() {
             </Link>
           </div>
         </div>
+
+        {error && (
+          <div className="p-4 bg-red-900 border border-red-700 rounded text-red-200 mb-6">
+            {error}
+          </div>
+        )}
 
         <div className="space-y-2">
           {combatState.combatants.map((combatant, idx) => (
@@ -324,7 +387,7 @@ function CombatantCard({
     const duration = durationStr ? parseInt(durationStr) : undefined;
 
     const newCondition: StatusCondition = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name,
       description: '',
       duration,
@@ -386,7 +449,7 @@ function CombatantCard({
                       }
                     }
                   }}
-                  className="w-14 bg-gray-700 rounded px-2 py-1 text-xs text-center"
+                  className="w-14 bg-gray-700 rounded px-2 py-1 text-xs text-center text-white"
                 />
                 <button
                   onClick={applyDamage}
@@ -465,5 +528,13 @@ function CombatantCard({
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CombatPage() {
+  return (
+    <ProtectedRoute>
+      <CombatContent />
+    </ProtectedRoute>
   );
 }

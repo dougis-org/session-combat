@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
-import { getDatabase } from '@/lib/db';
-
-interface Item {
-  _id?: unknown;
-  id: string;
-  userId: string;
-  name: string;
-  description?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { storage } from '@/lib/storage';
+import { Encounter } from '@/lib/types';
 
 export async function GET(request: NextRequest) {
   const auth = requireAuth(request);
@@ -20,16 +11,12 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const db = await getDatabase();
-    const items = await db
-      .collection<Item>('items')
-      .find({ userId: auth.userId })
-      .toArray();
-    return NextResponse.json(items);
+    const encounters = await storage.loadEncounters(auth.userId);
+    return NextResponse.json(encounters);
   } catch (error) {
-    console.error('Error fetching items:', error);
+    console.error('Error fetching encounters:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch items' },
+      { error: 'Failed to fetch encounters' },
       { status: 500 }
     );
   }
@@ -44,34 +31,34 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, description } = body;
+    const { name, description, monsters } = body;
 
     if (!name || name.trim() === '') {
       return NextResponse.json(
-        { error: 'Item name is required' },
+        { error: 'Encounter name is required' },
         { status: 400 }
       );
     }
 
-    const item: Item = {
+    const encounter: Encounter = {
+      _id: undefined,
       id: crypto.randomUUID(),
       userId: auth.userId,
       name: name.trim(),
       description: description || '',
+      monsters: monsters || [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const db = await getDatabase();
-    await db.collection<Item>('items').insertOne(item);
+    await storage.saveEncounter(encounter);
 
-    return NextResponse.json(item, { status: 201 });
+    return NextResponse.json(encounter, { status: 201 });
   } catch (error) {
-    console.error('Error creating item:', error);
+    console.error('Error creating encounter:', error);
     return NextResponse.json(
-      { error: 'Failed to create item' },
+      { error: 'Failed to create encounter' },
       { status: 500 }
     );
   }
 }
-
