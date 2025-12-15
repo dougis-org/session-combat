@@ -5,7 +5,8 @@ A Next.js application for tracking encounters and combat for D&D sessions.
 ## Features
 
 - **Encounter Management**: Create and manage encounters with monsters ahead of time
-- **Character Management**: Track your characters and their stats
+- **Character Management**: Track your characters and their stats with full D&D 5e stat blocks
+- **SRD Monster Library**: 18 public domain D&D 5e monsters available globally to all users
 - **Combat Tracker**: Full-featured combat tracker with:
   - Initiative tracking and automatic sorting
   - Hit point management with visual health bars
@@ -51,7 +52,9 @@ Navigate to the Characters page to add your characters. For each character, ente
 
 Navigate to the Encounters page to create encounters:
 - Give your encounter a name and description
-- Add monsters to the encounter with their stats (HP, AC, Initiative Bonus)
+- Add monsters from the **SRD Monster Library** (global templates)
+- Or create custom monsters with full D&D stat blocks
+- Define all monster stats including ability scores, actions, and special abilities
 
 ### 3. Start Combat
 
@@ -66,19 +69,47 @@ Navigate to the Combat Tracker:
 
 ## Data Persistence
 
-The application uses **localStorage** for simple, client-side data persistence. All encounters, characters, and combat state are automatically saved to your browser's local storage. This means:
+The application uses **MongoDB** for persistent data storage. All encounters, characters, and monsters are saved to the database, allowing:
 
-- Your data persists between browser sessions
-- Data is stored locally on your device
-- No server or database setup required
-- Each browser/device has its own separate data
+- Data to persist across browser sessions and devices
+- Multi-user access and authentication
+- Server-side backup and recovery
+- Scaling to production deployments
+
+For development, a local MongoDB connection is configured via `.env.local`.
+
+## Monster Library
+
+The application includes a built-in library of 18 Standard Reference Document (SRD) monsters from D&D 5e that are available to all users. These public domain creatures include famous enemies and NPCs like:
+
+- Dragons (Red Dragon Wyrmling, Adult Gold Dragon, Ancient Green Dragon)
+- Liches and Undead (Lich, Mummy)
+- Giants (Frost Giant)
+- Beasts (Dire Wolf, Black Bear)
+- Humanoids (Assassin, Goblin, Bandit, Commoner)
+- Aberrations (Aboleth, Beholder)
+- And more!
+
+### Seeding the Library
+
+To make the monsters available in your instance, an administrator can seed them using:
+
+```bash
+# API endpoint (admin only)
+curl -X PUT http://localhost:3000/api/monsters/global/seed
+
+# Or use the CLI script
+npx ts-node lib/scripts/seedMonsters.ts
+```
+
+See [docs/MONSTER_LIBRARY.md](docs/MONSTER_LIBRARY.md) for complete documentation on the monster library system.
 
 ## Technology Stack
 
 - **Next.js 16** - React framework
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
-- **localStorage** - Data persistence
+- **MongoDB** - Database persistence
 
 ## License
 
