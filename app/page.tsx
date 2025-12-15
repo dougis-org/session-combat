@@ -49,8 +49,8 @@ function HomeContent() {
   };
 
   return (
-    <div className="bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="bg-gray-900 text-white flex flex-col flex-1">
+      <div className="container mx-auto px-4 py-8 flex-1 flex flex-col">
         {/* Header with User Info and Logout */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">D&D Session Combat Tracker</h1>
