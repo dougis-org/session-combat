@@ -242,6 +242,24 @@ function CombatContent() {
     });
   };
 
+  const hasInitiativeBeenRolled = () => {
+    return combatState?.combatants.some(c => c.initiativeRoll);
+  };
+
+  const getDisplayCombatants = () => {
+    if (!combatState) return [];
+
+    if (hasInitiativeBeenRolled()) {
+      // After initiative, return sorted by initiative (highest first)
+      return [...combatState.combatants].sort((a, b) => b.initiative - a.initiative);
+    } else {
+      // Before initiative, group players at top, monsters at bottom
+      const players = combatState.combatants.filter(c => c.type === 'player');
+      const monsters = combatState.combatants.filter(c => c.type === 'monster');
+      return [...players, ...monsters];
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
@@ -405,17 +423,68 @@ function CombatContent() {
           </div>
         )}
 
-        <div className="space-y-2">
-          {combatState.combatants.map((combatant, idx) => (
-            <CombatantCard
-              key={combatant.id}
-              combatant={combatant}
-              isActive={idx === combatState.currentTurnIndex}
-              onUpdate={(updates) => updateCombatant(combatant.id, updates)}
-              onRemove={() => removeCombatant(combatant.id)}
-            />
-          ))}
-        </div>
+        {hasInitiativeBeenRolled() ? (
+          // Display sorted by initiative
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold text-yellow-400 mb-4">Initiative Order</h2>
+            {getDisplayCombatants().map((combatant, idx) => {
+              // Find the actual index in combatState for isActive check
+              const actualIdx = combatState.combatants.findIndex(c => c.id === combatant.id);
+              return (
+                <CombatantCard
+                  key={combatant.id}
+                  combatant={combatant}
+                  isActive={actualIdx === combatState.currentTurnIndex}
+                  onUpdate={(updates) => updateCombatant(combatant.id, updates)}
+                  onRemove={() => removeCombatant(combatant.id)}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          // Display grouped by type
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold text-blue-400 mb-3">Party</h2>
+              <div className="space-y-2">
+                {getDisplayCombatants()
+                  .filter(c => c.type === 'player')
+                  .map((combatant, idx) => {
+                    const actualIdx = combatState.combatants.findIndex(c => c.id === combatant.id);
+                    return (
+                      <CombatantCard
+                        key={combatant.id}
+                        combatant={combatant}
+                        isActive={actualIdx === combatState.currentTurnIndex}
+                        onUpdate={(updates) => updateCombatant(combatant.id, updates)}
+                        onRemove={() => removeCombatant(combatant.id)}
+                      />
+                    );
+                  })}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-red-400 mb-3">Enemies</h2>
+              <div className="space-y-2">
+                {getDisplayCombatants()
+                  .filter(c => c.type === 'monster')
+                  .map((combatant, idx) => {
+                    const actualIdx = combatState.combatants.findIndex(c => c.id === combatant.id);
+                    return (
+                      <CombatantCard
+                        key={combatant.id}
+                        combatant={combatant}
+                        isActive={actualIdx === combatState.currentTurnIndex}
+                        onUpdate={(updates) => updateCombatant(combatant.id, updates)}
+                        onRemove={() => removeCombatant(combatant.id)}
+                      />
+                    );
+                  })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
