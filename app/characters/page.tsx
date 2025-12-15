@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
-import { Character, AbilityScores } from '@/lib/types';
+import { Character, AbilityScores, CreatureStats } from '@/lib/types';
 
 function CharactersContent() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -215,9 +215,13 @@ function CharacterEditor({
   const [level, setLevel] = useState(character.level || 1);
   const [race, setRace] = useState(character.race || '');
   const [alignment, setAlignment] = useState(character.alignment || '');
-  const [stats, setStats] = useState(character);
+  const [stats, setStats] = useState<CreatureStats>(character);
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  const handleStatsChange = (newStats: CreatureStats) => {
+    setStats(newStats);
+  };
 
   const handleSave = async () => {
     setValidationError(null);
@@ -234,14 +238,16 @@ function CharacterEditor({
 
     setSaving(true);
     try {
-      await onSave({
+      const characterData: Character = {
         ...stats,
+        ...character, // Preserve id, userId, and any other original fields
         name,
         class: charClass || undefined,
         level: level || undefined,
         race: race || undefined,
         alignment: alignment || undefined,
-      });
+      };
+      await onSave(characterData);
     } finally {
       setSaving(false);
     }
@@ -321,7 +327,7 @@ function CharacterEditor({
       </div>
 
       {/* Creature Stats */}
-      <CreatureStatsForm stats={stats} onChange={setStats} />
+      <CreatureStatsForm stats={stats} onChange={handleStatsChange} />
 
       <div className="flex gap-2 mt-6">
         <button

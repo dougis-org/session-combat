@@ -164,7 +164,7 @@ function EncountersContent() {
                         <div key={monster.id} className="bg-gray-700 rounded p-2 text-sm">
                           <span className="font-medium">{monster.name}</span>
                           <span className="text-gray-400 ml-2">
-                            HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, Init: {monster.initiativeBonus >= 0 ? '+' : ''}{monster.initiativeBonus}, DEX: {monster.dexterity}
+                            HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, DEX: {monster.abilityScores.dexterity}
                           </span>
                         </div>
                       ))}
@@ -224,14 +224,10 @@ function EncounterEditor({
   const addMonsterFromLibrary = (template: MonsterTemplate) => {
     // Create a unique instance from the template
     const newMonster: Monster = {
+      ...template,
       id: crypto.randomUUID(),
+      userId: undefined,
       templateId: template.id,
-      name: template.name,
-      hp: template.hp,
-      maxHp: template.maxHp,
-      ac: template.ac,
-      initiativeBonus: template.initiativeBonus,
-      dexterity: template.dexterity,
     };
     setMonsters([...monsters, newMonster]);
     setShowTemplateSelector(false);
@@ -244,8 +240,11 @@ function EncounterEditor({
       hp: 10,
       maxHp: 10,
       ac: 10,
-      initiativeBonus: 0,
-      dexterity: 10,
+      abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+      size: 'medium',
+      type: 'humanoid',
+      speed: '30 ft.',
+      challengeRating: 0,
     };
     setEditingMonster(newMonster);
   };
@@ -341,7 +340,7 @@ function EncounterEditor({
                     <div>
                       <span className="font-medium">{template.name}</span>
                       <span className="text-gray-400 ml-2 text-xs">
-                        HP: {template.hp}/{template.maxHp}, AC: {template.ac}, Init: {template.initiativeBonus >= 0 ? '+' : ''}{template.initiativeBonus}
+                        HP: {template.hp}/{template.maxHp}, AC: {template.ac}
                       </span>
                     </div>
                     <button
@@ -378,7 +377,7 @@ function EncounterEditor({
                 <span className="font-medium">{monster.name}</span>
                 {monster.templateId && <span className="text-purple-400 ml-2 text-xs">(from library)</span>}
                 <span className="text-gray-400 ml-2 text-sm">
-                  HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, Init: {monster.initiativeBonus >= 0 ? '+' : ''}{monster.initiativeBonus}, DEX: {monster.dexterity}
+                  HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, DEX: {monster.abilityScores.dexterity}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -435,8 +434,7 @@ function MonsterEditor({
   const [hp, setHp] = useState(monster.hp);
   const [maxHp, setMaxHp] = useState(monster.maxHp);
   const [ac, setAc] = useState(monster.ac);
-  const [initiativeBonus, setInitiativeBonus] = useState(monster.initiativeBonus);
-  const [dexterity, setDexterity] = useState(monster.dexterity);
+  const [dexterity, setDexterity] = useState(monster.abilityScores.dexterity);
 
   const handleSave = () => {
     onSave({
@@ -445,8 +443,10 @@ function MonsterEditor({
       hp,
       maxHp,
       ac,
-      initiativeBonus,
-      dexterity,
+      abilityScores: {
+        ...monster.abilityScores,
+        dexterity,
+      },
     });
   };
 
@@ -490,15 +490,6 @@ function MonsterEditor({
             type="number"
             value={maxHp}
             onChange={(e) => setMaxHp(parseInt(e.target.value) || 0)}
-            className="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
-          />
-        </div>
-        <div>
-          <label className="block mb-1 text-xs">Initiative Bonus</label>
-          <input
-            type="number"
-            value={initiativeBonus}
-            onChange={(e) => setInitiativeBonus(parseInt(e.target.value) || 0)}
             className="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
           />
         </div>

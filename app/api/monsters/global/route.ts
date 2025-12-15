@@ -3,6 +3,8 @@ import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { MonsterTemplate } from '@/lib/types';
 import { getDatabase } from '@/lib/db';
+import { SRD_MONSTERS } from '@/lib/data/srd-monsters';
+import { randomUUID } from 'crypto';
 
 // Helper to check if user is admin
 async function isUserAdmin(userId: string): Promise<boolean> {
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     const template: MonsterTemplate = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       userId: 'GLOBAL',
       isGlobal: true,
       name: name.trim(),
@@ -135,6 +137,63 @@ export async function POST(request: NextRequest) {
     console.error('Error creating global monster template:', error);
     return NextResponse.json(
       { error: 'Failed to create global monster template' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * Seed SRD monsters into the database
+ * POST /api/monsters/global/seed
+ * Admin only
+ */
+export async function PUT(request: NextRequest) {
+  const auth = requireAuth(request);
+
+  if (auth instanceof NextResponse) {
+    return auth;
+  }
+
+  // Check if user is admin
+  const admin = await isUserAdmin(auth.userId);
+  if (!admin) {
+    return NextResponse.json(
+      { error: 'Only administrators can seed the monster library' },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const db = await getDatabase();
+    const collection = db.collection<MonsterTemplate>('monsterTemplates');
+
+    // Delete existing global monsters
+    await collection.deleteMany({ userId: 'GLOBAL' });
+
+    // Prepare monsters with required fields
+    const monstersToInsert = SRD_MONSTERS.map(monster => ({
+      ...monster,
+      id: randomUUID(),
+      userId: 'GLOBAL',
+      isGlobal: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+
+    // Insert all monsters
+    const result = await collection.insertMany(monstersToInsert);
+    const insertedCount = Object.keys(result.insertedIds).length;
+
+    return NextResponse.json({
+      success: true,
+      message: `Seeded ${insertedCount} SRD monsters`,
+      count: insertedCount,
+      monsters: monstersToInsert.map(m => ({ id: m.id, name: m.name, cr: m.challengeRating })),
+    }, { status: 200 });
+  } catch (error) {
+    console.error('Error seeding monsters:', error);
+    return NextResponse.json(
+      { error: 'Failed to seed monsters', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
