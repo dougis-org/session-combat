@@ -9,7 +9,7 @@
  */
 
 import { getDatabase } from '@/lib/db';
-import { SRD_MONSTERS } from '@/lib/data/srd-monsters';
+import { ALL_SRD_MONSTERS } from '@/lib/data/monsters';
 
 async function seedMonsters() {
   try {
@@ -17,14 +17,14 @@ async function seedMonsters() {
     const db = await getDatabase();
     const collection = db.collection('monsterTemplates');
 
-    console.log(`Seeding ${SRD_MONSTERS.length} SRD monsters...`);
+    console.log(`Seeding ${ALL_SRD_MONSTERS.length} SRD monsters...`);
 
     // Delete existing global monsters to avoid duplicates
     const deleteResult = await collection.deleteMany({ userId: 'GLOBAL' });
     console.log(`Deleted ${deleteResult.deletedCount} existing global monsters`);
 
     // Prepare monsters with required fields
-    const monstersToInsert = SRD_MONSTERS.map(monster => ({
+    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => ({
       ...monster,
       id: crypto.randomUUID(),
       userId: 'GLOBAL',

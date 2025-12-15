@@ -3,7 +3,7 @@ import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { MonsterTemplate } from '@/lib/types';
 import { getDatabase } from '@/lib/db';
-import { SRD_MONSTERS } from '@/lib/data/srd-monsters';
+import { ALL_SRD_MONSTERS } from '@/lib/data/monsters';
 import { randomUUID } from 'crypto';
 
 // Helper to check if user is admin
@@ -171,7 +171,7 @@ export async function PUT(request: NextRequest) {
     await collection.deleteMany({ userId: 'GLOBAL' });
 
     // Prepare monsters with required fields
-    const monstersToInsert = SRD_MONSTERS.map(monster => ({
+    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => ({
       ...monster,
       id: randomUUID(),
       userId: 'GLOBAL',
