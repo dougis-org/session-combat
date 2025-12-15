@@ -123,3 +123,27 @@ The test suite validates:
 - Input validation
 - Error handling
 - Database operations with real MongoDB
+
+---
+
+## Public Domain Monster Library Expansion
+
+A comprehensive plan for adding **334 public domain D&D 5e SRD monsters** to the global library using the official D&D 5e API has been created.
+
+See [PUBLIC_DOMAIN_MONSTER_PLAN.md](./PUBLIC_DOMAIN_MONSTER_PLAN.md) for:
+- API-driven ingestion approach (vs manual creation)
+- Complete implementation roadmap with 5 task groups
+- Data source: [D&D 5e API](https://www.dnd5eapi.co/api/2014/monsters)
+- Field mapping reference for transformation
+- Priority ordering and timeline
+- Current progress status
+
+**Key Benefits:**
+- 🚀 334 monsters (not 80+)
+- ⚡ Weeks instead of months
+- 🔄 Automatic updates as API updates
+- 📚 Official source of truth
+
+This plan enables efficient, scalable implementation by leveraging the official API rather than manual stat block entry.
+
+````
