@@ -99,7 +99,7 @@ function HomeContent() {
         )}
         
         {/* Main Navigation */}
-        <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto flex-1">
           <Link href="/encounters" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
             <h2 className="text-2xl font-semibold mb-2">Encounters</h2>
             <p className="text-gray-400">Manage encounters and monsters</p>
