@@ -62,11 +62,19 @@ export interface CombatantStatus {
   conditions: StatusCondition[];
 }
 
+export interface InitiativeRoll {
+  roll: number;
+  bonus: number;
+  total: number;
+  method: 'rolled' | 'manual'; // 'rolled' = automatic roll, 'manual' = user entered
+}
+
 export interface CombatantState {
   id: string;
   name: string;
   type: 'player' | 'monster';
   initiative: number;
+  initiativeRoll?: InitiativeRoll;
   hp: number;
   maxHp: number;
   ac: number;

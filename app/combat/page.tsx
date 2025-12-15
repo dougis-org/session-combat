@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { CombatState, CombatantState, Encounter, Player, StatusCondition } from '@/lib/types';
+import { CombatState, CombatantState, Encounter, Player, StatusCondition, InitiativeRoll } from '@/lib/types';
 
 function CombatContent() {
   const [combatState, setCombatState] = useState<CombatState | null>(null);
@@ -12,6 +12,7 @@ function CombatContent() {
   const [selectedEncounterId, setSelectedEncounterId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [initiativeMode, setInitiativeMode] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -125,8 +126,17 @@ function CombatContent() {
     // Roll initiative for all combatants
     const updatedCombatants = combatState.combatants.map(c => {
       const roll = Math.floor(Math.random() * 20) + 1;
-      const initiative = roll + getInitiativeBonus(c);
-      return { ...c, initiative };
+      const bonus = getInitiativeBonus(c);
+      const total = roll + bonus;
+      
+      const initiativeRoll: InitiativeRoll = {
+        roll,
+        bonus,
+        total,
+        method: 'rolled',
+      };
+      
+      return { ...c, initiative: total, initiativeRoll };
     });
 
     // Sort by initiative (descending)
@@ -137,6 +147,7 @@ function CombatContent() {
       combatants: updatedCombatants,
       currentTurnIndex: 0,
     });
+    setInitiativeMode(false);
   };
 
   const getInitiativeBonus = (combatant: CombatantState): number => {
@@ -212,6 +223,25 @@ function CombatContent() {
     });
   };
 
+  const setInitiativeRoll = (combatantId: string, initiativeRoll: InitiativeRoll) => {
+    if (!combatState) return;
+
+    const updatedCombatants = combatState.combatants.map(c =>
+      c.id === combatantId 
+        ? { ...c, initiative: initiativeRoll.total, initiativeRoll }
+        : c
+    );
+
+    // Sort by initiative (descending)
+    updatedCombatants.sort((a, b) => b.initiative - a.initiative);
+
+    saveCombatState({
+      ...combatState,
+      combatants: updatedCombatants,
+      currentTurnIndex: 0,
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
@@ -283,6 +313,53 @@ function CombatContent() {
 
   const currentCombatant = combatState.combatants[combatState.currentTurnIndex];
 
+  // Show initiative entry modal if in initiative mode
+  if (initiativeMode && combatState) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">Initiative</h1>
+            <Link href="/" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">
+              Back to Home
+            </Link>
+          </div>
+
+          {error && (
+            <div className="p-4 bg-red-900 border border-red-700 rounded text-red-200 mb-6">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-4 max-w-2xl mx-auto">
+            {combatState.combatants.map((combatant) => (
+              <InitiativeEntry
+                key={combatant.id}
+                combatant={combatant}
+                onSet={(initiativeRoll) => setInitiativeRoll(combatant.id, initiativeRoll)}
+              />
+            ))}
+          </div>
+
+          <div className="flex gap-2 justify-center mt-8">
+            <button
+              onClick={() => setInitiativeMode(false)}
+              className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded text-lg font-semibold"
+            >
+              Start Combat
+            </button>
+            <button
+              onClick={() => setInitiativeMode(false)}
+              className="bg-gray-600 hover:bg-gray-700 px-6 py-3 rounded text-lg font-semibold"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
@@ -296,7 +373,13 @@ function CombatContent() {
               onClick={rollInitiative}
               className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
             >
-              Roll Initiative
+              Roll All Initiative
+            </button>
+            <button
+              onClick={() => setInitiativeMode(true)}
+              className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded"
+            >
+              Manual Entry
             </button>
             <button
               onClick={nextTurn}
@@ -427,6 +510,13 @@ function CombatantCard({
             <div>
               <p className="text-xs text-gray-400">Initiative</p>
               <p className="text-lg font-bold">{combatant.initiative}</p>
+              {combatant.initiativeRoll && (
+                <p className="text-xs text-gray-500">
+                  {combatant.initiativeRoll.method === 'rolled' 
+                    ? `d20: ${combatant.initiativeRoll.roll} + ${combatant.initiativeRoll.bonus}`
+                    : 'Manual'}
+                </p>
+              )}
             </div>
             <div>
               <p className="text-xs text-gray-400">AC</p>
@@ -536,5 +626,167 @@ export default function CombatPage() {
     <ProtectedRoute>
       <CombatContent />
     </ProtectedRoute>
+  );
+}
+
+interface InitiativeEntryProps {
+  combatant: CombatantState;
+  onSet: (initiativeRoll: InitiativeRoll) => void;
+}
+
+function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
+  const [entryMode, setEntryMode] = useState<'roll' | 'dice' | 'total'>('roll');
+  const [diceRoll, setDiceRoll] = useState('');
+  const [totalValue, setTotalValue] = useState('');
+
+  const getBonus = (): number => {
+    // This is a simplified version - in real implementation, you'd need access to player/monster data
+    return 0;
+  };
+
+  const handleRoll = () => {
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const bonus = getBonus();
+    const total = roll + bonus;
+    
+    onSet({
+      roll,
+      bonus,
+      total,
+      method: 'rolled',
+    });
+  };
+
+  const handleDiceEntry = () => {
+    const roll = parseInt(diceRoll) || 0;
+    if (roll < 1 || roll > 20) {
+      alert('Dice roll must be between 1 and 20');
+      return;
+    }
+    
+    const bonus = getBonus();
+    const total = roll + bonus;
+    
+    onSet({
+      roll,
+      bonus,
+      total,
+      method: 'manual',
+    });
+  };
+
+  const handleTotalEntry = () => {
+    const total = parseInt(totalValue) || 0;
+    if (total < 0) {
+      alert('Initiative must be 0 or greater');
+      return;
+    }
+    
+    onSet({
+      roll: 0,
+      bonus: 0,
+      total,
+      method: 'manual',
+    });
+  };
+
+  return (
+    <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-lg font-semibold">{combatant.name}</h3>
+          <p className="text-sm text-gray-400">
+            {combatant.type === 'player' ? 'Player' : 'Monster'}
+          </p>
+        </div>
+        <span className={`px-2 py-1 rounded text-xs ${combatant.type === 'player' ? 'bg-blue-600' : 'bg-red-600'}`}>
+          {combatant.type}
+        </span>
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              setEntryMode('roll');
+              handleRoll();
+            }}
+            className={`flex-1 px-3 py-2 rounded text-sm ${
+              entryMode === 'roll' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
+            }`}
+          >
+            Roll d20
+          </button>
+          <button
+            onClick={() => setEntryMode('dice')}
+            className={`flex-1 px-3 py-2 rounded text-sm ${
+              entryMode === 'dice' ? 'bg-purple-600' : 'bg-gray-700 hover:bg-gray-600'
+            }`}
+          >
+            Enter Dice Roll
+          </button>
+          <button
+            onClick={() => setEntryMode('total')}
+            className={`flex-1 px-3 py-2 rounded text-sm ${
+              entryMode === 'total' ? 'bg-green-600' : 'bg-gray-700 hover:bg-gray-600'
+            }`}
+          >
+            Enter Total
+          </button>
+        </div>
+
+        {entryMode === 'dice' && (
+          <div className="flex gap-2">
+            <input
+              type="number"
+              min="1"
+              max="20"
+              value={diceRoll}
+              onChange={(e) => setDiceRoll(e.target.value)}
+              placeholder="1-20"
+              className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
+            />
+            <button
+              onClick={handleDiceEntry}
+              className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded"
+            >
+              Set
+            </button>
+          </div>
+        )}
+
+        {entryMode === 'total' && (
+          <div className="flex gap-2">
+            <input
+              type="number"
+              min="0"
+              value={totalValue}
+              onChange={(e) => setTotalValue(e.target.value)}
+              placeholder="Total initiative"
+              className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
+            />
+            <button
+              onClick={handleTotalEntry}
+              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+            >
+              Set
+            </button>
+          </div>
+        )}
+
+        {combatant.initiativeRoll && (
+          <div className="bg-gray-700 rounded px-3 py-2 text-sm">
+            <p className="text-gray-400">
+              Initiative: <span className="text-white font-bold">{combatant.initiativeRoll.total}</span>
+            </p>
+            {combatant.initiativeRoll.method === 'rolled' && (
+              <p className="text-gray-500 text-xs">
+                d20: {combatant.initiativeRoll.roll} + {combatant.initiativeRoll.bonus} = {combatant.initiativeRoll.total}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
