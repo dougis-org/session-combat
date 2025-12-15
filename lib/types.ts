@@ -6,6 +6,7 @@ export interface User {
   id?: string;
   email: string;
   passwordHash: string;
+  isAdmin?: boolean; // Admin users can manage global monster templates
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,10 +16,28 @@ export interface AuthPayload {
   email: string;
 }
 
+// Monster template in the library (reusable)
+export interface MonsterTemplate {
+  _id?: string;
+  id: string;
+  userId: string; // userId: 'GLOBAL' for admin-controlled global templates, otherwise user's userId
+  name: string;
+  hp: number;
+  maxHp: number;
+  ac: number;
+  initiativeBonus: number;
+  dexterity: number;
+  isGlobal?: boolean; // True if this is a global template (userId === 'GLOBAL')
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Monster instance in an encounter (unique copy with instance-specific state)
 export interface Monster {
   _id?: string;
   id: string;
-  userId: string;
+  userId?: string; // Optional for encounter instances
+  templateId?: string; // Reference to MonsterTemplate if created from library
   name: string;
   hp: number;
   maxHp: number;

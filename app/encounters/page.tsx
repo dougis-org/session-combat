@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { Encounter, Monster } from '@/lib/types';
+import { Encounter, Monster, MonsterTemplate } from '@/lib/types';
 
 function EncountersContent() {
   const [encounters, setEncounters] = useState<Encounter[]>([]);
@@ -196,11 +196,50 @@ function EncounterEditor({
   const [monsters, setMonsters] = useState<Monster[]>(encounter.monsters);
   const [editingMonster, setEditingMonster] = useState<Monster | null>(null);
   const [saving, setSaving] = useState(false);
+  const [monsterTemplates, setMonsterTemplates] = useState<MonsterTemplate[]>([]);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+
+  useEffect(() => {
+    if (showTemplateSelector && monsterTemplates.length === 0) {
+      loadMonsterTemplates();
+    }
+  }, [showTemplateSelector]);
+
+  const loadMonsterTemplates = async () => {
+    setLoadingTemplates(true);
+    try {
+      const response = await fetch('/api/monsters');
+      if (response.ok) {
+        const data = await response.json();
+        setMonsterTemplates(data || []);
+      }
+    } catch (error) {
+      console.error('Error loading monster templates:', error);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  const addMonsterFromLibrary = (template: MonsterTemplate) => {
+    // Create a unique instance from the template
+    const newMonster: Monster = {
+      id: crypto.randomUUID(),
+      templateId: template.id,
+      name: template.name,
+      hp: template.hp,
+      maxHp: template.maxHp,
+      ac: template.ac,
+      initiativeBonus: template.initiativeBonus,
+      dexterity: template.dexterity,
+    };
+    setMonsters([...monsters, newMonster]);
+    setShowTemplateSelector(false);
+  };
 
   const addMonster = () => {
     const newMonster: Monster = {
       id: crypto.randomUUID(),
-      userId: '',
       name: 'New Monster',
       hp: 10,
       maxHp: 10,
@@ -270,14 +309,59 @@ function EncounterEditor({
       <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-semibold">Monsters</h3>
-          <button
-            onClick={addMonster}
-            disabled={saving}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-3 py-1 rounded text-sm"
-          >
-            Add Monster
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowTemplateSelector(!showTemplateSelector)}
+              disabled={saving}
+              className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-3 py-1 rounded text-sm"
+            >
+              Add from Library
+            </button>
+            <button
+              onClick={addMonster}
+              disabled={saving}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-3 py-1 rounded text-sm"
+            >
+              Add Custom
+            </button>
+          </div>
         </div>
+
+        {showTemplateSelector && (
+          <div className="bg-gray-600 rounded p-4 mb-4 border-2 border-purple-500">
+            <h4 className="font-semibold mb-2">Select from Library</h4>
+            {loadingTemplates ? (
+              <p className="text-gray-300">Loading...</p>
+            ) : monsterTemplates.length === 0 ? (
+              <p className="text-gray-300">No monster templates available. <Link href="/monsters" className="text-blue-400 hover:text-blue-300">Create one</Link></p>
+            ) : (
+              <div className="space-y-2">
+                {monsterTemplates.map(template => (
+                  <div key={template.id} className="flex justify-between items-center bg-gray-700 rounded p-2">
+                    <div>
+                      <span className="font-medium">{template.name}</span>
+                      <span className="text-gray-400 ml-2 text-xs">
+                        HP: {template.hp}/{template.maxHp}, AC: {template.ac}, Init: {template.initiativeBonus >= 0 ? '+' : ''}{template.initiativeBonus}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => addMonsterFromLibrary(template)}
+                      className="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-sm"
+                    >
+                      Add
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => setShowTemplateSelector(false)}
+              className="mt-2 bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm"
+            >
+              Close
+            </button>
+          </div>
+        )}
 
         {editingMonster && (
           <MonsterEditor
@@ -292,6 +376,7 @@ function EncounterEditor({
             <div key={monster.id} className="bg-gray-700 rounded p-3 flex justify-between items-center">
               <div>
                 <span className="font-medium">{monster.name}</span>
+                {monster.templateId && <span className="text-purple-400 ml-2 text-xs">(from library)</span>}
                 <span className="text-gray-400 ml-2 text-sm">
                   HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, Init: {monster.initiativeBonus >= 0 ? '+' : ''}{monster.initiativeBonus}, DEX: {monster.dexterity}
                 </span>

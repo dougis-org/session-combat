@@ -1,6 +1,6 @@
 // MongoDB persistence utilities
 import { getDatabase } from './db';
-import { SessionData, Encounter, Character, CombatState, Party } from './types';
+import { SessionData, Encounter, Character, CombatState, Party, MonsterTemplate } from './types';
 
 /**
  * Server-side storage functions for MongoDB
@@ -62,6 +62,50 @@ export const storage = {
       return parties;
     } catch (error) {
       console.error('Error loading parties:', error);
+      return [];
+    }
+  },
+
+  // Load monster templates for a user
+  async loadMonsterTemplates(userId: string): Promise<MonsterTemplate[]> {
+    try {
+      const db = await getDatabase();
+      const templates = await db
+        .collection<MonsterTemplate>('monsterTemplates')
+        .find({ userId })
+        .toArray();
+      return templates;
+    } catch (error) {
+      console.error('Error loading monster templates:', error);
+      return [];
+    }
+  },
+
+  // Load global monster templates (admin-controlled)
+  async loadGlobalMonsterTemplates(): Promise<MonsterTemplate[]> {
+    try {
+      const db = await getDatabase();
+      const templates = await db
+        .collection<MonsterTemplate>('monsterTemplates')
+        .find({ userId: 'GLOBAL' })
+        .toArray();
+      return templates;
+    } catch (error) {
+      console.error('Error loading global monster templates:', error);
+      return [];
+    }
+  },
+
+  // Load all monster templates (user + global)
+  async loadAllMonsterTemplates(userId: string): Promise<MonsterTemplate[]> {
+    try {
+      const [userTemplates, globalTemplates] = await Promise.all([
+        this.loadMonsterTemplates(userId),
+        this.loadGlobalMonsterTemplates(),
+      ]);
+      return [...userTemplates, globalTemplates].flat();
+    } catch (error) {
+      console.error('Error loading all monster templates:', error);
       return [];
     }
   },
@@ -211,6 +255,30 @@ export const storage = {
       await db.collection<Party>('parties').deleteOne({ id, userId });
     } catch (error) {
       console.error('Error deleting party:', error);
+      throw error;
+    }
+  },
+
+  // Save monster template
+  async saveMonsterTemplate(template: MonsterTemplate): Promise<void> {
+    try {
+      const db = await getDatabase();
+      await db
+        .collection<MonsterTemplate>('monsterTemplates')
+        .updateOne({ id: template.id, userId: template.userId }, { $set: template }, { upsert: true });
+    } catch (error) {
+      console.error('Error saving monster template:', error);
+      throw error;
+    }
+  },
+
+  // Delete monster template
+  async deleteMonsterTemplate(id: string, userId: string): Promise<void> {
+    try {
+      const db = await getDatabase();
+      await db.collection<MonsterTemplate>('monsterTemplates').deleteOne({ id, userId });
+    } catch (error) {
+      console.error('Error deleting monster template:', error);
       throw error;
     }
   },

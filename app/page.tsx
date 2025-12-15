@@ -43,6 +43,11 @@ function HomeContent() {
             <p className="text-gray-400">Manage encounters and monsters</p>
           </Link>
 
+          <Link href="/monsters" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
+            <h2 className="text-2xl font-semibold mb-2">Monster Library</h2>
+            <p className="text-gray-400">Create a library of reusable monsters</p>
+          </Link>
+
           <Link href="/characters" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
             <h2 className="text-2xl font-semibold mb-2">Characters</h2>
             <p className="text-gray-400">Manage your characters and stats</p>
