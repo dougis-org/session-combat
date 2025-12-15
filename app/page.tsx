@@ -15,7 +15,7 @@ function HomeContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
         {/* Header with User Info and Logout */}
         <div className="flex justify-between items-center mb-8">
