@@ -48,7 +48,7 @@ export async function PUT(
 
   try {
     const body = await request.json();
-    const { name, hp, maxHp, ac, initiativeBonus } = body;
+    const { name, hp, maxHp, ac, initiativeBonus, dexterity } = body;
 
     // Get the existing player to verify ownership
     const players = await storage.loadPlayers(auth.userId);
@@ -75,6 +75,7 @@ export async function PUT(
       maxHp: maxHp !== undefined ? maxHp : existingPlayer.maxHp,
       ac: ac !== undefined ? ac : existingPlayer.ac,
       initiativeBonus: initiativeBonus !== undefined ? initiativeBonus : existingPlayer.initiativeBonus,
+      dexterity: dexterity !== undefined ? dexterity : existingPlayer.dexterity,
       updatedAt: new Date(),
     };
 

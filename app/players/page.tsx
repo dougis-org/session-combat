@@ -40,6 +40,7 @@ function PlayersContent() {
       maxHp: 10,
       ac: 10,
       initiativeBonus: 0,
+      dexterity: 10,
     };
     setEditingPlayer(newPlayer);
     setIsAdding(true);
@@ -140,6 +141,7 @@ function PlayersContent() {
                         <p>HP: {player.hp}/{player.maxHp}</p>
                         <p>AC: {player.ac}</p>
                         <p>Initiative Bonus: {player.initiativeBonus >= 0 ? '+' : ''}{player.initiativeBonus}</p>
+                        <p>Dexterity: {player.dexterity}</p>
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -186,6 +188,7 @@ function PlayerEditor({
   const [maxHp, setMaxHp] = useState(player.maxHp);
   const [ac, setAc] = useState(player.ac);
   const [initiativeBonus, setInitiativeBonus] = useState(player.initiativeBonus);
+  const [dexterity, setDexterity] = useState(player.dexterity);
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -206,6 +209,7 @@ function PlayerEditor({
         maxHp,
         ac,
         initiativeBonus,
+        dexterity,
       });
     } finally {
       setSaving(false);
@@ -280,6 +284,17 @@ function PlayerEditor({
             type="number"
             value={initiativeBonus}
             onChange={(e) => setInitiativeBonus(parseInt(e.target.value) || 0)}
+            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+            disabled={saving}
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1 text-sm">Dexterity</label>
+          <input
+            type="number"
+            value={dexterity}
+            onChange={(e) => setDexterity(parseInt(e.target.value) || 0)}
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
           />

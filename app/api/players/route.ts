@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, hp, maxHp, ac, initiativeBonus } = body;
+    const { name, hp, maxHp, ac, initiativeBonus, dexterity } = body;
 
     if (!name || name.trim() === '') {
       return NextResponse.json(
@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
       maxHp: maxHp || 0,
       ac: ac || 10,
       initiativeBonus: initiativeBonus || 0,
+      dexterity: dexterity || 10,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

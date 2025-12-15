@@ -73,6 +73,7 @@ function CombatContent() {
         name: player.name,
         type: 'player',
         initiative: 0,
+        dexterity: player.dexterity,
         hp: player.hp,
         maxHp: player.maxHp,
         ac: player.ac,
@@ -90,6 +91,7 @@ function CombatContent() {
             name: `${monster.name} ${idx + 1}`,
             type: 'monster',
             initiative: 0,
+            dexterity: monster.dexterity,
             hp: monster.hp,
             maxHp: monster.maxHp,
             ac: monster.ac,
@@ -139,8 +141,13 @@ function CombatContent() {
       return { ...c, initiative: total, initiativeRoll };
     });
 
-    // Sort by initiative (descending)
-    updatedCombatants.sort((a, b) => b.initiative - a.initiative);
+    // Sort by initiative (descending), then by dexterity (descending) as tiebreaker
+    updatedCombatants.sort((a, b) => {
+      if (a.initiative !== b.initiative) {
+        return b.initiative - a.initiative;
+      }
+      return b.dexterity - a.dexterity;
+    });
 
     saveCombatState({
       ...combatState,
@@ -232,8 +239,13 @@ function CombatContent() {
         : c
     );
 
-    // Sort by initiative (descending)
-    updatedCombatants.sort((a, b) => b.initiative - a.initiative);
+    // Sort by initiative (descending), then by dexterity (descending) as tiebreaker
+    updatedCombatants.sort((a, b) => {
+      if (a.initiative !== b.initiative) {
+        return b.initiative - a.initiative;
+      }
+      return b.dexterity - a.dexterity;
+    });
 
     saveCombatState({
       ...combatState,
@@ -250,8 +262,13 @@ function CombatContent() {
     if (!combatState) return [];
 
     if (hasInitiativeBeenRolled()) {
-      // After initiative, return sorted by initiative (highest first)
-      return [...combatState.combatants].sort((a, b) => b.initiative - a.initiative);
+      // After initiative, return sorted by initiative (highest first), then by dexterity as tiebreaker
+      return [...combatState.combatants].sort((a, b) => {
+        if (a.initiative !== b.initiative) {
+          return b.initiative - a.initiative;
+        }
+        return b.dexterity - a.dexterity;
+      });
     } else {
       // Before initiative, group players at top, monsters at bottom
       const players = combatState.combatants.filter(c => c.type === 'player');
@@ -592,42 +609,47 @@ function CombatantCard({
               <p className="text-lg font-bold">{combatant.ac}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400">HP</p>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  placeholder="0"
-                  value={hpAdjustment}
-                  onChange={handleHpAdjustmentChange}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      if (e.shiftKey) {
-                        applyHeal();
-                      } else {
-                        applyDamage();
-                      }
+              <p className="text-xs text-gray-400">DEX</p>
+              <p className="text-lg font-bold">{combatant.dexterity}</p>
+            </div>
+          </div>
+
+          <div className="mb-2">
+            <p className="text-xs text-gray-400">HP</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                placeholder="0"
+                value={hpAdjustment}
+                onChange={handleHpAdjustmentChange}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    if (e.shiftKey) {
+                      applyHeal();
+                    } else {
+                      applyDamage();
                     }
-                  }}
-                  className="w-14 bg-gray-700 rounded px-2 py-1 text-xs text-center text-white"
-                />
-                <button
-                  onClick={applyDamage}
-                  title="Apply damage (Enter)"
-                  className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
-                >
-                  Damage
-                </button>
-                <button
-                  onClick={applyHeal}
-                  title="Apply healing (Shift+Enter)"
-                  className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs"
-                >
-                  Heal
-                </button>
-                <span className="text-lg font-bold">
-                  {combatant.hp}/{combatant.maxHp}
-                </span>
-              </div>
+                  }
+                }}
+                className="w-14 bg-gray-700 rounded px-2 py-1 text-xs text-center text-white"
+              />
+              <button
+                onClick={applyDamage}
+                title="Apply damage (Enter)"
+                className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
+              >
+                Damage
+              </button>
+              <button
+                onClick={applyHeal}
+                title="Apply healing (Shift+Enter)"
+                className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs"
+              >
+                Heal
+              </button>
+              <span className="text-lg font-bold">
+                {combatant.hp}/{combatant.maxHp}
+              </span>
             </div>
           </div>
 

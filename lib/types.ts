@@ -24,6 +24,7 @@ export interface Monster {
   maxHp: number;
   ac: number;
   initiativeBonus: number;
+  dexterity: number;
 }
 
 export interface Player {
@@ -34,6 +35,7 @@ export interface Player {
   hp: number;
   maxHp: number;
   ac: number;
+  dexterity: number;
   initiativeBonus: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -75,6 +77,7 @@ export interface CombatantState {
   type: 'player' | 'monster';
   initiative: number;
   initiativeRoll?: InitiativeRoll;
+  dexterity: number;
   hp: number;
   maxHp: number;
   ac: number;

@@ -164,7 +164,7 @@ function EncountersContent() {
                         <div key={monster.id} className="bg-gray-700 rounded p-2 text-sm">
                           <span className="font-medium">{monster.name}</span>
                           <span className="text-gray-400 ml-2">
-                            HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, Init: {monster.initiativeBonus >= 0 ? '+' : ''}{monster.initiativeBonus}
+                            HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, Init: {monster.initiativeBonus >= 0 ? '+' : ''}{monster.initiativeBonus}, DEX: {monster.dexterity}
                           </span>
                         </div>
                       ))}
@@ -206,6 +206,7 @@ function EncounterEditor({
       maxHp: 10,
       ac: 10,
       initiativeBonus: 0,
+      dexterity: 10,
     };
     setEditingMonster(newMonster);
   };
@@ -292,7 +293,7 @@ function EncounterEditor({
               <div>
                 <span className="font-medium">{monster.name}</span>
                 <span className="text-gray-400 ml-2 text-sm">
-                  HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, Init: {monster.initiativeBonus >= 0 ? '+' : ''}{monster.initiativeBonus}
+                  HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, Init: {monster.initiativeBonus >= 0 ? '+' : ''}{monster.initiativeBonus}, DEX: {monster.dexterity}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -350,6 +351,7 @@ function MonsterEditor({
   const [maxHp, setMaxHp] = useState(monster.maxHp);
   const [ac, setAc] = useState(monster.ac);
   const [initiativeBonus, setInitiativeBonus] = useState(monster.initiativeBonus);
+  const [dexterity, setDexterity] = useState(monster.dexterity);
 
   const handleSave = () => {
     onSave({
@@ -359,6 +361,7 @@ function MonsterEditor({
       maxHp,
       ac,
       initiativeBonus,
+      dexterity,
     });
   };
 
@@ -411,6 +414,15 @@ function MonsterEditor({
             type="number"
             value={initiativeBonus}
             onChange={(e) => setInitiativeBonus(parseInt(e.target.value) || 0)}
+            className="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
+          />
+        </div>
+        <div>
+          <label className="block mb-1 text-xs">Dexterity</label>
+          <input
+            type="number"
+            value={dexterity}
+            onChange={(e) => setDexterity(parseInt(e.target.value) || 0)}
             className="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
           />
         </div>
