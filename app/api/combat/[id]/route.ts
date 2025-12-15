@@ -5,8 +5,9 @@ import { CombatState } from '@/lib/types';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const auth = requireAuth(request);
 
   if (auth instanceof NextResponse) {
@@ -17,7 +18,7 @@ export async function GET(
     const db = await getDatabase();
     const combatState = await db
       .collection<CombatState>('combatStates')
-      .findOne({ id: params.id, userId: auth.userId });
+      .findOne({ id, userId: auth.userId });
 
     if (!combatState) {
       return NextResponse.json(
@@ -38,8 +39,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const auth = requireAuth(request);
 
   if (auth instanceof NextResponse) {
@@ -53,7 +55,7 @@ export async function PUT(
     const db = await getDatabase();
     const existingCombatState = await db
       .collection<CombatState>('combatStates')
-      .findOne({ id: params.id, userId: auth.userId });
+      .findOne({ id, userId: auth.userId });
 
     if (!existingCombatState) {
       return NextResponse.json(
@@ -74,7 +76,7 @@ export async function PUT(
     await db
       .collection<CombatState>('combatStates')
       .updateOne(
-        { id: params.id, userId: auth.userId },
+        { id, userId: auth.userId },
         { $set: updatedCombatState }
       );
 
@@ -90,8 +92,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const auth = requireAuth(request);
 
   if (auth instanceof NextResponse) {
@@ -102,7 +105,7 @@ export async function DELETE(
     const db = await getDatabase();
     const combatState = await db
       .collection<CombatState>('combatStates')
-      .findOne({ id: params.id, userId: auth.userId });
+      .findOne({ id, userId: auth.userId });
 
     if (!combatState) {
       return NextResponse.json(
@@ -113,7 +116,7 @@ export async function DELETE(
 
     await db
       .collection<CombatState>('combatStates')
-      .deleteOne({ id: params.id, userId: auth.userId });
+      .deleteOne({ id, userId: auth.userId });
 
     return NextResponse.json({ message: 'Combat state deleted successfully' });
   } catch (error) {

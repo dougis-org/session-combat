@@ -3,7 +3,7 @@ import { requireAuth } from '@/lib/middleware';
 import { getDatabase } from '@/lib/db';
 
 interface Item {
-  _id?: unknown;
+  _id?: string;
   id: string;
   userId: string;
   name: string;
@@ -74,4 +74,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

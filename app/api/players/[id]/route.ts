@@ -5,8 +5,9 @@ import { Player } from '@/lib/types';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const auth = requireAuth(request);
 
   if (auth instanceof NextResponse) {
@@ -15,7 +16,7 @@ export async function GET(
 
   try {
     const players = await storage.loadPlayers(auth.userId);
-    const player = players.find((p) => p.id === params.id);
+    const player = players.find((p) => p.id === id);
 
     if (!player) {
       return NextResponse.json(
@@ -36,8 +37,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const auth = requireAuth(request);
 
   if (auth instanceof NextResponse) {
@@ -50,7 +52,7 @@ export async function PUT(
 
     // Get the existing player to verify ownership
     const players = await storage.loadPlayers(auth.userId);
-    const existingPlayer = players.find((p) => p.id === params.id);
+    const existingPlayer = players.find((p) => p.id === id);
 
     if (!existingPlayer) {
       return NextResponse.json(
@@ -90,8 +92,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const auth = requireAuth(request);
 
   if (auth instanceof NextResponse) {
@@ -101,7 +104,7 @@ export async function DELETE(
   try {
     // Verify ownership before deleting
     const players = await storage.loadPlayers(auth.userId);
-    const player = players.find((p) => p.id === params.id);
+    const player = players.find((p) => p.id === id);
 
     if (!player) {
       return NextResponse.json(
@@ -110,7 +113,7 @@ export async function DELETE(
       );
     }
 
-    await storage.deletePlayer(params.id, auth.userId);
+    await storage.deletePlayer(id, auth.userId);
 
     return NextResponse.json({ message: 'Player deleted successfully' });
   } catch (error) {

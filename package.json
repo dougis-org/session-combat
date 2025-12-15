@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "BUILD_VERSION=$(node -e \"console.log(require('./package.json').version)\") BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ') HOSTNAME=0.0.0.0 PORT=3000 next start",
     "lint": "next lint",
-    "test:integration": "jest --config=jest.integration.config.js"
+    "test:integration": "jest --config=jest.integration.config.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +25,7 @@
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@swc/jest": "^0.2.29",
     "@tailwindcss/postcss": "^4.1.18",
     "@testcontainers/mongodb": "^10.3.1",

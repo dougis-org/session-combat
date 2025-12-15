@@ -5,8 +5,9 @@ import { Encounter } from '@/lib/types';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const auth = requireAuth(request);
 
   if (auth instanceof NextResponse) {
@@ -15,7 +16,7 @@ export async function GET(
 
   try {
     const encounters = await storage.loadEncounters(auth.userId);
-    const encounter = encounters.find((e) => e.id === params.id);
+    const encounter = encounters.find((e) => e.id === id);
 
     if (!encounter) {
       return NextResponse.json(
@@ -36,8 +37,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const auth = requireAuth(request);
 
   if (auth instanceof NextResponse) {
@@ -50,7 +52,7 @@ export async function PUT(
 
     // Get the existing encounter to verify ownership
     const encounters = await storage.loadEncounters(auth.userId);
-    const existingEncounter = encounters.find((e) => e.id === params.id);
+    const existingEncounter = encounters.find((e) => e.id === id);
 
     if (!existingEncounter) {
       return NextResponse.json(
@@ -88,8 +90,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const auth = requireAuth(request);
 
   if (auth instanceof NextResponse) {
@@ -99,7 +102,7 @@ export async function DELETE(
   try {
     // Verify ownership before deleting
     const encounters = await storage.loadEncounters(auth.userId);
-    const encounter = encounters.find((e) => e.id === params.id);
+    const encounter = encounters.find((e) => e.id === id);
 
     if (!encounter) {
       return NextResponse.json(
@@ -108,7 +111,7 @@ export async function DELETE(
       );
     }
 
-    await storage.deleteEncounter(params.id, auth.userId);
+    await storage.deleteEncounter(id, auth.userId);
 
     return NextResponse.json({ message: 'Encounter deleted successfully' });
   } catch (error) {

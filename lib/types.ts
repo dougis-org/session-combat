@@ -16,7 +16,7 @@ export interface AuthPayload {
 }
 
 export interface Monster {
-  _id?: unknown;
+  _id?: string;
   id: string;
   userId: string;
   name: string;
@@ -27,7 +27,7 @@ export interface Monster {
 }
 
 export interface Player {
-  _id?: unknown;
+  _id?: string;
   id: string;
   userId: string;
   name: string;
@@ -40,7 +40,7 @@ export interface Player {
 }
 
 export interface Encounter {
-  _id?: unknown;
+  _id?: string;
   id: string;
   userId: string;
   name: string;
@@ -75,7 +75,7 @@ export interface CombatantState {
 }
 
 export interface CombatState {
-  _id?: unknown;
+  _id?: string;
   id: string;
   userId: string;
   encounterId?: string;

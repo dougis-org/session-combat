@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/db';
-import { comparePassword, generateToken, validateEmail } from '@/lib/auth';
+import { 
+  hashPassword, 
+  generateToken, 
+  validateEmail, 
+  validatePassword 
+} from '@/lib/auth';
 import { setAuthCookie } from '@/lib/middleware';
 import { User } from '@/lib/types';
 
@@ -24,46 +29,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return NextResponse.json(
+        { error: 'Password does not meet requirements', details: passwordValidation.errors },
+        { status: 400 }
+      );
+    }
+
     const db = await getDatabase();
     const usersCollection = db.collection<User>('users');
 
-    // Find user by email
-    const user = await usersCollection.findOne({ email });
-    if (!user) {
+    // Check if user already exists
+    const existingUser = await usersCollection.findOne({ email });
+    if (existingUser) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
+        { error: 'User with this email already exists' },
+        { status: 409 }
       );
     }
 
-    // Compare passwords
-    const passwordMatch = await comparePassword(password, user.passwordHash);
-    if (!passwordMatch) {
-      return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
-      );
-    }
+    // Hash password and create user
+    const passwordHash = await hashPassword(password);
+    const newUser: User = {
+      email,
+      passwordHash,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const result = await usersCollection.insertOne(newUser);
+    const userId = result.insertedId.toString();
 
     // Generate token
-    const userId = user._id?.toString() || '';
     const token = generateToken({ userId, email });
 
     // Create response with cookie
     const response = NextResponse.json(
-      { userId, email, message: 'Login successful' },
-      { status: 200 }
+      { userId, email, message: 'User registered successfully' },
+      { status: 201 }
     );
     setAuthCookie(response, token);
 
     return response;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Register error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
   }
 }
-
-export default POST;
