@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { CombatState, CombatantState, Encounter, Player, StatusCondition, InitiativeRoll } from '@/lib/types';
+import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll } from '@/lib/types';
 
 function CombatContent() {
   const [combatState, setCombatState] = useState<CombatState | null>(null);
   const [encounters, setEncounters] = useState<Encounter[]>([]);
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedEncounterId, setSelectedEncounterId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,22 +19,22 @@ function CombatContent() {
       try {
         setLoading(true);
         setError(null);
-        const [encountersRes, playersRes, combatRes] = await Promise.all([
+        const [encountersRes, charactersRes, combatRes] = await Promise.all([
           fetch('/api/encounters'),
-          fetch('/api/players'),
+          fetch('/api/characters'),
           fetch('/api/combat'),
         ]);
 
-        if (!encountersRes.ok || !playersRes.ok || !combatRes.ok) {
+        if (!encountersRes.ok || !charactersRes.ok || !combatRes.ok) {
           throw new Error('Failed to load data');
         }
 
         const encountersData = await encountersRes.json();
-        const playersData = await playersRes.json();
+        const charactersData = await charactersRes.json();
         const combatData = await combatRes.json();
 
         setEncounters(encountersData || []);
-        setPlayers(playersData || []);
+        setCharacters(charactersData || []);
         setCombatState(combatData || null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
@@ -66,17 +66,17 @@ function CombatContent() {
   const startCombat = () => {
     const combatants: CombatantState[] = [];
 
-    // Add players
-    players.forEach(player => {
+    // Add characters
+    characters.forEach(character => {
       combatants.push({
-        id: `player-${player.id}`,
-        name: player.name,
+        id: `character-${character.id}`,
+        name: character.name,
         type: 'player',
         initiative: 0,
-        dexterity: player.dexterity,
-        hp: player.hp,
-        maxHp: player.maxHp,
-        ac: player.ac,
+        dexterity: character.dexterity,
+        hp: character.hp,
+        maxHp: character.maxHp,
+        ac: character.ac,
         conditions: [],
       });
     });
@@ -151,8 +151,8 @@ function CombatContent() {
 
   const getInitiativeBonus = (combatant: CombatantState): number => {
     if (combatant.type === 'player') {
-      const player = players.find(p => `player-${p.id}` === combatant.id);
-      return player?.initiativeBonus || 0;
+      const character = characters.find(c => `character-${c.id}` === combatant.id);
+      return character?.initiativeBonus || 0;
     } else {
       // Extract initiative bonus from encounter monster
       if (combatState?.encounterId) {
@@ -320,20 +320,20 @@ function CombatContent() {
 
             <div className="mb-4">
               <p className="text-gray-400 text-sm">
-                Players: {players.length} | 
+                Characters: {characters.length} | 
                 Monsters: {selectedEncounterId ? encounters.find(e => e.id === selectedEncounterId)?.monsters.length || 0 : 0}
               </p>
             </div>
 
             <button
               onClick={startCombat}
-              disabled={players.length === 0}
+              disabled={characters.length === 0}
               className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-6 py-3 rounded text-lg font-semibold"
             >
               Start Combat
             </button>
-            {players.length === 0 && (
-              <p className="text-red-400 text-sm mt-2">You must create at least one player before starting combat</p>
+            {characters.length === 0 && (
+              <p className="text-red-400 text-sm mt-2">You must create at least one character before starting combat</p>
             )}
           </div>
         </div>

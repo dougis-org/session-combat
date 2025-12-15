@@ -43,9 +43,9 @@ function HomeContent() {
             <p className="text-gray-400">Manage encounters and monsters</p>
           </Link>
 
-          <Link href="/players" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
-            <h2 className="text-2xl font-semibold mb-2">Players</h2>
-            <p className="text-gray-400">Manage player characters and stats</p>
+          <Link href="/characters" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
+            <h2 className="text-2xl font-semibold mb-2">Characters</h2>
+            <p className="text-gray-400">Manage your characters and stats</p>
           </Link>
 
           <Link href="/combat" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">

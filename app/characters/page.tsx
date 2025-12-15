@@ -321,7 +321,7 @@ function CharacterEditor({
   );
 }
 
-export default function PlayersPage() {
+export default function CharactersPage() {
   return (
     <ProtectedRoute>
       <CharactersContent />

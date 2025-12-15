@@ -38,7 +38,7 @@ test.describe('Registration Flow', () => {
     const isProtectedPage = 
       page.url().includes('/combat') || 
       page.url().includes('/encounters') ||
-      page.url().includes('/players');
+      page.url().includes('/characters');
     
     expect(isProtectedPage).toBeTruthy();
   });

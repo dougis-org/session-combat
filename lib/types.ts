@@ -27,7 +27,7 @@ export interface Monster {
   dexterity: number;
 }
 
-export interface Player {
+export interface Character {
   _id?: string;
   id: string;
   userId: string;
@@ -100,6 +100,6 @@ export interface CombatState {
 
 export interface SessionData {
   encounters: Encounter[];
-  players: Player[];
+  characters: Character[];
   combatState?: CombatState;
 }

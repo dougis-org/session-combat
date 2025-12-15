@@ -102,20 +102,20 @@
 }
 ```
 
-#### Step 6: Create Players API
+#### Step 6: Create Characters API
 **Files:**
-- `/pages/api/players.ts` (GET, POST)
-- `/pages/api/players/[id].ts` (GET, PUT, DELETE)
+- `/pages/api/characters.ts` (GET, POST)
+- `/pages/api/characters/[id].ts` (GET, PUT, DELETE)
 
 **Requirements:**
 - Same authentication and userId filtering as Encounters
-- GET `/api/players` - List all players for user
-- POST `/api/players` - Create new player
-- GET `/api/players/[id]` - Get single player (verify ownership)
-- PUT `/api/players/[id]` - Update player (verify ownership)
-- DELETE `/api/players/[id]` - Delete player (verify ownership)
+- GET `/api/characters` - List all characters for user
+- POST `/api/characters` - Create new character
+- GET `/api/characters/[id]` - Get single character (verify ownership)
+- PUT `/api/characters/[id]` - Update character (verify ownership)
+- DELETE `/api/characters/[id]` - Delete character (verify ownership)
 
-**MongoDB Collection:** `players`
+**MongoDB Collection:** `characters`
 ```javascript
 {
   _id: ObjectId,
@@ -196,12 +196,12 @@
 - Add edit/delete buttons
 - Handle loading and error states
 
-#### Step 10: Update Players Page
-**File:** `/app/players/page.tsx`
+#### Step 10: Update Characters Page
+**File:** `/app/characters/page.tsx`
 - Wrap with ProtectedRoute
-- Use fetch to GET `/api/players`
-- Implement create player form (POST to `/api/players`)
-- List players from API instead of localStorage
+- Use fetch to GET `/api/characters`
+- Implement create character form (POST to `/api/characters`)
+- List characters from API instead of localStorage
 - Add edit/delete buttons
 - Handle loading and error states
 
@@ -231,7 +231,7 @@
 - Test GET `/api/encounters` returns only user's encounters
 - Test POST `/api/encounters` creates encounter with correct userId
 - Test DELETE `/api/encounters/[id]` fails for other users' encounters
-- Similar tests for players, items, and combat
+- Similar tests for characters, items, and combat
 - Test 401 responses when not authenticated
 
 #### Step 13: Security Review
@@ -330,7 +330,7 @@ Data Flow:
 │  MongoDB Database                    │
 │  - users collection                  │
 │  - encounters collection (userId)    │
-│  - players collection (userId)       │
+│  - characters collection (userId)       │
 │  - items collection (userId)         │
 │  - combatStates collection (userId)  │
 └──────────────────────────────────────┘
@@ -342,7 +342,7 @@ Data Flow:
 
 1. **Setup** - Provide MongoDB connection URL → Update .env.local
 2. **Phase 2** - Create login/register pages and ProtectedRoute
-3. **Phase 3** - Implement API routes (encounters, players, items, combat)
+3. **Phase 3** - Implement API routes (encounters, characters, items, combat)
 4. **Phase 4** - Update existing components to use new APIs
 5. **Phase 5** - Write tests and verify security
 

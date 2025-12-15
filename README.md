@@ -5,7 +5,7 @@ A Next.js application for tracking encounters and combat for D&D sessions.
 ## Features
 
 - **Encounter Management**: Create and manage encounters with monsters ahead of time
-- **Player Management**: Track player characters and their stats
+- **Character Management**: Track your characters and their stats
 - **Combat Tracker**: Full-featured combat tracker with:
   - Initiative tracking and automatic sorting
   - Hit point management with visual health bars
@@ -39,9 +39,9 @@ npm start
 
 ## Usage
 
-### 1. Add Players
+### 1. Add Characters
 
-Navigate to the Players page to add your player characters. For each player, enter:
+Navigate to the Characters page to add your characters. For each character, enter:
 - Name
 - Hit Points (HP) and Max HP
 - Armor Class (AC)
@@ -56,7 +56,7 @@ Navigate to the Encounters page to create encounters:
 ### 3. Start Combat
 
 Navigate to the Combat Tracker:
-1. Select an encounter (optional - you can start combat with just players)
+1. Select an encounter (optional - you can start combat with just characters)
 2. Click "Start Combat" to initialize the combat session
 3. Click "Roll Initiative" to roll for all combatants and sort by initiative order
 4. Use "Next Turn" to advance through combat
@@ -66,7 +66,7 @@ Navigate to the Combat Tracker:
 
 ## Data Persistence
 
-The application uses **localStorage** for simple, client-side data persistence. All encounters, players, and combat state are automatically saved to your browser's local storage. This means:
+The application uses **localStorage** for simple, client-side data persistence. All encounters, characters, and combat state are automatically saved to your browser's local storage. This means:
 
 - Your data persists between browser sessions
 - Data is stored locally on your device

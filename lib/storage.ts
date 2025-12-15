@@ -1,6 +1,6 @@
 // MongoDB persistence utilities
 import { getDatabase } from './db';
-import { SessionData, Encounter, Player, CombatState } from './types';
+import { SessionData, Encounter, Character, CombatState } from './types';
 
 /**
  * Server-side storage functions for MongoDB
@@ -22,17 +22,17 @@ export const storage = {
     }
   },
 
-  // Load players for a user
-  async loadPlayers(userId: string): Promise<Player[]> {
+  // Load characters for a user
+  async loadCharacters(userId: string): Promise<Character[]> {
     try {
       const db = await getDatabase();
-      const players = await db
-        .collection<Player>('players')
+      const characters = await db
+        .collection<Character>('characters')
         .find({ userId })
         .toArray();
-      return players;
+      return characters;
     } catch (error) {
-      console.error('Error loading players:', error);
+      console.error('Error loading characters:', error);
       return [];
     }
   },
@@ -54,16 +54,16 @@ export const storage = {
   // Load all session data for a user
   async load(userId: string): Promise<SessionData> {
     try {
-      const [encounters, players, combatState] = await Promise.all([
+      const [encounters, characters, combatState] = await Promise.all([
         this.loadEncounters(userId),
-        this.loadPlayers(userId),
+        this.loadCharacters(userId),
         this.loadCombatState(userId),
       ]);
 
-      return { encounters, players, combatState: combatState || undefined };
+      return { encounters, characters, combatState: combatState || undefined };
     } catch (error) {
       console.error('Error loading session data:', error);
-      return { encounters: [], players: [] };
+      return { encounters: [], characters: [] };
     }
   },
 
@@ -93,28 +93,28 @@ export const storage = {
     }
   },
 
-  // Save player
-  async savePlayer(player: Player): Promise<void> {
+  // Save character
+  async saveCharacter(character: Character): Promise<void> {
     try {
       const db = await getDatabase();
       await db
-        .collection<Player>('players')
-        .updateOne({ id: player.id, userId: player.userId }, { $set: player }, { upsert: true });
+        .collection<Character>('characters')
+        .updateOne({ id: character.id, userId: character.userId }, { $set: character }, { upsert: true });
     } catch (error) {
-      console.error('Error saving player:', error);
+      console.error('Error saving character:', error);
       throw error;
     }
   },
 
-  // Save multiple players
-  async savePlayers(players: Player[]): Promise<void> {
+  // Save multiple characters
+  async saveCharacters(characters: Character[]): Promise<void> {
     try {
       const db = await getDatabase();
-      for (const player of players) {
-        await this.savePlayer(player);
+      for (const character of characters) {
+        await this.saveCharacter(character);
       }
     } catch (error) {
-      console.error('Error saving players:', error);
+      console.error('Error saving characters:', error);
       throw error;
     }
   },
@@ -146,13 +146,13 @@ export const storage = {
     }
   },
 
-  // Delete player
-  async deletePlayer(id: string, userId: string): Promise<void> {
+  // Delete character
+  async deleteCharacter(id: string, userId: string): Promise<void> {
     try {
       const db = await getDatabase();
-      await db.collection<Player>('players').deleteOne({ id, userId });
+      await db.collection<Character>('characters').deleteOne({ id, userId });
     } catch (error) {
-      console.error('Error deleting player:', error);
+      console.error('Error deleting character:', error);
       throw error;
     }
   },
@@ -163,7 +163,7 @@ export const storage = {
       const db = await getDatabase();
       await Promise.all([
         db.collection<Encounter>('encounters').deleteMany({ userId }),
-        db.collection<Player>('players').deleteMany({ userId }),
+        db.collection<Character>('characters').deleteMany({ userId }),
         db.collection<CombatState>('combatStates').deleteMany({ userId }),
       ]);
     } catch (error) {
