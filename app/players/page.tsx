@@ -187,8 +187,16 @@ function PlayerEditor({
   const [ac, setAc] = useState(player.ac);
   const [initiativeBonus, setInitiativeBonus] = useState(player.initiativeBonus);
   const [saving, setSaving] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleSave = async () => {
+    setValidationError(null);
+
+    if (hp > maxHp) {
+      setValidationError('Current HP cannot be greater than Max HP');
+      return;
+    }
+
     setSaving(true);
     try {
       await onSave({
@@ -207,6 +215,12 @@ function PlayerEditor({
   return (
     <div className="bg-gray-800 rounded-lg p-6 mb-6 border-2 border-blue-500">
       <h2 className="text-2xl font-bold mb-4">{isNew ? 'Create Player' : 'Edit Player'}</h2>
+      
+      {validationError && (
+        <div className="p-3 bg-red-900 border border-red-700 rounded text-red-200 mb-4">
+          {validationError}
+        </div>
+      )}
       
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         <div>
@@ -247,7 +261,14 @@ function PlayerEditor({
           <input
             type="number"
             value={maxHp}
-            onChange={(e) => setMaxHp(parseInt(e.target.value) || 0)}
+            onChange={(e) => {
+              const newMaxHp = parseInt(e.target.value) || 0;
+              setMaxHp(newMaxHp);
+              // Cap current HP to new max HP if needed
+              if (hp > newMaxHp) {
+                setHp(newMaxHp);
+              }
+            }}
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
           />
