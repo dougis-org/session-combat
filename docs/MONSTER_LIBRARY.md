@@ -2,11 +2,11 @@
 
 ## Overview
 
-The Session Combat application includes a comprehensive library of Standard Reference Document (SRD) monsters from D&D 5e. These public domain creatures can be seeded into any instance of the application for use by all users.
+The Session Combat application includes a comprehensive library of **32+ Standard Reference Document (SRD) monsters** from D&D 5e. These public domain creatures can be seeded into any instance of the application for use by all users.
 
 ## Features
 
-- **18 SRD Monsters** - Complete stat blocks for standard D&D creatures
+- **32+ SRD Monsters** - Complete stat blocks for standard D&D creatures
 - **Global Templates** - Available to all users in the encounter builder
 - **Simple Seeding** - Two easy methods to populate the database
 - **Full D&D 5e Stats** - Comprehensive ability scores, actions, legendary actions, and more
@@ -17,21 +17,21 @@ The library includes creatures across various challenge ratings:
 
 ### Creatures by Challenge Rating
 
-- **CR 0** - Commoner
-- **CR 1/8** - Bandit
-- **CR 1/4** - Goblin
-- **CR 1/2** - Black Bear
-- **CR 1** - Mummy
-- **CR 3** - Ankheg, Dire Wolf
-- **CR 4** - Red Dragon Wyrmling
-- **CR 6** - Chimera
-- **CR 8** - Assassin, Frost Giant
-- **CR 10** - Aboleth
-- **CR 13** - Beholder
-- **CR 17** - Adult Gold Dragon
-- **CR 19** - Demon Balor
-- **CR 21** - Lich
-- **CR 22** - Ancient Green Dragon
+**CR 0** - Commoner
+**CR 0.125** - Skeleton, Zombie
+**CR 0.25** - Drow
+**CR 0.5** - Orc
+**CR 1** - Bandit, Harpy
+**CR 2** - Ogre, Ghast, Gargoyle
+**CR 3** - Ankheg, Dire Wolf, Manticore, Basilisk
+**CR 4** - Red Dragon Wyrmling
+**CR 5** - Wraith
+**CR 6** - Chimera, Medusa, Wyvern
+**CR 8** - Assassin, Frost Giant
+**CR 10** - Aboleth
+**CR 13** - Beholder, Vampire
+**CR 17** - Adult Gold Dragon
+**CR 22** - Ancient Green Dragon
 
 ## Seeding Methods
 
@@ -162,6 +162,41 @@ interface Monster {
   description?: string;
 }
 ```
+
+## Licensing & Content Restrictions
+
+### What's Included
+
+The current library includes only creatures from the **D&D 5e System Reference Document (SRD)**, which are:
+- **Public domain content** available for free use
+- **Open Gaming License (OGL) content** that is publicly available
+- **Completely free of copyright restrictions** for this purpose
+
+### About Commercial Modules (e.g., Vecna Eve of Ruin)
+
+Content from **commercial adventure modules** like "Vecna Eve of Ruin" **cannot be directly imported** due to copyright restrictions. These modules are:
+- Published and copyrighted by Wizards of the Coast
+- Protected intellectual property
+- Subject to legal licensing requirements
+
+However, many creatures from commercial modules have **SRD equivalents or similar creatures** that can be legally included. If you're looking for specific monsters:
+
+1. **Check if an SRD version exists** - Many famous D&D creatures have SRD stat blocks
+2. **Create custom variants** - Use the library creatures as templates and modify stats
+3. **Reference the commercial product** - If you own a module, you can use its content at your own table
+
+### How to Contribute Safely
+
+If you want to expand the library with additional creatures:
+- Only use creatures from **publicly available SRD content**
+- Only use creatures explicitly released under **OGL or Creative Commons licenses**
+- Verify licensing before adding content
+- Document the source of any new creatures
+
+For questions about licensing, consult:
+- [D&D 5e Official SRD](https://dnd.wizards.com/resources/systems-reference-document)
+- [Open Gaming License](https://openorcforge.com/ogl-faq/)
+- Original source materials
 
 ## Extending the Library
 

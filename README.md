@@ -6,7 +6,7 @@ A Next.js application for tracking encounters and combat for D&D sessions.
 
 - **Encounter Management**: Create and manage encounters with monsters ahead of time
 - **Character Management**: Track your characters and their stats with full D&D 5e stat blocks
-- **SRD Monster Library**: 18 public domain D&D 5e monsters available globally to all users
+- **SRD Monster Library**: 32+ public domain D&D 5e monsters available globally to all users
 - **Combat Tracker**: Full-featured combat tracker with:
   - Initiative tracking and automatic sorting
   - Hit point management with visual health bars
@@ -80,14 +80,16 @@ For development, a local MongoDB connection is configured via `.env.local`.
 
 ## Monster Library
 
-The application includes a built-in library of 18 Standard Reference Document (SRD) monsters from D&D 5e that are available to all users. These public domain creatures include famous enemies and NPCs like:
+The application includes a built-in library of 32+ Standard Reference Document (SRD) monsters from D&D 5e that are available to all users. These public domain creatures include famous enemies and NPCs like:
 
-- Dragons (Red Dragon Wyrmling, Adult Gold Dragon, Ancient Green Dragon)
-- Liches and Undead (Lich, Mummy)
+- Dragons (Red Dragon Wyrmling, Wyvern, Adult Gold Dragon, Ancient Green Dragon)
+- Liches and Undead (Lich, Vampire, Wraith, Zombie, Skeleton, Ghast, Mummy)
 - Giants (Frost Giant)
+- Monstrosities (Hydra, Manticore, Basilisk, Medusa, Chimera)
 - Beasts (Dire Wolf, Black Bear)
-- Humanoids (Assassin, Goblin, Bandit, Commoner)
+- Humanoids (Assassin, Ogre, Orc, Goblin, Bandit, Drow, Commoner)
 - Aberrations (Aboleth, Beholder)
+- Fey/Elementals (Harpy, Gargoyle)
 - And more!
 
 ### Seeding the Library
