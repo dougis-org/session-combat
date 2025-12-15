@@ -141,17 +141,9 @@ function CombatContent() {
       return { ...c, initiative: total, initiativeRoll };
     });
 
-    // Sort by initiative (descending), then by dexterity (descending) as tiebreaker
-    updatedCombatants.sort((a, b) => {
-      if (a.initiative !== b.initiative) {
-        return b.initiative - a.initiative;
-      }
-      return b.dexterity - a.dexterity;
-    });
-
     saveCombatState({
       ...combatState,
-      combatants: updatedCombatants,
+      combatants: sortCombatants(updatedCombatants),
       currentTurnIndex: 0,
     });
     setInitiativeMode(false);
@@ -173,7 +165,24 @@ function CombatContent() {
     }
     return 0;
   };
-
+  const sortCombatants = (combatants: CombatantState[]): CombatantState[] => {
+    return combatants.sort((a, b) => {
+      // Primary: Initiative (descending)
+      if (a.initiative !== b.initiative) {
+        return b.initiative - a.initiative;
+      }
+      // Secondary: Dexterity (descending)
+      if (a.dexterity !== b.dexterity) {
+        return b.dexterity - a.dexterity;
+      }
+      // Tertiary: Player before monster
+      if (a.type !== b.type) {
+        return a.type === 'player' ? -1 : 1;
+      }
+      // Quaternary: Alphabetically by name
+      return a.name.localeCompare(b.name);
+    });
+  };
   const nextTurn = () => {
     if (!combatState) return;
 
@@ -239,17 +248,9 @@ function CombatContent() {
         : c
     );
 
-    // Sort by initiative (descending), then by dexterity (descending) as tiebreaker
-    updatedCombatants.sort((a, b) => {
-      if (a.initiative !== b.initiative) {
-        return b.initiative - a.initiative;
-      }
-      return b.dexterity - a.dexterity;
-    });
-
     saveCombatState({
       ...combatState,
-      combatants: updatedCombatants,
+      combatants: sortCombatants(updatedCombatants),
       currentTurnIndex: 0,
     });
   };
@@ -262,13 +263,7 @@ function CombatContent() {
     if (!combatState) return [];
 
     if (hasInitiativeBeenRolled()) {
-      // After initiative, return sorted by initiative (highest first), then by dexterity as tiebreaker
-      return [...combatState.combatants].sort((a, b) => {
-        if (a.initiative !== b.initiative) {
-          return b.initiative - a.initiative;
-        }
-        return b.dexterity - a.dexterity;
-      });
+      return sortCombatants([...combatState.combatants]);
     } else {
       // Before initiative, group players at top, monsters at bottom
       const players = combatState.combatants.filter(c => c.type === 'player');
