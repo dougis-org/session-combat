@@ -12,11 +12,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Get user info including admin status
+    const db = require('@/lib/db').getDatabase;
+    let isAdmin = false;
+    try {
+      const database = await db();
+      const user = await database.collection('users').findOne({ id: auth.userId });
+      isAdmin = user?.isAdmin === true;
+    } catch (error) {
+      console.error('Error fetching user admin status:', error);
+    }
+
     return NextResponse.json(
       { 
         authenticated: true,
         userId: auth.userId,
-        email: auth.email
+        email: auth.email,
+        isAdmin
       },
       { status: 200 }
     );

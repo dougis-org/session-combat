@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 export interface AuthUser {
   userId: string;
   email: string;
+  isAdmin?: boolean;
 }
 
 export function useAuth() {
@@ -20,7 +21,7 @@ export function useAuth() {
       
       if (response.ok) {
         const data = await response.json();
-        setUser({ userId: data.userId, email: data.email });
+        setUser({ userId: data.userId, email: data.email, isAdmin: data.isAdmin });
         setError(null);
       } else {
         setUser(null);

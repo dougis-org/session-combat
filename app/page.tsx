@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
@@ -8,10 +9,43 @@ import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 function HomeContent() {
   const router = useRouter();
   const { user, logout, loading } = useAuth();
+  const [importing, setImporting] = useState(false);
+  const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const handleLogout = async () => {
     await logout();
     router.push('/login');
+  };
+
+  const handleImportMonsters = async () => {
+    try {
+      setImporting(true);
+      setImportMessage(null);
+      
+      const response = await fetch('/api/monsters/global', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ importSRD: true }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Import failed');
+      }
+
+      setImportMessage({
+        type: 'success',
+        text: `Successfully imported ${data.imported || 0} monsters`,
+      });
+    } catch (error) {
+      setImportMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Import failed',
+      });
+    } finally {
+      setImporting(false);
+    }
   };
 
   return (
@@ -35,6 +69,34 @@ function HomeContent() {
             </button>
           </div>
         </div>
+
+        {/* Admin Import Section */}
+        {user?.isAdmin && (
+          <div className="mb-8 bg-blue-950 border border-blue-800 rounded-lg p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold text-blue-300 mb-1">Admin Tools</h3>
+                <p className="text-sm text-blue-200">Import SRD monsters into the global catalog</p>
+              </div>
+              <button
+                onClick={handleImportMonsters}
+                disabled={importing}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded font-semibold transition-colors"
+              >
+                {importing ? 'Importing...' : 'Import SRD Monsters'}
+              </button>
+            </div>
+            {importMessage && (
+              <div className={`mt-3 p-2 rounded text-sm ${
+                importMessage.type === 'success'
+                  ? 'bg-green-900 text-green-200'
+                  : 'bg-red-900 text-red-200'
+              }`}>
+                {importMessage.text}
+              </div>
+            )}
+          </div>
+        )}
         
         {/* Main Navigation */}
         <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
