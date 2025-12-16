@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Character, isValidRace, VALID_RACES } from '@/lib/types';
+import { Character, isValidRace, VALID_RACES, isValidClass, VALID_CLASSES, CharacterClass, calculateTotalLevel } from '@/lib/types';
 
 export async function GET(request: NextRequest) {
   const auth = requireAuth(request);
@@ -50,8 +50,7 @@ export async function POST(request: NextRequest) {
       actions,
       bonusActions,
       reactions,
-      class: classType,
-      level,
+      classes,
       race,
       background,
       alignment,
@@ -75,6 +74,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate and normalize classes
+    let characterClasses: CharacterClass[] = [];
+    if (classes !== undefined && classes !== null) {
+      if (!Array.isArray(classes)) {
+        return NextResponse.json(
+          { error: 'Classes must be an array of {class, level} objects' },
+          { status: 400 }
+        );
+      }
+
+      for (const classEntry of classes) {
+        if (!classEntry.class || !isValidClass(classEntry.class)) {
+          return NextResponse.json(
+            { 
+              error: `Invalid class "${classEntry.class}". Must be one of: ` + VALID_CLASSES.join(', '),
+              validClasses: VALID_CLASSES 
+            },
+            { status: 400 }
+          );
+        }
+
+        if (typeof classEntry.level !== 'number' || classEntry.level < 1 || classEntry.level > 20) {
+          return NextResponse.json(
+            { error: 'Class level must be a number between 1 and 20' },
+            { status: 400 }
+          );
+        }
+
+        characterClasses.push({
+          class: classEntry.class,
+          level: classEntry.level,
+        });
+      }
+    }
+
+    // Default to Fighter level 1 if no classes provided
+    if (characterClasses.length === 0) {
+      characterClasses = [{ class: 'Fighter', level: 1 }];
+    }
+
     const character: Character = {
       _id: undefined,
       id: crypto.randomUUID(),
@@ -84,21 +123,20 @@ export async function POST(request: NextRequest) {
       maxHp: maxHp || 0,
       ac: ac || 10,
       acNote: acNote || undefined,
-      abilityScores: abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      abilityScores: abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
       savingThrows: savingThrows || {},
       skills: skills || {},
       damageResistances: damageResistances || [],
       damageImmunities: damageImmunities || [],
       damageVulnerabilities: damageVulnerabilities || [],
       conditionImmunities: conditionImmunities || [],
-      senses: senses || [],
+      senses: senses || {},
       languages: languages || [],
       traits: traits || [],
       actions: actions || [],
       bonusActions: bonusActions || [],
       reactions: reactions || [],
-      class: classType || undefined,
-      level: level || 1,
+      classes: characterClasses,
       race: race || undefined,
       background: background || undefined,
       alignment: alignment || undefined,
