@@ -4,8 +4,8 @@
   "description": "holds a combat tracker and encounters for a single DnD session",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/generate-version.js && next dev",
+    "build": "node scripts/generate-version.js && next build",
     "start": "BUILD_VERSION=$(node -e \"console.log(require('./package.json').version)\") BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ') HOSTNAME=0.0.0.0 PORT=3000 next start",
     "lint": "next lint",
     "test:integration": "jest --config=jest.integration.config.js",
