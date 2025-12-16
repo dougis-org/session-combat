@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import { verifyAuth } from '@/lib/middleware';
 
 export async function GET(request: NextRequest) {
@@ -17,13 +18,13 @@ export async function GET(request: NextRequest) {
     let isAdmin = false;
     try {
       const database = await db();
-      const user = await database.collection('users').findOne({ id: auth.userId });
+      const user = await database.collection('users').findOne({ _id: new ObjectId(auth.userId) });
       isAdmin = user?.isAdmin === true;
     } catch (error) {
       console.error('Error fetching user admin status:', error);
     }
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { 
         authenticated: true,
         userId: auth.userId,
@@ -32,6 +33,11 @@ export async function GET(request: NextRequest) {
       },
       { status: 200 }
     );
+    
+    // Cache auth data for 1 hour
+    response.headers.set('Cache-Control', 'private, max-age=3600');
+    
+    return response;
   } catch (error) {
     console.error('Me endpoint error:', error);
     return NextResponse.json(

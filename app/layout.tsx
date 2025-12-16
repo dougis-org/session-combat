@@ -49,8 +49,6 @@ export default async function RootLayout({
             <span>v{versionData.version}</span>
             <span>•</span>
             <span>{formatDate(versionData.buildDate)}</span>
-            <span>•</span>
-            <span>Build #{versionData.buildNumber}</span>
           </div>
         </footer>
       </body>
