@@ -68,6 +68,81 @@ export interface CharacterClass {
   level: number;
 }
 
+// Validation helper for character classes array
+export interface ClassValidationError {
+  valid: false;
+  error: string;
+}
+
+export interface ClassValidationSuccess {
+  valid: true;
+}
+
+export type ClassValidationResult = ClassValidationSuccess | ClassValidationError;
+
+export function validateCharacterClasses(
+  classes: unknown,
+  options: { allowEmpty?: boolean } = {}
+): ClassValidationResult {
+  const { allowEmpty = false } = options;
+
+  // Check if classes is an array
+  if (!Array.isArray(classes)) {
+    return {
+      valid: false,
+      error: 'Classes must be an array of {class, level} objects',
+    };
+  }
+
+  // Check for empty array (usually not allowed, especially on updates)
+  if (classes.length === 0 && !allowEmpty) {
+    return {
+      valid: false,
+      error: 'At least one class is required',
+    };
+  }
+
+  // Track classes to detect duplicates
+  const seenClasses = new Set<DnDClass>();
+
+  // Validate each class entry
+  for (const classEntry of classes) {
+    // Validate class property exists and is valid
+    if (!classEntry || typeof classEntry !== 'object' || !classEntry.class) {
+      return {
+        valid: false,
+        error: 'Each class entry must have a "class" property',
+      };
+    }
+
+    if (!isValidClass(classEntry.class)) {
+      return {
+        valid: false,
+        error: `Invalid class "${classEntry.class}". Must be one of: ${VALID_CLASSES.join(', ')}`,
+      };
+    }
+
+    // Check for duplicate classes
+    if (seenClasses.has(classEntry.class)) {
+      return {
+        valid: false,
+        error: `Duplicate class: "${classEntry.class}". Each character can have each class only once.`,
+      };
+    }
+    seenClasses.add(classEntry.class);
+
+    // Validate level property
+    if (typeof classEntry.level !== 'number' || classEntry.level < 1 || classEntry.level > 20) {
+      return {
+        valid: false,
+        error: `Class level must be a number between 1 and 20 (got ${classEntry.level})`,
+      };
+    }
+  }
+
+  return { valid: true };
+}
+
 // User and authentication
 export interface User {
   _id?: string;

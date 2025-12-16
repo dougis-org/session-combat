@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Character, isValidRace, VALID_RACES, isValidClass, VALID_CLASSES, CharacterClass, calculateTotalLevel } from '@/lib/types';
+import { Character, isValidRace, VALID_RACES, isValidClass, VALID_CLASSES, CharacterClass, calculateTotalLevel, validateCharacterClasses } from '@/lib/types';
 
 export async function GET(request: NextRequest) {
   const auth = requireAuth(request);
@@ -77,35 +77,23 @@ export async function POST(request: NextRequest) {
     // Validate and normalize classes
     let characterClasses: CharacterClass[] = [];
     if (classes !== undefined && classes !== null) {
-      if (!Array.isArray(classes)) {
+      const validationResult = validateCharacterClasses(classes, { allowEmpty: true });
+      if (!validationResult.valid) {
         return NextResponse.json(
-          { error: 'Classes must be an array of {class, level} objects' },
+          { 
+            error: validationResult.error,
+            validClasses: VALID_CLASSES 
+          },
           { status: 400 }
         );
       }
 
-      for (const classEntry of classes) {
-        if (!classEntry.class || !isValidClass(classEntry.class)) {
-          return NextResponse.json(
-            { 
-              error: `Invalid class "${classEntry.class}". Must be one of: ` + VALID_CLASSES.join(', '),
-              validClasses: VALID_CLASSES 
-            },
-            { status: 400 }
-          );
-        }
-
-        if (typeof classEntry.level !== 'number' || classEntry.level < 1 || classEntry.level > 20) {
-          return NextResponse.json(
-            { error: 'Class level must be a number between 1 and 20' },
-            { status: 400 }
-          );
-        }
-
-        characterClasses.push({
-          class: classEntry.class,
-          level: classEntry.level,
-        });
+      // Classes is valid (could be empty, but we handle that below)
+      if (Array.isArray(classes)) {
+        characterClasses = classes.map((c: any) => ({
+          class: c.class,
+          level: c.level,
+        }));
       }
     }
 
