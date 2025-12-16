@@ -129,7 +129,7 @@ export interface Character extends CreatureStats {
   // Character-specific metadata
   class?: string; // e.g., "Fighter", "Wizard"
   level?: number;
-  race?: string; // e.g., "Human", "Elf"
+  race?: Race; // Must be one of the valid D&D 5e races
   background?: string;
   alignment?: string;
   createdAt?: Date;
@@ -189,6 +189,28 @@ export interface CombatState {
   currentRound: number;
   currentTurnIndex: number;
   isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Party {
+  _id?: string;
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  characterIds: string[]; // ObjectId references to characters
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SessionData {
+  encounters: Encounter[];
+  characters: Character[];
+  parties: Party[];
+  combatState?: CombatState;
+}
+n;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Character } from '@/lib/types';
+import { Character, isValidRace, VALID_RACES } from '@/lib/types';
 
 export async function GET(
   request: NextRequest,
@@ -88,6 +88,17 @@ export async function PUT(
     if (name !== undefined && name.trim() === '') {
       return NextResponse.json(
         { error: 'Character name is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate race if provided
+    if (race !== undefined && race !== null && race !== '' && !isValidRace(race)) {
+      return NextResponse.json(
+        { 
+          error: 'Invalid race. Must be one of: ' + VALID_RACES.join(', '),
+          validRaces: VALID_RACES 
+        },
         { status: 400 }
       );
     }
