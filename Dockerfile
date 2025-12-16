@@ -27,6 +27,9 @@ RUN npm ci --include=dev
 # Copy application code
 COPY . .
 
+# Generate version file at build time
+RUN node scripts/generate-version.js
+
 # Build application
 RUN npx next build --experimental-build-mode compile
 
