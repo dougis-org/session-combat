@@ -181,25 +181,44 @@ export async function PUT(request: NextRequest) {
       updatedAt: new Date(),
     }));
 
-    // Validate all monsters have required fields
-    const invalidMonsters = monstersToInsert.filter(m => !m.name || m.name.trim() === '');
-    if (invalidMonsters.length > 0) {
-      console.error(`Found ${invalidMonsters.length} monsters without names:`, invalidMonsters.slice(0, 5));
-      return NextResponse.json({
-        error: 'Failed to seed monsters',
-        details: `${invalidMonsters.length} monsters missing required 'name' field`,
-      }, { status: 400 });
+    // Separate valid and invalid monsters
+    const validMonsters: typeof monstersToInsert = [];
+    const invalidMonsters: Array<{ monster: typeof monstersToInsert[0]; reason: string }> = [];
+
+    for (const monster of monstersToInsert) {
+      if (!monster.name || monster.name.trim() === '') {
+        invalidMonsters.push({ monster, reason: 'missing name' });
+      } else if (!monster.maxHp || monster.maxHp <= 0) {
+        invalidMonsters.push({ monster, reason: 'invalid maxHp' });
+      } else if (!monster.size || !monster.type) {
+        invalidMonsters.push({ monster, reason: 'missing size or type' });
+      } else {
+        validMonsters.push(monster);
+      }
     }
 
-    // Insert all monsters
-    const result = await collection.insertMany(monstersToInsert);
+    // Log invalid monsters for debugging
+    if (invalidMonsters.length > 0) {
+      console.warn(`Found ${invalidMonsters.length} monsters with bad data:`, invalidMonsters.slice(0, 5));
+    }
+
+    // Insert valid monsters
+    const result = validMonsters.length > 0 
+      ? await collection.insertMany(validMonsters)
+      : { insertedIds: {} };
+    
     const insertedCount = Object.keys(result.insertedIds).length;
 
     return NextResponse.json({
       success: true,
       message: `Seeded ${insertedCount} SRD monsters`,
       count: insertedCount,
-      monsters: monstersToInsert.map(m => ({ id: m.id, name: m.name, cr: m.challengeRating })),
+      skipped: invalidMonsters.length,
+      total: monstersToInsert.length,
+      importedMonsters: validMonsters.map(m => ({ id: m.id, name: m.name, cr: m.challengeRating })),
+      skippedMonsters: invalidMonsters.length > 0 
+        ? invalidMonsters.slice(0, 10).map(im => ({ name: im.monster.name, reason: im.reason }))
+        : undefined,
     }, { status: 200 });
   } catch (error) {
     console.error('Error seeding monsters:', error);

@@ -33,9 +33,13 @@ function HomeContent() {
         throw new Error(data.error || 'Import failed');
       }
 
+      const message = data.skipped 
+        ? `Successfully imported ${data.count} monsters (${data.skipped} skipped due to bad data)`
+        : `Successfully imported ${data.count} monsters`;
+
       setImportMessage({
         type: 'success',
-        text: `Successfully imported ${data.count || 0} monsters`,
+        text: message,
       });
     } catch (error) {
       setImportMessage({
