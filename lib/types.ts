@@ -279,10 +279,8 @@ export interface Character extends CreatureStats {
 }
 
 // Helper function to calculate total character level from classes array
+// Pure calculation - does not handle edge cases or defaults (validation belongs in API layer)
 export function calculateTotalLevel(classes: CharacterClass[]): number {
-  if (!Array.isArray(classes) || classes.length === 0) {
-    return 1; // Default to level 1 if no classes
-  }
   return classes.reduce((total, classLevel) => total + classLevel.level, 0);
 }
 
