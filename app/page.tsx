@@ -19,6 +19,7 @@ function HomeContent() {
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [adminToolsExpanded, setAdminToolsExpanded] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -97,66 +98,6 @@ function HomeContent() {
           </div>
         </div>
 
-        {/* Admin Import Section */}
-        {user?.isAdmin && (
-          <div className="mb-8 bg-blue-950 border border-blue-800 rounded-lg p-4">
-            <div className="flex justify-between items-center mb-3">
-              <div>
-                <h3 className="text-lg font-semibold text-blue-300 mb-1">Admin Tools</h3>
-                <p className="text-sm text-blue-200">Import SRD monsters into the global catalog</p>
-              </div>
-              <button
-                onClick={handleImportMonsters}
-                disabled={importing}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded font-semibold transition-colors"
-              >
-                {importing ? 'Importing...' : 'Import SRD Monsters'}
-              </button>
-            </div>
-            
-            {importMessage && (
-              <div className={`p-2 rounded text-sm ${
-                importMessage.type === 'success'
-                  ? 'bg-green-900 text-green-200'
-                  : 'bg-red-900 text-red-200'
-              }`}>
-                {importMessage.text}
-              </div>
-            )}
-
-            {/* Import Results Breakdown */}
-            {importResult && importMessage?.type === 'success' && (
-              <div className="mt-4 bg-blue-900 bg-opacity-50 rounded p-3">
-                <h4 className="text-sm font-semibold text-blue-200 mb-2">Import Breakdown by Type:</h4>
-                <div className="space-y-1 text-xs text-blue-100 max-h-48 overflow-y-auto">
-                  {allTypes.map(type => (
-                    <div key={type} className="flex justify-between">
-                      <span className="capitalize">{type}:</span>
-                      <span>
-                        Imported: <span className="text-green-300 font-semibold">{importResult.countByType[type] || 0}</span>
-                        {', '}
-                        Skipped: <span className={importResult.skippedByType?.[type] ? 'text-yellow-300 font-semibold' : 'text-green-300'}>{importResult.skippedByType?.[type] || 0}</span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Totals */}
-                <div className="border-t border-blue-700 mt-3 pt-2">
-                  <div className="flex justify-between font-semibold text-blue-200">
-                    <span>Total:</span>
-                    <span>
-                      Imported: <span className="text-green-300">{importResult.count}</span>
-                      {', '}
-                      Skipped: <span className={importResult.skipped ? 'text-yellow-300' : 'text-green-300'}>{importResult.skipped}</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-        
         {/* Main Navigation */}
         <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
           <Link href="/encounters" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
@@ -185,7 +126,77 @@ function HomeContent() {
           </Link>
         </div>
 
-        <div className="mt-auto text-center text-gray-400">
+        {/* Collapsible Admin Tools Section */}
+        {user?.isAdmin && (
+          <div className="mt-auto pt-8 border-t border-gray-700">
+            <button
+              onClick={() => setAdminToolsExpanded(!adminToolsExpanded)}
+              className="flex items-center justify-between w-full px-4 py-3 bg-blue-950 hover:bg-blue-900 border border-blue-800 rounded-lg transition-colors"
+            >
+              <span className="text-lg font-semibold text-blue-300">Admin Tools</span>
+              <span className={`text-blue-300 transform transition-transform ${adminToolsExpanded ? 'rotate-180' : ''}`}>
+                ▼
+              </span>
+            </button>
+
+            {adminToolsExpanded && (
+              <div className="mt-3 bg-blue-950 border border-blue-800 rounded-lg p-4 space-y-3">
+                <p className="text-sm text-blue-200">Import SRD monsters into the global catalog</p>
+                <button
+                  onClick={handleImportMonsters}
+                  disabled={importing}
+                  className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded font-semibold transition-colors"
+                >
+                  {importing ? 'Importing...' : 'Import SRD Monsters'}
+                </button>
+                
+                {importMessage && (
+                  <div className={`p-3 rounded text-sm ${
+                    importMessage.type === 'success'
+                      ? 'bg-green-900 text-green-200'
+                      : 'bg-red-900 text-red-200'
+                  }`}>
+                    {importMessage.text}
+                  </div>
+                )}
+
+                {/* Import Results Breakdown */}
+                {importResult && importMessage?.type === 'success' && (
+                  <div className="bg-blue-900 bg-opacity-50 rounded p-3">
+                    <h4 className="text-sm font-semibold text-blue-200 mb-2">Import Breakdown by Type:</h4>
+                    <div className="space-y-1 text-xs text-blue-100 max-h-48 overflow-y-auto">
+                      {allTypes.map(type => (
+                        <div key={type} className="flex justify-between">
+                          <span className="capitalize">{type}:</span>
+                          <span>
+                            Imported: <span className="text-green-300 font-semibold">{importResult.countByType[type] || 0}</span>
+                            {', '}
+                            Skipped: <span className={importResult.skippedByType?.[type] ? 'text-yellow-300 font-semibold' : 'text-green-300'}>{importResult.skippedByType?.[type] || 0}</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Totals */}
+                    <div className="border-t border-blue-700 mt-3 pt-2">
+                      <div className="flex justify-between font-semibold text-blue-200">
+                        <span>Total:</span>
+                        <span>
+                          Imported: <span className="text-green-300">{importResult.count}</span>
+                          {', '}
+                          Skipped: <span className={importResult.skipped ? 'text-yellow-300' : 'text-green-300'}>{importResult.skipped}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tagline */}
+        <div className="text-center text-gray-400 mt-6">
           <p>A simple combat tracker for D&D sessions</p>
         </div>
       </div>
