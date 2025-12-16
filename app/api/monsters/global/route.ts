@@ -209,12 +209,28 @@ export async function PUT(request: NextRequest) {
     
     const insertedCount = Object.keys(result.insertedIds).length;
 
+    // Count inserted monsters by type
+    const countByType: Record<string, number> = {};
+    validMonsters.forEach(monster => {
+      const type = monster.type || 'unknown';
+      countByType[type] = (countByType[type] || 0) + 1;
+    });
+
+    // Count skipped monsters by type
+    const skippedByType: Record<string, number> = {};
+    invalidMonsters.forEach(({ monster }) => {
+      const type = monster.type || 'unknown';
+      skippedByType[type] = (skippedByType[type] || 0) + 1;
+    });
+
     return NextResponse.json({
       success: true,
       message: `Seeded ${insertedCount} SRD monsters`,
       count: insertedCount,
       skipped: invalidMonsters.length,
       total: monstersToInsert.length,
+      countByType,
+      skippedByType: Object.keys(skippedByType).length > 0 ? skippedByType : undefined,
       importedMonsters: validMonsters.map(m => ({ id: m.id, name: m.name, cr: m.challengeRating })),
       skippedMonsters: invalidMonsters.length > 0 
         ? invalidMonsters.slice(0, 10).map(im => ({ name: im.monster.name, reason: im.reason }))
