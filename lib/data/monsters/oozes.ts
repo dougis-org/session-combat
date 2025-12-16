@@ -1,22 +1,28 @@
 /**
- * D&D 5e SRD Oozes
- * Source: D&D 5e API (https://www.dnd5eapi.co)
+ * Ooze-type monsters from D&D 5e SRD
+ * Auto-generated from D&D 5e API
  */
 
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate } from "../../types";
 
-export const OOZES: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt' | '_id'>[] = [
+export const OOZES: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   {
     "name": "Black Pudding",
-    "size": "large",
     "type": "ooze",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 7,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 85,
-    "maxHp": 85,
-    "speed": "20 ft., climb 20 ft.",
-    "abilityScores": {
+    "hitDice": "10d10",
+    "speed": {
+      "walk": "20 ft.",
+      "climb": "20 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 5,
       "constitution": 16,
@@ -37,14 +43,10 @@ export const OOZES: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updat
       "Frightened",
       "Prone"
     ],
-    "senses": {
-      "blindsight": "60 ft. (blind beyond this radius)",
-      "passive_perception": "8"
-    },
+    "senses": "blindsight 60 ft. (blind beyond this radius), passive_perception 8",
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amorphous",
@@ -76,15 +78,17 @@ export const OOZES: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updat
   },
   {
     "name": "Gelatinous Cube",
-    "size": "large",
     "type": "ooze",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 6,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 84,
-    "maxHp": 84,
-    "speed": "15 ft.",
-    "abilityScores": {
+    "hitDice": "8d10",
+    "speed": {
+      "walk": "15 ft."
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 3,
       "constitution": 20,
@@ -100,14 +104,10 @@ export const OOZES: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updat
       "Frightened",
       "Prone"
     ],
-    "senses": {
-      "blindsight": "60 ft. (blind beyond this radius)",
-      "passive_perception": "8"
-    },
+    "senses": "blindsight 60 ft. (blind beyond this radius), passive_perception 8",
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Ooze Cube",
@@ -136,15 +136,18 @@ export const OOZES: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updat
   },
   {
     "name": "Gray Ooze",
-    "size": "medium",
     "type": "ooze",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 8,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "10 ft., climb 10 ft.",
-    "abilityScores": {
+    "hitDice": "3d8",
+    "speed": {
+      "walk": "10 ft.",
+      "climb": "10 ft."
+    },
+    "abilities": {
       "strength": 12,
       "dexterity": 6,
       "constitution": 16,
@@ -168,14 +171,10 @@ export const OOZES: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updat
       "Frightened",
       "Prone"
     ],
-    "senses": {
-      "blindsight": "60 ft. (blind beyond this radius)",
-      "passive_perception": "8"
-    },
+    "senses": "blindsight 60 ft. (blind beyond this radius), passive_perception 8",
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amorphous",
@@ -201,15 +200,18 @@ export const OOZES: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updat
   },
   {
     "name": "Ochre Jelly",
-    "size": "large",
     "type": "ooze",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 8,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 45,
-    "maxHp": 45,
-    "speed": "10 ft., climb 10 ft.",
-    "abilityScores": {
+    "hitDice": "6d10",
+    "speed": {
+      "walk": "10 ft.",
+      "climb": "10 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 6,
       "constitution": 14,
@@ -232,14 +234,10 @@ export const OOZES: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updat
       "Frightened",
       "Prone"
     ],
-    "senses": {
-      "blindsight": "60 ft. (blind beyond this radius)",
-      "passive_perception": "8"
-    },
+    "senses": "blindsight 60 ft. (blind beyond this radius), passive_perception 8",
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amorphous",

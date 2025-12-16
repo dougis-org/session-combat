@@ -1,22 +1,28 @@
 /**
- * D&D 5e SRD Celestials
- * Source: D&D 5e API (https://www.dnd5eapi.co)
+ * Celestial-type monsters from D&D 5e SRD
+ * Auto-generated from D&D 5e API
  */
 
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate } from "../../types";
 
-export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt' | '_id'>[] = [
+export const CELESTIALS: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   {
     "name": "Couatl",
-    "size": "medium",
     "type": "celestial",
+    "size": "Medium",
     "alignment": "lawful good",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 97,
-    "maxHp": 97,
-    "speed": "30 ft., fly 90 ft.",
-    "abilityScores": {
+    "hitDice": "13d8",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "90 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 20,
       "constitution": 17,
@@ -36,10 +42,7 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "psychic",
       "bludgeoning, piercing, and slashing from nonmagical weapons"
     ],
-    "senses": {
-      "truesight": "120 ft.",
-      "passive_perception": "15"
-    },
+    "senses": "truesight 120 ft., passive_perception 15",
     "languages": [
       "all",
       "telepathy 120 ft."
@@ -47,7 +50,6 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Innate Spellcasting",
@@ -83,15 +85,18 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Deva",
-    "size": "medium",
     "type": "celestial",
+    "size": "Medium",
     "alignment": "lawful good",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 136,
-    "maxHp": 136,
-    "speed": "30 ft., fly 90 ft.",
-    "abilityScores": {
+    "hitDice": "16d8",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "90 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 18,
       "constitution": 18,
@@ -116,10 +121,7 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Exhaustion",
       "Frightened"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "19"
-    },
+    "senses": "darkvision 120 ft., passive_perception 19",
     "languages": [
       "all",
       "telepathy 120 ft."
@@ -127,7 +129,6 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "challengeRating": 10,
     "experiencePoints": 5900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Angelic Weapons",
@@ -165,15 +166,18 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Pegasus",
-    "size": "large",
     "type": "celestial",
+    "size": "Large",
     "alignment": "chaotic good",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 59,
-    "maxHp": 59,
-    "speed": "60 ft., fly 90 ft.",
-    "abilityScores": {
+    "hitDice": "7d10",
+    "speed": {
+      "walk": "60 ft.",
+      "fly": "90 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 15,
       "constitution": 16,
@@ -189,9 +193,7 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "skills": {
       "perception": 6
     },
-    "senses": {
-      "passive_perception": "16"
-    },
+    "senses": "passive_perception 16",
     "languages": [
       "understands Celestial",
       "Common",
@@ -201,7 +203,6 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Hooves",
@@ -213,15 +214,18 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Planetar",
-    "size": "large",
     "type": "celestial",
+    "size": "Large",
     "alignment": "lawful good",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 200,
-    "maxHp": 200,
-    "speed": "40 ft., fly 120 ft.",
-    "abilityScores": {
+    "hitDice": "16d10",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "120 ft."
+    },
+    "abilities": {
       "strength": 24,
       "dexterity": 20,
       "constitution": 24,
@@ -246,10 +250,7 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Exhaustion",
       "Frightened"
     ],
-    "senses": {
-      "truesight": "120 ft.",
-      "passive_perception": "21"
-    },
+    "senses": "truesight 120 ft., passive_perception 21",
     "languages": [
       "all",
       "telepathy 120 ft."
@@ -257,7 +258,6 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "challengeRating": 16,
     "experiencePoints": 15000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Angelic Weapons",
@@ -295,15 +295,18 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Solar",
-    "size": "large",
     "type": "celestial",
+    "size": "Large",
     "alignment": "lawful good",
     "ac": 21,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 243,
-    "maxHp": 243,
-    "speed": "50 ft., fly 150 ft.",
-    "abilityScores": {
+    "hitDice": "18d10",
+    "speed": {
+      "walk": "50 ft.",
+      "fly": "150 ft."
+    },
+    "abilities": {
       "strength": 26,
       "dexterity": 22,
       "constitution": 26,
@@ -333,10 +336,7 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Frightened",
       "Poisoned"
     ],
-    "senses": {
-      "truesight": "120 ft.",
-      "passive_perception": "24"
-    },
+    "senses": "truesight 120 ft., passive_perception 24",
     "languages": [
       "all",
       "telepathy 120 ft."
@@ -344,7 +344,6 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "challengeRating": 21,
     "experiencePoints": 33000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Angelic Weapons",
@@ -406,15 +405,17 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Unicorn",
-    "size": "large",
     "type": "celestial",
+    "size": "Large",
     "alignment": "lawful good",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 67,
-    "maxHp": 67,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "9d10",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 14,
       "constitution": 15,
@@ -430,10 +431,7 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Paralyzed",
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "darkvision 60 ft., passive_perception 13",
     "languages": [
       "Celestial",
       "Elvish",
@@ -443,7 +441,6 @@ export const CELESTIALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Charge",

@@ -1,22 +1,27 @@
 /**
- * D&D 5e SRD Giants
- * Source: D&D 5e API (https://www.dnd5eapi.co)
+ * Giant-type monsters from D&D 5e SRD
+ * Auto-generated from D&D 5e API
  */
 
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate } from "../../types";
 
-export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt' | '_id'>[] = [
+export const GIANTS: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   {
     "name": "Cloud Giant",
-    "size": "huge",
     "type": "giant",
+    "size": "Huge",
     "alignment": "neutral good (50%) or neutral evil (50%)",
     "ac": 14,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 200,
-    "maxHp": 200,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "16d12",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 27,
       "dexterity": 10,
       "constitution": 22,
@@ -33,9 +38,7 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "insight": 7,
       "perception": 7
     },
-    "senses": {
-      "passive_perception": "17"
-    },
+    "senses": "passive_perception 17",
     "languages": [
       "Common",
       "Giant"
@@ -43,7 +46,6 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 9,
     "experiencePoints": 5000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -75,15 +77,17 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Ettin",
-    "size": "large",
     "type": "giant",
+    "size": "Large",
     "alignment": "chaotic evil",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 85,
-    "maxHp": 85,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "10d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 21,
       "dexterity": 8,
       "constitution": 17,
@@ -94,10 +98,7 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 4
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "darkvision 60 ft., passive_perception 14",
     "languages": [
       "Giant",
       "Orc"
@@ -105,7 +106,6 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Two Heads",
@@ -137,15 +137,17 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Fire Giant",
-    "size": "huge",
     "type": "giant",
+    "size": "Huge",
     "alignment": "lawful evil",
     "ac": 18,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 162,
-    "maxHp": 162,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "13d12",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 25,
       "dexterity": 9,
       "constitution": 23,
@@ -165,16 +167,13 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "passive_perception": "16"
-    },
+    "senses": "passive_perception 16",
     "languages": [
       "Giant"
     ],
     "challengeRating": 9,
     "experiencePoints": 5000,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -196,15 +195,17 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Frost Giant",
-    "size": "huge",
     "type": "giant",
+    "size": "Huge",
     "alignment": "neutral evil",
     "ac": 15,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 138,
-    "maxHp": 138,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "12d12",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 9,
       "constitution": 21,
@@ -224,16 +225,13 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "damageImmunities": [
       "cold"
     ],
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "languages": [
       "Giant"
     ],
     "challengeRating": 8,
     "experiencePoints": 3900,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -255,15 +253,17 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Hill Giant",
-    "size": "huge",
     "type": "giant",
+    "size": "Huge",
     "alignment": "chaotic evil",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 105,
-    "maxHp": 105,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "10d12",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 21,
       "dexterity": 8,
       "constitution": 19,
@@ -274,16 +274,13 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 2
     },
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "Giant"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -305,15 +302,17 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Ogre",
-    "size": "large",
     "type": "giant",
+    "size": "Large",
     "alignment": "chaotic evil",
     "ac": 11,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 59,
-    "maxHp": 59,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "7d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 8,
       "constitution": 16,
@@ -321,10 +320,7 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 7,
       "charisma": 7
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "8"
-    },
+    "senses": "darkvision 60 ft., passive_perception 8",
     "languages": [
       "Common",
       "Giant"
@@ -332,7 +328,6 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Greatclub",
@@ -350,15 +345,18 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Oni",
-    "size": "large",
     "type": "giant",
+    "size": "Large",
     "alignment": "lawful evil",
     "ac": 16,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 110,
-    "maxHp": 110,
-    "speed": "30 ft., fly 30 ft.",
-    "abilityScores": {
+    "hitDice": "13d10",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "30 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 11,
       "constitution": 16,
@@ -377,10 +375,7 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "deception": 8,
       "perception": 4
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "darkvision 60 ft., passive_perception 14",
     "languages": [
       "Common",
       "Giant"
@@ -388,7 +383,6 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 7,
     "experiencePoints": 2900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Innate Spellcasting",
@@ -428,15 +422,17 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Stone Giant",
-    "size": "huge",
     "type": "giant",
+    "size": "Huge",
     "alignment": "neutral",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 126,
-    "maxHp": 126,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "11d12",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 15,
       "constitution": 20,
@@ -453,17 +449,13 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "athletics": 12,
       "perception": 4
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "darkvision 60 ft., passive_perception 14",
     "languages": [
       "Giant"
     ],
     "challengeRating": 7,
     "experiencePoints": 2900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Stone Camouflage",
@@ -497,15 +489,18 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Storm Giant",
-    "size": "huge",
     "type": "giant",
+    "size": "Huge",
     "alignment": "chaotic good",
     "ac": 16,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 230,
-    "maxHp": 230,
-    "speed": "50 ft., swim 50 ft.",
-    "abilityScores": {
+    "hitDice": "20d12",
+    "speed": {
+      "walk": "50 ft.",
+      "swim": "50 ft."
+    },
+    "abilities": {
       "strength": 29,
       "dexterity": 14,
       "constitution": 20,
@@ -532,9 +527,7 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "lightning",
       "thunder"
     ],
-    "senses": {
-      "passive_perception": "19"
-    },
+    "senses": "passive_perception 19",
     "languages": [
       "Common",
       "Giant"
@@ -542,7 +535,6 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 13,
     "experiencePoints": 10000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -581,15 +573,17 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Troll",
-    "size": "large",
     "type": "giant",
+    "size": "Large",
     "alignment": "chaotic evil",
     "ac": 15,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 84,
-    "maxHp": 84,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "8d10",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 13,
       "constitution": 20,
@@ -600,17 +594,13 @@ export const GIANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 2
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 60 ft., passive_perception 12",
     "languages": [
       "Giant"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",

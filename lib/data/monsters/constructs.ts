@@ -1,22 +1,27 @@
 /**
- * D&D 5e SRD Constructs
- * Source: D&D 5e API (https://www.dnd5eapi.co)
+ * Construct-type monsters from D&D 5e SRD
+ * Auto-generated from D&D 5e API
  */
 
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate } from "../../types";
 
-export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt' | '_id'>[] = [
+export const CONSTRUCTS: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   {
     "name": "Animated Armor",
-    "size": "medium",
     "type": "construct",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 33,
-    "maxHp": 33,
-    "speed": "25 ft.",
-    "abilityScores": {
+    "hitDice": "6d8",
+    "speed": {
+      "walk": "25 ft."
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 11,
       "constitution": 13,
@@ -38,14 +43,10 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Petrified",
       "Poisoned"
     ],
-    "senses": {
-      "blindsight": "60 ft. (blind beyond this radius)",
-      "passive_perception": "6"
-    },
+    "senses": "blindsight 60 ft. (blind beyond this radius), passive_perception 6",
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Antimagic Susceptibility",
@@ -71,15 +72,17 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Clay Golem",
-    "size": "large",
     "type": "construct",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 14,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 133,
-    "maxHp": 133,
-    "speed": "20 ft.",
-    "abilityScores": {
+    "hitDice": "14d10",
+    "speed": {
+      "walk": "20 ft."
+    },
+    "abilities": {
       "strength": 20,
       "dexterity": 9,
       "constitution": 18,
@@ -101,17 +104,13 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Petrified",
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "9"
-    },
+    "senses": "darkvision 60 ft., passive_perception 9",
     "languages": [
       "understands the languages of its creator but can't speak"
     ],
     "challengeRating": 9,
     "experiencePoints": 5000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Acid Absorption",
@@ -153,15 +152,17 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Flesh Golem",
-    "size": "medium",
     "type": "construct",
+    "size": "Medium",
     "alignment": "neutral",
     "ac": 9,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 93,
-    "maxHp": 93,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "11d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 9,
       "constitution": 18,
@@ -182,17 +183,13 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Petrified",
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "understands the languages of its creator but can't speak"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Berserk",
@@ -234,15 +231,19 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Flying Sword",
-    "size": "small",
     "type": "construct",
+    "size": "Small",
     "alignment": "unaligned",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 17,
-    "maxHp": 17,
-    "speed": "0 ft., fly 50 ft.",
-    "abilityScores": {
+    "hitDice": "5d6",
+    "speed": {
+      "walk": "0 ft.",
+      "fly": "50 ft.",
+      "hover": true
+    },
+    "abilities": {
       "strength": 12,
       "dexterity": 15,
       "constitution": 11,
@@ -266,14 +267,10 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Petrified",
       "Poisoned"
     ],
-    "senses": {
-      "blindsight": "60 ft. (blind beyond this radius)",
-      "passive_perception": "7"
-    },
+    "senses": "blindsight 60 ft. (blind beyond this radius), passive_perception 7",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Antimagic Susceptibility",
@@ -295,15 +292,18 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Homunculus",
-    "size": "tiny",
     "type": "construct",
+    "size": "Tiny",
     "alignment": "neutral",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 5,
-    "maxHp": 5,
-    "speed": "20 ft., fly 40 ft.",
-    "abilityScores": {
+    "hitDice": "2d4",
+    "speed": {
+      "walk": "20 ft.",
+      "fly": "40 ft."
+    },
+    "abilities": {
       "strength": 4,
       "dexterity": 15,
       "constitution": 11,
@@ -318,17 +318,13 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Charmed",
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "understands the languages of its creator but can't speak"
     ],
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Telepathic Bond",
@@ -346,15 +342,17 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Iron Golem",
-    "size": "large",
     "type": "construct",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 20,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 210,
-    "maxHp": 210,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "20d10",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 24,
       "dexterity": 9,
       "constitution": 20,
@@ -376,17 +374,13 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Petrified",
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 120 ft., passive_perception 10",
     "languages": [
       "understands the languages of its creator but can't speak"
     ],
     "challengeRating": 16,
     "experiencePoints": 15000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Fire Absorption",
@@ -433,15 +427,17 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Rug of Smothering",
-    "size": "large",
     "type": "construct",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 33,
-    "maxHp": 33,
-    "speed": "10 ft.",
-    "abilityScores": {
+    "hitDice": "6d10",
+    "speed": {
+      "walk": "10 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 14,
       "constitution": 10,
@@ -462,14 +458,10 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Petrified",
       "Poisoned"
     ],
-    "senses": {
-      "blindsight": "60 ft. (blind beyond this radius)",
-      "passive_perception": "6"
-    },
+    "senses": "blindsight 60 ft. (blind beyond this radius), passive_perception 6",
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Antimagic Susceptibility",
@@ -494,15 +486,17 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Shield Guardian",
-    "size": "large",
     "type": "construct",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 142,
-    "maxHp": 142,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "15d10",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 8,
       "constitution": 18,
@@ -520,18 +514,13 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Paralyzed",
       "Poisoned"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 10",
     "languages": [
       "understands commands given in any language but can't speak"
     ],
     "challengeRating": 7,
     "experiencePoints": 2900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Bound",
@@ -567,15 +556,17 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Stone Golem",
-    "size": "large",
     "type": "construct",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 178,
-    "maxHp": 178,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "17d10",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 22,
       "dexterity": 9,
       "constitution": 20,
@@ -596,17 +587,13 @@ export const CONSTRUCTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Petrified",
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 120 ft., passive_perception 10",
     "languages": [
       "understands the languages of its creator but can't speak"
     ],
     "challengeRating": 10,
     "experiencePoints": 5900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Immutable Form",
