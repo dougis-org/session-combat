@@ -49,8 +49,8 @@ function HomeContent() {
   };
 
   return (
-    <div className="bg-gray-900 text-white flex flex-col flex-1">
-      <div className="container mx-auto px-4 py-8 flex-1 flex flex-col">
+    <div className="bg-gray-900 text-white h-full w-full">
+      <div className="container mx-auto px-4 py-8 h-full flex flex-col">
         {/* Header with User Info and Logout */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">D&D Session Combat Tracker</h1>
@@ -99,7 +99,7 @@ function HomeContent() {
         )}
         
         {/* Main Navigation */}
-        <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto flex-1">
+        <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
           <Link href="/encounters" className="bg-gray-800 hover:bg-gray-700 rounded-lg p-6 transition">
             <h2 className="text-2xl font-semibold mb-2">Encounters</h2>
             <p className="text-gray-400">Manage encounters and monsters</p>
@@ -126,7 +126,7 @@ function HomeContent() {
           </Link>
         </div>
 
-        <div className="mt-12 text-center text-gray-400">
+        <div className="mt-auto text-center text-gray-400">
           <p>A simple combat tracker for D&D sessions</p>
         </div>
       </div>
