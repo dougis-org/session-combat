@@ -1,17 +1,31 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import versionData from '@/lib/version.json'
 
 export const metadata: Metadata = {
   title: 'D&D Session Combat Tracker',
   description: 'Combat tracker and encounter manager for D&D sessions',
 }
 
-export default function RootLayout({
+async function getVersionData() {
+  try {
+    const versionData = await import('@/lib/version.json')
+    return versionData.default || versionData
+  } catch (error) {
+    console.error('Failed to load version data:', error)
+    return {
+      version: '0.0.0',
+      buildDate: new Date().toISOString(),
+      buildNumber: 0
+    }
+  }
+}
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const versionData = await getVersionData()
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
