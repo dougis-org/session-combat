@@ -23,9 +23,8 @@ function HomeContent() {
       setImportMessage(null);
       
       const response = await fetch('/api/monsters/global', {
-        method: 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ importSRD: true }),
       });
 
       const data = await response.json();
@@ -36,7 +35,7 @@ function HomeContent() {
 
       setImportMessage({
         type: 'success',
-        text: `Successfully imported ${data.imported || 0} monsters`,
+        text: `Successfully imported ${data.count || 0} monsters`,
       });
     } catch (error) {
       setImportMessage({

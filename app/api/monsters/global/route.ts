@@ -181,6 +181,16 @@ export async function PUT(request: NextRequest) {
       updatedAt: new Date(),
     }));
 
+    // Validate all monsters have required fields
+    const invalidMonsters = monstersToInsert.filter(m => !m.name || m.name.trim() === '');
+    if (invalidMonsters.length > 0) {
+      console.error(`Found ${invalidMonsters.length} monsters without names:`, invalidMonsters.slice(0, 5));
+      return NextResponse.json({
+        error: 'Failed to seed monsters',
+        details: `${invalidMonsters.length} monsters missing required 'name' field`,
+      }, { status: 400 });
+    }
+
     // Insert all monsters
     const result = await collection.insertMany(monstersToInsert);
     const insertedCount = Object.keys(result.insertedIds).length;
