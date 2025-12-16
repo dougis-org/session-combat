@@ -171,15 +171,30 @@ export async function PUT(request: NextRequest) {
     // Delete existing global monsters
     await collection.deleteMany({ userId: 'GLOBAL' });
 
-    // Prepare monsters with required fields
-    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => ({
-      ...monster,
-      id: randomUUID(),
-      userId: 'GLOBAL',
-      isGlobal: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
+    // Prepare monsters with required fields, normalizing data structure
+    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => {
+      // Normalize the data from SRD format to MonsterTemplate format
+      const normalized: any = {
+        ...monster,
+        id: randomUUID(),
+        userId: 'GLOBAL',
+        isGlobal: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // Map 'hp' to 'maxHp' if needed
+      if (monster.hp !== undefined && !normalized.maxHp) {
+        normalized.maxHp = monster.hp;
+      }
+      
+      // Map 'abilities' to 'abilityScores' if needed
+      if ((monster as any).abilities && !normalized.abilityScores) {
+        normalized.abilityScores = (monster as any).abilities;
+      }
+
+      return normalized;
+    });
 
     // Separate valid and invalid monsters
     const validMonsters: typeof monstersToInsert = [];

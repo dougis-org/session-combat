@@ -5,7 +5,7 @@
 
 import { MonsterTemplate } from "../../types";
 
-export const FEYS: Omit<
+export const FEY: Omit<
   MonsterTemplate,
   "id" | "userId" | "createdAt" | "updatedAt" | "_id"
 >[] = [
