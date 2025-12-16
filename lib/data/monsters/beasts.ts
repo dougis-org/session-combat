@@ -1,22 +1,28 @@
 /**
- * D&D 5e SRD Beasts
- * Source: D&D 5e API (https://www.dnd5eapi.co)
+ * Beast-type monsters from D&D 5e SRD
+ * Auto-generated from D&D 5e API
  */
 
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate } from "../../types";
 
-export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt' | '_id'>[] = [
+export const BEASTS: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   {
     "name": "Ape",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 19,
-    "maxHp": 19,
-    "speed": "30 ft., climb 30 ft.",
-    "abilityScores": {
+    "hitDice": "3d8",
+    "speed": {
+      "walk": "30 ft.",
+      "climb": "30 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 14,
       "constitution": 14,
@@ -28,13 +34,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "athletics": 5,
       "perception": 3
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -56,15 +59,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Axe Beak",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 19,
-    "maxHp": 19,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "3d10",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 12,
       "constitution": 12,
@@ -72,13 +77,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 5
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Beak",
@@ -90,15 +92,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Baboon",
-    "size": "small",
     "type": "beast",
+    "size": "Small",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 3,
-    "maxHp": 3,
-    "speed": "30 ft., climb 30 ft.",
-    "abilityScores": {
+    "hitDice": "1d6",
+    "speed": {
+      "walk": "30 ft.",
+      "climb": "30 ft."
+    },
+    "abilities": {
       "strength": 8,
       "dexterity": 14,
       "constitution": 11,
@@ -106,13 +111,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 12,
       "charisma": 6
     },
-    "senses": {
-      "passive_perception": "11"
-    },
+    "senses": "passive_perception 11",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Pack Tactics",
@@ -130,15 +132,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Badger",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 3,
-    "maxHp": 3,
-    "speed": "20 ft., burrow 5 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "20 ft.",
+      "burrow": "5 ft."
+    },
+    "abilities": {
       "strength": 4,
       "dexterity": 11,
       "constitution": 12,
@@ -146,14 +151,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 12,
       "charisma": 5
     },
-    "senses": {
-      "darkvision": "30 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "darkvision 30 ft., passive_perception 11",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -171,15 +172,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Bat",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 1,
-    "maxHp": 1,
-    "speed": "5 ft., fly 30 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "5 ft.",
+      "fly": "30 ft."
+    },
+    "abilities": {
       "strength": 2,
       "dexterity": 15,
       "constitution": 8,
@@ -187,14 +191,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 12,
       "charisma": 4
     },
-    "senses": {
-      "blindsight": "60 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "blindsight 60 ft., passive_perception 11",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Echolocation",
@@ -209,22 +209,24 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       {
         "name": "Bite",
         "description": "Melee Weapon Attack: +0 to hit, reach 5 ft., one creature. Hit: 1 piercing damage.",
-        "attackBonus": 0,
         "damageDescription": "1 Piercing"
       }
     ]
   },
   {
     "name": "Black Bear",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 19,
-    "maxHp": 19,
-    "speed": "40 ft., climb 30 ft.",
-    "abilityScores": {
+    "hitDice": "3d8",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "30 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 10,
       "constitution": 14,
@@ -232,13 +234,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 12,
       "charisma": 7
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -266,15 +265,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Blood Hawk",
-    "size": "small",
     "type": "beast",
+    "size": "Small",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 7,
-    "maxHp": 7,
-    "speed": "10 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "2d6",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 6,
       "dexterity": 14,
       "constitution": 10,
@@ -285,13 +287,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 4
     },
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Sight",
@@ -313,15 +312,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Boar",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 13,
       "dexterity": 11,
       "constitution": 12,
@@ -329,13 +330,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 9,
       "charisma": 5
     },
-    "senses": {
-      "passive_perception": "9"
-    },
+    "senses": "passive_perception 9",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Charge",
@@ -357,15 +355,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Brown Bear",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 34,
-    "maxHp": 34,
-    "speed": "40 ft., climb 30 ft.",
-    "abilityScores": {
+    "hitDice": "4d10",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "30 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 10,
       "constitution": 16,
@@ -376,13 +377,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 3
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -410,15 +408,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Camel",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 9,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 15,
-    "maxHp": 15,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "2d10",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 8,
       "constitution": 14,
@@ -426,13 +426,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 8,
       "charisma": 5
     },
-    "senses": {
-      "passive_perception": "9"
-    },
+    "senses": "passive_perception 9",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -444,15 +441,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Cat",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 2,
-    "maxHp": 2,
-    "speed": "40 ft., climb 30 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "30 ft."
+    },
+    "abilities": {
       "strength": 3,
       "dexterity": 15,
       "constitution": 10,
@@ -464,13 +464,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 3,
       "stealth": 4
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -481,22 +478,24 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       {
         "name": "Claws",
         "description": "Melee Weapon Attack: +0 to hit, reach 5 ft., one target. Hit: 1 slashing damage.",
-        "attackBonus": 0,
         "damageDescription": "1 Slashing"
       }
     ]
   },
   {
     "name": "Constrictor Snake",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 13,
-    "maxHp": 13,
-    "speed": "30 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "2d10",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 14,
       "constitution": 12,
@@ -504,14 +503,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 3
     },
-    "senses": {
-      "blindsight": "10 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "blindsight 10 ft., passive_perception 10",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -529,15 +524,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Crab",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 2,
-    "maxHp": 2,
-    "speed": "20 ft., swim 20 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "20 ft.",
+      "swim": "20 ft."
+    },
+    "abilities": {
       "strength": 2,
       "dexterity": 11,
       "constitution": 10,
@@ -548,14 +546,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "stealth": 2
     },
-    "senses": {
-      "blindsight": "30 ft.",
-      "passive_perception": "9"
-    },
+    "senses": "blindsight 30 ft., passive_perception 9",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -566,22 +560,24 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       {
         "name": "Claw",
         "description": "Melee Weapon Attack: +0 to hit, reach 5 ft., one target. Hit: 1 bludgeoning damage.",
-        "attackBonus": 0,
         "damageDescription": "1 Bludgeoning"
       }
     ]
   },
   {
     "name": "Crocodile",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 19,
-    "maxHp": 19,
-    "speed": "20 ft., swim 20 ft.",
-    "abilityScores": {
+    "hitDice": "3d10",
+    "speed": {
+      "walk": "20 ft.",
+      "swim": "20 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 10,
       "constitution": 13,
@@ -592,13 +588,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "stealth": 2
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Hold Breath",
@@ -616,15 +609,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Deer",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 4,
-    "maxHp": 4,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "1d8",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 11,
       "dexterity": 16,
       "constitution": 11,
@@ -632,13 +627,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 14,
       "charisma": 5
     },
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -650,15 +642,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Dire Wolf",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 14,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 37,
-    "maxHp": 37,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "5d10",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 15,
       "constitution": 15,
@@ -670,13 +664,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 3,
       "stealth": 4
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Hearing and Smell",
@@ -698,15 +689,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Draft Horse",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 19,
-    "maxHp": 19,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "3d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 10,
       "constitution": 12,
@@ -714,13 +707,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 11,
       "charisma": 7
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Hooves",
@@ -732,15 +722,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Eagle",
-    "size": "small",
     "type": "beast",
+    "size": "Small",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 3,
-    "maxHp": 3,
-    "speed": "10 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "1d6",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 6,
       "dexterity": 15,
       "constitution": 10,
@@ -751,13 +744,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 4
     },
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Sight",
@@ -775,15 +765,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Elephant",
-    "size": "huge",
     "type": "beast",
+    "size": "Huge",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 76,
-    "maxHp": 76,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "8d12",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 22,
       "dexterity": 9,
       "constitution": 17,
@@ -791,13 +783,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 11,
       "charisma": 6
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Trampling Charge",
@@ -821,15 +810,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Elk",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 13,
-    "maxHp": 13,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "2d10",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 10,
       "constitution": 12,
@@ -837,13 +828,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 6
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Charge",
@@ -867,15 +855,19 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Flying Snake",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 14,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 5,
-    "maxHp": 5,
-    "speed": "30 ft., fly 60 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "2d4",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "60 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 4,
       "dexterity": 18,
       "constitution": 11,
@@ -883,14 +875,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 12,
       "charisma": 5
     },
-    "senses": {
-      "blindsight": "10 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "blindsight 10 ft., passive_perception 11",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Flyby",
@@ -908,15 +896,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Frog",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 1,
-    "maxHp": 1,
-    "speed": "20 ft., swim 20 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "20 ft.",
+      "swim": "20 ft."
+    },
+    "abilities": {
       "strength": 1,
       "dexterity": 13,
       "constitution": 8,
@@ -928,14 +919,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 1,
       "stealth": 3
     },
-    "senses": {
-      "darkvision": "30 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "darkvision 30 ft., passive_perception 11",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -949,15 +936,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Ape",
-    "size": "huge",
     "type": "beast",
+    "size": "Huge",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 157,
-    "maxHp": 157,
-    "speed": "40 ft., climb 40 ft.",
-    "abilityScores": {
+    "hitDice": "15d12",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "40 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 14,
       "constitution": 18,
@@ -969,13 +959,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "athletics": 9,
       "perception": 4
     },
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "challengeRating": 7,
     "experiencePoints": 2900,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -997,15 +984,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Badger",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 13,
-    "maxHp": 13,
-    "speed": "30 ft., burrow 10 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "30 ft.",
+      "burrow": "10 ft."
+    },
+    "abilities": {
       "strength": 13,
       "dexterity": 10,
       "constitution": 15,
@@ -1013,14 +1003,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 12,
       "charisma": 5
     },
-    "senses": {
-      "darkvision": "30 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "darkvision 30 ft., passive_perception 11",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -1048,15 +1034,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Bat",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "10 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "4d10",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 16,
       "constitution": 11,
@@ -1064,14 +1053,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 12,
       "charisma": 6
     },
-    "senses": {
-      "blindsight": "60 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "blindsight 60 ft., passive_perception 11",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Echolocation",
@@ -1093,15 +1078,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Boar",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 42,
-    "maxHp": 42,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "5d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 10,
       "constitution": 16,
@@ -1109,13 +1096,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 7,
       "charisma": 5
     },
-    "senses": {
-      "passive_perception": "8"
-    },
+    "senses": "passive_perception 8",
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Charge",
@@ -1137,15 +1121,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Centipede",
-    "size": "small",
     "type": "beast",
+    "size": "Small",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 4,
-    "maxHp": 4,
-    "speed": "30 ft., climb 30 ft.",
-    "abilityScores": {
+    "hitDice": "1d6",
+    "speed": {
+      "walk": "30 ft.",
+      "climb": "30 ft."
+    },
+    "abilities": {
       "strength": 5,
       "dexterity": 14,
       "constitution": 12,
@@ -1153,14 +1140,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 7,
       "charisma": 3
     },
-    "senses": {
-      "blindsight": "30 ft.",
-      "passive_perception": "8"
-    },
+    "senses": "blindsight 30 ft., passive_perception 8",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -1172,15 +1155,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Constrictor Snake",
-    "size": "huge",
     "type": "beast",
+    "size": "Huge",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 60,
-    "maxHp": 60,
-    "speed": "30 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "8d12",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 14,
       "constitution": 12,
@@ -1191,14 +1177,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 2
     },
-    "senses": {
-      "blindsight": "10 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "blindsight 10 ft., passive_perception 12",
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -1216,15 +1198,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Crab",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 15,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 13,
-    "maxHp": 13,
-    "speed": "30 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "3d8",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 13,
       "dexterity": 15,
       "constitution": 11,
@@ -1235,14 +1220,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "stealth": 4
     },
-    "senses": {
-      "blindsight": "30 ft.",
-      "passive_perception": "9"
-    },
+    "senses": "blindsight 30 ft., passive_perception 9",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -1260,15 +1241,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Crocodile",
-    "size": "huge",
     "type": "beast",
+    "size": "Huge",
     "alignment": "unaligned",
     "ac": 14,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 85,
-    "maxHp": 85,
-    "speed": "30 ft., swim 50 ft.",
-    "abilityScores": {
+    "hitDice": "9d12",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "50 ft."
+    },
+    "abilities": {
       "strength": 21,
       "dexterity": 9,
       "constitution": 17,
@@ -1279,13 +1263,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "stealth": 5
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Hold Breath",
@@ -1313,15 +1294,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Eagle",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "neutral good",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 26,
-    "maxHp": 26,
-    "speed": "10 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "4d10",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 17,
       "constitution": 13,
@@ -1332,9 +1316,7 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 4
     },
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "languages": [
       "Giant Eagle",
       "understands Common and Auran but can't speak"
@@ -1342,7 +1324,6 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Sight",
@@ -1370,15 +1351,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Elk",
-    "size": "huge",
     "type": "beast",
+    "size": "Huge",
     "alignment": "unaligned",
     "ac": 14,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 42,
-    "maxHp": 42,
-    "speed": "60 ft.",
-    "abilityScores": {
+    "hitDice": "5d12",
+    "speed": {
+      "walk": "60 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 16,
       "constitution": 14,
@@ -1389,9 +1372,7 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 4
     },
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "languages": [
       "Giant Elk",
       "understands Common",
@@ -1401,7 +1382,6 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Charge",
@@ -1425,15 +1405,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Fire Beetle",
-    "size": "small",
     "type": "beast",
+    "size": "Small",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 4,
-    "maxHp": 4,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "1d6",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 8,
       "dexterity": 10,
       "constitution": 12,
@@ -1441,14 +1423,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 7,
       "charisma": 3
     },
-    "senses": {
-      "blindsight": "30 ft.",
-      "passive_perception": "8"
-    },
+    "senses": "blindsight 30 ft., passive_perception 8",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Illumination",
@@ -1466,15 +1444,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Frog",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 18,
-    "maxHp": 18,
-    "speed": "30 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "4d8",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 12,
       "dexterity": 13,
       "constitution": 11,
@@ -1486,14 +1467,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 2,
       "stealth": 3
     },
-    "senses": {
-      "darkvision": "30 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 30 ft., passive_perception 12",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -1519,15 +1496,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Goat",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 19,
-    "maxHp": 19,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "3d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 11,
       "constitution": 12,
@@ -1535,13 +1514,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 12,
       "charisma": 6
     },
-    "senses": {
-      "passive_perception": "11"
-    },
+    "senses": "passive_perception 11",
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Charge",
@@ -1563,15 +1539,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Hyena",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 45,
-    "maxHp": 45,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "6d10",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 14,
       "constitution": 14,
@@ -1582,13 +1560,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 3
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Rampage",
@@ -1606,15 +1581,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Lizard",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 19,
-    "maxHp": 19,
-    "speed": "30 ft., climb 30 ft.",
-    "abilityScores": {
+    "hitDice": "3d10",
+    "speed": {
+      "walk": "30 ft.",
+      "climb": "30 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 12,
       "constitution": 13,
@@ -1622,14 +1600,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 5
     },
-    "senses": {
-      "darkvision": "30 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 30 ft., passive_perception 10",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -1641,15 +1615,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Octopus",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 52,
-    "maxHp": 52,
-    "speed": "10 ft., swim 60 ft.",
-    "abilityScores": {
+    "hitDice": "8d10",
+    "speed": {
+      "walk": "10 ft.",
+      "swim": "60 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 13,
       "constitution": 13,
@@ -1661,14 +1638,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 4,
       "stealth": 5
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "darkvision 60 ft., passive_perception 14",
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Hold Breath",
@@ -1698,15 +1671,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Owl",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "neutral",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 19,
-    "maxHp": 19,
-    "speed": "5 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "3d10",
+    "speed": {
+      "walk": "5 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 13,
       "dexterity": 15,
       "constitution": 12,
@@ -1718,10 +1694,7 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 5,
       "stealth": 4
     },
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "15"
-    },
+    "senses": "darkvision 120 ft., passive_perception 15",
     "languages": [
       "Giant Owl",
       "understands Common",
@@ -1731,7 +1704,6 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Flyby",
@@ -1753,15 +1725,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Poisonous Snake",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 14,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "30 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 18,
       "constitution": 13,
@@ -1772,14 +1747,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 2
     },
-    "senses": {
-      "blindsight": "10 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "blindsight 10 ft., passive_perception 12",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -1791,15 +1762,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Rat",
-    "size": "small",
     "type": "beast",
+    "size": "Small",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 7,
-    "maxHp": 7,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d6",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 7,
       "dexterity": 15,
       "constitution": 11,
@@ -1807,14 +1780,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 4
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -1836,15 +1805,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Rat (Diseased)",
-    "size": "small",
     "type": "beast",
+    "size": "Small",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 7,
-    "maxHp": 7,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d6",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 7,
       "dexterity": 15,
       "constitution": 11,
@@ -1852,14 +1823,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 4
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -1881,15 +1848,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Scorpion",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 15,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 52,
-    "maxHp": 52,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "7d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 13,
       "constitution": 15,
@@ -1897,14 +1866,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 9,
       "charisma": 3
     },
-    "senses": {
-      "blindsight": "60 ft.",
-      "passive_perception": "9"
-    },
+    "senses": "blindsight 60 ft., passive_perception 9",
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Claw",
@@ -1926,15 +1891,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Sea Horse",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 16,
-    "maxHp": 16,
-    "speed": "0 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "3d10",
+    "speed": {
+      "walk": "0 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 12,
       "dexterity": 15,
       "constitution": 11,
@@ -1942,13 +1910,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 12,
       "charisma": 5
     },
-    "senses": {
-      "passive_perception": "11"
-    },
+    "senses": "passive_perception 11",
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Charge",
@@ -1970,15 +1935,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Shark",
-    "size": "huge",
     "type": "beast",
+    "size": "Huge",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 126,
-    "maxHp": 126,
-    "speed": "swim 50 ft.",
-    "abilityScores": {
+    "hitDice": "11d12",
+    "speed": {
+      "swim": "50 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 11,
       "constitution": 21,
@@ -1989,14 +1956,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 3
     },
-    "senses": {
-      "blindsight": "60 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "blindsight 60 ft., passive_perception 13",
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Blood Frenzy",
@@ -2018,15 +1981,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Spider",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 14,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 26,
-    "maxHp": 26,
-    "speed": "30 ft., climb 30 ft.",
-    "abilityScores": {
+    "hitDice": "4d10",
+    "speed": {
+      "walk": "30 ft.",
+      "climb": "30 ft."
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 16,
       "constitution": 12,
@@ -2037,15 +2003,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "stealth": 7
     },
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 10",
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Spider Climb",
@@ -2076,15 +2037,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Toad",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 39,
-    "maxHp": 39,
-    "speed": "20 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "6d10",
+    "speed": {
+      "walk": "20 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 13,
       "constitution": 13,
@@ -2092,14 +2056,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 3
     },
-    "senses": {
-      "darkvision": "30 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 30 ft., passive_perception 10",
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -2125,15 +2085,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Vulture",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "neutral evil",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "10 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "3d10",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 10,
       "constitution": 15,
@@ -2144,16 +2107,13 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 3
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "languages": [
       "understands Common but can't speak"
     ],
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Sight and Smell",
@@ -2185,15 +2145,19 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Wasp",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 13,
-    "maxHp": 13,
-    "speed": "10 ft., fly 50 ft., swim 50 ft.",
-    "abilityScores": {
+    "hitDice": "3d8",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "50 ft.",
+      "swim": "50 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 14,
       "constitution": 10,
@@ -2201,13 +2165,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 3
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Sting",
@@ -2219,15 +2180,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Weasel",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 9,
-    "maxHp": 9,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 11,
       "dexterity": 16,
       "constitution": 10,
@@ -2239,14 +2202,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 3,
       "stealth": 5
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "darkvision 60 ft., passive_perception 13",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Hearing and Smell",
@@ -2264,15 +2223,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Giant Wolf Spider",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "40 ft., climb 40 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "40 ft."
+    },
+    "abilities": {
       "strength": 12,
       "dexterity": 16,
       "constitution": 13,
@@ -2284,15 +2246,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 3,
       "stealth": 7
     },
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 13",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Spider Climb",
@@ -2318,15 +2275,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Goat",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 4,
-    "maxHp": 4,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "1d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 12,
       "dexterity": 10,
       "constitution": 11,
@@ -2334,13 +2293,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 5
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Charge",
@@ -2362,15 +2318,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Hawk",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 1,
-    "maxHp": 1,
-    "speed": "10 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 5,
       "dexterity": 16,
       "constitution": 8,
@@ -2381,13 +2340,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 4
     },
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Sight",
@@ -2405,15 +2361,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Hunter Shark",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 45,
-    "maxHp": 45,
-    "speed": "swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "6d10",
+    "speed": {
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 13,
       "constitution": 15,
@@ -2424,14 +2382,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 2
     },
-    "senses": {
-      "darkvision": "30 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 30 ft., passive_perception 12",
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Blood Frenzy",
@@ -2453,15 +2407,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Hyena",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 5,
-    "maxHp": 5,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "1d8",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 11,
       "dexterity": 13,
       "constitution": 12,
@@ -2472,13 +2428,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 3
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Pack Tactics",
@@ -2496,15 +2449,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Jackal",
-    "size": "small",
     "type": "beast",
+    "size": "Small",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 3,
-    "maxHp": 3,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "1d6",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 8,
       "dexterity": 15,
       "constitution": 11,
@@ -2515,13 +2470,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 3
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Hearing and Smell",
@@ -2543,15 +2495,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Killer Whale",
-    "size": "huge",
     "type": "beast",
+    "size": "Huge",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 90,
-    "maxHp": 90,
-    "speed": "swim 60 ft.",
-    "abilityScores": {
+    "hitDice": "12d12",
+    "speed": {
+      "swim": "60 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 10,
       "constitution": 13,
@@ -2562,14 +2516,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 3
     },
-    "senses": {
-      "blindsight": "120 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "blindsight 120 ft., passive_perception 13",
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Echolocation",
@@ -2595,15 +2545,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Lion",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 26,
-    "maxHp": 26,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "4d10",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 15,
       "constitution": 13,
@@ -2615,13 +2567,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 3,
       "stealth": 6
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -2659,15 +2608,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Lizard",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 2,
-    "maxHp": 2,
-    "speed": "20 ft., climb 20 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "20 ft.",
+      "climb": "20 ft."
+    },
+    "abilities": {
       "strength": 2,
       "dexterity": 11,
       "constitution": 10,
@@ -2675,34 +2627,31 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 8,
       "charisma": 3
     },
-    "senses": {
-      "darkvision": "30 ft.",
-      "passive_perception": "9"
-    },
+    "senses": "darkvision 30 ft., passive_perception 9",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
         "description": "Melee Weapon Attack: +0 to hit, reach 5 ft., one target. Hit: 1 piercing damage.",
-        "attackBonus": 0,
         "damageDescription": "1 Piercing"
       }
     ]
   },
   {
     "name": "Mammoth",
-    "size": "huge",
     "type": "beast",
+    "size": "Huge",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 126,
-    "maxHp": 126,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "11d12",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 24,
       "dexterity": 9,
       "constitution": 21,
@@ -2710,13 +2659,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 11,
       "charisma": 6
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 6,
     "experiencePoints": 2300,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Trampling Charge",
@@ -2740,15 +2686,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Mastiff",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 5,
-    "maxHp": 5,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "1d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 13,
       "dexterity": 14,
       "constitution": 12,
@@ -2759,13 +2707,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 3
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Hearing and Smell",
@@ -2783,15 +2728,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Mule",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 10,
       "constitution": 13,
@@ -2799,13 +2746,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 5
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Beast of Burden",
@@ -2827,15 +2771,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Octopus",
-    "size": "small",
     "type": "beast",
+    "size": "Small",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 3,
-    "maxHp": 3,
-    "speed": "5 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "1d6",
+    "speed": {
+      "walk": "5 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 4,
       "dexterity": 15,
       "constitution": 11,
@@ -2847,14 +2794,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 2,
       "stealth": 4
     },
-    "senses": {
-      "darkvision": "30 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 30 ft., passive_perception 12",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Hold Breath",
@@ -2878,22 +2821,24 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       },
       {
         "name": "Ink Cloud",
-        "description": "A 5-foot-radius cloud of ink extends all around the octopus if it is underwater. The area is heavily obscured for 1 minute, although a significant current can disperse the ink. After releasing the ink, the octopus can use the Dash action as a bonus action.",
-        "attackBonus": 0
+        "description": "A 5-foot-radius cloud of ink extends all around the octopus if it is underwater. The area is heavily obscured for 1 minute, although a significant current can disperse the ink. After releasing the ink, the octopus can use the Dash action as a bonus action."
       }
     ]
   },
   {
     "name": "Owl",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 1,
-    "maxHp": 1,
-    "speed": "5 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "5 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 3,
       "dexterity": 13,
       "constitution": 8,
@@ -2905,14 +2850,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 3,
       "stealth": 3
     },
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "darkvision 120 ft., passive_perception 13",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Flyby",
@@ -2934,15 +2875,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Panther",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 13,
-    "maxHp": 13,
-    "speed": "50 ft., climb 40 ft.",
-    "abilityScores": {
+    "hitDice": "3d8",
+    "speed": {
+      "walk": "50 ft.",
+      "climb": "40 ft."
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 15,
       "constitution": 10,
@@ -2954,13 +2898,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 4,
       "stealth": 6
     },
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -2990,15 +2931,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Plesiosaurus",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 68,
-    "maxHp": 68,
-    "speed": "20 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "8d10",
+    "speed": {
+      "walk": "20 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 15,
       "constitution": 16,
@@ -3010,13 +2954,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 3,
       "stealth": 4
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Hold Breath",
@@ -3034,15 +2975,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Poisonous Snake",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 2,
-    "maxHp": 2,
-    "speed": "30 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 2,
       "dexterity": 16,
       "constitution": 11,
@@ -3050,14 +2994,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 3
     },
-    "senses": {
-      "blindsight": "10 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "blindsight 10 ft., passive_perception 10",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -3069,15 +3009,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Polar Bear",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 42,
-    "maxHp": 42,
-    "speed": "40 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "5d10",
+    "speed": {
+      "walk": "40 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 20,
       "dexterity": 10,
       "constitution": 16,
@@ -3088,13 +3031,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 3
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -3122,15 +3062,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Pony",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 10,
       "constitution": 13,
@@ -3138,13 +3080,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 11,
       "charisma": 7
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Hooves",
@@ -3156,15 +3095,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Quipper",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 1,
-    "maxHp": 1,
-    "speed": "swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 2,
       "dexterity": 16,
       "constitution": 9,
@@ -3172,14 +3113,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 7,
       "charisma": 2
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "8"
-    },
+    "senses": "darkvision 60 ft., passive_perception 8",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Blood Frenzy",
@@ -3201,15 +3138,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Rat",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 1,
-    "maxHp": 1,
-    "speed": "20 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "20 ft."
+    },
+    "abilities": {
       "strength": 2,
       "dexterity": 11,
       "constitution": 9,
@@ -3217,14 +3156,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 4
     },
-    "senses": {
-      "darkvision": "30 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 30 ft., passive_perception 10",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -3235,22 +3170,24 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       {
         "name": "Bite",
         "description": "Melee Weapon Attack: +0 to hit, reach 5 ft., one target. Hit: 1 piercing damage.",
-        "attackBonus": 0,
         "damageDescription": "1 Piercing"
       }
     ]
   },
   {
     "name": "Raven",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 1,
-    "maxHp": 1,
-    "speed": "10 ft., fly 50 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "50 ft."
+    },
+    "abilities": {
       "strength": 2,
       "dexterity": 14,
       "constitution": 8,
@@ -3261,13 +3198,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 3
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Mimicry",
@@ -3285,15 +3219,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Reef Shark",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "4d8",
+    "speed": {
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 13,
       "constitution": 13,
@@ -3304,14 +3240,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 2
     },
-    "senses": {
-      "blindsight": "30 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "blindsight 30 ft., passive_perception 12",
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Pack Tactics",
@@ -3333,15 +3265,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Rhinoceros",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 45,
-    "maxHp": 45,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "6d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 21,
       "dexterity": 8,
       "constitution": 15,
@@ -3349,13 +3283,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 12,
       "charisma": 6
     },
-    "senses": {
-      "passive_perception": "11"
-    },
+    "senses": "passive_perception 11",
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Charge",
@@ -3373,15 +3304,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Riding Horse",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 13,
-    "maxHp": 13,
-    "speed": "60 ft.",
-    "abilityScores": {
+    "hitDice": "2d10",
+    "speed": {
+      "walk": "60 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 10,
       "constitution": 12,
@@ -3389,13 +3322,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 11,
       "charisma": 7
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 0.25,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Hooves",
@@ -3407,15 +3337,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Saber-Toothed Tiger",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 52,
-    "maxHp": 52,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "7d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 14,
       "constitution": 15,
@@ -3427,13 +3359,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 3,
       "stealth": 6
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -3463,15 +3392,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Scorpion",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 1,
-    "maxHp": 1,
-    "speed": "10 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "10 ft."
+    },
+    "abilities": {
       "strength": 2,
       "dexterity": 11,
       "constitution": 8,
@@ -3479,14 +3410,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 8,
       "charisma": 2
     },
-    "senses": {
-      "blindsight": "10 ft.",
-      "passive_perception": "9"
-    },
+    "senses": "blindsight 10 ft., passive_perception 9",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Sting",
@@ -3498,15 +3425,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Sea Horse",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 1,
-    "maxHp": 1,
-    "speed": "swim 20 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "swim": "20 ft."
+    },
+    "abilities": {
       "strength": 1,
       "dexterity": 12,
       "constitution": 8,
@@ -3514,13 +3443,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 10,
       "charisma": 2
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Water Breathing",
@@ -3530,15 +3456,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Spider",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 1,
-    "maxHp": 1,
-    "speed": "20 ft., climb 20 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "20 ft.",
+      "climb": "20 ft."
+    },
+    "abilities": {
       "strength": 2,
       "dexterity": 14,
       "constitution": 8,
@@ -3549,14 +3478,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "stealth": 4
     },
-    "senses": {
-      "darkvision": "30 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 30 ft., passive_perception 12",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Spider Climb",
@@ -3582,15 +3507,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Stirge",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 14,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 2,
-    "maxHp": 2,
-    "speed": "10 ft., fly 40 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "40 ft."
+    },
+    "abilities": {
       "strength": 4,
       "dexterity": 16,
       "constitution": 11,
@@ -3598,14 +3526,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 8,
       "charisma": 6
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "9"
-    },
+    "senses": "darkvision 60 ft., passive_perception 9",
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Blood Drain",
@@ -3616,16 +3540,599 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     ]
   },
   {
-    "name": "Tiger",
-    "size": "large",
-    "type": "beast",
+    "name": "Swarm of Bats",
+    "type": "swarm of Tiny beasts",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
+    "hp": 22,
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "0 ft.",
+      "fly": "30 ft."
+    },
+    "abilities": {
+      "strength": 5,
+      "dexterity": 15,
+      "constitution": 10,
+      "intelligence": 2,
+      "wisdom": 12,
+      "charisma": 4
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "conditionImmunities": [
+      "Charmed",
+      "Frightened",
+      "Grappled",
+      "Paralyzed",
+      "Petrified",
+      "Prone",
+      "Restrained",
+      "Stunned"
+    ],
+    "senses": "blindsight 60 ft., passive_perception 11",
+    "challengeRating": 0.25,
+    "experiencePoints": 50,
+    "source": "SRD",
+    "traits": [
+      {
+        "name": "Echolocation",
+        "description": "The swarm can't use its blindsight while deafened."
+      },
+      {
+        "name": "Keen Hearing",
+        "description": "The swarm has advantage on Wisdom (Perception) checks that rely on hearing."
+      },
+      {
+        "name": "Swarm",
+        "description": "The swarm can occupy another creature's space and vice versa, and the swarm can move through any opening large enough for a Tiny bat. The swarm can't regain hit points or gain temporary hit points."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bites",
+        "description": "Melee Weapon Attack: +4 to hit, reach 0 ft., one creature in the swarm's space. Hit: 5 (2d4) piercing damage, or 2 (1d4) piercing damage if the swarm has half of its hit points or fewer.",
+        "attackBonus": 4,
+        "damageDescription": "2d4 Piercing"
+      }
+    ]
+  },
+  {
+    "name": "Swarm of Beetles",
+    "type": "swarm of Tiny beasts",
+    "size": "Medium",
+    "alignment": "unaligned",
+    "ac": 12,
+    "armorType": "natural",
+    "hp": 22,
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "20 ft.",
+      "burrow": "5 ft.",
+      "climb": "20 ft."
+    },
+    "abilities": {
+      "strength": 3,
+      "dexterity": 13,
+      "constitution": 10,
+      "intelligence": 1,
+      "wisdom": 7,
+      "charisma": 1
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "conditionImmunities": [
+      "Charmed",
+      "Frightened",
+      "Grappled",
+      "Paralyzed",
+      "Petrified",
+      "Prone",
+      "Restrained",
+      "Stunned"
+    ],
+    "senses": "blindsight 10 ft., passive_perception 8",
+    "challengeRating": 0.5,
+    "experiencePoints": 100,
+    "source": "SRD",
+    "traits": [
+      {
+        "name": "Swarm",
+        "description": "The swarm can occupy another creature's space and vice versa, and the swarm can move through any opening large enough for a Tiny insect. The swarm can't regain hit points or gain temporary hit points."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bites",
+        "description": "Melee Weapon Attack: +3 to hit, reach 0 ft., one target in the swarm's space. Hit: 10 (4d4) piercing damage, or 5 (2d4) piercing damage if the swarm has half of its hit points or fewer.",
+        "attackBonus": 3,
+        "damageDescription": "4d4 Piercing"
+      }
+    ]
+  },
+  {
+    "name": "Swarm of Centipedes",
+    "type": "swarm of Tiny beasts",
+    "size": "Medium",
+    "alignment": "unaligned",
+    "ac": 12,
+    "armorType": "natural",
+    "hp": 22,
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "20 ft.",
+      "climb": "20 ft."
+    },
+    "abilities": {
+      "strength": 3,
+      "dexterity": 13,
+      "constitution": 10,
+      "intelligence": 1,
+      "wisdom": 7,
+      "charisma": 1
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "conditionImmunities": [
+      "Charmed",
+      "Frightened",
+      "Grappled",
+      "Paralyzed",
+      "Petrified",
+      "Prone",
+      "Restrained",
+      "Stunned"
+    ],
+    "senses": "blindsight 10 ft., passive_perception 8",
+    "challengeRating": 0.5,
+    "experiencePoints": 100,
+    "source": "SRD",
+    "traits": [
+      {
+        "name": "Swarm",
+        "description": "The swarm can occupy another creature's space and vice versa, and the swarm can move through any opening large enough for a Tiny insect. The swarm can't regain hit points or gain temporary hit points."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bites",
+        "description": "Melee Weapon Attack: +3 to hit, reach 0 ft., one target in the swarm's space. Hit: 10 (4d4) piercing damage, or 5 (2d4) piercing damage if the swarm has half of its hit points or fewer.\nA creature reduced to 0 hit points by a swarm of centipedes is stable but poisoned for 1 hour, even after regaining hit points, and paralyzed while poisoned in this way.",
+        "attackBonus": 3,
+        "damageDescription": "4d4 Piercing"
+      }
+    ]
+  },
+  {
+    "name": "Swarm of Insects",
+    "type": "swarm of Tiny beasts",
+    "size": "Medium",
+    "alignment": "unaligned",
+    "ac": 12,
+    "armorType": "natural",
+    "hp": 22,
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "20 ft.",
+      "climb": "20 ft."
+    },
+    "abilities": {
+      "strength": 3,
+      "dexterity": 13,
+      "constitution": 10,
+      "intelligence": 1,
+      "wisdom": 7,
+      "charisma": 1
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "conditionImmunities": [
+      "Charmed",
+      "Frightened",
+      "Grappled",
+      "Paralyzed",
+      "Petrified",
+      "Prone",
+      "Restrained",
+      "Stunned"
+    ],
+    "senses": "blindsight 10 ft., passive_perception 8",
+    "challengeRating": 0.5,
+    "experiencePoints": 100,
+    "source": "SRD",
+    "traits": [
+      {
+        "name": "Swarm",
+        "description": "The swarm can occupy another creature's space and vice versa, and the swarm can move through any opening large enough for a Tiny insect. The swarm can't regain hit points or gain temporary hit points."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bites",
+        "description": "Melee Weapon Attack: +3 to hit, reach 0 ft., one target in the swarm's space. Hit: 10 (4d4) piercing damage, or 5 (2d4) piercing damage if the swarm has half of its hit points or fewer.",
+        "attackBonus": 3,
+        "damageDescription": "4d4 Piercing"
+      }
+    ]
+  },
+  {
+    "name": "Swarm of Poisonous Snakes",
+    "type": "swarm of Tiny beasts",
+    "size": "Medium",
+    "alignment": "unaligned",
+    "ac": 14,
+    "armorType": "dex",
+    "hp": 36,
+    "hitDice": "8d8",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
+      "strength": 8,
+      "dexterity": 18,
+      "constitution": 11,
+      "intelligence": 1,
+      "wisdom": 10,
+      "charisma": 3
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "conditionImmunities": [
+      "Charmed",
+      "Frightened",
+      "Grappled",
+      "Paralyzed",
+      "Petrified",
+      "Prone",
+      "Restrained",
+      "Stunned"
+    ],
+    "senses": "blindsight 10 ft., passive_perception 10",
+    "challengeRating": 2,
+    "experiencePoints": 450,
+    "source": "SRD",
+    "traits": [
+      {
+        "name": "Swarm",
+        "description": "The swarm can occupy another creature's space and vice versa, and the swarm can move through any opening large enough for a Tiny snake. The swarm can't regain hit points or gain temporary hit points."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bites",
+        "description": "Melee Weapon Attack: +6 to hit, reach 0 ft., one creature in the swarm's space. Hit: 7 (2d6) piercing damage, or 3 (1d6) piercing damage if the swarm has half of its hit points or fewer. The target must make a DC 10 Constitution saving throw, taking 14 (4d6) poison damage on a failed save, or half as much damage on a successful one.",
+        "attackBonus": 6,
+        "damageDescription": "2d6 Piercing"
+      }
+    ]
+  },
+  {
+    "name": "Swarm of Quippers",
+    "type": "swarm of Tiny beasts",
+    "size": "Medium",
+    "alignment": "unaligned",
+    "ac": 13,
+    "armorType": "dex",
+    "hp": 28,
+    "hitDice": "8d8",
+    "speed": {
+      "walk": "0 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
+      "strength": 13,
+      "dexterity": 16,
+      "constitution": 9,
+      "intelligence": 1,
+      "wisdom": 7,
+      "charisma": 2
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "conditionImmunities": [
+      "Charmed",
+      "Frightened",
+      "Grappled",
+      "Paralyzed",
+      "Petrified",
+      "Prone",
+      "Restrained",
+      "Stunned"
+    ],
+    "senses": "darkvision 60 ft., passive_perception 8",
+    "challengeRating": 1,
+    "experiencePoints": 200,
+    "source": "SRD",
+    "traits": [
+      {
+        "name": "Blood Frenzy",
+        "description": "The swarm has advantage on melee attack rolls against any creature that doesn't have all its hit points."
+      },
+      {
+        "name": "Swarm",
+        "description": "The swarm can occupy another creature's space and vice versa, and the swarm can move through any opening large enough for a Tiny quipper. The swarm can't regain hit points or gain temporary hit points."
+      },
+      {
+        "name": "Water Breathing",
+        "description": "The swarm can breathe only underwater."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bites",
+        "description": "Melee Weapon Attack: +5 to hit, reach 0 ft., one creature in the swarm's space. Hit: 14 (4d6) piercing damage, or 7 (2d6) piercing damage if the swarm has half of its hit points or fewer.",
+        "attackBonus": 5,
+        "damageDescription": "4d6 Piercing"
+      }
+    ]
+  },
+  {
+    "name": "Swarm of Rats",
+    "type": "swarm of Tiny beasts",
+    "size": "Medium",
+    "alignment": "unaligned",
+    "ac": 10,
+    "armorType": "dex",
+    "hp": 24,
+    "hitDice": "7d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
+      "strength": 9,
+      "dexterity": 11,
+      "constitution": 9,
+      "intelligence": 2,
+      "wisdom": 10,
+      "charisma": 3
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "conditionImmunities": [
+      "Charmed",
+      "Frightened",
+      "Grappled",
+      "Paralyzed",
+      "Petrified",
+      "Prone",
+      "Restrained",
+      "Stunned"
+    ],
+    "senses": "darkvision 30 ft., passive_perception 10",
+    "challengeRating": 0.25,
+    "experiencePoints": 50,
+    "source": "SRD",
+    "traits": [
+      {
+        "name": "Keen Smell",
+        "description": "The swarm has advantage on Wisdom (Perception) checks that rely on smell."
+      },
+      {
+        "name": "Swarm",
+        "description": "The swarm can occupy another creature's space and vice versa, and the swarm can move through any opening large enough for a Tiny rat. The swarm can't regain hit points or gain temporary hit points."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bites",
+        "description": "Melee Weapon Attack: +2 to hit, reach 0 ft., one target in the swarm's space. Hit: 7 (2d6) piercing damage, or 3 (1d6) piercing damage if the swarm has half of its hit points or fewer.",
+        "attackBonus": 2,
+        "damageDescription": "2d6 Piercing"
+      }
+    ]
+  },
+  {
+    "name": "Swarm of Ravens",
+    "type": "swarm of Tiny beasts",
+    "size": "Medium",
+    "alignment": "unaligned",
+    "ac": 12,
+    "armorType": "dex",
+    "hp": 24,
+    "hitDice": "7d8",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "50 ft."
+    },
+    "abilities": {
+      "strength": 6,
+      "dexterity": 14,
+      "constitution": 8,
+      "intelligence": 3,
+      "wisdom": 12,
+      "charisma": 6
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "conditionImmunities": [
+      "Charmed",
+      "Frightened",
+      "Grappled",
+      "Paralyzed",
+      "Petrified",
+      "Prone",
+      "Restrained",
+      "Stunned"
+    ],
+    "senses": "passive_perception 15",
+    "challengeRating": 0.25,
+    "experiencePoints": 50,
+    "source": "SRD",
+    "traits": [
+      {
+        "name": "Swarm",
+        "description": "The swarm can occupy another creature's space and vice versa, and the swarm can move through any opening large enough for a Tiny raven. The swarm can't regain hit points or gain temporary hit points."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Beaks",
+        "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target in the swarm's space. Hit: 7 (2d6) piercing damage, or 3 (1d6) piercing damage if the swarm has half of its hit points or fewer.",
+        "attackBonus": 4,
+        "damageDescription": "2d6 Piercing"
+      }
+    ]
+  },
+  {
+    "name": "Swarm of Spiders",
+    "type": "swarm of Tiny beasts",
+    "size": "Medium",
+    "alignment": "unaligned",
+    "ac": 12,
+    "armorType": "natural",
+    "hp": 22,
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "20 ft.",
+      "climb": "20 ft."
+    },
+    "abilities": {
+      "strength": 3,
+      "dexterity": 13,
+      "constitution": 10,
+      "intelligence": 1,
+      "wisdom": 7,
+      "charisma": 1
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "conditionImmunities": [
+      "Charmed",
+      "Frightened",
+      "Paralyzed",
+      "Petrified",
+      "Prone",
+      "Restrained",
+      "Stunned"
+    ],
+    "senses": "blindsight 10 ft., passive_perception 8",
+    "challengeRating": 0.5,
+    "experiencePoints": 100,
+    "source": "SRD",
+    "traits": [
+      {
+        "name": "Swarm",
+        "description": "The swarm can occupy another creature's space and vice versa, and the swarm can move through any opening large enough for a Tiny insect. The swarm can't regain hit points or gain temporary hit points."
+      },
+      {
+        "name": "Spider Climb",
+        "description": "The swarm can climb difficult surfaces, including upside down on ceilings, without needing to make an ability check."
+      },
+      {
+        "name": "Web Sense",
+        "description": "While in contact with a web, the swarm knows the exact location of any other creature in contact with the same web."
+      },
+      {
+        "name": "Web Walker",
+        "description": "The swarm ignores movement restrictions caused by webbing."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bites",
+        "description": "Melee Weapon Attack: +3 to hit, reach 0 ft., one target in the swarm's space. Hit: 10 (4d4) piercing damage, or 5 (2d4) piercing damage if the swarm has half of its hit points or fewer.",
+        "attackBonus": 3,
+        "damageDescription": "4d4 Piercing"
+      }
+    ]
+  },
+  {
+    "name": "Swarm of Wasps",
+    "type": "swarm of Tiny beasts",
+    "size": "Medium",
+    "alignment": "unaligned",
+    "ac": 12,
+    "armorType": "natural",
+    "hp": 22,
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "5 ft.",
+      "fly": "30 ft."
+    },
+    "abilities": {
+      "strength": 3,
+      "dexterity": 13,
+      "constitution": 10,
+      "intelligence": 1,
+      "wisdom": 7,
+      "charisma": 1
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "conditionImmunities": [
+      "Charmed",
+      "Frightened",
+      "Grappled",
+      "Paralyzed",
+      "Petrified",
+      "Prone",
+      "Restrained",
+      "Stunned"
+    ],
+    "senses": "blindsight 10 ft., passive_perception 8",
+    "challengeRating": 0.5,
+    "experiencePoints": 100,
+    "source": "SRD",
+    "traits": [
+      {
+        "name": "Swarm",
+        "description": "The swarm can occupy another creature's space and vice versa, and the swarm can move through any opening large enough for a Tiny insect. The swarm can't regain hit points or gain temporary hit points."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bites",
+        "description": "Melee Weapon Attack: +3 to hit, reach 0 ft., one target in the swarm's space. Hit: 10 (4d4) piercing damage, or 5 (2d4) piercing damage if the swarm has half of its hit points or fewer.",
+        "attackBonus": 3,
+        "damageDescription": "4d4 Piercing"
+      }
+    ]
+  },
+  {
+    "name": "Tiger",
+    "type": "beast",
+    "size": "Large",
+    "alignment": "unaligned",
+    "ac": 12,
+    "armorType": "dex",
     "hp": 37,
-    "maxHp": 37,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "5d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 15,
       "constitution": 14,
@@ -3637,14 +4144,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 3,
       "stealth": 6
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "darkvision 60 ft., passive_perception 13",
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Smell",
@@ -3674,15 +4177,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Triceratops",
-    "size": "huge",
     "type": "beast",
+    "size": "Huge",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 95,
-    "maxHp": 95,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "10d12",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 22,
       "dexterity": 9,
       "constitution": 17,
@@ -3690,13 +4195,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 11,
       "charisma": 5
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Trampling Charge",
@@ -3720,15 +4222,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Tyrannosaurus Rex",
-    "size": "huge",
     "type": "beast",
+    "size": "Huge",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 136,
-    "maxHp": 136,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "13d12",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 25,
       "dexterity": 10,
       "constitution": 19,
@@ -3739,13 +4243,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 4
     },
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "challengeRating": 8,
     "experiencePoints": 3900,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -3767,15 +4268,18 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Vulture",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 5,
-    "maxHp": 5,
-    "speed": "10 ft., fly 50 ft.",
-    "abilityScores": {
+    "hitDice": "1d8",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "50 ft."
+    },
+    "abilities": {
       "strength": 7,
       "dexterity": 10,
       "constitution": 13,
@@ -3786,13 +4290,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "skills": {
       "perception": 3
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Sight and Smell",
@@ -3814,15 +4315,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Warhorse",
-    "size": "large",
     "type": "beast",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 19,
-    "maxHp": 19,
-    "speed": "60 ft.",
-    "abilityScores": {
+    "hitDice": "3d10",
+    "speed": {
+      "walk": "60 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 12,
       "constitution": 13,
@@ -3830,13 +4333,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "wisdom": 12,
       "charisma": 7
     },
-    "senses": {
-      "passive_perception": "11"
-    },
+    "senses": "passive_perception 11",
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Trampling Charge",
@@ -3854,15 +4354,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Weasel",
-    "size": "tiny",
     "type": "beast",
+    "size": "Tiny",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 1,
-    "maxHp": 1,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 3,
       "dexterity": 16,
       "constitution": 8,
@@ -3874,13 +4376,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 3,
       "stealth": 5
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Hearing and Smell",
@@ -3898,15 +4397,17 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Wolf",
-    "size": "medium",
     "type": "beast",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 12,
       "dexterity": 15,
       "constitution": 12,
@@ -3918,13 +4419,10 @@ export const BEASTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "perception": 3,
       "stealth": 4
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Hearing and Smell",

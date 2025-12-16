@@ -6,11 +6,19 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 
+interface ImportResult {
+  count: number;
+  skipped: number;
+  countByType: Record<string, number>;
+  skippedByType?: Record<string, number>;
+}
+
 function HomeContent() {
   const router = useRouter();
   const { user, logout, loading } = useAuth();
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
 
   const handleLogout = async () => {
     await logout();
@@ -21,11 +29,11 @@ function HomeContent() {
     try {
       setImporting(true);
       setImportMessage(null);
+      setImportResult(null);
       
       const response = await fetch('/api/monsters/global', {
-        method: 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ importSRD: true }),
       });
 
       const data = await response.json();
@@ -34,9 +42,20 @@ function HomeContent() {
         throw new Error(data.error || 'Import failed');
       }
 
+      const message = data.skipped 
+        ? `Successfully imported ${data.count} monsters (${data.skipped} skipped due to bad data)`
+        : `Successfully imported ${data.count} monsters`;
+
+      setImportResult({
+        count: data.count,
+        skipped: data.skipped,
+        countByType: data.countByType,
+        skippedByType: data.skippedByType,
+      });
+
       setImportMessage({
         type: 'success',
-        text: `Successfully imported ${data.imported || 0} monsters`,
+        text: message,
       });
     } catch (error) {
       setImportMessage({
@@ -47,6 +66,14 @@ function HomeContent() {
       setImporting(false);
     }
   };
+
+  // Get all unique types from imported and skipped
+  const allTypes = importResult
+    ? Array.from(new Set([
+        ...Object.keys(importResult.countByType),
+        ...(importResult.skippedByType ? Object.keys(importResult.skippedByType) : []),
+      ])).sort()
+    : [];
 
   return (
     <div className="bg-gray-900 text-white h-full w-full">
@@ -73,7 +100,7 @@ function HomeContent() {
         {/* Admin Import Section */}
         {user?.isAdmin && (
           <div className="mb-8 bg-blue-950 border border-blue-800 rounded-lg p-4">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-3">
               <div>
                 <h3 className="text-lg font-semibold text-blue-300 mb-1">Admin Tools</h3>
                 <p className="text-sm text-blue-200">Import SRD monsters into the global catalog</p>
@@ -86,13 +113,45 @@ function HomeContent() {
                 {importing ? 'Importing...' : 'Import SRD Monsters'}
               </button>
             </div>
+            
             {importMessage && (
-              <div className={`mt-3 p-2 rounded text-sm ${
+              <div className={`p-2 rounded text-sm ${
                 importMessage.type === 'success'
                   ? 'bg-green-900 text-green-200'
                   : 'bg-red-900 text-red-200'
               }`}>
                 {importMessage.text}
+              </div>
+            )}
+
+            {/* Import Results Breakdown */}
+            {importResult && importMessage?.type === 'success' && (
+              <div className="mt-4 bg-blue-900 bg-opacity-50 rounded p-3">
+                <h4 className="text-sm font-semibold text-blue-200 mb-2">Import Breakdown by Type:</h4>
+                <div className="space-y-1 text-xs text-blue-100 max-h-48 overflow-y-auto">
+                  {allTypes.map(type => (
+                    <div key={type} className="flex justify-between">
+                      <span className="capitalize">{type}:</span>
+                      <span>
+                        Imported: <span className="text-green-300 font-semibold">{importResult.countByType[type] || 0}</span>
+                        {', '}
+                        Skipped: <span className={importResult.skippedByType?.[type] ? 'text-yellow-300 font-semibold' : 'text-green-300'}>{importResult.skippedByType?.[type] || 0}</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Totals */}
+                <div className="border-t border-blue-700 mt-3 pt-2">
+                  <div className="flex justify-between font-semibold text-blue-200">
+                    <span>Total:</span>
+                    <span>
+                      Imported: <span className="text-green-300">{importResult.count}</span>
+                      {', '}
+                      Skipped: <span className={importResult.skipped ? 'text-yellow-300' : 'text-green-300'}>{importResult.skipped}</span>
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
           </div>

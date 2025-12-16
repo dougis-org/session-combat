@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { MonsterTemplate } from '@/lib/types';
@@ -8,7 +9,7 @@ import { getDatabase } from '@/lib/db';
 async function isUserAdmin(userId: string): Promise<boolean> {
   try {
     const db = await getDatabase();
-    const user = await db.collection('users').findOne({ id: userId });
+    const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
     return user?.isAdmin === true;
   } catch (error) {
     console.error('Error checking admin status:', error);

@@ -1,22 +1,27 @@
 /**
- * D&D 5e SRD Humanoids
- * Source: D&D 5e API (https://www.dnd5eapi.co)
+ * Humanoid-type monsters from D&D 5e SRD
+ * Auto-generated from D&D 5e API
  */
 
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate } from "../../types";
 
-export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt' | '_id'>[] = [
+export const HUMANOIDS: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   {
     "name": "Acolyte",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 9,
-    "maxHp": 9,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 10,
       "constitution": 10,
@@ -28,16 +33,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "medicine": 4,
       "religion": 2
     },
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Spellcasting",
@@ -55,15 +57,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Archmage",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 99,
-    "maxHp": 99,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "18d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 14,
       "constitution": 12,
@@ -83,16 +87,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "damage from spells",
       "bludgeoning, piercing, and slashing from nonmagical attacks (from stoneskin)"
     ],
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "any six languages"
     ],
     "challengeRating": 12,
     "experiencePoints": 8400,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Magic Resistance",
@@ -114,15 +115,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Assassin",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any non-good alignment",
     "ac": 15,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 78,
-    "maxHp": 78,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "12d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 11,
       "dexterity": 16,
       "constitution": 14,
@@ -143,16 +146,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageResistances": [
       "poison"
     ],
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "languages": [
       "Thieves' cant plus any two languages"
     ],
     "challengeRating": 8,
     "experiencePoints": 3900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Assassinate",
@@ -188,15 +188,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Bandit",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any non-lawful alignment",
     "ac": 12,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 11,
       "dexterity": 12,
       "constitution": 12,
@@ -204,16 +206,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "wisdom": 10,
       "charisma": 10
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Scimitar",
@@ -231,15 +230,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Bandit Captain",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any non-lawful alignment",
     "ac": 15,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 65,
-    "maxHp": 65,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "10d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 16,
       "constitution": 14,
@@ -256,16 +257,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "athletics": 4,
       "deception": 4
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "languages": [
       "any two languages"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -293,15 +291,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Berserker",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any chaotic alignment",
     "ac": 13,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 67,
-    "maxHp": 67,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "9d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 12,
       "constitution": 17,
@@ -309,16 +309,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "wisdom": 11,
       "charisma": 9
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Reckless",
@@ -336,15 +333,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Bugbear",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "chaotic evil",
     "ac": 16,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 27,
-    "maxHp": 27,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 14,
       "constitution": 13,
@@ -356,10 +355,7 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "stealth": 6,
       "survival": 2
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Common",
       "Goblin"
@@ -367,7 +363,6 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Brute",
@@ -395,15 +390,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Commoner",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 4,
-    "maxHp": 4,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "1d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 10,
       "constitution": 10,
@@ -411,16 +408,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "wisdom": 10,
       "charisma": 10
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Club",
@@ -432,15 +426,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Cult Fanatic",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any non-good alignment",
     "ac": 13,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "6d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 11,
       "dexterity": 14,
       "constitution": 12,
@@ -453,16 +449,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "persuasion": 4,
       "religion": 2
     },
-    "senses": {
-      "passive_perception": "11"
-    },
+    "senses": "passive_perception 11",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Dark Devotion",
@@ -488,15 +481,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Cultist",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any non-good alignment",
     "ac": 12,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 9,
-    "maxHp": 9,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 11,
       "dexterity": 12,
       "constitution": 10,
@@ -508,16 +503,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "deception": 2,
       "religion": 2
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Dark Devotion",
@@ -535,15 +527,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Deep Gnome (Svirfneblin)",
-    "size": "small",
     "type": "humanoid",
+    "size": "Small",
     "alignment": "neutral good",
     "ac": 15,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 16,
-    "maxHp": 16,
-    "speed": "20 ft.",
-    "abilityScores": {
+    "hitDice": "3d6",
+    "speed": {
+      "walk": "20 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 14,
       "constitution": 14,
@@ -556,10 +550,7 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "perception": 2,
       "stealth": 4
     },
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 120 ft., passive_perception 12",
     "languages": [
       "Gnomish",
       "Terran",
@@ -568,7 +559,6 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "challengeRating": 0.5,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Stone Camouflage",
@@ -600,15 +590,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Drow",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral evil",
     "ac": 15,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 13,
-    "maxHp": 13,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "3d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 14,
       "constitution": 10,
@@ -620,10 +612,7 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "perception": 2,
       "stealth": 4
     },
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 120 ft., passive_perception 12",
     "languages": [
       "Elvish",
       "Undercommon"
@@ -631,7 +620,6 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Fey Ancestry",
@@ -663,15 +651,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Druid",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 27,
-    "maxHp": 27,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 12,
       "constitution": 13,
@@ -684,16 +674,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "nature": 3,
       "perception": 4
     },
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "languages": [
       "Druidic plus any two languages"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Spellcasting",
@@ -711,15 +698,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Duergar",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 16,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 26,
-    "maxHp": 26,
-    "speed": "25 ft.",
-    "abilityScores": {
+    "hitDice": "4d8",
+    "speed": {
+      "walk": "25 ft."
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 11,
       "constitution": 14,
@@ -730,10 +719,7 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageResistances": [
       "poison"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 120 ft., passive_perception 10",
     "languages": [
       "Dwarvish",
       "Undercommon"
@@ -741,7 +727,6 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Duergar Resilience",
@@ -777,15 +762,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Gladiator",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 16,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 112,
-    "maxHp": 112,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "15d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 15,
       "constitution": 16,
@@ -802,16 +789,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "athletics": 10,
       "intimidation": 5
     },
-    "senses": {
-      "passive_perception": "11"
-    },
+    "senses": "passive_perception 11",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Brave",
@@ -849,15 +833,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Gnoll",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "chaotic evil",
     "ac": 15,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 12,
       "constitution": 11,
@@ -865,17 +851,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "wisdom": 10,
       "charisma": 7
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Gnoll"
     ],
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Rampage",
@@ -905,15 +887,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Goblin",
-    "size": "small",
     "type": "humanoid",
+    "size": "Small",
     "alignment": "neutral evil",
     "ac": 15,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 7,
-    "maxHp": 7,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d6",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 8,
       "dexterity": 14,
       "constitution": 10,
@@ -924,10 +908,7 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "skills": {
       "stealth": 6
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "9"
-    },
+    "senses": "darkvision 60 ft., passive_perception 9",
     "languages": [
       "Common",
       "Goblin"
@@ -935,7 +916,6 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Nimble Escape",
@@ -959,15 +939,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Grimlock",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral evil",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 12,
       "constitution": 12,
@@ -983,17 +965,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "conditionImmunities": [
       "Blinded"
     ],
-    "senses": {
-      "blindsight": "30 ft. or 10 ft. while deafened (blind beyond this radius)",
-      "passive_perception": "13"
-    },
+    "senses": "blindsight 30 ft. or 10 ft. while deafened (blind beyond this radius), passive_perception 13",
     "languages": [
       "Undercommon"
     ],
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Blind Senses",
@@ -1019,15 +997,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Guard",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 16,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 13,
       "dexterity": 12,
       "constitution": 12,
@@ -1038,16 +1018,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "skills": {
       "perception": 2
     },
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Spear",
@@ -1059,15 +1036,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Half-Red Dragon Veteran",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 18,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 65,
-    "maxHp": 65,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "10d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 13,
       "constitution": 14,
@@ -1078,11 +1057,7 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageResistances": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 12",
     "languages": [
       "Common",
       "Draconic"
@@ -1090,7 +1065,6 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -1125,15 +1099,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Hobgoblin",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 18,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 13,
       "dexterity": 12,
       "constitution": 12,
@@ -1141,10 +1117,7 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "wisdom": 10,
       "charisma": 9
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Common",
       "Goblin"
@@ -1152,7 +1125,6 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Martial Advantage",
@@ -1176,15 +1148,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Knight",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 18,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 52,
-    "maxHp": 52,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "8d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 11,
       "constitution": 14,
@@ -1196,16 +1170,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "con": 4,
       "wis": 2
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Brave",
@@ -1243,15 +1214,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Kobold",
-    "size": "small",
     "type": "humanoid",
+    "size": "Small",
     "alignment": "lawful evil",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 5,
-    "maxHp": 5,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d6",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 7,
       "dexterity": 15,
       "constitution": 9,
@@ -1259,10 +1232,7 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "wisdom": 7,
       "charisma": 8
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "8"
-    },
+    "senses": "darkvision 60 ft., passive_perception 8",
     "languages": [
       "Common",
       "Draconic"
@@ -1270,7 +1240,6 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Sunlight Sensitivity",
@@ -1298,15 +1267,18 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Lizardfolk",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "30 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "4d8",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 10,
       "constitution": 13,
@@ -1319,16 +1291,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "stealth": 4,
       "survival": 5
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "languages": [
       "Draconic"
     ],
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Hold Breath",
@@ -1368,15 +1337,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Mage",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 40,
-    "maxHp": 40,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "9d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 9,
       "dexterity": 14,
       "constitution": 11,
@@ -1392,16 +1363,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "arcana": 6,
       "history": 6
     },
-    "senses": {
-      "passive_perception": "11"
-    },
+    "senses": "passive_perception 11",
     "languages": [
       "any four languages"
     ],
     "challengeRating": 6,
     "experiencePoints": 2300,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Spellcasting",
@@ -1419,15 +1387,18 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Merfolk",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "10 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "10 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 13,
       "constitution": 12,
@@ -1438,9 +1409,7 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "skills": {
       "perception": 2
     },
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "Aquan",
       "Common"
@@ -1448,7 +1417,6 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -1466,15 +1434,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Noble",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 15,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 9,
-    "maxHp": 9,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 11,
       "dexterity": 12,
       "constitution": 11,
@@ -1487,16 +1457,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "insight": 4,
       "persuasion": 5
     },
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "any two languages"
     ],
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Rapier",
@@ -1514,15 +1481,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Orc",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "chaotic evil",
     "ac": 13,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 15,
-    "maxHp": 15,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 12,
       "constitution": 16,
@@ -1533,10 +1502,7 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "skills": {
       "intimidation": 2
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Common",
       "Orc"
@@ -1544,7 +1510,6 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Aggressive",
@@ -1568,15 +1533,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Priest",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 13,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 27,
-    "maxHp": 27,
-    "speed": "25 ft.",
-    "abilityScores": {
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "25 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 10,
       "constitution": 12,
@@ -1589,16 +1556,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "persuasion": 3,
       "religion": 4
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "languages": [
       "any two languages"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Divine Eminence",
@@ -1620,15 +1584,18 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Sahuagin",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "30 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "4d8",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 13,
       "dexterity": 11,
       "constitution": 12,
@@ -1639,17 +1606,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "skills": {
       "perception": 5
     },
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "15"
-    },
+    "senses": "darkvision 120 ft., passive_perception 15",
     "languages": [
       "Sahuagin"
     ],
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Blood Frenzy",
@@ -1691,15 +1654,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Scout",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 13,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 16,
-    "maxHp": 16,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "3d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 11,
       "dexterity": 14,
       "constitution": 12,
@@ -1713,16 +1678,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "stealth": 6,
       "survival": 5
     },
-    "senses": {
-      "passive_perception": "15"
-    },
+    "senses": "passive_perception 15",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Hearing and Sight",
@@ -1750,15 +1712,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Spy",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 27,
-    "maxHp": 27,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "6d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 15,
       "constitution": 10,
@@ -1774,16 +1738,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "persuasion": 5,
       "stealth": 4
     },
-    "senses": {
-      "passive_perception": "16"
-    },
+    "senses": "passive_perception 16",
     "languages": [
       "any two languages"
     ],
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Cunning Action",
@@ -1815,15 +1776,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Thug",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any non-good alignment",
     "ac": 11,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 32,
-    "maxHp": 32,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 11,
       "constitution": 14,
@@ -1834,16 +1797,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "skills": {
       "intimidation": 2
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Pack Tactics",
@@ -1871,15 +1831,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Tribal Warrior",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 12,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 11,
-    "maxHp": 11,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 13,
       "dexterity": 11,
       "constitution": 12,
@@ -1887,16 +1849,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "wisdom": 11,
       "charisma": 8
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "languages": [
       "any one language"
     ],
     "challengeRating": 0.125,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Pack Tactics",
@@ -1914,15 +1873,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Veteran",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "any alignment",
     "ac": 17,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 58,
-    "maxHp": 58,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "9d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 13,
       "constitution": 14,
@@ -1934,16 +1895,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
       "athletics": 5,
       "perception": 2
     },
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "any one language (usually Common)"
     ],
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -1971,15 +1929,18 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Werebear, Bear Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral good",
     "ac": 11,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 135,
-    "maxHp": 135,
-    "speed": "40 ft., climb 30 ft.",
-    "abilityScores": {
+    "hitDice": "18d8",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "30 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 10,
       "constitution": 17,
@@ -1993,13 +1954,10 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "passive_perception": "17"
-    },
+    "senses": "passive_perception 17",
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2031,15 +1989,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Werebear, Human Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral good",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 135,
-    "maxHp": 135,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "18d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 10,
       "constitution": 17,
@@ -2053,16 +2013,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "passive_perception": "17"
-    },
+    "senses": "passive_perception 17",
     "languages": [
       "Common"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2088,15 +2045,18 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Werebear, Hybrid Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral good",
     "ac": 11,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 135,
-    "maxHp": 135,
-    "speed": "40 ft., climb 30 ft.",
-    "abilityScores": {
+    "hitDice": "18d8",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "30 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 10,
       "constitution": 17,
@@ -2110,16 +2070,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "passive_perception": "17"
-    },
+    "senses": "passive_perception 17",
     "languages": [
       "Common"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2157,15 +2114,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Wereboar, Boar Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral evil",
     "ac": 11,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 78,
-    "maxHp": 78,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "12d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 10,
       "constitution": 15,
@@ -2179,13 +2138,10 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2211,15 +2167,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Wereboar, Human Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral evil",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 78,
-    "maxHp": 78,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "12d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 10,
       "constitution": 15,
@@ -2233,16 +2191,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "Common (can't speak in boar form)"
     ],
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2268,15 +2223,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Wereboar, Hybrid Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral evil",
     "ac": 11,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 78,
-    "maxHp": 78,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "12d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 10,
       "constitution": 15,
@@ -2290,16 +2247,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "Common"
     ],
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2335,15 +2289,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Wererat, Human Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 33,
-    "maxHp": 33,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "6d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 15,
       "constitution": 12,
@@ -2358,16 +2314,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "Common"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2399,15 +2352,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Wererat, Hybrid Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 33,
-    "maxHp": 33,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "6d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 15,
       "constitution": 12,
@@ -2422,16 +2377,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "Common"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2469,15 +2421,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Wererat, Rat Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 33,
-    "maxHp": 33,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "6d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 15,
       "constitution": 12,
@@ -2492,14 +2446,10 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 60 ft., passive_perception 12",
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2521,15 +2471,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Weretiger, Human Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 120,
-    "maxHp": 120,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "16d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 15,
       "constitution": 16,
@@ -2544,17 +2496,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "15"
-    },
+    "senses": "darkvision 60 ft., passive_perception 15",
     "languages": [
       "Common"
     ],
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2586,15 +2534,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Weretiger, Hybrid Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 120,
-    "maxHp": 120,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "16d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 15,
       "constitution": 16,
@@ -2609,17 +2559,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "15"
-    },
+    "senses": "darkvision 60 ft., passive_perception 15",
     "languages": [
       "Common"
     ],
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2669,15 +2615,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Weretiger, Tiger Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "neutral",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 120,
-    "maxHp": 120,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "16d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 15,
       "constitution": 16,
@@ -2692,14 +2640,10 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "15"
-    },
+    "senses": "darkvision 60 ft., passive_perception 15",
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2733,15 +2677,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Werewolf, Human Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "chaotic evil",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 58,
-    "maxHp": 58,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "9d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 13,
       "constitution": 14,
@@ -2755,16 +2701,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "languages": [
       "Common"
     ],
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2790,15 +2733,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Werewolf, Hybrid Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "chaotic evil",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 58,
-    "maxHp": 58,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "9d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 13,
       "constitution": 14,
@@ -2812,16 +2757,13 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "languages": [
       "Common"
     ],
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -2853,15 +2795,17 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
   },
   {
     "name": "Werewolf, Wolf Form",
-    "size": "medium",
     "type": "humanoid",
+    "size": "Medium",
     "alignment": "chaotic evil",
     "ac": 12,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 58,
-    "maxHp": 58,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "9d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 13,
       "constitution": 14,
@@ -2875,13 +2819,10 @@ export const HUMANOIDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'u
     "damageImmunities": [
       "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered"
     ],
-    "senses": {
-      "passive_perception": "14"
-    },
+    "senses": "passive_perception 14",
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",

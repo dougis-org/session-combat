@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { MonsterTemplate } from '@/lib/types';
@@ -10,7 +11,7 @@ import { randomUUID } from 'crypto';
 async function isUserAdmin(userId: string): Promise<boolean> {
   try {
     const db = await getDatabase();
-    const user = await db.collection('users').findOne({ id: userId });
+    const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
     return user?.isAdmin === true;
   } catch (error) {
     console.error('Error checking admin status:', error);
@@ -170,25 +171,85 @@ export async function PUT(request: NextRequest) {
     // Delete existing global monsters
     await collection.deleteMany({ userId: 'GLOBAL' });
 
-    // Prepare monsters with required fields
-    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => ({
-      ...monster,
-      id: randomUUID(),
-      userId: 'GLOBAL',
-      isGlobal: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
+    // Prepare monsters with required fields, normalizing data structure
+    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => {
+      // Normalize the data from SRD format to MonsterTemplate format
+      const normalized: any = {
+        ...monster,
+        id: randomUUID(),
+        userId: 'GLOBAL',
+        isGlobal: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-    // Insert all monsters
-    const result = await collection.insertMany(monstersToInsert);
+      // Map 'hp' to 'maxHp' if needed
+      if (monster.hp !== undefined && !normalized.maxHp) {
+        normalized.maxHp = monster.hp;
+      }
+      
+      // Map 'abilities' to 'abilityScores' if needed
+      if ((monster as any).abilities && !normalized.abilityScores) {
+        normalized.abilityScores = (monster as any).abilities;
+      }
+
+      return normalized;
+    });
+
+    // Separate valid and invalid monsters
+    const validMonsters: typeof monstersToInsert = [];
+    const invalidMonsters: Array<{ monster: typeof monstersToInsert[0]; reason: string }> = [];
+
+    for (const monster of monstersToInsert) {
+      if (!monster.name || monster.name.trim() === '') {
+        invalidMonsters.push({ monster, reason: 'missing name' });
+      } else if (!monster.maxHp || monster.maxHp <= 0) {
+        invalidMonsters.push({ monster, reason: 'invalid maxHp' });
+      } else if (!monster.size || !monster.type) {
+        invalidMonsters.push({ monster, reason: 'missing size or type' });
+      } else {
+        validMonsters.push(monster);
+      }
+    }
+
+    // Log invalid monsters for debugging
+    if (invalidMonsters.length > 0) {
+      console.warn(`Found ${invalidMonsters.length} monsters with bad data:`, invalidMonsters.slice(0, 5));
+    }
+
+    // Insert valid monsters
+    const result = validMonsters.length > 0 
+      ? await collection.insertMany(validMonsters)
+      : { insertedIds: {} };
+    
     const insertedCount = Object.keys(result.insertedIds).length;
+
+    // Count inserted monsters by type
+    const countByType: Record<string, number> = {};
+    validMonsters.forEach(monster => {
+      const type = monster.type || 'unknown';
+      countByType[type] = (countByType[type] || 0) + 1;
+    });
+
+    // Count skipped monsters by type
+    const skippedByType: Record<string, number> = {};
+    invalidMonsters.forEach(({ monster }) => {
+      const type = monster.type || 'unknown';
+      skippedByType[type] = (skippedByType[type] || 0) + 1;
+    });
 
     return NextResponse.json({
       success: true,
       message: `Seeded ${insertedCount} SRD monsters`,
       count: insertedCount,
-      monsters: monstersToInsert.map(m => ({ id: m.id, name: m.name, cr: m.challengeRating })),
+      skipped: invalidMonsters.length,
+      total: monstersToInsert.length,
+      countByType,
+      skippedByType: Object.keys(skippedByType).length > 0 ? skippedByType : undefined,
+      importedMonsters: validMonsters.map(m => ({ id: m.id, name: m.name, cr: m.challengeRating })),
+      skippedMonsters: invalidMonsters.length > 0 
+        ? invalidMonsters.slice(0, 10).map(im => ({ name: im.monster.name, reason: im.reason }))
+        : undefined,
     }, { status: 200 });
   } catch (error) {
     console.error('Error seeding monsters:', error);

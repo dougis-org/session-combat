@@ -1,22 +1,28 @@
 /**
- * D&D 5e SRD Fiends
- * Source: D&D 5e API (https://www.dnd5eapi.co)
+ * Fiend-type monsters from D&D 5e SRD
+ * Auto-generated from D&D 5e API
  */
 
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate } from "../../types";
 
-export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt' | '_id'>[] = [
+export const FIENDS: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   {
     "name": "Balor",
-    "size": "huge",
     "type": "fiend",
+    "size": "Huge",
     "alignment": "chaotic evil",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 262,
-    "maxHp": 262,
-    "speed": "40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "21d12",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 26,
       "dexterity": 15,
       "constitution": 22,
@@ -42,10 +48,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "truesight": "120 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "truesight 120 ft., passive_perception 13",
     "languages": [
       "Abyssal",
       "telepathy 120 ft."
@@ -53,7 +56,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 19,
     "experiencePoints": 22000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Death Throes",
@@ -99,15 +101,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Barbed Devil",
-    "size": "medium",
     "type": "fiend",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 15,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 110,
-    "maxHp": 110,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "13d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 17,
       "constitution": 18,
@@ -137,10 +141,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "18"
-    },
+    "senses": "darkvision 120 ft., passive_perception 18",
     "languages": [
       "Infernal",
       "telepathy 120 ft."
@@ -148,7 +149,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Barbed Hide",
@@ -190,15 +190,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Bearded Devil",
-    "size": "medium",
     "type": "fiend",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 52,
-    "maxHp": 52,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "8d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 15,
       "constitution": 15,
@@ -222,10 +224,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 120 ft., passive_perception 10",
     "languages": [
       "Infernal",
       "telepathy 120 ft."
@@ -233,7 +232,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Devil's Sight",
@@ -269,15 +267,18 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Bone Devil",
-    "size": "large",
     "type": "fiend",
+    "size": "Large",
     "alignment": "lawful evil",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 142,
-    "maxHp": 142,
-    "speed": "40 ft., fly 40 ft.",
-    "abilityScores": {
+    "hitDice": "15d10",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "40 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 16,
       "constitution": 18,
@@ -305,10 +306,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 120 ft., passive_perception 12",
     "languages": [
       "Infernal",
       "telepathy 120 ft."
@@ -316,7 +314,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 9,
     "experiencePoints": 5000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Devil's Sight",
@@ -348,15 +345,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Chain Devil",
-    "size": "medium",
     "type": "fiend",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 16,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 85,
-    "maxHp": 85,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "10d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 15,
       "constitution": 18,
@@ -380,10 +379,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "darkvision 120 ft., passive_perception 11",
     "languages": [
       "Infernal",
       "telepathy 120 ft."
@@ -391,7 +387,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 8,
     "experiencePoints": 3900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Devil's Sight",
@@ -427,15 +422,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Dretch",
-    "size": "small",
     "type": "fiend",
+    "size": "Small",
     "alignment": "chaotic evil",
     "ac": 11,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 18,
-    "maxHp": 18,
-    "speed": "20 ft.",
-    "abilityScores": {
+    "hitDice": "4d6",
+    "speed": {
+      "walk": "20 ft."
+    },
+    "abilities": {
       "strength": 11,
       "dexterity": 11,
       "constitution": 12,
@@ -454,10 +451,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "9"
-    },
+    "senses": "darkvision 60 ft., passive_perception 9",
     "languages": [
       "Abyssal",
       "telepathy 60 ft. (works only with creatures that understand Abyssal)"
@@ -465,7 +459,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 0.25,
     "experiencePoints": 25,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -493,15 +486,18 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Erinyes",
-    "size": "medium",
     "type": "fiend",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 18,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 153,
-    "maxHp": 153,
-    "speed": "30 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "18d8",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 16,
       "constitution": 18,
@@ -526,10 +522,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "truesight": "120 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "truesight 120 ft., passive_perception 12",
     "languages": [
       "Infernal",
       "telepathy 120 ft."
@@ -537,7 +530,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 12,
     "experiencePoints": 8400,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Hellish Weapons",
@@ -575,15 +567,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Glabrezu",
-    "size": "large",
     "type": "fiend",
+    "size": "Large",
     "alignment": "chaotic evil",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 157,
-    "maxHp": 157,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "15d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 20,
       "dexterity": 15,
       "constitution": 21,
@@ -609,10 +603,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "truesight": "120 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "truesight 120 ft., passive_perception 13",
     "languages": [
       "Abyssal",
       "telepathy 120 ft."
@@ -620,7 +611,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 9,
     "experiencePoints": 5000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Innate Spellcasting",
@@ -652,15 +642,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Hell Hound",
-    "size": "medium",
     "type": "fiend",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 15,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 45,
-    "maxHp": 45,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "7d8",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 12,
       "constitution": 14,
@@ -674,17 +666,13 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "15"
-    },
+    "senses": "darkvision 60 ft., passive_perception 15",
     "languages": [
       "understands Infernal but can't speak it"
     ],
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Hearing and Smell",
@@ -713,15 +701,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Hezrou",
-    "size": "large",
     "type": "fiend",
+    "size": "Large",
     "alignment": "chaotic evil",
     "ac": 16,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 136,
-    "maxHp": 136,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "13d10",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 17,
       "constitution": 20,
@@ -746,10 +736,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "darkvision 120 ft., passive_perception 11",
     "languages": [
       "Abyssal",
       "telepathy 120 ft."
@@ -757,7 +744,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 8,
     "experiencePoints": 3900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Magic Resistance",
@@ -791,15 +777,18 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Horned Devil",
-    "size": "large",
     "type": "fiend",
+    "size": "Large",
     "alignment": "lawful evil",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 178,
-    "maxHp": 178,
-    "speed": "20 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "17d10",
+    "speed": {
+      "walk": "20 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 22,
       "dexterity": 17,
       "constitution": 21,
@@ -824,10 +813,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "darkvision 120 ft., passive_perception 13",
     "languages": [
       "Infernal",
       "telepathy 120 ft."
@@ -835,7 +821,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 11,
     "experiencePoints": 7200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Devil's Sight",
@@ -873,15 +858,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Ice Devil",
-    "size": "large",
     "type": "fiend",
+    "size": "Large",
     "alignment": "lawful evil",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 180,
-    "maxHp": 180,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "19d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 21,
       "dexterity": 14,
       "constitution": 18,
@@ -905,11 +892,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 12",
     "languages": [
       "Infernal",
       "telepathy 120 ft."
@@ -917,7 +900,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 14,
     "experiencePoints": 11500,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Devil's Sight",
@@ -959,15 +941,18 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Imp",
-    "size": "tiny",
     "type": "fiend",
+    "size": "Tiny",
     "alignment": "lawful evil",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 10,
-    "maxHp": 10,
-    "speed": "20 ft., fly 40 ft.",
-    "abilityScores": {
+    "hitDice": "3d4",
+    "speed": {
+      "walk": "20 ft.",
+      "fly": "40 ft."
+    },
+    "abilities": {
       "strength": 6,
       "dexterity": 17,
       "constitution": 13,
@@ -992,10 +977,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "darkvision 120 ft., passive_perception 11",
     "languages": [
       "Infernal",
       "Common"
@@ -1003,7 +985,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -1033,15 +1014,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Lemure",
-    "size": "medium",
     "type": "fiend",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 7,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 13,
-    "maxHp": 13,
-    "speed": "15 ft.",
-    "abilityScores": {
+    "hitDice": "3d8",
+    "speed": {
+      "walk": "15 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 5,
       "constitution": 11,
@@ -1061,17 +1044,13 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "Frightened",
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 120 ft., passive_perception 10",
     "languages": [
       "understands infernal but can't speak"
     ],
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Devil's Sight",
@@ -1093,15 +1072,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Marilith",
-    "size": "large",
     "type": "fiend",
+    "size": "Large",
     "alignment": "chaotic evil",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 189,
-    "maxHp": 189,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "18d10",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 20,
       "constitution": 20,
@@ -1127,10 +1108,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "truesight": "120 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "truesight 120 ft., passive_perception 13",
     "languages": [
       "Abyssal",
       "telepathy 120 ft."
@@ -1138,7 +1116,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 16,
     "experiencePoints": 15000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Magic Resistance",
@@ -1184,15 +1161,18 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Nalfeshnee",
-    "size": "large",
     "type": "fiend",
+    "size": "Large",
     "alignment": "chaotic evil",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 184,
-    "maxHp": 184,
-    "speed": "20 ft., fly 30 ft.",
-    "abilityScores": {
+    "hitDice": "16d10",
+    "speed": {
+      "walk": "20 ft.",
+      "fly": "30 ft."
+    },
+    "abilities": {
       "strength": 21,
       "dexterity": 10,
       "constitution": 22,
@@ -1218,10 +1198,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "truesight": "120 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "truesight 120 ft., passive_perception 11",
     "languages": [
       "Abyssal",
       "telepathy 120 ft."
@@ -1229,7 +1206,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 13,
     "experiencePoints": 10000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Magic Resistance",
@@ -1267,15 +1243,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Night Hag",
-    "size": "medium",
     "type": "fiend",
+    "size": "Medium",
     "alignment": "neutral evil",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 112,
-    "maxHp": 112,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "15d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 15,
       "constitution": 16,
@@ -1297,10 +1275,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Charmed"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "16"
-    },
+    "senses": "darkvision 120 ft., passive_perception 16",
     "languages": [
       "Abyssal",
       "Common",
@@ -1310,7 +1285,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Innate Spellcasting",
@@ -1348,15 +1322,18 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Nightmare",
-    "size": "large",
     "type": "fiend",
+    "size": "Large",
     "alignment": "neutral evil",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 68,
-    "maxHp": 68,
-    "speed": "60 ft., fly 90 ft.",
-    "abilityScores": {
+    "hitDice": "8d10",
+    "speed": {
+      "walk": "60 ft.",
+      "fly": "90 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 15,
       "constitution": 16,
@@ -1367,9 +1344,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "passive_perception": "11"
-    },
+    "senses": "passive_perception 11",
     "languages": [
       "understands Abyssal",
       "Common",
@@ -1378,7 +1353,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Confer Fire Resistance",
@@ -1404,15 +1378,18 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Pit Fiend",
-    "size": "large",
     "type": "fiend",
+    "size": "Large",
     "alignment": "lawful evil",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 300,
-    "maxHp": 300,
-    "speed": "30 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "24d10",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 26,
       "dexterity": 14,
       "constitution": 24,
@@ -1436,10 +1413,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "truesight": "120 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "truesight 120 ft., passive_perception 14",
     "languages": [
       "Infernal",
       "telepathy 120 ft."
@@ -1447,7 +1421,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 20,
     "experiencePoints": 25000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Fear Aura",
@@ -1501,15 +1474,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Quasit",
-    "size": "tiny",
     "type": "fiend",
+    "size": "Tiny",
     "alignment": "chaotic evil",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 7,
-    "maxHp": 7,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "3d4",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 5,
       "dexterity": 17,
       "constitution": 10,
@@ -1532,10 +1507,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 120 ft., passive_perception 10",
     "languages": [
       "Abyssal",
       "Common"
@@ -1543,7 +1515,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Shapechanger",
@@ -1575,15 +1546,17 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Rakshasa",
-    "size": "medium",
     "type": "fiend",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 16,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 110,
-    "maxHp": 110,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "13d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 17,
       "constitution": 18,
@@ -1601,10 +1574,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "damageVulnerabilities": [
       "piercing from magic weapons wielded by good creatures"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "darkvision 60 ft., passive_perception 13",
     "languages": [
       "Common",
       "Infernal"
@@ -1612,7 +1582,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 13,
     "experiencePoints": 10000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Limited Magic Immunity",
@@ -1638,15 +1607,18 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Succubus/Incubus",
-    "size": "medium",
     "type": "fiend",
+    "size": "Medium",
     "alignment": "neutral evil",
     "ac": 15,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 66,
-    "maxHp": 66,
-    "speed": "30 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "12d8",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 8,
       "dexterity": 17,
       "constitution": 13,
@@ -1668,10 +1640,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "poison",
       "bludgeoning, piercing, and slashing from nonmagical weapons"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "15"
-    },
+    "senses": "darkvision 60 ft., passive_perception 15",
     "languages": [
       "Abyssal",
       "Common",
@@ -1681,7 +1650,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Telepathic Bond",
@@ -1718,15 +1686,18 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Vrock",
-    "size": "large",
     "type": "fiend",
+    "size": "Large",
     "alignment": "chaotic evil",
     "ac": 15,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 104,
-    "maxHp": 104,
-    "speed": "40 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "11d10",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 15,
       "constitution": 18,
@@ -1751,10 +1722,7 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "darkvision 120 ft., passive_perception 11",
     "languages": [
       "Abyssal",
       "telepathy 120 ft."
@@ -1762,7 +1730,6 @@ export const FIENDS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 6,
     "experiencePoints": 2300,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Magic Resistance",

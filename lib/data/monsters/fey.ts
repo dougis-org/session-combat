@@ -1,22 +1,27 @@
 /**
- * D&D 5e SRD Feys
- * Source: D&D 5e API (https://www.dnd5eapi.co)
+ * Fey-type monsters from D&D 5e SRD
+ * Auto-generated from D&D 5e API
  */
 
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate } from "../../types";
 
-export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt' | '_id'>[] = [
+export const FEY: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   {
     "name": "Blink Dog",
-    "size": "medium",
     "type": "fey",
+    "size": "Medium",
     "alignment": "lawful good",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "4d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 12,
       "dexterity": 17,
       "constitution": 12,
@@ -28,9 +33,7 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
       "perception": 3,
       "stealth": 5
     },
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "languages": [
       "Blink Dog",
       "understands Sylvan but can't speak it"
@@ -38,7 +41,6 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Hearing and Smell",
@@ -60,15 +62,17 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
   },
   {
     "name": "Dryad",
-    "size": "medium",
     "type": "fey",
+    "size": "Medium",
     "alignment": "neutral",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 12,
       "constitution": 11,
@@ -80,10 +84,7 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
       "perception": 4,
       "stealth": 5
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "darkvision 60 ft., passive_perception 14",
     "languages": [
       "Elvish",
       "Sylvan"
@@ -91,7 +92,6 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Innate Spellcasting",
@@ -127,15 +127,17 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
   },
   {
     "name": "Green Hag",
-    "size": "medium",
     "type": "fey",
+    "size": "Medium",
     "alignment": "neutral evil",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 82,
-    "maxHp": 82,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "11d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 12,
       "constitution": 16,
@@ -149,10 +151,7 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
       "perception": 4,
       "stealth": 3
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "darkvision 60 ft., passive_perception 14",
     "languages": [
       "Common",
       "Draconic",
@@ -161,7 +160,6 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -195,15 +193,17 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
   },
   {
     "name": "Satyr",
-    "size": "medium",
     "type": "fey",
+    "size": "Medium",
     "alignment": "chaotic neutral",
     "ac": 14,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 31,
-    "maxHp": 31,
-    "speed": "40 ft.",
-    "abilityScores": {
+    "hitDice": "7d8",
+    "speed": {
+      "walk": "40 ft."
+    },
+    "abilities": {
       "strength": 12,
       "dexterity": 16,
       "constitution": 11,
@@ -216,9 +216,7 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
       "performance": 6,
       "stealth": 5
     },
-    "senses": {
-      "passive_perception": "12"
-    },
+    "senses": "passive_perception 12",
     "languages": [
       "Common",
       "Elvish",
@@ -227,7 +225,6 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Magic Resistance",
@@ -257,15 +254,18 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
   },
   {
     "name": "Sea Hag",
-    "size": "medium",
     "type": "fey",
+    "size": "Medium",
     "alignment": "chaotic evil",
     "ac": 14,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 52,
-    "maxHp": 52,
-    "speed": "30 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "7d8",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 13,
       "constitution": 16,
@@ -273,10 +273,7 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
       "wisdom": 12,
       "charisma": 13
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "darkvision 60 ft., passive_perception 11",
     "languages": [
       "Aquan",
       "Common",
@@ -285,7 +282,6 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -317,15 +313,18 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
   },
   {
     "name": "Sprite",
-    "size": "tiny",
     "type": "fey",
+    "size": "Tiny",
     "alignment": "neutral good",
     "ac": 15,
-    "acNote": "armor armor",
+    "armorType": "armor",
     "hp": 2,
-    "maxHp": 2,
-    "speed": "10 ft., fly 40 ft.",
-    "abilityScores": {
+    "hitDice": "1d4",
+    "speed": {
+      "walk": "10 ft.",
+      "fly": "40 ft."
+    },
+    "abilities": {
       "strength": 3,
       "dexterity": 18,
       "constitution": 10,
@@ -337,9 +336,7 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
       "perception": 3,
       "stealth": 8
     },
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "languages": [
       "Common",
       "Elvish",
@@ -348,7 +345,6 @@ export const FEYS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'update
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Longsword",

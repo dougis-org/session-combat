@@ -1,22 +1,29 @@
 /**
- * D&D 5e SRD Dragons
- * Source: D&D 5e API (https://www.dnd5eapi.co)
+ * Dragon-type monsters from D&D 5e SRD
+ * Auto-generated from D&D 5e API
  */
 
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate } from "../../types";
 
-export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt' | '_id'>[] = [
+export const DRAGONS: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   {
     "name": "Adult Black Dragon",
-    "size": "huge",
     "type": "dragon",
+    "size": "Huge",
     "alignment": "chaotic evil",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 195,
-    "maxHp": 195,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "17d12",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 14,
       "constitution": 21,
@@ -37,11 +44,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "acid"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "21"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 21",
     "languages": [
       "Common",
       "Draconic"
@@ -49,7 +52,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 14,
     "experiencePoints": 11500,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -114,15 +116,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Adult Blue Dragon",
-    "size": "huge",
     "type": "dragon",
+    "size": "Huge",
     "alignment": "lawful evil",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 225,
-    "maxHp": 225,
-    "speed": "40 ft., burrow 30 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "18d12",
+    "speed": {
+      "walk": "40 ft.",
+      "burrow": "30 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 25,
       "dexterity": 10,
       "constitution": 23,
@@ -143,11 +149,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "lightning"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "22"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 22",
     "languages": [
       "Common",
       "Draconic"
@@ -155,7 +157,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 16,
     "experiencePoints": 15000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Legendary Resistance",
@@ -216,15 +217,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Adult Brass Dragon",
-    "size": "huge",
     "type": "dragon",
+    "size": "Huge",
     "alignment": "chaotic good",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 172,
-    "maxHp": 172,
-    "speed": "40 ft., burrow 40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "15d12",
+    "speed": {
+      "walk": "40 ft.",
+      "burrow": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 10,
       "constitution": 21,
@@ -247,11 +252,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "21"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 21",
     "languages": [
       "Common",
       "Draconic"
@@ -259,7 +260,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 13,
     "experiencePoints": 10000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Legendary Resistance",
@@ -317,15 +317,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Adult Bronze Dragon",
-    "size": "huge",
     "type": "dragon",
+    "size": "Huge",
     "alignment": "lawful good",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 212,
-    "maxHp": 212,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "17d12",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 25,
       "dexterity": 10,
       "constitution": 23,
@@ -347,11 +351,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "lightning"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "22"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 22",
     "languages": [
       "Common",
       "Draconic"
@@ -359,7 +359,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 15,
     "experiencePoints": 13000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -421,15 +420,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Adult Copper Dragon",
-    "size": "huge",
     "type": "dragon",
+    "size": "Huge",
     "alignment": "chaotic good",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 184,
-    "maxHp": 184,
-    "speed": "40 ft., climb 40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "16d12",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 12,
       "constitution": 21,
@@ -451,11 +454,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "acid"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "22"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 22",
     "languages": [
       "Common",
       "Draconic"
@@ -463,7 +462,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 14,
     "experiencePoints": 11500,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Legendary Resistance",
@@ -521,15 +519,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Adult Gold Dragon",
-    "size": "huge",
     "type": "dragon",
+    "size": "Huge",
     "alignment": "lawful good",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 256,
-    "maxHp": 256,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "19d12",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 27,
       "dexterity": 14,
       "constitution": 25,
@@ -552,11 +554,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "24"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 24",
     "languages": [
       "Common",
       "Draconic"
@@ -564,7 +562,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 17,
     "experiencePoints": 18000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -626,15 +623,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Adult Green Dragon",
-    "size": "huge",
     "type": "dragon",
+    "size": "Huge",
     "alignment": "lawful evil",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 207,
-    "maxHp": 207,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "18d12",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 12,
       "constitution": 21,
@@ -661,11 +662,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "22"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 22",
     "languages": [
       "Common",
       "Draconic"
@@ -673,7 +670,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 15,
     "experiencePoints": 13000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -738,15 +734,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Adult Red Dragon",
-    "size": "huge",
     "type": "dragon",
+    "size": "Huge",
     "alignment": "chaotic evil",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 256,
-    "maxHp": 256,
-    "speed": "40 ft., climb 40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "19d12",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 27,
       "dexterity": 10,
       "constitution": 25,
@@ -767,11 +767,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "23"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 23",
     "languages": [
       "Common",
       "Draconic"
@@ -779,7 +775,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 17,
     "experiencePoints": 18000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Legendary Resistance",
@@ -840,15 +835,18 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Adult Silver Dragon",
-    "size": "huge",
     "type": "dragon",
+    "size": "Huge",
     "alignment": "lawful good",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 243,
-    "maxHp": 243,
-    "speed": "40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "18d12",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 27,
       "dexterity": 10,
       "constitution": 25,
@@ -871,11 +869,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "cold"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "21"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 21",
     "languages": [
       "Common",
       "Draconic"
@@ -883,7 +877,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 16,
     "experiencePoints": 15000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Legendary Resistance",
@@ -941,15 +934,20 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Adult White Dragon",
-    "size": "huge",
     "type": "dragon",
+    "size": "Huge",
     "alignment": "chaotic evil",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 200,
-    "maxHp": 200,
-    "speed": "40 ft., burrow 30 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "16d12",
+    "speed": {
+      "walk": "40 ft.",
+      "burrow": "30 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 22,
       "dexterity": 10,
       "constitution": 22,
@@ -970,11 +968,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "cold"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "21"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 21",
     "languages": [
       "Common",
       "Draconic"
@@ -982,7 +976,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 13,
     "experiencePoints": 10000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Ice Walk",
@@ -1047,15 +1040,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Ancient Black Dragon",
-    "size": "gargantuan",
     "type": "dragon",
+    "size": "Gargantuan",
     "alignment": "chaotic evil",
     "ac": 22,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 367,
-    "maxHp": 367,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "21d20",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 27,
       "dexterity": 14,
       "constitution": 25,
@@ -1076,11 +1073,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "acid"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "26"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 26",
     "languages": [
       "Common",
       "Draconic"
@@ -1088,7 +1081,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 21,
     "experiencePoints": 33000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -1153,15 +1145,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Ancient Blue Dragon",
-    "size": "gargantuan",
     "type": "dragon",
+    "size": "Gargantuan",
     "alignment": "lawful evil",
     "ac": 22,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 481,
-    "maxHp": 481,
-    "speed": "40 ft., burrow 40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "26d20",
+    "speed": {
+      "walk": "40 ft.",
+      "burrow": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 29,
       "dexterity": 10,
       "constitution": 27,
@@ -1182,11 +1178,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "lightning"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "27"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 27",
     "languages": [
       "Common",
       "Draconic"
@@ -1194,7 +1186,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 23,
     "experiencePoints": 50000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Legendary Resistance",
@@ -1255,15 +1246,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Ancient Brass Dragon",
-    "size": "gargantuan",
     "type": "dragon",
+    "size": "Gargantuan",
     "alignment": "chaotic good",
     "ac": 20,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 297,
-    "maxHp": 297,
-    "speed": "40 ft., burrow 40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "17d20",
+    "speed": {
+      "walk": "40 ft.",
+      "burrow": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 27,
       "dexterity": 10,
       "constitution": 25,
@@ -1286,11 +1281,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "24"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 24",
     "languages": [
       "Common",
       "Draconic"
@@ -1298,7 +1289,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 20,
     "experiencePoints": 25000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Legendary Resistance",
@@ -1360,15 +1350,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Ancient Bronze Dragon",
-    "size": "gargantuan",
     "type": "dragon",
+    "size": "Gargantuan",
     "alignment": "lawful good",
     "ac": 22,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 444,
-    "maxHp": 444,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "24d20",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 29,
       "dexterity": 10,
       "constitution": 27,
@@ -1390,11 +1384,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "lightning"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "27"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 27",
     "languages": [
       "Common",
       "Draconic"
@@ -1402,7 +1392,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 22,
     "experiencePoints": 41000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -1468,15 +1457,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Ancient Copper Dragon",
-    "size": "gargantuan",
     "type": "dragon",
+    "size": "Gargantuan",
     "alignment": "chaotic good",
     "ac": 21,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 350,
-    "maxHp": 350,
-    "speed": "40 ft., climb 40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "20d20",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 27,
       "dexterity": 12,
       "constitution": 25,
@@ -1498,11 +1491,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "acid"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "27"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 27",
     "languages": [
       "Common",
       "Draconic"
@@ -1510,7 +1499,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 21,
     "experiencePoints": 33000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Legendary Resistance",
@@ -1572,15 +1560,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Ancient Gold Dragon",
-    "size": "gargantuan",
     "type": "dragon",
+    "size": "Gargantuan",
     "alignment": "lawful good",
     "ac": 22,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 546,
-    "maxHp": 546,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "28d20",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 30,
       "dexterity": 14,
       "constitution": 29,
@@ -1603,11 +1595,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "27"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 27",
     "languages": [
       "Common",
       "Draconic"
@@ -1615,7 +1603,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 24,
     "experiencePoints": 62000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -1681,15 +1668,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Ancient Green Dragon",
-    "size": "gargantuan",
     "type": "dragon",
+    "size": "Gargantuan",
     "alignment": "lawful evil",
     "ac": 21,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 385,
-    "maxHp": 385,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "22d20",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 27,
       "dexterity": 12,
       "constitution": 25,
@@ -1716,11 +1707,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "27"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 27",
     "languages": [
       "Common",
       "Draconic"
@@ -1728,7 +1715,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 22,
     "experiencePoints": 41000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -1793,15 +1779,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Ancient Red Dragon",
-    "size": "gargantuan",
     "type": "dragon",
+    "size": "Gargantuan",
     "alignment": "chaotic evil",
     "ac": 22,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 546,
-    "maxHp": 546,
-    "speed": "40 ft., climb 40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "28d20",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 30,
       "dexterity": 10,
       "constitution": 29,
@@ -1822,11 +1812,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "26"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 26",
     "languages": [
       "Common",
       "Draconic"
@@ -1834,7 +1820,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 24,
     "experiencePoints": 62000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Legendary Resistance",
@@ -1895,15 +1880,18 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Ancient Silver Dragon",
-    "size": "gargantuan",
     "type": "dragon",
+    "size": "Gargantuan",
     "alignment": "lawful good",
     "ac": 22,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 487,
-    "maxHp": 487,
-    "speed": "40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "25d20",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 30,
       "dexterity": 10,
       "constitution": 29,
@@ -1926,11 +1914,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "cold"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "26"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 26",
     "languages": [
       "Common",
       "Draconic"
@@ -1938,7 +1922,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 23,
     "experiencePoints": 50000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Legendary Resistance",
@@ -2000,15 +1983,20 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Ancient White Dragon",
-    "size": "gargantuan",
     "type": "dragon",
+    "size": "Gargantuan",
     "alignment": "chaotic evil",
     "ac": 20,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 333,
-    "maxHp": 333,
-    "speed": "40 ft., burrow 40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "18d20",
+    "speed": {
+      "walk": "40 ft.",
+      "burrow": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 26,
       "dexterity": 10,
       "constitution": 26,
@@ -2029,11 +2017,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "cold"
     ],
-    "senses": {
-      "blindsight": "60 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "23"
-    },
+    "senses": "blindsight 60 ft., darkvision 120 ft., passive_perception 23",
     "languages": [
       "Common",
       "Draconic"
@@ -2041,7 +2025,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 20,
     "experiencePoints": 25000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Ice Walk",
@@ -2106,15 +2089,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Black Dragon Wyrmling",
-    "size": "medium",
     "type": "dragon",
+    "size": "Medium",
     "alignment": "chaotic evil",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 33,
-    "maxHp": 33,
-    "speed": "30 ft., fly 60 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "6d8",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "60 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 14,
       "constitution": 13,
@@ -2135,18 +2122,13 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "acid"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 14",
     "languages": [
       "Draconic"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -2171,15 +2153,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Blue Dragon Wyrmling",
-    "size": "medium",
     "type": "dragon",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 52,
-    "maxHp": 52,
-    "speed": "30 ft., burrow 15 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "8d8",
+    "speed": {
+      "walk": "30 ft.",
+      "burrow": "15 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 10,
       "constitution": 15,
@@ -2200,18 +2186,13 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "lightning"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 14",
     "languages": [
       "Draconic"
     ],
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -2230,15 +2211,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Brass Dragon Wyrmling",
-    "size": "medium",
     "type": "dragon",
+    "size": "Medium",
     "alignment": "chaotic good",
     "ac": 16,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 16,
-    "maxHp": 16,
-    "speed": "30 ft., burrow 15 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "3d8",
+    "speed": {
+      "walk": "30 ft.",
+      "burrow": "15 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 10,
       "constitution": 13,
@@ -2259,18 +2244,13 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 14",
     "languages": [
       "Draconic"
     ],
     "challengeRating": 1,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -2286,15 +2266,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Bronze Dragon Wyrmling",
-    "size": "medium",
     "type": "dragon",
+    "size": "Medium",
     "alignment": "lawful good",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 32,
-    "maxHp": 32,
-    "speed": "30 ft., fly 60 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "60 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 10,
       "constitution": 15,
@@ -2315,18 +2299,13 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "lightning"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 14",
     "languages": [
       "Draconic"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -2348,15 +2327,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Copper Dragon Wyrmling",
-    "size": "medium",
     "type": "dragon",
+    "size": "Medium",
     "alignment": "chaotic good",
     "ac": 16,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "30 ft., climb 30 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "4d8",
+    "speed": {
+      "walk": "30 ft.",
+      "climb": "30 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 12,
       "constitution": 13,
@@ -2377,18 +2360,13 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "acid"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 14",
     "languages": [
       "Draconic"
     ],
     "challengeRating": 1,
     "experiencePoints": 200,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -2404,15 +2382,18 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Dragon Turtle",
-    "size": "gargantuan",
     "type": "dragon",
+    "size": "Gargantuan",
     "alignment": "neutral",
     "ac": 20,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 341,
-    "maxHp": 341,
-    "speed": "20 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "22d20",
+    "speed": {
+      "walk": "20 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 25,
       "dexterity": 10,
       "constitution": 20,
@@ -2428,10 +2409,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageResistances": [
       "fire"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "11"
-    },
+    "senses": "darkvision 120 ft., passive_perception 11",
     "languages": [
       "Aquan",
       "Draconic"
@@ -2439,7 +2417,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 17,
     "experiencePoints": 18000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -2480,15 +2457,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Gold Dragon Wyrmling",
-    "size": "medium",
     "type": "dragon",
+    "size": "Medium",
     "alignment": "lawful good",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 60,
-    "maxHp": 60,
-    "speed": "30 ft., fly 60 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "8d8",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "60 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 14,
       "constitution": 17,
@@ -2509,18 +2490,13 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 14",
     "languages": [
       "Draconic"
     ],
     "challengeRating": 3,
     "experiencePoints": 700,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -2542,15 +2518,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Green Dragon Wyrmling",
-    "size": "medium",
     "type": "dragon",
+    "size": "Medium",
     "alignment": "lawful evil",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 38,
-    "maxHp": 38,
-    "speed": "30 ft., fly 60 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "7d8",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "60 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 12,
       "constitution": 13,
@@ -2574,18 +2554,13 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 14",
     "languages": [
       "Draconic"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -2610,15 +2585,18 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Pseudodragon",
-    "size": "tiny",
     "type": "dragon",
+    "size": "Tiny",
     "alignment": "neutral good",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 7,
-    "maxHp": 7,
-    "speed": "15 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "2d4",
+    "speed": {
+      "walk": "15 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 6,
       "dexterity": 15,
       "constitution": 13,
@@ -2630,18 +2608,13 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
       "perception": 3,
       "stealth": 4
     },
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 13",
     "languages": [
       "understands Common and Draconic but can't speak"
     ],
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Keen Senses",
@@ -2673,15 +2646,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Red Dragon Wyrmling",
-    "size": "medium",
     "type": "dragon",
+    "size": "Medium",
     "alignment": "chaotic evil",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 75,
-    "maxHp": 75,
-    "speed": "30 ft., climb 30 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "10d8",
+    "speed": {
+      "walk": "30 ft.",
+      "climb": "30 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 10,
       "constitution": 17,
@@ -2702,18 +2679,13 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 14",
     "languages": [
       "Draconic"
     ],
     "challengeRating": 4,
     "experiencePoints": 1100,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -2732,15 +2704,18 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Silver Dragon Wyrmling",
-    "size": "medium",
     "type": "dragon",
+    "size": "Medium",
     "alignment": "lawful good",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 45,
-    "maxHp": 45,
-    "speed": "30 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "6d8",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 10,
       "constitution": 17,
@@ -2761,18 +2736,13 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "cold"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 14",
     "languages": [
       "Draconic"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -2788,15 +2758,20 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "White Dragon Wyrmling",
-    "size": "medium",
     "type": "dragon",
+    "size": "Medium",
     "alignment": "chaotic evil",
     "ac": 16,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 32,
-    "maxHp": 32,
-    "speed": "30 ft., burrow 15 ft., fly 60 ft., swim 30 ft.",
-    "abilityScores": {
+    "hitDice": "5d8",
+    "speed": {
+      "walk": "30 ft.",
+      "burrow": "15 ft.",
+      "fly": "60 ft.",
+      "swim": "30 ft."
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 10,
       "constitution": 14,
@@ -2817,18 +2792,13 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "cold"
     ],
-    "senses": {
-      "blindsight": "10 ft.",
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "blindsight 10 ft., darkvision 60 ft., passive_perception 14",
     "languages": [
       "Draconic"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Bite",
@@ -2847,15 +2817,18 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Wyvern",
-    "size": "large",
     "type": "dragon",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 110,
-    "maxHp": 110,
-    "speed": "20 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "13d10",
+    "speed": {
+      "walk": "20 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 10,
       "constitution": 16,
@@ -2866,14 +2839,10 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "skills": {
       "perception": 4
     },
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "14"
-    },
+    "senses": "darkvision 60 ft., passive_perception 14",
     "challengeRating": 6,
     "experiencePoints": 2300,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -2901,15 +2870,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Young Black Dragon",
-    "size": "large",
     "type": "dragon",
+    "size": "Large",
     "alignment": "chaotic evil",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 127,
-    "maxHp": 127,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "15d10",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 14,
       "constitution": 17,
@@ -2930,11 +2903,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "acid"
     ],
-    "senses": {
-      "blindsight": "30 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "16"
-    },
+    "senses": "blindsight 30 ft., darkvision 120 ft., passive_perception 16",
     "languages": [
       "Common",
       "Draconic"
@@ -2942,7 +2911,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 7,
     "experiencePoints": 2900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -2977,15 +2945,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Young Blue Dragon",
-    "size": "large",
     "type": "dragon",
+    "size": "Large",
     "alignment": "lawful evil",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 152,
-    "maxHp": 152,
-    "speed": "40 ft., burrow 20 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "16d10",
+    "speed": {
+      "walk": "40 ft.",
+      "burrow": "20 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 21,
       "dexterity": 10,
       "constitution": 19,
@@ -3006,11 +2978,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "lightning"
     ],
-    "senses": {
-      "blindsight": "30 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "19"
-    },
+    "senses": "blindsight 30 ft., darkvision 120 ft., passive_perception 19",
     "languages": [
       "Common",
       "Draconic"
@@ -3018,7 +2986,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 9,
     "experiencePoints": 5000,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -3047,15 +3014,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Young Brass Dragon",
-    "size": "large",
     "type": "dragon",
+    "size": "Large",
     "alignment": "chaotic good",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 110,
-    "maxHp": 110,
-    "speed": "40 ft., burrow 20 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "13d10",
+    "speed": {
+      "walk": "40 ft.",
+      "burrow": "20 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 10,
       "constitution": 17,
@@ -3077,11 +3048,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "30 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "16"
-    },
+    "senses": "blindsight 30 ft., darkvision 120 ft., passive_perception 16",
     "languages": [
       "Common",
       "Draconic"
@@ -3089,7 +3056,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 6,
     "experiencePoints": 2300,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -3115,15 +3081,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Young Bronze Dragon",
-    "size": "large",
     "type": "dragon",
+    "size": "Large",
     "alignment": "lawful good",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 142,
-    "maxHp": 142,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "15d10",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 21,
       "dexterity": 10,
       "constitution": 19,
@@ -3145,11 +3115,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "lightning"
     ],
-    "senses": {
-      "blindsight": "30 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "17"
-    },
+    "senses": "blindsight 30 ft., darkvision 120 ft., passive_perception 17",
     "languages": [
       "Common",
       "Draconic"
@@ -3157,7 +3123,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 8,
     "experiencePoints": 3900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -3189,15 +3154,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Young Copper Dragon",
-    "size": "large",
     "type": "dragon",
+    "size": "Large",
     "alignment": "chaotic good",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 119,
-    "maxHp": 119,
-    "speed": "40 ft., climb 40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "14d10",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 12,
       "constitution": 17,
@@ -3219,11 +3188,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "acid"
     ],
-    "senses": {
-      "blindsight": "30 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "17"
-    },
+    "senses": "blindsight 30 ft., darkvision 120 ft., passive_perception 17",
     "languages": [
       "Common",
       "Draconic"
@@ -3231,7 +3196,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 7,
     "experiencePoints": 2900,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -3257,15 +3221,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Young Gold Dragon",
-    "size": "large",
     "type": "dragon",
+    "size": "Large",
     "alignment": "lawful good",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 178,
-    "maxHp": 178,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "17d10",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 14,
       "constitution": 21,
@@ -3288,11 +3256,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "30 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "19"
-    },
+    "senses": "blindsight 30 ft., darkvision 120 ft., passive_perception 19",
     "languages": [
       "Common",
       "Draconic"
@@ -3300,7 +3264,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 10,
     "experiencePoints": 5900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -3332,15 +3295,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Young Green Dragon",
-    "size": "large",
     "type": "dragon",
+    "size": "Large",
     "alignment": "lawful evil",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 136,
-    "maxHp": 136,
-    "speed": "40 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "16d10",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 12,
       "constitution": 17,
@@ -3365,11 +3332,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "blindsight": "30 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "17"
-    },
+    "senses": "blindsight 30 ft., darkvision 120 ft., passive_perception 17",
     "languages": [
       "Common",
       "Draconic"
@@ -3377,7 +3340,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 8,
     "experiencePoints": 3900,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Amphibious",
@@ -3412,15 +3374,19 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Young Red Dragon",
-    "size": "large",
     "type": "dragon",
+    "size": "Large",
     "alignment": "chaotic evil",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 178,
-    "maxHp": 178,
-    "speed": "40 ft., climb 40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "17d10",
+    "speed": {
+      "walk": "40 ft.",
+      "climb": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 10,
       "constitution": 21,
@@ -3441,11 +3407,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "blindsight": "30 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "18"
-    },
+    "senses": "blindsight 30 ft., darkvision 120 ft., passive_perception 18",
     "languages": [
       "Common",
       "Draconic"
@@ -3453,7 +3415,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 10,
     "experiencePoints": 5900,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -3482,15 +3443,18 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Young Silver Dragon",
-    "size": "large",
     "type": "dragon",
+    "size": "Large",
     "alignment": "lawful good",
     "ac": 18,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 168,
-    "maxHp": 168,
-    "speed": "40 ft., fly 80 ft.",
-    "abilityScores": {
+    "hitDice": "16d10",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "80 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 10,
       "constitution": 21,
@@ -3513,11 +3477,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "cold"
     ],
-    "senses": {
-      "blindsight": "30 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "18"
-    },
+    "senses": "blindsight 30 ft., darkvision 120 ft., passive_perception 18",
     "languages": [
       "Common",
       "Draconic"
@@ -3525,7 +3485,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 9,
     "experiencePoints": 5000,
     "source": "SRD",
-    "isGlobal": true,
     "actions": [
       {
         "name": "Multiattack",
@@ -3551,15 +3510,20 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
   },
   {
     "name": "Young White Dragon",
-    "size": "large",
     "type": "dragon",
+    "size": "Large",
     "alignment": "chaotic evil",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 133,
-    "maxHp": 133,
-    "speed": "40 ft., burrow 20 ft., fly 80 ft., swim 40 ft.",
-    "abilityScores": {
+    "hitDice": "14d10",
+    "speed": {
+      "walk": "40 ft.",
+      "burrow": "20 ft.",
+      "fly": "80 ft.",
+      "swim": "40 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 10,
       "constitution": 18,
@@ -3580,11 +3544,7 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "damageImmunities": [
       "cold"
     ],
-    "senses": {
-      "blindsight": "30 ft.",
-      "darkvision": "120 ft.",
-      "passive_perception": "16"
-    },
+    "senses": "blindsight 30 ft., darkvision 120 ft., passive_perception 16",
     "languages": [
       "Common",
       "Draconic"
@@ -3592,7 +3552,6 @@ export const DRAGONS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upd
     "challengeRating": 6,
     "experiencePoints": 2300,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Ice Walk",

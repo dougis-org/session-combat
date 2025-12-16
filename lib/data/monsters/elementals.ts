@@ -1,22 +1,28 @@
 /**
- * D&D 5e SRD Elementals
- * Source: D&D 5e API (https://www.dnd5eapi.co)
+ * Elemental-type monsters from D&D 5e SRD
+ * Auto-generated from D&D 5e API
  */
 
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate } from "../../types";
 
-export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt' | '_id'>[] = [
+export const ELEMENTALS: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   {
     "name": "Air Elemental",
-    "size": "large",
     "type": "elemental",
+    "size": "Large",
     "alignment": "neutral",
     "ac": 15,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 90,
-    "maxHp": 90,
-    "speed": "fly 90 ft.",
-    "abilityScores": {
+    "hitDice": "12d10",
+    "speed": {
+      "fly": "90 ft.",
+      "hover": true
+    },
+    "abilities": {
       "strength": 14,
       "dexterity": 20,
       "constitution": 14,
@@ -42,17 +48,13 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Restrained",
       "Unconscious"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Auran"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Air Form",
@@ -78,15 +80,17 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Azer",
-    "size": "medium",
     "type": "elemental",
+    "size": "Medium",
     "alignment": "lawful neutral",
     "ac": 15,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 39,
-    "maxHp": 39,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "6d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 12,
       "constitution": 15,
@@ -104,16 +108,13 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "passive_perception": "11"
-    },
+    "senses": "passive_perception 11",
     "languages": [
       "Ignan"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Heated Body",
@@ -139,15 +140,18 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Djinni",
-    "size": "large",
     "type": "elemental",
+    "size": "Large",
     "alignment": "chaotic good",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 161,
-    "maxHp": 161,
-    "speed": "30 ft., fly 90 ft.",
-    "abilityScores": {
+    "hitDice": "14d10",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "90 ft."
+    },
+    "abilities": {
       "strength": 21,
       "dexterity": 15,
       "constitution": 22,
@@ -164,17 +168,13 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "lightning",
       "thunder"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "13"
-    },
+    "senses": "darkvision 120 ft., passive_perception 13",
     "languages": [
       "Auran"
     ],
     "challengeRating": 11,
     "experiencePoints": 7200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Elemental Demise",
@@ -206,15 +206,18 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Dust Mephit",
-    "size": "small",
     "type": "elemental",
+    "size": "Small",
     "alignment": "neutral evil",
     "ac": 12,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 17,
-    "maxHp": 17,
-    "speed": "30 ft., fly 30 ft.",
-    "abilityScores": {
+    "hitDice": "5d6",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "30 ft."
+    },
+    "abilities": {
       "strength": 5,
       "dexterity": 14,
       "constitution": 10,
@@ -235,10 +238,7 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 60 ft., passive_perception 12",
     "languages": [
       "Auran",
       "Terran"
@@ -246,7 +246,6 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Death Burst",
@@ -276,15 +275,18 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Earth Elemental",
-    "size": "large",
     "type": "elemental",
+    "size": "Large",
     "alignment": "neutral",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 126,
-    "maxHp": 126,
-    "speed": "30 ft., burrow 30 ft.",
-    "abilityScores": {
+    "hitDice": "12d10",
+    "speed": {
+      "walk": "30 ft.",
+      "burrow": "30 ft."
+    },
+    "abilities": {
       "strength": 20,
       "dexterity": 8,
       "constitution": 20,
@@ -308,18 +310,13 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Poisoned",
       "Unconscious"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "tremorsense": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., tremorsense 60 ft., passive_perception 10",
     "languages": [
       "Terran"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Earth Glide",
@@ -345,15 +342,18 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Efreeti",
-    "size": "large",
     "type": "elemental",
+    "size": "Large",
     "alignment": "lawful evil",
     "ac": 17,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 200,
-    "maxHp": 200,
-    "speed": "40 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "16d10",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 22,
       "dexterity": 12,
       "constitution": 24,
@@ -369,17 +369,13 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "darkvision": "120 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 120 ft., passive_perception 12",
     "languages": [
       "Ignan"
     ],
     "challengeRating": 11,
     "experiencePoints": 7200,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Elemental Demise",
@@ -411,15 +407,17 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Fire Elemental",
-    "size": "large",
     "type": "elemental",
+    "size": "Large",
     "alignment": "neutral",
     "ac": 13,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 102,
-    "maxHp": 102,
-    "speed": "50 ft.",
-    "abilityScores": {
+    "hitDice": "12d10",
+    "speed": {
+      "walk": "50 ft."
+    },
+    "abilities": {
       "strength": 10,
       "dexterity": 17,
       "constitution": 16,
@@ -444,17 +442,13 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Restrained",
       "Unconscious"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Ignan"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Fire Form",
@@ -484,15 +478,18 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Gargoyle",
-    "size": "medium",
     "type": "elemental",
+    "size": "Medium",
     "alignment": "chaotic evil",
     "ac": 15,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 52,
-    "maxHp": 52,
-    "speed": "30 ft., fly 60 ft.",
-    "abilityScores": {
+    "hitDice": "7d8",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "60 ft."
+    },
+    "abilities": {
       "strength": 15,
       "dexterity": 11,
       "constitution": 16,
@@ -511,17 +508,13 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Petrified",
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Terran"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "False Appearance",
@@ -549,15 +542,18 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Ice Mephit",
-    "size": "small",
     "type": "elemental",
+    "size": "Small",
     "alignment": "neutral evil",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 21,
-    "maxHp": 21,
-    "speed": "30 ft., fly 30 ft.",
-    "abilityScores": {
+    "hitDice": "6d6",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "30 ft."
+    },
+    "abilities": {
       "strength": 7,
       "dexterity": 13,
       "constitution": 10,
@@ -580,10 +576,7 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "12"
-    },
+    "senses": "darkvision 60 ft., passive_perception 12",
     "languages": [
       "Aquan",
       "Auran"
@@ -591,7 +584,6 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Death Burst",
@@ -626,15 +618,19 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Invisible Stalker",
-    "size": "medium",
     "type": "elemental",
+    "size": "Medium",
     "alignment": "neutral",
     "ac": 14,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 104,
-    "maxHp": 104,
-    "speed": "50 ft., fly 50 ft.",
-    "abilityScores": {
+    "hitDice": "16d8",
+    "speed": {
+      "walk": "50 ft.",
+      "fly": "50 ft.",
+      "hover": true
+    },
+    "abilities": {
       "strength": 16,
       "dexterity": 19,
       "constitution": 14,
@@ -662,10 +658,7 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Restrained",
       "Unconscious"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "18"
-    },
+    "senses": "darkvision 60 ft., passive_perception 18",
     "languages": [
       "Auran",
       "understands Common but doesn't speak it"
@@ -673,7 +666,6 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "challengeRating": 6,
     "experiencePoints": 2300,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Invisibility",
@@ -699,15 +691,18 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Magma Mephit",
-    "size": "small",
     "type": "elemental",
+    "size": "Small",
     "alignment": "neutral evil",
     "ac": 11,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 22,
-    "maxHp": 22,
-    "speed": "30 ft., fly 30 ft.",
-    "abilityScores": {
+    "hitDice": "5d6",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "30 ft."
+    },
+    "abilities": {
       "strength": 8,
       "dexterity": 12,
       "constitution": 12,
@@ -728,10 +723,7 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Ignan",
       "Terran"
@@ -739,7 +731,6 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Death Burst",
@@ -774,15 +765,17 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Magmin",
-    "size": "small",
     "type": "elemental",
+    "size": "Small",
     "alignment": "chaotic neutral",
     "ac": 14,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 9,
-    "maxHp": 9,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "2d6",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 7,
       "dexterity": 15,
       "constitution": 12,
@@ -796,17 +789,13 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "damageImmunities": [
       "fire"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Ignan"
     ],
     "challengeRating": 0.5,
     "experiencePoints": 100,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Death Burst",
@@ -830,15 +819,17 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Salamander",
-    "size": "large",
     "type": "elemental",
+    "size": "Large",
     "alignment": "neutral evil",
     "ac": 15,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 90,
-    "maxHp": 90,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "12d10",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 14,
       "constitution": 15,
@@ -855,17 +846,13 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "damageVulnerabilities": [
       "cold"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Ignan"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Heated Body",
@@ -897,15 +884,18 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Steam Mephit",
-    "size": "small",
     "type": "elemental",
+    "size": "Small",
     "alignment": "neutral evil",
     "ac": 10,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 21,
-    "maxHp": 21,
-    "speed": "30 ft., fly 30 ft.",
-    "abilityScores": {
+    "hitDice": "6d6",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "30 ft."
+    },
+    "abilities": {
       "strength": 5,
       "dexterity": 11,
       "constitution": 10,
@@ -920,10 +910,7 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "conditionImmunities": [
       "Poisoned"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Aquan",
       "Ignan"
@@ -931,7 +918,6 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Death Burst",
@@ -962,15 +948,18 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Water Elemental",
-    "size": "large",
     "type": "elemental",
+    "size": "Large",
     "alignment": "neutral",
     "ac": 14,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 114,
-    "maxHp": 114,
-    "speed": "30 ft., swim 90 ft.",
-    "abilityScores": {
+    "hitDice": "12d10",
+    "speed": {
+      "walk": "30 ft.",
+      "swim": "90 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 14,
       "constitution": 18,
@@ -995,17 +984,13 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
       "Restrained",
       "Unconscious"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "passive_perception": "10"
-    },
+    "senses": "darkvision 60 ft., passive_perception 10",
     "languages": [
       "Aquan"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Water Form",
@@ -1038,15 +1023,18 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
   },
   {
     "name": "Xorn",
-    "size": "medium",
     "type": "elemental",
+    "size": "Medium",
     "alignment": "neutral",
     "ac": 19,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 73,
-    "maxHp": 73,
-    "speed": "20 ft., burrow 20 ft.",
-    "abilityScores": {
+    "hitDice": "7d8",
+    "speed": {
+      "walk": "20 ft.",
+      "burrow": "20 ft."
+    },
+    "abilities": {
       "strength": 17,
       "dexterity": 10,
       "constitution": 22,
@@ -1061,18 +1049,13 @@ export const ELEMENTALS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | '
     "damageResistances": [
       "piercing and slashing from nonmagical weapons that aren't adamantine"
     ],
-    "senses": {
-      "darkvision": "60 ft.",
-      "tremorsense": "60 ft.",
-      "passive_perception": "16"
-    },
+    "senses": "darkvision 60 ft., tremorsense 60 ft., passive_perception 16",
     "languages": [
       "Terran"
     ],
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Earth Glide",

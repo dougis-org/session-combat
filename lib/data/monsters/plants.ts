@@ -1,22 +1,27 @@
 /**
- * D&D 5e SRD Plants
- * Source: D&D 5e API (https://www.dnd5eapi.co)
+ * Plant-type monsters from D&D 5e SRD
+ * Auto-generated from D&D 5e API
  */
 
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate } from "../../types";
 
-export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt' | '_id'>[] = [
+export const PLANTS: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   {
     "name": "Awakened Shrub",
-    "size": "small",
     "type": "plant",
+    "size": "Small",
     "alignment": "unaligned",
     "ac": 9,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 10,
-    "maxHp": 10,
-    "speed": "20 ft.",
-    "abilityScores": {
+    "hitDice": "3d6",
+    "speed": {
+      "walk": "20 ft."
+    },
+    "abilities": {
       "strength": 3,
       "dexterity": 8,
       "constitution": 11,
@@ -30,16 +35,13 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "damageVulnerabilities": [
       "fire"
     ],
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "languages": [
       "one language known by its creator"
     ],
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "False Appearance",
@@ -57,15 +59,17 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Awakened Tree",
-    "size": "huge",
     "type": "plant",
+    "size": "Huge",
     "alignment": "unaligned",
     "ac": 13,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 59,
-    "maxHp": 59,
-    "speed": "20 ft.",
-    "abilityScores": {
+    "hitDice": "7d12",
+    "speed": {
+      "walk": "20 ft."
+    },
+    "abilities": {
       "strength": 19,
       "dexterity": 6,
       "constitution": 15,
@@ -80,16 +84,13 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "damageVulnerabilities": [
       "fire"
     ],
-    "senses": {
-      "passive_perception": "10"
-    },
+    "senses": "passive_perception 10",
     "languages": [
       "one language known by its creator"
     ],
     "challengeRating": 2,
     "experiencePoints": 450,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "False Appearance",
@@ -107,15 +108,18 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Shambling Mound",
-    "size": "large",
     "type": "plant",
+    "size": "Large",
     "alignment": "unaligned",
     "ac": 15,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 136,
-    "maxHp": 136,
-    "speed": "20 ft., swim 20 ft.",
-    "abilityScores": {
+    "hitDice": "16d10",
+    "speed": {
+      "walk": "20 ft.",
+      "swim": "20 ft."
+    },
+    "abilities": {
       "strength": 18,
       "dexterity": 8,
       "constitution": 16,
@@ -138,14 +142,10 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "Blinded",
       "Exhaustion"
     ],
-    "senses": {
-      "blindsight": "60 ft. (blind beyond this radius)",
-      "passive_perception": "10"
-    },
+    "senses": "blindsight 60 ft. (blind beyond this radius), passive_perception 10",
     "challengeRating": 5,
     "experiencePoints": 1800,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "Lightning Absorption",
@@ -171,15 +171,17 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Shrieker",
-    "size": "medium",
     "type": "plant",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 5,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 13,
-    "maxHp": 13,
-    "speed": "0 ft.",
-    "abilityScores": {
+    "hitDice": "3d8",
+    "speed": {
+      "walk": "0 ft."
+    },
+    "abilities": {
       "strength": 1,
       "dexterity": 1,
       "constitution": 10,
@@ -192,14 +194,10 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "Blinded",
       "Frightened"
     ],
-    "senses": {
-      "blindsight": "30 ft. (blind beyond this radius)",
-      "passive_perception": "6"
-    },
+    "senses": "blindsight 30 ft. (blind beyond this radius), passive_perception 6",
     "challengeRating": 0,
     "experiencePoints": 10,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "False Appearance",
@@ -215,15 +213,17 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Treant",
-    "size": "huge",
     "type": "plant",
+    "size": "Huge",
     "alignment": "chaotic good",
     "ac": 16,
-    "acNote": "natural armor",
+    "armorType": "natural",
     "hp": 138,
-    "maxHp": 138,
-    "speed": "30 ft.",
-    "abilityScores": {
+    "hitDice": "12d12",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "abilities": {
       "strength": 23,
       "dexterity": 8,
       "constitution": 21,
@@ -238,9 +238,7 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "damageVulnerabilities": [
       "fire"
     ],
-    "senses": {
-      "passive_perception": "13"
-    },
+    "senses": "passive_perception 13",
     "languages": [
       "Common",
       "Druidic",
@@ -250,7 +248,6 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
     "challengeRating": 9,
     "experiencePoints": 5000,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "False Appearance",
@@ -286,15 +283,17 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
   },
   {
     "name": "Violet Fungus",
-    "size": "medium",
     "type": "plant",
+    "size": "Medium",
     "alignment": "unaligned",
     "ac": 5,
-    "acNote": "dex armor",
+    "armorType": "dex",
     "hp": 18,
-    "maxHp": 18,
-    "speed": "5 ft.",
-    "abilityScores": {
+    "hitDice": "4d8",
+    "speed": {
+      "walk": "5 ft."
+    },
+    "abilities": {
       "strength": 3,
       "dexterity": 1,
       "constitution": 10,
@@ -307,14 +306,10 @@ export const PLANTS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' | 'upda
       "Blinded",
       "Frightened"
     ],
-    "senses": {
-      "blindsight": "30 ft. (blind beyond this radius)",
-      "passive_perception": "6"
-    },
+    "senses": "blindsight 30 ft. (blind beyond this radius), passive_perception 6",
     "challengeRating": 0.25,
     "experiencePoints": 50,
     "source": "SRD",
-    "isGlobal": true,
     "traits": [
       {
         "name": "False Appearance",
