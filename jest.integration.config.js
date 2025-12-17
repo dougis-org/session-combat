@@ -1,26 +1,21 @@
 /** @type {import('jest').Config} */
 module.exports = {
+  preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: ['**/tests/integration/**/*.test.(ts|js)'],
   testTimeout: 120000,
-  transform: {
-    '^.+\\.(ts|tsx)$': ['@swc/jest', {
-      jsc: {
-        parser: {
-          syntax: 'typescript',
-          tsx: false,
-        },
-        transform: {},
-        target: 'es2017',
-      },
-      module: {
-        type: 'commonjs',
-      },
-    }],
-  },
+  maxWorkers: 1, // Run tests sequentially to avoid port conflicts
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   collectCoverageFrom: [
-    'pages/api/**/*.{ts,tsx,js,jsx}',
-    '!pages/api/**/*.d.ts',
+    'app/api/**/*.{ts,tsx,js,jsx}',
+    '!app/api/**/*.d.ts',
   ],
+  globals: {
+    'ts-jest': {
+      tsconfig: {
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+      }
+    }
+  }
 };

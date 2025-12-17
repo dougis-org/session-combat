@@ -77,7 +77,7 @@ describe('Monster API Integration Tests', () => {
 
   beforeAll(async () => {
     console.log('Starting MongoDB container...');
-    mongoContainer = await new MongoDBContainer('mongo:latest')
+    mongoContainer = await new MongoDBContainer('mongo:8')
       .withExposedPorts(27017)
       .start();
 
@@ -89,9 +89,14 @@ describe('Monster API Integration Tests', () => {
     process.env.MONGODB_DB = 'session-combat-test';
 
     console.log('Starting Next.js server...');
-    nextProcess = spawn('npm', ['run', 'start'], {
-      env: { ...process.env },
+    nextProcess = spawn('npx', ['next', 'start'], {
+      env: { 
+        ...process.env,
+        PORT: '3000',
+        HOSTNAME: '0.0.0.0'
+      },
       stdio: 'pipe',
+      detached: true,
     });
 
     // Log Next.js output for debugging
@@ -116,10 +121,17 @@ describe('Monster API Integration Tests', () => {
   afterAll(async () => {
     console.log('Cleaning up...');
 
-    if (nextProcess) {
-      nextProcess.kill('SIGTERM');
+    if (nextProcess && nextProcess.pid) {
+      // Kill the entire process group (negative PID)
+      try {
+        process.kill(-nextProcess.pid, 'SIGTERM');
+      } catch (err) {
+        console.error('Error killing process group:', err);
+        // Try killing just the process
+        nextProcess.kill('SIGTERM');
+      }
       // Give the process time to terminate gracefully
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
     if (mongoContainer) {

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
-import { Character, AbilityScores, CreatureStats } from '@/lib/types';
+import { Character, CreatureStats, Race, isValidRace } from '@/lib/types';
 
 function CharactersContent() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -238,13 +238,14 @@ function CharacterEditor({
 
     setSaving(true);
     try {
+      const raceValue = race && isValidRace(race) ? race : undefined;
       const characterData: Character = {
         ...stats,
         ...character, // Preserve id, userId, and any other original fields
         name,
         class: charClass || undefined,
         level: level || undefined,
-        race: race || undefined,
+        race: raceValue,
         alignment: alignment || undefined,
       };
       await onSave(characterData);
