@@ -23,18 +23,21 @@ async function seedMonsters() {
     const deleteResult = await collection.deleteMany({ userId: 'GLOBAL' });
     console.log(`Deleted ${deleteResult.deletedCount} existing global monsters`);
 
-    // Prepare monsters with required fields
-    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => ({
-      ...monster,
-      id: crypto.randomUUID(),
-      userId: 'GLOBAL',
-      isGlobal: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
+    // Prepare monsters with required fields, omitting _id to let MongoDB generate it
+    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => {
+      const { _id, ...rest } = monster as any;
+      return {
+        ...rest,
+        id: crypto.randomUUID(),
+        userId: 'GLOBAL',
+        isGlobal: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    });
 
-    // Insert all monsters
-    const result = await collection.insertMany(monstersToInsert);
+    // Insert all monsters (MongoDB will generate _id automatically)
+    const result = await collection.insertMany(monstersToInsert as any);
     const insertedCount = Object.keys(result.insertedIds).length;
     console.log(`✓ Successfully seeded ${insertedCount} monsters`);
 
