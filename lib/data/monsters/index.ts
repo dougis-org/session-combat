@@ -27,7 +27,9 @@ import { UNDEAD } from "./undead";
  * Organized by creature type for easy access
  * Temporarily returns empty array until monster data is fixed
  */
-export const ALL_SRD_MONSTERS: any[] = [];
+import { MonsterTemplate } from '../../types';
+
+export const ALL_SRD_MONSTERS: MonsterTemplate[] = [];
 /*
 export const ALL_SRD_MONSTERS = [
   ...ABERRATIONS,
