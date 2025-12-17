@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
-import { Character, AbilityScores, CreatureStats } from '@/lib/types';
+import { Character, AbilityScores, CreatureStats, Race } from '@/lib/types';
 
 function CharactersContent() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -244,7 +244,7 @@ function CharacterEditor({
         name,
         class: charClass || undefined,
         level: level || undefined,
-        race: race || undefined,
+        race: (race || undefined) as Race | undefined,
         alignment: alignment || undefined,
       };
       await onSave(characterData);
