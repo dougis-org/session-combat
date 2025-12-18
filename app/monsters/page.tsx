@@ -348,16 +348,24 @@ function MonsterTemplateEditor({
   isNew: boolean;
   isGlobal: boolean;
 }) {
+  // Helper function to convert speed object to human-readable string
+  const normalizeSpeed = (speedValue: unknown): string => {
+    if (typeof speedValue === 'string') {
+      return speedValue;
+    }
+    if (typeof speedValue === 'object' && speedValue !== null) {
+      return Object.entries(speedValue as Record<string, string>)
+        .map(([key, value]) => `${key} ${value}`)
+        .join(', ');
+    }
+    return '30 ft.';
+  };
+
   const [name, setName] = useState(template.name);
   const [size, setSize] = useState(template.size);
   const [type, setType] = useState(template.type);
   const [alignment, setAlignment] = useState(template.alignment || '');
-  // Ensure speed is always a string (handle case where it might be stored as object)
-  const [speed, setSpeed] = useState(
-    typeof template.speed === 'string' ? template.speed : 
-    typeof template.speed === 'object' && template.speed ? JSON.stringify(template.speed) : 
-    '30 ft.'
-  );
+  const [speed, setSpeed] = useState(normalizeSpeed(template.speed));
   const [challengeRating, setChallengeRating] = useState(template.challengeRating);
   const [source, setSource] = useState(template.source || '');
   const [description, setDescription] = useState(template.description || '');
@@ -470,7 +478,7 @@ function MonsterTemplateEditor({
             <label className="block mb-1 text-sm font-bold">Speed</label>
             <input
               type="text"
-              value={typeof speed === 'string' ? speed : ''}
+              value={speed}
               onChange={e => setSpeed(e.target.value)}
               placeholder="e.g., 30 ft., fly 60 ft."
               className="w-full bg-gray-700 rounded px-3 py-2 text-white"

@@ -10,6 +10,9 @@
 
 import { getDatabase } from '@/lib/db';
 import { ALL_SRD_MONSTERS } from '@/lib/data/monsters';
+import { MonsterTemplate } from '@/lib/types';
+import { OptionalId } from 'mongodb';
+import { randomUUID } from 'crypto';
 
 async function seedMonsters() {
   try {
@@ -23,21 +26,18 @@ async function seedMonsters() {
     const deleteResult = await collection.deleteMany({ userId: 'GLOBAL' });
     console.log(`Deleted ${deleteResult.deletedCount} existing global monsters`);
 
-    // Prepare monsters with required fields, omitting _id to let MongoDB generate it
-    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => {
-      const { _id, ...rest } = monster as any;
-      return {
-        ...rest,
-        id: crypto.randomUUID(),
-        userId: 'GLOBAL',
-        isGlobal: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-    });
+    // Prepare monsters with required fields
+    const monstersToInsert: OptionalId<MonsterTemplate>[] = ALL_SRD_MONSTERS.map(monster => ({
+      ...monster,
+      id: randomUUID(),
+      userId: 'GLOBAL',
+      isGlobal: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
 
-    // Insert all monsters (MongoDB will generate _id automatically)
-    const result = await collection.insertMany(monstersToInsert as any);
+    // Insert all monsters
+    const result = await collection.insertMany(monstersToInsert);
     const insertedCount = Object.keys(result.insertedIds).length;
     console.log(`✓ Successfully seeded ${insertedCount} monsters`);
 
