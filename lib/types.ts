@@ -210,25 +210,24 @@ export interface SessionData {
   parties: Party[];
   combatState?: CombatState;
 }
-n;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
-export interface Party {
-  _id?: string;
-  id: string;
-  userId: string;
-  name: string;
-  description?: string;
-  characterIds: string[]; // ObjectId references to characters
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Define valid D&D 5e races as const array
+export const VALID_RACES = [
+  'dragonborn',
+  'dwarf',
+  'elf',
+  'gnome',
+  'half-elf',
+  'half-orc',
+  'halfling',
+  'human',
+  'tiefling'
+] as const;
 
-export interface SessionData {
-  encounters: Encounter[];
-  characters: Character[];
-  parties: Party[];
-  combatState?: CombatState;
+// Create a type from the const array
+export type Race = typeof VALID_RACES[number];
+
+// Type guard function to check if a value is a valid race
+export function isValidRace(value: any): value is Race {
+  return VALID_RACES.includes(value as Race);
 }
