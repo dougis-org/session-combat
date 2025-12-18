@@ -352,7 +352,12 @@ function MonsterTemplateEditor({
   const [size, setSize] = useState(template.size);
   const [type, setType] = useState(template.type);
   const [alignment, setAlignment] = useState(template.alignment || '');
-  const [speed, setSpeed] = useState(template.speed);
+  // Ensure speed is always a string (handle case where it might be stored as object)
+  const [speed, setSpeed] = useState(
+    typeof template.speed === 'string' ? template.speed : 
+    typeof template.speed === 'object' && template.speed ? JSON.stringify(template.speed) : 
+    '30 ft.'
+  );
   const [challengeRating, setChallengeRating] = useState(template.challengeRating);
   const [source, setSource] = useState(template.source || '');
   const [description, setDescription] = useState(template.description || '');
@@ -465,7 +470,7 @@ function MonsterTemplateEditor({
             <label className="block mb-1 text-sm font-bold">Speed</label>
             <input
               type="text"
-              value={speed}
+              value={typeof speed === 'string' ? speed : ''}
               onChange={e => setSpeed(e.target.value)}
               placeholder="e.g., 30 ft., fly 60 ft."
               className="w-full bg-gray-700 rounded px-3 py-2 text-white"
