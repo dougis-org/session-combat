@@ -10,6 +10,9 @@
 
 import { getDatabase } from '@/lib/db';
 import { ALL_SRD_MONSTERS } from '@/lib/data/monsters';
+import { MonsterTemplate } from '@/lib/types';
+import { OptionalId } from 'mongodb';
+import { randomUUID } from 'crypto';
 
 async function seedMonsters() {
   try {
@@ -24,9 +27,9 @@ async function seedMonsters() {
     console.log(`Deleted ${deleteResult.deletedCount} existing global monsters`);
 
     // Prepare monsters with required fields
-    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => ({
+    const monstersToInsert: OptionalId<MonsterTemplate>[] = ALL_SRD_MONSTERS.map(monster => ({
       ...monster,
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       userId: 'GLOBAL',
       isGlobal: true,
       createdAt: new Date(),

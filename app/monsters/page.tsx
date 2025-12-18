@@ -348,11 +348,24 @@ function MonsterTemplateEditor({
   isNew: boolean;
   isGlobal: boolean;
 }) {
+  // Helper function to convert speed object to human-readable string
+  const normalizeSpeed = (speedValue: unknown): string => {
+    if (typeof speedValue === 'string') {
+      return speedValue;
+    }
+    if (typeof speedValue === 'object' && speedValue !== null) {
+      return Object.entries(speedValue as Record<string, string>)
+        .map(([key, value]) => `${key} ${value}`)
+        .join(', ');
+    }
+    return '30 ft.';
+  };
+
   const [name, setName] = useState(template.name);
   const [size, setSize] = useState(template.size);
   const [type, setType] = useState(template.type);
   const [alignment, setAlignment] = useState(template.alignment || '');
-  const [speed, setSpeed] = useState(template.speed);
+  const [speed, setSpeed] = useState(normalizeSpeed(template.speed));
   const [challengeRating, setChallengeRating] = useState(template.challengeRating);
   const [source, setSource] = useState(template.source || '');
   const [description, setDescription] = useState(template.description || '');
