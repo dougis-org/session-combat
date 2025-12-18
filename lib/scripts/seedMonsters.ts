@@ -26,17 +26,20 @@ async function seedMonsters() {
     const deleteResult = await collection.deleteMany({ userId: 'GLOBAL' });
     console.log(`Deleted ${deleteResult.deletedCount} existing global monsters`);
 
-    // Prepare monsters with required fields
-    const monstersToInsert: OptionalId<MonsterTemplate>[] = ALL_SRD_MONSTERS.map(monster => ({
-      ...monster,
-      id: randomUUID(),
-      userId: 'GLOBAL',
-      isGlobal: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
+    // Prepare monsters with required fields, explicitly omitting _id for auto-generation
+    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => {
+      const { _id, ...rest } = monster;
+      return {
+        ...rest,
+        id: randomUUID(),
+        userId: 'GLOBAL',
+        isGlobal: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    });
 
-    // Insert all monsters
+    // Insert all monsters (MongoDB will auto-generate _id)
     const result = await collection.insertMany(monstersToInsert);
     const insertedCount = Object.keys(result.insertedIds).length;
     console.log(`✓ Successfully seeded ${insertedCount} monsters`);
