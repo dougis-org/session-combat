@@ -279,6 +279,7 @@ function CharacterEditor({
             onChange={e => setName(e.target.value)}
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
+            aria-label="Character name"
           />
         </div>
 
@@ -296,6 +297,7 @@ function CharacterEditor({
                   }}
                   className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
                   disabled={saving}
+                  aria-label="Character class"
                 >
                   <option value="">Select class...</option>
                   {VALID_CLASSES.map(cls => (
@@ -314,6 +316,7 @@ function CharacterEditor({
                   disabled={saving}
                   min="1"
                   max="20"
+                  aria-label="Class level"
                 />
                 <button
                   onClick={() => setClasses(classes.filter((_, i) => i !== idx))}
