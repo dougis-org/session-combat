@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
-import { Character, AbilityScores, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES } from '@/lib/types';
+import { Character, AbilityScores, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, DnDRace } from '@/lib/types';
 
 function CharactersContent() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -250,7 +250,7 @@ function CharacterEditor({
         ...character, // Preserve id, userId, and any other original fields
         name,
         classes,
-        race: race || undefined,
+        race: (race as DnDRace) || undefined,
         alignment: alignment || undefined,
       };
       await onSave(characterData);
@@ -342,14 +342,18 @@ function CharacterEditor({
 
         <div>
           <label className="block mb-1 text-sm font-bold">Race</label>
-          <input
-            type="text"
+          <select
             value={race}
             onChange={e => setRace(e.target.value)}
-            placeholder="e.g., Human, Elf"
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
-          />
+            aria-label="Character race"
+          >
+            <option value="">Select a race...</option>
+            {VALID_RACES.map(r => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
         </div>
 
         <div className="md:col-span-2">
