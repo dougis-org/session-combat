@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { MonsterTemplate } from '@/lib/types';
+import { GLOBAL_USER_ID } from '@/lib/constants';
 import { getDatabase } from '@/lib/db';
 import { ALL_SRD_MONSTERS } from '@/lib/data/monsters';
 import { randomUUID } from 'crypto';
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     const template: MonsterTemplate = {
       id: randomUUID(),
-      userId: 'GLOBAL',
+      userId: GLOBAL_USER_ID,
       isGlobal: true,
       name: name.trim(),
       hp: Math.min(hp || maxHp, maxHp),
@@ -169,7 +170,7 @@ export async function PUT(request: NextRequest) {
     const collection = db.collection<MonsterTemplate>('monsterTemplates');
 
     // Delete existing global monsters
-    await collection.deleteMany({ userId: 'GLOBAL' });
+    await collection.deleteMany({ userId: GLOBAL_USER_ID });
 
     // Prepare monsters with required fields, normalizing data structure
     const monstersToInsert = ALL_SRD_MONSTERS.map(monster => {
@@ -177,7 +178,7 @@ export async function PUT(request: NextRequest) {
       const normalized: any = {
         ...monster,
         id: randomUUID(),
-        userId: 'GLOBAL',
+        userId: GLOBAL_USER_ID,
         isGlobal: true,
         createdAt: new Date(),
         updatedAt: new Date(),

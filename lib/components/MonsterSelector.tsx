@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import Fuse from 'fuse.js';
 import { MonsterTemplate } from '@/lib/types';
+import { GLOBAL_USER_ID } from '@/lib/constants';
 
 type CreatorFilter = 'all' | 'mine' | 'global' | 'other';
 
@@ -24,6 +26,13 @@ export function MonsterSelector({
   const [searchQuery, setSearchQuery] = useState('');
   const [creatorFilter, setCreatorFilter] = useState<CreatorFilter>('all');
 
+  const filterLabels: Record<CreatorFilter, string> = {
+    all: 'All Monsters',
+    mine: 'My Monsters',
+    global: 'Global Monsters',
+    other: 'Other Monsters',
+  };
+
   // Fuse.js fuzzy search setup
   const fuse = useMemo(
     () =>
@@ -37,26 +46,31 @@ export function MonsterSelector({
 
   // Perform search and filter
   const filteredMonsters = useMemo(() => {
-    let results = monsters;
+    const baseMonsters = searchQuery.trim()
+      ? fuse.search(searchQuery).map((result) => result.item)
+      : monsters;
 
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const searchResults = fuse.search(searchQuery);
-      results = searchResults.map(result => result.item);
+    // If 'mine' filter is active but userId is not available, return empty
+    if (creatorFilter === 'mine' && !userId) {
+      return [];
     }
 
-    // Apply creator filter
-    if (creatorFilter === 'mine') {
-      results = results.filter(m => m.userId === userId);
-    } else if (creatorFilter === 'global') {
-      results = results.filter(m => m.userId === 'GLOBAL');
-    } else if (creatorFilter === 'other') {
-      results = results.filter(
-        m => m.userId !== 'GLOBAL' && m.userId !== userId
-      );
+    if (creatorFilter === 'all') {
+      return baseMonsters;
     }
 
-    return results;
+    return baseMonsters.filter((m) => {
+      switch (creatorFilter) {
+        case 'mine':
+          return m.userId === userId;
+        case 'global':
+          return m.userId === GLOBAL_USER_ID;
+        case 'other':
+          return m.userId !== GLOBAL_USER_ID && m.userId !== userId;
+        default:
+          return false;
+      }
+    });
   }, [searchQuery, creatorFilter, monsters, fuse, userId]);
 
   return (
@@ -68,20 +82,25 @@ export function MonsterSelector({
       ) : monsters.length === 0 ? (
         <p className="text-gray-300">
           No monster templates available.{' '}
-          <a href="/monsters" className="text-blue-400 hover:text-blue-300">
+          <Link href="/monsters" className="text-blue-400 hover:text-blue-300">
             Create one
-          </a>
+          </Link>
         </p>
       ) : (
         <>
           {/* Search Input */}
           <div className="mb-4">
+            <label htmlFor="monster-search" className="sr-only">
+              Search monsters
+            </label>
             <input
+              id="monster-search"
               type="text"
-              placeholder="Search monsters by name, type, or description..."
+              placeholder="Search monsters by name, type, description, or source..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-gray-700 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              aria-label="Search monsters by name, type, description, or source"
             />
           </div>
 
@@ -96,14 +115,9 @@ export function MonsterSelector({
                     ? 'bg-purple-600 text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
+                aria-pressed={creatorFilter === filter}
               >
-                {filter === 'mine'
-                  ? 'My Monsters'
-                  : filter === 'global'
-                    ? 'Global Monsters'
-                    : filter === 'other'
-                      ? 'Other Monsters'
-                      : 'All Monsters'}
+                {filterLabels[filter]}
               </button>
             ))}
           </div>
@@ -129,21 +143,19 @@ export function MonsterSelector({
                         HP: {template.hp}/{template.maxHp}
                       </span>
                       <span>AC: {template.ac}</span>
-                      {template.userId === 'GLOBAL' && (
+                      {template.userId === GLOBAL_USER_ID ? (
                         <span className="text-green-400">(Global)</span>
-                      )}
-                      {template.userId === userId && (
+                      ) : template.userId === userId ? (
                         <span className="text-blue-400">(Mine)</span>
+                      ) : (
+                        <span className="text-yellow-400">(Shared)</span>
                       )}
-                      {template.userId !== 'GLOBAL' &&
-                        template.userId !== userId && (
-                          <span className="text-yellow-400">(Shared)</span>
-                        )}
                     </div>
                   </div>
                   <button
                     onClick={() => onSelect(template)}
                     className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm ml-2 flex-shrink-0 transition-colors"
+                    aria-label={`Add ${template.name} to encounter`}
                   >
                     Add
                   </button>
