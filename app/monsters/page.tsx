@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { MonsterTemplate } from '@/lib/types';
+import { GLOBAL_USER_ID } from '@/lib/constants';
 
 function MonstersContent() {
   const [userTemplates, setUserTemplates] = useState<MonsterTemplate[]>([]);
@@ -45,8 +46,8 @@ function MonstersContent() {
       const userData = await userResponse.json();
       
       // Separate user and global templates
-      const userOnly = userData.filter((t: MonsterTemplate) => t.userId !== 'GLOBAL');
-      const global = userData.filter((t: MonsterTemplate) => t.userId === 'GLOBAL');
+      const userOnly = userData.filter((t: MonsterTemplate) => t.userId !== GLOBAL_USER_ID);
+      const global = userData.filter((t: MonsterTemplate) => t.userId === GLOBAL_USER_ID);
       
       setUserTemplates(userOnly || []);
       setGlobalTemplates(global || []);
@@ -65,7 +66,7 @@ function MonstersContent() {
 
     const newTemplate: MonsterTemplate = {
       id: '',
-      userId: mode === 'global' ? 'GLOBAL' : '',
+      userId: mode === 'global' ? GLOBAL_USER_ID : '',
       name: 'New Monster',
       size: 'medium',
       type: 'humanoid',

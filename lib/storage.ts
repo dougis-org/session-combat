@@ -1,6 +1,7 @@
 // MongoDB persistence utilities
 import { getDatabase } from './db';
 import { SessionData, Encounter, Character, CombatState, Party, MonsterTemplate } from './types';
+import { GLOBAL_USER_ID } from './constants';
 
 /**
  * Server-side storage functions for MongoDB
@@ -87,7 +88,7 @@ export const storage = {
       const db = await getDatabase();
       const templates = await db
         .collection<MonsterTemplate>('monsterTemplates')
-        .find({ userId: 'GLOBAL' })
+        .find({ userId: GLOBAL_USER_ID })
         .toArray();
       return templates;
     } catch (error) {
