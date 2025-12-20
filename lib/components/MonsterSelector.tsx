@@ -115,7 +115,7 @@ export function MonsterSelector({
                     ? 'bg-purple-600 text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
-                aria-pressed={creatorFilter === filter ? 'true' : 'false'}
+                aria-pressed={creatorFilter === filter}
               >
                 {filterLabels[filter]}
               </button>
