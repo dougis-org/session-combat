@@ -86,12 +86,12 @@ export function QuickCharacterEntry({
       maxHp: formData.maxHp,
       ac: 10, // Default AC
       abilityScores: {
-        str: 10,
-        dex: formData.dexterity,
-        con: 10,
-        int: 10,
-        wis: 10,
-        cha: 10,
+        strength: 10,
+        dexterity: formData.dexterity,
+        constitution: 10,
+        intelligence: 10,
+        wisdom: 10,
+        charisma: 10,
       },
       conditions: [],
       ...(initiativeValue > 0 && {
@@ -148,7 +148,7 @@ export function QuickCharacterEntry({
               className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <p className="text-xs text-gray-400 mt-1">
-              Initiative modifier: {Math.floor((formData.dexterity - 10) / 2):+d}
+              Initiative modifier: {Math.floor((formData.dexterity - 10) / 2) >= 0 ? '+' : ''}{Math.floor((formData.dexterity - 10) / 2)}
             </p>
           </div>
 

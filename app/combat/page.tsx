@@ -411,22 +411,6 @@ function CombatContent() {
                     + Add Enemy
                   </button>
                 </div>
-
-                {combatState && combatState.combatants.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-gray-700">
-                    <p className="text-xs text-gray-400 mb-2">
-                      Added: {combatState.combatants.length} combatant{combatState.combatants.length !== 1 ? 's' : ''}
-                    </p>
-                    <button
-                      onClick={() => {
-                        setInitiativeMode(true);
-                      }}
-                      className="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm font-semibold transition-colors"
-                    >
-                      Start Combat
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
