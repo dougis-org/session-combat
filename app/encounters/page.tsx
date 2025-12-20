@@ -330,7 +330,10 @@ function EncounterEditor({
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setEditingMonster(monster)}
+                    onClick={() => {
+                      setEditingMonster(monster);
+                      setShowCustomMonsterModal(true);
+                    }}
                     disabled={saving}
                     className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-2 py-1 rounded text-sm"
                   >
@@ -398,6 +401,7 @@ function EncounterEditor({
           monsters={monsterTemplates}
           onSelect={(template) => {
             addMonsterFromLibrary(template);
+            setShowLibraryModal(false);
           }}
           onClose={() => setShowLibraryModal(false)}
           loading={loadingTemplates}
@@ -409,7 +413,11 @@ function EncounterEditor({
       {/* Custom Monster Modal */}
       <Modal
         isOpen={showCustomMonsterModal && editingMonster !== null}
-        title={editingMonster?.id ? 'Edit Monster' : 'Add Custom Monster'}
+        title={
+          editingMonster && monsters.some((m) => m.id === editingMonster.id)
+            ? 'Edit Monster'
+            : 'Add Custom Monster'
+        }
         onClose={() => {
           setShowCustomMonsterModal(false);
           setEditingMonster(null);
