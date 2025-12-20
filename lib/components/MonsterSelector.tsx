@@ -75,6 +75,10 @@ export function MonsterSelector({
     });
   }, [searchQuery, creatorFilter, monsters, fuse, userId]);
 
+  const getAriaPressed = (filter: CreatorFilter): 'true' | 'false' => {
+    return creatorFilter === filter ? 'true' : 'false';
+  };
+
   return (
     <div>
       {loading ? (
@@ -115,7 +119,7 @@ export function MonsterSelector({
                     ? 'bg-purple-600 text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
-                aria-pressed={creatorFilter === filter}
+                aria-pressed={getAriaPressed(filter)}
               >
                 {filterLabels[filter]}
               </button>
