@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { MonsterSelector } from '@/lib/components/MonsterSelector';
+import { Modal } from '@/lib/components/Modal';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { Encounter, Monster, MonsterTemplate } from '@/lib/types';
 
@@ -200,14 +201,15 @@ function EncounterEditor({
   const [editingMonster, setEditingMonster] = useState<Monster | null>(null);
   const [saving, setSaving] = useState(false);
   const [monsterTemplates, setMonsterTemplates] = useState<MonsterTemplate[]>([]);
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [showLibraryModal, setShowLibraryModal] = useState(false);
+  const [showCustomMonsterModal, setShowCustomMonsterModal] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
 
   useEffect(() => {
-    if (showTemplateSelector && monsterTemplates.length === 0) {
+    if (showLibraryModal && monsterTemplates.length === 0) {
       loadMonsterTemplates();
     }
-  }, [showTemplateSelector]);
+  }, [showLibraryModal]);
 
   const loadMonsterTemplates = async () => {
     setLoadingTemplates(true);
@@ -233,7 +235,6 @@ function EncounterEditor({
       templateId: template.id,
     };
     setMonsters([...monsters, newMonster]);
-    setShowTemplateSelector(false);
   };
 
   const addMonster = () => {
@@ -260,6 +261,7 @@ function EncounterEditor({
       setMonsters([...monsters, monster]);
     }
     setEditingMonster(null);
+    setShowCustomMonsterModal(false);
   };
 
   const deleteMonster = (id: string) => {
@@ -284,7 +286,7 @@ function EncounterEditor({
     <div className="bg-gray-800 rounded-lg p-6 mb-6 border-2 border-blue-500">
       <h2 className="text-2xl font-bold mb-4">{isNew ? 'Create Encounter' : 'Edit Encounter'}</h2>
       
-      <div className="space-y-4 mb-4">
+      <div className="space-y-4 mb-6">
         <div>
           <label className="block mb-1 text-sm">Name</label>
           <input
@@ -309,72 +311,60 @@ function EncounterEditor({
       </div>
 
       <div className="mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="font-semibold">Monsters</h3>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowTemplateSelector(!showTemplateSelector)}
-              disabled={saving}
-              className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-3 py-1 rounded text-sm"
-            >
-              Add from Library
-            </button>
-            <button
-              onClick={addMonster}
-              disabled={saving}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-3 py-1 rounded text-sm"
-            >
-              Add Custom
-            </button>
-          </div>
+        <h3 className="font-semibold mb-3 text-lg">Monsters ({monsters.length})</h3>
+
+        <div className="space-y-2 mb-4">
+          {monsters.length === 0 ? (
+            <p className="text-gray-400 text-center py-4">No monsters added yet.</p>
+          ) : (
+            monsters.map(monster => (
+              <div key={monster.id} className="bg-gray-700 rounded p-3 flex justify-between items-center">
+                <div>
+                  <span className="font-medium">{monster.name}</span>
+                  {monster.templateId && <span className="text-purple-400 ml-2 text-xs">(from library)</span>}
+                  <span className="text-gray-400 ml-2 text-sm">
+                    HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, DEX: {monster.abilityScores.dexterity}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setEditingMonster(monster)}
+                    disabled={saving}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-2 py-1 rounded text-sm"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteMonster(monster.id)}
+                    disabled={saving}
+                    className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 px-2 py-1 rounded text-sm"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
-        {showTemplateSelector && (
-          <MonsterSelector
-            monsters={monsterTemplates}
-            onSelect={addMonsterFromLibrary}
-            onClose={() => setShowTemplateSelector(false)}
-            loading={loadingTemplates}
-            userId={user?.userId}
-          />
-        )}
-
-        {editingMonster && (
-          <MonsterEditor
-            monster={editingMonster}
-            onSave={saveMonster}
-            onCancel={() => setEditingMonster(null)}
-          />
-        )}
-
-        <div className="space-y-2">
-          {monsters.map(monster => (
-            <div key={monster.id} className="bg-gray-700 rounded p-3 flex justify-between items-center">
-              <div>
-                <span className="font-medium">{monster.name}</span>
-                {monster.templateId && <span className="text-purple-400 ml-2 text-xs">(from library)</span>}
-                <span className="text-gray-400 ml-2 text-sm">
-                  HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, DEX: {monster.abilityScores.dexterity}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setEditingMonster(monster)}
-                  disabled={saving}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-2 py-1 rounded text-sm"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => deleteMonster(monster.id)}
-                  disabled={saving}
-                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 px-2 py-1 rounded text-sm"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setShowLibraryModal(true)}
+            disabled={saving}
+            className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-3 py-2 rounded text-sm"
+          >
+            Add from Library
+          </button>
+          <button
+            onClick={() => {
+              addMonster();
+              setShowCustomMonsterModal(true);
+            }}
+            disabled={saving}
+            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-3 py-2 rounded text-sm"
+          >
+            Add Custom
+          </button>
         </div>
       </div>
 
@@ -394,6 +384,48 @@ function EncounterEditor({
           Cancel
         </button>
       </div>
+
+      {/* Library Modal */}
+      <Modal
+        isOpen={showLibraryModal}
+        title="Add Monster from Library"
+        onClose={() => setShowLibraryModal(false)}
+        size="large"
+      >
+        <MonsterSelector
+          monsters={monsterTemplates}
+          onSelect={(template) => {
+            addMonsterFromLibrary(template);
+          }}
+          onClose={() => setShowLibraryModal(false)}
+          loading={loadingTemplates}
+          userId={user?.userId}
+          hideCloseButton
+        />
+      </Modal>
+
+      {/* Custom Monster Modal */}
+      <Modal
+        isOpen={showCustomMonsterModal && editingMonster !== null}
+        title={editingMonster?.id ? 'Edit Monster' : 'Add Custom Monster'}
+        onClose={() => {
+          setShowCustomMonsterModal(false);
+          setEditingMonster(null);
+        }}
+        size="medium"
+      >
+        {editingMonster && (
+          <MonsterEditor
+            monster={editingMonster}
+            onSave={saveMonster}
+            onCancel={() => {
+              setShowCustomMonsterModal(false);
+              setEditingMonster(null);
+            }}
+            hideCancel={false}
+          />
+        )}
+      </Modal>
     </div>
   );
 }
@@ -402,10 +434,12 @@ function MonsterEditor({
   monster,
   onSave,
   onCancel,
+  hideCancel = false,
 }: {
   monster: Monster;
   onSave: (monster: Monster) => void;
   onCancel: () => void;
+  hideCancel?: boolean;
 }) {
   const [name, setName] = useState(monster.name);
   const [hp, setHp] = useState(monster.hp);
@@ -428,29 +462,28 @@ function MonsterEditor({
   };
 
   return (
-    <div className="bg-gray-600 rounded p-4 mb-2 border-2 border-green-500">
-      <h4 className="font-semibold mb-2">Edit Monster</h4>
-      <div className="grid grid-cols-2 gap-3 mb-3">
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block mb-1 text-xs">Name</label>
+          <label className="block mb-1 text-sm font-medium">Name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
+            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
           />
         </div>
         <div>
-          <label className="block mb-1 text-xs">AC</label>
+          <label className="block mb-1 text-sm font-medium">AC</label>
           <input
             type="number"
             value={ac}
             onChange={(e) => setAc(parseInt(e.target.value) || 0)}
-            className="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
+            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
           />
         </div>
         <div>
-          <label className="block mb-1 text-xs">HP</label>
+          <label className="block mb-1 text-sm font-medium">HP</label>
           <input
             type="number"
             value={hp}
@@ -458,41 +491,43 @@ function MonsterEditor({
               const newHp = parseInt(e.target.value) || 0;
               setHp(Math.min(newHp, maxHp));
             }}
-            className="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
+            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
           />
         </div>
         <div>
-          <label className="block mb-1 text-xs">Max HP</label>
+          <label className="block mb-1 text-sm font-medium">Max HP</label>
           <input
             type="number"
             value={maxHp}
             onChange={(e) => setMaxHp(parseInt(e.target.value) || 0)}
-            className="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
+            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
           />
         </div>
-        <div>
-          <label className="block mb-1 text-xs">Dexterity</label>
+        <div className="col-span-2">
+          <label className="block mb-1 text-sm font-medium">Dexterity</label>
           <input
             type="number"
             value={dexterity}
             onChange={(e) => setDexterity(parseInt(e.target.value) || 0)}
-            className="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
+            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
           />
         </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 pt-4">
         <button
           onClick={handleSave}
-          className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm"
+          className="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-medium"
         >
-          Save
+          Save Monster
         </button>
-        <button
-          onClick={onCancel}
-          className="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm"
-        >
-          Cancel
-        </button>
+        {!hideCancel && (
+          <button
+            onClick={onCancel}
+            className="flex-1 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-sm font-medium"
+          >
+            Cancel
+          </button>
+        )}
       </div>
     </div>
   );
