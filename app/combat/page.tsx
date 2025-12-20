@@ -153,9 +153,15 @@ function CombatContent() {
     }
   };
   const rollD20 = (): number => {
+    const max = 20;
     const randomBytes = new Uint8Array(1);
-    crypto.getRandomValues(randomBytes);
-    return (randomBytes[0] % 20) + 1;
+    const limit = Math.floor(256 / max) * max; // 240
+    let value: number;
+    do {
+      crypto.getRandomValues(randomBytes);
+      value = randomBytes[0];
+    } while (value >= limit);
+    return (value % max) + 1;
   };
 
   const rollInitiative = () => {
@@ -817,9 +823,15 @@ function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
   };
 
   const handleRoll = () => {
+    const max = 20;
     const randomBytes = new Uint8Array(1);
-    crypto.getRandomValues(randomBytes);
-    const roll = (randomBytes[0] % 20) + 1;
+    const limit = Math.floor(256 / max) * max; // 240
+    let value: number;
+    do {
+      crypto.getRandomValues(randomBytes);
+      value = randomBytes[0];
+    } while (value >= limit);
+    const roll = (value % max) + 1;
     const bonus = getBonus();
     const total = roll + bonus;
     

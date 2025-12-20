@@ -41,8 +41,8 @@ export function QuickCharacterEntry({
       return;
     }
 
-    if (formData.dexterity < 1 || formData.dexterity > 20) {
-      setError('Dexterity must be between 1 and 20');
+    if (formData.dexterity < 1 || formData.dexterity > 30) {
+      setError('Dexterity must be between 1 and 30');
       return;
     }
 
@@ -69,16 +69,10 @@ export function QuickCharacterEntry({
 
     // Calculate ability scores - set dexterity and default others to 10
     const dexModifier = Math.floor((formData.dexterity - 10) / 2);
-
-    // Generate a random ID using crypto.getRandomValues for better randomness
-    const randomBytes = new Uint8Array(4);
-    crypto.getRandomValues(randomBytes);
-    const randomHex = Array.from(randomBytes)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
+    const hasInitiative = formData.initiativeRoll.trim().length > 0;
 
     const newCombatant: CombatantState = {
-      id: `${combatantType}-${Date.now()}-${randomHex}`,
+      id: crypto.randomUUID(),
       name: formData.name.trim(),
       type: combatantType,
       initiative: initiativeValue,
@@ -94,10 +88,10 @@ export function QuickCharacterEntry({
         charisma: 10,
       },
       conditions: [],
-      ...(initiativeValue > 0 && {
+      ...(hasInitiative && {
         initiativeRoll: {
           roll: 0,
-          bonus: dexModifier,
+          bonus: 0,
           total: initiativeValue,
           method: 'manual' as const,
         },
@@ -107,10 +101,29 @@ export function QuickCharacterEntry({
     onAdd(newCombatant);
   };
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onCancel();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={handleBackdropClick}
+      onKeyDown={handleKeyDown}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="quickEntryHeading"
+    >
       <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-        <h2 className="text-2xl font-bold mb-4 text-white">
+        <h2 id="quickEntryHeading" className="text-2xl font-bold mb-4 text-white">
           Add {combatantType === 'player' ? 'Party Member' : 'Enemy'}
         </h2>
 
@@ -122,10 +135,11 @@ export function QuickCharacterEntry({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold mb-2 text-gray-200">
+            <label htmlFor="name" className="block text-sm font-semibold mb-2 text-gray-200">
               Name <span className="text-red-500">*</span>
             </label>
             <input
+              id="name"
               type="text"
               value={formData.name}
               onChange={e => handleChange('name', e.target.value)}
@@ -136,13 +150,14 @@ export function QuickCharacterEntry({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2 text-gray-200">
+            <label htmlFor="dexterity" className="block text-sm font-semibold mb-2 text-gray-200">
               Dexterity <span className="text-red-500">*</span>
             </label>
             <input
+              id="dexterity"
               type="number"
               min="1"
-              max="20"
+              max="30"
               value={formData.dexterity}
               onChange={e => handleChange('dexterity', parseInt(e.target.value) || 10)}
               className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -154,10 +169,11 @@ export function QuickCharacterEntry({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-200">
+              <label htmlFor="maxHp" className="block text-sm font-semibold mb-2 text-gray-200">
                 Max HP <span className="text-red-500">*</span>
               </label>
               <input
+                id="maxHp"
                 type="number"
                 min="1"
                 value={formData.maxHp}
@@ -167,10 +183,11 @@ export function QuickCharacterEntry({
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-200">
+              <label htmlFor="currentHp" className="block text-sm font-semibold mb-2 text-gray-200">
                 Current HP <span className="text-red-500">*</span>
               </label>
               <input
+                id="currentHp"
                 type="number"
                 min="0"
                 value={formData.currentHp}
@@ -181,10 +198,11 @@ export function QuickCharacterEntry({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2 text-gray-200">
+            <label htmlFor="initiativeRoll" className="block text-sm font-semibold mb-2 text-gray-200">
               Initiative Roll <span className="text-gray-400">(Optional)</span>
             </label>
             <input
+              id="initiativeRoll"
               type="number"
               value={formData.initiativeRoll}
               onChange={e => handleChange('initiativeRoll', e.target.value)}
