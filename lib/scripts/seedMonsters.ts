@@ -10,8 +10,7 @@
 
 import { getDatabase } from "@/lib/db";
 import { ALL_SRD_MONSTERS } from "@/lib/data/monsters";
-import { MonsterTemplate } from "@/lib/types";
-import { OptionalId } from "mongodb";
+import { GLOBAL_USER_ID } from "@/lib/constants";
 import { randomUUID } from "crypto";
 
 async function seedMonsters() {
@@ -23,18 +22,19 @@ async function seedMonsters() {
     console.log(`Seeding ${ALL_SRD_MONSTERS.length} SRD monsters...`);
 
     // Delete existing global monsters to avoid duplicates
-    const deleteResult = await collection.deleteMany({ userId: "GLOBAL" });
+    const deleteResult = await collection.deleteMany({ userId: GLOBAL_USER_ID });
     console.log(
       `Deleted ${deleteResult.deletedCount} existing global monsters`
     );
 
     // Prepare monsters with required fields, explicitly omitting _id for auto-generation
     const monstersToInsert = ALL_SRD_MONSTERS.map((monster) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _id, ...rest } = monster;
       return {
         ...rest,
         id: randomUUID(),
-        userId: "GLOBAL",
+        userId: GLOBAL_USER_ID,
         isGlobal: true,
         createdAt: new Date(),
         updatedAt: new Date(),

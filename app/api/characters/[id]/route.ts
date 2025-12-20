@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Character, isValidRace, VALID_RACES } from '@/lib/types';
+import { Character, isValidRace, VALID_RACES, isValidClass, VALID_CLASSES, CharacterClass, calculateTotalLevel, validateCharacterClasses } from '@/lib/types';
 
 export async function GET(
   request: NextRequest,
@@ -67,8 +67,7 @@ export async function PUT(
       actions,
       bonusActions,
       reactions,
-      class: classType,
-      level,
+      classes,
       race,
       background,
       alignment,
@@ -103,6 +102,26 @@ export async function PUT(
       );
     }
 
+    // Validate and normalize classes if provided
+    let characterClasses = existingCharacter.classes;
+    if (classes !== undefined && classes !== null) {
+      const validationResult = validateCharacterClasses(classes, { allowEmpty: false });
+      if (!validationResult.valid) {
+        return NextResponse.json(
+          { 
+            error: validationResult.error,
+            validClasses: VALID_CLASSES 
+          },
+          { status: 400 }
+        );
+      }
+
+      characterClasses = (classes as CharacterClass[]).map((c) => ({
+        class: c.class,
+        level: c.level,
+      }));
+    }
+
     const updatedCharacter: Character = {
       ...existingCharacter,
       name: name !== undefined ? name.trim() : existingCharacter.name,
@@ -123,8 +142,7 @@ export async function PUT(
       actions: actions !== undefined ? actions : existingCharacter.actions,
       bonusActions: bonusActions !== undefined ? bonusActions : existingCharacter.bonusActions,
       reactions: reactions !== undefined ? reactions : existingCharacter.reactions,
-      class: classType !== undefined ? classType : existingCharacter.class,
-      level: level !== undefined ? level : existingCharacter.level,
+      classes: characterClasses,
       race: race !== undefined ? race : existingCharacter.race,
       background: background !== undefined ? background : existingCharacter.background,
       alignment: alignment !== undefined ? alignment : existingCharacter.alignment,

@@ -1,5 +1,148 @@
 // Data types for the combat tracker
 
+// D&D 5e Classes - valid classes from https://www.dnd5eapi.co/api/2014/classes
+export type DnDClass = 
+  | 'Barbarian'
+  | 'Bard'
+  | 'Cleric'
+  | 'Druid'
+  | 'Fighter'
+  | 'Monk'
+  | 'Paladin'
+  | 'Ranger'
+  | 'Rogue'
+  | 'Sorcerer'
+  | 'Warlock'
+  | 'Wizard';
+
+export const VALID_CLASSES: DnDClass[] = [
+  'Barbarian',
+  'Bard',
+  'Cleric',
+  'Druid',
+  'Fighter',
+  'Monk',
+  'Paladin',
+  'Ranger',
+  'Rogue',
+  'Sorcerer',
+  'Warlock',
+  'Wizard',
+];
+
+export function isValidClass(className: unknown): className is DnDClass {
+  return typeof className === 'string' && VALID_CLASSES.includes(className as DnDClass);
+}
+
+// D&D 5e Races - valid races from https://www.dnd5eapi.co/api/2014/races
+export type DnDRace = 
+  | 'Dragonborn'
+  | 'Dwarf'
+  | 'Elf'
+  | 'Gnome'
+  | 'Half-Elf'
+  | 'Half-Orc'
+  | 'Halfling'
+  | 'Human'
+  | 'Tiefling';
+
+export const VALID_RACES: DnDRace[] = [
+  'Dragonborn',
+  'Dwarf',
+  'Elf',
+  'Gnome',
+  'Half-Elf',
+  'Half-Orc',
+  'Halfling',
+  'Human',
+  'Tiefling',
+];
+
+export function isValidRace(raceName: unknown): raceName is DnDRace {
+  return typeof raceName === 'string' && VALID_RACES.includes(raceName as DnDRace);
+}
+
+// Character Class Level - for multiclass support
+export interface CharacterClass {
+  class: DnDClass;
+  level: number;
+}
+
+// Validation helper for character classes array
+export interface ClassValidationError {
+  valid: false;
+  error: string;
+}
+
+export interface ClassValidationSuccess {
+  valid: true;
+}
+
+export type ClassValidationResult = ClassValidationSuccess | ClassValidationError;
+
+export function validateCharacterClasses(
+  classes: unknown,
+  options: { allowEmpty?: boolean } = {}
+): ClassValidationResult {
+  const { allowEmpty = false } = options;
+
+  // Check if classes is an array
+  if (!Array.isArray(classes)) {
+    return {
+      valid: false,
+      error: 'Classes must be an array of {class, level} objects',
+    };
+  }
+
+  // Check for empty array (usually not allowed, especially on updates)
+  if (classes.length === 0 && !allowEmpty) {
+    return {
+      valid: false,
+      error: 'At least one class is required',
+    };
+  }
+
+  // Track classes to detect duplicates
+  const seenClasses = new Set<DnDClass>();
+
+  // Validate each class entry
+  for (const classEntry of classes) {
+    // Validate class property exists and is valid
+    if (!classEntry || typeof classEntry !== 'object' || !classEntry.class) {
+      return {
+        valid: false,
+        error: 'Each class entry must have a "class" property',
+      };
+    }
+
+    if (!isValidClass(classEntry.class)) {
+      return {
+        valid: false,
+        error: `Invalid class "${classEntry.class}". Must be one of: ${VALID_CLASSES.join(', ')}`,
+      };
+    }
+
+    // Check for duplicate classes
+    if (seenClasses.has(classEntry.class)) {
+      return {
+        valid: false,
+        error: `Duplicate class: "${classEntry.class}". Each character can have each class only once.`,
+      };
+    }
+    seenClasses.add(classEntry.class);
+
+    // Validate level property
+    if (typeof classEntry.level !== 'number' || classEntry.level < 1 || classEntry.level > 20) {
+      return {
+        valid: false,
+        error: `Class level must be a number between 1 and 20 (got ${classEntry.level})`,
+      };
+    }
+  }
+
+  return { valid: true };
+}
+
 // User and authentication
 export interface User {
   _id?: string;
@@ -127,13 +270,18 @@ export interface Character extends CreatureStats {
   userId: string;
   name: string;
   // Character-specific metadata
-  class?: string; // e.g., "Fighter", "Wizard"
-  level?: number;
-  race?: Race; // Must be one of the valid D&D 5e races
+  classes: CharacterClass[]; // Array of classes for multiclass support
+  race?: DnDRace; // Must be one of the valid D&D 5e races
   background?: string;
   alignment?: string;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+// Helper function to calculate total character level from classes array
+// Pure calculation - does not handle edge cases or defaults (validation belongs in API layer)
+export function calculateTotalLevel(classes: CharacterClass[]): number {
+  return classes.reduce((total, classLevel) => total + classLevel.level, 0);
 }
 
 export interface Encounter {
@@ -209,25 +357,4 @@ export interface SessionData {
   characters: Character[];
   parties: Party[];
   combatState?: CombatState;
-}
-
-// Define valid D&D 5e races as const array
-export const VALID_RACES = [
-  'dragonborn',
-  'dwarf',
-  'elf',
-  'gnome',
-  'half-elf',
-  'half-orc',
-  'halfling',
-  'human',
-  'tiefling'
-] as const;
-
-// Create a type from the const array
-export type Race = typeof VALID_RACES[number];
-
-// Type guard function to check if a value is a valid race
-export function isValidRace(value: any): value is Race {
-  return VALID_RACES.includes(value as Race);
 }

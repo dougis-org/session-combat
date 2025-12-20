@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
+import { MonsterSelector } from '@/lib/components/MonsterSelector';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { Encounter, Monster, MonsterTemplate } from '@/lib/types';
 
 function EncountersContent() {
@@ -191,6 +193,7 @@ function EncounterEditor({
   onCancel: () => void;
   isNew: boolean;
 }) {
+  const { user } = useAuth();
   const [name, setName] = useState(encounter.name);
   const [description, setDescription] = useState(encounter.description);
   const [monsters, setMonsters] = useState<Monster[]>(encounter.monsters);
@@ -327,39 +330,13 @@ function EncounterEditor({
         </div>
 
         {showTemplateSelector && (
-          <div className="bg-gray-600 rounded p-4 mb-4 border-2 border-purple-500">
-            <h4 className="font-semibold mb-2">Select from Library</h4>
-            {loadingTemplates ? (
-              <p className="text-gray-300">Loading...</p>
-            ) : monsterTemplates.length === 0 ? (
-              <p className="text-gray-300">No monster templates available. <Link href="/monsters" className="text-blue-400 hover:text-blue-300">Create one</Link></p>
-            ) : (
-              <div className="space-y-2">
-                {monsterTemplates.map(template => (
-                  <div key={template.id} className="flex justify-between items-center bg-gray-700 rounded p-2">
-                    <div>
-                      <span className="font-medium">{template.name}</span>
-                      <span className="text-gray-400 ml-2 text-xs">
-                        HP: {template.hp}/{template.maxHp}, AC: {template.ac}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => addMonsterFromLibrary(template)}
-                      className="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-sm"
-                    >
-                      Add
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <button
-              onClick={() => setShowTemplateSelector(false)}
-              className="mt-2 bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm"
-            >
-              Close
-            </button>
-          </div>
+          <MonsterSelector
+            monsters={monsterTemplates}
+            onSelect={addMonsterFromLibrary}
+            onClose={() => setShowTemplateSelector(false)}
+            loading={loadingTemplates}
+            userId={user?.userId}
+          />
         )}
 
         {editingMonster && (
