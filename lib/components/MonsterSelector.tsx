@@ -115,7 +115,7 @@ export function MonsterSelector({
                     ? 'bg-purple-600 text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
-                aria-pressed={creatorFilter === filter}
+                aria-pressed={creatorFilter === filter ? 'true' : 'false'}
               >
                 {filterLabels[filter]}
               </button>
@@ -154,7 +154,7 @@ export function MonsterSelector({
                   </div>
                   <button
                     onClick={() => onSelect(template)}
-                    className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm ml-2 flex-shrink-0 transition-colors"
+                    className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm ml-2 shrink-0 transition-colors"
                     aria-label={`Add ${template.name} to encounter`}
                   >
                     Add

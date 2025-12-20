@@ -288,8 +288,9 @@ function EncounterEditor({
       
       <div className="space-y-4 mb-6">
         <div>
-          <label className="block mb-1 text-sm">Name</label>
+          <label htmlFor="encounter-name" className="block mb-1 text-sm">Name</label>
           <input
+            id="encounter-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -299,8 +300,9 @@ function EncounterEditor({
         </div>
         
         <div>
-          <label className="block mb-1 text-sm">Description</label>
+          <label htmlFor="encounter-description" className="block mb-1 text-sm">Description</label>
           <textarea
+            id="encounter-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
@@ -465,8 +467,9 @@ function MonsterEditor({
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block mb-1 text-sm font-medium">Name</label>
+          <label htmlFor="monster-name" className="block mb-1 text-sm font-medium">Name</label>
           <input
+            id="monster-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -474,8 +477,9 @@ function MonsterEditor({
           />
         </div>
         <div>
-          <label className="block mb-1 text-sm font-medium">AC</label>
+          <label htmlFor="monster-ac" className="block mb-1 text-sm font-medium">AC</label>
           <input
+            id="monster-ac"
             type="number"
             value={ac}
             onChange={(e) => setAc(parseInt(e.target.value) || 0)}
@@ -483,8 +487,9 @@ function MonsterEditor({
           />
         </div>
         <div>
-          <label className="block mb-1 text-sm font-medium">HP</label>
+          <label htmlFor="monster-hp" className="block mb-1 text-sm font-medium">HP</label>
           <input
+            id="monster-hp"
             type="number"
             value={hp}
             onChange={(e) => {
@@ -495,8 +500,9 @@ function MonsterEditor({
           />
         </div>
         <div>
-          <label className="block mb-1 text-sm font-medium">Max HP</label>
+          <label htmlFor="monster-maxhp" className="block mb-1 text-sm font-medium">Max HP</label>
           <input
+            id="monster-maxhp"
             type="number"
             value={maxHp}
             onChange={(e) => setMaxHp(parseInt(e.target.value) || 0)}
@@ -504,8 +510,9 @@ function MonsterEditor({
           />
         </div>
         <div className="col-span-2">
-          <label className="block mb-1 text-sm font-medium">Dexterity</label>
+          <label htmlFor="monster-dex" className="block mb-1 text-sm font-medium">Dexterity</label>
           <input
+            id="monster-dex"
             type="number"
             value={dexterity}
             onChange={(e) => setDexterity(parseInt(e.target.value) || 0)}
