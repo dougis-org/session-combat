@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
-import { Character, CreatureStats, Race, isValidRace } from '@/lib/types';
+import { Character, AbilityScores, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, DnDRace } from '@/lib/types';
 
 function CharactersContent() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -49,6 +49,7 @@ function CharactersContent() {
         wisdom: 10,
         charisma: 10,
       },
+      classes: [{ class: 'Fighter', level: 1 }],
     };
     setEditingCharacter(newCharacter);
     setIsAdding(true);
@@ -162,10 +163,17 @@ function CharactersContent() {
                       </button>
                     </div>
                   </div>
-                  {character.class && (
+                  {character.classes && character.classes.length > 0 && (
                     <div className="text-sm text-gray-400 mb-2">
-                      {character.class}
-                      {character.level && ` Level ${character.level}`}
+                      {character.classes.map((c, idx) => (
+                        <span key={idx}>
+                          {c.class} Level {c.level}
+                          {idx < character.classes.length - 1 && ' / '}
+                        </span>
+                      ))}
+                      <span className="ml-2 font-semibold">
+                        (Total Level {calculateTotalLevel(character.classes)})
+                      </span>
                       {character.race && ` - ${character.race}`}
                     </div>
                   )}
@@ -211,8 +219,7 @@ function CharacterEditor({
   isNew: boolean;
 }) {
   const [name, setName] = useState(character.name);
-  const [charClass, setCharClass] = useState(character.class || '');
-  const [level, setLevel] = useState(character.level || 1);
+  const [classes, setClasses] = useState(character.classes || [{ class: 'Fighter', level: 1 }]);
   const [race, setRace] = useState(character.race || '');
   const [alignment, setAlignment] = useState(character.alignment || '');
   const [stats, setStats] = useState<CreatureStats>(character);
@@ -238,14 +245,12 @@ function CharacterEditor({
 
     setSaving(true);
     try {
-      const raceValue = race && isValidRace(race) ? race : undefined;
       const characterData: Character = {
         ...stats,
         ...character, // Preserve id, userId, and any other original fields
         name,
-        class: charClass || undefined,
-        level: level || undefined,
-        race: raceValue,
+        classes,
+        race: (race as DnDRace) || undefined,
         alignment: alignment || undefined,
       };
       await onSave(characterData);
@@ -274,44 +279,81 @@ function CharacterEditor({
             onChange={e => setName(e.target.value)}
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
+            aria-label="Character name"
           />
         </div>
 
         <div>
-          <label className="block mb-1 text-sm font-bold">Class</label>
-          <input
-            type="text"
-            value={charClass}
-            onChange={e => setCharClass(e.target.value)}
-            placeholder="e.g., Fighter, Wizard"
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 text-sm font-bold">Level</label>
-          <input
-            type="number"
-            value={level}
-            onChange={e => setLevel(parseInt(e.target.value) || 1)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-            min="1"
-            max="20"
-          />
+          <label className="block mb-1 text-sm font-bold">Classes (Multiclass)</label>
+          <div className="space-y-2">
+            {classes.map((classEntry, idx) => (
+              <div key={idx} className="flex gap-2">
+                <select
+                  value={classEntry.class}
+                  onChange={e => {
+                    const newClasses = [...classes];
+                    newClasses[idx].class = e.target.value as any;
+                    setClasses(newClasses);
+                  }}
+                  className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
+                  disabled={saving}
+                  aria-label="Character class"
+                >
+                  <option value="">Select class...</option>
+                  {VALID_CLASSES.map(cls => (
+                    <option key={cls} value={cls}>{cls}</option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  value={classEntry.level}
+                  onChange={e => {
+                    const newClasses = [...classes];
+                    newClasses[idx].level = parseInt(e.target.value) || 1;
+                    setClasses(newClasses);
+                  }}
+                  className="w-20 bg-gray-700 rounded px-3 py-2 text-white"
+                  disabled={saving}
+                  min="1"
+                  max="20"
+                  aria-label="Class level"
+                />
+                <button
+                  onClick={() => setClasses(classes.filter((_, i) => i !== idx))}
+                  disabled={saving || classes.length === 1}
+                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 px-3 py-2 rounded text-sm"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => setClasses([...classes, { class: 'Fighter', level: 1 }])}
+              disabled={saving}
+              className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm"
+            >
+              Add Class
+            </button>
+            <div className="text-sm text-gray-300">
+              Total Level: {calculateTotalLevel(classes)}
+            </div>
+          </div>
         </div>
 
         <div>
           <label className="block mb-1 text-sm font-bold">Race</label>
-          <input
-            type="text"
+          <select
             value={race}
             onChange={e => setRace(e.target.value)}
-            placeholder="e.g., Human, Elf"
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
-          />
+            aria-label="Character race"
+          >
+            <option value="">Select a race...</option>
+            {VALID_RACES.map(r => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
         </div>
 
         <div className="md:col-span-2">
