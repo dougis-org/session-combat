@@ -5,13 +5,15 @@ Thank you for your interest in contributing to session-combat! This document out
 ## Repository Standards
 
 ### Code Quality
+
 - Follow the existing code style and conventions
 - Use TypeScript for type safety
 - Ensure all code passes linting (`npm run lint`)
 - Write clear, self-documenting code with meaningful variable and function names
 
 ### Git Workflow
-- Create feature branches from the default branch
+
+- Create feature branches from the default branch (pull the default first)
 - Use descriptive commit messages following conventional commits format when possible
 - Keep commits focused and atomic
 - Ensure all tests pass before submitting a pull request
@@ -21,13 +23,16 @@ Thank you for your interest in contributing to session-combat! This document out
 **We prefer integration tests using Testcontainers over complex mocks.**
 
 #### When to Use Integration Tests (Preferred)
+
 Integration tests should be your **first choice** when:
+
 - Testing API routes that interact with databases or external services
 - Validating end-to-end workflows
 - Testing behavior that depends on real infrastructure (databases, message queues, etc.)
 - The external dependency can be easily containerized
 
 Benefits:
+
 - Tests real behavior, not mocked behavior
 - Catches integration issues early
 - Reduces maintenance burden compared to complex mocks

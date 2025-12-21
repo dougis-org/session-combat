@@ -1,11 +1,34 @@
-# AGENTS.md: Instructions for AI Agents
+# AI Agent Contribution Guidelines
 
-All AI agents working in this repository must follow the guidelines and directions specified in `CONTRIBUTING.md`.
+Guidelines for AI agents contributing to this repository.  
+Follow the [CONTRIBUTING.md](CONTRIBUTING.md) standards and these additional requirements.
 
-- **Primary Source:** The `CONTRIBUTING.md` file contains the authoritative instructions for code style, review process, commit conventions, and all other contribution requirements.
-- **Obligation:** Agents must always consult and adhere to the rules in `CONTRIBUTING.md` before making any changes, submitting code, or performing automated actions.
-- **Updates:** If `CONTRIBUTING.md` is updated, agents must immediately begin following the new instructions.
+## Core Principles
 
-**Summary:**
+- Well-documented, maintainable contributions
+- Human review before merge
+- No breaking changes without documented approval
+- Test-Driven Development (TDD): write failing tests first, then implement
+- **NEVER** reduce quality for token constraints or speed
 
-> For all actions, always refer to and comply with the latest `CONTRIBUTING.md`.
+## Documentation
+
+- Include change summary and rationale in PR descriptions
+- Pass all linting checks
+- Adhere to line length limits (80-120 chars)
+
+## Testing
+
+- Provide evidence of passing tests (never skip)
+- Use data-driven parameterized tests when possible
+- Cover typical and edge cases
+- Prefer integration tests over mocks
+
+## Tooling
+
+- Use MCP servers first for any task they cover; never request a raw shell session.
+- If no MCP tool exists for the task, run the command via `start_process` (desktop commander)
+  only.
+- Examples: use MCP `read_file`/`write_file` for files; GitHub MCP for git; Jira/Confluence
+  MCP for tickets; `start_process` for commands like `gradlew clean test` or `python -m pytest` when no
+  MCP wrapper exists.
