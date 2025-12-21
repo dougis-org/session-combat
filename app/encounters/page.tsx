@@ -401,7 +401,14 @@ function EncounterEditor({
           monsters={monsterTemplates}
           onSelect={(template) => {
             addMonsterFromLibrary(template);
+          }}
+          onClose={() => setShowLibraryModal(false)}
+          hideCloseButton={true}
+        />
+      </Modal>
 
+      {/* Custom Monster Modal */}
+      <Modal
         isOpen={showCustomMonsterModal && editingMonster !== null}
         title={
           editingMonster && monsters.some((m) => m.id === editingMonster.id)
