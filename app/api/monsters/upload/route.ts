@@ -52,7 +52,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Transform and save monsters
-    const monsters = (document as MonsterUploadDocument).monsters || [];
+    const documentTyped = document as MonsterUploadDocument;
+    const monsters: RawMonsterData[] = (documentTyped.monsters as RawMonsterData[]) || [];
     const imported = [];
     const errors = [];
 

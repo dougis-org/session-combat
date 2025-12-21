@@ -367,7 +367,7 @@ function validateAbilityArray(
   for (let i = 0; i < value.length; i++) {
     const abilityResult = validateAbility(value[i], `${fieldName}[${i}]`);
     if (!abilityResult.valid) {
-      return { valid: false, error: abilityResult.error };
+      return { valid: false, error: abilityResult.error as ValidationError };
     }
     result.push(abilityResult.value);
   }
@@ -411,7 +411,7 @@ export function validateMonsterData(
         message: 'hp must be a number',
         index,
       });
-    } else if (data.maxHp && data.hp > data.maxHp) {
+    } else if (data.maxHp && typeof data.maxHp === 'number' && data.hp > data.maxHp) {
       errors.push({
         field: `${prefix}.hp`,
         message: 'hp must be less than or equal to maxHp',
