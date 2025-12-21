@@ -7,12 +7,16 @@ interface QuickCharacterEntryProps {
   onAdd: (combatant: CombatantState) => void;
   onCancel: () => void;
   combatantType: 'player' | 'monster';
+  existingCombatants?: CombatantState[];
+  onRemove?: (id: string) => void;
 }
 
 export function QuickCharacterEntry({
   onAdd,
   onCancel,
   combatantType,
+  existingCombatants = [],
+  onRemove,
 }: QuickCharacterEntryProps) {
   const [formData, setFormData] = useState({
     name: '',
@@ -122,7 +126,7 @@ export function QuickCharacterEntry({
       aria-modal="true"
       aria-labelledby="quickEntryHeading"
     >
-      <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+      <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
         <h2 id="quickEntryHeading" className="text-2xl font-bold mb-4 text-white">
           Add {combatantType === 'player' ? 'Party Member' : 'Enemy'}
         </h2>
@@ -234,6 +238,34 @@ export function QuickCharacterEntry({
         <p className="text-xs text-gray-400 mt-4 text-center">
           <span className="text-red-500">*</span> Required fields
         </p>
+
+        {existingCombatants.length > 0 && (
+          <section className="mt-6 pt-6 border-t border-gray-700" aria-labelledby="combatantsHeading">
+            <h3 id="combatantsHeading" className="text-sm font-semibold text-gray-300 mb-3">Current Combatants</h3>
+            <ul className="space-y-2">
+              {existingCombatants.map((combatant) => (
+                <li key={combatant.id} className="bg-gray-700 rounded px-3 py-2 flex justify-between items-center">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium truncate">{combatant.name}</p>
+                    <p className="text-xs text-gray-400">
+                      HP: {combatant.hp}/{combatant.maxHp}
+                    </p>
+                  </div>
+                  {onRemove && (
+                    <button
+                      type="button"
+                      onClick={() => onRemove(combatant.id)}
+                      className="ml-2 bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs text-white transition-colors flex-shrink-0"
+                      aria-label={`Delete ${combatant.name} from combat`}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </div>
   );

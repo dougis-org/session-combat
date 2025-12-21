@@ -483,6 +483,8 @@ function CombatContent() {
               combatantType={showQuickEntryType}
               onAdd={addCombatantToSetup}
               onCancel={() => setShowQuickEntryType(null)}
+              existingCombatants={setupCombatants}
+              onRemove={removeCombatantFromSetup}
             />
           )}
         </div>
