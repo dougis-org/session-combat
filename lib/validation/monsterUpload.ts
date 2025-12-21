@@ -3,7 +3,7 @@
  * Validates and transforms user-uploaded monster data
  */
 
-import { MonsterTemplate, AbilityScores } from '@/lib/types';
+import { MonsterTemplate, AbilityScores, CreatureAbility } from '@/lib/types';
 
 /**
  * Valid monster sizes in D&D 5e
@@ -257,17 +257,15 @@ function validateStringArray(
 }
 
 /**
- * Validates a record of strings or numbers
+ * Generic record validator
  */
-function validateStringNumberRecord(
+function validateRecord<T extends string | number | (string | number)>(
   value: unknown,
-  fieldName: string = 'record'
-): {
-  valid: true;
-  value: Record<string, string | number>;
-} | { valid: false; error: ValidationError } {
+  fieldName: string,
+  isValid: (val: unknown) => boolean
+): { valid: true; value: Record<string, T> } | { valid: false; error: ValidationError } {
   if (value === undefined || value === null) {
-    return { valid: true, value: {} };
+    return { valid: true, value: {} as Record<string, T> };
   }
 
   if (typeof value !== 'object' || Array.isArray(value)) {
@@ -280,23 +278,62 @@ function validateStringNumberRecord(
     };
   }
 
-  const result: Record<string, string | number> = {};
+  const result: Record<string, T> = {};
   const obj = value as Record<string, unknown>;
 
   for (const [key, val] of Object.entries(obj)) {
-    if (typeof val !== 'string' && typeof val !== 'number') {
+    if (!isValid(val)) {
       return {
         valid: false,
         error: {
           field: `${fieldName}.${key}`,
-          message: `${fieldName}.${key} must be a string or number`,
+          message: `${fieldName}.${key} has invalid type`,
         },
       };
     }
-    result[key] = val;
+    result[key] = val as T;
   }
 
   return { valid: true, value: result };
+}
+
+/**
+ * Validates a string-only record (key-value pairs with string values)
+ */
+function validateStringRecord(
+  value: unknown,
+  fieldName: string = 'record'
+): { valid: true; value: Record<string, string> } | { valid: false; error: ValidationError } {
+  return validateRecord<string>(value, fieldName, (val) => typeof val === 'string') as
+    | { valid: true; value: Record<string, string> }
+    | { valid: false; error: ValidationError };
+}
+
+/**
+ * Validates a numeric record (key-value pairs with number values)
+ */
+function validateNumberRecord(
+  value: unknown,
+  fieldName: string = 'record'
+): { valid: true; value: Record<string, number> } | { valid: false; error: ValidationError } {
+  return validateRecord<number>(value, fieldName, (val) => typeof val === 'number' && Number.isFinite(val as number)) as
+    | { valid: true; value: Record<string, number> }
+    | { valid: false; error: ValidationError };
+}
+
+/**
+ * Validates a record of strings or numbers
+ */
+function validateStringNumberRecord(
+  value: unknown,
+  fieldName: string = 'record'
+): {
+  valid: true;
+  value: Record<string, string | number>;
+} | { valid: false; error: ValidationError } {
+  return validateRecord<string | number>(value, fieldName, (val) => typeof val === 'string' || typeof val === 'number') as
+    | { valid: true; value: Record<string, string | number> }
+    | { valid: false; error: ValidationError };
 }
 
 /**
@@ -367,7 +404,7 @@ function validateAbilityArray(
   for (let i = 0; i < value.length; i++) {
     const abilityResult = validateAbility(value[i], `${fieldName}[${i}]`);
     if (!abilityResult.valid) {
-      return { valid: false, error: abilityResult.error };
+      return { valid: false, error: abilityResult.error as ValidationError };
     }
     result.push(abilityResult.value);
   }
@@ -411,7 +448,7 @@ export function validateMonsterData(
         message: 'hp must be a number',
         index,
       });
-    } else if (data.maxHp && data.hp > data.maxHp) {
+    } else if (data.maxHp && typeof data.maxHp === 'number' && data.hp > data.maxHp) {
       errors.push({
         field: `${prefix}.hp`,
         message: 'hp must be less than or equal to maxHp',
@@ -506,17 +543,27 @@ export function validateMonsterData(
     }
   }
 
-  // Optional: savingThrows, skills, senses (record objects)
-  const recordFields = ['savingThrows', 'skills', 'senses'];
-  for (const field of recordFields) {
-    if (data[field as keyof RawMonsterData] !== undefined && data[field as keyof RawMonsterData] !== null) {
-      const recordResult = validateStringNumberRecord(
-        data[field as keyof RawMonsterData],
-        `${prefix}.${field}`
-      );
-      if (!recordResult.valid) {
-        errors.push(recordResult.error);
-      }
+  // Optional: savingThrows (number record)
+  if (data.savingThrows !== undefined && data.savingThrows !== null) {
+    const result = validateNumberRecord(data.savingThrows, `${prefix}.savingThrows`);
+    if (!result.valid) {
+      errors.push(result.error);
+    }
+  }
+
+  // Optional: skills (number record)
+  if (data.skills !== undefined && data.skills !== null) {
+    const result = validateNumberRecord(data.skills, `${prefix}.skills`);
+    if (!result.valid) {
+      errors.push(result.error);
+    }
+  }
+
+  // Optional: senses (string record)
+  if (data.senses !== undefined && data.senses !== null) {
+    const result = validateStringRecord(data.senses, `${prefix}.senses`);
+    if (!result.valid) {
+      errors.push(result.error);
     }
   }
 
@@ -587,7 +634,7 @@ export function transformMonsterData(
     id: crypto.randomUUID(),
     userId,
     name: (raw.name as string).trim(),
-    size: (raw.size || 'medium') as any,
+    size: (raw.size || 'medium') as ValidSize,
     type: (raw.type || 'humanoid') as string,
     alignment: raw.alignment ? (raw.alignment as string) : undefined,
     ac: (raw.ac || 10) as number,
@@ -616,12 +663,12 @@ export function transformMonsterData(
     conditionImmunities: (raw.conditionImmunities || []) as string[],
     senses: (raw.senses || {}) as Record<string, string>,
     languages: (raw.languages || []) as string[],
-    traits: (raw.traits || []) as any[],
-    actions: (raw.actions || []) as any[],
-    bonusActions: (raw.bonusActions || []) as any[],
-    reactions: (raw.reactions || []) as any[],
-    lairActions: (raw.lairActions || []) as any[],
-    legendaryActions: (raw.legendaryActions || []) as any[],
+    traits: (raw.traits || []) as CreatureAbility[],
+    actions: (raw.actions || []) as CreatureAbility[],
+    bonusActions: (raw.bonusActions || []) as CreatureAbility[],
+    reactions: (raw.reactions || []) as CreatureAbility[],
+    lairActions: (raw.lairActions || []) as CreatureAbility[],
+    legendaryActions: (raw.legendaryActions || []) as CreatureAbility[],
     challengeRating: (raw.challengeRating || 0) as number,
     experiencePoints: (raw.experiencePoints || 0) as number,
     description: raw.description ? (raw.description as string) : undefined,

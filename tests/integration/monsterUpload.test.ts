@@ -9,8 +9,18 @@ import {
   transformMonsterData,
   MonsterUploadDocument,
   RawMonsterData,
-  ValidationResult,
-} from '@/lib/validation/monsterUpload';
+} from '../../lib/validation/monsterUpload';
+import {
+  createRawMonster,
+  createMonsterDocument,
+  VALID_ABILITY_SCORES,
+  VALID_SIZES,
+  INVALID_SIZE,
+  VALID_AC_VALUES,
+  INVALID_AC,
+  VALID_LANGUAGES,
+  VALID_TRAIT,
+} from './helpers/monsterTestData';
 
 describe('Monster Upload Validation', () => {
   describe('validateMonsterUploadDocument', () => {
@@ -118,9 +128,8 @@ describe('Monster Upload Validation', () => {
 
     describe('optional fields with validation', () => {
       it('should accept valid size values', () => {
-        const sizes = ['tiny', 'small', 'medium', 'large', 'huge', 'gargantuan'];
-        for (const size of sizes) {
-          const data: RawMonsterData = { name: 'Test', maxHp: 10, size };
+        for (const size of VALID_SIZES) {
+          const data = createRawMonster({ size });
           const result = validateMonsterData(data);
 
           expect(result.valid).toBe(true);
@@ -128,7 +137,7 @@ describe('Monster Upload Validation', () => {
       });
 
       it('should reject invalid size values', () => {
-        const data: RawMonsterData = { name: 'Test', maxHp: 10, size: 'enormous' };
+        const data = createRawMonster({ size: INVALID_SIZE });
         const result = validateMonsterData(data);
 
         expect(result.valid).toBe(false);
@@ -140,8 +149,8 @@ describe('Monster Upload Validation', () => {
       });
 
       it('should accept valid AC values (0-30)', () => {
-        for (const ac of [0, 10, 20, 30]) {
-          const data: RawMonsterData = { name: 'Test', maxHp: 10, ac };
+        for (const ac of VALID_AC_VALUES) {
+          const data = createRawMonster({ ac });
           const result = validateMonsterData(data);
 
           expect(result.valid).toBe(true);
@@ -149,7 +158,7 @@ describe('Monster Upload Validation', () => {
       });
 
       it('should reject AC outside valid range', () => {
-        const data: RawMonsterData = { name: 'Test', maxHp: 10, ac: 40 };
+        const data = createRawMonster({ ac: INVALID_AC });
         const result = validateMonsterData(data);
 
         expect(result.valid).toBe(false);
@@ -172,18 +181,9 @@ describe('Monster Upload Validation', () => {
 
     describe('ability scores', () => {
       it('should accept valid ability scores', () => {
-        const data: RawMonsterData = {
-          name: 'Test',
-          maxHp: 10,
-          abilityScores: {
-            strength: 10,
-            dexterity: 11,
-            constitution: 12,
-            intelligence: 13,
-            wisdom: 14,
-            charisma: 15,
-          },
-        };
+        const data: RawMonsterData = createRawMonster({
+          abilityScores: VALID_ABILITY_SCORES,
+        });
         const result = validateMonsterData(data);
 
         expect(result.valid).toBe(true);
@@ -237,49 +237,36 @@ describe('Monster Upload Validation', () => {
       });
 
       it('should accept valid language arrays', () => {
-        const data: RawMonsterData = {
-          name: 'Test',
-          maxHp: 10,
-          languages: ['Common', 'Goblin'],
-        };
+        const data = createRawMonster({
+          languages: VALID_LANGUAGES,
+        });
         const result = validateMonsterData(data);
 
         expect(result.valid).toBe(true);
       });
 
       it('should reject non-string values in language arrays', () => {
-        const data: RawMonsterData = {
-          name: 'Test',
-          maxHp: 10,
-          languages: ['Common', 123],
-        };
+        const data = createRawMonster({
+          languages: ['Common', 123 as any],
+        });
         const result = validateMonsterData(data);
 
         expect(result.valid).toBe(false);
       });
 
       it('should accept valid traits with name and description', () => {
-        const data: RawMonsterData = {
-          name: 'Test',
-          maxHp: 10,
-          traits: [
-            {
-              name: 'Keen Smell',
-              description: 'The creature has advantage on Wisdom checks.',
-            },
-          ],
-        };
+        const data = createRawMonster({
+          traits: [VALID_TRAIT],
+        });
         const result = validateMonsterData(data);
 
         expect(result.valid).toBe(true);
       });
 
       it('should reject traits without required fields', () => {
-        const data: RawMonsterData = {
-          name: 'Test',
-          maxHp: 10,
-          traits: [{ name: 'Keen Smell' }], // missing description
-        };
+        const data = createRawMonster({
+          traits: [{ name: 'Keen Smell' }] as any,
+        });
         const result = validateMonsterData(data);
 
         expect(result.valid).toBe(false);

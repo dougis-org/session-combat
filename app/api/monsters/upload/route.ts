@@ -51,31 +51,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Transform and save monsters
-    const monsters = (document as MonsterUploadDocument).monsters || [];
-    const imported = [];
-    const errors = [];
+    // Transform and save monsters in parallel for better performance
+    const documentTyped = document as MonsterUploadDocument;
+    const monsters: RawMonsterData[] = (documentTyped.monsters as RawMonsterData[]) || [];
 
-    for (let i = 0; i < monsters.length; i++) {
-      try {
-        const monsterData = monsters[i] as RawMonsterData;
-        const template = transformMonsterData(monsterData, auth.userId);
+    const results = await Promise.all(
+      monsters.map(async (monsterData, i) => {
+        try {
+          const template = transformMonsterData(monsterData, auth.userId);
 
-        // Save to database
-        await storage.saveMonsterTemplate(template);
+          // Save to database
+          await storage.saveMonsterTemplate(template);
 
-        imported.push({
-          index: i,
-          id: template.id,
-          name: template.name,
-        });
-      } catch (saveError) {
-        errors.push({
-          index: i,
-          message: `Failed to save monster: ${saveError instanceof Error ? saveError.message : 'Unknown error'}`,
-        });
-      }
-    }
+          return {
+            status: 'imported' as const,
+            value: {
+              index: i,
+              id: template.id,
+              name: template.name,
+            },
+          };
+        } catch (saveError) {
+          return {
+            status: 'error' as const,
+            value: {
+              index: i,
+              message: `Failed to save monster: ${saveError instanceof Error ? saveError.message : 'Unknown error'}`,
+            },
+          };
+        }
+      })
+    );
+
+    const imported = results.filter((r) => r.status === 'imported').map((r) => r.value);
+    const errors = results.filter((r) => r.status === 'error').map((r) => r.value);
 
     // Return results
     const success = imported.length > 0 && errors.length === 0;
@@ -96,7 +105,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Failed to process monster upload',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
