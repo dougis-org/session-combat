@@ -14,6 +14,7 @@ interface MonsterSelectorProps {
   onClose: () => void;
   loading?: boolean;
   userId?: string;
+  hideCloseButton?: boolean;
 }
 
 export function MonsterSelector({
@@ -22,6 +23,7 @@ export function MonsterSelector({
   onClose,
   loading = false,
   userId,
+  hideCloseButton = false,
 }: MonsterSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [creatorFilter, setCreatorFilter] = useState<CreatorFilter>('all');
@@ -74,9 +76,7 @@ export function MonsterSelector({
   }, [searchQuery, creatorFilter, monsters, fuse, userId]);
 
   return (
-    <div className="bg-gray-600 rounded p-4 mb-4 border-2 border-purple-500">
-      <h4 className="font-semibold mb-4">Select from Library</h4>
-
+    <div>
       {loading ? (
         <p className="text-gray-300">Loading...</p>
       ) : monsters.length === 0 ? (
@@ -106,24 +106,28 @@ export function MonsterSelector({
 
           {/* Creator Filter */}
           <div className="mb-4 flex gap-2 flex-wrap">
-            {(['all', 'mine', 'global', 'other'] as const).map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setCreatorFilter(filter)}
-                className={`px-3 py-1 rounded text-sm capitalize transition-colors ${
-                  creatorFilter === filter
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-                aria-pressed={creatorFilter === filter}
-              >
-                {filterLabels[filter]}
-              </button>
-            ))}
+            {(['all', 'mine', 'global', 'other'] as const).map((filter) => {
+              const isActive = creatorFilter === filter;
+              return (
+                <button
+                  key={filter}
+                  onClick={() => setCreatorFilter(filter)}
+                  className={`px-3 py-1 rounded text-sm capitalize transition-colors ${
+                    isActive
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  type="button"
+                  {...{ 'aria-pressed': isActive }}
+                >
+                  {filterLabels[filter]}
+                </button>
+              );
+            })}
           </div>
 
           {/* Monster List */}
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+          <div className="space-y-2">
             {filteredMonsters.length === 0 ? (
               <div className="text-gray-400 text-center py-4">
                 No monsters match your search and filter criteria.
@@ -154,7 +158,7 @@ export function MonsterSelector({
                   </div>
                   <button
                     onClick={() => onSelect(template)}
-                    className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm ml-2 flex-shrink-0 transition-colors"
+                    className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm ml-2 shrink-0 transition-colors"
                     aria-label={`Add ${template.name} to encounter`}
                   >
                     Add
@@ -166,13 +170,15 @@ export function MonsterSelector({
         </>
       )}
 
-      {/* Close Button */}
-      <button
-        onClick={onClose}
-        className="mt-4 w-full bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm transition-colors"
-      >
-        Close
-      </button>
+      {/* Close Button - only show if not hidden */}
+      {!hideCloseButton && (
+        <button
+          onClick={onClose}
+          className="mt-4 w-full bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm transition-colors"
+        >
+          Close
+        </button>
+      )}
     </div>
   );
 }
