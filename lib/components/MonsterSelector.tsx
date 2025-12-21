@@ -75,10 +75,6 @@ export function MonsterSelector({
     });
   }, [searchQuery, creatorFilter, monsters, fuse, userId]);
 
-  const getAriaPressed = (filter: CreatorFilter): 'true' | 'false' => {
-    return creatorFilter === filter ? 'true' : 'false';
-  };
-
   return (
     <div>
       {loading ? (
@@ -110,20 +106,24 @@ export function MonsterSelector({
 
           {/* Creator Filter */}
           <div className="mb-4 flex gap-2 flex-wrap">
-            {(['all', 'mine', 'global', 'other'] as const).map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setCreatorFilter(filter)}
-                className={`px-3 py-1 rounded text-sm capitalize transition-colors ${
-                  creatorFilter === filter
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-                aria-pressed={getAriaPressed(filter)}
-              >
-                {filterLabels[filter]}
-              </button>
-            ))}
+            {(['all', 'mine', 'global', 'other'] as const).map((filter) => {
+              const isActive = creatorFilter === filter;
+              return (
+                <button
+                  key={filter}
+                  onClick={() => setCreatorFilter(filter)}
+                  className={`px-3 py-1 rounded text-sm capitalize transition-colors ${
+                    isActive
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  type="button"
+                  {...{ 'aria-pressed': isActive }}
+                >
+                  {filterLabels[filter]}
+                </button>
+              );
+            })}
           </div>
 
           {/* Monster List */}
