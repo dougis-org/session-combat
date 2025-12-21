@@ -333,7 +333,7 @@ function EncounterEditor({
           <button
             onClick={() => setShowCombatantModal(true)}
             disabled={saving}
-            className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-3 py-2 rounded text-sm flex-1"
+            className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-3 py-2 rounded text-sm"
           >
             Add Combatant
           </button>

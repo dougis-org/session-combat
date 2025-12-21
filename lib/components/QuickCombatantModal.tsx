@@ -81,7 +81,7 @@ export function QuickCombatantModal({
       templateId: template.id,
     };
     onAddMonster(newMonster);
-    onClose();
+    // Keep modal open to allow adding multiple monsters from library
   };
 
   const handleAddCustomMonster = (e: React.FormEvent) => {
@@ -96,6 +96,11 @@ export function QuickCombatantModal({
 
     if (customFormData.dexterity < 1 || customFormData.dexterity > 30) {
       setError('Dexterity must be between 1 and 30');
+      return;
+    }
+
+    if (customFormData.ac < 1) {
+      setError('AC must be at least 1');
       return;
     }
 
@@ -133,11 +138,30 @@ export function QuickCombatantModal({
     onClose();
   };
 
-  const handleCustomFormChange = (field: string, value: string | number) => {
-    setCustomFormData((prev) => ({
-      ...prev,
-      [field]: field === 'name' ? value : parseInt(String(value)) || prev[field as keyof typeof prev],
-    }));
+  const handleCustomFormChange = (
+    field: keyof typeof customFormData,
+    value: string | number
+  ) => {
+    setCustomFormData((prev) => {
+      if (field === 'name') {
+        return { ...prev, name: String(value) };
+      }
+
+      const stringValue = String(value);
+      let numValue: number;
+
+      if (stringValue.trim() === '') {
+        numValue = 0;
+      } else {
+        const parsed = parseInt(stringValue, 10);
+        numValue = Number.isNaN(parsed) ? 0 : parsed;
+      }
+
+      return {
+        ...prev,
+        [field]: numValue,
+      };
+    });
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -170,7 +194,7 @@ export function QuickCombatantModal({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-700 px-6 pt-4">
+        <div className="flex border-b border-gray-700 px-6 pt-4" role="tablist">
           <button
             onClick={() => {
               setActiveTab('library');
@@ -182,6 +206,7 @@ export function QuickCombatantModal({
                 : 'text-gray-400 border-transparent hover:text-gray-300'
             }`}
             aria-selected={activeTab === 'library'}
+            aria-controls="tab-library-panel"
             role="tab"
           >
             From Library
@@ -197,6 +222,7 @@ export function QuickCombatantModal({
                 : 'text-gray-400 border-transparent hover:text-gray-300'
             }`}
             aria-selected={activeTab === 'custom'}
+            aria-controls="tab-custom-panel"
             role="tab"
           >
             Create New
@@ -212,7 +238,13 @@ export function QuickCombatantModal({
           )}
 
           {/* Library Tab */}
-          {activeTab === 'library' && (
+          <div
+            id="tab-library-panel"
+            role="tabpanel"
+            aria-labelledby="tab-library"
+            hidden={activeTab !== 'library'}
+            className={activeTab === 'library' ? 'block' : 'hidden'}
+          >
             <div className="space-y-4">
               {loadingTemplates ? (
                 <p className="text-gray-300">Loading templates...</p>
@@ -301,10 +333,16 @@ export function QuickCombatantModal({
                 </>
               )}
             </div>
-          )}
+          </div>
 
           {/* Custom Tab */}
-          {activeTab === 'custom' && (
+          <div
+            id="tab-custom-panel"
+            role="tabpanel"
+            aria-labelledby="tab-custom"
+            hidden={activeTab !== 'custom'}
+            className={activeTab === 'custom' ? 'block' : 'hidden'}
+          >
             <form onSubmit={handleAddCustomMonster} className="space-y-4">
               <div>
                 <label htmlFor="custom-name" className="block text-sm font-semibold mb-2 text-gray-200">
@@ -404,7 +442,7 @@ export function QuickCombatantModal({
                 </button>
               </div>
             </form>
-          )}
+          </div>
         </div>
       </div>
     </div>
