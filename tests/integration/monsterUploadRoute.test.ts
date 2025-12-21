@@ -3,51 +3,207 @@
  * Tests the POST /api/monsters/upload route with valid and invalid data
  */
 
-import { MonsterUploadDocument } from '../../../lib/validation/monsterUpload';
+import { validateMonsterUploadDocument } from '../../lib/validation/monsterUpload';
 
-describe('POST /api/monsters/upload', () => {
-  const validToken = 'valid-test-token';
-  const testUserId = 'test-user-123';
+describe('Monster Upload Route Integration', () => {
+  describe('Route Validation', () => {
+    it('should validate document structure before processing', () => {
+      const validMonster = {
+        monsters: [
+          {
+            name: 'Test Monster',
+            maxHp: 50,
+            size: 'medium',
+            type: 'humanoid',
+          },
+        ],
+      };
 
-  describe('Authentication', () => {
-    it('should reject requests without authentication', async () => {
-      // This test would require a running server, so we'll note it as a manual test
-      // In a real scenario, we'd mock the requireAuth middleware
-      expect(true).toBe(true); // Placeholder
+      const result = validateMonsterUploadDocument(validMonster);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject documents without monsters array', () => {
+      const invalidDocument = { invalid: 'structure' };
+      const result = validateMonsterUploadDocument(invalidDocument as any);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('should reject empty monsters array', () => {
+      const emptyDocument = { monsters: [] };
+      const result = validateMonsterUploadDocument(emptyDocument);
+
+      expect(result.valid).toBe(false);
+    });
+
+    it('should reject invalid monster data', () => {
+      const invalidMonster = {
+        monsters: [
+          {
+            // Missing required 'name' and 'maxHp'
+            size: 'medium',
+          },
+        ],
+      };
+
+      const result = validateMonsterUploadDocument(invalidMonster as any);
+      expect(result.valid).toBe(false);
+    });
+
+    it('should accept valid monster with all required fields', () => {
+      const validDocument = {
+        monsters: [
+          {
+            name: 'Dragon',
+            maxHp: 200,
+            size: 'huge',
+            type: 'dragon',
+            ac: 19,
+            alignement: 'chaotic evil',
+          },
+        ],
+      };
+
+      const result = validateMonsterUploadDocument(validDocument as any);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should accept multiple monsters in single document', () => {
+      const multiMonsterDoc = {
+        monsters: [
+          { name: 'Monster 1', maxHp: 50, size: 'medium', type: 'humanoid' },
+          { name: 'Monster 2', maxHp: 75, size: 'large', type: 'beast' },
+          { name: 'Monster 3', maxHp: 100, size: 'huge', type: 'dragon' },
+        ],
+      };
+
+      const result = validateMonsterUploadDocument(multiMonsterDoc as any);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should validate monster fields independently', () => {
+      const mixedValidityDoc = {
+        monsters: [
+          { name: 'Valid Monster', maxHp: 50, size: 'medium', type: 'humanoid' },
+          { maxHp: 75 }, // Missing name
+          { name: 'Another', maxHp: -5 }, // Invalid HP
+        ],
+      };
+
+      const result = validateMonsterUploadDocument(mixedValidityDoc as any);
+      expect(result.valid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('should accept optional fields', () => {
+      const minimalMonster = {
+        monsters: [
+          {
+            name: 'Minimal Monster',
+            maxHp: 1,
+          },
+        ],
+      };
+
+      const result = validateMonsterUploadDocument(minimalMonster as any);
+      expect(result.valid).toBe(true);
     });
   });
 
-  describe('Validation', () => {
-    it('should reject invalid JSON', async () => {
-      // Placeholder for API test
-      expect(true).toBe(true);
+  describe('Field-Specific Validation', () => {
+    it('should reject AC outside valid range', () => {
+      const invalidAC = {
+        monsters: [
+          {
+            name: 'Bad AC Monster',
+            maxHp: 50,
+            ac: 50, // Invalid, should be 0-30
+          },
+        ],
+      };
+
+      const result = validateMonsterUploadDocument(invalidAC as any);
+      expect(result.valid).toBe(false);
     });
 
-    it('should reject documents without monsters array', async () => {
-      // Placeholder for API test
-      expect(true).toBe(true);
+    it('should reject invalid monster size', () => {
+      const invalidSize = {
+        monsters: [
+          {
+            name: 'Bad Size Monster',
+            maxHp: 50,
+            size: 'enormous', // Not a valid D&D size
+          },
+        ],
+      };
+
+      const result = validateMonsterUploadDocument(invalidSize as any);
+      expect(result.valid).toBe(false);
     });
 
-    it('should accept valid monster documents', async () => {
-      // Placeholder for API test
-      expect(true).toBe(true);
-    });
-  });
+    it('should accept valid D&D sizes', () => {
+      const sizes = ['tiny', 'small', 'medium', 'large', 'huge', 'gargantuan'];
 
-  describe('Monster Storage', () => {
-    it('should assign userId from auth context', async () => {
-      // Placeholder for API test
-      expect(true).toBe(true);
+      for (const size of sizes) {
+        const doc = {
+          monsters: [
+            {
+              name: `${size} Monster`,
+              maxHp: 50,
+              size,
+            },
+          ],
+        };
+
+        const result = validateMonsterUploadDocument(doc as any);
+        expect(result.valid).toBe(true);
+      }
     });
 
-    it('should set isGlobal to false for uploaded monsters', async () => {
-      // Placeholder for API test
-      expect(true).toBe(true);
+    it('should validate ability scores in valid range', () => {
+      const validAbilities = {
+        monsters: [
+          {
+            name: 'Good Stats',
+            maxHp: 50,
+            abilityScores: {
+              strength: 15,
+              dexterity: 12,
+              constitution: 14,
+              intelligence: 10,
+              wisdom: 13,
+              charisma: 11,
+            },
+          },
+        ],
+      };
+
+      const result = validateMonsterUploadDocument(validAbilities as any);
+      expect(result.valid).toBe(true);
     });
 
-    it('should handle bulk upload with multiple monsters', async () => {
-      // Placeholder for API test
-      expect(true).toBe(true);
+    it('should reject ability scores outside range', () => {
+      const invalidAbilities = {
+        monsters: [
+          {
+            name: 'Bad Stats',
+            maxHp: 50,
+            abilityScores: {
+              strength: 50, // Too high
+              dexterity: 12,
+              constitution: 0, // Too low
+              intelligence: 10,
+              wisdom: 13,
+              charisma: 11,
+            },
+          },
+        ],
+      };
+
+      const result = validateMonsterUploadDocument(invalidAbilities as any);
+      expect(result.valid).toBe(false);
     });
   });
 });

@@ -3,7 +3,7 @@
  * Validates and transforms user-uploaded monster data
  */
 
-import { MonsterTemplate, AbilityScores } from '@/lib/types';
+import { MonsterTemplate, AbilityScores, CreatureAbility } from '@/lib/types';
 
 /**
  * Valid monster sizes in D&D 5e
@@ -300,6 +300,86 @@ function validateStringNumberRecord(
 }
 
 /**
+ * Validates a string-only record (key-value pairs with string values)
+ */
+function validateStringRecord(
+  value: unknown,
+  fieldName: string = 'record'
+): { valid: true; value: Record<string, string> } | { valid: false; error: ValidationError } {
+  if (value === undefined || value === null) {
+    return { valid: true, value: {} };
+  }
+
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    return {
+      valid: false,
+      error: {
+        field: fieldName,
+        message: `${fieldName} must be an object`,
+      },
+    };
+  }
+
+  const result: Record<string, string> = {};
+  const obj = value as Record<string, unknown>;
+
+  for (const [key, val] of Object.entries(obj)) {
+    if (typeof val !== 'string') {
+      return {
+        valid: false,
+        error: {
+          field: `${fieldName}.${key}`,
+          message: `${fieldName}.${key} must be a string`,
+        },
+      };
+    }
+    result[key] = val;
+  }
+
+  return { valid: true, value: result };
+}
+
+/**
+ * Validates a numeric record (key-value pairs with number values)
+ */
+function validateNumberRecord(
+  value: unknown,
+  fieldName: string = 'record'
+): { valid: true; value: Record<string, number> } | { valid: false; error: ValidationError } {
+  if (value === undefined || value === null) {
+    return { valid: true, value: {} };
+  }
+
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    return {
+      valid: false,
+      error: {
+        field: fieldName,
+        message: `${fieldName} must be an object`,
+      },
+    };
+  }
+
+  const result: Record<string, number> = {};
+  const obj = value as Record<string, unknown>;
+
+  for (const [key, val] of Object.entries(obj)) {
+    if (typeof val !== 'number' || !Number.isFinite(val)) {
+      return {
+        valid: false,
+        error: {
+          field: `${fieldName}.${key}`,
+          message: `${fieldName}.${key} must be a number`,
+        },
+      };
+    }
+    result[key] = val;
+  }
+
+  return { valid: true, value: result };
+}
+
+/**
  * Validates a creature ability (trait, action, etc)
  */
 function validateAbility(ability: unknown, fieldName: string = 'ability') {
@@ -506,17 +586,27 @@ export function validateMonsterData(
     }
   }
 
-  // Optional: savingThrows, skills, senses (record objects)
-  const recordFields = ['savingThrows', 'skills', 'senses'];
-  for (const field of recordFields) {
-    if (data[field as keyof RawMonsterData] !== undefined && data[field as keyof RawMonsterData] !== null) {
-      const recordResult = validateStringNumberRecord(
-        data[field as keyof RawMonsterData],
-        `${prefix}.${field}`
-      );
-      if (!recordResult.valid) {
-        errors.push(recordResult.error);
-      }
+  // Optional: savingThrows (number record)
+  if (data.savingThrows !== undefined && data.savingThrows !== null) {
+    const result = validateNumberRecord(data.savingThrows, `${prefix}.savingThrows`);
+    if (!result.valid) {
+      errors.push(result.error);
+    }
+  }
+
+  // Optional: skills (number record)
+  if (data.skills !== undefined && data.skills !== null) {
+    const result = validateNumberRecord(data.skills, `${prefix}.skills`);
+    if (!result.valid) {
+      errors.push(result.error);
+    }
+  }
+
+  // Optional: senses (string record)
+  if (data.senses !== undefined && data.senses !== null) {
+    const result = validateStringRecord(data.senses, `${prefix}.senses`);
+    if (!result.valid) {
+      errors.push(result.error);
     }
   }
 
@@ -587,7 +677,7 @@ export function transformMonsterData(
     id: crypto.randomUUID(),
     userId,
     name: (raw.name as string).trim(),
-    size: (raw.size || 'medium') as any,
+    size: (raw.size || 'medium') as ValidSize,
     type: (raw.type || 'humanoid') as string,
     alignment: raw.alignment ? (raw.alignment as string) : undefined,
     ac: (raw.ac || 10) as number,
@@ -616,12 +706,12 @@ export function transformMonsterData(
     conditionImmunities: (raw.conditionImmunities || []) as string[],
     senses: (raw.senses || {}) as Record<string, string>,
     languages: (raw.languages || []) as string[],
-    traits: (raw.traits || []) as any[],
-    actions: (raw.actions || []) as any[],
-    bonusActions: (raw.bonusActions || []) as any[],
-    reactions: (raw.reactions || []) as any[],
-    lairActions: (raw.lairActions || []) as any[],
-    legendaryActions: (raw.legendaryActions || []) as any[],
+    traits: (raw.traits || []) as CreatureAbility[],
+    actions: (raw.actions || []) as CreatureAbility[],
+    bonusActions: (raw.bonusActions || []) as CreatureAbility[],
+    reactions: (raw.reactions || []) as CreatureAbility[],
+    lairActions: (raw.lairActions || []) as CreatureAbility[],
+    legendaryActions: (raw.legendaryActions || []) as CreatureAbility[],
     challengeRating: (raw.challengeRating || 0) as number,
     experiencePoints: (raw.experiencePoints || 0) as number,
     description: raw.description ? (raw.description as string) : undefined,

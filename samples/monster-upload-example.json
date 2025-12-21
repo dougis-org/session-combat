@@ -17,26 +17,14 @@
         "wisdom": 15,
         "charisma": 14
       },
-      "savingThrows": [
-        {
-          "ability": "intelligence",
-          "bonus": 8
-        },
-        {
-          "ability": "wisdom",
-          "bonus": 6
-        },
-        {
-          "ability": "charisma",
-          "bonus": 5
-        }
-      ],
-      "skills": [
-        {
-          "name": "Perception",
-          "bonus": 10
-        }
-      ],
+      "savingThrows": {
+        "intelligence": 8,
+        "wisdom": 6,
+        "charisma": 5
+      },
+      "skills": {
+        "Perception": 10
+      },
       "damageImmunities": [
         "psychic"
       ],
@@ -46,8 +34,14 @@
         "frightened",
         "prone"
       ],
-      "senses": "darkvision 120 ft., passive Perception 20",
-      "languages": "Deep Speech, telepathy 120 ft.",
+      "senses": {
+        "darkvision": "120 ft.",
+        "passivePerception": 20
+      },
+      "languages": [
+        "Deep Speech",
+        "telepathy 120 ft."
+      ],
       "challengeRating": 10,
       "experiencePoints": 5900,
       "description": "The aboleth is an ancient, otherworldly creature of immense power. A massive aberration from the depths of dungeons, it dwells in dark waters, plotting against the realms of mortals.",

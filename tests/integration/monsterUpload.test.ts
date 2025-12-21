@@ -9,7 +9,6 @@ import {
   transformMonsterData,
   MonsterUploadDocument,
   RawMonsterData,
-  ValidationResult,
 } from '../../lib/validation/monsterUpload';
 
 describe('Monster Upload Validation', () => {

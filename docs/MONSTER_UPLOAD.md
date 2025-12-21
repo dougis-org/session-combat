@@ -66,8 +66,8 @@ All other fields from the [MonsterTemplate](../../lib/types.ts) interface are su
 - `source` (string): Source material reference
 - `abilityScores` (object): All six ability scores (1-30 range)
   - `strength`, `dexterity`, `constitution`, `intelligence`, `wisdom`, `charisma`
-- `savingThrows` (object): Saving throw modifiers by ability
-- `skills` (object): Skill bonuses
+- `savingThrows` (object): Saving throw modifiers by ability (key-value map, e.g., `{ "intelligence": 8, "wisdom": 5 }`)
+- `skills` (object): Skill bonuses (key-value map, e.g., `{ "Perception": 10, "Stealth": 6 }`)
 - `damageResistances` (array): List of damage types
 - `damageImmunities` (array): List of damage types
 - `damageVulnerabilities` (array): List of damage types
@@ -170,8 +170,7 @@ When some monsters fail to save:
 
 ### Error Codes
 
-- `200`: Invalid JSON body
-- `400`: Validation failed
+- `400`: Invalid JSON body or validation failed
 - `401`: Not authenticated
 - `500`: Server error
 
