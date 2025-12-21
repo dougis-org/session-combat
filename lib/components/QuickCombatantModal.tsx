@@ -77,7 +77,7 @@ export function QuickCombatantModal({
     const newMonster: Monster = {
       ...template,
       id: crypto.randomUUID(),
-      userId: undefined,
+
       templateId: template.id,
     };
     onAddMonster(newMonster);
@@ -95,7 +95,7 @@ export function QuickCombatantModal({
     }
 
     if (customFormData.dexterity < 1 || customFormData.dexterity > 30) {
-      setError('Dexterity must be between 1 and 30');
+      setError('Dexterity must be between 1 and 30 (30 is allowed for powerful monsters or exceptional creatures)');
       return;
     }
 
@@ -114,6 +114,10 @@ export function QuickCombatantModal({
       return;
     }
 
+    if (customFormData.ac < 1) {
+      setError('AC must be at least 1');
+      return;
+    }
     const newMonster: Monster = {
       id: crypto.randomUUID(),
       name: customFormData.name.trim(),
@@ -420,7 +424,7 @@ export function QuickCombatantModal({
                   value={customFormData.hp}
                   onChange={(e) => {
                     const newHp = parseInt(e.target.value) || 0;
-                    handleCustomFormChange('hp', Math.min(newHp, customFormData.maxHp));
+                    handleCustomFormChange('hp', newHp);
                   }}
                   className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
