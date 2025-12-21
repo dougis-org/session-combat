@@ -257,17 +257,15 @@ function validateStringArray(
 }
 
 /**
- * Validates a record of strings or numbers
+ * Generic record validator
  */
-function validateStringNumberRecord(
+function validateRecord<T extends string | number | (string | number)>(
   value: unknown,
-  fieldName: string = 'record'
-): {
-  valid: true;
-  value: Record<string, string | number>;
-} | { valid: false; error: ValidationError } {
+  fieldName: string,
+  isValid: (val: unknown) => boolean
+): { valid: true; value: Record<string, T> } | { valid: false; error: ValidationError } {
   if (value === undefined || value === null) {
-    return { valid: true, value: {} };
+    return { valid: true, value: {} as Record<string, T> };
   }
 
   if (typeof value !== 'object' || Array.isArray(value)) {
@@ -280,20 +278,20 @@ function validateStringNumberRecord(
     };
   }
 
-  const result: Record<string, string | number> = {};
+  const result: Record<string, T> = {};
   const obj = value as Record<string, unknown>;
 
   for (const [key, val] of Object.entries(obj)) {
-    if (typeof val !== 'string' && typeof val !== 'number') {
+    if (!isValid(val)) {
       return {
         valid: false,
         error: {
           field: `${fieldName}.${key}`,
-          message: `${fieldName}.${key} must be a string or number`,
+          message: `${fieldName}.${key} has invalid type`,
         },
       };
     }
-    result[key] = val;
+    result[key] = val as T;
   }
 
   return { valid: true, value: result };
@@ -306,37 +304,9 @@ function validateStringRecord(
   value: unknown,
   fieldName: string = 'record'
 ): { valid: true; value: Record<string, string> } | { valid: false; error: ValidationError } {
-  if (value === undefined || value === null) {
-    return { valid: true, value: {} };
-  }
-
-  if (typeof value !== 'object' || Array.isArray(value)) {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be an object`,
-      },
-    };
-  }
-
-  const result: Record<string, string> = {};
-  const obj = value as Record<string, unknown>;
-
-  for (const [key, val] of Object.entries(obj)) {
-    if (typeof val !== 'string') {
-      return {
-        valid: false,
-        error: {
-          field: `${fieldName}.${key}`,
-          message: `${fieldName}.${key} must be a string`,
-        },
-      };
-    }
-    result[key] = val;
-  }
-
-  return { valid: true, value: result };
+  return validateRecord<string>(value, fieldName, (val) => typeof val === 'string') as
+    | { valid: true; value: Record<string, string> }
+    | { valid: false; error: ValidationError };
 }
 
 /**
@@ -346,37 +316,24 @@ function validateNumberRecord(
   value: unknown,
   fieldName: string = 'record'
 ): { valid: true; value: Record<string, number> } | { valid: false; error: ValidationError } {
-  if (value === undefined || value === null) {
-    return { valid: true, value: {} };
-  }
+  return validateRecord<number>(value, fieldName, (val) => typeof val === 'number' && Number.isFinite(val as number)) as
+    | { valid: true; value: Record<string, number> }
+    | { valid: false; error: ValidationError };
+}
 
-  if (typeof value !== 'object' || Array.isArray(value)) {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be an object`,
-      },
-    };
-  }
-
-  const result: Record<string, number> = {};
-  const obj = value as Record<string, unknown>;
-
-  for (const [key, val] of Object.entries(obj)) {
-    if (typeof val !== 'number' || !Number.isFinite(val)) {
-      return {
-        valid: false,
-        error: {
-          field: `${fieldName}.${key}`,
-          message: `${fieldName}.${key} must be a number`,
-        },
-      };
-    }
-    result[key] = val;
-  }
-
-  return { valid: true, value: result };
+/**
+ * Validates a record of strings or numbers
+ */
+function validateStringNumberRecord(
+  value: unknown,
+  fieldName: string = 'record'
+): {
+  valid: true;
+  value: Record<string, string | number>;
+} | { valid: false; error: ValidationError } {
+  return validateRecord<string | number>(value, fieldName, (val) => typeof val === 'string' || typeof val === 'number') as
+    | { valid: true; value: Record<string, string | number> }
+    | { valid: false; error: ValidationError };
 }
 
 /**
