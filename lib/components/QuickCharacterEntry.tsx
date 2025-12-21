@@ -240,11 +240,11 @@ export function QuickCharacterEntry({
         </p>
 
         {existingCombatants.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-gray-700">
-            <h3 className="text-sm font-semibold text-gray-300 mb-3">Current Combatants</h3>
-            <div className="space-y-2 max-h-40 overflow-y-auto">
+          <section className="mt-6 pt-6 border-t border-gray-700" aria-labelledby="combatantsHeading">
+            <h3 id="combatantsHeading" className="text-sm font-semibold text-gray-300 mb-3">Current Combatants</h3>
+            <ul className="space-y-2">
               {existingCombatants.map((combatant) => (
-                <div key={combatant.id} className="bg-gray-700 rounded px-3 py-2 flex justify-between items-center">
+                <li key={combatant.id} className="bg-gray-700 rounded px-3 py-2 flex justify-between items-center">
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-medium truncate">{combatant.name}</p>
                     <p className="text-xs text-gray-400">
@@ -253,16 +253,18 @@ export function QuickCharacterEntry({
                   </div>
                   {onRemove && (
                     <button
+                      type="button"
                       onClick={() => onRemove(combatant.id)}
                       className="ml-2 bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs text-white transition-colors flex-shrink-0"
+                      aria-label={`Delete ${combatant.name} from combat`}
                     >
                       Delete
                     </button>
                   )}
-                </div>
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </section>
         )}
       </div>
     </div>
