@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { QuickCharacterEntry } from '@/lib/components/QuickCharacterEntry';
 import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll } from '@/lib/types';
+import { rollD20 } from '@/lib/utils/dice';
 
 function CombatContent() {
   const [combatState, setCombatState] = useState<CombatState | null>(null);
@@ -174,17 +175,6 @@ function CombatContent() {
       saveCombatState(null);
       setSetupCombatants([]);
     }
-  };
-  const rollD20 = (): number => {
-    const max = 20;
-    const randomBytes = new Uint8Array(1);
-    const limit = Math.floor(256 / max) * max; // 240
-    let value: number;
-    do {
-      crypto.getRandomValues(randomBytes);
-      value = randomBytes[0];
-    } while (value >= limit);
-    return (value % max) + 1;
   };
 
   const rollInitiative = () => {
@@ -904,15 +894,7 @@ function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
   };
 
   const handleRoll = () => {
-    const max = 20;
-    const randomBytes = new Uint8Array(1);
-    const limit = Math.floor(256 / max) * max; // 240
-    let value: number;
-    do {
-      crypto.getRandomValues(randomBytes);
-      value = randomBytes[0];
-    } while (value >= limit);
-    const roll = (value % max) + 1;
+    const roll = rollD20();
     const bonus = getBonus();
     const total = roll + bonus;
     

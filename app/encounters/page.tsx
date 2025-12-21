@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { MonsterSelector } from '@/lib/components/MonsterSelector';
+import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
 import { Modal } from '@/lib/components/Modal';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { Encounter, Monster, MonsterTemplate } from '@/lib/types';
@@ -201,15 +201,15 @@ function EncounterEditor({
   const [editingMonster, setEditingMonster] = useState<Monster | null>(null);
   const [saving, setSaving] = useState(false);
   const [monsterTemplates, setMonsterTemplates] = useState<MonsterTemplate[]>([]);
-  const [showLibraryModal, setShowLibraryModal] = useState(false);
+  const [showCombatantModal, setShowCombatantModal] = useState(false);
   const [showCustomMonsterModal, setShowCustomMonsterModal] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
 
   useEffect(() => {
-    if (showLibraryModal && monsterTemplates.length === 0) {
+    if (showCombatantModal && monsterTemplates.length === 0) {
       loadMonsterTemplates();
     }
-  }, [showLibraryModal]);
+  }, [showCombatantModal]);
 
   const loadMonsterTemplates = async () => {
     setLoadingTemplates(true);
@@ -226,31 +226,8 @@ function EncounterEditor({
     }
   };
 
-  const addMonsterFromLibrary = (template: MonsterTemplate) => {
-    // Create a unique instance from the template
-    const newMonster: Monster = {
-      ...template,
-      id: crypto.randomUUID(),
-      userId: undefined,
-      templateId: template.id,
-    };
-    setMonsters([...monsters, newMonster]);
-  };
-
-  const addMonster = () => {
-    const newMonster: Monster = {
-      id: crypto.randomUUID(),
-      name: 'New Monster',
-      hp: 10,
-      maxHp: 10,
-      ac: 10,
-      abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
-      size: 'medium',
-      type: 'humanoid',
-      speed: '30 ft.',
-      challengeRating: 0,
-    };
-    setEditingMonster(newMonster);
+  const addMonster = (monster: Monster) => {
+    setMonsters([...monsters, monster]);
   };
 
   const saveMonster = (monster: Monster) => {
@@ -354,21 +331,11 @@ function EncounterEditor({
 
         <div className="flex gap-2 mb-6">
           <button
-            onClick={() => setShowLibraryModal(true)}
+            onClick={() => setShowCombatantModal(true)}
             disabled={saving}
             className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-3 py-2 rounded text-sm"
           >
-            Add from Library
-          </button>
-          <button
-            onClick={() => {
-              addMonster();
-              setShowCustomMonsterModal(true);
-            }}
-            disabled={saving}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-3 py-2 rounded text-sm"
-          >
-            Add Custom
+            Add Combatant
           </button>
         </div>
       </div>
@@ -390,38 +357,32 @@ function EncounterEditor({
         </button>
       </div>
 
-      {/* Library Modal */}
-      <Modal
-        isOpen={showLibraryModal}
-        title="Add Monster from Library"
-        onClose={() => setShowLibraryModal(false)}
-        size="large"
-      >
-        <MonsterSelector
-          monsters={monsterTemplates}
-          onSelect={(template) => {
-            addMonsterFromLibrary(template);
-          }}
-          onClose={() => setShowLibraryModal(false)}
-          hideCloseButton={true}
+      {/* Combatant Modal */}
+      {showCombatantModal && (
+        <QuickCombatantModal
+          onAddMonster={addMonster}
+          onClose={() => setShowCombatantModal(false)}
+          monsterTemplates={monsterTemplates}
+          loadingTemplates={loadingTemplates}
+          userId={user?.userId}
         />
-      </Modal>
+      )}
 
-      {/* Custom Monster Modal */}
-      <Modal
-        isOpen={showCustomMonsterModal && editingMonster !== null}
-        title={
-          editingMonster && monsters.some((m) => m.id === editingMonster.id)
-            ? 'Edit Monster'
-            : 'Add Custom Monster'
-        }
-        onClose={() => {
-          setShowCustomMonsterModal(false);
-          setEditingMonster(null);
-        }}
-        size="medium"
-      >
-        {editingMonster && (
+      {/* Custom Monster Edit Modal */}
+      {editingMonster && showCustomMonsterModal && (
+        <Modal
+          isOpen={showCustomMonsterModal}
+          title={
+            monsters.some((m) => m.id === editingMonster.id)
+              ? 'Edit Monster'
+              : 'Add Custom Monster'
+          }
+          onClose={() => {
+            setShowCustomMonsterModal(false);
+            setEditingMonster(null);
+          }}
+          size="medium"
+        >
           <MonsterEditor
             monster={editingMonster}
             onSave={saveMonster}
@@ -431,8 +392,8 @@ function EncounterEditor({
             }}
             hideCancel={false}
           />
-        )}
-      </Modal>
+        </Modal>
+      )}
     </div>
   );
 }
