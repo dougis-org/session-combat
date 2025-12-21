@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
-import { Character, AbilityScores, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, DnDRace } from '@/lib/types';
+import { Character, AbilityScores, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, VALID_ALIGNMENTS, DnDRace } from '@/lib/types';
 
 function CharactersContent() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -358,14 +358,17 @@ function CharacterEditor({
 
         <div className="md:col-span-2">
           <label className="block mb-1 text-sm font-bold">Alignment</label>
-          <input
-            type="text"
+          <select
             value={alignment}
             onChange={e => setAlignment(e.target.value)}
-            placeholder="e.g., Lawful Good"
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
-          />
+          >
+            <option value="">Select Alignment</option>
+            {VALID_ALIGNMENTS.map(align => (
+              <option key={align} value={align}>{align}</option>
+            ))}
+          </select>
         </div>
       </div>
 
