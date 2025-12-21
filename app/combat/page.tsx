@@ -77,14 +77,30 @@ function CombatContent() {
     setSetupCombatants(prev => prev.filter(c => c.id !== id));
   };
 
-  const addCombatantToCombat = (combatant: CombatantState) => {
-    // Add combatant directly to active combat
+  const addCombatantToActiveSession = (combatant: CombatantState) => {
+    // Add combatant directly to active combat, re-sorting if initiative has been rolled.
+    // Note: New combatants are added with initiative: 0. If initiative has been rolled,
+    // they will appear at the bottom of the turn order. Users can manually adjust
+    // initiative via the Manual Entry option if needed.
     if (!combatState) return;
 
-    const updatedCombatants = [...combatState.combatants, combatant];
+    // Track the current combatant's ID to maintain turn pointer
+    const currentCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
+    
+    // Only sort if initiative has been rolled; otherwise just append
+    const updatedCombatants = hasInitiativeBeenRolled()
+      ? sortCombatants([...combatState.combatants, combatant])
+      : [...combatState.combatants, combatant];
+
+    // Find the index of the current combatant in the new list to preserve turn continuity
+    const newTurnIndex = currentCombatantId
+      ? updatedCombatants.findIndex(c => c.id === currentCombatantId)
+      : combatState.currentTurnIndex;
+
     saveCombatState({
       ...combatState,
       combatants: updatedCombatants,
+      currentTurnIndex: newTurnIndex !== -1 ? newTurnIndex : 0,
     });
     setShowQuickEntryType(null);
   };
@@ -145,15 +161,18 @@ function CombatContent() {
     };
 
     saveCombatState(newState);
+    setSetupCombatants([]);
   };
 
   const startCombat = () => {
+    // Starts combat including both library encounter combatants and any accumulated setup combatants.
     startCombatWithSetupCombatants();
   };
 
   const endCombat = () => {
     if (confirm('Are you sure you want to end combat?')) {
       saveCombatState(null);
+      setSetupCombatants([]);
     }
   };
   const rollD20 = (): number => {
@@ -334,6 +353,7 @@ function CombatContent() {
   }
 
   if (!combatState) {
+    // Setup phase: show option to start new combat with library combatants or quick entry
     return (
       <div className="min-h-screen bg-gray-900 text-white">
         <div className="container mx-auto px-4 py-8">
@@ -422,6 +442,7 @@ function CombatContent() {
                           <button
                             onClick={() => removeCombatantFromSetup(combatant.id)}
                             className="text-red-400 hover:text-red-300 text-xs"
+                            aria-label={`Remove ${combatant.name}`}
                           >
                             Remove
                           </button>
@@ -550,14 +571,14 @@ function CombatContent() {
               className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm"
               title="Add a party member mid-combat"
             >
-              + Player
+              + Add Party Member
             </button>
             <button
               onClick={() => setShowQuickEntryType('monster')}
               className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm"
               title="Add an enemy mid-combat"
             >
-              + Enemy
+              + Add Enemy
             </button>
             <button
               onClick={endCombat}
@@ -643,7 +664,7 @@ function CombatContent() {
         {showQuickEntryType && (
           <QuickCharacterEntry
             combatantType={showQuickEntryType}
-            onAdd={addCombatantToCombat}
+            onAdd={addCombatantToActiveSession}
             onCancel={() => setShowQuickEntryType(null)}
           />
         )}
