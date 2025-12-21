@@ -63,18 +63,7 @@ export function isValidRace(raceName: unknown): raceName is DnDRace {
 }
 
 // D&D 5e Alignments - standard 9-alignment system
-export type DnDAlignment = 
-  | 'Lawful Good'
-  | 'Neutral Good'
-  | 'Chaotic Good'
-  | 'Lawful Neutral'
-  | 'Neutral'
-  | 'Chaotic Neutral'
-  | 'Lawful Evil'
-  | 'Neutral Evil'
-  | 'Chaotic Evil';
-
-export const VALID_ALIGNMENTS: DnDAlignment[] = [
+export const VALID_ALIGNMENTS = [
   'Lawful Good',
   'Neutral Good',
   'Chaotic Good',
@@ -84,7 +73,9 @@ export const VALID_ALIGNMENTS: DnDAlignment[] = [
   'Lawful Evil',
   'Neutral Evil',
   'Chaotic Evil',
-];
+] as const;
+
+export type DnDAlignment = typeof VALID_ALIGNMENTS[number];
 
 export function isValidAlignment(alignment: unknown): alignment is DnDAlignment {
   return typeof alignment === 'string' && VALID_ALIGNMENTS.includes(alignment as DnDAlignment);
