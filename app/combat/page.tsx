@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
+import { QuickCharacterEntry } from '@/lib/components/QuickCharacterEntry';
 import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll } from '@/lib/types';
 
 function CombatContent() {
@@ -14,6 +15,7 @@ function CombatContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [initiativeMode, setInitiativeMode] = useState(false);
+  const [showQuickEntryType, setShowQuickEntryType] = useState<'player' | 'monster' | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -62,6 +64,30 @@ function CombatContent() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save combat state');
     }
+  };
+
+  const addCombatantToSetup = (combatant: CombatantState) => {
+    // Recreate combatState with the new combatant
+    if (!combatState) {
+      const newState: CombatState = {
+        id: crypto.randomUUID(),
+        userId: '',
+        combatants: [combatant],
+        currentRound: 1,
+        currentTurnIndex: 0,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      saveCombatState(newState);
+    } else {
+      const updatedCombatants = [...combatState.combatants, combatant];
+      saveCombatState({
+        ...combatState,
+        combatants: updatedCombatants,
+      });
+    }
+    setShowQuickEntryType(null);
   };
 
   const startCombat = () => {
@@ -126,13 +152,24 @@ function CombatContent() {
       saveCombatState(null);
     }
   };
+  const rollD20 = (): number => {
+    const max = 20;
+    const randomBytes = new Uint8Array(1);
+    const limit = Math.floor(256 / max) * max; // 240
+    let value: number;
+    do {
+      crypto.getRandomValues(randomBytes);
+      value = randomBytes[0];
+    } while (value >= limit);
+    return (value % max) + 1;
+  };
 
   const rollInitiative = () => {
     if (!combatState) return;
 
     // Roll initiative for all combatants
     const updatedCombatants = combatState.combatants.map(c => {
-      const roll = Math.floor(Math.random() * 20) + 1;
+      const roll = rollD20();
       const bonus = getInitiativeBonus(c);
       const total = roll + bonus;
       
@@ -309,43 +346,88 @@ function CombatContent() {
             </div>
           )}
 
-          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold mb-4">Start New Combat</h2>
+          <div className="bg-gray-800 rounded-lg p-6 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6">Start New Combat</h2>
             
-            <div className="mb-4">
-              <label className="block mb-2">Select Encounter (Optional)</label>
-              <select
-                value={selectedEncounterId}
-                onChange={(e) => setSelectedEncounterId(e.target.value)}
-                className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-              >
-                <option value="">No encounter</option>
-                {encounters.map(encounter => (
-                  <option key={encounter.id} value={encounter.id}>
-                    {encounter.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Option 1: Use existing characters */}
+              <div className="border border-gray-700 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3">From Library</h3>
+                <p className="text-gray-400 text-sm mb-4">
+                  Use your saved characters and encounters
+                </p>
+                
+                <div className="mb-4">
+                  <label className="block text-sm mb-2">Select Encounter (Optional)</label>
+                  <select
+                    value={selectedEncounterId}
+                    onChange={(e) => setSelectedEncounterId(e.target.value)}
+                    className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
+                  >
+                    <option value="">No encounter</option>
+                    {encounters.map(encounter => (
+                      <option key={encounter.id} value={encounter.id}>
+                        {encounter.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div className="mb-4">
-              <p className="text-gray-400 text-sm">
-                Characters: {characters.length} | 
-                Monsters: {selectedEncounterId ? encounters.find(e => e.id === selectedEncounterId)?.monsters.length || 0 : 0}
-              </p>
-            </div>
+                <div className="mb-4">
+                  <p className="text-gray-400 text-xs">
+                    Characters: {characters.length} | 
+                    Monsters: {selectedEncounterId ? encounters.find(e => e.id === selectedEncounterId)?.monsters.length || 0 : 0}
+                  </p>
+                </div>
 
-            <button
-              onClick={startCombat}
-              disabled={characters.length === 0}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-6 py-3 rounded text-lg font-semibold"
-            >
-              Start Combat
-            </button>
-            {characters.length === 0 && (
-              <p className="text-red-400 text-sm mt-2">You must create at least one character before starting combat</p>
-            )}
+                <button
+                  onClick={startCombat}
+                  disabled={characters.length === 0}
+                  className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded text-sm font-semibold transition-colors"
+                >
+                  Start Combat
+                </button>
+                {characters.length === 0 && (
+                  <p className="text-red-400 text-xs mt-2">Need at least one character</p>
+                )}
+              </div>
+
+              {/* Option 2: Quick entry */}
+              <div className="border border-blue-700 border-2 rounded-lg p-4 bg-blue-900 bg-opacity-20">
+                <h3 className="text-lg font-semibold mb-3 text-blue-300">Quick Entry</h3>
+                <p className="text-gray-400 text-sm mb-4">
+                  Add combatants on the fly during session
+                </p>
+                
+                <p className="text-xs text-gray-400 mb-4">
+                  Enter name, dexterity, HP, and optional initiative. Perfect for DMs managing player characters elsewhere.
+                </p>
+
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setShowQuickEntryType('player')}
+                    className="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-semibold transition-colors"
+                  >
+                    + Add Party Member
+                  </button>
+                  <button
+                    onClick={() => setShowQuickEntryType('monster')}
+                    className="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-semibold transition-colors"
+                  >
+                    + Add Enemy
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
+
+          {showQuickEntryType && (
+            <QuickCharacterEntry
+              combatantType={showQuickEntryType}
+              onAdd={addCombatantToSetup}
+              onCancel={() => setShowQuickEntryType(null)}
+            />
+          )}
         </div>
       </div>
     );
@@ -741,7 +823,15 @@ function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
   };
 
   const handleRoll = () => {
-    const roll = Math.floor(Math.random() * 20) + 1;
+    const max = 20;
+    const randomBytes = new Uint8Array(1);
+    const limit = Math.floor(256 / max) * max; // 240
+    let value: number;
+    do {
+      crypto.getRandomValues(randomBytes);
+      value = randomBytes[0];
+    } while (value >= limit);
+    const roll = (value % max) + 1;
     const bonus = getBonus();
     const total = roll + bonus;
     
