@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
@@ -26,6 +26,7 @@ function CombatContent() {
   const [selectedDetailCombatantId, setSelectedDetailCombatantId] = useState<string | null>(null);
   const [detailPosition, setDetailPosition] = useState<{top: number, left: number} | null>(null);
   const [initiativeEditId, setInitiativeEditId] = useState<string | null>(null);
+  const initiativePanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -78,14 +79,12 @@ function CombatContent() {
 
   // Scroll to initiative panel when it opens
   useEffect(() => {
-    if (initiativeEditId) {
-      // Small delay to ensure DOM is updated
-      setTimeout(() => {
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth',
-        });
-      }, 0);
+    if (initiativeEditId && initiativePanelRef.current) {
+      // Use scrollIntoView for more reliable scrolling
+      initiativePanelRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
     }
   }, [initiativeEditId]);
 
@@ -675,7 +674,7 @@ function CombatContent() {
 
         {/* Initiative Entry Panel */}
         {initiativeEditId && combatState && (
-          <div className="mb-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div ref={initiativePanelRef} className="mb-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
             <InitiativeEntry
               combatant={combatState.combatants.find(c => c.id === initiativeEditId)!}
               onSet={(initiativeRoll) => {
