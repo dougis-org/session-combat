@@ -28,6 +28,7 @@ function CombatContent() {
   const [initiativeEditId, setInitiativeEditId] = useState<string | null>(null);
   const [removeConfirmId, setRemoveConfirmId] = useState<string | null>(null);
   const [removeConfirmPosition, setRemoveConfirmPosition] = useState<{top: number, left: number} | null>(null);
+  const [showEncounterDescription, setShowEncounterDescription] = useState(false);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   const initiativePanelRef = useRef<HTMLDivElement>(null);
   const setupCombatantsRef = useRef<CombatantState[]>([]);
@@ -340,10 +341,13 @@ function CombatContent() {
       }
     }
 
+    const encounter = selectedEncounterId ? encounters.find(e => e.id === selectedEncounterId) : undefined;
+
     const newState: CombatState = {
       id: crypto.randomUUID(),
       userId: '',
       encounterId: selectedEncounterId || undefined,
+      encounterDescription: encounter?.description,
       combatants,
       currentRound: 1,
       currentTurnIndex: 0,
@@ -747,7 +751,29 @@ function CombatContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Combat Tracker</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold">Combat Tracker</h1>
+              {combatState.encounterDescription && (
+                <button
+                  onClick={() => setShowEncounterDescription(true)}
+                  className="hover:opacity-80 transition-opacity"
+                  title="See Encounter Description"
+                  type="button"
+                >
+                  <svg
+                    className="w-6 h-6 text-gray-400 hover:text-gray-300 cursor-pointer"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
             <p className="text-gray-400">Round {combatState.currentRound}</p>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -1086,6 +1112,32 @@ function CombatContent() {
                 </>
               );
             })()}
+          </div>
+        )}
+
+        {/* Encounter Description Modal */}
+        {showEncounterDescription && combatState?.encounterDescription && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setShowEncounterDescription(false)}
+          >
+            <div 
+              className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto shadow-xl border border-gray-700"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-start gap-4 mb-4">
+                <h2 className="text-2xl font-bold">Encounter Description</h2>
+                <button
+                  onClick={() => setShowEncounterDescription(false)}
+                  className="text-gray-400 hover:text-gray-200 text-2xl flex-shrink-0"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+                {combatState.encounterDescription}
+              </div>
+            </div>
           </div>
         )}
 

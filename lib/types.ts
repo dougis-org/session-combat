@@ -356,6 +356,7 @@ export interface CombatState {
   id: string;
   userId: string;
   encounterId?: string;
+  encounterDescription?: string;
   combatants: CombatantState[];
   currentRound: number;
   currentTurnIndex: number;
