@@ -341,6 +341,7 @@ export interface CombatantState extends CreatureStats {
   initiativeRoll?: InitiativeRoll;
   conditions: StatusCondition[];
   notes?: string;
+  targetIds?: string[]; // IDs of combatants being attacked
   // Additional metadata for combat display
   size?: 'tiny' | 'small' | 'medium' | 'large' | 'huge' | 'gargantuan';
   monsterType?: string;

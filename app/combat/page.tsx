@@ -274,6 +274,14 @@ function CombatContent() {
     }
   };
 
+  const restartRound = () => {
+    if (!combatState) return;
+    saveCombatState({
+      ...combatState,
+      currentTurnIndex: 0,
+    });
+  };
+
   const rollInitiative = () => {
     if (!combatState) return;
 
@@ -399,16 +407,26 @@ function CombatContent() {
   const setInitiativeRoll = (combatantId: string, initiativeRoll: InitiativeRoll) => {
     if (!combatState) return;
 
+    // Track the current combatant's ID to maintain turn pointer
+    const currentCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
+
     const updatedCombatants = combatState.combatants.map(c =>
       c.id === combatantId 
         ? { ...c, initiative: initiativeRoll.total, initiativeRoll }
         : c
     );
 
+    const sortedCombatants = sortCombatants(updatedCombatants);
+
+    // Find the index of the current combatant in the new sorted list to preserve turn continuity
+    const newTurnIndex = currentCombatantId
+      ? sortedCombatants.findIndex(c => c.id === currentCombatantId)
+      : 0;
+
     saveCombatState({
       ...combatState,
-      combatants: sortCombatants(updatedCombatants),
-      currentTurnIndex: 0,
+      combatants: sortedCombatants,
+      currentTurnIndex: newTurnIndex !== -1 ? newTurnIndex : 0,
     });
   };
 
@@ -654,6 +672,13 @@ function CombatContent() {
               + Add Enemy
             </button>
             <button
+              onClick={restartRound}
+              className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded text-sm"
+              title="Reset turn order to the first combatant"
+            >
+              Restart Round
+            </button>
+            <button
               onClick={endCombat}
               className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded"
             >
@@ -683,10 +708,7 @@ function CombatContent() {
                 <InitiativeEntry
                   combatant={combatant}
                   onSet={(initiativeRoll) => {
-                    updateCombatant(combatant.id, {
-                      initiative: initiativeRoll.total,
-                      initiativeRoll,
-                    });
+                    setInitiativeRoll(combatant.id, initiativeRoll);
                   }}
                 />
               </div>
@@ -700,10 +722,7 @@ function CombatContent() {
             <InitiativeEntry
               combatant={combatState.combatants.find(c => c.id === initiativeEditId)!}
               onSet={(initiativeRoll) => {
-                updateCombatant(initiativeEditId, {
-                  initiative: initiativeRoll.total,
-                  initiativeRoll,
-                });
+                setInitiativeRoll(initiativeEditId, initiativeRoll);
                 setInitiativeEditId(null);
               }}
             />
@@ -734,6 +753,7 @@ function CombatContent() {
                     setRemoveConfirmId(id);
                     setRemoveConfirmPosition(pos);
                   }}
+                  allCombatants={combatState.combatants}
                 />
               );
             })}
@@ -765,6 +785,7 @@ function CombatContent() {
                           setRemoveConfirmId(id);
                           setRemoveConfirmPosition(pos);
                         }}
+                        allCombatants={combatState.combatants}
                       />
                     );
                   })}
@@ -795,6 +816,7 @@ function CombatContent() {
                           setRemoveConfirmId(id);
                           setRemoveConfirmPosition(pos);
                         }}
+                        allCombatants={combatState.combatants}
                       />
                     );
                   })}
@@ -1043,6 +1065,7 @@ function CombatantCard({
   onShowDetails,
   onSetInitiative,
   onShowRemoveConfirm,
+  allCombatants,
 }: {
   combatant: CombatantState;
   isActive: boolean;
@@ -1052,10 +1075,12 @@ function CombatantCard({
   onShowDetails?: (combatantId: string, position: {top: number, left: number}) => void;
   onSetInitiative?: (combatantId: string) => void;
   onShowRemoveConfirm?: (combatantId: string, position: {top: number, left: number}) => void;
+  allCombatants?: CombatantState[];
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showConditions, setShowConditions] = useState(false);
   const [hpAdjustment, setHpAdjustment] = useState('');
+  const [showTargeting, setShowTargeting] = useState(false);
 
   const adjustHp = (amount: number) => {
     const newHp = Math.max(0, Math.min(combatant.maxHp, combatant.hp + amount));
@@ -1146,7 +1171,7 @@ function CombatantCard({
                   />
                 </svg>
               </button>
-              <h3 className="text-xl font-semibold">{combatant.name}</h3>
+              <h3 className="text-xl font-semibold">{combatant.name} {combatant.hp <= 0 && '☠️'}</h3>
               <button
                 onClick={(e) => {
                   const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
@@ -1176,7 +1201,7 @@ function CombatantCard({
             </div>
             <span className="text-sm text-gray-400 whitespace-nowrap">Hit Points:</span>
             <span className="text-lg font-bold">
-              Current: {combatant.hp} Total: {combatant.maxHp}
+              Current: <span className={hpColor === 'bg-green-500' ? 'text-green-500' : hpColor === 'bg-yellow-500' ? 'text-yellow-500' : 'text-red-500'}>{combatant.hp}</span> Max: {combatant.maxHp}
             </span>
             <input
               type="number"
@@ -1259,12 +1284,35 @@ function CombatantCard({
             </div>
           )}
 
+          {combatant.targetIds && combatant.targetIds.length > 0 && (
+            <div className="mb-2">
+              <p className="text-sm text-purple-400 font-semibold">Targeting:</p>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {combatant.targetIds.map(targetId => {
+                  const target = allCombatants?.find(c => c.id === targetId);
+                  return target ? (
+                    <span key={targetId} className={`px-2 py-1 rounded text-xs font-semibold ${target.type === 'player' ? 'bg-blue-600 text-blue-100' : 'bg-red-600 text-red-100'}`}>
+                      {target.name}
+                    </span>
+                  ) : null;
+                })}
+              </div>
+            </div>
+          )}
+
           {combatant.notes && (
             <p className="text-sm text-gray-400 italic">{combatant.notes}</p>
           )}
         </div>
 
         <div className="flex flex-col gap-2">
+          <button
+            onClick={() => setShowTargeting(!showTargeting)}
+            className="bg-orange-600 hover:bg-orange-700 px-2 py-1 rounded text-xs"
+            title="Set targets for this combatant"
+          >
+            Targeting
+          </button>
           <button
             onClick={addCondition}
             className="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs"
@@ -1273,6 +1321,47 @@ function CombatantCard({
           </button>
         </div>
       </div>
+
+      {showTargeting && allCombatants && (
+        <div className="mt-4 bg-gray-800 rounded p-4 border border-purple-600">
+          <div className="flex justify-between items-center mb-3">
+            <h4 className="text-sm font-semibold text-purple-300">Select targets for {combatant.name}</h4>
+            <button
+              onClick={() => setShowTargeting(false)}
+              className="text-gray-400 hover:text-gray-300 text-lg"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="space-y-2">
+            {allCombatants
+              .filter(c => c.id !== combatant.id)
+              .map(target => (
+                <label key={target.id} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={combatant.targetIds?.includes(target.id) ?? false}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        onUpdate({
+                          targetIds: [...(combatant.targetIds ?? []), target.id],
+                        });
+                      } else {
+                        onUpdate({
+                          targetIds: (combatant.targetIds ?? []).filter(id => id !== target.id),
+                        });
+                      }
+                    }}
+                    className="w-4 h-4 rounded bg-gray-700 border border-gray-600 cursor-pointer"
+                  />
+                  <span className={`text-sm ${target.type === 'player' ? 'text-blue-300' : 'text-red-300'}`}>
+                    {target.name}
+                  </span>
+                </label>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
