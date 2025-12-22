@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
     }
 
     const party: Party = {
-      _id: undefined,
       id: crypto.randomUUID(),
       userId: auth.userId,
       name: name.trim(),

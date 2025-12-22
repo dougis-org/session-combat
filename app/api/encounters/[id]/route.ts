@@ -50,9 +50,13 @@ export async function PUT(
     const body = await request.json();
     const { name, description, monsters } = body;
 
+    console.log('PUT /api/encounters/[id] received:', { pathId: id, bodyId: body.id, userId: auth.userId });
+
     // Get the existing encounter to verify ownership
     const encounters = await storage.loadEncounters(auth.userId);
+    console.log('Loaded encounters:', encounters.map(e => ({ id: e.id, name: e.name })));
     const existingEncounter = encounters.find((e) => e.id === id);
+    console.log('Found existing encounter:', existingEncounter ? { id: existingEncounter.id, name: existingEncounter.name } : 'NOT FOUND');
 
     if (!existingEncounter) {
       return NextResponse.json(

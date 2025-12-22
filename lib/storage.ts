@@ -2,6 +2,7 @@
 import { getDatabase } from './db';
 import { SessionData, Encounter, Character, CombatState, Party, MonsterTemplate, AbilityScores } from './types';
 import { GLOBAL_USER_ID } from './constants';
+import { ObjectId } from 'mongodb';
 
 /**
  * Helper to normalize ability scores with default values
@@ -172,9 +173,23 @@ export const storage = {
   async saveEncounter(encounter: Encounter): Promise<void> {
     try {
       const db = await getDatabase();
-      await db
+      const { _id, ...encounterData } = encounter;
+      console.log('saveEncounter called with:', { id: encounter.id, _id: encounter._id, name: encounter.name, userId: encounter.userId });
+      
+      // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
+      let query: any = { userId: encounter.userId };
+      if (encounter._id) {
+        query._id = new ObjectId(encounter._id);
+      } else {
+        query.id = encounter.id;
+      }
+      
+      console.log('Query for updateOne:', query);
+      
+      const result = await db
         .collection<Encounter>('encounters')
-        .updateOne({ id: encounter.id, userId: encounter.userId }, { $set: encounter }, { upsert: true });
+        .updateOne(query, { $set: encounterData }, { upsert: true });
+      console.log('updateOne result:', { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount, upsertedId: result.upsertedId });
     } catch (error) {
       console.error('Error saving encounter:', error);
       throw error;
@@ -198,9 +213,19 @@ export const storage = {
   async saveCharacter(character: Character): Promise<void> {
     try {
       const db = await getDatabase();
+      const { _id, ...characterData } = character;
+      
+      // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
+      let query: any = { userId: character.userId };
+      if (character._id) {
+        query._id = new ObjectId(character._id);
+      } else {
+        query.id = character.id;
+      }
+      
       await db
         .collection<Character>('characters')
-        .updateOne({ id: character.id, userId: character.userId }, { $set: character }, { upsert: true });
+        .updateOne(query, { $set: characterData }, { upsert: true });
     } catch (error) {
       console.error('Error saving character:', error);
       throw error;
@@ -227,9 +252,19 @@ export const storage = {
     }
     try {
       const db = await getDatabase();
+      const { _id, ...combatStateData } = combatState;
+      
+      // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
+      let query: any = { userId: combatState.userId };
+      if (combatState._id) {
+        query._id = new ObjectId(combatState._id);
+      } else {
+        query.id = combatState.id;
+      }
+      
       await db
         .collection<CombatState>('combatStates')
-        .updateOne({ id: combatState.id, userId: combatState.userId }, { $set: combatState }, { upsert: true });
+        .updateOne(query, { $set: combatStateData }, { upsert: true });
     } catch (error) {
       console.error('Error saving combat state:', error);
       throw error;
@@ -267,9 +302,19 @@ export const storage = {
   async saveParty(party: Party): Promise<void> {
     try {
       const db = await getDatabase();
+      const { _id, ...partyData } = party;
+      
+      // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
+      let query: any = { userId: party.userId };
+      if (party._id) {
+        query._id = new ObjectId(party._id);
+      } else {
+        query.id = party.id;
+      }
+      
       await db
         .collection<Party>('parties')
-        .updateOne({ id: party.id, userId: party.userId }, { $set: party }, { upsert: true });
+        .updateOne(query, { $set: partyData }, { upsert: true });
     } catch (error) {
       console.error('Error saving party:', error);
       throw error;
@@ -304,9 +349,19 @@ export const storage = {
   async saveMonsterTemplate(template: MonsterTemplate): Promise<void> {
     try {
       const db = await getDatabase();
+      const { _id, ...templateData } = template;
+      
+      // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
+      let query: any = { userId: template.userId };
+      if (template._id) {
+        query._id = new ObjectId(template._id);
+      } else {
+        query.id = template.id;
+      }
+      
       await db
         .collection<MonsterTemplate>('monsterTemplates')
-        .updateOne({ id: template.id, userId: template.userId }, { $set: template }, { upsert: true });
+        .updateOne(query, { $set: templateData }, { upsert: true });
     } catch (error) {
       console.error('Error saving monster template:', error);
       throw error;

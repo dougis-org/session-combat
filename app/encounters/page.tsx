@@ -51,8 +51,14 @@ function EncountersContent() {
   const saveEncounter = async (encounter: Encounter) => {
     try {
       setError(null);
-      const url = isAddingEncounter ? '/api/encounters' : `/api/encounters/${encounter.id}`;
-      const method = isAddingEncounter ? 'POST' : 'PUT';
+      // Check if this is a new encounter by looking at whether it has an ID
+      // Check both id and _id since MongoDB uses _id
+      const hasId = (encounter.id && encounter.id !== '') || (encounter._id && encounter._id !== '');
+      const isNew = !hasId;
+      const url = isNew ? '/api/encounters' : `/api/encounters/${encounter.id || encounter._id}`;
+      const method = isNew ? 'POST' : 'PUT';
+
+      console.log('Saving encounter:', { isNew, method, url, id: encounter.id, _id: encounter._id });
 
       const response = await fetch(url, {
         method,
@@ -360,9 +366,15 @@ function EncounterEditor({
       {/* Combatant Modal */}
       {showCombatantModal && (
         <QuickCombatantModal
-          onAddMonster={addMonster}
+          onAddMonster={(monster) => {
+            addMonster(monster);
+          }}
+          onAddCharacter={(character) => {
+            // Characters not supported in encounter builder
+          }}
           onClose={() => setShowCombatantModal(false)}
           monsterTemplates={monsterTemplates}
+          characterTemplates={[]}
           loadingTemplates={loadingTemplates}
           userId={user?.userId}
         />

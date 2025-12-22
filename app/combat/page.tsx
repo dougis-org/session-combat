@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
@@ -19,6 +19,7 @@ function CombatContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [initiativeMode, setInitiativeMode] = useState(false);
+  const [initiativeFilter, setInitiativeFilter] = useState<'all' | 'player' | 'monster'>('all');
   const [showQuickEntryType, setShowQuickEntryType] = useState<'player' | 'monster' | null>(null);
   const [showCombatantModal, setShowCombatantModal] = useState(false);
   const [setupCombatants, setSetupCombatants] = useState<CombatantState[]>([]);
@@ -28,8 +29,10 @@ function CombatContent() {
   const [initiativeEditId, setInitiativeEditId] = useState<string | null>(null);
   const [removeConfirmId, setRemoveConfirmId] = useState<string | null>(null);
   const [removeConfirmPosition, setRemoveConfirmPosition] = useState<{top: number, left: number} | null>(null);
+  const [showEncounterDescription, setShowEncounterDescription] = useState(false);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   const initiativePanelRef = useRef<HTMLDivElement>(null);
+  const setupCombatantsRef = useRef<CombatantState[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -99,6 +102,25 @@ function CombatContent() {
     }
   }, [toast]);
 
+  // Keep ref in sync with setupCombatants state for duplicate detection
+  useEffect(() => {
+    setupCombatantsRef.current = setupCombatants;
+  }, [setupCombatants]);
+
+  // Log when modal opens to diagnose data issues
+  useEffect(() => {
+    if (showCombatantModal) {
+      console.log('Modal opened with data:', {
+        monsterTemplatesCount: monsterTemplates.length,
+        charactersCount: characters.length,
+        loadingTemplates,
+        userId: user?.userId,
+        firstMonster: monsterTemplates[0],
+        firstCharacter: characters[0],
+      });
+    }
+  }, [showCombatantModal]);
+
   const saveCombatState = async (state: CombatState | null) => {
     try {
       setError(null);
@@ -119,6 +141,8 @@ function CombatContent() {
   const addCombatantToSetup = (combatant: CombatantState) => {
     // Add to setupCombatants instead of starting combat
     setSetupCombatants(prev => [...prev, combatant]);
+    // Keep ref in sync for immediate duplicate detection
+    setupCombatantsRef.current = [...setupCombatantsRef.current, combatant];
     setShowQuickEntryType(null);
   };
 
@@ -133,22 +157,57 @@ function CombatContent() {
     // initiative via the Manual Entry option if needed.
     if (!combatState) return;
 
+    // Handle renumbering if there are duplicates with the same base name
+    const cleanName = combatant.name.replace(/\s+\d+$/, '');
+    
+    // Find existing combatants with the same base name
+    const existingWithSameName = combatState.combatants.filter(c => {
+      const cleanExisting = c.name.replace(/\s+\d+$/, '');
+      return cleanExisting === cleanName;
+    });
+
+    let finalCombatant = combatant;
+    let updatedCombatantsList = combatState.combatants;
+
+    if (existingWithSameName.length > 0) {
+      // There are duplicates - need to renumber all of them including the new one
+      // Renumber the existing ones sequentially
+      const updatedCombatants = combatState.combatants.map(c => {
+        const cleanExisting = c.name.replace(/\s+\d+$/, '');
+        if (cleanExisting === cleanName) {
+          // Find which number this should be in the sequence
+          const indexInDuplicates = existingWithSameName.findIndex(dup => dup.id === c.id);
+          return { ...c, name: `${cleanName} ${indexInDuplicates + 1}` };
+        }
+        return c;
+      });
+      
+      // Add the new combatant with the next number
+      const newCombatantIndex = existingWithSameName.length + 1;
+      finalCombatant = { ...combatant, name: `${cleanName} ${newCombatantIndex}` };
+      
+      updatedCombatantsList = [...updatedCombatants, finalCombatant];
+    } else {
+      // No duplicates, just add it
+      updatedCombatantsList = [...combatState.combatants, finalCombatant];
+    }
+
     // Track the current combatant's ID to maintain turn pointer
     const currentCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
     
     // Only sort if initiative has been rolled; otherwise just append
-    const updatedCombatants = hasInitiativeBeenRolled()
-      ? sortCombatants([...combatState.combatants, combatant])
-      : [...combatState.combatants, combatant];
+    const sortedCombatants = hasInitiativeBeenRolled()
+      ? sortCombatants(updatedCombatantsList)
+      : updatedCombatantsList;
 
     // Find the index of the current combatant in the new list to preserve turn continuity
     const newTurnIndex = currentCombatantId
-      ? updatedCombatants.findIndex(c => c.id === currentCombatantId)
+      ? sortedCombatants.findIndex(c => c.id === currentCombatantId)
       : combatState.currentTurnIndex;
 
     saveCombatState({
       ...combatState,
-      combatants: updatedCombatants,
+      combatants: sortedCombatants,
       currentTurnIndex: newTurnIndex !== -1 ? newTurnIndex : 0,
     });
     setShowQuickEntryType(null);
@@ -160,37 +219,74 @@ function CombatContent() {
     type: 'monster' | 'player',
     idPrefix: string
   ) => {
-    const combatant: CombatantState = {
-      id: `${idPrefix}-${item.id}-${crypto.randomUUID()}`,
-      name: item.name,
-      type,
-      initiative: 0,
-      abilityScores: item.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
-      hp: item.hp,
-      maxHp: item.maxHp,
-      ac: item.ac,
-      conditions: [],
-      traits: item.traits,
-      actions: item.actions,
-      bonusActions: item.bonusActions,
-      reactions: item.reactions,
-      legendaryActions: 'legendaryActions' in item ? item.legendaryActions : undefined,
-      lairActions: 'lairActions' in item ? item.lairActions : undefined,
-    };
+    try {
+      console.log('Adding combatant:', item.name);
 
-    if (!combatState) {
-      // During setup phase
-      addCombatantToSetup(combatant);
-    } else {
-      // During active combat
-      addCombatantToActiveSession(combatant);
+      const combatant: CombatantState = {
+        id: `${idPrefix}-${item.id}-${crypto.randomUUID()}`,
+        name: item.name,
+        type,
+        initiative: 0,
+        abilityScores: item.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+        hp: item.hp,
+        maxHp: item.maxHp,
+        ac: item.ac,
+        conditions: [],
+        traits: item.traits,
+        actions: item.actions,
+        bonusActions: item.bonusActions,
+        reactions: item.reactions,
+        legendaryActions: 'legendaryActions' in item ? item.legendaryActions : undefined,
+        lairActions: 'lairActions' in item ? item.lairActions : undefined,
+      };
+
+      if (!combatState) {
+        // During setup phase - handle renumbering if needed
+        const cleanName = combatant.name.replace(/\s+\d+$/, '');
+        
+        // Find existing combatants with the same base name
+        const existingWithSameName = setupCombatantsRef.current.filter(c => {
+          const cleanExisting = c.name.replace(/\s+\d+$/, '');
+          return cleanExisting === cleanName;
+        });
+
+        if (existingWithSameName.length > 0) {
+          // There are duplicates - need to renumber all of them including the new one
+          // Renumber the existing ones sequentially
+          const updatedCombatants = setupCombatantsRef.current.map(c => {
+            const cleanExisting = c.name.replace(/\s+\d+$/, '');
+            if (cleanExisting === cleanName) {
+              // Find which number this should be in the sequence
+              const indexInDuplicates = existingWithSameName.findIndex(dup => dup.id === c.id);
+              return { ...c, name: `${cleanName} ${indexInDuplicates + 1}` };
+            }
+            return c;
+          });
+          
+          // Add the new combatant with the next number
+          const newCombatantIndex = existingWithSameName.length + 1;
+          combatant.name = `${cleanName} ${newCombatantIndex}`;
+          
+          const finalCombatants = [...updatedCombatants, combatant];
+          setSetupCombatants(finalCombatants);
+          setupCombatantsRef.current = finalCombatants;
+        } else {
+          // No duplicates, just add it
+          const newCombatants = [...setupCombatantsRef.current, combatant];
+          setSetupCombatants(newCombatants);
+          setupCombatantsRef.current = newCombatants;
+        }
+      } else {
+        // During active combat
+        addCombatantToActiveSession(combatant);
+      }
+
+      setShowCombatantModal(false);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'Failed to add combatant';
+      console.error('Error adding combatant:', err);
+      setError(errMsg);
     }
-
-    setToast({
-      message: `${combatant.name} added to combat`,
-      type: 'success',
-    });
-    setShowCombatantModal(false);
   };
 
   const startCombatWithSetupCombatants = () => {
@@ -246,10 +342,13 @@ function CombatContent() {
       }
     }
 
+    const encounter = selectedEncounterId ? encounters.find(e => e.id === selectedEncounterId) : undefined;
+
     const newState: CombatState = {
       id: crypto.randomUUID(),
       userId: '',
       encounterId: selectedEncounterId || undefined,
+      encounterDescription: encounter?.description,
       combatants,
       currentRound: 1,
       currentTurnIndex: 0,
@@ -446,6 +545,15 @@ function CombatContent() {
       return [...players, ...monsters];
     }
   };
+
+  // Combatants that still need initiative (initiative === 0) sorted alphabetically by name
+  const zeroInitiative = useMemo(() => {
+    if (!combatState) return [] as CombatantState[];
+    return [...combatState.combatants.filter(c => c.initiative === 0)].sort((a, b) => a.name.localeCompare(b.name));
+  }, [combatState]);
+
+  // Filtered view for zero-initiative list (all/player/monster)
+  const filteredZeroInitiative = zeroInitiative.filter(c => initiativeFilter === 'all' || c.type === initiativeFilter);
 
   if (loading) {
     return (
@@ -653,7 +761,29 @@ function CombatContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Combat Tracker</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold">Combat Tracker</h1>
+              {combatState.encounterDescription && (
+                <button
+                  onClick={() => setShowEncounterDescription(true)}
+                  className="hover:opacity-80 transition-opacity"
+                  title="See Encounter Description"
+                  type="button"
+                >
+                  <svg
+                    className="w-6 h-6 text-gray-400 hover:text-gray-300 cursor-pointer"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
             <p className="text-gray-400">Round {combatState.currentRound}</p>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -697,22 +827,51 @@ function CombatContent() {
         )}
 
         {/* Initiative Entry Blocks for Combatants with 0 Initiative */}
-        {combatState && combatState.combatants.filter(c => c.initiative === 0).length > 0 && (
+        {zeroInitiative.length > 0 && (
           <div ref={initiativePanelRef} className="mb-6 space-y-4">
-            {combatState.combatants.filter(c => c.initiative === 0).map((combatant) => (
-              <div key={combatant.id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                <div className="mb-4">
-                  <p className="text-sm text-gray-400 mb-1">Set Initiative for:</p>
-                  <h3 className="text-lg font-semibold">{combatant.name}</h3>
+            {/* Filter controls - only show when there are zero-initiative combatants */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-gray-400">Show:</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setInitiativeFilter('all')}
+                    className={`px-3 py-1 rounded text-sm ${initiativeFilter === 'all' ? 'bg-gray-700 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setInitiativeFilter('player')}
+                    className={`px-3 py-1 rounded text-sm ${initiativeFilter === 'player' ? 'bg-gray-700 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}`}
+                  >
+                    Players
+                  </button>
+                  <button
+                    onClick={() => setInitiativeFilter('monster')}
+                    className={`px-3 py-1 rounded text-sm ${initiativeFilter === 'monster' ? 'bg-gray-700 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}`}
+                  >
+                    Monsters
+                  </button>
                 </div>
-                <InitiativeEntry
-                  combatant={combatant}
-                  onSet={(initiativeRoll) => {
-                    setInitiativeRoll(combatant.id, initiativeRoll);
-                  }}
-                />
               </div>
-            ))}
+
+              <p className="text-sm text-gray-400">{zeroInitiative.length} need initiative</p>
+            </div>
+
+            {filteredZeroInitiative.length === 0 ? (
+              <div className="p-4 bg-gray-800 rounded text-gray-400">No combatants match the selected filter.</div>
+            ) : (
+              filteredZeroInitiative.map((combatant) => (
+                <div key={combatant.id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                  <InitiativeEntry
+                    combatant={combatant}
+                    onSet={(initiativeRoll) => {
+                      setInitiativeRoll(combatant.id, initiativeRoll);
+                    }}
+                  />
+                </div>
+              ))
+            )}
           </div>
         )}
 
@@ -725,6 +884,7 @@ function CombatContent() {
                 setInitiativeRoll(initiativeEditId, initiativeRoll);
                 setInitiativeEditId(null);
               }}
+              onClose={() => setInitiativeEditId(null)}
             />
           </div>
         )}
@@ -995,6 +1155,32 @@ function CombatContent() {
           </div>
         )}
 
+        {/* Encounter Description Modal */}
+        {showEncounterDescription && combatState?.encounterDescription && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setShowEncounterDescription(false)}
+          >
+            <div 
+              className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto shadow-xl border border-gray-700"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-start gap-4 mb-4">
+                <h2 className="text-2xl font-bold">Encounter Description</h2>
+                <button
+                  onClick={() => setShowEncounterDescription(false)}
+                  className="text-gray-400 hover:text-gray-200 text-2xl flex-shrink-0"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+                {combatState.encounterDescription}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Remove Confirmation Modal */}
         {removeConfirmId && combatState && removeConfirmPosition && (
           <div 
@@ -1045,7 +1231,7 @@ function CombatContent() {
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transition-opacity duration-300 ${
+          className={`fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transition-opacity duration-300 z-50 ${
             toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
           }`}
         >
@@ -1377,12 +1563,23 @@ export default function CombatPage() {
 interface InitiativeEntryProps {
   combatant: CombatantState;
   onSet: (initiativeRoll: InitiativeRoll) => void;
+  onClose?: () => void; // optional: close the edit form (only valid when initiative exists)
 }
 
-function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
+function InitiativeEntry({ combatant, onSet, onClose }: InitiativeEntryProps) {
   const [entryMode, setEntryMode] = useState<'roll' | 'dice' | 'total'>('roll');
   const [diceRoll, setDiceRoll] = useState('');
   const [totalValue, setTotalValue] = useState('');
+
+  // Close with Escape only when there is an existing initiative and an onClose handler
+  useEffect(() => {
+    if (!combatant.initiativeRoll || !onClose) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [combatant.initiativeRoll, onClose]);
 
   const getBonus = (): number => {
     // This is a simplified version - in real implementation, you'd need access to player/monster data
@@ -1436,101 +1633,135 @@ function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+    <div className="relative bg-gray-800 rounded-lg p-4 border border-gray-700">
+      {/* Close button only for entries that already have an initiative and when parent provided onClose */}
+      {combatant.initiativeRoll && onClose && (
+        <button
+          onClick={onClose}
+          aria-label={`Close initiative editor for ${combatant.name}`}
+          className="absolute -top-3 -right-3 w-7 h-7 rounded-full bg-gray-800 border border-gray-700 text-gray-400 hover:text-gray-200 flex items-center justify-center text-lg"
+          type="button"
+        >
+          ×
+        </button>
+      )}
+
       <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-lg font-semibold">{combatant.name}</h3>
-          <p className="text-sm text-gray-400">
-            {combatant.type === 'player' ? 'Player' : 'Monster'}
-          </p>
-        </div>
-        <span className={`px-2 py-1 rounded text-xs ${combatant.type === 'player' ? 'bg-blue-600' : 'bg-red-600'}`}>
-          {combatant.type}
-        </span>
-      </div>
+        <div className="flex flex-col md:flex-row items-start gap-4">
+              <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-400">Set Initiative:</span>
+              <h3 className="text-lg font-semibold">{combatant.name}</h3>
+            </div>
+            <div className="flex justify-end mt-2">
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                combatant.type === "player"
+                  ? "bg-blue-600 text-blue-100"
+                  : "bg-red-600 text-red-100"
+                }`}
+              >
+                {combatant.type === "player" ? "Character" : "Monster"}
+              </span>
+            </div>
+            </div>
 
-      <div className="space-y-3">
-        <div className="flex gap-2">
-          <button
-            onClick={() => {
-              setEntryMode('roll');
-              handleRoll();
-            }}
-            className={`flex-1 px-3 py-2 rounded text-sm ${
-              entryMode === 'roll' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
-            }`}
-          >
-            Roll d20
-          </button>
-          <button
-            onClick={() => setEntryMode('dice')}
-            className={`flex-1 px-3 py-2 rounded text-sm ${
-              entryMode === 'dice' ? 'bg-purple-600' : 'bg-gray-700 hover:bg-gray-600'
-            }`}
-          >
-            Enter Dice Roll
-          </button>
-          <button
-            onClick={() => setEntryMode('total')}
-            className={`flex-1 px-3 py-2 rounded text-sm ${
-              entryMode === 'total' ? 'bg-green-600' : 'bg-gray-700 hover:bg-gray-600'
-            }`}
-          >
-            Enter Total
-          </button>
-        </div>
-
-        {entryMode === 'dice' && (
-          <div className="flex gap-2">
-            <input
-              type="number"
-              min="1"
-              max="20"
-              value={diceRoll}
-              onChange={(e) => setDiceRoll(e.target.value)}
-              placeholder="1-20"
-              className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
-            />
+          {/* Buttons: stacked on mobile (full width), horizontal on md+ */}
+          <div className="flex flex-col md:flex-row gap-2 md:pl-3 w-full md:w-auto">
             <button
-              onClick={handleDiceEntry}
-              className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded"
+              onClick={() => {
+                setEntryMode("roll");
+                handleRoll();
+              }}
+              className={`w-full md:w-28 px-2 py-2 rounded text-sm flex-none ${
+                entryMode === "roll"
+                  ? "bg-blue-600"
+                  : "bg-gray-700 hover:bg-gray-600"
+              }`}
             >
-              Set
+              Roll d20
+            </button>
+            <button
+              onClick={() => setEntryMode("dice")}
+              className={`w-full md:w-40 px-2 py-2 rounded text-sm flex-none ${
+                entryMode === "dice"
+                  ? "bg-purple-600"
+                  : "bg-gray-700 hover:bg-gray-600"
+              }`}
+            >
+              Enter Dice Roll
+            </button>
+            <button
+              onClick={() => setEntryMode("total")}
+              className={`w-full md:w-28 px-2 py-2 rounded text-sm flex-none ${
+                entryMode === "total"
+                  ? "bg-green-600"
+                  : "bg-gray-700 hover:bg-gray-600"
+              }`}
+            >
+              Enter Total
             </button>
           </div>
-        )}
+        </div>
 
-        {entryMode === 'total' && (
-          <div className="flex gap-2">
-            <input
-              type="number"
-              min="0"
-              value={totalValue}
-              onChange={(e) => setTotalValue(e.target.value)}
-              placeholder="Total initiative"
-              className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
-            />
-            <button
-              onClick={handleTotalEntry}
-              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
-            >
-              Set
-            </button>
-          </div>
-        )}
+        <div className="flex items-start gap-2">
+          {entryMode === "dice" && (
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min="1"
+                max="20"
+                value={diceRoll}
+                onChange={(e) => setDiceRoll(e.target.value)}
+                placeholder="1-20"
+                className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
+              />
+              <button
+                onClick={handleDiceEntry}
+                className="bg-purple-600 hover:bg-purple-700 w-20 px-2 py-2 rounded"
+              >
+                Set
+              </button>
+            </div>
+          )}
 
-        {combatant.initiativeRoll && (
-          <div className="bg-gray-700 rounded px-3 py-2 text-sm">
-            <p className="text-gray-400">
-              Initiative: <span className="text-white font-bold">{combatant.initiativeRoll.total}</span>
-            </p>
-            {combatant.initiativeRoll.method === 'rolled' && (
-              <p className="text-gray-500 text-xs">
-                d20: {combatant.initiativeRoll.roll} + {combatant.initiativeRoll.bonus} = {combatant.initiativeRoll.total}
+          {entryMode === "total" && (
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min="0"
+                value={totalValue}
+                onChange={(e) => setTotalValue(e.target.value)}
+                placeholder="Total initiative"
+                className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
+              />
+              <button
+                onClick={handleTotalEntry}
+                className="bg-green-600 hover:bg-green-700 w-20 px-2 py-2 rounded"
+              >
+                Set
+              </button>
+            </div>
+          )}
+
+          {combatant.initiativeRoll && (
+            <div className="bg-gray-700 rounded px-3 py-2 text-sm">
+              <p className="text-gray-400">
+                Initiative:{" "}
+                <span className="text-white font-bold">
+                  {combatant.initiativeRoll.total}
+                </span>
               </p>
-            )}
-          </div>
-        )}
+              {combatant.initiativeRoll.method === "rolled" && (
+                <p className="text-gray-500 text-xs">
+                  d20: {combatant.initiativeRoll.roll} +{" "}
+                  {combatant.initiativeRoll.bonus} ={" "}
+                  {combatant.initiativeRoll.total}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
