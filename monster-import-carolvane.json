@@ -1,0 +1,152 @@
+{
+  "monsters": [
+    {
+      "userId": "694989b14865bf0bddbb4434",
+      "name": "Gingerbread Man",
+      "type": "construct",
+      "alignment": "neutral evil",
+      "size": "small",
+      "ac": 13,
+      "maxHp": 15,
+      "speed": "30 ft.",
+      "abilityScores": {
+        "strength": 8,
+        "dexterity": 14,
+        "constitution": 18,
+        "intelligence": 3,
+        "wisdom": 6,
+        "charisma": 1
+      },
+      "damageVulnerabilities": ["fire"],
+      "damageImmunities": ["poison", "psychic"],
+      "conditionImmunities": ["charmed", "exhaustion", "frightened", "paralyzed", "petrified", "poisoned"],
+      "senses": {
+        "darkvision": "60 ft.",
+        "passivePerception": "8"
+      },
+      "languages": ["understands Common but can't speak"],
+      "challengeRating": 0.5,
+      "experiencePoints": 100,
+      "traits": [
+        {
+          "name": "Antimagic Susceptibility",
+          "description": "The gingerbread man is incapacitated while in the area of an antimagic field. If targeted by dispel magic, the gingerbread man must succeed on a Constitution saving throw against the caster's spell save DC or fall unconscious for 1 minute."
+        },
+        {
+          "name": "Cookie Crumble",
+          "description": "When the gingerbread man is reduced to 0 hit points, it crumbles into a pile of cookie crumbs and powdered sugar. Any creature within 5 feet of it must succeed on a DC 11 Dexterity saving throw or be blinded until the end of its next turn as sugar gets in their eyes."
+        },
+        {
+          "name": "False Appearance",
+          "description": "While the gingerbread man remains motionless, it is indistinguishable from a normal gingerbread cookie."
+        }
+      ],
+      "actions": [
+        {
+          "name": "Candy Cane Sword",
+          "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6+2) slashing damage.",
+          "attackBonus": 4
+        },
+        {
+          "name": "Brittle Strike",
+          "description": "When the gingerbread man hits with its candy cane sword, roll a d10. On a roll of 1-4, the sword shatters, dealing an additional 3 (1d4+1) piercing damage to the target as candy shards fly everywhere. The gingerbread man can no longer make candy cane sword attacks (but can still make cookie toss attacks)."
+        },
+        {
+          "name": "Cookie Toss",
+          "description": "Ranged Weapon Attack: +4 to hit, range 20/60 ft., one target. Hit: 4 (1d4+2) bludgeoning damage.",
+          "attackBonus": 4
+        }
+      ],
+      "description": "These animated cookies stand about 2 feet tall, with candy button eyes that gleam with malicious intelligence. Their bodies are made of firm gingerbread, decorated with white icing and colorful candy. They wield weapons made of hardened candy canes that break apart when they strike. Despite their whimsical appearance, they fight with surprising ferocity and cunning."
+    },
+    {
+      "userId": "694989b14865bf0bddbb4434",
+      "name": "Jax the Kidnapper",
+      "type": "humanoid",
+      "alignment": "neutral evil",
+      "size": "medium",
+      "ac": 15,
+      "acNote": "studded leather armor",
+      "maxHp": 50,
+      "speed": "30 ft., climb 30 ft.",
+      "abilityScores": {
+        "strength": 11,
+        "dexterity": 17,
+        "constitution": 12,
+        "intelligence": 11,
+        "wisdom": 13,
+        "charisma": 12
+      },
+      "savingThrows": {
+        "dexterity": 5,
+        "intelligence": 2
+      },
+      "skills": {
+        "acrobatics": 5,
+        "deception": 3,
+        "perception": 5,
+        "sleightOfHand": 5,
+        "stealth": 7,
+        "survival": 5
+      },
+      "senses": {
+        "passivePerception": "15"
+      },
+      "languages": ["Common", "Thieves' Cant"],
+      "challengeRating": 2,
+      "experiencePoints": 450,
+      "traits": [
+        {
+          "name": "Cunning Action",
+          "description": "On each of his turns, Jax can use a bonus action to take the Dash, Disengage, or Hide action."
+        },
+        {
+          "name": "Evasion",
+          "description": "If Jax is subjected to an effect that allows him to make a Dexterity saving throw to take only half damage, he instead takes no damage if he succeeds on the saving throw, and only half damage if he fails."
+        },
+        {
+          "name": "Sneak Attack (1/Turn)",
+          "description": "Jax deals an extra 10 (3d6) damage when he hits a target with a weapon attack and has advantage on the attack roll, or when the target is within 5 feet of an ally of Jax that isn't incapacitated and Jax doesn't have disadvantage on the attack roll."
+        },
+        {
+          "name": "Sure-Footed",
+          "description": "Jax has advantage on Strength and Dexterity saving throws made against effects that would knock him prone."
+        }
+      ],
+      "actions": [
+        {
+          "name": "Multiattack",
+          "description": "Jax makes two attacks with his shortsword or longbow."
+        },
+        {
+          "name": "Shortsword",
+          "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 6 (1d6+3) piercing damage.",
+          "attackBonus": 5
+        },
+        {
+          "name": "Longbow",
+          "description": "Ranged Weapon Attack: +5 to hit, range 150/600 ft., one target. Hit: 7 (1d8+3) piercing damage.",
+          "attackBonus": 5
+        },
+        {
+          "name": "Cookie Toss",
+          "description": "Jax throws one of his magical gingerbread cookies at a point within 30 feet. At the start of his next turn, the cookie animates into a Gingerbread Man under his control. Jax can have a maximum of 6 animated gingerbread men at a time. If he already has 6, the oldest one crumbles to dust when a new one animates.",
+          "recharge": "5-6"
+        }
+      ],
+      "bonusActions": [
+        {
+          "name": "Quick Shot",
+          "description": "Jax makes one attack with his longbow (can only be used if he hasn't already used Multiattack this turn)."
+        }
+      ],
+      "reactions": [
+        {
+          "name": "Uncanny Dodge",
+          "description": "When an attacker that Jax can see hits him with an attack, he can use his reaction to halve the attack's damage against him."
+        }
+      ],
+      "description": "Jax is a coward and a bully who preys on the weak. He was once an aspiring adventurer from Carolvane who left to seek glory but failed miserably. After falling in with a slaving ring, he hatched this plan to kidnap children during the festival preparations when security would be lax. He views himself as a victim of circumstance and is desperate, foolish, and in over his head."
+    }
+  ]
+}
