@@ -135,6 +135,8 @@ function MonstersContent() {
   };
 
   const copyTemplate = async (id: string) => {
+    // Prevent concurrent copy requests to avoid race condition with copyingId state
+    if (copyingId) return;
     try {
       setError(null);
       setCopyingId(id);
