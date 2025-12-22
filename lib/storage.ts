@@ -16,7 +16,11 @@ export const storage = {
         .collection<Encounter>('encounters')
         .find({ userId })
         .toArray();
-      return encounters;
+      // Ensure id field is set to the string representation of _id
+      return encounters.map(enc => ({
+        ...enc,
+        id: enc._id?.toString() || enc.id,
+      }));
     } catch (error) {
       console.error('Error loading encounters:', error);
       return [];
@@ -31,7 +35,11 @@ export const storage = {
         .collection<Character>('characters')
         .find({ userId })
         .toArray();
-      return characters;
+      // Ensure id field is set to the string representation of _id
+      return characters.map(char => ({
+        ...char,
+        id: char._id?.toString() || char.id,
+      }));
     } catch (error) {
       console.error('Error loading characters:', error);
       return [];
@@ -60,7 +68,11 @@ export const storage = {
         .collection<Party>('parties')
         .find({ userId })
         .toArray();
-      return parties;
+      // Ensure id field is set to the string representation of _id
+      return parties.map(party => ({
+        ...party,
+        id: party._id?.toString() || party.id,
+      }));
     } catch (error) {
       console.error('Error loading parties:', error);
       return [];
@@ -75,7 +87,11 @@ export const storage = {
         .collection<MonsterTemplate>('monsterTemplates')
         .find({ userId })
         .toArray();
-      return templates;
+      // Ensure id field is set to the string representation of _id
+      return templates.map(template => ({
+        ...template,
+        id: template._id?.toString() || template.id,
+      }));
     } catch (error) {
       console.error('Error loading monster templates:', error);
       return [];
@@ -90,7 +106,11 @@ export const storage = {
         .collection<MonsterTemplate>('monsterTemplates')
         .find({ userId: GLOBAL_USER_ID })
         .toArray();
-      return templates;
+      // Ensure id field is set to the string representation of _id
+      return templates.map(template => ({
+        ...template,
+        id: template._id?.toString() || template.id,
+      }));
     } catch (error) {
       console.error('Error loading global monster templates:', error);
       return [];
