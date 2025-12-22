@@ -783,92 +783,101 @@ function CombatantCard({
   const hpPercent = (combatant.hp / combatant.maxHp) * 100;
   const hpColor = hpPercent > 50 ? 'bg-green-500' : hpPercent > 25 ? 'bg-yellow-500' : 'bg-red-500';
 
-  // Background shading based on combatant type
-  const bgClass = combatant.type === 'player' 
-    ? 'bg-blue-900 bg-opacity-30' 
-    : 'bg-red-900 bg-opacity-30';
+  // Background gradient based on combatant type - stronger fade from left to right
+  const bgStyle = combatant.type === 'player'
+    ? { backgroundImage: 'linear-gradient(to right, rgba(96, 165, 250, 0.18), rgba(96, 165, 250, 0.02))' }
+    : { backgroundImage: 'linear-gradient(to right, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.02))' };
 
   return (
-    <div className={`${bgClass} rounded-lg p-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'}`}>
+    <div style={bgStyle} className={`rounded-lg px-4 py-6 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'}`}>
       <div className="flex justify-between items-start">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-xl font-semibold">{combatant.name}</h3>
-            <span className={`px-2 py-1 rounded text-xs ${combatant.type === 'player' ? 'bg-blue-600' : 'bg-red-600'}`}>
-              {combatant.type}
+          <div className="flex items-center gap-4 mb-2">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  // placeholder for future modal
+                }}
+                className="hover:opacity-80 transition-opacity"
+                title={`See full ${combatant.type === 'player' ? 'Character' : 'Monster'} information`}
+                type="button"
+              >
+                <svg
+                  className="w-5 h-5 text-gray-400 hover:text-gray-300 cursor-pointer"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+              <h3 className="text-xl font-semibold">{combatant.name}</h3>
+              {isActive && onNextTurn && (
+                <button
+                  onClick={onNextTurn}
+                  className="px-2 py-1 rounded text-xs bg-yellow-600 hover:bg-yellow-700 animate-pulse font-semibold"
+                >
+                  Current Turn (done)
+                </button>
+              )}
+            </div>
+            {!isActive && <div className="w-40"></div>}
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-gray-400">AC</p>
+              <p className="text-lg font-bold">{combatant.ac}</p>
+            </div>
+            <span className="text-sm text-gray-400 whitespace-nowrap">Hit Points:</span>
+            <span className="text-lg font-bold">
+              Current: {combatant.hp} Total: {combatant.maxHp}
             </span>
-            {isActive && (
-              <span className="px-2 py-1 rounded text-xs bg-yellow-600 animate-pulse">
-                Current Turn
-              </span>
-            )}
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 mb-2">
-            <div>
+            <input
+              type="number"
+              placeholder="0"
+              value={hpAdjustment}
+              onChange={handleHpAdjustmentChange}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  if (e.shiftKey) {
+                    applyHeal();
+                  } else {
+                    applyDamage();
+                  }
+                }
+              }}
+              className="w-14 bg-gray-700 rounded px-2 py-1 text-xs text-center text-white"
+            />
+            <button
+              onClick={applyDamage}
+              title="Apply damage (Enter)"
+              className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
+            >
+              Damage
+            </button>
+            <button
+              onClick={applyHeal}
+              title="Apply healing (Shift+Enter)"
+              className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs"
+            >
+              Heal
+            </button>
+            <div className="flex items-center gap-2 ml-auto pr-4">
               <p className="text-xs text-gray-400">Initiative</p>
               <p className="text-lg font-bold">{combatant.initiative}</p>
               {combatant.initiativeRoll && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 whitespace-nowrap">
                   {combatant.initiativeRoll.method === 'rolled' 
-                    ? `d20: ${combatant.initiativeRoll.roll} + ${combatant.initiativeRoll.bonus}`
+                    ? `d20:${combatant.initiativeRoll.roll}+${combatant.initiativeRoll.bonus}`
                     : 'Manual'}
                 </p>
               )}
             </div>
-            <div>
-              <p className="text-xs text-gray-400">AC</p>
-              <p className="text-lg font-bold">{combatant.ac}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-400">DEX</p>
-              <p className="text-lg font-bold">{combatant.abilityScores?.dexterity || 10}</p>
-            </div>
           </div>
 
-          <div className="mb-2">
-            <p className="text-xs text-gray-400">HP</p>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                placeholder="0"
-                value={hpAdjustment}
-                onChange={handleHpAdjustmentChange}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    if (e.shiftKey) {
-                      applyHeal();
-                    } else {
-                      applyDamage();
-                    }
-                  }
-                }}
-                className="w-14 bg-gray-700 rounded px-2 py-1 text-xs text-center text-white"
-              />
-              <button
-                onClick={applyDamage}
-                title="Apply damage (Enter)"
-                className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
-              >
-                Damage
-              </button>
-              <button
-                onClick={applyHeal}
-                title="Apply healing (Shift+Enter)"
-                className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs"
-              >
-                Heal
-              </button>
-              <span className="text-lg font-bold">
-                {combatant.hp}/{combatant.maxHp}
-              </span>
-            </div>
-          </div>
-
-          <div className="mb-2">
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div className={`${hpColor} h-2 rounded-full transition-all`} style={{ width: `${hpPercent}%` }} />
-            </div>
+          <div className="w-4/5 bg-gray-700 rounded-full h-2">
+            <div className={`${hpColor} h-2 rounded-full transition-all`} style={{ width: `${hpPercent}%` }} />
           </div>
 
           {combatant.conditions.length > 0 && (
@@ -908,7 +917,7 @@ function CombatantCard({
         <div className="flex flex-col gap-2">
           <button
             onClick={addCondition}
-            className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
+            className="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs"
           >
             Add Condition
           </button>
