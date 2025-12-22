@@ -28,6 +28,7 @@ function CombatContent() {
     const loadData = async () => {
       try {
         setLoading(true);
+        setLoadingTemplates(true);
         setError(null);
         const [encountersRes, charactersRes, combatRes, monstersRes] = await Promise.all([
           fetch('/api/encounters'),
@@ -53,6 +54,7 @@ function CombatContent() {
         setError(err instanceof Error ? err.message : 'Failed to load data');
       } finally {
         setLoading(false);
+        setLoadingTemplates(false);
       }
     };
 
@@ -115,38 +117,20 @@ function CombatContent() {
     setShowCombatantModal(false);
   };
 
-  const addMonsterFromLibrary = (monster: Monster) => {
+  const addCombatantFromLibrary = (
+    item: Monster | Character,
+    type: 'monster' | 'player',
+    idPrefix: string
+  ) => {
     const combatant: CombatantState = {
-      id: `monster-${monster.id}-${Date.now()}`,
-      name: monster.name,
-      type: 'monster',
+      id: `${idPrefix}-${item.id}-${crypto.randomUUID()}`,
+      name: item.name,
+      type,
       initiative: 0,
-      abilityScores: monster.abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      hp: monster.hp,
-      maxHp: monster.maxHp,
-      ac: monster.ac,
-      conditions: [],
-    };
-
-    if (!combatState) {
-      // During setup phase
-      addCombatantToSetup(combatant);
-    } else {
-      // During active combat
-      addCombatantToActiveSession(combatant);
-    }
-  };
-
-  const addCharacterFromLibrary = (character: Character) => {
-    const combatant: CombatantState = {
-      id: `character-${character.id}-${Date.now()}`,
-      name: character.name,
-      type: 'player',
-      initiative: 0,
-      abilityScores: character.abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      hp: character.hp,
-      maxHp: character.maxHp,
-      ac: character.ac,
+      abilityScores: item.abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      hp: item.hp,
+      maxHp: item.maxHp,
+      ac: item.ac,
       conditions: [],
     };
 
@@ -523,8 +507,8 @@ function CombatContent() {
 
           {showCombatantModal && (
             <QuickCombatantModal
-              onAddMonster={addMonsterFromLibrary}
-              onAddCharacter={addCharacterFromLibrary}
+              onAddMonster={(monster) => addCombatantFromLibrary(monster, 'monster', 'monster')}
+              onAddCharacter={(character) => addCombatantFromLibrary(character, 'player', 'character')}
               onClose={() => setShowCombatantModal(false)}
               monsterTemplates={monsterTemplates}
               characterTemplates={characters}
@@ -711,8 +695,8 @@ function CombatContent() {
         {/* Combatant Modal for both library and custom */}
         {showCombatantModal && (
           <QuickCombatantModal
-            onAddMonster={addMonsterFromLibrary}
-            onAddCharacter={addCharacterFromLibrary}
+            onAddMonster={(monster) => addCombatantFromLibrary(monster, 'monster', 'monster')}
+            onAddCharacter={(character) => addCombatantFromLibrary(character, 'player', 'character')}
             onClose={() => setShowCombatantModal(false)}
             monsterTemplates={monsterTemplates}
             characterTemplates={characters}

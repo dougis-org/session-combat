@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Fuse from 'fuse.js';
 import { Monster, MonsterTemplate, Character } from '@/lib/types';
@@ -42,6 +42,12 @@ export function QuickCombatantModal({
 
   const [error, setError] = useState<string | null>(null);
 
+  // Reset search and filters when tab changes
+  useEffect(() => {
+    setSearchQuery('');
+    setCreatorFilter('all');
+  }, [activeTab]);
+
   // Fuse.js fuzzy search setup for monsters
   const monsterFuse = useMemo(
     () =>
@@ -57,7 +63,7 @@ export function QuickCombatantModal({
   const characterFuse = useMemo(
     () =>
       new Fuse(characterTemplates, {
-        keys: ['name', 'class'],
+        keys: ['name', 'classes.class'],
         threshold: 0.3,
         includeScore: true,
       }),
@@ -471,6 +477,11 @@ export function QuickCombatantModal({
                             <div className="text-gray-400 text-xs flex gap-3 mt-1 flex-wrap">
                               <span>HP: {character.hp}/{character.maxHp}</span>
                               <span>AC: {character.ac}</span>
+                              {character.classes && character.classes.length > 0 && (
+                                <span>
+                                  Class: {character.classes.map(c => c.class).join('/')}
+                                </span>
+                              )}
                               {character.userId === GLOBAL_USER_ID ? (
                                 <span className="text-green-400">(Global)</span>
                               ) : character.userId === userId ? (
