@@ -795,9 +795,8 @@ function CombatContent() {
           <div 
             className="absolute bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-xl border border-gray-700 z-50"
             style={{
-              top: `${detailPosition.top > window.innerHeight / 2 ? detailPosition.top - 400 : detailPosition.top}px`,
+              top: '10px',
               left: `${detailPosition.left}px`,
-              transform: detailPosition.top > window.innerHeight / 2 ? 'translateY(-100%)' : undefined,
             }}
             onClick={(e) => e.stopPropagation()}
           >
