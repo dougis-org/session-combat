@@ -811,6 +811,76 @@ function CombatContent() {
                         </div>
                       </div>
                     </div>
+
+                    {combatant.actions && combatant.actions.length > 0 && (
+                      <div>
+                        <p className="text-gray-400 text-sm mb-2 font-semibold">Actions</p>
+                        <div className="space-y-2">
+                          {combatant.actions.map((action) => (
+                            <div key={action.name} className="text-xs">
+                              <p className="font-bold text-white">{action.name}</p>
+                              <p className="text-gray-300">{action.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {combatant.bonusActions && combatant.bonusActions.length > 0 && (
+                      <div>
+                        <p className="text-gray-400 text-sm mb-2 font-semibold">Bonus Actions</p>
+                        <div className="space-y-2">
+                          {combatant.bonusActions.map((action) => (
+                            <div key={action.name} className="text-xs">
+                              <p className="font-bold text-white">{action.name}</p>
+                              <p className="text-gray-300">{action.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {combatant.reactions && combatant.reactions.length > 0 && (
+                      <div>
+                        <p className="text-gray-400 text-sm mb-2 font-semibold">Reactions</p>
+                        <div className="space-y-2">
+                          {combatant.reactions.map((action) => (
+                            <div key={action.name} className="text-xs">
+                              <p className="font-bold text-white">{action.name}</p>
+                              <p className="text-gray-300">{action.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {combatant.legendaryActions && combatant.legendaryActions.length > 0 && (
+                      <div>
+                        <p className="text-gray-400 text-sm mb-2 font-semibold">Legendary Actions</p>
+                        <div className="space-y-2">
+                          {combatant.legendaryActions.map((action) => (
+                            <div key={action.name} className="text-xs">
+                              <p className="font-bold text-white">{action.name}</p>
+                              <p className="text-gray-300">{action.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {combatant.lairActions && combatant.lairActions.length > 0 && (
+                      <div>
+                        <p className="text-gray-400 text-sm mb-2 font-semibold">Lair Actions</p>
+                        <div className="space-y-2">
+                          {combatant.lairActions.map((action) => (
+                            <div key={action.name} className="text-xs">
+                              <p className="font-bold text-white">{action.name}</p>
+                              <p className="text-gray-300">{action.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </>
               );

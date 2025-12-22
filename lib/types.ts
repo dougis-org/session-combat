@@ -345,6 +345,9 @@ export interface CombatantState extends CreatureStats {
   size?: 'tiny' | 'small' | 'medium' | 'large' | 'huge' | 'gargantuan';
   monsterType?: string;
   challengeRating?: number;
+  // Lair & Legendary Actions (monster-specific, optional for compatibility)
+  lairActions?: CreatureAbility[];
+  legendaryActions?: CreatureAbility[];
 }
 
 export interface CombatState {
