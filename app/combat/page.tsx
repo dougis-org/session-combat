@@ -829,6 +829,12 @@ function CombatContent() {
               <div key={combatant.id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
                 <div className="mb-4">
                   <p className="text-sm text-gray-400 mb-1">Set Initiative for:</p>
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">{combatant.name}</h3>
+                    <span className={`px-2 py-1 rounded text-xs ${combatant.type === 'player' ? 'bg-blue-600' : 'bg-red-600'}`}>
+                      {combatant.type}
+                    </span>
+                  </div>
                 </div>
                 <InitiativeEntry
                   combatant={combatant}
