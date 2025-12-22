@@ -625,18 +625,6 @@ function CombatContent() {
           </div>
           <div className="flex gap-2 flex-wrap">
             <button
-              onClick={rollInitiative}
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
-            >
-              Roll All Initiative
-            </button>
-            <button
-              onClick={() => setInitiativeMode(true)}
-              className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded"
-            >
-              Manual Entry
-            </button>
-            <button
               onClick={() => setShowCombatantModal(true)}
               className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm"
               title="Add a party member mid-combat"
