@@ -2,6 +2,7 @@
 import { getDatabase } from './db';
 import { SessionData, Encounter, Character, CombatState, Party, MonsterTemplate } from './types';
 import { GLOBAL_USER_ID } from './constants';
+import { ObjectId } from 'mongodb';
 
 /**
  * Server-side storage functions for MongoDB
@@ -247,9 +248,14 @@ export const storage = {
   async saveParty(party: Party): Promise<void> {
     try {
       const db = await getDatabase();
+      // Ensure _id is set for upsert operations to avoid duplicate key errors
+      const partyWithId = {
+        ...party,
+        _id: party._id || new ObjectId().toString(),
+      };
       await db
         .collection<Party>('parties')
-        .updateOne({ id: party.id, userId: party.userId }, { $set: party }, { upsert: true });
+        .updateOne({ id: party.id, userId: party.userId }, { $set: partyWithId }, { upsert: true });
     } catch (error) {
       console.error('Error saving party:', error);
       throw error;
