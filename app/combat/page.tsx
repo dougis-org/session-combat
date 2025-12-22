@@ -806,13 +806,18 @@ function CombatContent() {
               
               return (
                 <>
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold">
-                      {combatant.name}
-                    </h2>
+                  <div className="flex justify-between items-start gap-4 mb-4">
+                    <div className="flex items-center gap-2 flex-1">
+                      <h2 className="text-2xl font-bold">
+                        {combatant.name}
+                      </h2>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${combatant.type === 'player' ? 'bg-blue-600 text-blue-100' : 'bg-red-600 text-red-100'}`}>
+                        {combatant.type === 'player' ? 'Character' : 'Monster'}
+                      </span>
+                    </div>
                     <button
                       onClick={() => setSelectedDetailCombatantId(null)}
-                      className="text-gray-400 hover:text-gray-200 text-2xl"
+                      className="text-gray-400 hover:text-gray-200 text-2xl flex-shrink-0"
                     >
                       ×
                     </button>
@@ -831,40 +836,6 @@ function CombatContent() {
                       <div>
                         <p className="text-gray-400 text-sm">Initiative</p>
                         <p className="text-lg font-bold">{combatant.initiative}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-sm">Type</p>
-                        <p className="text-lg font-bold">{combatant.type === 'player' ? 'Character' : 'Monster'}</p>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <p className="text-gray-400 text-sm mb-2">Ability Scores</p>
-                      <div className="grid grid-cols-6 gap-2">
-                        <div className="bg-gray-700 p-2 rounded text-center">
-                          <p className="text-xs text-gray-400">STR</p>
-                          <p className="font-bold">{combatant.abilityScores?.strength || 10}</p>
-                        </div>
-                        <div className="bg-gray-700 p-2 rounded text-center">
-                          <p className="text-xs text-gray-400">DEX</p>
-                          <p className="font-bold">{combatant.abilityScores?.dexterity || 10}</p>
-                        </div>
-                        <div className="bg-gray-700 p-2 rounded text-center">
-                          <p className="text-xs text-gray-400">CON</p>
-                          <p className="font-bold">{combatant.abilityScores?.constitution || 10}</p>
-                        </div>
-                        <div className="bg-gray-700 p-2 rounded text-center">
-                          <p className="text-xs text-gray-400">INT</p>
-                          <p className="font-bold">{combatant.abilityScores?.intelligence || 10}</p>
-                        </div>
-                        <div className="bg-gray-700 p-2 rounded text-center">
-                          <p className="text-xs text-gray-400">WIS</p>
-                          <p className="font-bold">{combatant.abilityScores?.wisdom || 10}</p>
-                        </div>
-                        <div className="bg-gray-700 p-2 rounded text-center">
-                          <p className="text-xs text-gray-400">CHA</p>
-                          <p className="font-bold">{combatant.abilityScores?.charisma || 10}</p>
-                        </div>
                       </div>
                     </div>
 
@@ -934,6 +905,38 @@ function CombatContent() {
                               <p className="text-gray-300">{action.description}</p>
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {combatant.abilityScores && (
+                      <div>
+                        <p className="text-gray-400 text-sm mb-2">Ability Scores</p>
+                        <div className="grid grid-cols-6 gap-2">
+                          <div className="bg-gray-700 p-2 rounded text-center">
+                            <p className="text-xs text-gray-400">STR</p>
+                            <p className="font-bold">{combatant.abilityScores?.strength || 10}</p>
+                          </div>
+                          <div className="bg-gray-700 p-2 rounded text-center">
+                            <p className="text-xs text-gray-400">DEX</p>
+                            <p className="font-bold">{combatant.abilityScores?.dexterity || 10}</p>
+                          </div>
+                          <div className="bg-gray-700 p-2 rounded text-center">
+                            <p className="text-xs text-gray-400">CON</p>
+                            <p className="font-bold">{combatant.abilityScores?.constitution || 10}</p>
+                          </div>
+                          <div className="bg-gray-700 p-2 rounded text-center">
+                            <p className="text-xs text-gray-400">INT</p>
+                            <p className="font-bold">{combatant.abilityScores?.intelligence || 10}</p>
+                          </div>
+                          <div className="bg-gray-700 p-2 rounded text-center">
+                            <p className="text-xs text-gray-400">WIS</p>
+                            <p className="font-bold">{combatant.abilityScores?.wisdom || 10}</p>
+                          </div>
+                          <div className="bg-gray-700 p-2 rounded text-center">
+                            <p className="text-xs text-gray-400">CHA</p>
+                            <p className="font-bold">{combatant.abilityScores?.charisma || 10}</p>
+                          </div>
                         </div>
                       </div>
                     )}
