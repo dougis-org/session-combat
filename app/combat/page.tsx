@@ -793,10 +793,11 @@ function CombatContent() {
         {/* Detail Popup */}
         {selectedDetailCombatantId && combatState && detailPosition && (
           <div 
-            className="absolute bg-gray-800 rounded-lg p-6 max-w-sm w-full max-h-96 overflow-y-auto shadow-xl border border-gray-700 z-50"
+            className="absolute bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-96 overflow-y-auto shadow-xl border border-gray-700 z-50"
             style={{
-              top: `${detailPosition.top}px`,
+              top: `${detailPosition.top > window.innerHeight / 2 ? detailPosition.top - 400 : detailPosition.top}px`,
               left: `${detailPosition.left}px`,
+              transform: detailPosition.top > window.innerHeight / 2 ? 'translateY(-100%)' : undefined,
             }}
             onClick={(e) => e.stopPropagation()}
           >
