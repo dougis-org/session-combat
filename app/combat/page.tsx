@@ -1045,6 +1045,13 @@ function CombatantCard({
                 </svg>
               </button>
               <h3 className="text-xl font-semibold">{combatant.name}</h3>
+              <button
+                onClick={onRemove}
+                className="text-red-500 hover:text-red-400 text-xl leading-none"
+                title="Remove combatant"
+              >
+                ✕
+              </button>
               {isActive && onNextTurn && (
                 <button
                   onClick={onNextTurn}
@@ -1155,12 +1162,6 @@ function CombatantCard({
             className="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs"
           >
             Add Condition
-          </button>
-          <button
-            onClick={onRemove}
-            className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
-          >
-            Remove
           </button>
         </div>
       </div>
