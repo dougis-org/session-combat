@@ -1046,7 +1046,11 @@ function CombatantCard({
               </button>
               <h3 className="text-xl font-semibold">{combatant.name}</h3>
               <button
-                onClick={onRemove}
+                onClick={() => {
+                  if (confirm(`Remove ${combatant.name} from combat?`)) {
+                    onRemove();
+                  }
+                }}
                 className="text-red-500 hover:text-red-400 text-xl leading-none"
                 title="Remove combatant"
               >
