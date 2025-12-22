@@ -30,6 +30,7 @@ function CombatContent() {
   const [removeConfirmPosition, setRemoveConfirmPosition] = useState<{top: number, left: number} | null>(null);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   const initiativePanelRef = useRef<HTMLDivElement>(null);
+  const setupCombatantsRef = useRef<CombatantState[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -99,6 +100,25 @@ function CombatContent() {
     }
   }, [toast]);
 
+  // Keep ref in sync with setupCombatants state for duplicate detection
+  useEffect(() => {
+    setupCombatantsRef.current = setupCombatants;
+  }, [setupCombatants]);
+
+  // Log when modal opens to diagnose data issues
+  useEffect(() => {
+    if (showCombatantModal) {
+      console.log('Modal opened with data:', {
+        monsterTemplatesCount: monsterTemplates.length,
+        charactersCount: characters.length,
+        loadingTemplates,
+        userId: user?.userId,
+        firstMonster: monsterTemplates[0],
+        firstCharacter: characters[0],
+      });
+    }
+  }, [showCombatantModal]);
+
   const saveCombatState = async (state: CombatState | null) => {
     try {
       setError(null);
@@ -119,6 +139,8 @@ function CombatContent() {
   const addCombatantToSetup = (combatant: CombatantState) => {
     // Add to setupCombatants instead of starting combat
     setSetupCombatants(prev => [...prev, combatant]);
+    // Keep ref in sync for immediate duplicate detection
+    setupCombatantsRef.current = [...setupCombatantsRef.current, combatant];
     setShowQuickEntryType(null);
   };
 
@@ -133,22 +155,57 @@ function CombatContent() {
     // initiative via the Manual Entry option if needed.
     if (!combatState) return;
 
+    // Handle renumbering if there are duplicates with the same base name
+    const cleanName = combatant.name.replace(/\s+\d+$/, '');
+    
+    // Find existing combatants with the same base name
+    const existingWithSameName = combatState.combatants.filter(c => {
+      const cleanExisting = c.name.replace(/\s+\d+$/, '');
+      return cleanExisting === cleanName;
+    });
+
+    let finalCombatant = combatant;
+    let updatedCombatantsList = combatState.combatants;
+
+    if (existingWithSameName.length > 0) {
+      // There are duplicates - need to renumber all of them including the new one
+      // Renumber the existing ones sequentially
+      const updatedCombatants = combatState.combatants.map(c => {
+        const cleanExisting = c.name.replace(/\s+\d+$/, '');
+        if (cleanExisting === cleanName) {
+          // Find which number this should be in the sequence
+          const indexInDuplicates = existingWithSameName.findIndex(dup => dup.id === c.id);
+          return { ...c, name: `${cleanName} ${indexInDuplicates + 1}` };
+        }
+        return c;
+      });
+      
+      // Add the new combatant with the next number
+      const newCombatantIndex = existingWithSameName.length + 1;
+      finalCombatant = { ...combatant, name: `${cleanName} ${newCombatantIndex}` };
+      
+      updatedCombatantsList = [...updatedCombatants, finalCombatant];
+    } else {
+      // No duplicates, just add it
+      updatedCombatantsList = [...combatState.combatants, finalCombatant];
+    }
+
     // Track the current combatant's ID to maintain turn pointer
     const currentCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
     
     // Only sort if initiative has been rolled; otherwise just append
-    const updatedCombatants = hasInitiativeBeenRolled()
-      ? sortCombatants([...combatState.combatants, combatant])
-      : [...combatState.combatants, combatant];
+    const sortedCombatants = hasInitiativeBeenRolled()
+      ? sortCombatants(updatedCombatantsList)
+      : updatedCombatantsList;
 
     // Find the index of the current combatant in the new list to preserve turn continuity
     const newTurnIndex = currentCombatantId
-      ? updatedCombatants.findIndex(c => c.id === currentCombatantId)
+      ? sortedCombatants.findIndex(c => c.id === currentCombatantId)
       : combatState.currentTurnIndex;
 
     saveCombatState({
       ...combatState,
-      combatants: updatedCombatants,
+      combatants: sortedCombatants,
       currentTurnIndex: newTurnIndex !== -1 ? newTurnIndex : 0,
     });
     setShowQuickEntryType(null);
@@ -160,37 +217,74 @@ function CombatContent() {
     type: 'monster' | 'player',
     idPrefix: string
   ) => {
-    const combatant: CombatantState = {
-      id: `${idPrefix}-${item.id}-${crypto.randomUUID()}`,
-      name: item.name,
-      type,
-      initiative: 0,
-      abilityScores: item.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
-      hp: item.hp,
-      maxHp: item.maxHp,
-      ac: item.ac,
-      conditions: [],
-      traits: item.traits,
-      actions: item.actions,
-      bonusActions: item.bonusActions,
-      reactions: item.reactions,
-      legendaryActions: 'legendaryActions' in item ? item.legendaryActions : undefined,
-      lairActions: 'lairActions' in item ? item.lairActions : undefined,
-    };
+    try {
+      console.log('Adding combatant:', item.name);
 
-    if (!combatState) {
-      // During setup phase
-      addCombatantToSetup(combatant);
-    } else {
-      // During active combat
-      addCombatantToActiveSession(combatant);
+      const combatant: CombatantState = {
+        id: `${idPrefix}-${item.id}-${crypto.randomUUID()}`,
+        name: item.name,
+        type,
+        initiative: 0,
+        abilityScores: item.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+        hp: item.hp,
+        maxHp: item.maxHp,
+        ac: item.ac,
+        conditions: [],
+        traits: item.traits,
+        actions: item.actions,
+        bonusActions: item.bonusActions,
+        reactions: item.reactions,
+        legendaryActions: 'legendaryActions' in item ? item.legendaryActions : undefined,
+        lairActions: 'lairActions' in item ? item.lairActions : undefined,
+      };
+
+      if (!combatState) {
+        // During setup phase - handle renumbering if needed
+        const cleanName = combatant.name.replace(/\s+\d+$/, '');
+        
+        // Find existing combatants with the same base name
+        const existingWithSameName = setupCombatantsRef.current.filter(c => {
+          const cleanExisting = c.name.replace(/\s+\d+$/, '');
+          return cleanExisting === cleanName;
+        });
+
+        if (existingWithSameName.length > 0) {
+          // There are duplicates - need to renumber all of them including the new one
+          // Renumber the existing ones sequentially
+          const updatedCombatants = setupCombatantsRef.current.map(c => {
+            const cleanExisting = c.name.replace(/\s+\d+$/, '');
+            if (cleanExisting === cleanName) {
+              // Find which number this should be in the sequence
+              const indexInDuplicates = existingWithSameName.findIndex(dup => dup.id === c.id);
+              return { ...c, name: `${cleanName} ${indexInDuplicates + 1}` };
+            }
+            return c;
+          });
+          
+          // Add the new combatant with the next number
+          const newCombatantIndex = existingWithSameName.length + 1;
+          combatant.name = `${cleanName} ${newCombatantIndex}`;
+          
+          const finalCombatants = [...updatedCombatants, combatant];
+          setSetupCombatants(finalCombatants);
+          setupCombatantsRef.current = finalCombatants;
+        } else {
+          // No duplicates, just add it
+          const newCombatants = [...setupCombatantsRef.current, combatant];
+          setSetupCombatants(newCombatants);
+          setupCombatantsRef.current = newCombatants;
+        }
+      } else {
+        // During active combat
+        addCombatantToActiveSession(combatant);
+      }
+
+      setShowCombatantModal(false);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'Failed to add combatant';
+      console.error('Error adding combatant:', err);
+      setError(errMsg);
     }
-
-    setToast({
-      message: `${combatant.name} added to combat`,
-      type: 'success',
-    });
-    setShowCombatantModal(false);
   };
 
   const startCombatWithSetupCombatants = () => {
@@ -1045,7 +1139,7 @@ function CombatContent() {
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transition-opacity duration-300 ${
+          className={`fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transition-opacity duration-300 z-50 ${
             toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
           }`}
         >
