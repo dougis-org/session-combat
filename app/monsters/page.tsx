@@ -17,6 +17,7 @@ function MonstersContent() {
   const [isAddingTemplate, setIsAddingTemplate] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<MonsterTemplate | null>(null);
   const [editingMode, setEditingMode] = useState<'user' | 'global'>('user');
+  const [copyingId, setCopyingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTemplates();
@@ -130,6 +131,25 @@ function MonstersContent() {
       await fetchTemplates();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete monster template');
+    }
+  };
+
+  const copyTemplate = async (id: string) => {
+    try {
+      setError(null);
+      setCopyingId(id);
+      const response = await fetch(`/api/monsters/${id}/duplicate`, {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to copy monster');
+      }
+      await fetchTemplates();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to copy monster');
+    } finally {
+      setCopyingId(null);
     }
   };
 
@@ -256,6 +276,8 @@ function MonstersContent() {
                       setIsAddingTemplate(false);
                     }}
                     onDelete={() => deleteTemplate(template.id, 'global')}
+                    onCopy={() => copyTemplate(template.id)}
+                    isCopying={copyingId === template.id}
                   />
                 ))}
               </div>
@@ -273,12 +295,16 @@ function MonsterTemplateCard({
   canEdit = true,
   onEdit,
   onDelete,
+  onCopy,
+  isCopying = false,
 }: {
   template: MonsterTemplate;
   isGlobal: boolean;
   canEdit?: boolean;
   onEdit: () => void;
   onDelete: () => void;
+  onCopy?: () => void;
+  isCopying?: boolean;
 }) {
   return (
     <div className={`rounded-lg p-4 ${isGlobal ? 'bg-gray-800 border border-purple-600' : 'bg-gray-800'}`}>
@@ -295,22 +321,34 @@ function MonsterTemplateCard({
             </p>
           )}
         </div>
-        {canEdit && (
-          <div className="flex gap-2">
+        <div className="flex gap-2">
+          {isGlobal && onCopy && (
             <button
-              onClick={onEdit}
-              className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+              onClick={onCopy}
+              disabled={isCopying}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-3 py-1 rounded text-sm"
+              aria-label={`Copy ${template.name} to your library`}
             >
-              Edit
+              {isCopying ? 'Copying...' : 'Copy'}
             </button>
-            <button
-              onClick={onDelete}
-              className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
-            >
-              Delete
-            </button>
-          </div>
-        )}
+          )}
+          {canEdit && (
+            <>
+              <button
+                onClick={onEdit}
+                className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+              >
+                Edit
+              </button>
+              <button
+                onClick={onDelete}
+                className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
+              >
+                Delete
+              </button>
+            </>
+          )}
+        </div>
       </div>
       <CreatureStatBlock
         abilityScores={template.abilityScores}

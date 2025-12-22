@@ -95,12 +95,19 @@ Seeded Monsters:
 
 Once seeded, monsters are available to all users:
 
-1. **In Encounter Builder:**
+1. **Copying to Your Library:**
+   - Navigate to the Monster Library (/monsters)
+   - Global monsters appear in the "Global Monster Library" section
+   - Click the green **"Copy"** button on any global monster card
+   - The monster is duplicated to your personal library with all stats preserved
+   - You can now edit your copy independently of the global template
+
+2. **In Encounter Builder:**
    - Click "Browse Library" or similar button
    - Select a monster from the SRD library
    - Click "Add to Encounter" to clone it into your encounter
 
-2. **Monster Details:**
+3. **Monster Details:**
    - Full stat blocks including ability scores, saving throws, and skills
    - Special traits, actions, bonus actions, and legendary actions
    - Damage immunities, resistances, and condition immunities
