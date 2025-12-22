@@ -1,6 +1,7 @@
 import { MongoDBContainer, StartedMongoDBContainer } from '@testcontainers/mongodb';
 import { ChildProcess, spawn } from 'child_process';
 import fetch from 'node-fetch';
+import { findAvailablePort } from './utils/port';
 
 // Type definitions for API responses
 interface MonsterTemplate {
@@ -28,7 +29,8 @@ interface ErrorResponse {
 describe('Monster API Integration Tests', () => {
   let mongoContainer: StartedMongoDBContainer;
   let nextProcess: ChildProcess;
-  const baseUrl = 'http://localhost:3000';
+  let baseUrl: string;
+  let port: number;
   let authToken: string;
   let userId: string;
 
@@ -88,11 +90,15 @@ describe('Monster API Integration Tests', () => {
     process.env.MONGODB_URI = mongoUri;
     process.env.MONGODB_DB = 'session-combat-test';
 
+    // Find available port
+    port = await findAvailablePort(3000);
+    baseUrl = `http://localhost:${port}`;
+
     console.log('Starting Next.js server...');
     nextProcess = spawn('npx', ['next', 'start'], {
       env: { 
         ...process.env,
-        PORT: '3000',
+        PORT: port.toString(),
         HOSTNAME: '0.0.0.0'
       },
       stdio: 'pipe',

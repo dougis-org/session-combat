@@ -1,11 +1,13 @@
 import { MongoDBContainer, StartedMongoDBContainer } from '@testcontainers/mongodb';
 import { ChildProcess, spawn } from 'child_process';
 import fetch from 'node-fetch';
+import { findAvailablePort } from './utils/port';
 
 describe('API Integration Tests', () => {
   let mongoContainer: StartedMongoDBContainer;
   let nextProcess: ChildProcess;
-  const baseUrl = 'http://localhost:3000';
+  let port: number;
+  let baseUrl: string;
 
   // Helper function to wait for the server to be ready
   async function waitForServer(url: string, maxAttempts = 30, delay = 2000): Promise<void> {
@@ -31,6 +33,11 @@ describe('API Integration Tests', () => {
 
     console.log('MongoDB container started');
 
+    // Find an available port
+    port = await findAvailablePort(3000);
+    baseUrl = `http://localhost:${port}`;
+    console.log(`Using port ${port} for Next.js server`);
+
     // Set environment variables for the Next.js server
     const mongoUri = mongoContainer.getConnectionString();
     process.env.MONGODB_URI = mongoUri;
@@ -40,7 +47,7 @@ describe('API Integration Tests', () => {
     nextProcess = spawn('npx', ['next', 'start'], {
       env: { 
         ...process.env,
-        PORT: '3000',
+        PORT: port.toString(),
         HOSTNAME: '0.0.0.0'
       },
       stdio: 'pipe',

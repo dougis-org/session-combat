@@ -27,6 +27,9 @@ RUN npm ci --include=dev
 # Copy application code
 COPY . .
 
+# Copy public assets explicitly
+COPY public/ ./public/
+
 # Generate version file at build time
 RUN node scripts/generate-version.js
 
@@ -50,6 +53,9 @@ ENV PORT=3000
 
 # Copy built application
 COPY --from=build /app /app
+
+# Ensure public folder is accessible
+RUN ls -la /app/public/ || echo "Warning: public folder not found"
 
 # Entrypoint sets up the container.
 ENTRYPOINT [ "/app/docker-entrypoint.js" ]
