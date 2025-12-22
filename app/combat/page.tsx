@@ -635,12 +635,6 @@ function CombatContent() {
               Manual Entry
             </button>
             <button
-              onClick={nextTurn}
-              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
-            >
-              Next Turn
-            </button>
-            <button
               onClick={() => setShowCombatantModal(true)}
               className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm"
               title="Add a party member mid-combat"
