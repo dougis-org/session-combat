@@ -1,0 +1,25 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "Running pre-commit checks..."
+echo ""
+
+# Run build
+echo "→ Building application..."
+if ! npm run build; then
+  echo "❌ Build failed. Commit aborted."
+  exit 1
+fi
+echo "✓ Build passed"
+echo ""
+
+# Run tests
+echo "→ Running tests..."
+if ! npm run test:ci; then
+  echo "❌ Tests failed. Commit aborted."
+  exit 1
+fi
+echo "✓ Tests passed"
+echo ""
+
+echo "✓ All pre-commit checks passed!"
