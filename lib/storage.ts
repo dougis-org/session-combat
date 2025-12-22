@@ -1,7 +1,21 @@
 // MongoDB persistence utilities
 import { getDatabase } from './db';
-import { SessionData, Encounter, Character, CombatState, Party, MonsterTemplate } from './types';
+import { SessionData, Encounter, Character, CombatState, Party, MonsterTemplate, AbilityScores } from './types';
 import { GLOBAL_USER_ID } from './constants';
+
+/**
+ * Helper to normalize ability scores with default values
+ */
+function normalizeAbilityScores(scores: Partial<AbilityScores> | undefined): AbilityScores {
+  return {
+    strength: scores?.strength ?? 10,
+    dexterity: scores?.dexterity ?? 10,
+    constitution: scores?.constitution ?? 10,
+    intelligence: scores?.intelligence ?? 10,
+    wisdom: scores?.wisdom ?? 10,
+    charisma: scores?.charisma ?? 10,
+  };
+}
 
 /**
  * Server-side storage functions for MongoDB
@@ -36,9 +50,11 @@ export const storage = {
         .find({ userId })
         .toArray();
       // Ensure id field is set to the string representation of _id
+      // Also normalize ability scores with defaults
       return characters.map(char => ({
         ...char,
         id: char._id?.toString() || char.id,
+        abilityScores: normalizeAbilityScores(char.abilityScores),
       }));
     } catch (error) {
       console.error('Error loading characters:', error);
@@ -88,9 +104,11 @@ export const storage = {
         .find({ userId })
         .toArray();
       // Ensure id field is set to the string representation of _id
+      // Also normalize ability scores with defaults
       return templates.map(template => ({
         ...template,
         id: template._id?.toString() || template.id,
+        abilityScores: normalizeAbilityScores(template.abilityScores),
       }));
     } catch (error) {
       console.error('Error loading monster templates:', error);
@@ -107,9 +125,11 @@ export const storage = {
         .find({ userId: GLOBAL_USER_ID })
         .toArray();
       // Ensure id field is set to the string representation of _id
+      // Also normalize ability scores with defaults
       return templates.map(template => ({
         ...template,
         id: template._id?.toString() || template.id,
+        abilityScores: normalizeAbilityScores(template.abilityScores),
       }));
     } catch (error) {
       console.error('Error loading global monster templates:', error);
