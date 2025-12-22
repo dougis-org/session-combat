@@ -815,6 +815,14 @@ function CombatantCard({
                 </svg>
               </button>
               <h3 className="text-xl font-semibold">{combatant.name}</h3>
+              {isActive && onNextTurn && (
+                <button
+                  onClick={onNextTurn}
+                  className="px-2 py-1 rounded text-xs bg-yellow-600 hover:bg-yellow-700 animate-pulse font-semibold"
+                >
+                  Current Turn (done)
+                </button>
+              )}
             </div>
             {!isActive && <div className="w-40"></div>}
             <div className="flex items-center gap-2">
