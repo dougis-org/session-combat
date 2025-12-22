@@ -141,11 +141,17 @@ function CombatContent() {
       name: item.name,
       type,
       initiative: 0,
-      abilityScores: item.abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      abilityScores: item.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
       hp: item.hp,
       maxHp: item.maxHp,
       ac: item.ac,
       conditions: [],
+      traits: item.traits,
+      actions: item.actions,
+      bonusActions: item.bonusActions,
+      reactions: item.reactions,
+      legendaryActions: 'legendaryActions' in item ? item.legendaryActions : undefined,
+      lairActions: 'lairActions' in item ? item.lairActions : undefined,
     };
 
     if (!combatState) {
@@ -170,11 +176,15 @@ function CombatContent() {
         name: character.name,
         type: 'player',
         initiative: 0,
-        abilityScores: character.abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+        abilityScores: character.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
         hp: character.hp,
         maxHp: character.maxHp,
         ac: character.ac,
         conditions: [],
+        traits: character.traits,
+        actions: character.actions,
+        bonusActions: character.bonusActions,
+        reactions: character.reactions,
       });
     });
 
@@ -190,11 +200,17 @@ function CombatContent() {
             name: `${monster.name} ${idx + 1}`,
             type: 'monster',
             initiative: 0,
-            abilityScores: monster.abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+            abilityScores: monster.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
             hp: monster.hp,
             maxHp: monster.maxHp,
             ac: monster.ac,
             conditions: [],
+            traits: monster.traits,
+            actions: monster.actions,
+            bonusActions: monster.bonusActions,
+            reactions: monster.reactions,
+            legendaryActions: monster.legendaryActions,
+            lairActions: monster.lairActions,
           });
         });
       }
