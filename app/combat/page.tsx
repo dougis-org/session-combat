@@ -643,6 +643,7 @@ function CombatContent() {
                   isActive={actualIdx === combatState.currentTurnIndex}
                   onUpdate={(updates) => updateCombatant(combatant.id, updates)}
                   onRemove={() => removeCombatant(combatant.id)}
+                  onNextTurn={nextTurn}
                 />
               );
             })}
@@ -664,6 +665,7 @@ function CombatContent() {
                         isActive={actualIdx === combatState.currentTurnIndex}
                         onUpdate={(updates) => updateCombatant(combatant.id, updates)}
                         onRemove={() => removeCombatant(combatant.id)}
+                        onNextTurn={nextTurn}
                       />
                     );
                   })}
@@ -684,6 +686,7 @@ function CombatContent() {
                         isActive={actualIdx === combatState.currentTurnIndex}
                         onUpdate={(updates) => updateCombatant(combatant.id, updates)}
                         onRemove={() => removeCombatant(combatant.id)}
+                        onNextTurn={nextTurn}
                       />
                     );
                   })}
@@ -714,11 +717,13 @@ function CombatantCard({
   isActive,
   onUpdate,
   onRemove,
+  onNextTurn,
 }: {
   combatant: CombatantState;
   isActive: boolean;
   onUpdate: (updates: Partial<CombatantState>) => void;
   onRemove: () => void;
+  onNextTurn?: () => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showConditions, setShowConditions] = useState(false);
@@ -778,8 +783,13 @@ function CombatantCard({
   const hpPercent = (combatant.hp / combatant.maxHp) * 100;
   const hpColor = hpPercent > 50 ? 'bg-green-500' : hpPercent > 25 ? 'bg-yellow-500' : 'bg-red-500';
 
+  // Background shading based on combatant type
+  const bgClass = combatant.type === 'player' 
+    ? 'bg-blue-900 bg-opacity-30' 
+    : 'bg-red-900 bg-opacity-30';
+
   return (
-    <div className={`bg-gray-800 rounded-lg p-4 ${isActive ? 'border-2 border-yellow-500' : ''}`}>
+    <div className={`${bgClass} rounded-lg p-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'}`}>
       <div className="flex justify-between items-start">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
@@ -902,12 +912,15 @@ function CombatantCard({
           >
             Add Condition
           </button>
-          <button
-            onClick={onRemove}
-            className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
-          >
-            Remove
-          </button>
+          {isActive && onNextTurn && (
+            <button
+              onClick={onNextTurn}
+              className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm font-semibold"
+              title="Move to next turn"
+            >
+              Turn Complete
+            </button>
+          )}
         </div>
       </div>
     </div>
