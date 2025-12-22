@@ -1086,15 +1086,20 @@ function CombatantCard({
               Heal
             </button>
             <div className="flex items-center gap-2 ml-auto pr-4">
-              <p className="text-xs text-gray-400">Initiative</p>
-              <p className="text-lg font-bold">{combatant.initiative}</p>
-              {combatant.initiativeRoll && (
-                <p className="text-xs text-gray-500 whitespace-nowrap">
-                  {combatant.initiativeRoll.method === 'rolled' 
-                    ? `d20:${combatant.initiativeRoll.roll}+${combatant.initiativeRoll.bonus}`
-                    : 'Manual'}
-                </p>
-              )}
+              <button
+                onClick={() => onSetInitiative?.(combatant.id)}
+                className="flex items-center gap-1 hover:opacity-80 cursor-pointer transition-opacity"
+              >
+                <p className="text-xs text-gray-400">Initiative</p>
+                <p className="text-lg font-bold">{combatant.initiative}</p>
+                {combatant.initiativeRoll && (
+                  <p className="text-xs text-gray-500 whitespace-nowrap">
+                    {combatant.initiativeRoll.method === 'rolled' 
+                      ? `d20:${combatant.initiativeRoll.roll}+${combatant.initiativeRoll.bonus}`
+                      : 'Manual'}
+                  </p>
+                )}
+              </button>
             </div>
           </div>
 
@@ -1143,14 +1148,6 @@ function CombatantCard({
           >
             Add Condition
           </button>
-          {combatant.initiative === 0 && (
-            <button
-              onClick={() => onSetInitiative?.(combatant.id)}
-              className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs"
-            >
-              Set Initiative
-            </button>
-          )}
           <button
             onClick={onRemove}
             className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
