@@ -829,7 +829,6 @@ function CombatContent() {
               <div key={combatant.id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
                 <div className="mb-4">
                   <p className="text-sm text-gray-400 mb-1">Set Initiative for:</p>
-                  <h3 className="text-lg font-semibold">{combatant.name}</h3>
                 </div>
                 <InitiativeEntry
                   combatant={combatant}
@@ -1591,14 +1590,9 @@ function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
     <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-semibold">{combatant.name}</h3>
-          <p className="text-sm text-gray-400">
-            {combatant.type === 'player' ? 'Player' : 'Monster'}
-          </p>
+          {/* Name and type shown by parent; removed to avoid duplication */}
         </div>
-        <span className={`px-2 py-1 rounded text-xs ${combatant.type === 'player' ? 'bg-blue-600' : 'bg-red-600'}`}>
-          {combatant.type}
-        </span>
+
       </div>
 
       <div className="space-y-3">
@@ -1608,7 +1602,7 @@ function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
               setEntryMode('roll');
               handleRoll();
             }}
-            className={`flex-1 px-3 py-2 rounded text-sm ${
+            className={`w-28 px-2 py-2 rounded text-sm flex-none ${
               entryMode === 'roll' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
             }`}
           >
@@ -1616,7 +1610,7 @@ function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
           </button>
           <button
             onClick={() => setEntryMode('dice')}
-            className={`flex-1 px-3 py-2 rounded text-sm ${
+            className={`w-40 px-2 py-2 rounded text-sm flex-none ${
               entryMode === 'dice' ? 'bg-purple-600' : 'bg-gray-700 hover:bg-gray-600'
             }`}
           >
@@ -1624,7 +1618,7 @@ function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
           </button>
           <button
             onClick={() => setEntryMode('total')}
-            className={`flex-1 px-3 py-2 rounded text-sm ${
+            className={`w-28 px-2 py-2 rounded text-sm flex-none ${
               entryMode === 'total' ? 'bg-green-600' : 'bg-gray-700 hover:bg-gray-600'
             }`}
           >
@@ -1645,7 +1639,7 @@ function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
             />
             <button
               onClick={handleDiceEntry}
-              className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded"
+              className="bg-purple-600 hover:bg-purple-700 w-20 px-2 py-2 rounded"
             >
               Set
             </button>
@@ -1664,7 +1658,7 @@ function InitiativeEntry({ combatant, onSet }: InitiativeEntryProps) {
             />
             <button
               onClick={handleTotalEntry}
-              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+              className="bg-green-600 hover:bg-green-700 w-20 px-2 py-2 rounded"
             >
               Set
             </button>
