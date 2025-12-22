@@ -4,42 +4,50 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
-import { QuickCharacterEntry } from '@/lib/components/QuickCharacterEntry';
-import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll } from '@/lib/types';
+import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
 
 function CombatContent() {
+  const { user } = useAuth();
   const [combatState, setCombatState] = useState<CombatState | null>(null);
   const [encounters, setEncounters] = useState<Encounter[]>([]);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [monsterTemplates, setMonsterTemplates] = useState<MonsterTemplate[]>([]);
   const [selectedEncounterId, setSelectedEncounterId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [initiativeMode, setInitiativeMode] = useState(false);
   const [showQuickEntryType, setShowQuickEntryType] = useState<'player' | 'monster' | null>(null);
+  const [showCombatantModal, setShowCombatantModal] = useState(false);
   const [setupCombatants, setSetupCombatants] = useState<CombatantState[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
         setError(null);
-        const [encountersRes, charactersRes, combatRes] = await Promise.all([
+        const [encountersRes, charactersRes, combatRes, monstersRes] = await Promise.all([
           fetch('/api/encounters'),
           fetch('/api/characters'),
           fetch('/api/combat'),
+          fetch('/api/monsters'),
         ]);
 
-        if (!encountersRes.ok || !charactersRes.ok || !combatRes.ok) {
+        if (!encountersRes.ok || !charactersRes.ok || !combatRes.ok || !monstersRes.ok) {
           throw new Error('Failed to load data');
         }
 
         const encountersData = await encountersRes.json();
         const charactersData = await charactersRes.json();
         const combatData = await combatRes.json();
+        const monstersData = await monstersRes.json();
 
         setEncounters(encountersData || []);
         setCharacters(charactersData || []);
+        setMonsterTemplates(monstersData || []);
         setCombatState(combatData || null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
@@ -104,6 +112,51 @@ function CombatContent() {
       currentTurnIndex: newTurnIndex !== -1 ? newTurnIndex : 0,
     });
     setShowQuickEntryType(null);
+    setShowCombatantModal(false);
+  };
+
+  const addMonsterFromLibrary = (monster: Monster) => {
+    const combatant: CombatantState = {
+      id: `monster-${monster.id}-${Date.now()}`,
+      name: monster.name,
+      type: 'monster',
+      initiative: 0,
+      abilityScores: monster.abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      hp: monster.hp,
+      maxHp: monster.maxHp,
+      ac: monster.ac,
+      conditions: [],
+    };
+
+    if (!combatState) {
+      // During setup phase
+      addCombatantToSetup(combatant);
+    } else {
+      // During active combat
+      addCombatantToActiveSession(combatant);
+    }
+  };
+
+  const addCharacterFromLibrary = (character: Character) => {
+    const combatant: CombatantState = {
+      id: `character-${character.id}-${Date.now()}`,
+      name: character.name,
+      type: 'player',
+      initiative: 0,
+      abilityScores: character.abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      hp: character.hp,
+      maxHp: character.maxHp,
+      ac: character.ac,
+      conditions: [],
+    };
+
+    if (!combatState) {
+      // During setup phase
+      addCombatantToSetup(combatant);
+    } else {
+      // During active combat
+      addCombatantToActiveSession(combatant);
+    }
   };
 
   const startCombatWithSetupCombatants = () => {
@@ -444,13 +497,13 @@ function CombatContent() {
 
                 <div className="space-y-2">
                   <button
-                    onClick={() => setShowQuickEntryType('player')}
+                    onClick={() => setShowCombatantModal(true)}
                     className="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-semibold transition-colors"
                   >
                     + Add Party Member
                   </button>
                   <button
-                    onClick={() => setShowQuickEntryType('monster')}
+                    onClick={() => setShowCombatantModal(true)}
                     className="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-semibold transition-colors"
                   >
                     + Add Enemy
@@ -468,13 +521,15 @@ function CombatContent() {
             </div>
           </div>
 
-          {showQuickEntryType && (
-            <QuickCharacterEntry
-              combatantType={showQuickEntryType}
-              onAdd={addCombatantToSetup}
-              onCancel={() => setShowQuickEntryType(null)}
-              existingCombatants={setupCombatants}
-              onRemove={removeCombatantFromSetup}
+          {showCombatantModal && (
+            <QuickCombatantModal
+              onAddMonster={addMonsterFromLibrary}
+              onAddCharacter={addCharacterFromLibrary}
+              onClose={() => setShowCombatantModal(false)}
+              monsterTemplates={monsterTemplates}
+              characterTemplates={characters}
+              loadingTemplates={loadingTemplates}
+              userId={user?.userId}
             />
           )}
         </div>
@@ -559,14 +614,14 @@ function CombatContent() {
               Next Turn
             </button>
             <button
-              onClick={() => setShowQuickEntryType('player')}
+              onClick={() => setShowCombatantModal(true)}
               className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm"
               title="Add a party member mid-combat"
             >
               + Add Party Member
             </button>
             <button
-              onClick={() => setShowQuickEntryType('monster')}
+              onClick={() => setShowCombatantModal(true)}
               className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm"
               title="Add an enemy mid-combat"
             >
@@ -653,11 +708,16 @@ function CombatContent() {
           </div>
         )}
 
-        {showQuickEntryType && (
-          <QuickCharacterEntry
-            combatantType={showQuickEntryType}
-            onAdd={addCombatantToActiveSession}
-            onCancel={() => setShowQuickEntryType(null)}
+        {/* Combatant Modal for both library and custom */}
+        {showCombatantModal && (
+          <QuickCombatantModal
+            onAddMonster={addMonsterFromLibrary}
+            onAddCharacter={addCharacterFromLibrary}
+            onClose={() => setShowCombatantModal(false)}
+            monsterTemplates={monsterTemplates}
+            characterTemplates={characters}
+            loadingTemplates={loadingTemplates}
+            userId={user?.userId}
           />
         )}
       </div>

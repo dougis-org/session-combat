@@ -3,27 +3,31 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Fuse from 'fuse.js';
-import { Monster, MonsterTemplate } from '@/lib/types';
+import { Monster, MonsterTemplate, Character } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
 
 interface QuickCombatantModalProps {
   onAddMonster: (monster: Monster) => void;
+  onAddCharacter?: (character: Character) => void;
   onClose: () => void;
   monsterTemplates: MonsterTemplate[];
+  characterTemplates?: Character[];
   loadingTemplates?: boolean;
   userId?: string;
 }
 
-type TabType = 'library' | 'custom';
+type TabType = 'monsters' | 'characters' | 'custom';
 
 export function QuickCombatantModal({
   onAddMonster,
+  onAddCharacter,
   onClose,
   monsterTemplates,
+  characterTemplates = [],
   loadingTemplates = false,
   userId,
 }: QuickCombatantModalProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('library');
+  const [activeTab, setActiveTab] = useState<TabType>('monsters');
   const [searchQuery, setSearchQuery] = useState('');
   const [creatorFilter, setCreatorFilter] = useState<'all' | 'mine' | 'global' | 'other'>('all');
 
@@ -38,8 +42,8 @@ export function QuickCombatantModal({
 
   const [error, setError] = useState<string | null>(null);
 
-  // Fuse.js fuzzy search setup
-  const fuse = useMemo(
+  // Fuse.js fuzzy search setup for monsters
+  const monsterFuse = useMemo(
     () =>
       new Fuse(monsterTemplates, {
         keys: ['name', 'type', 'description', 'source'],
@@ -49,10 +53,21 @@ export function QuickCombatantModal({
     [monsterTemplates]
   );
 
-  // Perform search and filter
+  // Fuse.js fuzzy search setup for characters
+  const characterFuse = useMemo(
+    () =>
+      new Fuse(characterTemplates, {
+        keys: ['name', 'class'],
+        threshold: 0.3,
+        includeScore: true,
+      }),
+    [characterTemplates]
+  );
+
+  // Perform search and filter for monsters
   const filteredMonsters = useMemo(() => {
     const baseMonsters = searchQuery.trim()
-      ? fuse.search(searchQuery).map((result) => result.item)
+      ? monsterFuse.search(searchQuery).map((result) => result.item)
       : monsterTemplates;
 
     if (creatorFilter === 'all') {
@@ -71,17 +86,47 @@ export function QuickCombatantModal({
           return false;
       }
     });
-  }, [searchQuery, creatorFilter, monsterTemplates, fuse, userId]);
+  }, [searchQuery, creatorFilter, monsterTemplates, monsterFuse, userId]);
+
+  // Perform search and filter for characters
+  const filteredCharacters = useMemo(() => {
+    const baseCharacters = searchQuery.trim()
+      ? characterFuse.search(searchQuery).map((result) => result.item)
+      : characterTemplates;
+
+    if (creatorFilter === 'all') {
+      return baseCharacters;
+    }
+
+    return baseCharacters.filter((c) => {
+      switch (creatorFilter) {
+        case 'mine':
+          return c.userId === userId;
+        case 'global':
+          return c.userId === GLOBAL_USER_ID;
+        case 'other':
+          return c.userId !== GLOBAL_USER_ID && c.userId !== userId;
+        default:
+          return false;
+      }
+    });
+  }, [searchQuery, creatorFilter, characterTemplates, characterFuse, userId]);
 
   const handleAddFromLibrary = (template: MonsterTemplate) => {
     const newMonster: Monster = {
       ...template,
       id: crypto.randomUUID(),
-
       templateId: template.id,
     };
     onAddMonster(newMonster);
     // Keep modal open to allow adding multiple monsters from library
+  };
+
+  const handleAddCharacterFromLibrary = (character: Character) => {
+    if (onAddCharacter) {
+      onAddCharacter(character);
+      // Keep modal open to allow adding multiple characters from library
+    }
   };
 
   const handleAddCustomMonster = (e: React.FormEvent) => {
@@ -201,19 +246,35 @@ export function QuickCombatantModal({
         <div className="flex border-b border-gray-700 px-6 pt-4" role="tablist">
           <button
             onClick={() => {
-              setActiveTab('library');
+              setActiveTab('monsters');
               setError(null);
             }}
             className={`px-4 py-2 font-medium transition-colors border-b-2 ${
-              activeTab === 'library'
+              activeTab === 'monsters'
                 ? 'text-purple-400 border-purple-400'
                 : 'text-gray-400 border-transparent hover:text-gray-300'
             }`}
-            aria-selected={activeTab === 'library'}
-            aria-controls="tab-library-panel"
+            aria-selected={activeTab === 'monsters'}
+            aria-controls="tab-monsters-panel"
             role="tab"
           >
-            From Library
+            Monsters
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('characters');
+              setError(null);
+            }}
+            className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+              activeTab === 'characters'
+                ? 'text-purple-400 border-purple-400'
+                : 'text-gray-400 border-transparent hover:text-gray-300'
+            }`}
+            aria-selected={activeTab === 'characters'}
+            aria-controls="tab-characters-panel"
+            role="tab"
+          >
+            Party Members
           </button>
           <button
             onClick={() => {
@@ -241,13 +302,13 @@ export function QuickCombatantModal({
             </div>
           )}
 
-          {/* Library Tab */}
+          {/* Library Tab - Monsters */}
           <div
-            id="tab-library-panel"
+            id="tab-monsters-panel"
             role="tabpanel"
-            aria-labelledby="tab-library"
-            hidden={activeTab !== 'library'}
-            className={activeTab === 'library' ? 'block' : 'hidden'}
+            aria-labelledby="tab-monsters"
+            hidden={activeTab !== 'monsters'}
+            className={activeTab === 'monsters' ? 'block' : 'hidden'}
           >
             <div className="space-y-4">
               {loadingTemplates ? (
@@ -327,6 +388,102 @@ export function QuickCombatantModal({
                             onClick={() => handleAddFromLibrary(template)}
                             className="bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm ml-3 flex-shrink-0 transition-colors"
                             aria-label={`Add ${template.name} to encounter`}
+                          >
+                            Add
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Characters Tab */}
+          <div
+            id="tab-characters-panel"
+            role="tabpanel"
+            aria-labelledby="tab-characters"
+            hidden={activeTab !== 'characters'}
+            className={activeTab === 'characters' ? 'block' : 'hidden'}
+          >
+            <div className="space-y-4">
+              {loadingTemplates ? (
+                <p className="text-gray-300">Loading characters...</p>
+              ) : characterTemplates.length === 0 ? (
+                <p className="text-gray-300">
+                  No party members available.{' '}
+                  <Link href="/characters" className="text-blue-400 hover:text-blue-300">
+                    Create one
+                  </Link>
+                </p>
+              ) : (
+                <>
+                  {/* Search Input */}
+                  <div>
+                    <label htmlFor="character-search" className="sr-only">
+                      Search characters
+                    </label>
+                    <input
+                      id="character-search"
+                      type="text"
+                      placeholder="Search by name or class..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full bg-gray-700 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      aria-label="Search characters"
+                    />
+                  </div>
+
+                  {/* Creator Filter */}
+                  <div className="flex gap-2 flex-wrap">
+                    {(['all', 'mine', 'global', 'other'] as const).map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => setCreatorFilter(filter)}
+                        className={`px-3 py-1 rounded text-sm capitalize transition-colors ${
+                          creatorFilter === filter
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                        aria-pressed={creatorFilter === filter}
+                      >
+                        {filter === 'all' ? 'All' : filter === 'mine' ? 'My' : filter === 'global' ? 'Global' : 'Other'}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Character List */}
+                  <div className="space-y-2 max-h-72 overflow-y-auto">
+                    {filteredCharacters.length === 0 ? (
+                      <div className="text-gray-400 text-center py-4">
+                        No characters match your search and filter criteria.
+                      </div>
+                    ) : (
+                      filteredCharacters.map((character) => (
+                        <div
+                          key={character.id}
+                          className="flex justify-between items-center bg-gray-700 rounded p-3 hover:bg-gray-650 transition-colors"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium">{character.name}</div>
+                            <div className="text-gray-400 text-xs flex gap-3 mt-1 flex-wrap">
+                              <span>HP: {character.hp}/{character.maxHp}</span>
+                              <span>AC: {character.ac}</span>
+                              {character.userId === GLOBAL_USER_ID ? (
+                                <span className="text-green-400">(Global)</span>
+                              ) : character.userId === userId ? (
+                                <span className="text-blue-400">(Mine)</span>
+                              ) : (
+                                <span className="text-yellow-400">(Shared)</span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleAddCharacterFromLibrary(character)}
+                            className="bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm ml-3 flex-shrink-0 transition-colors"
+                            aria-label={`Add ${character.name} to combat`}
                           >
                             Add
                           </button>
