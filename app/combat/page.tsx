@@ -25,6 +25,7 @@ function CombatContent() {
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [selectedDetailCombatantId, setSelectedDetailCombatantId] = useState<string | null>(null);
   const [detailPosition, setDetailPosition] = useState<{top: number, left: number} | null>(null);
+  const [initiativeEditId, setInitiativeEditId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -678,6 +679,7 @@ function CombatContent() {
                     setSelectedDetailCombatantId(id);
                     setDetailPosition(pos);
                   }}
+                  onSetInitiative={setInitiativeEditId}
                 />
               );
             })}
@@ -704,6 +706,7 @@ function CombatContent() {
                     setSelectedDetailCombatantId(id);
                     setDetailPosition(pos);
                   }}
+                        onSetInitiative={setInitiativeEditId}
                       />
                     );
                   })}
@@ -729,6 +732,7 @@ function CombatContent() {
                     setSelectedDetailCombatantId(id);
                     setDetailPosition(pos);
                   }}
+                        onSetInitiative={setInitiativeEditId}
                       />
                     );
                   })}
@@ -903,6 +907,20 @@ function CombatContent() {
             })()}
           </div>
         )}
+
+        {/* Initiative Entry Modal */}
+        {initiativeEditId && combatState && (
+          <InitiativeEntry
+            combatant={combatState.combatants.find(c => c.id === initiativeEditId)!}
+            onSet={(initiativeRoll) => {
+              updateCombatant(initiativeEditId, {
+                initiative: initiativeRoll.total,
+                initiativeRoll,
+              });
+              setInitiativeEditId(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );
@@ -915,6 +933,7 @@ function CombatantCard({
   onRemove,
   onNextTurn,
   onShowDetails,
+  onSetInitiative,
 }: {
   combatant: CombatantState;
   isActive: boolean;
@@ -922,6 +941,7 @@ function CombatantCard({
   onRemove: () => void;
   onNextTurn?: () => void;
   onShowDetails?: (combatantId: string, position: {top: number, left: number}) => void;
+  onSetInitiative?: (combatantId: string) => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showConditions, setShowConditions] = useState(false);
@@ -1122,6 +1142,20 @@ function CombatantCard({
             className="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs"
           >
             Add Condition
+          </button>
+          {combatant.initiative === 0 && (
+            <button
+              onClick={() => onSetInitiative?.(combatant.id)}
+              className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs"
+            >
+              Set Initiative
+            </button>
+          )}
+          <button
+            onClick={onRemove}
+            className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
+          >
+            Remove
           </button>
         </div>
       </div>
