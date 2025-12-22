@@ -668,9 +668,32 @@ function CombatContent() {
           </div>
         )}
 
-        {/* Initiative Entry Panel */}
-        {initiativeEditId && combatState && (
-          <div ref={initiativePanelRef} className="mb-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
+        {/* Initiative Entry Blocks for Combatants with 0 Initiative */}
+        {combatState && combatState.combatants.filter(c => c.initiative === 0).length > 0 && (
+          <div ref={initiativePanelRef} className="mb-6 space-y-4">
+            {combatState.combatants.filter(c => c.initiative === 0).map((combatant) => (
+              <div key={combatant.id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="mb-4">
+                  <p className="text-sm text-gray-400 mb-1">Set Initiative for:</p>
+                  <h3 className="text-lg font-semibold">{combatant.name}</h3>
+                </div>
+                <InitiativeEntry
+                  combatant={combatant}
+                  onSet={(initiativeRoll) => {
+                    updateCombatant(combatant.id, {
+                      initiative: initiativeRoll.total,
+                      initiativeRoll,
+                    });
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Initiative Entry Panel - for clicking on individual combatants */}
+        {initiativeEditId && combatState && !combatState.combatants.some(c => c.initiative === 0) && (
+          <div className="mb-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
             <InitiativeEntry
               combatant={combatState.combatants.find(c => c.id === initiativeEditId)!}
               onSet={(initiativeRoll) => {
