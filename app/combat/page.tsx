@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
@@ -545,6 +545,12 @@ function CombatContent() {
     }
   };
 
+  // Combatants that still need initiative (initiative === 0) sorted alphabetically by name
+  const zeroInitiative = useMemo(() => {
+    if (!combatState) return [] as CombatantState[];
+    return [...combatState.combatants.filter(c => c.initiative === 0)].sort((a, b) => a.name.localeCompare(b.name));
+  }, [combatState]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
@@ -817,9 +823,9 @@ function CombatContent() {
         )}
 
         {/* Initiative Entry Blocks for Combatants with 0 Initiative */}
-        {combatState && combatState.combatants.filter(c => c.initiative === 0).length > 0 && (
+        {zeroInitiative.length > 0 && (
           <div ref={initiativePanelRef} className="mb-6 space-y-4">
-            {combatState.combatants.filter(c => c.initiative === 0).map((combatant) => (
+            {zeroInitiative.map((combatant) => (
               <div key={combatant.id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
                 <div className="mb-4">
                   <p className="text-sm text-gray-400 mb-1">Set Initiative for:</p>
