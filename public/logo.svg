@@ -1,41 +1,114 @@
-<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="200" height="200" style="background:transparent">
+
   <defs>
-    <linearGradient id="metalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#ffed4e;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#cc9900;stop-opacity:1" />
+    <linearGradient id="steelGradientTip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8e8e8"></stop>
+      <stop offset="22%" stop-color="#dddddd"></stop>
+      <stop offset="55%" stop-color="#c0c0c0"></stop>
+      <stop offset="80%" stop-color="#aaaaaa"></stop>
+      <stop offset="95%" stop-color="#d0d0d0"></stop>
+      <stop offset="100%" stop-color="#e8e8e8"></stop>
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+    <linearGradient id="tipEdgeBold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#CCCCCC" stop-opacity="1"></stop>
+      <stop offset="50%" stop-color="#CCCCCC" stop-opacity="1"></stop>
+      <stop offset="100%" stop-color="#CCCCCC" stop-opacity="0"></stop>
+    </linearGradient>
+    <linearGradient id="tipFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="white" stop-opacity="0.25"></stop>
+      <stop offset="18%" stop-color="white" stop-opacity="1"></stop>
+      <stop offset="100%" stop-color="white" stop-opacity="1"></stop>
+    </linearGradient>
+    <mask id="bladeFadeMask">
+      <rect x="0" y="0" width="1000" height="1000" fill="url(#tipFade)"></rect>
+    </mask>
+    <linearGradient id="fullerGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#666666"></stop>
+      <stop offset="50%" stop-color="#bbbbbb"></stop>
+      <stop offset="100%" stop-color="#666666"></stop>
+    </linearGradient>
+    <linearGradient id="hiltMetal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a8a8a8"></stop>
+      <stop offset="100%" stop-color="#444"></stop>
+    </linearGradient>
+    <linearGradient id="leatherBase" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6b3f2c"></stop>
+      <stop offset="100%" stop-color="#5c3626"></stop>
+    </linearGradient>
+    <linearGradient id="leatherRidge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(0,0,0,0.15)"></stop>
+      <stop offset="50%" stop-color="rgba(0,0,0,0)"></stop>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.15)"></stop>
+    </linearGradient>
+    <filter id="metalNoise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.3" numOctaves="1" seed="7" result="noise"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+    <radialGradient id="fireballGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#ffffcc"></stop>
+      <stop offset="25%" stop-color="#ffdd33"></stop>
+      <stop offset="50%" stop-color="#ff9900"></stop>
+      <stop offset="75%" stop-color="#ff3300"></stop>
+      <stop offset="100%" stop-color="#cc0000" stop-opacity="0"></stop>
+    </radialGradient>
+    <filter id="fireGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur">
+        <animate attributeName="stdDeviation" values="12;14;12" dur="1.5s" repeatCount="indefinite"></animate>
+      </feGaussianBlur>
       <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="blur"></feMergeNode>
+        <feMergeNode in="SourceGraphic"></feMergeNode>
       </feMerge>
     </filter>
   </defs>
-  <g filter="url(#glow)">
-    <path d="M 60 60 L 75 140 L 70 140 L 55 60 Z" fill="url(#metalGradient)" opacity="0.9"/>
-    <path d="M 60 60 L 72 140 L 71 140 L 58 60 Z" fill="#ffff99" opacity="0.5"/>
-    <rect x="50" y="142" width="25" height="8" fill="#8b4513" rx="2"/>
-    <rect x="56" y="150" width="13" height="25" fill="#a0522d" rx="2"/>
-    <line x1="56" y1="156" x2="69" y2="156" stroke="#8b4513" stroke-width="1" opacity="0.6"/>
-    <line x1="56" y1="162" x2="69" y2="162" stroke="#8b4513" stroke-width="1" opacity="0.6"/>
-    <line x1="56" y1="168" x2="69" y2="168" stroke="#8b4513" stroke-width="1" opacity="0.6"/>
-    <circle cx="62.5" cy="177" r="4" fill="#8b4513"/>
+
+  <!-- LEFT SWORD -->
+  <g transform="rotate(-44 500 560)">
+    <path d="M500 -90 L540 140 L520 790 L480 790 L460 140 Z" fill="url(#steelGradientTip)" filter="url(#metalNoise)" mask="url(#bladeFadeMask)"></path>
+    <path d="M500 -90 L520 140 L480 140 Z" fill="url(#tipEdgeBold)" opacity="1"></path>
+    <path d="M494 210 L506 210 L500 730 Z" fill="url(#fullerGradient)" opacity="0.75"></path>
+    <path d="M460 140 L485 790" stroke="#CCCCCC" stroke-opacity="0.4" stroke-width="3"></path>
+    <path d="M540 140 L515 790" stroke="#888888" stroke-opacity="0.3" stroke-width="3"></path>
+    <rect x="445" y="790" width="110" height="14" rx="4" fill="url(#hiltMetal)"></rect>
+    <rect x="470" y="804" width="60" height="135" rx="12" fill="url(#leatherBase)"></rect>
+    <g stroke="#7a4d36" stroke-width="2">
+      <line x1="470" y1="804" x2="530" y2="840" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="824" x2="530" y2="860" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="844" x2="530" y2="880" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="864" x2="530" y2="900" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="884" x2="530" y2="920" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="904" x2="530" y2="940" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="924" x2="530" y2="960" stroke="url(#leatherRidge)"></line>
+    </g>
+    <circle cx="500" cy="960" r="24" fill="url(#hiltMetal)" stroke="#333" stroke-width="2"></circle>
   </g>
-  <g filter="url(#glow)">
-    <path d="M 140 60 L 125 140 L 130 140 L 145 60 Z" fill="url(#metalGradient)" opacity="0.9"/>
-    <path d="M 140 60 L 128 140 L 129 140 L 142 60 Z" fill="#ffff99" opacity="0.5"/>
-    <rect x="125" y="142" width="25" height="8" fill="#8b4513" rx="2"/>
-    <rect x="131" y="150" width="13" height="25" fill="#a0522d" rx="2"/>
-    <line x1="131" y1="156" x2="144" y2="156" stroke="#8b4513" stroke-width="1" opacity="0.6"/>
-    <line x1="131" y1="162" x2="144" y2="162" stroke="#8b4513" stroke-width="1" opacity="0.6"/>
-    <line x1="131" y1="168" x2="144" y2="168" stroke="#8b4513" stroke-width="1" opacity="0.6"/>
-    <circle cx="137.5" cy="177" r="4" fill="#8b4513"/>
+
+  <!-- RIGHT SWORD -->
+  <g transform="rotate(44 500 560)">
+    <path d="M500 -90 L540 140 L520 790 L480 790 L460 140 Z" fill="url(#steelGradientTip)" filter="url(#metalNoise)" mask="url(#bladeFadeMask)"></path>
+    <path d="M500 -90 L520 140 L480 140 Z" fill="url(#tipEdgeBold)" opacity="1"></path>
+    <path d="M494 210 L506 210 L500 730 Z" fill="url(#fullerGradient)" opacity="0.75"></path>
+    <path d="M460 140 L485 790" stroke="#CCCCCC" stroke-opacity="0.4" stroke-width="3"></path>
+    <path d="M540 140 L515 790" stroke="#888888" stroke-opacity="0.3" stroke-width="3"></path>
+    <rect x="445" y="790" width="110" height="14" rx="4" fill="url(#hiltMetal)"></rect>
+    <rect x="470" y="804" width="60" height="135" rx="12" fill="url(#leatherBase)"></rect>
+    <g stroke="#7a4d36" stroke-width="2">
+      <line x1="470" y1="804" x2="530" y2="840" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="824" x2="530" y2="860" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="844" x2="530" y2="880" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="864" x2="530" y2="900" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="884" x2="530" y2="920" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="904" x2="530" y2="940" stroke="url(#leatherRidge)"></line>
+      <line x1="470" y1="924" x2="530" y2="960" stroke="url(#leatherRidge)"></line>
+    </g>
+    <circle cx="500" cy="960" r="24" fill="url(#hiltMetal)" stroke="#333" stroke-width="2"></circle>
   </g>
-  <g filter="url(#glow)">
-    <path d="M 100 50 L 108 95 L 95 95 L 115 150 L 85 115 L 98 115 Z" fill="#ffd700" opacity="0.95"/>
-    <path d="M 100 60 L 105 90 L 97 90 L 110 140 L 90 110 L 100 110 Z" fill="#ffff99" opacity="0.7"/>
-    <path d="M 100 50 L 108 95 L 95 95 L 115 150 L 85 115 L 98 115 Z" fill="#ffd700" opacity="0.3" filter="url(#glow)"/>
+
+  <!-- Fireball -->
+  <g filter="url(#fireGlow)">
+    <circle cx="500" cy="300" r="135" fill="url(#fireballGradient)">
+      <animateTransform attributeName="transform" type="scale" values="1;1.03;1" dur="1.5s" repeatCount="indefinite" additive="sum" origin="500 300"></animateTransform>
+    </circle>
   </g>
+
 </svg>
