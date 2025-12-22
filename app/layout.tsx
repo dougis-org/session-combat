@@ -4,6 +4,9 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'D&D Session Combat Tracker',
   description: 'Combat tracker and encounter manager for D&D sessions',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 async function getVersionData() {
