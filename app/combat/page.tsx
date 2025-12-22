@@ -28,6 +28,7 @@ function CombatContent() {
   const [initiativeEditId, setInitiativeEditId] = useState<string | null>(null);
   const [removeConfirmId, setRemoveConfirmId] = useState<string | null>(null);
   const [removeConfirmPosition, setRemoveConfirmPosition] = useState<{top: number, left: number} | null>(null);
+  const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   const initiativePanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,6 +90,14 @@ function CombatContent() {
       });
     }
   }, [initiativeEditId]);
+
+  // Auto-dismiss toast after 3 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const saveCombatState = async (state: CombatState | null) => {
     try {
@@ -176,6 +185,12 @@ function CombatContent() {
       // During active combat
       addCombatantToActiveSession(combatant);
     }
+
+    setToast({
+      message: `${combatant.name} added to combat`,
+      type: 'success',
+    });
+    setShowCombatantModal(false);
   };
 
   const startCombatWithSetupCombatants = () => {
@@ -1004,6 +1019,17 @@ function CombatContent() {
           </div>
         )}
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transition-opacity duration-300 ${
+            toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }
