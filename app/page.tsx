@@ -83,7 +83,7 @@ function HomeContent() {
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <img src="/favicon.svg" alt="D&D Combat Tracker" className="w-10 h-10" />
+              <img src="/logo.svg" alt="D&D Combat Tracker" className="w-16 h-16" />
               <h1 className="text-4xl font-bold">D&D Session Combat Tracker</h1>
             </Link>
           </div>
