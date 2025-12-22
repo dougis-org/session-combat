@@ -26,6 +26,8 @@ function CombatContent() {
   const [selectedDetailCombatantId, setSelectedDetailCombatantId] = useState<string | null>(null);
   const [detailPosition, setDetailPosition] = useState<{top: number, left: number} | null>(null);
   const [initiativeEditId, setInitiativeEditId] = useState<string | null>(null);
+  const [removeConfirmId, setRemoveConfirmId] = useState<string | null>(null);
+  const [removeConfirmPosition, setRemoveConfirmPosition] = useState<{top: number, left: number} | null>(null);
   const initiativePanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -702,6 +704,10 @@ function CombatContent() {
                     setDetailPosition(pos);
                   }}
                   onSetInitiative={setInitiativeEditId}
+                  onShowRemoveConfirm={(id, pos) => {
+                    setRemoveConfirmId(id);
+                    setRemoveConfirmPosition(pos);
+                  }}
                 />
               );
             })}
@@ -729,6 +735,10 @@ function CombatContent() {
                     setDetailPosition(pos);
                   }}
                         onSetInitiative={setInitiativeEditId}
+                        onShowRemoveConfirm={(id, pos) => {
+                          setRemoveConfirmId(id);
+                          setRemoveConfirmPosition(pos);
+                        }}
                       />
                     );
                   })}
@@ -755,6 +765,10 @@ function CombatContent() {
                     setDetailPosition(pos);
                   }}
                         onSetInitiative={setInitiativeEditId}
+                        onShowRemoveConfirm={(id, pos) => {
+                          setRemoveConfirmId(id);
+                          setRemoveConfirmPosition(pos);
+                        }}
                       />
                     );
                   })}
@@ -929,6 +943,52 @@ function CombatContent() {
             })()}
           </div>
         )}
+
+        {/* Remove Confirmation Modal */}
+        {removeConfirmId && combatState && removeConfirmPosition && (
+          <div 
+            className="absolute bg-gray-800 rounded-lg p-6 max-w-sm w-80 shadow-xl border border-gray-700 z-50"
+            style={{
+              top: `${removeConfirmPosition.top}px`,
+              left: `${removeConfirmPosition.left}px`,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {(() => {
+              const combatant = combatState.combatants.find(c => c.id === removeConfirmId);
+              if (!combatant) return null;
+              
+              return (
+                <>
+                  <p className="text-lg font-semibold mb-4">
+                    Remove <span className="text-red-400">{combatant.name}</span> from combat?
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        removeCombatant(removeConfirmId);
+                        setRemoveConfirmId(null);
+                        setRemoveConfirmPosition(null);
+                      }}
+                      className="flex-1 bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-semibold"
+                    >
+                      Remove
+                    </button>
+                    <button
+                      onClick={() => {
+                        setRemoveConfirmId(null);
+                        setRemoveConfirmPosition(null);
+                      }}
+                      className="flex-1 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded font-semibold"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -942,6 +1002,7 @@ function CombatantCard({
   onNextTurn,
   onShowDetails,
   onSetInitiative,
+  onShowRemoveConfirm,
 }: {
   combatant: CombatantState;
   isActive: boolean;
@@ -950,6 +1011,7 @@ function CombatantCard({
   onNextTurn?: () => void;
   onShowDetails?: (combatantId: string, position: {top: number, left: number}) => void;
   onSetInitiative?: (combatantId: string) => void;
+  onShowRemoveConfirm?: (combatantId: string, position: {top: number, left: number}) => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showConditions, setShowConditions] = useState(false);
@@ -1046,10 +1108,12 @@ function CombatantCard({
               </button>
               <h3 className="text-xl font-semibold">{combatant.name}</h3>
               <button
-                onClick={() => {
-                  if (confirm(`Remove ${combatant.name} from combat?`)) {
-                    onRemove();
-                  }
+                onClick={(e) => {
+                  const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                  onShowRemoveConfirm?.(combatant.id, {
+                    top: rect.bottom,
+                    left: rect.left,
+                  });
                 }}
                 className="text-red-500 hover:text-red-400 text-xl leading-none"
                 title="Remove combatant"
