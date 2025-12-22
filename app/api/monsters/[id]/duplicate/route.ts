@@ -3,7 +3,7 @@ import { requireAuth } from '../../../../../lib/middleware';
 import { storage } from '../../../../../lib/storage';
 import { MonsterTemplate } from '../../../../../lib/types';
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = requireAuth(request);
 
   if (auth instanceof NextResponse) {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   }
 
   try {
-    const id = params.id;
+    const { id } = await params;
 
     const templates = await storage.loadAllMonsterTemplates(auth.userId);
     const original = templates.find((t: MonsterTemplate) => t.id === id);
