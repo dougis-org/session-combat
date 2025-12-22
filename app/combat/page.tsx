@@ -824,7 +824,7 @@ function CombatContent() {
                   </div>
 
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                       <div>
                         <p className="text-gray-400 text-sm">HP</p>
                         <p className="text-lg font-bold">{combatant.hp} / {combatant.maxHp}</p>
