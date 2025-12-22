@@ -76,6 +76,19 @@ function CombatContent() {
     }
   }, [selectedDetailCombatantId]);
 
+  // Scroll to initiative panel when it opens
+  useEffect(() => {
+    if (initiativeEditId) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        });
+      }, 0);
+    }
+  }, [initiativeEditId]);
+
   const saveCombatState = async (state: CombatState | null) => {
     try {
       setError(null);
@@ -660,6 +673,22 @@ function CombatContent() {
           </div>
         )}
 
+        {/* Initiative Entry Panel */}
+        {initiativeEditId && combatState && (
+          <div className="mb-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <InitiativeEntry
+              combatant={combatState.combatants.find(c => c.id === initiativeEditId)!}
+              onSet={(initiativeRoll) => {
+                updateCombatant(initiativeEditId, {
+                  initiative: initiativeRoll.total,
+                  initiativeRoll,
+                });
+                setInitiativeEditId(null);
+              }}
+            />
+          </div>
+        )}
+
         {hasInitiativeBeenRolled() ? (
           // Display sorted by initiative
           <div className="space-y-2">
@@ -906,20 +935,6 @@ function CombatContent() {
               );
             })()}
           </div>
-        )}
-
-        {/* Initiative Entry Modal */}
-        {initiativeEditId && combatState && (
-          <InitiativeEntry
-            combatant={combatState.combatants.find(c => c.id === initiativeEditId)!}
-            onSet={(initiativeRoll) => {
-              updateCombatant(initiativeEditId, {
-                initiative: initiativeRoll.total,
-                initiativeRoll,
-              });
-              setInitiativeEditId(null);
-            }}
-          />
         )}
       </div>
     </div>
