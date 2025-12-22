@@ -24,6 +24,7 @@ function CombatContent() {
   const [setupCombatants, setSetupCombatants] = useState<CombatantState[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [selectedDetailCombatantId, setSelectedDetailCombatantId] = useState<string | null>(null);
+  const [detailPosition, setDetailPosition] = useState<{top: number, left: number} | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -657,7 +658,10 @@ function CombatContent() {
                   onUpdate={(updates) => updateCombatant(combatant.id, updates)}
                   onRemove={() => removeCombatant(combatant.id)}
                   onNextTurn={nextTurn}
-                  onShowDetails={setSelectedDetailCombatantId}
+                  onShowDetails={(id, pos) => {
+                    setSelectedDetailCombatantId(id);
+                    setDetailPosition(pos);
+                  }}
                 />
               );
             })}
@@ -680,7 +684,10 @@ function CombatContent() {
                         onUpdate={(updates) => updateCombatant(combatant.id, updates)}
                         onRemove={() => removeCombatant(combatant.id)}
                         onNextTurn={nextTurn}
-                        onShowDetails={setSelectedDetailCombatantId}
+                        onShowDetails={(id, pos) => {
+                    setSelectedDetailCombatantId(id);
+                    setDetailPosition(pos);
+                  }}
                       />
                     );
                   })}
@@ -702,7 +709,10 @@ function CombatContent() {
                         onUpdate={(updates) => updateCombatant(combatant.id, updates)}
                         onRemove={() => removeCombatant(combatant.id)}
                         onNextTurn={nextTurn}
-                        onShowDetails={setSelectedDetailCombatantId}
+                        onShowDetails={(id, pos) => {
+                    setSelectedDetailCombatantId(id);
+                    setDetailPosition(pos);
+                  }}
                       />
                     );
                   })}
@@ -724,10 +734,14 @@ function CombatContent() {
           />
         )}
 
-        {/* Detail Modal */}
-        {selectedDetailCombatantId && combatState && (
+        {/* Detail Popup */}
+        {selectedDetailCombatantId && combatState && detailPosition && (
           <div 
-            className="fixed top-4 right-4 bg-gray-800 rounded-lg p-6 max-w-sm w-full max-h-96 overflow-y-auto shadow-xl border border-gray-700 z-50"
+            className="absolute bg-gray-800 rounded-lg p-6 max-w-sm w-full max-h-96 overflow-y-auto shadow-xl border border-gray-700 z-50"
+            style={{
+              top: `${detailPosition.top}px`,
+              left: `${detailPosition.left}px`,
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {(() => {
@@ -821,7 +835,7 @@ function CombatantCard({
   onUpdate: (updates: Partial<CombatantState>) => void;
   onRemove: () => void;
   onNextTurn?: () => void;
-  onShowDetails?: (combatantId: string) => void;
+  onShowDetails?: (combatantId: string, position: {top: number, left: number}) => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showConditions, setShowConditions] = useState(false);
@@ -893,8 +907,12 @@ function CombatantCard({
           <div className="flex items-center gap-4 mb-2">
             <div className="flex items-center gap-2">
               <button
-                onClick={() => {
-                  onShowDetails?.(combatant.id);
+                onClick={(e) => {
+                  const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                  onShowDetails?.(combatant.id, {
+                    top: rect.bottom,
+                    left: rect.left,
+                  });
                 }}
                 className="hover:opacity-80 transition-opacity"
                 title={`See full ${combatant.type === 'player' ? 'Character' : 'Monster'} information`}
