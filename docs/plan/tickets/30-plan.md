@@ -118,17 +118,25 @@
 **1.1 – Unit Test: Party selection state management**
 - **File (new)**: `tests/integration/partySelection.test.ts`
 - **Test data (new)**: `tests/integration/helpers/partyTestData.ts` (test fixture with 2–3 sample parties)
+- **Provider class / methods**: `PartyTestDataProvider.sampleParties()`, `PartyTestDataProvider.duplicateScenarios()`, `PartyTestDataProvider.edgeCases()`
 - **Objective**: Verify that selecting a party correctly expands its characters into setup combatants
-- **Parameterized inputs** (CSV/provider):
-  - Party with 0 characters (edge case)
-  - Party with 1 character
-  - Party with 3 characters
-  - Deselecting a party clears added characters
-  - Selecting a new party replaces previous selection
+- **Parameterized inputs** (provider methods):
+  - `sampleParties()` → Party with 0 characters (edge case), 1 character, 3 characters
+  - `duplicateScenarios()` → combinations where party characters overlap with manual setup (pre- and post-selection)
+  - `edgeCases()` → missing characters, null/invalid party id
 - **Assertions**:
   - Selected party's characters appear in `setupCombatants`
   - Character count matches `party.characterIds.length`
   - Deselection removes party characters from setup
+  - Selecting a party when a character is already manually added triggers the duplicate-warning behavior
+
+**Additional unit test: End-of-combat state clearing**
+- **File (new)**: add tests to `tests/integration/partySelection.test.ts` or `tests/integration/combatWithParty.test.ts`
+- **Objective**: Verify that `endCombat()` clears `selectedPartyId` and removes any party-added `setupCombatants` so no residual party selection persists across sessions
+- **Assertions**:
+  - After `endCombat()`, `selectedPartyId` is `null` and `setupCombatants` contains no `party-` prefixed combatants
+  - After starting combat (i.e., `startCombatWithSetupCombatants()`), the `selectedPartyId` is cleared and repeated starts do not duplicate party characters
+
 
 **1.2 – Integration Test: Party selection in combat initialization**
 - **File (new)**: `tests/integration/combatWithParty.test.ts`
@@ -136,13 +144,24 @@
 - **Test cases**:
   - User selects party → characters added to setup
   - User selects encounter + party → monsters + party characters both present in combat
-  - User selects party + manually adds duplicate character → duplicate warning or prevention
+  - User selects party + manually adds duplicate character → duplicate warning or prevention (both orders: manual-then-party and party-then-manual)
   - Party with no characters selected → no error, combat proceeds
+  - Unauthenticated requests to `/api/parties` return 401 (see `tests/integration/parties.integration.test.ts`)
 - **Data provider**: Reuse `partyTestData.ts` + existing monster/character fixtures
 - **Assertions**:
   - Combat state includes party-selected characters
   - Character order preserved (no unexpected re-sorting)
   - Initiative rolls include all combatants (party + manual + encounter)
+  - Unauthorized users cannot fetch another user's parties (401)
+
+**Additional integration test**
+- **File (new)**: `tests/integration/parties.integration.test.ts`
+- **Objective**: Validate route-level behavior for `/api/parties` including authentication and correct ownership filtering
+- **Test cases**:
+  - Unauthenticated GET `/api/parties` → 401
+  - Authenticated GET `/api/parties` → returns only parties for the authenticated user
+  - Malformed party data in DB is handled gracefully (server returns 200 with sanitized data or an error depending on schema violations)
+
 
 ---
 
@@ -166,6 +185,7 @@
   - Add `selectedPartyId: string | null` state
   - Add handler `selectParty(partyId: string | null)`
   - On party selection, call internal function to expand party characters into `setupCombatants`
+  - Add explicit cleanup in `endCombat()` to clear `selectedPartyId` and remove `party-` prefixed `setupCombatants`
 - **Handler logic** (pseudo):
   ```typescript
   const selectParty = (partyId: string | null) => {
@@ -175,12 +195,12 @@
       setSetupCombatants(prev => prev.filter(c => !c.id.startsWith('party-')));
       return;
     }
-    
+
     const party = parties.find(p => p.id === partyId);
     if (!party) return;
-    
+
     setSelectedPartyId(partyId);
-    
+
     // Add party's characters to setup
     const partyCharacters = characters.filter(c => party.characterIds.includes(c.id));
     const newCombatants = partyCharacters.map(char => ({
@@ -198,16 +218,30 @@
       bonusActions: char.bonusActions,
       reactions: char.reactions,
     }));
-    
-    // Check for duplicates
-    const existingIds = new Set(setupCombatants.map(c => c.id.split('-').pop()));
-    const duplicates = newCombatants.filter(nc => existingIds.has(nc.id.split('-').pop()));
+
+    // Check for duplicates (handle both party- prefixed and character- prefixed IDs)
+    const existingCharacterIds = new Set(setupCombatants.map(c => {
+      // Support both formats: 'party-<partyId>-<charId>' and 'character-<charId>'
+      const parts = c.id.split('-');
+      return parts.length >= 2 ? parts[parts.length - 1] : c.id;
+    }));
+
+    const duplicates = newCombatants.filter(nc => existingCharacterIds.has(nc.id.split('-').pop()));
     if (duplicates.length > 0) {
       setError(`${duplicates.length} characters from party already in combat`);
       return;
     }
-    
+
     setSetupCombatants(prev => [...prev, ...newCombatants]);
+  };
+
+  // Ensure party state cleared when combat ends
+  const endCombat = () => {
+    if (confirm('Are you sure you want to end combat?')) {
+      saveCombatState(null);
+      setSetupCombatants([]);
+      setSelectedPartyId(null); // CLEAR party selection on end
+    }
   };
   ```
 
@@ -235,6 +269,7 @@
   - `expandPartyToCharacters(party: Party, characters: Character[]): CombatantState[]`
   - `findDuplicatePartyCharacters(partyCharacters: Character[], setupCombatants: CombatantState[]): Character[]`
 - **Rationale**: Reusable for tests and future party-related features
+- **Reuse note**: Leverage the existing duplicate/renumbering logic already implemented in `app/combat/page.tsx` (see `addCombatant` logic at lines ~220–270) to minimize duplication; wrap or extract that logic into the new utility rather than reimplementing it.
 
 **3.2 – Review for duplication within combat page**
 - Existing code already has duplicate detection for manually added monsters; reuse that pattern for party characters
@@ -258,13 +293,25 @@ npm run format
 npm run build
 ```
 
-**4.4 – Manual QA checklist**
+**4.4 – Security & vulnerability scans (MANDATORY)**
+- Run Snyk code scan for new first-party code and tests:
+```bash
+npx snyk code test --json > snyk-results.json
+```
+- If any findings are reported for newly added code, stop and remediate before merging. Re-run scan after fixes until clean or acceptable risk agreed.
+
+**4.5 – Manual QA checklist**
 - [ ] Parties dropdown appears on combat page
 - [ ] Selecting a party adds its characters to setup
 - [ ] Deselecting a party removes its characters
 - [ ] Party + encounter + manual combatants all present after "Start Combat"
 - [ ] Initiative rolls include all combatants (party + manual + encounter)
 - [ ] Duplicate character warning prevents adding duplicate
+- [ ] End-of-combat clears selected party and party-added setup combatants
+- [ ] `/api/parties` returns 401 when unauthenticated and returns only user's parties when authenticated
+
+**Notes:**
+- Per user request, the Codacy step was intentionally omitted from this plan; ensure your local workflow aligns with the repository guidance if required by your CI process.
 
 ---
 
@@ -294,11 +341,13 @@ npm run build
 
 | File | Change |
 |------|--------|
-| `app/combat/page.tsx` | Add party state; load parties; add selector UI; implement party selection handler and deduplication logic |
+| `app/combat/page.tsx` | Add party state; load parties; add selector UI; implement party selection handler and deduplication logic; ensure `endCombat()` clears `selectedPartyId` and removes party-added `setupCombatants` |
 | `lib/utils/partySelection.ts` | **(NEW)** Export `expandPartyToCharacters()` and `findDuplicatePartyCharacters()` utilities |
 | `tests/integration/partySelection.test.ts` | **(NEW)** Unit tests for party selection state management (parameterized with `partyTestData.ts`) |
 | `tests/integration/combatWithParty.test.ts` | **(NEW)** Integration tests for party selection in combat initialization |
-| `tests/integration/helpers/partyTestData.ts` | **(NEW)** Test fixture with sample parties (0, 1, 3 characters each) |
+| `tests/integration/helpers/partyTestData.ts` | **(NEW)** Test fixture with sample parties (0, 1, 3 characters each). **Provider**: `PartyTestDataProvider` with methods `sampleParties()`, `duplicateScenarios()`, `edgeCases()` |
+| `tests/integration/parties.integration.test.ts` | **(NEW)** Integration tests for `/api/parties` authentication and ownership filtering |
+| `tests/integration/partySelection.test.ts` | **(NEW)** Unit tests for party selection state management including end-of-combat clearing and duplicate scenarios |
 
 ---
 
@@ -307,9 +356,22 @@ npm run build
 ### Parameterized Test Strategy
 
 **Test data source:** `tests/integration/helpers/partyTestData.ts`
-- Provider class with static methods returning arrays of test parties
+- **Provider class:** `PartyTestDataProvider`
+- **Required methods**:
+  - `sampleParties(): Party[]` → returns sample parties (0, 1, 3 characters)
+  - `duplicateScenarios(): { preExistingSetupCombatants: CombatantState[], party: Party }[]` → scenarios to exercise duplicates both when manual entries exist before party selection and when manual entries occur after party selection
+  - `edgeCases(): any[]` → missing characters, malformed party, empty arrays
 - Each party fixture includes: `id`, `name`, `characterIds`, `description`
 - Variations: empty party, single-char party, multi-char party
+
+**Example provider signature (TypeScript)**:
+```ts
+export class PartyTestDataProvider {
+  static sampleParties(): Party[] { /* returns fixtures */ }
+  static duplicateScenarios(): Array<{ preExistingSetupCombatants: CombatantState[], party: Party }> { /* returns fixtures */ }
+  static edgeCases(): any[] { /* returns malformed and boundary fixtures */ }
+}
+```
 
 **Test Categories:**
 
@@ -321,6 +383,7 @@ npm run build
 | **Combat initialization** | Integration (Testcontainers) | Real MongoDB + parties, characters, encounters | E2E flow validation |
 | **Regression** | Smoke test (simple) | Manual combatant entry still works | Verify no breakage to existing flow |
 | **Edge cases** | Parameterized (provider) | `PartyTestDataProvider.edgeCases()` | Empty party, missing characters, null party ID |
+| **Large-party performance** | Integration (low priority) | Use a generated party with N=20 characters from `PartyTestDataProvider.largeParty()` | Validate UI responsiveness and server handling for unusually large parties (profiling) |
 
 ### Test Coverage Breakdown
 
@@ -399,11 +462,11 @@ npm start
 
 | AC # | Requirement | Milestone | Task(s) | Flag(s) | Test(s) |
 |------|-------------|-----------|---------|---------|---------|
-| 1 | **Combat setup displays available parties** | None | UI dropdown; load parties API | None | `combatWithParty.test.ts` |
+| 1 | **Combat setup displays available parties** | None | UI dropdown; load parties API | None | `combatWithParty.test.ts`, `parties.integration.test.ts` |
 | 2 | **Party selection is optional** | None | Null state handling; deselect handler | None | `partySelection.test.ts` |
 | 3 | **Selected party characters added to combat** | None | `selectParty()` handler; character expansion | None | `partySelection.test.ts`, `combatWithParty.test.ts` |
 | 4 | **No duplicate characters** | None | Deduplication logic; duplicate detection utility | None | `partySelection.test.ts` (parameterized duplicates) |
-| 5 | **Party selection persists until setup complete** | None | State preservation; clear on end-combat | None | `combatWithParty.test.ts` |
+| 5 | **Party selection persists until setup complete** | None | State preservation; clear on end-combat (`endCombat()` should clear `selectedPartyId` and party-added setup combatants) | None | `combatWithParty.test.ts`, `partySelection.test.ts` (end-of-combat clearing) |
 | 6 | **Existing combat flow remains intact** | None | Backward compatibility; no changes to `startCombatWithSetupCombatants()` | None | Regression smoke test |
 | 7 | **Integration tests validate party-to-combat flow** | None | Integration test suite | None | `combatWithParty.test.ts` |
 
