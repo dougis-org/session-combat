@@ -1,7 +1,7 @@
 ### 1) Summary
 
 - Ticket: #26  
-- One-liner: Enable registration submission for weak/short/invalid passwords (client UI currently prevents submission), ensure client + server validation surface clear errors and E2E tests pass.  
+- One-liner: Enforce password complexity by disabling submit until the password meets requirements (length, uppercase, lowercase, number); surface inline validation errors and ensure server validation and tests pass.  
 - Related milestone(s): NA  
 - Out of scope: changing password policy (strength requirements), altering server-side password rules, fixing unrelated registration page title test (#25)
 
@@ -10,22 +10,22 @@
 ### 2) Assumptions & Open Questions
 
 - Assumptions:
-  - Server-side password validation (enforced by `validatePassword` in `lib/auth.ts`) is authoritative and must remain; the UI should allow submission and display validation errors rather than blocking clicks.
-  - Existing Playwright E2E test suite (tests/e2e/registration.spec.ts) should validate this behavior after the fix (no test changes required).
+  - Server-side password validation (enforced by `validatePassword` in `lib/auth.ts`) is authoritative and must remain.
+  - UI policy: the registration form **must block** submission until the password meets complexity requirements (length, uppercase, lowercase, number). The submit button should be disabled when requirements are not satisfied and inline requirement hints should be visible and updated live.
+  - Existing Playwright E2E test suite (`tests/e2e/registration.spec.ts`) will be updated to assert disabled state where applicable.
   - No DB or migration changes required.
 - Open questions (blocking -> need answers):
-  1. Do we want additional immediate client-side complexity checks (showing specific requirements) as part of this ticket, or is enabling submit + showing server/client-side errors sufficient? (If yes, I will add inline requirement hints.)
-  2. Is there any UX guideline that insists some validation must block submission (e.g., for accessibility) — otherwise I’ll enable submit for all non-loading states.
+  1. None (UI enforcement policy provided by product).
 
 ---
 
 ### 3) Acceptance Criteria (normalized)
 
-1. The registration submit button can be clicked even when the entered password is weak (e.g., 'weak'). ✅  
-2. Submitting with a weak password results in a visible validation error on the registration form (client-side error area or server error text) matching `/password|requirement|weak/i`. ✅  
+1. The registration submit button is **disabled** until the entered password satisfies complexity requirements (length ≥ 8, contains uppercase, lowercase, and a number). ✅  
+2. Inline validation messages reflect which requirements are missing and update live as the user types; when the form is submitted with invalid data the error area shows the server or client-provided messages matching `/password|requirement|weak/i`. ✅  
 3. Successful registration continues to redirect to a protected page (existing behavior preserved). ✅  
-4. Existing Playwright E2E tests in `tests/e2e/registration.spec.ts` pass locally and in CI after the change. ✅  
-5. Unit or integration test(s) are added to assert the behavior (submit button enabled for weak password + error displayed after submission). ✅
+4. Existing Playwright E2E tests in `tests/e2e/registration.spec.ts` are updated to assert the disabled state and still pass in CI after the change. ✅  
+5. Unit and integration tests are added (including parameterized password vector tests) to assert validator behavior, UI disabled/enabled state, server error rendering, and double-submit prevention. ✅
 
 ---
 
@@ -36,9 +36,11 @@
   - Server-side validation exists in `app/api/auth/register/route.ts` using `validatePassword()` from `lib/auth.ts` which enforces complexity and length.
   - Playwright E2E test `tests/e2e/registration.spec.ts` expects registration attempt with weak password to show an error (currently blocked by disabled button).
 - Proposed changes (high-level):
-  - Update `app/register/page.tsx` to only disable submit while `loading` (remove `password.length < 8` from disabled prop).
-  - Keep/strengthen client-side validation in `handleSubmit` so that submission with an invalid password displays clear error messages (it already checks length; add checks for missing uppercase/lowercase/digit to mirror server-side errors for improved UX).
-  - Add a small unit/integration test to ensure submit is enabled for weak password and that submitting shows an error message after submission.
+  - Extract a small, pure, bundle-safe password validator into `lib/validation/password.ts` that returns `{ valid: boolean, errors: string[] }`. This will be used by both client (UI) and server-side validation logic to avoid duplication and bundle bloat.
+  - Update `app/register/page.tsx` to **disable submit** when the validator reports invalid; add live inline requirement hints that update as the user types.
+  - Add comprehensive parameterized tests for the validator (unit), UI behavior (unit/integration), and E2E flows. Include tests for server 500 and network failure behaviors, and double-submit prevention (disable button while loading).
+  - Display server `details` array if present for explanatory messaging on errors returned from the server. Keep server-side validation as the source of truth for final acceptance.
+  - Add test data file `tests/unit/data/password-cases.json` for parameterized cases (weak, missing uppercase, missing lowercase, missing digit, unicode, long input).
 - Data model / schema: none.
 - APIs & contracts:
   - No API contract change. Server returns 400 with details when password invalid: `{ error: 'Password does not meet requirements', details: [...] }`.
@@ -70,9 +72,17 @@ RED → GREEN → REFACTOR
      - For unit test (optional): `tests/unit/register.page.test.tsx` using React Testing Library to assert disabled state depends only on `loading`.
 3. Implement change (minimal)
    - Edit `app/register/page.tsx`:
-     - Change submit button `disabled` prop from `disabled={loading || password.length < 8}` → `disabled={loading}`.
-     - In `handleSubmit`, expand client-side checks to validate uppercase/lowercase/digit and set user-facing messages (use same text as server or a generic message + server details for parity).
-     - Display server `details` if present (e.g., render `error` and list `details` returned by API).
+     - Use `lib/validation/password.ts` validator to control `submit` button `disabled` prop (disabled when `!validator.valid || loading`). Add live inline requirement hints.
+     - In `handleSubmit`, rely on validator pre-checks and, on server response errors, render server `details` if present.
+     - Ensure the button is disabled when `loading` to prevent double-submits.
+   - Add new shared validator:
+     - New: `lib/validation/password.ts` - pure function `validatePasswordForClient(password: string): { valid: boolean; errors: string[] }` and unit tests to verify vectors from `tests/unit/data/password-cases.json`.
+   - Tests to write first (RED):
+     - Unit: validator parameterized tests using `tests/unit/data/password-cases.json`.
+     - Unit: `register.page` tests asserting disabled/enabled state and inline hints.
+     - Integration/E2E: update `tests/e2e/registration.spec.ts` to assert disabled state for invalid passwords and full success flow for valid passwords.
+     - Integration/E2E: tests for server 500 handling and double-submit behaviour (button disabled while loading).
+   - Refactor: If needed, update server to import shared validator or wrap existing `lib/auth.validatePassword` to reuse logic while avoiding bringing server-only dependencies into client bundle.
 4. Run tests (fail expected before implementation — confirm RED)
    - `npm run test:integration` (Jest integration) and Playwright e2e run for the registration test.
 5. Implement code changes (make tests pass)
@@ -114,16 +124,22 @@ Docs & artifacts:
 ### 7) File-Level Change List
 
 - Modify: `app/register/page.tsx`
-  - Change: `disabled={loading || password.length < 8}` → `disabled={loading}`
-  - Add: Additional client-side checks in `handleSubmit` to validate uppercase/lowercase/number and present messages consistently.
-  - Add: Show server `details` array (if present) in the error area.
-- Potential (NEW) Unit test:
-  - New: `tests/unit/register.page.test.tsx` — asserts button `disabled` prop only depends on `loading` and that after clicking with weak password an error message is shown.
-- Adjust Playwright E2E (if needed):
-  - `tests/e2e/registration.spec.ts` — (verify no update needed; if flaky, add `await expect(page.locator('button[type="submit"]')).toBeEnabled()` before click).
+  - Change button `disabled` logic to `disabled={loading || !validator.valid}` using shared validator from `lib/validation/password.ts`.
+  - Add live inline requirement hints updated as the user types.
+  - Ensure button is disabled while `loading` to prevent double-submits.
+  - In `handleSubmit`, rely on validator pre-checks and display server `details` if returned.
+- New shared validator & tests:
+  - New: `lib/validation/password.ts` — pure `validatePasswordForClient(password: string): { valid: boolean; errors: string[] }` and map server validation rules.
+  - New unit tests: `tests/unit/validation/password.test.ts` parameterized using `tests/unit/data/password-cases.json`.
+- Unit tests for UI:
+  - New: `tests/unit/register.page.test.tsx` — asserts button disabled/enabled state, inline hint rendering, double-submit prevention.
+- E2E tests:
+  - Update: `tests/e2e/registration.spec.ts` to assert disabled state for invalid passwords and success flow for valid passwords.
+  - Add: server-500 and network-error test cases to confirm user-facing error appearance.
 - Docs:
-  - Update `docs/improvements.md` (small note referencing #26) or `CHANGELOG.md` if present.
-- No server changes required.
+  - Update `docs/improvements.md` (small note referencing #26) and add an entry to changelog if present.
+- Server changes:
+  - Optionally adapt server to reuse shared validator or wrap `lib/auth.validatePassword`, ensure no server-only deps are imported into client bundles.
 
 ---
 
@@ -151,15 +167,16 @@ Parameterized Test Strategy:
 
 - Rollout:
   - Merge PR to `main` after CI green.
-  - No feature flag; change is small bugfix.
+  - No feature flag for this low-risk UX fix (justify if product requires a flag).
 - Monitoring:
-  - Watch CI e2e jobs for stability.
-  - Monitor recent deploys for increased registration errors (SLO: registration success rate).
+  - Instrument metrics: `auth_register_requests_total`, `auth_register_success_total`, `auth_register_failure_total{status}`, and `auth_register_latency_ms`.
+  - Dashboards: add a panel showing success rate and failure breakdown by status code for `/api/auth/register`.
 - Alerts:
-  - If registration 5xx rate increases >2% over baseline in 30 minutes, rollback changes.
+  - Alert when `rate(auth_register_failure_total{status=~"5.."}[5m]) / rate(auth_register_requests_total[5m]) > 0.02` sustained for 30m; notify `#ci-alerts` (or configured channel).
 - Rollback procedure:
   - Revert PR commit and re-deploy (Git revert + PR).
   - Re-run E2E tests to confirm restored state.
+- Note: Add a log entry when server returns validation errors but **do not** log PII (mask emails/passwords if needed).
 
 ---
 
