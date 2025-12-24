@@ -4,6 +4,7 @@ import { FormEvent, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { validatePasswordForClient } from '@/lib/validation/password';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -184,7 +185,7 @@ export default function RegisterPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || password.length < 8}
+            disabled={loading || !validatePasswordForClient(password).valid}
             className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold rounded transition-colors"
           >
             {loading ? 'Creating Account...' : 'Create Account'}
