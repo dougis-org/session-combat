@@ -1548,8 +1548,30 @@ function CombatantCard({
                         {target.name}
                       </button>
                       {hoveredTargetId === targetId && (
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-gray-200 whitespace-nowrap pointer-events-none z-50">
-                          Click to apply damage or add condition
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 border border-gray-700 rounded shadow-lg pointer-events-none z-50 min-w-max">
+                          <div className="px-3 py-2 space-y-1">
+                            <div className="text-xs text-gray-300 font-semibold mb-2">{target.name}</div>
+                            <div className="text-xs text-gray-400">
+                              <div>AC: {target.ac}</div>
+                              <div className="flex items-center gap-1">
+                                HP: <span className={target.hp === 0 ? 'text-red-400' : 'text-gray-300'}>{target.hp}/{target.maxHp}</span>
+                                {target.hp === 0 && <span className="text-red-400 text-lg">☠</span>}
+                              </div>
+                            </div>
+                            {target.conditions.length > 0 && (
+                              <div className="text-xs space-y-1 pt-1">
+                                {target.conditions.map((condition) => (
+                                  <div key={condition.id} className="text-yellow-400">
+                                    • {condition.name}
+                                    {condition.duration && ` (${condition.duration})`}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <div className="border-t border-gray-600 mt-2 pt-2 text-xs text-gray-400 italic">
+                              Click to apply damage or add condition
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
