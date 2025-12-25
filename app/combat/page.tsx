@@ -1477,9 +1477,29 @@ function CombatantCard({
                 {combatant.targetIds.map(targetId => {
                   const target = allCombatants?.find(c => c.id === targetId);
                   return target ? (
-                    <span key={targetId} className={`px-2 py-1 rounded text-xs font-semibold ${target.type === 'player' ? 'bg-blue-600 text-blue-100' : 'bg-red-600 text-red-100'}`}>
-                      {target.name}
-                    </span>
+                    <div
+                      key={targetId}
+                      className="group relative"
+                      title={`${target.name} - HP: ${target.hp}/${target.maxHp}, AC: ${target.ac}${target.conditions?.length ? ', Conditions: ' + target.conditions.join(', ') : ''}`}
+                    >
+                      <span className={`px-2 py-1 rounded text-xs font-semibold cursor-help ${target.type === 'player' ? 'bg-blue-600 text-blue-100' : 'bg-red-600 text-red-100'}`}>
+                        {target.name}
+                      </span>
+                      {/* Tooltip */}
+                      <div className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 border border-gray-700 rounded p-2 text-xs text-gray-200 whitespace-nowrap z-10 shadow-lg">
+                        <div className="font-semibold">{target.name}</div>
+                        <div className="text-gray-300">HP: <span className={target.hp <= target.maxHp * 0.25 ? 'text-red-400' : target.hp <= target.maxHp * 0.5 ? 'text-yellow-400' : 'text-green-400'}>{target.hp}</span>/{target.maxHp}</div>
+                        <div className="text-gray-300">AC: {target.ac}</div>
+                        {target.conditions && target.conditions.length > 0 && (
+                          <div className="text-gray-300 mt-1 border-t border-gray-700 pt-1">
+                            <div className="text-gray-400">Conditions:</div>
+                            {target.conditions.map((cond, idx) => (
+                              <div key={idx} className="text-orange-300">{cond.name}</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   ) : null;
                 })}
               </div>
