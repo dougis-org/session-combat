@@ -1281,6 +1281,7 @@ function CombatantCard({
   const [newCondition, setNewCondition] = useState('');
   const [conditionDuration, setConditionDuration] = useState('');
   const [targetActionMode, setTargetActionMode] = useState<'damage' | 'condition' | null>(null);
+  const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
 
   const adjustHp = (amount: number) => {
     const newHp = Math.max(0, Math.min(combatant.maxHp, combatant.hp + amount));
@@ -1534,16 +1535,24 @@ function CombatantCard({
                 {combatant.targetIds.map(targetId => {
                   const target = allCombatants?.find(c => c.id === targetId);
                   return target ? (
-                    <button
-                      key={targetId}
-                      onClick={() => {
-                        setSelectedTargetId(targetId);
-                        setTargetActionMode(null);
-                      }}
-                      className={`px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:opacity-80 ${target.type === 'player' ? 'bg-blue-600 hover:bg-blue-700 text-blue-100' : 'bg-red-600 hover:bg-red-700 text-red-100'}`}
-                    >
-                      {target.name}
-                    </button>
+                    <div key={targetId} className="relative inline-block">
+                      <button
+                        onClick={() => {
+                          setSelectedTargetId(targetId);
+                          setTargetActionMode(null);
+                        }}
+                        onMouseEnter={() => setHoveredTargetId(targetId)}
+                        onMouseLeave={() => setHoveredTargetId(null)}
+                        className={`px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:opacity-80 ${target.type === 'player' ? 'bg-blue-600 hover:bg-blue-700 text-blue-100' : 'bg-red-600 hover:bg-red-700 text-red-100'}`}
+                      >
+                        {target.name}
+                      </button>
+                      {hoveredTargetId === targetId && (
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-gray-200 whitespace-nowrap pointer-events-none z-50">
+                          Click to apply damage or add condition
+                        </div>
+                      )}
+                    </div>
                   ) : null;
                 })}
               </div>
