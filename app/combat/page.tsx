@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
+import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
@@ -784,7 +785,10 @@ function CombatContent() {
                 </button>
               )}
             </div>
-            <p className="text-gray-400">Round {combatState.currentRound}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-gray-400">Round {combatState.currentRound}</p>
+              <CombatInfoIcon combatants={combatState.combatants} />
+            </div>
           </div>
           <div className="flex gap-2 flex-wrap">
             <button
