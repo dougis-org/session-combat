@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { AuthPayload } from './types';
+import { validatePasswordForClient } from './validation/password';
 
 export type { AuthPayload };
 
@@ -50,8 +51,6 @@ export function validateEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
-
-import { validatePasswordForClient } from './validation/password';
 
 /**
  * Validate password strength (server-side wrapper using shared validator)

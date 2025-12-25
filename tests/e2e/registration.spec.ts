@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+// Test credentials - for testing purposes only
+const VALID_TEST_PASSWORD = 'SecurePassword123!';
+
 test.describe('Registration Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Clear any existing authentication
@@ -8,12 +11,12 @@ test.describe('Registration Flow', () => {
 
   test('should successfully register a new user', async ({ page }) => {
     const testEmail = `test-${Date.now()}@example.com`;
-    const testPassword = 'SecurePassword123!';
+    const testPassword = VALID_TEST_PASSWORD;
 
     // Navigate to register page
     await page.goto('/register');
 
-    // Wait for the page to load (check for form elements)
+    // Verify form elements are visible
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
 
@@ -49,7 +52,7 @@ test.describe('Registration Flow', () => {
 
     // Fill in with invalid email
     await page.fill('input[type="email"]', 'not-an-email');
-    await page.fill('input[type="password"]', 'SecurePassword123!');
+    await page.fill('input[type="password"]', VALID_TEST_PASSWORD);
 
     // Submit the form
     await page.click('button[type="submit"]');
@@ -103,7 +106,7 @@ test.describe('Registration Flow', () => {
 
   test('should reject registration if email already exists', async ({ page }) => {
     const testEmail = `test-${Date.now()}@example.com`;
-    const testPassword = 'SecurePassword123!';
+    const testPassword = VALID_TEST_PASSWORD;
 
     // First registration should succeed
     await page.goto('/register');
@@ -132,7 +135,7 @@ test.describe('Registration Flow', () => {
 
   test('should successfully login after registration', async ({ page }) => {
     const testEmail = `test-${Date.now()}@example.com`;
-    const testPassword = 'SecurePassword123!';
+    const testPassword = VALID_TEST_PASSWORD;
 
     // Register a new user
     await page.goto('/register');
