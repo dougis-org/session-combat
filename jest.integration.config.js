@@ -6,6 +6,9 @@ module.exports = {
   testTimeout: 120000,
   maxWorkers: 1, // Run tests sequentially to avoid port conflicts
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1',
+  },
   collectCoverageFrom: [
     'app/api/**/*.{ts,tsx,js,jsx}',
     '!app/api/**/*.d.ts',
