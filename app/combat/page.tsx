@@ -1487,8 +1487,7 @@ function CombatantCard({
                       </span>
                       {/* Tooltip */}
                       <div className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 border border-gray-700 rounded p-2 text-xs text-gray-200 whitespace-nowrap z-10 shadow-lg">
-                        <div className="font-semibold">{target.name}</div>
-                        <div className="text-gray-300">HP: <span className={target.hp <= target.maxHp * 0.25 ? 'text-red-400' : target.hp <= target.maxHp * 0.5 ? 'text-yellow-400' : 'text-green-400'}>{target.hp}</span>/{target.maxHp}</div>
+                        <div className="text-gray-300">HP: <span className={target.hp === 0 ? 'text-gray-500' : target.hp <= target.maxHp * 0.25 ? 'text-red-400' : target.hp <= target.maxHp * 0.5 ? 'text-yellow-400' : 'text-green-400'}>{target.hp}</span>/{target.maxHp}{target.hp === 0 && <span className="ml-1">☠</span>}</div>
                         <div className="text-gray-300">AC: {target.ac}</div>
                         {target.conditions && target.conditions.length > 0 && (
                           <div className="text-gray-300 mt-1 border-t border-gray-700 pt-1">
