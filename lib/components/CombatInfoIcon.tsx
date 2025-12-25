@@ -58,7 +58,6 @@ export function CombatInfoIcon({ combatants }: CombatInfoIconProps) {
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         className="hover:opacity-80 transition-opacity"
-        title="View combatants and statuses"
         type="button"
         aria-label="Combat information"
       >

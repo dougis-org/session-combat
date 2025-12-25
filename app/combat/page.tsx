@@ -1541,7 +1541,6 @@ function CombatantCard({
                         setTargetActionMode(null);
                       }}
                       className={`px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:opacity-80 ${target.type === 'player' ? 'bg-blue-600 hover:bg-blue-700 text-blue-100' : 'bg-red-600 hover:bg-red-700 text-red-100'}`}
-                      title={`Click to apply damage or add condition to ${target.name}`}
                     >
                       {target.name}
                     </button>
