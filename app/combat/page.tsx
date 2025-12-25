@@ -918,6 +918,7 @@ function CombatContent() {
                     setRemoveConfirmPosition(pos);
                   }}
                   allCombatants={combatState.combatants}
+                  onUpdateCombatant={(id, updates) => updateCombatant(id, updates)}
                 />
               );
             })}
@@ -950,6 +951,7 @@ function CombatContent() {
                           setRemoveConfirmPosition(pos);
                         }}
                         allCombatants={combatState.combatants}
+                        onUpdateCombatant={(id, updates) => updateCombatant(id, updates)}
                       />
                     );
                   })}
@@ -981,6 +983,7 @@ function CombatContent() {
                           setRemoveConfirmPosition(pos);
                         }}
                         allCombatants={combatState.combatants}
+                        onUpdateCombatant={(id, updates) => updateCombatant(id, updates)}
                       />
                     );
                   })}
@@ -1256,6 +1259,7 @@ function CombatantCard({
   onSetInitiative,
   onShowRemoveConfirm,
   allCombatants,
+  onUpdateCombatant,
 }: {
   combatant: CombatantState;
   isActive: boolean;
@@ -1266,11 +1270,17 @@ function CombatantCard({
   onSetInitiative?: (combatantId: string) => void;
   onShowRemoveConfirm?: (combatantId: string, position: {top: number, left: number}) => void;
   allCombatants?: CombatantState[];
+  onUpdateCombatant?: (combatantId: string, updates: Partial<CombatantState>) => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showConditions, setShowConditions] = useState(false);
   const [hpAdjustment, setHpAdjustment] = useState('');
   const [showTargeting, setShowTargeting] = useState(false);
+  const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
+  const [damageInput, setDamageInput] = useState('');
+  const [newCondition, setNewCondition] = useState('');
+  const [conditionDuration, setConditionDuration] = useState('');
+  const [targetActionMode, setTargetActionMode] = useState<'damage' | 'condition' | null>(null);
 
   const adjustHp = (amount: number) => {
     const newHp = Math.max(0, Math.min(combatant.maxHp, combatant.hp + amount));
@@ -1321,6 +1331,49 @@ function CombatantCard({
     onUpdate({
       conditions: combatant.conditions.filter(c => c.id !== conditionId),
     });
+  };
+
+  const applyDamageToTarget = () => {
+    if (!selectedTargetId || !damageInput || !onUpdateCombatant) return;
+    
+    const damage = parseInt(damageInput);
+    if (isNaN(damage) || damage <= 0) {
+      alert('Please enter a valid damage amount');
+      return;
+    }
+
+    const target = allCombatants?.find(c => c.id === selectedTargetId);
+    if (target) {
+      const newHp = Math.max(0, target.hp - damage);
+      onUpdateCombatant(selectedTargetId, { hp: newHp });
+    }
+
+    setDamageInput('');
+    setSelectedTargetId(null);
+    setTargetActionMode(null);
+  };
+
+  const addConditionToTarget = () => {
+    if (!selectedTargetId || !newCondition || !onUpdateCombatant) return;
+
+    const target = allCombatants?.find(c => c.id === selectedTargetId);
+    if (target) {
+      const condition: StatusCondition = {
+        id: crypto.randomUUID(),
+        name: newCondition,
+        description: '',
+        duration: conditionDuration ? parseInt(conditionDuration) : undefined,
+      };
+
+      onUpdateCombatant(selectedTargetId, {
+        conditions: [...target.conditions, condition],
+      });
+    }
+
+    setNewCondition('');
+    setConditionDuration('');
+    setSelectedTargetId(null);
+    setTargetActionMode(null);
   };
 
   const hpPercent = (combatant.hp / combatant.maxHp) * 100;
@@ -1481,28 +1534,17 @@ function CombatantCard({
                 {combatant.targetIds.map(targetId => {
                   const target = allCombatants?.find(c => c.id === targetId);
                   return target ? (
-                    <div
+                    <button
                       key={targetId}
-                      className="group relative"
-                      title={`${target.name} - HP: ${target.hp}/${target.maxHp}, AC: ${target.ac}${target.conditions?.length ? ', Conditions: ' + target.conditions.join(', ') : ''}`}
+                      onClick={() => {
+                        setSelectedTargetId(targetId);
+                        setTargetActionMode(null);
+                      }}
+                      className={`px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:opacity-80 ${target.type === 'player' ? 'bg-blue-600 hover:bg-blue-700 text-blue-100' : 'bg-red-600 hover:bg-red-700 text-red-100'}`}
+                      title={`Click to apply damage or add condition to ${target.name}`}
                     >
-                      <span className={`px-2 py-1 rounded text-xs font-semibold cursor-help ${target.type === 'player' ? 'bg-blue-600 text-blue-100' : 'bg-red-600 text-red-100'}`}>
-                        {target.name}
-                      </span>
-                      {/* Tooltip */}
-                      <div className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 border border-gray-700 rounded p-2 text-xs text-gray-200 whitespace-nowrap z-10 shadow-lg">
-                        <div className="text-gray-300">HP: <span className={target.hp === 0 ? 'text-gray-500' : target.hp <= target.maxHp * 0.25 ? 'text-red-400' : target.hp <= target.maxHp * 0.5 ? 'text-yellow-400' : 'text-green-400'}>{target.hp}</span>/{target.maxHp}{target.hp === 0 && <span className="ml-1">☠</span>}</div>
-                        <div className="text-gray-300">AC: {target.ac}</div>
-                        {target.conditions && target.conditions.length > 0 && (
-                          <div className="text-gray-300 mt-1 border-t border-gray-700 pt-1">
-                            <div className="text-gray-400">Conditions:</div>
-                            {target.conditions.map((cond, idx) => (
-                              <div key={idx} className="text-orange-300">{cond.name}</div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                      {target.name}
+                    </button>
                   ) : null;
                 })}
               </div>
@@ -1608,6 +1650,114 @@ function CombatantCard({
                   ))}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Target Action Modal */}
+      {selectedTargetId && allCombatants && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-sm mx-auto">
+            {(() => {
+              const target = allCombatants.find(c => c.id === selectedTargetId);
+              if (!target) return null;
+
+              return (
+                <>
+                  <h3 className="text-lg font-semibold mb-4 text-white">
+                    {target.name}
+                  </h3>
+
+                  {!targetActionMode ? (
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-400 mb-4">
+                        HP: {target.hp}/{target.maxHp} | AC: {target.ac}
+                      </p>
+                      <button
+                        onClick={() => setTargetActionMode('damage')}
+                        className="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white font-semibold transition-colors"
+                      >
+                        Apply Damage
+                      </button>
+                      <button
+                        onClick={() => setTargetActionMode('condition')}
+                        className="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white font-semibold transition-colors"
+                      >
+                        Add Condition
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedTargetId(null);
+                          setTargetActionMode(null);
+                        }}
+                        className="w-full bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-white font-semibold transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : targetActionMode === 'damage' ? (
+                    <div className="space-y-3">
+                      <input
+                        type="number"
+                        min="0"
+                        value={damageInput}
+                        onChange={(e) => setDamageInput(e.target.value)}
+                        placeholder="Damage amount"
+                        className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={applyDamageToTarget}
+                          className="flex-1 bg-red-600 hover:bg-red-700 px-3 py-2 rounded text-white font-semibold transition-colors"
+                        >
+                          Apply
+                        </button>
+                        <button
+                          onClick={() => setTargetActionMode(null)}
+                          className="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-white font-semibold transition-colors"
+                        >
+                          Back
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        value={newCondition}
+                        onChange={(e) => setNewCondition(e.target.value)}
+                        placeholder="Condition name"
+                        className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        autoFocus
+                      />
+                      <input
+                        type="number"
+                        min="0"
+                        value={conditionDuration}
+                        onChange={(e) => setConditionDuration(e.target.value)}
+                        placeholder="Duration in rounds (optional)"
+                        className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={addConditionToTarget}
+                          className="flex-1 bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-white font-semibold transition-colors"
+                        >
+                          Add
+                        </button>
+                        <button
+                          onClick={() => setTargetActionMode(null)}
+                          className="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-white font-semibold transition-colors"
+                        >
+                          Back
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
