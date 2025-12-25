@@ -4,10 +4,22 @@
  * This component is a simple presentational component with no complex business logic.
  * It displays:
  * - An info icon next to the round indicator
- * - A mouseover tooltip showing:
- *   - Count of alive players and monsters (excluding hp=0)
- *   - List of combatants grouped by name
- *   - Status conditions for each combatant
+ * - A mouseover tooltip with 2-column layout (Players | Monsters)
+ *
+ * Tooltip Content:
+ * - Each column shows count of alive combatants in the header
+ * - Lists combatants grouped by name (with ×N multiplier for duplicates)
+ * - Displays status conditions with durations in yellow
+ * - Shows horizontal delimiter separating alive from dead combatants
+ * - Dead combatants appear strikethrough below the delimiter
+ * - "DEFEATED" section shows dead/unconscious characters in red
+ *
+ * Key Features:
+ * - Only alive combatants (hp > 0) counted in totals
+ * - Dead combatants displayed separately with strikethrough styling
+ * - Each column independently shows both alive and dead
+ * - Horizontal line (border) visually separates living from defeated
+ * - "None" text shows in column if no alive combatants of that type
  *
  * Testing Strategy:
  * - Unit testing is not configured in this project (no React Testing Library setup)
@@ -19,9 +31,14 @@
  * Manual Testing Checklist:
  * ✓ Icon appears next to round indicator
  * ✓ Tooltip shows on mouseover, hides on mouseleave
+ * ✓ 2-column layout with Players on left, Monsters on right
  * ✓ Counts are correct (only alive combatants counted)
  * ✓ Combatants grouped by type and name
  * ✓ Status conditions display correctly with durations
- * ✓ Empty state displays when no combatants are alive
+ * ✓ Horizontal delimiter separates alive from dead
+ * ✓ Dead combatants shown with strikethrough in red "DEFEATED" section
  * ✓ Multiple combatants with same name show count (×2, ×3, etc.)
+ * ✓ Empty columns show "None" when no alive combatants of that type
+ * ✓ All columns have dead section if any defeated combatants exist
  */
+

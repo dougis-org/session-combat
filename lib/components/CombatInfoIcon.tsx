@@ -10,28 +10,44 @@ interface CombatInfoIconProps {
 export function CombatInfoIcon({ combatants }: CombatInfoIconProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
-  // Get alive combatants (hp > 0) and group by type
+  // Separate alive and dead combatants
   const aliveCombatants = combatants.filter((c) => c.hp > 0);
-  const playersByName = new Map<string, CombatantState[]>();
-  const monstersByName = new Map<string, CombatantState[]>();
+  const deadCombatants = combatants.filter((c) => c.hp <= 0);
 
-  // Group alive combatants by name
+  // Group alive combatants by type and name
+  const alivePlayersByName = new Map<string, CombatantState[]>();
+  const aliveMonstersByName = new Map<string, CombatantState[]>();
+
   aliveCombatants.forEach((combatant) => {
     if (combatant.type === 'player') {
-      const existing = playersByName.get(combatant.name) || [];
-      playersByName.set(combatant.name, [...existing, combatant]);
+      const existing = alivePlayersByName.get(combatant.name) || [];
+      alivePlayersByName.set(combatant.name, [...existing, combatant]);
     } else {
-      const existing = monstersByName.get(combatant.name) || [];
-      monstersByName.set(combatant.name, [...existing, combatant]);
+      const existing = aliveMonstersByName.get(combatant.name) || [];
+      aliveMonstersByName.set(combatant.name, [...existing, combatant]);
+    }
+  });
+
+  // Group dead combatants by type and name
+  const deadPlayersByName = new Map<string, CombatantState[]>();
+  const deadMonstersByName = new Map<string, CombatantState[]>();
+
+  deadCombatants.forEach((combatant) => {
+    if (combatant.type === 'player') {
+      const existing = deadPlayersByName.get(combatant.name) || [];
+      deadPlayersByName.set(combatant.name, [...existing, combatant]);
+    } else {
+      const existing = deadMonstersByName.get(combatant.name) || [];
+      deadMonstersByName.set(combatant.name, [...existing, combatant]);
     }
   });
 
   // Count totals
-  const totalPlayers = Array.from(playersByName.values()).reduce(
+  const totalPlayers = Array.from(alivePlayersByName.values()).reduce(
     (sum, group) => sum + group.length,
     0
   );
-  const totalMonsters = Array.from(monstersByName.values()).reduce(
+  const totalMonsters = Array.from(aliveMonstersByName.values()).reduce(
     (sum, group) => sum + group.length,
     0
   );
@@ -61,81 +77,122 @@ export function CombatInfoIcon({ combatants }: CombatInfoIconProps) {
 
       {showTooltip && (
         <div className="absolute left-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-lg z-50 min-w-max">
-          {/* Summary counts */}
-          <div className="mb-3 pb-3 border-b border-gray-700">
-            <p className="text-sm text-gray-200 font-semibold">
-              Players: {totalPlayers}
-            </p>
-            <p className="text-sm text-gray-200 font-semibold">
-              Monsters: {totalMonsters}
-            </p>
+          {/* Two column layout: Players | Monsters */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Players Column */}
+            <div>
+              <p className="text-xs text-gray-400 font-semibold mb-2">PLAYERS ({totalPlayers})</p>
+              
+              {/* Alive Players */}
+              {alivePlayersByName.size > 0 ? (
+                <div className="space-y-1">
+                  {Array.from(alivePlayersByName.entries()).map(([name, group]) => (
+                    <div key={name} className="text-xs text-gray-300">
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-medium">{name}</span>
+                        {group.length > 1 && (
+                          <span className="text-gray-500">×{group.length}</span>
+                        )}
+                      </div>
+                      {group.some((c) => c.conditions.length > 0) && (
+                        <div className="ml-2 text-gray-400 text-xs">
+                          {group.flatMap((c) =>
+                            c.conditions.map((condition) => (
+                              <div key={condition.id} className="text-yellow-400">
+                                • {condition.name}
+                                {condition.duration && ` (${condition.duration})`}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-500 italic">None</p>
+              )}
+
+              {/* Dead Players Separator */}
+              {deadPlayersByName.size > 0 && (
+                <>
+                  <div className="border-t border-gray-600 my-2"></div>
+                  <p className="text-xs text-red-400 font-semibold mb-1">DEFEATED</p>
+                  <div className="space-y-1">
+                    {Array.from(deadPlayersByName.entries()).map(([name, group]) => (
+                      <div key={`dead-${name}`} className="text-xs text-gray-500 line-through">
+                        <div className="flex items-baseline gap-1">
+                          <span className="font-medium">{name}</span>
+                          {group.length > 1 && (
+                            <span className="text-gray-600">×{group.length}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Monsters Column */}
+            <div>
+              <p className="text-xs text-gray-400 font-semibold mb-2">MONSTERS ({totalMonsters})</p>
+              
+              {/* Alive Monsters */}
+              {aliveMonstersByName.size > 0 ? (
+                <div className="space-y-1">
+                  {Array.from(aliveMonstersByName.entries()).map(([name, group]) => (
+                    <div key={name} className="text-xs text-gray-300">
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-medium">{name}</span>
+                        {group.length > 1 && (
+                          <span className="text-gray-500">×{group.length}</span>
+                        )}
+                      </div>
+                      {group.some((c) => c.conditions.length > 0) && (
+                        <div className="ml-2 text-gray-400 text-xs">
+                          {group.flatMap((c) =>
+                            c.conditions.map((condition) => (
+                              <div key={condition.id} className="text-yellow-400">
+                                • {condition.name}
+                                {condition.duration && ` (${condition.duration})`}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-500 italic">None</p>
+              )}
+
+              {/* Dead Monsters Separator */}
+              {deadMonstersByName.size > 0 && (
+                <>
+                  <div className="border-t border-gray-600 my-2"></div>
+                  <p className="text-xs text-red-400 font-semibold mb-1">DEFEATED</p>
+                  <div className="space-y-1">
+                    {Array.from(deadMonstersByName.entries()).map(([name, group]) => (
+                      <div key={`dead-${name}`} className="text-xs text-gray-500 line-through">
+                        <div className="flex items-baseline gap-1">
+                          <span className="font-medium">{name}</span>
+                          {group.length > 1 && (
+                            <span className="text-gray-600">×{group.length}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Players list */}
-          {playersByName.size > 0 && (
-            <div className="mb-3">
-              <p className="text-xs text-gray-400 font-semibold mb-1">PLAYERS</p>
-              <div className="space-y-1">
-                {Array.from(playersByName.entries()).map(([name, group]) => (
-                  <div key={name} className="text-xs text-gray-300">
-                    <div className="flex items-baseline gap-1">
-                      <span className="font-medium">{name}</span>
-                      {group.length > 1 && (
-                        <span className="text-gray-500">×{group.length}</span>
-                      )}
-                    </div>
-                    {group.some((c) => c.conditions.length > 0) && (
-                      <div className="ml-2 text-gray-400 text-xs">
-                        {group.flatMap((c) =>
-                          c.conditions.map((condition) => (
-                            <div key={condition.id} className="text-yellow-400">
-                              • {condition.name}
-                              {condition.duration && ` (${condition.duration})`}
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Monsters list */}
-          {monstersByName.size > 0 && (
-            <div>
-              <p className="text-xs text-gray-400 font-semibold mb-1">MONSTERS</p>
-              <div className="space-y-1">
-                {Array.from(monstersByName.entries()).map(([name, group]) => (
-                  <div key={name} className="text-xs text-gray-300">
-                    <div className="flex items-baseline gap-1">
-                      <span className="font-medium">{name}</span>
-                      {group.length > 1 && (
-                        <span className="text-gray-500">×{group.length}</span>
-                      )}
-                    </div>
-                    {group.some((c) => c.conditions.length > 0) && (
-                      <div className="ml-2 text-gray-400 text-xs">
-                        {group.flatMap((c) =>
-                          c.conditions.map((condition) => (
-                            <div key={condition.id} className="text-yellow-400">
-                              • {condition.name}
-                              {condition.duration && ` (${condition.duration})`}
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Empty state */}
-          {totalPlayers === 0 && totalMonsters === 0 && (
-            <p className="text-xs text-gray-400">No active combatants</p>
+          {totalPlayers === 0 && totalMonsters === 0 && deadPlayersByName.size === 0 && deadMonstersByName.size === 0 && (
+            <p className="text-xs text-gray-400 col-span-2">No combatants</p>
           )}
         </div>
       )}
