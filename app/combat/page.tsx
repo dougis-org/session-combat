@@ -1519,32 +1519,72 @@ function CombatantCard({
               ✕
             </button>
           </div>
-          <div className="space-y-2">
-            {allCombatants
-              .filter(c => c.id !== combatant.id)
-              .map(target => (
-                <label key={target.id} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={combatant.targetIds?.includes(target.id) ?? false}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        onUpdate({
-                          targetIds: [...(combatant.targetIds ?? []), target.id],
-                        });
-                      } else {
-                        onUpdate({
-                          targetIds: (combatant.targetIds ?? []).filter(id => id !== target.id),
-                        });
-                      }
-                    }}
-                    className="w-4 h-4 rounded bg-gray-700 border border-gray-600 cursor-pointer"
-                  />
-                  <span className={`text-sm ${target.type === 'player' ? 'text-blue-300' : 'text-red-300'}`}>
-                    {target.name}
-                  </span>
-                </label>
-              ))}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Monsters Column */}
+            <div>
+              <h5 className="text-xs font-semibold text-red-300 mb-2 uppercase">Enemies</h5>
+              <div className="space-y-2">
+                {allCombatants
+                  .filter(c => c.id !== combatant.id && c.type !== 'player')
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(target => (
+                    <label key={target.id} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={combatant.targetIds?.includes(target.id) ?? false}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            onUpdate({
+                              targetIds: [...(combatant.targetIds ?? []), target.id],
+                            });
+                          } else {
+                            onUpdate({
+                              targetIds: (combatant.targetIds ?? []).filter(id => id !== target.id),
+                            });
+                          }
+                        }}
+                        className="w-4 h-4 rounded bg-gray-700 border border-gray-600 cursor-pointer"
+                      />
+                      <span className="text-sm text-red-300">
+                        {target.name}
+                      </span>
+                    </label>
+                  ))}
+              </div>
+            </div>
+            
+            {/* Party Column */}
+            <div>
+              <h5 className="text-xs font-semibold text-blue-300 mb-2 uppercase">Party</h5>
+              <div className="space-y-2">
+                {allCombatants
+                  .filter(c => c.id !== combatant.id && c.type === 'player')
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(target => (
+                    <label key={target.id} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={combatant.targetIds?.includes(target.id) ?? false}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            onUpdate({
+                              targetIds: [...(combatant.targetIds ?? []), target.id],
+                            });
+                          } else {
+                            onUpdate({
+                              targetIds: (combatant.targetIds ?? []).filter(id => id !== target.id),
+                            });
+                          }
+                        }}
+                        className="w-4 h-4 rounded bg-gray-700 border border-gray-600 cursor-pointer"
+                      />
+                      <span className="text-sm text-blue-300">
+                        {target.name}
+                      </span>
+                    </label>
+                  ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
