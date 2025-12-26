@@ -1530,7 +1530,7 @@ function CombatantCard({
 
           {combatant.targetIds && combatant.targetIds.length > 0 && (
             <div className="mb-2">
-              <div className="flex flex-wrap gap-2 mt-1">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm text-purple-400 font-semibold">Targets:</span>
                 {combatant.targetIds.map(targetId => {
                   const target = allCombatants?.find(c => c.id === targetId);
