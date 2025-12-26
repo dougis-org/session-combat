@@ -1386,7 +1386,7 @@ function CombatantCard({
     : { backgroundImage: 'linear-gradient(to right, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.02))' };
 
   return (
-    <div style={bgStyle} className={`rounded-lg px-4 py-6 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'}`}>
+    <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'}`}>
       <div className="flex justify-between items-start">
         <div className="flex-1">
           <div className="flex items-center gap-4 mb-2">
@@ -1530,8 +1530,8 @@ function CombatantCard({
 
           {combatant.targetIds && combatant.targetIds.length > 0 && (
             <div className="mb-2">
-              <p className="text-sm text-purple-400 font-semibold">Targeting:</p>
               <div className="flex flex-wrap gap-2 mt-1">
+                <span className="text-sm text-purple-400 font-semibold">Targets:</span>
                 {combatant.targetIds.map(targetId => {
                   const target = allCombatants?.find(c => c.id === targetId);
                   return target ? (
@@ -1591,7 +1591,7 @@ function CombatantCard({
             className="bg-orange-600 hover:bg-orange-700 px-2 py-1 rounded text-xs"
             title="Set targets for this combatant"
           >
-            Targeting
+            Add Target(s)
           </button>
           <button
             onClick={addCondition}
