@@ -339,8 +339,8 @@ describe('Monster Upload Validation', () => {
       expect(result.source).toBe('SRD');
       expect(result.abilityScores.strength).toBe(21);
       expect(result.languages).toHaveLength(1);
-      expect(result.traits).toHaveLength(1);
-      expect(result.traits[0].name).toBe('Amphibious');
+      expect(result.traits?.length).toBe(1);
+      expect(result.traits?.[0].name).toBe('Amphibious');
     });
 
     it('should clamp hp to maxHp if provided value is higher', () => {
@@ -415,9 +415,9 @@ describe('Monster Upload Validation', () => {
       const validation = validateMonsterUploadDocument(document);
       expect(validation.valid).toBe(true);
 
-      const monsters = document.monsters || [];
-      const transformed = monsters.map((m, idx) =>
-        transformMonsterData(m as RawMonsterData, 'test-user')
+      const monsters = (document.monsters || []) as RawMonsterData[];
+      const transformed = monsters.map((m: RawMonsterData, idx: number) =>
+        transformMonsterData(m, 'test-user')
       );
 
       expect(transformed).toHaveLength(2);
@@ -440,7 +440,7 @@ describe('Monster Upload Validation', () => {
       expect(validation.valid).toBe(true); // This is valid
 
       // But we could still transform it
-      const monsters = document.monsters || [];
+      const monsters = (document.monsters || []) as RawMonsterData[];
       const transformed = transformMonsterData(monsters[0] as RawMonsterData, 'test-user');
       expect(transformed.name).toBe('Goblin');
     });
