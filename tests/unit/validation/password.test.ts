@@ -1,19 +1,7 @@
 import { validatePasswordForClient } from '@/lib/validation/password';
-import * as fs from 'fs';
-import * as path from 'path';
 
 // Load parameterized test data
-const testDataPath = path.join(
-  __dirname,
-  '..',
-  '..',
-  'unit',
-  'data',
-  'password-cases.json'
-);
-const passwordTestCases = JSON.parse(
-  fs.readFileSync(testDataPath, 'utf-8')
-);
+const passwordTestCases = require('../data/password-cases.json');
 
 describe('validatePasswordForClient', () => {
   describe('parameterized password validation', () => {
