@@ -1,72 +1,57 @@
 import { validatePasswordForClient } from '@/lib/validation/password';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Load parameterized test data
+const testDataPath = path.join(
+  __dirname,
+  '..',
+  '..',
+  'unit',
+  'data',
+  'password-cases.json'
+);
+const passwordTestCases = JSON.parse(
+  fs.readFileSync(testDataPath, 'utf-8')
+);
 
 describe('validatePasswordForClient', () => {
-  it('should return valid for a strong password', () => {
-    const result = validatePasswordForClient('SecurePassword123');
-    expect(result.valid).toBe(true);
-    expect(result.errors).toHaveLength(0);
+  describe('parameterized password validation', () => {
+    test.each(passwordTestCases)(
+      '$description',
+      ({ password, expectedValid, expectedErrors }) => {
+        const result = validatePasswordForClient(password);
+
+        // Verify valid/invalid status
+        expect(result.valid).toBe(expectedValid);
+
+        // Verify error count matches
+        expect(result.errors).toHaveLength(expectedErrors.length);
+
+        // Verify each expected error is present
+        expectedErrors.forEach((expectedError) => {
+          expect(result.errors).toContain(expectedError);
+        });
+      }
+    );
   });
 
-  it('should reject empty password', () => {
-    const result = validatePasswordForClient('');
-    expect(result.valid).toBe(false);
-    expect(result.errors).toContain('Password must be at least 8 characters long');
-  });
+  // Additional edge case: verify error message consistency
+  describe('error message consistency', () => {
+    it('should use consistent error message format', () => {
+      const result = validatePasswordForClient('weak');
+      expect(result.errors).toEqual(
+        expect.arrayContaining([
+          expect.stringMatching(/Password must/i),
+        ])
+      );
+    });
 
-  it('should reject password shorter than 8 characters', () => {
-    const result = validatePasswordForClient('Short1A');
-    expect(result.valid).toBe(false);
-    expect(result.errors).toContain('Password must be at least 8 characters long');
-  });
-
-  it('should reject password without uppercase letter', () => {
-    const result = validatePasswordForClient('password123');
-    expect(result.valid).toBe(false);
-    expect(result.errors).toContain('Password must contain at least one uppercase letter');
-  });
-
-  it('should reject password without lowercase letter', () => {
-    const result = validatePasswordForClient('PASSWORD123');
-    expect(result.valid).toBe(false);
-    expect(result.errors).toContain('Password must contain at least one lowercase letter');
-  });
-
-  it('should reject password without number', () => {
-    const result = validatePasswordForClient('PasswordNoNum');
-    expect(result.valid).toBe(false);
-    expect(result.errors).toContain('Password must contain at least one number');
-  });
-
-  it('should reject password with multiple missing requirements', () => {
-    const result = validatePasswordForClient('weak');
-    expect(result.valid).toBe(false);
-    expect(result.errors.length).toBeGreaterThan(1);
-    expect(result.errors).toContain('Password must be at least 8 characters long');
-    expect(result.errors).toContain('Password must contain at least one uppercase letter');
-    expect(result.errors).toContain('Password must contain at least one number');
-  });
-
-  it('should accept passwords exactly 8 characters long', () => {
-    const result = validatePasswordForClient('Passwrd1');
-    expect(result.valid).toBe(true);
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('should accept long passwords', () => {
-    const result = validatePasswordForClient('VeryLongPasswordWith123Numbers');
-    expect(result.valid).toBe(true);
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('should accept passwords with special characters', () => {
-    const result = validatePasswordForClient('Password@123!');
-    expect(result.valid).toBe(true);
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('should accept passwords with unicode characters', () => {
-    const result = validatePasswordForClient('Pässwörd123');
-    expect(result.valid).toBe(true);
-    expect(result.errors).toHaveLength(0);
+    it('should not include technical jargon in error messages', () => {
+      const result = validatePasswordForClient('invalid');
+      result.errors.forEach((error) => {
+        expect(error).not.toMatch(/regex|pattern|match/i);
+      });
+    });
   });
 });
