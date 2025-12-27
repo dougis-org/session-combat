@@ -22,7 +22,7 @@ describe('POST /api/monsters/[id]/duplicate', () => {
   });
 
   it('duplicates an existing template into the user library', async () => {
-    const original = {
+    const original: any = {
       id: 'orig-1',
       userId: 'GLOBAL_USER',
       name: 'Goblin',
@@ -39,12 +39,12 @@ describe('POST /api/monsters/[id]/duplicate', () => {
       updatedAt: new Date(),
     };
 
-    mockLoadAll.mockResolvedValue([original]);
+    mockLoadAll.mockResolvedValue([original] as any);
 
-    const res = await POST({} as any, { params: { id: 'orig-1' } });
+    const res = await POST({} as any, { params: { id: 'orig-1' } } as any);
 
     expect(mockSave).toHaveBeenCalledTimes(1);
-    const saved = mockSave.mock.calls[0][0];
+    const saved = mockSave.mock.calls[0][0] as any;
     expect(saved.userId).toBe('user-1');
     expect(saved.id).not.toBe('orig-1');
     expect(saved.name).toMatch(/Goblin/);

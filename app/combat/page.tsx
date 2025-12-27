@@ -8,6 +8,7 @@ import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
+import { expandPartyToCharacters, findDuplicatePartyCharacters } from '@/lib/utils/partySelection';
 
 function CombatContent() {
   const { user } = useAuth();
@@ -23,6 +24,8 @@ function CombatContent() {
   const [showQuickEntryType, setShowQuickEntryType] = useState<'player' | 'monster' | null>(null);
   const [showCombatantModal, setShowCombatantModal] = useState(false);
   const [setupCombatants, setSetupCombatants] = useState<CombatantState[]>([]);
+  const [parties, setParties] = useState<any[]>([]);
+  const [selectedPartyId, setSelectedPartyId] = useState<string | null>(null);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [selectedDetailCombatantId, setSelectedDetailCombatantId] = useState<string | null>(null);
   const [detailPosition, setDetailPosition] = useState<{top: number, left: number} | null>(null);
@@ -40,14 +43,15 @@ function CombatContent() {
         setLoading(true);
         setLoadingTemplates(true);
         setError(null);
-        const [encountersRes, charactersRes, combatRes, monstersRes] = await Promise.all([
+        const [encountersRes, charactersRes, combatRes, monstersRes, partiesRes] = await Promise.all([
           fetch('/api/encounters'),
           fetch('/api/characters'),
           fetch('/api/combat'),
           fetch('/api/monsters'),
+          fetch('/api/parties'),
         ]);
 
-        if (!encountersRes.ok || !charactersRes.ok || !combatRes.ok || !monstersRes.ok) {
+        if (!encountersRes.ok || !charactersRes.ok || !combatRes.ok || !monstersRes.ok || !partiesRes.ok) {
           throw new Error('Failed to load data');
         }
 
@@ -55,11 +59,14 @@ function CombatContent() {
         const charactersData = await charactersRes.json();
         const combatData = await combatRes.json();
         const monstersData = await monstersRes.json();
+        const partiesData = await partiesRes.json();
 
         setEncounters(encountersData || []);
         setCharacters(charactersData || []);
         setMonsterTemplates(monstersData || []);
         setCombatState(combatData || null);
+        setParties(partiesData || []);
+
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
       } finally {
@@ -110,7 +117,7 @@ function CombatContent() {
   // Log when modal opens to diagnose data issues
   useEffect(() => {
     if (showCombatantModal) {
-      console.log('Modal opened with data:', {
+      console.debug('Modal opened with data:', {
         monsterTemplatesCount: monsterTemplates.length,
         charactersCount: characters.length,
         loadingTemplates,
@@ -148,6 +155,48 @@ function CombatContent() {
 
   const removeCombatantFromSetup = (id: string) => {
     setSetupCombatants(prev => prev.filter(c => c.id !== id));
+  };
+
+  const selectParty = (partyId: string | null) => {
+    if (!partyId) {
+      setSelectedPartyId(null);
+      // Remove any party-added combatants
+      setSetupCombatants(prev => prev.filter(c => !c.id.startsWith('party-')));
+      return;
+    }
+
+    const party = parties.find(p => p.id === partyId);
+    if (!party) return;
+
+    // Expand party characters
+    const partyCharacters = characters.filter(c => party.characterIds.includes(c.id));
+
+    // Duplicate detection
+    const duplicates = findDuplicatePartyCharacters(partyCharacters.map(pc => ({ id: pc.id })), setupCombatants);
+    if (duplicates.length > 0) {
+      setToast({ message: `${duplicates.length} characters from party already in combat setup. Remove them first.`, type: 'error' });
+      return;
+    }
+
+    const newCombatants: CombatantState[] = partyCharacters.map(char => ({
+      id: `party-${partyId}-${char.id}`,
+      name: char.name,
+      type: 'player',
+      initiative: 0,
+      abilityScores: char.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+      hp: char.hp,
+      maxHp: char.maxHp,
+      ac: char.ac,
+      conditions: [],
+      traits: char.traits,
+      actions: char.actions,
+      bonusActions: char.bonusActions,
+      reactions: char.reactions,
+    }));
+
+    setSelectedPartyId(partyId);
+    setSetupCombatants(prev => [...prev, ...newCombatants]);
+    console.debug(`Party ${party.name} selected - added ${newCombatants.length} characters to setup`);
   };
 
   const addCombatantToActiveSession = (combatant: CombatantState) => {
@@ -220,7 +269,7 @@ function CombatContent() {
     idPrefix: string
   ) => {
     try {
-      console.log('Adding combatant:', item.name);
+      console.debug('Adding combatant:', item.name);
 
       const combatant: CombatantState = {
         id: `${idPrefix}-${item.id}-${crypto.randomUUID()}`,
@@ -370,6 +419,7 @@ function CombatContent() {
     if (confirm('Are you sure you want to end combat?')) {
       saveCombatState(null);
       setSetupCombatants([]);
+      setSelectedPartyId(null); // Clear any selected party on end
     }
   };
 
@@ -666,6 +716,20 @@ function CombatContent() {
                 )}
 
                 <div className="space-y-2">
+                  <div className="mb-2">
+                    <label className="text-xs text-gray-400">Select Party</label>
+                    <select
+                      className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-2 mt-1 text-sm"
+                      value={selectedPartyId ?? ''}
+                      onChange={(e) => selectParty(e.target.value || null)}
+                    >
+                      <option value="">-- No Party --</option>
+                      {parties.map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
                   <button
                     onClick={() => setShowCombatantModal(true)}
                     className="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-semibold transition-colors"

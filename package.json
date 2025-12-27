@@ -7,7 +7,7 @@
     "dev": "node scripts/generate-version.js && next dev",
     "build": "node scripts/generate-version.js && next build",
     "start": "BUILD_VERSION=$(node -e \"console.log(require('./package.json').version)\") BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ') HOSTNAME=0.0.0.0 PORT=3000 next start",
-    "lint": "next lint",
+    "lint": "eslint app lib tests --ext .js,.jsx,.ts,.tsx",
     "test:integration": "jest --config=jest.integration.config.js",
     "test:ci": "npm run test:integration",
     "test:e2e": "playwright test",
