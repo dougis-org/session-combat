@@ -1,9 +1,10 @@
 'use client';
 
-import { FormEvent, useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { validatePasswordForClient } from '@/lib/validation/password';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -39,6 +40,12 @@ export default function RegisterPage() {
 
   const strength = getPasswordStrength(password);
 
+  // Memoize password validation to avoid recalculating on every render
+  const passwordValidation = useMemo(
+    () => validatePasswordForClient(password),
+    [password]
+  );
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError('');
@@ -59,8 +66,8 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 8) {
-      setFormError('Password must be at least 8 characters long');
+    if (!passwordValidation.valid) {
+      setFormError(passwordValidation.errors[0] || 'Password does not meet requirements');
       return;
     }
 
@@ -184,7 +191,7 @@ export default function RegisterPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || password.length < 8}
+            disabled={loading || !passwordValidation.valid}
             className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold rounded transition-colors"
           >
             {loading ? 'Creating Account...' : 'Create Account'}

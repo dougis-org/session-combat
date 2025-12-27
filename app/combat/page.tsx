@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
+import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
@@ -848,7 +849,10 @@ function CombatContent() {
                 </button>
               )}
             </div>
-            <p className="text-gray-400">Round {combatState.currentRound}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-gray-400">Round {combatState.currentRound}</p>
+              <CombatInfoIcon combatants={combatState.combatants} />
+            </div>
           </div>
           <div className="flex gap-2 flex-wrap">
             <button
@@ -978,6 +982,7 @@ function CombatContent() {
                     setRemoveConfirmPosition(pos);
                   }}
                   allCombatants={combatState.combatants}
+                  onUpdateCombatant={(id, updates) => updateCombatant(id, updates)}
                 />
               );
             })}
@@ -1010,6 +1015,7 @@ function CombatContent() {
                           setRemoveConfirmPosition(pos);
                         }}
                         allCombatants={combatState.combatants}
+                        onUpdateCombatant={(id, updates) => updateCombatant(id, updates)}
                       />
                     );
                   })}
@@ -1041,6 +1047,7 @@ function CombatContent() {
                           setRemoveConfirmPosition(pos);
                         }}
                         allCombatants={combatState.combatants}
+                        onUpdateCombatant={(id, updates) => updateCombatant(id, updates)}
                       />
                     );
                   })}
@@ -1316,6 +1323,7 @@ function CombatantCard({
   onSetInitiative,
   onShowRemoveConfirm,
   allCombatants,
+  onUpdateCombatant,
 }: {
   combatant: CombatantState;
   isActive: boolean;
@@ -1326,11 +1334,18 @@ function CombatantCard({
   onSetInitiative?: (combatantId: string) => void;
   onShowRemoveConfirm?: (combatantId: string, position: {top: number, left: number}) => void;
   allCombatants?: CombatantState[];
+  onUpdateCombatant?: (combatantId: string, updates: Partial<CombatantState>) => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showConditions, setShowConditions] = useState(false);
   const [hpAdjustment, setHpAdjustment] = useState('');
   const [showTargeting, setShowTargeting] = useState(false);
+  const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
+  const [damageInput, setDamageInput] = useState('');
+  const [newCondition, setNewCondition] = useState('');
+  const [conditionDuration, setConditionDuration] = useState('');
+  const [targetActionMode, setTargetActionMode] = useState<'damage' | 'condition' | null>(null);
+  const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
 
   const adjustHp = (amount: number) => {
     const newHp = Math.max(0, Math.min(combatant.maxHp, combatant.hp + amount));
@@ -1383,6 +1398,49 @@ function CombatantCard({
     });
   };
 
+  const applyDamageToTarget = () => {
+    if (!selectedTargetId || !damageInput || !onUpdateCombatant) return;
+    
+    const damage = parseInt(damageInput);
+    if (isNaN(damage) || damage <= 0) {
+      alert('Please enter a valid damage amount');
+      return;
+    }
+
+    const target = allCombatants?.find(c => c.id === selectedTargetId);
+    if (target) {
+      const newHp = Math.max(0, target.hp - damage);
+      onUpdateCombatant(selectedTargetId, { hp: newHp });
+    }
+
+    setDamageInput('');
+    setSelectedTargetId(null);
+    setTargetActionMode(null);
+  };
+
+  const addConditionToTarget = () => {
+    if (!selectedTargetId || !newCondition || !onUpdateCombatant) return;
+
+    const target = allCombatants?.find(c => c.id === selectedTargetId);
+    if (target) {
+      const condition: StatusCondition = {
+        id: crypto.randomUUID(),
+        name: newCondition,
+        description: '',
+        duration: conditionDuration ? parseInt(conditionDuration) : undefined,
+      };
+
+      onUpdateCombatant(selectedTargetId, {
+        conditions: [...target.conditions, condition],
+      });
+    }
+
+    setNewCondition('');
+    setConditionDuration('');
+    setSelectedTargetId(null);
+    setTargetActionMode(null);
+  };
+
   const hpPercent = (combatant.hp / combatant.maxHp) * 100;
   const hpColor = hpPercent > 50 ? 'bg-green-500' : hpPercent > 25 ? 'bg-yellow-500' : 'bg-red-500';
 
@@ -1392,7 +1450,7 @@ function CombatantCard({
     : { backgroundImage: 'linear-gradient(to right, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.02))' };
 
   return (
-    <div style={bgStyle} className={`rounded-lg px-4 py-6 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'}`}>
+    <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'}`}>
       <div className="flex justify-between items-start">
         <div className="flex-1">
           <div className="flex items-center gap-4 mb-2">
@@ -1536,14 +1594,50 @@ function CombatantCard({
 
           {combatant.targetIds && combatant.targetIds.length > 0 && (
             <div className="mb-2">
-              <p className="text-sm text-purple-400 font-semibold">Targeting:</p>
-              <div className="flex flex-wrap gap-2 mt-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-purple-400 font-semibold">Targets:</span>
                 {combatant.targetIds.map(targetId => {
                   const target = allCombatants?.find(c => c.id === targetId);
                   return target ? (
-                    <span key={targetId} className={`px-2 py-1 rounded text-xs font-semibold ${target.type === 'player' ? 'bg-blue-600 text-blue-100' : 'bg-red-600 text-red-100'}`}>
-                      {target.name}
-                    </span>
+                    <div key={targetId} className="relative inline-block">
+                      <button
+                        onClick={() => {
+                          setSelectedTargetId(targetId);
+                          setTargetActionMode(null);
+                        }}
+                        onMouseEnter={() => setHoveredTargetId(targetId)}
+                        onMouseLeave={() => setHoveredTargetId(null)}
+                        className={`px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:opacity-80 ${target.type === 'player' ? 'bg-blue-600 hover:bg-blue-700 text-blue-100' : 'bg-red-600 hover:bg-red-700 text-red-100'}`}
+                      >
+                        {target.name}
+                      </button>
+                      {hoveredTargetId === targetId && (
+                        <div className="absolute bottom-full left-0 mb-2 bg-gray-900 border border-gray-700 rounded shadow-lg pointer-events-none z-50 min-w-max">
+                          <div className="px-3 py-2 space-y-1">
+                            <div className="text-xs text-gray-400">
+                              <div>AC: {target.ac}</div>
+                              <div className="flex items-center gap-1">
+                                HP: <span className={target.hp === 0 ? 'text-red-400' : 'text-gray-300'}>{target.hp}/{target.maxHp}</span>
+                                {target.hp === 0 && <span className="text-red-400 text-lg">☠</span>}
+                              </div>
+                            </div>
+                            {target.conditions.length > 0 && (
+                              <div className="text-xs space-y-1 pt-1">
+                                {target.conditions.map((condition) => (
+                                  <div key={condition.id} className="text-yellow-400">
+                                    • {condition.name}
+                                    {condition.duration && ` (${condition.duration})`}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <div className="border-t border-gray-600 mt-2 pt-2 text-xs text-gray-400 italic">
+                              Click to apply damage or add condition
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   ) : null;
                 })}
               </div>
@@ -1561,7 +1655,7 @@ function CombatantCard({
             className="bg-orange-600 hover:bg-orange-700 px-2 py-1 rounded text-xs"
             title="Set targets for this combatant"
           >
-            Targeting
+            Add Target(s)
           </button>
           <button
             onClick={addCondition}
@@ -1583,32 +1677,180 @@ function CombatantCard({
               ✕
             </button>
           </div>
-          <div className="space-y-2">
-            {allCombatants
-              .filter(c => c.id !== combatant.id)
-              .map(target => (
-                <label key={target.id} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={combatant.targetIds?.includes(target.id) ?? false}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        onUpdate({
-                          targetIds: [...(combatant.targetIds ?? []), target.id],
-                        });
-                      } else {
-                        onUpdate({
-                          targetIds: (combatant.targetIds ?? []).filter(id => id !== target.id),
-                        });
-                      }
-                    }}
-                    className="w-4 h-4 rounded bg-gray-700 border border-gray-600 cursor-pointer"
-                  />
-                  <span className={`text-sm ${target.type === 'player' ? 'text-blue-300' : 'text-red-300'}`}>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Monsters Column */}
+            <div>
+              <h5 className="text-xs font-semibold text-red-300 mb-2 uppercase">Enemies</h5>
+              <div className="space-y-2">
+                {allCombatants
+                  .filter(c => c.id !== combatant.id && c.type !== 'player')
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(target => (
+                    <label key={target.id} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={combatant.targetIds?.includes(target.id) ?? false}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            onUpdate({
+                              targetIds: [...(combatant.targetIds ?? []), target.id],
+                            });
+                          } else {
+                            onUpdate({
+                              targetIds: (combatant.targetIds ?? []).filter(id => id !== target.id),
+                            });
+                          }
+                        }}
+                        className="w-4 h-4 rounded bg-gray-700 border border-gray-600 cursor-pointer"
+                      />
+                      <span className="text-sm text-red-300">
+                        {target.name}
+                      </span>
+                    </label>
+                  ))}
+              </div>
+            </div>
+            
+            {/* Party Column */}
+            <div>
+              <h5 className="text-xs font-semibold text-blue-300 mb-2 uppercase">Party</h5>
+              <div className="space-y-2">
+                {allCombatants
+                  .filter(c => c.id !== combatant.id && c.type === 'player')
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(target => (
+                    <label key={target.id} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={combatant.targetIds?.includes(target.id) ?? false}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            onUpdate({
+                              targetIds: [...(combatant.targetIds ?? []), target.id],
+                            });
+                          } else {
+                            onUpdate({
+                              targetIds: (combatant.targetIds ?? []).filter(id => id !== target.id),
+                            });
+                          }
+                        }}
+                        className="w-4 h-4 rounded bg-gray-700 border border-gray-600 cursor-pointer"
+                      />
+                      <span className="text-sm text-blue-300">
+                        {target.name}
+                      </span>
+                    </label>
+                  ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Target Action Modal */}
+      {selectedTargetId && allCombatants && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-sm mx-auto">
+            {(() => {
+              const target = allCombatants.find(c => c.id === selectedTargetId);
+              if (!target) return null;
+
+              return (
+                <>
+                  <h3 className="text-lg font-semibold mb-4 text-white">
                     {target.name}
-                  </span>
-                </label>
-              ))}
+                  </h3>
+
+                  {!targetActionMode ? (
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-400 mb-4">
+                        HP: {target.hp}/{target.maxHp} | AC: {target.ac}
+                      </p>
+                      <button
+                        onClick={() => setTargetActionMode('damage')}
+                        className="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white font-semibold transition-colors"
+                      >
+                        Apply Damage
+                      </button>
+                      <button
+                        onClick={() => setTargetActionMode('condition')}
+                        className="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white font-semibold transition-colors"
+                      >
+                        Add Condition
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedTargetId(null);
+                          setTargetActionMode(null);
+                        }}
+                        className="w-full bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-white font-semibold transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : targetActionMode === 'damage' ? (
+                    <div className="space-y-3">
+                      <input
+                        type="number"
+                        min="0"
+                        value={damageInput}
+                        onChange={(e) => setDamageInput(e.target.value)}
+                        placeholder="Damage amount"
+                        className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={applyDamageToTarget}
+                          className="flex-1 bg-red-600 hover:bg-red-700 px-3 py-2 rounded text-white font-semibold transition-colors"
+                        >
+                          Apply
+                        </button>
+                        <button
+                          onClick={() => setTargetActionMode(null)}
+                          className="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-white font-semibold transition-colors"
+                        >
+                          Back
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        value={newCondition}
+                        onChange={(e) => setNewCondition(e.target.value)}
+                        placeholder="Condition name"
+                        className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        autoFocus
+                      />
+                      <input
+                        type="number"
+                        min="0"
+                        value={conditionDuration}
+                        onChange={(e) => setConditionDuration(e.target.value)}
+                        placeholder="Duration in rounds (optional)"
+                        className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={addConditionToTarget}
+                          className="flex-1 bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-white font-semibold transition-colors"
+                        >
+                          Add
+                        </button>
+                        <button
+                          onClick={() => setTargetActionMode(null)}
+                          className="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-white font-semibold transition-colors"
+                        >
+                          Back
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
