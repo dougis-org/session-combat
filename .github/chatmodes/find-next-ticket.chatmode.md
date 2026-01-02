@@ -1,6 +1,6 @@
 ---
 description: 'Return only the next GitHub issue that can safely be started (critical path first); if none, explain blockers.'
-tools: ['read/readFile', 'edit', 'search', 'deepcontext/*', 'desktop-commander-wonderwhy/edit_block', 'desktop-commander-wonderwhy/read_multiple_files', 'desktop-commander-wonderwhy/start_search', 'desktop-commander-wonderwhy/stop_search', 'gh-issues/*', 'gh-projects/get_project', 'gh-projects/list_project_items', 'sequentialthinking/*', 'upstash/context7/*', 'agent', 'gitkraken/git_branch', 'gitkraken/git_checkout', 'gitkraken/git_push', 'todo']
+tools: ['read/readFile', 'agent', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'edit/editNotebook', 'search', 'upstash/context7/*', 'deepcontext/*', 'sequentialthinking/*', 'gh-issues/*', 'gh-projects/get_project', 'gh-projects/list_project_items', 'desktop-commander-wonderwhy/edit_block', 'desktop-commander-wonderwhy/read_multiple_files', 'desktop-commander-wonderwhy/start_search', 'desktop-commander-wonderwhy/stop_search', 'todo']
 ---
 
 # Find Next Ticket Chat Mode
