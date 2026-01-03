@@ -11,33 +11,35 @@
 
 - Assumptions:
   - Authentication check remains a prerequisite (user must be authenticated once; stored token/session can persist in localStorage).
-  - "Local storage" means browser `localStorage` for user-created entities (encounters, parties, characters, combat state) and `IndexedDB` optional for large monster catalog (user profile attribute `cacheMonsterCatalog`, defaults to false).
+  - "Local storage" means browser `localStorage` for user-created entities (encounters, parties, characters, combat state). IndexedDB for monster catalog is deferred to future ticket.
   - API routes currently fetch from MongoDB directly; they will be augmented to **check local storage first**, then remote, and provide a **sync queue** mechanism for writes.
-  - Existing clientStorage.ts provides basic localStorage interface and should be extended to support versioning, expiration, and conflict detection.
+  - Existing clientStorage.ts provides basic localStorage interface and should be extended to support versioning, soft-delete flag, and conflict detection.
   - All user-facing data (encounters, parties, characters, combat state) should persist to local storage **on every successful change**; combat state takes priority for data loss prevention.
-  - App is in alpha; breaking changes are acceptable. No global feature flag for offline mode (offline is always enabled). Only sync interval is configurable via env var.
+  - App is in alpha; breaking changes are acceptable. **Offline-first is always enabled (no global feature flag).** Sync behavior is controlled by `NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL` env var: 0 = on-demand sync (manual or visibility/online events only), N > 0 = auto-sync every N seconds when online.
   - Integration tests will use Testcontainers (MongoDB) and mocked network conditions to verify sync retry and conflict resolution.
   - Combat session state is most time-sensitive; it persists to local storage immediately and syncs asynchronously with exponential backoff on network retry.
-  - LWW (Last-Write-Wins) based on timestamp is the conflict resolution strategy.
-  - Sync triggers on page visibility change (resume on tab focus) and on a configurable timer (default 30s if online).
-  - Sync queue has max size ~1000 operations; quota warnings at 80% full localStorage.
-- Open questions (blocking -> need answers):
-  1. **Conflict resolution strategy**: If a user edits an encounter offline, then the same encounter is edited in another browser tab/device while offline, how should conflicts be resolved on sync? (Recommend: Last-Write-Wins (LWW) with timestamp; can be enhanced to three-way merge in a future ticket.)
-  2. **Sync trigger strategy**: Should sync happen on a timer (e.g., every 30 seconds if online), on page visibility change, or both? (Recommend: On visibility + timer + manual "sync now" button if offline-mode flag present.)
-  3. **Storage limits & retention**: Should we set a localStorage quota (e.g., 5MB max) and evict old encounters/parties? Or rely on browser defaults (~10MB)? (Recommend: Start with no active eviction; rely on browser quota; add warnings if > 80% full in a future ticket.)
+  - LWW (Last-Write-Wins) based on `_lastModified` timestamp is the conflict resolution strategy; conflicts are logged and user is notified via toast.
+  - Sync triggers on page visibility change (resume on tab focus), on `online` event (resume immediately), and on a configurable timer (default 30s if online; 0 = disabled, on-demand only).
+  - Sync queue has max size ~1000 operations; quota warnings at 80% full localStorage. Quota limit enforcement (rejecting writes when full) deferred to future ticket.
+- Open questions (resolved; no blocking items):
+  1. **Conflict resolution strategy**: ✅ Resolved. LWW (Last-Write-Wins) by `_lastModified` timestamp. Conflicts logged; user notified via toast. Three-way merge deferred to future ticket.
+  2. **Sync trigger strategy**: ✅ Resolved. Sync on page visibility change (resume on tab focus), on `online` event (resume immediately), and on configurable timer (interval from `NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL` env var; 0 = on-demand only).
+  3. **Storage limits & retention**: ✅ Resolved. Rely on browser localStorage defaults (~10MB). Warn at 80% full. Active eviction/quota enforcement deferred to future ticket.
 
 ---
 
 ### 3) Acceptance Criteria (normalized)
 
-1. Encounters, parties, characters, and combat state are persisted to `localStorage` (under a versioned `sessionCombat:v1` key) whenever created, updated, or deleted locally.
+1. Encounters, parties, characters, and combat state are persisted to `localStorage` (under a versioned `sessionCombat:v1` key) whenever created, updated, or deleted locally. Soft-deleted items (marked `_deleted: true`) are hidden from GET responses but retained in localStorage until sync confirms remote deletion.
 2. API GET routes (`/api/encounters`, `/api/parties`, `/api/characters`, `/api/combat`) return merged local + remote data (local takes precedence if both exist with same ID).
-3. API POST/PUT routes (`/api/encounters`, `/api/parties`, etc.) write to local storage immediately (optimistic write) and queue a sync task to MongoDB; if network succeeds, queue is cleared; if network fails, queue persists and retries on next network availability.
+3. API POST/PUT routes (`/api/encounters`, `/api/parties`, etc.) write to local storage immediately (optimistic write) and queue a sync task to MongoDB; if network succeeds, queue is cleared and local copies are hard-deleted; if network fails, queue persists and retries on next network availability.
 4. A sync service (`lib/sync/SyncQueue.ts`) manages pending writes: retries with exponential backoff (1s, 2s, 4s, up to 30s), detects online/offline transitions, and logs outcomes.
-5. Monster catalog persistence is **opt-in** via user profile attribute `cacheMonsterCatalog` (defaults to false if not set): when enabled, users can cache the full SRD list to `IndexedDB` for offline reference.
+5. When merge conflicts occur (same entity edited offline in two tabs), last-write-wins by `_lastModified` timestamp; app logs conflict and shows toast "Changes from another session applied".
 6. When combat session ends via "End Combat" button, the combat state is ejected (deleted) from local storage; remote MongoDB record remains for history/audit.
 7. Existing E2E tests pass; new integration tests validate: optimistic writes, sync queue retry, offline/online transitions, merge of local and remote data, and deduplication.
 8. API contracts remain backward-compatible; new response fields are optional.
+
+**Note:** Monster catalog persistence (IndexedDB opt-in) is deferred to future ticket #XX; not included in this ticket.
 
 ---
 
@@ -65,15 +67,17 @@
 **Data model / schema:**
 - LocalStore key schema:
   ```
-  sessionCombat:v1:encounters:<uuid> = { id, userId, name, ...encounter fields, _syncId, _version, _lastModified }
-  sessionCombat:v1:parties:<uuid> = { id, userId, name, ...party fields, _syncId, _version, _lastModified }
-  sessionCombat:v1:characters:<uuid> = { id, userId, name, ...character fields, _syncId, _version, _lastModified }
+  sessionCombat:v1:encounters:<uuid> = { id, userId, name, ...encounter fields, _syncId, _version, _lastModified, _deleted?: bool }
+  sessionCombat:v1:parties:<uuid> = { id, userId, name, ...party fields, _syncId, _version, _lastModified, _deleted?: bool }
+  sessionCombat:v1:characters:<uuid> = { id, userId, name, ...character fields, _syncId, _version, _lastModified, _deleted?: bool }
   sessionCombat:v1:combatState = { userId, ...combat fields, _syncId, _version, _lastModified }
   sessionCombat:v1:syncQueue = [
     { _id, type: 'POST'|'PUT'|'DELETE', resource: 'encounters'|'parties'|..., payload, retries: 0, nextRetry: timestamp }
   ]
-  sessionCombat:v1:config = { flags: { offline.enabled: bool }, lastSync: timestamp }
+  sessionCombat:v1:config = { lastSync: timestamp }
   ```
+  
+  **Delete semantics:** On DELETE request, set `_deleted: true` locally (soft delete, hidden from GET). Queue DELETE task to server. On sync success, hard-delete local record after remote confirms.
 - IndexedDB (optional, requires opt-in): store full monster catalog under `session-combat-db` / `monsters` object store.
 - No MongoDB schema changes; all remote documents remain unchanged.
 
@@ -86,16 +90,15 @@
   - `GET /api/encounters` — returns `{ data: Encounter[], source: 'local' | 'remote' | 'merged', syncStatus: 'synced' | 'pending' }` (optional fields for backward compat).
   - Error responses: if offline and local cache miss, return `{ error: 'No local data available and offline', status: 503 }`.
 
-**Feature flags:**
-- `app.offline.sync_interval_seconds` (environment: `NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL`, default: 30) — how often (in seconds) to retry sync when online.
-- **User profile attribute (opt-in):** `cacheMonsterCatalog` (boolean, defaults to false) — when true, allows user to cache full monster catalog to IndexedDB for offline reference.
+**Configuration (no feature flags; offline-first is always enabled):**
+- `NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL` (environment variable, default: 30) — how often (in seconds) to automatically retry/process sync queue when online. Set to 0 to disable automatic sync (manual sync only via page visibility change or `online` event).
 
 **Config:**
 - Environment variables (in `.env.local`):
   ```
-  NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL=30   # Seconds; sync retry interval when online
+  NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL=30   # Seconds; auto-sync interval when online (0 = on-demand only)
   ```
-- Runtime config: load from env vars.
+- Runtime config: load from env vars on app startup (read in SyncService).
 
 **External deps:**
 - No new production dependencies required.
@@ -156,6 +159,14 @@
 **2.1: Unit Tests — LocalStore Abstraction**
 - **File (NEW):** `tests/unit/sync/LocalStore.test.ts`
   - **Test data:** `tests/unit/data/local-store-test-cases.json` (parameterized cases: valid encounter, party, character, combat state, edge cases like empty name, Unicode, max size).
+  - **Data schema example:**
+    ```json
+    [
+      { "testName": "save valid encounter", "entityType": "encounters", "input": { "id": "uuid-1", "name": "Goblin Ambush", ... }, "expectedOutput": { "...input": true, "_version": 1, "_lastModified": "<timestamp>" }, "isErrorCase": false },
+      { "testName": "load nonexistent", "entityType": "encounters", "input": { "id": "nonexistent" }, "expectedOutput": null, "isErrorCase": false }
+    ]
+    ```
+  - **Provider class (NEW):** `tests/unit/helpers/LocalStoreTestDataProvider.ts` — reuses factory pattern from [tests/integration/helpers/monsterTestData.ts](tests/integration/helpers/monsterTestData.ts) (cite existing pattern).
   - **Tests (RED state):**
     - `saveEncounter()` persists to versioned key and increments version.
     - `loadEncounter(id)` retrieves by id and returns `null` if not found.
@@ -167,6 +178,14 @@
 **2.2: Unit Tests — SyncQueue Abstraction**
 - **File (NEW):** `tests/unit/sync/SyncQueue.test.ts`
   - **Test data:** `tests/unit/data/sync-queue-test-cases.json` (parameterized: POST encounter, PUT party, DELETE character, retries, backoff timing).
+  - **Data schema example:**
+    ```json
+    [
+      { "testName": "enqueue POST and persist", "operation": { "type": "POST", "resource": "encounters", "payload": { ... } }, "expectedQueue": { "length": 1, "first": { "...operation": true } }, "isErrorCase": false },
+      { "testName": "backoff 1s → 2s → 4s → 30s", "retryCount": [0, 1, 2, 3, 4], "expectedMs": [1000, 2000, 4000, 8000, 30000], "isErrorCase": false }
+    ]
+    ```
+  - **Provider class (NEW):** `tests/unit/helpers/SyncQueueTestDataProvider.ts` — reuses factory pattern from [tests/integration/helpers/monsterTestData.ts](tests/integration/helpers/monsterTestData.ts).
   - **Tests (RED state):**
     - `enqueue(operation)` adds to queue, persists to localStorage.
     - `dequeue()` returns next pending operation.
@@ -186,22 +205,23 @@
 
 **2.4: Integration Tests — Local + Remote Merge**
 - **File (NEW):** `tests/integration/local-remote-sync.integration.test.ts`
-  - **Setup:** Testcontainers MongoDB + Next.js test server (as in existing `api.integration.test.ts`).
+  - **Setup:** Testcontainers MongoDB + Next.js test server (as in existing [api.integration.test.ts](tests/integration/api.integration.test.ts)).
   - **Tests (RED state):**
     - `GET /api/encounters` returns local data when offline; remote + local merged when online.
-    - `POST /api/encounters` writes locally, queues sync, returns immediately; sync happens asynchronously.
-    - `PUT /api/encounters/:id` updates locally, queues sync.
-    - `DELETE /api/encounters/:id` deletes locally, queues deletion task.
+    - `POST /api/encounters` writes locally, queues sync, returns immediately with `_syncPending: true` flag; sync happens asynchronously.
+    - `PUT /api/encounters/:id` updates locally, queues sync; soft-deleted items hidden from GET.
+    - `DELETE /api/encounters/:id` sets `_deleted: true` locally, queues deletion task; after sync success, hard-deletes local record.
     - Offline → online transition triggers sync queue processing.
-    - Network errors (500, timeout) trigger retry with backoff.
+    - Network errors (500, timeout) trigger retry with backoff (verify cap at 30s).
     - Deduplication: if local id matches remote id (same encounter), merge correctly (not create duplicate).
+    - Conflict resolution: two edits offline with different timestamps; merge uses LWW; log entry created; toast shown.
 
-**2.5: Integration Tests — Feature Flag OFF (Backward Compatibility)**
-- **File (NEW):** `tests/integration/offline-flag-off.integration.test.ts`
+**2.5: Integration Tests — Backward Compatibility & Old Format Migration**
+- **File (NEW):** `tests/integration/backward-compat.integration.test.ts`
   - **Tests (RED state):**
-    - When `NEXT_PUBLIC_OFFLINE_MODE_ENABLED=false`, app uses remote-first (current behavior).
-    - Local store is populated but not used for reads (remote takes precedence).
-    - Sync queue is disabled.
+    - Old localStorage format (`sessionData` key) is detected on first read and migrated to new schema.
+    - Migrated data is available in GET requests after migration.
+    - New writes use versioned keys (`sessionCombat:v1:*`); old key is removed after successful migration.
 
 #### Phase 3: Implementation (GREEN)
 
@@ -304,11 +324,13 @@
 **4.1: Code Review for Duplication**
 - Check for repeated merge/deduplicate logic; extract to utility function `lib/sync/mergeLocalAndRemote.ts`.
 - Ensure all API routes follow the same pattern; consolidate via shared middleware if appropriate.
+- Verify test data factories reuse pattern from [tests/integration/helpers/monsterTestData.ts](tests/integration/helpers/monsterTestData.ts); consolidate into `tests/unit/helpers/testDataFactories.ts` if needed.
 
 **4.2: Simplify and Clean Up**
 - Keep methods <= 25 lines (single responsibility).
 - Remove dead code, commented blocks.
 - Ensure error messages are clear and actionable.
+- Verify soft-delete flag (`_deleted`) is handled consistently across LocalStore, SyncQueue, and API merge logic.
 
 **4.3: Linting & Formatting**
 - Run `npm run lint` and fix any violations.
@@ -316,20 +338,31 @@
 
 #### Phase 5: Pre-PR Duplication & Complexity Review (MANDATORY)
 
-**5.1: Static Analysis**
-- Run Codacy analysis on all modified/new files.
-- Address high-severity issues (unused variables, suspicious patterns).
+**5.1: Codacy Static Analysis**
+- **Immediately after each file edit:** Run `codacy_cli_analyze` (Codacy MCP tool) for each modified file (tool parameter: empty/unset).
+- **After integration tests pass:** Run `codacy_cli_analyze` with `tool: "trivy"` for security vulnerability scan of new dependencies.
+- **Acceptance thresholds:**
+  - Duplication: <10% (within module)
+  - Complexity (McCabe): <15 per function
+  - Security: No HIGH or CRITICAL vulnerabilities
+  - Unused variables: Zero
+- **Address violations:** Fix any HIGH-severity issues before moving to 5.2. Log issue details with Codacy IDs in commit message.
 
-**5.2: Test Coverage**
-- Ensure all new modules have unit tests with >80% line coverage.
-- Integration tests cover happy path, error cases, offline/online transitions.
+**5.2: Test Coverage & Completion**
+- Ensure all new modules (`LocalStore.ts`, `SyncQueue.ts`, `NetworkDetector.ts`, etc.) have unit tests with >80% line coverage.
+- Integration tests cover happy path, error cases, offline/online transitions, soft-delete lifecycle, conflict resolution logging.
+- Run full test suite: `npm run test:integration` (all pass).
 
 **5.3: Manual Testing**
 - Locally test offline scenario:
   - Open DevTools Network tab, select "Offline" profile.
-  - Create encounter, verify it saves locally and shows in list.
-  - Go online, verify sync completes (check browser console and localStorage).
-- Test feature flag OFF: verify app still works with remote-first (backward compat).
+  - Create encounter, verify it saves locally and shows in list (check localStorage keys `sessionCombat:v1:encounters:*`).
+  - Go online, verify sync completes (check browser console logs `[SyncQueue] Sync attempt`, localStorage cleared, MongoDB record created).
+  - Delete encounter offline; verify `_deleted: true` flag set; sync on reconnect; verify hard-deleted from localStorage.
+- Test old format migration:
+  - Manually create old `sessionData` key in localStorage; reload app.
+  - Verify migration log in console; old key removed; new `sessionCombat:v1:*` keys created.
+  - Verify data accessible in GET requests.
 
 **5.4: Build & Run Tests**
 ```bash
@@ -412,14 +445,12 @@ npm run lint
 - Updated: `app/api/combat/route.ts` — add local-first logic to GET/POST/PUT.
 - Updated: `app/combat/page.tsx` — eject combat state on end combat button.
 - Updated: `app/layout.tsx` — initialize SyncService on app mount.
-- Updated: `lib/clientStorage.ts` — integrate with new LocalStore (backward-compatible wrapper).
-- Updated: User profile schema — add `cacheMonsterCatalog: boolean` field.
-- Updated: User settings/profile UI — add "Cache Monster Catalog" toggle.
+- Updated: `lib/clientStorage.ts` — integrate with new LocalStore (backward-compatible wrapper); implement `migrateOldFormat()` to detect and transform old `sessionData` key.
 
 **Documentation & Config:**
-- Updated: `README.md` — add "Offline Support" section with storage details and limitations.
-- Updated: `.env.local.example` — add `NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL=30`.
-- (NEW) `docs/OFFLINE_MODE.md` — detailed guide on offline architecture, storage schema, conflict resolution, and troubleshooting.
+- Updated: `README.md` — add "Offline Support" section with storage details (localStorage ~10MB limit), sync interval config, and limitations (LWW conflict resolution, soft-delete behavior).
+- Updated: `.env.local.example` — add `NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL=30` (0 = on-demand only).
+- (NEW) `docs/OFFLINE_MODE.md` — detailed guide on offline architecture, storage schema (`sessionCombat:v1:*` keys), soft-delete and sync lifecycle, conflict resolution (LWW + logging), troubleshooting, and browser storage limits.
 
 ---
 
@@ -524,16 +555,18 @@ npm run lint
 
 ### 11) Traceability Map
 
-| AC # | Requirement | Milestone | Task(s) | Flag(s) | Test(s) |
-|------|-------------|-----------|---------|---------|---------|
-| 1 | Persist encounters/parties/characters/combat to localStorage on create/update/delete | NA | Impl LocalStore, update API routes | `app.offline.enabled` | Unit: LocalStore, Integration: API write |
-| 2 | GET routes return merged local+remote (local precedence) | NA | Impl merge utility, update API GET routes | `app.offline.enabled` | Integration: local-remote merge |
-| 3 | POST/PUT routes optimistic write + sync queue | NA | Impl SyncQueue, update API POST/PUT routes | `app.offline.enabled` | Unit: SyncQueue, Integration: optimistic write |
-| 4 | Sync service retries with exponential backoff | NA | Impl SyncService, SyncQueue backoff logic | `app.offline.enabled` | Unit: backoff timing, Integration: retry behavior |
-| 5 | Monster catalog caching opt-in (IndexedDB) | NA | (Future ticket; skip for now) | `app.offline.monster_catalog_caching_allowed` | (TBD) |
-| 6 | Feature flag `app.offline.enabled` (default OFF) | NA | Add env var, conditional logic in routes | `app.offline.enabled` | Integration: flag OFF backward compat |
-| 7 | E2E tests pass, new integration tests validate sync | NA | Write parameterized tests | N/A | E2E: existing, Integration: new |
-| 8 | API backward-compatible | NA | Verify response schema, optional new fields | N/A | Integration: API contract |
+| AC # | Requirement | Milestone | Task(s) | Config | Test(s) |
+|------|-------------|-----------|---------|---------|----------|
+| 1 | Persist encounters/parties/characters/combat to localStorage (soft-delete flag) | NA | Impl LocalStore, update API routes, soft-delete lifecycle | `NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL` | Unit: LocalStore, Integration: API write + delete |
+| 2 | GET routes return merged local+remote (local precedence) | NA | Impl merge utility, update API GET routes | `NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL` | Integration: local-remote merge |
+| 3 | POST/PUT routes optimistic write + sync queue | NA | Impl SyncQueue, update API POST/PUT routes | `NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL` | Unit: SyncQueue, Integration: optimistic write |
+| 4 | Sync service retries with exponential backoff (capped 30s) | NA | Impl SyncService, SyncQueue backoff logic | `NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL` | Unit: backoff timing, Integration: retry behavior |
+| 5 | Conflict resolution (LWW by timestamp), log and notify user | NA | Impl `_lastModified` comparison, add logging + toast | N/A | Unit: LWW logic, Integration: conflict scenario |
+| 6 | Combat session ejected from localStorage on "End Combat" | NA | Update app/combat/page.tsx, call deleteEntity() | N/A | Integration: combat ejection test |
+| 7 | E2E tests pass; new integration tests validate sync, conflicts, migration | NA | Write parameterized tests (JSON data sources) | N/A | E2E: existing, Integration: new (7 test files) |
+| 8 | API backward-compatible; old `sessionData` key migrated | NA | Verify response schema, implement migration in clientStorage | N/A | Integration: API contract + migration |
+
+**Note:** Monster catalog caching (IndexedDB, user profile opt-in) deferred to future ticket.
 
 ---
 
