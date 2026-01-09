@@ -1,0 +1,12 @@
+{
+  "encounters": [
+    {
+      "name": "Valid encounter",
+      "input": {
+        "id": "enc-001",
+        "userId": "user-123",
+        "name": "Goblin Ambush"
+      }
+    }
+  ]
+}
