@@ -202,7 +202,7 @@ describe('Local-Remote Sync Integration', () => {
 
       // Simulate first failure
       await syncQueue.markFailure(queued!._id);
-      queued = await syncQueue.dequeue();
+      queued = await syncQueue.getOperation(queued!._id);
       expect(queued?.retries).toBe(1);
 
       const backoff1 = syncQueue.getRetryBackoffMs(0);

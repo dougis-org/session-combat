@@ -5,6 +5,7 @@
 
 import { useEffect } from 'react';
 import { initializeSyncService } from '@/lib/sync/SyncService';
+import type { SyncOperation } from '@/lib/sync/SyncQueue';
 
 export default function RootLayout({
   children,
@@ -14,7 +15,31 @@ export default function RootLayout({
   useEffect(() => {
     // Initialize sync service on app mount
     const intervalMs = parseInt(process.env.NEXT_PUBLIC_OFFLINE_SYNC_INTERVAL || '30000', 10);
-    initializeSyncService({ intervalMs });
+
+    // Fetch function for syncing operations to the server
+    const fetchFn = async (op: SyncOperation) => {
+      const { type, resource, payload } = op;
+
+      const options: RequestInit = {
+        method: type,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+
+      // Include body for POST and PUT operations
+      if (type === 'POST' || type === 'PUT') {
+        options.body = JSON.stringify(payload);
+      }
+
+      const response = await fetch(resource, options);
+
+      if (!response.ok) {
+        throw new Error(`Sync failed: ${response.status} ${response.statusText}`);
+      }
+    };
+
+    initializeSyncService({ intervalMs, fetchFn });
     console.debug('[App] SyncService initialized');
   }, []);
 

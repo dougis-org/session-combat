@@ -14,11 +14,18 @@ export interface SyncTriggerConfig {
 export function useSyncTriggers(onSync: () => void, config?: SyncTriggerConfig) {
   const { intervalMs = 30000 } = config || {}; // Default 30 seconds
 
+  // Store the latest onSync callback in a ref to avoid stale closures
+  const onSyncRef = React.useRef(onSync);
+
+  React.useEffect(() => {
+    onSyncRef.current = onSync;
+  }, [onSync]);
+
   const handler = (event: Event) => {
     if (event.type === 'visibilitychange') {
       if (document.visibilityState === 'visible') {
         console.debug('[SyncTriggers] Page visible; triggering sync');
-        onSync();
+        onSyncRef.current();
       }
     }
   };
@@ -29,17 +36,18 @@ export function useSyncTriggers(onSync: () => void, config?: SyncTriggerConfig) 
     return () => {
       document.removeEventListener('visibilitychange', handler);
     };
-  }, [onSync]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // handler is stable within component lifecycle
 
   // Setup periodic sync timer
   React.useEffect(() => {
     const timer = setInterval(() => {
       if (document.visibilityState === 'visible' && navigator.onLine) {
         console.debug('[SyncTriggers] Timer triggered sync');
-        onSync();
+        onSyncRef.current();
       }
     }, intervalMs);
 
     return () => clearInterval(timer);
-  }, [onSync, intervalMs]);
+  }, [intervalMs]); // Only restart timer if interval changes
 }

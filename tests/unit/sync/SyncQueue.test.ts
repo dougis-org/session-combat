@@ -124,7 +124,7 @@ describe('SyncQueue', () => {
 
       await syncQueue.markFailure(queued!._id);
 
-      const updated = await syncQueue.dequeue();
+      const updated = await syncQueue.getOperation(queued!._id);
       expect(updated?.retries).toBe(1);
     });
 
@@ -143,7 +143,7 @@ describe('SyncQueue', () => {
       await syncQueue.markFailure(queued!._id);
       const afterFailure = Date.now();
 
-      const updated = await syncQueue.dequeue();
+      const updated = await syncQueue.getOperation(queued!._id);
       expect(updated?.nextRetry).toBeGreaterThanOrEqual(beforeFailure + 1000);
       expect(updated?.nextRetry).toBeLessThanOrEqual(afterFailure + 1000);
     });

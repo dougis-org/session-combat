@@ -57,6 +57,13 @@ export class SyncQueue {
   }
 
   /**
+   * Get a specific operation by ID (for testing/debugging)
+   */
+  async getOperation(operationId: string): Promise<SyncOperation | null> {
+    return this.queue.find(op => op._id === operationId) || null;
+  }
+
+  /**
    * Mark operation as successfully synced
    */
   async markSuccess(operationId: string): Promise<void> {
@@ -87,7 +94,7 @@ export class SyncQueue {
   getRetryBackoffMs(retryCount: number): number {
     const base = 1000; // 1 second
     const maxBackoff = 30000; // 30 seconds
-    const backoff = base * Math.pow(2, Math.min(retryCount, 5)); // Cap exponent at 5
+    const backoff = base * Math.pow(2, retryCount);
     return Math.min(backoff, maxBackoff);
   }
 
@@ -165,7 +172,7 @@ export class SyncQueue {
   }
 
   private generateId(): string {
-    return `sync-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `sync-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 }
 

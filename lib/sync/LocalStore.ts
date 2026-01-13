@@ -54,10 +54,12 @@ export class LocalStore {
       let storedData: StoredEntity;
       const existing = localStorage.getItem(key);
 
-      if (existing) {
+      if (existing && !JSON.parse(existing)._deleted) {
         try {
           storedData = JSON.parse(existing);
           storedData._version = (storedData._version || 0) + 1;
+          // Merge new data with existing
+          storedData = { ...storedData, ...data };
         } catch (e) {
           // Parse error, reset version
           storedData = {
@@ -67,11 +69,14 @@ export class LocalStore {
           };
         }
       } else {
+        // Create new entity (either doesn't exist or was deleted)
         storedData = {
           ...data,
           _version: 1,
           _lastModified: Date.now()
         };
+        // Clear _deleted flag if it exists
+        delete storedData._deleted;
       }
 
       // Ensure _lastModified is current
@@ -127,7 +132,9 @@ export class LocalStore {
             // Only include non-deleted entities
             if (!entity._deleted) {
               const id = entity.id || entity._id;
-              result[id] = entity;
+              if (id) {
+                result[id] = entity;
+              }
             }
           }
         }
@@ -185,7 +192,17 @@ export class LocalStore {
         if (Array.isArray(entities)) {
           for (const entity of entities) {
             if (entity.id) {
-              await this.saveEntity(type, entity.id, entity);
+              // Old format doesn't have userId, add a placeholder
+              const entityWithUserId = {
+                ...entity,
+                userId: entity.userId || 'migrated-user'
+              };
+              try {
+                await this.saveEntity(type, entity.id, entityWithUserId);
+              } catch (error) {
+                // Log but continue migrating other entities
+                console.warn(`[LocalStore] Failed to migrate ${type}:${entity.id}:`, error);
+              }
             }
           }
         }

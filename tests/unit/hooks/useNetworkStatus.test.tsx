@@ -25,7 +25,7 @@ describe('useNetworkStatus', () => {
       value: false
     });
 
-    const { result, rerender } = renderHook(() => useNetworkStatus());
+    const { result } = renderHook(() => useNetworkStatus());
     expect(result.current.isOnline).toBe(false);
 
     act(() => {

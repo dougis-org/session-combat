@@ -6,12 +6,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { offlineGet, offlinePost, offlinePut, offlineDelete } from '@/lib/api/offlineHandlers';
 import { Encounter } from '@/lib/types';
+import { getDatabase } from '@/lib/db';
 
 /**
  * GET /api/encounters
  */
 export async function GET(request: NextRequest) {
-  return offlineGet('encounters');
+  return offlineGet('encounters', async () => {
+    const db = await getDatabase();
+    const encounters = await db.collection<Encounter>('encounters').find({}).toArray();
+    return encounters;
+  });
 }
 
 /**

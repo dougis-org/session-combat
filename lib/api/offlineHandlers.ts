@@ -3,7 +3,7 @@
  * Reduces duplication across encounters, parties, characters endpoints
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getLocalStore } from '@/lib/sync/LocalStore';
 import { getSyncQueue } from '@/lib/sync/SyncQueue';
 import { mergeLocalAndRemote } from '@/lib/sync/mergeLocalAndRemote';

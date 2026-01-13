@@ -6,7 +6,6 @@
  */
 
 import { SyncQueue } from './SyncQueue';
-import { useNetworkStatus } from './NetworkDetector';
 
 export class SyncService {
   private syncQueue: SyncQueue;
@@ -124,9 +123,15 @@ export class SyncService {
 // Singleton instance
 let instance: SyncService | null = null;
 
-export function initializeSyncService(options?: { intervalMs?: number }): SyncService {
+export function initializeSyncService(options?: {
+  intervalMs?: number;
+  fetchFn?: (op: any) => Promise<void>;
+}): SyncService {
   if (!instance) {
-    instance = new SyncService(options?.intervalMs || 30000);
+    instance = new SyncService(
+      options?.intervalMs || 30000,
+      options?.fetchFn
+    );
   }
   return instance;
 }
