@@ -211,7 +211,7 @@ function validateAbilityScores(
     if (!scoreResult.valid) {
       return { valid: false, error: scoreResult.error };
     }
-    scores[ability as keyof AbilityScores] = scoreResult.value;
+    (scores as any)[ability as string] = scoreResult.value;
   }
 
   return {

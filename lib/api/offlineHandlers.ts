@@ -27,7 +27,7 @@ export async function offlineGet<T>(
     const local = await localStore.loadAllEntities(resourceType);
     const remote = onRemoteFetch ? await onRemoteFetch() : [];
 
-    const merged = mergeLocalAndRemote(local, remote, { excludeDeleted: true });
+    const merged = mergeLocalAndRemote(local as unknown as any[], remote as unknown as any[], { excludeDeleted: true });
     return NextResponse.json({
       data: merged,
       source: local.length > 0 && remote.length === 0 ? 'local' : 'merged',

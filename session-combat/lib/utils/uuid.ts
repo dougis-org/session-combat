@@ -15,7 +15,7 @@ export function generateUUID(): string {
   }
 
   // Fallback to crypto.getRandomValues (browser API)
-  if (typeof global !== 'undefined' && global.crypto && global.crypto.getRandomValues) {
+  if (typeof global !== 'undefined' && (global as any).crypto && typeof (global as any).crypto.getRandomValues === 'function') {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       const r = (Math.random() * 16) | 0;
       const v = c === 'x' ? r : (r & 0x3) | 0x8;

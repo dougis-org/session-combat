@@ -169,7 +169,7 @@ function EncountersContent() {
                   <div className="mt-4">
                     <h3 className="font-semibold mb-2">Monsters ({encounter.monsters.length})</h3>
                     <div className="grid gap-2">
-                      {encounter.monsters.map(monster => (
+                      {encounter.monsters.map((monster: any) => (
                         <div key={monster.id} className="bg-gray-700 rounded p-2 text-sm">
                           <span className="font-medium">{monster.name}</span>
                           <span className="text-gray-400 ml-2">
@@ -472,7 +472,7 @@ function MonsterEditor({
             value={hp}
             onChange={(e) => {
               const newHp = parseInt(e.target.value) || 0;
-              setHp(Math.min(newHp, maxHp));
+              setHp(Math.min(newHp, maxHp ?? 0));
             }}
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
           />

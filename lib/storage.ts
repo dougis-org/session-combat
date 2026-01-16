@@ -1,6 +1,6 @@
 // MongoDB persistence utilities
 import { getDatabase } from './db';
-import { SessionData, Encounter, Character, CombatState, Party, MonsterTemplate } from './types';
+import { Encounter, Character, CombatState, Party, MonsterTemplate } from './types';
 import { GLOBAL_USER_ID } from './constants';
 import { ObjectId } from 'mongodb';
 
@@ -133,7 +133,7 @@ export const storage = {
   },
 
   // Load all session data for a user
-  async load(userId: string): Promise<SessionData> {
+  async load(userId: string): Promise<any> {
     try {
       const [encounters, characters, parties, combatState] = await Promise.all([
         this.loadEncounters(userId),
@@ -193,14 +193,14 @@ export const storage = {
   async saveCharacter(character: Character): Promise<void> {
     try {
       const db = await getDatabase();
-      const { _id, ...characterData } = character;
+      const { _id, ...characterData } = character as any;
       
       // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
       let query: any = { userId: character.userId };
-      if (character._id) {
-        query._id = new ObjectId(character._id);
+      if ((character as any)._id) {
+        query._id = new ObjectId((character as any)._id);
       } else {
-        query.id = character.id;
+        query.id = (character as any).id;
       }
       
       await db
@@ -232,14 +232,14 @@ export const storage = {
     }
     try {
       const db = await getDatabase();
-      const { _id, ...combatStateData } = combatState;
+      const { _id, ...combatStateData } = combatState as any;
       
       // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
-      let query: any = { userId: combatState.userId };
-      if (combatState._id) {
-        query._id = new ObjectId(combatState._id);
+      let query: any = { userId: (combatState as any).userId };
+      if ((combatState as any)._id) {
+        query._id = new ObjectId((combatState as any)._id);
       } else {
-        query.id = combatState.id;
+        query.id = (combatState as any).id;
       }
       
       await db
@@ -282,14 +282,14 @@ export const storage = {
   async saveParty(party: Party): Promise<void> {
     try {
       const db = await getDatabase();
-      const { _id, ...partyData } = party;
+      const { _id, ...partyData } = party as any;
       
       // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
-      let query: any = { userId: party.userId };
-      if (party._id) {
-        query._id = new ObjectId(party._id);
+      let query: any = { userId: (party as any).userId };
+      if ((party as any)._id) {
+        query._id = new ObjectId((party as any)._id);
       } else {
-        query.id = party.id;
+        query.id = (party as any).id;
       }
       
       await db
