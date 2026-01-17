@@ -32,7 +32,15 @@ export default function RootLayout({
         options.body = JSON.stringify(payload);
       }
 
-      const response = await fetch(resource, options);
+      // Ensure resource is a valid URL/path; prefix with '/api/' when needed
+      const endpoint =
+        resource.startsWith('http://') ||
+        resource.startsWith('https://') ||
+        resource.startsWith('/')
+          ? resource
+          : `/api/${resource}`;
+
+      const response = await fetch(endpoint, options);
 
       if (!response.ok) {
         throw new Error(`Sync failed: ${response.status} ${response.statusText}`);

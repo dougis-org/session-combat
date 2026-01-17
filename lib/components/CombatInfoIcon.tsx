@@ -4,7 +4,6 @@
 import React, { useState } from 'react';
 type Condition = any;
 type CombatantState = any;
-import { CombatState } from '@/lib/types';
 
 interface CombatInfoIconProps {
   combatants: any[];

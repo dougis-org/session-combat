@@ -255,8 +255,7 @@ describe('Local-Remote Sync Integration', () => {
 
       // Eject
       await localStore.deleteEntity('combatState', userId);
-      loaded = await localStore.loadEntity('combatState', userId);
-      
+
       // Should be marked as deleted
       const stored = localStorage.getItem(`sessionCombat:v1:combatState:${userId}`);
       const parsed = JSON.parse(stored!);
