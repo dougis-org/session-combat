@@ -535,7 +535,7 @@ export function QuickCombatantModal({
                               <span>AC: {character.ac}</span>
                               {character.classes && character.classes.length > 0 && (
                                 <span>
-                                  Class: {character.classes.map(c => c.class).join('/')}
+                                  Class: {character.classes.map((c: any) => c.class).join('/')}
                                 </span>
                               )}
                               {character.userId === GLOBAL_USER_ID ? (

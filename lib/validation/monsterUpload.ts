@@ -4,6 +4,7 @@
  */
 
 import { MonsterTemplate, AbilityScores, CreatureAbility } from '@/lib/types';
+import { generateUUID } from '@/lib/utils/uuid';
 
 /**
  * Valid monster sizes in D&D 5e
@@ -210,7 +211,7 @@ function validateAbilityScores(
     if (!scoreResult.valid) {
       return { valid: false, error: scoreResult.error };
     }
-    scores[ability as keyof AbilityScores] = scoreResult.value;
+    (scores as any)[ability as string] = scoreResult.value;
   }
 
   return {
@@ -631,7 +632,7 @@ export function transformMonsterData(
   const now = new Date();
 
   return {
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     userId,
     name: (raw.name as string).trim(),
     size: (raw.size || 'medium') as ValidSize,

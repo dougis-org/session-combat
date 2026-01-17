@@ -1,184 +1,66 @@
-// Data types for the combat tracker
+/**
+ * Shared type definitions
+ */
 
-// D&D 5e Classes - valid classes from https://www.dnd5eapi.co/api/2014/classes
-export type DnDClass = 
-  | 'Barbarian'
-  | 'Bard'
-  | 'Cleric'
-  | 'Druid'
-  | 'Fighter'
-  | 'Monk'
-  | 'Paladin'
-  | 'Ranger'
-  | 'Rogue'
-  | 'Sorcerer'
-  | 'Warlock'
-  | 'Wizard';
-
-export const VALID_CLASSES: DnDClass[] = [
-  'Barbarian',
-  'Bard',
-  'Cleric',
-  'Druid',
-  'Fighter',
-  'Monk',
-  'Paladin',
-  'Ranger',
-  'Rogue',
-  'Sorcerer',
-  'Warlock',
-  'Wizard',
-];
-
-export function isValidClass(className: unknown): className is DnDClass {
-  return typeof className === 'string' && VALID_CLASSES.includes(className as DnDClass);
-}
-
-// D&D 5e Races - valid races from https://www.dnd5eapi.co/api/2014/races
-export type DnDRace = 
-  | 'Dragonborn'
-  | 'Dwarf'
-  | 'Elf'
-  | 'Gnome'
-  | 'Half-Elf'
-  | 'Half-Orc'
-  | 'Halfling'
-  | 'Human'
-  | 'Tiefling';
-
-export const VALID_RACES: DnDRace[] = [
-  'Dragonborn',
-  'Dwarf',
-  'Elf',
-  'Gnome',
-  'Half-Elf',
-  'Half-Orc',
-  'Halfling',
-  'Human',
-  'Tiefling',
-];
-
-export function isValidRace(raceName: unknown): raceName is DnDRace {
-  return typeof raceName === 'string' && VALID_RACES.includes(raceName as DnDRace);
-}
-
-// D&D 5e Alignments - standard 9-alignment system
-export const VALID_ALIGNMENTS = [
-  'Lawful Good',
-  'Neutral Good',
-  'Chaotic Good',
-  'Lawful Neutral',
-  'Neutral',
-  'Chaotic Neutral',
-  'Lawful Evil',
-  'Neutral Evil',
-  'Chaotic Evil',
-] as const;
-
-export type DnDAlignment = typeof VALID_ALIGNMENTS[number];
-
-export function isValidAlignment(alignment: unknown): alignment is DnDAlignment {
-  return typeof alignment === 'string' && VALID_ALIGNMENTS.includes(alignment as DnDAlignment);
-}
-
-// Character Class Level - for multiclass support
-export interface CharacterClass {
-  class: DnDClass;
-  level: number;
-}
-
-// Validation helper for character classes array
-export interface ClassValidationError {
-  valid: false;
-  error: string;
-}
-
-export interface ClassValidationSuccess {
-  valid: true;
-}
-
-export type ClassValidationResult = ClassValidationSuccess | ClassValidationError;
-
-export function validateCharacterClasses(
-  classes: unknown,
-  options: { allowEmpty?: boolean } = {}
-): ClassValidationResult {
-  const { allowEmpty = false } = options;
-
-  // Check if classes is an array
-  if (!Array.isArray(classes)) {
-    return {
-      valid: false,
-      error: 'Classes must be an array of {class, level} objects',
-    };
-  }
-
-  // Check for empty array (usually not allowed, especially on updates)
-  if (classes.length === 0 && !allowEmpty) {
-    return {
-      valid: false,
-      error: 'At least one class is required',
-    };
-  }
-
-  // Track classes to detect duplicates
-  const seenClasses = new Set<DnDClass>();
-
-  // Validate each class entry
-  for (const classEntry of classes) {
-    // Validate class property exists and is valid
-    if (!classEntry || typeof classEntry !== 'object' || !classEntry.class) {
-      return {
-        valid: false,
-        error: 'Each class entry must have a "class" property',
-      };
-    }
-
-    if (!isValidClass(classEntry.class)) {
-      return {
-        valid: false,
-        error: `Invalid class "${classEntry.class}". Must be one of: ${VALID_CLASSES.join(', ')}`,
-      };
-    }
-
-    // Check for duplicate classes
-    if (seenClasses.has(classEntry.class)) {
-      return {
-        valid: false,
-        error: `Duplicate class: "${classEntry.class}". Each character can have each class only once.`,
-      };
-    }
-    seenClasses.add(classEntry.class);
-
-    // Validate level property
-    if (typeof classEntry.level !== 'number' || classEntry.level < 1 || classEntry.level > 20) {
-      return {
-        valid: false,
-        error: `Class level must be a number between 1 and 20 (got ${classEntry.level})`,
-      };
-    }
-  }
-
-  return { valid: true };
-}
-
-// User and authentication
-export interface User {
-  _id?: string;
-  id?: string;
-  email: string;
-  passwordHash: string;
-  isAdmin?: boolean; // Admin users can manage global monster templates
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface AuthPayload {
+export interface Encounter {
+  _id?: any;
+  id: string;
   userId: string;
-  email: string;
+  name: string;
+  description?: string;
+  difficulty?: string;
+  monsters: Monster[];
+  creatures?: string[];
+  createdAt?: Date;
+  updatedAt?: Date;
+  _version?: number;
+  _lastModified?: number;
+  _deleted?: boolean;
 }
 
-// Ability scores interface
+export interface Party {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  characters?: string[];
+  characterIds?: string[];
+  updatedAt?: Date;
+  _version?: number;
+  _lastModified?: number;
+  _deleted?: boolean;
+}
+
+export interface Character {
+  id: string;
+  userId: string;
+  name: string;
+  class?: string;
+  level?: number;
+  _version?: number;
+  _lastModified?: number;
+  _deleted?: boolean;
+}
+
+export interface CombatState {
+  id?: string;
+  userId: string;
+  encounterId?: string;
+  round?: number;
+  turn?: number;
+  participants?: any[];
+  activeParticipantId?: string;
+  combatants?: any[];
+  currentRound?: number;
+  currentTurnIndex?: number;
+  isActive?: boolean;
+  updatedAt?: Date;
+  _version?: number;
+  _lastModified?: number;
+  _deleted?: boolean;
+}
+
+// Additional shared types and constants used across the app
 export interface AbilityScores {
   strength: number;
   dexterity: number;
@@ -188,197 +70,146 @@ export interface AbilityScores {
   charisma: number;
 }
 
-// Creature ability (trait, action, etc.) - shared between monsters and characters
-export interface CreatureAbility {
-  name: string;
-  description: string;
-  attackBonus?: number;
-  damageDescription?: string; // e.g., "2d6 + 3 piercing"
-  saveDC?: number;
-  saveType?: string; // e.g., "Dexterity", "Strength"
-  recharge?: string; // e.g., "Recharge 5-6"
-}
-
-// Shared base statistics for any creature (monster, character, NPC)
 export interface CreatureStats {
-  // Ability Scores
-  abilityScores: AbilityScores;
-  // Combat Stats
-  ac: number;
-  acNote?: string; // e.g., "natural armor", "leather armor + DEX"
+  ac?: number;
+  acNote?: string;
   hp: number;
   maxHp: number;
-  // Saving Throws (bonus to saves, if different from ability modifiers)
-  savingThrows?: Partial<Record<keyof AbilityScores, number>>;
-  // Skills
-  skills?: Record<string, number>; // e.g., { "acrobatics": 2, "arcana": 4 }
-  // Resistances and Immunities
+  abilityScores: AbilityScores;
+  skills?: Record<string, number>;
+  savingThrows?: Record<string, number>;
   damageResistances?: string[];
   damageImmunities?: string[];
   damageVulnerabilities?: string[];
   conditionImmunities?: string[];
-  // Senses
-  senses?: Record<string, string>; // e.g., { "darkvision": "60 ft.", "passive Perception": "14" }
-  // Languages and Communication
+  senses?: Record<string, string>;
   languages?: string[];
-  communication?: string;
-  // Special Abilities
-  traits?: CreatureAbility[];
-  actions?: CreatureAbility[];
-  bonusActions?: CreatureAbility[];
-  reactions?: CreatureAbility[];
+  traits?: any[];
+  actions?: any[];
+  bonusActions?: any[];
+  reactions?: any[];
 }
 
-// Monster ability (trait, action, etc.) - legacy alias for backward compatibility
-export interface MonsterAbility extends CreatureAbility {}
+export type CharacterClass = { class: string; level: number };
 
-// Monster template in the library (reusable)
-export interface MonsterTemplate extends CreatureStats {
-  _id?: string;
-  id: string;
-  userId: string; // userId: 'GLOBAL' for admin-controlled global templates, otherwise user's userId
-  // Basic Info
-  name: string;
-  size: 'tiny' | 'small' | 'medium' | 'large' | 'huge' | 'gargantuan';
-  type: string; // e.g., 'humanoid', 'beast', 'dragon', 'undead', etc.
-  alignment?: string; // e.g., 'chaotic evil', 'neutral', etc.
-  // Speed
-  speed: string; // e.g., "30 ft.", "30 ft., fly 60 ft."
-  // Challenge Rating
-  challengeRating: number;
-  experiencePoints?: number; // Calculated based on CR
-  // Lair & Legendary Actions (monster-specific)
-  lairActions?: CreatureAbility[];
-  legendaryActions?: CreatureAbility[];
-  // Metadata
-  isGlobal?: boolean; // True if this is a global template (userId === 'GLOBAL')
-  source?: string; // e.g., "Monster Manual", "Xanathar's Guide"
-  description?: string; // Additional notes or lore
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Monster instance in an encounter (unique copy with instance-specific state)
-export interface Monster extends CreatureStats {
-  _id?: string;
-  id: string;
-  userId?: string; // Optional for encounter instances
-  templateId?: string; // Reference to MonsterTemplate if created from library
-  // Basic Info
-  name: string;
-  size: 'tiny' | 'small' | 'medium' | 'large' | 'huge' | 'gargantuan';
-  type: string;
-  alignment?: string;
-  // Speed
-  speed: string;
-  // Challenge
-  challengeRating: number;
-  experiencePoints?: number;
-  // Lair & Legendary Actions (monster-specific)
-  lairActions?: CreatureAbility[];
-  legendaryActions?: CreatureAbility[];
-  // Metadata
-  source?: string;
-  description?: string;
-}
-
-// Character - player character with shared creature stats
 export interface Character extends CreatureStats {
-  _id?: string;
   id: string;
   userId: string;
   name: string;
-  // Character-specific metadata
-  classes: CharacterClass[]; // Array of classes for multiclass support
-  race?: DnDRace; // Must be one of the valid D&D 5e races
+  classes: CharacterClass[];
+  race?: string;
   background?: string;
   alignment?: string;
-  createdAt?: Date;
   updatedAt?: Date;
+  _version?: number;
+  _lastModified?: number;
+  _deleted?: boolean;
 }
 
-// Helper function to calculate total character level from classes array
-// Pure calculation - does not handle edge cases or defaults (validation belongs in API layer)
-export function calculateTotalLevel(classes: CharacterClass[]): number {
-  return classes.reduce((total, classLevel) => total + classLevel.level, 0);
-}
+export type MonsterTemplate = any; // kept generic for now
 
-export interface Encounter {
-  _id?: string;
+export type Monster = {
   id: string;
-  userId: string;
   name: string;
-  description: string;
-  monsters: Monster[];
+  size?: string;
+  ac?: number;
+  hp?: number;
+  maxHp?: number;
+  abilityScores: AbilityScores;
+  languages?: string[];
+  traits?: any[];
+  templateId?: string;
+};
+
+export type DnDRace = (typeof VALID_RACES)[number];
+
+export const VALID_CLASSES = [
+  'Fighter',
+  'Rogue',
+  'Wizard',
+  'Cleric',
+  'Paladin',
+  'Ranger',
+  'Bard',
+  'Druid',
+  'Monk',
+  'Warlock',
+  'Sorcerer',
+  'Barbarian',
+];
+
+export const VALID_RACES = [
+  'Human',
+  'Elf',
+  'Dwarf',
+  'Halfling',
+  'Gnome',
+  'Half-Elf',
+  'Half-Orc',
+  'Tiefling',
+  'Dragonborn',
+];
+
+export const VALID_ALIGNMENTS = [
+  'Lawful Good',
+  'Neutral Good',
+  'Chaotic Good',
+  'Lawful Neutral',
+  'True Neutral',
+  'Chaotic Neutral',
+  'Lawful Evil',
+  'Neutral Evil',
+  'Chaotic Evil',
+];
+
+export function calculateTotalLevel(classes: CharacterClass[] | undefined) {
+  if (!classes || classes.length === 0) return 0;
+  return classes.reduce((sum, c) => sum + (typeof c.level === 'number' ? c.level : 0), 0);
+}
+
+export function isValidClass(name: string) {
+  return VALID_CLASSES.includes(name);
+}
+
+export function isValidRace(name: string) {
+  return VALID_RACES.includes(name);
+}
+
+export function validateCharacterClasses(
+  classes: any,
+  options: { allowEmpty?: boolean } = {}
+): { valid: boolean; error?: string } {
+  if (!Array.isArray(classes)) return { valid: false, error: 'Classes must be an array' };
+  if (classes.length === 0) {
+    return options.allowEmpty ? { valid: true } : { valid: false, error: 'At least one class must be provided' };
+  }
+
+  let total = 0;
+  for (const c of classes) {
+    if (!c || typeof c.class !== 'string' || !Number.isInteger(c.level)) {
+      return { valid: false, error: 'Each class must have a string `class` and integer `level`' };
+    }
+    if (!isValidClass(c.class)) return { valid: false, error: `Invalid class: ${c.class}` };
+    if (c.level <= 0) return { valid: false, error: 'Class level must be greater than 0' };
+    total += c.level;
+  }
+
+  if (total > 30) return { valid: false, error: 'Total character level exceeds allowed maximum (30)' };
+
+  return { valid: true };
+}
+
+// Auth / User related types
+export interface User {
+  _id?: any;
+  email: string;
+  passwordHash: string;
   createdAt: Date;
   updatedAt: Date;
+  cacheMonsterCatalog?: boolean;
 }
 
-export interface StatusCondition {
-  id: string;
-  name: string;
-  description: string;
-  duration?: number; // in rounds
-}
-
-export interface CombatantStatus {
-  combatantId: string;
-  conditions: StatusCondition[];
-}
-
-export interface InitiativeRoll {
-  roll: number;
-  bonus: number;
-  total: number;
-  method: 'rolled' | 'manual'; // 'rolled' = automatic roll, 'manual' = user entered
-}
-
-export interface CombatantState extends CreatureStats {
-  id: string;
-  name: string;
-  type: 'player' | 'monster';
-  initiative: number;
-  initiativeRoll?: InitiativeRoll;
-  conditions: StatusCondition[];
-  notes?: string;
-  targetIds?: string[]; // IDs of combatants being attacked
-  // Additional metadata for combat display
-  size?: 'tiny' | 'small' | 'medium' | 'large' | 'huge' | 'gargantuan';
-  monsterType?: string;
-  challengeRating?: number;
-  // Lair & Legendary Actions (monster-specific, optional for compatibility)
-  lairActions?: CreatureAbility[];
-  legendaryActions?: CreatureAbility[];
-}
-
-export interface CombatState {
-  _id?: string;
-  id: string;
+export type AuthPayload = {
   userId: string;
-  encounterId?: string;
-  encounterDescription?: string;
-  combatants: CombatantState[];
-  currentRound: number;
-  currentTurnIndex: number;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Party {
-  _id?: string;
-  id: string;
-  userId: string;
-  name: string;
-  description?: string;
-  characterIds: string[]; // ObjectId references to characters
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface SessionData {
-  encounters: Encounter[];
-  characters: Character[];
-  parties: Party[];
-  combatState?: CombatState;
-}
+  email: string;
+};

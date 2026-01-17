@@ -1,0 +1,37 @@
+{
+  "encounters": [
+    {
+      "name": "Valid encounter",
+      "input": {
+        "id": "enc-001",
+        "userId": "user-123",
+        "name": "Goblin Ambush"
+      }
+    },
+    {
+      "name": "Unicode encounter",
+      "input": {
+        "id": "enc-002",
+        "userId": "user-123",
+        "name": "龍との戦い"
+      }
+    }
+  ],
+  "edgeCases": [
+    {
+      "name": "Empty name",
+      "input": {
+        "id": "enc-empty",
+        "userId": "user-123",
+        "name": ""
+      }
+    },
+    {
+      "name": "Missing id",
+      "input": {
+        "userId": "user-123",
+        "name": "No ID Encounter"
+      }
+    }
+  ]
+}
