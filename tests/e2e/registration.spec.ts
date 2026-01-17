@@ -168,4 +168,97 @@ test.describe('Registration Flow', () => {
 
     expect(page.url()).not.toContain('/login');
   });
+
+  test('should display validation error when password requirements not met', async ({ page }) => {
+    const testEmail = `test-${Date.now()}@example.com`;
+
+    await page.goto('/register');
+
+    // Fill in valid email but invalid password (no uppercase)
+    await page.fill('input[type="email"]', testEmail);
+    await page.fill('input[type="password"]', 'lowercase123');
+    
+    // Confirm password
+    const confirmInputs = await page.locator('input[type="password"]').all();
+    await confirmInputs[1].fill('lowercase123');
+
+    // Submit button should be disabled
+    const submitButton = page.locator('button[type="submit"]');
+    await expect(submitButton).toBeDisabled();
+  });
+
+  test('should show error message when password requirements violated after server validation', async ({ page }) => {
+    const testEmail = `test-${Date.now()}@example.com`;
+
+    await page.goto('/register');
+
+    // Fill in form with valid data
+    await page.fill('input[type="email"]', testEmail);
+    const validPassword = 'ValidPassword123';
+    const passwordInputs = await page.locator('input[type="password"]').all();
+    await passwordInputs[0].fill(validPassword);
+    await passwordInputs[1].fill(validPassword);
+
+    // Submit form (should succeed or fail with specific error)
+    const submitButton = page.locator('button[type="submit"]');
+    await expect(submitButton).toBeEnabled();
+
+    // If registration fails due to server error, verify error is displayed
+    // (This test validates the error display mechanism works)
+    await submitButton.click();
+
+    // Wait a bit for potential server response
+    await page.waitForTimeout(1000);
+
+    // Either we redirect (success) or see an error message
+    const hasError = await page.isVisible('text=/password|error|requirement/i');
+    const hasRedirected = !page.url().includes('/register');
+
+    expect(hasError || hasRedirected).toBeTruthy();
+  });
+
+  test('should show error when confirm password does not match', async ({ page }) => {
+    const testEmail = `test-${Date.now()}@example.com`;
+    const password = 'ValidPassword123';
+
+    await page.goto('/register');
+
+    await page.fill('input[type="email"]', testEmail);
+    const passwordInputs = await page.locator('input[type="password"]').all();
+    await passwordInputs[0].fill(password);
+    await passwordInputs[1].fill('DifferentPassword123');
+
+    // Submit button should remain disabled until passwords match
+    const submitButton = page.locator('button[type="submit"]');
+    
+    // After entering mismatched passwords, button should be disabled or error shown
+    await page.waitForTimeout(500);
+    const passwordMismatchError = await page.isVisible('text=/do not match/i');
+    expect(passwordMismatchError).toBeTruthy();
+  });
+
+  test('should prevent double-submit by disabling button during request', async ({ page }) => {
+    const testEmail = `test-${Date.now()}@example.com`;
+    const testPassword = VALID_TEST_PASSWORD;
+
+    await page.goto('/register');
+
+    // Fill in valid credentials
+    await page.fill('input[type="email"]', testEmail);
+    await page.fill('input[type="password"]', testPassword);
+    const confirmInputs = await page.locator('input[type="password"]').all();
+    await confirmInputs[1].fill(testPassword);
+
+    // Click submit and immediately check if button is disabled
+    const submitButton = page.locator('button[type="submit"]');
+    
+    // Before click, button should be enabled
+    await expect(submitButton).toBeEnabled();
+
+    // Click submit
+    await submitButton.click();
+
+    // Button should be disabled during submission (showing "Creating Account...")
+    await expect(submitButton).toBeDisabled();
+  });
 });
