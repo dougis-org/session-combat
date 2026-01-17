@@ -1,53 +1,20 @@
 /**
- * SyncTriggers - Manages sync triggers based on page visibility and timers
+ * SyncTriggers (DEPRECATED)
+ *
+ * This module previously exposed a React hook for triggering syncs on page
+ * visibility and timers. That logic has been consolidated into `SyncService`.
+ * The hook remains to avoid breaking imports but is a no-op and issues a
+ * deprecation warning.
  */
 
 import React from 'react';
 
 export interface SyncTriggerConfig {
-  intervalMs?: number; // Default sync interval in milliseconds
+  intervalMs?: number;
 }
 
-/**
- * React hook that triggers sync on page visibility changes and timers
- */
-export function useSyncTriggers(onSync: () => void, config?: SyncTriggerConfig) {
-  const { intervalMs = 30000 } = config || {}; // Default 30 seconds
-
-  // Store the latest onSync callback in a ref to avoid stale closures
-  const onSyncRef = React.useRef(onSync);
-
+export function useSyncTriggers(_onSync: () => void, _config?: SyncTriggerConfig) {
   React.useEffect(() => {
-    onSyncRef.current = onSync;
-  }, [onSync]);
-
-  const handler = (event: Event) => {
-    if (event.type === 'visibilitychange') {
-      if (document.visibilityState === 'visible') {
-        console.debug('[SyncTriggers] Page visible; triggering sync');
-        onSyncRef.current();
-      }
-    }
-  };
-
-  // Setup visibility change listener
-  React.useEffect(() => {
-    document.addEventListener('visibilitychange', handler);
-    return () => {
-      document.removeEventListener('visibilitychange', handler);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // handler is stable within component lifecycle
-
-  // Setup periodic sync timer
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      if (document.visibilityState === 'visible' && navigator.onLine) {
-        console.debug('[SyncTriggers] Timer triggered sync');
-        onSyncRef.current();
-      }
-    }, intervalMs);
-
-    return () => clearInterval(timer);
-  }, [intervalMs]); // Only restart timer if interval changes
+    console.warn('[SyncTriggers] useSyncTriggers is deprecated. SyncService now handles visibility and timer triggers.');
+  }, []);
 }

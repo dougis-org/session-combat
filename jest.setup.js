@@ -2,10 +2,16 @@
 
 // Polyfill crypto.randomUUID for jsdom environment
 if (typeof global.crypto === 'undefined' || !global.crypto.randomUUID) {
-  const crypto = require('crypto');
+  // Prefer native crypto.randomUUID when available; otherwise provide a
+  // lightweight fallback for the test environment to avoid relying on
+  // CommonJS `require` in ESM contexts.
+  const randomUUID = (typeof globalThis.crypto !== 'undefined' && globalThis.crypto.randomUUID)
+    ? globalThis.crypto.randomUUID.bind(globalThis.crypto)
+    : () => `uuid-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
   global.crypto = {
     ...global.crypto,
-    randomUUID: () => crypto.randomUUID()
+    randomUUID
   };
 }
 

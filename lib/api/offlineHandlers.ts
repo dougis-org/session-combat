@@ -15,17 +15,18 @@ const OFFLINE_MODE_ENABLED = process.env.NEXT_PUBLIC_OFFLINE_MODE_ENABLED !== 'f
  */
 export async function offlineGet<T>(
   resourceType: string,
-  onRemoteFetch?: () => Promise<T[]>
+  onRemoteFetch: () => Promise<T[]>
 ): Promise<NextResponse> {
   try {
+    // Always attempt to fetch remote data using the provided callback
+    const remote = await onRemoteFetch();
+
     if (!OFFLINE_MODE_ENABLED) {
-      const remote = onRemoteFetch ? await onRemoteFetch() : [];
       return NextResponse.json({ data: remote, source: 'remote' });
     }
 
     const localStore = getLocalStore();
     const local = await localStore.loadAllEntities(resourceType);
-    const remote = onRemoteFetch ? await onRemoteFetch() : [];
 
     const merged = mergeLocalAndRemote(local as unknown as any[], remote as unknown as any[], { excludeDeleted: true });
     return NextResponse.json({

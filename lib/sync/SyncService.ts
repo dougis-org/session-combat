@@ -5,10 +5,10 @@
  * Processes pending operations with exponential backoff.
  */
 
-import { SyncQueue } from './SyncQueue';
+import { getSyncQueue } from './SyncQueue';
 
 export class SyncService {
-  private syncQueue: SyncQueue;
+  private syncQueue = getSyncQueue();
   private isOnline: boolean = navigator.onLine;
   private isSyncing: boolean = false;
   private syncInterval: NodeJS.Timeout | null = null;
@@ -18,8 +18,9 @@ export class SyncService {
     private syncIntervalMs: number = 30000,
     private fetchFn?: (op: any) => Promise<void>
   ) {
-    this.syncQueue = new SyncQueue();
+    // Use shared queue instance
     this.setupNetworkListener();
+    this.setupVisibilityListener();
     this.startSyncLoop();
   }
 
@@ -117,6 +118,23 @@ export class SyncService {
       // Default implementation - would be overridden in real usage
       throw new Error('Fetch function not provided to SyncService');
     });
+  }
+
+  private setupVisibilityListener(): void {
+    const handler = () => {
+      if (document.visibilityState === 'visible' && this.isOnline) {
+        console.debug('[SyncService] Page visible; triggering sync');
+        // Fire-and-forget
+        void this.sync();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handler);
+  }
+
+  // Allow updating fetchFn after initialization (useful for tests)
+  setFetchFn(fn: (op: any) => Promise<void>) {
+    this.fetchFn = fn;
   }
 }
 
