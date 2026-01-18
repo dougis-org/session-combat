@@ -165,7 +165,7 @@ function CharactersContent() {
                   </div>
                   {character.classes && character.classes.length > 0 && (
                     <div className="text-sm text-gray-400 mb-2">
-                      {character.classes.map((c, idx) => (
+                      {character.classes.map((c: any, idx: number) => (
                         <span key={idx}>
                           {c.class} Level {c.level}
                           {idx < character.classes.length - 1 && ' / '}
@@ -286,7 +286,7 @@ function CharacterEditor({
         <div>
           <label className="block mb-1 text-sm font-bold">Classes (Multiclass)</label>
           <div className="space-y-2">
-            {classes.map((classEntry, idx) => (
+            {classes.map((classEntry: any, idx: number) => (
               <div key={idx} className="flex gap-2">
                 <select
                   value={classEntry.class}
@@ -300,7 +300,7 @@ function CharacterEditor({
                   aria-label="Character class"
                 >
                   <option value="">Select class...</option>
-                  {VALID_CLASSES.map(cls => (
+                  {VALID_CLASSES.map((cls: any) => (
                     <option key={cls} value={cls}>{cls}</option>
                   ))}
                 </select>
@@ -319,7 +319,7 @@ function CharacterEditor({
                   aria-label="Class level"
                 />
                 <button
-                  onClick={() => setClasses(classes.filter((_, i) => i !== idx))}
+                  onClick={() => setClasses(classes.filter((_: any, i: number) => i !== idx))}
                   disabled={saving || classes.length === 1}
                   className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 px-3 py-2 rounded text-sm"
                 >
@@ -350,7 +350,7 @@ function CharacterEditor({
             aria-label="Character race"
           >
             <option value="">Select a race...</option>
-            {VALID_RACES.map(r => (
+            {VALID_RACES.map((r: any) => (
               <option key={r} value={r}>{r}</option>
             ))}
           </select>
@@ -365,7 +365,7 @@ function CharacterEditor({
             disabled={saving}
           >
             <option value="">Select Alignment</option>
-            {VALID_ALIGNMENTS.map(align => (
+            {VALID_ALIGNMENTS.map((align: any) => (
               <option key={align} value={align}>{align}</option>
             ))}
           </select>
