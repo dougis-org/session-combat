@@ -1,0 +1,44 @@
+{
+  "enqueueCases": [
+    {
+      "name": "Enqueue POST operation",
+      "operation": {
+        "type": "POST",
+        "resource": "encounters",
+        "payload": {
+          "id": "enc-001",
+          "name": "Test encounter"
+        }
+      },
+      "expectedQueueLength": 1
+    },
+    {
+      "name": "Enqueue PUT operation",
+      "operation": {
+        "type": "PUT",
+        "resource": "parties",
+        "payload": {
+          "id": "party-001",
+          "name": "Updated party"
+        }
+      }
+    }
+  ],
+  "retryBackoffCases": [
+    {
+      "name": "First retry: 1 second",
+      "retryCount": 0,
+      "expectedBackoffMs": 1000
+    },
+    {
+      "name": "Second retry: 2 seconds",
+      "retryCount": 1,
+      "expectedBackoffMs": 2000
+    },
+    {
+      "name": "Cap at 30 seconds",
+      "retryCount": 10,
+      "expectedBackoffMs": 30000
+    }
+  ]
+}
