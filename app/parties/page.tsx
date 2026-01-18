@@ -44,8 +44,6 @@ function PartiesContent() {
       name: 'New Party',
       description: '',
       characterIds: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
     };
     setEditingParty(newParty);
     setIsAdding(true);
@@ -153,9 +151,9 @@ function PartiesContent() {
                         <p className="text-gray-400 text-sm mt-1">{party.description}</p>
                       )}
                       <div className="text-gray-400 text-sm mt-2">
-                        <p>Members: {party.characterIds.length}</p>
-                        {party.characterIds.length > 0 && (
-                          <p className="mt-1 text-xs">{getCharacterNames(party.characterIds)}</p>
+                        <p>Members: {party.characterIds?.length ?? 0}</p>
+                        {(party.characterIds?.length ?? 0) > 0 && (
+                          <p className="mt-1 text-xs">{getCharacterNames(party.characterIds ?? [])}</p>
                         )}
                       </div>
                     </div>
