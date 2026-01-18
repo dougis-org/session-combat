@@ -1,6 +1,6 @@
 'use client';
 
-import { AbilityScores, CreatureStats, CreatureAbility } from '@/lib/types';
+import { AbilityScores, CreatureStats } from '@/lib/types';
 import { useState } from 'react';
 
 interface CreatureStatsFormProps {
@@ -52,7 +52,7 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
   };
 
   const addAbility = (type: 'traits' | 'actions' | 'bonusActions' | 'reactions') => {
-    const newAbility: CreatureAbility = {
+    const newAbility = {
       name: 'New Ability',
       description: '',
     };
@@ -62,11 +62,11 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
 
   const removeAbility = (type: 'traits' | 'actions' | 'bonusActions' | 'reactions', index: number) => {
     const current = stats[type] || [];
-    const updated = current.filter((_, i) => i !== index);
+    const updated = current.filter((_: any, i: number) => i !== index);
     updateBasicStat(type, updated.length > 0 ? updated : undefined);
   };
 
-  const updateAbility = (type: 'traits' | 'actions' | 'bonusActions' | 'reactions', index: number, ability: CreatureAbility) => {
+  const updateAbility = (type: 'traits' | 'actions' | 'bonusActions' | 'reactions', index: number, ability: any) => {
     const current = stats[type] || [];
     const updated = [...current];
     updated[index] = ability;

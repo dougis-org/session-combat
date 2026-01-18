@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '../../../../../lib/middleware';
 import { storage } from '../../../../../lib/storage';
 import { MonsterTemplate } from '../../../../../lib/types';
+import { generateUUID } from '../../../../../lib/utils/uuid';
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = requireAuth(request);
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const duplicated: MonsterTemplate = {
       ...original,
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       userId: auth.userId,
       isGlobal: false,
       name: original.name && original.name.includes('(copy)') ? original.name : `${original.name} (copy)`,

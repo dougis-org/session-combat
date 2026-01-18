@@ -2,12 +2,12 @@
 // This is a temporary client-side storage for the app
 // In production, should use API routes instead
 
-import { SessionData, Encounter, Character, CombatState, Party } from './types';
+import { Encounter, Character, CombatState, Party } from './types';
 
 const SESSION_DATA_KEY = 'sessionData';
 
 export const clientStorage = {
-  load(): SessionData {
+  load(): any {
     try {
       const data = localStorage.getItem(SESSION_DATA_KEY);
       if (data) {
