@@ -512,7 +512,7 @@ function MonsterTemplateEditor({
               disabled={saving}
             >
               <option value="">Select Alignment</option>
-              {VALID_ALIGNMENTS.map(align => (
+              {VALID_ALIGNMENTS.map((align: any) => (
                 <option key={align} value={align}>{align}</option>
               ))}
             </select>
@@ -569,7 +569,7 @@ function MonsterTemplateEditor({
       </div>
 
       {/* Creature Stats */}
-      <CreatureStatsForm stats={stats} onChange={(updatedStats) => setStats(prev => ({ ...prev, ...updatedStats }))} />
+      <CreatureStatsForm stats={stats} onChange={(updatedStats) => setStats((prev: typeof stats) => ({ ...prev, ...updatedStats }))} />
 
       <div className="flex gap-2 mt-6">
         <button
