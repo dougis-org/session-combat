@@ -3,6 +3,7 @@
  */
 'use client';
 
+import './globals.css';
 import { useEffect } from 'react';
 import { initializeSyncService } from '@/lib/sync/SyncService';
 import type { SyncOperation } from '@/lib/sync/SyncQueue';
