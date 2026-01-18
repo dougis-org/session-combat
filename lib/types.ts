@@ -199,6 +199,39 @@ export function validateCharacterClasses(
   return { valid: true };
 }
 
+export interface StatusCondition {
+  id: string;
+  name: string;
+  description: string;
+  duration?: number; // in rounds
+}
+
+export interface CombatantStatus {
+  combatantId: string;
+  conditions: StatusCondition[];
+}
+
+export interface InitiativeRoll {
+  roll: number;
+  bonus: number;
+  total: number;
+  method: 'rolled' | 'manual';
+}
+
+export interface CombatantState extends CreatureStats {
+  id: string;
+  name: string;
+  type: 'player' | 'monster';
+  initiative: number;
+  initiativeRoll?: InitiativeRoll;
+  conditions: StatusCondition[];
+  notes?: string;
+  targetIds?: string[];
+  size?: 'tiny' | 'small' | 'medium' | 'large' | 'huge' | 'gargantuan';
+  monsterType?: string;
+  challengeRating?: number;
+}
+
 // Auth / User related types
 export interface User {
   _id?: any;
