@@ -1,5 +1,12 @@
 import { SyncQueue } from '../../../lib/sync/SyncQueue';
 import testCases from '../data/sync-queue-test-cases.json';
+import {
+  buildOp,
+  enqueueOp,
+  enqueueMany,
+  readStoredQueue,
+  QUEUE_KEY
+} from './helpers/syncQueue.helpers';
 
 describe('SyncQueue', () => {
   let syncQueue: SyncQueue;
@@ -15,14 +22,9 @@ describe('SyncQueue', () => {
 
   describe('enqueue', () => {
     it('should add operation to queue', async () => {
-      const testCase = testCases.enqueueCases[0];
-      const op = testCase.operation;
+      const op = testCases.enqueueCases[0].operation as any;
 
-      await syncQueue.enqueue({
-        type: op.type as any,
-        resource: op.resource,
-        payload: op.payload
-      });
+      await enqueueOp(syncQueue, op);
 
       const queued = await syncQueue.dequeue();
       expect(queued).toBeDefined();
@@ -30,55 +32,31 @@ describe('SyncQueue', () => {
     });
 
     it('should persist queue to localStorage', async () => {
-      const testCase = testCases.enqueueCases[0];
-      const op = testCase.operation;
+      const op = testCases.enqueueCases[0].operation as any;
 
-      await syncQueue.enqueue({
-        type: op.type as any,
-        resource: op.resource,
-        payload: op.payload
-      });
+      await enqueueOp(syncQueue, op);
 
-      const stored = localStorage.getItem('sessionCombat:v1:syncQueue');
-      expect(stored).toBeDefined();
-      const parsed = JSON.parse(stored!);
-      expect(Array.isArray(parsed)).toBe(true);
-      expect(parsed.length).toBeGreaterThan(0);
+      const stored = readStoredQueue();
+      expect(Array.isArray(stored)).toBe(true);
+      expect(stored.length).toBeGreaterThan(0);
     });
 
     it('should handle multiple enqueues in sequence', async () => {
-      const cases = testCases.enqueueCases.slice(0, 2);
-      
-      for (const testCase of cases) {
-        const op = testCase.operation;
-        await syncQueue.enqueue({
-          type: op.type as any,
-          resource: op.resource,
-          payload: op.payload
-        });
-      }
+      const cases = testCases.enqueueCases.slice(0, 2).map(c => c.operation as any);
+      await enqueueMany(syncQueue, cases);
 
-      const stored = localStorage.getItem('sessionCombat:v1:syncQueue');
-      const parsed = JSON.parse(stored!);
+      const parsed = readStoredQueue();
       expect(parsed.length).toBe(2);
     });
   });
 
   describe('dequeue', () => {
     it('should return oldest pending operation', async () => {
-      const cases = testCases.enqueueCases.slice(0, 2);
-      
-      for (const testCase of cases) {
-        const op = testCase.operation;
-        await syncQueue.enqueue({
-          type: op.type as any,
-          resource: op.resource,
-          payload: op.payload
-        });
-      }
+      const cases = testCases.enqueueCases.slice(0, 2).map(c => c.operation as any);
+      await enqueueMany(syncQueue, cases);
 
       const first = await syncQueue.dequeue();
-      expect(first?.resource).toBe(cases[0].operation.resource);
+      expect(first?.resource).toBe(cases[0].resource);
     });
 
     it('should return null if queue is empty', async () => {
@@ -89,14 +67,9 @@ describe('SyncQueue', () => {
 
   describe('markSuccess', () => {
     it('should remove operation from queue', async () => {
-      const testCase = testCases.enqueueCases[0];
-      const op = testCase.operation;
+      const op = testCases.enqueueCases[0].operation as any;
 
-      await syncQueue.enqueue({
-        type: op.type as any,
-        resource: op.resource,
-        payload: op.payload
-      });
+      await enqueueOp(syncQueue, op);
 
       const queued = await syncQueue.dequeue();
       expect(queued).toBeDefined();
@@ -110,14 +83,9 @@ describe('SyncQueue', () => {
 
   describe('markFailure', () => {
     it('should increment retry count', async () => {
-      const testCase = testCases.enqueueCases[0];
-      const op = testCase.operation;
+      const op = testCases.enqueueCases[0].operation as any;
 
-      await syncQueue.enqueue({
-        type: op.type as any,
-        resource: op.resource,
-        payload: op.payload
-      });
+      await enqueueOp(syncQueue, op);
 
       const queued = await syncQueue.dequeue();
       expect(queued?.retries).toBe(0);
@@ -129,14 +97,9 @@ describe('SyncQueue', () => {
     });
 
     it('should set correct next retry time based on backoff', async () => {
-      const testCase = testCases.enqueueCases[0];
-      const op = testCase.operation;
+      const op = testCases.enqueueCases[0].operation as any;
 
-      await syncQueue.enqueue({
-        type: op.type as any,
-        resource: op.resource,
-        payload: op.payload
-      });
+      await enqueueOp(syncQueue, op);
 
       const queued = await syncQueue.dequeue();
       const beforeFailure = Date.now();
@@ -165,36 +128,26 @@ describe('SyncQueue', () => {
 
   describe('clear', () => {
     it('should wipe entire queue', async () => {
-      const testCase = testCases.enqueueCases[0];
-      const op = testCase.operation;
+      const op = testCases.enqueueCases[0].operation as any;
 
-      await syncQueue.enqueue({
-        type: op.type as any,
-        resource: op.resource,
-        payload: op.payload
-      });
+      await enqueueOp(syncQueue, op);
 
       await syncQueue.clear();
 
       const remaining = await syncQueue.dequeue();
       expect(remaining).toBeNull();
 
-      const stored = localStorage.getItem('sessionCombat:v1:syncQueue');
+      const stored = localStorage.getItem(QUEUE_KEY);
       expect(stored).toBeNull();
     });
   });
 
   describe('persistence', () => {
     it('should load queue from localStorage on initialization', async () => {
-      const testCase = testCases.enqueueCases[0];
-      const op = testCase.operation;
+      const op = testCases.enqueueCases[0].operation as any;
 
       const queue1 = new SyncQueue();
-      await queue1.enqueue({
-        type: op.type as any,
-        resource: op.resource,
-        payload: op.payload
-      });
+      await enqueueOp(queue1, op);
 
       // Create new instance (simulates page reload)
       const queue2 = new SyncQueue();
