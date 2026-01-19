@@ -56,4 +56,14 @@ export const clientStorage = {
       console.error('Error saving parties:', error);
     }
   },
+
+  // Clear client-side session data (used on logout)
+  clear(): void {
+    try {
+      localStorage.removeItem('sessionData');
+      console.debug('[clientStorage] Cleared sessionData');
+    } catch (error) {
+      console.error('Error clearing client storage:', error);
+    }
+  },
 };

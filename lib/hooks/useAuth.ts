@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { clientStorage } from '@/lib/clientStorage';
 
 export interface AuthUser {
   userId: string;
@@ -100,11 +101,38 @@ export function useAuth() {
   const logout = useCallback(async () => {
     try {
       setLoading(true);
-      await fetch('/api/auth/logout', { method: 'POST' });
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      if (!response.ok) {
+        console.warn('Logout endpoint returned non-OK status');
+      }
+
+      // Client-side cleanup: clear clientStorage and any `sessionCombat:v1:*` localStorage keys
+      try {
+        clientStorage.clear();
+      } catch (cleanupErr) {
+        console.warn('clientStorage.clear failed:', cleanupErr);
+      }
+
+      try {
+        // Local offline implementation was reverted in main — do not rely on library APIs existing.
+        // Instead, defensively clear any localStorage keys that start with the application prefix.
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('sessionCombat:v1:')) {
+            localStorage.removeItem(key);
+          }
+        }
+      } catch (cleanupErr) {
+        console.warn('Failed to clear sessionCombat localStorage keys:', cleanupErr);
+      }
+
       setUser(null);
       setError(null);
+      console.debug('[auth] logout completed');
+      return true;
     } catch (err) {
       console.error('Logout failed:', err);
+      return false;
     } finally {
       setLoading(false);
     }
