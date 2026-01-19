@@ -4,10 +4,12 @@
 
 import { SessionData, Encounter, Character, CombatState, Party } from './types';
 
+const SESSION_DATA_KEY = 'sessionData';
+
 export const clientStorage = {
   load(): SessionData {
     try {
-      const data = localStorage.getItem('sessionData');
+      const data = localStorage.getItem(SESSION_DATA_KEY);
       if (data) {
         return JSON.parse(data);
       }
@@ -21,7 +23,7 @@ export const clientStorage = {
     try {
       const data = this.load();
       data.encounters = encounters;
-      localStorage.setItem('sessionData', JSON.stringify(data));
+      localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(data));
     } catch (error) {
       console.error('Error saving encounters:', error);
     }
@@ -31,7 +33,7 @@ export const clientStorage = {
     try {
       const data = this.load();
       data.characters = characters;
-      localStorage.setItem('sessionData', JSON.stringify(data));
+      localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(data));
     } catch (error) {
       console.error('Error saving characters:', error);
     }
@@ -41,7 +43,7 @@ export const clientStorage = {
     try {
       const data = this.load();
       data.combatState = combatState;
-      localStorage.setItem('sessionData', JSON.stringify(data));
+      localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(data));
     } catch (error) {
       console.error('Error saving combat state:', error);
     }
@@ -51,9 +53,19 @@ export const clientStorage = {
     try {
       const data = this.load();
       data.parties = parties;
-      localStorage.setItem('sessionData', JSON.stringify(data));
+      localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(data));
     } catch (error) {
       console.error('Error saving parties:', error);
+    }
+  },
+
+  // Clear client-side session data (used on logout)
+  clear(): void {
+    try {
+      localStorage.removeItem(SESSION_DATA_KEY);
+      console.debug('[clientStorage] Cleared sessionData');
+    } catch (error) {
+      console.error('Error clearing client storage:', error);
     }
   },
 };

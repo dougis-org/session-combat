@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { clientStorage } from '@/lib/clientStorage';
+import { useRouter } from 'next/navigation';
+
+const SESSION_COMBAT_PREFIX = 'sessionCombat:v1:';
 
 export interface AuthUser {
   userId: string;
@@ -12,6 +16,7 @@ export function useAuth() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   // Check if user is authenticated
   const checkAuth = useCallback(async () => {
@@ -100,15 +105,42 @@ export function useAuth() {
   const logout = useCallback(async () => {
     try {
       setLoading(true);
-      await fetch('/api/auth/logout', { method: 'POST' });
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      if (!response.ok) {
+        console.warn('Logout endpoint returned non-OK status');
+      }
+
+      // Client-side cleanup: clear clientStorage and any sessionCombat:v1:* localStorage keys
+      try {
+        clientStorage.clear();
+      } catch (cleanupErr) {
+        console.warn('clientStorage.clear failed:', cleanupErr);
+      }
+
+      try {
+        // Defensively clear any localStorage keys that start with the application prefix
+        Object.keys(localStorage)
+          .filter(key => key.startsWith(SESSION_COMBAT_PREFIX))
+          .forEach(key => localStorage.removeItem(key));
+      } catch (cleanupErr) {
+        console.warn('Failed to clear sessionCombat localStorage keys:', cleanupErr);
+      }
+
       setUser(null);
       setError(null);
+      console.debug('[auth] logout completed');
+      
+      // Redirect to login using router.replace to prevent back button access
+      router.replace('/login');
+      
+      return true;
     } catch (err) {
       console.error('Logout failed:', err);
+      return false;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   return {
     user,
