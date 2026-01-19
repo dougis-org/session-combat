@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { clientStorage } from '@/lib/clientStorage';
+import { useRouter } from 'next/navigation';
+
+const SESSION_COMBAT_PREFIX = 'sessionCombat:v1:';
 
 export interface AuthUser {
   userId: string;
@@ -13,6 +16,7 @@ export function useAuth() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   // Check if user is authenticated
   const checkAuth = useCallback(async () => {
@@ -106,7 +110,7 @@ export function useAuth() {
         console.warn('Logout endpoint returned non-OK status');
       }
 
-      // Client-side cleanup: clear clientStorage and any `sessionCombat:v1:*` localStorage keys
+      // Client-side cleanup: clear clientStorage and any sessionCombat:v1:* localStorage keys
       try {
         clientStorage.clear();
       } catch (cleanupErr) {
@@ -114,14 +118,10 @@ export function useAuth() {
       }
 
       try {
-        // Local offline implementation was reverted in main — do not rely on library APIs existing.
-        // Instead, defensively clear any localStorage keys that start with the application prefix.
-        for (let i = localStorage.length - 1; i >= 0; i--) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith('sessionCombat:v1:')) {
-            localStorage.removeItem(key);
-          }
-        }
+        // Defensively clear any localStorage keys that start with the application prefix
+        Object.keys(localStorage)
+          .filter(key => key.startsWith(SESSION_COMBAT_PREFIX))
+          .forEach(key => localStorage.removeItem(key));
       } catch (cleanupErr) {
         console.warn('Failed to clear sessionCombat localStorage keys:', cleanupErr);
       }
@@ -129,6 +129,10 @@ export function useAuth() {
       setUser(null);
       setError(null);
       console.debug('[auth] logout completed');
+      
+      // Redirect to login using router.replace to prevent back button access
+      router.replace('/login');
+      
       return true;
     } catch (err) {
       console.error('Logout failed:', err);
@@ -136,7 +140,7 @@ export function useAuth() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   return {
     user,

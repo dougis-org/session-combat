@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const VALID_TEST_PASSWORD = 'SecurePassword123!';
+const VALID_TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPassword123!';
 
 test.describe('Logout behavior', () => {
   test.beforeEach(async ({ page }) => {
