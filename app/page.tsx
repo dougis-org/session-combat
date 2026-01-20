@@ -23,8 +23,6 @@ function HomeContent() {
 
   const handleLogout = async () => {
     await logout();
-    // Replace history entry to prevent back navigation to protected pages
-    router.replace('/login');
   };
 
   const handleImportMonsters = async () => {
