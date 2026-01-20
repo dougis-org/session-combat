@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -14,7 +13,6 @@ interface ImportResult {
 }
 
 function HomeContent() {
-  const router = useRouter();
   const { user, logout, loading } = useAuth();
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -23,8 +21,6 @@ function HomeContent() {
 
   const handleLogout = async () => {
     await logout();
-    // Replace history entry to prevent back navigation to protected pages
-    router.replace('/login');
   };
 
   const handleImportMonsters = async () => {

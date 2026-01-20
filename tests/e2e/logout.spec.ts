@@ -7,17 +7,22 @@ test.describe('Logout behavior', () => {
     await page.context().clearCookies();
   });
 
-  test('logout clears client storage and redirects to login', async ({ page }) => {
+  test('logout clears client storage and redirects to login', async ({ page, context }) => {
     const testEmail = `test-${Date.now()}@example.com`;
 
-    // Register + login
-    await page.goto('/register');
-    await page.fill('input[type="email"]', testEmail);
-    await page.fill('input[type="password"]', VALID_TEST_PASSWORD);
-    await page.click('button[type="submit"]');
+    // Register via API to avoid UI interaction issues
+    const registerResponse = await context.request.post('/api/auth/register', {
+      data: {
+        email: testEmail,
+        password: VALID_TEST_PASSWORD,
+      },
+    });
 
-    // Wait for redirect away from /register
-    await page.waitForURL((url) => !url.pathname.includes('/register'), { timeout: 10000 });
+    await expect(registerResponse).toBeOK();
+
+    // Navigate to home page (should be logged in)
+    await page.goto('/');
+    await expect(page).toHaveURL(/.*\/$/);
 
     // Seed client-side storage that should be cleared on logout
     await page.evaluate(() => {
