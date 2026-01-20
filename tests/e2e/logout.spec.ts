@@ -11,20 +11,18 @@ test.describe('Logout behavior', () => {
     const testEmail = `test-${Date.now()}@example.com`;
 
     // Register via API to avoid UI interaction issues
-    const registerResponse = await context.request.post('http://localhost:3000/api/auth/register', {
+    const registerResponse = await context.request.post('/api/auth/register', {
       data: {
         email: testEmail,
         password: VALID_TEST_PASSWORD,
       },
     });
 
-    if (!registerResponse.ok()) {
-      throw new Error(`Registration failed: ${registerResponse.status()}`);
-    }
+    await expect(registerResponse).toBeOK();
 
     // Navigate to home page (should be logged in)
     await page.goto('/');
-    await page.waitForURL(/\/$/, { timeout: 5000 });
+    await expect(page).toHaveURL(/.*\/$/);
 
     // Seed client-side storage that should be cleared on logout
     await page.evaluate(() => {
