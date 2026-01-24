@@ -93,8 +93,14 @@ Note: Q1 (concurrent registration rate limit) **RESOLVED — confirmed 4 paralle
 
 Phases: RED → GREEN → REFACTOR
 
+**STATUS UPDATE (2026-01-24):**
+- ✅ **PREP COMPLETE**: Branch `feature/42-playwright-regression-tests` created and pushed.
+- ✅ **DEPENDENCIES FIXED**: Installed `@types/uuid` dev dependency; app now compiles successfully.
+- ✅ **CONFIG FIXED**: Fixed `playwright.config.ts` syntax error (line 23 corruption) and added REGRESSION_WORKERS env var support.
+- ⏳ **NEXT**: Begin RED phase — implement failing tests and fixtures.
+
 1. Prep: Branching
-   - Create branch `feature/42-playwright-regression-tests` (done).
+   - ✅ Create branch `feature/42-playwright-regression-tests` (done).
 
 2. RED - Tests first (add failing tests)
    - Add `tests/e2e/fixtures/users.json` with schema:
