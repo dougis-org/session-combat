@@ -131,14 +131,8 @@ export function useAuth() {
       console.debug('[auth] logout completed');
       
       // Redirect to login using router.replace to prevent back button access
-      router.replace('/login');
-      
-      return true;
-    } catch (err) {
-      console.error('Logout failed:', err);
-      return false;
-    } finally {
       setLoading(false);
+      router.replace('/login');
     }
   }, [router]);
 
