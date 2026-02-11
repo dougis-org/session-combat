@@ -2,6 +2,12 @@
 
 ## Completed ✅
 
+### Bug Fixes & Improvements
+- [x] **GH-43**: Fix logout flow to clear client-side storage and redirect to login
+  - Prevents users from re-accessing protected pages via browser back button
+  - Clears `sessionData` and `sessionCombat:v1:*` localStorage keys on logout
+  - Uses `router.replace()` to replace history instead of push
+
 ### Phase 1: Foundation & Infrastructure
 - [x] Add MongoDB, bcryptjs, jsonwebtoken dependencies
 - [x] Create MongoDB connection utility (`lib/db.ts`)
