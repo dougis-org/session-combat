@@ -135,7 +135,7 @@ export function useAuth() {
       router.replace('/login');
     } catch (err) {
       console.error('Logout failed:', err);
-      setError('Failed to logout');
+      setError('Logout failed');
     } finally {
       setLoading(false);
     }
