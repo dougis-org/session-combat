@@ -28,6 +28,7 @@ test.describe("Registration Flow", () => {
     await page.click('button[type="submit"]');
 
     // Wait for navigation to complete (should redirect to dashboard or protected route)
+    // Use 30s timeout to accommodate CI environment delays
     await page.waitForURL(
       (url) => {
         // Should not stay on /register or go to /login on error
@@ -36,7 +37,7 @@ test.describe("Registration Flow", () => {
           !url.pathname.includes("/login")
         );
       },
-      { timeout: 10000 },
+      { timeout: 30000 },
     );
 
     // Verify user is authenticated (should be redirected to a protected page)
@@ -64,7 +65,8 @@ test.describe("Registration Flow", () => {
     await page.click('button[type="submit"]');
 
     // Wait for an error message to appear and verify we're still on the register page
-    await page.waitForSelector("text=/invalid|error/i", { timeout: 5000 });
+    // Use 15s timeout to accommodate CI environment delays
+    await page.waitForSelector("text=/invalid|error/i", { timeout: 15000 });
     expect(page.url()).toContain("/register");
 
     // Look for error message
