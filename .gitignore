@@ -43,3 +43,8 @@ next-env.d.ts
 .github/instructions/snyk_rules.instructions.md
 
 .github/tmp/
+
+# Playwright artifacts (generated reports & results)
+playwright-report/
+test-results/
+tests/e2e/test-results/

@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
-import { Page } from '@playwright/test';
+import { v4 as uuidv4 } from "uuid";
+import { Page } from "@playwright/test";
 
 /**
  * Generate a unique email address for test purposes using UUID
@@ -15,10 +15,10 @@ export function generateUniqueEmail(): string {
 export async function fillRegistrationForm(
   page: Page,
   email: string,
-  password: string
+  password: string,
 ): Promise<void> {
-  await page.fill('input[type="email"]', email);
-  await page.fill('input[type="password"]', password);
+  await page.fill("#email", email);
+  await page.fill("#password", password);
 }
 
 /**
@@ -26,11 +26,16 @@ export async function fillRegistrationForm(
  */
 export async function submitRegistrationForm(page: Page): Promise<void> {
   await page.click('button[type="submit"]');
-  
+
   // Wait for navigation away from registration/login
-  await page.waitForURL((url) => {
-    return !url.pathname.includes('/register') && !url.pathname.includes('/login');
-  }, { timeout: 10000 });
+  await page.waitForURL(
+    (url) => {
+      return (
+        !url.pathname.includes("/register") && !url.pathname.includes("/login")
+      );
+    },
+    { timeout: 10000 },
+  );
 }
 
 /**
@@ -39,9 +44,9 @@ export async function submitRegistrationForm(page: Page): Promise<void> {
 export async function registerUser(
   page: Page,
   email: string,
-  password: string
+  password: string,
 ): Promise<void> {
-  await page.goto('/register');
+  await page.goto("/register");
   await fillRegistrationForm(page, email, password);
   await submitRegistrationForm(page);
 }
@@ -52,17 +57,22 @@ export async function registerUser(
 export async function loginUser(
   page: Page,
   email: string,
-  password: string
+  password: string,
 ): Promise<void> {
-  await page.goto('/login');
-  await page.fill('input[type="email"]', email);
-  await page.fill('input[type="password"]', password);
+  await page.goto("/login");
+  await page.fill("#email", email);
+  await page.fill("#password", password);
   await page.click('button[type="submit"]');
-  
+
   // Wait for navigation away from login
-  await page.waitForURL((url) => {
-    return !url.pathname.includes('/login') && !url.pathname.includes('/register');
-  }, { timeout: 10000 });
+  await page.waitForURL(
+    (url) => {
+      return (
+        !url.pathname.includes("/login") && !url.pathname.includes("/register")
+      );
+    },
+    { timeout: 10000 },
+  );
 }
 
 /**
@@ -70,21 +80,22 @@ export async function loginUser(
  */
 export async function createCharacter(
   page: Page,
-  character: { name: string; class: string; race: string }
+  character: { name: string; class: string; race: string },
 ): Promise<void> {
-  // Navigate to character creation page
-  await page.goto('/characters/create');
-  
-  // Fill in character details
-  await page.fill('input[placeholder*="Name"]', character.name);
-  await page.selectOption('select[name="class"]', character.class);
-  await page.selectOption('select[name="race"]', character.race);
-  
-  // Submit form
-  await page.click('button[type="submit"]');
-  
-  // Wait for success or redirect
-  await page.waitForURL((url) => !url.pathname.includes('/create'), { timeout: 5000 });
+  // Navigate to characters page and open the editor via the real UI
+  await page.goto("/characters");
+  await page.getByRole("button", { name: "Add New Character" }).click();
+
+  // Fill in character details using accessible labels
+  await page.getByLabel("Character name").fill(character.name);
+  await page.getByLabel("Character class").selectOption(character.class);
+  await page.getByLabel("Character race").selectOption(character.race);
+
+  // Submit via Save button
+  await page.getByRole("button", { name: /Save Character/i }).click();
+
+  // Wait for the new character to appear in the list
+  await page.waitForSelector(`text=${character.name}`, { timeout: 5000 });
 }
 
 /**
@@ -92,23 +103,26 @@ export async function createCharacter(
  */
 export async function createParty(
   page: Page,
-  party: { name: string; memberCount: number }
+  party: { name: string; memberCount: number },
 ): Promise<void> {
-  // Navigate to party creation page
-  await page.goto('/parties/create');
-  
-  // Fill in party details
-  await page.fill('input[placeholder*="Name"]', party.name);
-  
-  // For member count, might need to add members via UI
-  // This is a simplified version - adjust based on actual UI
-  await page.fill('input[placeholder*="Member"]', party.memberCount.toString());
-  
-  // Submit form
-  await page.click('button[type="submit"]');
-  
-  // Wait for success or redirect
-  await page.waitForURL((url) => !url.pathname.includes('/create'), { timeout: 5000 });
+  // Navigate to parties page and open the inline Add New Party form
+  await page.goto("/parties");
+  await page.getByRole("button", { name: "Add New Party" }).click();
+
+  // Fill in party details using label
+  await page.getByLabel("Party Name").fill(party.name);
+
+  // Select members via checkboxes (pick the first N available)
+  const memberCheckboxes = page.locator('input[type="checkbox"]');
+  const availableCount = await memberCheckboxes.count();
+  const toSelect = Math.min(party.memberCount, availableCount);
+  for (let i = 0; i < toSelect; i++) {
+    await memberCheckboxes.nth(i).check();
+  }
+
+  // Submit the new party form
+  await page.getByRole("button", { name: /Save Party/i }).click();
+  await page.waitForSelector(`text=${party.name}`, { timeout: 5000 });
 }
 
 /**
@@ -116,20 +130,22 @@ export async function createParty(
  */
 export async function importMonster(
   page: Page,
-  filePath: string
+  filePath: string,
 ): Promise<void> {
   // Navigate to import page
-  await page.goto('/monsters/import');
-  
+  await page.goto("/monsters/import");
+
   // Upload file
   const fileInput = await page.locator('input[type="file"]');
   await fileInput.setInputFiles(filePath);
-  
+
   // Submit import
   await page.click('button[type="submit"]');
-  
+
   // Wait for success
-  await page.waitForURL((url) => !url.pathname.includes('/import'), { timeout: 10000 });
+  await page.waitForURL((url) => !url.pathname.includes("/import"), {
+    timeout: 10000,
+  });
 }
 
 /**
@@ -137,37 +153,45 @@ export async function importMonster(
  */
 export async function createEncounter(
   page: Page,
-  encounter: { name: string; combatantCount?: number }
+  encounter: { name: string; combatantCount?: number },
 ): Promise<void> {
-  // Navigate to encounter creation page
-  await page.goto('/encounters/create');
-  
-  // Fill in encounter details
-  await page.fill('input[placeholder*="Name"]', encounter.name);
-  
-  // Submit form
-  await page.click('button[type="submit"]');
-  
-  // Wait for success or redirect
-  await page.waitForURL((url) => !url.pathname.includes('/create'), { timeout: 5000 });
+  // Navigate to encounters page and open the editor via the UI
+  await page.goto("/encounters");
+  await page.getByRole("button", { name: "Add New Encounter" }).click();
+
+  // Fill in encounter details (label should exist in editor)
+  await page.getByLabel("Name").fill(encounter.name);
+
+  // Submit via Save button
+  await page.getByRole("button", { name: /Save Encounter/i }).click();
+
+  // Wait for the new encounter to appear in the list
+  await page.waitForSelector(`text=${encounter.name}`, { timeout: 5000 });
 }
 
 /**
  * Open combat screen for an encounter
  */
-export async function openCombat(page: Page, encounterId?: string): Promise<void> {
+export async function openCombat(
+  page: Page,
+  encounterId?: string,
+): Promise<void> {
   // Navigate to combat page or click on an encounter to open combat
   if (encounterId) {
     await page.goto(`/combat/${encounterId}`);
   } else {
     // Click on the first available encounter to open combat
-    await page.goto('/encounters');
-    const firstEncounter = page.locator('[data-testid="encounter-card"]').first();
+    await page.goto("/encounters");
+    const firstEncounter = page
+      .locator('[data-testid="encounter-card"]')
+      .first();
     await firstEncounter.click();
   }
-  
+
   // Wait for combat UI to be visible
-  await page.waitForSelector('[data-testid="combat-screen"]', { timeout: 5000 });
+  await page.waitForSelector('[data-testid="combat-screen"]', {
+    timeout: 5000,
+  });
 }
 
 /**
@@ -178,9 +202,9 @@ export async function verifyCombatScreenElements(page: Page): Promise<void> {
   const initiativeOrder = page.locator('[data-testid="initiative-order"]');
   const healthBars = page.locator('[data-testid="health-bar"]');
   const combatantsList = page.locator('[data-testid="combatants-list"]');
-  
+
   // All should be visible
-  await initiativeOrder.waitFor({ state: 'visible', timeout: 5000 });
-  await healthBars.first().waitFor({ state: 'visible', timeout: 5000 });
-  await combatantsList.waitFor({ state: 'visible', timeout: 5000 });
+  await initiativeOrder.waitFor({ state: "visible", timeout: 5000 });
+  await healthBars.first().waitFor({ state: "visible", timeout: 5000 });
+  await combatantsList.waitFor({ state: "visible", timeout: 5000 });
 }
