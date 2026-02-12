@@ -141,7 +141,7 @@ function EncountersContent() {
               </div>
             ) : (
               encounters.map(encounter => (
-                <div key={encounter.id} className="bg-gray-800 rounded-lg p-4">
+                <div key={encounter.id} className="bg-gray-800 rounded-lg p-4" data-testid="encounter-card">
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <h2 className="text-xl font-semibold">{encounter.name}</h2>
