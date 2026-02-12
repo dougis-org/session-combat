@@ -35,9 +35,9 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await page.goto("/register");
 
     // Verify page title/heading
-    await expect(page.locator("h1, h2"))
-      .first()
-      .toBeVisible({ timeout: 10000 });
+    await expect(page.locator("h1, h2").first()).toBeVisible({
+      timeout: 10000,
+    });
 
     // Verify form exists
     await expect(page.locator("form")).toBeVisible();
@@ -67,10 +67,6 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
 
     const submitBtn = page.locator('button[type="submit"]');
     await expect(submitBtn).toBeVisible({ timeout: 10000 });
-
-    // Button should be clickable initially or become clickable when form is filled
-    const isClickable = await submitBtn.isEnabled().catch(() => false);
-    expect(typeof isClickable).toBe("boolean");
   });
 
   test("email input accepts valid email format", async ({ page }) => {
@@ -125,16 +121,29 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
 
     const passwordInput = page.locator("#password");
 
-    // Type a weak password
+    // Type a weak password and assert weak strength indicator
     await passwordInput.fill("weak");
-    await page.waitForTimeout(500);
+    await expect(page.locator("text=Password Strength: Weak")).toBeVisible();
 
-    // Type a strong password
-    await passwordInput.clear();
+    // Type a strong password and assert the UI updates accordingly
     await passwordInput.fill(getStrongPassword());
-    await page.waitForTimeout(500);
+    await expect(page.locator("text=Password Strength: Strong")).toBeVisible();
 
-    // Just verify the form responds to input changes
+    // Password requirement list items should reflect satisfied rules (green text)
+    await expect(page.locator("text=At least 8 characters")).toHaveClass(
+      /text-green-400/,
+    );
+    await expect(page.locator("text=Lowercase letter (a-z)")).toHaveClass(
+      /text-green-400/,
+    );
+    await expect(page.locator("text=Uppercase letter (A-Z)")).toHaveClass(
+      /text-green-400/,
+    );
+    await expect(page.locator("text=Number (0-9)")).toHaveClass(
+      /text-green-400/,
+    );
+
+    // Just verify the input value updated
     expect(await passwordInput.inputValue()).toBe(getStrongPassword());
   });
 
@@ -170,30 +179,23 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
   test("login form has email and password fields", async ({ page }) => {
     await page.goto("/login");
 
-    // Check email field exists
-    const emailInput = page.locator('#email, input[type="email"]').first();
-    if (await emailInput.isVisible().catch(() => false)) {
-      expect(await emailInput.getAttribute("type")).toBe("email");
-    }
+    // Check email field exists and is of correct type
+    const emailInput = page.locator("#email");
+    await expect(emailInput).toBeVisible();
+    await expect(emailInput).toHaveAttribute("type", "email");
 
-    // Check password field exists
-    const passwordInput = page
-      .locator('#password, input[type="password"]')
-      .first();
-    if (await passwordInput.isVisible().catch(() => false)) {
-      expect(await passwordInput.getAttribute("type")).toBe("password");
-    }
+    // Check password field exists and is of correct type
+    const passwordInput = page.locator("#password");
+    await expect(passwordInput).toBeVisible();
+    await expect(passwordInput).toHaveAttribute("type", "password");
   });
 
   test("login form has submit button", async ({ page }) => {
     await page.goto("/login");
 
     const submitBtn = page.locator('button[type="submit"]').first();
-    const isPresent = await submitBtn.isVisible().catch(() => false);
-
-    if (isPresent) {
-      expect(await submitBtn.isEnabled().catch(() => true)).toBeTruthy();
-    }
+    await expect(submitBtn).toBeVisible();
+    await expect(submitBtn).toBeEnabled();
   });
 
   // ============================================================
@@ -223,7 +225,6 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     });
 
     await page.goto("/register", { waitUntil: "networkidle" }).catch(() => {});
-    await page.waitForTimeout(1000);
 
     // Should not have any critical errors (some warnings might exist)
     const criticalErrors = errors.filter(
@@ -381,7 +382,6 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     const registerUrl = page.url();
 
     await page.goto("/login");
-    const loginUrl = page.url();
 
     // Go back
     await page.goBack();
@@ -400,9 +400,9 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await page.fill("#email", email);
     await page.fill("#password", password);
 
-    // Tab to another field
+    // Tab to another field and assert focus moves (no fixed waits)
     await page.press("#password", "Tab");
-    await page.waitForTimeout(500);
+    await expect(page.locator("#confirmPassword")).toBeFocused();
 
     // Values should still be there
     expect(await page.inputValue("#email")).toBe(email);
