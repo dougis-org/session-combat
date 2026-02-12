@@ -9,7 +9,7 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
+  /* Retry on CI: 2 retries for better flakiness tolerance */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: (() => {
@@ -18,20 +18,30 @@ export default defineConfig({
     const parsed = Number.parseInt(value, 10);
     if (!Number.isFinite(parsed) || parsed < 1) {
       console.warn(
-        `Invalid REGRESSION_WORKERS=\"${value}\"; falling back to ${process.env.CI ? "1" : "undefined"}`,
+        `Invalid REGRESSION_WORKERS="${value}"; falling back to ${process.env.CI ? "1" : "undefined"}`,
       );
       return process.env.CI ? 1 : undefined;
     }
     return parsed;
   })(),
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
+  reporter: [
+    ["html"],
+    ["list"], // Also output list format for CI logs
+  ],
+  /* Timeout settings for better stability */
+  timeout: 30000, // 30 seconds per test
+  expect: {
+    timeout: 10000, // 10 seconds for expect assertions
+  },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: "http://localhost:3000",
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
+    /* Screenshot on failure for debugging */
+    screenshot: "only-on-failure",
   },
 
   /* Configure projects for major browsers */

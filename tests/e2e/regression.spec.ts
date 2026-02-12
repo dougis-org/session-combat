@@ -26,6 +26,10 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
   test.beforeEach(async ({ page }) => {
     // Clear authentication before each test
     await page.context().clearCookies();
+    // Wait for page to be ready
+    await page.waitForLoadState("networkidle").catch(() => {
+      // Network idle may timeout, that's okay - we just want DOM ready
+    });
   });
 
   // ============================================================

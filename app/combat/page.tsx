@@ -758,7 +758,7 @@ function CombatContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-900 text-white" data-testid="combat-screen">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -895,7 +895,7 @@ function CombatContent() {
 
         {hasInitiativeBeenRolled() ? (
           // Display sorted by initiative
-          <div className="space-y-2">
+          <div className="space-y-2" data-testid="initiative-order">
             <h2 className="text-xl font-semibold text-yellow-400 mb-4">Initiative Order</h2>
             {getDisplayCombatants().map((combatant, idx) => {
               // Find the actual index in combatState for isActive check
@@ -925,7 +925,7 @@ function CombatContent() {
           </div>
         ) : (
           // Display grouped by type
-          <div className="space-y-6">
+          <div className="space-y-6" data-testid="combatants-list">
             <div>
               <h2 className="text-xl font-semibold text-blue-400 mb-3">Party</h2>
               <div className="space-y-2">
@@ -1496,7 +1496,7 @@ function CombatantCard({
           </div>
 
           <div className="w-4/5 bg-gray-700 rounded-full h-2">
-            <div className={`${hpColor} h-2 rounded-full transition-all`} style={{ width: `${hpPercent}%` }} />
+            <div className={`${hpColor} h-2 rounded-full transition-all`} data-testid="health-bar" style={{ width: `${hpPercent}%` }} />
           </div>
 
           {combatant.conditions.length > 0 && (
