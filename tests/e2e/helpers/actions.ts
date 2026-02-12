@@ -28,13 +28,14 @@ export async function submitRegistrationForm(page: Page): Promise<void> {
   await page.click('button[type="submit"]');
 
   // Wait for navigation away from registration/login
+  // Use 30s timeout to accommodate CI environment delays
   await page.waitForURL(
     (url) => {
       return (
         !url.pathname.includes("/register") && !url.pathname.includes("/login")
       );
     },
-    { timeout: 10000 },
+    { timeout: 30000 },
   );
 }
 
@@ -65,13 +66,14 @@ export async function loginUser(
   await page.click('button[type="submit"]');
 
   // Wait for navigation away from login
+  // Use 30s timeout to accommodate CI environment delays
   await page.waitForURL(
     (url) => {
       return (
         !url.pathname.includes("/login") && !url.pathname.includes("/register")
       );
     },
-    { timeout: 10000 },
+    { timeout: 30000 },
   );
 }
 
@@ -94,8 +96,8 @@ export async function createCharacter(
   // Submit via Save button
   await page.getByRole("button", { name: /Save Character/i }).click();
 
-  // Wait for the new character to appear in the list
-  await page.waitForSelector(`text=${character.name}`, { timeout: 5000 });
+  // Wait for the new character to appear in the list (increased timeout for CI)
+  await page.waitForSelector(`text=${character.name}`, { timeout: 15000 });
 }
 
 /**
@@ -122,7 +124,7 @@ export async function createParty(
 
   // Submit the new party form
   await page.getByRole("button", { name: /Save Party/i }).click();
-  await page.waitForSelector(`text=${party.name}`, { timeout: 5000 });
+  await page.waitForSelector(`text=${party.name}`, { timeout: 15000 });
 }
 
 /**
@@ -166,7 +168,7 @@ export async function createEncounter(
   await page.getByRole("button", { name: /Save Encounter/i }).click();
 
   // Wait for the new encounter to appear in the list
-  await page.waitForSelector(`text=${encounter.name}`, { timeout: 5000 });
+  await page.waitForSelector(`text=${encounter.name}`, { timeout: 15000 });
 }
 
 /**
