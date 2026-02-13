@@ -98,6 +98,7 @@ jobs:
           REGRESSION_WORKERS: '2'
           MONGODB_URI: mongodb://localhost:27017
           MONGODB_DB: session-combat-e2e
+          SKIP_CHROMIUM_FIREFOX: 'true'
       
       - name: Upload Playwright HTML report
         if: always()
