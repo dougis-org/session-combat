@@ -1,0 +1,17 @@
+[
+    {
+        "type": "valid",
+        "variant": "standard_monster",
+        "description": "Uses samples/monster-upload-example.json"
+    },
+    {
+        "type": "error",
+        "variant": "invalid_json",
+        "description": "Malformed JSON payload"
+    },
+    {
+        "type": "error",
+        "variant": "oversized_file",
+        "description": "File exceeds size limit (>10MB)"
+    }
+]
