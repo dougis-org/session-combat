@@ -19,6 +19,7 @@ export async function fillRegistrationForm(
 ): Promise<void> {
   await page.fill("#email", email);
   await page.fill("#password", password);
+  await page.fill("#confirmPassword", password);
 }
 
 /**

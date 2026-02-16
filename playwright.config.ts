@@ -28,6 +28,7 @@ export default defineConfig({
   reporter: [
     ["html"],
     ["list"], // Also output list format for CI logs
+    ["json", { outputFile: "test-results.json" }],
   ],
   /* Timeout settings for better stability */
   timeout: 30000, // 30 seconds per test
@@ -63,6 +64,12 @@ export default defineConfig({
       },
     ];
 
+    // Run only chromium for debugging
+    if (process.env.CHROMIUM_ONLY) {
+      console.log("✅ Running regression tests with chromium only");
+      return allProjects.filter((p) => p.name === "chromium");
+    }
+
     // In CI environment, run only webkit due to system dependency issues with chromium/firefox
     if (process.env.SKIP_CHROMIUM_FIREFOX) {
       console.log("✅ Running regression tests with webkit only (chromium/firefox skipped)");
@@ -92,6 +99,7 @@ export default defineConfig({
   //   name: 'Google Chrome',
   //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
   // },
+
 
   /* Run your local dev server before starting the tests */
   webServer: {

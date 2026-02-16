@@ -1,24 +1,5 @@
 export default [
     {
-        languageOptions: {
-            globals: {
-                // Node.js globals
-                __dirname: "readonly",
-                __filename: "readonly",
-                Buffer: "readonly",
-                clearImmediate: "readonly",
-                clearInterval: "readonly",
-                clearTimeout: "readonly",
-                console: "readonly",
-                global: "readonly",
-                module: "writable",
-                process: "readonly",
-                require: "readonly",
-                setImmediate: "readonly",
-                setInterval: "readonly",
-                setTimeout: "readonly",
-            },
-        },
         rules: {
           "constructor-super": ["error"],
           "for-direction": ["error"],
@@ -50,7 +31,7 @@ export default [
           "no-import-assign": ["error"],
           "no-inner-declarations": ["error", "functions"],
           "no-invalid-regexp": ["error"],
-          "no-irregular-whitespace": ["error", {"skipComments": false, "skipJSXText": false, "skipRegExps": false, "skipStrings": true, "skipTemplates": false}],
+          "no-irregular-whitespace": ["error", {"skipStrings": true, "skipJSXText": false, "skipRegExps": false, "skipComments": false, "skipTemplates": false}],
           "no-loss-of-precision": ["error"],
           "no-misleading-character-class": ["error"],
           "no-mixed-spaces-and-tabs": ["error"],

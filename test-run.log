@@ -1,0 +1,1959 @@
+
+> session-combat@1.0.0 test:regression
+> playwright test
+
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+[2m[WebServer] [22m[33m[1m⚠[22m[39m Warning: Next.js inferred your workspace root, but it may not be correct.
+[2m[WebServer] [22m We detected multiple lockfiles and selected the directory of /home/doug/package-lock.json as the root directory.
+[2m[WebServer] [22m To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+[2m[WebServer] [22m   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+[2m[WebServer] [22m Detected additional lockfiles: 
+[2m[WebServer] [22m   * /home/doug/dev/session-combat/package-lock.json
+[2m[WebServer] [22m
+
+Running 138 tests using 8 workers
+
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✓    4 [chromium] › tests/e2e/registration.spec.ts:77:7 › Registration Flow › should enable submit button for valid password (1.2s)
+  ✓    6 [chromium] › tests/e2e/registration.spec.ts:92:7 › Registration Flow › should reject registration with weak password (1.2s)
+  ✓    3 [chromium] › tests/e2e/regression.spec.ts:38:7 › Regression Test Suite - Session Combat › register page loads and displays form (1.3s)
+  ✓    5 [chromium] › tests/e2e/logout.spec.ts:10:7 › Logout behavior › logout clears client storage and redirects to login (1.5s)
+  ✓    9 [chromium] › tests/e2e/regression.spec.ts:50:7 › Regression Test Suite - Session Combat › register form has all required input fields (972ms)
+  ✓   11 [chromium] › tests/e2e/regression.spec.ts:69:7 › Regression Test Suite - Session Combat › register form has submit button (962ms)
+  ✓   10 [chromium] › tests/e2e/regression.spec.ts:76:7 › Regression Test Suite - Session Combat › email input accepts valid email format (1.0s)
+  ✓   12 [chromium] › tests/e2e/regression.spec.ts:88:7 › Regression Test Suite - Session Combat › password input accepts text input (901ms)
+  ✓   13 [chromium] › tests/e2e/regression.spec.ts:101:7 › Regression Test Suite - Session Combat › confirm password input accepts text input (988ms)
+  ✓   14 [chromium] › tests/e2e/regression.spec.ts:113:7 › Regression Test Suite - Session Combat › password requirements are displayed (982ms)
+  ✓   15 [chromium] › tests/e2e/regression.spec.ts:123:7 › Regression Test Suite - Session Combat › password requirements update based on input (982ms)
+  ✓   16 [chromium] › tests/e2e/regression.spec.ts:154:7 › Regression Test Suite - Session Combat › can link to login page from register (1.5s)
+  ✓   17 [chromium] › tests/e2e/regression.spec.ts:176:7 › Regression Test Suite - Session Combat › login page loads and displays form (919ms)
+  ✓   18 [chromium] › tests/e2e/regression.spec.ts:183:7 › Regression Test Suite - Session Combat › login form has email and password fields (931ms)
+  ✓   19 [chromium] › tests/e2e/regression.spec.ts:197:7 › Regression Test Suite - Session Combat › login form has submit button (996ms)
+  ✓   20 [chromium] › tests/e2e/regression.spec.ts:208:7 › Regression Test Suite - Session Combat › register and login pages are accessible (868ms)
+  ✓   22 [chromium] › tests/e2e/regression.spec.ts:246:7 › Regression Test Suite - Session Combat › form fields can be filled and cleared (994ms)
+  ✓   23 [chromium] › tests/e2e/regression.spec.ts:265:7 › Regression Test Suite - Session Combat › password inputs mask character entry (907ms)
+  ✘   21 [chromium] › tests/e2e/regression.spec.ts:222:7 › Regression Test Suite - Session Combat › navigation does not produce console errors (1.5s)
+  ✓   24 [chromium] › tests/e2e/regression.spec.ts:281:7 › Regression Test Suite - Session Combat › form shows/hides elements appropriately (842ms)
+  ✓   26 [chromium] › tests/e2e/regression.spec.ts:316:7 › Regression Test Suite - Session Combat › register page has consistent styling (919ms)
+  ✓   25 [chromium] › tests/e2e/regression.spec.ts:298:7 › Regression Test Suite - Session Combat › page remains responsive after user input (952ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✓   27 [chromium] › tests/e2e/regression.spec.ts:346:7 › Regression Test Suite - Session Combat › form elements are properly spaced and visible (840ms)
+  ✓   28 [chromium] › tests/e2e/regression.spec.ts:361:7 › Regression Test Suite - Session Combat › can reload register page multiple times (1.0s)
+  ✓   29 [chromium] › tests/e2e/regression.spec.ts:370:7 › Regression Test Suite - Session Combat › can switch between register and login pages (1.2s)
+  ✓   31 [chromium] › tests/e2e/regression.spec.ts:332:7 › Regression Test Suite - Session Combat › form labels exist for accessibility (906ms)
+  ✓   30 [chromium] › tests/e2e/regression.spec.ts:384:7 › Regression Test Suite - Session Combat › back button navigation works (1.1s)
+  ✓   32 [chromium] › tests/e2e/regression.spec.ts:397:7 › Regression Test Suite - Session Combat › form inputs persist during page interactions (866ms)
+  ✓   35 [chromium] › tests/e2e/regression.spec.ts:454:7 › Regression Test Suite - Session Combat › page responds to rapid user input (858ms)
+  ✓   33 [chromium] › tests/e2e/regression.spec.ts:419:7 › Regression Test Suite - Session Combat › application loads without critical errors (1.4s)
+  ✓   34 [chromium] › tests/e2e/regression.spec.ts:440:7 › Regression Test Suite - Session Combat › form is interactive and not stuck loading (3.4s)
+  ✘    2 [chromium] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists (11.2s)
+  ✘    7 [chromium] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration (11.1s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘    8 [chromium] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email (16.2s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘    1 [chromium] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user (30.1s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   36 [chromium] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow (30.0s)
+  ✘   37 [chromium] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration (30.0s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   38 [chromium] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character (30.0s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   39 [chromium] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created (30.0s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   40 [chromium] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party (30.1s)
+  ✘   41 [chromium] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created (30.1s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✓   47 [firefox] › tests/e2e/logout.spec.ts:10:7 › Logout behavior › logout clears client storage and redirects to login (1.5s)
+  ✓   50 [firefox] › tests/e2e/registration.spec.ts:77:7 › Registration Flow › should enable submit button for valid password (512ms)
+  ✓   51 [firefox] › tests/e2e/registration.spec.ts:92:7 › Registration Flow › should reject registration with weak password (559ms)
+  ✘   42 [chromium] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file (30.0s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   52 [firefox] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists (10.6s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✓   54 [firefox] › tests/e2e/regression.spec.ts:38:7 › Regression Test Suite - Session Combat › register page loads and displays form (1.3s)
+  ✓   55 [firefox] › tests/e2e/regression.spec.ts:50:7 › Regression Test Suite - Session Combat › register form has all required input fields (933ms)
+  ✘   53 [firefox] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration (11.0s)
+  ✓   56 [firefox] › tests/e2e/regression.spec.ts:69:7 › Regression Test Suite - Session Combat › register form has submit button (920ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   43 [chromium] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter (30.1s)
+  ✘   49 [firefox] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email (16.3s)
+  ✓   57 [firefox] › tests/e2e/regression.spec.ts:88:7 › Regression Test Suite - Session Combat › password input accepts text input (1.0s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✓   59 [firefox] › tests/e2e/regression.spec.ts:123:7 › Regression Test Suite - Session Combat › password requirements update based on input (1.1s)
+  ✓   58 [firefox] › tests/e2e/regression.spec.ts:76:7 › Regression Test Suite - Session Combat › email input accepts valid email format (1.6s)
+  ✓   63 [firefox] › tests/e2e/regression.spec.ts:176:7 › Regression Test Suite - Session Combat › login page loads and displays form (1.0s)
+  ✓   60 [firefox] › tests/e2e/regression.spec.ts:101:7 › Regression Test Suite - Session Combat › confirm password input accepts text input (1.5s)
+  ✓   62 [firefox] › tests/e2e/regression.spec.ts:154:7 › Regression Test Suite - Session Combat › can link to login page from register (1.8s)
+  ✓   61 [firefox] › tests/e2e/regression.spec.ts:113:7 › Regression Test Suite - Session Combat › password requirements are displayed (1.6s)
+  ✓   64 [firefox] › tests/e2e/regression.spec.ts:183:7 › Regression Test Suite - Session Combat › login form has email and password fields (1.0s)
+  ✓   65 [firefox] › tests/e2e/regression.spec.ts:197:7 › Regression Test Suite - Session Combat › login form has submit button (970ms)
+  ✓   66 [firefox] › tests/e2e/regression.spec.ts:208:7 › Regression Test Suite - Session Combat › register and login pages are accessible (906ms)
+  ✓   68 [firefox] › tests/e2e/regression.spec.ts:246:7 › Regression Test Suite - Session Combat › form fields can be filled and cleared (1.0s)
+  ✓   67 [firefox] › tests/e2e/regression.spec.ts:222:7 › Regression Test Suite - Session Combat › navigation does not produce console errors (1.5s)
+  ✓   69 [firefox] › tests/e2e/regression.spec.ts:265:7 › Regression Test Suite - Session Combat › password inputs mask character entry (1.0s)
+  ✓   70 [firefox] › tests/e2e/regression.spec.ts:281:7 › Regression Test Suite - Session Combat › form shows/hides elements appropriately (1.0s)
+  ✓   71 [firefox] › tests/e2e/regression.spec.ts:298:7 › Regression Test Suite - Session Combat › page remains responsive after user input (948ms)
+  ✓   72 [firefox] › tests/e2e/regression.spec.ts:316:7 › Regression Test Suite - Session Combat › register page has consistent styling (1.1s)
+  ✓   73 [firefox] › tests/e2e/regression.spec.ts:332:7 › Regression Test Suite - Session Combat › form labels exist for accessibility (1.1s)
+  ✓   74 [firefox] › tests/e2e/regression.spec.ts:346:7 › Regression Test Suite - Session Combat › form elements are properly spaced and visible (1.1s)
+  ✓   75 [firefox] › tests/e2e/regression.spec.ts:361:7 › Regression Test Suite - Session Combat › can reload register page multiple times (1.1s)
+  ✓   78 [firefox] › tests/e2e/regression.spec.ts:397:7 › Regression Test Suite - Session Combat › form inputs persist during page interactions (1.2s)
+  ✓   77 [firefox] › tests/e2e/regression.spec.ts:384:7 › Regression Test Suite - Session Combat › back button navigation works (1.6s)
+  ✓   76 [firefox] › tests/e2e/regression.spec.ts:370:7 › Regression Test Suite - Session Combat › can switch between register and login pages (1.7s)
+  ✘   44 [chromium] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter (30.1s)
+  ✓   79 [firefox] › tests/e2e/regression.spec.ts:419:7 › Regression Test Suite - Session Combat › application loads without critical errors (1.7s)
+  ✘   45 [chromium] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements (30.1s)
+  ✓   81 [firefox] › tests/e2e/regression.spec.ts:454:7 › Regression Test Suite - Session Combat › page responds to rapid user input (1.1s)
+  ✘   46 [chromium] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat (30.1s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✓   80 [firefox] › tests/e2e/regression.spec.ts:440:7 › Regression Test Suite - Session Combat › form is interactive and not stuck loading (3.8s)
+  ✘   48 [firefox] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user (30.1s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   82 [firefox] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow (30.0s)
+  ✘   83 [firefox] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character (30.1s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   84 [firefox] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party (30.1s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   85 [firefox] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration (30.1s)
+  ✘   86 [firefox] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created (30.1s)
+  ✘   87 [firefox] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created (30.1s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   93 [webkit] › tests/e2e/logout.spec.ts:10:7 › Logout behavior › logout clears client storage and redirects to login (2ms)
+  ✘   88 [firefox] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file (30.1s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   94 [webkit] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   95 [webkit] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email (3ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   96 [webkit] › tests/e2e/registration.spec.ts:77:7 › Registration Flow › should enable submit button for valid password (2ms)
+  ✘   97 [webkit] › tests/e2e/registration.spec.ts:92:7 › Registration Flow › should reject registration with weak password (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   98 [webkit] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘   99 [webkit] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration (1ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  100 [webkit] › tests/e2e/regression.spec.ts:38:7 › Regression Test Suite - Session Combat › register page loads and displays form (2ms)
+  ✘  101 [webkit] › tests/e2e/regression.spec.ts:50:7 › Regression Test Suite - Session Combat › register form has all required input fields (3ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  102 [webkit] › tests/e2e/regression.spec.ts:69:7 › Regression Test Suite - Session Combat › register form has submit button (3ms)
+  ✘   89 [firefox] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter (30.1s)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  103 [webkit] › tests/e2e/regression.spec.ts:76:7 › Regression Test Suite - Session Combat › email input accepts valid email format (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  104 [webkit] › tests/e2e/regression.spec.ts:88:7 › Regression Test Suite - Session Combat › password input accepts text input (3ms)
+  ✘  105 [webkit] › tests/e2e/regression.spec.ts:101:7 › Regression Test Suite - Session Combat › confirm password input accepts text input (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  106 [webkit] › tests/e2e/regression.spec.ts:113:7 › Regression Test Suite - Session Combat › password requirements are displayed (2ms)
+  ✘  107 [webkit] › tests/e2e/regression.spec.ts:123:7 › Regression Test Suite - Session Combat › password requirements update based on input (3ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  108 [webkit] › tests/e2e/regression.spec.ts:154:7 › Regression Test Suite - Session Combat › can link to login page from register (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  109 [webkit] › tests/e2e/regression.spec.ts:176:7 › Regression Test Suite - Session Combat › login page loads and displays form (2ms)
+  ✘  110 [webkit] › tests/e2e/regression.spec.ts:183:7 › Regression Test Suite - Session Combat › login form has email and password fields (3ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  111 [webkit] › tests/e2e/regression.spec.ts:197:7 › Regression Test Suite - Session Combat › login form has submit button (2ms)
+  ✘  112 [webkit] › tests/e2e/regression.spec.ts:208:7 › Regression Test Suite - Session Combat › register and login pages are accessible (3ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  113 [webkit] › tests/e2e/regression.spec.ts:222:7 › Regression Test Suite - Session Combat › navigation does not produce console errors (1ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  114 [webkit] › tests/e2e/regression.spec.ts:246:7 › Regression Test Suite - Session Combat › form fields can be filled and cleared (2ms)
+  ✘  115 [webkit] › tests/e2e/regression.spec.ts:265:7 › Regression Test Suite - Session Combat › password inputs mask character entry (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  116 [webkit] › tests/e2e/regression.spec.ts:281:7 › Regression Test Suite - Session Combat › form shows/hides elements appropriately (2ms)
+  ✘  117 [webkit] › tests/e2e/regression.spec.ts:298:7 › Regression Test Suite - Session Combat › page remains responsive after user input (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  118 [webkit] › tests/e2e/regression.spec.ts:316:7 › Regression Test Suite - Session Combat › register page has consistent styling (3ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  119 [webkit] › tests/e2e/regression.spec.ts:332:7 › Regression Test Suite - Session Combat › form labels exist for accessibility (3ms)
+  ✘  120 [webkit] › tests/e2e/regression.spec.ts:346:7 › Regression Test Suite - Session Combat › form elements are properly spaced and visible (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  121 [webkit] › tests/e2e/regression.spec.ts:361:7 › Regression Test Suite - Session Combat › can reload register page multiple times (3ms)
+  ✘  122 [webkit] › tests/e2e/regression.spec.ts:370:7 › Regression Test Suite - Session Combat › can switch between register and login pages (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  123 [webkit] › tests/e2e/regression.spec.ts:384:7 › Regression Test Suite - Session Combat › back button navigation works (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  124 [webkit] › tests/e2e/regression.spec.ts:397:7 › Regression Test Suite - Session Combat › form inputs persist during page interactions (3ms)
+  ✘  125 [webkit] › tests/e2e/regression.spec.ts:419:7 › Regression Test Suite - Session Combat › application loads without critical errors (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  126 [webkit] › tests/e2e/regression.spec.ts:440:7 › Regression Test Suite - Session Combat › form is interactive and not stuck loading (2ms)
+  ✘  127 [webkit] › tests/e2e/regression.spec.ts:454:7 › Regression Test Suite - Session Combat › page responds to rapid user input (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  128 [webkit] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  129 [webkit] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration (2ms)
+  ✘  130 [webkit] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  131 [webkit] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created (1ms)
+  ✘  132 [webkit] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party (3ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  133 [webkit] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created (2ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  134 [webkit] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file (2ms)
+  ✘  135 [webkit] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter (3ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  136 [webkit] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter (2ms)
+  ✘  137 [webkit] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements (3ms)
+✅ Running regression tests with all browsers (chromium, firefox, webkit)
+  ✘  138 [webkit] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat (1ms)
+  ✘   90 [firefox] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter (30.1s)
+  ✘   91 [firefox] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements (30.1s)
+  ✘   92 [firefox] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat (30.1s)
+
+
+  1) [chromium] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+      30 |     // Wait for navigation to complete (should redirect to dashboard or protected route)
+      31 |     // Use 30s timeout to accommodate CI environment delays
+    > 32 |     await page.waitForURL(
+         |                ^
+      33 |       (url) => {
+      34 |         // Should not stay on /register or go to /login on error
+      35 |         return (
+        at /home/doug/dev/session-combat/tests/e2e/registration.spec.ts:32:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/registration-Registration--73e6f-ssfully-register-a-new-user-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/registration-Registration--73e6f-ssfully-register-a-new-user-chromium/error-context.md
+
+  2) [chromium] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('text=/invalid|error/i') to be visible[22m
+
+
+      67 |     // Wait for an error message to appear and verify we're still on the register page
+      68 |     // Use 15s timeout to accommodate CI environment delays
+    > 69 |     await page.waitForSelector("text=/invalid|error/i", { timeout: 15000 });
+         |                ^
+      70 |     expect(page.url()).toContain("/register");
+      71 |
+      72 |     // Look for error message
+        at /home/doug/dev/session-combat/tests/e2e/registration.spec.ts:69:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/registration-Registration--76fcd-stration-with-invalid-email-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/registration-Registration--76fcd-stration-with-invalid-email-chromium/error-context.md
+
+  3) [chromium] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists 
+
+    TimeoutError: page.waitForURL: Timeout 10000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+      124 |
+      125 |     // Wait for redirect
+    > 126 |     await page.waitForURL((url) => !url.pathname.includes("/register"), {
+          |                ^
+      127 |       timeout: 10000,
+      128 |     });
+      129 |
+        at /home/doug/dev/session-combat/tests/e2e/registration.spec.ts:126:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/registration-Registration--92d5d-ion-if-email-already-exists-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/registration-Registration--92d5d-ion-if-email-already-exists-chromium/error-context.md
+
+  4) [chromium] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration 
+
+    TimeoutError: page.waitForURL: Timeout 10000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+      160 |
+      161 |     // Wait for successful registration redirect
+    > 162 |     await page.waitForURL((url) => !url.pathname.includes("/register"), {
+          |                ^
+      163 |       timeout: 10000,
+      164 |     });
+      165 |
+        at /home/doug/dev/session-combat/tests/e2e/registration.spec.ts:162:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/registration-Registration--cb788-ly-login-after-registration-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/registration-Registration--cb788-ly-login-after-registration-chromium/error-context.md
+
+  5) [chromium] › tests/e2e/regression.spec.ts:222:7 › Regression Test Suite - Session Combat › navigation does not produce console errors 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m0[39m
+    Received: [31m1[39m
+
+      238 |         !e.includes("ERR_INTERNET_DISCONNECTED"),
+      239 |     );
+    > 240 |     expect(criticalErrors.length).toBe(0);
+          |                                   ^
+      241 |   });
+      242 |
+      243 |   // ============================================================
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:240:35
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-12b62--not-produce-console-errors-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-12b62--not-produce-console-errors-chromium/error-context.md
+
+  6) [chromium] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:477:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-d0fd8-lete-user-registration-flow-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-d0fd8-lete-user-registration-flow-chromium/error-context.md
+
+  7) [chromium] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:489:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-e19c7-an-login-after-registration-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-e19c7-an-login-after-registration-chromium/error-context.md
+
+  8) [chromium] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:511:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-79413-user-can-create-a-character-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-79413-user-can-create-a-character-chromium/error-context.md
+
+  9) [chromium] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:528:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-88430-e-characters-can-be-created-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-88430-e-characters-can-be-created-chromium/error-context.md
+
+  10) [chromium] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:550:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-dc60c-bat-user-can-create-a-party-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-dc60c-bat-user-can-create-a-party-chromium/error-context.md
+
+  11) [chromium] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:569:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-2f0af-ember-counts-can-be-created-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-2f0af-ember-counts-can-be-created-chromium/error-context.md
+
+  12) [chromium] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:590:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-7fdc4-n-import-monsters-from-file-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-7fdc4-n-import-monsters-from-file-chromium/error-context.md
+
+  13) [chromium] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:609:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-9f032-ser-can-create-an-encounter-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-9f032-ser-can-create-an-encounter-chromium/error-context.md
+
+  14) [chromium] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:628:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-e1d45-bat-screen-for-an-encounter-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-e1d45-bat-screen-for-an-encounter-chromium/error-context.md
+
+  15) [chromium] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:645:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-9b0f1-splays-required-UI-elements-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-9b0f1-splays-required-UI-elements-chromium/error-context.md
+
+  16) [chromium] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:668:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-a3185-from-registration-to-combat-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-a3185-from-registration-to-combat-chromium/error-context.md
+
+  17) [firefox] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+      30 |     // Wait for navigation to complete (should redirect to dashboard or protected route)
+      31 |     // Use 30s timeout to accommodate CI environment delays
+    > 32 |     await page.waitForURL(
+         |                ^
+      33 |       (url) => {
+      34 |         // Should not stay on /register or go to /login on error
+      35 |         return (
+        at /home/doug/dev/session-combat/tests/e2e/registration.spec.ts:32:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/registration-Registration--73e6f-ssfully-register-a-new-user-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/registration-Registration--73e6f-ssfully-register-a-new-user-firefox/error-context.md
+
+  18) [firefox] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('text=/invalid|error/i') to be visible[22m
+
+
+      67 |     // Wait for an error message to appear and verify we're still on the register page
+      68 |     // Use 15s timeout to accommodate CI environment delays
+    > 69 |     await page.waitForSelector("text=/invalid|error/i", { timeout: 15000 });
+         |                ^
+      70 |     expect(page.url()).toContain("/register");
+      71 |
+      72 |     // Look for error message
+        at /home/doug/dev/session-combat/tests/e2e/registration.spec.ts:69:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/registration-Registration--76fcd-stration-with-invalid-email-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/registration-Registration--76fcd-stration-with-invalid-email-firefox/error-context.md
+
+  19) [firefox] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists 
+
+    TimeoutError: page.waitForURL: Timeout 10000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+      124 |
+      125 |     // Wait for redirect
+    > 126 |     await page.waitForURL((url) => !url.pathname.includes("/register"), {
+          |                ^
+      127 |       timeout: 10000,
+      128 |     });
+      129 |
+        at /home/doug/dev/session-combat/tests/e2e/registration.spec.ts:126:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/registration-Registration--92d5d-ion-if-email-already-exists-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/registration-Registration--92d5d-ion-if-email-already-exists-firefox/error-context.md
+
+  20) [firefox] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration 
+
+    TimeoutError: page.waitForURL: Timeout 10000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+      160 |
+      161 |     // Wait for successful registration redirect
+    > 162 |     await page.waitForURL((url) => !url.pathname.includes("/register"), {
+          |                ^
+      163 |       timeout: 10000,
+      164 |     });
+      165 |
+        at /home/doug/dev/session-combat/tests/e2e/registration.spec.ts:162:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/registration-Registration--cb788-ly-login-after-registration-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/registration-Registration--cb788-ly-login-after-registration-firefox/error-context.md
+
+  21) [firefox] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:477:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-d0fd8-lete-user-registration-flow-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-d0fd8-lete-user-registration-flow-firefox/error-context.md
+
+  22) [firefox] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:489:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-e19c7-an-login-after-registration-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-e19c7-an-login-after-registration-firefox/error-context.md
+
+  23) [firefox] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:511:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-79413-user-can-create-a-character-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-79413-user-can-create-a-character-firefox/error-context.md
+
+  24) [firefox] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:528:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-88430-e-characters-can-be-created-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-88430-e-characters-can-be-created-firefox/error-context.md
+
+  25) [firefox] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:550:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-dc60c-bat-user-can-create-a-party-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-dc60c-bat-user-can-create-a-party-firefox/error-context.md
+
+  26) [firefox] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:569:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-2f0af-ember-counts-can-be-created-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-2f0af-ember-counts-can-be-created-firefox/error-context.md
+
+  27) [firefox] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:590:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-7fdc4-n-import-monsters-from-file-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-7fdc4-n-import-monsters-from-file-firefox/error-context.md
+
+  28) [firefox] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:609:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-9f032-ser-can-create-an-encounter-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-9f032-ser-can-create-an-encounter-firefox/error-context.md
+
+  29) [firefox] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:628:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-e1d45-bat-screen-for-an-encounter-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-e1d45-bat-screen-for-an-encounter-firefox/error-context.md
+
+  30) [firefox] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:645:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-9b0f1-splays-required-UI-elements-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-9b0f1-splays-required-UI-elements-firefox/error-context.md
+
+  31) [firefox] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers/actions.ts:32
+
+      30 |   // Wait for navigation away from registration/login
+      31 |   // Use 30s timeout to accommodate CI environment delays
+    > 32 |   await page.waitForURL(
+         |              ^
+      33 |     (url) => {
+      34 |       return (
+      35 |         !url.pathname.includes("/register") && !url.pathname.includes("/login")
+        at submitRegistrationForm (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:32:14)
+        at registerUser (/home/doug/dev/session-combat/tests/e2e/helpers/actions.ts:52:3)
+        at /home/doug/dev/session-combat/tests/e2e/regression.spec.ts:668:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/regression-Regression-Test-a3185-from-registration-to-combat-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/regression-Regression-Test-a3185-from-registration-to-combat-firefox/error-context.md
+
+  32) [webkit] › tests/e2e/logout.spec.ts:10:7 › Logout behavior › logout clears client storage and redirects to login 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  33) [webkit] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  34) [webkit] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  35) [webkit] › tests/e2e/registration.spec.ts:77:7 › Registration Flow › should enable submit button for valid password 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  36) [webkit] › tests/e2e/registration.spec.ts:92:7 › Registration Flow › should reject registration with weak password 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  37) [webkit] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  38) [webkit] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  39) [webkit] › tests/e2e/regression.spec.ts:38:7 › Regression Test Suite - Session Combat › register page loads and displays form 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  40) [webkit] › tests/e2e/regression.spec.ts:50:7 › Regression Test Suite - Session Combat › register form has all required input fields 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  41) [webkit] › tests/e2e/regression.spec.ts:69:7 › Regression Test Suite - Session Combat › register form has submit button 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  42) [webkit] › tests/e2e/regression.spec.ts:76:7 › Regression Test Suite - Session Combat › email input accepts valid email format 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  43) [webkit] › tests/e2e/regression.spec.ts:88:7 › Regression Test Suite - Session Combat › password input accepts text input 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  44) [webkit] › tests/e2e/regression.spec.ts:101:7 › Regression Test Suite - Session Combat › confirm password input accepts text input 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  45) [webkit] › tests/e2e/regression.spec.ts:113:7 › Regression Test Suite - Session Combat › password requirements are displayed 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  46) [webkit] › tests/e2e/regression.spec.ts:123:7 › Regression Test Suite - Session Combat › password requirements update based on input 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  47) [webkit] › tests/e2e/regression.spec.ts:154:7 › Regression Test Suite - Session Combat › can link to login page from register 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  48) [webkit] › tests/e2e/regression.spec.ts:176:7 › Regression Test Suite - Session Combat › login page loads and displays form 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  49) [webkit] › tests/e2e/regression.spec.ts:183:7 › Regression Test Suite - Session Combat › login form has email and password fields 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  50) [webkit] › tests/e2e/regression.spec.ts:197:7 › Regression Test Suite - Session Combat › login form has submit button 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  51) [webkit] › tests/e2e/regression.spec.ts:208:7 › Regression Test Suite - Session Combat › register and login pages are accessible 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  52) [webkit] › tests/e2e/regression.spec.ts:222:7 › Regression Test Suite - Session Combat › navigation does not produce console errors 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  53) [webkit] › tests/e2e/regression.spec.ts:246:7 › Regression Test Suite - Session Combat › form fields can be filled and cleared 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  54) [webkit] › tests/e2e/regression.spec.ts:265:7 › Regression Test Suite - Session Combat › password inputs mask character entry 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  55) [webkit] › tests/e2e/regression.spec.ts:281:7 › Regression Test Suite - Session Combat › form shows/hides elements appropriately 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  56) [webkit] › tests/e2e/regression.spec.ts:298:7 › Regression Test Suite - Session Combat › page remains responsive after user input 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  57) [webkit] › tests/e2e/regression.spec.ts:316:7 › Regression Test Suite - Session Combat › register page has consistent styling 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  58) [webkit] › tests/e2e/regression.spec.ts:332:7 › Regression Test Suite - Session Combat › form labels exist for accessibility 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  59) [webkit] › tests/e2e/regression.spec.ts:346:7 › Regression Test Suite - Session Combat › form elements are properly spaced and visible 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  60) [webkit] › tests/e2e/regression.spec.ts:361:7 › Regression Test Suite - Session Combat › can reload register page multiple times 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  61) [webkit] › tests/e2e/regression.spec.ts:370:7 › Regression Test Suite - Session Combat › can switch between register and login pages 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  62) [webkit] › tests/e2e/regression.spec.ts:384:7 › Regression Test Suite - Session Combat › back button navigation works 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  63) [webkit] › tests/e2e/regression.spec.ts:397:7 › Regression Test Suite - Session Combat › form inputs persist during page interactions 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  64) [webkit] › tests/e2e/regression.spec.ts:419:7 › Regression Test Suite - Session Combat › application loads without critical errors 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  65) [webkit] › tests/e2e/regression.spec.ts:440:7 › Regression Test Suite - Session Combat › form is interactive and not stuck loading 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  66) [webkit] › tests/e2e/regression.spec.ts:454:7 › Regression Test Suite - Session Combat › page responds to rapid user input 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  67) [webkit] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  68) [webkit] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  69) [webkit] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  70) [webkit] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  71) [webkit] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  72) [webkit] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  73) [webkit] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  74) [webkit] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  75) [webkit] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  76) [webkit] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  77) [webkit] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2\                                     ║
+    ║         libavif16\                                   ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  77 failed
+    [chromium] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user 
+    [chromium] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email 
+    [chromium] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists 
+    [chromium] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration 
+    [chromium] › tests/e2e/regression.spec.ts:222:7 › Regression Test Suite - Session Combat › navigation does not produce console errors 
+    [chromium] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow 
+    [chromium] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration 
+    [chromium] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character 
+    [chromium] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created 
+    [chromium] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party 
+    [chromium] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created 
+    [chromium] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file 
+    [chromium] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter 
+    [chromium] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter 
+    [chromium] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements 
+    [chromium] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat 
+    [firefox] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user 
+    [firefox] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email 
+    [firefox] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists 
+    [firefox] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration 
+    [firefox] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow 
+    [firefox] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration 
+    [firefox] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character 
+    [firefox] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created 
+    [firefox] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party 
+    [firefox] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created 
+    [firefox] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file 
+    [firefox] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter 
+    [firefox] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter 
+    [firefox] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements 
+    [firefox] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat 
+    [webkit] › tests/e2e/logout.spec.ts:10:7 › Logout behavior › logout clears client storage and redirects to login 
+    [webkit] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user 
+    [webkit] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email 
+    [webkit] › tests/e2e/registration.spec.ts:77:7 › Registration Flow › should enable submit button for valid password 
+    [webkit] › tests/e2e/registration.spec.ts:92:7 › Registration Flow › should reject registration with weak password 
+    [webkit] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists 
+    [webkit] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration 
+    [webkit] › tests/e2e/regression.spec.ts:38:7 › Regression Test Suite - Session Combat › register page loads and displays form 
+    [webkit] › tests/e2e/regression.spec.ts:50:7 › Regression Test Suite - Session Combat › register form has all required input fields 
+    [webkit] › tests/e2e/regression.spec.ts:69:7 › Regression Test Suite - Session Combat › register form has submit button 
+    [webkit] › tests/e2e/regression.spec.ts:76:7 › Regression Test Suite - Session Combat › email input accepts valid email format 
+    [webkit] › tests/e2e/regression.spec.ts:88:7 › Regression Test Suite - Session Combat › password input accepts text input 
+    [webkit] › tests/e2e/regression.spec.ts:101:7 › Regression Test Suite - Session Combat › confirm password input accepts text input 
+    [webkit] › tests/e2e/regression.spec.ts:113:7 › Regression Test Suite - Session Combat › password requirements are displayed 
+    [webkit] › tests/e2e/regression.spec.ts:123:7 › Regression Test Suite - Session Combat › password requirements update based on input 
+    [webkit] › tests/e2e/regression.spec.ts:154:7 › Regression Test Suite - Session Combat › can link to login page from register 
+    [webkit] › tests/e2e/regression.spec.ts:176:7 › Regression Test Suite - Session Combat › login page loads and displays form 
+    [webkit] › tests/e2e/regression.spec.ts:183:7 › Regression Test Suite - Session Combat › login form has email and password fields 
+    [webkit] › tests/e2e/regression.spec.ts:197:7 › Regression Test Suite - Session Combat › login form has submit button 
+    [webkit] › tests/e2e/regression.spec.ts:208:7 › Regression Test Suite - Session Combat › register and login pages are accessible 
+    [webkit] › tests/e2e/regression.spec.ts:222:7 › Regression Test Suite - Session Combat › navigation does not produce console errors 
+    [webkit] › tests/e2e/regression.spec.ts:246:7 › Regression Test Suite - Session Combat › form fields can be filled and cleared 
+    [webkit] › tests/e2e/regression.spec.ts:265:7 › Regression Test Suite - Session Combat › password inputs mask character entry 
+    [webkit] › tests/e2e/regression.spec.ts:281:7 › Regression Test Suite - Session Combat › form shows/hides elements appropriately 
+    [webkit] › tests/e2e/regression.spec.ts:298:7 › Regression Test Suite - Session Combat › page remains responsive after user input 
+    [webkit] › tests/e2e/regression.spec.ts:316:7 › Regression Test Suite - Session Combat › register page has consistent styling 
+    [webkit] › tests/e2e/regression.spec.ts:332:7 › Regression Test Suite - Session Combat › form labels exist for accessibility 
+    [webkit] › tests/e2e/regression.spec.ts:346:7 › Regression Test Suite - Session Combat › form elements are properly spaced and visible 
+    [webkit] › tests/e2e/regression.spec.ts:361:7 › Regression Test Suite - Session Combat › can reload register page multiple times 
+    [webkit] › tests/e2e/regression.spec.ts:370:7 › Regression Test Suite - Session Combat › can switch between register and login pages 
+    [webkit] › tests/e2e/regression.spec.ts:384:7 › Regression Test Suite - Session Combat › back button navigation works 
+    [webkit] › tests/e2e/regression.spec.ts:397:7 › Regression Test Suite - Session Combat › form inputs persist during page interactions 
+    [webkit] › tests/e2e/regression.spec.ts:419:7 › Regression Test Suite - Session Combat › application loads without critical errors 
+    [webkit] › tests/e2e/regression.spec.ts:440:7 › Regression Test Suite - Session Combat › form is interactive and not stuck loading 
+    [webkit] › tests/e2e/regression.spec.ts:454:7 › Regression Test Suite - Session Combat › page responds to rapid user input 
+    [webkit] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow 
+    [webkit] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration 
+    [webkit] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character 
+    [webkit] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created 
+    [webkit] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party 
+    [webkit] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created 
+    [webkit] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file 
+    [webkit] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter 
+    [webkit] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter 
+    [webkit] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements 
+    [webkit] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat 
+  61 passed (2.3m)
+
+[36m  Serving HTML report at http://localhost:9323. Press Ctrl+C to quit.[39m
