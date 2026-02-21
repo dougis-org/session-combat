@@ -171,9 +171,14 @@ test.describe("Registration Flow", () => {
     await page.context().clearCookies();
     await page.goto("/login");
 
+    // Wait for auth check to complete so inputs are stable and enabled
+    await expect(page.locator('button[type="submit"]')).toBeEnabled({
+      timeout: 10000,
+    });
+
     // Login with the registered credentials
-    await page.fill('input[type="email"]', testEmail);
-    await page.fill('input[type="password"]', testPassword);
+    await page.locator('#email').fill(testEmail);
+    await page.locator('#password').fill(testPassword);
     await page.click('button[type="submit"]');
 
     // Should successfully log in and redirect away from login page

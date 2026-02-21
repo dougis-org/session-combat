@@ -179,24 +179,54 @@ export async function openCombat(
   page: Page,
   encounterId?: string,
 ): Promise<void> {
-  // Navigate to combat page or click on an encounter to open combat
-  if (encounterId) {
-    await page.goto(`/combat/${encounterId}`);
-  } else {
-    // Click on the first available encounter to open combat
-    await page.goto("/encounters");
-    const firstEncounter = page
-      .locator('[data-testid="encounter-card"]')
-      .first();
+  // Navigate directly to the combat page
+  await page.goto("/combat");
 
-    // Wait for element to be visible before clicking
-    await firstEncounter.waitFor({ state: "visible", timeout: 10000 });
-    await firstEncounter.click();
+  // Wait for the page to finish loading (setup or active combat)
+  await page
+    .waitForSelector(
+      '[data-testid="combat-screen"], text=Start New Combat',
+      { timeout: 15000 },
+    )
+    .catch(() => {});
+
+  // If already in active combat, we're done
+  const combatScreen = page.locator('[data-testid="combat-screen"]');
+  if (await combatScreen.isVisible({ timeout: 1000 }).catch(() => false)) {
+    return;
   }
 
-  // Wait for combat UI to be visible - wait for the main combat container
+  // In setup phase — check if the library "Start Combat" is enabled (has characters)
+  const libraryStartBtn = page
+    .getByRole("button", { name: "Start Combat" })
+    .first();
+  const isLibraryEnabled = await libraryStartBtn
+    .isEnabled()
+    .catch(() => false);
+
+  if (isLibraryEnabled) {
+    await libraryStartBtn.click();
+  } else {
+    // No characters saved — use Quick Entry to add a combatant
+    await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
+
+    // Switch to the "Create New" tab
+    await page.getByRole("tab", { name: "Create New" }).click();
+
+    // Fill in a minimal combatant and submit
+    await page.locator("#custom-name").fill("Test Enemy");
+    await page.locator('button[type="submit"]').click();
+
+    // Click the Quick Entry "Start Combat" button (data-testid added to target it precisely)
+    await page
+      .locator('[data-testid="start-combat-quick"]')
+      .waitFor({ state: "visible", timeout: 10000 });
+    await page.locator('[data-testid="start-combat-quick"]').click();
+  }
+
+  // Wait for the active combat UI
   await page.waitForSelector('[data-testid="combat-screen"]', {
-    timeout: 10000,
+    timeout: 15000,
   });
 }
 

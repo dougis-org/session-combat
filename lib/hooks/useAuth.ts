@@ -36,7 +36,7 @@ export function useAuth() {
         setUser(null);
       }
     } catch (err) {
-      console.error("Auth check failed:", err);
+      console.warn("Auth check failed:", err);
       setUser(null);
       setError("Failed to check authentication");
     } finally {

@@ -682,6 +682,7 @@ function CombatContent() {
                   {setupCombatants.length > 0 && (
                     <button
                       onClick={startCombatWithSetupCombatants}
+                      data-testid="start-combat-quick"
                       className="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-semibold transition-colors mt-2"
                     >
                       Start Combat
