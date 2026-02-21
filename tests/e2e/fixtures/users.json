@@ -1,0 +1,27 @@
+[
+    {
+        "email": "{{UUID}}@dougis.com",
+        "password": "SecurePass123!",
+        "variant": "happy_path_1"
+    },
+    {
+        "email": "{{UUID}}@dougis.com",
+        "password": "SecurePass456!",
+        "variant": "happy_path_2"
+    },
+    {
+        "email": "{{UUID}}@dougis.com",
+        "password": "SecurePass789!",
+        "variant": "happy_path_3"
+    },
+    {
+        "email": "invalid-email",
+        "password": "SecurePass123!",
+        "variant": "error_invalid_email"
+    },
+    {
+        "email": "{{UUID}}@dougis.com",
+        "password": "weak",
+        "variant": "error_weak_password"
+    }
+]
