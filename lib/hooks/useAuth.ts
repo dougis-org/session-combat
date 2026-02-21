@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback } from 'react';
-import { clientStorage } from '@/lib/clientStorage';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useCallback } from "react";
+import { clientStorage } from "@/lib/clientStorage";
+import { useRouter } from "next/navigation";
 
-const SESSION_COMBAT_PREFIX = 'sessionCombat:v1:';
+const SESSION_COMBAT_PREFIX = "sessionCombat:v1:";
 
 export interface AuthUser {
   userId: string;
@@ -22,19 +22,23 @@ export function useAuth() {
   const checkAuth = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/auth/me');
-      
+      const response = await fetch("/api/auth/me");
+
       if (response.ok) {
         const data = await response.json();
-        setUser({ userId: data.userId, email: data.email, isAdmin: data.isAdmin });
+        setUser({
+          userId: data.userId,
+          email: data.email,
+          isAdmin: data.isAdmin,
+        });
         setError(null);
       } else {
         setUser(null);
       }
     } catch (err) {
-      console.error('Auth check failed:', err);
+      console.warn("Auth check failed:", err);
       setUser(null);
-      setError('Failed to check authentication');
+      setError("Failed to check authentication");
     } finally {
       setLoading(false);
     }
@@ -47,28 +51,35 @@ export function useAuth() {
 
   // Register function
   const register = useCallback(async (email: string, password: string) => {
+    console.log("[Auth Hook] Register initiated for email:", email);
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+      console.log("[Auth Hook] Register API response status:", response.status);
 
       const data = await response.json();
+      console.log("[Auth Hook] Register API response data:", data);
 
       if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
+        throw new Error(data.error || "Registration failed");
       }
 
       setUser({ userId: data.userId, email: data.email });
+      console.log("[Auth Hook] User state updated, returning true.");
       return true;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Registration failed';
+      const message =
+        err instanceof Error ? err.message : "Registration failed";
+      console.error("[Auth Hook] Registration error:", message);
       setError(message);
       return false;
     } finally {
+      console.log("[Auth Hook] Register function finished, setting loading to false.");
       setLoading(false);
     }
   }, []);
@@ -78,22 +89,22 @@ export function useAuth() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
+        throw new Error(data.error || "Login failed");
       }
 
       setUser({ userId: data.userId, email: data.email });
       return true;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Login failed';
+      const message = err instanceof Error ? err.message : "Login failed";
       setError(message);
       return false;
     } finally {
@@ -105,37 +116,40 @@ export function useAuth() {
   const logout = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      const response = await fetch("/api/auth/logout", { method: "POST" });
       if (!response.ok) {
-        console.warn('Logout endpoint returned non-OK status');
+        console.warn("Logout endpoint returned non-OK status");
       }
 
       // Client-side cleanup: clear clientStorage and any sessionCombat:v1:* localStorage keys
       try {
         clientStorage.clear();
       } catch (cleanupErr) {
-        console.warn('clientStorage.clear failed:', cleanupErr);
+        console.warn("clientStorage.clear failed:", cleanupErr);
       }
 
       try {
         // Defensively clear any localStorage keys that start with the application prefix
         Object.keys(localStorage)
-          .filter(key => key.startsWith(SESSION_COMBAT_PREFIX))
-          .forEach(key => localStorage.removeItem(key));
+          .filter((key) => key.startsWith(SESSION_COMBAT_PREFIX))
+          .forEach((key) => localStorage.removeItem(key));
       } catch (cleanupErr) {
-        console.warn('Failed to clear sessionCombat localStorage keys:', cleanupErr);
+        console.warn(
+          "Failed to clear sessionCombat localStorage keys:",
+          cleanupErr,
+        );
       }
 
       setUser(null);
       setError(null);
-      console.debug('[auth] logout completed');
-      
-      // Redirect to login using router.replace to prevent back button access
+      console.debug("[auth] logout completed");
 
-      router.replace('/login');
+      // Redirect to login using router.replace to prevent back button access
+      setLoading(false);
+      router.replace("/login");
     } catch (err) {
-      console.error('Logout failed:', err);
-      setError('Failed to logout');
+      console.error("Logout failed:", err);
+      setError("Logout failed");
     } finally {
       setLoading(false);
     }

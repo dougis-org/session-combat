@@ -1,0 +1,894 @@
+
+> session-combat@1.0.0 test:regression
+> playwright test
+
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+[2m[WebServer] [22m[33m[1m⚠[22m[39m Warning: Next.js inferred your workspace root, but it may not be correct.
+[2m[WebServer] [22m We detected multiple lockfiles and selected the directory of /home/doug/package-lock.json as the root directory.
+[2m[WebServer] [22m To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+[2m[WebServer] [22m   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+[2m[WebServer] [22m Detected additional lockfiles: 
+[2m[WebServer] [22m   * /home/doug/dev/session-combat/package-lock.json
+[2m[WebServer] [22m
+
+Running 46 tests using 8 workers
+
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+  ✘   1 [webkit] › tests/e2e/registration.spec.ts:92:7 › Registration Flow › should reject registration with weak password (3ms)
+  ✘   2 [webkit] › tests/e2e/logout.spec.ts:10:7 › Logout behavior › logout clears client storage and redirects to login (3ms)
+  ✘   3 [webkit] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user (10ms)
+  ✘   4 [webkit] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists (7ms)
+  ✘   5 [webkit] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration (4ms)
+  ✘   6 [webkit] › tests/e2e/regression.spec.ts:38:7 › Regression Test Suite - Session Combat › register page loads and displays form (5ms)
+  ✘   7 [webkit] › tests/e2e/registration.spec.ts:77:7 › Registration Flow › should enable submit button for valid password (4ms)
+  ✘   8 [webkit] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email (4ms)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+  ✘   9 [webkit] › tests/e2e/regression.spec.ts:69:7 › Regression Test Suite - Session Combat › register form has submit button (2ms)
+  ✘  10 [webkit] › tests/e2e/regression.spec.ts:50:7 › Regression Test Suite - Session Combat › register form has all required input fields (4ms)
+  ✘  11 [webkit] › tests/e2e/regression.spec.ts:76:7 › Regression Test Suite - Session Combat › email input accepts valid email format (15ms)
+  ✘  12 [webkit] › tests/e2e/regression.spec.ts:88:7 › Regression Test Suite - Session Combat › password input accepts text input (7ms)
+  ✘  14 [webkit] › tests/e2e/regression.spec.ts:101:7 › Regression Test Suite - Session Combat › confirm password input accepts text input (4ms)
+  ✘  13 [webkit] › tests/e2e/regression.spec.ts:113:7 › Regression Test Suite - Session Combat › password requirements are displayed (5ms)
+  ✘  15 [webkit] › tests/e2e/regression.spec.ts:123:7 › Regression Test Suite - Session Combat › password requirements update based on input (4ms)
+  ✘  16 [webkit] › tests/e2e/regression.spec.ts:154:7 › Regression Test Suite - Session Combat › can link to login page from register (9ms)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+  ✘  17 [webkit] › tests/e2e/regression.spec.ts:197:7 › Regression Test Suite - Session Combat › login form has submit button (3ms)
+  ✘  19 [webkit] › tests/e2e/regression.spec.ts:208:7 › Regression Test Suite - Session Combat › register and login pages are accessible (3ms)
+  ✘  18 [webkit] › tests/e2e/regression.spec.ts:176:7 › Regression Test Suite - Session Combat › login page loads and displays form (3ms)
+  ✘  20 [webkit] › tests/e2e/regression.spec.ts:183:7 › Regression Test Suite - Session Combat › login form has email and password fields (5ms)
+  ✘  21 [webkit] › tests/e2e/regression.spec.ts:222:7 › Regression Test Suite - Session Combat › navigation does not produce console errors (4ms)
+  ✘  22 [webkit] › tests/e2e/regression.spec.ts:265:7 › Regression Test Suite - Session Combat › password inputs mask character entry (5ms)
+  ✘  23 [webkit] › tests/e2e/regression.spec.ts:281:7 › Regression Test Suite - Session Combat › form shows/hides elements appropriately (4ms)
+  ✘  24 [webkit] › tests/e2e/regression.spec.ts:246:7 › Regression Test Suite - Session Combat › form fields can be filled and cleared (4ms)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+  ✘  26 [webkit] › tests/e2e/regression.spec.ts:316:7 › Regression Test Suite - Session Combat › register page has consistent styling (3ms)
+  ✘  25 [webkit] › tests/e2e/regression.spec.ts:346:7 › Regression Test Suite - Session Combat › form elements are properly spaced and visible (3ms)
+  ✘  27 [webkit] › tests/e2e/regression.spec.ts:298:7 › Regression Test Suite - Session Combat › page remains responsive after user input (4ms)
+  ✘  28 [webkit] › tests/e2e/regression.spec.ts:332:7 › Regression Test Suite - Session Combat › form labels exist for accessibility (4ms)
+  ✘  29 [webkit] › tests/e2e/regression.spec.ts:361:7 › Regression Test Suite - Session Combat › can reload register page multiple times (5ms)
+  ✘  30 [webkit] › tests/e2e/regression.spec.ts:384:7 › Regression Test Suite - Session Combat › back button navigation works (4ms)
+  ✘  31 [webkit] › tests/e2e/regression.spec.ts:370:7 › Regression Test Suite - Session Combat › can switch between register and login pages (3ms)
+  ✘  32 [webkit] › tests/e2e/regression.spec.ts:397:7 › Regression Test Suite - Session Combat › form inputs persist during page interactions (4ms)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+  ✘  33 [webkit] › tests/e2e/regression.spec.ts:419:7 › Regression Test Suite - Session Combat › application loads without critical errors (3ms)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+  ✘  34 [webkit] › tests/e2e/regression.spec.ts:440:7 › Regression Test Suite - Session Combat › form is interactive and not stuck loading (3ms)
+  ✘  35 [webkit] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration (4ms)
+  ✘  36 [webkit] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow (3ms)
+  ✘  37 [webkit] › tests/e2e/regression.spec.ts:454:7 › Regression Test Suite - Session Combat › page responds to rapid user input (4ms)
+  ✘  39 [webkit] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party (4ms)
+  ✘  38 [webkit] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created (3ms)
+  ✘  40 [webkit] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character (4ms)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+  ✘  41 [webkit] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created (2ms)
+✅ Running regression tests with webkit only (chromium/firefox skipped)
+  ✘  42 [webkit] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file (3ms)
+  ✘  43 [webkit] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter (4ms)
+  ✘  44 [webkit] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter (3ms)
+  ✘  45 [webkit] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements (3ms)
+  ✘  46 [webkit] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat (3ms)
+
+
+  1) [webkit] › tests/e2e/logout.spec.ts:10:7 › Logout behavior › logout clears client storage and redirects to login 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  2) [webkit] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  3) [webkit] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  4) [webkit] › tests/e2e/registration.spec.ts:77:7 › Registration Flow › should enable submit button for valid password 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  5) [webkit] › tests/e2e/registration.spec.ts:92:7 › Registration Flow › should reject registration with weak password 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  6) [webkit] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  7) [webkit] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  8) [webkit] › tests/e2e/regression.spec.ts:38:7 › Regression Test Suite - Session Combat › register page loads and displays form 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  9) [webkit] › tests/e2e/regression.spec.ts:50:7 › Regression Test Suite - Session Combat › register form has all required input fields 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  10) [webkit] › tests/e2e/regression.spec.ts:69:7 › Regression Test Suite - Session Combat › register form has submit button 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  11) [webkit] › tests/e2e/regression.spec.ts:76:7 › Regression Test Suite - Session Combat › email input accepts valid email format 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  12) [webkit] › tests/e2e/regression.spec.ts:88:7 › Regression Test Suite - Session Combat › password input accepts text input 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  13) [webkit] › tests/e2e/regression.spec.ts:101:7 › Regression Test Suite - Session Combat › confirm password input accepts text input 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  14) [webkit] › tests/e2e/regression.spec.ts:113:7 › Regression Test Suite - Session Combat › password requirements are displayed 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  15) [webkit] › tests/e2e/regression.spec.ts:123:7 › Regression Test Suite - Session Combat › password requirements update based on input 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  16) [webkit] › tests/e2e/regression.spec.ts:154:7 › Regression Test Suite - Session Combat › can link to login page from register 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  17) [webkit] › tests/e2e/regression.spec.ts:176:7 › Regression Test Suite - Session Combat › login page loads and displays form 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  18) [webkit] › tests/e2e/regression.spec.ts:183:7 › Regression Test Suite - Session Combat › login form has email and password fields 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  19) [webkit] › tests/e2e/regression.spec.ts:197:7 › Regression Test Suite - Session Combat › login form has submit button 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  20) [webkit] › tests/e2e/regression.spec.ts:208:7 › Regression Test Suite - Session Combat › register and login pages are accessible 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  21) [webkit] › tests/e2e/regression.spec.ts:222:7 › Regression Test Suite - Session Combat › navigation does not produce console errors 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  22) [webkit] › tests/e2e/regression.spec.ts:246:7 › Regression Test Suite - Session Combat › form fields can be filled and cleared 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  23) [webkit] › tests/e2e/regression.spec.ts:265:7 › Regression Test Suite - Session Combat › password inputs mask character entry 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  24) [webkit] › tests/e2e/regression.spec.ts:281:7 › Regression Test Suite - Session Combat › form shows/hides elements appropriately 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  25) [webkit] › tests/e2e/regression.spec.ts:298:7 › Regression Test Suite - Session Combat › page remains responsive after user input 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  26) [webkit] › tests/e2e/regression.spec.ts:316:7 › Regression Test Suite - Session Combat › register page has consistent styling 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  27) [webkit] › tests/e2e/regression.spec.ts:332:7 › Regression Test Suite - Session Combat › form labels exist for accessibility 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  28) [webkit] › tests/e2e/regression.spec.ts:346:7 › Regression Test Suite - Session Combat › form elements are properly spaced and visible 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  29) [webkit] › tests/e2e/regression.spec.ts:361:7 › Regression Test Suite - Session Combat › can reload register page multiple times 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  30) [webkit] › tests/e2e/regression.spec.ts:370:7 › Regression Test Suite - Session Combat › can switch between register and login pages 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  31) [webkit] › tests/e2e/regression.spec.ts:384:7 › Regression Test Suite - Session Combat › back button navigation works 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  32) [webkit] › tests/e2e/regression.spec.ts:397:7 › Regression Test Suite - Session Combat › form inputs persist during page interactions 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  33) [webkit] › tests/e2e/regression.spec.ts:419:7 › Regression Test Suite - Session Combat › application loads without critical errors 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  34) [webkit] › tests/e2e/regression.spec.ts:440:7 › Regression Test Suite - Session Combat › form is interactive and not stuck loading 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  35) [webkit] › tests/e2e/regression.spec.ts:454:7 › Regression Test Suite - Session Combat › page responds to rapid user input 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  36) [webkit] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  37) [webkit] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  38) [webkit] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  39) [webkit] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  40) [webkit] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  41) [webkit] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  42) [webkit] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  43) [webkit] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  44) [webkit] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  45) [webkit] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  46) [webkit] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libicu74\                   ║
+    ║         libxml2                                      ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+  46 failed
+    [webkit] › tests/e2e/logout.spec.ts:10:7 › Logout behavior › logout clears client storage and redirects to login 
+    [webkit] › tests/e2e/registration.spec.ts:12:7 › Registration Flow › should successfully register a new user 
+    [webkit] › tests/e2e/registration.spec.ts:57:7 › Registration Flow › should reject registration with invalid email 
+    [webkit] › tests/e2e/registration.spec.ts:77:7 › Registration Flow › should enable submit button for valid password 
+    [webkit] › tests/e2e/registration.spec.ts:92:7 › Registration Flow › should reject registration with weak password 
+    [webkit] › tests/e2e/registration.spec.ts:113:7 › Registration Flow › should reject registration if email already exists 
+    [webkit] › tests/e2e/registration.spec.ts:151:7 › Registration Flow › should successfully login after registration 
+    [webkit] › tests/e2e/regression.spec.ts:38:7 › Regression Test Suite - Session Combat › register page loads and displays form 
+    [webkit] › tests/e2e/regression.spec.ts:50:7 › Regression Test Suite - Session Combat › register form has all required input fields 
+    [webkit] › tests/e2e/regression.spec.ts:69:7 › Regression Test Suite - Session Combat › register form has submit button 
+    [webkit] › tests/e2e/regression.spec.ts:76:7 › Regression Test Suite - Session Combat › email input accepts valid email format 
+    [webkit] › tests/e2e/regression.spec.ts:88:7 › Regression Test Suite - Session Combat › password input accepts text input 
+    [webkit] › tests/e2e/regression.spec.ts:101:7 › Regression Test Suite - Session Combat › confirm password input accepts text input 
+    [webkit] › tests/e2e/regression.spec.ts:113:7 › Regression Test Suite - Session Combat › password requirements are displayed 
+    [webkit] › tests/e2e/regression.spec.ts:123:7 › Regression Test Suite - Session Combat › password requirements update based on input 
+    [webkit] › tests/e2e/regression.spec.ts:154:7 › Regression Test Suite - Session Combat › can link to login page from register 
+    [webkit] › tests/e2e/regression.spec.ts:176:7 › Regression Test Suite - Session Combat › login page loads and displays form 
+    [webkit] › tests/e2e/regression.spec.ts:183:7 › Regression Test Suite - Session Combat › login form has email and password fields 
+    [webkit] › tests/e2e/regression.spec.ts:197:7 › Regression Test Suite - Session Combat › login form has submit button 
+    [webkit] › tests/e2e/regression.spec.ts:208:7 › Regression Test Suite - Session Combat › register and login pages are accessible 
+    [webkit] › tests/e2e/regression.spec.ts:222:7 › Regression Test Suite - Session Combat › navigation does not produce console errors 
+    [webkit] › tests/e2e/regression.spec.ts:246:7 › Regression Test Suite - Session Combat › form fields can be filled and cleared 
+    [webkit] › tests/e2e/regression.spec.ts:265:7 › Regression Test Suite - Session Combat › password inputs mask character entry 
+    [webkit] › tests/e2e/regression.spec.ts:281:7 › Regression Test Suite - Session Combat › form shows/hides elements appropriately 
+    [webkit] › tests/e2e/regression.spec.ts:298:7 › Regression Test Suite - Session Combat › page remains responsive after user input 
+    [webkit] › tests/e2e/regression.spec.ts:316:7 › Regression Test Suite - Session Combat › register page has consistent styling 
+    [webkit] › tests/e2e/regression.spec.ts:332:7 › Regression Test Suite - Session Combat › form labels exist for accessibility 
+    [webkit] › tests/e2e/regression.spec.ts:346:7 › Regression Test Suite - Session Combat › form elements are properly spaced and visible 
+    [webkit] › tests/e2e/regression.spec.ts:361:7 › Regression Test Suite - Session Combat › can reload register page multiple times 
+    [webkit] › tests/e2e/regression.spec.ts:370:7 › Regression Test Suite - Session Combat › can switch between register and login pages 
+    [webkit] › tests/e2e/regression.spec.ts:384:7 › Regression Test Suite - Session Combat › back button navigation works 
+    [webkit] › tests/e2e/regression.spec.ts:397:7 › Regression Test Suite - Session Combat › form inputs persist during page interactions 
+    [webkit] › tests/e2e/regression.spec.ts:419:7 › Regression Test Suite - Session Combat › application loads without critical errors 
+    [webkit] › tests/e2e/regression.spec.ts:440:7 › Regression Test Suite - Session Combat › form is interactive and not stuck loading 
+    [webkit] › tests/e2e/regression.spec.ts:454:7 › Regression Test Suite - Session Combat › page responds to rapid user input 
+    [webkit] › tests/e2e/regression.spec.ts:473:7 › Regression Test Suite - Session Combat › complete user registration flow 
+    [webkit] › tests/e2e/regression.spec.ts:484:7 › Regression Test Suite - Session Combat › user can login after registration 
+    [webkit] › tests/e2e/regression.spec.ts:505:7 › Regression Test Suite - Session Combat › registered user can create a character 
+    [webkit] › tests/e2e/regression.spec.ts:521:7 › Regression Test Suite - Session Combat › multiple characters can be created 
+    [webkit] › tests/e2e/regression.spec.ts:544:7 › Regression Test Suite - Session Combat › user can create a party 
+    [webkit] › tests/e2e/regression.spec.ts:560:7 › Regression Test Suite - Session Combat › party with different member counts can be created 
+    [webkit] › tests/e2e/regression.spec.ts:585:7 › Regression Test Suite - Session Combat › user can import monsters from file 
+    [webkit] › tests/e2e/regression.spec.ts:603:7 › Regression Test Suite - Session Combat › user can create an encounter 
+    [webkit] › tests/e2e/regression.spec.ts:622:7 › Regression Test Suite - Session Combat › user can open combat screen for an encounter 
+    [webkit] › tests/e2e/regression.spec.ts:639:7 › Regression Test Suite - Session Combat › combat screen displays required UI elements 
+    [webkit] › tests/e2e/regression.spec.ts:658:7 › Regression Test Suite - Session Combat › complete end-to-end flow from registration to combat 
+
+[36m  Serving HTML report at http://localhost:35987. Press Ctrl+C to quit.[39m

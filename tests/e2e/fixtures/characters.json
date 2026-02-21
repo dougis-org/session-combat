@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Aragorn",
+        "class": "Fighter",
+        "race": "Human"
+    },
+    {
+        "name": "Legolas",
+        "class": "Ranger",
+        "race": "Elf"
+    }
+]
