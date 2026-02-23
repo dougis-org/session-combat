@@ -348,7 +348,7 @@ describe("Monster Upload Validation", () => {
       expect(result.abilityScores.strength).toBe(21);
       expect(result.languages).toHaveLength(1);
       expect(result.traits).toHaveLength(1);
-      expect(result.traits?.[0]?.name).toBe("Amphibious");
+      expect(result.traits[0].name).toBe("Amphibious");
     });
 
     it("should clamp hp to maxHp if provided value is higher", () => {
@@ -425,7 +425,7 @@ describe("Monster Upload Validation", () => {
 
       const monsters: RawMonsterData[] = (document.monsters ||
         []) as RawMonsterData[];
-      const transformed = monsters.map((m: RawMonsterData, idx: number) =>
+      const transformed = monsters.map((m: RawMonsterData) =>
         transformMonsterData(m, "test-user"),
       );
 
@@ -435,7 +435,7 @@ describe("Monster Upload Validation", () => {
       expect(transformed.every((m) => m.userId === "test-user")).toBe(true);
     });
 
-    it("should fail validation but still provide transformation hints", () => {
+    it("should pass validation and allow transformation for minimal monster data", () => {
       const document: MonsterUploadDocument = {
         monsters: [
           {

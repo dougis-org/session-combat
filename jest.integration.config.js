@@ -4,7 +4,8 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: ['**/tests/integration/**/*.test.(ts|js)'],
-  // Exclude Docker-dependent tests that require Testcontainers
+  // Exclude Docker-dependent tests that require Testcontainers/running services.
+  // These run separately via `npm run test:docker` with the docker compose stack.
   testPathIgnorePatterns: [
     '/node_modules/',
     'api.integration.test.ts',

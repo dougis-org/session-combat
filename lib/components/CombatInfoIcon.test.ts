@@ -58,7 +58,7 @@ describe('CombatInfoIcon', () => {
 
   it('placeholder for future unit tests if React Testing Library is added', () => {
     // When React Testing Library is added to the project,
-    // unit tests for this component should should cover:
+    // unit tests for this component should cover:
     // - Icon visibility
     // - Tooltip display on hover
     // - Column layout (Players vs Monsters)

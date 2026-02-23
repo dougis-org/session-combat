@@ -79,7 +79,9 @@ export function useAuth() {
       setError(message);
       return false;
     } finally {
-      console.log("[Auth Hook] Register function finished, setting loading to false.");
+      console.log(
+        "[Auth Hook] Register function finished, setting loading to false.",
+      );
       setLoading(false);
     }
   }, []);
@@ -145,7 +147,6 @@ export function useAuth() {
       console.debug("[auth] logout completed");
 
       // Redirect to login using router.replace to prevent back button access
-      setLoading(false);
       router.replace("/login");
     } catch (err) {
       console.error("Logout failed:", err);

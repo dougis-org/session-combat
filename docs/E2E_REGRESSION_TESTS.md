@@ -58,7 +58,7 @@ npm run test:e2e
 npm run test:regression
 ```
 
-This runs tests with 4 parallel workers by default. Control workers with the environment variable:
+Workers default to Playwright's auto-detection locally, or 1 in CI. Override with:
 
 ```bash
 REGRESSION_WORKERS=2 npm run test:regression
@@ -83,75 +83,31 @@ npx playwright test tests/e2e/regression.spec.ts --debug
 ```
 tests/
 ├── e2e/
-│   ├── regression.spec.ts          # Main regression test suite
-│   ├── registration.spec.ts        # Existing registration tests
-│   ├── fixtures/
-│   │   ├── users.json              # User test data (Phase 2+)
-│   │   ├── characters.json         # Character templates (Phase 2)
-│   │   ├── parties.json            # Party templates (Phase 2)
-│   │   └── import-monster-variants.json  # Monster variants (Phase 3a)
+│   ├── regression.spec.ts          # Main regression test suite (39 tests)
+│   ├── registration.spec.ts        # Registration flow tests (6 tests)
+│   ├── logout.spec.ts              # Logout/storage cleanup tests (1 test)
 │   └── helpers/
-│       ├── actions.ts              # Reusable UI actions
-│       └── db.ts                   # Database test helpers (optional)
-```
-
-### Test Fixtures
-
-Test data is provided in JSON format under `tests/e2e/fixtures/` for Phase 2 and 3 implementation:
-
-#### users.json (Phase 2+)
-
-5 variants for parametrized user tests:
-- **3 happy-path variants**: Valid email + strong passwords
-- **2 error-case variants**: Invalid email, weak password
-
-```json
-[
-  {
-    "email": "{{UUID}}@dougis.com",
-    "password": "SecurePass123!",
-    "variant": "happy_path_1"
-  },
-  {
-    "email": "invalid-email",
-    "password": "SecurePass123!",
-    "variant": "error_invalid_email"
-  }
-]
-```
-
-UUID substitution happens at runtime via `generateUniqueEmail()`.
-
-#### characters.json & parties.json (Phase 2)
-
-Provide test data for character and party creation flows:
-
-```json
-[
-  {
-    "name": "Aragorn",
-    "class": "Fighter",
-    "race": "Human"
-  }
-]
+│       ├── actions.ts              # Reusable UI action helpers
+│       └── db.ts                   # Database test helpers (optional, for teardown)
 ```
 
 ## Test Helpers
 
 ### `tests/e2e/helpers/actions.ts`
 
-Reusable UI action functions (Phase 1 implemented, Phase 2+ functions prepared):
+Reusable UI action functions covering the full regression suite:
 
 ```typescript
 import {
   generateUniqueEmail,
   registerUser,
   loginUser,
-  createCharacter,        // Phase 2+
-  createParty,            // Phase 2+
-  importMonster,          // Phase 3a+
-  createEncounter,        // Phase 3a+
-  openCombat              // Phase 3b+
+  createCharacter,
+  createParty,
+  importMonster,
+  createEncounter,
+  openCombat,
+  verifyCombatScreenElements,
 } from './helpers/actions';
 
 // Generate unique email for registration
@@ -186,9 +142,9 @@ await disconnectDB();
 
 ### What Gets Tested
 
-The regression suite (`tests/e2e/regression.spec.ts`) includes **31 parallel smoke tests** covering:
+The regression suite (`tests/e2e/regression.spec.ts`) includes **39 parallel tests** covering the full user journey:
 
-#### 1. Registration Page Tests (10 tests)
+#### 1. Registration Page Tests (9 tests)
 - ✅ Register page loads and displays form
 - ✅ Register form has all required input fields
 - ✅ Register form has submit button
@@ -198,7 +154,6 @@ The regression suite (`tests/e2e/regression.spec.ts`) includes **31 parallel smo
 - ✅ Password requirements are displayed
 - ✅ Password requirements update based on input
 - ✅ Can link to login page from register
-- ✅ Form is interactive and not stuck loading
 
 #### 2. Login Page Tests (3 tests)
 - ✅ Login page loads and displays form
@@ -209,19 +164,18 @@ The regression suite (`tests/e2e/regression.spec.ts`) includes **31 parallel smo
 - ✅ Register and login pages are accessible
 - ✅ Navigation does not produce console errors
 
-#### 4. Form Interaction Tests (5 tests)
+#### 4. Form Interaction Tests (4 tests)
 - ✅ Form fields can be filled and cleared
 - ✅ Password inputs mask character entry
 - ✅ Form shows/hides elements appropriately
 - ✅ Page remains responsive after user input
-- ✅ Page responds to rapid user input
 
 #### 5. UI Consistency Tests (3 tests)
 - ✅ Register page has consistent styling
 - ✅ Form labels exist for accessibility
 - ✅ Form elements are properly spaced and visible
 
-#### 6. Edge Cases & Robustness Tests (7 tests)
+#### 6. Edge Cases & Robustness Tests (6 tests)
 - ✅ Can reload register page multiple times
 - ✅ Can switch between register and login pages
 - ✅ Back button navigation works
@@ -230,24 +184,33 @@ The regression suite (`tests/e2e/regression.spec.ts`) includes **31 parallel smo
 - ✅ Form is interactive and not stuck loading
 - ✅ Page responds to rapid user input
 
-#### 7. Integration Sanity Checks (2 tests)
-- ✅ Application loads without critical errors
-- ✅ Form is interactive and not stuck loading
+#### 7. Full User Flow Tests (12 tests)
+- ✅ Complete user registration flow
+- ✅ User can login after registration
+- ✅ Registered user can create a character
+- ✅ Multiple characters can be created
+- ✅ User can create a party
+- ✅ Party with different member counts can be created
+- ✅ User can import monsters from file
+- ✅ User can create an encounter
+- ✅ User can open combat screen for an encounter
+- ✅ Combat screen displays required UI elements
+- ✅ Complete end-to-end flow from registration to combat
 
-**Total: 31 parallel regression tests** covering registration, login, navigation, and form interaction flows (Phase 1).
+**Total: 39 regression tests** run via `npm run test:regression`. The full E2E suite (`npm run test:e2e`) additionally includes `registration.spec.ts` and `logout.spec.ts`.
 
 ### Test Categories
 
-| Category | Count | Coverage | Approach |
-|----------|-------|----------|----------|
-| Registration page | 10 | Page load, form structure, field interaction | Smoke checks for form presence and input handling |
-| Login page | 3 | Page load, fields, submit button | Direct UI assertions |
-| Navigation | 2 | Page accessibility, routing, console errors | Navigation flow validation |
-| Form interaction | 5 | Field fills/clears, input masking, responsiveness | Form field interaction testing |
-| UI consistency | 3 | Styling, labels, element spacing | Accessibility and layout validation |
-| Edge cases | 7 | Page reloading, switching, back button, persistence | Robustness under various user scenarios |
-| Integration | 2 | Error detection, interactivity | Sanity checks for overall app health |
-| **TOTAL** | **31** | **Core UI smoke coverage (Phase 1)** | **Parallel workers** |
+| Category | Count | Coverage |
+|----------|-------|----------|
+| Registration page | 9 | Page load, form structure, field interaction |
+| Login page | 3 | Page load, fields, submit button |
+| Navigation | 2 | Page accessibility, routing, console errors |
+| Form interaction | 4 | Field fills/clears, input masking, responsiveness |
+| UI consistency | 3 | Styling, labels, element spacing |
+| Edge cases | 7 | Reloading, navigation, back button, persistence |
+| Full user flows | 11 | Registration → login → character → party → encounter → combat |
+| **TOTAL** | **39** | **Full regression coverage** |
 
 ### Running Specific Test
 
@@ -329,7 +292,7 @@ export default defineConfig({
 
 ### Environment Variables
 
-- `REGRESSION_WORKERS` - Number of parallel workers (default: 4)
+- `REGRESSION_WORKERS` - Number of parallel workers (defaults to Playwright auto-detection locally, 1 in CI)
 - `MONGODB_DB` - Test database name (set to `session-combat-e2e` in CI)
 - `CI` - Set by GitHub Actions; triggers single worker + 2 retries
 

@@ -112,7 +112,7 @@ export async function deleteFromCollection(
 
   try {
     const db = await getTestDB();
-    await db.collection(collectionName).deleteMany(filter as any);
+    await db.collection(collectionName).deleteMany(filter);
   } catch (error) {
     console.error(`Failed to delete from ${collectionName}:`, error);
     throw error;
@@ -130,7 +130,7 @@ export async function findInCollection(
     const db = await getTestDB();
     return (await db
       .collection(collectionName)
-      .find(filter as any)
+      .find(filter)
       .toArray()) as Record<string, unknown>[];
   } catch (error) {
     console.error(`Failed to find in ${collectionName}:`, error);
