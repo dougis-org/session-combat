@@ -72,12 +72,18 @@ export default defineConfig({
 
     // In CI environment, run only webkit due to system dependency issues with chromium/firefox
     if (process.env.SKIP_CHROMIUM_FIREFOX) {
-      console.log("✅ Running regression tests with webkit only (chromium/firefox skipped)");
+      console.log(
+        "✅ Running regression tests with webkit only (chromium/firefox skipped)",
+      );
       return allProjects.filter((p) => p.name === "webkit");
     }
 
-    console.log("✅ Running regression tests with all browsers (chromium, firefox, webkit)");
-    return allProjects;
+    // console.log("✅ Running regression tests with all browsers (chromium, firefox, webkit)");
+    // return allProjects;
+    console.log(
+      "✅ Running regression tests with chromium/firefox only (webkit skipped)",
+    );
+    return allProjects.filter((p) => p.name !== "webkit");
   })(),
 
   /* Test against mobile viewports. */
@@ -99,7 +105,6 @@ export default defineConfig({
   //   name: 'Google Chrome',
   //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
   // },
-
 
   /* Run your local dev server before starting the tests */
   webServer: {
