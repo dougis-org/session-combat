@@ -41,3 +41,20 @@ next-env.d.ts
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
+
+.github/tmp/
+
+# Playwright artifacts (generated reports & results)
+playwright-report/
+test-results/
+tests/e2e/test-results/
+e2e-results/
+
+# Test run logs and output files
+test-run*.log
+regression-test-run.log
+test-output.txt
+test-results*.txt
+test-results-webkit.log
+test-results.json
+regression-test-output.txt
