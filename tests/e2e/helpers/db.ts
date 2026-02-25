@@ -36,9 +36,9 @@ export async function clearTestCollections(): Promise<void> {
   const allowCleanup = process.env.ALLOW_DB_CLEANUP === "true";
   const isTestDb = /test|e2e/i.test(dbName);
 
-  if (!process.env.MONGODB_DB) {
+  if (!process.env.MONGODB_URI) {
     console.warn(
-      "MONGODB_DB not set; skipping collection cleanup. This is expected in local development without MongoDB. In CI/test environments, set MONGODB_DB to the test database name.",
+      "MONGODB_URI not set; skipping collection cleanup. This is expected in local development without a running test database.",
     );
     return;
   }

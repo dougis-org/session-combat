@@ -1,6 +1,6 @@
 async function globalTeardown() {
-  if ((global as any).__MONGOCONTAINER__) {
-    await (global as any).__MONGOCONTAINER__.stop();
+  if (global.__MONGOCONTAINER__) {
+    await global.__MONGOCONTAINER__.stop();
   }
 }
 

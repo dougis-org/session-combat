@@ -9,7 +9,6 @@ module.exports = {
     "!**/tests/e2e/**",
   ],
   testTimeout: 120000,
-  maxWorkers: 1,
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",

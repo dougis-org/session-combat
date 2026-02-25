@@ -5,6 +5,8 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./tests/e2e",
+  globalSetup: "./tests/e2e/global.setup.ts",
+  globalTeardown: "./tests/e2e/global.teardown.ts",
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -78,10 +80,11 @@ export default defineConfig({
       return allProjects.filter((p) => p.name === "webkit");
     }
 
-    // console.log("✅ Running regression tests with all browsers (chromium, firefox, webkit)");
-    // return allProjects;
+    // Default: chromium + firefox. Webkit is deferred until Safari traffic
+    // warrants the additional CI overhead and dependency complexity.
+    // Enable webkit via CHROMIUM_ONLY=false (or remove this filter) when ready.
     console.log(
-      "✅ Running regression tests with chromium/firefox only (webkit skipped)",
+      "✅ Running regression tests with chromium + firefox (webkit deferred)",
     );
     return allProjects.filter((p) => p.name !== "webkit");
   })(),

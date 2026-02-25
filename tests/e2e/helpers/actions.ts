@@ -6,7 +6,7 @@ import { Page } from "@playwright/test";
  */
 export function generateUniqueEmail(): string {
   const uuid = uuidv4();
-  return `${uuid}@dougis.com`;
+  return `${uuid}@example.com`;
 }
 
 /**
@@ -42,7 +42,7 @@ export async function submitRegistrationForm(page: Page): Promise<void> {
   // Wait for all in-flight requests to settle so the auth cookie is fully
   // persisted before subsequent navigations (WebKit can delay Set-Cookie
   // processing from fetch() responses)
-  await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  await page.waitForLoadState("networkidle", { timeout: 15000 }).catch((e) => console.warn("waitForLoadState('networkidle') timed out after registration:", e));
 }
 
 /**
@@ -83,7 +83,7 @@ export async function loginUser(
   );
 
   // Wait for auth state to fully settle (see submitRegistrationForm)
-  await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  await page.waitForLoadState("networkidle", { timeout: 15000 }).catch((e) => console.warn("waitForLoadState('networkidle') timed out after login:", e));
 }
 
 /**
@@ -106,7 +106,7 @@ export async function createCharacter(
   await page.getByRole("button", { name: /Save Character/i }).click();
 
   // Wait for the new character to appear in the list (increased timeout for CI)
-  await page.waitForSelector(`text=${character.name}`, { timeout: 15000 });
+  await page.getByText(character.name).waitFor({ timeout: 15000 });
 }
 
 /**
@@ -133,7 +133,7 @@ export async function createParty(
 
   // Submit the new party form
   await page.getByRole("button", { name: /Save Party/i }).click();
-  await page.waitForSelector(`text=${party.name}`, { timeout: 15000 });
+  await page.getByText(party.name).waitFor({ timeout: 15000 });
 }
 
 /**
@@ -164,7 +164,7 @@ export async function importMonster(
  */
 export async function createEncounter(
   page: Page,
-  encounter: { name: string; combatantCount?: number },
+  encounter: { name: string },
 ): Promise<void> {
   // Navigate to encounters page and open the editor via the UI
   await page.goto("/encounters");
@@ -177,7 +177,7 @@ export async function createEncounter(
   await page.getByRole("button", { name: /Save Encounter/i }).click();
 
   // Wait for the new encounter to appear in the list
-  await page.waitForSelector(`text=${encounter.name}`, { timeout: 15000 });
+  await page.getByText(encounter.name).waitFor({ state: "visible", timeout: 15000 });
 }
 
 /**
@@ -187,16 +187,19 @@ export async function openCombat(
   page: Page,
   encounterId?: string,
 ): Promise<void> {
-  // Navigate directly to the combat page
-  await page.goto("/combat");
+  // Navigate to combat, optionally linking to a specific encounter
+  const combatUrl = encounterId
+    ? `/combat?encounterId=${encodeURIComponent(encounterId)}`
+    : "/combat";
+  await page.goto(combatUrl);
 
   // Wait for the page to finish loading (setup or active combat)
+  // Wait for either active combat screen or the setup phase to appear
   await page
-    .waitForSelector(
-      '[data-testid="combat-screen"], text=Start New Combat',
-      { timeout: 15000 },
-    )
-    .catch(() => {});
+    .locator('[data-testid="combat-screen"]')
+    .or(page.getByText("Start New Combat"))
+    .waitFor({ timeout: 15000 })
+    .catch((e) => console.warn("Combat screen or setup not visible within timeout:", e));
 
   // If already in active combat, we're done
   const combatScreen = page.locator('[data-testid="combat-screen"]');
