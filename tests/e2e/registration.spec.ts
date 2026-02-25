@@ -50,18 +50,15 @@ test.describe("Registration Flow", () => {
     await page.goto("/register");
 
     // Fill in with invalid email
-    await page.fill('input[type="email"]', "not-an-email");
-    await page.fill('input[type="password"]', VALID_TEST_PASSWORD);
-    await page.fill('input[id="confirmPassword"]', VALID_TEST_PASSWORD);
+    await page.fill("#email", "not-an-email");
+    await page.fill("#password", VALID_TEST_PASSWORD);
+    await page.fill("#confirmPassword", VALID_TEST_PASSWORD);
 
     // Submit the form
     await page.click('button[type="submit"]');
 
-    // Wait briefly for form to process
-    await page.waitForTimeout(500);
-
-    // Should still be on register page (no navigation should occur on validation error)
-    expect(page.url()).toContain("/register");
+    // Should remain on register page — no navigation on a validation error
+    await expect(page).toHaveURL(/\/register/);
   });
 
   test("should enable submit button for valid password", async ({ page }) => {
@@ -71,8 +68,8 @@ test.describe("Registration Flow", () => {
     const validPassword = "SecurePassword123";
 
     // Fill in with valid password
-    await page.fill('input[type="email"]', testEmail);
-    await page.fill('input[type="password"]', validPassword);
+    await page.fill("#email", testEmail);
+    await page.fill("#password", validPassword);
 
     // Verify submit button is enabled for valid password
     const submitButton = page.locator('button[type="submit"]');
@@ -85,9 +82,9 @@ test.describe("Registration Flow", () => {
     const testEmail = `test-${Date.now()}@example.com`;
 
     // Fill in with weak password
-    await page.fill('input[type="email"]', testEmail);
-    await page.fill('input[type="password"]', "weak");
-    await page.fill('input[id="confirmPassword"]', "weak");
+    await page.fill("#email", testEmail);
+    await page.fill("#password", "weak");
+    await page.fill("#confirmPassword", "weak");
 
     // Verify submit button is disabled for weak password
     const submitButton = page.locator('button[type="submit"]');
@@ -130,14 +127,11 @@ test.describe("Registration Flow", () => {
     // Try to register with same email
     await page.fill("#email", testEmail);
     await page.fill("#password", testPassword);
-    await  page.fill("#confirmPassword", testPassword);
+    await page.fill("#confirmPassword", testPassword);
     await page.click('button[type="submit"]');
 
-    // Wait for navigation away from form or error (use moderate timeout)
-    await Promise.race([
-      page.waitForURL((url) => !url.pathname.includes("/register"), { timeout: 5000 }).catch(() => {}),
-      page.waitForTimeout(2000),
-    ]);
+    // Wait briefly to see if we navigate — if the email is taken we stay on /register
+    await page.waitForURL((url) => !url.pathname.includes("/register"), { timeout: 5000 }).catch(() => {});
 
     // Should still be on register page (duplicate email should show error)
     expect(page.url()).toContain("/register");

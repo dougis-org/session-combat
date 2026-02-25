@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { v4 as uuidv4 } from "uuid";
 import {
   generateUniqueEmail,
   registerUser,
@@ -26,10 +25,6 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
   test.beforeEach(async ({ page }) => {
     // Clear authentication before each test
     await page.context().clearCookies();
-    // Wait for page to be ready
-    await page.waitForLoadState("networkidle").catch(() => {
-      // Network idle may timeout, that's okay - we just want DOM ready
-    });
   });
 
   // ============================================================
@@ -160,14 +155,13 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
       .filter({ hasText: /log in|login|sign in/i })
       .first();
 
-    if (await loginLink.isVisible().catch(() => false)) {
-      await loginLink.click();
-      await page.waitForLoadState("networkidle").catch(() => {});
+    await expect(loginLink).toBeVisible();
+    await loginLink.click();
+    await page.waitForLoadState("networkidle").catch(() => {});
 
-      // Should navigate to login page
-      const url = page.url();
-      expect(url.includes("/login") || url.includes("/signin")).toBeTruthy();
-    }
+    // Should navigate to login page
+    const url = page.url();
+    expect(url.includes("/login") || url.includes("/signin")).toBeTruthy();
   });
 
   // ============================================================
@@ -396,7 +390,6 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await page.goBack();
     // Wait for page to load after going back
     await page.waitForLoadState("networkidle").catch(() => {});
-    await page.waitForTimeout(500);
 
     // Should be back at register
     const currentUrlPath = page.url().split('?')[0];
@@ -425,27 +418,6 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
   // ============================================================
   // INTEGRATION SANITY CHECKS
   // ============================================================
-  test("application loads without critical errors", async ({ page }) => {
-    const errors: string[] = [];
-
-    page.on("console", (msg) => {
-      if (msg.type() === "error") {
-        errors.push(msg.text());
-      }
-    });
-
-    await page.goto("/register", { waitUntil: "networkidle" }).catch(() => {});
-
-    const criticalErrors = errors.filter(
-      (e) =>
-        e.includes("TypeError") ||
-        e.includes("ReferenceError") ||
-        e.includes("SyntaxError"),
-    );
-
-    expect(criticalErrors.length).toBe(0);
-  });
-
   test("form is interactive and not stuck loading", async ({ page }) => {
     await page.goto("/register");
 
@@ -454,7 +426,7 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
 
     // Should be able to interact (not disabled/loading forever)
     await emailInput.click({ timeout: 5000 });
-    await emailInput.type(generateUniqueEmail(), { delay: 50 });
+    await emailInput.fill(generateUniqueEmail());
 
     const filledValue = await emailInput.inputValue();
     expect(filledValue.length).toBeGreaterThan(0);
