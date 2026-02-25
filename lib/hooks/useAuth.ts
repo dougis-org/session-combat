@@ -51,7 +51,6 @@ export function useAuth() {
 
   // Register function
   const register = useCallback(async (email: string, password: string) => {
-    console.log("[Auth Hook] Register initiated for email:", email);
     try {
       setLoading(true);
       setError(null);
@@ -60,17 +59,14 @@ export function useAuth() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      console.log("[Auth Hook] Register API response status:", response.status);
 
       const data = await response.json();
-      console.log("[Auth Hook] Register API response data:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Registration failed");
       }
 
       setUser({ userId: data.userId, email: data.email });
-      console.log("[Auth Hook] User state updated, returning true.");
       return true;
     } catch (err) {
       const message =
@@ -79,9 +75,6 @@ export function useAuth() {
       setError(message);
       return false;
     } finally {
-      console.log(
-        "[Auth Hook] Register function finished, setting loading to false.",
-      );
       setLoading(false);
     }
   }, []);

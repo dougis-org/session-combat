@@ -56,16 +56,10 @@ describe('CombatInfoIcon', () => {
     expect(testingStrategy.alternativeTests).toContain('E2E via Playwright');
   });
 
-  it('placeholder for future unit tests if React Testing Library is added', () => {
-    // When React Testing Library is added to the project,
-    // unit tests for this component should cover:
-    // - Icon visibility
-    // - Tooltip display on hover
-    // - Column layout (Players vs Monsters)
-    // - Count calculations (alive combatants only)
-    // - Status condition rendering
-    // - Dead combatants styling
-
-    expect(true).toBe(true);
-  });
+  // When React Testing Library is added, cover:
+  // - Icon visibility, tooltip on hover, 2-column layout
+  // - Count calculations (alive only), status condition rendering, dead combatant styling
+  it.todo('renders icon and tooltip when React Testing Library is available');
+  it.todo('counts only alive combatants in column headers');
+  it.todo('groups combatants by name with ×N multiplier for duplicates');
 });

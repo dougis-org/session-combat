@@ -41,6 +41,7 @@ function MonsterImportContent() {
       router.push('/monsters');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to import monsters');
+    } finally {
       setLoading(false);
     }
   };
