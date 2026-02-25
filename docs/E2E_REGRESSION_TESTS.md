@@ -175,7 +175,7 @@ The regression suite (`tests/e2e/regression.spec.ts`) includes **39 parallel tes
 - ✅ Form labels exist for accessibility
 - ✅ Form elements are properly spaced and visible
 
-#### 6. Edge Cases & Robustness Tests (6 tests)
+#### 6. Edge Cases & Robustness Tests (7 tests)
 - ✅ Can reload register page multiple times
 - ✅ Can switch between register and login pages
 - ✅ Back button navigation works
