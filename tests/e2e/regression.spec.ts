@@ -160,8 +160,7 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await page.waitForLoadState("networkidle").catch(() => {});
 
     // Should navigate to login page
-    const url = page.url();
-    expect(url.includes("/login") || url.includes("/signin")).toBeTruthy();
+    await expect(page).toHaveURL(/\/(login|signin)/);
   });
 
   // ============================================================
@@ -458,8 +457,7 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await registerUser(page, email, password);
 
     // Should be redirected to dashboard or home page after registration
-    const url = page.url();
-    expect(!url.includes("/register") && !url.includes("/login")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/(register|login)/);
   });
 
   test("user can login after registration", async ({ page }) => {
@@ -476,12 +474,11 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await loginUser(page, email, password);
 
     // Should be logged in (not on login page)
-    const url = page.url();
-    expect(!url.includes("/login")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/login/);
   });
 
   // ============================================================
-  // CHARACTER CREATION FLOW (AC Requirement)
+  // CHARACTER CREATION FLOW (Acceptance Criteria)
   // ============================================================
   test("registered user can create a character", async ({ page }) => {
     const email = generateUniqueEmail();
@@ -495,8 +492,7 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await createCharacter(page, character);
 
     // Should be redirected away from character creation page
-    const url = page.url();
-    expect(!url.includes("/characters/create")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/characters\/create/);
   });
 
   test("multiple characters can be created", async ({ page }) => {
@@ -515,12 +511,11 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await createCharacter(page, char2);
 
     // Both should be created successfully
-    const url = page.url();
-    expect(!url.includes("/create")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/create/);
   });
 
   // ============================================================
-  // PARTY CREATION FLOW (AC Requirement)
+  // PARTY CREATION FLOW (Acceptance Criteria)
   // ============================================================
   test("user can create a party", async ({ page }) => {
     const email = generateUniqueEmail();
@@ -534,8 +529,7 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await createParty(page, party);
 
     // Should be redirected away from party creation
-    const url = page.url();
-    expect(!url.includes("/parties/create")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/parties\/create/);
   });
 
   test("party with different member counts can be created", async ({
@@ -556,12 +550,11 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await createParty(page, party2);
 
     // Both should be created
-    const url = page.url();
-    expect(!url.includes("/create")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/create/);
   });
 
   // ============================================================
-  // MONSTER IMPORT FLOW (AC Requirement)
+  // MONSTER IMPORT FLOW (Acceptance Criteria)
   // ============================================================
   test("user can import monsters from file", async ({ page }) => {
     const email = generateUniqueEmail();
@@ -574,12 +567,11 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await importMonster(page, "samples/monster-upload-example.json");
 
     // Should be redirected away from import page
-    const url = page.url();
-    expect(!url.includes("/monsters/import")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/monsters\/import/);
   });
 
   // ============================================================
-  // ENCOUNTER CREATION FLOW (AC Requirement)
+  // ENCOUNTER CREATION FLOW (Acceptance Criteria)
   // ============================================================
   test("user can create an encounter", async ({ page }) => {
     const email = generateUniqueEmail();
@@ -593,12 +585,11 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await createEncounter(page, encounter);
 
     // Should be redirected away from encounter creation
-    const url = page.url();
-    expect(!url.includes("/encounters/create")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/encounters\/create/);
   });
 
   // ============================================================
-  // COMBAT FLOW (AC Requirement)
+  // COMBAT FLOW (Acceptance Criteria)
   // ============================================================
   test("user can open combat screen for an encounter", async ({ page }) => {
     const email = generateUniqueEmail();
@@ -613,8 +604,7 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
     await openCombat(page);
 
     // Combat screen should be visible
-    const url = page.url();
-    expect(url.includes("/combat")).toBeTruthy();
+    await expect(page).toHaveURL(/\/combat/);
   });
 
   test("combat screen displays required UI elements", async ({ page }) => {
@@ -647,23 +637,23 @@ test.describe.parallel("Regression Test Suite - Session Combat", () => {
 
     // 1. Register user
     await registerUser(page, email, password);
-    expect(!page.url().includes("/register")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/register/);
 
     // 2. Create character
     await createCharacter(page, character);
-    expect(!page.url().includes("/characters/create")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/characters\/create/);
 
     // 3. Create party
     await createParty(page, party);
-    expect(!page.url().includes("/parties/create")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/parties\/create/);
 
     // 4. Create encounter
     await createEncounter(page, encounter);
-    expect(!page.url().includes("/encounters/create")).toBeTruthy();
+    await expect(page).not.toHaveURL(/\/encounters\/create/);
 
     // 5. Open combat
     await openCombat(page);
-    expect(page.url().includes("/combat")).toBeTruthy();
+    await expect(page).toHaveURL(/\/combat/);
 
     // 6. Verify combat UI
     await verifyCombatScreenElements(page);
