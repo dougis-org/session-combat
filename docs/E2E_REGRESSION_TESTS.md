@@ -83,7 +83,7 @@ npx playwright test tests/e2e/regression.spec.ts --debug
 ```
 tests/
 ├── e2e/
-│   ├── regression.spec.ts          # Main regression test suite (39 tests)
+│   ├── regression.spec.ts          # Main regression test suite (38 tests)
 │   ├── registration.spec.ts        # Registration flow tests (6 tests)
 │   ├── logout.spec.ts              # Logout/storage cleanup tests (1 test)
 │   └── helpers/
@@ -142,7 +142,7 @@ await disconnectDB();
 
 ### What Gets Tested
 
-The regression suite (`tests/e2e/regression.spec.ts`) includes **39 parallel tests** covering the full user journey:
+The regression suite (`tests/e2e/regression.spec.ts`) includes **38 parallel tests** covering the full user journey:
 
 #### 1. Registration Page Tests (9 tests)
 - ✅ Register page loads and displays form
@@ -175,12 +175,11 @@ The regression suite (`tests/e2e/regression.spec.ts`) includes **39 parallel tes
 - ✅ Form labels exist for accessibility
 - ✅ Form elements are properly spaced and visible
 
-#### 6. Edge Cases & Robustness Tests (7 tests)
+#### 6. Edge Cases & Robustness Tests (6 tests)
 - ✅ Can reload register page multiple times
 - ✅ Can switch between register and login pages
 - ✅ Back button navigation works
 - ✅ Form inputs persist during page interactions
-- ✅ Application loads without critical errors
 - ✅ Form is interactive and not stuck loading
 - ✅ Page responds to rapid user input
 
@@ -197,7 +196,7 @@ The regression suite (`tests/e2e/regression.spec.ts`) includes **39 parallel tes
 - ✅ Combat screen displays required UI elements
 - ✅ Complete end-to-end flow from registration to combat
 
-**Total: 39 regression tests** run via `npm run test:regression`. The full E2E suite (`npm run test:e2e`) additionally includes `registration.spec.ts` and `logout.spec.ts`.
+**Total: 38 regression tests** run via `npm run test:regression`. The full E2E suite (`npm run test:e2e`) additionally includes `registration.spec.ts` and `logout.spec.ts`.
 
 ### Test Categories
 
@@ -208,9 +207,9 @@ The regression suite (`tests/e2e/regression.spec.ts`) includes **39 parallel tes
 | Navigation | 2 | Page accessibility, routing, console errors |
 | Form interaction | 4 | Field fills/clears, input masking, responsiveness |
 | UI consistency | 3 | Styling, labels, element spacing |
-| Edge cases | 7 | Reloading, navigation, back button, persistence |
+| Edge cases | 6 | Reloading, navigation, back button, persistence |
 | Full user flows | 11 | Registration → login → character → party → encounter → combat |
-| **TOTAL** | **39** | **Full regression coverage** |
+| **TOTAL** | **38** | **Full regression coverage** |
 
 ### Running Specific Test
 
