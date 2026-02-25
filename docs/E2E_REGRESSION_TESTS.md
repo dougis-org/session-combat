@@ -184,7 +184,7 @@ The regression suite (`tests/e2e/regression.spec.ts`) includes **39 parallel tes
 - ✅ Form is interactive and not stuck loading
 - ✅ Page responds to rapid user input
 
-#### 7. Full User Flow Tests (12 tests)
+#### 7. Full User Flow Tests (11 tests)
 - ✅ Complete user registration flow
 - ✅ User can login after registration
 - ✅ Registered user can create a character
@@ -438,13 +438,13 @@ Future improvements to the regression suite are tracked in GitHub issues:
 - Use fixtures: `characters.json`, `parties.json`
 - Use helpers: `createCharacter()`, `createParty()`
 
-### Phase 3a: Monster Import & Encounters (Issue #52)
+### Phase 3a: Monster Import & Encounters (Issue TBD)
 - Add monster import tests (≥5 tests)
 - Add encounter creation tests (≥3 tests)
 - Use fixtures: `import-monster-variants.json`
 - Use helpers: `importMonster()`, `createEncounter()`
 
-### Phase 3b: Combat Screen (Issue #53)
+### Phase 3b: Combat Screen (Issue TBD)
 - Add combat screen initialization tests (≥3 tests)
 - Add combat action execution tests (≥4 tests)
 - Add combat UI interaction tests (≥3 tests)
