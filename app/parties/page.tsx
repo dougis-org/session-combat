@@ -249,8 +249,9 @@ function PartyEditor({
       
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block mb-1 text-sm font-semibold">Party Name</label>
+          <label htmlFor="party-name" className="block mb-1 text-sm font-semibold">Party Name</label>
           <input
+            id="party-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}

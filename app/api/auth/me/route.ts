@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
     
-    // Cache auth data for 1 hour
-    response.headers.set('Cache-Control', 'private, max-age=3600');
+    // Prevent caching — auth state changes when cookies change
+    response.headers.set('Cache-Control', 'no-store');
     
     return response;
   } catch (error) {

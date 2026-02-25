@@ -79,6 +79,7 @@ export default function RegisterPage() {
     const success = await register(email, password);
     if (success) {
       router.push('/');
+      return; // Exit early after successful registration and redirect
     } else {
       setFormError(error || 'Registration failed');
     }
