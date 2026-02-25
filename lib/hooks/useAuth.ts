@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { clientStorage } from "@/lib/clientStorage";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from 'react';
+import { clientStorage } from '@/lib/clientStorage';
+import { useRouter } from 'next/navigation';
 
-const SESSION_COMBAT_PREFIX = "sessionCombat:v1:";
+const SESSION_COMBAT_PREFIX = 'sessionCombat:v1:';
 
 export interface AuthUser {
   userId: string;
@@ -22,7 +22,7 @@ export function useAuth() {
   const checkAuth = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/auth/me");
+      const response = await fetch('/api/auth/me');
 
       if (response.ok) {
         const data = await response.json();
@@ -36,9 +36,9 @@ export function useAuth() {
         setUser(null);
       }
     } catch (err) {
-      console.warn("Auth check failed:", err);
+      console.warn('Auth check failed:', err);
       setUser(null);
-      setError("Failed to check authentication");
+      setError('Failed to check authentication');
     } finally {
       setLoading(false);
     }
@@ -54,24 +54,24 @@ export function useAuth() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Registration failed");
+        throw new Error(data.error || 'Registration failed');
       }
 
       setUser({ userId: data.userId, email: data.email });
       return true;
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Registration failed";
-      console.error("[Auth Hook] Registration error:", message);
+        err instanceof Error ? err.message : 'Registration failed';
+      console.error('[Auth Hook] Registration error:', message);
       setError(message);
       return false;
     } finally {
@@ -84,22 +84,22 @@ export function useAuth() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Login failed");
+        throw new Error(data.error || 'Login failed');
       }
 
       setUser({ userId: data.userId, email: data.email });
       return true;
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Login failed";
+      const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);
       return false;
     } finally {
@@ -111,16 +111,16 @@ export function useAuth() {
   const logout = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/auth/logout", { method: "POST" });
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
       if (!response.ok) {
-        console.warn("Logout endpoint returned non-OK status");
+        console.warn('Logout endpoint returned non-OK status');
       }
 
       // Client-side cleanup: clear clientStorage and any sessionCombat:v1:* localStorage keys
       try {
         clientStorage.clear();
       } catch (cleanupErr) {
-        console.warn("clientStorage.clear failed:", cleanupErr);
+        console.warn('clientStorage.clear failed:', cleanupErr);
       }
 
       try {
@@ -130,20 +130,20 @@ export function useAuth() {
           .forEach((key) => localStorage.removeItem(key));
       } catch (cleanupErr) {
         console.warn(
-          "Failed to clear sessionCombat localStorage keys:",
+          'Failed to clear sessionCombat localStorage keys:',
           cleanupErr,
         );
       }
 
       setUser(null);
       setError(null);
-      console.debug("[auth] logout completed");
+      console.debug('[auth] logout completed');
 
       // Redirect to login using router.replace to prevent back button access
-      router.replace("/login");
+      router.replace('/login');
     } catch (err) {
-      console.error("Logout failed:", err);
-      setError("Logout failed");
+      console.error('Logout failed:', err);
+      setError('Logout failed');
     } finally {
       setLoading(false);
     }
