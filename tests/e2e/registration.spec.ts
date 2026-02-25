@@ -107,9 +107,9 @@ test.describe("Registration Flow", () => {
 
     // First registration should succeed
     await page.goto("/register");
-    await page.fill('input[type="email"]', testEmail);
-    await page.fill('input[type="password"]', testPassword);
-    await page.fill('input[id="confirmPassword"]', testPassword);
+    await page.fill("#email", testEmail);
+    await page.fill("#password", testPassword);
+    await page.fill("#confirmPassword", testPassword);
     await page.click('button[type="submit"]');
 
     // Wait for redirect
@@ -143,9 +143,9 @@ test.describe("Registration Flow", () => {
 
     // Register a new user
     await page.goto("/register");
-    await page.fill('input[type="email"]', testEmail);
-    await page.fill('input[type="password"]', testPassword);
-    await page.fill('input[id="confirmPassword"]', testPassword);
+    await page.fill("#email", testEmail);
+    await page.fill("#password", testPassword);
+    await page.fill("#confirmPassword", testPassword);
     await page.click('button[type="submit"]');
 
     // Wait for successful registration redirect
