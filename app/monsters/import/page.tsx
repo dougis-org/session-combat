@@ -21,6 +21,12 @@ function MonsterImportContent() {
       return;
     }
 
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+    if (file.size > MAX_FILE_SIZE) {
+      setError('File is too large. Please upload a JSON file under 5 MB.');
+      return;
+    }
+
     try {
       setLoading(true);
       const text = await file.text();
@@ -34,11 +40,23 @@ function MonsterImportContent() {
 
       const result = await response.json();
 
+      // Handle partial success (HTTP 207 Multi-Status)
+      if (response.status === 207) {
+        const successCount = typeof result.successCount === 'number' ? result.successCount : 0;
+        const totalCount = typeof result.totalCount === 'number' ? result.totalCount : successCount;
+        const details = result.failures || result.error;
+        let message = `Successfully imported ${successCount} of ${totalCount} monsters.`;
+        if (details) message += ` Some monsters could not be imported: ${details}`;
+        setError(message);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(result.error || 'Failed to import monsters');
       }
 
       router.push('/monsters');
+      return;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to import monsters');
     } finally {
