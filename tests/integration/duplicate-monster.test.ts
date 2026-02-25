@@ -47,7 +47,7 @@ describe("POST /api/monsters/[id]/duplicate", () => {
 
     mockLoadAll.mockResolvedValue([original]);
 
-    const res = await POST({} as any, { params: { id: "orig-1" } } as any);
+    const res = await POST({} as any, { params: Promise.resolve({ id: "orig-1" }) });
 
     expect(mockSave).toHaveBeenCalledTimes(1);
     const saved = mockSave.mock.calls[0][0];
