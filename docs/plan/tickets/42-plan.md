@@ -99,8 +99,16 @@ Phases: RED → GREEN → REFACTOR
 - ✅ **CONFIG FIXED**: Fixed `playwright.config.ts` syntax error (line 23 corruption) and added REGRESSION_WORKERS env var support.
 - ⏳ **NEXT**: Begin RED phase — implement failing tests and fixtures.
 
+**STATUS UPDATE (2026-02-25): COMPLETE**
+- ✅ All phases implemented and merged via 5 focused PRs (#57–#61) split from `feature/42-playwright-regression-tests`:
+  - PR #57 (`test/infra-and-helpers`): Playwright config, `package.json` scripts (`test:e2e`, `test:regression`), helper files, `REGRESSION_WORKERS` support
+  - PR #58 (`feat/monster-import-and-app-fixes`): Monster import page, auth hook, app fixes
+  - PR #59 (`fix/integration-test-cleanup`): Integration test updates
+  - PR #60 (`test/e2e-regression-suite`): 38 regression tests (`regression.spec.ts`, `registration.spec.ts`, `logout.spec.ts`)
+  - PR #61 (`feat/ci-cd-quality-and-docs`): CI workflow, Codacy config, this documentation
+
 1. Prep: Branching
-   - ✅ Create branch `feature/42-playwright-regression-tests` (done).
+   - ✅ Create branch `feature/42-playwright-regression-tests` (done; subsequently split into PRs #57–#61).
 
 2. RED - Tests first (add failing tests)
    - Add `tests/e2e/fixtures/users.json` with schema:
@@ -214,10 +222,10 @@ Phases: RED → GREEN → REFACTOR
 - (New) `tests/e2e/fixtures/characters.json` — character creation input (2 variants: Fighter/Human, Ranger/Elf)
 - (New) `tests/e2e/fixtures/parties.json` — party creation input (2 variants: 4 members, 2 members)
 - (New) `tests/e2e/fixtures/import-monster-variants.json` — monster import input (valid & error cases: invalid JSON, oversized file)
-- (Update) `package.json` — add `@playwright/test@^1.51.1` to devDependencies, add `test:e2e` and `test:regression` scripts
-- (Update) `.github/workflows/integration-tests.yml` — add Playwright browsers install and `npm run test:regression` step; upload Playwright reports as artifacts on all runs
-- (Update) `playwright.config.ts` — add REGRESSION_WORKERS env var override for worker configuration during regression runs
-- (Update) `docs/INTEGRATION_TESTS.md` — add Playwright run instructions, fixture formats, edge-case reference, and artifact locations
+- ✅ (Update) `package.json` — add `@playwright/test@^1.51.1` to devDependencies, add `test:e2e` and `test:regression` scripts (merged via PR #57)
+- ✅ (Update) `.github/workflows/integration-tests.yml` — add Playwright browsers install and `npm run test:regression` step; upload Playwright reports as artifacts on all runs (merged via PR #61)
+- ✅ (Update) `playwright.config.ts` — add REGRESSION_WORKERS env var override for worker configuration during regression runs (merged via PR #57)
+- ✅ (Update) `docs/E2E_REGRESSION_TESTS.md` — add Playwright run instructions, fixture formats, edge-case reference, and artifact locations (merged via PR #61)
 
 ---
 

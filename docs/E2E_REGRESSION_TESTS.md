@@ -246,7 +246,7 @@ The report shows:
 
 ### CI Artifacts
 
-In GitHub Actions, Playwright reports are uploaded as artifacts on failure:
+In GitHub Actions, Playwright reports are uploaded as artifacts on all runs:
 
 ```
 playwright-report/
@@ -292,7 +292,9 @@ export default defineConfig({
 ### Environment Variables
 
 - `REGRESSION_WORKERS` - Number of parallel workers (defaults to Playwright auto-detection locally, 1 in CI)
+- `MONGODB_URI` - MongoDB connection string (set to `mongodb://localhost:27017` in CI)
 - `MONGODB_DB` - Test database name (set to `session-combat-e2e` in CI)
+- `SKIP_CHROMIUM_FIREFOX` - Set to `'true'` in CI to run only WebKit (reduces resource usage on GitHub Actions)
 - `CI` - Set by GitHub Actions; triggers single worker + 2 retries
 
 ## Running in CI
@@ -302,18 +304,20 @@ Regression tests run automatically in GitHub Actions:
 ### Workflow: `.github/workflows/integration-tests.yml`
 
 ```yaml
-- name: Install Playwright browsers
+- name: Install Playwright browsers with system dependencies
   run: npx playwright install --with-deps
 
 - name: Run Playwright regression tests
-  env:
-    MONGODB_DB: session-combat-e2e
-    REGRESSION_WORKERS: 2
   run: npm run test:regression
+  env:
+    REGRESSION_WORKERS: '2'
+    MONGODB_URI: mongodb://localhost:27017
+    MONGODB_DB: session-combat-e2e
+    SKIP_CHROMIUM_FIREFOX: 'true'
 
-- name: Upload Playwright report
+- name: Upload Playwright HTML report
   if: always()
-  uses: actions/upload-artifact@v3
+  uses: actions/upload-artifact@v4
   with:
     name: playwright-report
     path: playwright-report/
@@ -437,13 +441,13 @@ Future improvements to the regression suite are tracked in GitHub issues:
 - Use fixtures: `characters.json`, `parties.json`
 - Use helpers: `createCharacter()`, `createParty()`
 
-### Phase 3a: Monster Import & Encounters (Issue TBD)
+### Phase 3a: Monster Import & Encounters (Issue #52)
 - Add monster import tests (≥5 tests)
 - Add encounter creation tests (≥3 tests)
 - Use fixtures: `import-monster-variants.json`
 - Use helpers: `importMonster()`, `createEncounter()`
 
-### Phase 3b: Combat Screen (Issue TBD)
+### Phase 3b: Combat Screen (Issue #53)
 - Add combat screen initialization tests (≥3 tests)
 - Add combat action execution tests (≥4 tests)
 - Add combat UI interaction tests (≥3 tests)
