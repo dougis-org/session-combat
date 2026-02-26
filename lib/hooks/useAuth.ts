@@ -23,16 +23,20 @@ export function useAuth() {
     try {
       setLoading(true);
       const response = await fetch('/api/auth/me');
-      
+
       if (response.ok) {
         const data = await response.json();
-        setUser({ userId: data.userId, email: data.email, isAdmin: data.isAdmin });
+        setUser({
+          userId: data.userId,
+          email: data.email,
+          isAdmin: data.isAdmin,
+        });
         setError(null);
       } else {
         setUser(null);
       }
     } catch (err) {
-      console.error('Auth check failed:', err);
+      console.warn('Auth check failed:', err);
       setUser(null);
       setError('Failed to check authentication');
     } finally {
@@ -65,7 +69,9 @@ export function useAuth() {
       setUser({ userId: data.userId, email: data.email });
       return true;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Registration failed';
+      const message =
+        err instanceof Error ? err.message : 'Registration failed';
+      console.error('[Auth Hook] Registration error:', message);
       setError(message);
       return false;
     } finally {
@@ -120,22 +126,24 @@ export function useAuth() {
       try {
         // Defensively clear any localStorage keys that start with the application prefix
         Object.keys(localStorage)
-          .filter(key => key.startsWith(SESSION_COMBAT_PREFIX))
-          .forEach(key => localStorage.removeItem(key));
+          .filter((key) => key.startsWith(SESSION_COMBAT_PREFIX))
+          .forEach((key) => localStorage.removeItem(key));
       } catch (cleanupErr) {
-        console.warn('Failed to clear sessionCombat localStorage keys:', cleanupErr);
+        console.warn(
+          'Failed to clear sessionCombat localStorage keys:',
+          cleanupErr,
+        );
       }
 
       setUser(null);
       setError(null);
       console.debug('[auth] logout completed');
-      
-      // Redirect to login using router.replace to prevent back button access
 
+      // Redirect to login using router.replace to prevent back button access
       router.replace('/login');
     } catch (err) {
       console.error('Logout failed:', err);
-      setError('Failed to logout');
+      setError('Logout failed');
     } finally {
       setLoading(false);
     }

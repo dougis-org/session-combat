@@ -36,7 +36,7 @@
       ],
       "senses": {
         "darkvision": "120 ft.",
-        "passivePerception": 20
+        "passivePerception": "20"
       },
       "languages": [
         "Deep Speech",
