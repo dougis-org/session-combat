@@ -44,6 +44,9 @@ next-env.d.ts
 
 .github/tmp/
 
+# Auto-generated version file (produced by scripts/generate-version.js on every build/dev)
+lib/version.json
+
 # Playwright artifacts (generated reports & results)
 playwright-report/
 test-results/
