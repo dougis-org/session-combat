@@ -93,6 +93,7 @@ function HomeContent() {
             <button
               onClick={handleLogout}
               disabled={loading}
+              data-testid="logout-button"
               className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded font-semibold transition-colors"
             >
               {loading ? 'Logging out...' : 'Logout'}

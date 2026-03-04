@@ -1,12 +1,10 @@
-import { MongoDBContainer } from "@testcontainers/mongodb";
-
 async function globalSetup() {
-  const container = await new MongoDBContainer().start();
-  process.env.MONGODB_URI = container.getConnectionString();
-  process.env.MONGODB_DB = "session-combat-e2e";
-
-  // Store the container reference for teardown
-  global.__MONGOCONTAINER__ = container;
+  if (!process.env.MONGODB_URI) {
+    throw new Error(
+      "MONGODB_URI is not set. E2E tests require a running MongoDB instance.\n" +
+      "Set MONGODB_URI before running: MONGODB_URI=mongodb://localhost:27017 npm run test:regression",
+    );
+  }
 }
 
 export default globalSetup;

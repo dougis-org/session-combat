@@ -138,7 +138,11 @@ export default function RegisterPage() {
                   />
                 ))}
               </div>
-              <p className={`text-xs font-medium ${strength.color}`}>
+              <p
+                data-testid="password-strength"
+                data-strength={strength.label.toLowerCase()}
+                className={`text-xs font-medium ${strength.color}`}
+              >
                 Password Strength: {strength.label}
               </p>
             </div>
@@ -148,16 +152,32 @@ export default function RegisterPage() {
           <div className="bg-gray-700 rounded p-3 text-xs text-gray-300 space-y-1">
             <p className="font-semibold text-gray-200 mb-2">Password requirements:</p>
             <ul className="list-disc list-inside space-y-1">
-              <li className={password.length >= 8 ? 'text-green-400' : 'text-gray-400'}>
+              <li
+                data-testid="req-length"
+                data-satisfied={password.length >= 8}
+                className={password.length >= 8 ? 'text-green-400' : 'text-gray-400'}
+              >
                 At least 8 characters
               </li>
-              <li className={/[a-z]/.test(password) ? 'text-green-400' : 'text-gray-400'}>
+              <li
+                data-testid="req-lowercase"
+                data-satisfied={/[a-z]/.test(password)}
+                className={/[a-z]/.test(password) ? 'text-green-400' : 'text-gray-400'}
+              >
                 Lowercase letter (a-z)
               </li>
-              <li className={/[A-Z]/.test(password) ? 'text-green-400' : 'text-gray-400'}>
+              <li
+                data-testid="req-uppercase"
+                data-satisfied={/[A-Z]/.test(password)}
+                className={/[A-Z]/.test(password) ? 'text-green-400' : 'text-gray-400'}
+              >
                 Uppercase letter (A-Z)
               </li>
-              <li className={/[0-9]/.test(password) ? 'text-green-400' : 'text-gray-400'}>
+              <li
+                data-testid="req-number"
+                data-satisfied={/[0-9]/.test(password)}
+                className={/[0-9]/.test(password) ? 'text-green-400' : 'text-gray-400'}
+              >
                 Number (0-9)
               </li>
             </ul>
