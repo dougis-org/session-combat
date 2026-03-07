@@ -334,6 +334,10 @@ test.describe("Auth", () => {
     const email = generateUniqueEmail();
     await registerUser(page, email, STRONG_PASSWORD);
     await page.context().clearCookies();
+    // Navigate to /login first so the browser settles into a clean unauthenticated
+    // state before loginUser fills and submits the form. Without this, WebKit can
+    // race a background auth-check redirect against the explicit goto inside loginUser.
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
     await loginUser(page, email, STRONG_PASSWORD);
     await expect(page).not.toHaveURL(/\/login/);
   });
@@ -371,6 +375,10 @@ test.describe("Auth", () => {
     });
 
     await context.clearCookies();
+    // Settle into a clean unauthenticated state before navigating to /register.
+    // In WebKit, a background auth-check redirect can interrupt the goto("/register")
+    // if the browser is still on an authenticated page when cookies are cleared.
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
     await page.goto("/register");
 
     await fillRegistrationForm(page, email, STRONG_PASSWORD);
