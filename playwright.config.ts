@@ -1,28 +1,30 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const e2eDbName = process.env.MONGODB_DB || "session-combat-e2e";
+process.env.MONGODB_DB = e2eDbName;
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
   testDir: "./tests/e2e",
   globalSetup: "./tests/e2e/global.setup.ts",
-  globalTeardown: "./tests/e2e/global.teardown.ts",
-  /* Run tests in files in parallel */
-  fullyParallel: true,
+  /* Avoid cross-test DB cleanup interference */
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI: 2 retries for better flakiness tolerance */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
+  /* Default to one worker to keep shared DB cleanup deterministic. */
   workers: (() => {
     const value = process.env.REGRESSION_WORKERS;
-    if (!value) return process.env.CI ? 1 : undefined;
+    if (!value) return 1;
     const parsed = Number.parseInt(value, 10);
     if (!Number.isFinite(parsed) || parsed < 1) {
       console.warn(
-        `Invalid REGRESSION_WORKERS="${value}"; falling back to ${process.env.CI ? "1" : "undefined"}`,
+        `Invalid REGRESSION_WORKERS="${value}"; falling back to 1`,
       );
-      return process.env.CI ? 1 : undefined;
+      return 1;
     }
     return parsed;
   })(),
@@ -113,6 +115,10 @@ export default defineConfig({
   webServer: {
     command: "npm run dev",
     url: "http://localhost:3000",
+    env: {
+      ...process.env,
+      MONGODB_DB: e2eDbName,
+    },
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
