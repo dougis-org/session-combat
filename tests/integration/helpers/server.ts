@@ -123,14 +123,21 @@ export async function registerAndGetCookie(
     );
   }
 
-  const setCookie = response.headers.get("set-cookie");
-  if (!setCookie) {
-    throw new Error("No Set-Cookie header in register response");
-  }
+  const rawHeaders = (response.headers as unknown as {
+    raw?: () => Record<string, string[]>;
+  }).raw?.();
+  const setCookieHeaders = rawHeaders?.["set-cookie"];
 
-  // Extract the cookie name=value pairs (strip attributes like Path, HttpOnly, etc.)
-  return setCookie
-    .split(",")
-    .map((c) => c.split(";")[0].trim())
-    .join("; ");
+  const cookies =
+    Array.isArray(setCookieHeaders) && setCookieHeaders.length > 0
+      ? setCookieHeaders
+      : (() => {
+          const singleSetCookie = response.headers.get("set-cookie");
+          if (!singleSetCookie) {
+            throw new Error("No Set-Cookie header in register response");
+          }
+          return [singleSetCookie];
+        })();
+
+  return cookies.map((cookie) => cookie.split(";")[0].trim()).join("; ");
 }

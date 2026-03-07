@@ -1,15 +1,14 @@
 import fetch from "node-fetch";
 import { startTestServer, registerAndGetCookie, TestServer } from "./helpers/server";
 
-interface MonsterTemplate {
+interface MonsterResponse {
   id: string;
   userId: string;
   name: string;
   hp: number;
   maxHp: number;
   ac: number;
-  initiativeBonus: number;
-  dexterity: number;
+  abilityScores: Record<string, number>;
   createdAt: string;
   updatedAt: string;
 }
@@ -66,11 +65,12 @@ describe("Monster API Integration Tests", () => {
     });
 
     expect(response.status).toBe(201);
-    const data = (await response.json()) as MonsterTemplate;
+    const data = (await response.json()) as MonsterResponse;
     expect(data.name).toBe("Goblin");
     expect(data.hp).toBe(7);
     expect(data.maxHp).toBe(7);
     expect(data.ac).toBe(15);
+    expect(data.abilityScores).toBeDefined();
     expect(data.id).toBeDefined();
     expect(data.createdAt).toBeDefined();
   });
@@ -79,7 +79,7 @@ describe("Monster API Integration Tests", () => {
     const response = await fetch(`${baseUrl}/api/monsters`, {
       method: "POST",
       headers: authed(),
-      body: JSON.stringify({ hp: 7, maxHp: 7, ac: 15, initiativeBonus: 2, dexterity: 12 }),
+      body: JSON.stringify({ hp: 7, maxHp: 7, ac: 15 }),
     });
     expect(response.status).toBe(400);
     const data = (await response.json()) as ErrorResponse;
@@ -95,8 +95,6 @@ describe("Monster API Integration Tests", () => {
         hp: 7,
         maxHp: 0,
         ac: 15,
-        initiativeBonus: 2,
-        dexterity: 12,
       }),
     });
     expect(response.status).toBe(400);
@@ -104,7 +102,7 @@ describe("Monster API Integration Tests", () => {
     expect(data.error).toContain("Max HP");
   });
 
-  it("should return 400 when hp exceeds maxHp", async () => {
+  it("should cap hp to maxHp when hp exceeds maxHp", async () => {
     const response = await fetch(`${baseUrl}/api/monsters`, {
       method: "POST",
       headers: authed(),
@@ -113,12 +111,12 @@ describe("Monster API Integration Tests", () => {
         hp: 20,
         maxHp: 10,
         ac: 15,
-        initiativeBonus: 2,
-        dexterity: 12,
       }),
     });
-    // Server may cap HP or reject — either 201 (capped) or 400 (rejected) is acceptable
-    expect([201, 400]).toContain(response.status);
+    expect(response.status).toBe(201);
+    const data = (await response.json()) as MonsterResponse;
+    expect(data.maxHp).toBe(10);
+    expect(data.hp).toBe(10);
   });
 
   it("should use default values for optional fields", async () => {
@@ -128,11 +126,12 @@ describe("Monster API Integration Tests", () => {
       body: JSON.stringify({ name: "Minimal Monster", maxHp: 10 }),
     });
     expect(response.status).toBe(201);
-    const data = (await response.json()) as MonsterTemplate;
+    const data = (await response.json()) as MonsterResponse;
     expect(data.name).toBe("Minimal Monster");
     expect(data.maxHp).toBe(10);
     expect(data.ac).toBe(10); // default
     expect(data.hp).toBe(10); // hp defaults to maxHp
+    expect(data.abilityScores).toBeDefined();
   });
 
   it("should return 404 when trying to GET non-existent monster", async () => {

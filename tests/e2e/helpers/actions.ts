@@ -179,15 +179,16 @@ export async function openCombat(
     .or(page.getByText("Start New Combat"))
     .waitFor({ timeout: 15000 });
 
-  const combatScreen = page.locator('[data-testid="combat-screen"]');
-  if (await combatScreen.isVisible({ timeout: 1000 }).catch(() => false)) {
+  const combatScreen = page.locator('[data-testid="combat-screen"]').first();
+  if ((await combatScreen.count()) > 0 && (await combatScreen.isVisible())) {
     return;
   }
 
   const libraryStartBtn = page
     .getByRole("button", { name: "Start Combat" })
     .first();
-  const isLibraryEnabled = await libraryStartBtn.isEnabled().catch(() => false);
+  const hasLibraryStartButton = (await libraryStartBtn.count()) > 0;
+  const isLibraryEnabled = hasLibraryStartButton && (await libraryStartBtn.isEnabled());
 
   if (isLibraryEnabled) {
     await libraryStartBtn.click();
@@ -220,9 +221,4 @@ export async function verifyCombatScreenElements(page: Page): Promise<void> {
   await initiativeOrder
     .or(combatantsList)
     .waitFor({ state: "visible", timeout: 10000 });
-
-  const healthBars = page.locator('[data-testid="health-bar"]');
-  await healthBars.first().waitFor({ state: "visible", timeout: 10000 }).catch(() => {
-    // Health bars may not be rendered until after first health update
-  });
 }

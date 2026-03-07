@@ -382,16 +382,16 @@ test.describe("Auth", () => {
     await page.goto("/register");
 
     await fillRegistrationForm(page, email, STRONG_PASSWORD);
+    const duplicateRegisterResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/auth/register") &&
+        response.request().method() === "POST",
+    );
     await page.click('button[type="submit"]');
 
-    // If duplicate, we stay on /register; accept brief redirect attempt timing
-    await page
-      .waitForURL((url) => !url.pathname.includes("/register"), {
-        timeout: 5000,
-      })
-      .catch(() => {});
-
-    expect(page.url()).toContain("/register");
+    const duplicateRegisterResponse = await duplicateRegisterResponsePromise;
+    expect(duplicateRegisterResponse.status()).toBe(409);
+    await expect(page).toHaveURL(/\/register/);
   });
 
   // ────────────────────────────────────────────────────────────
