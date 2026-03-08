@@ -4,7 +4,7 @@ Define reliable test environment setup expectations for E2E and integration test
 ## Requirements
 
 ### Requirement: Playwright E2E tests use the environment-provided MongoDB
-The Playwright test suite SHALL NOT start its own MongoDB container. It SHALL rely on `MONGODB_URI` and `MONGODB_DB` environment variables being set before the test run (in CI: via job-level `env:` pointing to the Docker service; locally: via the developer's own MongoDB instance). The `global.setup.ts` file SHALL be simplified to a no-op or removed, and `global.teardown.ts` SHALL be removed. The `playwright.config.ts` SHALL remove the `globalSetup` and `globalTeardown` references if both files are removed.
+The Playwright test suite SHALL NOT start or manage its own MongoDB container. It SHALL rely on `MONGODB_URI` and `MONGODB_DB` environment variables being set before the test run (in CI: via job-level `env:` pointing to the Docker service; locally: via the developer's own MongoDB instance). The `global.setup.ts` file SHALL NOT start or manage MongoDB containers, but MAY perform environment validation and guard logic (for example, enforcing that `MONGODB_URI` is set and that `MONGODB_DB` uses a safe value). The `global.teardown.ts` file SHALL NOT manage MongoDB containers and MAY be removed if not otherwise needed. The `playwright.config.ts` SHALL remove the `globalSetup` and `globalTeardown` references if both files are removed.
 
 #### Scenario: CI run uses Docker-service MongoDB
 - **WHEN** Playwright tests run in CI with `MONGODB_URI=mongodb://localhost:27017` set at the job level
