@@ -54,15 +54,15 @@ Each Playwright test SHALL start with a clean database state. A global `beforeEa
 - **THEN** `page.context().clearCookies()` is also called (in addition to DB cleanup) so browser auth state is reset
 
 ### Requirement: No duplicate E2E spec coverage
-`tests/e2e/regression.spec.ts` and `tests/e2e/registration.spec.ts` SHALL NOT test the same scenarios. The overlapping registration and login form tests SHALL exist in exactly one spec file. The recommended consolidation is:
+`tests/e2e/auth.spec.ts` and `tests/e2e/combat.spec.ts` SHALL NOT test the same user scenarios. Each distinct scenario (such as "register page loads form" or "user can start a combat encounter") SHALL be owned by exactly one spec file. The recommended division of responsibilities is:
 - `auth.spec.ts` — registration, login, logout, duplicate-email rejection
 - `combat.spec.ts` — character creation, party creation, encounter creation, combat flow
-- The existing `logout.spec.ts` content SHALL be merged into `auth.spec.ts` and `logout.spec.ts` removed
+
 
 #### Scenario: No test scenario covered by more than one spec file
 - **WHEN** the spec files are audited
 - **THEN** each distinct user scenario (e.g., "register page loads form") appears in exactly one spec file
 
 #### Scenario: All previously covered scenarios still exist after consolidation
-- **WHEN** the old spec files are replaced by the consolidated files
-- **THEN** all test cases from `regression.spec.ts`, `registration.spec.ts`, and `logout.spec.ts` are preserved (possibly renamed/restructured) in the new files
+- **WHEN** E2E spec files are refactored, split, or consolidated
+- **THEN** all previously covered user scenarios are preserved somewhere in the E2E suite (possibly renamed or restructured) so that no scenario loses automated coverage
