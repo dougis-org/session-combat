@@ -22,7 +22,7 @@ The Playwright test suite SHALL NOT start its own MongoDB container. It SHALL re
 - **THEN** the test suite uses that connection without starting any additional container
 
 ### Requirement: Integration tests share a server bootstrap utility
-Integration test files (`api.integration.test.ts`, `monsters.integration.test.ts`) SHALL import a shared `startTestServer` / `stopTestServer` helper from `tests/integration/helpers/server.ts` rather than each independently copying the MongoDB-container and Next.js spawn logic.
+Integration test files (`api.integration.test.ts`, `monsters.integration.test.ts`) SHALL import a shared `startTestServer` / `cleanup` helper from `tests/integration/helpers/server.ts` rather than each independently copying the MongoDB-container and Next.js spawn logic.
 
 #### Scenario: Server helper starts a fresh stack per test file
 - **WHEN** a Jest integration test file calls `await startTestServer()` in `beforeAll`
