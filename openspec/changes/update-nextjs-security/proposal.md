@@ -4,10 +4,9 @@ Next.js 16.0.10 has 2 known medium-severity security vulnerabilities (identified
 
 ## What Changes
 
-- Update `next` from `^16.0.10` to `^16.1.6` (latest stable) in `package.json`
-- Update `eslint-config-next` to match the new Next.js version
-- Run `npm install` to apply the updated lock file
-- Verify the application builds and tests pass after the upgrade
+- Regenerate `package-lock.json` to resolve `next` to `16.1.6` (the `package.json` range `^16.1.6` was already correct; the lock file had pinned an older, vulnerable version)
+- Add `@swc/helpers@0.5.19` to `devDependencies` to satisfy `@swc/core`'s peer dependency and keep `npm ci` consistent
+- Verify the application builds and tests pass after the lock file update
 
 ## Capabilities
 
@@ -19,7 +18,7 @@ Next.js 16.0.10 has 2 known medium-severity security vulnerabilities (identified
 
 ## Impact
 
-- **Dependencies**: `next`, `eslint-config-next` version bumps in `package.json` and `package-lock.json`
+- **Dependencies**: `package-lock.json` regenerated to resolve `next` to `16.1.6`; `@swc/helpers@0.5.19` added to `package.json` devDependencies for `npm ci` compatibility
 - **Build**: Must verify `next build` succeeds after upgrade
 - **Tests**: Integration, E2E, and regression test suites must pass post-upgrade
 - **CI**: No pipeline changes expected; existing CI workflows cover build + test validation

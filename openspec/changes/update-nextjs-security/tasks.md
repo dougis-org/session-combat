@@ -22,6 +22,6 @@
 
 ## 5. Pull Request
 
-- [x] 5.1 Commit all changes (`package.json`, `package-lock.json`) on the feature branch
+- [x] 5.1 Commit all relevant changes (`package.json`, `package-lock.json`, documentation) on the feature branch
 - [x] 5.2 Open a PR from `fix/issue-54-nextjs-security` → `main` referencing issue #54
-- [ ] 5.3 Confirm CI passes (build + tests) before merging — PR #67 open, awaiting CI
+- [x] 5.3 Confirm CI passes (build + tests) before merging

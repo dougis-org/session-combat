@@ -1,8 +1,8 @@
 ## Context
 
-Next.js 16.0.10 contains 2 known medium-severity security vulnerabilities identified by the Red Hat Dependency Analytics Plugin (OSV data). The project currently declares `"next": "^16.1.6"` in `package.json` and has version 16.1.6 installed — meaning the `package.json` spec may already be correct, but `package-lock.json` and the installed modules may lag behind. The latest stable release is 16.1.6.
+Next.js 16.0.10 contains 2 known medium-severity security vulnerabilities identified by the Red Hat Dependency Analytics Plugin (OSV data). The project already declares `"next": "^16.1.6"` in `package.json`, but the `package-lock.json` had resolved to an older, vulnerable version — meaning the intent was correct but the installed version was not. The latest stable release is 16.1.6. Note that Next.js 16.1.6 requires Node.js `>=20.9.0` per its `engines` field; any environment running an older Node version must upgrade as part of this change.
 
-The goal is to confirm the version declaration is accurate, force a clean install to pin the lock file to the patched version, and validate nothing regresses.
+The goal is to regenerate `package-lock.json` so it resolves `next` to the patched `16.1.6`, validate nothing regresses, and ensure `npm ci` (used in CI) is satisfied by the new lock file.
 
 ## Goals / Non-Goals
 
@@ -20,10 +20,11 @@ The goal is to confirm the version declaration is accurate, force a clean instal
 
 ## Decisions
 
-### Decision 1: Minimal-scope upgrade
-Only `next` and `eslint-config-next` are touched. Broader dependency upgrades introduce unrelated risk and are out of scope for a targeted security patch.
+### Decision 1: Minimal-scope lock file regeneration
+The primary change is regenerating `package-lock.json` to resolve `next` to `16.1.6`. Because the project uses caret (`^`) ranges for many packages, a full lock file regeneration also re-resolves other dependencies to their latest compatible versions within those ranges. This breadth is a known consequence of deleting and regenerating the lock file rather than using `npm update next` in isolation. The broader churn was reviewed in the PR diff and confirmed to introduce no regressions via the test suite. Additionally, `@swc/helpers@0.5.19` was added as a direct devDependency to resolve a peer dependency conflict between `@swc/core` and `next` that surfaced during `npm ci`.
 
 **Alternatives considered:**
+- `npm update next eslint-config-next` — would update only those two packages in the lock file while preserving other pins; rejected because the original lock file was generated with npm 11 (incompatible with CI's npm 10), requiring a full regeneration anyway.
 - Full `npm audit fix` — rejected; could introduce unrelated changes and regressions.
 - Pinning exact version (e.g., `16.1.6`) — rejected; using `^` range ensures future patch-level fixes are automatically included without manual intervention.
 
@@ -56,4 +57,4 @@ No new CI steps are needed. The existing integration tests, E2E regression suite
 
 ## Open Questions
 
-- Are the 2 CVEs specifically in Next.js core or in a transitive dependency it pulls? (Check `npm audit` output post-install to confirm.)
+- ~~Are the 2 CVEs specifically in Next.js core or in a transitive dependency it pulls?~~ **Resolved:** `npm audit` post-install shows zero advisories attributed to `next@16.1.6`. The original vulnerabilities were in `next@16.0.10` itself and are fixed in `16.1.6`. Remaining 4 moderate advisories are in `undici` via `testcontainers` (dev-only).
