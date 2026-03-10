@@ -46,9 +46,9 @@ test.describe("Auth", () => {
 
   test("register form has submit button", async ({ page }) => {
     await page.goto("/register");
-    await expect(
-      page.locator('button[type="submit"]'),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('button[type="submit"]')).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test("email input accepts valid email format", async ({ page }) => {
@@ -84,16 +84,14 @@ test.describe("Auth", () => {
     await page.goto("/register");
 
     await page.locator("#password").fill("weak");
-    await expect(page.locator('[data-testid="password-strength"]')).toHaveAttribute(
-      "data-strength",
-      "weak",
-    );
+    await expect(
+      page.locator('[data-testid="password-strength"]'),
+    ).toHaveAttribute("data-strength", "weak");
 
     await page.locator("#password").fill(STRONG_PASSWORD);
-    await expect(page.locator('[data-testid="password-strength"]')).toHaveAttribute(
-      "data-strength",
-      "strong",
-    );
+    await expect(
+      page.locator('[data-testid="password-strength"]'),
+    ).toHaveAttribute("data-strength", "strong");
 
     await expect(page.locator('[data-testid="req-length"]')).toHaveAttribute(
       "data-satisfied",
@@ -376,9 +374,16 @@ test.describe("Auth", () => {
 
     await context.clearCookies();
     // Settle into a clean unauthenticated state before navigating to /register.
-    // In WebKit, a background auth-check redirect can interrupt the goto("/register")
-    // if the browser is still on an authenticated page when cookies are cleared.
-    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    // In WebKit, clearing cookies while on an authenticated page can trigger a
+    // concurrent auth-middleware redirect to /login, which interrupts our own
+    // goto("/login") and causes Playwright to throw. We catch that specific error
+    // (both navigations land on /login anyway) and then confirm via waitForURL.
+    await page
+      .goto("/login", { waitUntil: "domcontentloaded" })
+      .catch((e: Error) => {
+        if (!e.message.includes("interrupted by another navigation")) throw e;
+      });
+    await page.waitForURL(/\/login/);
     await page.goto("/register");
 
     await fillRegistrationForm(page, email, STRONG_PASSWORD);
