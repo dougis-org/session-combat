@@ -44,10 +44,10 @@ Verified at implementation time (March 2026):
 - [x] 6.1 Create feature branch `chore/update-github-actions-versions`
 - [x] 6.2 Commit changes: `chore: update GitHub Actions to Node 24 runtime versions`
 - [x] 6.3 Open PR #74 targeting `main`
-- [ ] 6.4 Verify CI passes on the PR branch (no deprecation warnings, all jobs green)
+- [x] 6.4 Verify CI passes on the PR branch (no deprecation warnings, all jobs green)
 - [x] 6.5 Enable auto-merge once checks pass
 
 ## 7. Post-Merge
 
-- [ ] 7.1 Verify the merged workflow runs on `main` show no Node 20 deprecation warnings
-- [ ] 7.2 Run `/opsx:archive` to archive this change and sync the `ci-actions-currency` spec to `openspec/specs/`
+- [x] 7.1 Verify the merged workflow runs on `main` show no Node 20 deprecation warnings
+- [x] 7.2 Run `/opsx:archive` to archive this change and sync the `ci-actions-currency` spec to `openspec/specs/`
