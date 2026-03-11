@@ -12,8 +12,8 @@ All GitHub Actions used in CI workflows under `.github/workflows/` SHALL referen
 - **THEN** all occurrences reference the same major version tag
 
 ### Requirement: All action version tags reference published releases
-All `uses: <action>@<version>` references in CI workflow files SHALL reference version tags that exist in the action's GitHub repository. Non-existent version tags (such as `@v6` for an action that has no v6 release) SHALL NOT be used.
+All `uses: <action>@<version>` references in CI workflow files SHALL reference version tags that exist in the action's GitHub repository. Version tags that do not exist in the corresponding action repository SHALL NOT be used.
 
 #### Scenario: Valid version tag
-- **WHEN** a CI workflow references `actions/checkout@vN`
-- **THEN** a corresponding `vN` tag exists in the `actions/checkout` GitHub repository
+- **WHEN** a CI workflow references an action at a major version tag
+- **THEN** a corresponding release tag exists in that action's GitHub repository

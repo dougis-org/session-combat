@@ -1,46 +1,51 @@
 ## 1. Research: Verify Latest Action Versions
 
-- [x] 1.1 Look up the current latest major version of `actions/checkout` that uses Node 24 (confirm whether v5 is released and stable)
-- [x] 1.2 Look up the current latest major version of `actions/setup-node` that uses Node 24 (confirm v5 or newer)
-- [x] 1.3 Look up the current latest major version of `actions/upload-artifact` that uses Node 24 (confirm v5 or newer)
-- [x] 1.4 Confirm that `actions/checkout@v6` does not exist as a published release tag (GitHub tags page or marketplace)
-- [x] 1.5 Review release notes for each new major version — check for any breaking changes to `with:` inputs used in the workflows
+Verified at implementation time (March 2026):
+- `actions/checkout@v6` — latest major, Node 24 runtime (v6.0.2, Jan 2026) ✓
+- `actions/setup-node@v6` — latest major, Node 24 runtime (v6.2.0) ✓
+- `actions/upload-artifact@v7` — latest major, Node 24 runtime (v7.0.0, Feb 2026) ✓
+
+- [x] 1.1 Look up the current latest major version of `actions/checkout` — confirmed: `@v6` (Node 24 runtime)
+- [x] 1.2 Look up the current latest major version of `actions/setup-node` — confirmed: `@v6` (Node 24 runtime)
+- [x] 1.3 Look up the current latest major version of `actions/upload-artifact` — confirmed: `@v7` (Node 24 runtime)
+- [x] 1.4 Confirm `actions/checkout@v6` is a valid published release tag — confirmed: v6.0.2 released Jan 2026
+- [x] 1.5 Review release notes for each new major version — `node-version`/`cache` inputs (setup-node) and `name`/`path`/`retention-days` inputs (upload-artifact) are fully backward-compatible
 
 ## 2. Update `.github/workflows/build-test.yml`
 
-- [x] 2.1 Update `actions/checkout` in `unit-tests` job (currently `@v6`) to verified latest version
-- [x] 2.2 Update `actions/setup-node` in `unit-tests` job (currently `@v4`) to verified latest version
-- [x] 2.3 Update `actions/checkout` in `integration-tests` job (currently `@v4`) to verified latest version
-- [x] 2.4 Update `actions/setup-node` in `integration-tests` job (currently `@v4`) to verified latest version
-- [x] 2.5 Update `actions/upload-artifact` in `integration-tests` job (currently `@v4`) to verified latest version
-- [x] 2.6 Update `actions/checkout` in `regression-tests` job (currently `@v4`) to verified latest version
-- [x] 2.7 Update `actions/setup-node` in `regression-tests` job (currently `@v4`) to verified latest version
-- [x] 2.8 Update `actions/upload-artifact` in `regression-tests` job (currently `@v4`) to verified latest version
-- [x] 2.9 Update `actions/checkout` in `finalize-coverage` job (currently `@v4`) to verified latest version
+- [x] 2.1 Update `actions/checkout` in `unit-tests` job (was `@v6`) — already at target version ✓
+- [x] 2.2 Update `actions/setup-node` in `unit-tests` job (`@v4` → `@v6`)
+- [x] 2.3 Update `actions/checkout` in `integration-tests` job (`@v4` → `@v6`)
+- [x] 2.4 Update `actions/setup-node` in `integration-tests` job (`@v4` → `@v6`)
+- [x] 2.5 Update `actions/upload-artifact` in `integration-tests` job (`@v4` → `@v7`)
+- [x] 2.6 Update `actions/checkout` in `regression-tests` job (`@v4` → `@v6`)
+- [x] 2.7 Update `actions/setup-node` in `regression-tests` job (`@v4` → `@v6`)
+- [x] 2.8 Update `actions/upload-artifact` in `regression-tests` job (`@v4` → `@v7`)
+- [x] 2.9 Update `actions/checkout` in `finalize-coverage` job (`@v4` → `@v6`)
 
 ## 3. Update `.github/workflows/deploy.yml`
 
-- [x] 3.1 Update `actions/checkout` (currently `@v6`) to verified latest version
-- [x] 3.2 Update `actions/setup-node` (currently `@v4`) to verified latest version
+- [x] 3.1 Update `actions/checkout` — was already at `@v6` ✓
+- [x] 3.2 Update `actions/setup-node` (`@v4` → `@v6`)
 
 ## 4. Update `.github/workflows/resolve-outdated-comments.yml`
 
-- [x] 4.1 Update `actions/checkout` (currently `@v6`) to verified latest version
+- [x] 4.1 Update `actions/checkout` — was already at `@v6` ✓
 
 ## 5. Validation
 
-- [x] 5.1 Run `grep -r "actions/checkout\|actions/setup-node\|actions/upload-artifact" .github/workflows/` and confirm all versions are consistent and match the verified latest
+- [x] 5.1 Run grep to confirm all action versions are consistent: all checkout at `@v6`, setup-node at `@v6`, upload-artifact at `@v7`
 - [x] 5.2 Confirm no `@v4` references remain for the three updated actions
-- [x] 5.3 Confirm no `@v6` references remain for `actions/checkout`
-- [x] 5.4 Verify YAML syntax is valid for all three files (e.g., `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/build-test.yml'))"` or equivalent)
+- [x] 5.3 Confirm no `@v4` references remain for `actions/checkout` (all standardized to `@v6`)
+- [x] 5.4 Verify YAML syntax is valid for all three files — all parse cleanly ✓
 
 ## 6. PR and Merge
 
-- [ ] 6.1 Create a feature branch (e.g., `chore/update-github-actions-versions`)
-- [ ] 6.2 Commit changes with message: `chore: update GitHub Actions to Node 24 runtime versions`
-- [ ] 6.3 Open PR targeting `main`; title: "chore: update GitHub Actions to Node 24 runtime versions"
+- [x] 6.1 Create feature branch `chore/update-github-actions-versions`
+- [x] 6.2 Commit changes: `chore: update GitHub Actions to Node 24 runtime versions`
+- [x] 6.3 Open PR #74 targeting `main`
 - [ ] 6.4 Verify CI passes on the PR branch (no deprecation warnings, all jobs green)
-- [ ] 6.5 Enable auto-merge once checks pass
+- [x] 6.5 Enable auto-merge once checks pass
 
 ## 7. Post-Merge
 
