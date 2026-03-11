@@ -1,0 +1,199 @@
+name: Build & Test
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests with coverage
+        run: npm run test:unit
+
+      - name: Upload unit coverage to Codacy
+        if: always()
+        env:
+          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+          CODACY_ORGANIZATION_PROVIDER: gh
+          CODACY_USERNAME: dougis-org
+          CODACY_PROJECT_NAME: session-combat
+        run: |
+          curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
+          chmod +x codacy-coverage-reporter.sh
+          if [ -f coverage/lcov.info ]; then
+            ./codacy-coverage-reporter.sh report --partial -l Javascript -r coverage/lcov.info
+            ./codacy-coverage-reporter.sh report --partial -l TypeScript -r coverage/lcov.info
+          else
+            echo "No coverage report found at coverage/lcov.info"
+          fi
+
+  integration-tests:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_DB: session-combat-test
+
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Upload integration coverage to Codacy
+        if: always()
+        env:
+          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+          CODACY_ORGANIZATION_PROVIDER: gh
+          CODACY_USERNAME: dougis-org
+          CODACY_PROJECT_NAME: session-combat
+        run: |
+          curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
+          chmod +x codacy-coverage-reporter.sh
+          if [ -f coverage/lcov.info ]; then
+            ./codacy-coverage-reporter.sh report --partial -l Javascript -r coverage/lcov.info
+            ./codacy-coverage-reporter.sh report --partial -l TypeScript -r coverage/lcov.info
+          else
+            echo "No coverage report found at coverage/lcov.info"
+          fi
+
+      - name: Upload integration test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: |
+            coverage/
+            test-results/
+          retention-days: 7
+
+  regression-tests:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ ping: 1 })' || exit 1"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers with system dependencies
+        run: npx playwright install --with-deps
+
+      - name: Wait for MongoDB to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if nc -z localhost 27017; then echo 'Mongo is up' && exit 0; fi
+            sleep 1
+          done
+          echo 'Mongo did not become ready' && exit 1
+
+      - name: Build application
+        run: npm run build
+        env:
+          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_DB: session-combat-e2e
+
+      - name: Run Playwright regression tests
+        run: npm run test:regression
+        env:
+          REGRESSION_WORKERS: '2'
+          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_DB: session-combat-e2e
+          SKIP_CHROMIUM_FIREFOX: 'true'
+
+      - name: Upload E2E coverage to Codacy
+        if: always()
+        env:
+          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+          CODACY_ORGANIZATION_PROVIDER: gh
+          CODACY_USERNAME: dougis-org
+          CODACY_PROJECT_NAME: session-combat
+        run: |
+          curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
+          chmod +x codacy-coverage-reporter.sh
+          if [ -f coverage/lcov.info ]; then
+            ./codacy-coverage-reporter.sh report --partial -l Javascript -r coverage/lcov.info
+            ./codacy-coverage-reporter.sh report --partial -l TypeScript -r coverage/lcov.info
+          else
+            echo "No coverage report found at coverage/lcov.info (E2E coverage requires instrumentation - see issue #72)"
+          fi
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+  finalize-coverage:
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, regression-tests]
+    if: always()
+
+    steps:
+      - name: Finalize Codacy coverage
+        env:
+          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+          CODACY_ORGANIZATION_PROVIDER: gh
+          CODACY_USERNAME: dougis-org
+          CODACY_PROJECT_NAME: session-combat
+        run: |
+          curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
+          chmod +x codacy-coverage-reporter.sh
+          ./codacy-coverage-reporter.sh final

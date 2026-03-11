@@ -8,6 +8,7 @@
     "build": "node scripts/generate-version.js && next build",
     "start": "BUILD_VERSION=$(node -e \"console.log(require('./package.json').version)\") BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ') HOSTNAME=0.0.0.0 PORT=3000 next start",
     "lint": "next lint",
+    "test:unit": "jest --testPathPattern='tests/unit' --coverage",
     "test:integration": "jest --config=jest.integration.config.js",
     "test:docker": "jest --config=jest.docker.config.js",
     "test:ci": "npm run test:integration",
