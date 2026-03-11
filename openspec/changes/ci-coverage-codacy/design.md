@@ -33,7 +33,7 @@ Codacy is already configured for the repo; the pattern for uploading coverage vi
 
 **Alternative considered**: `codacy/codacy-coverage-reporter-action` — rejected per the reference pattern in the issue.
 
-### Decision: Upload `final` only from the last job (unit-tests)
+### Decision: Use a dedicated job to send the final coverage signal
 **Rationale**: Codacy requires exactly one `final` call after all partials are uploaded. Since the jobs run in parallel, the `final` call must be sent after all partials arrive. We use a dedicated `finalize-coverage` job that depends on all test jobs, ensuring it only runs after all partials are uploaded.
 
 ### Decision: Add `test:unit` npm script using default `jest.config.js`
@@ -43,4 +43,4 @@ Codacy is already configured for the repo; the pattern for uploading coverage vi
 
 - **E2E coverage gap** → Playwright does not produce LCOV by default. The regression job will upload nothing or an empty report; Codacy will still show unit + integration coverage. Mitigation: skip the upload step gracefully if `coverage/lcov.info` does not exist.
 - **Parallel partial uploads** → If jobs finish at different times, Codacy may process partials out of order. Mitigation: the `finalize-coverage` job only sends `final` after all upstream jobs complete, which is the correct Codacy usage pattern.
-- **Secret availability** → `CODACY_API_TOKEN` must be present in the repo secrets. If absent, coverage upload fails silently (jobs still pass). Mitigation: document in the PR description.
+- **Secret availability** → `CODACY_API_TOKEN` is unavailable on fork PRs and will cause the reporter to exit non-zero, failing the job. Mitigation: each upload step checks `[ -z "$CODACY_API_TOKEN" ]` and exits 0 when the token is absent.

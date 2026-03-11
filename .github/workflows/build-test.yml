@@ -37,11 +37,14 @@ jobs:
           CODACY_USERNAME: dougis-org
           CODACY_PROJECT_NAME: session-combat
         run: |
+          if [ -z "$CODACY_API_TOKEN" ]; then
+            echo "CODACY_API_TOKEN not set (fork PR or missing secret), skipping coverage upload"
+            exit 0
+          fi
           curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
           chmod +x codacy-coverage-reporter.sh
           if [ -f coverage/lcov.info ]; then
-            ./codacy-coverage-reporter.sh report --partial -l Javascript -r coverage/lcov.info
-            ./codacy-coverage-reporter.sh report --partial -l TypeScript -r coverage/lcov.info
+            ./codacy-coverage-reporter.sh report --partial -r coverage/lcov.info
           else
             echo "No coverage report found at coverage/lcov.info"
           fi
@@ -71,8 +74,8 @@ jobs:
           MONGODB_URI: mongodb://localhost:27017
           MONGODB_DB: session-combat-test
 
-      - name: Run integration tests
-        run: npm run test:integration
+      - name: Run integration tests with coverage
+        run: npm run test:integration -- --coverage
 
       - name: Upload integration coverage to Codacy
         if: always()
@@ -82,11 +85,14 @@ jobs:
           CODACY_USERNAME: dougis-org
           CODACY_PROJECT_NAME: session-combat
         run: |
+          if [ -z "$CODACY_API_TOKEN" ]; then
+            echo "CODACY_API_TOKEN not set (fork PR or missing secret), skipping coverage upload"
+            exit 0
+          fi
           curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
           chmod +x codacy-coverage-reporter.sh
           if [ -f coverage/lcov.info ]; then
-            ./codacy-coverage-reporter.sh report --partial -l Javascript -r coverage/lcov.info
-            ./codacy-coverage-reporter.sh report --partial -l TypeScript -r coverage/lcov.info
+            ./codacy-coverage-reporter.sh report --partial -r coverage/lcov.info
           else
             echo "No coverage report found at coverage/lcov.info"
           fi
@@ -164,11 +170,14 @@ jobs:
           CODACY_USERNAME: dougis-org
           CODACY_PROJECT_NAME: session-combat
         run: |
+          if [ -z "$CODACY_API_TOKEN" ]; then
+            echo "CODACY_API_TOKEN not set (fork PR or missing secret), skipping coverage upload"
+            exit 0
+          fi
           curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
           chmod +x codacy-coverage-reporter.sh
           if [ -f coverage/lcov.info ]; then
-            ./codacy-coverage-reporter.sh report --partial -l Javascript -r coverage/lcov.info
-            ./codacy-coverage-reporter.sh report --partial -l TypeScript -r coverage/lcov.info
+            ./codacy-coverage-reporter.sh report --partial -r coverage/lcov.info
           else
             echo "No coverage report found at coverage/lcov.info (E2E coverage requires instrumentation - see issue #72)"
           fi
@@ -187,6 +196,9 @@ jobs:
     if: always()
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Finalize Codacy coverage
         env:
           CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
@@ -194,6 +206,10 @@ jobs:
           CODACY_USERNAME: dougis-org
           CODACY_PROJECT_NAME: session-combat
         run: |
+          if [ -z "$CODACY_API_TOKEN" ]; then
+            echo "CODACY_API_TOKEN not set (fork PR or missing secret), skipping coverage finalization"
+            exit 0
+          fi
           curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
           chmod +x codacy-coverage-reporter.sh
           ./codacy-coverage-reporter.sh final

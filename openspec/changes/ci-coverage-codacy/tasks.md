@@ -1,6 +1,6 @@
 ## 1. npm Script
 
-- [x] 1.1 Add `test:unit` script to `package.json` that runs `jest --coverage` using the default `jest.config.js`
+- [x] 1.1 Add `test:unit` script to `package.json` that runs `jest --testPathPattern='tests/unit' --coverage` (scoped to unit tests only to avoid running integration tests without MongoDB)
 
 ## 2. Workflow File
 

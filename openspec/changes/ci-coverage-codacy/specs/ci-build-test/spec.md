@@ -34,7 +34,7 @@ The `unit-tests` CI job SHALL upload `coverage/lcov.info` to Codacy as a partial
 
 #### Scenario: Coverage file present
 - **WHEN** `coverage/lcov.info` exists after unit tests complete
-- **THEN** the Codacy reporter is invoked with `--partial -l Javascript` and `--partial -l TypeScript` flags
+- **THEN** the Codacy reporter is invoked once with `report --partial -r coverage/lcov.info` (language auto-detected from the LCOV file paths)
 
 #### Scenario: Coverage file absent
 - **WHEN** `coverage/lcov.info` does not exist
@@ -45,7 +45,7 @@ The `integration-tests` CI job SHALL upload `coverage/lcov.info` to Codacy as a 
 
 #### Scenario: Integration coverage uploaded
 - **WHEN** the integration test job completes and `coverage/lcov.info` exists
-- **THEN** the Codacy reporter uploads it with `--partial` flags for both Javascript and TypeScript
+- **THEN** the Codacy reporter uploads it with `report --partial -r coverage/lcov.info` (single invocation, language auto-detected)
 
 ### Requirement: Coverage finalized after all test jobs complete
 A `finalize-coverage` CI job SHALL run after all test jobs (unit, integration, regression) complete and SHALL send the Codacy `final` signal to commit the combined coverage.
