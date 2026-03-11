@@ -60,6 +60,15 @@ const writeQueue = (queue: SyncOperation[]): void => {
 const calculateRetryDelay = (attempts: number): number =>
   Math.min(1000 * 2 ** attempts, 30000);
 
+const toFailedOperation = (operation: SyncOperation): SyncOperation => {
+  const nextAttempts = operation.attempts + 1;
+  return {
+    ...operation,
+    attempts: nextAttempts,
+    nextRetryAt: now() + calculateRetryDelay(operation.attempts),
+  };
+};
+
 let autoFlushSyncFn: SyncFn | null = null;
 let networkSubscribed = false;
 let flushInProgress = false;
@@ -141,12 +150,7 @@ export const SyncQueue = {
         return operation;
       }
 
-      const nextAttempts = operation.attempts + 1;
-      return {
-        ...operation,
-        attempts: nextAttempts,
-        nextRetryAt: now() + calculateRetryDelay(operation.attempts),
-      };
+      return toFailedOperation(operation);
     });
 
     writeQueue(queue);
@@ -175,12 +179,7 @@ export const SyncQueue = {
         try {
           await syncFn(operation);
         } catch {
-          const nextAttempts = operation.attempts + 1;
-          retained.push({
-            ...operation,
-            attempts: nextAttempts,
-            nextRetryAt: now() + calculateRetryDelay(operation.attempts),
-          });
+          retained.push(toFailedOperation(operation));
         }
       }
 

@@ -1,5 +1,13 @@
 /** @jest-environment jsdom */
 
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  jest,
+  test,
+} from "@jest/globals";
 import React from "react";
 import { act } from "react";
 import { createRoot, Root } from "react-dom/client";
@@ -98,6 +106,81 @@ describe("logout clears storage integration", () => {
     ).toBeNull();
     expect(localStorage.getItem("sessionData")).toBeNull();
     expect(localStorage.getItem("unrelated")).toBe("keep-me");
+    expect(replaceMock).toHaveBeenCalledWith("/login");
+  });
+
+  test("logout still clears client-side data when API logout request fails", async () => {
+    function Harness() {
+      const auth = useAuth();
+      React.useEffect(() => {
+        logoutFn = auth.logout;
+      }, [auth.logout]);
+      return null;
+    }
+
+    global.fetch = jest.fn(async () => {
+      throw new Error("network down");
+    }) as typeof fetch;
+
+    await act(async () => {
+      root.render(React.createElement(Harness));
+    });
+
+    LocalStore.set("encounters", [{ id: "enc-1" }]);
+    SyncQueue.enqueue({
+      entity: "encounters",
+      action: "upsert",
+      payload: { id: "enc-1" },
+    });
+    clientStorage.saveEncounters([]);
+
+    await act(async () => {
+      await logoutFn?.();
+    });
+
+    expect(
+      localStorage.getItem(`${SESSION_COMBAT_PREFIX}encounters`),
+    ).toBeNull();
+    expect(
+      localStorage.getItem(`${SESSION_COMBAT_PREFIX}syncQueue`),
+    ).toBeNull();
+    expect(localStorage.getItem("sessionData")).toBeNull();
+    expect(replaceMock).toHaveBeenCalledWith("/login");
+  });
+
+  test("logout runs remaining cleanup steps when one cleanup step throws", async () => {
+    function Harness() {
+      const auth = useAuth();
+      React.useEffect(() => {
+        logoutFn = auth.logout;
+      }, [auth.logout]);
+      return null;
+    }
+
+    await act(async () => {
+      root.render(React.createElement(Harness));
+    });
+
+    LocalStore.set("encounters", [{ id: "enc-1" }]);
+    SyncQueue.enqueue({
+      entity: "encounters",
+      action: "upsert",
+      payload: { id: "enc-1" },
+    });
+    clientStorage.saveEncounters([]);
+
+    jest.spyOn(LocalStore, "clear").mockImplementation(() => {
+      throw new Error("LocalStore clear failed");
+    });
+
+    await act(async () => {
+      await logoutFn?.();
+    });
+
+    expect(
+      localStorage.getItem(`${SESSION_COMBAT_PREFIX}syncQueue`),
+    ).toBeNull();
+    expect(localStorage.getItem("sessionData")).toBeNull();
     expect(replaceMock).toHaveBeenCalledWith("/login");
   });
 });

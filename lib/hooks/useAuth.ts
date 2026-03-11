@@ -108,32 +108,33 @@ export function useAuth() {
 
   // Logout function
   const logout = useCallback(async () => {
+    const safeCleanup = (label: string, cleanup: () => void) => {
+      try {
+        cleanup();
+      } catch (cleanupErr) {
+        console.warn(`Failed logout cleanup step: ${label}`, cleanupErr);
+      }
+    };
+
     try {
       setLoading(true);
       const response = await fetch("/api/auth/logout", { method: "POST" });
       if (!response.ok) {
         console.warn("Logout endpoint returned non-OK status");
       }
-
-      // Client-side cleanup: clear all offline and session data.
-      try {
-        LocalStore.clear();
-        SyncQueue.clear();
-        clientStorage.clear();
-      } catch (cleanupErr) {
-        console.warn("Failed to clear local logout state:", cleanupErr);
-      }
-
-      setUser(null);
-      setError(null);
-      console.debug("[auth] logout completed");
-
-      // Redirect to login using router.replace to prevent back button access
-      router.replace("/login");
     } catch (err) {
       console.error("Logout failed:", err);
       setError("Logout failed");
     } finally {
+      // Always clear browser-side session data, even if network logout fails.
+      safeCleanup("LocalStore.clear", () => LocalStore.clear());
+      safeCleanup("SyncQueue.clear", () => SyncQueue.clear());
+      safeCleanup("clientStorage.clear", () => clientStorage.clear());
+
+      setUser(null);
+      setError(null);
+      console.debug("[auth] logout completed");
+      router.replace("/login");
       setLoading(false);
     }
   }, [router]);
