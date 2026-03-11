@@ -65,7 +65,7 @@ const toFailedOperation = (operation: SyncOperation): SyncOperation => {
   return {
     ...operation,
     attempts: nextAttempts,
-    nextRetryAt: now() + calculateRetryDelay(operation.attempts),
+    nextRetryAt: now() + calculateRetryDelay(nextAttempts),
   };
 };
 

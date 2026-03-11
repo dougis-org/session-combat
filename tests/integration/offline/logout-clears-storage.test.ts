@@ -178,6 +178,9 @@ describe("logout clears storage integration", () => {
     });
 
     expect(
+      localStorage.getItem(`${SESSION_COMBAT_PREFIX}encounters`),
+    ).not.toBeNull();
+    expect(
       localStorage.getItem(`${SESSION_COMBAT_PREFIX}syncQueue`),
     ).toBeNull();
     expect(localStorage.getItem("sessionData")).toBeNull();

@@ -37,7 +37,7 @@ describe("SyncQueue", () => {
     expect(parsed[0].entity).toBe("encounters");
   });
 
-  test("markFailed() sets nextRetryAt about 1000ms out for attempts: 0", () => {
+  test("markFailed() sets nextRetryAt about 2000ms out for attempts: 0", () => {
     const start = 1_000_000;
     jest.spyOn(Date, "now").mockReturnValue(start);
 
@@ -52,7 +52,7 @@ describe("SyncQueue", () => {
 
     const updated = SyncQueue.getAll()[0];
     expect(updated.attempts).toBe(1);
-    expect(updated.nextRetryAt).toBe(start + 1000);
+    expect(updated.nextRetryAt).toBe(start + 2000);
   });
 
   test("markFailed() caps nextRetryAt at 30000ms for high attempts", () => {

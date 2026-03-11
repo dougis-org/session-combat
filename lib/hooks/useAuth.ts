@@ -124,7 +124,6 @@ export function useAuth() {
       }
     } catch (err) {
       console.error("Logout failed:", err);
-      setError("Logout failed");
     } finally {
       // Always clear browser-side session data, even if network logout fails.
       safeCleanup("LocalStore.clear", () => LocalStore.clear());
