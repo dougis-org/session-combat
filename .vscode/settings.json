@@ -21,5 +21,6 @@
         "titleBar.inactiveForeground": "#e7e7e799"
     },
     "peacock.color": "forestgreen",
-    "snyk.advanced.autoSelectOrganization": true
+    "snyk.advanced.autoSelectOrganization": true,
+    "snyk.advanced.organization": "3191d5e0-24a6-4c8f-b934-a88c1a5cfb2f"
 }

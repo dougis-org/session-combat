@@ -14,5 +14,5 @@
 ## 3. Verification
 
 - [x] 3.1 Confirm `npm run test:unit` runs successfully locally and produces `coverage/lcov.info`
-- [ ] 3.2 Open a PR and confirm the `Build & Test` workflow appears in GitHub Actions with all four jobs (unit-tests, integration-tests, regression-tests, finalize-coverage)
-- [ ] 3.3 Confirm Codacy shows combined coverage from the PR run
+- [x] 3.2 Open a PR and confirm the `Build & Test` workflow appears in GitHub Actions with all four jobs (unit-tests, integration-tests, regression-tests, finalize-coverage)
+- [x] 3.3 Confirm Codacy shows combined coverage from the PR run
