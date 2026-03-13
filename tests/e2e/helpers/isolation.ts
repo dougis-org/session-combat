@@ -1,19 +1,19 @@
+import { createHash } from "node:crypto";
+import type { TestInfo } from "@playwright/test";
 import { v4 as uuidv4 } from "uuid";
 
-type IsolationInput = {
-  workerIndex: number;
-  retry: number;
-  title: string;
-};
+type IsolationInput = Pick<TestInfo, "workerIndex" | "retry" | "title">;
 
 function slugify(value: string): string {
+  const hash = createHash("sha1").update(value).digest("hex").slice(0, 7);
   const normalized = value
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, 48);
+    .slice(0, 40);
 
-  return normalized || "test";
+  const slug = normalized || "test";
+  return `${slug}-${hash}`;
 }
 
 export function buildTestNamespace({

@@ -75,7 +75,7 @@ npm run test:e2e:ui
 **Debug a specific test:**
 
 ```bash
-npx playwright test tests/e2e/regression.spec.ts --debug
+npx playwright test tests/e2e/auth.spec.ts --debug
 ```
 
 ## Test Organization
@@ -85,12 +85,11 @@ npx playwright test tests/e2e/regression.spec.ts --debug
 ```text
 tests/
 ├── e2e/
-│   ├── regression.spec.ts          # Main regression test suite (38 tests)
-│   ├── registration.spec.ts        # Registration flow tests (6 tests)
-│   ├── logout.spec.ts              # Logout/storage cleanup tests (1 test)
+│   ├── auth.spec.ts                # Authentication and registration regression coverage
+│   ├── combat.spec.ts              # Stateful character/party/encounter/combat flows
 │   └── helpers/
 │       ├── actions.ts              # Reusable UI action helpers
-│       └── db.ts                   # Database test helpers (optional, for teardown)
+│       └── isolation.ts            # Worker-scoped namespace and identity helpers
 ```
 
 ## Test Helpers
@@ -144,7 +143,8 @@ await disconnectDB();
 
 ### What Gets Tested
 
-The regression suite (`tests/e2e/regression.spec.ts`) includes **38 parallel tests** covering the full user journey:
+The regression suite across `tests/e2e/auth.spec.ts` and `tests/e2e/combat.spec.ts`
+includes **38 parallel tests** covering the full user journey:
 
 #### 1. Registration Page Tests (9 tests)
 
@@ -206,8 +206,8 @@ The regression suite (`tests/e2e/regression.spec.ts`) includes **38 parallel tes
 - ✅ Complete end-to-end flow from registration to combat
 
 **Total: 38 regression tests** run via `npm run test:regression`.
-The full E2E suite (`npm run test:e2e`) additionally includes
-`registration.spec.ts` and `logout.spec.ts`.
+The full E2E suite (`npm run test:e2e`) runs the same auth and combat specs
+across the configured browser projects.
 
 ### Test Categories
 
@@ -228,11 +228,11 @@ The full E2E suite (`npm run test:e2e`) additionally includes
 
 # Run only registration tests
 
-npx playwright test regression.spec.ts -g "Registration"
+npx playwright test tests/e2e/auth.spec.ts -g "Registration"
 
 # Run only form tests
 
-npx playwright test regression.spec.ts -g "Form"
+npx playwright test tests/e2e/auth.spec.ts -g "Form"
 ```
 
 ## Viewing Test Results
@@ -306,7 +306,7 @@ export default defineConfig({
 
 ### Environment Variables
 
-- `REGRESSION_WORKERS` - Number of parallel workers (defaults to Playwright auto-detection locally, 1 in CI)
+- `REGRESSION_WORKERS` - Number of parallel workers (defaults to Playwright auto-detection locally and 1 in CI)
 - `MONGODB_URI` - MongoDB connection string (set to `mongodb://localhost:27017` in CI)
 - `MONGODB_DB` - Test database name (set to `session-combat-e2e` in CI)
 - `CHROMIUM_ONLY` - Set to `'true'` in CI to run the Chromium-specific regression path
@@ -339,7 +339,7 @@ Regression tests run automatically in GitHub Actions:
       exit $status
     }
     trap finish EXIT
-    npm run test:regression -- --project=chromium 2>&1 | tee /dev/stderr
+    npm run test:regression
   env:
     REGRESSION_WORKERS: '2'
     MONGODB_URI: mongodb://localhost:27017
@@ -349,7 +349,7 @@ Regression tests run automatically in GitHub Actions:
 - name: Upload Playwright HTML report
 
   if: always()
-  uses: actions/upload-artifact@v4
+  uses: actions/upload-artifact@v7
   with:
     name: playwright-report
     path: playwright-report/
