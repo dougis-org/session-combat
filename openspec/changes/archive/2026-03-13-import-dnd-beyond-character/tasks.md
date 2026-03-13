@@ -23,14 +23,14 @@
 
 ## 3. PR and Merge
 
-- [ ] 3.1 Open a pull request that links GH issue #39, summarizes the import workflow, and explains any parser dependency or fixture strategy
-- [ ] 3.2 Request human review, capture approval expectation, and address unresolved review comments before merge
-- [ ] 3.3 Request Copilot review or equivalent automated review, resolve actionable findings, and rerun affected tests after fixes
-- [ ] 3.4 Keep auto-merge disabled until required CI, review, and security checks are green; enable auto-merge only after all blockers are cleared
+- [x] 3.1 Open a pull request that links GH issue #39, summarizes the import workflow, and explains any parser dependency or fixture strategy
+- [x] 3.2 Request human review, capture approval expectation, and address unresolved review comments before merge
+- [x] 3.3 Request Copilot review or equivalent automated review, resolve actionable findings, and rerun affected tests after fixes
+- [x] 3.4 Keep auto-merge disabled until required CI, review, and security checks are green; enable auto-merge only after all blockers are cleared
 
 ## 4. Post-Merge
 
 - [x] 4.1 Update user-facing or contributor documentation if the import flow, supported URL formats, or testing approach needs to be documented
 - [x] 4.2 Sync the approved spec delta from `openspec/changes/import-dnd-beyond-character/specs/dnd-beyond-character-import/spec.md` into `openspec/specs/` as part of the archive workflow
-- [ ] 4.3 Archive the change with the OpenSpec archive flow after merge and verification are complete
-- [ ] 4.4 Clean up the feature branch after merge and confirm the default branch is up to date
+- [x] 4.3 Archive the change with the OpenSpec archive flow after merge and verification are complete
+- [x] 4.4 Clean up the feature branch after merge and confirm the default branch is up to date
