@@ -43,8 +43,9 @@ export async function fetchDndBeyondCharacter(
 
 export async function importDndBeyondCharacter(
   pageUrl: string,
+  fetchImpl: typeof fetch = fetch,
 ): Promise<NormalizedDndBeyondCharacter> {
-  const data = await fetchDndBeyondCharacter(pageUrl);
+  const data = await fetchDndBeyondCharacter(pageUrl, fetchImpl);
   return normalizeDndBeyondCharacter(data);
 }
 

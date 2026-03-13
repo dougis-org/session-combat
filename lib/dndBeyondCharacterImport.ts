@@ -87,6 +87,13 @@ const NOTE_TITLE_MAP = {
   organizations: "Organizations",
   otherNotes: "Other Notes",
 };
+const PASSIVE_SENSE_SKILLS: Array<
+  [string, keyof typeof SKILL_ABILITY_MAP, keyof AbilityScores]
+> = [
+  ["passive perception", "perception", "wisdom"],
+  ["passive investigation", "investigation", "intelligence"],
+  ["passive insight", "insight", "wisdom"],
+];
 
 interface DndBeyondStatValue {
   id: number;
@@ -400,19 +407,16 @@ function normalizeClasses(
   classes: DndBeyondClassEntry[] | null | undefined,
   warnings: string[],
 ): CharacterClass[] {
-  const merged = new Map<DnDClass, number>();
-
-  for (const entry of classes || []) {
-    const normalizedEntry = normalizeClassEntry(entry, warnings);
-    if (!normalizedEntry) {
-      continue;
-    }
-
-    merged.set(
-      normalizedEntry.className,
-      (merged.get(normalizedEntry.className) || 0) + normalizedEntry.level,
-    );
-  }
+  const merged = (classes || [])
+    .map((entry) => normalizeClassEntry(entry, warnings))
+    .filter(isPresent)
+    .reduce((classLevels, entry) => {
+      classLevels.set(
+        entry.className,
+        (classLevels.get(entry.className) || 0) + entry.level,
+      );
+      return classLevels;
+    }, new Map<DnDClass, number>());
 
   const normalized = Array.from(merged.entries()).map(([className, level]) => ({
     class: className,
@@ -618,16 +622,14 @@ function normalizeSavingThrows(
     (modifier) => (modifier.subType || "").replace("-saving-throws", ""),
   );
 
-  const savingThrows: Partial<Record<keyof AbilityScores, number>> = {};
-
-  for (const ability of ABILITY_KEYS) {
-    const base = getAbilityModifier(abilityScores[ability]);
-    const proficiency = proficientSaves.has(ability) ? proficiencyBonus : 0;
-    const bonus = bonusesBySubtype[`${ability}-saving-throws`] || 0;
-    savingThrows[ability] = base + proficiency + bonus;
-  }
-
-  return savingThrows;
+  return Object.fromEntries(
+    ABILITY_KEYS.map((ability) => [
+      ability,
+      getAbilityModifier(abilityScores[ability]) +
+        (proficientSaves.has(ability) ? proficiencyBonus : 0) +
+        (bonusesBySubtype[`${ability}-saving-throws`] || 0),
+    ]),
+  );
 }
 
 function normalizeSkills(
@@ -674,15 +676,14 @@ function normalizeSenses(
     senses.speed = `${walkSpeed} ft.`;
   }
 
-  senses["passive perception"] = String(
-    10 + (skills.perception ?? getAbilityModifier(abilityScores.wisdom)),
-  );
-  senses["passive investigation"] = String(
-    10 +
-      (skills.investigation ?? getAbilityModifier(abilityScores.intelligence)),
-  );
-  senses["passive insight"] = String(
-    10 + (skills.insight ?? getAbilityModifier(abilityScores.wisdom)),
+  Object.assign(
+    senses,
+    Object.fromEntries(
+      PASSIVE_SENSE_SKILLS.map(([label, skill, ability]) => [
+        label,
+        String(10 + (skills[skill] ?? getAbilityModifier(abilityScores[ability]))),
+      ]),
+    ),
   );
 
   return senses;
@@ -735,16 +736,18 @@ function normalizeAbilities(
     reactions: [] as CreatureAbility[],
   };
 
-  for (const entries of Object.values(actions || {})) {
-    for (const entry of entries || []) {
-      const ability = normalizeActionEntry(entry);
-      if (!ability) {
-        continue;
-      }
-
+  Object.values(actions || {})
+    .flatMap((entries) => entries || [])
+    .map((entry) => ({ entry, ability: normalizeActionEntry(entry) }))
+    .filter(
+      (
+        item,
+      ): item is { entry: DndBeyondActionEntry; ability: CreatureAbility } =>
+        isPresent(item.ability),
+    )
+    .forEach(({ entry, ability }) => {
       pushAbilityByActivation(categorizedAbilities, entry, ability);
-    }
-  }
+    });
 
   const mappedTraits = [
     ...mapNarrativeEntries(traits, TRAIT_TITLE_MAP),
@@ -897,4 +900,8 @@ function titleize(value: string): string {
 
 function dedupeStrings(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean)));
+}
+
+function isPresent<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
 }
