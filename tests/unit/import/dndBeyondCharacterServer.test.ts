@@ -5,6 +5,10 @@ import {
   importDndBeyondCharacter,
 } from "@/lib/server/dndBeyondCharacterImport";
 import { sampleDndBeyondCharacterResponse } from "@/tests/fixtures/dndBeyondCharacter";
+import {
+  DND_BEYOND_CHARACTER_NAME,
+  DND_BEYOND_CHARACTER_URL,
+} from "@/tests/helpers/dndBeyondImport";
 
 describe("dndBeyondCharacterImport server module", () => {
   test("fetches the public character-service payload", async () => {
@@ -15,7 +19,7 @@ describe("dndBeyondCharacterImport server module", () => {
     })) as unknown as typeof fetch;
 
     const result = await fetchDndBeyondCharacter(
-      "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+      DND_BEYOND_CHARACTER_URL,
       fetchImpl,
     );
 
@@ -23,7 +27,7 @@ describe("dndBeyondCharacterImport server module", () => {
       expect.stringContaining("/character/91913267?includeCustomItems=true"),
       expect.objectContaining({ cache: "no-store" }),
     );
-    expect(result.name).toBe("Dolor Vagarpie");
+    expect(result.name).toBe(DND_BEYOND_CHARACTER_NAME);
   });
 
   test("maps 403 and 404 upstream responses to a public access error", async () => {
@@ -35,7 +39,7 @@ describe("dndBeyondCharacterImport server module", () => {
 
     await expect(
       fetchDndBeyondCharacter(
-        "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+        DND_BEYOND_CHARACTER_URL,
         fetchImpl,
       ),
     ).rejects.toThrow(/make sure the character is public/i);
@@ -50,7 +54,7 @@ describe("dndBeyondCharacterImport server module", () => {
 
     await expect(
       fetchDndBeyondCharacter(
-        "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+        DND_BEYOND_CHARACTER_URL,
         fetchImpl,
       ),
     ).rejects.toThrow(/missing character data/i);
@@ -65,7 +69,7 @@ describe("dndBeyondCharacterImport server module", () => {
 
     await expect(
       fetchDndBeyondCharacter(
-        "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+        DND_BEYOND_CHARACTER_URL,
         fetchImpl,
       ),
     ).rejects.toThrow(/timed out/i);
@@ -79,11 +83,11 @@ describe("dndBeyondCharacterImport server module", () => {
     })) as unknown as typeof fetch;
 
     const result = await importDndBeyondCharacter(
-      "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+      DND_BEYOND_CHARACTER_URL,
       fetchImpl,
     );
 
-    expect(result.character.name).toBe("Dolor Vagarpie");
+    expect(result.character.name).toBe(DND_BEYOND_CHARACTER_NAME);
     expect(result.character.classes).toEqual([
       { class: "Rogue", level: 5 },
       { class: "Warlock", level: 7 },

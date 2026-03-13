@@ -10,6 +10,14 @@ import {
   verifyCombatScreenElements,
 } from "./helpers/actions";
 import { clearTestCollections } from "./helpers/db";
+import {
+  createDuplicateNameConflictPayload,
+  createImportedCharacterApiPayload,
+  createPersistedImportedCharacter,
+  DND_BEYOND_CHARACTER_URL,
+  EXISTING_IMPORTED_CHARACTER_ID,
+  IMPORT_WARNING,
+} from "@/tests/helpers/dndBeyondImport";
 
 const STRONG_PASSWORD = "TestPassword123!";
 
@@ -25,10 +33,9 @@ test.describe("Combat flows", () => {
     await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
 
     let characters = [
-      {
-        id: "existing-character-id",
+      createPersistedImportedCharacter({
+        id: EXISTING_IMPORTED_CHARACTER_ID,
         userId: "test-user-id",
-        name: "Dolor Vagarpie",
         ac: 15,
         hp: 30,
         maxHp: 30,
@@ -41,7 +48,7 @@ test.describe("Combat flows", () => {
           charisma: 16,
         },
         classes: [{ class: "Warlock", level: 3 }],
-      },
+      }),
     ];
 
     await page.route("**/api/characters", async (route) => {
@@ -65,57 +72,36 @@ test.describe("Combat flows", () => {
         overwrite?: boolean;
       };
 
-      expect(body.url).toBe(
-        "https://www.dndbeyond.com/characters/91913267/BRdgB3",
-      );
+      expect(body.url).toBe(DND_BEYOND_CHARACTER_URL);
 
       if (!body.overwrite) {
         await route.fulfill({
           status: 409,
           contentType: "application/json",
-          body: JSON.stringify({
-            conflict: "duplicate-name",
-            error: "Character already exists",
-            existingCharacter: {
-              id: "existing-character-id",
-              name: "Dolor Vagarpie",
-            },
-            warnings: ["Alignment was not supported and was omitted."],
-          }),
+          body: JSON.stringify(
+            createDuplicateNameConflictPayload({ warnings: [IMPORT_WARNING] }),
+          ),
         });
         return;
       }
 
       characters = [
-        {
-          id: "existing-character-id",
+        createPersistedImportedCharacter({
+          id: EXISTING_IMPORTED_CHARACTER_ID,
           userId: "test-user-id",
-          name: "Dolor Vagarpie",
           ac: 18,
-          hp: 92,
-          maxHp: 92,
-          abilityScores: {
-            strength: 10,
-            dexterity: 17,
-            constitution: 14,
-            intelligence: 16,
-            wisdom: 10,
-            charisma: 21,
-          },
-          classes: [
-            { class: "Rogue", level: 5 },
-            { class: "Warlock", level: 7 },
-          ],
-        },
+        }),
       ];
 
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({
-          character: characters[0],
-          warnings: ["Alignment was not supported and was omitted."],
-        }),
+        body: JSON.stringify(
+          createImportedCharacterApiPayload({
+            character: characters[0],
+            warnings: [IMPORT_WARNING],
+          }),
+        ),
       });
     });
 
@@ -128,9 +114,7 @@ test.describe("Combat flows", () => {
       .getByRole("button", { name: "Import from D&D Beyond" })
       .first()
       .click();
-    await page
-      .locator("#dnd-beyond-url")
-      .fill("https://www.dndbeyond.com/characters/91913267/BRdgB3");
+    await page.locator("#dnd-beyond-url").fill(DND_BEYOND_CHARACTER_URL);
     await page
       .getByRole("button", { name: "Import from D&D Beyond" })
       .last()

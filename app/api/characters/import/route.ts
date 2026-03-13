@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { DndBeyondImportError } from "@/lib/dndBeyondCharacterImport";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { importDndBeyondCharacter } from "@/lib/server/dndBeyondCharacterImport";
@@ -67,15 +68,60 @@ export async function POST(request: NextRequest) {
       overwritten: Boolean(existingCharacter),
     });
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to import D&D Beyond character.";
-    const status = /required|valid|supported|format|public|missing/i.test(
-      message,
-    )
-      ? 400
-      : 502;
-    return NextResponse.json({ error: message }, { status });
+    const response = getImportErrorResponse(error);
+
+    if (response.status >= 500) {
+      console.error("D&D Beyond import failed", error);
+    }
+
+    return NextResponse.json({ error: response.message }, { status: response.status });
   }
+}
+
+function getImportErrorResponse(
+  error: unknown,
+): { message: string; status: number } {
+  const importError = asImportError(error);
+
+  if (importError) {
+    return {
+      status: importError.status,
+      message: importError.exposeMessage
+        ? importError.message
+        : "Failed to import D&D Beyond character.",
+    };
+  }
+
+  return {
+    status: 502,
+    message: "Failed to import D&D Beyond character.",
+  };
+}
+
+function asImportError(
+  error: unknown,
+): Pick<DndBeyondImportError, "message" | "status" | "exposeMessage"> | null {
+  const errorWithExposeFlag = error as { exposeMessage?: unknown } | null;
+  const errorWithStatus = error as { status?: unknown } | null;
+  const errorWithMessage = error as { message?: unknown } | null;
+
+  if (
+    error &&
+    typeof error === "object" &&
+    "message" in error &&
+    "status" in error &&
+    typeof errorWithMessage?.message === "string" &&
+    typeof errorWithStatus?.status === "number"
+  ) {
+    return {
+      message: errorWithMessage.message,
+      status: errorWithStatus.status,
+      exposeMessage:
+        typeof errorWithExposeFlag?.exposeMessage === "boolean"
+          ? errorWithExposeFlag.exposeMessage
+          : errorWithStatus.status < 500,
+    };
+  }
+
+  return null;
 }

@@ -176,11 +176,31 @@ export interface ParsedDndBeyondCharacterUrl {
   normalizedUrl: string;
 }
 
+export type ImportedCharacterDraft = Omit<
+  Character,
+  "_id" | "id" | "userId" | "createdAt" | "updatedAt"
+>;
+
 export interface NormalizedDndBeyondCharacter {
-  character: Character;
+  character: ImportedCharacterDraft;
   warnings: string[];
   sourceCharacterId: string;
   sourceUrl?: string;
+}
+
+export class DndBeyondImportError extends Error {
+  readonly status: number;
+  readonly exposeMessage: boolean;
+
+  constructor(
+    message: string,
+    options: { status: number; exposeMessage?: boolean },
+  ) {
+    super(message);
+    this.name = "DndBeyondImportError";
+    this.status = options.status;
+    this.exposeMessage = options.exposeMessage ?? options.status < 500;
+  }
 }
 
 interface CharacterIdentity {
@@ -216,14 +236,14 @@ export function parseDndBeyondCharacterUrl(
   const parsed = parseUrlOrThrow(url);
 
   if (!isSupportedDndBeyondHostname(parsed.hostname)) {
-    throw new Error(
+    throw createValidationError(
       "Only canonical public D&D Beyond character URLs are supported.",
     );
   }
 
   const match = parsed.pathname.match(CHARACTER_PATH_PATTERN);
   if (!match) {
-    throw new Error(
+    throw createValidationError(
       "Use a public D&D Beyond character URL in the format /characters/<id>/<shareCode>.",
     );
   }
@@ -262,7 +282,7 @@ function parseUrlOrThrow(url: string): URL {
   try {
     return new URL(url);
   } catch {
-    throw new Error("Enter a valid D&D Beyond character URL.");
+    throw createValidationError("Enter a valid D&D Beyond character URL.");
   }
 }
 
@@ -278,11 +298,15 @@ function requireCharacterIdentity(
   const name = data.name?.trim();
 
   if (!sourceCharacterId) {
-    throw new Error("The imported D&D Beyond character is missing an ID.");
+    throw createValidationError(
+      "The imported D&D Beyond character is missing an ID.",
+    );
   }
 
   if (!name) {
-    throw new Error("The imported D&D Beyond character is missing a name.");
+    throw createValidationError(
+      "The imported D&D Beyond character is missing a name.",
+    );
   }
 
   return { name, sourceCharacterId };
@@ -356,10 +380,8 @@ function buildNormalizationWarnings(
 function buildNormalizedCharacter(
   name: string,
   details: NormalizedCharacterDetails,
-): Character {
+): ImportedCharacterDraft {
   return {
-    id: "",
-    userId: "",
     name,
     ac: details.ac,
     hp: details.hp,
@@ -424,7 +446,7 @@ function normalizeClasses(
   }));
 
   if (normalized.length === 0) {
-    throw new Error(
+    throw createValidationError(
       "The imported D&D Beyond character did not include any supported classes.",
     );
   }
@@ -504,7 +526,7 @@ function resolveAbilityScore(
   const baseValue = baseScores.get(statId);
 
   if (typeof baseValue !== "number") {
-    throw new Error(
+    throw createValidationError(
       `The imported D&D Beyond character is missing ${ability} data.`,
     );
   }
@@ -906,4 +928,8 @@ function dedupeStrings(values: string[]): string[] {
 
 function isPresent<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
+}
+
+function createValidationError(message: string): DndBeyondImportError {
+  return new DndBeyondImportError(message, { status: 400 });
 }

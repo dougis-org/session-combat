@@ -3,6 +3,7 @@ import "server-only";
 import {
   DndBeyondCharacterData,
   DndBeyondCharacterServiceResponse,
+  DndBeyondImportError,
   NormalizedDndBeyondCharacter,
   normalizeDndBeyondCharacter,
   parseDndBeyondCharacterUrl,
@@ -62,20 +63,25 @@ function assertSuccessfulCharacterResponse(response: Response): void {
   }
 
   if (response.status === 404 || response.status === 403) {
-    throw new Error(
+    throw new DndBeyondImportError(
       "The D&D Beyond character could not be accessed. Make sure the character is public.",
+      { status: 400 },
     );
   }
 
-  throw new Error("Failed to fetch the D&D Beyond character.");
+  throw new DndBeyondImportError("Failed to fetch the D&D Beyond character.", {
+    status: 502,
+    exposeMessage: false,
+  });
 }
 
 function extractCharacterServiceData(body: unknown): DndBeyondCharacterData {
   const response = body as DndBeyondCharacterServiceResponse;
 
   if (!response.success || !response.data) {
-    throw new Error(
+    throw new DndBeyondImportError(
       "The D&D Beyond character response was missing character data.",
+      { status: 502, exposeMessage: false },
     );
   }
 
@@ -83,11 +89,19 @@ function extractCharacterServiceData(body: unknown): DndBeyondCharacterData {
 }
 
 function mapFetchError(error: unknown): Error {
-  if (error instanceof Error && error.name === "AbortError") {
-    return new Error("The D&D Beyond character request timed out.");
+  if (error instanceof DndBeyondImportError) {
+    return error;
   }
 
-  return error instanceof Error
-    ? error
-    : new Error("Failed to fetch the D&D Beyond character.");
+  if (error instanceof Error && error.name === "AbortError") {
+    return new DndBeyondImportError(
+      "The D&D Beyond character request timed out.",
+      { status: 502, exposeMessage: false },
+    );
+  }
+
+  return new DndBeyondImportError("Failed to fetch the D&D Beyond character.", {
+    status: 502,
+    exposeMessage: false,
+  });
 }

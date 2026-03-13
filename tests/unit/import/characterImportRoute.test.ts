@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { POST } from "@/app/api/characters/import/route";
+import { DndBeyondImportError } from "@/lib/dndBeyondCharacterImport";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { importDndBeyondCharacter } from "@/lib/server/dndBeyondCharacterImport";
-import { sampleDndBeyondCharacterResponse } from "@/tests/fixtures/dndBeyondCharacter";
+import {
+  createNormalizedImportResult,
+  DND_BEYOND_CHARACTER_NAME,
+  DND_BEYOND_CHARACTER_URL,
+  EXISTING_IMPORTED_CHARACTER_ID,
+  IMPORT_WARNING,
+} from "@/tests/helpers/dndBeyondImport";
 
 jest.mock("@/lib/middleware", () => ({
   requireAuth: jest.fn(),
@@ -35,48 +42,6 @@ function createRequest(body: unknown): NextRequest {
   });
 }
 
-function createImportedCharacter() {
-  return {
-    character: {
-      id: "",
-      userId: "",
-      name: sampleDndBeyondCharacterResponse.data.name,
-      ac: 17,
-      hp: 92,
-      maxHp: 92,
-      abilityScores: {
-        strength: 10,
-        dexterity: 17,
-        constitution: 14,
-        intelligence: 16,
-        wisdom: 10,
-        charisma: 21,
-      },
-      classes: [
-        { class: "Rogue" as const, level: 5 },
-        { class: "Warlock" as const, level: 7 },
-      ],
-      savingThrows: {},
-      skills: {},
-      damageResistances: [],
-      damageImmunities: [],
-      damageVulnerabilities: [],
-      conditionImmunities: [],
-      senses: {},
-      languages: ["Common", "Infernal"],
-      traits: [],
-      actions: [],
-      bonusActions: [],
-      reactions: [],
-      race: "Tiefling" as const,
-      alignment: "Chaotic Good" as const,
-    },
-    warnings: ["Alignment was not supported and was omitted."],
-    sourceCharacterId: String(sampleDndBeyondCharacterResponse.data.id),
-    sourceUrl: sampleDndBeyondCharacterResponse.data.readonlyUrl,
-  };
-}
-
 describe("character import route", () => {
   beforeEach(() => {
     mockedRequireAuth.mockReset();
@@ -87,7 +52,7 @@ describe("character import route", () => {
     mockedRequireAuth.mockReturnValue({ userId: "user-123" });
     mockedLoadCharacters.mockResolvedValue([]);
     mockedSaveCharacter.mockResolvedValue(undefined);
-    mockedImportCharacter.mockResolvedValue(createImportedCharacter());
+    mockedImportCharacter.mockResolvedValue(createNormalizedImportResult());
   });
 
   test("returns auth response when the user is not authenticated", async () => {
@@ -114,7 +79,7 @@ describe("character import route", () => {
       {
         id: "existing-id",
         userId: "user-123",
-        name: "  dolor vagarpie  ",
+        name: `  ${DND_BEYOND_CHARACTER_NAME.toLowerCase()}  `,
         ac: 12,
         hp: 10,
         maxHp: 10,
@@ -133,7 +98,7 @@ describe("character import route", () => {
 
     const response = await POST(
       createRequest({
-        url: "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+        url: DND_BEYOND_CHARACTER_URL,
       }),
     );
     const body = await response.json();
@@ -142,18 +107,16 @@ describe("character import route", () => {
     expect(body.conflict).toBe("duplicate-name");
     expect(body.existingCharacter).toEqual({
       id: "existing-id",
-      name: "  dolor vagarpie  ",
+      name: `  ${DND_BEYOND_CHARACTER_NAME.toLowerCase()}  `,
     });
-    expect(body.warnings).toEqual([
-      "Alignment was not supported and was omitted.",
-    ]);
+    expect(body.warnings).toEqual([IMPORT_WARNING]);
     expect(mockedSaveCharacter).not.toHaveBeenCalled();
   });
 
   test("saves a new imported character and returns warnings", async () => {
     const response = await POST(
       createRequest({
-        url: "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+        url: DND_BEYOND_CHARACTER_URL,
       }),
     );
     const body = await response.json();
@@ -161,14 +124,12 @@ describe("character import route", () => {
     expect(response.status).toBe(200);
     expect(body.character.userId).toBe("user-123");
     expect(body.character.id).toBeTruthy();
-    expect(body.warnings).toEqual([
-      "Alignment was not supported and was omitted.",
-    ]);
+    expect(body.warnings).toEqual([IMPORT_WARNING]);
     expect(body.overwritten).toBe(false);
     expect(mockedSaveCharacter).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: "user-123",
-        name: "Dolor Vagarpie",
+        name: DND_BEYOND_CHARACTER_NAME,
       }),
     );
   });
@@ -178,9 +139,9 @@ describe("character import route", () => {
     mockedLoadCharacters.mockResolvedValue([
       {
         _id: "mongo-id",
-        id: "existing-id",
+        id: EXISTING_IMPORTED_CHARACTER_ID,
         userId: "user-123",
-        name: "Dolor Vagarpie",
+        name: DND_BEYOND_CHARACTER_NAME,
         ac: 12,
         hp: 10,
         maxHp: 10,
@@ -199,14 +160,14 @@ describe("character import route", () => {
 
     const response = await POST(
       createRequest({
-        url: "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+        url: DND_BEYOND_CHARACTER_URL,
         overwrite: true,
       }),
     );
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.character.id).toBe("existing-id");
+    expect(body.character.id).toBe(EXISTING_IMPORTED_CHARACTER_ID);
     expect(body.character._id).toBe("mongo-id");
     expect(new Date(body.character.createdAt).toISOString()).toBe(
       createdAt.toISOString(),
@@ -216,8 +177,9 @@ describe("character import route", () => {
 
   test("maps importer validation errors to 400 responses", async () => {
     mockedImportCharacter.mockRejectedValue(
-      new Error(
+      new DndBeyondImportError(
         "Use a public D&D Beyond character URL in the format /characters/<id>/<shareCode>.",
+        { status: 400 },
       ),
     );
 
@@ -237,12 +199,12 @@ describe("character import route", () => {
 
     const response = await POST(
       createRequest({
-        url: "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+        url: DND_BEYOND_CHARACTER_URL,
       }),
     );
     const body = await response.json();
 
     expect(response.status).toBe(502);
-    expect(body.error).toBe("Upstream exploded");
+    expect(body.error).toBe("Failed to import D&D Beyond character.");
   });
 });

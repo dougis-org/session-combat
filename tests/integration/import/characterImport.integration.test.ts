@@ -14,6 +14,10 @@ import {
   TestServer,
 } from "../helpers/server";
 import { sampleDndBeyondCharacterResponse } from "@/tests/fixtures/dndBeyondCharacter";
+import {
+  DND_BEYOND_CHARACTER_NAME,
+  DND_BEYOND_CHARACTER_URL,
+} from "@/tests/helpers/dndBeyondImport";
 
 function listen(server: Server): Promise<number> {
   return new Promise((resolve) => {
@@ -94,13 +98,13 @@ describe("Character import API integration", () => {
         Cookie: cookie,
       },
       body: JSON.stringify({
-        url: "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+        url: DND_BEYOND_CHARACTER_URL,
       }),
     });
 
     expect(response.status).toBe(200);
     const body = await response.json();
-    expect(body.character.name).toBe("Dolor Vagarpie");
+    expect(body.character.name).toBe(DND_BEYOND_CHARACTER_NAME);
     expect(body.character.id).toBeTruthy();
     expect(body.warnings).toEqual(expect.any(Array));
   });
@@ -113,7 +117,7 @@ describe("Character import API integration", () => {
         Cookie: cookie,
       },
       body: JSON.stringify({
-        url: "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+        url: DND_BEYOND_CHARACTER_URL,
       }),
     });
 
@@ -127,7 +131,7 @@ describe("Character import API integration", () => {
         Cookie: cookie,
       },
       body: JSON.stringify({
-        url: "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+        url: DND_BEYOND_CHARACTER_URL,
       }),
     });
 
@@ -144,7 +148,7 @@ describe("Character import API integration", () => {
         Cookie: cookie,
       },
       body: JSON.stringify({
-        url: "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+        url: DND_BEYOND_CHARACTER_URL,
         overwrite: true,
       }),
     });
@@ -185,6 +189,6 @@ describe("Character import API integration", () => {
 
     expect(response.status).toBe(502);
     const body = await response.json();
-    expect(body.error).toMatch(/failed to fetch/i);
+    expect(body.error).toBe("Failed to import D&D Beyond character.");
   });
 });

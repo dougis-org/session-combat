@@ -12,6 +12,16 @@ interface ImportConflictState {
   existingCharacterName: string;
 }
 
+interface ImportResponseBody {
+  conflict?: string;
+  error?: string;
+  existingCharacter?: {
+    id: string;
+    name: string;
+  };
+  warnings?: string[];
+}
+
 export function CharactersContent() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,9 +144,13 @@ export function CharactersContent() {
         }),
       });
 
-      const data = await response.json();
+      const data = await readImportResponseBody(response);
       if (!response.ok) {
-        if (response.status === 409 && data.conflict === 'duplicate-name') {
+        if (
+          response.status === 409 &&
+          data?.conflict === 'duplicate-name' &&
+          data.existingCharacter
+        ) {
           setImportConflict({
             existingCharacterId: data.existingCharacter.id,
             existingCharacterName: data.existingCharacter.name,
@@ -145,11 +159,11 @@ export function CharactersContent() {
           return;
         }
 
-        throw new Error(data.error || 'Failed to import character');
+        throw new Error(data?.error || 'Failed to import character');
       }
 
       setImportConflict(null);
-      setImportWarnings(Array.isArray(data.warnings) ? data.warnings : []);
+      setImportWarnings(Array.isArray(data?.warnings) ? data.warnings : []);
       setImportUrl('');
       setIsImportPanelOpen(false);
       await fetchCharacters();
@@ -162,6 +176,7 @@ export function CharactersContent() {
 
   const abortImportConflict = () => {
     setImportConflict(null);
+    setImportWarnings([]);
   };
 
   return (
@@ -356,6 +371,27 @@ export function CharactersContent() {
       </div>
     </div>
   );
+}
+
+async function readImportResponseBody(
+  response: Response,
+): Promise<ImportResponseBody | null> {
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    try {
+      return (await response.json()) as ImportResponseBody;
+    } catch {
+      return null;
+    }
+  }
+
+  try {
+    const text = await response.text();
+    return text ? { error: text } : null;
+  } catch {
+    return null;
+  }
 }
 
 function CharacterEditor({

@@ -12,6 +12,13 @@ import React from "react";
 import { act } from "react";
 import { createRoot, Root } from "react-dom/client";
 import { CharactersContent } from "@/app/characters/page";
+import {
+  CONFLICT_WARNING,
+  createDuplicateNameConflictPayload,
+  createImportedCharacterApiPayload,
+  DND_BEYOND_CHARACTER_URL,
+  IMPORT_WARNING,
+} from "@/tests/helpers/dndBeyondImport";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -67,44 +74,16 @@ describe("Characters page import UI", () => {
             return {
               ok: false,
               status: 409,
-              json: async () => ({
-                conflict: "duplicate-name",
-                error: "Character already exists",
-                warnings: ["Race was not supported and was omitted."],
-                existingCharacter: {
-                  id: "existing-character-id",
-                  name: "Dolor Vagarpie",
-                },
-              }),
+              headers: new Headers({ "Content-Type": "application/json" }),
+              json: async () => createDuplicateNameConflictPayload(),
             } as Response;
           }
 
           return {
             ok: true,
             status: 200,
-            json: async () => ({
-              character: {
-                id: "existing-character-id",
-                userId: "user-1",
-                name: "Dolor Vagarpie",
-                hp: 92,
-                maxHp: 92,
-                ac: 18,
-                abilityScores: {
-                  strength: 10,
-                  dexterity: 17,
-                  constitution: 14,
-                  intelligence: 16,
-                  wisdom: 10,
-                  charisma: 21,
-                },
-                classes: [
-                  { class: "Rogue", level: 5 },
-                  { class: "Warlock", level: 7 },
-                ],
-              },
-              warnings: ["Alignment was not supported and was omitted."],
-            }),
+            headers: new Headers({ "Content-Type": "application/json" }),
+            json: async () => createImportedCharacterApiPayload(),
           } as Response;
         }
 
@@ -119,6 +98,7 @@ describe("Characters page import UI", () => {
         return {
           ok: false,
           status: 404,
+          headers: new Headers({ "Content-Type": "application/json" }),
           json: async () => ({ error: "not found" }),
         } as Response;
       },
@@ -174,7 +154,7 @@ describe("Characters page import UI", () => {
   test("shows duplicate-name confirmation and surfaces warnings after overwrite", async () => {
     await renderPage();
     await openImportPanel();
-    await setImportUrl("https://www.dndbeyond.com/characters/91913267/BRdgB3");
+    await setImportUrl(DND_BEYOND_CHARACTER_URL);
 
     const submitButton = Array.from(container.querySelectorAll("button"))
       .filter((button) => button.textContent?.match(/import from d&d beyond/i))
@@ -185,9 +165,7 @@ describe("Characters page import UI", () => {
     });
 
     expect(container.textContent).toContain("already exists");
-    expect(container.textContent).toContain(
-      "Race was not supported and was omitted.",
-    );
+    expect(container.textContent).toContain(CONFLICT_WARNING);
 
     const overwriteButton = Array.from(
       container.querySelectorAll("button"),
@@ -199,15 +177,13 @@ describe("Characters page import UI", () => {
       );
     });
 
-    expect(container.textContent).toContain(
-      "Alignment was not supported and was omitted.",
-    );
+    expect(container.textContent).toContain(IMPORT_WARNING);
   });
 
   test("aborts import conflict state when the user cancels overwrite", async () => {
     await renderPage();
     await openImportPanel();
-    await setImportUrl("https://www.dndbeyond.com/characters/91913267/BRdgB3");
+    await setImportUrl(DND_BEYOND_CHARACTER_URL);
 
     const submitButton = Array.from(container.querySelectorAll("button"))
       .filter((button) => button.textContent?.match(/import from d&d beyond/i))
@@ -226,5 +202,56 @@ describe("Characters page import UI", () => {
     });
 
     expect(container.textContent).not.toContain("already exists");
+    expect(container.textContent).not.toContain(CONFLICT_WARNING);
+  });
+
+  test("uses plain-text error bodies when import responses are not JSON", async () => {
+    global.fetch = jest.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input.toString();
+
+        if (url === "/api/characters" && (!init || init.method === undefined)) {
+          return {
+            ok: true,
+            status: 200,
+            headers: new Headers({ "Content-Type": "application/json" }),
+            json: async () => [],
+          } as Response;
+        }
+
+        if (url === "/api/characters/import") {
+          return {
+            ok: false,
+            status: 502,
+            headers: new Headers({ "Content-Type": "text/plain" }),
+            text: async () => "gateway timeout",
+            json: async () => {
+              throw new Error("not json");
+            },
+          } as Response;
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          headers: new Headers({ "Content-Type": "application/json" }),
+          json: async () => ({ error: "not found" }),
+        } as Response;
+      },
+    ) as typeof fetch;
+
+    await renderPage();
+    await openImportPanel();
+    await setImportUrl(DND_BEYOND_CHARACTER_URL);
+
+    const submitButton = Array.from(container.querySelectorAll("button"))
+      .filter((button) => button.textContent?.match(/import from d&d beyond/i))
+      .at(-1);
+
+    await act(async () => {
+      submitButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(container.textContent).toContain("gateway timeout");
   });
 });
