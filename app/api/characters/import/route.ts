@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
-import { importDndBeyondCharacter } from "@/lib/dndBeyondCharacterImport";
+import { importDndBeyondCharacter } from "@/lib/server/dndBeyondCharacterImport";
 import { Character } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
@@ -61,16 +61,8 @@ export async function POST(request: NextRequest) {
 
     await storage.saveCharacter(characterToSave);
 
-    const persistedCharacters = await storage.loadCharacters(auth.userId);
-    const persistedCharacter =
-      persistedCharacters.find(
-        (character) =>
-          character.name.trim().toLowerCase() ===
-          characterToSave.name.trim().toLowerCase(),
-      ) || characterToSave;
-
     return NextResponse.json({
-      character: persistedCharacter,
+      character: characterToSave,
       warnings: imported.warnings,
       overwritten: Boolean(existingCharacter),
     });

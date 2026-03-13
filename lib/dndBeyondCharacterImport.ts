@@ -13,9 +13,6 @@ import {
 
 const CANONICAL_HOST = "www.dndbeyond.com";
 const CHARACTER_PATH_PATTERN = /^\/characters\/(\d+)\/([A-Za-z0-9_-]+)\/?$/;
-const DEFAULT_CHARACTER_SERVICE_BASE_URL =
-  "https://character-service.dndbeyond.com/character/v5";
-const FETCH_TIMEOUT_MS = 15000;
 
 const ALIGNMENT_ID_MAP: Record<number, DnDAlignment> = {
   1: "Lawful Good",
@@ -57,6 +54,38 @@ const SKILL_ABILITY_MAP: Record<string, keyof AbilityScores> = {
   "sleight of hand": "dexterity",
   stealth: "dexterity",
   survival: "wisdom",
+};
+
+const ABILITY_KEYS = Object.values(ABILITY_ID_MAP);
+const ARMOR_TYPE_MAX_DEX_MODIFIER: Partial<Record<number, number>> = {
+  2: 2,
+  3: 0,
+};
+const CONDITION_IMMUNITY_DAMAGE_TYPES = new Set([
+  "poison",
+  "fire",
+  "cold",
+  "lightning",
+]);
+const ACTIONS_BY_ACTIVATION_TYPE: Partial<
+  Record<number, "actions" | "bonusActions" | "reactions">
+> = {
+  3: "bonusActions",
+  4: "reactions",
+};
+const TRAIT_TITLE_MAP = {
+  personalityTraits: "Personality Traits",
+  ideals: "Ideals",
+  bonds: "Bonds",
+  flaws: "Flaws",
+  appearance: "Appearance",
+};
+const NOTE_TITLE_MAP = {
+  backstory: "Backstory",
+  allies: "Allies",
+  enemies: "Enemies",
+  organizations: "Organizations",
+  otherNotes: "Other Notes",
 };
 
 interface DndBeyondStatValue {
@@ -106,7 +135,7 @@ interface DndBeyondRaceData {
   } | null;
 }
 
-interface DndBeyondCharacterData {
+export interface DndBeyondCharacterData {
   id?: number | string;
   readonlyUrl?: string | null;
   name?: string | null;
@@ -129,7 +158,7 @@ interface DndBeyondCharacterData {
   notes?: Record<string, string | null> | null;
 }
 
-interface DndBeyondCharacterServiceResponse {
+export interface DndBeyondCharacterServiceResponse {
   success?: boolean;
   data?: DndBeyondCharacterData | null;
 }
@@ -147,19 +176,39 @@ export interface NormalizedDndBeyondCharacter {
   sourceUrl?: string;
 }
 
+interface CharacterIdentity {
+  name: string;
+  sourceCharacterId: string;
+}
+
+interface NormalizedCharacterDetails {
+  abilityScores: AbilityScores;
+  ac: number;
+  alignment?: DnDAlignment;
+  bonusActions: CreatureAbility[];
+  classes: CharacterClass[];
+  conditionImmunities: string[];
+  damageImmunities: string[];
+  damageResistances: string[];
+  damageVulnerabilities: string[];
+  hp: number;
+  languages: string[];
+  maxHp: number;
+  race?: DnDRace;
+  reactions: CreatureAbility[];
+  savingThrows: Partial<Record<keyof AbilityScores, number>>;
+  senses: Record<string, string>;
+  skills: Record<string, number>;
+  traits: CreatureAbility[];
+  actions: CreatureAbility[];
+}
+
 export function parseDndBeyondCharacterUrl(
   url: string,
 ): ParsedDndBeyondCharacterUrl {
-  let parsed: URL;
+  const parsed = parseUrlOrThrow(url);
 
-  try {
-    parsed = new URL(url);
-  } catch {
-    throw new Error("Enter a valid D&D Beyond character URL.");
-  }
-
-  const hostname = parsed.hostname.toLowerCase();
-  if (hostname !== CANONICAL_HOST && hostname !== "dndbeyond.com") {
+  if (!isSupportedDndBeyondHostname(parsed.hostname)) {
     throw new Error(
       "Only canonical public D&D Beyond character URLs are supported.",
     );
@@ -180,59 +229,44 @@ export function parseDndBeyondCharacterUrl(
   };
 }
 
-export async function fetchDndBeyondCharacter(
-  pageUrl: string,
-  fetchImpl: typeof fetch = fetch,
-): Promise<DndBeyondCharacterData> {
-  const { characterId } = parseDndBeyondCharacterUrl(pageUrl);
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  const baseUrl =
-    process.env.DND_BEYOND_CHARACTER_SERVICE_BASE_URL ||
-    DEFAULT_CHARACTER_SERVICE_BASE_URL;
-  const endpoint = `${baseUrl.replace(/\/$/, "")}/character/${characterId}?includeCustomItems=true`;
-
-  try {
-    const response = await fetchImpl(endpoint, {
-      signal: controller.signal,
-      headers: {
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      if (response.status === 404 || response.status === 403) {
-        throw new Error(
-          "The D&D Beyond character could not be accessed. Make sure the character is public.",
-        );
-      }
-      throw new Error("Failed to fetch the D&D Beyond character.");
-    }
-
-    const body = (await response.json()) as DndBeyondCharacterServiceResponse;
-    if (!body.success || !body.data) {
-      throw new Error(
-        "The D&D Beyond character response was missing character data.",
-      );
-    }
-
-    return body.data;
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new Error("The D&D Beyond character request timed out.");
-    }
-
-    throw error;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
 export function normalizeDndBeyondCharacter(
   data: DndBeyondCharacterData,
 ): NormalizedDndBeyondCharacter {
+  const identity = requireCharacterIdentity(data);
   const warnings: string[] = [];
+  const details = normalizeCharacterDetails(data, warnings);
+  warnings.push(...buildNormalizationWarnings(data, details));
+
+  return {
+    character: buildNormalizedCharacter(identity.name, details),
+    warnings,
+    sourceCharacterId: identity.sourceCharacterId,
+    sourceUrl: data.readonlyUrl || undefined,
+  };
+}
+
+function flattenModifiers(
+  modifierGroups?: Record<string, DndBeyondModifier[] | null> | null,
+): DndBeyondModifier[] {
+  return Object.values(modifierGroups || {}).flatMap((items) => items || []);
+}
+
+function parseUrlOrThrow(url: string): URL {
+  try {
+    return new URL(url);
+  } catch {
+    throw new Error("Enter a valid D&D Beyond character URL.");
+  }
+}
+
+function isSupportedDndBeyondHostname(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  return normalized === CANONICAL_HOST || normalized === "dndbeyond.com";
+}
+
+function requireCharacterIdentity(
+  data: DndBeyondCharacterData,
+): CharacterIdentity {
   const sourceCharacterId = String(data.id || "");
   const name = data.name?.trim();
 
@@ -244,30 +278,115 @@ export function normalizeDndBeyondCharacter(
     throw new Error("The imported D&D Beyond character is missing a name.");
   }
 
+  return { name, sourceCharacterId };
+}
+
+function normalizeCharacterDetails(
+  data: DndBeyondCharacterData,
+  warnings: string[],
+): NormalizedCharacterDetails {
   const modifiers = flattenModifiers(data.modifiers);
-  const totalLevel = normalizeClasses(data.classes, warnings);
+  const classes = normalizeClasses(data.classes, warnings);
+  const totalLevel = calculateTotalLevel(classes);
+  const proficiencyBonus = getProficiencyBonus(totalLevel);
   const abilityScores = normalizeAbilityScores(data, modifiers);
-  const proficiencyBonus = getProficiencyBonus(calculateTotalLevel(totalLevel));
-  const race = normalizeRace(data.race?.fullName);
-  const alignment = normalizeAlignment(data.alignmentId);
-  const maxHp = normalizeMaxHp(
-    data,
-    abilityScores,
-    totalLevel.length ? calculateTotalLevel(totalLevel) : 1,
-  );
-  const hp =
-    typeof data.currentHitPoints === "number"
-      ? data.currentHitPoints
-      : Math.max(0, maxHp - (data.removedHitPoints || 0));
-  const ac = normalizeArmorClass(data.inventory, abilityScores, modifiers);
-  const savingThrows = normalizeSavingThrows(
-    abilityScores,
-    modifiers,
-    proficiencyBonus,
-  );
+  const maxHp = normalizeMaxHp(data, abilityScores, totalLevel);
   const skills = normalizeSkills(abilityScores, modifiers, proficiencyBonus);
-  const senses = normalizeSenses(data, modifiers, skills, abilityScores);
-  const languages = dedupeStrings(
+  const categorizedAbilities = normalizeAbilities(
+    data.actions,
+    data.traits,
+    data.notes,
+  );
+
+  return {
+    abilityScores,
+    ac: normalizeArmorClass(data.inventory, abilityScores, modifiers),
+    alignment: normalizeAlignment(data.alignmentId),
+    actions: categorizedAbilities.actions,
+    bonusActions: categorizedAbilities.bonusActions,
+    classes,
+    conditionImmunities: normalizeConditionImmunities(modifiers),
+    damageImmunities: normalizeByModifierType(modifiers, "immunity"),
+    damageResistances: normalizeByModifierType(modifiers, "resistance"),
+    damageVulnerabilities: normalizeByModifierType(modifiers, "vulnerability"),
+    hp: normalizeCurrentHp(data, maxHp),
+    languages: normalizeLanguages(modifiers),
+    maxHp,
+    race: normalizeRace(data.race?.fullName),
+    reactions: categorizedAbilities.reactions,
+    savingThrows: normalizeSavingThrows(
+      abilityScores,
+      modifiers,
+      proficiencyBonus,
+    ),
+    senses: normalizeSenses(data, modifiers, skills, abilityScores),
+    skills,
+    traits: categorizedAbilities.traits,
+  };
+}
+
+function buildNormalizationWarnings(
+  data: DndBeyondCharacterData,
+  details: NormalizedCharacterDetails,
+): string[] {
+  const warnings: string[] = [];
+
+  if (!details.race && data.race?.fullName) {
+    warnings.push(
+      `Race "${data.race.fullName}" is not supported and was omitted.`,
+    );
+  }
+
+  if (!details.alignment && typeof data.alignmentId === "number") {
+    warnings.push(
+      `Alignment value "${data.alignmentId}" was not supported and was omitted.`,
+    );
+  }
+
+  return warnings;
+}
+
+function buildNormalizedCharacter(
+  name: string,
+  details: NormalizedCharacterDetails,
+): Character {
+  return {
+    id: "",
+    userId: "",
+    name,
+    ac: details.ac,
+    hp: details.hp,
+    maxHp: details.maxHp,
+    abilityScores: details.abilityScores,
+    savingThrows: details.savingThrows,
+    skills: details.skills,
+    damageResistances: details.damageResistances,
+    damageImmunities: details.damageImmunities,
+    damageVulnerabilities: details.damageVulnerabilities,
+    conditionImmunities: details.conditionImmunities,
+    senses: details.senses,
+    languages: details.languages,
+    traits: details.traits,
+    actions: details.actions,
+    bonusActions: details.bonusActions,
+    reactions: details.reactions,
+    classes: details.classes,
+    race: details.race,
+    alignment: details.alignment,
+  };
+}
+
+function normalizeCurrentHp(
+  data: DndBeyondCharacterData,
+  maxHp: number,
+): number {
+  return typeof data.currentHitPoints === "number"
+    ? data.currentHitPoints
+    : Math.max(0, maxHp - (data.removedHitPoints || 0));
+}
+
+function normalizeLanguages(modifiers: DndBeyondModifier[]): string[] {
+  return dedupeStrings(
     modifiers
       .filter((modifier) => modifier.type === "language")
       .map(
@@ -275,75 +394,6 @@ export function normalizeDndBeyondCharacter(
           modifier.friendlySubtypeName || titleize(modifier.subType || ""),
       ),
   );
-  const damageResistances = normalizeByModifierType(modifiers, "resistance");
-  const damageImmunities = normalizeByModifierType(modifiers, "immunity");
-  const damageVulnerabilities = normalizeByModifierType(
-    modifiers,
-    "vulnerability",
-  );
-  const conditionImmunities = normalizeConditionImmunities(modifiers);
-  const categorizedAbilities = normalizeAbilities(
-    data.actions,
-    data.traits,
-    data.notes,
-  );
-
-  if (!race && data.race?.fullName) {
-    warnings.push(
-      `Race "${data.race.fullName}" is not supported and was omitted.`,
-    );
-  }
-
-  if (!alignment && typeof data.alignmentId === "number") {
-    warnings.push(
-      `Alignment value "${data.alignmentId}" was not supported and was omitted.`,
-    );
-  }
-
-  const character: Character = {
-    id: "",
-    userId: "",
-    name,
-    ac,
-    hp,
-    maxHp,
-    abilityScores,
-    savingThrows,
-    skills,
-    damageResistances,
-    damageImmunities,
-    damageVulnerabilities,
-    conditionImmunities,
-    senses,
-    languages,
-    traits: categorizedAbilities.traits,
-    actions: categorizedAbilities.actions,
-    bonusActions: categorizedAbilities.bonusActions,
-    reactions: categorizedAbilities.reactions,
-    classes: totalLevel,
-    race,
-    alignment,
-  };
-
-  return {
-    character,
-    warnings,
-    sourceCharacterId,
-    sourceUrl: data.readonlyUrl || undefined,
-  };
-}
-
-export async function importDndBeyondCharacter(
-  pageUrl: string,
-): Promise<NormalizedDndBeyondCharacter> {
-  const data = await fetchDndBeyondCharacter(pageUrl);
-  return normalizeDndBeyondCharacter(data);
-}
-
-function flattenModifiers(
-  modifierGroups?: Record<string, DndBeyondModifier[] | null> | null,
-): DndBeyondModifier[] {
-  return Object.values(modifierGroups || {}).flatMap((items) => items || []);
 }
 
 function normalizeClasses(
@@ -353,20 +403,15 @@ function normalizeClasses(
   const merged = new Map<DnDClass, number>();
 
   for (const entry of classes || []) {
-    const className = entry.definition?.name?.trim();
-    const level = Math.max(1, Math.trunc(entry.level || 0));
-
-    if (!className) {
+    const normalizedEntry = normalizeClassEntry(entry, warnings);
+    if (!normalizedEntry) {
       continue;
     }
 
-    if (!VALID_CLASSES.includes(className as DnDClass)) {
-      warnings.push(`Class "${className}" is not supported and was omitted.`);
-      continue;
-    }
-
-    const typedClass = className as DnDClass;
-    merged.set(typedClass, (merged.get(typedClass) || 0) + level);
+    merged.set(
+      normalizedEntry.className,
+      (merged.get(normalizedEntry.className) || 0) + normalizedEntry.level,
+    );
   }
 
   const normalized = Array.from(merged.entries()).map(([className, level]) => ({
@@ -383,31 +428,34 @@ function normalizeClasses(
   return normalized;
 }
 
+function normalizeClassEntry(
+  entry: DndBeyondClassEntry,
+  warnings: string[],
+): { className: DnDClass; level: number } | null {
+  const className = entry.definition?.name?.trim();
+
+  if (!className) {
+    return null;
+  }
+
+  if (!VALID_CLASSES.includes(className as DnDClass)) {
+    warnings.push(`Class "${className}" is not supported and was omitted.`);
+    return null;
+  }
+
+  return {
+    className: className as DnDClass,
+    level: Math.max(1, Math.trunc(entry.level || 0)),
+  };
+}
+
 function normalizeAbilityScores(
   data: DndBeyondCharacterData,
   modifiers: DndBeyondModifier[],
 ): AbilityScores {
-  const baseScores = new Map<number, number>();
-  const bonusScores = new Map<number, number>();
-  const overrideScores = new Map<number, number>();
-
-  for (const stat of data.stats || []) {
-    if (typeof stat.value === "number") {
-      baseScores.set(stat.id, stat.value);
-    }
-  }
-
-  for (const stat of data.bonusStats || []) {
-    if (typeof stat.value === "number") {
-      bonusScores.set(stat.id, stat.value);
-    }
-  }
-
-  for (const stat of data.overrideStats || []) {
-    if (typeof stat.value === "number") {
-      overrideScores.set(stat.id, stat.value);
-    }
-  }
+  const baseScores = indexStatValues(data.stats);
+  const bonusScores = indexStatValues(data.bonusStats);
+  const overrideScores = indexStatValues(data.overrideStats);
 
   const scoreBonuses = sumModifierBonusesBySubtype(modifiers);
   const abilityScores = {} as AbilityScores;
@@ -415,24 +463,54 @@ function normalizeAbilityScores(
   for (const [id, ability] of Object.entries(ABILITY_ID_MAP) as Array<
     [string, keyof AbilityScores]
   >) {
-    const numericId = Number(id);
-    const baseValue = baseScores.get(numericId);
-    if (typeof baseValue !== "number") {
-      throw new Error(
-        `The imported D&D Beyond character is missing ${ability} data.`,
-      );
-    }
-
-    const overrideValue = overrideScores.get(numericId);
-    const bonusValue = bonusScores.get(numericId) || 0;
-    const modifierBonus = scoreBonuses[`${ability}-score`] || 0;
-    abilityScores[ability] =
-      typeof overrideValue === "number"
-        ? overrideValue
-        : baseValue + bonusValue + modifierBonus;
+    abilityScores[ability] = resolveAbilityScore(
+      Number(id),
+      ability,
+      baseScores,
+      bonusScores,
+      overrideScores,
+      scoreBonuses,
+    );
   }
 
   return abilityScores;
+}
+
+function indexStatValues(
+  stats: DndBeyondStatValue[] | null | undefined,
+): Map<number, number> {
+  return new Map(
+    (stats || [])
+      .filter(
+        (stat): stat is DndBeyondStatValue & { value: number } =>
+          typeof stat.value === "number",
+      )
+      .map((stat) => [stat.id, stat.value]),
+  );
+}
+
+function resolveAbilityScore(
+  statId: number,
+  ability: keyof AbilityScores,
+  baseScores: Map<number, number>,
+  bonusScores: Map<number, number>,
+  overrideScores: Map<number, number>,
+  scoreBonuses: Record<string, number>,
+): number {
+  const baseValue = baseScores.get(statId);
+
+  if (typeof baseValue !== "number") {
+    throw new Error(
+      `The imported D&D Beyond character is missing ${ability} data.`,
+    );
+  }
+
+  return (
+    overrideScores.get(statId) ??
+    baseValue +
+      (bonusScores.get(statId) || 0) +
+      (scoreBonuses[`${ability}-score`] || 0)
+  );
 }
 
 function normalizeRace(
@@ -480,12 +558,7 @@ function normalizeArmorClass(
   modifiers: DndBeyondModifier[],
 ): number {
   const dexterityModifier = getAbilityModifier(abilityScores.dexterity);
-  const armorBonuses = modifiers
-    .filter((modifier) => modifier.subType === "armor-class")
-    .reduce(
-      (total, modifier) => total + (modifier.value ?? modifier.fixedValue ?? 0),
-      0,
-    );
+  const armorBonuses = getArmorBonuses(modifiers);
 
   const equippedArmor = (inventory || []).find(
     (item) => item.equipped && typeof item.definition?.armorClass === "number",
@@ -498,20 +571,37 @@ function normalizeArmorClass(
     return 10 + dexterityModifier + armorBonuses;
   }
 
-  const armorTypeId = equippedArmor.definition.armorTypeId;
-  let dexterityContribution = dexterityModifier;
-
-  if (armorTypeId === 2) {
-    dexterityContribution = Math.min(dexterityModifier, 2);
-  }
-
-  if (armorTypeId === 3) {
-    dexterityContribution = 0;
-  }
-
   return (
-    equippedArmor.definition.armorClass + dexterityContribution + armorBonuses
+    equippedArmor.definition.armorClass +
+    getArmorDexterityContribution(
+      dexterityModifier,
+      equippedArmor.definition.armorTypeId,
+    ) +
+    armorBonuses
   );
+}
+
+function getArmorBonuses(modifiers: DndBeyondModifier[]): number {
+  return modifiers
+    .filter((modifier) => modifier.subType === "armor-class")
+    .reduce(
+      (total, modifier) => total + (getModifierNumericValue(modifier) || 0),
+      0,
+    );
+}
+
+function getArmorDexterityContribution(
+  dexterityModifier: number,
+  armorTypeId?: number | null,
+): number {
+  const maxModifier =
+    typeof armorTypeId === "number"
+      ? ARMOR_TYPE_MAX_DEX_MODIFIER[armorTypeId]
+      : undefined;
+
+  return typeof maxModifier === "number"
+    ? Math.min(dexterityModifier, maxModifier)
+    : dexterityModifier;
 }
 
 function normalizeSavingThrows(
@@ -520,23 +610,17 @@ function normalizeSavingThrows(
   proficiencyBonus: number,
 ): Partial<Record<keyof AbilityScores, number>> {
   const bonusesBySubtype = sumModifierBonusesBySubtype(modifiers);
-  const proficientSaves = new Set(
-    modifiers
-      .filter(
-        (modifier) =>
-          modifier.type === "proficiency" &&
-          modifier.subType?.endsWith("-saving-throws"),
-      )
-      .map((modifier) =>
-        (modifier.subType || "").replace("-saving-throws", ""),
-      ),
+  const proficientSaves = collectModifierSubtypeSet(
+    modifiers,
+    (modifier) =>
+      modifier.type === "proficiency" &&
+      Boolean(modifier.subType?.endsWith("-saving-throws")),
+    (modifier) => (modifier.subType || "").replace("-saving-throws", ""),
   );
 
   const savingThrows: Partial<Record<keyof AbilityScores, number>> = {};
 
-  for (const ability of Object.keys(ABILITY_ID_MAP).map(
-    (id) => ABILITY_ID_MAP[Number(id)],
-  )) {
+  for (const ability of ABILITY_KEYS) {
     const base = getAbilityModifier(abilityScores[ability]);
     const proficiency = proficientSaves.has(ability) ? proficiencyBonus : 0;
     const bonus = bonusesBySubtype[`${ability}-saving-throws`] || 0;
@@ -551,15 +635,15 @@ function normalizeSkills(
   modifiers: DndBeyondModifier[],
   proficiencyBonus: number,
 ): Record<string, number> {
-  const expertise = new Set(
-    modifiers
-      .filter((modifier) => modifier.type === "expertise")
-      .map((modifier) => normalizeSkillName(modifier.subType || "")),
+  const expertise = collectModifierSubtypeSet(
+    modifiers,
+    (modifier) => modifier.type === "expertise",
+    (modifier) => normalizeSkillName(modifier.subType || ""),
   );
-  const proficiency = new Set(
-    modifiers
-      .filter((modifier) => modifier.type === "proficiency")
-      .map((modifier) => normalizeSkillName(modifier.subType || "")),
+  const proficiency = collectModifierSubtypeSet(
+    modifiers,
+    (modifier) => modifier.type === "proficiency",
+    (modifier) => normalizeSkillName(modifier.subType || ""),
   );
   const bonusesBySubtype = sumModifierBonusesBySubtype(modifiers);
 
@@ -583,18 +667,7 @@ function normalizeSenses(
   skills: Record<string, number>,
   abilityScores: AbilityScores,
 ): Record<string, string> {
-  const senses: Record<string, string> = {};
-
-  for (const modifier of modifiers) {
-    if (
-      modifier.type === "set-base" &&
-      modifier.subType &&
-      typeof (modifier.value ?? modifier.fixedValue) === "number"
-    ) {
-      senses[normalizeSenseKey(modifier.subType)] =
-        `${modifier.value ?? modifier.fixedValue} ft.`;
-    }
-  }
+  const senses = collectSenseModifiers(modifiers);
 
   const walkSpeed = data.race?.weightSpeeds?.normal?.walk;
   if (typeof walkSpeed === "number" && walkSpeed > 0) {
@@ -637,10 +710,7 @@ function normalizeConditionImmunities(
       .filter(
         (modifier) =>
           modifier.type === "immunity" &&
-          modifier.subType !== "poison" &&
-          modifier.subType !== "fire" &&
-          modifier.subType !== "cold" &&
-          modifier.subType !== "lightning",
+          !CONDITION_IMMUNITY_DAMAGE_TYPES.has(modifier.subType || ""),
       )
       .map(
         (modifier) =>
@@ -659,59 +729,62 @@ function normalizeAbilities(
   bonusActions: CreatureAbility[];
   reactions: CreatureAbility[];
 } {
-  const mappedActions: CreatureAbility[] = [];
-  const mappedBonusActions: CreatureAbility[] = [];
-  const mappedReactions: CreatureAbility[] = [];
+  const categorizedAbilities = {
+    actions: [] as CreatureAbility[],
+    bonusActions: [] as CreatureAbility[],
+    reactions: [] as CreatureAbility[],
+  };
 
   for (const entries of Object.values(actions || {})) {
     for (const entry of entries || []) {
-      if (!entry.name || !(entry.snippet || entry.description)) {
+      const ability = normalizeActionEntry(entry);
+      if (!ability) {
         continue;
       }
 
-      const ability: CreatureAbility = {
-        name: entry.name,
-        description: sanitizeHtmlSnippet(
-          entry.snippet || entry.description || "",
-        ),
-      };
-
-      switch (entry.activation?.activationType) {
-        case 3:
-          mappedBonusActions.push(ability);
-          break;
-        case 4:
-          mappedReactions.push(ability);
-          break;
-        default:
-          mappedActions.push(ability);
-      }
+      pushAbilityByActivation(categorizedAbilities, entry, ability);
     }
   }
 
   const mappedTraits = [
-    ...mapNarrativeEntries(traits, {
-      personalityTraits: "Personality Traits",
-      ideals: "Ideals",
-      bonds: "Bonds",
-      flaws: "Flaws",
-      appearance: "Appearance",
-    }),
-    ...mapNarrativeEntries(notes, {
-      backstory: "Backstory",
-      allies: "Allies",
-      enemies: "Enemies",
-      organizations: "Organizations",
-      otherNotes: "Other Notes",
-    }),
+    ...mapNarrativeEntries(traits, TRAIT_TITLE_MAP),
+    ...mapNarrativeEntries(notes, NOTE_TITLE_MAP),
   ];
 
   return {
     traits: mappedTraits,
-    actions: mappedActions,
-    bonusActions: mappedBonusActions,
-    reactions: mappedReactions,
+    actions: categorizedAbilities.actions,
+    bonusActions: categorizedAbilities.bonusActions,
+    reactions: categorizedAbilities.reactions,
   };
+}
+
+function normalizeActionEntry(
+  entry: DndBeyondActionEntry,
+): CreatureAbility | null {
+  if (!entry.name || !(entry.snippet || entry.description)) {
+    return null;
+  }
+
+  return {
+    name: entry.name,
+    description: sanitizeHtmlSnippet(entry.snippet || entry.description || ""),
+  };
+}
+
+function pushAbilityByActivation(
+  categorizedAbilities: {
+    actions: CreatureAbility[];
+    bonusActions: CreatureAbility[];
+    reactions: CreatureAbility[];
+  },
+  entry: DndBeyondActionEntry,
+  ability: CreatureAbility,
+): void {
+  const targetKey =
+    ACTIONS_BY_ACTIVATION_TYPE[entry.activation?.activationType || 0] ||
+    "actions";
+  categorizedAbilities[targetKey].push(ability);
 }
 
 function mapNarrativeEntries(
@@ -730,15 +803,11 @@ function sumModifierBonusesBySubtype(
   modifiers: DndBeyondModifier[],
 ): Record<string, number> {
   return modifiers.reduce<Record<string, number>>((accumulator, modifier) => {
-    if (modifier.type !== "bonus" && modifier.type !== "set-base") {
+    if (!isBonusLikeModifier(modifier) || !modifier.subType) {
       return accumulator;
     }
 
-    if (!modifier.subType) {
-      return accumulator;
-    }
-
-    const numericValue = modifier.value ?? modifier.fixedValue;
+    const numericValue = getModifierNumericValue(modifier);
     if (typeof numericValue !== "number") {
       return accumulator;
     }
@@ -747,6 +816,49 @@ function sumModifierBonusesBySubtype(
       (accumulator[modifier.subType] || 0) + numericValue;
     return accumulator;
   }, {});
+}
+
+function collectModifierSubtypeSet(
+  modifiers: DndBeyondModifier[],
+  predicate: (modifier: DndBeyondModifier) => boolean,
+  mapSubtype: (modifier: DndBeyondModifier) => string,
+): Set<string> {
+  return new Set(
+    modifiers
+      .filter(predicate)
+      .map(mapSubtype)
+      .filter((value) => value.length > 0),
+  );
+}
+
+function collectSenseModifiers(
+  modifiers: DndBeyondModifier[],
+): Record<string, string> {
+  return modifiers.reduce<Record<string, string>>((senses, modifier) => {
+    if (
+      modifier.type !== "set-base" ||
+      !modifier.subType ||
+      typeof getModifierNumericValue(modifier) !== "number"
+    ) {
+      return senses;
+    }
+
+    senses[normalizeSenseKey(modifier.subType)] =
+      `${getModifierNumericValue(modifier)} ft.`;
+    return senses;
+  }, {});
+}
+
+function isBonusLikeModifier(modifier: DndBeyondModifier): boolean {
+  return modifier.type === "bonus" || modifier.type === "set-base";
+}
+
+function getModifierNumericValue(modifier: DndBeyondModifier): number | null {
+  return typeof modifier.value === "number"
+    ? modifier.value
+    : typeof modifier.fixedValue === "number"
+      ? modifier.fixedValue
+      : null;
 }
 
 function getProficiencyBonus(totalLevel: number): number {

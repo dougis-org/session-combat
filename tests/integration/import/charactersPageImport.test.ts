@@ -34,11 +34,13 @@ jest.mock("@/lib/components/CreatureStatsForm", () => ({
 describe("Characters import UI", () => {
   let container: HTMLDivElement;
   let root: Root;
+  let originalFetch: typeof global.fetch;
 
   beforeEach(() => {
     (
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
     ).IS_REACT_ACT_ENVIRONMENT = true;
+    originalFetch = global.fetch;
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -114,6 +116,7 @@ describe("Characters import UI", () => {
       root.unmount();
     });
     container.remove();
+    global.fetch = originalFetch;
     jest.restoreAllMocks();
   });
 

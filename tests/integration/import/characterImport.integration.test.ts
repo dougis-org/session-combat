@@ -33,12 +33,21 @@ describe("Character import API integration", () => {
   let cookie: string;
   let mockService: Server;
   let mockServicePort: number;
+  let originalCharacterServiceBaseUrl: string | undefined;
 
   beforeAll(async () => {
+    originalCharacterServiceBaseUrl =
+      process.env.DND_BEYOND_CHARACTER_SERVICE_BASE_URL;
     mockService = createServer((request, response) => {
       if (request.url?.startsWith("/character/v5/character/91913267")) {
         response.writeHead(200, { "Content-Type": "application/json" });
         response.end(JSON.stringify(sampleDndBeyondCharacterResponse));
+        return;
+      }
+
+      if (request.url?.startsWith("/character/v5/character/500")) {
+        response.writeHead(500, { "Content-Type": "application/json" });
+        response.end(JSON.stringify({ error: "Upstream failed" }));
         return;
       }
 
@@ -54,7 +63,12 @@ describe("Character import API integration", () => {
   }, 120000);
 
   afterAll(async () => {
-    delete process.env.DND_BEYOND_CHARACTER_SERVICE_BASE_URL;
+    if (typeof originalCharacterServiceBaseUrl === "string") {
+      process.env.DND_BEYOND_CHARACTER_SERVICE_BASE_URL =
+        originalCharacterServiceBaseUrl;
+    } else {
+      delete process.env.DND_BEYOND_CHARACTER_SERVICE_BASE_URL;
+    }
     await server.cleanup();
     await new Promise<void>((resolve, reject) => {
       mockService.close((error) => {
@@ -138,5 +152,39 @@ describe("Character import API integration", () => {
     expect(overwriteResponse.status).toBe(200);
     const overwriteBody = await overwriteResponse.json();
     expect(overwriteBody.character.id).toBe(conflictBody.existingCharacter.id);
+  });
+
+  test("returns 400 for an invalid D&D Beyond URL", async () => {
+    const response = await fetch(`${baseUrl}/api/characters/import`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookie,
+      },
+      body: JSON.stringify({
+        url: "https://example.com/not-dnd-beyond",
+      }),
+    });
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toMatch(/canonical public D&D Beyond character URLs/i);
+  });
+
+  test("returns 502 when the upstream character service fails", async () => {
+    const response = await fetch(`${baseUrl}/api/characters/import`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookie,
+      },
+      body: JSON.stringify({
+        url: "https://www.dndbeyond.com/characters/500/BRdgB3",
+      }),
+    });
+
+    expect(response.status).toBe(502);
+    const body = await response.json();
+    expect(body.error).toMatch(/failed to fetch/i);
   });
 });
