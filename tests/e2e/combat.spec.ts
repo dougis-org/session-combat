@@ -9,7 +9,6 @@ import {
   openCombat,
   verifyCombatScreenElements,
 } from "./helpers/actions";
-import { clearTestCollections } from "./helpers/db";
 import {
   createDuplicateNameConflictPayload,
   createImportedCharacterApiPayload,
@@ -18,19 +17,20 @@ import {
   EXISTING_IMPORTED_CHARACTER_ID,
   IMPORT_WARNING,
 } from "@/tests/helpers/dndBeyondImport";
+import { createTestIdentity } from "./helpers/isolation";
 
 const STRONG_PASSWORD = "TestPassword123!";
 
 test.describe("Combat flows", () => {
   test.beforeEach(async ({ page }) => {
     await page.context().clearCookies();
-    await clearTestCollections();
   });
 
   test("registered user can import a D&D Beyond character after resolving a duplicate-name conflict", async ({
     page,
-  }) => {
-    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
+  }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
 
     let characters = [
       createPersistedImportedCharacter({
@@ -139,25 +139,27 @@ test.describe("Combat flows", () => {
   // Character creation
   // ────────────────────────────────────────────────────────────
 
-  test("registered user can create a character", async ({ page }) => {
-    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
+  test("registered user can create a character", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
     await createCharacter(page, {
-      name: "Aragorn",
+      name: identity.name("Aragorn"),
       class: "Fighter",
       race: "Human",
     });
     await expect(page).not.toHaveURL(/\/characters\/create/);
   });
 
-  test("multiple characters can be created", async ({ page }) => {
-    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
+  test("multiple characters can be created", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
     await createCharacter(page, {
-      name: "Legolas",
+      name: identity.name("Legolas"),
       class: "Ranger",
       race: "Elf",
     });
     await createCharacter(page, {
-      name: "Gimli",
+      name: identity.name("Gimli"),
       class: "Barbarian",
       race: "Dwarf",
     });
@@ -168,18 +170,18 @@ test.describe("Combat flows", () => {
   // Party creation
   // ────────────────────────────────────────────────────────────
 
-  test("user can create a party", async ({ page }) => {
-    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
-    await createParty(page, { name: "Fellowship", memberCount: 4 });
+  test("user can create a party", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await createParty(page, { name: identity.name("Fellowship"), memberCount: 4 });
     await expect(page).not.toHaveURL(/\/parties\/create/);
   });
 
-  test("party with different member counts can be created", async ({
-    page,
-  }) => {
-    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
-    await createParty(page, { name: "Small Group", memberCount: 2 });
-    await createParty(page, { name: "Large Group", memberCount: 6 });
+  test("party with different member counts can be created", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await createParty(page, { name: identity.name("Small Group"), memberCount: 2 });
+    await createParty(page, { name: identity.name("Large Group"), memberCount: 6 });
     await expect(page).not.toHaveURL(/\/create/);
   });
 
@@ -187,8 +189,9 @@ test.describe("Combat flows", () => {
   // Monster import
   // ────────────────────────────────────────────────────────────
 
-  test("user can import monsters from file", async ({ page }) => {
-    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
+  test("user can import monsters from file", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
     await importMonster(page, "samples/monster-upload-example.json");
     await expect(page).not.toHaveURL(/\/monsters\/import/);
   });
@@ -197,9 +200,10 @@ test.describe("Combat flows", () => {
   // Encounter creation
   // ────────────────────────────────────────────────────────────
 
-  test("user can create an encounter", async ({ page }) => {
-    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
-    await createEncounter(page, { name: "Goblin Ambush" });
+  test("user can create an encounter", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await createEncounter(page, { name: identity.name("Goblin Ambush") });
     await expect(page).not.toHaveURL(/\/encounters\/create/);
   });
 
@@ -207,16 +211,18 @@ test.describe("Combat flows", () => {
   // Combat screen
   // ────────────────────────────────────────────────────────────
 
-  test("user can open combat screen for an encounter", async ({ page }) => {
-    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
-    await createEncounter(page, { name: "Test Encounter" });
+  test("user can open combat screen for an encounter", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await createEncounter(page, { name: identity.name("Test Encounter") });
     await openCombat(page);
     await expect(page).toHaveURL(/\/combat/);
   });
 
-  test("combat screen displays required UI elements", async ({ page }) => {
-    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
-    await createEncounter(page, { name: "Combat UI Test" });
+  test("combat screen displays required UI elements", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await createEncounter(page, { name: identity.name("Combat UI Test") });
     await openCombat(page);
     await verifyCombatScreenElements(page);
   });
@@ -227,21 +233,25 @@ test.describe("Combat flows", () => {
 
   test("complete end-to-end flow from registration to combat", async ({
     page,
-  }) => {
-    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
+  }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
     await expect(page).not.toHaveURL(/\/register/);
 
     await createCharacter(page, {
-      name: "Thorin",
+      name: identity.name("Thorin"),
       class: "Barbarian",
       race: "Dwarf",
     });
     await expect(page).not.toHaveURL(/\/characters\/create/);
 
-    await createParty(page, { name: "Dwarven Company", memberCount: 13 });
+    await createParty(page, {
+      name: identity.name("Dwarven Company"),
+      memberCount: 13,
+    });
     await expect(page).not.toHaveURL(/\/parties\/create/);
 
-    await createEncounter(page, { name: "Dragon Attack" });
+    await createEncounter(page, { name: identity.name("Dragon Attack") });
     await expect(page).not.toHaveURL(/\/encounters\/create/);
 
     await openCombat(page);
