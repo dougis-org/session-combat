@@ -6,14 +6,12 @@ import {
   registerUser,
   loginUser,
 } from "./helpers/actions";
-import { clearTestCollections } from "./helpers/db";
 
 const STRONG_PASSWORD = "TestPassword123!";
 
 test.describe("Auth", () => {
   test.beforeEach(async ({ page }) => {
     await page.context().clearCookies();
-    await clearTestCollections();
   });
 
   // ────────────────────────────────────────────────────────────

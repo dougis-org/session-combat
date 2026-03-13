@@ -155,12 +155,26 @@ jobs:
           MONGODB_DB: session-combat-e2e
 
       - name: Run Playwright regression tests
-        run: npm run test:regression
+        run: |
+          set -uo pipefail
+          start_ts=$(date +%s)
+          finish() {
+            status=$?
+            end_ts=$(date +%s)
+            elapsed=$((end_ts - start_ts))
+            echo "Regression browser scope: chromium"
+            echo "Regression workers: ${REGRESSION_WORKERS:-unset}"
+            echo "Regression duration (seconds): ${elapsed}"
+            exit $status
+          }
+          trap finish EXIT
+
+          npm run test:regression
         env:
           REGRESSION_WORKERS: '2'
           MONGODB_URI: mongodb://localhost:27017
           MONGODB_DB: session-combat-e2e
-          SKIP_CHROMIUM_FIREFOX: 'true'
+          CHROMIUM_ONLY: 'true'
 
       - name: Upload E2E coverage to Codacy
         if: always()
