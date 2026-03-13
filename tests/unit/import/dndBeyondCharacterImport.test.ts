@@ -100,9 +100,12 @@ describe("dndBeyondCharacterImport", () => {
     expect(result.character.alignment).toBeUndefined();
     expect(result.warnings).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("Race"),
-        expect.stringContaining("Alignment"),
+        'Race "Aasimar" is not supported and was omitted.',
+        "Alignment was not supported and was omitted.",
       ]),
+    );
+    expect(result.warnings).not.toEqual(
+      expect.arrayContaining([expect.stringContaining("999")]),
     );
   });
 
@@ -292,6 +295,13 @@ describe("dndBeyondCharacterImport", () => {
           },
           {
             type: "immunity",
+            subType: "poison",
+            fixedValue: null,
+            value: null,
+            friendlySubtypeName: null,
+          },
+          {
+            type: "immunity",
             subType: "poisoned",
             fixedValue: null,
             value: null,
@@ -353,6 +363,8 @@ describe("dndBeyondCharacterImport", () => {
       darkvision: "60 ft.",
       speed: "30 ft.",
     });
+    expect(result.character.damageImmunities).toContain("Poison");
+    expect(result.character.damageImmunities).not.toContain("Poisoned");
     expect(result.character.conditionImmunities).toContain("Poisoned");
     expect(result.character.damageResistances).toContain("Fire");
     expect(result.character.damageVulnerabilities).toContain("Cold");

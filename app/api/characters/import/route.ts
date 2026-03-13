@@ -74,13 +74,17 @@ export async function POST(request: NextRequest) {
       console.error("D&D Beyond import failed", error);
     }
 
-    return NextResponse.json({ error: response.message }, { status: response.status });
+    return NextResponse.json(
+      { error: response.message },
+      { status: response.status },
+    );
   }
 }
 
-function getImportErrorResponse(
-  error: unknown,
-): { message: string; status: number } {
+function getImportErrorResponse(error: unknown): {
+  message: string;
+  status: number;
+} {
   const importError = asImportError(error);
 
   if (importError) {

@@ -8,7 +8,6 @@ import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { Character, AbilityScores, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, VALID_ALIGNMENTS, DnDRace } from '@/lib/types';
 
 interface ImportConflictState {
-  existingCharacterId: string;
   existingCharacterName: string;
 }
 
@@ -152,7 +151,6 @@ export function CharactersContent() {
           data.existingCharacter
         ) {
           setImportConflict({
-            existingCharacterId: data.existingCharacter.id,
             existingCharacterName: data.existingCharacter.name,
           });
           setImportWarnings(Array.isArray(data.warnings) ? data.warnings : []);

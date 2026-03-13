@@ -10,10 +10,7 @@ import {
   VALID_RACES,
   calculateTotalLevel,
 } from "./types";
-import {
-  PASSIVE_SENSE_SKILLS,
-  SKILL_ABILITY_MAP,
-} from "./characterReference";
+import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
 
 const CANONICAL_HOST = "www.dndbeyond.com";
 const CHARACTER_PATH_PATTERN = /^\/characters\/(\d+)\/([A-Za-z0-9_-]+)\/?$/;
@@ -44,11 +41,20 @@ const ARMOR_TYPE_MAX_DEX_MODIFIER: Partial<Record<number, number>> = {
   2: 2,
   3: 0,
 };
-const CONDITION_IMMUNITY_DAMAGE_TYPES = new Set([
-  "poison",
-  "fire",
+const DAMAGE_TYPE_NAMES = new Set([
+  "acid",
+  "bludgeoning",
   "cold",
+  "fire",
+  "force",
   "lightning",
+  "necrotic",
+  "piercing",
+  "poison",
+  "psychic",
+  "radiant",
+  "slashing",
+  "thunder",
 ]);
 const ACTIONS_BY_ACTIVATION_TYPE: Partial<
   Record<number, "actions" | "bonusActions" | "reactions">
@@ -298,6 +304,7 @@ function normalizeCharacterDetails(
   const abilityScores = normalizeAbilityScores(data, modifiers);
   const maxHp = normalizeMaxHp(data, abilityScores, totalLevel);
   const skills = normalizeSkills(abilityScores, modifiers, proficiencyBonus);
+  const immunities = normalizeImmunities(modifiers);
   const categorizedAbilities = normalizeAbilities(
     data.actions,
     data.traits,
@@ -311,8 +318,8 @@ function normalizeCharacterDetails(
     actions: categorizedAbilities.actions,
     bonusActions: categorizedAbilities.bonusActions,
     classes,
-    conditionImmunities: normalizeConditionImmunities(modifiers),
-    damageImmunities: normalizeByModifierType(modifiers, "immunity"),
+    conditionImmunities: immunities.conditionImmunities,
+    damageImmunities: immunities.damageImmunities,
     damageResistances: normalizeByModifierType(modifiers, "resistance"),
     damageVulnerabilities: normalizeByModifierType(modifiers, "vulnerability"),
     hp: normalizeCurrentHp(data, maxHp),
@@ -344,9 +351,7 @@ function buildNormalizationWarnings(
   }
 
   if (!details.alignment && typeof data.alignmentId === "number") {
-    warnings.push(
-      `Alignment value "${data.alignmentId}" was not supported and was omitted.`,
-    );
+    warnings.push("Alignment was not supported and was omitted.");
   }
 
   return warnings;
@@ -702,21 +707,49 @@ function normalizeByModifierType(
   );
 }
 
-function normalizeConditionImmunities(
-  modifiers: DndBeyondModifier[],
-): string[] {
-  return dedupeStrings(
-    modifiers
-      .filter(
-        (modifier) =>
-          modifier.type === "immunity" &&
-          !CONDITION_IMMUNITY_DAMAGE_TYPES.has(modifier.subType || ""),
-      )
-      .map(
-        (modifier) =>
-          modifier.friendlySubtypeName || titleize(modifier.subType || ""),
-      ),
-  );
+function normalizeImmunities(modifiers: DndBeyondModifier[]): {
+  damageImmunities: string[];
+  conditionImmunities: string[];
+} {
+  const classified = modifiers
+    .filter((modifier) => modifier.type === "immunity")
+    .reduce(
+      (result, modifier) => {
+        const label =
+          modifier.friendlySubtypeName || titleize(modifier.subType || "");
+
+        if (!label) {
+          return result;
+        }
+
+        if (isDamageTypeModifier(modifier)) {
+          result.damageImmunities.push(label);
+        } else {
+          result.conditionImmunities.push(label);
+        }
+
+        return result;
+      },
+      {
+        damageImmunities: [] as string[],
+        conditionImmunities: [] as string[],
+      },
+    );
+
+  return {
+    damageImmunities: dedupeStrings(classified.damageImmunities),
+    conditionImmunities: dedupeStrings(classified.conditionImmunities),
+  };
+}
+
+function isDamageTypeModifier(modifier: DndBeyondModifier): boolean {
+  return [modifier.subType, modifier.friendlySubtypeName]
+    .filter((value): value is string => typeof value === "string")
+    .some((value) => DAMAGE_TYPE_NAMES.has(normalizeModifierCategory(value)));
+}
+
+function normalizeModifierCategory(value: string): string {
+  return value.toLowerCase().replace(/-/g, " ").trim();
 }
 
 function normalizeAbilities(

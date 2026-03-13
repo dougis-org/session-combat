@@ -38,10 +38,13 @@ describe("Character import API integration", () => {
   let mockService: Server;
   let mockServicePort: number;
   let originalCharacterServiceBaseUrl: string | undefined;
+  let originalAllowInsecureCharacterServiceBaseUrl: string | undefined;
 
   beforeAll(async () => {
     originalCharacterServiceBaseUrl =
       process.env.DND_BEYOND_CHARACTER_SERVICE_BASE_URL;
+    originalAllowInsecureCharacterServiceBaseUrl =
+      process.env.ALLOW_INSECURE_DND_BEYOND_CHARACTER_SERVICE_BASE_URL;
     mockService = createServer((request, response) => {
       if (request.url?.startsWith("/character/v5/character/91913267")) {
         response.writeHead(200, { "Content-Type": "application/json" });
@@ -61,6 +64,7 @@ describe("Character import API integration", () => {
 
     mockServicePort = await listen(mockService);
     process.env.DND_BEYOND_CHARACTER_SERVICE_BASE_URL = `http://127.0.0.1:${mockServicePort}/character/v5`;
+    process.env.ALLOW_INSECURE_DND_BEYOND_CHARACTER_SERVICE_BASE_URL = "true";
 
     server = await startTestServer();
     baseUrl = server.baseUrl;
@@ -72,6 +76,12 @@ describe("Character import API integration", () => {
         originalCharacterServiceBaseUrl;
     } else {
       delete process.env.DND_BEYOND_CHARACTER_SERVICE_BASE_URL;
+    }
+    if (typeof originalAllowInsecureCharacterServiceBaseUrl === "string") {
+      process.env.ALLOW_INSECURE_DND_BEYOND_CHARACTER_SERVICE_BASE_URL =
+        originalAllowInsecureCharacterServiceBaseUrl;
+    } else {
+      delete process.env.ALLOW_INSECURE_DND_BEYOND_CHARACTER_SERVICE_BASE_URL;
     }
     await server.cleanup();
     await new Promise<void>((resolve, reject) => {
