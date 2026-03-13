@@ -74,7 +74,7 @@ const codacyEslintConfig = [
       "require-yield": ["error"],
       "use-isnan": [
         "error",
-        { enforceForSwitchCase: true, enforceForIndexOf: false },
+        { enforceForIndexOf: false, enforceForSwitchCase: true },
       ],
       "valid-typeof": ["error", { requireStringLiterals: false }],
     },

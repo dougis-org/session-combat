@@ -681,7 +681,9 @@ function normalizeSenses(
     Object.fromEntries(
       PASSIVE_SENSE_SKILLS.map(([label, skill, ability]) => [
         label,
-        String(10 + (skills[skill] ?? getAbilityModifier(abilityScores[ability]))),
+        String(
+          10 + (skills[skill] ?? getAbilityModifier(abilityScores[ability])),
+        ),
       ]),
     ),
   );

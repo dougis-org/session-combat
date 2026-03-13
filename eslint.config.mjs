@@ -1,12 +1,3 @@
-import nextConfig from "eslint-config-next";
-import nextPlugin from "@next/eslint-plugin-next";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 
-const eslintConfig = [
-  ...nextConfig,
-  {
-    name: "next/core-web-vitals-overrides",
-    rules: nextPlugin.configs["core-web-vitals"].rules,
-  },
-];
-
-export default eslintConfig;
+export default nextCoreWebVitals;
