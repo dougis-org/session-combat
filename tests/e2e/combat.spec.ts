@@ -19,6 +19,138 @@ test.describe("Combat flows", () => {
     await clearTestCollections();
   });
 
+  test("registered user can import a D&D Beyond character after resolving a duplicate-name conflict", async ({
+    page,
+  }) => {
+    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
+
+    let characters = [
+      {
+        id: "existing-character-id",
+        userId: "test-user-id",
+        name: "Dolor Vagarpie",
+        ac: 15,
+        hp: 30,
+        maxHp: 30,
+        abilityScores: {
+          strength: 10,
+          dexterity: 14,
+          constitution: 12,
+          intelligence: 13,
+          wisdom: 10,
+          charisma: 16,
+        },
+        classes: [{ class: "Warlock", level: 3 }],
+      },
+    ];
+
+    await page.route("**/api/characters", async (route) => {
+      const request = route.request();
+      if (request.method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(characters),
+        });
+        return;
+      }
+
+      await route.continue();
+    });
+
+    await page.route("**/api/characters/import", async (route) => {
+      const request = route.request();
+      const body = request.postDataJSON() as {
+        url?: string;
+        overwrite?: boolean;
+      };
+
+      expect(body.url).toBe(
+        "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+      );
+
+      if (!body.overwrite) {
+        await route.fulfill({
+          status: 409,
+          contentType: "application/json",
+          body: JSON.stringify({
+            conflict: "duplicate-name",
+            error: "Character already exists",
+            existingCharacter: {
+              id: "existing-character-id",
+              name: "Dolor Vagarpie",
+            },
+            warnings: ["Alignment was not supported and was omitted."],
+          }),
+        });
+        return;
+      }
+
+      characters = [
+        {
+          id: "existing-character-id",
+          userId: "test-user-id",
+          name: "Dolor Vagarpie",
+          ac: 18,
+          hp: 92,
+          maxHp: 92,
+          abilityScores: {
+            strength: 10,
+            dexterity: 17,
+            constitution: 14,
+            intelligence: 16,
+            wisdom: 10,
+            charisma: 21,
+          },
+          classes: [
+            { class: "Rogue", level: 5 },
+            { class: "Warlock", level: 7 },
+          ],
+        },
+      ];
+
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          character: characters[0],
+          warnings: ["Alignment was not supported and was omitted."],
+        }),
+      });
+    });
+
+    await page.goto("/characters");
+    await expect(
+      page.getByRole("heading", { name: "Characters" }),
+    ).toBeVisible();
+
+    await page
+      .getByRole("button", { name: "Import from D&D Beyond" })
+      .first()
+      .click();
+    await page
+      .locator("#dnd-beyond-url")
+      .fill("https://www.dndbeyond.com/characters/91913267/BRdgB3");
+    await page
+      .getByRole("button", { name: "Import from D&D Beyond" })
+      .last()
+      .click();
+
+    await expect(page.getByText(/Character already exists/i)).toBeVisible();
+    await expect(
+      page.getByText(/Alignment was not supported and was omitted\./i),
+    ).toBeVisible();
+
+    await page
+      .getByRole("button", { name: "Overwrite Existing Character" })
+      .click();
+
+    await expect(page.getByText(/Import warnings/i)).toBeVisible();
+    await expect(page.getByText(/Rogue Level 5/i)).toBeVisible();
+    await expect(page.getByText(/Warlock Level 7/i)).toBeVisible();
+    await expect(page.locator("#dnd-beyond-url")).toHaveCount(0);
+  });
+
   // ────────────────────────────────────────────────────────────
   // Character creation
   // ────────────────────────────────────────────────────────────
@@ -35,8 +167,16 @@ test.describe("Combat flows", () => {
 
   test("multiple characters can be created", async ({ page }) => {
     await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
-    await createCharacter(page, { name: "Legolas", class: "Ranger", race: "Elf" });
-    await createCharacter(page, { name: "Gimli", class: "Barbarian", race: "Dwarf" });
+    await createCharacter(page, {
+      name: "Legolas",
+      class: "Ranger",
+      race: "Elf",
+    });
+    await createCharacter(page, {
+      name: "Gimli",
+      class: "Barbarian",
+      race: "Dwarf",
+    });
     await expect(page).not.toHaveURL(/\/create/);
   });
 
@@ -50,7 +190,9 @@ test.describe("Combat flows", () => {
     await expect(page).not.toHaveURL(/\/parties\/create/);
   });
 
-  test("party with different member counts can be created", async ({ page }) => {
+  test("party with different member counts can be created", async ({
+    page,
+  }) => {
     await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
     await createParty(page, { name: "Small Group", memberCount: 2 });
     await createParty(page, { name: "Large Group", memberCount: 6 });

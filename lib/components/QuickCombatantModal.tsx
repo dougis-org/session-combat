@@ -34,17 +34,6 @@ export function QuickCombatantModal({
   const [creatorFilter, setCreatorFilter] = useState<'all' | 'mine' | 'global' | 'other'>('all');
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
-  // Log when component mounts
-  useEffect(() => {
-    console.log('QuickCombatantModal mounted with data:', {
-      onAddMonster: typeof onAddMonster,
-      onAddCharacter: typeof onAddCharacter,
-      monsterTemplates: monsterTemplates.length,
-      characterTemplates: characterTemplates.length,
-      userId,
-    });
-  }, []);
-
   // Auto-dismiss toast after 2 seconds
   useEffect(() => {
     if (toast) {
@@ -66,11 +55,12 @@ export function QuickCombatantModal({
 
   const [error, setError] = useState<string | null>(null);
 
-  // Reset search and filters when tab changes
-  useEffect(() => {
+  const switchTab = (nextTab: TabType) => {
+    setActiveTab(nextTab);
     setSearchQuery('');
     setCreatorFilter('all');
-  }, [activeTab]);
+    setError(null);
+  };
 
   // Fuse.js fuzzy search setup for monsters
   const monsterFuse = useMemo(
@@ -307,10 +297,7 @@ export function QuickCombatantModal({
         {/* Tabs */}
         <div className="flex border-b border-gray-700 px-6 pt-4" role="tablist">
           <button
-            onClick={() => {
-              setActiveTab('monsters');
-              setError(null);
-            }}
+            onClick={() => switchTab('monsters')}
             className={`px-4 py-2 font-medium transition-colors border-b-2 ${
               activeTab === 'monsters'
                 ? 'text-purple-400 border-purple-400'
@@ -323,10 +310,7 @@ export function QuickCombatantModal({
             Monsters
           </button>
           <button
-            onClick={() => {
-              setActiveTab('characters');
-              setError(null);
-            }}
+            onClick={() => switchTab('characters')}
             className={`px-4 py-2 font-medium transition-colors border-b-2 ${
               activeTab === 'characters'
                 ? 'text-purple-400 border-purple-400'
@@ -339,10 +323,7 @@ export function QuickCombatantModal({
             Party Members
           </button>
           <button
-            onClick={() => {
-              setActiveTab('custom');
-              setError(null);
-            }}
+            onClick={() => switchTab('custom')}
             className={`px-4 py-2 font-medium transition-colors border-b-2 ${
               activeTab === 'custom'
                 ? 'text-purple-400 border-purple-400'

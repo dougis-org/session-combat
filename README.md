@@ -6,6 +6,7 @@ A Next.js application for tracking encounters and combat for D&D sessions.
 
 - **Encounter Management**: Create and manage encounters with monsters ahead of time
 - **Character Management**: Track your characters and their stats with full D&D 5e stat blocks
+- **D&D Beyond Import**: Import a public D&D Beyond character by URL, surface normalization warnings, and explicitly overwrite on duplicate-name conflicts
 - **SRD Monster Library**: 32+ public domain D&D 5e monsters available globally to all users
 - **Combat Tracker**: Full-featured combat tracker with:
   - Initiative tracking and automatic sorting
@@ -31,6 +32,16 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Validation Commands
+
+```bash
+npm run lint
+npm run build
+npm run test:unit -- --runInBand tests/unit/import/dndBeyondCharacterImport.test.ts
+npm run test:integration -- --runInBand tests/integration/import
+MONGODB_URI=mongodb://localhost:27017 MONGODB_DB=session-combat-e2e CHROMIUM_ONLY=1 npx playwright test tests/e2e/combat.spec.ts --grep "import a D&D Beyond character"
+```
+
 ### Building for Production
 
 ```bash
@@ -42,15 +53,26 @@ npm start
 
 ### 1. Add Characters
 
-Navigate to the Characters page to add your characters. For each character, enter:
+Navigate to the Characters page to add your characters manually or import them from D&D Beyond.
+
+For manual character entry, enter:
+
 - Name
 - Hit Points (HP) and Max HP
 - Armor Class (AC)
 - Initiative Bonus
 
+For D&D Beyond import:
+
+- Click `Import from D&D Beyond` on the Characters page
+- Paste a public URL in the format `https://www.dndbeyond.com/characters/<id>/<shareCode>`
+- Review any normalization warnings returned by the importer
+- If a same-name character already exists, choose whether to abort or fully overwrite the existing record
+
 ### 2. Create Encounters
 
 Navigate to the Encounters page to create encounters:
+
 - Give your encounter a name and description
 - Add monsters from the **SRD Monster Library** (global templates)
 - Or create custom monsters with full D&D stat blocks
@@ -59,6 +81,7 @@ Navigate to the Encounters page to create encounters:
 ### 3. Start Combat
 
 Navigate to the Combat Tracker:
+
 1. Select an encounter (optional - you can start combat with just characters)
 2. Click "Start Combat" to initialize the combat session
 3. Click "Roll Initiative" to roll for all combatants and sort by initiative order

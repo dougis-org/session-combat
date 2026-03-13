@@ -108,20 +108,6 @@ function CombatContent() {
     setupCombatantsRef.current = setupCombatants;
   }, [setupCombatants]);
 
-  // Log when modal opens to diagnose data issues
-  useEffect(() => {
-    if (showCombatantModal) {
-      console.log('Modal opened with data:', {
-        monsterTemplatesCount: monsterTemplates.length,
-        charactersCount: characters.length,
-        loadingTemplates,
-        userId: user?.userId,
-        firstMonster: monsterTemplates[0],
-        firstCharacter: characters[0],
-      });
-    }
-  }, [showCombatantModal]);
-
   const saveCombatState = async (state: CombatState | null) => {
     try {
       setError(null);

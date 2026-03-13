@@ -22,15 +22,17 @@ async function seedMonsters() {
     console.log(`Seeding ${ALL_SRD_MONSTERS.length} SRD monsters...`);
 
     // Delete existing global monsters to avoid duplicates
-    const deleteResult = await collection.deleteMany({ userId: GLOBAL_USER_ID });
+    const deleteResult = await collection.deleteMany({
+      userId: GLOBAL_USER_ID,
+    });
     console.log(
-      `Deleted ${deleteResult.deletedCount} existing global monsters`
+      `Deleted ${deleteResult.deletedCount} existing global monsters`,
     );
 
     // Prepare monsters with required fields, explicitly omitting _id for auto-generation
     const monstersToInsert = ALL_SRD_MONSTERS.map((monster) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { _id, ...rest } = monster;
+      const { _id: omittedId, ...rest } = monster;
+      void omittedId;
       return {
         ...rest,
         id: randomUUID(),
@@ -53,7 +55,7 @@ async function seedMonsters() {
     });
 
     console.log(
-      `\n✓ Seeding complete! ${insertedCount} monsters are now available globally.`
+      `\n✓ Seeding complete! ${insertedCount} monsters are now available globally.`,
     );
     process.exit(0);
   } catch (error) {
