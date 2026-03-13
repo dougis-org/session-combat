@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
-}
+const tailwindConfig = {
+  content: ["./app/**/*.{js,ts,jsx,tsx,mdx}"],
+};
+
+export default tailwindConfig;

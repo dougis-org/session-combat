@@ -7,10 +7,29 @@ import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { Character, AbilityScores, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, VALID_ALIGNMENTS, DnDRace } from '@/lib/types';
 
-function CharactersContent() {
+interface ImportConflictState {
+  existingCharacterName: string;
+}
+
+interface ImportResponseBody {
+  conflict?: string;
+  error?: string;
+  existingCharacter?: {
+    id: string;
+    name: string;
+  };
+  warnings?: string[];
+}
+
+export function CharactersContent() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [importWarnings, setImportWarnings] = useState<string[]>([]);
+  const [importUrl, setImportUrl] = useState('');
+  const [isImportPanelOpen, setIsImportPanelOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importConflict, setImportConflict] = useState<ImportConflictState | null>(null);
   const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -34,6 +53,8 @@ function CharactersContent() {
   };
 
   const addCharacter = () => {
+    setImportWarnings([]);
+    setImportConflict(null);
     const newCharacter: Character = {
       id: '',
       userId: '',
@@ -58,6 +79,7 @@ function CharactersContent() {
   const saveCharacter = async (character: Character) => {
     try {
       setError(null);
+      setImportWarnings([]);
       const url = isAdding ? '/api/characters' : `/api/characters/${character.id}`;
       const method = isAdding ? 'POST' : 'PUT';
 
@@ -84,6 +106,7 @@ function CharactersContent() {
     if (!confirm('Are you sure you want to delete this character?')) return;
     try {
       setError(null);
+      setImportWarnings([]);
       const response = await fetch(`/api/characters/${id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete character');
       await fetchCharacters();
@@ -95,6 +118,63 @@ function CharactersContent() {
   const cancelEdit = () => {
     setIsAdding(false);
     setEditingCharacter(null);
+  };
+
+  const toggleImportPanel = () => {
+    setIsImportPanelOpen((current) => !current);
+    setImportConflict(null);
+    setError(null);
+  };
+
+  const submitImport = async (overwrite = false) => {
+    try {
+      setIsImporting(true);
+      setError(null);
+      setImportWarnings([]);
+
+      const response = await fetch('/api/characters/import', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: importUrl,
+          overwrite,
+        }),
+      });
+
+      const data = await readImportResponseBody(response);
+      if (!response.ok) {
+        if (
+          response.status === 409 &&
+          data?.conflict === 'duplicate-name' &&
+          data.existingCharacter
+        ) {
+          setImportConflict({
+            existingCharacterName: data.existingCharacter.name,
+          });
+          setImportWarnings(Array.isArray(data.warnings) ? data.warnings : []);
+          return;
+        }
+
+        throw new Error(data?.error || 'Failed to import character');
+      }
+
+      setImportConflict(null);
+      setImportWarnings(Array.isArray(data?.warnings) ? data.warnings : []);
+      setImportUrl('');
+      setIsImportPanelOpen(false);
+      await fetchCharacters();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to import character');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const abortImportConflict = () => {
+    setImportConflict(null);
+    setImportWarnings([]);
   };
 
   return (
@@ -113,13 +193,97 @@ function CharactersContent() {
           </div>
         )}
 
-        <button
-          onClick={addCharacter}
-          disabled={loading}
-          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded mb-6"
-        >
-          Add New Character
-        </button>
+        {importWarnings.length > 0 && (
+          <div className="p-4 bg-amber-900 border border-amber-700 rounded text-amber-100 mb-6">
+            <div className="font-semibold mb-2">Import warnings</div>
+            <ul className="list-disc pl-5 space-y-1">
+              {importWarnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-3 mb-6">
+          <button
+            onClick={addCharacter}
+            disabled={loading}
+            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded"
+          >
+            Add New Character
+          </button>
+          <button
+            onClick={toggleImportPanel}
+            disabled={loading || isImporting}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 px-4 py-2 rounded"
+          >
+            Import from D&D Beyond
+          </button>
+        </div>
+
+        {isImportPanelOpen && (
+          <div className="bg-gray-800 rounded-lg p-6 mb-6 border border-indigo-500">
+            <h2 className="text-xl font-bold mb-4">Import a Public D&amp;D Beyond Character</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block mb-1 text-sm font-bold" htmlFor="dnd-beyond-url">
+                  Character URL
+                </label>
+                <input
+                  id="dnd-beyond-url"
+                  type="url"
+                  value={importUrl}
+                  onChange={(event) => setImportUrl(event.target.value)}
+                  placeholder="https://www.dndbeyond.com/characters/<id>/<shareCode>"
+                  className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+                  disabled={isImporting}
+                />
+              </div>
+
+              {importConflict && (
+                <div className="p-4 bg-amber-950 border border-amber-700 rounded text-amber-100">
+                  <div className="font-semibold mb-2">Character already exists</div>
+                  <p className="mb-3">
+                    A character named {importConflict.existingCharacterName} already exists. You can abort the import or overwrite the existing character.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={abortImportConflict}
+                      disabled={isImporting}
+                      className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 px-4 py-2 rounded"
+                    >
+                      Abort
+                    </button>
+                    <button
+                      onClick={() => submitImport(true)}
+                      disabled={isImporting}
+                      className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 px-4 py-2 rounded"
+                    >
+                      Overwrite Existing Character
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => submitImport(false)}
+                  disabled={isImporting || !importUrl.trim()}
+                  className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 px-4 py-2 rounded"
+                >
+                  {isImporting ? 'Importing...' : 'Import from D&D Beyond'}
+                </button>
+                <button
+                  onClick={toggleImportPanel}
+                  disabled={isImporting}
+                  className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 px-4 py-2 rounded"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {editingCharacter && (
           <CharacterEditor
@@ -205,6 +369,27 @@ function CharactersContent() {
       </div>
     </div>
   );
+}
+
+async function readImportResponseBody(
+  response: Response,
+): Promise<ImportResponseBody | null> {
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    try {
+      return (await response.json()) as ImportResponseBody;
+    } catch {
+      return null;
+    }
+  }
+
+  try {
+    const text = await response.text();
+    return text ? { error: text } : null;
+  } catch {
+    return null;
+  }
 }
 
 function CharacterEditor({
@@ -363,6 +548,7 @@ function CharacterEditor({
             onChange={e => setAlignment(e.target.value)}
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
             disabled={saving}
+            aria-label="Character alignment"
           >
             <option value="">Select Alignment</option>
             {VALID_ALIGNMENTS.map(align => (

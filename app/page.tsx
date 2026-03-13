@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
@@ -80,7 +81,7 @@ function HomeContent() {
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <img src="/logo.svg" alt="D&D Combat Tracker" className="w-16 h-16" />
+              <Image src="/logo.svg" alt="D&D Combat Tracker" width={64} height={64} className="w-16 h-16" />
               <h1 className="text-4xl font-bold">D&D Session Combat Tracker</h1>
             </Link>
           </div>

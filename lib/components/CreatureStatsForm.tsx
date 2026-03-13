@@ -1,6 +1,7 @@
 'use client';
 
 import { AbilityScores, CreatureStats, CreatureAbility } from '@/lib/types';
+import { ABILITY_SCORE_KEYS, SKILL_NAMES } from '@/lib/characterReference';
 import { useState } from 'react';
 
 interface CreatureStatsFormProps {
@@ -83,6 +84,7 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
             type="number"
             value={stats.ac}
             onChange={e => updateBasicStat('ac', parseInt(e.target.value) || 0)}
+            aria-label="Armor Class"
             className="w-full bg-gray-700 rounded px-2 py-1 text-white"
           />
           <input
@@ -99,6 +101,7 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
             type="number"
             value={stats.hp}
             onChange={e => updateBasicStat('hp', parseInt(e.target.value) || 0)}
+            aria-label="Current Hit Points"
             className="w-full bg-gray-700 rounded px-2 py-1 text-white"
           />
         </div>
@@ -108,6 +111,7 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
             type="number"
             value={stats.maxHp}
             onChange={e => updateBasicStat('maxHp', parseInt(e.target.value) || 0)}
+            aria-label="Maximum Hit Points"
             className="w-full bg-gray-700 rounded px-2 py-1 text-white"
           />
         </div>
@@ -124,7 +128,7 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
         </button>
         {expandedSections.abilities && (
           <div className="grid grid-cols-6 gap-2">
-            {(['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'] as const).map(ability => (
+            {ABILITY_SCORE_KEYS.map(ability => (
               <div key={ability}>
                 <label className="block text-xs font-bold capitalize mb-1">{ability}</label>
                 <input
@@ -133,6 +137,7 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
                   max="20"
                   value={stats.abilityScores[ability]}
                   onChange={e => updateAbilityScore(ability, parseInt(e.target.value) || 10)}
+                  aria-label={`${ability} score`}
                   className="w-full bg-gray-700 rounded px-1 py-1 text-white text-sm"
                 />
               </div>
@@ -152,17 +157,14 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
         </button>
         {expandedSections.skills && (
           <div className="grid grid-cols-2 gap-2">
-            {[
-              'acrobatics', 'animal handling', 'arcana', 'athletics', 'deception', 'history',
-              'insight', 'intimidation', 'investigation', 'medicine', 'nature', 'perception',
-              'performance', 'persuasion', 'religion', 'sleight of hand', 'stealth', 'survival',
-            ].map(skill => (
+            {SKILL_NAMES.map(skill => (
               <div key={skill}>
                 <label className="text-xs capitalize">{skill}</label>
                 <input
                   type="number"
                   value={stats.skills?.[skill] || 0}
                   onChange={e => updateSkill(skill, parseInt(e.target.value) || 0)}
+                  aria-label={`${skill} bonus`}
                   className="w-full bg-gray-700 rounded px-1 py-1 text-white text-sm"
                 />
               </div>
@@ -272,6 +274,7 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
                   });
                   updateBasicStat('senses', Object.keys(senses).length > 0 ? senses : undefined);
                 }}
+                aria-label="Senses"
                 className="w-full bg-gray-700 rounded px-2 py-1 text-white text-sm"
                 rows={2}
               />
@@ -379,6 +382,7 @@ function AbilityEditorSection({ title, abilities, onAdd, onRemove, onUpdate }: A
               <textarea
                 value={ability.description}
                 onChange={e => onUpdate(idx, { ...ability, description: e.target.value })}
+                aria-label={`${title} description ${idx + 1}`}
                 placeholder="Description"
                 className="w-full bg-gray-600 rounded px-2 py-1 text-white text-sm"
                 rows={2}

@@ -212,25 +212,27 @@ function EncounterEditor({
   const [loadingTemplates, setLoadingTemplates] = useState(false);
 
   useEffect(() => {
-    if (showCombatantModal && monsterTemplates.length === 0) {
-      loadMonsterTemplates();
+    if (!showCombatantModal || monsterTemplates.length > 0) {
+      return;
     }
-  }, [showCombatantModal]);
 
-  const loadMonsterTemplates = async () => {
-    setLoadingTemplates(true);
-    try {
-      const response = await fetch('/api/monsters');
-      if (response.ok) {
-        const data = await response.json();
-        setMonsterTemplates(data || []);
+    const loadMonsterTemplates = async () => {
+      setLoadingTemplates(true);
+      try {
+        const response = await fetch('/api/monsters');
+        if (response.ok) {
+          const data = await response.json();
+          setMonsterTemplates(data || []);
+        }
+      } catch (error) {
+        console.error('Error loading monster templates:', error);
+      } finally {
+        setLoadingTemplates(false);
       }
-    } catch (error) {
-      console.error('Error loading monster templates:', error);
-    } finally {
-      setLoadingTemplates(false);
-    }
-  };
+    };
+
+    void loadMonsterTemplates();
+  }, [showCombatantModal, monsterTemplates.length]);
 
   const addMonster = (monster: Monster) => {
     setMonsters([...monsters, monster]);

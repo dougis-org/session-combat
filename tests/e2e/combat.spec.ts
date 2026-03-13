@@ -10,6 +10,14 @@ import {
   verifyCombatScreenElements,
 } from "./helpers/actions";
 import { clearTestCollections } from "./helpers/db";
+import {
+  createDuplicateNameConflictPayload,
+  createImportedCharacterApiPayload,
+  createPersistedImportedCharacter,
+  DND_BEYOND_CHARACTER_URL,
+  EXISTING_IMPORTED_CHARACTER_ID,
+  IMPORT_WARNING,
+} from "@/tests/helpers/dndBeyondImport";
 
 const STRONG_PASSWORD = "TestPassword123!";
 
@@ -17,6 +25,114 @@ test.describe("Combat flows", () => {
   test.beforeEach(async ({ page }) => {
     await page.context().clearCookies();
     await clearTestCollections();
+  });
+
+  test("registered user can import a D&D Beyond character after resolving a duplicate-name conflict", async ({
+    page,
+  }) => {
+    await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
+
+    let characters = [
+      createPersistedImportedCharacter({
+        id: EXISTING_IMPORTED_CHARACTER_ID,
+        userId: "test-user-id",
+        ac: 15,
+        hp: 30,
+        maxHp: 30,
+        abilityScores: {
+          strength: 10,
+          dexterity: 14,
+          constitution: 12,
+          intelligence: 13,
+          wisdom: 10,
+          charisma: 16,
+        },
+        classes: [{ class: "Warlock", level: 3 }],
+      }),
+    ];
+
+    await page.route("**/api/characters", async (route) => {
+      const request = route.request();
+      if (request.method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(characters),
+        });
+        return;
+      }
+
+      await route.continue();
+    });
+
+    await page.route("**/api/characters/import", async (route) => {
+      const request = route.request();
+      const body = request.postDataJSON() as {
+        url?: string;
+        overwrite?: boolean;
+      };
+
+      expect(body.url).toBe(DND_BEYOND_CHARACTER_URL);
+
+      if (!body.overwrite) {
+        await route.fulfill({
+          status: 409,
+          contentType: "application/json",
+          body: JSON.stringify(
+            createDuplicateNameConflictPayload({ warnings: [IMPORT_WARNING] }),
+          ),
+        });
+        return;
+      }
+
+      characters = [
+        createPersistedImportedCharacter({
+          id: EXISTING_IMPORTED_CHARACTER_ID,
+          userId: "test-user-id",
+          ac: 18,
+        }),
+      ];
+
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(
+          createImportedCharacterApiPayload({
+            character: characters[0],
+            warnings: [IMPORT_WARNING],
+          }),
+        ),
+      });
+    });
+
+    await page.goto("/characters");
+    await expect(
+      page.getByRole("heading", { name: "Characters" }),
+    ).toBeVisible();
+
+    await page
+      .getByRole("button", { name: "Import from D&D Beyond" })
+      .first()
+      .click();
+    await page.locator("#dnd-beyond-url").fill(DND_BEYOND_CHARACTER_URL);
+    await page
+      .getByRole("button", { name: "Import from D&D Beyond" })
+      .last()
+      .click();
+
+    await expect(page.getByText(/Character already exists/i)).toBeVisible();
+    await expect(
+      page.getByText(/Alignment was not supported and was omitted\./i),
+    ).toBeVisible();
+
+    await page
+      .getByRole("button", { name: "Overwrite Existing Character" })
+      .click();
+
+    await expect(page.getByText(/Import warnings/i)).toBeVisible();
+    await expect(page.getByText(/Rogue Level 5/i)).toBeVisible();
+    await expect(page.getByText(/Warlock Level 7/i)).toBeVisible();
+    await expect(page.locator("#dnd-beyond-url")).toHaveCount(0);
   });
 
   // ────────────────────────────────────────────────────────────
@@ -35,8 +151,16 @@ test.describe("Combat flows", () => {
 
   test("multiple characters can be created", async ({ page }) => {
     await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
-    await createCharacter(page, { name: "Legolas", class: "Ranger", race: "Elf" });
-    await createCharacter(page, { name: "Gimli", class: "Barbarian", race: "Dwarf" });
+    await createCharacter(page, {
+      name: "Legolas",
+      class: "Ranger",
+      race: "Elf",
+    });
+    await createCharacter(page, {
+      name: "Gimli",
+      class: "Barbarian",
+      race: "Dwarf",
+    });
     await expect(page).not.toHaveURL(/\/create/);
   });
 
@@ -50,7 +174,9 @@ test.describe("Combat flows", () => {
     await expect(page).not.toHaveURL(/\/parties\/create/);
   });
 
-  test("party with different member counts can be created", async ({ page }) => {
+  test("party with different member counts can be created", async ({
+    page,
+  }) => {
     await registerUser(page, generateUniqueEmail(), STRONG_PASSWORD);
     await createParty(page, { name: "Small Group", memberCount: 2 });
     await createParty(page, { name: "Large Group", memberCount: 6 });
