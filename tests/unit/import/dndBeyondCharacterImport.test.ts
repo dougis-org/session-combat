@@ -40,6 +40,18 @@ describe("dndBeyondCharacterImport", () => {
     });
   });
 
+  test("trims whitespace around a canonical D&D Beyond character URL", () => {
+    expect(
+      parseDndBeyondCharacterUrl(
+        "  https://www.dndbeyond.com/characters/91913267/BRdgB3  ",
+      ),
+    ).toEqual({
+      characterId: "91913267",
+      shareCode: "BRdgB3",
+      normalizedUrl: "https://www.dndbeyond.com/characters/91913267/BRdgB3",
+    });
+  });
+
   test("normalizes a public D&D Beyond character into the local model", () => {
     const result = normalizeDndBeyondCharacter(
       sampleDndBeyondCharacterResponse.data,
@@ -237,6 +249,17 @@ describe("dndBeyondCharacterImport", () => {
     expect(result.character.hp).toBe(31);
   });
 
+  test("clamps explicit current hit points to the normalized range", () => {
+    const result = normalizeDndBeyondCharacter({
+      ...sampleDndBeyondCharacterResponse.data,
+      currentHitPoints: 999,
+      overrideHitPoints: 44,
+    });
+
+    expect(result.character.maxHp).toBe(44);
+    expect(result.character.hp).toBe(44);
+  });
+
   test("falls back to removed hit points and clamps health at zero", () => {
     const result = normalizeDndBeyondCharacter({
       ...sampleDndBeyondCharacterResponse.data,
@@ -378,5 +401,29 @@ describe("dndBeyondCharacterImport", () => {
     expect(result.character.senses.speed).toBeUndefined();
     expect(result.character.senses["passive insight"]).toBe("10");
     expect(result.character.senses["passive investigation"]).toBe("13");
+  });
+
+  test("omits actions whose sanitized descriptions are empty", () => {
+    const result = normalizeDndBeyondCharacter({
+      ...sampleDndBeyondCharacterResponse.data,
+      actions: {
+        ...sampleDndBeyondCharacterResponse.data.actions,
+        feat: [
+          {
+            name: "Markup Only",
+            description: "<p><br></p>",
+            activation: { activationType: 1 },
+          },
+        ],
+      },
+    });
+
+    expect(result.character.actions).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Markup Only",
+        }),
+      ]),
+    );
   });
 });

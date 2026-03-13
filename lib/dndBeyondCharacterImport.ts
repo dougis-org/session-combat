@@ -10,6 +10,10 @@ import {
   VALID_RACES,
   calculateTotalLevel,
 } from "./types";
+import {
+  PASSIVE_SENSE_SKILLS,
+  SKILL_ABILITY_MAP,
+} from "./characterReference";
 
 const CANONICAL_HOST = "www.dndbeyond.com";
 const CHARACTER_PATH_PATTERN = /^\/characters\/(\d+)\/([A-Za-z0-9_-]+)\/?$/;
@@ -33,27 +37,6 @@ const ABILITY_ID_MAP: Record<number, keyof AbilityScores> = {
   4: "intelligence",
   5: "wisdom",
   6: "charisma",
-};
-
-const SKILL_ABILITY_MAP: Record<string, keyof AbilityScores> = {
-  acrobatics: "dexterity",
-  "animal handling": "wisdom",
-  arcana: "intelligence",
-  athletics: "strength",
-  deception: "charisma",
-  history: "intelligence",
-  insight: "wisdom",
-  intimidation: "charisma",
-  investigation: "intelligence",
-  medicine: "wisdom",
-  nature: "intelligence",
-  perception: "wisdom",
-  performance: "charisma",
-  persuasion: "charisma",
-  religion: "intelligence",
-  "sleight of hand": "dexterity",
-  stealth: "dexterity",
-  survival: "wisdom",
 };
 
 const ABILITY_KEYS = Object.values(ABILITY_ID_MAP);
@@ -87,14 +70,6 @@ const NOTE_TITLE_MAP = {
   organizations: "Organizations",
   otherNotes: "Other Notes",
 };
-const PASSIVE_SENSE_SKILLS: Array<
-  [string, keyof typeof SKILL_ABILITY_MAP, keyof AbilityScores]
-> = [
-  ["passive perception", "perception", "wisdom"],
-  ["passive investigation", "investigation", "intelligence"],
-  ["passive insight", "insight", "wisdom"],
-];
-
 interface DndBeyondStatValue {
   id: number;
   value: number | null;
@@ -280,7 +255,7 @@ function flattenModifiers(
 
 function parseUrlOrThrow(url: string): URL {
   try {
-    return new URL(url);
+    return new URL(url.trim());
   } catch {
     throw createValidationError("Enter a valid D&D Beyond character URL.");
   }
@@ -410,7 +385,7 @@ function normalizeCurrentHp(
   maxHp: number,
 ): number {
   return typeof data.currentHitPoints === "number"
-    ? data.currentHitPoints
+    ? Math.min(Math.max(0, data.currentHitPoints), maxHp)
     : Math.max(0, maxHp - (data.removedHitPoints || 0));
 }
 
@@ -793,9 +768,17 @@ function normalizeActionEntry(
     return null;
   }
 
+  const description = sanitizeHtmlSnippet(
+    entry.snippet || entry.description || "",
+  );
+
+  if (!description) {
+    return null;
+  }
+
   return {
     name: entry.name,
-    description: sanitizeHtmlSnippet(entry.snippet || entry.description || ""),
+    description,
   };
 }
 
