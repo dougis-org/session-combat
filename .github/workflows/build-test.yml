@@ -204,9 +204,90 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
+  playwright-coverage:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ ping: 1 })' || exit 1"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium with system dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Wait for MongoDB to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if nc -z localhost 27017; then echo 'Mongo is up' && exit 0; fi
+            sleep 1
+          done
+          echo 'Mongo did not become ready' && exit 1
+
+      - name: Run Playwright browser coverage
+        run: npm run test:e2e:coverage
+        env:
+          PLAYWRIGHT_COVERAGE: 'true'
+          PLAYWRIGHT_SERVER_MODE: production
+          CHROMIUM_ONLY: '1'
+          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_DB: session-combat-e2e
+
+      - name: Upload Playwright browser coverage to Codacy
+        if: always()
+        env:
+          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+          CODACY_ORGANIZATION_PROVIDER: gh
+          CODACY_USERNAME: dougis-org
+          CODACY_PROJECT_NAME: session-combat
+        run: |
+          if [ -z "$CODACY_API_TOKEN" ]; then
+            echo "CODACY_API_TOKEN not set (fork PR or missing secret), skipping coverage upload"
+            exit 0
+          fi
+          curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
+          chmod +x codacy-coverage-reporter.sh
+          if [ -f coverage/lcov.info ]; then
+            ./codacy-coverage-reporter.sh report --partial -r coverage/lcov.info
+          else
+            echo "No coverage report found at coverage/lcov.info from Playwright browser coverage"
+            exit 1
+          fi
+
+      - name: Upload Playwright browser coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-browser-coverage
+          path: |
+            coverage/
+            test-results/
+          retention-days: 7
+
   finalize-coverage:
     runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests, regression-tests]
+    needs: [unit-tests, integration-tests, regression-tests, playwright-coverage]
     if: always()
 
     steps:

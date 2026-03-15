@@ -39,6 +39,7 @@ npm run lint
 npm run build
 npm run test:unit -- --runInBand tests/unit/import/dndBeyondCharacterImport.test.ts
 npm run test:integration -- --runInBand tests/integration/import
+MONGODB_URI=mongodb://localhost:27017 MONGODB_DB=session-combat-e2e npm run test:e2e:coverage
 MONGODB_URI=mongodb://localhost:27017 MONGODB_DB=session-combat-e2e CHROMIUM_ONLY=1 npx playwright test tests/e2e/combat.spec.ts --grep "import a D&D Beyond character"
 ```
 

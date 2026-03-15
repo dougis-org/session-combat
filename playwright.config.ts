@@ -2,6 +2,10 @@ import { defineConfig, devices } from "@playwright/test";
 
 const e2eDbName = process.env.MONGODB_DB || "session-combat-e2e";
 process.env.MONGODB_DB = e2eDbName;
+const isPlaywrightCoverageEnabled = process.env.PLAYWRIGHT_COVERAGE === "true";
+const useProductionServer =
+  process.env.PLAYWRIGHT_SERVER_MODE === "production" ||
+  isPlaywrightCoverageEnabled;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -68,6 +72,11 @@ export default defineConfig({
       },
     ];
 
+    if (isPlaywrightCoverageEnabled) {
+      console.log("✅ Running Playwright browser coverage with chromium only");
+      return allProjects.filter((p) => p.name === "chromium");
+    }
+
     // Run only chromium for debugging
     if (process.env.CHROMIUM_ONLY) {
       console.log("✅ Running regression tests with chromium only");
@@ -113,13 +122,13 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "npm run dev",
+    command: useProductionServer ? "npm start" : "npm run dev",
     url: "http://localhost:3000",
     env: {
       ...process.env,
       MONGODB_DB: e2eDbName,
     },
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !process.env.CI && !useProductionServer,
     timeout: 120 * 1000,
   },
 });
