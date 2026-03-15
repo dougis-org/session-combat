@@ -29,11 +29,12 @@ export const storage = {
   },
 
   // Load characters for a user
+  // Note: Queries the characters_active view which automatically excludes soft-deleted characters
   async loadCharacters(userId: string): Promise<Character[]> {
     try {
       const db = await getDatabase();
       const characters = await db
-        .collection<Character>('characters')
+        .collection<Character>('characters_active')
         .find({ userId })
         .toArray();
       // Ensure id field is set to the string representation of _id
@@ -262,12 +263,17 @@ export const storage = {
     }
   },
 
-  // Delete character
+  // Delete character (soft delete)
+  // Sets deletedAt timestamp instead of removing the document, preserving audit trail
   async deleteCharacter(id: string, userId: string): Promise<void> {
     try {
       const db = await getDatabase();
-      await db.collection<Character>('characters').deleteOne({ id, userId });
-      // Also remove character from all parties
+      // Soft delete: mark with deletedAt timestamp
+      await db.collection<Character>('characters').updateOne(
+        { id, userId },
+        { $set: { deletedAt: new Date() } }
+      );
+      // Also remove character from all parties to ensure referential integrity
       await db.collection<Party>('parties').updateMany(
         { userId },
         { $pull: { characterIds: id } }

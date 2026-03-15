@@ -172,15 +172,26 @@ test.describe("Combat flows", () => {
   test("user can create a party", async ({ page }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
-    await createParty(page, { name: identity.name("Fellowship"), memberCount: 4 });
+    await createParty(page, {
+      name: identity.name("Fellowship"),
+      memberCount: 4,
+    });
     await expect(page).not.toHaveURL(/\/parties\/create/);
   });
 
-  test("party with different member counts can be created", async ({ page }, testInfo) => {
+  test("party with different member counts can be created", async ({
+    page,
+  }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
-    await createParty(page, { name: identity.name("Small Group"), memberCount: 2 });
-    await createParty(page, { name: identity.name("Large Group"), memberCount: 6 });
+    await createParty(page, {
+      name: identity.name("Small Group"),
+      memberCount: 2,
+    });
+    await createParty(page, {
+      name: identity.name("Large Group"),
+      memberCount: 6,
+    });
     await expect(page).not.toHaveURL(/\/create/);
   });
 
@@ -210,7 +221,9 @@ test.describe("Combat flows", () => {
   // Combat screen
   // ────────────────────────────────────────────────────────────
 
-  test("user can open combat screen for an encounter", async ({ page }, testInfo) => {
+  test("user can open combat screen for an encounter", async ({
+    page,
+  }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
     await createEncounter(page, { name: identity.name("Test Encounter") });
@@ -218,7 +231,9 @@ test.describe("Combat flows", () => {
     await expect(page).toHaveURL(/\/combat/);
   });
 
-  test("combat screen displays required UI elements", async ({ page }, testInfo) => {
+  test("combat screen displays required UI elements", async ({
+    page,
+  }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
     await createEncounter(page, { name: identity.name("Combat UI Test") });
