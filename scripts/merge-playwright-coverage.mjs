@@ -73,6 +73,18 @@ function normalizeSourcePath(filePath) {
 
   stripped = stripped.replace(/^\.?\//, "");
 
+  // Normalize path to app/ or lib/ directory by checking path segments
+  const segments = stripped.split("/");
+  let appOrLibIndex = segments.indexOf("app");
+  if (appOrLibIndex === -1) {
+    appOrLibIndex = segments.indexOf("lib");
+  }
+
+  if (appOrLibIndex !== -1) {
+    const relevantPath = segments.slice(appOrLibIndex).join("/");
+    return path.join(repoRoot, relevantPath);
+  }
+
   const appIndex = stripped.indexOf("app/");
   if (appIndex >= 0) {
     return path.join(repoRoot, stripped.slice(appIndex));

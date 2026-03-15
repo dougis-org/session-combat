@@ -14,6 +14,7 @@ export const test = base.extend({
     if (shouldCollectCoverage) {
       await page.coverage.startJSCoverage({
         resetOnNavigation: false,
+        includeRawScriptCoverage: true,
       });
     }
 
