@@ -28,8 +28,22 @@ export const storage = {
     }
   },
 
-  // Load characters for a user
-  // Note: Queries the characters_active view which automatically excludes soft-deleted characters
+  /**
+   * Load all active characters for a user.
+   * 
+   * This function queries the `characters_active` MongoDB view, which automatically
+   * filters out soft-deleted characters (those with a deletedAt timestamp set).
+   * The view is created during database initialization and uses a pipeline that matches
+   * characters where deletedAt is null or does not exist.
+   * 
+   * @param userId - The user ID to load characters for
+   * @returns Promise resolving to array of active Character objects
+   * 
+   * @remarks
+   * - Soft-deleted characters (with deletedAt != null) are automatically excluded by the view
+   * - The explicit 'id' field is preserved; MongoDB's '_id' is used as fallback only
+   * - Returns empty array on error (logged to console)
+   */
   async loadCharacters(userId: string): Promise<Character[]> {
     try {
       const db = await getDatabase();
@@ -263,8 +277,30 @@ export const storage = {
     }
   },
 
-  // Delete character (soft delete)
-  // Sets deletedAt timestamp instead of removing the document, preserving audit trail
+  /**
+   * Soft delete a character by marking it with a deletedAt timestamp.
+   * 
+   * This function performs a soft delete, marking the character as deleted without
+   * removing the underlying document. This preserves the character data for audit trails,
+   * recovery, or future reference. Soft-deleted characters are automatically excluded
+   * from queries via the characters_active view.
+   * 
+   * The function also maintains referential integrity by removing the character ID from
+   * all parties that reference it, ensuring the character doesn't appear in party listings
+   * or combat scenarios.
+   * 
+   * @param id - The character ID to soft delete
+   * @param userId - The user ID (for ownership verification)
+   * @returns Promise that resolves when the soft delete is complete
+   * 
+   * @remarks
+   * - Atomically sets deletedAt timestamp and removes from all parties
+   * - Character data remains intact; deletedAt field is the only modification
+   * - Soft-deleted characters return 404 on GET detail requests
+   * - Soft-deleted characters are excluded from GET list via the characters_active view
+   * 
+   * @throws Error if database operation fails
+   */
   async deleteCharacter(id: string, userId: string): Promise<void> {
     try {
       const db = await getDatabase();

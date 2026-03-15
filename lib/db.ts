@@ -8,21 +8,33 @@ let cachedDb: Db | null = null;
 
 /**
  * Initialize MongoDB views and indexes after database connection.
- * Creates the characters_active view for soft-deleted character filtering.
+ * 
+ * Creates the `characters_active` view that automatically filters out soft-deleted characters.
+ * This ensures that all queries against the view only return active (non-deleted) characters,
+ * enforcing the soft delete logic at the database layer rather than in application code.
+ * 
+ * Also creates an index on the deletedAt field for optimal query performance when the view
+ * evaluates its filtering pipeline.
  */
 async function initializeDatabase(db: Db): Promise<void> {
   try {
     // Create index on deletedAt field for optimal query performance
+    // This index accelerates the $match pipeline in the characters_active view
     await db.collection('characters').createIndex({ deletedAt: 1 });
     console.log('Created index on characters.deletedAt');
 
-    // Create characters_active view that filters out soft-deleted characters
+    // Drop existing view if it exists (needed to update view definition)
     try {
       await db.dropCollection('characters_active');
     } catch {
       // View doesn't exist yet, ignore error
     }
 
+    // Create characters_active MongoDB view that filters out soft-deleted characters.
+    // The view uses an aggregation pipeline with $match stage that returns only documents where:
+    // - deletedAt field is null (explicitly soft-deleted but not permanently removed), OR
+    // - deletedAt field does not exist (pre-soft-delete migration documents)
+    // This ensures backward compatibility with characters created before soft delete was implemented.
     await db.createCollection('characters_active', {
       viewOn: 'characters',
       pipeline: [
