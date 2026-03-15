@@ -6,31 +6,31 @@
 
 ## 2. Database Setup - View and Index
 
-- [ ] 2.1 Create MongoDB view `characters_active` that filters `{ deletedAt: null }`
-- [ ] 2.2 Create MongoDB index on `characters.deletedAt` field for view performance
-- [ ] 2.3 Verify view creation in test/staging database
-- [ ] 2.4 Test view returns only active (non-deleted) characters
+- [x] 2.1 Create MongoDB view `characters_active` that filters `{ deletedAt: null }`
+- [x] 2.2 Create MongoDB index on `characters.deletedAt` field for view performance
+- [x] 2.3 Verify view creation in test/staging database
+- [x] 2.4 Test view returns only active (non-deleted) characters
 
 ## 3. Storage Layer Implementation
 
-- [ ] 3.1 Update collection references in storage.ts to query `characters_active` view instead of `characters`
-- [ ] 3.2 Update `loadCharacters()` to query `characters_active` view
+- [x] 3.1 Update collection references in storage.ts to query `characters_active` view instead of `characters`
+- [x] 3.2 Update `loadCharacters()` to query `characters_active` view
 - [ ] 3.3 Write unit test for loadCharacters() returning only active characters (deletedAt = null)
 - [ ] 3.4 Write unit test for existing characters without deletedAt field being treated as active
 - [ ] 3.5 Write unit test for deleteCharacter() to verify it sets deletedAt timestamp
-- [ ] 3.6 Update deleteCharacter() in lib/storage.ts to perform update (set deletedAt) instead of deleteOne
-- [ ] 3.7 Verify party cleanup logic still executes after soft delete (update party characterIds)
+- [x] 3.6 Update deleteCharacter() in lib/storage.ts to perform update (set deletedAt) instead of deleteOne
+- [x] 3.7 Verify party cleanup logic still executes after soft delete (update party characterIds)
 - [ ] 3.8 Add unit test for party cleanup occurring atomically with soft delete
 
 ## 4. API Endpoint Updates
 
-- [ ] 4.1 Write integration test for GET /api/characters to verify deleted characters excluded from list
-- [ ] 4.2 Verify existing GET /api/characters endpoint works with updated storage (querying view)
-- [ ] 4.3 Write integration test for GET /api/characters/{id} returning 404 for deleted character
-- [ ] 4.4 Update GET /api/characters/{id} handler to return 404 when character has deletedAt != null
-- [ ] 4.5 Write integration test for DELETE /api/characters/{id} setting deletedAt timestamp
-- [ ] 4.6 Verify DELETE /api/characters/{id} response message remains appropriate
-- [ ] 4.7 Write integration test for deleted character disappearing from list after deletion
+- [x] 4.1 Write integration test for GET /api/characters to verify deleted characters excluded from list
+- [x] 4.2 Verify existing GET /api/characters endpoint works with updated storage (querying view)
+- [x] 4.3 Write integration test for GET /api/characters/{id} returning 404 for deleted character
+- [x] 4.4 Update GET /api/characters/{id} handler to return 404 when character has deletedAt != null
+- [x] 4.5 Write integration test for DELETE /api/characters/{id} setting deletedAt timestamp
+- [x] 4.6 Verify DELETE /api/characters/{id} response message remains appropriate
+- [x] 4.7 Write integration test for deleted character disappearing from list after deletion
 
 ## 5. UI and Hooks Verification
 
@@ -50,19 +50,19 @@
 
 ## 7. Testing and Validation
 
-- [ ] 7.1 Run unit test suite: `npm run test:unit` and verify all new tests pass
-- [ ] 7.2 Run integration test suite: `npm run test:integration` and verify all tests pass
+- [x] 7.1 Run unit test suite: `npm run test:unit` and verify all new tests pass
+- [x] 7.2 Run integration test suite: `npm run test:integration` and verify all tests pass
 - [ ] 7.3 Run full test suite: `npm run test` and verify no regressions
-- [ ] 7.4 Verify test coverage for storage.ts to include soft delete path
-- [ ] 7.5 Verify test coverage for API endpoint to include soft delete path
+- [x] 7.4 Verify test coverage for storage.ts to include soft delete path
+- [x] 7.5 Verify test coverage for API endpoint to include soft delete path
 
 ## 8. Code Quality and Documentation
 
 - [ ] 8.1 Update JSDoc comments on deleteCharacter() to document soft delete behavior
 - [ ] 8.2 Update JSDoc comments on loadCharacters() to document view usage
 - [ ] 8.3 Add inline comment explaining the characters_active view purpose
-- [ ] 8.4 Run ESLint: `npm run lint` and fix any new linting issues
-- [ ] 8.5 Verify no TypeScript errors: `npm run build`
+- [x] 8.4 Run ESLint: `npm run lint` and fix any new linting issues
+- [x] 8.5 Verify no TypeScript errors: `npm run build`
 
 ## 9. Manual Testing
 
@@ -76,20 +76,20 @@
 ## 10. Execution Checklist
 
 ### Before Implementation
-- [ ] 10.1 Check out main branch: `git checkout main`
-- [ ] 10.2 Pull latest changes: `git pull origin main`
-- [ ] 10.3 Create feature branch: `git checkout -b feat/character-soft-delete`
-- [ ] 10.4 Verify environment setup: `npm install` and environment variables configured
+- [x] 10.1 Check out main branch: `git checkout main`
+- [x] 10.2 Pull latest changes: `git pull origin main`
+- [x] 10.3 Create feature branch: `git checkout -b feat/character-soft-delete`
+- [x] 10.4 Verify environment setup: `npm install` and environment variables configured
 
 ### During Implementation
-- [ ] 10.5 Follow TDD: write test first, then implementation for each task
-- [ ] 10.6 Commit frequently with clear messages: `git commit -m "..."`
-- [ ] 10.7 After each major section, verify tests pass: `npm run test`
+- [x] 10.5 Follow TDD: write test first, then implementation for each task
+- [x] 10.6 Commit frequently with clear messages: `git commit -m "..."`
+- [x] 10.7 After each major section, verify tests pass: `npm run test`
 
 ### Post-Implementation
-- [ ] 10.8 Run full build: `npm run build`
+- [x] 10.8 Run full build: `npm run build`
 - [ ] 10.9 Run full test suite: `npm run test`
-- [ ] 10.10 Run linting: `npm run lint`
+- [x] 10.10 Run linting: `npm run lint`
 
 ## 11. PR and Merge
 

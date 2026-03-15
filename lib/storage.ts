@@ -37,10 +37,10 @@ export const storage = {
         .collection<Character>('characters_active')
         .find({ userId })
         .toArray();
-      // Ensure id field is set to the string representation of _id
+      // Ensure id field is set - prefer explicit id field, fallback to _id
       return characters.map(char => ({
         ...char,
-        id: char._id?.toString() || char.id,
+        id: char.id || char._id?.toString(),
       }));
     } catch (error) {
       console.error('Error loading characters:', error);

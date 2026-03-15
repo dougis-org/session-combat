@@ -26,7 +26,7 @@ async function initializeDatabase(db: Db): Promise<void> {
     await db.createCollection('characters_active', {
       viewOn: 'characters',
       pipeline: [
-        { $match: { deletedAt: null } }
+        { $match: { $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] } }
       ]
     });
     console.log('Created characters_active view');
