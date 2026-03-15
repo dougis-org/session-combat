@@ -7,18 +7,17 @@ const isPlaywrightCoverageEnabled = process.env.PLAYWRIGHT_COVERAGE === "true";
 export { expect };
 
 export const test = base.extend({
-  page: async ({ page, browserName }, use, testInfo) => {
+  page: async ({ page, browserName }, runFixture, testInfo) => {
     const shouldCollectCoverage =
       isPlaywrightCoverageEnabled && browserName === "chromium";
 
     if (shouldCollectCoverage) {
       await page.coverage.startJSCoverage({
         resetOnNavigation: false,
-        includeRawScriptCoverage: true,
       });
     }
 
-    await use(page);
+    await runFixture(page);
 
     if (!shouldCollectCoverage) {
       return;
