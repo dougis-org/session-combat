@@ -283,6 +283,13 @@ export interface Monster extends CreatureStats {
 }
 
 // Character - player character with shared creature stats
+/**
+ * Represents a player character with D&D 5e statistics and metadata.
+ * 
+ * Includes combat stats, abilities, class information, and soft delete tracking.
+ * Soft-deleted characters (deletedAt != null) should be filtered from queries using
+ * the characters_active MongoDB view.
+ */
 export interface Character extends CreatureStats {
   _id?: string;
   id: string;
@@ -295,6 +302,13 @@ export interface Character extends CreatureStats {
   alignment?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  /**
+   * Timestamp when the character was soft-deleted.
+   * When null/undefined, the character is active.
+   * When set to a date, the character is considered deleted but data is preserved for audit trail.
+   * Characters with deletedAt != null should be excluded from queries using the characters_active view.
+   */
+  deletedAt?: Date;
 }
 
 // Helper function to calculate total character level from classes array
