@@ -15,12 +15,12 @@
 
 - [x] 3.1 Update collection references in storage.ts to query `characters_active` view instead of `characters`
 - [x] 3.2 Update `loadCharacters()` to query `characters_active` view
-- [ ] 3.3 Write unit test for loadCharacters() returning only active characters (deletedAt = null)
-- [ ] 3.4 Write unit test for existing characters without deletedAt field being treated as active
-- [ ] 3.5 Write unit test for deleteCharacter() to verify it sets deletedAt timestamp
+- [x] 3.3 Write unit test for loadCharacters() returning only active characters (deletedAt = null)
+- [x] 3.4 Write unit test for existing characters without deletedAt field being treated as active
+- [x] 3.5 Write unit test for deleteCharacter() to verify it sets deletedAt timestamp
 - [x] 3.6 Update deleteCharacter() in lib/storage.ts to perform update (set deletedAt) instead of deleteOne
 - [x] 3.7 Verify party cleanup logic still executes after soft delete (update party characterIds)
-- [ ] 3.8 Add unit test for party cleanup occurring atomically with soft delete
+- [x] 3.8 Add unit test for party cleanup occurring atomically with soft delete
 
 ## 4. API Endpoint Updates
 
@@ -42,11 +42,11 @@
 
 ## 6. Data Integrity and Edge Cases
 
-- [ ] 6.1 Write test: double-delete of same character returns appropriate response
-- [ ] 6.2 Write test: delete character that's in multiple parties removes from all
-- [ ] 6.3 Write test: soft-deleted character data remains intact (no field mutations)
-- [ ] 6.4 Write test: backwards compatibility with pre-soft-delete characters (no deletedAt field)
-- [ ] 6.5 Write test: mixed active and deleted characters queried correctly via view
+- [x] 6.1 Write test: double-delete of same character returns appropriate response
+- [x] 6.2 Write test: delete character that's in multiple parties removes from all
+- [x] 6.3 Write test: soft-deleted character data remains intact (no field mutations)
+- [x] 6.4 Write test: backwards compatibility with pre-soft-delete characters (no deletedAt field)
+- [x] 6.5 Write test: mixed active and deleted characters queried correctly via view
 
 ## 7. Testing and Validation
 
@@ -58,9 +58,9 @@
 
 ## 8. Code Quality and Documentation
 
-- [ ] 8.1 Update JSDoc comments on deleteCharacter() to document soft delete behavior
-- [ ] 8.2 Update JSDoc comments on loadCharacters() to document view usage
-- [ ] 8.3 Add inline comment explaining the characters_active view purpose
+- [x] 8.1 Update JSDoc comments on deleteCharacter() to document soft delete behavior
+- [x] 8.2 Update JSDoc comments on loadCharacters() to document view usage
+- [x] 8.3 Add inline comment explaining the characters_active view purpose
 - [x] 8.4 Run ESLint: `npm run lint` and fix any new linting issues
 - [x] 8.5 Verify no TypeScript errors: `npm run build`
 

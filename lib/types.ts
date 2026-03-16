@@ -1,84 +1,94 @@
 // Data types for the combat tracker
 
 // D&D 5e Classes - valid classes from https://www.dnd5eapi.co/api/2014/classes
-export type DnDClass = 
-  | 'Barbarian'
-  | 'Bard'
-  | 'Cleric'
-  | 'Druid'
-  | 'Fighter'
-  | 'Monk'
-  | 'Paladin'
-  | 'Ranger'
-  | 'Rogue'
-  | 'Sorcerer'
-  | 'Warlock'
-  | 'Wizard';
+export type DnDClass =
+  | "Barbarian"
+  | "Bard"
+  | "Cleric"
+  | "Druid"
+  | "Fighter"
+  | "Monk"
+  | "Paladin"
+  | "Ranger"
+  | "Rogue"
+  | "Sorcerer"
+  | "Warlock"
+  | "Wizard";
 
 export const VALID_CLASSES: DnDClass[] = [
-  'Barbarian',
-  'Bard',
-  'Cleric',
-  'Druid',
-  'Fighter',
-  'Monk',
-  'Paladin',
-  'Ranger',
-  'Rogue',
-  'Sorcerer',
-  'Warlock',
-  'Wizard',
+  "Barbarian",
+  "Bard",
+  "Cleric",
+  "Druid",
+  "Fighter",
+  "Monk",
+  "Paladin",
+  "Ranger",
+  "Rogue",
+  "Sorcerer",
+  "Warlock",
+  "Wizard",
 ];
 
 export function isValidClass(className: unknown): className is DnDClass {
-  return typeof className === 'string' && VALID_CLASSES.includes(className as DnDClass);
+  return (
+    typeof className === "string" &&
+    VALID_CLASSES.includes(className as DnDClass)
+  );
 }
 
 // D&D 5e Races - valid races from https://www.dnd5eapi.co/api/2014/races
-export type DnDRace = 
-  | 'Dragonborn'
-  | 'Dwarf'
-  | 'Elf'
-  | 'Gnome'
-  | 'Half-Elf'
-  | 'Half-Orc'
-  | 'Halfling'
-  | 'Human'
-  | 'Tiefling';
+export type DnDRace =
+  | "Dragonborn"
+  | "Dwarf"
+  | "Elf"
+  | "Gnome"
+  | "Half-Elf"
+  | "Half-Orc"
+  | "Halfling"
+  | "Human"
+  | "Tiefling";
 
 export const VALID_RACES: DnDRace[] = [
-  'Dragonborn',
-  'Dwarf',
-  'Elf',
-  'Gnome',
-  'Half-Elf',
-  'Half-Orc',
-  'Halfling',
-  'Human',
-  'Tiefling',
+  "Dragonborn",
+  "Dwarf",
+  "Elf",
+  "Gnome",
+  "Half-Elf",
+  "Half-Orc",
+  "Halfling",
+  "Human",
+  "Tiefling",
 ];
 
 export function isValidRace(raceName: unknown): raceName is DnDRace {
-  return typeof raceName === 'string' && VALID_RACES.includes(raceName as DnDRace);
+  return (
+    typeof raceName === "string" && VALID_RACES.includes(raceName as DnDRace)
+  );
 }
 
 // D&D 5e Alignments - standard 9-alignment system
 export const VALID_ALIGNMENTS = [
-  'Lawful Good',
-  'Neutral Good',
-  'Chaotic Good',
-  'Lawful Neutral',
-  'Neutral',
-  'Chaotic Neutral',
-  'Lawful Evil',
-  'Neutral Evil',
-  'Chaotic Evil',
+  "Lawful Good",
+  "Neutral Good",
+  "Chaotic Good",
+  "Lawful Neutral",
+  "Neutral",
+  "Chaotic Neutral",
+  "Lawful Evil",
+  "Neutral Evil",
+  "Chaotic Evil",
 ] as const;
 
-export type DnDAlignment = typeof VALID_ALIGNMENTS[number];
+export type DnDAlignment = (typeof VALID_ALIGNMENTS)[number];
 
-export function isValidAlignment(alignment: unknown): alignment is DnDAlignment {
-  return typeof alignment === 'string' && VALID_ALIGNMENTS.includes(alignment as DnDAlignment);
+export function isValidAlignment(
+  alignment: unknown,
+): alignment is DnDAlignment {
+  return (
+    typeof alignment === "string" &&
+    VALID_ALIGNMENTS.includes(alignment as DnDAlignment)
+  );
 }
 
 // Character Class Level - for multiclass support
@@ -97,11 +107,13 @@ export interface ClassValidationSuccess {
   valid: true;
 }
 
-export type ClassValidationResult = ClassValidationSuccess | ClassValidationError;
+export type ClassValidationResult =
+  | ClassValidationSuccess
+  | ClassValidationError;
 
 export function validateCharacterClasses(
   classes: unknown,
-  options: { allowEmpty?: boolean } = {}
+  options: { allowEmpty?: boolean } = {},
 ): ClassValidationResult {
   const { allowEmpty = false } = options;
 
@@ -109,7 +121,7 @@ export function validateCharacterClasses(
   if (!Array.isArray(classes)) {
     return {
       valid: false,
-      error: 'Classes must be an array of {class, level} objects',
+      error: "Classes must be an array of {class, level} objects",
     };
   }
 
@@ -117,7 +129,7 @@ export function validateCharacterClasses(
   if (classes.length === 0 && !allowEmpty) {
     return {
       valid: false,
-      error: 'At least one class is required',
+      error: "At least one class is required",
     };
   }
 
@@ -127,7 +139,7 @@ export function validateCharacterClasses(
   // Validate each class entry
   for (const classEntry of classes) {
     // Validate class property exists and is valid
-    if (!classEntry || typeof classEntry !== 'object' || !classEntry.class) {
+    if (!classEntry || typeof classEntry !== "object" || !classEntry.class) {
       return {
         valid: false,
         error: 'Each class entry must have a "class" property',
@@ -137,7 +149,7 @@ export function validateCharacterClasses(
     if (!isValidClass(classEntry.class)) {
       return {
         valid: false,
-        error: `Invalid class "${classEntry.class}". Must be one of: ${VALID_CLASSES.join(', ')}`,
+        error: `Invalid class "${classEntry.class}". Must be one of: ${VALID_CLASSES.join(", ")}`,
       };
     }
 
@@ -151,7 +163,11 @@ export function validateCharacterClasses(
     seenClasses.add(classEntry.class);
 
     // Validate level property
-    if (typeof classEntry.level !== 'number' || classEntry.level < 1 || classEntry.level > 20) {
+    if (
+      typeof classEntry.level !== "number" ||
+      classEntry.level < 1 ||
+      classEntry.level > 20
+    ) {
       return {
         valid: false,
         error: `Class level must be a number between 1 and 20 (got ${classEntry.level})`,
@@ -239,7 +255,7 @@ export interface MonsterTemplate extends CreatureStats {
   userId: string; // userId: 'GLOBAL' for admin-controlled global templates, otherwise user's userId
   // Basic Info
   name: string;
-  size: 'tiny' | 'small' | 'medium' | 'large' | 'huge' | 'gargantuan';
+  size: "tiny" | "small" | "medium" | "large" | "huge" | "gargantuan";
   type: string; // e.g., 'humanoid', 'beast', 'dragon', 'undead', etc.
   alignment?: string; // e.g., 'chaotic evil', 'neutral', etc.
   // Speed
@@ -266,7 +282,7 @@ export interface Monster extends CreatureStats {
   templateId?: string; // Reference to MonsterTemplate if created from library
   // Basic Info
   name: string;
-  size: 'tiny' | 'small' | 'medium' | 'large' | 'huge' | 'gargantuan';
+  size: "tiny" | "small" | "medium" | "large" | "huge" | "gargantuan";
   type: string;
   alignment?: string;
   // Speed
@@ -285,7 +301,7 @@ export interface Monster extends CreatureStats {
 // Character - player character with shared creature stats
 /**
  * Represents a player character with D&D 5e statistics and metadata.
- * 
+ *
  * Includes combat stats, abilities, class information, and soft delete tracking.
  * Soft-deleted characters (deletedAt != null) should be filtered from queries using
  * the characters_active MongoDB view.
@@ -344,20 +360,20 @@ export interface InitiativeRoll {
   roll: number;
   bonus: number;
   total: number;
-  method: 'rolled' | 'manual'; // 'rolled' = automatic roll, 'manual' = user entered
+  method: "rolled" | "manual"; // 'rolled' = automatic roll, 'manual' = user entered
 }
 
 export interface CombatantState extends CreatureStats {
   id: string;
   name: string;
-  type: 'player' | 'monster';
+  type: "player" | "monster";
   initiative: number;
   initiativeRoll?: InitiativeRoll;
   conditions: StatusCondition[];
   notes?: string;
   targetIds?: string[]; // IDs of combatants being attacked
   // Additional metadata for combat display
-  size?: 'tiny' | 'small' | 'medium' | 'large' | 'huge' | 'gargantuan';
+  size?: "tiny" | "small" | "medium" | "large" | "huge" | "gargantuan";
   monsterType?: string;
   challengeRating?: number;
   // Lair & Legendary Actions (monster-specific, optional for compatibility)

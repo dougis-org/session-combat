@@ -1,11 +1,10 @@
+import { afterAll, beforeAll, describe, expect, test } from "@jest/globals";
+import { MongoClient } from "mongodb";
 import {
-  afterAll,
-  beforeAll,
-  describe,
-  expect,
-  test,
-} from "@jest/globals";
-import { startTestServer, registerAndGetCookie, TestServer } from "../helpers/server";
+  startTestServer,
+  registerAndGetCookie,
+  TestServer,
+} from "../helpers/server";
 
 describe("Character Soft Delete API Integration", () => {
   let server: TestServer;
@@ -16,12 +15,16 @@ describe("Character Soft Delete API Integration", () => {
     server = await startTestServer();
     baseUrl = server.baseUrl;
     const uniqueEmail = `softdelete-${Date.now()}@test.com`;
-    authCookie = await registerAndGetCookie(baseUrl, uniqueEmail, "TestPassword123!");
-  });
+    authCookie = await registerAndGetCookie(
+      baseUrl,
+      uniqueEmail,
+      "TestPassword123!",
+    );
+  }, 120000);
 
   afterAll(async () => {
     await server.cleanup();
-  });
+  }, 30000);
 
   describe("DELETE /api/characters/{id}", () => {
     test("should soft delete character by setting deletedAt timestamp", async () => {
@@ -54,10 +57,13 @@ describe("Character Soft Delete API Integration", () => {
       const characterId = character.id;
 
       // Delete the character
-      const deleteRes = await fetch(`${baseUrl}/api/characters/${characterId}`, {
-        method: "DELETE",
-        headers: { Cookie: authCookie },
-      });
+      const deleteRes = await fetch(
+        `${baseUrl}/api/characters/${characterId}`,
+        {
+          method: "DELETE",
+          headers: { Cookie: authCookie },
+        },
+      );
 
       expect(deleteRes.status).toBe(200);
       const deleteResult = await deleteRes.json();
@@ -108,9 +114,12 @@ describe("Character Soft Delete API Integration", () => {
       });
 
       // Try to get deleted character detail
-      const detailRes = await fetch(`${baseUrl}/api/characters/${characterId}`, {
-        headers: { Cookie: authCookie },
-      });
+      const detailRes = await fetch(
+        `${baseUrl}/api/characters/${characterId}`,
+        {
+          headers: { Cookie: authCookie },
+        },
+      );
 
       expect(detailRes.status).toBe(404);
     });
@@ -152,15 +161,31 @@ describe("Character Soft Delete API Integration", () => {
         headers: { Cookie: authCookie },
       });
 
-      // In a real scenario, we would query the raw collection to verify data is preserved
-      // For now, we're verifying the API behavior (character not in active list)
+      // Verify character data is preserved in the raw collection with deletedAt set
+      const mongoClient = new MongoClient(process.env.MONGODB_URI!);
+      await mongoClient.connect();
+      try {
+        const db = mongoClient.db(process.env.MONGODB_DB || "session-combat-test");
+        const rawChar = await db
+          .collection("characters")
+          .findOne({ id: characterId });
+
+        expect(rawChar).not.toBeNull();
+        expect(rawChar!.deletedAt).toBeDefined();
+        expect(rawChar!.name).toBe(originalData.name);
+        expect(rawChar!.ac).toBe(originalData.ac);
+        expect(rawChar!.hp).toBe(originalData.hp);
+      } finally {
+        await mongoClient.close();
+      }
+
+      // Character should not appear in active list
       const listRes = await fetch(`${baseUrl}/api/characters`, {
         headers: { Cookie: authCookie },
       });
 
       const characters = await listRes.json();
-      const foundDeleted = characters.find((c: any) => c.id === characterId);
-      expect(foundDeleted).toBeUndefined(); // Soft-deleted character should not appear
+      expect(characters.find((c: any) => c.id === characterId)).toBeUndefined();
     });
   });
 

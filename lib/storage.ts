@@ -1,8 +1,15 @@
 // MongoDB persistence utilities
-import { getDatabase } from './db';
-import { SessionData, Encounter, Character, CombatState, Party, MonsterTemplate } from './types';
-import { GLOBAL_USER_ID } from './constants';
-import { ObjectId } from 'mongodb';
+import { getDatabase } from "./db";
+import {
+  SessionData,
+  Encounter,
+  Character,
+  CombatState,
+  Party,
+  MonsterTemplate,
+} from "./types";
+import { GLOBAL_USER_ID } from "./constants";
+import { ObjectId } from "mongodb";
 
 /**
  * Server-side storage functions for MongoDB
@@ -14,31 +21,31 @@ export const storage = {
     try {
       const db = await getDatabase();
       const encounters = await db
-        .collection<Encounter>('encounters')
+        .collection<Encounter>("encounters")
         .find({ userId })
         .toArray();
       // Ensure id field is set to the string representation of _id
-      return encounters.map(enc => ({
+      return encounters.map((enc) => ({
         ...enc,
         id: enc._id?.toString() || enc.id,
       }));
     } catch (error) {
-      console.error('Error loading encounters:', error);
+      console.error("Error loading encounters:", error);
       return [];
     }
   },
 
   /**
    * Load all active characters for a user.
-   * 
+   *
    * This function queries the `characters_active` MongoDB view, which automatically
    * filters out soft-deleted characters (those with a deletedAt timestamp set).
    * The view is created during database initialization and uses a pipeline that matches
    * characters where deletedAt is null or does not exist.
-   * 
+   *
    * @param userId - The user ID to load characters for
    * @returns Promise resolving to array of active Character objects
-   * 
+   *
    * @remarks
    * - Soft-deleted characters (with deletedAt != null) are automatically excluded by the view
    * - The explicit 'id' field is preserved; MongoDB's '_id' is used as fallback only
@@ -47,17 +54,34 @@ export const storage = {
   async loadCharacters(userId: string): Promise<Character[]> {
     try {
       const db = await getDatabase();
-      const characters = await db
-        .collection<Character>('characters_active')
-        .find({ userId })
-        .toArray();
-      // Ensure id field is set - prefer explicit id field, fallback to _id
-      return characters.map(char => ({
-        ...char,
-        id: char.id || char._id?.toString(),
-      }));
+      try {
+        const characters = await db
+          .collection<Character>("characters_active")
+          .find({ userId })
+          .toArray();
+        // Ensure id field is set - prefer explicit id field, fallback to _id
+        return characters.map((char) => ({
+          ...char,
+          id: char.id || char._id?.toString(),
+        }));
+      } catch (viewError) {
+        // Fall back to querying the underlying collection with an explicit filter
+        // when the view is unavailable (e.g., initialization failed or missing privileges).
+        console.warn(
+          "characters_active view unavailable, falling back to direct query:",
+          viewError,
+        );
+        const characters = await db
+          .collection<Character>("characters")
+          .find({ userId, deletedAt: null as unknown as Date })
+          .toArray();
+        return characters.map((char) => ({
+          ...char,
+          id: char.id || char._id?.toString(),
+        }));
+      }
     } catch (error) {
-      console.error('Error loading characters:', error);
+      console.error("Error loading characters:", error);
       return [];
     }
   },
@@ -67,11 +91,11 @@ export const storage = {
     try {
       const db = await getDatabase();
       const combatState = await db
-        .collection<CombatState>('combatStates')
+        .collection<CombatState>("combatStates")
         .findOne({ userId });
       return combatState || null;
     } catch (error) {
-      console.error('Error loading combat state:', error);
+      console.error("Error loading combat state:", error);
       return null;
     }
   },
@@ -81,16 +105,16 @@ export const storage = {
     try {
       const db = await getDatabase();
       const parties = await db
-        .collection<Party>('parties')
+        .collection<Party>("parties")
         .find({ userId })
         .toArray();
       // Ensure id field is set to the string representation of _id
-      return parties.map(party => ({
+      return parties.map((party) => ({
         ...party,
         id: party._id?.toString() || party.id,
       }));
     } catch (error) {
-      console.error('Error loading parties:', error);
+      console.error("Error loading parties:", error);
       return [];
     }
   },
@@ -100,16 +124,16 @@ export const storage = {
     try {
       const db = await getDatabase();
       const templates = await db
-        .collection<MonsterTemplate>('monsterTemplates')
+        .collection<MonsterTemplate>("monsterTemplates")
         .find({ userId })
         .toArray();
       // Ensure id field is set to the string representation of _id
-      return templates.map(template => ({
+      return templates.map((template) => ({
         ...template,
         id: template._id?.toString() || template.id,
       }));
     } catch (error) {
-      console.error('Error loading monster templates:', error);
+      console.error("Error loading monster templates:", error);
       return [];
     }
   },
@@ -119,16 +143,16 @@ export const storage = {
     try {
       const db = await getDatabase();
       const templates = await db
-        .collection<MonsterTemplate>('monsterTemplates')
+        .collection<MonsterTemplate>("monsterTemplates")
         .find({ userId: GLOBAL_USER_ID })
         .toArray();
       // Ensure id field is set to the string representation of _id
-      return templates.map(template => ({
+      return templates.map((template) => ({
         ...template,
         id: template._id?.toString() || template.id,
       }));
     } catch (error) {
-      console.error('Error loading global monster templates:', error);
+      console.error("Error loading global monster templates:", error);
       return [];
     }
   },
@@ -142,7 +166,7 @@ export const storage = {
       ]);
       return [...userTemplates, globalTemplates].flat();
     } catch (error) {
-      console.error('Error loading all monster templates:', error);
+      console.error("Error loading all monster templates:", error);
       return [];
     }
   },
@@ -157,9 +181,14 @@ export const storage = {
         this.loadCombatState(userId),
       ]);
 
-      return { encounters, characters, parties, combatState: combatState || undefined };
+      return {
+        encounters,
+        characters,
+        parties,
+        combatState: combatState || undefined,
+      };
     } catch (error) {
-      console.error('Error loading session data:', error);
+      console.error("Error loading session data:", error);
       return { encounters: [], characters: [], parties: [] };
     }
   },
@@ -169,8 +198,13 @@ export const storage = {
     try {
       const db = await getDatabase();
       const { _id, ...encounterData } = encounter;
-      console.log('saveEncounter called with:', { id: encounter.id, _id: encounter._id, name: encounter.name, userId: encounter.userId });
-      
+      console.log("saveEncounter called with:", {
+        id: encounter.id,
+        _id: encounter._id,
+        name: encounter.name,
+        userId: encounter.userId,
+      });
+
       // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
       let query: any = { userId: encounter.userId };
       if (encounter._id) {
@@ -178,15 +212,19 @@ export const storage = {
       } else {
         query.id = encounter.id;
       }
-      
-      console.log('Query for updateOne:', query);
-      
+
+      console.log("Query for updateOne:", query);
+
       const result = await db
-        .collection<Encounter>('encounters')
+        .collection<Encounter>("encounters")
         .updateOne(query, { $set: encounterData }, { upsert: true });
-      console.log('updateOne result:', { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount, upsertedId: result.upsertedId });
+      console.log("updateOne result:", {
+        matchedCount: result.matchedCount,
+        modifiedCount: result.modifiedCount,
+        upsertedId: result.upsertedId,
+      });
     } catch (error) {
-      console.error('Error saving encounter:', error);
+      console.error("Error saving encounter:", error);
       throw error;
     }
   },
@@ -199,7 +237,7 @@ export const storage = {
         await this.saveEncounter(encounter);
       }
     } catch (error) {
-      console.error('Error saving encounters:', error);
+      console.error("Error saving encounters:", error);
       throw error;
     }
   },
@@ -209,7 +247,7 @@ export const storage = {
     try {
       const db = await getDatabase();
       const { _id, ...characterData } = character;
-      
+
       // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
       let query: any = { userId: character.userId };
       if (character._id) {
@@ -217,12 +255,12 @@ export const storage = {
       } else {
         query.id = character.id;
       }
-      
+
       await db
-        .collection<Character>('characters')
+        .collection<Character>("characters")
         .updateOne(query, { $set: characterData }, { upsert: true });
     } catch (error) {
-      console.error('Error saving character:', error);
+      console.error("Error saving character:", error);
       throw error;
     }
   },
@@ -235,7 +273,7 @@ export const storage = {
         await this.saveCharacter(character);
       }
     } catch (error) {
-      console.error('Error saving characters:', error);
+      console.error("Error saving characters:", error);
       throw error;
     }
   },
@@ -248,7 +286,7 @@ export const storage = {
     try {
       const db = await getDatabase();
       const { _id, ...combatStateData } = combatState;
-      
+
       // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
       let query: any = { userId: combatState.userId };
       if (combatState._id) {
@@ -256,12 +294,12 @@ export const storage = {
       } else {
         query.id = combatState.id;
       }
-      
+
       await db
-        .collection<CombatState>('combatStates')
+        .collection<CombatState>("combatStates")
         .updateOne(query, { $set: combatStateData }, { upsert: true });
     } catch (error) {
-      console.error('Error saving combat state:', error);
+      console.error("Error saving combat state:", error);
       throw error;
     }
   },
@@ -270,52 +308,51 @@ export const storage = {
   async deleteEncounter(id: string, userId: string): Promise<void> {
     try {
       const db = await getDatabase();
-      await db.collection<Encounter>('encounters').deleteOne({ id, userId });
+      await db.collection<Encounter>("encounters").deleteOne({ id, userId });
     } catch (error) {
-      console.error('Error deleting encounter:', error);
+      console.error("Error deleting encounter:", error);
       throw error;
     }
   },
 
   /**
    * Soft delete a character by marking it with a deletedAt timestamp.
-   * 
+   *
    * This function performs a soft delete, marking the character as deleted without
    * removing the underlying document. This preserves the character data for audit trails,
    * recovery, or future reference. Soft-deleted characters are automatically excluded
    * from queries via the characters_active view.
-   * 
+   *
    * The function also maintains referential integrity by removing the character ID from
    * all parties that reference it, ensuring the character doesn't appear in party listings
-   * or combat scenarios.
-   * 
+   * or combat scenarios. Note: the soft delete and party cleanup are separate operations
+   * and are not atomic; party cleanup is best-effort.
+   *
    * @param id - The character ID to soft delete
    * @param userId - The user ID (for ownership verification)
    * @returns Promise that resolves when the soft delete is complete
-   * 
+   *
    * @remarks
-   * - Atomically sets deletedAt timestamp and removes from all parties
+   * - Sets deletedAt timestamp, then performs best-effort cleanup to remove from all parties
    * - Character data remains intact; deletedAt field is the only modification
    * - Soft-deleted characters return 404 on GET detail requests
    * - Soft-deleted characters are excluded from GET list via the characters_active view
-   * 
+   *
    * @throws Error if database operation fails
    */
   async deleteCharacter(id: string, userId: string): Promise<void> {
     try {
       const db = await getDatabase();
       // Soft delete: mark with deletedAt timestamp
-      await db.collection<Character>('characters').updateOne(
-        { id, userId },
-        { $set: { deletedAt: new Date() } }
-      );
+      await db
+        .collection<Character>("characters")
+        .updateOne({ id, userId }, { $set: { deletedAt: new Date() } });
       // Also remove character from all parties to ensure referential integrity
-      await db.collection<Party>('parties').updateMany(
-        { userId },
-        { $pull: { characterIds: id } }
-      );
+      await db
+        .collection<Party>("parties")
+        .updateMany({ userId }, { $pull: { characterIds: id } });
     } catch (error) {
-      console.error('Error deleting character:', error);
+      console.error("Error deleting character:", error);
       throw error;
     }
   },
@@ -325,7 +362,7 @@ export const storage = {
     try {
       const db = await getDatabase();
       const { _id, ...partyData } = party;
-      
+
       // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
       let query: any = { userId: party.userId };
       if (party._id) {
@@ -333,12 +370,12 @@ export const storage = {
       } else {
         query.id = party.id;
       }
-      
+
       await db
-        .collection<Party>('parties')
+        .collection<Party>("parties")
         .updateOne(query, { $set: partyData }, { upsert: true });
     } catch (error) {
-      console.error('Error saving party:', error);
+      console.error("Error saving party:", error);
       throw error;
     }
   },
@@ -351,7 +388,7 @@ export const storage = {
         await this.saveParty(party);
       }
     } catch (error) {
-      console.error('Error saving parties:', error);
+      console.error("Error saving parties:", error);
       throw error;
     }
   },
@@ -360,9 +397,9 @@ export const storage = {
   async deleteParty(id: string, userId: string): Promise<void> {
     try {
       const db = await getDatabase();
-      await db.collection<Party>('parties').deleteOne({ id, userId });
+      await db.collection<Party>("parties").deleteOne({ id, userId });
     } catch (error) {
-      console.error('Error deleting party:', error);
+      console.error("Error deleting party:", error);
       throw error;
     }
   },
@@ -372,7 +409,7 @@ export const storage = {
     try {
       const db = await getDatabase();
       const { _id, ...templateData } = template;
-      
+
       // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
       let query: any = { userId: template.userId };
       if (template._id) {
@@ -380,12 +417,12 @@ export const storage = {
       } else {
         query.id = template.id;
       }
-      
+
       await db
-        .collection<MonsterTemplate>('monsterTemplates')
+        .collection<MonsterTemplate>("monsterTemplates")
         .updateOne(query, { $set: templateData }, { upsert: true });
     } catch (error) {
-      console.error('Error saving monster template:', error);
+      console.error("Error saving monster template:", error);
       throw error;
     }
   },
@@ -394,9 +431,11 @@ export const storage = {
   async deleteMonsterTemplate(id: string, userId: string): Promise<void> {
     try {
       const db = await getDatabase();
-      await db.collection<MonsterTemplate>('monsterTemplates').deleteOne({ id, userId });
+      await db
+        .collection<MonsterTemplate>("monsterTemplates")
+        .deleteOne({ id, userId });
     } catch (error) {
-      console.error('Error deleting monster template:', error);
+      console.error("Error deleting monster template:", error);
       throw error;
     }
   },
@@ -406,15 +445,14 @@ export const storage = {
     try {
       const db = await getDatabase();
       await Promise.all([
-        db.collection<Encounter>('encounters').deleteMany({ userId }),
-        db.collection<Character>('characters').deleteMany({ userId }),
-        db.collection<Party>('parties').deleteMany({ userId }),
-        db.collection<CombatState>('combatStates').deleteMany({ userId }),
+        db.collection<Encounter>("encounters").deleteMany({ userId }),
+        db.collection<Character>("characters").deleteMany({ userId }),
+        db.collection<Party>("parties").deleteMany({ userId }),
+        db.collection<CombatState>("combatStates").deleteMany({ userId }),
       ]);
     } catch (error) {
-      console.error('Error clearing data:', error);
+      console.error("Error clearing data:", error);
       throw error;
     }
   },
 };
-
