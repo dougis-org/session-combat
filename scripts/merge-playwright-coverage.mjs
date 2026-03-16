@@ -1,10 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createCoverageMap } from "istanbul-lib-coverage";
-import libReport from "istanbul-lib-report";
-import reports from "istanbul-reports";
+import coveragePkg from "istanbul-lib-coverage";
+import libReportPkg from "istanbul-lib-report";
+import reportsPkg from "istanbul-reports";
 import v8toIstanbul from "v8-to-istanbul";
+
+const { createCoverageMap } = coveragePkg;
+const libReport = libReportPkg;
+const reports = reportsPkg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
