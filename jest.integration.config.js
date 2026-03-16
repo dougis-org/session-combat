@@ -16,7 +16,12 @@ module.exports = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
   },
-  collectCoverageFrom: ["app/api/**/*.{ts,tsx,js,jsx}", "!app/api/**/*.d.ts"],
+  collectCoverageFrom: [
+    "app/api/**/*.{ts,tsx,js,jsx}",
+    "lib/**/*.{ts,tsx,js,jsx}",
+    "!app/api/**/*.d.ts",
+    "!lib/**/*.d.ts",
+  ],
   transform: {
     "^.+\\.tsx?$": [
       "ts-jest",
