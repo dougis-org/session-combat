@@ -20,7 +20,7 @@ export const test = base.extend({
     await runFixture(page);
 
     if (!shouldCollectCoverage) {
-      return;
+      return page;
     }
 
     const coverage = await page.coverage.stopJSCoverage();
