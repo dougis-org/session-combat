@@ -199,40 +199,45 @@ Testability notes:
   fix the blocking issue, and revalidate the last known-good coverage baseline
   before proceeding to the next wave.
 
-## Implementation Note: Playwright V8 Coverage Limitation
+## Implementation Note: Playwright Coverage Scope Closure
 
-During implementation, a critical discovery was made regarding Playwright's V8
-coverage API on server-rendered Next.js applications:
+After implementing a prototype for Playwright V8 coverage collection, testing
+revealed a fundamental architectural incompatibility: Playwright's
+`page.coverage.startJSCoverage()` API on server-rendered Next.js applications
+captures inline scripts and page-level code but does not produce source-mappable
+bundle URLs (it yields page URLs like `http://localhost:3000/register` instead
+of bundle paths like `/_next/static/chunks/*.js`). This prevents meaningful
+conversion back to source files and Codacy reporting.
 
-**Finding:** Playwright's `page.coverage.startJSCoverage()` captures inline
-scripts and page-level code executed in the browser, but on a server-rendered
-Next.js app with dynamic `_next/static/chunks/*.js` bundles, the coverage data
-contains page URLs (`http://localhost:3000/register`) rather than actual bundle
-URLs. This prevents the current merge script from mapping V8 coverage back to
-source files through source maps, because the coverage doesn't include the
-actual client-side bundle execution.
+**Decision:** The Playwright browser coverage infrastructure (V8 collector,
+merge script, CI job) has been **removed** in favor of focusing on Wave 1-3
+coverage improvements using unit and integration tests, which have
+straightforward Istanbul/LCOV mapping and direct Codacy contribution.
 
-**Status:** Infrastructure is in place (fixture, merge script, CI job) and
-coverage collection is functional. However, **this specific implementation of
-Playwright V8 coverage is not suitable for Codacy reporting in our architecture**.
+**Rationale:**
+- The removed implementation was functionally complete but produced unusable
+  outputs for coverage reporting.
+- Unit and integration tests have proven coverage mapping and require less
+  infrastructure.
+- If browser coverage becomes a priority in the future, a different approach
+  (server-side instrumentation, custom DevTools Protocol) should be evaluated
+  with a clearer success criterion.
 
-**Recommended Path Forward:**
-1. **Defer Playwright browser coverage** as a standalone contribution to Codacy
-   until Decision 6 is revisited.
-2. **Focus Wave 1-3 on unit and integration tests** instead, which have
-   straightforward Istanbul/LCOV mapping.
-3. **Consider alternatives for browser coverage** in a future milestone, such as:
-   - Server-side code instrumentation with `nyc` or similar on the Next.js
-     runtime itself
-   - Custom Chrome DevTools Protocol instrumentation outside Playwright's
-     coverage API
-   - Accepting that Playwright exercises client UI but is documented as a
-     non-coverage contributor for now
+**What Was Kept:**
+- Playwright regression tests themselves (valuable for cross-browser stability)
+- Existing CI infrastructure for regression validation
 
-**Impact on Tasks:** Tasks 2.4 and 4.4 remain implemented as non-blocking
-audit paths but should not block Wave 1 completion. Deployment of the new
-`playground-coverage` CI job can proceed as a proof-of-concept without merging
-the coverage totals to Codacy until the architectural limitation is resolved.
+**What Was Removed:**
+- Coverage collection fixture logic
+- Merge script for V8→LCOV conversion
+- Separate `playwright-coverage` CI job
+- Coverage-specific npm scripts
+- Istanbul/v8-to-istanbul dependencies
+- Source map configuration tied to PLAYWRIGHT_COVERAGE env var
+
+This decision allows the PR and issue #72 to remain focused on the core goal:
+raising Codacy coverage through tested, mapped, and verifiable improvements in
+unit and integration suites.
 
 ## Open Questions
 
@@ -240,6 +245,5 @@ the coverage totals to Codacy until the architectural limitation is resolved.
   or as module-group completion goals plus a minimum repo-wide delta?
 - Should `lib/scripts/**` and similar operational files remain in the default
   denominator after the first implementation wave, or be reviewed separately?
-- Should the Chromium-only Playwright coverage job run on every PR as an audit
-  (non-blocking) step, or be gated on resolving the V8→source mapping limitation
-  documented above?
+- When should Wave 1 implementation begin, now that Playwright coverage has
+  been removed from the scope of this change?
