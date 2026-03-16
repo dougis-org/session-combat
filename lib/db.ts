@@ -1,12 +1,71 @@
-import { MongoClient, Db, MongoClientOptions } from 'mongodb';
+import { MongoClient, Db, MongoClientOptions } from "mongodb";
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const DB_NAME = process.env.MONGODB_DB || 'session-combat';
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017";
+const DB_NAME = process.env.MONGODB_DB || "session-combat";
 
 let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;
 
-export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
+/**
+ * Initialize MongoDB views and indexes after database connection.
+ *
+ * Creates the `characters_active` view that automatically filters out soft-deleted characters.
+ * This ensures that all queries against the view only return active (non-deleted) characters,
+ * enforcing the soft delete logic at the database layer rather than in application code.
+ *
+ * Also creates an index on the deletedAt field for optimal query performance when the view
+ * evaluates its filtering pipeline.
+ */
+async function initializeDatabase(db: Db): Promise<void> {
+  try {
+    // Create index on deletedAt field for optimal query performance
+    // This index accelerates the $match pipeline in the characters_active view
+    await db.collection("characters").createIndex({ deletedAt: 1 });
+    console.log("Created index on characters.deletedAt");
+
+    // Check if characters_active already exists as a view; only drop views,
+    // never a real collection, to avoid accidental data loss during re-initialization.
+    const existing = await db
+      .listCollections({ name: "characters_active" })
+      .toArray();
+    if (existing.length > 0 && existing[0].type === "view") {
+      try {
+        await db.dropCollection("characters_active");
+      } catch (error) {
+        // Only ignore NamespaceNotFound; rethrow any other error so the outer
+        // catch block can handle it appropriately.
+        if (
+          !(
+            error instanceof Error &&
+            "codeName" in error &&
+            (error as { codeName?: string }).codeName === "NamespaceNotFound"
+          )
+        ) {
+          throw error;
+        }
+      }
+    }
+
+    // Create characters_active MongoDB view that filters out soft-deleted characters.
+    // { deletedAt: null } matches both null values AND missing fields, providing
+    // backward compatibility with characters created before soft delete was implemented.
+    await db.createCollection("characters_active", {
+      viewOn: "characters",
+      pipeline: [{ $match: { deletedAt: null } }],
+    });
+    console.log("Created characters_active view");
+  } catch (error) {
+    // Silently ignore view/index errors - they may already exist or fail in read-only environments
+    if (error instanceof Error && !error.message.includes("already exists")) {
+      console.warn("Warning during database initialization:", error.message);
+    }
+  }
+}
+
+export async function connectToDatabase(): Promise<{
+  client: MongoClient;
+  db: Db;
+}> {
   if (cachedClient && cachedDb) {
     return { client: cachedClient, db: cachedDb };
   }
@@ -24,13 +83,16 @@ export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db
     // Verify connection
     await db.admin().ping();
 
+    // Initialize views and indexes
+    await initializeDatabase(db);
+
     cachedClient = client;
     cachedDb = db;
 
-    console.log('Connected to MongoDB');
+    console.log("Connected to MongoDB");
     return { client, db };
   } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
+    console.error("Error connecting to MongoDB:", error);
     throw error;
   }
 }

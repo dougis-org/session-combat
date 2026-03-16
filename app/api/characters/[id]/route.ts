@@ -1,11 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
-import { Character, isValidRace, VALID_RACES, isValidClass, VALID_CLASSES, CharacterClass, calculateTotalLevel, validateCharacterClasses } from '@/lib/types';
+import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/middleware";
+import { storage } from "@/lib/storage";
+import {
+  Character,
+  isValidRace,
+  VALID_RACES,
+  isValidClass,
+  VALID_CLASSES,
+  CharacterClass,
+  calculateTotalLevel,
+  validateCharacterClasses,
+} from "@/lib/types";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const auth = requireAuth(request);
@@ -20,24 +29,24 @@ export async function GET(
 
     if (!character) {
       return NextResponse.json(
-        { error: 'Character not found' },
-        { status: 404 }
+        { error: "Character not found" },
+        { status: 404 },
       );
     }
 
     return NextResponse.json(character);
   } catch (error) {
-    console.error('Error fetching character:', error);
+    console.error("Error fetching character:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch character' },
-      { status: 500 }
+      { error: "Failed to fetch character" },
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const auth = requireAuth(request);
@@ -79,40 +88,47 @@ export async function PUT(
 
     if (!existingCharacter) {
       return NextResponse.json(
-        { error: 'Character not found' },
-        { status: 404 }
+        { error: "Character not found" },
+        { status: 404 },
       );
     }
 
-    if (name !== undefined && name.trim() === '') {
+    if (name !== undefined && name.trim() === "") {
       return NextResponse.json(
-        { error: 'Character name is required' },
-        { status: 400 }
+        { error: "Character name is required" },
+        { status: 400 },
       );
     }
 
     // Validate race if provided
-    if (race !== undefined && race !== null && race !== '' && !isValidRace(race)) {
+    if (
+      race !== undefined &&
+      race !== null &&
+      race !== "" &&
+      !isValidRace(race)
+    ) {
       return NextResponse.json(
-        { 
-          error: 'Invalid race. Must be one of: ' + VALID_RACES.join(', '),
-          validRaces: VALID_RACES 
+        {
+          error: "Invalid race. Must be one of: " + VALID_RACES.join(", "),
+          validRaces: VALID_RACES,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Validate and normalize classes if provided
     let characterClasses = existingCharacter.classes;
     if (classes !== undefined && classes !== null) {
-      const validationResult = validateCharacterClasses(classes, { allowEmpty: false });
+      const validationResult = validateCharacterClasses(classes, {
+        allowEmpty: false,
+      });
       if (!validationResult.valid) {
         return NextResponse.json(
-          { 
+          {
             error: validationResult.error,
-            validClasses: VALID_CLASSES 
+            validClasses: VALID_CLASSES,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -129,23 +145,48 @@ export async function PUT(
       maxHp: maxHp !== undefined ? maxHp : existingCharacter.maxHp,
       ac: ac !== undefined ? ac : existingCharacter.ac,
       acNote: acNote !== undefined ? acNote : existingCharacter.acNote,
-      abilityScores: abilityScores !== undefined ? abilityScores : existingCharacter.abilityScores,
-      savingThrows: savingThrows !== undefined ? savingThrows : existingCharacter.savingThrows,
+      abilityScores:
+        abilityScores !== undefined
+          ? abilityScores
+          : existingCharacter.abilityScores,
+      savingThrows:
+        savingThrows !== undefined
+          ? savingThrows
+          : existingCharacter.savingThrows,
       skills: skills !== undefined ? skills : existingCharacter.skills,
-      damageResistances: damageResistances !== undefined ? damageResistances : existingCharacter.damageResistances,
-      damageImmunities: damageImmunities !== undefined ? damageImmunities : existingCharacter.damageImmunities,
-      damageVulnerabilities: damageVulnerabilities !== undefined ? damageVulnerabilities : existingCharacter.damageVulnerabilities,
-      conditionImmunities: conditionImmunities !== undefined ? conditionImmunities : existingCharacter.conditionImmunities,
+      damageResistances:
+        damageResistances !== undefined
+          ? damageResistances
+          : existingCharacter.damageResistances,
+      damageImmunities:
+        damageImmunities !== undefined
+          ? damageImmunities
+          : existingCharacter.damageImmunities,
+      damageVulnerabilities:
+        damageVulnerabilities !== undefined
+          ? damageVulnerabilities
+          : existingCharacter.damageVulnerabilities,
+      conditionImmunities:
+        conditionImmunities !== undefined
+          ? conditionImmunities
+          : existingCharacter.conditionImmunities,
       senses: senses !== undefined ? senses : existingCharacter.senses,
-      languages: languages !== undefined ? languages : existingCharacter.languages,
+      languages:
+        languages !== undefined ? languages : existingCharacter.languages,
       traits: traits !== undefined ? traits : existingCharacter.traits,
       actions: actions !== undefined ? actions : existingCharacter.actions,
-      bonusActions: bonusActions !== undefined ? bonusActions : existingCharacter.bonusActions,
-      reactions: reactions !== undefined ? reactions : existingCharacter.reactions,
+      bonusActions:
+        bonusActions !== undefined
+          ? bonusActions
+          : existingCharacter.bonusActions,
+      reactions:
+        reactions !== undefined ? reactions : existingCharacter.reactions,
       classes: characterClasses,
       race: race !== undefined ? race : existingCharacter.race,
-      background: background !== undefined ? background : existingCharacter.background,
-      alignment: alignment !== undefined ? alignment : existingCharacter.alignment,
+      background:
+        background !== undefined ? background : existingCharacter.background,
+      alignment:
+        alignment !== undefined ? alignment : existingCharacter.alignment,
       updatedAt: new Date(),
     };
 
@@ -153,17 +194,17 @@ export async function PUT(
 
     return NextResponse.json(updatedCharacter);
   } catch (error) {
-    console.error('Error updating character:', error);
+    console.error("Error updating character:", error);
     return NextResponse.json(
-      { error: 'Failed to update character' },
-      { status: 500 }
+      { error: "Failed to update character" },
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const auth = requireAuth(request);
@@ -179,19 +220,19 @@ export async function DELETE(
 
     if (!character) {
       return NextResponse.json(
-        { error: 'Character not found' },
-        { status: 404 }
+        { error: "Character not found" },
+        { status: 404 },
       );
     }
 
     await storage.deleteCharacter(id, auth.userId);
 
-    return NextResponse.json({ message: 'Character deleted successfully' });
+    return NextResponse.json({ message: "Character deleted successfully" });
   } catch (error) {
-    console.error('Error deleting character:', error);
+    console.error("Error deleting character:", error);
     return NextResponse.json(
-      { error: 'Failed to delete character' },
-      { status: 500 }
+      { error: "Failed to delete character" },
+      { status: 500 },
     );
   }
 }
