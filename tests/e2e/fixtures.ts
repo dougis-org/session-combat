@@ -7,7 +7,7 @@ const isPlaywrightCoverageEnabled = process.env.PLAYWRIGHT_COVERAGE === "true";
 export { expect };
 
 export const test = base.extend({
-  page: async ({ page, browserName }, runFixture, testInfo) => {
+  page: async ({ page, browserName }, use, testInfo) => {
     const shouldCollectCoverage =
       isPlaywrightCoverageEnabled && browserName === "chromium";
 
@@ -22,7 +22,7 @@ export const test = base.extend({
 
     let testError: unknown;
     try {
-      await runFixture(page);
+      await use(page);
     } catch (err) {
       testError = err;
     }
