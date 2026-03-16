@@ -48,9 +48,11 @@ export const test = base.extend({
         "utf8",
       );
       console.log(`[Coverage] Saved coverage to: ${outputPath}`);
-    } catch (error) {
-      console.error(`[Coverage] Failed to collect coverage: ${error.message}`);
-      throw error;
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : String(err);
+      console.error(`[Coverage] Failed to collect coverage: ${errorMsg}`);
+      throw err;
     }
   },
 });

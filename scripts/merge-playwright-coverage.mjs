@@ -152,7 +152,9 @@ async function main() {
     throw new Error("No Playwright browser coverage files were found.");
   }
 
-  console.log(`[Merge] Found ${coverageFiles.length} coverage files to process`);
+  console.log(
+    `[Merge] Found ${coverageFiles.length} coverage files to process`,
+  );
   const rawCoverageMap = createCoverageMap({});
   let processedEntries = 0;
 
@@ -160,9 +162,7 @@ async function main() {
     console.log(`[Merge] Processing: ${coverageFile}`);
     const payload = JSON.parse(await fs.readFile(coverageFile, "utf8"));
     const entries = Array.isArray(payload) ? payload : payload.coverage || [];
-    console.log(
-      `[Merge]   Found ${entries.length} entries in ${coverageFile}`,
-    );
+    console.log(`[Merge]   Found ${entries.length} entries in ${coverageFile}`);
 
     for (const entry of entries) {
       const bundlePath = toBundlePath(entry.url);
