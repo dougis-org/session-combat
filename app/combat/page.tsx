@@ -444,13 +444,27 @@ function CombatContent() {
       nextIndex = 0;
       nextRound += 1;
 
-      // Reduce duration of conditions
+      // Collect conditions expiring this round for alert
+      const expiringConditions: { combatantName: string; conditionName: string }[] = [];
+      combatState.combatants.forEach(c => {
+        c.conditions.forEach(cond => {
+          if (cond.duration !== undefined && cond.duration - 1 <= 0) {
+            expiringConditions.push({ combatantName: c.name, conditionName: cond.name });
+          }
+        });
+      });
+      if (expiringConditions.length > 0) {
+        const lines = expiringConditions.map(e => `• ${e.combatantName}: ${e.conditionName}`).join('\n');
+        alert(`Conditions expired:\n${lines}`);
+      }
+
+      // Reduce duration of conditions and remove expired ones
       const updatedCombatants = combatState.combatants.map(c => ({
         ...c,
         conditions: c.conditions.map(cond => ({
           ...cond,
-          duration: cond.duration ? Math.max(0, cond.duration - 1) : cond.duration,
-        })).filter(cond => !cond.duration || cond.duration > 0),
+          duration: cond.duration != null ? Math.max(0, cond.duration - 1) : cond.duration,
+        })).filter(cond => cond.duration == null || cond.duration > 0),
       }));
 
       saveCombatState({
