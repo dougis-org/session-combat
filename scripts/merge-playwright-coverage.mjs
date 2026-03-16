@@ -129,6 +129,9 @@ function shouldKeepSource(normalizedPath) {
 }
 
 async function main() {
+  console.log("[Merge] Starting Playwright coverage merge process...");
+  console.log(`[Merge] Looking for coverage files in: ${testResultsDir}`);
+  
   let coverageFiles = [];
 
   try {

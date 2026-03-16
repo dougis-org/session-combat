@@ -20,9 +20,16 @@ export const test = base.extend({
       });
     }
 
-    await runFixture(page);
+    let testError: unknown;
+    try {
+      await runFixture(page);
+    } catch (err) {
+      testError = err;
+    }
 
     if (!shouldCollectCoverage) {
+      // Re-throw test error if no coverage collection needed
+      if (testError) throw testError;
       return;
     }
 
@@ -49,10 +56,12 @@ export const test = base.extend({
       );
       console.log(`[Coverage] Saved coverage to: ${outputPath}`);
     } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : String(err);
+      const errorMsg = err instanceof Error ? err.message : String(err);
       console.error(`[Coverage] Failed to collect coverage: ${errorMsg}`);
       throw err;
     }
+
+    // Re-throw test error after coverage collection
+    if (testError) throw testError;
   },
 });
