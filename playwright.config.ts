@@ -119,7 +119,7 @@ export default defineConfig({
       ...process.env,
       MONGODB_DB: e2eDbName,
     },
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120 * 1000,
   },
 });
