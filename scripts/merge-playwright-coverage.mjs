@@ -148,15 +148,21 @@ async function main() {
   }
 
   if (coverageFiles.length === 0) {
+    console.log(`[Merge] No coverage files found in: ${testResultsDir}`);
     throw new Error("No Playwright browser coverage files were found.");
   }
 
+  console.log(`[Merge] Found ${coverageFiles.length} coverage files to process`);
   const rawCoverageMap = createCoverageMap({});
   let processedEntries = 0;
 
   for (const coverageFile of coverageFiles) {
+    console.log(`[Merge] Processing: ${coverageFile}`);
     const payload = JSON.parse(await fs.readFile(coverageFile, "utf8"));
     const entries = Array.isArray(payload) ? payload : payload.coverage || [];
+    console.log(
+      `[Merge]   Found ${entries.length} entries in ${coverageFile}`,
+    );
 
     for (const entry of entries) {
       const bundlePath = toBundlePath(entry.url);
@@ -182,10 +188,17 @@ async function main() {
   }
 
   if (processedEntries === 0) {
+    console.log(
+      `[Merge] WARNING: Processed ${processedEntries} coverage entries`,
+    );
     throw new Error(
       "Playwright browser coverage did not produce any mergeable Next.js bundle entries.",
     );
   }
+
+  console.log(
+    `[Merge] Successfully processed ${processedEntries} coverage entries`,
+  );
 
   const normalizedCoverageMap = createCoverageMap({});
 
@@ -222,6 +235,12 @@ async function main() {
     .create("json-summary", { file: "coverage-summary.json" })
     .execute(reportContext);
   reports.create("lcovonly", { file: "lcov.info" }).execute(reportContext);
+
+  const lcovPath = path.join(coverageDir, "lcov.info");
+  console.log(`[Merge] ✓ Generated coverage report at ${lcovPath}`);
+  console.log(
+    `[Merge] ✓ Coverage includes ${normalizedCoverageMap.files().length} source files`,
+  );
 
   console.log(
     JSON.stringify(

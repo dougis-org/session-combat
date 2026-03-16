@@ -12,6 +12,9 @@ export const test = base.extend({
       isPlaywrightCoverageEnabled && browserName === "chromium";
 
     if (shouldCollectCoverage) {
+      console.log(
+        `[Coverage] Starting V8 coverage collection for test: ${testInfo.title}`,
+      );
       await page.coverage.startJSCoverage({
         resetOnNavigation: false,
       });
@@ -20,25 +23,34 @@ export const test = base.extend({
     await runFixture(page);
 
     if (!shouldCollectCoverage) {
-      return page;
+      return;
     }
 
-    const coverage = await page.coverage.stopJSCoverage();
-    const outputPath = testInfo.outputPath("playwright-js-coverage.json");
+    try {
+      const coverage = await page.coverage.stopJSCoverage();
+      console.log(
+        `[Coverage] Collected ${coverage.length} coverage entries for ${testInfo.title}`,
+      );
 
-    await fs.mkdir(path.dirname(outputPath), { recursive: true });
-    await fs.writeFile(
-      outputPath,
-      JSON.stringify(
-        {
-          testId: testInfo.testId,
-          title: testInfo.title,
-          coverage,
-        },
-        null,
-        2,
-      ),
-      "utf8",
-    );
+      const outputPath = testInfo.outputPath("playwright-js-coverage.json");
+      await fs.mkdir(path.dirname(outputPath), { recursive: true });
+      await fs.writeFile(
+        outputPath,
+        JSON.stringify(
+          {
+            testId: testInfo.testId,
+            title: testInfo.title,
+            coverage,
+          },
+          null,
+          2,
+        ),
+        "utf8",
+      );
+      console.log(`[Coverage] Saved coverage to: ${outputPath}`);
+    } catch (error) {
+      console.error(`[Coverage] Failed to collect coverage: ${error.message}`);
+      throw error;
+    }
   },
 });
