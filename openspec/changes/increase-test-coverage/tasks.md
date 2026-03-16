@@ -11,7 +11,7 @@
 - [ ] 2.1 Add or update project documentation for the verified baseline, the comparison method between local artifacts and Codacy, and the current non-instrumented suites.
 - [ ] 2.2 Update the `Build & Test` implementation only as needed to keep coverage inputs reproducible and auditable without changing the denominator implicitly.
 - [ ] 2.3 If any `collectCoverageFrom` or upload-input change is proposed, document the before-and-after denominator impact before code review.
-- [ ] 2.4 Prototype a Chromium-only Playwright browser-coverage job that converts browser coverage into a mergeable report and verify that the mapped files resolve cleanly to project source.
+- [ ] 2.4 Prototype a Chromium-only Playwright browser-coverage job that converts browser coverage into a mergeable report. **STATUS:** Infrastructure implemented and coverage collection functional. However, Playwright's V8 coverage API does not yield source-mappable bundle URLs on server-rendered Next.js apps (see design.md Implementation Note). Mark this task as "non-blocking audit" for now; do not wait on V8→source mapping before starting Wave 1 unit/integration work.
 - [ ] 2.5 Keep the existing WebKit regression job intact while documenting that Playwright browser coverage is client-side only unless separate server instrumentation is added.
 
 ## 3. Wave 1 High-Risk Coverage
@@ -26,13 +26,13 @@
 - [ ] 4.1 Write failing tests first for the highest-value client and page flows that remain near 0% coverage, prioritizing encounter, monster, and combat-related logic over low-risk files.
 - [ ] 4.2 Extract or isolate test seams in large UI files only where necessary to keep tests deterministic and maintainable.
 - [ ] 4.3 Add targeted tests for shared React components and hooks that sit on critical flows, including auth-protected rendering, storage-backed behavior, and combat-related forms or modals.
-- [ ] 4.4 Prefer harvesting coverage from already-exercised Playwright client flows before writing duplicate browser tests for the same UI surfaces.
+- [ ] 4.4 Prefer harvesting coverage from already-exercised Playwright client flows before writing duplicate browser tests for the same UI surfaces. **Note:** Until Playwright V8 coverage mapping is resolved (see design.md Implementation Note), Playwright coverage will remain a non-blocking audit; do not wait on browser coverage to complete this task.
 - [ ] 4.5 Evaluate whether selected E2E scenarios need instrumentation follow-up, but do not treat non-instrumented Playwright jobs as coverage contributors.
 
 ## 5. Validation
 
 - [ ] 5.1 Re-run the affected unit and integration suites with coverage and confirm that the new totals reflect exercised code rather than denominator-only changes.
-- [ ] 5.2 Run `npm run lint`, `npm run build`, `npm run test:unit`, and `npm run test:integration`, plus the Chromium-only Playwright coverage flow if enabled, and record the resulting coverage delta for the milestone.
+- [ ] 5.2 Run `npm run lint`, `npm run build`, `npm run test:unit`, and `npm run test:integration`, plus the Chromium-only Playwright coverage flow (audit only, do not wait on source mapping), and record the resulting coverage delta for the milestone.
 - [ ] 5.3 If CI, review comments, or security findings block progress, stop scope expansion, fix the blocker, and revalidate the last known-good coverage baseline before continuing.
 
 ## 6. PR and Merge
