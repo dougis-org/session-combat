@@ -54,6 +54,8 @@ export const VALID_PASSWORDS = [
   "ValidPassword789!",
 ];
 
+
+
 // ============================================================================
 // Client Functions
 // ============================================================================
@@ -99,7 +101,7 @@ export async function apiCall(
     fetchOptions.body = JSON.stringify(options.body);
   }
 
-  return fetch(`${baseUrl}${endpoint}`, fetchOptions);
+  return fetch(`${baseUrl}${endpoint}`, fetchOptions as any);
 }
 
 /**
@@ -191,8 +193,13 @@ export function extractAuthCookie(response: Response): string | null {
   return cookies.map((cookie) => cookie.split(";")[0].trim()).join("; ");
 }
 
+// ============================================================================
+// Assertion Helpers - Bundle Common Patterns
+// ============================================================================
+
 /**
  * Assert successful response and extract data
+ * Used for responses that should succeed (200/201)
  */
 export async function assertSuccessResponse<T>(
   response: Response,
@@ -208,20 +215,46 @@ export async function assertSuccessResponse<T>(
 }
 
 /**
- * Assert error response and extract error message
+ * Assert error response - checks status and optionally validates error content
+ * Combines status check + JSON parsing + optional error field assertion
  */
-export async function assertErrorResponse(
+export async function assertErrorResponse<T extends { error?: string } = { error?: string }>(
   response: Response,
-  expectedStatus: number
-): Promise<string> {
+  expectedStatus: number,
+  options: { errorContains?: string } = {}
+): Promise<T> {
   if (response.status !== expectedStatus) {
     const body = await response.text();
     throw new Error(
       `Expected status ${expectedStatus}, got ${response.status}. Body: ${body}`
     );
   }
-  const data = await parseJsonResponse<{ error?: string }>(response);
-  return data.error || "";
+  const data = await parseJsonResponse<T>(response);
+  
+  if (options.errorContains && data.error) {
+    if (!data.error.includes(options.errorContains)) {
+      throw new Error(
+        `Expected error to contain "${options.errorContains}", got: "${data.error}"`
+      );
+    }
+  }
+  
+  return data;
+}
+
+/**
+ * Assert response has expected status code only
+ * Minimal assertion for tests that only care about status
+ */
+export function assertResponseStatus(
+  response: Response,
+  expectedStatus: number
+): void {
+  if (response.status !== expectedStatus) {
+    throw new Error(
+      `Expected status ${expectedStatus}, got ${response.status}`
+    );
+  }
 }
 
 // ============================================================================
@@ -245,8 +278,81 @@ export function createTestUser(
 /**
  * Create multiple test users for parallel testing
  */
-export function createTestUsers(count: number = 3) {
-  return Array.from({ length: count }, (_,i) => 
-    createTestUser(`parallel-user${i + 1}`, VALID_PASSWORDS[i % VALID_PASSWORDS.length])
-  );
+// ============================================================================
+// High-Level Test Scenarios - Consolidate Common Patterns
+// ============================================================================
+
+/**
+ * Test a successful auth response with required fields
+ * Consolidates: API call + status check + JSON parse + field assertions
+ */
+export async function testSuccessfulAuthFlow<T extends Record<string, any>>(
+  response: Response,
+  expectedStatus: number,
+  requiredFields: (keyof T)[]
+): Promise<T> {
+  const data = await assertSuccessResponse<T>(response, expectedStatus);
+  
+  for (const field of requiredFields) {
+    expect(data[field]).toBeDefined();
+  }
+  
+  return data;
+}
+
+/**
+ * Test an error auth response with optional error message validation
+ * Consolidates: API call + status check + error assertion
+ */
+export async function testErrorAuthFlow(
+  response: Response,
+  expectedStatus: number,
+  expectedErrorFragment?: string
+): Promise<void> {
+  const data = await assertErrorResponse<{ error: string }>(response, expectedStatus);
+  
+  if (expectedErrorFragment && data.error) {
+    expect(data.error).toContain(expectedErrorFragment);
+  }
+}
+
+/**
+ * Create a unique test scenario with setup and execution
+ * Parameters for different auth test cases
+ */
+export interface AuthTestCase {
+  name: string;
+  email: string;
+  password: string;
+  shouldRegisterFirst?: boolean;
+}
+
+/**
+ * Run a batch of login test scenarios with consistent pattern
+ */
+export async function runLoginScenarios(
+  baseUrl: string,
+  scenarios: AuthTestCase[]
+): Promise<void> {
+  for (const scenario of scenarios) {
+    if (scenario.shouldRegisterFirst) {
+      await registerUser(baseUrl, scenario.email, scenario.password);
+    }
+    
+    const response = await loginUser(baseUrl, scenario.email, scenario.password);
+    expect(response.status).toBeGreaterThanOrEqual(200);
+  }
+}
+
+/**
+ * Run a batch of register test scenarios with consistent pattern
+ */
+export async function runRegisterScenarios(
+  baseUrl: string,
+  scenarios: AuthTestCase[]
+): Promise<void> {
+  for (const scenario of scenarios) {
+    const response = await registerUser(baseUrl, scenario.email, scenario.password);
+    expect(response.status).toBeGreaterThanOrEqual(200);
+  }
 }

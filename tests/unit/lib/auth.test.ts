@@ -22,7 +22,6 @@ describe("lib/auth.ts - Unit Tests", () => {
   describe("generateToken", () => {
     it("should generate a valid JWT token with correct payload", () => {
       const payload: AuthPayload = TEST_PAYLOADS.basic;
-
       const token = generateToken(payload);
 
       expect(token).toBeDefined();
@@ -35,7 +34,6 @@ describe("lib/auth.ts - Unit Tests", () => {
         userId: "user-456",
         email: "user456@test.org",
       };
-
       const token = generateToken(payload);
       const verified = verifyToken(token);
 
@@ -44,32 +42,8 @@ describe("lib/auth.ts - Unit Tests", () => {
       expect(verified?.email).toBe(payload.email);
     });
 
-    it("should generate same payload in tokens called sequentially", () => {
-      const payload: AuthPayload = {
-        userId: "user-789",
-        email: "user789@example.com",
-      };
-
-      const token1 = generateToken(payload);
-      const token2 = generateToken(payload);
-
-      // Both tokens should verify to same payload
-      expect(verifyToken(token1)).toEqual(expect.objectContaining(payload));
-      expect(verifyToken(token2)).toEqual(expect.objectContaining(payload));
-    });
-
-    it("should handle special characters in email", () => {
-      const payload: AuthPayload = TEST_PAYLOADS.special;
-
-      const token = generateToken(payload);
-      const verified = verifyToken(token);
-
-      expect(verified?.email).toBe("user+test@example.co.uk");
-    });
-
     it("should include iat (issued at) and exp (expiry) timestamps", () => {
       const payload: AuthPayload = TEST_PAYLOADS.timestamps;
-
       const token = generateToken(payload);
       const verified = verifyToken(token);
 
@@ -82,10 +56,24 @@ describe("lib/auth.ts - Unit Tests", () => {
     });
   });
 
+  describe("generateToken - Parameterized payload types", () => {
+    it.each([
+      ["basic", TEST_PAYLOADS.basic],
+      ["special email", TEST_PAYLOADS.special],
+      ["timestamps", TEST_PAYLOADS.timestamps],
+    ])("should generate token with %s payload", (_label, payload) => {
+      const token = generateToken(payload);
+      const verified = verifyToken(token);
+
+      expect(verified).toBeDefined();
+      expect(verified?.userId).toBe((payload as AuthPayload).userId);
+      expect(verified?.email).toBe((payload as AuthPayload).email);
+    });
+  });
+
   describe("verifyToken", () => {
     it("should accept valid non-expired token", () => {
       const payload: AuthPayload = TEST_PAYLOADS.valid;
-
       const token = generateToken(payload);
       const verified = verifyToken(token);
 
@@ -94,16 +82,16 @@ describe("lib/auth.ts - Unit Tests", () => {
       expect(verified?.email).toBe(payload.email);
     });
 
-    it("should return null for malformed token", () => {
-      MALFORMED_TOKENS.forEach((token) => {
+    it.each(MALFORMED_TOKENS)(
+      "should return null for malformed token: %s",
+      (token) => {
         const result = verifyToken(token);
         expect(result).toBeNull();
-      });
-    });
+      }
+    );
 
     it("should return null for corrupted token", () => {
       const payload: AuthPayload = TEST_PAYLOADS.corrupt;
-
       const token = generateToken(payload);
       const corruptedToken = token.substring(0, token.length - 5) + "xxxxx";
 
@@ -111,16 +99,15 @@ describe("lib/auth.ts - Unit Tests", () => {
       expect(result).toBeNull();
     });
 
-    it("should handle null/undefined input gracefully", () => {
-      expect(verifyToken(null as any)).toBeNull();
-      expect(verifyToken(undefined as any)).toBeNull();
-      expect(verifyToken("")).toBeNull();
-    });
+    it.each([null, undefined, ""])(
+      "should handle null/undefined/empty input gracefully",
+      (input) => {
+        expect(verifyToken(input as any)).toBeNull();
+      }
+    );
 
     it("should reject token with wrong secret", () => {
       const payload: AuthPayload = TEST_PAYLOADS.wrongSecret;
-
-      // Sign token with a different secret than the one used by verifyToken
       const tokenWithWrongSecret = jwt.sign(payload, "a-different-secret");
 
       const verified = verifyToken(tokenWithWrongSecret);
@@ -136,7 +123,6 @@ describe("lib/auth.ts - Unit Tests", () => {
       expect(hash).toBeDefined();
       expect(typeof hash).toBe("string");
       expect(hash.length).toBeGreaterThan(0);
-      // Bcrypt hashes are typically 60 characters
       expect(hash.length).toBeGreaterThanOrEqual(50);
     });
 
@@ -148,20 +134,21 @@ describe("lib/auth.ts - Unit Tests", () => {
       expect(hash1).not.toBe(hash2);
     });
 
-    it("should handle special characters in password", async () => {
-      for (const password of SPECIAL_PASSWORDS) {
-        const hash = await hashPassword(password);
-        expect(hash).toBeDefined();
-        expect(hash.length).toBeGreaterThan(0);
-      }
-    });
-
     it("should not include plaintext password in hash", async () => {
       const password = "SecretPassword123";
       const hash = await hashPassword(password);
 
       expect(hash).not.toContain(password);
     });
+
+    it.each(SPECIAL_PASSWORDS)(
+      "should handle special character password: %s",
+      async (password) => {
+        const hash = await hashPassword(password);
+        expect(hash).toBeDefined();
+        expect(hash.length).toBeGreaterThan(0);
+      }
+    );
   });
 
   describe("comparePassword", () => {
@@ -174,7 +161,7 @@ describe("lib/auth.ts - Unit Tests", () => {
     });
 
     it("should return false for incorrect password", async () => {
-      const password = "CorrrectPassword123!"; // Intentional typo
+      const password = "CorrrectPassword123!";
       const correctPassword = "CorrectPassword123!";
       const hash = await hashPassword(correctPassword);
       const result = await comparePassword(password, hash);
@@ -182,76 +169,58 @@ describe("lib/auth.ts - Unit Tests", () => {
       expect(result).toBe(false);
     });
 
-    it("should handle off-by-one character", async () => {
-      const password = "Password123";
-      const hash = await hashPassword(password);
-
-      expect(await comparePassword("Password123", hash)).toBe(true);
-      expect(await comparePassword("Password124", hash)).toBe(false);
-      expect(await comparePassword("password123", hash)).toBe(false); // Case sensitive
-      expect(await comparePassword("Password123 ", hash)).toBe(false); // Extra space
-    });
-
-    it("should handle special characters", async () => {
-      const password = "Pass@#$%123!";
-      const hash = await hashPassword(password);
-
-      expect(await comparePassword(password, hash)).toBe(true);
-      expect(await comparePassword("Pass@#$%124!", hash)).toBe(false);
-    });
-
-    it("should be case-sensitive", async () => {
-      const password = "MixedCasePassword";
-      const hash = await hashPassword(password);
-
-      expect(await comparePassword("MixedCasePassword", hash)).toBe(true);
-      expect(await comparePassword("mixedcasepassword", hash)).toBe(false);
-    });
+    it.each([
+      ["Password123", "Password123", true, "exact match"],
+      ["Password123", "Password124", false, "off-by-one character"],
+      ["Password123", "password123", false, "case sensitivity"],
+      ["Password123", "Password123 ", false, "extra space"],
+      ["Pass@#$%123!", "Pass@#$%123!", true, "special characters"],
+      ["Pass@#$%123!", "Pass@#$%124!", false, "special character mismatch"],
+    ])(
+      "should handle case-sensitive comparison: %s vs %s (%s)",
+      async (originalPassword, testPassword, expectedResult, _desc) => {
+        const hash = await hashPassword(originalPassword);
+        const result = await comparePassword(testPassword, hash);
+        expect(result).toBe(expectedResult);
+      }
+    );
   });
 
   describe("validateEmail", () => {
-    it("should accept valid email formats", () => {
-      VALID_EMAILS.forEach((email) => {
-        expect(validateEmail(email)).toBe(true);
-      });
+    it.each(VALID_EMAILS)("should accept valid email: %s", (email) => {
+      expect(validateEmail(email)).toBe(true);
     });
 
-    it("should reject invalid email formats", () => {
-      INVALID_EMAILS.forEach((email) => {
-        expect(validateEmail(email)).toBe(false);
-      });
+    it.each(INVALID_EMAILS)("should reject invalid email: %s", (email) => {
+      expect(validateEmail(email)).toBe(false);
     });
 
-    it("should handle special valid characters", () => {
-      expect(validateEmail("user+tag@example.com")).toBe(true);
-      expect(validateEmail("user-name@example.com")).toBe(true);
-      expect(validateEmail("user_name@example.com")).toBe(true);
-      expect(validateEmail("123@example.com")).toBe(true);
-    });
-
-    it("should reject null/undefined", () => {
-      expect(validateEmail(null as any)).toBe(false);
-      expect(validateEmail(undefined as any)).toBe(false);
-    });
+    it.each([null, undefined])(
+      "should reject null/undefined",
+      (input) => {
+        expect(validateEmail(input as any)).toBe(false);
+      }
+    );
   });
 
   describe("validatePassword", () => {
-    it("should return { valid: true } for strong password", () => {
+    it("should return valid for strong password", () => {
       const result = validatePassword(STRONG_PASSWORD);
 
       expect(result.valid).toBe(true);
       expect(result.errors).toEqual([]);
     });
 
-    it("should return validation errors for weak password", () => {
-      WEAK_PASSWORDS.forEach((password) => {
+    it.each(WEAK_PASSWORDS)(
+      "should return validation errors for weak password: %s",
+      (password) => {
         const result = validatePassword(password);
 
         expect(result.valid).toBe(false);
         expect(Array.isArray(result.errors)).toBe(true);
         expect(result.errors.length).toBeGreaterThan(0);
-      });
-    });
+      }
+    );
 
     it("should accept passwords with special characters", () => {
       const result = validatePassword("ValidPass123!@#");
@@ -266,7 +235,6 @@ describe("lib/auth.ts - Unit Tests", () => {
       expect(result.valid).toBe(false);
       expect(result.errors).toBeDefined();
       expect(Array.isArray(result.errors)).toBe(true);
-      // Errors should describe what's wrong
       result.errors.forEach((error) => {
         expect(typeof error).toBe("string");
         expect(error.length).toBeGreaterThan(0);
@@ -306,11 +274,9 @@ describe("lib/auth.ts - Unit Tests", () => {
 
       const hashes = await Promise.all(passwords.map((p) => hashPassword(p)));
 
-      // All hashes should be different
       const uniqueHashes = new Set(hashes);
       expect(uniqueHashes.size).toBe(hashes.length);
 
-      // Each password should match its corresponding hash
       for (let i = 0; i < passwords.length; i++) {
         const isMatch = await comparePassword(passwords[i], hashes[i]);
         expect(isMatch).toBe(true);

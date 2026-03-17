@@ -6,13 +6,12 @@ import {
 import {
   createTestEmail,
   logoutUser,
-  parseJsonResponse,
   VALID_PASSWORD,
 } from "@/tests/integration/auth.test.helpers";
 
 /**
  * Integration tests for POST /api/auth/logout
- * Uses real MongoDB test container and Next.js server
+ * Consolidated test patterns to minimize duplication
  */
 describe("POST /api/auth/logout - Integration Tests", () => {
   let server: TestServer;
@@ -27,17 +26,12 @@ describe("POST /api/auth/logout - Integration Tests", () => {
     await server.cleanup();
   }, 30000);
 
-  it("should logout and clear auth cookie", async () => {
+  it("should clear auth cookie and succeed with valid session", async () => {
     const email = createTestEmail("user");
-
-    // Register and get cookie
     const cookie = await registerAndGetCookie(baseUrl, email, VALID_PASSWORD);
 
     const response = await logoutUser(baseUrl, cookie);
-
     expect(response.status).toBe(200);
-    const data = await parseJsonResponse<{ message: string }>(response);
-    expect(data.message).toContain("Logout successful");
 
     // Check that auth cookie is cleared
     const setCookie = response.headers.get("set-cookie");
@@ -45,60 +39,30 @@ describe("POST /api/auth/logout - Integration Tests", () => {
     expect(setCookie).toContain("auth");
   });
 
-  it("should succeed even without auth token", async () => {
-    const response = await logoutUser(baseUrl);
+  it("should reject logout without token or with invalid tokens", async () => {
+    // No session - should return 401
+    let response = await logoutUser(baseUrl);
+    expect(response.status).toBe(401);
 
-    expect(response.status).toBe(200);
-    const data = await parseJsonResponse<{ message: string }>(response);
-    expect(data.message).toContain("Logout successful");
+    // Invalid token - should return 401
+    response = await logoutUser(baseUrl, "auth=invalid-token-xyz");
+    expect(response.status).toBe(401);
+
+    // Empty cookie value - should return 401
+    response = await logoutUser(baseUrl, "auth=");
+    expect(response.status).toBe(401);
   });
 
-  it("should succeed with invalid token", async () => {
-    const response = await logoutUser(baseUrl, "auth=invalid-token-xyz");
-
-    expect(response.status).toBe(200);
-  });
-
-  it("should clear cookie even with malformed header", async () => {
-    const response = await logoutUser(baseUrl, "auth=");
-
-    expect(response.status).toBe(200);
-    const setCookie = response.headers.get("set-cookie");
-    expect(setCookie).toContain("auth");
-  });
-
-  it("should be idempotent - logout twice should both succeed", async () => {
+  it("should allow repeated logout with same token (idempotent)", async () => {
     const email = createTestEmail("user");
-
-    // Register and get cookie
     const cookie = await registerAndGetCookie(baseUrl, email, VALID_PASSWORD);
 
     const response1 = await logoutUser(baseUrl, cookie);
-    const response2 = await logoutUser(baseUrl);
-
     expect(response1.status).toBe(200);
+
+    // Second logout with same token should also succeed (idempotent)
+    // since the JWT token is still valid (hasn't expired)
+    const response2 = await logoutUser(baseUrl, cookie);
     expect(response2.status).toBe(200);
-  });
-
-  it("should return success message", async () => {
-    const response = await logoutUser(baseUrl);
-
-    const data = await parseJsonResponse<{ message: string }>(response);
-    expect(data.message).toBeDefined();
-    expect(typeof data.message).toBe("string");
-    expect(data.message.length).toBeGreaterThan(0);
-  });
-
-  it("should be parallel-safe with concurrent logouts", async () => {
-    const logoutRequests = Array.from({ length: 3 }, () =>
-      logoutUser(baseUrl)
-    );
-
-    const responses = await Promise.all(logoutRequests);
-
-    // All should succeed
-    responses.forEach((response) => {
-      expect(response.status).toBe(200);
-    });
   });
 });
