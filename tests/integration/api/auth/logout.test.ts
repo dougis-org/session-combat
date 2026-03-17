@@ -1,10 +1,14 @@
-import fetch from "node-fetch";
 import {
   startTestServer,
   registerAndGetCookie,
   TestServer,
 } from "@/tests/integration/helpers/server";
-import { createTestEmail, apiCall } from "@/tests/integration/auth.test.helpers";
+import {
+  createTestEmail,
+  logoutUser,
+  parseJsonResponse,
+  VALID_PASSWORD,
+} from "@/tests/integration/auth.test.helpers";
 
 /**
  * Integration tests for POST /api/auth/logout
@@ -25,17 +29,14 @@ describe("POST /api/auth/logout - Integration Tests", () => {
 
   it("should logout and clear auth cookie", async () => {
     const email = createTestEmail("user");
-    const password = "ValidPassword123!";
 
     // Register and get cookie
-    const cookie = await registerAndGetCookie(baseUrl, email, password);
+    const cookie = await registerAndGetCookie(baseUrl, email, VALID_PASSWORD);
 
-    const response = await apiCall(baseUrl, "/api/auth/logout", {
-      cookie,
-    });
+    const response = await logoutUser(baseUrl, cookie);
 
     expect(response.status).toBe(200);
-    const data = (await response.json()) as any;
+    const data = await parseJsonResponse<{ message: string }>(response);
     expect(data.message).toContain("Logout successful");
 
     // Check that auth cookie is cleared
@@ -45,25 +46,21 @@ describe("POST /api/auth/logout - Integration Tests", () => {
   });
 
   it("should succeed even without auth token", async () => {
-    const response = await apiCall(baseUrl, "/api/auth/logout");
+    const response = await logoutUser(baseUrl);
 
     expect(response.status).toBe(200);
-    const data = (await response.json()) as any;
+    const data = await parseJsonResponse<{ message: string }>(response);
     expect(data.message).toContain("Logout successful");
   });
 
   it("should succeed with invalid token", async () => {
-    const response = await apiCall(baseUrl, "/api/auth/logout", {
-      cookie: "auth=invalid-token-xyz",
-    });
+    const response = await logoutUser(baseUrl, "auth=invalid-token-xyz");
 
     expect(response.status).toBe(200);
   });
 
   it("should clear cookie even with malformed header", async () => {
-    const response = await apiCall(baseUrl, "/api/auth/logout", {
-      cookie: "auth=",
-    });
+    const response = await logoutUser(baseUrl, "auth=");
 
     expect(response.status).toBe(200);
     const setCookie = response.headers.get("set-cookie");
@@ -72,25 +69,21 @@ describe("POST /api/auth/logout - Integration Tests", () => {
 
   it("should be idempotent - logout twice should both succeed", async () => {
     const email = createTestEmail("user");
-    const password = "ValidPassword123!";
 
     // Register and get cookie
-    const cookie = await registerAndGetCookie(baseUrl, email, password);
+    const cookie = await registerAndGetCookie(baseUrl, email, VALID_PASSWORD);
 
-    const response1 = await apiCall(baseUrl, "/api/auth/logout", {
-      cookie,
-    });
-
-    const response2 = await apiCall(baseUrl, "/api/auth/logout");
+    const response1 = await logoutUser(baseUrl, cookie);
+    const response2 = await logoutUser(baseUrl);
 
     expect(response1.status).toBe(200);
     expect(response2.status).toBe(200);
   });
 
   it("should return success message", async () => {
-    const response = await apiCall(baseUrl, "/api/auth/logout");
+    const response = await logoutUser(baseUrl);
 
-    const data = (await response.json()) as any;
+    const data = await parseJsonResponse<{ message: string }>(response);
     expect(data.message).toBeDefined();
     expect(typeof data.message).toBe("string");
     expect(data.message.length).toBeGreaterThan(0);
@@ -98,7 +91,7 @@ describe("POST /api/auth/logout - Integration Tests", () => {
 
   it("should be parallel-safe with concurrent logouts", async () => {
     const logoutRequests = Array.from({ length: 3 }, () =>
-      apiCall(baseUrl, "/api/auth/logout")
+      logoutUser(baseUrl)
     );
 
     const responses = await Promise.all(logoutRequests);

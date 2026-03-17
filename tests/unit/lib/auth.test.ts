@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import {
   hashPassword,
   comparePassword,
@@ -7,14 +8,20 @@ import {
   validatePassword,
 } from "@/lib/auth";
 import { AuthPayload } from "@/lib/types";
+import {
+  TEST_PAYLOADS,
+  MALFORMED_TOKENS,
+  SPECIAL_PASSWORDS,
+  VALID_EMAILS,
+  INVALID_EMAILS,
+  WEAK_PASSWORDS,
+  STRONG_PASSWORD,
+} from "@/tests/unit/lib/auth.test.helpers";
 
 describe("lib/auth.ts - Unit Tests", () => {
   describe("generateToken", () => {
     it("should generate a valid JWT token with correct payload", () => {
-      const payload: AuthPayload = {
-        userId: "test-user-123",
-        email: "test@example.com",
-      };
+      const payload: AuthPayload = TEST_PAYLOADS.basic;
 
       const token = generateToken(payload);
 
@@ -52,10 +59,7 @@ describe("lib/auth.ts - Unit Tests", () => {
     });
 
     it("should handle special characters in email", () => {
-      const payload: AuthPayload = {
-        userId: "user-special",
-        email: "user+test@example.co.uk",
-      };
+      const payload: AuthPayload = TEST_PAYLOADS.special;
 
       const token = generateToken(payload);
       const verified = verifyToken(token);
@@ -64,10 +68,7 @@ describe("lib/auth.ts - Unit Tests", () => {
     });
 
     it("should include iat (issued at) and exp (expiry) timestamps", () => {
-      const payload: AuthPayload = {
-        userId: "user-timestamps",
-        email: "timestamps@test.com",
-      };
+      const payload: AuthPayload = TEST_PAYLOADS.timestamps;
 
       const token = generateToken(payload);
       const verified = verifyToken(token);
@@ -83,10 +84,7 @@ describe("lib/auth.ts - Unit Tests", () => {
 
   describe("verifyToken", () => {
     it("should accept valid non-expired token", () => {
-      const payload: AuthPayload = {
-        userId: "user-valid",
-        email: "valid@example.com",
-      };
+      const payload: AuthPayload = TEST_PAYLOADS.valid;
 
       const token = generateToken(payload);
       const verified = verifyToken(token);
@@ -97,24 +95,14 @@ describe("lib/auth.ts - Unit Tests", () => {
     });
 
     it("should return null for malformed token", () => {
-      const malformedTokens = [
-        "not.a.token",
-        "invalid",
-        "header.invalid-base64.signature",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.invalid", // Valid header, invalid payload
-      ];
-
-      malformedTokens.forEach((token) => {
+      MALFORMED_TOKENS.forEach((token) => {
         const result = verifyToken(token);
         expect(result).toBeNull();
       });
     });
 
     it("should return null for corrupted token", () => {
-      const payload: AuthPayload = {
-        userId: "user-corrupt",
-        email: "corrupt@test.com",
-      };
+      const payload: AuthPayload = TEST_PAYLOADS.corrupt;
 
       const token = generateToken(payload);
       const corruptedToken = token.substring(0, token.length - 5) + "xxxxx";
@@ -129,18 +117,14 @@ describe("lib/auth.ts - Unit Tests", () => {
       expect(verifyToken("")).toBeNull();
     });
 
-    it("should reject token with wrong secret (simulated)", () => {
-      const payload: AuthPayload = {
-        userId: "user-wrong-secret",
-        email: "wrongsecret@test.com",
-      };
+    it("should reject token with wrong secret", () => {
+      const payload: AuthPayload = TEST_PAYLOADS.wrongSecret;
 
-      const token = generateToken(payload);
-      // We can't easily test this without modifying the secret,
-      // but we verify that token verification is strict
-      const verified = verifyToken(token);
-      expect(verified).not.toBeNull();
-      expect(verified?.userId).toBe(payload.userId);
+      // Sign token with a different secret than the one used by verifyToken
+      const tokenWithWrongSecret = jwt.sign(payload, "a-different-secret");
+
+      const verified = verifyToken(tokenWithWrongSecret);
+      expect(verified).toBeNull();
     });
   });
 
@@ -165,14 +149,7 @@ describe("lib/auth.ts - Unit Tests", () => {
     });
 
     it("should handle special characters in password", async () => {
-      const specialPasswords = [
-        "Pass!@#$%^&*()",
-        "Пароль123", // Cyrillic
-        "パスワード", // Japanese
-        "密码测试", // Chinese
-      ];
-
-      for (const password of specialPasswords) {
+      for (const password of SPECIAL_PASSWORDS) {
         const hash = await hashPassword(password);
         expect(hash).toBeDefined();
         expect(hash.length).toBeGreaterThan(0);
@@ -234,31 +211,13 @@ describe("lib/auth.ts - Unit Tests", () => {
 
   describe("validateEmail", () => {
     it("should accept valid email formats", () => {
-      const validEmails = [
-        "user@example.com",
-        "test+tag@example.co.uk",
-        "first.last@subdomain.example.com",
-        "user123@test-domain.org",
-        "a@b.c",
-      ];
-
-      validEmails.forEach((email) => {
+      VALID_EMAILS.forEach((email) => {
         expect(validateEmail(email)).toBe(true);
       });
     });
 
     it("should reject invalid email formats", () => {
-      const invalidEmails = [
-        "notanemail", // no @
-        "@example.com", // nothing before @
-        "user@", // nothing after @
-        "user @example.com", // space in user
-        "user@example", // no dot after @
-        "", // empty
-        "user name@example.com", // space in user
-      ];
-
-      invalidEmails.forEach((email) => {
+      INVALID_EMAILS.forEach((email) => {
         expect(validateEmail(email)).toBe(false);
       });
     });
@@ -278,21 +237,14 @@ describe("lib/auth.ts - Unit Tests", () => {
 
   describe("validatePassword", () => {
     it("should return { valid: true } for strong password", () => {
-      const result = validatePassword("StrongPassword123!");
+      const result = validatePassword(STRONG_PASSWORD);
 
       expect(result.valid).toBe(true);
       expect(result.errors).toEqual([]);
     });
 
     it("should return validation errors for weak password", () => {
-      const weakPasswords = [
-        "short", // Too short
-        "nouppercase123", // No uppercase
-        "NOLOWERCASE123", // No lowercase
-        "NoNumbers", // No numbers
-      ];
-
-      weakPasswords.forEach((password) => {
+      WEAK_PASSWORDS.forEach((password) => {
         const result = validatePassword(password);
 
         expect(result.valid).toBe(false);
@@ -304,12 +256,8 @@ describe("lib/auth.ts - Unit Tests", () => {
     it("should accept passwords with special characters", () => {
       const result = validatePassword("ValidPass123!@#");
 
-      if (result.valid === true) {
-        expect(result.errors).toEqual([]);
-      } else {
-        // It's acceptable to reject if special chars aren't required
-        expect(result.errors).toBeDefined();
-      }
+      expect(result.valid).toBe(true);
+      expect(result.errors).toEqual([]);
     });
 
     it("should provide specific error messages", () => {

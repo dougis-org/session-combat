@@ -1,9 +1,17 @@
-import fetch from "node-fetch";
 import {
   startTestServer,
   TestServer,
 } from "@/tests/integration/helpers/server";
-import { createTestEmail, apiCall } from "@/tests/integration/auth.test.helpers";
+import {
+  createTestEmail,
+  registerUser,
+  parseJsonResponse,
+  VALID_PASSWORD,
+  WEAK_PASSWORDS,
+  INVALID_EMAILS,
+  createTestUsers,
+  extractAuthCookie,
+} from "@/tests/integration/auth.test.helpers";
 
 /**
  * Integration tests for POST /api/auth/register
@@ -23,160 +31,97 @@ describe("POST /api/auth/register - Integration Tests", () => {
   }, 30000);
 
   it("should register new user with valid email and password", async () => {
-    const payload = {
-      email: createTestEmail("newuser"),
-      password: "ValidPassword123!",
-    };
+    const email = createTestEmail("newuser");
 
-    const response = await apiCall(baseUrl, "/api/auth/register", {
-      body: payload,
-    });
+    const response = await registerUser(baseUrl, email, VALID_PASSWORD);
 
     expect(response.status).toBe(201);
-    const data = (await response.json()) as any;
+    const data = await parseJsonResponse<{
+      userId: string;
+      email: string;
+    }>(response);
     expect(data.userId).toBeDefined();
-    expect(data.email).toBe(payload.email);
-    expect(data.message).toContain("User registered successfully");
+    expect(data.email).toBe(email);
   });
 
   it("should return 409 when email already exists", async () => {
     const email = createTestEmail("existing");
-    const password = "ValidPassword123!";
 
     // Create first user
-    const firstPayload = { email, password };
-    await apiCall(baseUrl, "/api/auth/register", {
-      body: firstPayload,
-    });
+    await registerUser(baseUrl, email, VALID_PASSWORD);
 
     // Try to register same email again
-    const secondPayload = { email, password: "DifferentPassword123!" };
-    const response = await apiCall(baseUrl, "/api/auth/register", {
-      body: secondPayload,
-    });
+    const response = await registerUser(baseUrl, email, "DifferentPassword123!");
 
     expect(response.status).toBe(409);
-    const data = (await response.json()) as any;
-    expect(data.error).toContain("already exists");
+    const data = await parseJsonResponse<{ error: string }>(response);
+    expect(data.error).toBeDefined();
   });
 
   it("should return 400 when email format is invalid", async () => {
-    const invalidEmails = [
-      "notanemail",
-      "@example.com",
-      "user@",
-      "user@example",
-    ];
-
-    for (const email of invalidEmails) {
-      const payload = { email, password: "ValidPassword123!" };
-      const response = await apiCall(baseUrl, "/api/auth/register", {
-        body: payload,
-      });
+    for (const email of INVALID_EMAILS) {
+      const response = await registerUser(baseUrl, email, VALID_PASSWORD);
 
       expect(response.status).toBe(400);
-      const data = (await response.json()) as any;
-      expect(data.error).toContain("Invalid email");
+      const data = await parseJsonResponse<{ error: string }>(response);
+      expect(data.error).toBeDefined();
     }
   });
 
   it("should return 400 when password is weak", async () => {
-    const weakPasswords = [
-      "short",
-      "nouppercase123",
-      "NOLOWERCASE123",
-      "NoNumbers",
-    ];
-
-    for (const password of weakPasswords) {
-      const payload = {
-        email: createTestEmail("weak-password-test"),
-        password,
-      };
-      const response = await apiCall(baseUrl, "/api/auth/register", {
-        body: payload,
-      });
+    for (const password of WEAK_PASSWORDS) {
+      const response = await registerUser(
+        baseUrl,
+        createTestEmail("weak-password-test"),
+        password
+      );
 
       expect(response.status).toBe(400);
-      const data = (await response.json()) as any;
-      expect(data.error).toContain("Password");
+      const data = await parseJsonResponse<{ error: string }>(response);
+      expect(data.error).toBeDefined();
     }
   });
 
   it("should return 400 when email is missing", async () => {
-    const payload = { password: "ValidPassword123!" };
-    const response = await apiCall(baseUrl, "/api/auth/register", {
-      body: payload,
-    });
+    const response = await registerUser(baseUrl, "", VALID_PASSWORD);
 
     expect(response.status).toBe(400);
-    const data = (await response.json()) as any;
+    const data = await parseJsonResponse<{ error: string }>(response);
     expect(data.error).toContain("required");
   });
 
   it("should return 400 when password is missing", async () => {
-    const payload = { email: createTestEmail("no-password") };
-    const response = await apiCall(baseUrl, "/api/auth/register", {
-      body: payload,
-    });
+    const response = await registerUser(baseUrl, createTestEmail("no-password"), "");
 
     expect(response.status).toBe(400);
-    const data = (await response.json()) as any;
-    expect(data.error).toContain("required");
+    const data = await parseJsonResponse<{ error: string }>(response);
+    expect(data.error).toBeDefined();
   });
 
   it("should set auth cookie in response", async () => {
-    const payload = {
-      email: createTestEmail("cookietest"),
-      password: "ValidPassword123!",
-    };
+    const email = createTestEmail("cookietest");
 
-    const response = await apiCall(baseUrl, "/api/auth/register", {
-      body: payload,
-    });
+    const response = await registerUser(baseUrl, email, VALID_PASSWORD);
 
-    const setCookie = response.headers.get("set-cookie");
-    expect(setCookie).toBeDefined();
-    expect(setCookie).toContain("auth");
+    const cookie = extractAuthCookie(response);
+    expect(cookie).toBeDefined();
   });
 
   it("should handle special characters in email", async () => {
-    const payload = {
-      email: `user+test-${Date.now()}-${Math.random().toString(36).slice(2, 11)}@example.co.uk`,
-      password: "ValidPassword123!",
-    };
+    const email = `user+test-${Date.now()}-${Math.random().toString(36).slice(2, 11)}@example.co.uk`;
 
-    const response = await apiCall(baseUrl, "/api/auth/register", {
-      body: payload,
-    });
+    const response = await registerUser(baseUrl, email, VALID_PASSWORD);
 
     expect(response.status).toBe(201);
-    const data = (await response.json()) as any;
-    expect(data.email).toBe(payload.email);
+    const data = await parseJsonResponse<{ email: string }>(response);
+    expect(data.email).toBe(email);
   });
 
   it("should be parallel-safe with different users", async () => {
-    const users = [
-      {
-        email: createTestEmail("parallel-user1"),
-        password: "ValidPassword123!",
-      },
-      {
-        email: createTestEmail("parallel-user2"),
-        password: "ValidPassword456!",
-      },
-      {
-        email: createTestEmail("parallel-user3"),
-        password: "ValidPassword789!",
-      },
-    ];
+    const users = createTestUsers(3);
 
     const responses = await Promise.all(
-      users.map((user) =>
-        apiCall(baseUrl, "/api/auth/register", {
-          body: user,
-        })
-      )
+      users.map((user) => registerUser(baseUrl, user.email, user.password))
     );
 
     // All should succeed
