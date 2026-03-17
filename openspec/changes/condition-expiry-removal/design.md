@@ -32,7 +32,7 @@ The `StatusCondition` type (`lib/types.ts`) already carries an optional `duratio
 - `typeof cond.duration === 'undefined' || cond.duration > 0`: verbose but equivalent; rejected for brevity.
 - Moving to a separate helper function: overkill for a one-liner predicate.
 
-**Proposal mapping**: Fixes "Combatant conditions do not remove when there number of rounds have expired" from the issue.
+**Proposal mapping**: Fixes "Combatant conditions do not remove when the number of rounds have expired" from the issue.
 
 ### D2: Collect expiring conditions before mutation, then alert
 **Decision**: Before the `.map()` + `.filter()` pass, collect a list of `{ combatantName, conditionName }` tuples for all conditions where `cond.duration !== undefined && cond.duration - 1 <= 0`. Then fire a single `alert()` with all expiring conditions before calling `saveCombatState`.

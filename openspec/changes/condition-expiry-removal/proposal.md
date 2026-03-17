@@ -10,8 +10,8 @@ Additionally, there is no notification to the user when a condition expires, mak
 
 **In scope:**
 - Fix the condition expiry filter so conditions at `duration = 0` are removed
-- Show a validation alert listing which conditions expired when advancing a combatant's turn
-- Conditions expire on the turn of the combatant who carries them (i.e. when it becomes that combatant's turn)
+- Show a validation alert listing which conditions expired at the end of a round
+- Conditions expire at round end (when the turn index wraps back to the first combatant), consistent with the existing duration decrement behavior
 
 **Out of scope:**
 - Changing when condition duration ticks down (e.g. start vs. end of turn)
@@ -40,10 +40,10 @@ Additionally, there is no notification to the user when a condition expires, mak
 
 ## Open Questions
 
-1. Should the alert list conditions for all combatants whose conditions expired this turn advance, or only the combatant whose turn it now is?
-   *(Current assumption: alert covers conditions belonging to the combatant whose turn it was — the one whose duration ticked down.)*
-2. Should expired conditions be removed immediately on the advancing turn, or at the start of the newly active combatant's turn?
-   *(Current assumption: removed when advancing past the combatant — i.e. on `nextTurn` for that combatant's entry.)*
+1. Should the alert list conditions for all combatants whose conditions expired this round, or only a subset?
+   *(Resolved: alert covers all combatants whose conditions expire at round wrap — consistent with the round-end decrement scope.)*
+2. Should expired conditions be removed at round end or at the start of each combatant's individual turn?
+   *(Resolved: removed at round end, matching the existing duration decrement timing.)*
 
 ## Non-Goals
 

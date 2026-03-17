@@ -9,6 +9,7 @@ import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
+import { processRoundEnd } from '@/lib/combat/conditionExpiry';
 
 function CombatContent() {
   const { user } = useAuth();
@@ -444,28 +445,12 @@ function CombatContent() {
       nextIndex = 0;
       nextRound += 1;
 
-      // Collect conditions expiring this round for alert
-      const expiringConditions: { combatantName: string; conditionName: string }[] = [];
-      combatState.combatants.forEach(c => {
-        c.conditions.forEach(cond => {
-          if (cond.duration !== undefined && cond.duration - 1 <= 0) {
-            expiringConditions.push({ combatantName: c.name, conditionName: cond.name });
-          }
-        });
-      });
-      if (expiringConditions.length > 0) {
-        const lines = expiringConditions.map(e => `• ${e.combatantName}: ${e.conditionName}`).join('\n');
+      // Decrement condition durations, collect expiring conditions, and remove expired ones (single pass)
+      const { updatedCombatants, expiring } = processRoundEnd(combatState.combatants);
+      if (expiring.length > 0) {
+        const lines = expiring.map(e => `• ${e.combatantName}: ${e.conditionName}`).join('\n');
         alert(`Conditions expired:\n${lines}`);
       }
-
-      // Reduce duration of conditions and remove expired ones
-      const updatedCombatants = combatState.combatants.map(c => ({
-        ...c,
-        conditions: c.conditions.map(cond => ({
-          ...cond,
-          duration: cond.duration != null ? Math.max(0, cond.duration - 1) : cond.duration,
-        })).filter(cond => cond.duration == null || cond.duration > 0),
-      }));
 
       saveCombatState({
         ...combatState,
