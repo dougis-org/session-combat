@@ -12,9 +12,9 @@
 
 ## 3. Validation
 
-- [ ] 3.1 Manually verify: add a condition with `duration = 1` to a combatant, advance turns until round wrap — confirm alert fires and condition disappears
-- [ ] 3.2 Manually verify: add a condition with `duration = 2`, advance one round — confirm condition remains with `duration = 1`, no alert
-- [ ] 3.3 Manually verify: add a condition with no duration — confirm it never expires and no alert fires for it
+- [x] 3.1 Manually verify: add a condition with `duration = 1` to a combatant, advance turns until round wrap — confirm alert fires and condition disappears
+- [x] 3.2 Manually verify: add a condition with `duration = 2`, advance one round — confirm condition remains with `duration = 1`, no alert
+- [x] 3.3 Manually verify: add a condition with no duration — confirm it never expires and no alert fires for it
 <!-- Note: 3.1–3.3 require a running app for manual browser verification -->
 - [x] 3.4 Run existing tests: `npm test` — confirm no regressions
 - [x] 3.5 If `window.alert` is called in any unit/integration tests that cover `nextTurn`, mock it: `jest.spyOn(window, 'alert').mockImplementation(() => {})`
@@ -24,12 +24,12 @@
 
 - [x] 4.1 Commit changes: `git add app/combat/page.tsx && git commit -m "fix: remove expired conditions and alert on condition expiry at round end"`
 - [x] 4.2 Push branch and open PR referencing issue #32 — https://github.com/dougis-org/session-combat/pull/83
-- [ ] 4.3 Confirm CI passes (build + tests)
-- [ ] 4.4 Resolve any review comments; re-run CI if needed
-- [ ] 4.5 Enable auto-merge once approved
+- [x] 4.3 Confirm CI passes (build + tests)
+- [x] 4.4 Resolve any review comments; re-run CI if needed
+- [x] 4.5 Enable auto-merge once approved
 
 ## 5. Post-Merge
 
-- [ ] 5.1 Sync approved spec to permanent store: copy `openspec/changes/condition-expiry-removal/specs/combat-condition-expiry/spec.md` → `openspec/specs/combat-condition-expiry/spec.md`
-- [ ] 5.2 Archive the change: run `/opsx:archive` (or `openspec archive change condition-expiry-removal`)
-- [ ] 5.3 Delete local feature branch: `git branch -d fix/condition-expiry-removal`
+- [x] 5.1 Sync approved spec to permanent store: copy `openspec/changes/condition-expiry-removal/specs/combat-condition-expiry/spec.md` → `openspec/specs/combat-condition-expiry/spec.md`
+- [x] 5.2 Archive the change: run `/opsx:archive` (or `openspec archive change condition-expiry-removal`)
+- [x] 5.3 Delete local feature branch: `git branch -d fix/condition-expiry-removal`
