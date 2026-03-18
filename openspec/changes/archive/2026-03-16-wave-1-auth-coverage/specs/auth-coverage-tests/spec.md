@@ -51,11 +51,11 @@ The system SHALL have comprehensive integration tests for user registration, cov
 
 #### Scenario: Reject registration with duplicate email
 - **WHEN** a test POSTs to `/api/auth/register` with an email already in the database
-- **THEN** response status is 409 (conflict), user is not created, error message references duplicate email
+- **THEN** response status is 409 (conflict), user is not created, response error code/enum indicates duplicate email
 
 #### Scenario: Reject registration with invalid email format
 - **WHEN** a test POSTs to `/api/auth/register` with malformed email (e.g., "not-an-email")
-- **THEN** response status is 400, user is not created, error message explains invalid format
+- **THEN** response status is 400, user is not created, response error code/enum indicates invalid format
 
 #### Scenario: Reject registration with weak password
 - **WHEN** a test POSTs to `/api/auth/register` with password failing requirements (too short, no uppercase, etc.)
