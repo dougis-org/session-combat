@@ -1,10 +1,16 @@
-import { startTestServer, TestServer } from "@/tests/integration/helpers/server";
 import {
+  startTestServer,
+  TestServer,
+} from "@/tests/integration/helpers/server";
+import {
+  apiCall,
   createTestEmail,
   registerUser,
   loginUser,
   assertSuccessResponse,
   assertErrorResponse,
+  extractAuthCookie,
+  parseJsonResponse,
   VALID_PASSWORD,
   INVALID_EMAILS,
 } from "@/tests/integration/auth.test.helpers";
@@ -38,6 +44,24 @@ describe("POST /api/auth/login - Integration Tests", () => {
 
     expect(data.userId).toBeDefined();
     expect(data.email).toBe(email);
+
+    const cookie = extractAuthCookie(response);
+    expect(cookie).toBeTruthy();
+    expect(cookie).toContain("auth-token=");
+
+    // Ensure the issued cookie can be used for authenticated requests
+    const meResponse = await apiCall(baseUrl, "/api/auth/me", {
+      method: "GET",
+      cookie,
+    });
+    const meData = await parseJsonResponse<{
+      authenticated: boolean;
+      userId: string;
+      email: string;
+    }>(meResponse);
+
+    expect(meData.authenticated).toBe(true);
+    expect(meData.email).toBe(email);
   });
 
   it("should return 401 for authentication failures", async () => {

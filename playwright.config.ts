@@ -9,22 +9,23 @@ process.env.MONGODB_DB = e2eDbName;
 export default defineConfig({
   testDir: "./tests/e2e",
   globalSetup: "./tests/e2e/global.setup.ts",
-  /* Test data is isolated per test namespace so workers can run safely. */
-  fullyParallel: true,
+  globalTeardown: "./tests/e2e/global.teardown.ts",
+  /* Test data is isolated per test namespace, but parallelism can cause flaky behavior in this repo. */
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI: 2 retries for better flakiness tolerance */
   retries: process.env.CI ? 2 : 0,
-  /* Default to Playwright worker auto-detection locally and 1 worker in CI. */
+  /* Default to 1 worker to keep the test environment stable. Override with REGRESSION_WORKERS for local experimentation. */
   workers: (() => {
     const value = process.env.REGRESSION_WORKERS;
-    if (!value) return process.env.CI ? 1 : undefined;
+    if (!value) return 1;
     const parsed = Number.parseInt(value, 10);
     if (!Number.isFinite(parsed) || parsed < 1) {
       console.warn(
-        `Invalid REGRESSION_WORKERS="${value}"; falling back to ${process.env.CI ? 1 : "Playwright default"}`,
+        `Invalid REGRESSION_WORKERS="${value}"; falling back to 1`,
       );
-      return process.env.CI ? 1 : undefined;
+      return 1;
     }
     return parsed;
   })(),

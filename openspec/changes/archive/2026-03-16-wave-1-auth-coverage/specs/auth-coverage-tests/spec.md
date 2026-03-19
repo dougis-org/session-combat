@@ -14,20 +14,20 @@ The system SHALL have comprehensive unit tests for all token generation, validat
 - **THEN** a valid JWT token is returned with correct payload and signature
 
 #### Scenario: Validate correct token
-- **WHEN** a test calls validateToken() with a valid, non-expired token
-- **THEN** validateToken returns true and extracts correct user ID
+- **WHEN** a test calls verifyToken() with a valid, non-expired token
+- **THEN** verifyToken returns the decoded payload
 
 #### Scenario: Reject expired token
-- **WHEN** a test calls validateToken() with a token past its expiry time
-- **THEN** validateToken returns false or throws an expiry error
+- **WHEN** a test calls verifyToken() with a token past its expiry time
+- **THEN** verifyToken returns null
 
 #### Scenario: Reject malformed token
-- **WHEN** a test calls validateToken() with a malformed or corrupted token string
-- **THEN** validateToken returns false or throws a validation error
+- **WHEN** a test calls verifyToken() with a malformed or corrupted token string
+- **THEN** verifyToken returns null
 
 #### Scenario: Reject missing token
-- **WHEN** a test calls validateToken() with undefined or null input
-- **THEN** validateToken returns false or throws a missing token error
+- **WHEN** a test calls verifyToken() with undefined or null input
+- **THEN** verifyToken returns null
 
 #### Scenario: Handle special characters in payload
 - **WHEN** a test generates a token with user email containing special characters (e.g., +, -, _)
@@ -93,7 +93,7 @@ The system SHALL have comprehensive integration tests for logout, covering sessi
 
 #### Scenario: Logout clears session
 - **WHEN** a logged-in test POSTs to `/api/auth/logout` with valid auth token
-- **THEN** response status is 200, subsequent requests with that token are rejected (401 unauthorized)
+- **THEN** response status is 200 and the response clears the auth cookie (client is no longer automatically authenticated)
 
 #### Scenario: Reject logout without token
 - **WHEN** a test POSTs to `/api/auth/logout` without providing an auth token

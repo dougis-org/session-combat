@@ -54,8 +54,6 @@ export const VALID_PASSWORDS = [
   "ValidPassword789!",
 ];
 
-
-
 // ============================================================================
 // Client Functions
 // ============================================================================
@@ -81,7 +79,7 @@ export async function apiCall(
     body?: unknown;
     cookie?: string;
     headers?: Record<string, string>;
-  } = {}
+  } = {},
 ) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -111,7 +109,7 @@ export async function parseJsonResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get("content-type");
   if (!contentType?.includes("application/json")) {
     throw new Error(
-      `Expected JSON response, got ${contentType}. Body: ${await response.text()}`
+      `Expected JSON response, got ${contentType}. Body: ${await response.text()}`,
     );
   }
   return response.json() as Promise<T>;
@@ -128,7 +126,7 @@ export async function parseJsonResponse<T>(response: Response): Promise<T> {
 export async function registerUser(
   baseUrl: string,
   email: string = createTestEmail(),
-  password: string = VALID_PASSWORD
+  password: string = VALID_PASSWORD,
 ) {
   return apiCall(baseUrl, "/api/auth/register", {
     body: { email, password },
@@ -142,7 +140,7 @@ export async function registerUser(
 export async function loginUser(
   baseUrl: string,
   email: string,
-  password: string = VALID_PASSWORD
+  password: string = VALID_PASSWORD,
 ) {
   return apiCall(baseUrl, "/api/auth/login", {
     body: { email, password },
@@ -156,7 +154,7 @@ export async function loginUser(
 export async function registerAndLogin(
   baseUrl: string,
   email: string = createTestEmail(),
-  password: string = VALID_PASSWORD
+  password: string = VALID_PASSWORD,
 ) {
   const registerResponse = await registerUser(baseUrl, email, password);
   const loginResponse = await loginUser(baseUrl, email, password);
@@ -167,10 +165,7 @@ export async function registerAndLogin(
  * Logout the user
  * Returns the API response for assertion
  */
-export async function logoutUser(
-  baseUrl: string,
-  cookie?: string
-) {
+export async function logoutUser(baseUrl: string, cookie?: string) {
   return apiCall(baseUrl, "/api/auth/logout", {
     cookie,
   });
@@ -185,12 +180,24 @@ export async function logoutUser(
  * Handles both array and single cookie formats
  */
 export function extractAuthCookie(response: Response): string | null {
-  const setCookie = response.headers.get("set-cookie");
-  if (!setCookie) return null;
+  const rawHeaders = (response.headers as any).raw?.();
+  const setCookieHeaders: string[] | undefined = rawHeaders?.["set-cookie"];
 
-  // Handle multiple cookies separated by comma (raw Set-Cookie may have multiple)
-  const cookies = setCookie.split(",");
-  return cookies.map((cookie) => cookie.split(";")[0].trim()).join("; ");
+  const cookies = Array.isArray(setCookieHeaders)
+    ? setCookieHeaders
+    : response.headers.get("set-cookie")
+    ? [response.headers.get("set-cookie")!]
+    : [];
+
+  // Find the auth-token cookie value specifically (avoid splitting on commas inside Expires)
+  for (const cookie of cookies) {
+    const match = cookie.match(/(^|;\s*)auth-token=[^;]+/i);
+    if (match) {
+      return match[0].trim();
+    }
+  }
+
+  return null;
 }
 
 // ============================================================================
@@ -203,12 +210,12 @@ export function extractAuthCookie(response: Response): string | null {
  */
 export async function assertSuccessResponse<T>(
   response: Response,
-  expectedStatus: number = 200
+  expectedStatus: number = 200,
 ): Promise<T> {
   if (response.status !== expectedStatus) {
     const body = await response.text();
     throw new Error(
-      `Expected status ${expectedStatus}, got ${response.status}. Body: ${body}`
+      `Expected status ${expectedStatus}, got ${response.status}. Body: ${body}`,
     );
   }
   return parseJsonResponse<T>(response);
@@ -218,27 +225,29 @@ export async function assertSuccessResponse<T>(
  * Assert error response - checks status and optionally validates error content
  * Combines status check + JSON parsing + optional error field assertion
  */
-export async function assertErrorResponse<T extends { error?: string } = { error?: string }>(
+export async function assertErrorResponse<
+  T extends { error?: string } = { error?: string },
+>(
   response: Response,
   expectedStatus: number,
-  options: { errorContains?: string } = {}
+  options: { errorContains?: string } = {},
 ): Promise<T> {
   if (response.status !== expectedStatus) {
     const body = await response.text();
     throw new Error(
-      `Expected status ${expectedStatus}, got ${response.status}. Body: ${body}`
+      `Expected status ${expectedStatus}, got ${response.status}. Body: ${body}`,
     );
   }
   const data = await parseJsonResponse<T>(response);
-  
+
   if (options.errorContains && data.error) {
     if (!data.error.includes(options.errorContains)) {
       throw new Error(
-        `Expected error to contain "${options.errorContains}", got: "${data.error}"`
+        `Expected error to contain "${options.errorContains}", got: "${data.error}"`,
       );
     }
   }
-  
+
   return data;
 }
 
@@ -248,11 +257,11 @@ export async function assertErrorResponse<T extends { error?: string } = { error
  */
 export function assertResponseStatus(
   response: Response,
-  expectedStatus: number
+  expectedStatus: number,
 ): void {
   if (response.status !== expectedStatus) {
     throw new Error(
-      `Expected status ${expectedStatus}, got ${response.status}`
+      `Expected status ${expectedStatus}, got ${response.status}`,
     );
   }
 }
@@ -267,7 +276,7 @@ export function assertResponseStatus(
  */
 export function createTestUser(
   prefix: string = "user",
-  password: string = VALID_PASSWORD
+  password: string = VALID_PASSWORD,
 ) {
   return {
     email: createTestEmail(prefix),
@@ -289,14 +298,14 @@ export function createTestUser(
 export async function testSuccessfulAuthFlow<T extends Record<string, any>>(
   response: Response,
   expectedStatus: number,
-  requiredFields: (keyof T)[]
+  requiredFields: (keyof T)[],
 ): Promise<T> {
   const data = await assertSuccessResponse<T>(response, expectedStatus);
-  
+
   for (const field of requiredFields) {
     expect(data[field]).toBeDefined();
   }
-  
+
   return data;
 }
 
@@ -307,10 +316,13 @@ export async function testSuccessfulAuthFlow<T extends Record<string, any>>(
 export async function testErrorAuthFlow(
   response: Response,
   expectedStatus: number,
-  expectedErrorFragment?: string
+  expectedErrorFragment?: string,
 ): Promise<void> {
-  const data = await assertErrorResponse<{ error: string }>(response, expectedStatus);
-  
+  const data = await assertErrorResponse<{ error: string }>(
+    response,
+    expectedStatus,
+  );
+
   if (expectedErrorFragment && data.error) {
     expect(data.error).toContain(expectedErrorFragment);
   }
@@ -332,14 +344,18 @@ export interface AuthTestCase {
  */
 export async function runLoginScenarios(
   baseUrl: string,
-  scenarios: AuthTestCase[]
+  scenarios: AuthTestCase[],
 ): Promise<void> {
   for (const scenario of scenarios) {
     if (scenario.shouldRegisterFirst) {
       await registerUser(baseUrl, scenario.email, scenario.password);
     }
-    
-    const response = await loginUser(baseUrl, scenario.email, scenario.password);
+
+    const response = await loginUser(
+      baseUrl,
+      scenario.email,
+      scenario.password,
+    );
     expect(response.status).toBeGreaterThanOrEqual(200);
   }
 }
@@ -349,10 +365,14 @@ export async function runLoginScenarios(
  */
 export async function runRegisterScenarios(
   baseUrl: string,
-  scenarios: AuthTestCase[]
+  scenarios: AuthTestCase[],
 ): Promise<void> {
   for (const scenario of scenarios) {
-    const response = await registerUser(baseUrl, scenario.email, scenario.password);
+    const response = await registerUser(
+      baseUrl,
+      scenario.email,
+      scenario.password,
+    );
     expect(response.status).toBeGreaterThanOrEqual(200);
   }
 }

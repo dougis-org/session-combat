@@ -34,19 +34,39 @@ describe("POST /api/auth/register - Integration Tests", () => {
   it("should register new user with valid email and password", async () => {
     const email = createTestEmail("newuser");
     const response = await registerUser(baseUrl, email, VALID_PASSWORD);
-    const data = await assertSuccessResponse<{ userId: string; email: string }>(response, 201);
+    const data = await assertSuccessResponse<{ userId: string; email: string }>(
+      response,
+      201,
+    );
 
     expect(data.userId).toBeDefined();
     expect(data.email).toBe(email);
+
     const cookie = extractAuthCookie(response);
-    expect(cookie).toBeDefined();
+    expect(cookie).toBeTruthy();
+    expect(cookie).toContain("auth-token=");
+
+    // Verify the user is persisted with a hashed password (not plaintext)
+    const { getDatabase } = await import("@/lib/db");
+    const db = await getDatabase();
+    const user = await db.collection("users").findOne({ email });
+
+    expect(user).not.toBeNull();
+    expect(user?.passwordHash).toBeDefined();
+    expect(user?.passwordHash).not.toBe(VALID_PASSWORD);
+    // bcrypt hashes should start with $2a$ / $2b$ / $2y$
+    expect(user?.passwordHash).toMatch(/^\$2[aby]\$/);
   });
 
   it("should return 409 when email already exists", async () => {
     const email = createTestEmail("existing");
     await registerUser(baseUrl, email, VALID_PASSWORD);
-    
-    const response = await registerUser(baseUrl, email, "DifferentPassword123!");
+
+    const response = await registerUser(
+      baseUrl,
+      email,
+      "DifferentPassword123!",
+    );
     await assertErrorResponse(response, 409);
   });
 
@@ -62,7 +82,7 @@ describe("POST /api/auth/register - Integration Tests", () => {
       const response = await registerUser(
         baseUrl,
         createTestEmail("weak-test"),
-        password
+        password,
       );
       await assertErrorResponse(response, 400);
     }
@@ -87,7 +107,10 @@ describe("POST /api/auth/register - Integration Tests", () => {
 
     for (const email of specialEmails) {
       const response = await registerUser(baseUrl, email, VALID_PASSWORD);
-      const data = await assertSuccessResponse<{ email: string }>(response, 201);
+      const data = await assertSuccessResponse<{ email: string }>(
+        response,
+        201,
+      );
       expect(data.email).toBe(email);
     }
   });
@@ -100,7 +123,7 @@ describe("POST /api/auth/register - Integration Tests", () => {
     ];
 
     const responses = await Promise.all(
-      users.map((user) => registerUser(baseUrl, user.email, user.password))
+      users.map((user) => registerUser(baseUrl, user.email, user.password)),
     );
 
     responses.forEach((response) => {

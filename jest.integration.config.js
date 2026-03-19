@@ -11,6 +11,7 @@ module.exports = {
     "monsters.integration.test.ts",
   ],
   testTimeout: 120000,
+  forceExit: true, // Prevent hanging from open HTTP/DB handles after tests complete
   maxWorkers: 1, // Run tests sequentially to avoid port conflicts
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   moduleNameMapper: {

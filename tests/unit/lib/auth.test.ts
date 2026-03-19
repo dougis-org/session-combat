@@ -82,6 +82,14 @@ describe("lib/auth.ts - Unit Tests", () => {
       expect(verified?.email).toBe(payload.email);
     });
 
+    it("should return null for expired token", () => {
+      const payload: AuthPayload = TEST_PAYLOADS.valid;
+      const secret = process.env.JWT_SECRET || "dev-secret-key-change-in-production";
+      const expiredToken = jwt.sign(payload, secret, { expiresIn: "-1s" });
+
+      expect(verifyToken(expiredToken)).toBeNull();
+    });
+
     it.each(MALFORMED_TOKENS)(
       "should return null for malformed token: %s",
       (token) => {
