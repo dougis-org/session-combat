@@ -31,12 +31,12 @@
 
 - [x] 5.1 Re-run the affected unit and integration suites with coverage and confirm that the new totals reflect exercised code rather than denominator-only changes.
 - [x] 5.2 Run `npm run lint`, `npm run build`, `npm run test:unit`, and `npm run test:integration`, and record the resulting coverage delta for the milestone.
-- [ ] 5.3 If CI, review comments, or security findings block progress, stop scope expansion, fix the blocker, and revalidate the last known-good coverage baseline before continuing.
+- [x] 5.3 If CI, review comments, or security findings block progress, stop scope expansion, fix the blocker, and revalidate the last known-good coverage baseline before continuing.
 
 ## 6. PR and Merge
 
 - [x] 6.1 Prepare a PR that references GitHub issue `#72` and summarizes the verified baseline, the modules covered in this milestone, the measured coverage delta, and any denominator decisions.
-- [ ] 6.2 Resolve CI failures, review comments, and security findings before requesting final approval; do not merge while any blocking issue remains open.
+- [x] 6.2 Resolve CI failures, review comments, and security findings before requesting final approval; do not merge while any blocking issue remains open.
 - [ ] 6.3 Enable auto-merge only after required approvals are present and all required checks are green.
 
 ## 7. Post-Merge
