@@ -9,7 +9,7 @@ async function globalSetup() {
       .start();
     global.__MONGOCONTAINER__ = mongoContainer;
 
-    const mongoUri = `mongodb://localhost:${mongoContainer.getMappedPort(27017)}/?directConnection=true`;
+    const mongoUri = `mongodb://${mongoContainer.getHost()}:${mongoContainer.getMappedPort(27017)}/?directConnection=true`;
     process.env.MONGODB_URI = mongoUri;
   }
 

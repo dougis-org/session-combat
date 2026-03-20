@@ -180,8 +180,8 @@ export async function logoutUser(baseUrl: string, cookie?: string) {
  * Handles both array and single cookie formats
  */
 export function extractAuthCookie(response: Response): string | null {
-  const rawHeaders = (response.headers as any).raw?.();
-  const setCookieHeaders: string[] | undefined = rawHeaders?.["set-cookie"];
+  const setCookieHeaders: string[] | undefined =
+    response.headers.raw()["set-cookie"];
 
   const cookies = Array.isArray(setCookieHeaders)
     ? setCookieHeaders
