@@ -52,7 +52,7 @@ describe("POST /api/auth/login - Integration Tests", () => {
     // Ensure the issued cookie can be used for authenticated requests
     const meResponse = await apiCall(baseUrl, "/api/auth/me", {
       method: "GET",
-      cookie,
+      cookie: cookie ?? undefined,
     });
     const meData = await parseJsonResponse<{
       authenticated: boolean;

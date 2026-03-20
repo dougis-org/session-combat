@@ -116,10 +116,8 @@ export default defineConfig({
   webServer: {
     command: "npm run dev",
     url: "http://localhost:3000",
-    env: {
-      ...process.env,
-      MONGODB_DB: e2eDbName,
-    },
+    // No explicit env — process inherits parent env, including MONGODB_DB (set on line 4)
+    // and MONGODB_URI (set by globalSetup before the webServer is launched).
     reuseExistingServer: true,
     timeout: 120 * 1000,
   },

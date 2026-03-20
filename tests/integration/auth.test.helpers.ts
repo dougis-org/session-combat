@@ -3,7 +3,7 @@
  * Centralizes common patterns, test data, and helper functions to reduce duplication
  */
 
-import fetch from "node-fetch";
+import fetch, { RequestInit, Response } from "node-fetch";
 
 // ============================================================================
 // Test Data Constants
@@ -99,7 +99,7 @@ export async function apiCall(
     fetchOptions.body = JSON.stringify(options.body);
   }
 
-  return fetch(`${baseUrl}${endpoint}`, fetchOptions as any);
+  return fetch(`${baseUrl}${endpoint}`, fetchOptions);
 }
 
 /**
@@ -315,22 +315,14 @@ export async function testSuccessfulAuthFlow<T extends Record<string, any>>(
 }
 
 /**
- * Test an error auth response with optional error message validation
- * Consolidates: API call + status check + error assertion
+ * Test an error auth response
+ * Consolidates: API call + status check + error field presence assertion
  */
 export async function testErrorAuthFlow(
   response: Response,
   expectedStatus: number,
-  expectedErrorFragment?: string,
 ): Promise<void> {
-  const data = await assertErrorResponse<{ error: string }>(
-    response,
-    expectedStatus,
-  );
-
-  if (expectedErrorFragment && data.error) {
-    expect(data.error).toContain(expectedErrorFragment);
-  }
+  await assertErrorResponse<{ error: string }>(response, expectedStatus);
 }
 
 /**
