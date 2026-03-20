@@ -21,11 +21,11 @@
 
 ## 4. Wave 2 Application and Component Coverage
 
-- [ ] 4.1 Write failing tests first for the highest-value client and page flows that remain near 0% coverage, prioritizing encounter, monster, and combat-related logic over low-risk files.
-- [ ] 4.2 Extract or isolate test seams in large UI files only where necessary to keep tests deterministic and maintainable.
-- [ ] 4.3 Add targeted tests for shared React components and hooks that sit on critical flows, including auth-protected rendering, storage-backed behavior, and combat-related forms or modals.
-- [ ] 4.4 Prioritize high-value application logic and component test harnesses once Wave 1 fundamentals are in place.
-- [ ] 4.5 Evaluate whether selected E2E scenarios need instrumentation follow-up, but do not treat non-instrumented Playwright jobs as coverage contributors.
+- [x] 4.1 Write failing tests first for the highest-value client and page flows that remain near 0% coverage, prioritizing encounter, monster, and combat-related logic over low-risk files.
+- [x] 4.2 Extract or isolate test seams in large UI files only where necessary to keep tests deterministic and maintainable.
+- [x] 4.3 Add targeted tests for shared React components and hooks that sit on critical flows, including auth-protected rendering, storage-backed behavior, and combat-related forms or modals.
+- [x] 4.4 Prioritize high-value application logic and component test harnesses once Wave 1 fundamentals are in place.
+- [x] 4.5 Evaluate whether selected E2E scenarios need instrumentation follow-up, but do not treat non-instrumented Playwright jobs as coverage contributors.
 
 ## 5. Validation
 
