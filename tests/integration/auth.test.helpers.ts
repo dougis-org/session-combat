@@ -240,7 +240,12 @@ export async function assertErrorResponse<
   }
   const data = await parseJsonResponse<T>(response);
 
-  if (options.errorContains && data.error) {
+  if (options.errorContains) {
+    if (!data.error) {
+      throw new Error(
+        `Expected response to have an "error" field containing "${options.errorContains}", but "error" was absent`,
+      );
+    }
     if (!data.error.includes(options.errorContains)) {
       throw new Error(
         `Expected error to contain "${options.errorContains}", got: "${data.error}"`,
@@ -356,7 +361,7 @@ export async function runLoginScenarios(
       scenario.email,
       scenario.password,
     );
-    expect(response.status).toBeGreaterThanOrEqual(200);
+    expect(response.ok).toBe(true);
   }
 }
 
@@ -373,6 +378,6 @@ export async function runRegisterScenarios(
       scenario.email,
       scenario.password,
     );
-    expect(response.status).toBeGreaterThanOrEqual(200);
+    expect(response.ok).toBe(true);
   }
 }

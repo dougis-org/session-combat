@@ -89,11 +89,15 @@ The system SHALL have comprehensive integration tests for user login, covering s
 - **THEN** authenticated request succeeds and returns user data
 
 ### Requirement: Integration test coverage for POST /api/auth/logout route
-The system SHALL have comprehensive integration tests for logout, covering session clearing and token invalidation.
+The system SHALL have comprehensive integration tests for logout, covering session clearing and token rejection. Because the implementation uses stateless JWTs (no server-side session store), logout clears the auth cookie on the client but cannot revoke the token itself — a second request with the same unexpired token will still pass `verifyAuth`.
 
 #### Scenario: Logout clears session
 - **WHEN** a logged-in test POSTs to `/api/auth/logout` with valid auth token
 - **THEN** response status is 200 and the response clears the auth cookie (client is no longer automatically authenticated)
+
+#### Scenario: Logout is idempotent for stateless JWTs
+- **WHEN** a test POSTs to `/api/auth/logout` twice with the same unexpired token
+- **THEN** both responses return 200 (the token is structurally valid; no server-side session exists to invalidate)
 
 #### Scenario: Reject logout without token
 - **WHEN** a test POSTs to `/api/auth/logout` without providing an auth token
