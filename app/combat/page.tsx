@@ -7,8 +7,9 @@ import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
+import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
+import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
 
 function CombatContent() {
@@ -25,6 +26,8 @@ function CombatContent() {
   const [showQuickEntryType, setShowQuickEntryType] = useState<'player' | 'monster' | null>(null);
   const [showCombatantModal, setShowCombatantModal] = useState(false);
   const [setupCombatants, setSetupCombatants] = useState<CombatantState[]>([]);
+  const [parties, setParties] = useState<Party[]>([]);
+  const [selectedPartyId, setSelectedPartyId] = useState<string | null>(null);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [selectedDetailCombatantId, setSelectedDetailCombatantId] = useState<string | null>(null);
   const [detailPosition, setDetailPosition] = useState<{top: number, left: number} | null>(null);
@@ -42,14 +45,15 @@ function CombatContent() {
         setLoading(true);
         setLoadingTemplates(true);
         setError(null);
-        const [encountersRes, charactersRes, combatRes, monstersRes] = await Promise.all([
+        const [encountersRes, charactersRes, combatRes, monstersRes, partiesRes] = await Promise.all([
           fetch('/api/encounters'),
           fetch('/api/characters'),
           fetch('/api/combat'),
           fetch('/api/monsters'),
+          fetch('/api/parties'),
         ]);
 
-        if (!encountersRes.ok || !charactersRes.ok || !combatRes.ok || !monstersRes.ok) {
+        if (!encountersRes.ok || !charactersRes.ok || !combatRes.ok || !monstersRes.ok || !partiesRes.ok) {
           throw new Error('Failed to load data');
         }
 
@@ -57,11 +61,13 @@ function CombatContent() {
         const charactersData = await charactersRes.json();
         const combatData = await combatRes.json();
         const monstersData = await monstersRes.json();
+        const partiesData = await partiesRes.json();
 
         setEncounters(encountersData || []);
         setCharacters(charactersData || []);
         setMonsterTemplates(monstersData || []);
         setCombatState(combatData || null);
+        setParties(partiesData || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
       } finally {
@@ -136,6 +142,10 @@ function CombatContent() {
 
   const removeCombatantFromSetup = (id: string) => {
     setSetupCombatants(prev => prev.filter(c => c.id !== id));
+  };
+
+  const selectParty = (partyId: string | null) => {
+    setSelectedPartyId(partyId);
   };
 
   const addCombatantToActiveSession = (combatant: CombatantState) => {
@@ -281,8 +291,10 @@ function CombatContent() {
     // Combine setup combatants with characters from library
     const combatants: CombatantState[] = [...setupCombatants];
 
-    // Add characters
-    characters.forEach(character => {
+    // Add characters: only party members if a party is selected, otherwise all characters
+    const charactersToAdd = resolveCharactersForCombat(selectedPartyId, parties, characters, setupCombatants);
+
+    charactersToAdd.forEach(character => {
       const dexterity = character.abilityScores?.dexterity || 10;
       const dexModifier = Math.floor((dexterity - 10) / 2);
       combatants.push({
@@ -358,6 +370,7 @@ function CombatContent() {
     if (confirm('Are you sure you want to end combat?')) {
       saveCombatState(null);
       setSetupCombatants([]);
+      setSelectedPartyId(null);
     }
   };
 
@@ -597,8 +610,24 @@ function CombatContent() {
                 </div>
 
                 <div className="mb-4">
+                  <label className="block text-sm mb-2">Select Party (Optional)</label>
+                  <select
+                    value={selectedPartyId ?? ''}
+                    onChange={(e) => selectParty(e.target.value || null)}
+                    className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
+                  >
+                    <option value="">No party (all characters)</option>
+                    {parties.map(party => (
+                      <option key={party.id} value={party.id}>
+                        {party.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="mb-4">
                   <p className="text-gray-400 text-xs">
-                    Characters: {characters.length} | 
+                    Characters: {resolveCharactersForCombat(selectedPartyId, parties, characters, setupCombatants).length} |
                     Monsters: {selectedEncounterId ? encounters.find(e => e.id === selectedEncounterId)?.monsters.length || 0 : 0}
                   </p>
                 </div>
