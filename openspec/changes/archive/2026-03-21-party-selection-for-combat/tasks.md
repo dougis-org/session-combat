@@ -32,21 +32,20 @@
 - [x] 6.2 Run `npm run build` — confirm TypeScript compilation succeeds
 - [x] 6.3 Run `npm run test:unit -- --testPathPattern=tests/unit/lib/partySelection.test.ts` — all unit tests pass
 - [x] 6.4 Run full test suite `npm test` — no regressions
-- [ ] 6.5 Manual smoke test: select party → start combat → verify only party characters present
-- [ ] 6.6 Manual smoke test: no party selected → start combat → verify all characters present
-- [ ] 6.7 Manual smoke test: character manually added + same character in party → verify no duplicate in combat
-
+- [x] 6.5 Manual smoke test: select party → start combat → verify only party characters present
+- [x] 6.6 Manual smoke test: no party selected → start combat → verify all characters present
+- [x] 6.7 Manual smoke test: character manually added + same character in party → verify no duplicate in combat
 
 ## 7. PR and Merge
 
 - [x] 7.1 Push branch and open PR against `main`; reference issue #30 in description
-- [ ] 7.2 Confirm CI passes (lint, build, tests)
-- [ ] 7.3 Resolve any review comments before merge
-- [ ] 7.4 Enable auto-merge or merge once approved
+- [x] 7.2 Confirm CI passes (lint, build, tests)
+- [x] 7.3 Resolve any review comments before merge
+- [x] 7.4 Enable auto-merge or merge once approved
 
 ## 8. Post-Merge
 
-- [ ] 8.1 Run `/opsx:archive party-selection-for-combat` to archive the change
-- [ ] 8.2 Sync approved spec to `openspec/specs/party-selection-for-combat/spec.md`
-- [ ] 8.3 Delete local feature branch; confirm remote branch cleaned up
-- [ ] 8.4 Close GitHub issue #30
+- [x] 8.1 Run `/opsx:archive party-selection-for-combat` to archive the change
+- [x] 8.2 Sync approved spec to `openspec/specs/party-selection-for-combat/spec.md`
+- [x] 8.3 Delete local feature branch; confirm remote branch cleaned up
+- [x] 8.4 Close GitHub issue #30
