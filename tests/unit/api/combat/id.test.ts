@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { GET, PUT, DELETE } from "@/app/api/combat/[id]/route";
 import { requireAuth } from "@/lib/middleware";
 import { getDatabase } from "@/lib/db";
@@ -7,6 +6,9 @@ import {
   mockUnauthorized,
   mockDbCollection,
   makeRouteRequest,
+  itReturns401WithParams,
+  itReturns404WithParams,
+  itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
@@ -32,19 +34,15 @@ const makeRequest = (method: string, body?: unknown) =>
 describe("GET /api/combat/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await GET(makeRequest("GET"), { params });
-    expect(response.status).toBe(401);
-  });
+  itReturns401WithParams(GET, () => makeRequest("GET"), params, mockedRequireAuth);
 
-  it("returns 404 when combat state not found", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) });
-
-    const response = await GET(makeRequest("GET"), { params });
-    expect(response.status).toBe(404);
-  });
+  itReturns404WithParams(
+    GET,
+    () => makeRequest("GET"),
+    params,
+    () => mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) }),
+    mockedRequireAuth
+  );
 
   it("returns combat state when found", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -56,34 +54,29 @@ describe("GET /api/combat/[id]", () => {
     expect(body.id).toBe(COMBAT_ID);
   });
 
-  it("returns 500 on database error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection(mockedGetDatabase, {
+  itReturns500WithParams(
+    GET,
+    () => makeRequest("GET"),
+    params,
+    () => mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockRejectedValue(new Error("DB error")),
-    });
-    const response = await GET(makeRequest("GET"), { params });
-    expect(response.status).toBe(500);
-  });
+    }),
+    mockedRequireAuth
+  );
 });
 
 describe("PUT /api/combat/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await PUT(makeRequest("PUT", {}), { params });
-    expect(response.status).toBe(401);
-  });
+  itReturns401WithParams(PUT, () => makeRequest("PUT", {}), params, mockedRequireAuth);
 
-  it("returns 404 when combat state not found", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) });
-
-    const response = await PUT(makeRequest("PUT", { currentRound: 2 }), {
-      params,
-    });
-    expect(response.status).toBe(404);
-  });
+  itReturns404WithParams(
+    PUT,
+    () => makeRequest("PUT", { currentRound: 2 }),
+    params,
+    () => mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) }),
+    mockedRequireAuth
+  );
 
   it("updates combat state and returns 200", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -105,32 +98,29 @@ describe("PUT /api/combat/[id]", () => {
     expect(updateOne).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 500 on database error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection(mockedGetDatabase, {
+  itReturns500WithParams(
+    PUT,
+    () => makeRequest("PUT", {}),
+    params,
+    () => mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockRejectedValue(new Error("DB error")),
-    });
-    const response = await PUT(makeRequest("PUT", {}), { params });
-    expect(response.status).toBe(500);
-  });
+    }),
+    mockedRequireAuth
+  );
 });
 
 describe("DELETE /api/combat/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await DELETE(makeRequest("DELETE"), { params });
-    expect(response.status).toBe(401);
-  });
+  itReturns401WithParams(DELETE, () => makeRequest("DELETE"), params, mockedRequireAuth);
 
-  it("returns 404 when combat state not found", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) });
-
-    const response = await DELETE(makeRequest("DELETE"), { params });
-    expect(response.status).toBe(404);
-  });
+  itReturns404WithParams(
+    DELETE,
+    () => makeRequest("DELETE"),
+    params,
+    () => mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) }),
+    mockedRequireAuth
+  );
 
   it("deletes combat state and returns 200", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -146,12 +136,13 @@ describe("DELETE /api/combat/[id]", () => {
     expect(deleteOne).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 500 on database error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection(mockedGetDatabase, {
+  itReturns500WithParams(
+    DELETE,
+    () => makeRequest("DELETE"),
+    params,
+    () => mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockRejectedValue(new Error("DB error")),
-    });
-    const response = await DELETE(makeRequest("DELETE"), { params });
-    expect(response.status).toBe(500);
-  });
+    }),
+    mockedRequireAuth
+  );
 });

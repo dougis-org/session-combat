@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/combat/route";
 import { requireAuth } from "@/lib/middleware";
 import { getDatabase } from "@/lib/db";
@@ -7,6 +6,8 @@ import {
   mockUnauthorized,
   mockDbCollection,
   makeRouteRequest,
+  itReturns401,
+  itReturns500,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
@@ -22,11 +23,7 @@ const makeRequest = (body?: unknown) =>
 describe("GET /api/combat", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await GET(makeRequest());
-    expect(response.status).toBe(401);
-  });
+  itReturns401(GET, () => makeRequest(), mockedRequireAuth);
 
   it("returns null when no combat state exists", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -49,25 +46,20 @@ describe("GET /api/combat", () => {
     expect(body.id).toBe("cs-1");
   });
 
-  it("returns 500 on database error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection(mockedGetDatabase, {
+  itReturns500(
+    GET,
+    () => makeRequest(),
+    () => mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockRejectedValue(new Error("DB error")),
-    });
-
-    const response = await GET(makeRequest());
-    expect(response.status).toBe(500);
-  });
+    }),
+    mockedRequireAuth
+  );
 });
 
 describe("POST /api/combat", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await POST(makeRequest({ combatants: [] }));
-    expect(response.status).toBe(401);
-  });
+  itReturns401(POST, () => makeRequest({ combatants: [] }), mockedRequireAuth);
 
   it("creates new combat state and returns 201", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -87,13 +79,12 @@ describe("POST /api/combat", () => {
     expect(updateOne).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 500 on database error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection(mockedGetDatabase, {
+  itReturns500(
+    POST,
+    () => makeRequest({ combatants: [] }),
+    () => mockDbCollection(mockedGetDatabase, {
       updateOne: jest.fn().mockRejectedValue(new Error("DB error")),
-    });
-
-    const response = await POST(makeRequest({ combatants: [] }));
-    expect(response.status).toBe(500);
-  });
+    }),
+    mockedRequireAuth
+  );
 });

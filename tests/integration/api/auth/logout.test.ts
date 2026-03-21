@@ -1,7 +1,6 @@
 import {
-  startTestServer,
+  setupTestServer,
   registerAndGetCookie,
-  TestServer,
 } from "@/tests/integration/helpers/server";
 import {
   createTestEmail,
@@ -14,23 +13,13 @@ import {
  * Consolidated test patterns to minimize duplication
  */
 describe("POST /api/auth/logout - Integration Tests", () => {
-  let server: TestServer;
-  let baseUrl: string;
-
-  beforeAll(async () => {
-    server = await startTestServer();
-    baseUrl = server.baseUrl;
-  }, 120000);
-
-  afterAll(async () => {
-    await server.cleanup();
-  }, 30000);
+  const ctx = setupTestServer();
 
   it("should clear auth cookie and succeed with valid session", async () => {
     const email = createTestEmail("user");
-    const cookie = await registerAndGetCookie(baseUrl, email, VALID_PASSWORD);
+    const cookie = await registerAndGetCookie(ctx.baseUrl, email, VALID_PASSWORD);
 
-    const response = await logoutUser(baseUrl, cookie);
+    const response = await logoutUser(ctx.baseUrl, cookie);
     expect(response.status).toBe(200);
 
     // Check that auth cookie is cleared
@@ -41,28 +30,28 @@ describe("POST /api/auth/logout - Integration Tests", () => {
 
   it("should reject logout without token or with invalid tokens", async () => {
     // No session - should return 401
-    let response = await logoutUser(baseUrl);
+    let response = await logoutUser(ctx.baseUrl);
     expect(response.status).toBe(401);
 
     // Invalid token - should return 401
-    response = await logoutUser(baseUrl, "auth-token=invalid-token-xyz");
+    response = await logoutUser(ctx.baseUrl, "auth-token=invalid-token-xyz");
     expect(response.status).toBe(401);
 
     // Empty cookie value - should return 401
-    response = await logoutUser(baseUrl, "auth-token=");
+    response = await logoutUser(ctx.baseUrl, "auth-token=");
     expect(response.status).toBe(401);
   });
 
   it("should allow repeated logout with same token (idempotent)", async () => {
     const email = createTestEmail("user");
-    const cookie = await registerAndGetCookie(baseUrl, email, VALID_PASSWORD);
+    const cookie = await registerAndGetCookie(ctx.baseUrl, email, VALID_PASSWORD);
 
-    const response1 = await logoutUser(baseUrl, cookie);
+    const response1 = await logoutUser(ctx.baseUrl, cookie);
     expect(response1.status).toBe(200);
 
     // Second logout with same token should also succeed (idempotent)
     // since the JWT token is still valid (hasn't expired)
-    const response2 = await logoutUser(baseUrl, cookie);
+    const response2 = await logoutUser(ctx.baseUrl, cookie);
     expect(response2.status).toBe(200);
   });
 });

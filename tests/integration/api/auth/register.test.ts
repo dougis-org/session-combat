@@ -1,7 +1,4 @@
-import {
-  startTestServer,
-  TestServer,
-} from "@/tests/integration/helpers/server";
+import { setupTestServer } from "@/tests/integration/helpers/server";
 import {
   createTestEmail,
   createTestUser,
@@ -19,21 +16,11 @@ import {
  * Consolidated test patterns to minimize duplication
  */
 describe("POST /api/auth/register - Integration Tests", () => {
-  let server: TestServer;
-  let baseUrl: string;
-
-  beforeAll(async () => {
-    server = await startTestServer();
-    baseUrl = server.baseUrl;
-  }, 120000);
-
-  afterAll(async () => {
-    await server.cleanup();
-  }, 30000);
+  const ctx = setupTestServer();
 
   it("should register new user with valid email and password", async () => {
     const email = createTestEmail("newuser");
-    const response = await registerUser(baseUrl, email, VALID_PASSWORD);
+    const response = await registerUser(ctx.baseUrl, email, VALID_PASSWORD);
     const data = await assertSuccessResponse<{ userId: string; email: string }>(
       response,
       201,
@@ -63,10 +50,10 @@ describe("POST /api/auth/register - Integration Tests", () => {
 
   it("should return 409 when email already exists", async () => {
     const email = createTestEmail("existing");
-    await registerUser(baseUrl, email, VALID_PASSWORD);
+    await registerUser(ctx.baseUrl, email, VALID_PASSWORD);
 
     const response = await registerUser(
-      baseUrl,
+      ctx.baseUrl,
       email,
       "DifferentPassword123!",
     );
@@ -75,7 +62,7 @@ describe("POST /api/auth/register - Integration Tests", () => {
 
   it("should reject all invalid email formats", async () => {
     for (const email of INVALID_EMAILS) {
-      const response = await registerUser(baseUrl, email, VALID_PASSWORD);
+      const response = await registerUser(ctx.baseUrl, email, VALID_PASSWORD);
       await assertErrorResponse(response, 400);
     }
   });
@@ -83,7 +70,7 @@ describe("POST /api/auth/register - Integration Tests", () => {
   it("should reject all weak passwords", async () => {
     for (const password of WEAK_PASSWORDS) {
       const response = await registerUser(
-        baseUrl,
+        ctx.baseUrl,
         createTestEmail("weak-test"),
         password,
       );
@@ -93,11 +80,11 @@ describe("POST /api/auth/register - Integration Tests", () => {
 
   it("should reject missing email and password fields", async () => {
     // Missing email
-    let response = await registerUser(baseUrl, "", VALID_PASSWORD);
+    let response = await registerUser(ctx.baseUrl, "", VALID_PASSWORD);
     expect(response.status).toBe(400);
 
     // Missing password
-    response = await registerUser(baseUrl, createTestEmail("no-password"), "");
+    response = await registerUser(ctx.baseUrl, createTestEmail("no-password"), "");
     expect(response.status).toBe(400);
   });
 
@@ -109,7 +96,7 @@ describe("POST /api/auth/register - Integration Tests", () => {
     ];
 
     for (const email of specialEmails) {
-      const response = await registerUser(baseUrl, email, VALID_PASSWORD);
+      const response = await registerUser(ctx.baseUrl, email, VALID_PASSWORD);
       const data = await assertSuccessResponse<{ email: string }>(
         response,
         201,
@@ -126,7 +113,7 @@ describe("POST /api/auth/register - Integration Tests", () => {
     ];
 
     const responses = await Promise.all(
-      users.map((user) => registerUser(baseUrl, user.email, user.password)),
+      users.map((user) => registerUser(ctx.baseUrl, user.email, user.password)),
     );
 
     responses.forEach((response) => {

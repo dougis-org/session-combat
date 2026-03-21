@@ -102,6 +102,30 @@ export async function startTestServer(): Promise<TestServer> {
 }
 
 /**
+ * Register Jest beforeAll/afterAll hooks to start and stop a test server.
+ * Returns a context object whose properties are populated before any test runs.
+ *
+ * Usage:
+ *   const ctx = setupTestServer();
+ *   it("...", async () => { await fetch(ctx.baseUrl + "/api/..."); });
+ */
+export function setupTestServer(): { baseUrl: string; cleanup: () => Promise<void> } {
+  const ctx = {} as { baseUrl: string; cleanup: () => Promise<void> };
+
+  beforeAll(async () => {
+    const server = await startTestServer();
+    ctx.baseUrl = server.baseUrl;
+    ctx.cleanup = server.cleanup;
+  }, 120000);
+
+  afterAll(async () => {
+    await ctx.cleanup?.();
+  }, 30000);
+
+  return ctx;
+}
+
+/**
  * Register a user via the API and return the session cookie string
  * extracted from the Set-Cookie header, ready to pass as a Cookie header
  * in subsequent requests.
