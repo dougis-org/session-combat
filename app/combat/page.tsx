@@ -9,7 +9,7 @@ import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
-import { expandPartyToCharacters, resolveCharactersForCombat } from '@/lib/utils/partySelection';
+import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
 
 function CombatContent() {
@@ -627,12 +627,7 @@ function CombatContent() {
 
                 <div className="mb-4">
                   <p className="text-gray-400 text-xs">
-                    Characters: {selectedPartyId
-                      ? (() => {
-                          const party = parties.find(p => p.id === selectedPartyId);
-                          return party ? expandPartyToCharacters(party, characters).length : 0;
-                        })()
-                      : characters.length} |
+                    Characters: {resolveCharactersForCombat(selectedPartyId, parties, characters, setupCombatants).length} |
                     Monsters: {selectedEncounterId ? encounters.find(e => e.id === selectedEncounterId)?.monsters.length || 0 : 0}
                   </p>
                 </div>
