@@ -295,7 +295,7 @@ function CombatContent() {
     const charactersToAdd = selectedPartyId
       ? (() => {
           const party = parties.find(p => p.id === selectedPartyId);
-          if (!party) return characters;
+          if (!party) return [];
           const partyChars = expandPartyToCharacters(party, characters);
           const duplicates = findDuplicatePartyCharacters(partyChars, setupCombatants);
           const duplicateIds = new Set(duplicates.map(d => d.id));

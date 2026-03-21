@@ -6,7 +6,7 @@
 ## 2. Utility Module
 
 - [x] 2.1 Create `lib/utils/partySelection.ts` — port `expandPartyToCharacters()` and `findDuplicatePartyCharacters()` from `feature/30-select-party-for-combat`; tighten types to use `Party` and `Character` from `lib/types` instead of `any`
-- [x] 2.2 Write unit tests in `lib/utils/__tests__/partySelection.test.ts` covering: happy path expansion, empty party, character not found, duplicate detection (with `character-${id}` prefix), and no-overlap case
+- [x] 2.2 Write unit tests in `tests/unit/lib/partySelection.test.ts` covering: happy path expansion, empty party, character not found, duplicate detection (with `character-${id}` prefix), no-overlap case, suffixed IDs, and false-positive prevention
 
 ## 3. Combat Page — State & Data
 
@@ -30,7 +30,7 @@
 
 - [x] 6.1 Run `npm run lint` — confirm zero new errors
 - [x] 6.2 Run `npm run build` — confirm TypeScript compilation succeeds
-- [x] 6.3 Run `npm test -- lib/utils/__tests__/partySelection.test.ts` — all unit tests pass
+- [x] 6.3 Run `npm run test:unit -- --testPathPattern=tests/unit/lib/partySelection.test.ts` — all unit tests pass
 - [x] 6.4 Run full test suite `npm test` — no regressions
 - [ ] 6.5 Manual smoke test: select party → start combat → verify only party characters present
 - [ ] 6.6 Manual smoke test: no party selected → start combat → verify all characters present
@@ -39,7 +39,7 @@
 
 ## 7. PR and Merge
 
-- [ ] 7.1 Push branch and open PR against `main`; reference issue #30 in description
+- [x] 7.1 Push branch and open PR against `main`; reference issue #30 in description
 - [ ] 7.2 Confirm CI passes (lint, build, tests)
 - [ ] 7.3 Resolve any review comments before merge
 - [ ] 7.4 Enable auto-merge or merge once approved

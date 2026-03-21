@@ -89,4 +89,21 @@ describe('findDuplicatePartyCharacters', () => {
     const result = findDuplicatePartyCharacters(partyChars, []);
     expect(result).toEqual([]);
   });
+
+  it('detects characters when setupCombatant IDs have a uuid suffix', () => {
+    const setupCombatants = [
+      { id: 'character-char-1-123e4567-e89b-12d3-a456-426614174000' },
+      { id: 'monster-goblin-0' },
+    ];
+    const result = findDuplicatePartyCharacters(partyChars, setupCombatants);
+    expect(result.map(c => c.id)).toEqual(['char-1']);
+  });
+
+  it('does not false-positive on unrelated IDs that contain the character id as a substring', () => {
+    const setupCombatants = [
+      { id: 'monster-char-1-variant' }, // not a character- prefix, should not match
+    ];
+    const result = findDuplicatePartyCharacters(partyChars, setupCombatants);
+    expect(result).toEqual([]);
+  });
 });

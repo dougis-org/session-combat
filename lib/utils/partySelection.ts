@@ -3,20 +3,24 @@ import { Party, Character } from '@/lib/types';
 /**
  * Returns the Character objects that belong to the given party.
  * Characters not found in the library are silently excluded.
+ * Uses a Map for O(M+N) lookup instead of O(M*N).
  */
 export function expandPartyToCharacters(
   party: Party,
   characters: Character[]
 ): Character[] {
   if (!party || !Array.isArray(party.characterIds)) return [];
+  const characterMap = new Map(characters.map(c => [c.id, c]));
   return party.characterIds
-    .map(id => characters.find(c => c.id === id))
+    .map(id => characterMap.get(id))
     .filter((c): c is Character => c !== undefined);
 }
 
 /**
  * Returns party characters that are already represented in setupCombatants.
- * Matches on substring because setupCombatants use IDs like `character-${char.id}`.
+ * Matches by `character-${pc.id}` prefix to avoid false positives from
+ * unrelated IDs that happen to contain the same substring. Handles both
+ * plain `character-${id}` and suffixed `character-${id}-${uuid}` forms.
  */
 export function findDuplicatePartyCharacters(
   partyCharacters: Character[],
@@ -24,6 +28,6 @@ export function findDuplicatePartyCharacters(
 ): Character[] {
   const setupIds = setupCombatants.map(s => s.id);
   return partyCharacters.filter(pc =>
-    setupIds.some(id => id.includes(pc.id))
+    setupIds.some(id => id.startsWith(`character-${pc.id}`))
   );
 }
