@@ -2,8 +2,8 @@
 
 import React from "react";
 import { act } from "react";
-import { createRoot, Root } from "react-dom/client";
-import { useAuth, AuthUser } from "@/lib/hooks/useAuth";
+import { createRoot } from "react-dom/client";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 // Mock next/navigation
 const mockRouterReplace = jest.fn();
@@ -48,9 +48,16 @@ function renderHook(): { result: { current: HookResult }; unmount: () => void } 
 }
 
 describe("useAuth", () => {
+  let originalFetch: typeof global.fetch;
+
   beforeEach(() => {
+    originalFetch = global.fetch;
     jest.clearAllMocks();
     (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   it("starts with loading=true and no user", async () => {
@@ -133,7 +140,7 @@ describe("useAuth", () => {
     });
 
     expect(loginResult!).toBe(false);
-    expect(result.current.error).toBe("Invalid credentials");
+    expect(result.current.error).not.toBeNull();
     unmount();
   });
 

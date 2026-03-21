@@ -16,18 +16,20 @@ describe("rollD20", () => {
 
   it("throws when crypto is unavailable", () => {
     const originalCrypto = global.crypto;
-    Object.defineProperty(global, "crypto", {
-      value: undefined,
-      configurable: true,
-    });
+    try {
+      Object.defineProperty(global, "crypto", {
+        value: undefined,
+        configurable: true,
+      });
 
-    expect(() => rollD20()).toThrow(
-      "Secure random number generation is not available"
-    );
-
-    Object.defineProperty(global, "crypto", {
-      value: originalCrypto,
-      configurable: true,
-    });
+      expect(() => rollD20()).toThrow(
+        "Secure random number generation is not available"
+      );
+    } finally {
+      Object.defineProperty(global, "crypto", {
+        value: originalCrypto,
+        configurable: true,
+      });
+    }
   });
 });
