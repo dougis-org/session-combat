@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/characters/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
+import {
+  MOCK_AUTH,
+  mockUnauthorized,
+  makeRouteRequest,
+} from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
 jest.mock("@/lib/storage", () => ({
@@ -14,24 +19,17 @@ jest.mock("@/lib/storage", () => ({
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 
-const MOCK_AUTH = { userId: "user-123", email: "user@example.com" };
 const MOCK_CHARACTERS = [{ id: "char-1", name: "Thorin", userId: "user-123" }];
 
-function makeRequest(body?: unknown): NextRequest {
-  return new NextRequest("http://localhost/api/characters", {
-    method: body ? "POST" : "GET",
-    headers: { "Content-Type": "application/json", cookie: "auth-token=t" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-}
+const BASE_URL = "http://localhost/api/characters";
+const makeRequest = (body?: unknown) =>
+  makeRouteRequest(BASE_URL, body !== undefined ? "POST" : "GET", body);
 
 describe("GET /api/characters", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await GET(makeRequest());
     expect(response.status).toBe(401);
   });
@@ -60,9 +58,7 @@ describe("POST /api/characters", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await POST(makeRequest({ name: "Hero" }));
     expect(response.status).toBe(401);
   });

@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { GET, PUT, DELETE } from "@/app/api/encounters/[id]/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
+import {
+  MOCK_AUTH,
+  mockUnauthorized,
+  makeRouteRequest,
+} from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
 jest.mock("@/lib/storage", () => ({
@@ -15,7 +20,6 @@ jest.mock("@/lib/storage", () => ({
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 
-const MOCK_AUTH = { userId: "user-123", email: "user@example.com" };
 const ENC_ID = "enc-abc";
 const MOCK_ENCOUNTER = {
   id: ENC_ID,
@@ -25,23 +29,15 @@ const MOCK_ENCOUNTER = {
   monsters: [],
 };
 
-function makeRequest(method: string, body?: unknown): NextRequest {
-  return new NextRequest(`http://localhost/api/encounters/${ENC_ID}`, {
-    method,
-    headers: { "Content-Type": "application/json", cookie: "auth-token=t" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-}
-
 const params = Promise.resolve({ id: ENC_ID });
+const makeRequest = (method: string, body?: unknown) =>
+  makeRouteRequest(`http://localhost/api/encounters/${ENC_ID}`, method, body);
 
 describe("GET /api/encounters/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await GET(makeRequest("GET"), { params });
     expect(response.status).toBe(401);
   });
@@ -77,9 +73,7 @@ describe("PUT /api/encounters/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await PUT(makeRequest("PUT", {}), { params });
     expect(response.status).toBe(401);
   });
@@ -134,9 +128,7 @@ describe("DELETE /api/encounters/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await DELETE(makeRequest("DELETE"), { params });
     expect(response.status).toBe(401);
   });

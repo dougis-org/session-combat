@@ -1,7 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/combat/route";
 import { requireAuth } from "@/lib/middleware";
 import { getDatabase } from "@/lib/db";
+import {
+  MOCK_AUTH,
+  mockUnauthorized,
+  mockDbCollection,
+  makeRouteRequest,
+} from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
@@ -9,36 +15,22 @@ jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedGetDatabase = jest.mocked(getDatabase);
 
-const MOCK_AUTH = { userId: "user-123", email: "user@example.com" };
-
-function makeRequest(body?: unknown): NextRequest {
-  return new NextRequest("http://localhost/api/combat", {
-    method: body ? "POST" : "GET",
-    headers: { "Content-Type": "application/json", cookie: "auth-token=t" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-}
-
-function mockDbCollection(methods: Record<string, jest.Mock>) {
-  mockedGetDatabase.mockResolvedValue({
-    collection: jest.fn().mockReturnValue(methods),
-  } as any);
-}
+const BASE_URL = "http://localhost/api/combat";
+const makeRequest = (body?: unknown) =>
+  makeRouteRequest(BASE_URL, body !== undefined ? "POST" : "GET", body);
 
 describe("GET /api/combat", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await GET(makeRequest());
     expect(response.status).toBe(401);
   });
 
   it("returns null when no combat state exists", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection({ findOne: jest.fn().mockResolvedValue(null) });
+    mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) });
 
     const response = await GET(makeRequest());
     expect(response.status).toBe(200);
@@ -49,7 +41,7 @@ describe("GET /api/combat", () => {
   it("returns existing combat state", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const state = { id: "cs-1", userId: "user-123", combatants: [] };
-    mockDbCollection({ findOne: jest.fn().mockResolvedValue(state) });
+    mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(state) });
 
     const response = await GET(makeRequest());
     expect(response.status).toBe(200);
@@ -59,7 +51,7 @@ describe("GET /api/combat", () => {
 
   it("returns 500 on database error", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection({
+    mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockRejectedValue(new Error("DB error")),
     });
 
@@ -72,9 +64,7 @@ describe("POST /api/combat", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await POST(makeRequest({ combatants: [] }));
     expect(response.status).toBe(401);
   });
@@ -82,7 +72,7 @@ describe("POST /api/combat", () => {
   it("creates new combat state and returns 201", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const updateOne = jest.fn().mockResolvedValue({});
-    mockDbCollection({ updateOne });
+    mockDbCollection(mockedGetDatabase, { updateOne });
 
     const response = await POST(
       makeRequest({ encounterId: "enc-1", combatants: [] })
@@ -99,7 +89,7 @@ describe("POST /api/combat", () => {
 
   it("returns 500 on database error", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection({
+    mockDbCollection(mockedGetDatabase, {
       updateOne: jest.fn().mockRejectedValue(new Error("DB error")),
     });
 

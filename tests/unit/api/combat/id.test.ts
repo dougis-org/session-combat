@@ -1,7 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { GET, PUT, DELETE } from "@/app/api/combat/[id]/route";
 import { requireAuth } from "@/lib/middleware";
 import { getDatabase } from "@/lib/db";
+import {
+  MOCK_AUTH,
+  mockUnauthorized,
+  mockDbCollection,
+  makeRouteRequest,
+} from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
@@ -9,7 +15,6 @@ jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedGetDatabase = jest.mocked(getDatabase);
 
-const MOCK_AUTH = { userId: "user-123", email: "user@example.com" };
 const COMBAT_ID = "cs-abc-123";
 const MOCK_STATE = {
   id: COMBAT_ID,
@@ -20,36 +25,22 @@ const MOCK_STATE = {
   isActive: true,
 };
 
-function makeRequest(method: string, body?: unknown): NextRequest {
-  return new NextRequest(`http://localhost/api/combat/${COMBAT_ID}`, {
-    method,
-    headers: { "Content-Type": "application/json", cookie: "auth-token=t" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-}
-
 const params = Promise.resolve({ id: COMBAT_ID });
-
-function mockDbCollection(methods: Record<string, jest.Mock>) {
-  mockedGetDatabase.mockResolvedValue({
-    collection: jest.fn().mockReturnValue(methods),
-  } as any);
-}
+const makeRequest = (method: string, body?: unknown) =>
+  makeRouteRequest(`http://localhost/api/combat/${COMBAT_ID}`, method, body);
 
 describe("GET /api/combat/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await GET(makeRequest("GET"), { params });
     expect(response.status).toBe(401);
   });
 
   it("returns 404 when combat state not found", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection({ findOne: jest.fn().mockResolvedValue(null) });
+    mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) });
 
     const response = await GET(makeRequest("GET"), { params });
     expect(response.status).toBe(404);
@@ -57,7 +48,7 @@ describe("GET /api/combat/[id]", () => {
 
   it("returns combat state when found", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection({ findOne: jest.fn().mockResolvedValue(MOCK_STATE) });
+    mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(MOCK_STATE) });
 
     const response = await GET(makeRequest("GET"), { params });
     expect(response.status).toBe(200);
@@ -67,7 +58,7 @@ describe("GET /api/combat/[id]", () => {
 
   it("returns 500 on database error", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection({
+    mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockRejectedValue(new Error("DB error")),
     });
     const response = await GET(makeRequest("GET"), { params });
@@ -79,16 +70,14 @@ describe("PUT /api/combat/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await PUT(makeRequest("PUT", {}), { params });
     expect(response.status).toBe(401);
   });
 
   it("returns 404 when combat state not found", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection({ findOne: jest.fn().mockResolvedValue(null) });
+    mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) });
 
     const response = await PUT(makeRequest("PUT", { currentRound: 2 }), {
       params,
@@ -99,7 +88,7 @@ describe("PUT /api/combat/[id]", () => {
   it("updates combat state and returns 200", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const updateOne = jest.fn().mockResolvedValue({});
-    mockDbCollection({
+    mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockResolvedValue(MOCK_STATE),
       updateOne,
     });
@@ -118,7 +107,7 @@ describe("PUT /api/combat/[id]", () => {
 
   it("returns 500 on database error", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection({
+    mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockRejectedValue(new Error("DB error")),
     });
     const response = await PUT(makeRequest("PUT", {}), { params });
@@ -130,16 +119,14 @@ describe("DELETE /api/combat/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await DELETE(makeRequest("DELETE"), { params });
     expect(response.status).toBe(401);
   });
 
   it("returns 404 when combat state not found", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection({ findOne: jest.fn().mockResolvedValue(null) });
+    mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) });
 
     const response = await DELETE(makeRequest("DELETE"), { params });
     expect(response.status).toBe(404);
@@ -148,7 +135,7 @@ describe("DELETE /api/combat/[id]", () => {
   it("deletes combat state and returns 200", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const deleteOne = jest.fn().mockResolvedValue({});
-    mockDbCollection({
+    mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockResolvedValue(MOCK_STATE),
       deleteOne,
     });
@@ -161,7 +148,7 @@ describe("DELETE /api/combat/[id]", () => {
 
   it("returns 500 on database error", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockDbCollection({
+    mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockRejectedValue(new Error("DB error")),
     });
     const response = await DELETE(makeRequest("DELETE"), { params });

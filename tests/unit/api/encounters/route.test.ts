@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/encounters/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
+import {
+  MOCK_AUTH,
+  mockUnauthorized,
+  makeRouteRequest,
+} from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
 jest.mock("@/lib/storage", () => ({
@@ -14,26 +19,19 @@ jest.mock("@/lib/storage", () => ({
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 
-const MOCK_AUTH = { userId: "user-123", email: "user@example.com" };
 const MOCK_ENCOUNTERS = [
   { id: "enc-1", userId: "user-123", name: "Goblin Ambush", monsters: [] },
 ];
 
-function makeRequest(body?: unknown): NextRequest {
-  return new NextRequest("http://localhost/api/encounters", {
-    method: body ? "POST" : "GET",
-    headers: { "Content-Type": "application/json", cookie: "auth-token=t" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-}
+const BASE_URL = "http://localhost/api/encounters";
+const makeRequest = (body?: unknown) =>
+  makeRouteRequest(BASE_URL, body !== undefined ? "POST" : "GET", body);
 
 describe("GET /api/encounters", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await GET(makeRequest());
     expect(response.status).toBe(401);
   });
@@ -62,9 +60,7 @@ describe("POST /api/encounters", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    );
+    mockUnauthorized(mockedRequireAuth);
     const response = await POST(makeRequest({ name: "Test" }));
     expect(response.status).toBe(401);
   });

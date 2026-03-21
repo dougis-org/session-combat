@@ -32,27 +32,9 @@ export const INVALID_EMAILS = [
 ];
 
 /**
- * Valid special character emails for testing edge cases
- */
-export const SPECIAL_EMAILS = [
-  "user+test@example.co.uk",
-  "user-name@example.com",
-  "user_name@example.com",
-];
-
-/**
  * Valid strong password for testing
  */
 export const VALID_PASSWORD = "ValidPassword123!";
-
-/**
- * Valid alternative passwords for parallel testing
- */
-export const VALID_PASSWORDS = [
-  "ValidPassword123!",
-  "ValidPassword456!",
-  "ValidPassword789!",
-];
 
 // ============================================================================
 // Client Functions
@@ -292,84 +274,3 @@ export function createTestUser(
 /**
  * Create multiple test users for parallel testing
  */
-// ============================================================================
-// High-Level Test Scenarios - Consolidate Common Patterns
-// ============================================================================
-
-/**
- * Test a successful auth response with required fields
- * Consolidates: API call + status check + JSON parse + field assertions
- */
-export async function testSuccessfulAuthFlow<T extends Record<string, any>>(
-  response: Response,
-  expectedStatus: number,
-  requiredFields: (keyof T)[],
-): Promise<T> {
-  const data = await assertSuccessResponse<T>(response, expectedStatus);
-
-  for (const field of requiredFields) {
-    expect(data[field]).toBeDefined();
-  }
-
-  return data;
-}
-
-/**
- * Test an error auth response
- * Consolidates: API call + status check + error field presence assertion
- */
-export async function testErrorAuthFlow(
-  response: Response,
-  expectedStatus: number,
-): Promise<void> {
-  await assertErrorResponse<{ error: string }>(response, expectedStatus);
-}
-
-/**
- * Create a unique test scenario with setup and execution
- * Parameters for different auth test cases
- */
-export interface AuthTestCase {
-  name: string;
-  email: string;
-  password: string;
-  shouldRegisterFirst?: boolean;
-}
-
-/**
- * Run a batch of login test scenarios with consistent pattern
- */
-export async function runLoginScenarios(
-  baseUrl: string,
-  scenarios: AuthTestCase[],
-): Promise<void> {
-  for (const scenario of scenarios) {
-    if (scenario.shouldRegisterFirst) {
-      await registerUser(baseUrl, scenario.email, scenario.password);
-    }
-
-    const response = await loginUser(
-      baseUrl,
-      scenario.email,
-      scenario.password,
-    );
-    expect(response.ok).toBe(true);
-  }
-}
-
-/**
- * Run a batch of register test scenarios with consistent pattern
- */
-export async function runRegisterScenarios(
-  baseUrl: string,
-  scenarios: AuthTestCase[],
-): Promise<void> {
-  for (const scenario of scenarios) {
-    const response = await registerUser(
-      baseUrl,
-      scenario.email,
-      scenario.password,
-    );
-    expect(response.ok).toBe(true);
-  }
-}
