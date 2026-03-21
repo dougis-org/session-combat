@@ -45,6 +45,8 @@ export function makeRouteRequest(
 // boilerplate in every describe block.
 
 type RouteHandler = (req: NextRequest) => Promise<Response> | Response;
+// Note: params is Promise<...> because Next.js 15 App Router made route params
+// async. Route handlers await params before reading id.
 type ContextHandler = (
   req: NextRequest,
   ctx: { params: Promise<{ id: string }> }
@@ -68,9 +70,10 @@ export function itReturns500(
   handler: RouteHandler,
   makeReq: () => NextRequest,
   setupError: () => void,
-  mockedRequireAuth: jest.Mock
+  mockedRequireAuth: jest.Mock,
+  description = "returns 500 on error"
 ): void {
-  it("returns 500 on error", async () => {
+  it(description, async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     setupError();
     const response = await handler(makeReq());
@@ -98,9 +101,10 @@ export function itReturns404WithParams(
   makeReq: () => NextRequest,
   params: Promise<{ id: string }>,
   setupNotFound: () => void,
-  mockedRequireAuth: jest.Mock
+  mockedRequireAuth: jest.Mock,
+  description = "returns 404 when not found"
 ): void {
-  it("returns 404 when not found", async () => {
+  it(description, async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     setupNotFound();
     const response = await handler(makeReq(), { params });
@@ -114,9 +118,10 @@ export function itReturns500WithParams(
   makeReq: () => NextRequest,
   params: Promise<{ id: string }>,
   setupError: () => void,
-  mockedRequireAuth: jest.Mock
+  mockedRequireAuth: jest.Mock,
+  description = "returns 500 on error"
 ): void {
-  it("returns 500 on error", async () => {
+  it(description, async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     setupError();
     const response = await handler(makeReq(), { params });

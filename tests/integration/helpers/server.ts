@@ -109,17 +109,30 @@ export async function startTestServer(): Promise<TestServer> {
  *   const ctx = setupTestServer();
  *   it("...", async () => { await fetch(ctx.baseUrl + "/api/..."); });
  */
-export function setupTestServer(): { baseUrl: string; cleanup: () => Promise<void> } {
-  const ctx = {} as { baseUrl: string; cleanup: () => Promise<void> };
+export function setupTestServer(): { baseUrl: string } {
+  let baseUrl: string | undefined;
+  let cleanupFn: (() => Promise<void>) | undefined;
+
+  const ctx = {
+    get baseUrl(): string {
+      if (!baseUrl) {
+        throw new Error(
+          "ctx.baseUrl accessed before server initialisation — " +
+            "only use it inside test callbacks that run after beforeAll",
+        );
+      }
+      return baseUrl;
+    },
+  };
 
   beforeAll(async () => {
     const server = await startTestServer();
-    ctx.baseUrl = server.baseUrl;
-    ctx.cleanup = server.cleanup;
+    baseUrl = server.baseUrl;
+    cleanupFn = server.cleanup;
   }, 120000);
 
   afterAll(async () => {
-    await ctx.cleanup?.();
+    await cleanupFn?.();
   }, 30000);
 
   return ctx;

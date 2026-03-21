@@ -3,7 +3,6 @@ import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
   MOCK_AUTH,
-  mockUnauthorized,
   makeRouteRequest,
   itReturns401WithParams,
   itReturns404WithParams,

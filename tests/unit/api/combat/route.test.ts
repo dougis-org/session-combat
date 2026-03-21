@@ -3,7 +3,6 @@ import { requireAuth } from "@/lib/middleware";
 import { getDatabase } from "@/lib/db";
 import {
   MOCK_AUTH,
-  mockUnauthorized,
   mockDbCollection,
   makeRouteRequest,
   itReturns401,
