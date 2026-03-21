@@ -1,11 +1,11 @@
-import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/encounters/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
   MOCK_AUTH,
-  mockUnauthorized,
   makeRouteRequest,
+  itReturns401,
+  itReturns500,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
@@ -30,11 +30,7 @@ const makeRequest = (body?: unknown) =>
 describe("GET /api/encounters", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await GET(makeRequest());
-    expect(response.status).toBe(401);
-  });
+  itReturns401(GET, () => makeRequest(), mockedRequireAuth);
 
   it("returns list of encounters", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -47,23 +43,18 @@ describe("GET /api/encounters", () => {
     expect(body[0].name).toBe("Goblin Ambush");
   });
 
-  it("returns 500 on storage error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error"));
-
-    const response = await GET(makeRequest());
-    expect(response.status).toBe(500);
-  });
+  itReturns500(
+    GET,
+    () => makeRequest(),
+    () => mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error")),
+    mockedRequireAuth
+  );
 });
 
 describe("POST /api/encounters", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await POST(makeRequest({ name: "Test" }));
-    expect(response.status).toBe(401);
-  });
+  itReturns401(POST, () => makeRequest({ name: "Test" }), mockedRequireAuth);
 
   it("returns 400 when name is missing", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -93,11 +84,10 @@ describe("POST /api/encounters", () => {
     expect(mockedStorage.saveEncounter).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 500 on storage error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveEncounter.mockRejectedValue(new Error("Storage error"));
-
-    const response = await POST(makeRequest({ name: "Valid Name" }));
-    expect(response.status).toBe(500);
-  });
+  itReturns500(
+    POST,
+    () => makeRequest({ name: "Valid Name" }),
+    () => mockedStorage.saveEncounter.mockRejectedValue(new Error("Storage error")),
+    mockedRequireAuth
+  );
 });

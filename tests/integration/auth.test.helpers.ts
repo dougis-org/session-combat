@@ -186,6 +186,18 @@ export function extractAuthCookie(response: Response): string | null {
 // Assertion Helpers - Bundle Common Patterns
 // ============================================================================
 
+async function assertStatus(
+  response: Response,
+  expectedStatus: number,
+): Promise<void> {
+  if (response.status !== expectedStatus) {
+    const body = await response.text();
+    throw new Error(
+      `Expected status ${expectedStatus}, got ${response.status}. Body: ${body}`,
+    );
+  }
+}
+
 /**
  * Assert successful response and extract data
  * Used for responses that should succeed (200/201)
@@ -194,12 +206,7 @@ export async function assertSuccessResponse<T>(
   response: Response,
   expectedStatus: number = 200,
 ): Promise<T> {
-  if (response.status !== expectedStatus) {
-    const body = await response.text();
-    throw new Error(
-      `Expected status ${expectedStatus}, got ${response.status}. Body: ${body}`,
-    );
-  }
+  await assertStatus(response, expectedStatus);
   return parseJsonResponse<T>(response);
 }
 
@@ -214,12 +221,7 @@ export async function assertErrorResponse<
   expectedStatus: number,
   options: { errorContains?: string } = {},
 ): Promise<T> {
-  if (response.status !== expectedStatus) {
-    const body = await response.text();
-    throw new Error(
-      `Expected status ${expectedStatus}, got ${response.status}. Body: ${body}`,
-    );
-  }
+  await assertStatus(response, expectedStatus);
   const data = await parseJsonResponse<T>(response);
 
   if (options.errorContains) {

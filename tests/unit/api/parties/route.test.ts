@@ -1,11 +1,11 @@
-import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/parties/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
   MOCK_AUTH,
-  mockUnauthorized,
   makeRouteRequest,
+  itReturns401,
+  itReturns500,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
@@ -30,11 +30,7 @@ const makeRequest = (body?: unknown) =>
 describe("GET /api/parties", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await GET(makeRequest());
-    expect(response.status).toBe(401);
-  });
+  itReturns401(GET, () => makeRequest(), mockedRequireAuth);
 
   it("returns list of parties", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -47,23 +43,18 @@ describe("GET /api/parties", () => {
     expect(body[0].name).toBe("Fellowship");
   });
 
-  it("returns 500 on storage error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadParties.mockRejectedValue(new Error("Storage error"));
-
-    const response = await GET(makeRequest());
-    expect(response.status).toBe(500);
-  });
+  itReturns500(
+    GET,
+    () => makeRequest(),
+    () => mockedStorage.loadParties.mockRejectedValue(new Error("Storage error")),
+    mockedRequireAuth
+  );
 });
 
 describe("POST /api/parties", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await POST(makeRequest({ name: "Crew" }));
-    expect(response.status).toBe(401);
-  });
+  itReturns401(POST, () => makeRequest({ name: "Crew" }), mockedRequireAuth);
 
   it("returns 400 when name is missing", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -97,11 +88,10 @@ describe("POST /api/parties", () => {
     expect(mockedStorage.saveParty).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 500 on storage error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveParty.mockRejectedValue(new Error("Storage error"));
-
-    const response = await POST(makeRequest({ name: "Doomed Party" }));
-    expect(response.status).toBe(500);
-  });
+  itReturns500(
+    POST,
+    () => makeRequest({ name: "Doomed Party" }),
+    () => mockedStorage.saveParty.mockRejectedValue(new Error("Storage error")),
+    mockedRequireAuth
+  );
 });

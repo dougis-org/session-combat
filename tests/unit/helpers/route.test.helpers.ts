@@ -38,3 +38,93 @@ export function makeRouteRequest(
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 }
+
+// ─── Test factory helpers ────────────────────────────────────────────────────
+// These call it() synchronously, so Jest registers them in the enclosing
+// describe() block. Use them to avoid repeating the identical 401/404/500
+// boilerplate in every describe block.
+
+type RouteHandler = (req: NextRequest) => Promise<Response> | Response;
+// Note: params is Promise<...> because Next.js 15 App Router made route params
+// async. Route handlers await params before reading id.
+type ContextHandler = (
+  req: NextRequest,
+  ctx: { params: Promise<{ id: string }> }
+) => Promise<Response> | Response;
+
+/** Register: returns 401 when requireAuth returns Unauthorized (no route params) */
+export function itReturns401(
+  handler: RouteHandler,
+  makeReq: () => NextRequest,
+  mockedRequireAuth: jest.Mock
+): void {
+  it("returns 401 when not authenticated", async () => {
+    mockUnauthorized(mockedRequireAuth);
+    const response = await handler(makeReq());
+    expect(response.status).toBe(401);
+  });
+}
+
+/** Register: returns 500 when setupError configures the mock to throw (no route params) */
+export function itReturns500(
+  handler: RouteHandler,
+  makeReq: () => NextRequest,
+  setupError: () => void,
+  mockedRequireAuth: jest.Mock,
+  description = "returns 500 on error"
+): void {
+  it(description, async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    setupError();
+    const response = await handler(makeReq());
+    expect(response.status).toBe(500);
+  });
+}
+
+/** Register: returns 401 when requireAuth returns Unauthorized (with route params) */
+export function itReturns401WithParams(
+  handler: ContextHandler,
+  makeReq: () => NextRequest,
+  params: Promise<{ id: string }>,
+  mockedRequireAuth: jest.Mock
+): void {
+  it("returns 401 when not authenticated", async () => {
+    mockUnauthorized(mockedRequireAuth);
+    const response = await handler(makeReq(), { params });
+    expect(response.status).toBe(401);
+  });
+}
+
+/** Register: returns 404 when setupNotFound configures mock to return no result (with route params) */
+export function itReturns404WithParams(
+  handler: ContextHandler,
+  makeReq: () => NextRequest,
+  params: Promise<{ id: string }>,
+  setupNotFound: () => void,
+  mockedRequireAuth: jest.Mock,
+  description = "returns 404 when not found"
+): void {
+  it(description, async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    setupNotFound();
+    const response = await handler(makeReq(), { params });
+    expect(response.status).toBe(404);
+  });
+}
+
+/** Register: returns 500 when setupError configures the mock to throw (with route params) */
+export function itReturns500WithParams(
+  handler: ContextHandler,
+  makeReq: () => NextRequest,
+  params: Promise<{ id: string }>,
+  setupError: () => void,
+  mockedRequireAuth: jest.Mock,
+  description = "returns 500 on error"
+): void {
+  it(description, async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    setupError();
+    const response = await handler(makeReq(), { params });
+    expect(response.status).toBe(500);
+  });
+}
