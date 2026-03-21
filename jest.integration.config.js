@@ -11,6 +11,9 @@ module.exports = {
     "monsters.integration.test.ts",
   ],
   testTimeout: 120000,
+  // forceExit is NOT set here — use `npm run test:ci` (which passes --forceExit) for
+  // pre-commit hooks and CI. Direct `npm run test:integration` runs without force-exit so
+  // leaked handles surface during development.
   maxWorkers: 1, // Run tests sequentially to avoid port conflicts
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   moduleNameMapper: {

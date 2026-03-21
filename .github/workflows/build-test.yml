@@ -75,7 +75,7 @@ jobs:
           MONGODB_DB: session-combat-test
 
       - name: Run integration tests with coverage
-        run: npm run test:integration -- --coverage
+        run: npm run test:integration -- --coverage --forceExit
 
       - name: Upload integration coverage to Codacy
         if: always()

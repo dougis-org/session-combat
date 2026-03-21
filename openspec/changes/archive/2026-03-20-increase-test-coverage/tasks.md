@@ -43,5 +43,5 @@
 
 - [x] 7.1 Update any user-facing or contributor-facing docs affected by the new coverage workflow or milestone guidance.
 - [x] 7.2 Sync approved spec deltas back into `openspec/specs/` during the archive workflow and verify the archived change captures the final accepted behavior.
-- [ ] 7.3 Archive the change through the OpenSpec workflow once implementation is merged.
+- [x] 7.3 Archive the change through the OpenSpec workflow once implementation is merged.
 - [ ] 7.4 Prune merged local branches after the archive step is complete.

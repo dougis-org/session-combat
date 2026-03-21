@@ -1,9 +1,16 @@
+import { MongoDBContainer, StartedMongoDBContainer } from "@testcontainers/mongodb";
+
 async function globalSetup() {
   if (!process.env.MONGODB_URI) {
-    throw new Error(
-      "MONGODB_URI is not set. E2E tests require a running MongoDB instance.\n" +
-      "Set MONGODB_URI before running: MONGODB_URI=mongodb://localhost:27017 npm run test:regression",
-    );
+    // Start a disposable MongoDB container for E2E tests when no external URI is provided.
+    console.log("MONGODB_URI not set; starting a MongoDB testcontainer for E2E tests...");
+    const mongoContainer: StartedMongoDBContainer = await new MongoDBContainer("mongo:8")
+      .withExposedPorts(27017)
+      .start();
+    global.__MONGOCONTAINER__ = mongoContainer;
+
+    const mongoUri = `mongodb://${mongoContainer.getHost()}:${mongoContainer.getMappedPort(27017)}/?directConnection=true`;
+    process.env.MONGODB_URI = mongoUri;
   }
 
   if (!process.env.MONGODB_DB) {

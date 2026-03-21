@@ -1,5 +1,5 @@
-import { StartedMongoDbContainer } from '@testcontainers/mongodb';
+import { StartedMongoDBContainer } from '@testcontainers/mongodb';
 
 declare global {
-  var __MONGOCONTAINER__: StartedMongoDbContainer | undefined;
+  var __MONGOCONTAINER__: StartedMongoDBContainer | undefined;
 }

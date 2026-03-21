@@ -17,9 +17,20 @@ export async function fillRegistrationForm(
   email: string,
   password: string,
 ): Promise<void> {
-  await page.fill("#email", email);
-  await page.fill("#password", password);
-  await page.fill("#confirmPassword", password);
+  const emailField = page.locator("#email");
+  await expect(emailField).toBeVisible({ timeout: 15000 });
+  await expect(emailField).toBeEnabled({ timeout: 15000 });
+  await emailField.fill(email);
+
+  const passwordField = page.locator("#password");
+  await expect(passwordField).toBeVisible({ timeout: 15000 });
+  await expect(passwordField).toBeEnabled({ timeout: 15000 });
+  await passwordField.fill(password);
+
+  const confirmPasswordField = page.locator("#confirmPassword");
+  await expect(confirmPasswordField).toBeVisible({ timeout: 15000 });
+  await expect(confirmPasswordField).toBeEnabled({ timeout: 15000 });
+  await confirmPasswordField.fill(password);
 }
 
 /**
