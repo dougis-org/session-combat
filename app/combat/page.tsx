@@ -9,7 +9,7 @@ import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
-import { expandPartyToCharacters, findDuplicatePartyCharacters } from '@/lib/utils/partySelection';
+import { expandPartyToCharacters, resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
 
 function CombatContent() {
@@ -292,16 +292,7 @@ function CombatContent() {
     const combatants: CombatantState[] = [...setupCombatants];
 
     // Add characters: only party members if a party is selected, otherwise all characters
-    const charactersToAdd = selectedPartyId
-      ? (() => {
-          const party = parties.find(p => p.id === selectedPartyId);
-          if (!party) return [];
-          const partyChars = expandPartyToCharacters(party, characters);
-          const duplicates = findDuplicatePartyCharacters(partyChars, setupCombatants);
-          const duplicateIds = new Set(duplicates.map(d => d.id));
-          return partyChars.filter(c => !duplicateIds.has(c.id));
-        })()
-      : characters;
+    const charactersToAdd = resolveCharactersForCombat(selectedPartyId, parties, characters, setupCombatants);
 
     charactersToAdd.forEach(character => {
       const dexterity = character.abilityScores?.dexterity || 10;

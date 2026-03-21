@@ -17,6 +17,27 @@ export function expandPartyToCharacters(
 }
 
 /**
+ * Resolves which characters should be added to combat based on party selection.
+ * - No party selected: returns all library characters (existing behavior)
+ * - Party selected but not found: returns [] (unknown party ID treated as empty)
+ * - Party selected: returns party characters minus any already in setupCombatants
+ */
+export function resolveCharactersForCombat(
+  selectedPartyId: string | null,
+  parties: Party[],
+  characters: Character[],
+  setupCombatants: Array<{ id: string }>
+): Character[] {
+  if (!selectedPartyId) return characters;
+  const party = parties.find(p => p.id === selectedPartyId);
+  if (!party) return [];
+  const partyChars = expandPartyToCharacters(party, characters);
+  const duplicates = findDuplicatePartyCharacters(partyChars, setupCombatants);
+  const duplicateIds = new Set(duplicates.map(d => d.id));
+  return partyChars.filter(c => !duplicateIds.has(c.id));
+}
+
+/**
  * Returns party characters that are already represented in setupCombatants.
  * Matches by `character-${pc.id}` prefix to avoid false positives from
  * unrelated IDs that happen to contain the same substring. Handles both
