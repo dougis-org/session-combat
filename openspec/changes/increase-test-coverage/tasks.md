@@ -37,11 +37,11 @@
 
 - [x] 6.1 Prepare a PR that references GitHub issue `#72` and summarizes the verified baseline, the modules covered in this milestone, the measured coverage delta, and any denominator decisions.
 - [x] 6.2 Resolve CI failures, review comments, and security findings before requesting final approval; do not merge while any blocking issue remains open.
-- [ ] 6.3 Enable auto-merge only after required approvals are present and all required checks are green.
+- [x] 6.3 Enable auto-merge only after required approvals are present and all required checks are green.
 
 ## 7. Post-Merge
 
-- [ ] 7.1 Update any user-facing or contributor-facing docs affected by the new coverage workflow or milestone guidance.
-- [ ] 7.2 Sync approved spec deltas back into `openspec/specs/` during the archive workflow and verify the archived change captures the final accepted behavior.
+- [x] 7.1 Update any user-facing or contributor-facing docs affected by the new coverage workflow or milestone guidance.
+- [x] 7.2 Sync approved spec deltas back into `openspec/specs/` during the archive workflow and verify the archived change captures the final accepted behavior.
 - [ ] 7.3 Archive the change through the OpenSpec workflow once implementation is merged.
 - [ ] 7.4 Prune merged local branches after the archive step is complete.
