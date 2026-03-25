@@ -1412,7 +1412,7 @@ function CombatantCard({
   const hpTotal = combatant.maxHp + tempHp;
 const hpPercent = hpTotal > 0 ? (combatant.hp / hpTotal) * 100 : 0;
 const tempHpPercent = hpTotal > 0 ? (tempHp / hpTotal) * 100 : 0;
-  const hpColor = (combatant.hp / combatant.maxHp) > 0.5 ? 'bg-green-500' : (combatant.hp / combatant.maxHp) > 0.25 ? 'bg-yellow-500' : 'bg-red-500';
+const hpColor = combatant.maxHp > 0 ? ((combatant.hp / combatant.maxHp) > 0.5 ? 'bg-green-500' : (combatant.hp / combatant.maxHp) > 0.25 ? 'bg-yellow-500' : 'bg-red-500') : 'bg-red-500';
 
   // Background gradient based on combatant type - stronger fade from left to right
   const bgStyle = combatant.type === 'player'
