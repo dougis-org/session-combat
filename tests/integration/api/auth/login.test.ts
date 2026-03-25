@@ -1,4 +1,7 @@
-import { setupTestServer } from "@/tests/integration/helpers/server";
+import {
+  startTestServer,
+  TestServer,
+} from "@/tests/integration/helpers/server";
 import {
   apiCall,
   createTestEmail,
@@ -17,13 +20,23 @@ import {
  * Consolidated test patterns to minimize duplication
  */
 describe("POST /api/auth/login - Integration Tests", () => {
-  const ctx = setupTestServer();
+  let server: TestServer;
+  let baseUrl: string;
+
+  beforeAll(async () => {
+    server = await startTestServer();
+    baseUrl = server.baseUrl;
+  }, 120000);
+
+  afterAll(async () => {
+    await server.cleanup();
+  }, 30000);
 
   it("should login with valid email and password", async () => {
     const email = createTestEmail("user");
-    await registerUser(ctx.baseUrl, email, VALID_PASSWORD);
+    await registerUser(baseUrl, email, VALID_PASSWORD);
 
-    const response = await loginUser(ctx.baseUrl, email, VALID_PASSWORD);
+    const response = await loginUser(baseUrl, email, VALID_PASSWORD);
     const data = await assertSuccessResponse<{
       userId: string;
       email: string;
@@ -37,7 +50,7 @@ describe("POST /api/auth/login - Integration Tests", () => {
     expect(cookie).toContain("auth-token=");
 
     // Ensure the issued cookie can be used for authenticated requests
-    const meResponse = await apiCall(ctx.baseUrl, "/api/auth/me", {
+    const meResponse = await apiCall(baseUrl, "/api/auth/me", {
       method: "GET",
       cookie: cookie ?? undefined,
     });
@@ -54,31 +67,31 @@ describe("POST /api/auth/login - Integration Tests", () => {
   it("should return 401 for authentication failures", async () => {
     // Wrong password
     const email1 = createTestEmail("wrong-password-test");
-    await registerUser(ctx.baseUrl, email1, VALID_PASSWORD);
-    let response = await loginUser(ctx.baseUrl, email1, "WrongPassword456!");
+    await registerUser(baseUrl, email1, VALID_PASSWORD);
+    let response = await loginUser(baseUrl, email1, "WrongPassword456!");
     expect(response.status).toBe(401);
 
     // Non-existent user
     const nonexistentEmail = createTestEmail("nonexistent");
-    response = await loginUser(ctx.baseUrl, nonexistentEmail, VALID_PASSWORD);
+    response = await loginUser(baseUrl, nonexistentEmail, VALID_PASSWORD);
     expect(response.status).toBe(401);
   });
 
   it("should reject all invalid email formats", async () => {
     for (const email of INVALID_EMAILS) {
-      const response = await loginUser(ctx.baseUrl, email, VALID_PASSWORD);
+      const response = await loginUser(baseUrl, email, VALID_PASSWORD);
       await assertErrorResponse(response, 400);
     }
   });
 
   it("should reject missing email and password fields", async () => {
     // Missing email
-    let response = await loginUser(ctx.baseUrl, "", VALID_PASSWORD);
+    let response = await loginUser(baseUrl, "", VALID_PASSWORD);
     expect(response.status).toBe(400);
 
     // Missing password
     const email = createTestEmail("missing-password");
-    response = await loginUser(ctx.baseUrl, email, "");
+    response = await loginUser(baseUrl, email, "");
     expect(response.status).toBe(400);
   });
 });

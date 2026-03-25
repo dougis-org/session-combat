@@ -66,7 +66,7 @@
   `Current: 42  Max: 80  +14 tmp`
   The `+N tmp` label uses blue (`text-blue-400`) to match the bar segment.
 - **Alternatives considered**: A separate "Temp HP" row (more vertical space); showing `42 + 14 tmp / 80` in the main HP label (harder to parse).
-- **Rationale**: Inline suffix is compact and scannable. Blue colouring links it visually to the bar segment.
+- **Rationale**: Inline suffix is compact and scannable. Gold colouring links it visually to the bar segment.
 
 ### D6: Clear on combat end — no explicit action needed
 

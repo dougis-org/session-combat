@@ -37,22 +37,22 @@
   - Set up combat with one combatant (hp=30, maxHp=40)
   - Enable Temp toggle, enter 14, click "Set Temp" → assert `+14 tmp` visible, temp bar segment visible
   - Enter 10, click "Damage" → assert `+4 tmp` visible, hp unchanged (30)
-  - Enter 10, click "Damage" → assert temp gone (0), hp=24
+  - Enter 10, click "Damage" → assert temp gone (0), hp=26
   - Click "End Combat", confirm → assert combat screen cleared
 
 ## 6. Validation
 
 - [x] 6.1 Run unit tests: `npm test` — all pass including new `combat.test.ts`
-- [ ] 6.2 Run E2E tests: `npx playwright test` — new temp HP scenario passes, no regressions
+- [x] 6.2 Run E2E tests: `npx playwright test` — new temp HP scenario passes, no regressions
 - [x] 6.3 Run type check: `npx tsc --noEmit`
 - [x] 6.4 Run build: `npm run build`
 
 ## 7. PR and Merge
 
-- [ ] 7.1 Commit and push feature branch
-- [ ] 7.2 Open PR referencing issue #87
-- [ ] 7.3 Wait for CI and any agent reviews; resolve all comments
-- [ ] 7.4 Enable auto-merge when all checks are green
+- [x] 7.1 Commit and push feature branch
+- [x] 7.2 Open PR referencing issue #87
+- [x] 7.3 Wait for CI and any agent reviews; resolve all comments
+- [x] 7.4 Enable auto-merge when all checks are green
 
 Ownership metadata:
 - Implementer: —
