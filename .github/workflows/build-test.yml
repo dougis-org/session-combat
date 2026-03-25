@@ -194,8 +194,16 @@ jobs:
           if [ -f coverage-e2e/lcov.info ]; then
             ./codacy-coverage-reporter.sh report --partial -r coverage-e2e/lcov.info
           else
-            echo "No coverage report found at coverage-e2e/lcov.info"
+            echo "No coverage report found at coverage-e2e/lcov.info (check GENERATE_SOURCE_MAPS=true on build step and @bgotink/playwright-coverage reporter config)"
           fi
+
+      - name: Upload E2E coverage artifact on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-coverage
+          path: coverage-e2e/
+          retention-days: 7
 
       - name: Upload Playwright HTML report
         if: always()
