@@ -1334,7 +1334,12 @@ function CombatantCard({
   const applySetTemp = () => {
     const amount = parseInt(hpAdjustment) || 0;
     if (amount > 0) {
-      const result = calcSetTempHp(combatant.tempHp ?? 0, amount);
+      const currentTempHp = combatant.tempHp ?? 0;
+      const result = calcSetTempHp(currentTempHp, amount);
+      if (result.tempHp === currentTempHp) {
+        setHpAdjustment('');
+        return;
+      }
       onUpdate({ tempHp: result.tempHp });
       setHpAdjustment('');
     }
