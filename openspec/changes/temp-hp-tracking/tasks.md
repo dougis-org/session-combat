@@ -37,7 +37,7 @@
   - Set up combat with one combatant (hp=30, maxHp=40)
   - Enable Temp toggle, enter 14, click "Set Temp" → assert `+14 tmp` visible, temp bar segment visible
   - Enter 10, click "Damage" → assert `+4 tmp` visible, hp unchanged (30)
-  - Enter 10, click "Damage" → assert temp gone (0), hp=26
+  - Enter 10, click "Damage" → assert temp gone (0), hp=24
   - Click "End Combat", confirm → assert combat screen cleared
 
 ## 6. Validation
