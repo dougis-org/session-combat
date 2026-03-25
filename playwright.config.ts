@@ -1,3 +1,4 @@
+import path from "path";
 import { defineConfig, devices } from "@playwright/test";
 import { defineCoverageReporterConfig } from "@bgotink/playwright-coverage";
 
@@ -38,8 +39,10 @@ export default defineConfig({
     [
       "@bgotink/playwright-coverage",
       defineCoverageReporterConfig({
-        resultDir: "coverage-e2e",
+        resultDir: path.join(__dirname, "coverage-e2e"),
         reports: [["lcovonly", { file: "lcov.info" }]],
+        rewritePath: ({ absolutePath }) =>
+          absolutePath.replace(/\/_N_E\//, "/"),
       }),
     ],
   ],
