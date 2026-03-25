@@ -33,9 +33,9 @@ Unit and integration tests output to `coverage/lcov.info`. Using a distinct path
 
 `next.config.js` will gate `productionBrowserSourceMaps` on `process.env.GENERATE_SOURCE_MAPS === 'true'`. The regression-tests CI job sets this on its build step. No separate build script is needed, and the default (unset) remains source-map-off for all other contexts including `npm run build` locally and the deploy workflow.
 
-### 4. `defineCoverageReporterConfig` wraps the existing `defineConfig`
+### 4. Coverage reporter added via `defineCoverageReporterConfig`
 
-The `@bgotink/playwright-coverage` API requires wrapping the Playwright config. The existing `defineConfig(...)` call becomes the inner argument. The coverage reporter config specifies LCOV format and `outputDirectory: 'coverage-e2e'`. HTML output can be added for local debugging if desired but is not required for CI.
+The `@bgotink/playwright-coverage` API is integrated by adding a coverage reporter entry to the existing Playwright config, using `defineCoverageReporterConfig({ resultDir, reports, rewritePath })`. The reporter is configured to emit LCOV to `resultDir: 'coverage-e2e'` for CI, with additional formats such as `html` optionally enabled for local debugging. `rewritePath` is used to map covered files back to the repository paths so Codacy can associate coverage with the correct sources.
 
 ### 5. No change to `finalize-coverage` job
 
