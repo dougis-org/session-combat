@@ -9,6 +9,7 @@ import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
+import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp } from '@/lib/utils/combat';
 import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
 
@@ -1297,10 +1298,16 @@ function CombatantCard({
   const [conditionDuration, setConditionDuration] = useState('');
   const [targetActionMode, setTargetActionMode] = useState<'damage' | 'condition' | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
+  const [isTempMode, setIsTempMode] = useState(false);
 
   const adjustHp = (amount: number) => {
-    const newHp = Math.max(0, Math.min(combatant.maxHp, combatant.hp + amount));
-    onUpdate({ hp: newHp });
+    if (amount < 0) {
+      const result = calcApplyDamage(combatant.hp, combatant.tempHp ?? 0, -amount);
+      onUpdate({ hp: result.hp, tempHp: result.tempHp });
+    } else {
+      const result = calcApplyHealing(combatant.hp, combatant.maxHp, amount);
+      onUpdate({ hp: result.hp });
+    }
   };
 
   const handleHpAdjustmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1320,6 +1327,15 @@ function CombatantCard({
     const amount = parseInt(hpAdjustment) || 0;
     if (amount > 0) {
       adjustHp(amount);
+      setHpAdjustment('');
+    }
+  };
+
+  const applySetTemp = () => {
+    const amount = parseInt(hpAdjustment) || 0;
+    if (amount > 0) {
+      const result = calcSetTempHp(combatant.tempHp ?? 0, amount);
+      onUpdate({ tempHp: result.tempHp });
       setHpAdjustment('');
     }
   };
@@ -1360,8 +1376,8 @@ function CombatantCard({
 
     const target = allCombatants?.find(c => c.id === selectedTargetId);
     if (target) {
-      const newHp = Math.max(0, target.hp - damage);
-      onUpdateCombatant(selectedTargetId, { hp: newHp });
+      const result = calcApplyDamage(target.hp, target.tempHp ?? 0, damage);
+      onUpdateCombatant(selectedTargetId, { hp: result.hp, tempHp: result.tempHp });
     }
 
     setDamageInput('');
@@ -1392,8 +1408,11 @@ function CombatantCard({
     setTargetActionMode(null);
   };
 
-  const hpPercent = (combatant.hp / combatant.maxHp) * 100;
-  const hpColor = hpPercent > 50 ? 'bg-green-500' : hpPercent > 25 ? 'bg-yellow-500' : 'bg-red-500';
+  const tempHp = combatant.tempHp ?? 0;
+  const hpTotal = combatant.maxHp + tempHp;
+  const hpPercent = (combatant.hp / hpTotal) * 100;
+  const tempHpPercent = (tempHp / hpTotal) * 100;
+  const hpColor = (combatant.hp / combatant.maxHp) > 0.5 ? 'bg-green-500' : (combatant.hp / combatant.maxHp) > 0.25 ? 'bg-yellow-500' : 'bg-red-500';
 
   // Background gradient based on combatant type - stronger fade from left to right
   const bgStyle = combatant.type === 'player'
@@ -1460,7 +1479,7 @@ function CombatantCard({
             </div>
             <span className="text-sm text-gray-400 whitespace-nowrap">Hit Points:</span>
             <span className="text-lg font-bold">
-              Current: <span className={hpColor === 'bg-green-500' ? 'text-green-500' : hpColor === 'bg-yellow-500' ? 'text-yellow-500' : 'text-red-500'}>{combatant.hp}</span> Max: {combatant.maxHp}
+              Current: <span className={hpColor === 'bg-green-500' ? 'text-green-500' : hpColor === 'bg-yellow-500' ? 'text-yellow-500' : 'text-red-500'}>{combatant.hp}</span> Max: {combatant.maxHp}{tempHp > 0 && <span className="text-blue-400"> +{tempHp} tmp</span>}
             </span>
             <input
               type="number"
@@ -1470,7 +1489,7 @@ function CombatantCard({
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
                   if (e.shiftKey) {
-                    applyHeal();
+                    isTempMode ? applySetTemp() : applyHeal();
                   } else {
                     applyDamage();
                   }
@@ -1486,12 +1505,21 @@ function CombatantCard({
               Damage
             </button>
             <button
-              onClick={applyHeal}
-              title="Apply healing (Shift+Enter)"
+              onClick={isTempMode ? applySetTemp : applyHeal}
+              title={isTempMode ? "Set temporary HP" : "Apply healing (Shift+Enter)"}
               className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs"
             >
-              Heal
+              {isTempMode ? 'Set Temp' : 'Heal'}
             </button>
+            <label className="flex items-center gap-1 text-xs text-gray-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isTempMode}
+                onChange={(e) => setIsTempMode(e.target.checked)}
+                className="cursor-pointer"
+              />
+              Temp
+            </label>
             <div className="flex items-center gap-2 ml-auto pr-4">
               <button
                 onClick={() => onSetInitiative?.(combatant.id)}
@@ -1510,8 +1538,11 @@ function CombatantCard({
             </div>
           </div>
 
-          <div className="w-4/5 bg-gray-700 rounded-full h-2">
-            <div className={`${hpColor} h-2 rounded-full transition-all`} data-testid="health-bar" style={{ width: `${hpPercent}%` }} />
+          <div className="w-4/5 bg-gray-700 rounded-full h-2 flex overflow-hidden">
+            <div className={`${hpColor} h-2 transition-all`} data-testid="health-bar" style={{ width: `${hpPercent}%` }} />
+            {tempHp > 0 && (
+              <div className="bg-blue-400 h-2 transition-all" data-testid="temp-hp-bar" style={{ width: `${tempHpPercent}%` }} />
+            )}
           </div>
 
           {combatant.conditions.length > 0 && (

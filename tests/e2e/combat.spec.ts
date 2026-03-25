@@ -245,6 +245,60 @@ test.describe("Combat flows", () => {
   // End-to-end flow
   // ────────────────────────────────────────────────────────────
 
+  // ────────────────────────────────────────────────────────────
+  // Temp HP tracking
+  // ────────────────────────────────────────────────────────────
+
+  test("temp HP absorbs damage correctly and clears on combat end", async ({
+    page,
+  }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+
+    // Set up combat with one custom combatant (hp=30, maxHp=40)
+    await page.goto("/combat");
+    await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
+    await page.getByRole("tab", { name: "Create New" }).click();
+    await page.locator("#custom-name").fill(identity.name("Test Fighter"));
+    await page.locator("#custom-maxhp").fill("40");
+    await page.locator("#custom-hp").fill("30");
+    await page.locator('button[type="submit"]').click();
+    await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
+    await page.locator('[data-testid="start-combat-quick"]').click();
+    await page.waitForSelector('[data-testid="combatants-list"]', { timeout: 15000 });
+
+    // Find the combatant card's HP input — one combatant, one number input
+    const hpInput = page.locator('input[placeholder="0"]').first();
+
+    // Enable Temp mode, enter 14, click "Set Temp"
+    await page.getByLabel("Temp").first().check();
+    await hpInput.fill("14");
+    await page.getByRole("button", { name: "Set Temp" }).first().click();
+
+    // Assert "+14 tmp" visible in HP display and temp HP bar visible
+    await expect(page.getByText("14 tmp", { exact: false })).toBeVisible();
+    await expect(page.locator('[data-testid="temp-hp-bar"]').first()).toBeVisible();
+
+    // Enter 10 damage → 10 absorbed by temp HP (4 remaining), regular HP unchanged at 30
+    await page.getByLabel("Temp").first().uncheck();
+    await hpInput.fill("10");
+    await page.getByRole("button", { name: "Damage" }).first().click();
+    await expect(page.getByText("4 tmp", { exact: false })).toBeVisible();
+    // The HP span text content contains the current hp value
+    await expect(page.getByText(/Current:.*30/).first()).toBeVisible();
+
+    // Enter 10 damage → 4 absorbed, 6 overflow to regular HP (30 - 6 = 24)
+    await hpInput.fill("10");
+    await page.getByRole("button", { name: "Damage" }).first().click();
+    await expect(page.locator('[data-testid="temp-hp-bar"]')).toHaveCount(0);
+    await expect(page.getByText(/Current:.*24/).first()).toBeVisible();
+
+    // End combat — accept the confirm dialog, then assert setup screen returns
+    page.on("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "End Combat" }).click();
+    await expect(page.getByRole("heading", { name: "Start New Combat" })).toBeVisible({ timeout: 10000 });
+  });
+
   test("complete end-to-end flow from registration to combat", async ({
     page,
   }, testInfo) => {

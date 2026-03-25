@@ -370,6 +370,7 @@ export interface CombatantState extends CreatureStats {
   initiative: number;
   initiativeRoll?: InitiativeRoll;
   conditions: StatusCondition[];
+  tempHp?: number;
   notes?: string;
   targetIds?: string[]; // IDs of combatants being attacked
   // Additional metadata for combat display
