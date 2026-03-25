@@ -9,7 +9,7 @@
 ## 3. Playwright Coverage Integration
 
 - [x] 3.1 Update `tests/e2e/fixtures.ts` to import `test` from `@bgotink/playwright-coverage` instead of `@playwright/test`
-- [x] 3.2 Update `playwright.config.ts` to wrap the existing `defineConfig(...)` call with `defineCoverageReporterConfig`, configuring LCOV output to `coverage-e2e/`
+- [x] 3.2 Update `playwright.config.ts` to configure the `@bgotink/playwright-coverage` reporter to write LCOV output to `coverage-e2e/`
 
 ## 4. CI Updates
 
