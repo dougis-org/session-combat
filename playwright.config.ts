@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { defineCoverageReporterConfig } from "@bgotink/playwright-coverage";
 
 const e2eDbName = process.env.MONGODB_DB || "session-combat-e2e";
 process.env.MONGODB_DB = e2eDbName;
@@ -34,6 +35,13 @@ export default defineConfig({
     ["html"],
     ["list"], // Also output list format for CI logs
     ["json", { outputFile: "test-results.json" }],
+    [
+      "@bgotink/playwright-coverage",
+      defineCoverageReporterConfig({
+        resultDir: "coverage-e2e",
+        reports: [["lcovonly", { file: "lcov.info" }]],
+      }),
+    ],
   ],
   /* Timeout settings for better stability */
   timeout: 30000, // 30 seconds per test

@@ -153,6 +153,7 @@ jobs:
         env:
           MONGODB_URI: mongodb://localhost:27017
           MONGODB_DB: session-combat-e2e
+          GENERATE_SOURCE_MAPS: 'true'
 
       - name: Run Playwright regression tests
         run: |
@@ -190,10 +191,10 @@ jobs:
           fi
           curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
           chmod +x codacy-coverage-reporter.sh
-          if [ -f coverage/lcov.info ]; then
-            ./codacy-coverage-reporter.sh report --partial -r coverage/lcov.info
+          if [ -f coverage-e2e/lcov.info ]; then
+            ./codacy-coverage-reporter.sh report --partial -r coverage-e2e/lcov.info
           else
-            echo "No coverage report found at coverage/lcov.info (E2E coverage requires instrumentation - see issue #72)"
+            echo "No coverage report found at coverage-e2e/lcov.info"
           fi
 
       - name: Upload Playwright HTML report
