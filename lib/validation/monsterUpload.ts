@@ -68,6 +68,7 @@ export interface RawMonsterData {
   reactions?: unknown;
   lairActions?: unknown;
   legendaryActions?: unknown;
+  legendaryActionCount?: unknown;
 }
 
 /**
@@ -669,6 +670,7 @@ export function transformMonsterData(
     reactions: (raw.reactions || []) as CreatureAbility[],
     lairActions: (raw.lairActions || []) as CreatureAbility[],
     legendaryActions: (raw.legendaryActions || []) as CreatureAbility[],
+    legendaryActionCount: raw.legendaryActionCount !== undefined ? (raw.legendaryActionCount as number) : undefined,
     challengeRating: (raw.challengeRating || 0) as number,
     experiencePoints: (raw.experiencePoints || 0) as number,
     description: raw.description ? (raw.description as string) : undefined,

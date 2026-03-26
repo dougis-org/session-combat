@@ -1,5 +1,5 @@
 import { describe, test, expect } from '@jest/globals';
-import { applyDamage, applyHealing, setTempHp } from '@/lib/utils/combat';
+import { applyDamage, applyHealing, setTempHp, useLegendaryAction, resetLegendaryActions } from '@/lib/utils/combat';
 
 describe('applyDamage', () => {
   test('fully absorbed by temp HP', () => {
@@ -52,5 +52,33 @@ describe('setTempHp', () => {
 
   test('setting from 0', () => {
     expect(setTempHp(0, 14)).toEqual({ tempHp: 14 });
+  });
+});
+
+describe('useLegendaryAction', () => {
+  test('cost 1 decrements by 1', () => {
+    expect(useLegendaryAction(3, 1)).toEqual({ legendaryActionsRemaining: 2 });
+  });
+
+  test('cost 2 decrements by 2', () => {
+    expect(useLegendaryAction(3, 2)).toEqual({ legendaryActionsRemaining: 1 });
+  });
+
+  test('remaining cannot go below 0', () => {
+    expect(useLegendaryAction(1, 2)).toEqual({ legendaryActionsRemaining: 0 });
+  });
+
+  test('remaining of 0 stays 0', () => {
+    expect(useLegendaryAction(0, 1)).toEqual({ legendaryActionsRemaining: 0 });
+  });
+});
+
+describe('resetLegendaryActions', () => {
+  test('returns full count', () => {
+    expect(resetLegendaryActions(3)).toEqual({ legendaryActionsRemaining: 3 });
+  });
+
+  test('count of 0 returns 0', () => {
+    expect(resetLegendaryActions(0)).toEqual({ legendaryActionsRemaining: 0 });
   });
 });

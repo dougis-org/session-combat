@@ -9,7 +9,7 @@ import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
-import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp } from '@/lib/utils/combat';
+import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, useLegendaryAction as calcUseLegendaryAction, resetLegendaryActions } from '@/lib/utils/combat';
 import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
 
@@ -237,6 +237,8 @@ function CombatContent() {
         reactions: item.reactions,
         legendaryActions: 'legendaryActions' in item ? item.legendaryActions : undefined,
         lairActions: 'lairActions' in item ? item.lairActions : undefined,
+        legendaryActionCount: 'legendaryActionCount' in item ? item.legendaryActionCount : undefined,
+        legendaryActionsRemaining: 'legendaryActionCount' in item ? (item.legendaryActionCount ?? 0) : undefined,
       };
 
       if (!combatState) {
@@ -466,15 +468,32 @@ function CombatContent() {
         alert(`Conditions expired:\n${lines}`);
       }
 
+      // Reset legendary action pool for the incoming combatant
+      const combatantsAfterReset = updatedCombatants.map((c, i) => {
+        if (i === nextIndex && (c.legendaryActionCount ?? 0) > 0) {
+          return { ...c, ...resetLegendaryActions(c.legendaryActionCount!) };
+        }
+        return c;
+      });
+
       saveCombatState({
         ...combatState,
-        combatants: updatedCombatants,
+        combatants: combatantsAfterReset,
         currentTurnIndex: nextIndex,
         currentRound: nextRound,
       });
     } else {
+      // Reset legendary action pool for the incoming combatant
+      const combatantsAfterReset = combatState.combatants.map((c, i) => {
+        if (i === nextIndex && (c.legendaryActionCount ?? 0) > 0) {
+          return { ...c, ...resetLegendaryActions(c.legendaryActionCount!) };
+        }
+        return c;
+      });
+
       saveCombatState({
         ...combatState,
+        combatants: combatantsAfterReset,
         currentTurnIndex: nextIndex,
       });
     }
@@ -1114,14 +1133,75 @@ function CombatContent() {
 
                     {combatant.legendaryActions && combatant.legendaryActions.length > 0 && (
                       <div>
-                        <p className="text-gray-400 text-sm mb-2 font-semibold">Legendary Actions</p>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-gray-400 text-sm font-semibold">
+                            LEGENDARY ACTIONS
+                            {(combatant.legendaryActionCount ?? 0) > 0 && (
+                              <span className="text-amber-400 ml-1">
+                                — ⚡ {combatant.legendaryActionsRemaining ?? combatant.legendaryActionCount} remaining
+                              </span>
+                            )}
+                          </p>
+                          {(combatant.legendaryActionCount ?? 0) > 0 && (
+                            <button
+                              className="text-xs px-2 py-1 rounded bg-amber-700 hover:bg-amber-600 text-white"
+                              data-testid="legendary-action-restore"
+                              onClick={() => updateCombatant(combatant.id, resetLegendaryActions(combatant.legendaryActionCount!))}
+                            >
+                              Restore All
+                            </button>
+                          )}
+                        </div>
+                        {(combatant.legendaryActionCount ?? 0) > 0 && (
+                          <div className="flex items-center gap-2 mb-3" data-testid="legendary-action-pool-editor">
+                            <span className="text-xs text-gray-400">Pool:</span>
+                            <button
+                              className="px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-white text-sm"
+                              onClick={() => {
+                                const newCount = Math.max(0, (combatant.legendaryActionCount ?? 0) - 1);
+                                updateCombatant(combatant.id, { legendaryActionCount: newCount, legendaryActionsRemaining: newCount });
+                              }}
+                            >
+                              −
+                            </button>
+                            <span className="text-sm font-bold text-amber-400 min-w-[1.5rem] text-center">{combatant.legendaryActionCount}</span>
+                            <button
+                              className="px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-white text-sm"
+                              onClick={() => {
+                                const newCount = (combatant.legendaryActionCount ?? 0) + 1;
+                                updateCombatant(combatant.id, { legendaryActionCount: newCount, legendaryActionsRemaining: newCount });
+                              }}
+                            >
+                              +
+                            </button>
+                          </div>
+                        )}
                         <div className="space-y-2">
-                          {combatant.legendaryActions.map((action) => (
-                            <div key={action.name} className="text-xs">
-                              <p className="font-bold text-white">{action.name}</p>
-                              <p className="text-gray-300">{action.description}</p>
-                            </div>
-                          ))}
+                          {combatant.legendaryActions.map((action, index) => {
+                            const cost = action.cost ?? 1;
+                            const remaining = combatant.legendaryActionsRemaining ?? combatant.legendaryActionCount ?? 0;
+                            const canUse = remaining >= cost;
+                            return (
+                              <div key={action.name} className="text-xs">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div>
+                                    <p className="font-bold text-white">{action.name}</p>
+                                    <p className="text-gray-300">{action.description}</p>
+                                  </div>
+                                  {(combatant.legendaryActionCount ?? 0) > 0 && (
+                                    <button
+                                      className="text-xs px-2 py-1 rounded bg-amber-800 hover:bg-amber-700 text-white whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+                                      data-testid={`legendary-action-use-${index}`}
+                                      disabled={!canUse}
+                                      onClick={() => updateCombatant(combatant.id, calcUseLegendaryAction(remaining, cost))}
+                                    >
+                                      Use — {cost} ⚡
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -1486,6 +1566,14 @@ const hpColor = combatant.maxHp > 0 ? ((combatant.hp / combatant.maxHp) > 0.5 ? 
             <span className="text-lg font-bold">
               Current: <span className={hpColor === 'bg-green-500' ? 'text-green-500' : hpColor === 'bg-yellow-500' ? 'text-yellow-500' : 'text-red-500'}>{combatant.hp}</span> Max: {combatant.maxHp}{tempHp > 0 && <span className="text-blue-400"> +{tempHp} tmp</span>}
             </span>
+            {(combatant.legendaryActionCount ?? 0) > 0 && (
+              <span
+                className="text-sm font-semibold text-amber-400 whitespace-nowrap"
+                data-testid="legendary-action-badge"
+              >
+                ⚡ {combatant.legendaryActionsRemaining ?? combatant.legendaryActionCount}/{combatant.legendaryActionCount}
+              </span>
+            )}
             <input
               type="number"
               placeholder="0"

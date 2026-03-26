@@ -39,3 +39,22 @@ export function setTempHp(
 ): { tempHp: number } {
   return { tempHp: Math.max(currentTempHp, newValue) };
 }
+
+/**
+ * Spend legendary actions. Remaining cannot go below 0.
+ */
+export function useLegendaryAction(
+  remaining: number,
+  cost: number,
+): { legendaryActionsRemaining: number } {
+  return { legendaryActionsRemaining: Math.max(0, remaining - cost) };
+}
+
+/**
+ * Reset legendary action pool to full at the start of the creature's turn.
+ */
+export function resetLegendaryActions(
+  count: number,
+): { legendaryActionsRemaining: number } {
+  return { legendaryActionsRemaining: count };
+}
