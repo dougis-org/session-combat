@@ -18,5 +18,5 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Run `npm run test:regression` locally (or in CI) and confirm `coverage-e2e/lcov.info` is produced
-- [ ] 5.2 Confirm the CI `regression-tests` job uploads the partial report without error on a PR
+- [x] 5.1 Run `npm run test:regression` locally (or in CI) and confirm `coverage-e2e/lcov.info` is produced
+- [x] 5.2 Confirm the CI `regression-tests` job uploads the partial report without error on a PR
