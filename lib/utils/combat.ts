@@ -63,3 +63,46 @@ export function resetLegendaryActions(
   const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0;
   return { legendaryActionsRemaining: safeCount };
 }
+
+/**
+ * Apply legendary pool reset to the combatant at nextIndex when advancing turns.
+ * Only resets if the combatant has a non-zero legendaryActionCount; all others pass through unchanged.
+ */
+export function resetIncomingLegendaryPool<T extends { legendaryActionCount?: number }>(
+  combatants: T[],
+  nextIndex: number,
+): T[] {
+  return combatants.map((c, i) => {
+    if (i === nextIndex && (c.legendaryActionCount ?? 0) > 0) {
+      return { ...c, ...resetLegendaryActions(c.legendaryActionCount!) };
+    }
+    return c;
+  });
+}
+
+/**
+ * Decrement the legendary action pool by 1 (min 0), clamping remaining to the new pool size.
+ */
+export function decrementLegendaryPool(
+  count: number,
+  remaining: number,
+): { legendaryActionCount: number; legendaryActionsRemaining: number } {
+  const newCount = Math.max(0, count - 1);
+  return {
+    legendaryActionCount: newCount,
+    legendaryActionsRemaining: Math.min(remaining, newCount),
+  };
+}
+
+/**
+ * Increment the legendary action pool by 1, preserving current remaining actions.
+ */
+export function incrementLegendaryPool(
+  count: number,
+  remaining: number,
+): { legendaryActionCount: number; legendaryActionsRemaining: number } {
+  return {
+    legendaryActionCount: count + 1,
+    legendaryActionsRemaining: remaining,
+  };
+}
