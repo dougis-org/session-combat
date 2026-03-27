@@ -428,12 +428,12 @@ test.describe("Combat flows", () => {
     await expect(poolEditor).toBeVisible({ timeout: 5000 });
 
     // Click [−] to reduce pool from 3 to 2; remaining clamps to new count (3→2)
-    await poolEditor.getByRole("button", { name: "−" }).click();
+    await poolEditor.getByRole("button", { name: "Decrease legendary action pool" }).click();
     const badge = page.locator('[data-testid="legendary-action-badge"]').first();
     await expect(badge).toContainText("⚡ 2/2");
 
     // Click [+] to increase pool from 2 to 3; remaining stays at 2 (no implicit restore)
-    await poolEditor.getByRole("button", { name: "+" }).click();
+    await poolEditor.getByRole("button", { name: "Increase legendary action pool" }).click();
     await expect(badge).toContainText("⚡ 2/3");
   });
 
