@@ -9,7 +9,8 @@ import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
-import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp } from '@/lib/utils/combat';
+import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool } from '@/lib/utils/combat';
+import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
 import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
 
@@ -237,6 +238,8 @@ function CombatContent() {
         reactions: item.reactions,
         legendaryActions: 'legendaryActions' in item ? item.legendaryActions : undefined,
         lairActions: 'lairActions' in item ? item.lairActions : undefined,
+        legendaryActionCount: 'legendaryActionCount' in item ? item.legendaryActionCount : undefined,
+        legendaryActionsRemaining: 'legendaryActionCount' in item ? item.legendaryActionCount : undefined,
       };
 
       if (!combatState) {
@@ -454,6 +457,7 @@ function CombatContent() {
 
     let nextIndex = combatState.currentTurnIndex + 1;
     let nextRound = combatState.currentRound;
+    let baseCombatants = combatState.combatants;
 
     if (nextIndex >= combatState.combatants.length) {
       nextIndex = 0;
@@ -465,19 +469,18 @@ function CombatContent() {
         const lines = expiring.map(e => `• ${e.combatantName}: ${e.conditionName}`).join('\n');
         alert(`Conditions expired:\n${lines}`);
       }
-
-      saveCombatState({
-        ...combatState,
-        combatants: updatedCombatants,
-        currentTurnIndex: nextIndex,
-        currentRound: nextRound,
-      });
-    } else {
-      saveCombatState({
-        ...combatState,
-        currentTurnIndex: nextIndex,
-      });
+      baseCombatants = updatedCombatants;
     }
+
+    // Reset legendary action pool for the incoming combatant (both mid-round and round-end paths)
+    const combatants = resetIncomingLegendaryPool(baseCombatants, nextIndex);
+
+    saveCombatState({
+      ...combatState,
+      combatants,
+      currentTurnIndex: nextIndex,
+      currentRound: nextRound,
+    });
   };
 
   const updateCombatant = (id: string, updates: Partial<CombatantState>) => {
@@ -1112,19 +1115,10 @@ function CombatContent() {
                       </div>
                     )}
 
-                    {combatant.legendaryActions && combatant.legendaryActions.length > 0 && (
-                      <div>
-                        <p className="text-gray-400 text-sm mb-2 font-semibold">Legendary Actions</p>
-                        <div className="space-y-2">
-                          {combatant.legendaryActions.map((action) => (
-                            <div key={action.name} className="text-xs">
-                              <p className="font-bold text-white">{action.name}</p>
-                              <p className="text-gray-300">{action.description}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    <LegendaryActionsPanel
+                      combatant={combatant}
+                      onUpdate={(updates) => updateCombatant(combatant.id, updates)}
+                    />
 
                     {combatant.lairActions && combatant.lairActions.length > 0 && (
                       <div>
@@ -1441,6 +1435,7 @@ const hpColor = combatant.maxHp > 0 ? ((combatant.hp / combatant.maxHp) > 0.5 ? 
                 className="hover:opacity-80 transition-opacity"
                 title={`See full ${combatant.type === 'player' ? 'Character' : 'Monster'} information`}
                 type="button"
+                data-testid="combatant-detail-toggle"
               >
                 <svg
                   className="w-5 h-5 text-gray-400 hover:text-gray-300 cursor-pointer"
@@ -1486,6 +1481,14 @@ const hpColor = combatant.maxHp > 0 ? ((combatant.hp / combatant.maxHp) > 0.5 ? 
             <span className="text-lg font-bold">
               Current: <span className={hpColor === 'bg-green-500' ? 'text-green-500' : hpColor === 'bg-yellow-500' ? 'text-yellow-500' : 'text-red-500'}>{combatant.hp}</span> Max: {combatant.maxHp}{tempHp > 0 && <span className="text-blue-400"> +{tempHp} tmp</span>}
             </span>
+            {(combatant.legendaryActionCount ?? 0) > 0 && (
+              <span
+                className="text-sm font-semibold text-amber-400 whitespace-nowrap"
+                data-testid="legendary-action-badge"
+              >
+                ⚡ {combatant.legendaryActionsRemaining ?? combatant.legendaryActionCount}/{combatant.legendaryActionCount}
+              </span>
+            )}
             <input
               type="number"
               placeholder="0"

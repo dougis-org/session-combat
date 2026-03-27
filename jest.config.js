@@ -4,8 +4,8 @@ module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
   testMatch: [
-    "**/tests/**/*.test.(ts|js)",
-    "**/lib/**/*.test.(ts|js)",
+    "**/tests/**/*.test.(ts|tsx|js|jsx)",
+    "**/lib/**/*.test.(ts|tsx|js|jsx)",
     "!**/tests/e2e/**",
   ],
   testTimeout: 120000,

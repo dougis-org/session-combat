@@ -72,18 +72,22 @@ export const SRD_MONSTERS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' |
         damageDescription: '3d6 + 5 bludgeoning',
       },
     ],
+    legendaryActionCount: 3,
     legendaryActions: [
       {
         name: 'Detect',
         description: 'The aboleth makes a Wisdom (Perception) check.',
+        cost: 1,
       },
       {
         name: 'Tail Swipe',
         description: 'The aboleth makes one tail attack.',
+        cost: 1,
       },
       {
         name: 'Tentacle Attack',
         description: 'The aboleth makes one tentacle attack.',
+        cost: 1,
       },
     ],
   },
@@ -1432,18 +1436,22 @@ export const SRD_MONSTERS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' |
         damageDescription: '1d6 + 3 piercing + 2d6 necrotic',
       },
     ],
+    legendaryActionCount: 3,
     legendaryActions: [
       {
         name: 'Move',
         description: 'The vampire moves up to its speed without provoking opportunity attacks.',
+        cost: 1,
       },
       {
         name: 'Unarmed Strike',
         description: 'The vampire makes one unarmed strike.',
+        cost: 1,
       },
       {
-        name: 'Bite (Costs 2 Actions)',
+        name: 'Bite',
         description: 'The vampire makes one bite attack.',
+        cost: 2,
       },
     ],
   },
