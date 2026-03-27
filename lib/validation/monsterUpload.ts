@@ -569,12 +569,12 @@ export function validateMonsterData(
   }
 
   // Optional: legendaryActionCount (non-negative integer)
-  if (data.legendaryActionCount !== undefined && data.legendaryActionCount !== null) {
+  if (data.legendaryActionCount !== undefined) {
     const lac = data.legendaryActionCount;
     if (typeof lac !== 'number' || !Number.isFinite(lac) || lac < 0 || !Number.isInteger(lac)) {
       errors.push({
         field: `${prefix}.legendaryActionCount`,
-        message: `legendaryActionCount must be a non-negative integer, got: ${JSON.stringify(lac)}`,
+        message: `legendaryActionCount must be a non-negative integer, got: ${String(lac)}`,
         index,
       });
     }
@@ -682,7 +682,12 @@ export function transformMonsterData(
     reactions: (raw.reactions || []) as CreatureAbility[],
     lairActions: (raw.lairActions || []) as CreatureAbility[],
     legendaryActions: (raw.legendaryActions || []) as CreatureAbility[],
-    legendaryActionCount: raw.legendaryActionCount !== undefined ? (raw.legendaryActionCount as number) : undefined,
+    legendaryActionCount:
+      typeof raw.legendaryActionCount === 'number' &&
+      Number.isFinite(raw.legendaryActionCount) &&
+      Number.isInteger(raw.legendaryActionCount)
+        ? (raw.legendaryActionCount as number)
+        : undefined,
     challengeRating: (raw.challengeRating || 0) as number,
     experiencePoints: (raw.experiencePoints || 0) as number,
     description: raw.description ? (raw.description as string) : undefined,

@@ -77,15 +77,15 @@ The DM SHALL be able to use a legendary action from the detail panel, decrementi
 ---
 
 ### Requirement: DM can adjust the legendary action pool during combat
-The DM SHALL be able to increase or decrease `legendaryActionCount` for a combatant inline from the detail panel. Adjusting the pool SHALL also update `legendaryActionsRemaining` to the new count (full reset).
+The DM SHALL be able to increase or decrease `legendaryActionCount` for a combatant inline from the detail panel. Increasing the pool SHALL preserve `legendaryActionsRemaining`; decreasing the pool SHALL clamp `legendaryActionsRemaining` to the new `legendaryActionCount` if it would otherwise exceed it.
 
 #### Scenario: Pool increase via [+] button
-- **WHEN** the DM clicks `[+]` on a combatant with `legendaryActionCount: 3`
+- **WHEN** the DM clicks `[+]` on a combatant with `legendaryActionCount: 3` and `legendaryActionsRemaining: 2`
 - **THEN** `legendaryActionCount` SHALL equal 4
-- **AND** `legendaryActionsRemaining` SHALL equal 4
+- **AND** `legendaryActionsRemaining` SHALL remain 2
 
-#### Scenario: Pool decrease via [−] button
-- **WHEN** the DM clicks `[−]` on a combatant with `legendaryActionCount: 3`
+#### Scenario: Pool decrease via [−] button (clamp behavior)
+- **WHEN** the DM clicks `[−]` on a combatant with `legendaryActionCount: 3` and `legendaryActionsRemaining: 3`
 - **THEN** `legendaryActionCount` SHALL equal 2
 - **AND** `legendaryActionsRemaining` SHALL equal 2
 
