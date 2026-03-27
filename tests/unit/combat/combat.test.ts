@@ -71,6 +71,26 @@ describe('useLegendaryAction', () => {
   test('remaining of 0 stays 0', () => {
     expect(useLegendaryAction(0, 1)).toEqual({ legendaryActionsRemaining: 0 });
   });
+
+  test('negative cost is treated as 0 (no change)', () => {
+    expect(useLegendaryAction(3, -1)).toEqual({ legendaryActionsRemaining: 3 });
+  });
+
+  test('non-finite cost (NaN) is treated as 0', () => {
+    expect(useLegendaryAction(3, NaN)).toEqual({ legendaryActionsRemaining: 3 });
+  });
+
+  test('non-finite cost (Infinity) is treated as 0', () => {
+    expect(useLegendaryAction(3, Infinity)).toEqual({ legendaryActionsRemaining: 3 });
+  });
+
+  test('non-finite remaining is treated as 0', () => {
+    expect(useLegendaryAction(NaN, 1)).toEqual({ legendaryActionsRemaining: 0 });
+  });
+
+  test('fractional cost is floored to integer', () => {
+    expect(useLegendaryAction(3, 1.9)).toEqual({ legendaryActionsRemaining: 2 });
+  });
 });
 
 describe('resetLegendaryActions', () => {
@@ -80,5 +100,17 @@ describe('resetLegendaryActions', () => {
 
   test('count of 0 returns 0', () => {
     expect(resetLegendaryActions(0)).toEqual({ legendaryActionsRemaining: 0 });
+  });
+
+  test('negative count is clamped to 0', () => {
+    expect(resetLegendaryActions(-1)).toEqual({ legendaryActionsRemaining: 0 });
+  });
+
+  test('non-finite count (NaN) returns 0', () => {
+    expect(resetLegendaryActions(NaN)).toEqual({ legendaryActionsRemaining: 0 });
+  });
+
+  test('non-finite count (Infinity) returns 0', () => {
+    expect(resetLegendaryActions(Infinity)).toEqual({ legendaryActionsRemaining: 0 });
   });
 });

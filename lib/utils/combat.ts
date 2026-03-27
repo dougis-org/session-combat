@@ -42,19 +42,24 @@ export function setTempHp(
 
 /**
  * Spend legendary actions. Remaining cannot go below 0.
+ * Non-finite or negative cost is treated as 0; non-finite remaining is treated as 0.
  */
 export function useLegendaryAction(
   remaining: number,
   cost: number,
 ): { legendaryActionsRemaining: number } {
-  return { legendaryActionsRemaining: Math.max(0, remaining - cost) };
+  const safeCost = Number.isFinite(cost) ? Math.max(0, Math.floor(cost)) : 0;
+  const safeRemaining = Number.isFinite(remaining) ? remaining : 0;
+  return { legendaryActionsRemaining: Math.max(0, safeRemaining - safeCost) };
 }
 
 /**
  * Reset legendary action pool to full at the start of the creature's turn.
+ * Non-finite or negative count is clamped to 0.
  */
 export function resetLegendaryActions(
   count: number,
 ): { legendaryActionsRemaining: number } {
-  return { legendaryActionsRemaining: count };
+  const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0;
+  return { legendaryActionsRemaining: safeCount };
 }

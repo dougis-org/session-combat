@@ -1449,7 +1449,7 @@ export const SRD_MONSTERS: Omit<MonsterTemplate, 'id' | 'userId' | 'createdAt' |
         cost: 1,
       },
       {
-        name: 'Bite (Costs 2 Actions)',
+        name: 'Bite',
         description: 'The vampire makes one bite attack.',
         cost: 2,
       },

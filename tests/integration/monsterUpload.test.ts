@@ -455,4 +455,58 @@ describe("Monster Upload Validation", () => {
       expect(transformed.name).toBe("Goblin");
     });
   });
+
+  describe("legendaryActionCount validation and transform", () => {
+    it("should pass through valid legendaryActionCount in transform", () => {
+      const raw: RawMonsterData = { name: "Aboleth", maxHp: 135, legendaryActionCount: 3 };
+      const result = transformMonsterData(raw, "user123");
+      expect(result.legendaryActionCount).toBe(3);
+    });
+
+    it("should pass through legendaryActionCount of 0", () => {
+      const raw: RawMonsterData = { name: "Goblin", maxHp: 7, legendaryActionCount: 0 };
+      const result = transformMonsterData(raw, "user123");
+      expect(result.legendaryActionCount).toBe(0);
+    });
+
+    it("should return undefined legendaryActionCount when not provided", () => {
+      const raw: RawMonsterData = { name: "Goblin", maxHp: 7 };
+      const result = transformMonsterData(raw, "user123");
+      expect(result.legendaryActionCount).toBeUndefined();
+    });
+
+    it("should reject non-integer legendaryActionCount", () => {
+      const raw: RawMonsterData = { name: "Test", maxHp: 10, legendaryActionCount: 1.5 };
+      const result = validateMonsterData(raw);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].field).toContain("legendaryActionCount");
+    });
+
+    it("should reject negative legendaryActionCount", () => {
+      const raw: RawMonsterData = { name: "Test", maxHp: 10, legendaryActionCount: -1 };
+      const result = validateMonsterData(raw);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].field).toContain("legendaryActionCount");
+    });
+
+    it("should reject string legendaryActionCount", () => {
+      const raw: RawMonsterData = { name: "Test", maxHp: 10, legendaryActionCount: "three" as unknown as number };
+      const result = validateMonsterData(raw);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].field).toContain("legendaryActionCount");
+    });
+
+    it("should reject NaN legendaryActionCount", () => {
+      const raw: RawMonsterData = { name: "Test", maxHp: 10, legendaryActionCount: NaN };
+      const result = validateMonsterData(raw);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].field).toContain("legendaryActionCount");
+    });
+
+    it("should accept valid legendaryActionCount in validateMonsterData", () => {
+      const raw: RawMonsterData = { name: "Test", maxHp: 10, legendaryActionCount: 3 };
+      const result = validateMonsterData(raw);
+      expect(result.valid).toBe(true);
+    });
+  });
 });

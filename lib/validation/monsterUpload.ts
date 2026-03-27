@@ -568,6 +568,18 @@ export function validateMonsterData(
     }
   }
 
+  // Optional: legendaryActionCount (non-negative integer)
+  if (data.legendaryActionCount !== undefined && data.legendaryActionCount !== null) {
+    const lac = data.legendaryActionCount;
+    if (typeof lac !== 'number' || !Number.isFinite(lac) || lac < 0 || !Number.isInteger(lac)) {
+      errors.push({
+        field: `${prefix}.legendaryActionCount`,
+        message: `legendaryActionCount must be a non-negative integer, got: ${JSON.stringify(lac)}`,
+        index,
+      });
+    }
+  }
+
   return {
     valid: errors.length === 0,
     errors,

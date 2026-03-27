@@ -383,8 +383,7 @@ test.describe("Combat flows", () => {
     await addLegendaryMonsterToCombat(page);
 
     // Open detail panel
-    const infoBtn = page.locator("svg.w-5.h-5.text-gray-400").first();
-    await infoBtn.click();
+    await page.locator('[data-testid="combatant-detail-toggle"]').first().click();
 
     // Click the first Use button
     const useBtn = page.locator('[data-testid="legendary-action-use-0"]').first();
@@ -405,8 +404,7 @@ test.describe("Combat flows", () => {
     await addLegendaryMonsterToCombat(page);
 
     // Open detail panel and use one action
-    const infoBtn = page.locator("svg.w-5.h-5.text-gray-400").first();
-    await infoBtn.click();
+    await page.locator('[data-testid="combatant-detail-toggle"]').first().click();
     await page.locator('[data-testid="legendary-action-use-0"]').first().click();
     const badge = page.locator('[data-testid="legendary-action-badge"]').first();
     await expect(badge).toContainText("⚡ 2/3");
@@ -424,20 +422,19 @@ test.describe("Combat flows", () => {
     await addLegendaryMonsterToCombat(page);
 
     // Open detail panel
-    const infoBtn = page.locator("svg.w-5.h-5.text-gray-400").first();
-    await infoBtn.click();
+    await page.locator('[data-testid="combatant-detail-toggle"]').first().click();
 
     const poolEditor = page.locator('[data-testid="legendary-action-pool-editor"]').first();
     await expect(poolEditor).toBeVisible({ timeout: 5000 });
 
-    // Click [−] to reduce from 3 to 2
+    // Click [−] to reduce pool from 3 to 2; remaining clamps to new count (3→2)
     await poolEditor.getByRole("button", { name: "−" }).click();
     const badge = page.locator('[data-testid="legendary-action-badge"]').first();
     await expect(badge).toContainText("⚡ 2/2");
 
-    // Click [+] to increase from 2 to 3
+    // Click [+] to increase pool from 2 to 3; remaining stays at 2 (no implicit restore)
     await poolEditor.getByRole("button", { name: "+" }).click();
-    await expect(badge).toContainText("⚡ 3/3");
+    await expect(badge).toContainText("⚡ 2/3");
   });
 
   test("advancing turn to legendary combatant resets remaining to pool", async ({
