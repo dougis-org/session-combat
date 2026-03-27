@@ -77,17 +77,17 @@
 - [x] 11.1 Commit all changes to `feat/legendary-actions`: `git add <files> && git commit -m "feat(combat): legendary action counter tracking (#90)"`
 - [x] 11.2 Push: `git push`
 - [x] 11.3 Open PR from `feat/legendary-actions` → `main` referencing issue #90
-- [ ] 11.4 Monitor CI — fix any failures, push fixes, repeat until all checks green
-- [ ] 11.5 Address all review comments — commit fixes, push, repeat until no unresolved comments
-- [ ] 11.6 Enable auto-merge once all CI checks pass and no blocking review comments remain
-- [ ] 11.7 Confirm merge to `main`
+- [x] 11.4 Monitor CI — fix any failures, push fixes, repeat until all checks green
+- [x] 11.5 Address all review comments — commit fixes, push, repeat until no unresolved comments
+- [x] 11.6 Enable auto-merge once all CI checks pass and no blocking review comments remain
+- [x] 11.7 Confirm merge to `main`
 
 ## 12. Post-Merge
 
-- [ ] 12.1 Checkout `main` and pull: `git checkout main && git pull --ff-only`
-- [ ] 12.2 Verify merged changes appear on `main`
-- [ ] 12.3 Sync spec delta to canonical location: copy `openspec/changes/legendary-actions/specs/legendary-action-tracking/spec.md` → `openspec/specs/legendary-action-tracking/spec.md`
-- [ ] 12.4 Archive change as single atomic commit (copy to `openspec/changes/archive/` + delete original in one commit): `git add openspec/ && git commit -m "chore(openspec): archive legendary-actions change"`
-- [ ] 12.5 Push archive commit: `git push`
-- [ ] 12.6 Prune merged local branch: `git branch -d feat/legendary-actions`
-- [ ] 12.7 Close GitHub issue #90
+- [x] 12.1 Checkout `main` and pull: `git checkout main && git pull --ff-only`
+- [x] 12.2 Verify merged changes appear on `main`
+- [x] 12.3 Sync spec delta to canonical location: copy `openspec/changes/legendary-actions/specs/legendary-action-tracking/spec.md` → `openspec/specs/legendary-action-tracking/spec.md`
+- [x] 12.4 Archive change as single atomic commit (copy to `openspec/changes/archive/` + delete original in one commit): `git add openspec/ && git commit -m "chore(openspec): archive legendary-actions change"`
+- [x] 12.5 Push archive commit: `git push`
+- [x] 12.6 Prune merged local branch: `git branch -d feat/legendary-actions`
+- [x] 12.7 Close GitHub issue #90
