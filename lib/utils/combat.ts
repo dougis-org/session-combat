@@ -82,27 +82,34 @@ export function resetIncomingLegendaryPool<T extends { legendaryActionCount?: nu
 
 /**
  * Decrement the legendary action pool by 1 (min 0), clamping remaining to the new pool size.
+ * Non-finite or negative inputs are clamped to finite non-negative values.
  */
 export function decrementLegendaryPool(
   count: number,
   remaining: number,
 ): { legendaryActionCount: number; legendaryActionsRemaining: number } {
-  const newCount = Math.max(0, count - 1);
+  const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0;
+  const safeRemaining = Number.isFinite(remaining) ? Math.max(0, remaining) : 0;
+  const newCount = Math.max(0, safeCount - 1);
   return {
     legendaryActionCount: newCount,
-    legendaryActionsRemaining: Math.min(remaining, newCount),
+    legendaryActionsRemaining: Math.min(safeRemaining, newCount),
   };
 }
 
 /**
  * Increment the legendary action pool by 1, preserving current remaining actions.
+ * Non-finite or negative inputs are clamped to finite non-negative values.
  */
 export function incrementLegendaryPool(
   count: number,
   remaining: number,
 ): { legendaryActionCount: number; legendaryActionsRemaining: number } {
+  const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0;
+  const safeRemaining = Number.isFinite(remaining) ? Math.max(0, remaining) : 0;
+  const newCount = safeCount + 1;
   return {
-    legendaryActionCount: count + 1,
-    legendaryActionsRemaining: remaining,
+    legendaryActionCount: newCount,
+    legendaryActionsRemaining: Math.min(safeRemaining, newCount),
   };
 }
