@@ -1319,6 +1319,7 @@ function CombatContent() {
                         setRemoveConfirmId(null);
                         setRemoveConfirmPosition(null);
                       }}
+                      data-testid="remove-confirm-button"
                       className="flex-1 bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-semibold"
                     >
                       Remove

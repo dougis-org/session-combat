@@ -668,8 +668,9 @@ test.describe("Combat flows", () => {
     await startCombatQuick(page);
 
     // Lair slot should appear before the player in initiative order
+    // nth(0) is the "Initiative Order" heading; combatant rows start at nth(1)
     const rows = page.locator('[data-testid="initiative-order"] > *');
-    await expect(rows.nth(0)).toContainText("Test Lair");
+    await expect(rows.nth(1)).toContainText("Test Lair");
   });
 
   test("lair slot shows compact badge when inactive in initiative order", async ({ page }, testInfo) => {
@@ -764,7 +765,7 @@ test.describe("Combat flows", () => {
     const removeBtn = page.locator('[data-testid="lair-slot-remove"]').first();
     await expect(removeBtn).toBeVisible({ timeout: 5000 });
     await removeBtn.click();
-    await page.getByRole("button", { name: "Remove" }).click();
+    await page.locator('[data-testid="remove-confirm-button"]').click();
     await expect(page.getByText("Test Lair")).toHaveCount(0);
   });
 
