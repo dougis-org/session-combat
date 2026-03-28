@@ -1,4 +1,6 @@
+import path from "path";
 import { defineConfig, devices } from "@playwright/test";
+import { defineCoverageReporterConfig } from "@bgotink/playwright-coverage";
 
 const e2eDbName = process.env.MONGODB_DB || "session-combat-e2e";
 process.env.MONGODB_DB = e2eDbName;
@@ -34,6 +36,31 @@ export default defineConfig({
     ["html"],
     ["list"], // Also output list format for CI logs
     ["json", { outputFile: "test-results.json" }],
+    [
+      "@bgotink/playwright-coverage",
+      defineCoverageReporterConfig({
+        sourceRoot: __dirname,
+        resultDir: path.join(__dirname, "coverage-e2e"),
+        reports: [["lcovonly", { file: "lcov.info" }]],
+        rewritePath: ({ absolutePath }) => {
+          // Strip Next.js webpack /_N_E/ prefix
+          if (absolutePath.includes("/_N_E/")) {
+            return absolutePath.replace("/_N_E/", "/");
+          }
+          // Strip Turbopack source path: ...turbopack:/[project]/<path>/<projectName>/relative/file
+          // The actual file path is __dirname + everything from the last /projectName/ onward
+          if (absolutePath.includes("turbopack:")) {
+            const projectName = path.basename(__dirname);
+            const marker = `/${projectName}/`;
+            const idx = absolutePath.lastIndexOf(marker);
+            if (idx !== -1) {
+              return path.join(__dirname, absolutePath.slice(idx + marker.length));
+            }
+          }
+          return absolutePath;
+        },
+      }),
+    ],
   ],
   /* Timeout settings for better stability */
   timeout: 30000, // 30 seconds per test
@@ -112,13 +139,15 @@ export default defineConfig({
   //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
   // },
 
-  /* Run your local dev server before starting the tests */
+  /* Run your local dev server before starting the tests.
+     In CI, use the production build (next start) so V8 coverage source maps resolve
+     to real source files. Locally, reuse any running dev server for speed. */
   webServer: {
-    command: "npm run dev",
+    command: process.env.CI ? "npm start" : "npm run dev",
     url: "http://localhost:3000",
-    // No explicit env — process inherits parent env, including MONGODB_DB (set on line 4)
-    // and MONGODB_URI (set by globalSetup before the webServer is launched).
-    reuseExistingServer: true,
+    // No explicit env — process inherits parent env, including MONGODB_DB
+    // (set above) and MONGODB_URI (set by globalSetup before the webServer is launched).
+    reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
 });

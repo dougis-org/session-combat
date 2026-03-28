@@ -1,11 +1,12 @@
-import { NextRequest } from "next/server";
 import { GET, PUT, DELETE } from "@/app/api/encounters/[id]/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
   MOCK_AUTH,
-  mockUnauthorized,
   makeRouteRequest,
+  itReturns401WithParams,
+  itReturns404WithParams,
+  itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
@@ -36,19 +37,15 @@ const makeRequest = (method: string, body?: unknown) =>
 describe("GET /api/encounters/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await GET(makeRequest("GET"), { params });
-    expect(response.status).toBe(401);
-  });
+  itReturns401WithParams(GET, () => makeRequest("GET"), params, mockedRequireAuth);
 
-  it("returns 404 when encounter not found", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadEncounters.mockResolvedValue([]);
-
-    const response = await GET(makeRequest("GET"), { params });
-    expect(response.status).toBe(404);
-  });
+  itReturns404WithParams(
+    GET,
+    () => makeRequest("GET"),
+    params,
+    () => mockedStorage.loadEncounters.mockResolvedValue([]),
+    mockedRequireAuth
+  );
 
   it("returns encounter when found", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -60,33 +57,27 @@ describe("GET /api/encounters/[id]", () => {
     expect(body.id).toBe(ENC_ID);
   });
 
-  it("returns 500 on storage error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error"));
-
-    const response = await GET(makeRequest("GET"), { params });
-    expect(response.status).toBe(500);
-  });
+  itReturns500WithParams(
+    GET,
+    () => makeRequest("GET"),
+    params,
+    () => mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error")),
+    mockedRequireAuth
+  );
 });
 
 describe("PUT /api/encounters/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await PUT(makeRequest("PUT", {}), { params });
-    expect(response.status).toBe(401);
-  });
+  itReturns401WithParams(PUT, () => makeRequest("PUT", {}), params, mockedRequireAuth);
 
-  it("returns 404 when encounter not found", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadEncounters.mockResolvedValue([]);
-
-    const response = await PUT(makeRequest("PUT", { name: "New Name" }), {
-      params,
-    });
-    expect(response.status).toBe(404);
-  });
+  itReturns404WithParams(
+    PUT,
+    () => makeRequest("PUT", { name: "New Name" }),
+    params,
+    () => mockedStorage.loadEncounters.mockResolvedValue([]),
+    mockedRequireAuth
+  );
 
   it("returns 400 when name is empty after update", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -113,33 +104,27 @@ describe("PUT /api/encounters/[id]", () => {
     expect(mockedStorage.saveEncounter).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 500 on storage error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error"));
-
-    const response = await PUT(makeRequest("PUT", { name: "Valid" }), {
-      params,
-    });
-    expect(response.status).toBe(500);
-  });
+  itReturns500WithParams(
+    PUT,
+    () => makeRequest("PUT", { name: "Valid" }),
+    params,
+    () => mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error")),
+    mockedRequireAuth
+  );
 });
 
 describe("DELETE /api/encounters/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await DELETE(makeRequest("DELETE"), { params });
-    expect(response.status).toBe(401);
-  });
+  itReturns401WithParams(DELETE, () => makeRequest("DELETE"), params, mockedRequireAuth);
 
-  it("returns 404 when encounter not found", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadEncounters.mockResolvedValue([]);
-
-    const response = await DELETE(makeRequest("DELETE"), { params });
-    expect(response.status).toBe(404);
-  });
+  itReturns404WithParams(
+    DELETE,
+    () => makeRequest("DELETE"),
+    params,
+    () => mockedStorage.loadEncounters.mockResolvedValue([]),
+    mockedRequireAuth
+  );
 
   it("deletes encounter and returns 200", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -155,11 +140,11 @@ describe("DELETE /api/encounters/[id]", () => {
     );
   });
 
-  it("returns 500 on storage error", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error"));
-
-    const response = await DELETE(makeRequest("DELETE"), { params });
-    expect(response.status).toBe(500);
-  });
+  itReturns500WithParams(
+    DELETE,
+    () => makeRequest("DELETE"),
+    params,
+    () => mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error")),
+    mockedRequireAuth
+  );
 });

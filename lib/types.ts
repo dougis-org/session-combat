@@ -213,6 +213,7 @@ export interface CreatureAbility {
   saveDC?: number;
   saveType?: string; // e.g., "Dexterity", "Strength"
   recharge?: string; // e.g., "Recharge 5-6"
+  cost?: number; // Action point cost (legendary actions only); defaults to 1
 }
 
 // Shared base statistics for any creature (monster, character, NPC)
@@ -266,6 +267,7 @@ export interface MonsterTemplate extends CreatureStats {
   // Lair & Legendary Actions (monster-specific)
   lairActions?: CreatureAbility[];
   legendaryActions?: CreatureAbility[];
+  legendaryActionCount?: number; // Pool size (e.g. 3 for most bosses)
   // Metadata
   isGlobal?: boolean; // True if this is a global template (userId === 'GLOBAL')
   source?: string; // e.g., "Monster Manual", "Xanathar's Guide"
@@ -293,6 +295,7 @@ export interface Monster extends CreatureStats {
   // Lair & Legendary Actions (monster-specific)
   lairActions?: CreatureAbility[];
   legendaryActions?: CreatureAbility[];
+  legendaryActionCount?: number; // Pool size (e.g. 3 for most bosses)
   // Metadata
   source?: string;
   description?: string;
@@ -370,6 +373,7 @@ export interface CombatantState extends CreatureStats {
   initiative: number;
   initiativeRoll?: InitiativeRoll;
   conditions: StatusCondition[];
+  tempHp?: number;
   notes?: string;
   targetIds?: string[]; // IDs of combatants being attacked
   // Additional metadata for combat display
@@ -379,6 +383,8 @@ export interface CombatantState extends CreatureStats {
   // Lair & Legendary Actions (monster-specific, optional for compatibility)
   lairActions?: CreatureAbility[];
   legendaryActions?: CreatureAbility[];
+  legendaryActionCount?: number; // DM-adjustable pool size (copied from template)
+  legendaryActionsRemaining?: number; // Runtime counter; resets on turn start
 }
 
 export interface CombatState {

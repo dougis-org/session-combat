@@ -7,8 +7,11 @@ import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { CombatState, CombatantState, Encounter, Character, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
+import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
+import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool } from '@/lib/utils/combat';
+import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
+import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
 
 function CombatContent() {
@@ -25,6 +28,8 @@ function CombatContent() {
   const [showQuickEntryType, setShowQuickEntryType] = useState<'player' | 'monster' | null>(null);
   const [showCombatantModal, setShowCombatantModal] = useState(false);
   const [setupCombatants, setSetupCombatants] = useState<CombatantState[]>([]);
+  const [parties, setParties] = useState<Party[]>([]);
+  const [selectedPartyId, setSelectedPartyId] = useState<string | null>(null);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [selectedDetailCombatantId, setSelectedDetailCombatantId] = useState<string | null>(null);
   const [detailPosition, setDetailPosition] = useState<{top: number, left: number} | null>(null);
@@ -42,14 +47,15 @@ function CombatContent() {
         setLoading(true);
         setLoadingTemplates(true);
         setError(null);
-        const [encountersRes, charactersRes, combatRes, monstersRes] = await Promise.all([
+        const [encountersRes, charactersRes, combatRes, monstersRes, partiesRes] = await Promise.all([
           fetch('/api/encounters'),
           fetch('/api/characters'),
           fetch('/api/combat'),
           fetch('/api/monsters'),
+          fetch('/api/parties'),
         ]);
 
-        if (!encountersRes.ok || !charactersRes.ok || !combatRes.ok || !monstersRes.ok) {
+        if (!encountersRes.ok || !charactersRes.ok || !combatRes.ok || !monstersRes.ok || !partiesRes.ok) {
           throw new Error('Failed to load data');
         }
 
@@ -57,11 +63,13 @@ function CombatContent() {
         const charactersData = await charactersRes.json();
         const combatData = await combatRes.json();
         const monstersData = await monstersRes.json();
+        const partiesData = await partiesRes.json();
 
         setEncounters(encountersData || []);
         setCharacters(charactersData || []);
         setMonsterTemplates(monstersData || []);
         setCombatState(combatData || null);
+        setParties(partiesData || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
       } finally {
@@ -136,6 +144,10 @@ function CombatContent() {
 
   const removeCombatantFromSetup = (id: string) => {
     setSetupCombatants(prev => prev.filter(c => c.id !== id));
+  };
+
+  const selectParty = (partyId: string | null) => {
+    setSelectedPartyId(partyId);
   };
 
   const addCombatantToActiveSession = (combatant: CombatantState) => {
@@ -226,6 +238,8 @@ function CombatContent() {
         reactions: item.reactions,
         legendaryActions: 'legendaryActions' in item ? item.legendaryActions : undefined,
         lairActions: 'lairActions' in item ? item.lairActions : undefined,
+        legendaryActionCount: 'legendaryActionCount' in item ? item.legendaryActionCount : undefined,
+        legendaryActionsRemaining: 'legendaryActionCount' in item ? item.legendaryActionCount : undefined,
       };
 
       if (!combatState) {
@@ -281,8 +295,10 @@ function CombatContent() {
     // Combine setup combatants with characters from library
     const combatants: CombatantState[] = [...setupCombatants];
 
-    // Add characters
-    characters.forEach(character => {
+    // Add characters: only party members if a party is selected, otherwise all characters
+    const charactersToAdd = resolveCharactersForCombat(selectedPartyId, parties, characters, setupCombatants);
+
+    charactersToAdd.forEach(character => {
       const dexterity = character.abilityScores?.dexterity || 10;
       const dexModifier = Math.floor((dexterity - 10) / 2);
       combatants.push({
@@ -358,6 +374,7 @@ function CombatContent() {
     if (confirm('Are you sure you want to end combat?')) {
       saveCombatState(null);
       setSetupCombatants([]);
+      setSelectedPartyId(null);
     }
   };
 
@@ -440,6 +457,7 @@ function CombatContent() {
 
     let nextIndex = combatState.currentTurnIndex + 1;
     let nextRound = combatState.currentRound;
+    let baseCombatants = combatState.combatants;
 
     if (nextIndex >= combatState.combatants.length) {
       nextIndex = 0;
@@ -451,19 +469,18 @@ function CombatContent() {
         const lines = expiring.map(e => `• ${e.combatantName}: ${e.conditionName}`).join('\n');
         alert(`Conditions expired:\n${lines}`);
       }
-
-      saveCombatState({
-        ...combatState,
-        combatants: updatedCombatants,
-        currentTurnIndex: nextIndex,
-        currentRound: nextRound,
-      });
-    } else {
-      saveCombatState({
-        ...combatState,
-        currentTurnIndex: nextIndex,
-      });
+      baseCombatants = updatedCombatants;
     }
+
+    // Reset legendary action pool for the incoming combatant (both mid-round and round-end paths)
+    const combatants = resetIncomingLegendaryPool(baseCombatants, nextIndex);
+
+    saveCombatState({
+      ...combatState,
+      combatants,
+      currentTurnIndex: nextIndex,
+      currentRound: nextRound,
+    });
   };
 
   const updateCombatant = (id: string, updates: Partial<CombatantState>) => {
@@ -597,8 +614,24 @@ function CombatContent() {
                 </div>
 
                 <div className="mb-4">
+                  <label className="block text-sm mb-2">Select Party (Optional)</label>
+                  <select
+                    value={selectedPartyId ?? ''}
+                    onChange={(e) => selectParty(e.target.value || null)}
+                    className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
+                  >
+                    <option value="">No party (all characters)</option>
+                    {parties.map(party => (
+                      <option key={party.id} value={party.id}>
+                        {party.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="mb-4">
                   <p className="text-gray-400 text-xs">
-                    Characters: {characters.length} | 
+                    Characters: {resolveCharactersForCombat(selectedPartyId, parties, characters, setupCombatants).length} |
                     Monsters: {selectedEncounterId ? encounters.find(e => e.id === selectedEncounterId)?.monsters.length || 0 : 0}
                   </p>
                 </div>
@@ -1082,19 +1115,10 @@ function CombatContent() {
                       </div>
                     )}
 
-                    {combatant.legendaryActions && combatant.legendaryActions.length > 0 && (
-                      <div>
-                        <p className="text-gray-400 text-sm mb-2 font-semibold">Legendary Actions</p>
-                        <div className="space-y-2">
-                          {combatant.legendaryActions.map((action) => (
-                            <div key={action.name} className="text-xs">
-                              <p className="font-bold text-white">{action.name}</p>
-                              <p className="text-gray-300">{action.description}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    <LegendaryActionsPanel
+                      combatant={combatant}
+                      onUpdate={(updates) => updateCombatant(combatant.id, updates)}
+                    />
 
                     {combatant.lairActions && combatant.lairActions.length > 0 && (
                       <div>
@@ -1268,10 +1292,16 @@ function CombatantCard({
   const [conditionDuration, setConditionDuration] = useState('');
   const [targetActionMode, setTargetActionMode] = useState<'damage' | 'condition' | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
+  const [isTempMode, setIsTempMode] = useState(false);
 
   const adjustHp = (amount: number) => {
-    const newHp = Math.max(0, Math.min(combatant.maxHp, combatant.hp + amount));
-    onUpdate({ hp: newHp });
+    if (amount < 0) {
+      const result = calcApplyDamage(combatant.hp, combatant.tempHp ?? 0, -amount);
+      onUpdate({ hp: result.hp, tempHp: result.tempHp });
+    } else {
+      const result = calcApplyHealing(combatant.hp, combatant.maxHp, amount);
+      onUpdate({ hp: result.hp });
+    }
   };
 
   const handleHpAdjustmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1291,6 +1321,20 @@ function CombatantCard({
     const amount = parseInt(hpAdjustment) || 0;
     if (amount > 0) {
       adjustHp(amount);
+      setHpAdjustment('');
+    }
+  };
+
+  const applySetTemp = () => {
+    const amount = parseInt(hpAdjustment) || 0;
+    if (amount > 0) {
+      const currentTempHp = combatant.tempHp ?? 0;
+      const result = calcSetTempHp(currentTempHp, amount);
+      if (result.tempHp === currentTempHp) {
+        setHpAdjustment('');
+        return;
+      }
+      onUpdate({ tempHp: result.tempHp });
       setHpAdjustment('');
     }
   };
@@ -1331,8 +1375,8 @@ function CombatantCard({
 
     const target = allCombatants?.find(c => c.id === selectedTargetId);
     if (target) {
-      const newHp = Math.max(0, target.hp - damage);
-      onUpdateCombatant(selectedTargetId, { hp: newHp });
+      const result = calcApplyDamage(target.hp, target.tempHp ?? 0, damage);
+      onUpdateCombatant(selectedTargetId, { hp: result.hp, tempHp: result.tempHp });
     }
 
     setDamageInput('');
@@ -1363,8 +1407,11 @@ function CombatantCard({
     setTargetActionMode(null);
   };
 
-  const hpPercent = (combatant.hp / combatant.maxHp) * 100;
-  const hpColor = hpPercent > 50 ? 'bg-green-500' : hpPercent > 25 ? 'bg-yellow-500' : 'bg-red-500';
+  const tempHp = combatant.tempHp ?? 0;
+  const hpTotal = combatant.maxHp + tempHp;
+const hpPercent = hpTotal > 0 ? (combatant.hp / hpTotal) * 100 : 0;
+const tempHpPercent = hpTotal > 0 ? (tempHp / hpTotal) * 100 : 0;
+const hpColor = combatant.maxHp > 0 ? ((combatant.hp / combatant.maxHp) > 0.5 ? 'bg-green-500' : (combatant.hp / combatant.maxHp) > 0.25 ? 'bg-yellow-500' : 'bg-red-500') : 'bg-red-500';
 
   // Background gradient based on combatant type - stronger fade from left to right
   const bgStyle = combatant.type === 'player'
@@ -1388,6 +1435,7 @@ function CombatantCard({
                 className="hover:opacity-80 transition-opacity"
                 title={`See full ${combatant.type === 'player' ? 'Character' : 'Monster'} information`}
                 type="button"
+                data-testid="combatant-detail-toggle"
               >
                 <svg
                   className="w-5 h-5 text-gray-400 hover:text-gray-300 cursor-pointer"
@@ -1431,8 +1479,16 @@ function CombatantCard({
             </div>
             <span className="text-sm text-gray-400 whitespace-nowrap">Hit Points:</span>
             <span className="text-lg font-bold">
-              Current: <span className={hpColor === 'bg-green-500' ? 'text-green-500' : hpColor === 'bg-yellow-500' ? 'text-yellow-500' : 'text-red-500'}>{combatant.hp}</span> Max: {combatant.maxHp}
+              Current: <span className={hpColor === 'bg-green-500' ? 'text-green-500' : hpColor === 'bg-yellow-500' ? 'text-yellow-500' : 'text-red-500'}>{combatant.hp}</span> Max: {combatant.maxHp}{tempHp > 0 && <span className="text-blue-400"> +{tempHp} tmp</span>}
             </span>
+            {(combatant.legendaryActionCount ?? 0) > 0 && (
+              <span
+                className="text-sm font-semibold text-amber-400 whitespace-nowrap"
+                data-testid="legendary-action-badge"
+              >
+                ⚡ {combatant.legendaryActionsRemaining ?? combatant.legendaryActionCount}/{combatant.legendaryActionCount}
+              </span>
+            )}
             <input
               type="number"
               placeholder="0"
@@ -1441,7 +1497,7 @@ function CombatantCard({
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
                   if (e.shiftKey) {
-                    applyHeal();
+                    isTempMode ? applySetTemp() : applyHeal();
                   } else {
                     applyDamage();
                   }
@@ -1457,12 +1513,21 @@ function CombatantCard({
               Damage
             </button>
             <button
-              onClick={applyHeal}
-              title="Apply healing (Shift+Enter)"
+              onClick={isTempMode ? applySetTemp : applyHeal}
+              title={isTempMode ? "Set temporary HP" : "Apply healing (Shift+Enter)"}
               className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs"
             >
-              Heal
+              {isTempMode ? 'Set Temp' : 'Heal'}
             </button>
+            <label className="flex items-center gap-1 text-xs text-gray-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isTempMode}
+                onChange={(e) => setIsTempMode(e.target.checked)}
+                className="cursor-pointer"
+              />
+              Temp
+            </label>
             <div className="flex items-center gap-2 ml-auto pr-4">
               <button
                 onClick={() => onSetInitiative?.(combatant.id)}
@@ -1481,8 +1546,11 @@ function CombatantCard({
             </div>
           </div>
 
-          <div className="w-4/5 bg-gray-700 rounded-full h-2">
-            <div className={`${hpColor} h-2 rounded-full transition-all`} data-testid="health-bar" style={{ width: `${hpPercent}%` }} />
+          <div className="w-4/5 bg-gray-700 rounded-full h-2 flex overflow-hidden">
+            <div className={`${hpColor} h-2 transition-all`} data-testid="health-bar" style={{ width: `${hpPercent}%` }} />
+            {tempHp > 0 && (
+              <div className="bg-blue-400 h-2 transition-all" data-testid="temp-hp-bar" style={{ width: `${tempHpPercent}%` }} />
+            )}
           </div>
 
           {combatant.conditions.length > 0 && (

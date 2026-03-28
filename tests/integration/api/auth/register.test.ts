@@ -47,8 +47,7 @@ describe("POST /api/auth/register - Integration Tests", () => {
     expect(cookie).toContain("auth-token=");
 
     // Verify the user is persisted with a hashed password (not plaintext)
-    // Dynamic import defers module load until after beforeAll sets MONGODB_URI
-    const { getDatabase, closeDatabase } = await import("@/lib/db");
+    const { getDatabase } = await import("@/lib/db");
     const db = await getDatabase();
     const user = await db.collection("users").findOne({ email });
 
@@ -57,8 +56,6 @@ describe("POST /api/auth/register - Integration Tests", () => {
     expect(user?.passwordHash).not.toBe(VALID_PASSWORD);
     // bcrypt hashes should start with $2a$ / $2b$ / $2y$
     expect(user?.passwordHash).toMatch(/^\$2[aby]\$/);
-    // Close the connection opened by the test process to prevent leaked handles
-    await closeDatabase();
   });
 
   it("should return 409 when email already exists", async () => {
