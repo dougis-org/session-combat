@@ -51,6 +51,7 @@ export function LairActionsSlot({ combatant, onUpdate, onNextTurn, isActive }: L
           </button>
           <button
             type="button"
+            data-testid="lair-action-skip"
             className="text-xs px-3 py-1 rounded bg-gray-600 hover:bg-gray-500 text-white"
             onClick={onNextTurn}
           >

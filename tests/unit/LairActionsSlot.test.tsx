@@ -95,11 +95,7 @@ describe('LairActionsSlot', () => {
   test('Skip button calls onNextTurn', async () => {
     const onNextTurn = jest.fn() as jest.MockedFunction<() => void>;
     await renderSlot({}, true, () => {}, onNextTurn);
-    const skipBtn = Array.from(container.querySelectorAll('button')).find(
-      b => b.textContent?.toLowerCase().includes('skip')
-    ) as HTMLButtonElement;
-    expect(skipBtn).not.toBeNull();
-    await act(async () => { skipBtn.click(); });
+    await clickEl('lair-action-skip');
     expect(onNextTurn).toHaveBeenCalledTimes(1);
   });
 
