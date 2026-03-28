@@ -124,6 +124,7 @@ function CombatContent() {
   const saveCombatState = async (state: CombatState | null) => {
     try {
       setError(null);
+      setCombatState(state);
       if (state) {
         const response = await fetch('/api/combat', {
           method: 'POST',
@@ -132,7 +133,6 @@ function CombatContent() {
         });
         if (!response.ok) throw new Error('Failed to save combat state');
       }
-      setCombatState(state);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save combat state');
     }
@@ -159,6 +159,7 @@ function CombatContent() {
       name,
       type: 'lair',
       initiative: 20,
+      initiativeRoll: { roll: 20, bonus: 0, total: 20, method: 'manual' },
       conditions: [],
       hp: 0,
       maxHp: 0,
@@ -275,7 +276,7 @@ function CombatContent() {
         id: `${idPrefix}-${item.id}-${crypto.randomUUID()}`,
         name: item.name,
         type,
-        initiative: 0,
+        initiative: ('initiative' in item && typeof item.initiative === 'number') ? item.initiative : 0,
         abilityScores: item.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
         hp: item.hp,
         maxHp: item.maxHp,
@@ -438,19 +439,20 @@ function CombatContent() {
   const rollInitiative = () => {
     if (!combatState) return;
 
-    // Roll initiative for all combatants
+    // Roll initiative for all non-lair combatants (lair slots are always initiative 20)
     const updatedCombatants = combatState.combatants.map(c => {
+      if (c.type === 'lair') return c;
       const roll = rollD20();
       const bonus = getInitiativeBonus(c);
       const total = roll + bonus;
-      
+
       const initiativeRoll: InitiativeRoll = {
         roll,
         bonus,
         total,
         method: 'rolled',
       };
-      
+
       return { ...c, initiative: total, initiativeRoll };
     });
 

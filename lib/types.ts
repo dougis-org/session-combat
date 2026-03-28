@@ -300,6 +300,8 @@ export interface Monster extends CreatureStats {
   // Metadata
   source?: string;
   description?: string;
+  // Optional initiative override (used when manually creating a combatant with a specific initiative value)
+  initiative?: number;
 }
 
 // Character - player character with shared creature stats

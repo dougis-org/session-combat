@@ -51,6 +51,7 @@ export function QuickCombatantModal({
     maxHp: 10,
     ac: 10,
     dexterity: 10,
+    initiative: '' as number | '',
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -233,6 +234,7 @@ export function QuickCombatantModal({
       type: 'humanoid',
       speed: '30 ft.',
       challengeRating: 0,
+      ...(customFormData.initiative !== '' && { initiative: Number(customFormData.initiative) }),
     };
 
     onAddMonster(newMonster);
@@ -246,6 +248,14 @@ export function QuickCombatantModal({
     setCustomFormData((prev) => {
       if (field === 'name') {
         return { ...prev, name: String(value) };
+      }
+
+      if (field === 'initiative') {
+        if (value === '' || String(value).trim() === '') {
+          return { ...prev, initiative: '' };
+        }
+        const parsed = parseInt(String(value), 10);
+        return { ...prev, initiative: Number.isNaN(parsed) ? '' : parsed };
       }
 
       const stringValue = String(value);
@@ -631,6 +641,20 @@ export function QuickCombatantModal({
                     const newHp = parseInt(e.target.value) || 0;
                     handleCustomFormChange('hp', newHp);
                   }}
+                  className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="custom-initiative" className="block text-sm font-semibold mb-2 text-gray-200">
+                  Initiative <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  id="custom-initiative"
+                  type="number"
+                  value={customFormData.initiative}
+                  onChange={(e) => handleCustomFormChange('initiative', e.target.value === '' ? '' : parseInt(e.target.value))}
+                  placeholder="Auto-rolled if blank"
                   className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
