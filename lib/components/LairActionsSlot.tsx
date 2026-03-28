@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CombatantState } from '@/lib/types';
+import type { CombatantState, CreatureAbility } from '@/lib/types';
 import { useCharge, restoreCharge, restoreAllCharges } from '@/lib/utils/combat';
 
 interface LairActionsSlotProps {
@@ -24,7 +24,7 @@ export function LairActionsSlot({ combatant, onUpdate, onNextTurn, isActive }: L
     );
   }
 
-  const applyToAction = (fn: (a: import('@/lib/types').CreatureAbility) => import('@/lib/types').CreatureAbility, index: number) => {
+  const applyToAction = (fn: (a: CreatureAbility) => CreatureAbility, index: number) => {
     onUpdate({ lairActions: actions.map((a, i) => i === index ? fn(a) : { ...a }) });
   };
 
@@ -68,7 +68,7 @@ export function LairActionsSlot({ combatant, onUpdate, onNextTurn, isActive }: L
 
           return (
             <div
-              key={action.name}
+              key={`${action.name}-${index}`}
               data-testid={`lair-action-${index}`}
               className={`text-xs rounded p-2 bg-gray-800 ${exhausted ? 'exhausted opacity-50' : ''}`}
             >

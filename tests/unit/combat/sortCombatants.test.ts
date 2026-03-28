@@ -74,4 +74,12 @@ describe('sortCombatants', () => {
     const sorted = sortCombatants([b, a]);
     expect(sorted[0].id).toBe('a');
   });
+
+  test('lair sorts before high-DEX player at initiative 20', () => {
+    const player = make('p', 'Alice', 'player', 20, 20);
+    const lair = make('l', 'Dragon Lair', 'lair', 20, 10);
+    const sorted = sortCombatants([player, lair]);
+    expect(sorted[0].type).toBe('lair');
+    expect(sorted[1].type).toBe('player');
+  });
 });

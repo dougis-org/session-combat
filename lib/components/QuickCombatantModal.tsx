@@ -653,7 +653,7 @@ export function QuickCombatantModal({
                   id="custom-initiative"
                   type="number"
                   value={customFormData.initiative}
-                  onChange={(e) => handleCustomFormChange('initiative', e.target.value === '' ? '' : parseInt(e.target.value))}
+                  onChange={(e) => handleCustomFormChange('initiative', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
                   placeholder="Auto-rolled if blank"
                   className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />

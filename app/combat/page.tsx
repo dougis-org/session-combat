@@ -122,6 +122,7 @@ function CombatContent() {
   }, [setupCombatants]);
 
   const saveCombatState = async (state: CombatState | null) => {
+    const prev = combatState;
     try {
       setError(null);
       setCombatState(state);
@@ -134,6 +135,7 @@ function CombatContent() {
         if (!response.ok) throw new Error('Failed to save combat state');
       }
     } catch (err) {
+      setCombatState(prev);
       setError(err instanceof Error ? err.message : 'Failed to save combat state');
     }
   };
@@ -168,6 +170,8 @@ function CombatContent() {
       lairActions,
     };
   };
+
+  const cancelLairForm = () => { setShowLairForm(false); setLairFormName(''); setLairFormSeedMonster(''); };
 
   const confirmAddLair = () => {
     const name = lairFormName.trim();
@@ -768,7 +772,7 @@ function CombatContent() {
               onNameChange={setLairFormName}
               onSeedChange={setLairFormSeedMonster}
               onConfirm={confirmAddLair}
-              onCancel={() => { setShowLairForm(false); setLairFormName(''); setLairFormSeedMonster(''); }}
+              onCancel={cancelLairForm}
             />
           )}
         </div>
@@ -990,9 +994,10 @@ function CombatContent() {
                         type="button"
                         data-testid="lair-slot-remove"
                         className="text-xs text-red-400 hover:text-red-300 mt-1 ml-2"
-                        onClick={() => {
+                        onClick={(e) => {
+                          const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
                           setRemoveConfirmId(combatant.id);
-                          setRemoveConfirmPosition({ top: 200, left: 200 });
+                          setRemoveConfirmPosition({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
                         }}
                       >
                         Remove

@@ -1,5 +1,5 @@
 // Pure combat math utilities for D&D 5e combat mechanics
-import { CreatureAbility, CombatantState } from '@/lib/types';
+import type { CreatureAbility, CombatantState } from '@/lib/types';
 
 /**
  * Apply damage to a combatant, draining temp HP first.
@@ -127,17 +127,17 @@ const TYPE_ORDER: Record<CombatantState['type'], number> = { lair: 0, player: 1,
 export function sortCombatants(combatants: CombatantState[]): CombatantState[] {
   return [...combatants].sort((a, b) => {
     if (a.initiative !== b.initiative) return b.initiative - a.initiative;
+    if (a.type !== b.type) return TYPE_ORDER[a.type] - TYPE_ORDER[b.type];
     const aDex = a.abilityScores?.dexterity ?? 10;
     const bDex = b.abilityScores?.dexterity ?? 10;
     if (aDex !== bDex) return bDex - aDex;
-    if (a.type !== b.type) return TYPE_ORDER[a.type] - TYPE_ORDER[b.type];
     return a.name.localeCompare(b.name);
   });
 }
 
 /**
  * Decrement usesRemaining by 1, clamped at 0. Returns new object.
- * If usesRemaining is absent, returns ability unchanged.
+ * If usesRemaining is absent, returns a copy of the ability unchanged.
  */
 export function useCharge(ability: CreatureAbility): CreatureAbility {
   return ability.usesRemaining === undefined
