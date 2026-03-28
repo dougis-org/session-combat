@@ -526,4 +526,331 @@ test.describe("Combat flows", () => {
 
     await verifyCombatScreenElements(page);
   });
+
+  // ────────────────────────────────────────────────────────────
+  // Lair actions
+  // ────────────────────────────────────────────────────────────
+
+  const LAIR_MONSTER = {
+    ...LEGENDARY_MONSTER,
+    id: "dragon-lair-test-id",
+    _id: "dragon-lair-test-id",
+    name: "Ancient Dragon",
+    lairActions: [
+      { name: "Earthquake", description: "The ground shakes violently.", usesRemaining: 2 },
+      { name: "Volcanic Gas", description: "Toxic fumes fill the area." },
+    ],
+    legendaryActions: [],
+    legendaryActionCount: 0,
+  };
+
+  async function startCombatWithLairMonster(page: import("@playwright/test").Page) {
+    await page.route("**/api/monsters", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify([LAIR_MONSTER]),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await page.goto("/combat");
+    await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
+    await expect(page.getByText("Ancient Dragon")).toBeVisible({ timeout: 10000 });
+    await page.getByRole("button", { name: "Add Ancient Dragon to encounter" }).click();
+    await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
+    await page.locator('[data-testid="start-combat-quick"]').click();
+    await page.waitForSelector('[data-testid="combatants-list"]', { timeout: 15000 });
+  }
+
+  test("Add Lair button is present in pre-combat setup", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await page.goto("/combat");
+    await expect(page.getByRole("button", { name: /Add Lair/i })).toBeVisible({ timeout: 10000 });
+  });
+
+  test("Add Lair form appears on button click and inserts slot at initiative 20", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+
+    await page.route("**/api/monsters", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([]) });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await page.goto("/combat");
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await expect(page.locator('[data-testid="lair-name-input"]')).toBeVisible({ timeout: 5000 });
+    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Cave");
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+
+    // Lair slot should appear in the setup list with initiative 20
+    await expect(page.getByText("Dragon Cave")).toBeVisible({ timeout: 5000 });
+  });
+
+  test("Seed from monster dropdown lists monsters with lairActions", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await startCombatWithLairMonster(page);
+
+    // Now add lair slot via "Add Lair" in active combat
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await expect(page.locator('[data-testid="lair-seed-select"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="lair-seed-select"]')).toContainText("Ancient Dragon");
+  });
+
+  test("lair slot sorts before initiative-20 player in order", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+
+    await page.route("**/api/monsters", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([]) });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await page.goto("/combat");
+    // Add a custom player combatant with initiative 20
+    await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
+    await page.getByRole("tab", { name: "Create New" }).click();
+    await page.locator("#custom-name").fill(identity.name("Fighter"));
+    await page.locator("#custom-maxhp").fill("30");
+    await page.locator("#custom-hp").fill("30");
+    await page.locator("#custom-initiative").fill("20");
+    await page.locator('button[type="submit"]').click();
+
+    // Add lair slot
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await page.locator('[data-testid="lair-name-input"]').fill("Test Lair");
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+
+    // Start combat
+    await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
+    await page.locator('[data-testid="start-combat-quick"]').click();
+    await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
+
+    // Lair slot should appear before the player in initiative order
+    const rows = page.locator('[data-testid="initiative-order"] > *');
+    const firstRow = rows.nth(0);
+    await expect(firstRow).toContainText("Test Lair");
+  });
+
+  test("lair slot shows compact badge when inactive in initiative order", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+
+    await page.route("**/api/monsters", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([]) });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await page.goto("/combat");
+    await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
+    await page.getByRole("tab", { name: "Create New" }).click();
+    await page.locator("#custom-name").fill("Goblin");
+    await page.locator("#custom-maxhp").fill("7");
+    await page.locator("#custom-hp").fill("7");
+    await page.locator('button[type="submit"]').click();
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await page.locator('[data-testid="lair-name-input"]').fill("Test Lair");
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+    await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
+    await page.locator('[data-testid="start-combat-quick"]').click();
+    await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
+
+    // The lair slot row should contain lair icon (badge) but not the full action list
+    const lairBadge = page.locator('[data-testid="lair-slot-badge"]').first();
+    await expect(lairBadge).toBeVisible();
+  });
+
+  test("advancing turn to lair slot shows active LairActionsSlot", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await startCombatWithLairMonster(page);
+
+    // Add a lair slot in active combat
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Lair");
+    await page.locator('[data-testid="lair-seed-select"]').selectOption("Ancient Dragon");
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+
+    // Advance to the lair slot's turn
+    // (The lair is at init 20; advance turns until "Dragon Lair" is active)
+    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
+    // Keep clicking until lair slot is active (up to 5 times)
+    for (let i = 0; i < 5; i++) {
+      const activeLair = page.locator('[data-testid="lair-active"]');
+      const isVisible = await activeLair.isVisible().catch(() => false);
+      if (isVisible) break;
+      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
+    }
+    await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
+  });
+
+  test("Skip button in active lair slot advances to next combatant", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await startCombatWithLairMonster(page);
+
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Lair");
+    await page.locator('[data-testid="lair-seed-select"]').selectOption("Ancient Dragon");
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+
+    // Advance until lair is active
+    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
+    for (let i = 0; i < 5; i++) {
+      const activeLair = page.locator('[data-testid="lair-active"]');
+      const isVisible = await activeLair.isVisible().catch(() => false);
+      if (isVisible) break;
+      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
+    }
+
+    await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
+    const skipBtn = page.locator('[data-testid="lair-active"]').getByRole("button", { name: "Skip" });
+    await skipBtn.click();
+    // Lair should no longer be active
+    await expect(page.locator('[data-testid="lair-active"]')).toHaveCount(0);
+  });
+
+  test("Use button in active lair slot decrements usesRemaining", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await startCombatWithLairMonster(page);
+
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Lair");
+    await page.locator('[data-testid="lair-seed-select"]').selectOption("Ancient Dragon");
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+
+    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
+    for (let i = 0; i < 5; i++) {
+      const activeLair = page.locator('[data-testid="lair-active"]');
+      const isVisible = await activeLair.isVisible().catch(() => false);
+      if (isVisible) break;
+      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
+    }
+
+    await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
+    // Earthquake has usesRemaining: 2 — use it, should decrement to 1
+    const useBtn = page.locator('[data-testid="lair-active"] [data-testid="lair-action-use-0"]');
+    await expect(useBtn).toBeVisible({ timeout: 5000 });
+    await useBtn.click();
+    // The charge count should now show 1
+    await expect(page.locator('[data-testid="lair-active"]')).toContainText("1");
+  });
+
+  test("Use button disabled when usesRemaining is 0 in active lair slot", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+
+    const exhaustedMonster = {
+      ...LAIR_MONSTER,
+      lairActions: [
+        { name: "Earthquake", description: "Ground shakes.", usesRemaining: 0 },
+      ],
+    };
+
+    await page.route("**/api/monsters", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([exhaustedMonster]) });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await page.goto("/combat");
+    await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
+    await expect(page.getByText("Ancient Dragon")).toBeVisible({ timeout: 10000 });
+    await page.getByRole("button", { name: "Add Ancient Dragon to encounter" }).click();
+    await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
+    await page.locator('[data-testid="start-combat-quick"]').click();
+    await page.waitForSelector('[data-testid="combatants-list"]', { timeout: 15000 });
+
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Lair");
+    await page.locator('[data-testid="lair-seed-select"]').selectOption("Ancient Dragon");
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+
+    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
+    for (let i = 0; i < 5; i++) {
+      const activeLair = page.locator('[data-testid="lair-active"]');
+      const isVisible = await activeLair.isVisible().catch(() => false);
+      if (isVisible) break;
+      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
+    }
+
+    const useBtn = page.locator('[data-testid="lair-active"] [data-testid="lair-action-use-0"]') as import("@playwright/test").Locator;
+    await expect(useBtn).toBeDisabled({ timeout: 5000 });
+  });
+
+  test("lair slot can be removed from active combat", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+
+    await page.route("**/api/monsters", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([]) });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await page.goto("/combat");
+    await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
+    await page.getByRole("tab", { name: "Create New" }).click();
+    await page.locator("#custom-name").fill("Goblin");
+    await page.locator("#custom-maxhp").fill("7");
+    await page.locator("#custom-hp").fill("7");
+    await page.locator('button[type="submit"]').click();
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await page.locator('[data-testid="lair-name-input"]').fill("Test Lair");
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+    await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
+    await page.locator('[data-testid="start-combat-quick"]').click();
+    await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
+
+    // Remove the lair slot
+    const removeBtn = page.locator('[data-testid="lair-slot-remove"]').first();
+    await expect(removeBtn).toBeVisible({ timeout: 5000 });
+    await removeBtn.click();
+    await page.getByRole("button", { name: "Remove" }).click();
+    await expect(page.getByText("Test Lair")).toHaveCount(0);
+  });
+
+  test("lair action descriptions are read-only during active combat", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await startCombatWithLairMonster(page);
+
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Lair");
+    await page.locator('[data-testid="lair-seed-select"]').selectOption("Ancient Dragon");
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+
+    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
+    for (let i = 0; i < 5; i++) {
+      const activeLair = page.locator('[data-testid="lair-active"]');
+      const isVisible = await activeLair.isVisible().catch(() => false);
+      if (isVisible) break;
+      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
+    }
+
+    await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
+    // Description text should be plain text (not editable input)
+    const descInputs = page.locator('[data-testid="lair-active"] input[type="text"]');
+    await expect(descInputs).toHaveCount(0);
+  });
 });

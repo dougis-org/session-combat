@@ -1,5 +1,6 @@
 import { describe, test, expect } from '@jest/globals';
-import { applyDamage, applyHealing, setTempHp, useLegendaryAction, resetLegendaryActions, resetIncomingLegendaryPool, decrementLegendaryPool, incrementLegendaryPool } from '@/lib/utils/combat';
+import { applyDamage, applyHealing, setTempHp, useLegendaryAction, resetLegendaryActions, resetIncomingLegendaryPool, decrementLegendaryPool, incrementLegendaryPool, useCharge, restoreCharge, restoreAllCharges } from '@/lib/utils/combat';
+import { CreatureAbility } from '@/lib/types';
 
 describe('applyDamage', () => {
   test('fully absorbed by temp HP', () => {
@@ -189,5 +190,115 @@ describe('incrementLegendaryPool', () => {
 
   test('increments from 0', () => {
     expect(incrementLegendaryPool(0, 0)).toEqual({ legendaryActionCount: 1, legendaryActionsRemaining: 0 });
+  });
+});
+
+describe('useCharge', () => {
+  const makeAbility = (overrides: Partial<CreatureAbility> = {}): CreatureAbility => ({
+    name: 'Earthquake',
+    description: 'The ground shakes.',
+    ...overrides,
+  });
+
+  test('decrements usesRemaining by 1', () => {
+    const result = useCharge(makeAbility({ usesRemaining: 3 }));
+    expect(result.usesRemaining).toBe(2);
+  });
+
+  test('clamps at 0, does not go negative', () => {
+    const result = useCharge(makeAbility({ usesRemaining: 0 }));
+    expect(result.usesRemaining).toBe(0);
+  });
+
+  test('returns new object, does not mutate input', () => {
+    const ability = makeAbility({ usesRemaining: 2 });
+    const result = useCharge(ability);
+    expect(result).not.toBe(ability);
+    expect(ability.usesRemaining).toBe(2);
+  });
+
+  test('passes through ability without usesRemaining unchanged', () => {
+    const ability = makeAbility();
+    const result = useCharge(ability);
+    expect(result.usesRemaining).toBeUndefined();
+    expect(result.name).toBe('Earthquake');
+  });
+
+  test('preserves all other fields', () => {
+    const ability = makeAbility({ usesRemaining: 1, attackBonus: 5 });
+    const result = useCharge(ability);
+    expect(result.attackBonus).toBe(5);
+    expect(result.description).toBe('The ground shakes.');
+  });
+});
+
+describe('restoreCharge', () => {
+  const makeAbility = (overrides: Partial<CreatureAbility> = {}): CreatureAbility => ({
+    name: 'Rockfall',
+    description: 'Rocks fall.',
+    ...overrides,
+  });
+
+  test('increments usesRemaining by 1', () => {
+    const result = restoreCharge(makeAbility({ usesRemaining: 2 }));
+    expect(result.usesRemaining).toBe(3);
+  });
+
+  test('increments from 0', () => {
+    const result = restoreCharge(makeAbility({ usesRemaining: 0 }));
+    expect(result.usesRemaining).toBe(1);
+  });
+
+  test('returns new object, does not mutate input', () => {
+    const ability = makeAbility({ usesRemaining: 1 });
+    const result = restoreCharge(ability);
+    expect(result).not.toBe(ability);
+    expect(ability.usesRemaining).toBe(1);
+  });
+
+  test('passes through ability without usesRemaining unchanged', () => {
+    const ability = makeAbility();
+    const result = restoreCharge(ability);
+    expect(result.usesRemaining).toBeUndefined();
+  });
+
+  test('preserves all other fields', () => {
+    const ability = makeAbility({ usesRemaining: 0, saveDC: 15 });
+    const result = restoreCharge(ability);
+    expect(result.saveDC).toBe(15);
+  });
+});
+
+describe('restoreAllCharges', () => {
+  const limited = (name: string, uses: number): CreatureAbility => ({ name, description: 'd', usesRemaining: uses });
+  const unlimited = (name: string): CreatureAbility => ({ name, description: 'd' });
+
+  test('increments usesRemaining on all limited actions', () => {
+    const result = restoreAllCharges([limited('A', 0), limited('B', 1)]);
+    expect(result[0].usesRemaining).toBe(1);
+    expect(result[1].usesRemaining).toBe(2);
+  });
+
+  test('leaves unlimited actions (no usesRemaining) unchanged', () => {
+    const result = restoreAllCharges([unlimited('X')]);
+    expect(result[0].usesRemaining).toBeUndefined();
+  });
+
+  test('mixed array: limited incremented, unlimited unchanged', () => {
+    const result = restoreAllCharges([limited('A', 0), unlimited('B'), limited('C', 2)]);
+    expect(result[0].usesRemaining).toBe(1);
+    expect(result[1].usesRemaining).toBeUndefined();
+    expect(result[2].usesRemaining).toBe(3);
+  });
+
+  test('returns new array, does not mutate input', () => {
+    const actions = [limited('A', 1)];
+    const result = restoreAllCharges(actions);
+    expect(result).not.toBe(actions);
+    expect(actions[0].usesRemaining).toBe(1);
+  });
+
+  test('empty array returns empty array', () => {
+    expect(restoreAllCharges([])).toEqual([]);
   });
 });

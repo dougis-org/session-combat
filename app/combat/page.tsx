@@ -9,8 +9,9 @@ import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
-import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool } from '@/lib/utils/combat';
+import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool, sortCombatants } from '@/lib/utils/combat';
 import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
+import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
 
@@ -38,6 +39,9 @@ function CombatContent() {
   const [removeConfirmPosition, setRemoveConfirmPosition] = useState<{top: number, left: number} | null>(null);
   const [showEncounterDescription, setShowEncounterDescription] = useState(false);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [showLairForm, setShowLairForm] = useState(false);
+  const [lairFormName, setLairFormName] = useState('');
+  const [lairFormSeedMonster, setLairFormSeedMonster] = useState('');
   const initiativePanelRef = useRef<HTMLDivElement>(null);
   const setupCombatantsRef = useRef<CombatantState[]>([]);
 
@@ -144,6 +148,55 @@ function CombatContent() {
 
   const removeCombatantFromSetup = (id: string) => {
     setSetupCombatants(prev => prev.filter(c => c.id !== id));
+  };
+
+  const buildLairCombatant = (name: string, seedMonsterName: string, sourceList: CombatantState[] | null): CombatantState => {
+    let lairActions: import('@/lib/types').CreatureAbility[] = [];
+    if (seedMonsterName) {
+      const source = sourceList
+        ? sourceList.find(c => c.name === seedMonsterName)
+        : null;
+      lairActions = (source?.lairActions ?? []).map(a => ({ ...a }));
+    }
+    return {
+      id: `lair-${crypto.randomUUID()}`,
+      name,
+      type: 'lair',
+      initiative: 20,
+      conditions: [],
+      hp: 0,
+      maxHp: 0,
+      ac: 0,
+      abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+      lairActions,
+    };
+  };
+
+  const confirmAddLair = () => {
+    const name = lairFormName.trim();
+    if (!name) return;
+    if (!combatState) {
+      // Setup phase
+      const lair = buildLairCombatant(name, lairFormSeedMonster, setupCombatants);
+      setSetupCombatants(prev => [...prev, lair]);
+      setupCombatantsRef.current = [...setupCombatantsRef.current, lair];
+    } else {
+      // Active combat
+      const lair = buildLairCombatant(name, lairFormSeedMonster, combatState.combatants);
+      const currentCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
+      const updatedList = sortCombatants([...combatState.combatants, lair]);
+      const newTurnIndex = currentCombatantId
+        ? updatedList.findIndex(c => c.id === currentCombatantId)
+        : combatState.currentTurnIndex;
+      saveCombatState({
+        ...combatState,
+        combatants: updatedList,
+        currentTurnIndex: newTurnIndex !== -1 ? newTurnIndex : 0,
+      });
+    }
+    setLairFormName('');
+    setLairFormSeedMonster('');
+    setShowLairForm(false);
   };
 
   const selectParty = (partyId: string | null) => {
@@ -432,26 +485,6 @@ function CombatContent() {
     }
     return 0;
   };
-  const sortCombatants = (combatants: CombatantState[]): CombatantState[] => {
-    return combatants.sort((a, b) => {
-      // Primary: Initiative (descending)
-      if (a.initiative !== b.initiative) {
-        return b.initiative - a.initiative;
-      }
-      // Secondary: Dexterity (descending)
-      const aDex = a.abilityScores?.dexterity || 10;
-      const bDex = b.abilityScores?.dexterity || 10;
-      if (aDex !== bDex) {
-        return bDex - aDex;
-      }
-      // Tertiary: Player before monster
-      if (a.type !== b.type) {
-        return a.type === 'player' ? -1 : 1;
-      }
-      // Quaternary: Alphabetically by name
-      return a.name.localeCompare(b.name);
-    });
-  };
   const nextTurn = () => {
     if (!combatState) return;
 
@@ -697,6 +730,12 @@ function CombatContent() {
                   >
                     + Add Enemy
                   </button>
+                  <button
+                    onClick={() => setShowLairForm(true)}
+                    className="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm font-semibold transition-colors"
+                  >
+                    + Add Lair
+                  </button>
                   {setupCombatants.length > 0 && (
                     <button
                       onClick={startCombatWithSetupCombatants}
@@ -720,6 +759,18 @@ function CombatContent() {
               characterTemplates={characters}
               loadingTemplates={loadingTemplates}
               userId={user?.userId}
+            />
+          )}
+
+          {showLairForm && (
+            <LairForm
+              seedOptions={setupCombatants.filter(c => c.type !== 'lair' && (c.lairActions ?? []).length > 0).map(c => c.name)}
+              lairName={lairFormName}
+              seedMonster={lairFormSeedMonster}
+              onNameChange={setLairFormName}
+              onSeedChange={setLairFormSeedMonster}
+              onConfirm={confirmAddLair}
+              onCancel={() => { setShowLairForm(false); setLairFormName(''); setLairFormSeedMonster(''); }}
             />
           )}
         </div>
@@ -825,6 +876,13 @@ function CombatContent() {
               + Add Enemy
             </button>
             <button
+              onClick={() => setShowLairForm(true)}
+              className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm"
+              title="Add a lair actions slot"
+            >
+              + Add Lair
+            </button>
+            <button
               onClick={restartRound}
               className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded text-sm"
               title="Reset turn order to the first combatant"
@@ -919,11 +977,37 @@ function CombatContent() {
             {getDisplayCombatants().map((combatant, idx) => {
               // Find the actual index in combatState for isActive check
               const actualIdx = combatState.combatants.findIndex(c => c.id === combatant.id);
+              const isActive = actualIdx === combatState.currentTurnIndex;
+              if (combatant.type === 'lair') {
+                return (
+                  <div key={combatant.id} data-testid={isActive ? 'lair-active' : 'lair-slot-badge'}>
+                    <LairActionsSlot
+                      combatant={combatant}
+                      isActive={isActive}
+                      onUpdate={(updates) => updateCombatant(combatant.id, updates)}
+                      onNextTurn={nextTurn}
+                    />
+                    {!isActive && (
+                      <button
+                        type="button"
+                        data-testid="lair-slot-remove"
+                        className="text-xs text-red-400 hover:text-red-300 mt-1 ml-2"
+                        onClick={() => {
+                          setRemoveConfirmId(combatant.id);
+                          setRemoveConfirmPosition({ top: 200, left: 200 });
+                        }}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                );
+              }
               return (
                 <CombatantCard
                   key={combatant.id}
                   combatant={combatant}
-                  isActive={actualIdx === combatState.currentTurnIndex}
+                  isActive={isActive}
                   onUpdate={(updates) => updateCombatant(combatant.id, updates)}
                   onRemove={() => removeCombatant(combatant.id)}
                   onNextTurn={nextTurn}
@@ -1021,6 +1105,19 @@ function CombatContent() {
             characterTemplates={characters}
             loadingTemplates={loadingTemplates}
             userId={user?.userId}
+          />
+        )}
+
+        {/* Add Lair Form */}
+        {showLairForm && combatState && (
+          <LairForm
+            seedOptions={combatState.combatants.filter(c => c.type !== 'lair' && (c.lairActions ?? []).length > 0).map(c => c.name)}
+            lairName={lairFormName}
+            seedMonster={lairFormSeedMonster}
+            onNameChange={setLairFormName}
+            onSeedChange={setLairFormSeedMonster}
+            onConfirm={confirmAddLair}
+            onCancel={() => { setShowLairForm(false); setLairFormName(''); setLairFormSeedMonster(''); }}
           />
         )}
 
@@ -1673,7 +1770,7 @@ const hpColor = combatant.maxHp > 0 ? ((combatant.hp / combatant.maxHp) > 0.5 ? 
               <h5 className="text-xs font-semibold text-red-300 mb-2 uppercase">Enemies</h5>
               <div className="space-y-2">
                 {allCombatants
-                  .filter(c => c.id !== combatant.id && c.type !== 'player')
+                  .filter(c => c.id !== combatant.id && c.type !== 'player' && c.type !== 'lair')
                   .sort((a, b) => a.name.localeCompare(b.name))
                   .map(target => (
                     <label key={target.id} className="flex items-center gap-2 cursor-pointer">
@@ -2057,6 +2154,79 @@ function InitiativeEntry({ combatant, onSet, onClose }: InitiativeEntryProps) {
               )}
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LairForm({
+  seedOptions,
+  lairName,
+  seedMonster,
+  onNameChange,
+  onSeedChange,
+  onConfirm,
+  onCancel,
+}: {
+  seedOptions: string[];
+  lairName: string;
+  seedMonster: string;
+  onNameChange: (v: string) => void;
+  onSeedChange: (v: string) => void;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gray-800 rounded-lg p-6 w-full max-w-sm border border-gray-700 shadow-xl">
+        <h3 className="text-lg font-bold text-purple-300 mb-4">🏰 Add Lair Slot</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Lair name</label>
+            <input
+              type="text"
+              data-testid="lair-name-input"
+              className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
+              placeholder="e.g. Dragon's Lair"
+              value={lairName}
+              onChange={e => onNameChange(e.target.value)}
+              autoFocus
+            />
+          </div>
+          {seedOptions.length > 0 && (
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Seed from monster (optional)</label>
+              <select
+                data-testid="lair-seed-select"
+                className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
+                value={seedMonster}
+                onChange={e => onSeedChange(e.target.value)}
+              >
+                <option value="">— None (empty lair) —</option>
+                {seedOptions.map(name => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              className="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm font-semibold disabled:opacity-40"
+              disabled={!lairName.trim()}
+              onClick={onConfirm}
+            >
+              Add Lair
+            </button>
+            <button
+              type="button"
+              className="flex-1 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold"
+              onClick={onCancel}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>

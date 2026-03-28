@@ -1,4 +1,5 @@
 // Pure combat math utilities for D&D 5e combat mechanics
+import { CreatureAbility, CombatantState } from '@/lib/types';
 
 /**
  * Apply damage to a combatant, draining temp HP first.
@@ -112,4 +113,54 @@ export function incrementLegendaryPool(
     legendaryActionCount: newCount,
     legendaryActionsRemaining: Math.min(safeRemaining, newCount),
   };
+}
+
+/**
+ * Sort combatants by initiative order for display.
+ * Primary: initiative descending.
+ * Secondary: dexterity descending.
+ * Tertiary: lair before player before monster (lair fires before others at init 20).
+ * Within multiple lairs at the same initiative: alphabetically by name.
+ */
+export function sortCombatants(combatants: CombatantState[]): CombatantState[] {
+  const typeOrder = (type: CombatantState['type']): number => {
+    if (type === 'lair') return 0;
+    if (type === 'player') return 1;
+    return 2; // monster
+  };
+
+  return [...combatants].sort((a, b) => {
+    if (a.initiative !== b.initiative) return b.initiative - a.initiative;
+    const aDex = a.abilityScores?.dexterity ?? 10;
+    const bDex = b.abilityScores?.dexterity ?? 10;
+    if (aDex !== bDex) return bDex - aDex;
+    if (a.type !== b.type) return typeOrder(a.type) - typeOrder(b.type);
+    return a.name.localeCompare(b.name);
+  });
+}
+
+/**
+ * Decrement usesRemaining by 1, clamped at 0. Returns new object.
+ * If usesRemaining is absent, returns ability unchanged.
+ */
+export function useCharge(ability: CreatureAbility): CreatureAbility {
+  if (ability.usesRemaining === undefined) return { ...ability };
+  return { ...ability, usesRemaining: Math.max(0, ability.usesRemaining - 1) };
+}
+
+/**
+ * Increment usesRemaining by 1. Returns new object.
+ * If usesRemaining is absent, returns ability unchanged.
+ */
+export function restoreCharge(ability: CreatureAbility): CreatureAbility {
+  if (ability.usesRemaining === undefined) return { ...ability };
+  return { ...ability, usesRemaining: ability.usesRemaining + 1 };
+}
+
+/**
+ * Apply restoreCharge to all actions where usesRemaining is a finite number.
+ * Unlimited actions (usesRemaining absent) pass through unchanged. Returns new array.
+ */
+export function restoreAllCharges(actions: CreatureAbility[]): CreatureAbility[] {
+  return actions.map(a => (Number.isFinite(a.usesRemaining) ? restoreCharge(a) : { ...a }));
 }

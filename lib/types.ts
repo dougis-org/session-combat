@@ -214,6 +214,7 @@ export interface CreatureAbility {
   saveType?: string; // e.g., "Dexterity", "Strength"
   recharge?: string; // e.g., "Recharge 5-6"
   cost?: number; // Action point cost (legendary actions only); defaults to 1
+  usesRemaining?: number; // Remaining uses for limited-use abilities (lair actions); absent = unlimited
 }
 
 // Shared base statistics for any creature (monster, character, NPC)
@@ -369,7 +370,7 @@ export interface InitiativeRoll {
 export interface CombatantState extends CreatureStats {
   id: string;
   name: string;
-  type: "player" | "monster";
+  type: "player" | "monster" | "lair";
   initiative: number;
   initiativeRoll?: InitiativeRoll;
   conditions: StatusCondition[];
