@@ -32,6 +32,10 @@ function makeLairCombatant(overrides: Partial<CombatantState> = {}): CombatantSt
   };
 }
 
+function getUpdatedLairActions(mock: jest.MockedFunction<(u: Partial<CombatantState>) => void>): typeof DEFAULT_LAIR_ACTIONS {
+  return (mock.mock.calls[0][0] as { lairActions: typeof DEFAULT_LAIR_ACTIONS }).lairActions;
+}
+
 describe('LairActionsSlot', () => {
   let container: HTMLDivElement;
   let root: Root;
@@ -54,6 +58,12 @@ describe('LairActionsSlot', () => {
       );
     });
     return { combatant };
+  };
+
+  const clickEl = async (testid: string) => {
+    const el = container.querySelector(`[data-testid="${testid}"]`) as HTMLElement;
+    expect(el).not.toBeNull();
+    await act(async () => { el.click(); });
   };
 
   beforeEach(() => {
@@ -96,48 +106,33 @@ describe('LairActionsSlot', () => {
   test('Use button decrements charge via onUpdate', async () => {
     const onUpdate = jest.fn() as jest.MockedFunction<(u: Partial<CombatantState>) => void>;
     await renderSlot({}, true, onUpdate);
-    const useBtn = container.querySelector('[data-testid="lair-action-use-0"]') as HTMLButtonElement;
-    expect(useBtn).not.toBeNull();
-    await act(async () => { useBtn.click(); });
+    await clickEl('lair-action-use-0');
     expect(onUpdate).toHaveBeenCalled();
-    const call = (onUpdate as jest.MockedFunction<typeof onUpdate>).mock.calls[0][0];
-    const updatedActions = (call as { lairActions: typeof DEFAULT_LAIR_ACTIONS }).lairActions;
-    expect(updatedActions[0].usesRemaining).toBe(1);
+    expect(getUpdatedLairActions(onUpdate)[0].usesRemaining).toBe(1);
   });
 
   test('[−] button decrements usesRemaining via onUpdate', async () => {
     const onUpdate = jest.fn() as jest.MockedFunction<(u: Partial<CombatantState>) => void>;
     await renderSlot({}, true, onUpdate);
-    const decBtn = container.querySelector('[data-testid="lair-action-decrement-0"]') as HTMLButtonElement;
-    expect(decBtn).not.toBeNull();
-    await act(async () => { decBtn.click(); });
+    await clickEl('lair-action-decrement-0');
     expect(onUpdate).toHaveBeenCalled();
-    const call = (onUpdate as jest.MockedFunction<typeof onUpdate>).mock.calls[0][0];
-    const updatedActions = (call as { lairActions: typeof DEFAULT_LAIR_ACTIONS }).lairActions;
-    expect(updatedActions[0].usesRemaining).toBe(1);
+    expect(getUpdatedLairActions(onUpdate)[0].usesRemaining).toBe(1);
   });
 
   test('[+] button increments usesRemaining via onUpdate', async () => {
     const onUpdate = jest.fn() as jest.MockedFunction<(u: Partial<CombatantState>) => void>;
     await renderSlot({}, true, onUpdate);
-    const incBtn = container.querySelector('[data-testid="lair-action-increment-0"]') as HTMLButtonElement;
-    expect(incBtn).not.toBeNull();
-    await act(async () => { incBtn.click(); });
+    await clickEl('lair-action-increment-0');
     expect(onUpdate).toHaveBeenCalled();
-    const call = (onUpdate as jest.MockedFunction<typeof onUpdate>).mock.calls[0][0];
-    const updatedActions = (call as { lairActions: typeof DEFAULT_LAIR_ACTIONS }).lairActions;
-    expect(updatedActions[0].usesRemaining).toBe(3);
+    expect(getUpdatedLairActions(onUpdate)[0].usesRemaining).toBe(3);
   });
 
   test('Restore All calls onUpdate with all charges incremented', async () => {
     const onUpdate = jest.fn() as jest.MockedFunction<(u: Partial<CombatantState>) => void>;
     await renderSlot({}, true, onUpdate);
-    const restoreBtn = container.querySelector('[data-testid="lair-action-restore-all"]') as HTMLButtonElement;
-    expect(restoreBtn).not.toBeNull();
-    await act(async () => { restoreBtn.click(); });
+    await clickEl('lair-action-restore-all');
     expect(onUpdate).toHaveBeenCalled();
-    const call = (onUpdate as jest.MockedFunction<typeof onUpdate>).mock.calls[0][0];
-    const updatedActions = (call as { lairActions: typeof DEFAULT_LAIR_ACTIONS }).lairActions;
+    const updatedActions = getUpdatedLairActions(onUpdate);
     // limited: 2→3, 0→1; unlimited: unchanged
     expect(updatedActions[0].usesRemaining).toBe(3);
     expect(updatedActions[1].usesRemaining).toBe(1);

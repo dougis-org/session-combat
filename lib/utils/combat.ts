@@ -115,6 +115,8 @@ export function incrementLegendaryPool(
   };
 }
 
+const TYPE_ORDER: Record<CombatantState['type'], number> = { lair: 0, player: 1, monster: 2 };
+
 /**
  * Sort combatants by initiative order for display.
  * Primary: initiative descending.
@@ -123,18 +125,12 @@ export function incrementLegendaryPool(
  * Within multiple lairs at the same initiative: alphabetically by name.
  */
 export function sortCombatants(combatants: CombatantState[]): CombatantState[] {
-  const typeOrder = (type: CombatantState['type']): number => {
-    if (type === 'lair') return 0;
-    if (type === 'player') return 1;
-    return 2; // monster
-  };
-
   return [...combatants].sort((a, b) => {
     if (a.initiative !== b.initiative) return b.initiative - a.initiative;
     const aDex = a.abilityScores?.dexterity ?? 10;
     const bDex = b.abilityScores?.dexterity ?? 10;
     if (aDex !== bDex) return bDex - aDex;
-    if (a.type !== b.type) return typeOrder(a.type) - typeOrder(b.type);
+    if (a.type !== b.type) return TYPE_ORDER[a.type] - TYPE_ORDER[b.type];
     return a.name.localeCompare(b.name);
   });
 }
@@ -144,8 +140,9 @@ export function sortCombatants(combatants: CombatantState[]): CombatantState[] {
  * If usesRemaining is absent, returns ability unchanged.
  */
 export function useCharge(ability: CreatureAbility): CreatureAbility {
-  if (ability.usesRemaining === undefined) return { ...ability };
-  return { ...ability, usesRemaining: Math.max(0, ability.usesRemaining - 1) };
+  return ability.usesRemaining === undefined
+    ? { ...ability }
+    : { ...ability, usesRemaining: Math.max(0, ability.usesRemaining - 1) };
 }
 
 /**
@@ -153,8 +150,9 @@ export function useCharge(ability: CreatureAbility): CreatureAbility {
  * If usesRemaining is absent, returns ability unchanged.
  */
 export function restoreCharge(ability: CreatureAbility): CreatureAbility {
-  if (ability.usesRemaining === undefined) return { ...ability };
-  return { ...ability, usesRemaining: ability.usesRemaining + 1 };
+  return ability.usesRemaining === undefined
+    ? { ...ability }
+    : { ...ability, usesRemaining: ability.usesRemaining + 1 };
 }
 
 /**

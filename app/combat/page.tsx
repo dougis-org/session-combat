@@ -151,13 +151,9 @@ function CombatContent() {
   };
 
   const buildLairCombatant = (name: string, seedMonsterName: string, sourceList: CombatantState[] | null): CombatantState => {
-    let lairActions: import('@/lib/types').CreatureAbility[] = [];
-    if (seedMonsterName) {
-      const source = sourceList
-        ? sourceList.find(c => c.name === seedMonsterName)
-        : null;
-      lairActions = (source?.lairActions ?? []).map(a => ({ ...a }));
-    }
+    const lairActions = seedMonsterName
+      ? (sourceList?.find(c => c.name === seedMonsterName)?.lairActions ?? []).map(a => ({ ...a }))
+      : [];
     return {
       id: `lair-${crypto.randomUUID()}`,
       name,

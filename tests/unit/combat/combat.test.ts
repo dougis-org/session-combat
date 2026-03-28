@@ -2,6 +2,12 @@ import { describe, test, expect } from '@jest/globals';
 import { applyDamage, applyHealing, setTempHp, useLegendaryAction, resetLegendaryActions, resetIncomingLegendaryPool, decrementLegendaryPool, incrementLegendaryPool, useCharge, restoreCharge, restoreAllCharges } from '@/lib/utils/combat';
 import { CreatureAbility } from '@/lib/types';
 
+const makeAbility = (overrides: Partial<CreatureAbility> = {}): CreatureAbility => ({
+  name: 'Earthquake',
+  description: 'The ground shakes.',
+  ...overrides,
+});
+
 describe('applyDamage', () => {
   test('fully absorbed by temp HP', () => {
     expect(applyDamage(30, 14, 10)).toEqual({ hp: 30, tempHp: 4 });
@@ -194,12 +200,6 @@ describe('incrementLegendaryPool', () => {
 });
 
 describe('useCharge', () => {
-  const makeAbility = (overrides: Partial<CreatureAbility> = {}): CreatureAbility => ({
-    name: 'Earthquake',
-    description: 'The ground shakes.',
-    ...overrides,
-  });
-
   test('decrements usesRemaining by 1', () => {
     const result = useCharge(makeAbility({ usesRemaining: 3 }));
     expect(result.usesRemaining).toBe(2);
@@ -233,12 +233,6 @@ describe('useCharge', () => {
 });
 
 describe('restoreCharge', () => {
-  const makeAbility = (overrides: Partial<CreatureAbility> = {}): CreatureAbility => ({
-    name: 'Rockfall',
-    description: 'Rocks fall.',
-    ...overrides,
-  });
-
   test('increments usesRemaining by 1', () => {
     const result = restoreCharge(makeAbility({ usesRemaining: 2 }));
     expect(result.usesRemaining).toBe(3);

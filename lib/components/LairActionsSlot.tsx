@@ -24,19 +24,8 @@ export function LairActionsSlot({ combatant, onUpdate, onNextTurn, isActive }: L
     );
   }
 
-  const handleUse = (index: number) => {
-    const updated = actions.map((a, i) => i === index ? useCharge(a) : { ...a });
-    onUpdate({ lairActions: updated });
-  };
-
-  const handleDecrement = (index: number) => {
-    const updated = actions.map((a, i) => i === index ? useCharge(a) : { ...a });
-    onUpdate({ lairActions: updated });
-  };
-
-  const handleIncrement = (index: number) => {
-    const updated = actions.map((a, i) => i === index ? restoreCharge(a) : { ...a });
-    onUpdate({ lairActions: updated });
+  const applyToAction = (fn: (a: import('@/lib/types').CreatureAbility) => import('@/lib/types').CreatureAbility, index: number) => {
+    onUpdate({ lairActions: actions.map((a, i) => i === index ? fn(a) : { ...a }) });
   };
 
   const handleRestoreAll = () => {
@@ -95,7 +84,7 @@ export function LairActionsSlot({ combatant, onUpdate, onNextTurn, isActive }: L
                         data-testid={`lair-action-decrement-${index}`}
                         aria-label={`Decrease uses for ${action.name}`}
                         className="px-1.5 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-white"
-                        onClick={() => handleDecrement(index)}
+                        onClick={() => applyToAction(useCharge, index)}
                       >
                         −
                       </button>
@@ -107,7 +96,7 @@ export function LairActionsSlot({ combatant, onUpdate, onNextTurn, isActive }: L
                         data-testid={`lair-action-increment-${index}`}
                         aria-label={`Increase uses for ${action.name}`}
                         className="px-1.5 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-white"
-                        onClick={() => handleIncrement(index)}
+                        onClick={() => applyToAction(restoreCharge, index)}
                       >
                         +
                       </button>
@@ -118,7 +107,7 @@ export function LairActionsSlot({ combatant, onUpdate, onNextTurn, isActive }: L
                     data-testid={`lair-action-use-${index}`}
                     className="text-xs px-2 py-1 rounded bg-purple-800 hover:bg-purple-700 text-white whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
                     disabled={!canUse}
-                    onClick={() => handleUse(index)}
+                    onClick={() => applyToAction(useCharge, index)}
                   >
                     Use
                   </button>

@@ -566,6 +566,25 @@ test.describe("Combat flows", () => {
     await page.waitForSelector('[data-testid="combatants-list"]', { timeout: 15000 });
   }
 
+  async function addLairSlot(page: import("@playwright/test").Page, name: string, seedMonster?: string) {
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await page.locator('[data-testid="lair-name-input"]').fill(name);
+    if (seedMonster) {
+      await page.locator('[data-testid="lair-seed-select"]').selectOption(seedMonster);
+    }
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+  }
+
+  async function advanceToActiveLair(page: import("@playwright/test").Page) {
+    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
+    for (let i = 0; i < 5; i++) {
+      const activeLair = page.locator('[data-testid="lair-active"]');
+      const isVisible = await activeLair.isVisible().catch(() => false);
+      if (isVisible) break;
+      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
+    }
+  }
+
   test("Add Lair button is present in pre-combat setup", async ({ page }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
@@ -681,21 +700,10 @@ test.describe("Combat flows", () => {
     await startCombatWithLairMonster(page);
 
     // Add a lair slot in active combat
-    await page.getByRole("button", { name: /Add Lair/i }).first().click();
-    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Lair");
-    await page.locator('[data-testid="lair-seed-select"]').selectOption("Ancient Dragon");
-    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+    await addLairSlot(page, "Dragon Lair", "Ancient Dragon");
 
     // Advance to the lair slot's turn
-    // (The lair is at init 20; advance turns until "Dragon Lair" is active)
-    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
-    // Keep clicking until lair slot is active (up to 5 times)
-    for (let i = 0; i < 5; i++) {
-      const activeLair = page.locator('[data-testid="lair-active"]');
-      const isVisible = await activeLair.isVisible().catch(() => false);
-      if (isVisible) break;
-      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
-    }
+    await advanceToActiveLair(page);
     await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
   });
 
@@ -704,19 +712,10 @@ test.describe("Combat flows", () => {
     await registerUser(page, identity.email, STRONG_PASSWORD);
     await startCombatWithLairMonster(page);
 
-    await page.getByRole("button", { name: /Add Lair/i }).first().click();
-    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Lair");
-    await page.locator('[data-testid="lair-seed-select"]').selectOption("Ancient Dragon");
-    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+    await addLairSlot(page, "Dragon Lair", "Ancient Dragon");
 
     // Advance until lair is active
-    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
-    for (let i = 0; i < 5; i++) {
-      const activeLair = page.locator('[data-testid="lair-active"]');
-      const isVisible = await activeLair.isVisible().catch(() => false);
-      if (isVisible) break;
-      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
-    }
+    await advanceToActiveLair(page);
 
     await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
     const skipBtn = page.locator('[data-testid="lair-active"]').getByRole("button", { name: "Skip" });
@@ -730,18 +729,9 @@ test.describe("Combat flows", () => {
     await registerUser(page, identity.email, STRONG_PASSWORD);
     await startCombatWithLairMonster(page);
 
-    await page.getByRole("button", { name: /Add Lair/i }).first().click();
-    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Lair");
-    await page.locator('[data-testid="lair-seed-select"]').selectOption("Ancient Dragon");
-    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+    await addLairSlot(page, "Dragon Lair", "Ancient Dragon");
 
-    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
-    for (let i = 0; i < 5; i++) {
-      const activeLair = page.locator('[data-testid="lair-active"]');
-      const isVisible = await activeLair.isVisible().catch(() => false);
-      if (isVisible) break;
-      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
-    }
+    await advanceToActiveLair(page);
 
     await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
     // Earthquake has usesRemaining: 2 — use it, should decrement to 1
@@ -779,18 +769,9 @@ test.describe("Combat flows", () => {
     await page.locator('[data-testid="start-combat-quick"]').click();
     await page.waitForSelector('[data-testid="combatants-list"]', { timeout: 15000 });
 
-    await page.getByRole("button", { name: /Add Lair/i }).first().click();
-    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Lair");
-    await page.locator('[data-testid="lair-seed-select"]').selectOption("Ancient Dragon");
-    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+    await addLairSlot(page, "Dragon Lair", "Ancient Dragon");
 
-    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
-    for (let i = 0; i < 5; i++) {
-      const activeLair = page.locator('[data-testid="lair-active"]');
-      const isVisible = await activeLair.isVisible().catch(() => false);
-      if (isVisible) break;
-      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
-    }
+    await advanceToActiveLair(page);
 
     const useBtn = page.locator('[data-testid="lair-active"] [data-testid="lair-action-use-0"]') as import("@playwright/test").Locator;
     await expect(useBtn).toBeDisabled({ timeout: 5000 });
@@ -835,18 +816,9 @@ test.describe("Combat flows", () => {
     await registerUser(page, identity.email, STRONG_PASSWORD);
     await startCombatWithLairMonster(page);
 
-    await page.getByRole("button", { name: /Add Lair/i }).first().click();
-    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Lair");
-    await page.locator('[data-testid="lair-seed-select"]').selectOption("Ancient Dragon");
-    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+    await addLairSlot(page, "Dragon Lair", "Ancient Dragon");
 
-    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
-    for (let i = 0; i < 5; i++) {
-      const activeLair = page.locator('[data-testid="lair-active"]');
-      const isVisible = await activeLair.isVisible().catch(() => false);
-      if (isVisible) break;
-      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
-    }
+    await advanceToActiveLair(page);
 
     await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
     // Description text should be plain text (not editable input)
