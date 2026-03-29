@@ -29,7 +29,7 @@ const baseCharacter: Character = {
   ac: 18,
   abilityScores: { strength: 16, dexterity: 10, constitution: 14, intelligence: 10, wisdom: 12, charisma: 16 },
   damageResistances: ['necrotic'],
-  damageImmunities: ['disease'],
+  damageImmunities: ['poison'],
   conditionImmunities: ['frightened'],
   classes: [{ class: 'Paladin', level: 5 }],
 };
@@ -101,5 +101,52 @@ describe('buildCombatantFromSource – core fields', () => {
     const c = buildCombatantFromSource(m, 'monster', 'monster');
     expect(c.legendaryActionCount).toBe(3);
     expect(c.legendaryActionsRemaining).toBe(3);
+  });
+
+  test('legendaryActionCount absent on character → undefined on combatant', () => {
+    const c = buildCombatantFromSource(baseCharacter, 'player', 'character');
+    expect(c.legendaryActionCount).toBeUndefined();
+    expect(c.legendaryActionsRemaining).toBeUndefined();
+  });
+
+  test('legendaryActions absent on character → undefined on combatant', () => {
+    const c = buildCombatantFromSource(baseCharacter, 'player', 'character');
+    expect(c.legendaryActions).toBeUndefined();
+  });
+
+  test('lairActions absent on character → undefined on combatant', () => {
+    const c = buildCombatantFromSource(baseCharacter, 'player', 'character');
+    expect(c.lairActions).toBeUndefined();
+  });
+
+  test('legendaryActions present on monster are copied', () => {
+    const m = { ...baseMonster, legendaryActions: [{ name: 'Claw', description: 'Attack with claw', cost: 1 }] };
+    const c = buildCombatantFromSource(m, 'monster', 'monster');
+    expect(c.legendaryActions).toHaveLength(1);
+    expect(c.legendaryActions![0].name).toBe('Claw');
+  });
+
+  test('lairActions present on monster are copied', () => {
+    const m = { ...baseMonster, lairActions: [{ name: 'Eruption', description: 'Lava erupts', cost: 1 }] };
+    const c = buildCombatantFromSource(m, 'monster', 'monster');
+    expect(c.lairActions).toHaveLength(1);
+  });
+
+  test('source with numeric initiative copies it', () => {
+    // Monster with initiative set (e.g. from a template that pre-sets it)
+    const m = { ...baseMonster, initiative: 15 };
+    const c = buildCombatantFromSource(m, 'monster', 'monster');
+    expect(c.initiative).toBe(15);
+  });
+
+  test('source without initiative defaults to 0', () => {
+    const c = buildCombatantFromSource(baseCharacter, 'player', 'character');
+    expect(c.initiative).toBe(0);
+  });
+
+  test('source without abilityScores uses default 10s', () => {
+    const bare: Character = { ...baseCharacter, abilityScores: undefined as any };
+    const c = buildCombatantFromSource(bare, 'player', 'character');
+    expect(c.abilityScores).toEqual({ strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 });
   });
 });

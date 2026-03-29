@@ -10,7 +10,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate, ActiveDamageEffect } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
 import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool, sortCombatants, buildLairCombatant, buildCombatantFromSource, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects } from '@/lib/utils/combat';
-import { DAMAGE_TYPES, DAMAGE_TYPE_GROUPS, DAMAGE_EFFECT_PRESETS, DamageType } from '@/lib/constants';
+import { DAMAGE_TYPE_GROUPS, DAMAGE_EFFECT_PRESETS, DamageType } from '@/lib/constants';
 import { LairForm } from '@/lib/components/LairForm';
 import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
@@ -1328,6 +1328,7 @@ function CombatantCard({
   const [selectedDamageType, setSelectedDamageType] = useState<DamageType | ''>('');
   const [targetDamageType, setTargetDamageType] = useState<DamageType | ''>('');
   const [showEffectsPanel, setShowEffectsPanel] = useState(false);
+  const [pendingPreset, setPendingPreset] = useState<{ label: string; kind: 'resistance' | 'immunity' | 'vulnerability'; choices: DamageType[] } | null>(null);
 
   const adjustHp = (amount: number) => {
     if (amount < 0) {
@@ -1586,6 +1587,7 @@ function CombatantCard({
               onChange={(e) => setSelectedDamageType(e.target.value as DamageType | '')}
               className="bg-gray-700 rounded px-1 py-1 text-xs text-white border border-gray-600"
               title="Damage type (for resistance/immunity/vulnerability)"
+              aria-label="Damage type (for resistance/immunity/vulnerability)"
             >
               <option value="">Type</option>
               {Object.entries(DAMAGE_TYPE_GROUPS).map(([group, types]) => (
@@ -1670,6 +1672,7 @@ function CombatantCard({
                         onClick={() => onUpdate({ activeDamageEffects: removeActiveDamageEffects(activeEffects, e.type, e.kind) })}
                         className="ml-0.5 text-yellow-300 hover:text-white leading-none"
                         title={`Remove ${e.label}`}
+                        aria-label={`Remove ${e.label}`}
                       >✕</button>
                     </span>
                   ))}
@@ -1683,31 +1686,68 @@ function CombatantCard({
                 </div>
                 {showEffectsPanel && (
                   <div className="mt-2 bg-gray-800 border border-teal-700 rounded p-3 space-y-2">
-                    <p className="text-xs text-teal-300 font-semibold">Apply a combat damage effect:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {DAMAGE_EFFECT_PRESETS.map(preset => (
-                        <button
-                          key={preset.id}
-                          onClick={() => {
-                            const newEffects = preset.effects
-                              .filter(e => e.type !== null)
-                              .map(e => ({
-                                type: e.type as DamageType,
-                                kind: e.kind,
-                                label: preset.label,
-                              }));
-                            if (newEffects.length > 0) {
-                              onUpdate({ activeDamageEffects: mergeActiveDamageEffects(activeEffects, newEffects) });
-                              setShowEffectsPanel(false);
-                            }
-                          }}
-                          className="text-xs bg-teal-700 hover:bg-teal-600 text-white px-2 py-1 rounded"
-                          title={preset.description}
-                        >
-                          {preset.label}
-                        </button>
-                      ))}
-                    </div>
+                    {pendingPreset ? (
+                      <>
+                        <p className="text-xs text-teal-300 font-semibold">{pendingPreset.label}: choose a damage type</p>
+                        <div className="flex flex-wrap gap-1">
+                          {pendingPreset.choices.map(t => (
+                            <button
+                              key={t}
+                              onClick={() => {
+                                const effect: ActiveDamageEffect = { type: t, kind: pendingPreset.kind, label: pendingPreset.label };
+                                onUpdate({ activeDamageEffects: mergeActiveDamageEffects(activeEffects, [effect]) });
+                                setPendingPreset(null);
+                                setShowEffectsPanel(false);
+                              }}
+                              className="text-xs bg-teal-800 hover:bg-teal-700 text-teal-200 border border-teal-600 px-2 py-0.5 rounded capitalize"
+                            >
+                              {t}
+                            </button>
+                          ))}
+                          <button
+                            onClick={() => setPendingPreset(null)}
+                            className="text-xs text-gray-400 hover:text-gray-300 px-1"
+                          >
+                            ← Back
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-xs text-teal-300 font-semibold">Apply a combat damage effect:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {DAMAGE_EFFECT_PRESETS.map(preset => {
+                            const hasNullType = preset.effects.some(e => e.type === null);
+                            return (
+                              <button
+                                key={preset.id}
+                                onClick={() => {
+                                  if (hasNullType) {
+                                    // Preset requires user to pick a type — open secondary picker
+                                    const nullEffect = preset.effects.find(e => e.type === null)!;
+                                    const choices: DamageType[] = nullEffect.choicesLimited ??
+                                      ([...DAMAGE_TYPE_GROUPS.Physical, ...DAMAGE_TYPE_GROUPS.Elemental, ...DAMAGE_TYPE_GROUPS['Energy & Planar'], ...DAMAGE_TYPE_GROUPS.Other]);
+                                    setPendingPreset({ label: preset.label, kind: nullEffect.kind, choices });
+                                  } else {
+                                    const newEffects = preset.effects.map(e => ({
+                                      type: e.type as DamageType,
+                                      kind: e.kind,
+                                      label: preset.label,
+                                    }));
+                                    onUpdate({ activeDamageEffects: mergeActiveDamageEffects(activeEffects, newEffects) });
+                                    setShowEffectsPanel(false);
+                                  }
+                                }}
+                                className="text-xs bg-teal-700 hover:bg-teal-600 text-white px-2 py-1 rounded"
+                                title={preset.description}
+                              >
+                                {preset.label}{hasNullType ? ' →' : ''}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
                     <div className="flex items-center gap-2 pt-1">
                       <span className="text-xs text-gray-400">Custom:</span>
                       {(['resistance', 'immunity', 'vulnerability'] as const).map(kind => (
