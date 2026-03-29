@@ -30,18 +30,14 @@ async function seedMonsters() {
     );
 
     // Prepare monsters with required fields, explicitly omitting _id for auto-generation
-    const monstersToInsert = ALL_SRD_MONSTERS.map((monster) => {
-      const { _id: omittedId, ...rest } = monster;
-      void omittedId;
-      return {
-        ...rest,
-        id: randomUUID(),
-        userId: GLOBAL_USER_ID,
-        isGlobal: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-    });
+    const monstersToInsert = ALL_SRD_MONSTERS.map((monster) => ({
+      ...monster,
+      id: randomUUID(),
+      userId: GLOBAL_USER_ID,
+      isGlobal: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
 
     // Insert all monsters (MongoDB will auto-generate _id)
     const result = await collection.insertMany(monstersToInsert);
