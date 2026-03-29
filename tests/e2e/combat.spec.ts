@@ -336,7 +336,7 @@ test.describe("Combat flows", () => {
     updatedAt: new Date().toISOString(),
   };
 
-  async function addLegendaryMonsterToCombat(page: import("@playwright/test").Page) {
+  async function addLegendaryMonsterToCombat(page: Page) {
     // Mock /api/monsters to include the legendary monster
     await page.route("**/api/monsters", async (route) => {
       if (route.request().method() === "GET") {
@@ -522,6 +522,12 @@ test.describe("Combat flows", () => {
   // Lair actions
   // ────────────────────────────────────────────────────────────
 
+  type Page = import("@playwright/test").Page;
+
+  async function assertLairActive(page: Page) {
+    await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
+  }
+
   const LAIR_MONSTER = {
     ...LEGENDARY_MONSTER,
     id: "dragon-lair-test-id",
@@ -535,7 +541,7 @@ test.describe("Combat flows", () => {
     legendaryActionCount: 0,
   };
 
-  async function startCombatWithLairMonster(page: import("@playwright/test").Page) {
+  async function startCombatWithLairMonster(page: Page) {
     await page.route("**/api/monsters", async (route) => {
       if (route.request().method() === "GET") {
         await route.fulfill({
@@ -557,7 +563,7 @@ test.describe("Combat flows", () => {
     await page.waitForSelector('[data-testid="combatants-list"]', { timeout: 15000 });
   }
 
-  async function addLairSlot(page: import("@playwright/test").Page, name: string, seedMonster?: string) {
+  async function addLairSlot(page: Page, name: string, seedMonster?: string) {
     await page.getByRole("button", { name: /Add Lair/i }).first().click();
     await page.locator('[data-testid="lair-name-input"]').fill(name);
     if (seedMonster) {
@@ -566,7 +572,7 @@ test.describe("Combat flows", () => {
     await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
   }
 
-  async function advanceToActiveLair(page: import("@playwright/test").Page) {
+  async function advanceToActiveLair(page: Page) {
     const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
     for (let i = 0; i < 5; i++) {
       const activeLair = page.locator('[data-testid="lair-active"]');
@@ -576,7 +582,7 @@ test.describe("Combat flows", () => {
     }
   }
 
-  async function setupEmptyMonstersMock(page: import("@playwright/test").Page) {
+  async function setupEmptyMonstersMock(page: Page) {
     await page.route("**/api/monsters", async (route) => {
       if (route.request().method() === "GET") {
         await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([]) });
@@ -587,7 +593,7 @@ test.describe("Combat flows", () => {
   }
 
   async function createCustomCombatant(
-    page: import("@playwright/test").Page,
+    page: Page,
     name: string,
     hp: number,
     options: { initiative?: string } = {},
@@ -603,13 +609,13 @@ test.describe("Combat flows", () => {
     await page.locator('button[type="submit"]').click();
   }
 
-  async function startCombatQuick(page: import("@playwright/test").Page, waitSelector = "initiative-order") {
+  async function startCombatQuick(page: Page, waitSelector = "initiative-order") {
     await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
     await page.locator('[data-testid="start-combat-quick"]').click();
     await page.waitForSelector(`[data-testid="${waitSelector}"]`, { timeout: 15000 });
   }
 
-  async function setupActiveSeededLairCombat(page: import("@playwright/test").Page) {
+  async function setupActiveSeededLairCombat(page: Page) {
     await startCombatWithLairMonster(page);
     await addLairSlot(page, "Dragon Lair", "Ancient Dragon");
     await advanceToActiveLair(page);
@@ -676,14 +682,14 @@ test.describe("Combat flows", () => {
   test("advancing turn to lair slot shows active LairActionsSlot", async ({ page }, testInfo) => {
     const identity = await registerTestUser(page, testInfo);
     await setupActiveSeededLairCombat(page);
-    await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
+    await assertLairActive(page);
   });
 
   test("Skip button in active lair slot advances to next combatant", async ({ page }, testInfo) => {
     const identity = await registerTestUser(page, testInfo);
     await setupActiveSeededLairCombat(page);
 
-    await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
+    await assertLairActive(page);
     await page.locator('[data-testid="lair-active"] [data-testid="lair-action-skip"]').click();
     // Lair should no longer be active
     await expect(page.locator('[data-testid="lair-active"]')).toHaveCount(0);
@@ -693,7 +699,7 @@ test.describe("Combat flows", () => {
     const identity = await registerTestUser(page, testInfo);
     await setupActiveSeededLairCombat(page);
 
-    await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
+    await assertLairActive(page);
     // Earthquake has usesRemaining: 2 — use it, should decrement to 1
     const useBtn = page.locator('[data-testid="lair-active"] [data-testid="lair-action-use-0"]');
     await expect(useBtn).toBeVisible({ timeout: 5000 });
@@ -754,7 +760,7 @@ test.describe("Combat flows", () => {
     const identity = await registerTestUser(page, testInfo);
     await setupActiveSeededLairCombat(page);
 
-    await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
+    await assertLairActive(page);
     // Description text should be plain text (not editable input)
     await expect(page.locator('[data-testid="lair-active"] input[type="text"]')).toHaveCount(0);
   });

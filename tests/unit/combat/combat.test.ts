@@ -298,6 +298,14 @@ describe('restoreAllCharges', () => {
 });
 
 describe('buildLairCombatant', () => {
+  const dragonBase: CombatantState = {
+    id: 'm1', name: 'Dragon', type: 'monster', initiative: 15,
+    conditions: [], hp: 100, maxHp: 100, ac: 18,
+    abilityScores: { strength: 20, dexterity: 10, constitution: 18, intelligence: 12, wisdom: 10, charisma: 16 },
+    lairActions: [{ name: 'Eruption', description: 'Lava erupts.' }],
+  };
+  const dragonSource = [dragonBase];
+
   test('returns a lair-type combatant with initiative 20', () => {
     const c = buildLairCombatant('Dragon Lair', '', null);
     expect(c.type).toBe('lair');
@@ -323,43 +331,20 @@ describe('buildLairCombatant', () => {
   });
 
   test('lairActions is empty when seedMonsterName is empty string', () => {
-    const source: CombatantState[] = [
-      {
-        id: 'm1', name: 'Dragon', type: 'monster', initiative: 15,
-        conditions: [], hp: 100, maxHp: 100, ac: 18,
-        abilityScores: { strength: 20, dexterity: 10, constitution: 18, intelligence: 12, wisdom: 10, charisma: 16 },
-        lairActions: [{ name: 'Eruption', description: 'Lava erupts.' }],
-      },
-    ];
-    const c = buildLairCombatant('Lair', '', source);
+    const c = buildLairCombatant('Lair', '', dragonSource);
     expect(c.lairActions).toEqual([]);
   });
 
   test('copies lairActions from matching seed monster', () => {
     const lairAction = { name: 'Eruption', description: 'Lava erupts.', usesRemaining: 1 };
-    const source: CombatantState[] = [
-      {
-        id: 'm1', name: 'Dragon', type: 'monster', initiative: 15,
-        conditions: [], hp: 100, maxHp: 100, ac: 18,
-        abilityScores: { strength: 20, dexterity: 10, constitution: 18, intelligence: 12, wisdom: 10, charisma: 16 },
-        lairActions: [lairAction],
-      },
-    ];
+    const source: CombatantState[] = [{ ...dragonBase, lairActions: [lairAction] }];
     const c = buildLairCombatant('Dragon Lair', 'Dragon', source);
     expect(c.lairActions).toEqual([lairAction]);
     expect(c.lairActions![0]).not.toBe(lairAction); // deep copy
   });
 
   test('empty lairActions when seed monster name not found', () => {
-    const source: CombatantState[] = [
-      {
-        id: 'm1', name: 'Dragon', type: 'monster', initiative: 15,
-        conditions: [], hp: 100, maxHp: 100, ac: 18,
-        abilityScores: { strength: 20, dexterity: 10, constitution: 18, intelligence: 12, wisdom: 10, charisma: 16 },
-        lairActions: [{ name: 'Eruption', description: 'Lava erupts.' }],
-      },
-    ];
-    const c = buildLairCombatant('Lair', 'Unknown', source);
+    const c = buildLairCombatant('Lair', 'Unknown', dragonSource);
     expect(c.lairActions).toEqual([]);
   });
 
