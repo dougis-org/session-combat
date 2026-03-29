@@ -1,4 +1,5 @@
 // Pure combat math utilities for D&D 5e combat mechanics
+import type { CreatureAbility, CombatantState } from '@/lib/types';
 
 /**
  * Apply damage to a combatant, draining temp HP first.
@@ -111,5 +112,82 @@ export function incrementLegendaryPool(
   return {
     legendaryActionCount: newCount,
     legendaryActionsRemaining: Math.min(safeRemaining, newCount),
+  };
+}
+
+const TYPE_ORDER: Record<CombatantState['type'], number> = { lair: 0, player: 1, monster: 2 };
+
+/**
+ * Sort combatants by initiative order for display.
+ * Primary: initiative descending.
+ * Secondary: dexterity descending.
+ * Tertiary: lair before player before monster (lair fires before others at init 20).
+ * Within multiple lairs at the same initiative: alphabetically by name.
+ */
+export function sortCombatants(combatants: CombatantState[]): CombatantState[] {
+  return [...combatants].sort((a, b) => {
+    if (a.initiative !== b.initiative) return b.initiative - a.initiative;
+    if (a.type !== b.type) return TYPE_ORDER[a.type] - TYPE_ORDER[b.type];
+    const aDex = a.abilityScores?.dexterity ?? 10;
+    const bDex = b.abilityScores?.dexterity ?? 10;
+    if (aDex !== bDex) return bDex - aDex;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+/**
+ * Decrement usesRemaining by 1, clamped at 0. Returns new object.
+ * If usesRemaining is absent, returns a copy of the ability unchanged.
+ */
+export function useCharge(ability: CreatureAbility): CreatureAbility {
+  return ability.usesRemaining === undefined
+    ? { ...ability }
+    : { ...ability, usesRemaining: Math.max(0, ability.usesRemaining - 1) };
+}
+
+/**
+ * Increment usesRemaining by 1. Returns new object.
+ * If usesRemaining is absent, returns ability unchanged.
+ */
+export function restoreCharge(ability: CreatureAbility): CreatureAbility {
+  return ability.usesRemaining === undefined
+    ? { ...ability }
+    : { ...ability, usesRemaining: ability.usesRemaining + 1 };
+}
+
+/**
+ * Apply restoreCharge to all actions where usesRemaining is a finite number.
+ * Unlimited actions (usesRemaining absent) pass through unchanged. Returns new array.
+ */
+export function restoreAllCharges(actions: CreatureAbility[]): CreatureAbility[] {
+  return actions.map(a => (Number.isFinite(a.usesRemaining) ? restoreCharge(a) : { ...a }));
+}
+
+/**
+ * Build a lair pseudo-combatant.
+ * Sets initiative to 20 and includes an initiativeRoll so the initiative-order
+ * view activates even when lairs are the only rolled combatants.
+ * Copies lairActions from seedMonsterName if found in sourceList.
+ */
+export function buildLairCombatant(
+  name: string,
+  seedMonsterName: string,
+  sourceList: CombatantState[] | null,
+): CombatantState {
+  const lairActions = seedMonsterName
+    ? (sourceList?.find(c => c.name === seedMonsterName)?.lairActions ?? []).map(a => ({ ...a }))
+    : [];
+  return {
+    id: `lair-${crypto.randomUUID()}`,
+    name,
+    type: 'lair',
+    initiative: 20,
+    initiativeRoll: { roll: 20, bonus: 0, total: 20, method: 'manual' },
+    conditions: [],
+    hp: 0,
+    maxHp: 0,
+    ac: 0,
+    abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+    lairActions,
   };
 }

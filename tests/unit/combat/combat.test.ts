@@ -1,5 +1,12 @@
 import { describe, test, expect } from '@jest/globals';
-import { applyDamage, applyHealing, setTempHp, useLegendaryAction, resetLegendaryActions, resetIncomingLegendaryPool, decrementLegendaryPool, incrementLegendaryPool } from '@/lib/utils/combat';
+import { applyDamage, applyHealing, setTempHp, useLegendaryAction, resetLegendaryActions, resetIncomingLegendaryPool, decrementLegendaryPool, incrementLegendaryPool, useCharge, restoreCharge, restoreAllCharges, buildLairCombatant } from '@/lib/utils/combat';
+import type { CreatureAbility, CombatantState } from '@/lib/types';
+
+const makeAbility = (overrides: Partial<CreatureAbility> = {}): CreatureAbility => ({
+  name: 'Earthquake',
+  description: 'The ground shakes.',
+  ...overrides,
+});
 
 describe('applyDamage', () => {
   test('fully absorbed by temp HP', () => {
@@ -189,5 +196,167 @@ describe('incrementLegendaryPool', () => {
 
   test('increments from 0', () => {
     expect(incrementLegendaryPool(0, 0)).toEqual({ legendaryActionCount: 1, legendaryActionsRemaining: 0 });
+  });
+});
+
+describe('useCharge', () => {
+  test('decrements usesRemaining by 1', () => {
+    const result = useCharge(makeAbility({ usesRemaining: 3 }));
+    expect(result.usesRemaining).toBe(2);
+  });
+
+  test('clamps at 0, does not go negative', () => {
+    const result = useCharge(makeAbility({ usesRemaining: 0 }));
+    expect(result.usesRemaining).toBe(0);
+  });
+
+  test('returns new object, does not mutate input', () => {
+    const ability = makeAbility({ usesRemaining: 2 });
+    const result = useCharge(ability);
+    expect(result).not.toBe(ability);
+    expect(ability.usesRemaining).toBe(2);
+  });
+
+  test('passes through ability without usesRemaining unchanged', () => {
+    const ability = makeAbility();
+    const result = useCharge(ability);
+    expect(result.usesRemaining).toBeUndefined();
+    expect(result.name).toBe('Earthquake');
+  });
+
+  test('preserves all other fields', () => {
+    const ability = makeAbility({ usesRemaining: 1, attackBonus: 5 });
+    const result = useCharge(ability);
+    expect(result.attackBonus).toBe(5);
+    expect(result.description).toBe('The ground shakes.');
+  });
+});
+
+describe('restoreCharge', () => {
+  test('increments usesRemaining by 1', () => {
+    const result = restoreCharge(makeAbility({ usesRemaining: 2 }));
+    expect(result.usesRemaining).toBe(3);
+  });
+
+  test('increments from 0', () => {
+    const result = restoreCharge(makeAbility({ usesRemaining: 0 }));
+    expect(result.usesRemaining).toBe(1);
+  });
+
+  test('returns new object, does not mutate input', () => {
+    const ability = makeAbility({ usesRemaining: 1 });
+    const result = restoreCharge(ability);
+    expect(result).not.toBe(ability);
+    expect(ability.usesRemaining).toBe(1);
+  });
+
+  test('passes through ability without usesRemaining unchanged', () => {
+    const ability = makeAbility();
+    const result = restoreCharge(ability);
+    expect(result.usesRemaining).toBeUndefined();
+  });
+
+  test('preserves all other fields', () => {
+    const ability = makeAbility({ usesRemaining: 0, saveDC: 15 });
+    const result = restoreCharge(ability);
+    expect(result.saveDC).toBe(15);
+  });
+});
+
+describe('restoreAllCharges', () => {
+  const limited = (name: string, uses: number): CreatureAbility => ({ name, description: 'd', usesRemaining: uses });
+  const unlimited = (name: string): CreatureAbility => ({ name, description: 'd' });
+
+  test('increments usesRemaining on all limited actions', () => {
+    const result = restoreAllCharges([limited('A', 0), limited('B', 1)]);
+    expect(result[0].usesRemaining).toBe(1);
+    expect(result[1].usesRemaining).toBe(2);
+  });
+
+  test('leaves unlimited actions (no usesRemaining) unchanged', () => {
+    const result = restoreAllCharges([unlimited('X')]);
+    expect(result[0].usesRemaining).toBeUndefined();
+  });
+
+  test('mixed array: limited incremented, unlimited unchanged', () => {
+    const result = restoreAllCharges([limited('A', 0), unlimited('B'), limited('C', 2)]);
+    expect(result[0].usesRemaining).toBe(1);
+    expect(result[1].usesRemaining).toBeUndefined();
+    expect(result[2].usesRemaining).toBe(3);
+  });
+
+  test('returns new array, does not mutate input', () => {
+    const actions = [limited('A', 1)];
+    const result = restoreAllCharges(actions);
+    expect(result).not.toBe(actions);
+    expect(actions[0].usesRemaining).toBe(1);
+  });
+
+  test('empty array returns empty array', () => {
+    expect(restoreAllCharges([])).toEqual([]);
+  });
+});
+
+describe('buildLairCombatant', () => {
+  const dragonBase: CombatantState = {
+    id: 'm1', name: 'Dragon', type: 'monster', initiative: 15,
+    conditions: [], hp: 100, maxHp: 100, ac: 18,
+    abilityScores: { strength: 20, dexterity: 10, constitution: 18, intelligence: 12, wisdom: 10, charisma: 16 },
+    lairActions: [{ name: 'Eruption', description: 'Lava erupts.' }],
+  };
+  const dragonSource = [dragonBase];
+
+  test('returns a lair-type combatant with initiative 20', () => {
+    const c = buildLairCombatant('Dragon Lair', '', null);
+    expect(c.type).toBe('lair');
+    expect(c.initiative).toBe(20);
+    expect(c.name).toBe('Dragon Lair');
+  });
+
+  test('id is unique per call', () => {
+    const a = buildLairCombatant('Lair', '', null);
+    const b = buildLairCombatant('Lair', '', null);
+    expect(a.id).not.toBe(b.id);
+    expect(a.id).toMatch(/^lair-/);
+  });
+
+  test('includes initiativeRoll so hasInitiativeBeenRolled returns true', () => {
+    const c = buildLairCombatant('Test', '', null);
+    expect(c.initiativeRoll).toEqual({ roll: 20, bonus: 0, total: 20, method: 'manual' });
+  });
+
+  test('lairActions is empty when no seed monster', () => {
+    const c = buildLairCombatant('Lair', '', null);
+    expect(c.lairActions).toEqual([]);
+  });
+
+  test('lairActions is empty when seedMonsterName is empty string', () => {
+    const c = buildLairCombatant('Lair', '', dragonSource);
+    expect(c.lairActions).toEqual([]);
+  });
+
+  test('copies lairActions from matching seed monster', () => {
+    const lairAction = { name: 'Eruption', description: 'Lava erupts.', usesRemaining: 1 };
+    const source: CombatantState[] = [{ ...dragonBase, lairActions: [lairAction] }];
+    const c = buildLairCombatant('Dragon Lair', 'Dragon', source);
+    expect(c.lairActions).toEqual([lairAction]);
+    expect(c.lairActions![0]).not.toBe(lairAction); // deep copy
+  });
+
+  test('empty lairActions when seed monster name not found', () => {
+    const c = buildLairCombatant('Lair', 'Unknown', dragonSource);
+    expect(c.lairActions).toEqual([]);
+  });
+
+  test('empty lairActions when sourceList is null and seedMonsterName given', () => {
+    const c = buildLairCombatant('Lair', 'Dragon', null);
+    expect(c.lairActions).toEqual([]);
+  });
+
+  test('hp, maxHp, and ac are all 0', () => {
+    const c = buildLairCombatant('Lair', '', null);
+    expect(c.hp).toBe(0);
+    expect(c.maxHp).toBe(0);
+    expect(c.ac).toBe(0);
   });
 });

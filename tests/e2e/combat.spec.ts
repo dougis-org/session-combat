@@ -17,8 +17,15 @@ import {
   IMPORT_WARNING,
 } from "@/tests/helpers/dndBeyondImport";
 import { createTestIdentity } from "./helpers/isolation";
+import type { Page, TestInfo } from "@playwright/test";
 
 const STRONG_PASSWORD = "TestPassword123!";
+
+async function registerTestUser(page: Page, testInfo: TestInfo) {
+  const identity = createTestIdentity(testInfo);
+  await registerUser(page, identity.email, STRONG_PASSWORD);
+  return identity;
+}
 
 test.describe("Combat flows", () => {
   test.beforeEach(async ({ page }) => {
@@ -28,8 +35,7 @@ test.describe("Combat flows", () => {
   test("registered user can import a D&D Beyond character after resolving a duplicate-name conflict", async ({
     page,
   }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
 
     let characters = [
       createPersistedImportedCharacter({
@@ -139,8 +145,7 @@ test.describe("Combat flows", () => {
   // ────────────────────────────────────────────────────────────
 
   test("registered user can create a character", async ({ page }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await createCharacter(page, {
       name: identity.name("Aragorn"),
       class: "Fighter",
@@ -150,8 +155,7 @@ test.describe("Combat flows", () => {
   });
 
   test("multiple characters can be created", async ({ page }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await createCharacter(page, {
       name: identity.name("Legolas"),
       class: "Ranger",
@@ -170,8 +174,7 @@ test.describe("Combat flows", () => {
   // ────────────────────────────────────────────────────────────
 
   test("user can create a party", async ({ page }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await createParty(page, {
       name: identity.name("Fellowship"),
       memberCount: 4,
@@ -182,8 +185,7 @@ test.describe("Combat flows", () => {
   test("party with different member counts can be created", async ({
     page,
   }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await createParty(page, {
       name: identity.name("Small Group"),
       memberCount: 2,
@@ -200,8 +202,7 @@ test.describe("Combat flows", () => {
   // ────────────────────────────────────────────────────────────
 
   test("user can import monsters from file", async ({ page }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await importMonster(page, "samples/monster-upload-example.json");
     await expect(page).not.toHaveURL(/\/monsters\/import/);
   });
@@ -211,8 +212,7 @@ test.describe("Combat flows", () => {
   // ────────────────────────────────────────────────────────────
 
   test("user can create an encounter", async ({ page }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await createEncounter(page, { name: identity.name("Goblin Ambush") });
     await expect(page).not.toHaveURL(/\/encounters\/create/);
   });
@@ -224,8 +224,7 @@ test.describe("Combat flows", () => {
   test("user can open combat screen for an encounter", async ({
     page,
   }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await createEncounter(page, { name: identity.name("Test Encounter") });
     await openCombat(page);
     await expect(page).toHaveURL(/\/combat/);
@@ -234,8 +233,7 @@ test.describe("Combat flows", () => {
   test("combat screen displays required UI elements", async ({
     page,
   }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await createEncounter(page, { name: identity.name("Combat UI Test") });
     await openCombat(page);
     await verifyCombatScreenElements(page);
@@ -252,8 +250,7 @@ test.describe("Combat flows", () => {
   test("temp HP absorbs damage correctly and clears on combat end", async ({
     page,
   }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
 
     // Set up combat with one custom combatant (hp=30, maxHp=40)
     await page.goto("/combat");
@@ -339,7 +336,7 @@ test.describe("Combat flows", () => {
     updatedAt: new Date().toISOString(),
   };
 
-  async function addLegendaryMonsterToCombat(page: import("@playwright/test").Page) {
+  async function addLegendaryMonsterToCombat(page: Page) {
     // Mock /api/monsters to include the legendary monster
     await page.route("**/api/monsters", async (route) => {
       if (route.request().method() === "GET") {
@@ -366,8 +363,7 @@ test.describe("Combat flows", () => {
   test("legendary monster badge visible in combatant row with correct count", async ({
     page,
   }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await addLegendaryMonsterToCombat(page);
 
     const badge = page.locator('[data-testid="legendary-action-badge"]').first();
@@ -378,8 +374,7 @@ test.describe("Combat flows", () => {
   test("clicking Use decrements legendary actions remaining and badge updates", async ({
     page,
   }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await addLegendaryMonsterToCombat(page);
 
     // Open detail panel
@@ -399,8 +394,7 @@ test.describe("Combat flows", () => {
   test("Restore All resets legendary actions remaining to pool", async ({
     page,
   }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await addLegendaryMonsterToCombat(page);
 
     // Open detail panel and use one action
@@ -417,8 +411,7 @@ test.describe("Combat flows", () => {
   test("pool editor [+] and [−] adjust legendaryActionCount and remaining", async ({
     page,
   }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await addLegendaryMonsterToCombat(page);
 
     // Open detail panel
@@ -440,8 +433,7 @@ test.describe("Combat flows", () => {
   test("advancing turn to legendary combatant resets remaining to pool", async ({
     page,
   }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
 
     // Add a second (non-legendary) combatant so we can advance turns
     await page.route("**/api/monsters", async (route) => {
@@ -501,8 +493,7 @@ test.describe("Combat flows", () => {
   test("complete end-to-end flow from registration to combat", async ({
     page,
   }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const identity = await registerTestUser(page, testInfo);
     await expect(page).not.toHaveURL(/\/register/);
 
     await createCharacter(page, {
@@ -525,5 +516,249 @@ test.describe("Combat flows", () => {
     await expect(page).toHaveURL(/\/combat/);
 
     await verifyCombatScreenElements(page);
+  });
+
+  // ────────────────────────────────────────────────────────────
+  // Lair actions
+  // ────────────────────────────────────────────────────────────
+
+  async function assertLairActive(page: Page) {
+    await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
+  }
+
+  async function setupEmptyCombat(page: Page, testInfo: TestInfo) {
+    const identity = await registerTestUser(page, testInfo);
+    await setupEmptyMonstersMock(page);
+    await page.goto("/combat");
+    return identity;
+  }
+
+  const LAIR_MONSTER = {
+    ...LEGENDARY_MONSTER,
+    id: "dragon-lair-test-id",
+    _id: "dragon-lair-test-id",
+    name: "Ancient Dragon",
+    lairActions: [
+      { name: "Earthquake", description: "The ground shakes violently.", usesRemaining: 2 },
+      { name: "Volcanic Gas", description: "Toxic fumes fill the area." },
+    ],
+    legendaryActions: [],
+    legendaryActionCount: 0,
+  };
+
+  async function startCombatWithLairMonster(page: Page) {
+    await page.route("**/api/monsters", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify([LAIR_MONSTER]),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await page.goto("/combat");
+    await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
+    await expect(page.getByText("Ancient Dragon")).toBeVisible({ timeout: 10000 });
+    await page.getByRole("button", { name: "Add Ancient Dragon to encounter" }).click();
+    await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
+    await page.locator('[data-testid="start-combat-quick"]').click();
+    await page.waitForSelector('[data-testid="combatants-list"]', { timeout: 15000 });
+  }
+
+  async function addLairSlot(page: Page, name: string, seedMonster?: string) {
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await page.locator('[data-testid="lair-name-input"]').fill(name);
+    if (seedMonster) {
+      await page.locator('[data-testid="lair-seed-select"]').selectOption(seedMonster);
+    }
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+  }
+
+  async function advanceToActiveLair(page: Page) {
+    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
+    for (let i = 0; i < 5; i++) {
+      const activeLair = page.locator('[data-testid="lair-active"]');
+      const isVisible = await activeLair.isVisible().catch(() => false);
+      if (isVisible) break;
+      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
+    }
+  }
+
+  async function setupEmptyMonstersMock(page: Page) {
+    await page.route("**/api/monsters", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([]) });
+      } else {
+        await route.continue();
+      }
+    });
+  }
+
+  async function createCustomCombatant(
+    page: Page,
+    name: string,
+    hp: number,
+    options: { initiative?: string } = {},
+  ) {
+    await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
+    await page.getByRole("tab", { name: "Create New" }).click();
+    await page.locator("#custom-name").fill(name);
+    await page.locator("#custom-maxhp").fill(String(hp));
+    await page.locator("#custom-hp").fill(String(hp));
+    if (options.initiative !== undefined) {
+      await page.locator("#custom-initiative").fill(options.initiative);
+    }
+    await page.locator('button[type="submit"]').click();
+  }
+
+  async function startCombatQuick(page: Page, waitSelector = "initiative-order") {
+    await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
+    await page.locator('[data-testid="start-combat-quick"]').click();
+    await page.waitForSelector(`[data-testid="${waitSelector}"]`, { timeout: 15000 });
+  }
+
+  async function setupActiveSeededLairCombat(page: Page) {
+    await startCombatWithLairMonster(page);
+    await addLairSlot(page, "Dragon Lair", "Ancient Dragon");
+    await advanceToActiveLair(page);
+  }
+
+  test("Add Lair button is present in pre-combat setup", async ({ page }, testInfo) => {
+    const identity = await registerTestUser(page, testInfo);
+    await page.goto("/combat");
+    await expect(page.getByRole("button", { name: /Add Lair/i })).toBeVisible({ timeout: 10000 });
+  });
+
+  test("Add Lair form appears on button click and inserts slot at initiative 20", async ({ page }, testInfo) => {
+    const identity = await setupEmptyCombat(page, testInfo);
+
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await expect(page.locator('[data-testid="lair-name-input"]')).toBeVisible({ timeout: 5000 });
+    await page.locator('[data-testid="lair-name-input"]').fill("Dragon Cave");
+    await page.getByRole("button", { name: /Confirm|Add Lair/i }).last().click();
+
+    // Lair slot should appear in the setup list with initiative 20
+    await expect(page.getByText("Dragon Cave")).toBeVisible({ timeout: 5000 });
+  });
+
+  test("Seed from monster dropdown lists monsters with lairActions", async ({ page }, testInfo) => {
+    const identity = await registerTestUser(page, testInfo);
+    await startCombatWithLairMonster(page);
+
+    // Now add lair slot via "Add Lair" in active combat
+    await page.getByRole("button", { name: /Add Lair/i }).first().click();
+    await expect(page.locator('[data-testid="lair-seed-select"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="lair-seed-select"]')).toContainText("Ancient Dragon");
+  });
+
+  test("lair slot sorts before initiative-20 player in order", async ({ page }, testInfo) => {
+    const identity = await setupEmptyCombat(page, testInfo);
+
+    await createCustomCombatant(page, identity.name("Fighter"), 30, { initiative: "20" });
+    await addLairSlot(page, "Test Lair");
+    await startCombatQuick(page);
+
+    // Lair slot should appear before the player in initiative order
+    // nth(0) is the "Initiative Order" heading; combatant rows start at nth(1)
+    const rows = page.locator('[data-testid="initiative-order"] > *');
+    await expect(rows.nth(1)).toContainText("Test Lair");
+  });
+
+  test("lair slot shows compact badge when inactive in initiative order", async ({ page }, testInfo) => {
+    const identity = await setupEmptyCombat(page, testInfo);
+
+    await createCustomCombatant(page, "Goblin", 7);
+    await addLairSlot(page, "Test Lair");
+    await startCombatQuick(page);
+
+    // The lair slot row should contain lair icon (badge) but not the full action list
+    await expect(page.locator('[data-testid="lair-slot-badge"]').first()).toBeVisible();
+  });
+
+  test("advancing turn to lair slot shows active LairActionsSlot", async ({ page }, testInfo) => {
+    const identity = await registerTestUser(page, testInfo);
+    await setupActiveSeededLairCombat(page);
+    await assertLairActive(page);
+  });
+
+  test("Skip button in active lair slot advances to next combatant", async ({ page }, testInfo) => {
+    const identity = await registerTestUser(page, testInfo);
+    await setupActiveSeededLairCombat(page);
+
+    await assertLairActive(page);
+    await page.locator('[data-testid="lair-active"] [data-testid="lair-action-skip"]').click();
+    // Lair should no longer be active
+    await expect(page.locator('[data-testid="lair-active"]')).toHaveCount(0);
+  });
+
+  test("Use button in active lair slot decrements usesRemaining", async ({ page }, testInfo) => {
+    const identity = await registerTestUser(page, testInfo);
+    await setupActiveSeededLairCombat(page);
+
+    await assertLairActive(page);
+    // Earthquake has usesRemaining: 2 — use it, should decrement to 1
+    const useBtn = page.locator('[data-testid="lair-active"] [data-testid="lair-action-use-0"]');
+    await expect(useBtn).toBeVisible({ timeout: 5000 });
+    await useBtn.click();
+    // The charge count should now show 1
+    await expect(page.locator('[data-testid="lair-active"]')).toContainText("1");
+  });
+
+  test("Use button disabled when usesRemaining is 0 in active lair slot", async ({ page }, testInfo) => {
+    const identity = await registerTestUser(page, testInfo);
+
+    const exhaustedMonster = {
+      ...LAIR_MONSTER,
+      lairActions: [
+        { name: "Earthquake", description: "Ground shakes.", usesRemaining: 0 },
+      ],
+    };
+
+    await page.route("**/api/monsters", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([exhaustedMonster]) });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await page.goto("/combat");
+    await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
+    await expect(page.getByText("Ancient Dragon")).toBeVisible({ timeout: 10000 });
+    await page.getByRole("button", { name: "Add Ancient Dragon to encounter" }).click();
+    await startCombatQuick(page, "combatants-list");
+
+    await addLairSlot(page, "Dragon Lair", "Ancient Dragon");
+    await advanceToActiveLair(page);
+
+    const useBtn = page.locator('[data-testid="lair-active"] [data-testid="lair-action-use-0"]');
+    await expect(useBtn).toBeDisabled({ timeout: 5000 });
+  });
+
+  test("lair slot can be removed from active combat", async ({ page }, testInfo) => {
+    const identity = await setupEmptyCombat(page, testInfo);
+
+    await createCustomCombatant(page, "Goblin", 7);
+    await addLairSlot(page, "Test Lair");
+    await startCombatQuick(page);
+
+    // Remove the lair slot
+    const removeBtn = page.locator('[data-testid="lair-slot-remove"]').first();
+    await expect(removeBtn).toBeVisible({ timeout: 5000 });
+    await removeBtn.click();
+    await page.locator('[data-testid="remove-confirm-button"]').click();
+    await expect(page.getByText("Test Lair")).toHaveCount(0);
+  });
+
+  test("lair action descriptions are read-only during active combat", async ({ page }, testInfo) => {
+    const identity = await registerTestUser(page, testInfo);
+    await setupActiveSeededLairCombat(page);
+
+    await assertLairActive(page);
+    // Description text should be plain text (not editable input)
+    await expect(page.locator('[data-testid="lair-active"] input[type="text"]')).toHaveCount(0);
   });
 });
