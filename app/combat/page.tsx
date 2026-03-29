@@ -7,9 +7,10 @@ import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
+import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate, ActiveDamageEffect } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
-import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool, sortCombatants, buildLairCombatant } from '@/lib/utils/combat';
+import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool, sortCombatants, buildLairCombatant, buildCombatantFromSource, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects } from '@/lib/utils/combat';
+import { DAMAGE_TYPES, DAMAGE_TYPE_GROUPS, DAMAGE_EFFECT_PRESETS, DamageType } from '@/lib/constants';
 import { LairForm } from '@/lib/components/LairForm';
 import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
@@ -256,25 +257,7 @@ function CombatContent() {
     try {
       console.log('Adding combatant:', item.name);
 
-      const combatant: CombatantState = {
-        id: `${idPrefix}-${item.id}-${crypto.randomUUID()}`,
-        name: item.name,
-        type,
-        initiative: ('initiative' in item && typeof item.initiative === 'number') ? item.initiative : 0,
-        abilityScores: item.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
-        hp: item.hp,
-        maxHp: item.maxHp,
-        ac: item.ac,
-        conditions: [],
-        traits: item.traits,
-        actions: item.actions,
-        bonusActions: item.bonusActions,
-        reactions: item.reactions,
-        legendaryActions: 'legendaryActions' in item ? item.legendaryActions : undefined,
-        lairActions: 'lairActions' in item ? item.lairActions : undefined,
-        legendaryActionCount: 'legendaryActionCount' in item ? item.legendaryActionCount : undefined,
-        legendaryActionsRemaining: 'legendaryActionCount' in item ? item.legendaryActionCount : undefined,
-      };
+      const combatant: CombatantState = buildCombatantFromSource(item, type, idPrefix);
 
       if (!combatState) {
         // During setup phase - handle renumbering if needed
@@ -333,23 +316,8 @@ function CombatContent() {
     const charactersToAdd = resolveCharactersForCombat(selectedPartyId, parties, characters, setupCombatants);
 
     charactersToAdd.forEach(character => {
-      const dexterity = character.abilityScores?.dexterity || 10;
-      const dexModifier = Math.floor((dexterity - 10) / 2);
-      combatants.push({
-        id: `character-${character.id}`,
-        name: character.name,
-        type: 'player',
-        initiative: 0,
-        abilityScores: character.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
-        hp: character.hp,
-        maxHp: character.maxHp,
-        ac: character.ac,
-        conditions: [],
-        traits: character.traits,
-        actions: character.actions,
-        bonusActions: character.bonusActions,
-        reactions: character.reactions,
-      });
+      const c = buildCombatantFromSource(character, 'player', 'character');
+      combatants.push({ ...c, id: `character-${character.id}` });
     });
 
     // Add monsters from selected encounter if any
@@ -357,25 +325,8 @@ function CombatContent() {
       const encounter = encounters.find(e => e.id === selectedEncounterId);
       if (encounter) {
         encounter.monsters.forEach((monster, idx) => {
-          const dexterity = monster.abilityScores?.dexterity || 10;
-          const dexModifier = Math.floor((dexterity - 10) / 2);
-          combatants.push({
-            id: `monster-${monster.id}-${idx}`,
-            name: `${monster.name} ${idx + 1}`,
-            type: 'monster',
-            initiative: 0,
-            abilityScores: monster.abilityScores || { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
-            hp: monster.hp,
-            maxHp: monster.maxHp,
-            ac: monster.ac,
-            conditions: [],
-            traits: monster.traits,
-            actions: monster.actions,
-            bonusActions: monster.bonusActions,
-            reactions: monster.reactions,
-            legendaryActions: monster.legendaryActions,
-            lairActions: monster.lairActions,
-          });
+          const c = buildCombatantFromSource(monster, 'monster', 'monster');
+          combatants.push({ ...c, id: `monster-${monster.id}-${idx}`, name: `${monster.name} ${idx + 1}` });
         });
       }
     }
@@ -1374,11 +1325,31 @@ function CombatantCard({
   const [targetActionMode, setTargetActionMode] = useState<'damage' | 'condition' | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
   const [isTempMode, setIsTempMode] = useState(false);
+  const [selectedDamageType, setSelectedDamageType] = useState<DamageType | ''>('');
+  const [targetDamageType, setTargetDamageType] = useState<DamageType | ''>('');
+  const [showEffectsPanel, setShowEffectsPanel] = useState(false);
 
   const adjustHp = (amount: number) => {
     if (amount < 0) {
-      const result = calcApplyDamage(combatant.hp, combatant.tempHp ?? 0, -amount);
-      onUpdate({ hp: result.hp, tempHp: result.tempHp });
+      const rawDamage = -amount;
+      if (selectedDamageType) {
+        const result = calcApplyDamageWithType(
+          combatant.hp,
+          combatant.tempHp ?? 0,
+          rawDamage,
+          selectedDamageType,
+          {
+            damageResistances: combatant.damageResistances,
+            damageImmunities: combatant.damageImmunities,
+            damageVulnerabilities: combatant.damageVulnerabilities,
+            activeDamageEffects: combatant.activeDamageEffects,
+          },
+        );
+        onUpdate({ hp: result.hp, tempHp: result.tempHp });
+      } else {
+        const result = calcApplyDamage(combatant.hp, combatant.tempHp ?? 0, rawDamage);
+        onUpdate({ hp: result.hp, tempHp: result.tempHp });
+      }
     } else {
       const result = calcApplyHealing(combatant.hp, combatant.maxHp, amount);
       onUpdate({ hp: result.hp });
@@ -1447,7 +1418,7 @@ function CombatantCard({
 
   const applyDamageToTarget = () => {
     if (!selectedTargetId || !damageInput || !onUpdateCombatant) return;
-    
+
     const damage = parseInt(damageInput);
     if (isNaN(damage) || damage <= 0) {
       alert('Please enter a valid damage amount');
@@ -1456,11 +1427,28 @@ function CombatantCard({
 
     const target = allCombatants?.find(c => c.id === selectedTargetId);
     if (target) {
-      const result = calcApplyDamage(target.hp, target.tempHp ?? 0, damage);
-      onUpdateCombatant(selectedTargetId, { hp: result.hp, tempHp: result.tempHp });
+      if (targetDamageType) {
+        const result = calcApplyDamageWithType(
+          target.hp,
+          target.tempHp ?? 0,
+          damage,
+          targetDamageType,
+          {
+            damageResistances: target.damageResistances,
+            damageImmunities: target.damageImmunities,
+            damageVulnerabilities: target.damageVulnerabilities,
+            activeDamageEffects: target.activeDamageEffects,
+          },
+        );
+        onUpdateCombatant(selectedTargetId, { hp: result.hp, tempHp: result.tempHp });
+      } else {
+        const result = calcApplyDamage(target.hp, target.tempHp ?? 0, damage);
+        onUpdateCombatant(selectedTargetId, { hp: result.hp, tempHp: result.tempHp });
+      }
     }
 
     setDamageInput('');
+    setTargetDamageType('');
     setSelectedTargetId(null);
     setTargetActionMode(null);
   };
@@ -1490,9 +1478,16 @@ function CombatantCard({
 
   const tempHp = combatant.tempHp ?? 0;
   const hpTotal = combatant.maxHp + tempHp;
-const hpPercent = hpTotal > 0 ? (combatant.hp / hpTotal) * 100 : 0;
-const tempHpPercent = hpTotal > 0 ? (tempHp / hpTotal) * 100 : 0;
-const hpColor = combatant.maxHp > 0 ? ((combatant.hp / combatant.maxHp) > 0.5 ? 'bg-green-500' : (combatant.hp / combatant.maxHp) > 0.25 ? 'bg-yellow-500' : 'bg-red-500') : 'bg-red-500';
+  const hpPercent = hpTotal > 0 ? (combatant.hp / hpTotal) * 100 : 0;
+  const tempHpPercent = hpTotal > 0 ? (tempHp / hpTotal) * 100 : 0;
+  const hpColor = combatant.maxHp > 0 ? ((combatant.hp / combatant.maxHp) > 0.5 ? 'bg-green-500' : (combatant.hp / combatant.maxHp) > 0.25 ? 'bg-yellow-500' : 'bg-red-500') : 'bg-red-500';
+
+  // Derived damage modifier fields for display and active effects panel
+  const statResistances = combatant.damageResistances ?? [];
+  const statImmunities = combatant.damageImmunities ?? [];
+  const statVulnerabilities = combatant.damageVulnerabilities ?? [];
+  const activeEffects = combatant.activeDamageEffects ?? [];
+  const hasDamageModifiers = statResistances.length > 0 || statImmunities.length > 0 || statVulnerabilities.length > 0 || activeEffects.length > 0;
 
   // Background gradient based on combatant type - stronger fade from left to right
   const bgStyle = combatant.type === 'player'
@@ -1586,10 +1581,25 @@ const hpColor = combatant.maxHp > 0 ? ((combatant.hp / combatant.maxHp) > 0.5 ? 
               }}
               className="w-14 bg-gray-700 rounded px-2 py-1 text-xs text-center text-white"
             />
+            <select
+              value={selectedDamageType}
+              onChange={(e) => setSelectedDamageType(e.target.value as DamageType | '')}
+              className="bg-gray-700 rounded px-1 py-1 text-xs text-white border border-gray-600"
+              title="Damage type (for resistance/immunity/vulnerability)"
+            >
+              <option value="">Type</option>
+              {Object.entries(DAMAGE_TYPE_GROUPS).map(([group, types]) => (
+                <optgroup key={group} label={group}>
+                  {types.map(t => (
+                    <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
             <button
               onClick={applyDamage}
-              title="Apply damage (Enter)"
-              className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
+              title={selectedDamageType ? `Apply ${selectedDamageType} damage (with resistances)` : "Apply damage (Enter)"}
+              className={`px-2 py-1 rounded text-xs ${selectedDamageType ? 'bg-orange-600 hover:bg-orange-700' : 'bg-red-600 hover:bg-red-700'}`}
             >
               Damage
             </button>
@@ -1633,6 +1643,94 @@ const hpColor = combatant.maxHp > 0 ? ((combatant.hp / combatant.maxHp) > 0.5 ? 
               <div className="bg-blue-400 h-2 transition-all" data-testid="temp-hp-bar" style={{ width: `${tempHpPercent}%` }} />
             )}
           </div>
+
+          {/* Active Damage Effects */}
+          {(hasDamageModifiers || showEffectsPanel) && (
+              <div className="mt-1 mb-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {statImmunities.map(t => (
+                    <span key={`imm-${t}`} className="text-xs bg-purple-900 text-purple-200 px-1.5 py-0.5 rounded font-semibold" title="Immunity (from stats)">
+                      IMM: {t}
+                    </span>
+                  ))}
+                  {statResistances.map(t => (
+                    <span key={`res-${t}`} className="text-xs bg-green-900 text-green-200 px-1.5 py-0.5 rounded" title="Resistance (from stats)">
+                      RES: {t}
+                    </span>
+                  ))}
+                  {statVulnerabilities.map(t => (
+                    <span key={`vuln-${t}`} className="text-xs bg-red-900 text-red-200 px-1.5 py-0.5 rounded" title="Vulnerability (from stats)">
+                      VULN: {t}
+                    </span>
+                  ))}
+                  {activeEffects.map(e => (
+                    <span key={`active-${e.type}-${e.kind}`} className="text-xs bg-yellow-800 text-yellow-200 px-1.5 py-0.5 rounded flex items-center gap-1" title={e.label}>
+                      {e.kind === 'immunity' ? 'IMM' : e.kind === 'resistance' ? 'RES' : 'VULN'}: {e.type} ✱
+                      <button
+                        onClick={() => onUpdate({ activeDamageEffects: removeActiveDamageEffects(activeEffects, e.type, e.kind) })}
+                        className="ml-0.5 text-yellow-300 hover:text-white leading-none"
+                        title={`Remove ${e.label}`}
+                      >✕</button>
+                    </span>
+                  ))}
+                  <button
+                    onClick={() => setShowEffectsPanel(!showEffectsPanel)}
+                    className="text-xs text-teal-400 hover:text-teal-300 underline"
+                    title="Add temporary combat damage effects"
+                  >
+                    {showEffectsPanel ? 'Hide effects' : '+ Add effect'}
+                  </button>
+                </div>
+                {showEffectsPanel && (
+                  <div className="mt-2 bg-gray-800 border border-teal-700 rounded p-3 space-y-2">
+                    <p className="text-xs text-teal-300 font-semibold">Apply a combat damage effect:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {DAMAGE_EFFECT_PRESETS.map(preset => (
+                        <button
+                          key={preset.id}
+                          onClick={() => {
+                            const newEffects = preset.effects
+                              .filter(e => e.type !== null)
+                              .map(e => ({
+                                type: e.type as DamageType,
+                                kind: e.kind,
+                                label: preset.label,
+                              }));
+                            if (newEffects.length > 0) {
+                              onUpdate({ activeDamageEffects: mergeActiveDamageEffects(activeEffects, newEffects) });
+                              setShowEffectsPanel(false);
+                            }
+                          }}
+                          className="text-xs bg-teal-700 hover:bg-teal-600 text-white px-2 py-1 rounded"
+                          title={preset.description}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 pt-1">
+                      <span className="text-xs text-gray-400">Custom:</span>
+                      {(['resistance', 'immunity', 'vulnerability'] as const).map(kind => (
+                        selectedDamageType ? (
+                          <button
+                            key={kind}
+                            onClick={() => {
+                              const effect: ActiveDamageEffect = { type: selectedDamageType, kind, label: `${kind} (${selectedDamageType})` };
+                              onUpdate({ activeDamageEffects: mergeActiveDamageEffects(activeEffects, [effect]) });
+                              setShowEffectsPanel(false);
+                            }}
+                            className="text-xs bg-gray-700 hover:bg-gray-600 border border-teal-600 text-teal-200 px-2 py-1 rounded capitalize"
+                          >
+                            {kind} ({selectedDamageType})
+                          </button>
+                        ) : null
+                      ))}
+                      {!selectedDamageType && <span className="text-xs text-gray-500 italic">Select a damage type above first</span>}
+                    </div>
+                  </div>
+                )}
+              </div>
+          )}
 
           {combatant.conditions.length > 0 && (
             <div className="mb-2">
@@ -1870,12 +1968,27 @@ const hpColor = combatant.maxHp > 0 ? ((combatant.hp / combatant.maxHp) > 0.5 ? 
                         className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
                         autoFocus
                       />
+                      <select
+                        value={targetDamageType}
+                        onChange={(e) => setTargetDamageType(e.target.value as DamageType | '')}
+                        className="w-full bg-gray-700 rounded px-3 py-2 text-white border border-gray-600"
+                        title="Damage type (applies target's resistances/immunities)"
+                      >
+                        <option value="">No damage type</option>
+                        {Object.entries(DAMAGE_TYPE_GROUPS).map(([group, types]) => (
+                          <optgroup key={group} label={group}>
+                            {types.map(t => (
+                              <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                            ))}
+                          </optgroup>
+                        ))}
+                      </select>
                       <div className="flex gap-2">
                         <button
                           onClick={applyDamageToTarget}
-                          className="flex-1 bg-red-600 hover:bg-red-700 px-3 py-2 rounded text-white font-semibold transition-colors"
+                          className={`flex-1 px-3 py-2 rounded text-white font-semibold transition-colors ${targetDamageType ? 'bg-orange-600 hover:bg-orange-700' : 'bg-red-600 hover:bg-red-700'}`}
                         >
-                          Apply
+                          Apply{targetDamageType ? ` (${targetDamageType})` : ''}
                         </button>
                         <button
                           onClick={() => setTargetActionMode(null)}

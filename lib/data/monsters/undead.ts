@@ -82,7 +82,9 @@ export const UNDEAD: Omit<
       "fire",
       "lightning",
       "thunder",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "cold",
@@ -231,7 +233,9 @@ export const UNDEAD: Omit<
     ],
     damageImmunities: [
       "poison",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     conditionImmunities: [
       "Charmed",
@@ -374,7 +378,9 @@ export const UNDEAD: Omit<
       wisdom: 2,
     },
     damageResistances: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "necrotic",
@@ -449,7 +455,9 @@ export const UNDEAD: Omit<
     damageImmunities: [
       "necrotic",
       "poison",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageVulnerabilities: [
       "fire",
@@ -603,7 +611,9 @@ export const UNDEAD: Omit<
       "fire",
       "lightning",
       "thunder",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "necrotic",
@@ -727,7 +737,9 @@ export const UNDEAD: Omit<
       "fire",
       "lightning",
       "thunder",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "necrotic",
@@ -801,7 +813,9 @@ export const UNDEAD: Omit<
     },
     damageResistances: [
       "necrotic",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       darkvision: "120 ft.",
@@ -900,7 +914,9 @@ export const UNDEAD: Omit<
     },
     damageResistances: [
       "necrotic",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       darkvision: "120 ft.",
@@ -980,7 +996,9 @@ export const UNDEAD: Omit<
     },
     damageResistances: [
       "necrotic",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       darkvision: "60 ft.",
@@ -1053,7 +1071,9 @@ export const UNDEAD: Omit<
     },
     damageResistances: [
       "necrotic",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       darkvision: "120 ft.",
@@ -1200,7 +1220,9 @@ export const UNDEAD: Omit<
     },
     damageResistances: [
       "necrotic",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
@@ -1273,7 +1295,9 @@ export const UNDEAD: Omit<
       "fire",
       "necrotic",
       "thunder",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "lightning",
@@ -1354,7 +1378,9 @@ export const UNDEAD: Omit<
       "fire",
       "lightning",
       "thunder",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "necrotic",

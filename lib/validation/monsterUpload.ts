@@ -4,6 +4,13 @@
  */
 
 import { MonsterTemplate, AbilityScores, CreatureAbility } from '@/lib/types';
+import { DAMAGE_TYPES, DamageType } from '@/lib/constants';
+
+function filterToDamageTypes(values: unknown[]): DamageType[] {
+  return (values as string[]).filter((v): v is DamageType =>
+    (DAMAGE_TYPES as readonly string[]).includes(v)
+  );
+}
 
 /**
  * Valid monster sizes in D&D 5e
@@ -670,9 +677,9 @@ export function transformMonsterData(
         },
     savingThrows: (raw.savingThrows || {}) as Record<string, number>,
     skills: (raw.skills || {}) as Record<string, number>,
-    damageResistances: (raw.damageResistances || []) as string[],
-    damageImmunities: (raw.damageImmunities || []) as string[],
-    damageVulnerabilities: (raw.damageVulnerabilities || []) as string[],
+    damageResistances: filterToDamageTypes((raw.damageResistances || []) as unknown[]),
+    damageImmunities: filterToDamageTypes((raw.damageImmunities || []) as unknown[]),
+    damageVulnerabilities: filterToDamageTypes((raw.damageVulnerabilities || []) as unknown[]),
     conditionImmunities: (raw.conditionImmunities || []) as string[],
     senses: (raw.senses || {}) as Record<string, string>,
     languages: (raw.languages || []) as string[],

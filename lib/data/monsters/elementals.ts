@@ -15,7 +15,9 @@ export const ELEMENTALS: Omit<
     damageResistances: [
       "lightning",
       "thunder",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
@@ -273,7 +275,9 @@ export const ELEMENTALS: Omit<
     hp: 126,
     speed: "30 ft., burrow 30 ft.",
     damageResistances: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
@@ -404,7 +408,9 @@ export const ELEMENTALS: Omit<
     hp: 102,
     speed: "50 ft.",
     damageResistances: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -475,7 +481,9 @@ export const ELEMENTALS: Omit<
     hp: 52,
     speed: "30 ft., fly 60 ft.",
     damageResistances: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't adamantine",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
@@ -617,7 +625,9 @@ export const ELEMENTALS: Omit<
       stealth: 10,
     },
     damageResistances: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
@@ -757,7 +767,9 @@ export const ELEMENTALS: Omit<
     hp: 9,
     speed: "30 ft.",
     damageResistances: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -811,7 +823,9 @@ export const ELEMENTALS: Omit<
     hp: 90,
     speed: "30 ft.",
     damageResistances: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -940,7 +954,9 @@ export const ELEMENTALS: Omit<
     speed: "30 ft., swim 90 ft.",
     damageResistances: [
       "acid",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
@@ -1017,7 +1033,8 @@ export const ELEMENTALS: Omit<
       stealth: 3,
     },
     damageResistances: [
-      "piercing and slashing from nonmagical weapons that aren't adamantine",
+      "piercing",
+      "slashing",
     ],
     senses: {
       darkvision: "60 ft.",

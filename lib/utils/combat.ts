@@ -1,5 +1,6 @@
 // Pure combat math utilities for D&D 5e combat mechanics
-import type { CreatureAbility, CombatantState } from '@/lib/types';
+import type { ActiveDamageEffect, CreatureAbility, CombatantState, Monster, Character } from '@/lib/types';
+import type { DamageType } from '@/lib/constants';
 
 /**
  * Apply damage to a combatant, draining temp HP first.
@@ -115,6 +116,113 @@ export function incrementLegendaryPool(
   };
 }
 
+type DamageModifierKind = ActiveDamageEffect['kind'];
+
+// Precedence for merging active damage effects; higher wins.
+const KIND_PRECEDENCE: Record<DamageModifierKind, number> = {
+  resistance: 1,
+  vulnerability: 2,
+  immunity: 3,
+};
+
+interface DamageModifierSources {
+  damageResistances?: DamageType[];
+  damageImmunities?: DamageType[];
+  damageVulnerabilities?: DamageType[];
+  activeDamageEffects?: ActiveDamageEffect[];
+}
+
+/**
+ * Apply damage with D&D 5e resistance/immunity/vulnerability logic.
+ * Priority: immunity (0 damage) > resistance+vulnerability cancel > resistance (½) > vulnerability (×2).
+ * Sources: creatureStats arrays AND activeDamageEffects, combined.
+ * Returns { hp, tempHp, effectiveDamage }.
+ */
+export function applyDamageWithType(
+  hp: number,
+  tempHp: number,
+  rawDamage: number,
+  damageType: DamageType,
+  sources: DamageModifierSources,
+): { hp: number; tempHp: number; effectiveDamage: number } {
+  const { damageResistances = [], damageImmunities = [], damageVulnerabilities = [], activeDamageEffects = [] } = sources;
+
+  const activeForType = activeDamageEffects.filter(e => e.type === damageType);
+
+  const isImmune =
+    damageImmunities.includes(damageType) ||
+    activeForType.some(e => e.kind === 'immunity');
+
+  if (isImmune) {
+    return { hp, tempHp, effectiveDamage: 0 };
+  }
+
+  const isResistant =
+    damageResistances.includes(damageType) ||
+    activeForType.some(e => e.kind === 'resistance');
+
+  const isVulnerable =
+    damageVulnerabilities.includes(damageType) ||
+    activeForType.some(e => e.kind === 'vulnerability');
+
+  let effectiveDamage: number;
+  if (isResistant && isVulnerable) {
+    effectiveDamage = rawDamage; // cancel out per 5e rules
+  } else if (isResistant) {
+    effectiveDamage = Math.floor(rawDamage / 2);
+  } else if (isVulnerable) {
+    effectiveDamage = rawDamage * 2;
+  } else {
+    effectiveDamage = rawDamage;
+  }
+
+  const { hp: newHp, tempHp: newTempHp } = applyDamage(hp, tempHp, effectiveDamage);
+  return { hp: newHp, tempHp: newTempHp, effectiveDamage };
+}
+
+/**
+ * Merge new ActiveDamageEffects into an existing array.
+ * For each incoming effect, if an effect already exists for that damage type:
+ *   - Keep whichever has higher precedence (immunity > vulnerability > resistance).
+ *   - Same kind + same type: replace with incoming (update label).
+ * Returns a new array; does not mutate existing.
+ */
+export function mergeActiveDamageEffects(
+  existing: ActiveDamageEffect[],
+  incoming: ActiveDamageEffect[],
+): ActiveDamageEffect[] {
+  const result = [...existing];
+  for (const effect of incoming) {
+    const idx = result.findIndex(e => e.type === effect.type);
+    if (idx === -1) {
+      result.push(effect);
+    } else {
+      const existingPrecedence = KIND_PRECEDENCE[result[idx].kind];
+      const incomingPrecedence = KIND_PRECEDENCE[effect.kind];
+      if (incomingPrecedence >= existingPrecedence) {
+        result[idx] = effect;
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Remove ActiveDamageEffects matching the given kind.
+ * If type is null, removes all effects matching the kind regardless of type.
+ * If type is specified, only removes effects matching both type and kind.
+ * Returns a new array; does not mutate existing.
+ */
+export function removeActiveDamageEffects(
+  effects: ActiveDamageEffect[],
+  type: DamageType | null,
+  kind: DamageModifierKind,
+): ActiveDamageEffect[] {
+  return effects.filter(e =>
+    !(e.kind === kind && (type === null || e.type === type))
+  );
+}
+
 const TYPE_ORDER: Record<CombatantState['type'], number> = { lair: 0, player: 1, monster: 2 };
 
 /**
@@ -161,6 +269,41 @@ export function restoreCharge(ability: CreatureAbility): CreatureAbility {
  */
 export function restoreAllCharges(actions: CreatureAbility[]): CreatureAbility[] {
   return actions.map(a => (Number.isFinite(a.usesRemaining) ? restoreCharge(a) : { ...a }));
+}
+
+/**
+ * Build a CombatantState from a Monster or Character source.
+ * Copies all combat-relevant fields including resistance/immunity/vulnerability arrays.
+ */
+export function buildCombatantFromSource(
+  source: Monster | Character,
+  type: 'monster' | 'player',
+  idPrefix: string,
+): CombatantState {
+  const lacCount = 'legendaryActionCount' in source ? source.legendaryActionCount : undefined;
+  return {
+    id: `${idPrefix}-${source.id}-${crypto.randomUUID()}`,
+    name: source.name,
+    type,
+    initiative: ('initiative' in source && typeof source.initiative === 'number') ? source.initiative : 0,
+    abilityScores: source.abilityScores ?? { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+    hp: source.hp,
+    maxHp: source.maxHp,
+    ac: source.ac,
+    conditions: [],
+    traits: source.traits,
+    actions: source.actions,
+    bonusActions: source.bonusActions,
+    reactions: source.reactions,
+    damageResistances: source.damageResistances,
+    damageImmunities: source.damageImmunities,
+    damageVulnerabilities: source.damageVulnerabilities,
+    conditionImmunities: source.conditionImmunities,
+    legendaryActions: 'legendaryActions' in source ? source.legendaryActions : undefined,
+    lairActions: 'lairActions' in source ? source.lairActions : undefined,
+    legendaryActionCount: lacCount,
+    legendaryActionsRemaining: lacCount,
+  };
 }
 
 /**

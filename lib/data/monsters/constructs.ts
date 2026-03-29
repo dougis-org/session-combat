@@ -77,7 +77,9 @@ export const CONSTRUCTS: Omit<
       "acid",
       "poison",
       "psychic",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't adamantine",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     conditionImmunities: [
       "Charmed",
@@ -156,7 +158,9 @@ export const CONSTRUCTS: Omit<
     damageImmunities: [
       "lightning",
       "poison",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't adamantine",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     conditionImmunities: [
       "Charmed",
@@ -343,7 +347,9 @@ export const CONSTRUCTS: Omit<
       "fire",
       "poison",
       "psychic",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't adamantine",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     conditionImmunities: [
       "Charmed",
@@ -556,7 +562,9 @@ export const CONSTRUCTS: Omit<
     damageImmunities: [
       "poison",
       "psychic",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't adamantine",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     conditionImmunities: [
       "Charmed",
