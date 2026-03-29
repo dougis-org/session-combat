@@ -670,7 +670,7 @@ export const MONSTROSITIES: Omit<
         name: "Longsword",
         description: "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 7 (1d8 + 3) slashing damage, or 8 (1d10 + 3) slashing damage if used with two hands.",
         attackBonus: 6,
-        damageDescription: "undefined",
+        damageDescription: "1d8+3 Slashing",
       },
       {
         name: "Longbow",
@@ -732,13 +732,13 @@ export const MONSTROSITIES: Omit<
         name: "Bite",
         description: "Melee Weapon Attack: +4 to hit, reach 5 ft., one creature. Hit: 6 (1d8 + 2) piercing damage plus 4 (1d8) poison damage. The target must succeed on a DC 11 Constitution saving throw or be poisoned for 1 minute. The creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.",
         attackBonus: 4,
-        damageDescription: "2d6+2 Piercing",
+        damageDescription: "1d8+2 Piercing",
       },
       {
         name: "Claws",
         description: "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (2d4 + 2) slashing damage.",
         attackBonus: 4,
-        damageDescription: "2d4+2 Bludgeoning",
+        damageDescription: "2d4+2 Slashing",
       },
       {
         name: "Web",

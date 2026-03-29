@@ -532,7 +532,7 @@ export const FIENDS: Omit<
         name: "Longsword",
         description: "Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 8 (1d8 + 4) slashing damage, or 9 (1d10 + 4) slashing damage if used with two hands, plus 13 (3d8) poison damage.",
         attackBonus: 8,
-        damageDescription: "undefined",
+        damageDescription: "1d8+4 Slashing",
       },
       {
         name: "Longbow",

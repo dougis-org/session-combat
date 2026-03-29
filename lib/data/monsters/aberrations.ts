@@ -273,10 +273,10 @@ export const ABERRATIONS: Omit<
         description: "The gibbering mouther makes one bite attack and, if it can, uses its Blinding Spittle.",
       },
       {
-        name: "Bites",
+        name: "Bite",
         description: "Melee Weapon Attack: +2 to hit, reach 5 ft., one creature. Hit: 17 (5d6) piercing damage. If the target is Medium or smaller, it must succeed on a DC 10 Strength saving throw or be knocked prone. If the target is killed by this damage, it is absorbed into the mouther.",
         attackBonus: 2,
-        damageDescription: "5d6 Bludgeoning",
+        damageDescription: "5d6 Piercing",
       },
       {
         name: "Blinding Spittle",

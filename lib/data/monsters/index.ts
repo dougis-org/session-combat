@@ -14,7 +14,10 @@ import { OOZES } from "./oozes";
 import { PLANTS } from "./plants";
 import { UNDEAD } from "./undead";
 
-export const ALL_SRD_MONSTERS: MonsterTemplate[] = [
+export const ALL_SRD_MONSTERS: Omit<
+  MonsterTemplate,
+  "id" | "userId" | "createdAt" | "updatedAt" | "_id"
+>[] = [
   ...ABERRATIONS,
   ...BEASTS,
   ...CELESTIALS,
@@ -29,4 +32,4 @@ export const ALL_SRD_MONSTERS: MonsterTemplate[] = [
   ...OOZES,
   ...PLANTS,
   ...UNDEAD,
-] as MonsterTemplate[];
+];

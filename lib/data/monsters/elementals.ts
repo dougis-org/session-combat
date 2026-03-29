@@ -11,7 +11,7 @@ export const ELEMENTALS: Omit<
     alignment: "neutral",
     ac: 15,
     hp: 90,
-    speed: "fly 90 ft., hover true",
+    speed: "fly 90 ft. (hover)",
     damageResistances: [
       "lightning",
       "thunder",
@@ -611,7 +611,7 @@ export const ELEMENTALS: Omit<
     alignment: "neutral",
     ac: 14,
     hp: 104,
-    speed: "50 ft., fly 50 ft., hover true",
+    speed: "50 ft., fly 50 ft. (hover)",
     skills: {
       perception: 8,
       stealth: 10,
@@ -848,7 +848,7 @@ export const ELEMENTALS: Omit<
         name: "Spear",
         description: "Melee or Ranged Weapon Attack: +7 to hit, reach 5 ft. or range 20 ft./60 ft., one target. Hit: 11 (2d6 + 4) piercing damage, or 13 (2d8 + 4) piercing damage if used with two hands to make a melee attack, plus 3 (1d6) fire damage.",
         attackBonus: 7,
-        damageDescription: "undefined",
+        damageDescription: "2d6+4 Piercing",
       },
       {
         name: "Tail",

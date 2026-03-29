@@ -119,7 +119,6 @@ export const PLANTS: Omit<
     ],
     conditionImmunities: [
       "Blinded",
-      "Blinded",
       "Exhaustion",
     ],
     senses: {
@@ -170,7 +169,6 @@ export const PLANTS: Omit<
     hp: 13,
     speed: "0 ft.",
     conditionImmunities: [
-      "Blinded",
       "Blinded",
       "Frightened",
     ],
@@ -281,7 +279,6 @@ export const PLANTS: Omit<
     hp: 18,
     speed: "5 ft.",
     conditionImmunities: [
-      "Blinded",
       "Blinded",
       "Frightened",
     ],

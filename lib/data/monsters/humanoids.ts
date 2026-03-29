@@ -616,7 +616,7 @@ export const HUMANOIDS: Omit<
         name: "Shortsword",
         description: "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage.",
         attackBonus: 4,
-        damageDescription: "1d6+2 Bludgeoning",
+        damageDescription: "1d6+2 Piercing",
       },
       {
         name: "Hand Crossbow",
@@ -668,7 +668,7 @@ export const HUMANOIDS: Omit<
         name: "Quarterstaff",
         description: " Melee Weapon Attack: +2 to hit (+4 to hit with shillelagh), reach 5 ft., one target. Hit: 3 (1d6) bludgeoning damage, 4 (1d8) bludgeoning damage if wielded with two hands, or 6 (1d8 + 2) bludgeoning damage with shillelagh.",
         attackBonus: 2,
-        damageDescription: "undefined",
+        damageDescription: "1d6 Bludgeoning",
       },
     ],
     abilityScores: {
@@ -728,7 +728,7 @@ export const HUMANOIDS: Omit<
         name: "Javelin",
         description: "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 5 (1d6 + 2) piercing damage, or 9 (2d6 + 2) piercing damage while enlarged.",
         attackBonus: 4,
-        damageDescription: "1d6+2 Bludgeoning",
+        damageDescription: "1d6+2 Piercing",
       },
       {
         name: "Invisibility",
@@ -790,7 +790,7 @@ export const HUMANOIDS: Omit<
         name: "Spear",
         description: "Melee or Ranged Weapon Attack: +7 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 11 (2d6 + 4) piercing damage, or 13 (2d8 + 4) piercing damage if used with two hands to make a melee attack.",
         attackBonus: 7,
-        damageDescription: "undefined",
+        damageDescription: "2d6+4 Piercing",
       },
       {
         name: "Shield Bash",
@@ -850,7 +850,7 @@ export const HUMANOIDS: Omit<
         name: "Spear",
         description: "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 5 (1d6 + 2) piercing damage, or 6 (1d8 + 2) piercing damage if used with two hands to make a melee attack.",
         attackBonus: 4,
-        damageDescription: "undefined",
+        damageDescription: "1d6+2 Piercing",
       },
       {
         name: "Longbow",
@@ -1004,7 +1004,7 @@ export const HUMANOIDS: Omit<
         name: "Spear",
         description: "Melee or Ranged Weapon Attack: +3 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d6 + 1) piercing damage or 5 (1d8 + 1) piercing damage if used with two hands to make a melee attack.",
         attackBonus: 3,
-        damageDescription: "undefined",
+        damageDescription: "1d6+1 Piercing",
       },
     ],
     abilityScores: {
@@ -1049,7 +1049,7 @@ export const HUMANOIDS: Omit<
         name: "Longsword",
         description: "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 7 (1d8 + 3) slashing damage, or 8 (1d10 + 3) slashing damage if used with two hands.",
         attackBonus: 5,
-        damageDescription: "undefined",
+        damageDescription: "1d8+3 Slashing",
       },
       {
         name: "Shortsword",
@@ -1111,7 +1111,7 @@ export const HUMANOIDS: Omit<
         name: "Longsword",
         description: "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 5 (1d8 + 1) slashing damage, or 6 (1d10 + 1) slashing damage if used with two hands.",
         attackBonus: 3,
-        damageDescription: "undefined",
+        damageDescription: "1d8+1 Slashing",
       },
       {
         name: "Longbow",
@@ -1397,7 +1397,7 @@ export const HUMANOIDS: Omit<
         name: "Spear",
         description: "Melee or Ranged Weapon Attack: +2 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 3 (1d6) piercing damage, or 4 (1d8) piercing damage if used with two hands to make a melee attack.",
         attackBonus: 2,
-        damageDescription: "undefined",
+        damageDescription: "1d6 Piercing",
       },
     ],
     abilityScores: {
@@ -1437,7 +1437,7 @@ export const HUMANOIDS: Omit<
         name: "Rapier",
         description: "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 5 (1d8 + 1) piercing damage.",
         attackBonus: 3,
-        damageDescription: "1d8+1 Bludgeoning",
+        damageDescription: "1d8+1 Piercing",
       },
     ],
     reactions: [
@@ -1614,7 +1614,7 @@ export const HUMANOIDS: Omit<
         name: "Spear",
         description: "Melee or Ranged Weapon Attack: +3 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d6 + 1) piercing damage, or 5 (1d8 + 1) piercing damage if used with two hands to make a melee attack.",
         attackBonus: 3,
-        damageDescription: "undefined",
+        damageDescription: "1d6+1 Piercing",
       },
     ],
     abilityScores: {
@@ -1829,7 +1829,7 @@ export const HUMANOIDS: Omit<
         name: "Spear",
         description: "Melee or Ranged Weapon Attack: +3 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d6 + 1) piercing damage, or 5 (1d8 + 1) piercing damage if used with two hands to make a melee attack.",
         attackBonus: 3,
-        damageDescription: "undefined",
+        damageDescription: "1d6+1 Piercing",
       },
     ],
     abilityScores: {
@@ -1872,7 +1872,7 @@ export const HUMANOIDS: Omit<
         name: "Longsword",
         description: "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 7 (1d8 + 3) slashing damage, or 8 (1d10 + 3) slashing damage if used with two hands.",
         attackBonus: 5,
-        damageDescription: "undefined",
+        damageDescription: "1d8+3 Slashing",
       },
       {
         name: "Shortsword",
@@ -2677,7 +2677,7 @@ export const HUMANOIDS: Omit<
         name: "Spear",
         description: "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 20/60 ft., one creature. Hit: 5 (1d6 + 2) piercing damage, or 6 (1d8 + 2) piercing damage if used with two hands to make a melee attack.",
         attackBonus: 4,
-        damageDescription: "undefined",
+        damageDescription: "1d6+2 Piercing",
       },
     ],
     abilityScores: {

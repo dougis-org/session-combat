@@ -177,10 +177,7 @@ export const CELESTIALS: Omit<
       passive_perception: "16",
     },
     languages: [
-      "understands Celestial",
-      "Common",
-      "Elvish",
-      "and Sylvan but can't speak",
+      "understands Celestial, Common, Elvish, and Sylvan but can't speak",
     ],
     challengeRating: 2,
     experiencePoints: 450,
@@ -351,7 +348,7 @@ export const CELESTIALS: Omit<
         name: "Greatsword",
         description: "Melee Weapon Attack: +15 to hit, reach 5 ft., one target. Hit: 22 (4d6 + 8) slashing damage plus 27 (6d8) radiant damage.",
         attackBonus: 15,
-        damageDescription: "4d6+8 Radiant",
+        damageDescription: "4d6+8 Slashing",
       },
       {
         name: "Slaying Longbow",

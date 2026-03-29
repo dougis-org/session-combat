@@ -41,10 +41,10 @@
 
 ## 7. PR and Merge
 
-- [ ] 7.1 Stage and commit all changes (14 category files + `index.ts` + new test): `git add lib/data/monsters/ tests/unit/monsterLibrary.test.ts && git commit -m "fix: restore 334 SRD monsters and add regression test (fixes #102)"`
-- [ ] 7.2 Push branch: `git push`
-- [ ] 7.3 Open PR targeting `main` — title: "fix: restore SRD monster library (334 monsters, fixes #102)"
-- [ ] 7.4 Monitor CI: if any check fails, diagnose → fix → commit → push → repeat until all checks pass
+- [x] 7.1 Stage and commit all changes (14 category files + `index.ts` + new test): `git add lib/data/monsters/ tests/unit/monsterLibrary.test.ts && git commit -m "fix: restore 334 SRD monsters and add regression test (fixes #102)"`
+- [x] 7.2 Push branch: `git push`
+- [x] 7.3 Open PR targeting `main` — title: "fix: restore SRD monster library (334 monsters, fixes #102)"
+- [ ] 7.4 Monitor CI: if any check fails, diagnose → fix → commit → push → repeat until all checks pass (CI running)
 - [ ] 7.5 Address any review comments: fix → commit → push → repeat until no unresolved comments remain
 - [ ] 7.6 Enable auto-merge once all CI checks are green and no blocking review comments remain
 

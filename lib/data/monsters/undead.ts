@@ -76,7 +76,7 @@ export const UNDEAD: Omit<
     alignment: "any alignment",
     ac: 11,
     hp: 45,
-    speed: "0 ft., fly 40 ft., hover true",
+    speed: "0 ft., fly 40 ft. (hover)",
     damageResistances: [
       "acid",
       "fire",
@@ -99,6 +99,7 @@ export const UNDEAD: Omit<
       "Poisoned",
       "Prone",
       "Restrained",
+      "Unconscious",
     ],
     senses: {
       darkvision: "60 ft.",
@@ -719,7 +720,7 @@ export const UNDEAD: Omit<
     alignment: "chaotic evil",
     ac: 12,
     hp: 22,
-    speed: "0 ft., fly 50 ft., hover true",
+    speed: "0 ft., fly 50 ft. (hover)",
     damageResistances: [
       "acid",
       "cold",
@@ -1239,7 +1240,7 @@ export const UNDEAD: Omit<
         name: "Longsword",
         description: "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 6 (1d8 + 2) slashing damage, or 7 (1d10 + 2) slashing damage if used with two hands.",
         attackBonus: 4,
-        damageDescription: "undefined",
+        damageDescription: "1d8+2 Slashing",
       },
       {
         name: "Longbow",
@@ -1265,7 +1266,7 @@ export const UNDEAD: Omit<
     alignment: "chaotic evil",
     ac: 19,
     hp: 22,
-    speed: "0 ft., fly 50 ft., hover true",
+    speed: "0 ft., fly 50 ft. (hover)",
     damageResistances: [
       "acid",
       "cold",
@@ -1346,7 +1347,7 @@ export const UNDEAD: Omit<
     alignment: "neutral evil",
     ac: 13,
     hp: 67,
-    speed: "0 ft., fly 60 ft., hover true",
+    speed: "0 ft., fly 60 ft. (hover)",
     damageResistances: [
       "acid",
       "cold",

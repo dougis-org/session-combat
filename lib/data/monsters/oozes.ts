@@ -209,7 +209,6 @@ export const OOZES: Omit<
     conditionImmunities: [
       "Blinded",
       "Charmed",
-      "Blinded",
       "Exhaustion",
       "Frightened",
       "Prone",

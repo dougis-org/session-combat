@@ -231,7 +231,7 @@ export const CONSTRUCTS: Omit<
     alignment: "unaligned",
     ac: 17,
     hp: 17,
-    speed: "0 ft., fly 50 ft., hover true",
+    speed: "0 ft., fly 50 ft. (hover)",
     savingThrows: {
       dexterity: 4,
     },
@@ -242,7 +242,6 @@ export const CONSTRUCTS: Omit<
     conditionImmunities: [
       "Blinded",
       "Charmed",
-      "Blinded",
       "Frightened",
       "Paralyzed",
       "Petrified",
@@ -432,7 +431,6 @@ export const CONSTRUCTS: Omit<
     conditionImmunities: [
       "Blinded",
       "Charmed",
-      "Blinded",
       "Frightened",
       "Paralyzed",
       "Petrified",

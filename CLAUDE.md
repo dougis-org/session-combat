@@ -1,0 +1,11 @@
+# Claude Code Instructions
+
+## Tool Preferences
+
+**Prefer MCP tooling over Bash for all file operations and searches.**
+
+- Use `mcp__oraios_serena__read_file` or `mcp__oraios_serena__search_for_pattern` instead of `sed`, `awk`, `cat`, `grep` via Bash
+- Use `mcp__oraios_serena__find_symbol` / `mcp__oraios_serena__get_symbols_overview` for code navigation
+- Use `mcp__oraios_serena__replace_content` or `mcp__oraios_serena__replace_symbol_body` for edits when possible
+- Fall back to Claude Code native tools (Read, Edit, Grep, Glob) only when MCP tools cannot accomplish the task
+- Only use Bash for system commands that have no MCP equivalent (git, npm, node, etc.)
