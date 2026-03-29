@@ -19,10 +19,49 @@ export function LairForm({
   onConfirm,
   onCancel,
 }: LairFormProps) {
+  const titleId = 'lair-form-title';
+
+  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      onCancel();
+    }
+  };
+
+  React.useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onCancel();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onCancel]);
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg p-6 w-full max-w-sm border border-gray-700 shadow-xl">
-        <h3 className="text-lg font-bold text-purple-300 mb-4">🏰 Add Lair Slot</h3>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={handleOverlayClick}
+    >
+      <div
+        className="bg-gray-800 rounded-lg p-6 w-full max-w-sm border border-gray-700 shadow-xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+      >
+        <h3
+          id={titleId}
+          className="text-lg font-bold text-purple-300 mb-4"
+        >
+          🏰 Add Lair Slot
+        </h3>
         <div className="space-y-4">
           <div>
             <label className="block text-sm text-gray-400 mb-1">Lair name</label>

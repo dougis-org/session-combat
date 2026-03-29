@@ -522,10 +522,15 @@ test.describe("Combat flows", () => {
   // Lair actions
   // ────────────────────────────────────────────────────────────
 
-  type Page = import("@playwright/test").Page;
-
   async function assertLairActive(page: Page) {
     await expect(page.locator('[data-testid="lair-active"]')).toBeVisible({ timeout: 5000 });
+  }
+
+  async function setupEmptyCombat(page: Page, testInfo: TestInfo) {
+    const identity = await registerTestUser(page, testInfo);
+    await setupEmptyMonstersMock(page);
+    await page.goto("/combat");
+    return identity;
   }
 
   const LAIR_MONSTER = {
@@ -628,9 +633,7 @@ test.describe("Combat flows", () => {
   });
 
   test("Add Lair form appears on button click and inserts slot at initiative 20", async ({ page }, testInfo) => {
-    const identity = await registerTestUser(page, testInfo);
-    await setupEmptyMonstersMock(page);
-    await page.goto("/combat");
+    const identity = await setupEmptyCombat(page, testInfo);
 
     await page.getByRole("button", { name: /Add Lair/i }).first().click();
     await expect(page.locator('[data-testid="lair-name-input"]')).toBeVisible({ timeout: 5000 });
@@ -652,9 +655,7 @@ test.describe("Combat flows", () => {
   });
 
   test("lair slot sorts before initiative-20 player in order", async ({ page }, testInfo) => {
-    const identity = await registerTestUser(page, testInfo);
-    await setupEmptyMonstersMock(page);
-    await page.goto("/combat");
+    const identity = await setupEmptyCombat(page, testInfo);
 
     await createCustomCombatant(page, identity.name("Fighter"), 30, { initiative: "20" });
     await addLairSlot(page, "Test Lair");
@@ -667,9 +668,7 @@ test.describe("Combat flows", () => {
   });
 
   test("lair slot shows compact badge when inactive in initiative order", async ({ page }, testInfo) => {
-    const identity = await registerTestUser(page, testInfo);
-    await setupEmptyMonstersMock(page);
-    await page.goto("/combat");
+    const identity = await setupEmptyCombat(page, testInfo);
 
     await createCustomCombatant(page, "Goblin", 7);
     await addLairSlot(page, "Test Lair");
@@ -740,9 +739,7 @@ test.describe("Combat flows", () => {
   });
 
   test("lair slot can be removed from active combat", async ({ page }, testInfo) => {
-    const identity = await registerTestUser(page, testInfo);
-    await setupEmptyMonstersMock(page);
-    await page.goto("/combat");
+    const identity = await setupEmptyCombat(page, testInfo);
 
     await createCustomCombatant(page, "Goblin", 7);
     await addLairSlot(page, "Test Lair");

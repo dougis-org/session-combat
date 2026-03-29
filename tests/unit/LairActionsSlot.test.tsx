@@ -4,11 +4,12 @@
 (globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
 import { act } from 'react';
 import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
-import { CombatantState } from '@/lib/types';
+import type { CombatantState } from '@/lib/types';
+import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
+import type { Root } from 'react-dom/client';
 
 const DEFAULT_LAIR_ACTIONS = [
   { name: 'Earthquake', description: 'The ground shakes violently.', usesRemaining: 2 },
@@ -67,14 +68,11 @@ describe('LairActionsSlot', () => {
   };
 
   beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
+    ({ container, root } = createReactRoot());
   });
 
   afterEach(async () => {
-    await act(async () => { root.unmount(); });
-    document.body.removeChild(container);
+    await unmountReactRoot(container, root);
   });
 
   test('renders compact badge with lair name when inactive', async () => {

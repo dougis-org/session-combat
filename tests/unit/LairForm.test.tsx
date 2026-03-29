@@ -4,24 +4,22 @@
 (globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
 import { act } from 'react';
 import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { LairForm } from '@/lib/components/LairForm';
+import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
+import type { Root } from 'react-dom/client';
 
 describe('LairForm', () => {
   let container: HTMLDivElement;
   let root: Root;
 
   beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
+    ({ container, root } = createReactRoot());
   });
 
   afterEach(async () => {
-    await act(async () => { root.unmount(); });
-    document.body.removeChild(container);
+    await unmountReactRoot(container, root);
   });
 
   const render = async (props: Partial<Parameters<typeof LairForm>[0]> = {}) => {
@@ -89,5 +87,65 @@ describe('LairForm', () => {
     await render({ lairName: 'Test Lair' });
     const input = container.querySelector('[data-testid="lair-name-input"]') as HTMLInputElement;
     expect(input.value).toBe('Test Lair');
+  });
+
+  test('Escape key calls onCancel', async () => {
+    const { onCancel } = await render();
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    });
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  test('clicking the overlay calls onCancel', async () => {
+    const { onCancel } = await render();
+    const overlay = container.firstElementChild as HTMLDivElement;
+    await act(async () => {
+      overlay.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  test('clicking inside the dialog does not call onCancel', async () => {
+    const { onCancel } = await render();
+    const dialog = container.querySelector('[role="dialog"]') as HTMLDivElement;
+    await act(async () => {
+      dialog.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  test('dialog has correct ARIA attributes', async () => {
+    await render();
+    const dialog = container.querySelector('[role="dialog"]');
+    expect(dialog?.getAttribute('aria-modal')).toBe('true');
+    expect(dialog?.getAttribute('aria-labelledby')).toBeTruthy();
+  });
+
+  test('body scroll is locked while mounted', async () => {
+    await render();
+    expect(document.body.style.overflow).toBe('hidden');
+  });
+
+  test('input onChange fires onNameChange with new value', async () => {
+    const { onNameChange } = await render();
+    const input = container.querySelector('[data-testid="lair-name-input"]') as HTMLInputElement;
+    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    await act(async () => {
+      nativeSetter?.call(input, 'New Lair');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(onNameChange).toHaveBeenCalled();
+  });
+
+  test('select onChange fires onSeedChange with selected value', async () => {
+    const { onSeedChange } = await render({ seedOptions: ['Dragon', 'Lich'] });
+    const select = container.querySelector('[data-testid="lair-seed-select"]') as HTMLSelectElement;
+    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')?.set;
+    await act(async () => {
+      nativeSetter?.call(select, 'Dragon');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    expect(onSeedChange).toHaveBeenCalled();
   });
 });
