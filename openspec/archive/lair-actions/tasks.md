@@ -64,16 +64,16 @@
 
 ## 9. PR and Merge
 
-- [ ] 9.1 Commit all changes with a clear message and push to `feat/lair-actions`
-- [ ] 9.2 Open PR from `feat/lair-actions` to `main`
-- [ ] 9.3 Monitor CI: on failure, diagnose, fix, commit, push, repeat until all checks pass
-- [ ] 9.4 Address each review comment, commit fixes to `feat/lair-actions`, push, repeat until no unresolved comments remain
-- [ ] 9.5 Enable auto-merge only when all required CI checks are green and no blocking review comments remain
+- [x] 9.1 Commit all changes with a clear message and push to `feat/lair-actions`
+- [x] 9.2 Open PR from `feat/lair-actions` to `main`
+- [x] 9.3 Monitor CI: on failure, diagnose, fix, commit, push, repeat until all checks pass
+- [x] 9.4 Address each review comment, commit fixes to `feat/lair-actions`, push, repeat until no unresolved comments remain
+- [x] 9.5 Enable auto-merge only when all required CI checks are green and no blocking review comments remain
 
 ## 10. Post-Merge
 
-- [ ] 10.1 Checkout `main` and pull; verify merged changes appear on the default branch
-- [ ] 10.2 Mark all tasks complete
-- [ ] 10.3 Sync approved spec deltas: copy `openspec/changes/lair-actions/specs/` content to `openspec/specs/` as appropriate
-- [ ] 10.4 Archive the change: copy `openspec/changes/lair-actions/` to `openspec/archive/lair-actions/` and delete the original — commit both the copy and deletion as a **single atomic commit**; push to `main`
-- [ ] 10.5 Prune merged local branch (`git branch -d feat/lair-actions`)
+- [x] 10.1 Checkout `main` and pull; verify merged changes appear on the default branch
+- [x] 10.2 Mark all tasks complete
+- [x] 10.3 Sync approved spec deltas: copy `openspec/changes/lair-actions/specs/` content to `openspec/specs/` as appropriate
+- [x] 10.4 Archive the change: copy `openspec/changes/lair-actions/` to `openspec/archive/lair-actions/` and delete the original — commit both the copy and deletion as a **single atomic commit**; push to `main`
+- [x] 10.5 Prune merged local branch (`git branch -d feat/lair-actions`)
