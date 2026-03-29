@@ -162,3 +162,32 @@ export function restoreCharge(ability: CreatureAbility): CreatureAbility {
 export function restoreAllCharges(actions: CreatureAbility[]): CreatureAbility[] {
   return actions.map(a => (Number.isFinite(a.usesRemaining) ? restoreCharge(a) : { ...a }));
 }
+
+/**
+ * Build a lair pseudo-combatant.
+ * Sets initiative to 20 and includes an initiativeRoll so the initiative-order
+ * view activates even when lairs are the only rolled combatants.
+ * Copies lairActions from seedMonsterName if found in sourceList.
+ */
+export function buildLairCombatant(
+  name: string,
+  seedMonsterName: string,
+  sourceList: CombatantState[] | null,
+): CombatantState {
+  const lairActions = seedMonsterName
+    ? (sourceList?.find(c => c.name === seedMonsterName)?.lairActions ?? []).map(a => ({ ...a }))
+    : [];
+  return {
+    id: `lair-${crypto.randomUUID()}`,
+    name,
+    type: 'lair',
+    initiative: 20,
+    initiativeRoll: { roll: 20, bonus: 0, total: 20, method: 'manual' },
+    conditions: [],
+    hp: 0,
+    maxHp: 0,
+    ac: 0,
+    abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+    lairActions,
+  };
+}

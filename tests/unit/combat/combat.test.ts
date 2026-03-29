@@ -1,6 +1,6 @@
 import { describe, test, expect } from '@jest/globals';
-import { applyDamage, applyHealing, setTempHp, useLegendaryAction, resetLegendaryActions, resetIncomingLegendaryPool, decrementLegendaryPool, incrementLegendaryPool, useCharge, restoreCharge, restoreAllCharges } from '@/lib/utils/combat';
-import { CreatureAbility } from '@/lib/types';
+import { applyDamage, applyHealing, setTempHp, useLegendaryAction, resetLegendaryActions, resetIncomingLegendaryPool, decrementLegendaryPool, incrementLegendaryPool, useCharge, restoreCharge, restoreAllCharges, buildLairCombatant } from '@/lib/utils/combat';
+import type { CreatureAbility, CombatantState } from '@/lib/types';
 
 const makeAbility = (overrides: Partial<CreatureAbility> = {}): CreatureAbility => ({
   name: 'Earthquake',
@@ -294,5 +294,84 @@ describe('restoreAllCharges', () => {
 
   test('empty array returns empty array', () => {
     expect(restoreAllCharges([])).toEqual([]);
+  });
+});
+
+describe('buildLairCombatant', () => {
+  test('returns a lair-type combatant with initiative 20', () => {
+    const c = buildLairCombatant('Dragon Lair', '', null);
+    expect(c.type).toBe('lair');
+    expect(c.initiative).toBe(20);
+    expect(c.name).toBe('Dragon Lair');
+  });
+
+  test('id is unique per call', () => {
+    const a = buildLairCombatant('Lair', '', null);
+    const b = buildLairCombatant('Lair', '', null);
+    expect(a.id).not.toBe(b.id);
+    expect(a.id).toMatch(/^lair-/);
+  });
+
+  test('includes initiativeRoll so hasInitiativeBeenRolled returns true', () => {
+    const c = buildLairCombatant('Test', '', null);
+    expect(c.initiativeRoll).toEqual({ roll: 20, bonus: 0, total: 20, method: 'manual' });
+  });
+
+  test('lairActions is empty when no seed monster', () => {
+    const c = buildLairCombatant('Lair', '', null);
+    expect(c.lairActions).toEqual([]);
+  });
+
+  test('lairActions is empty when seedMonsterName is empty string', () => {
+    const source: CombatantState[] = [
+      {
+        id: 'm1', name: 'Dragon', type: 'monster', initiative: 15,
+        conditions: [], hp: 100, maxHp: 100, ac: 18,
+        abilityScores: { strength: 20, dexterity: 10, constitution: 18, intelligence: 12, wisdom: 10, charisma: 16 },
+        lairActions: [{ name: 'Eruption', description: 'Lava erupts.' }],
+      },
+    ];
+    const c = buildLairCombatant('Lair', '', source);
+    expect(c.lairActions).toEqual([]);
+  });
+
+  test('copies lairActions from matching seed monster', () => {
+    const lairAction = { name: 'Eruption', description: 'Lava erupts.', usesRemaining: 1 };
+    const source: CombatantState[] = [
+      {
+        id: 'm1', name: 'Dragon', type: 'monster', initiative: 15,
+        conditions: [], hp: 100, maxHp: 100, ac: 18,
+        abilityScores: { strength: 20, dexterity: 10, constitution: 18, intelligence: 12, wisdom: 10, charisma: 16 },
+        lairActions: [lairAction],
+      },
+    ];
+    const c = buildLairCombatant('Dragon Lair', 'Dragon', source);
+    expect(c.lairActions).toEqual([lairAction]);
+    expect(c.lairActions![0]).not.toBe(lairAction); // deep copy
+  });
+
+  test('empty lairActions when seed monster name not found', () => {
+    const source: CombatantState[] = [
+      {
+        id: 'm1', name: 'Dragon', type: 'monster', initiative: 15,
+        conditions: [], hp: 100, maxHp: 100, ac: 18,
+        abilityScores: { strength: 20, dexterity: 10, constitution: 18, intelligence: 12, wisdom: 10, charisma: 16 },
+        lairActions: [{ name: 'Eruption', description: 'Lava erupts.' }],
+      },
+    ];
+    const c = buildLairCombatant('Lair', 'Unknown', source);
+    expect(c.lairActions).toEqual([]);
+  });
+
+  test('empty lairActions when sourceList is null and seedMonsterName given', () => {
+    const c = buildLairCombatant('Lair', 'Dragon', null);
+    expect(c.lairActions).toEqual([]);
+  });
+
+  test('hp, maxHp, and ac are all 0', () => {
+    const c = buildLairCombatant('Lair', '', null);
+    expect(c.hp).toBe(0);
+    expect(c.maxHp).toBe(0);
+    expect(c.ac).toBe(0);
   });
 });

@@ -9,7 +9,8 @@ import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate } from '@/lib/types';
 import { rollD20 } from '@/lib/utils/dice';
-import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool, sortCombatants } from '@/lib/utils/combat';
+import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool, sortCombatants, buildLairCombatant } from '@/lib/utils/combat';
+import { LairForm } from '@/lib/components/LairForm';
 import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
@@ -152,25 +153,6 @@ function CombatContent() {
     setSetupCombatants(prev => prev.filter(c => c.id !== id));
   };
 
-  const buildLairCombatant = (name: string, seedMonsterName: string, sourceList: CombatantState[] | null): CombatantState => {
-    const lairActions = seedMonsterName
-      ? (sourceList?.find(c => c.name === seedMonsterName)?.lairActions ?? []).map(a => ({ ...a }))
-      : [];
-    return {
-      id: `lair-${crypto.randomUUID()}`,
-      name,
-      type: 'lair',
-      initiative: 20,
-      initiativeRoll: { roll: 20, bonus: 0, total: 20, method: 'manual' },
-      conditions: [],
-      hp: 0,
-      maxHp: 0,
-      ac: 0,
-      abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
-      lairActions,
-    };
-  };
-
   const cancelLairForm = () => { setShowLairForm(false); setLairFormName(''); setLairFormSeedMonster(''); };
 
   const confirmAddLair = () => {
@@ -195,9 +177,7 @@ function CombatContent() {
         currentTurnIndex: newTurnIndex !== -1 ? newTurnIndex : 0,
       });
     }
-    setLairFormName('');
-    setLairFormSeedMonster('');
-    setShowLairForm(false);
+    cancelLairForm();
   };
 
   const selectParty = (partyId: string | null) => {
@@ -1120,7 +1100,7 @@ function CombatContent() {
             onNameChange={setLairFormName}
             onSeedChange={setLairFormSeedMonster}
             onConfirm={confirmAddLair}
-            onCancel={() => { setShowLairForm(false); setLairFormName(''); setLairFormSeedMonster(''); }}
+            onCancel={cancelLairForm}
           />
         )}
 
@@ -2164,75 +2144,3 @@ function InitiativeEntry({ combatant, onSet, onClose }: InitiativeEntryProps) {
   );
 }
 
-function LairForm({
-  seedOptions,
-  lairName,
-  seedMonster,
-  onNameChange,
-  onSeedChange,
-  onConfirm,
-  onCancel,
-}: {
-  seedOptions: string[];
-  lairName: string;
-  seedMonster: string;
-  onNameChange: (v: string) => void;
-  onSeedChange: (v: string) => void;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg p-6 w-full max-w-sm border border-gray-700 shadow-xl">
-        <h3 className="text-lg font-bold text-purple-300 mb-4">🏰 Add Lair Slot</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Lair name</label>
-            <input
-              type="text"
-              data-testid="lair-name-input"
-              className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
-              placeholder="e.g. Dragon's Lair"
-              value={lairName}
-              onChange={e => onNameChange(e.target.value)}
-              autoFocus
-            />
-          </div>
-          {seedOptions.length > 0 && (
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Seed from monster (optional)</label>
-              <select
-                data-testid="lair-seed-select"
-                className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
-                value={seedMonster}
-                onChange={e => onSeedChange(e.target.value)}
-              >
-                <option value="">— None (empty lair) —</option>
-                {seedOptions.map(name => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-              </select>
-            </div>
-          )}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              className="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm font-semibold disabled:opacity-40"
-              disabled={!lairName.trim()}
-              onClick={onConfirm}
-            >
-              Add Lair
-            </button>
-            <button
-              type="button"
-              className="flex-1 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold"
-              onClick={onCancel}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
