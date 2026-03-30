@@ -166,10 +166,10 @@ describe('CombatantCard – stat damage modifier badges', () => {
 // ---------------------------------------------------------------------------
 
 describe('CombatantCard – effects panel toggle', () => {
-  test('no effects panel shown by default when no modifiers', () => {
+  test('effects panel is collapsed by default; + Add effect button always visible', () => {
     render(BASE, jest.fn());
     expect(container.textContent).not.toContain('Apply a combat damage effect');
-    expect(container.textContent).not.toContain('+ Add effect');
+    expect(findButton('+ Add effect')).not.toBeNull();
   });
 
   test('+ Add effect button visible when stat modifiers present', () => {

@@ -117,13 +117,6 @@ function safeNonNeg(n: number): number {
 
 type DamageModifierKind = ActiveDamageEffect['kind'];
 
-// Precedence for merging active damage effects; higher wins.
-const KIND_PRECEDENCE: Record<DamageModifierKind, number> = {
-  resistance: 1,
-  vulnerability: 2,
-  immunity: 3,
-};
-
 interface DamageModifierSources {
   damageResistances?: DamageType[];
   damageImmunities?: DamageType[];
@@ -181,9 +174,12 @@ export function applyDamageWithType(
 
 /**
  * Merge new ActiveDamageEffects into an existing array.
- * For each incoming effect, if an effect already exists for that damage type:
- *   - Keep whichever has higher precedence (immunity > vulnerability > resistance).
- *   - Same kind + same type: replace with incoming (update label).
+ * Rules per incoming effect:
+ *   - Immunity: removes all existing effects for that damage type, then adds itself.
+ *   - Resistance/vulnerability: no-op if the type is already immune; otherwise
+ *     replaces any existing effect with the same (type, kind), or adds new.
+ *     Resistance and vulnerability for the same type can coexist (they cancel at
+ *     application time per 5e rules).
  * Returns a new array; does not mutate existing.
  */
 export function mergeActiveDamageEffects(

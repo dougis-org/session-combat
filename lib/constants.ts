@@ -26,12 +26,13 @@ export const DAMAGE_TYPES = [
 export type DamageType = (typeof DAMAGE_TYPES)[number];
 
 /**
- * Normalize an array of unknown values to canonical DamageType entries.
- * Lowercases and trims each value, then filters to known types.
- * Safe to call with any input (non-strings are coerced via String()).
+ * Normalize an input to canonical DamageType entries.
+ * Lowercases and trims each element, then filters to known types.
+ * Safe to call with any input: non-arrays are treated as [].
  */
-export function filterToDamageTypes(values: unknown[]): DamageType[] {
-  return (values as string[])
+export function filterToDamageTypes(values: unknown): DamageType[] {
+  const array = Array.isArray(values) ? values : [];
+  return (array as unknown[])
     .map(v => String(v).toLowerCase().trim())
     .filter((v): v is DamageType => (DAMAGE_TYPES as readonly string[]).includes(v));
 }

@@ -1647,8 +1647,7 @@ export function CombatantCard({
           </div>
 
           {/* Active Damage Effects */}
-          {(hasDamageModifiers || showEffectsPanel) && (
-              <div className="mt-1 mb-1">
+          <div className="mt-1 mb-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   {statImmunities.map(t => (
                     <span key={`imm-${t}`} className="text-xs bg-purple-900 text-purple-200 px-1.5 py-0.5 rounded font-semibold" title="Immunity (from stats)">
@@ -1770,7 +1769,6 @@ export function CombatantCard({
                   </div>
                 )}
               </div>
-          )}
 
           {combatant.conditions.length > 0 && (
             <div className="mb-2">
@@ -2012,8 +2010,8 @@ export function CombatantCard({
                         value={targetDamageType}
                         onChange={(e) => setTargetDamageType(e.target.value as DamageType | '')}
                         className="w-full bg-gray-700 rounded px-3 py-2 text-white border border-gray-600"
-                        title="Damage type (applies target's resistances/immunities)"
-                        aria-label="Damage type (applies target's resistances and immunities)"
+                        title="Damage type (applies target's resistances, immunities, and vulnerabilities)"
+                        aria-label="Damage type (applies target's resistances, immunities, and vulnerabilities)"
                       >
                         <option value="">No damage type</option>
                         {Object.entries(DAMAGE_TYPE_GROUPS).map(([group, types]) => (
