@@ -51,8 +51,7 @@ export function useLegendaryAction(
   cost: number,
 ): { legendaryActionsRemaining: number } {
   const safeCost = Number.isFinite(cost) ? Math.max(0, Math.floor(cost)) : 0;
-  const safeRemaining = Number.isFinite(remaining) ? remaining : 0;
-  return { legendaryActionsRemaining: Math.max(0, safeRemaining - safeCost) };
+  return { legendaryActionsRemaining: Math.max(0, safeNonNeg(remaining) - safeCost) };
 }
 
 /**
@@ -62,8 +61,7 @@ export function useLegendaryAction(
 export function resetLegendaryActions(
   count: number,
 ): { legendaryActionsRemaining: number } {
-  const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0;
-  return { legendaryActionsRemaining: safeCount };
+  return { legendaryActionsRemaining: safeNonNeg(count) };
 }
 
 /**
@@ -90,12 +88,10 @@ export function decrementLegendaryPool(
   count: number,
   remaining: number,
 ): { legendaryActionCount: number; legendaryActionsRemaining: number } {
-  const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0;
-  const safeRemaining = Number.isFinite(remaining) ? Math.max(0, remaining) : 0;
-  const newCount = Math.max(0, safeCount - 1);
+  const newCount = Math.max(0, safeNonNeg(count) - 1);
   return {
     legendaryActionCount: newCount,
-    legendaryActionsRemaining: Math.min(safeRemaining, newCount),
+    legendaryActionsRemaining: Math.min(safeNonNeg(remaining), newCount),
   };
 }
 
@@ -107,13 +103,16 @@ export function incrementLegendaryPool(
   count: number,
   remaining: number,
 ): { legendaryActionCount: number; legendaryActionsRemaining: number } {
-  const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0;
-  const safeRemaining = Number.isFinite(remaining) ? Math.max(0, remaining) : 0;
-  const newCount = safeCount + 1;
+  const newCount = safeNonNeg(count) + 1;
   return {
     legendaryActionCount: newCount,
-    legendaryActionsRemaining: Math.min(safeRemaining, newCount),
+    legendaryActionsRemaining: Math.min(safeNonNeg(remaining), newCount),
   };
+}
+
+/** Clamp a potentially non-finite number to a non-negative finite value. */
+function safeNonNeg(n: number): number {
+  return Number.isFinite(n) ? Math.max(0, n) : 0;
 }
 
 type DamageModifierKind = ActiveDamageEffect['kind'];

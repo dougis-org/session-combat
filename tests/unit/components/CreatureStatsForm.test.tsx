@@ -41,11 +41,15 @@ function render(stats: CreatureStats, onChange: (s: CreatureStats) => void) {
 }
 
 function clickResistancesHeader() {
-  const buttons = container.querySelectorAll('button');
-  const resistancesBtn = Array.from(buttons).find(b =>
-    b.textContent?.includes('Resistances')
+  const resistancesBtn = Array.from(container.querySelectorAll('button')).find(
+    b => b.textContent?.includes('Resistances'),
   );
   act(() => { (resistancesBtn as HTMLButtonElement).click(); });
+}
+
+function renderExpanded(stats: CreatureStats, onChange: (s: CreatureStats) => void) {
+  render(stats, onChange);
+  clickResistancesHeader();
 }
 
 // ---------------------------------------------------------------------------
@@ -62,24 +66,21 @@ describe('CreatureStatsForm – resistances section', () => {
   });
 
   test('expanding section renders checkboxes for all 13 damage types per field (39 total)', () => {
-    render(BASE_STATS, jest.fn() as any);
-    clickResistancesHeader();
+    renderExpanded(BASE_STATS, jest.fn() as any);
     const checkboxes = container.querySelectorAll('input[type="checkbox"]');
     // 3 fields × 13 types = 39 checkboxes
     expect(checkboxes.length).toBe(39);
   });
 
   test('checkboxes are unchecked when no resistances set', () => {
-    render(BASE_STATS, jest.fn() as any);
-    clickResistancesHeader();
+    renderExpanded(BASE_STATS, jest.fn() as any);
     const checkboxes = container.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(cb => expect((cb as HTMLInputElement).checked).toBe(false));
   });
 
   test('pre-selected resistances render as checked', () => {
     const stats = { ...BASE_STATS, damageResistances: ['fire' as const, 'cold' as const] };
-    render(stats, jest.fn() as any);
-    clickResistancesHeader();
+    renderExpanded(stats, jest.fn() as any);
     // Find the fire resistance checkbox (first field group = vulnerabilities, second = resistances)
     const labels = container.querySelectorAll('label');
     const fireLabel = Array.from(labels).find(l => {
@@ -101,8 +102,7 @@ describe('CreatureStatsForm – resistances section', () => {
 describe('CreatureStatsForm – checkbox toggle calls onChange', () => {
   test('checking an unchecked resistance calls onChange with the type added', () => {
     const onChange = jest.fn();
-    render(BASE_STATS, onChange as any);
-    clickResistancesHeader();
+    renderExpanded(BASE_STATS, onChange as any);
 
     // Find the resistance section — it's the second group of 13 checkboxes
     // We look for an unchecked checkbox adjacent to a span saying "fire"
@@ -129,8 +129,7 @@ describe('CreatureStatsForm – checkbox toggle calls onChange', () => {
   test('unchecking a checked resistance calls onChange with the type removed', () => {
     const stats = { ...BASE_STATS, damageResistances: ['fire' as const] };
     const onChange = jest.fn();
-    render(stats, onChange as any);
-    clickResistancesHeader();
+    renderExpanded(stats, onChange as any);
 
     // Find the checked fire checkbox in the resistance group
     const checkedBoxes = Array.from(container.querySelectorAll('input[type="checkbox"]')).filter(
@@ -150,8 +149,7 @@ describe('CreatureStatsForm – checkbox toggle calls onChange', () => {
 
   test('checking immunity type calls onChange with damageImmunities containing the type', () => {
     const onChange = jest.fn();
-    render(BASE_STATS, onChange as any);
-    clickResistancesHeader();
+    renderExpanded(BASE_STATS, onChange as any);
 
     // Immunity group is the third set of 13 (indices 26-38)
     // DAMAGE_TYPE_GROUPS order: Physical (bludgeoning,piercing,slashing), Elemental (acid,cold,fire,lightning,thunder), Energy & Planar (force,necrotic,radiant), Other (poison,psychic)
@@ -171,8 +169,7 @@ describe('CreatureStatsForm – checkbox toggle calls onChange', () => {
   test('removing last type from a field sets field to undefined', () => {
     const stats = { ...BASE_STATS, damageVulnerabilities: ['cold' as const] };
     const onChange = jest.fn();
-    render(stats, onChange as any);
-    clickResistancesHeader();
+    renderExpanded(stats, onChange as any);
 
     const checkedBoxes = Array.from(container.querySelectorAll('input[type="checkbox"]')).filter(
       cb => (cb as HTMLInputElement).checked

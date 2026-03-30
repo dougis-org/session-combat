@@ -25,6 +25,17 @@ export const DAMAGE_TYPES = [
 
 export type DamageType = (typeof DAMAGE_TYPES)[number];
 
+/**
+ * Normalize an array of unknown values to canonical DamageType entries.
+ * Lowercases and trims each value, then filters to known types.
+ * Safe to call with any input (non-strings are coerced via String()).
+ */
+export function filterToDamageTypes(values: unknown[]): DamageType[] {
+  return (values as string[])
+    .map(v => String(v).toLowerCase().trim())
+    .filter((v): v is DamageType => (DAMAGE_TYPES as readonly string[]).includes(v));
+}
+
 // Damage type families for grouped UI display
 export const DAMAGE_TYPE_GROUPS = {
   Physical: ['bludgeoning', 'piercing', 'slashing'] as DamageType[],
@@ -36,26 +47,22 @@ export const DAMAGE_TYPE_GROUPS = {
 // Combat-scoped damage effect presets
 import type { DamageEffectPreset } from '@/lib/types';
 
+const BPS_RESISTANCE_EFFECTS = (
+  ['bludgeoning', 'piercing', 'slashing'] as DamageType[]
+).map(type => ({ type, kind: 'resistance' as const }));
+
 export const DAMAGE_EFFECT_PRESETS: readonly DamageEffectPreset[] = [
   {
     id: 'rage',
     label: 'Rage',
     description: 'Barbarian Rage: resistance to B/P/S damage',
-    effects: [
-      { type: 'bludgeoning', kind: 'resistance' },
-      { type: 'piercing', kind: 'resistance' },
-      { type: 'slashing', kind: 'resistance' },
-    ],
+    effects: BPS_RESISTANCE_EFFECTS,
   },
   {
     id: 'stoneskin',
     label: 'Stoneskin',
     description: 'Stoneskin spell: resistance to B/P/S damage',
-    effects: [
-      { type: 'bludgeoning', kind: 'resistance' },
-      { type: 'piercing', kind: 'resistance' },
-      { type: 'slashing', kind: 'resistance' },
-    ],
+    effects: BPS_RESISTANCE_EFFECTS,
   },
   {
     id: 'protection-from-energy',

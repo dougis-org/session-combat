@@ -4,13 +4,7 @@
  */
 
 import { MonsterTemplate, AbilityScores, CreatureAbility } from '@/lib/types';
-import { DAMAGE_TYPES, DamageType } from '@/lib/constants';
-
-function filterToDamageTypes(values: unknown[]): DamageType[] {
-  return (values as string[])
-    .map(v => String(v).toLowerCase().trim())
-    .filter((v): v is DamageType => (DAMAGE_TYPES as readonly string[]).includes(v));
-}
+import { filterToDamageTypes } from '@/lib/constants';
 
 /**
  * Valid monster sizes in D&D 5e

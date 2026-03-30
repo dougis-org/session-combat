@@ -66,6 +66,26 @@ function render(combatant: CombatantState, onUpdate: ReturnType<typeof jest.fn>)
   });
 }
 
+/** Render a combatant that has at least one damage modifier (fire resistance)
+ *  so the effects panel controls are visible. Returns the onUpdate mock. */
+function renderWithModifiers(
+  overrides: Partial<CombatantState> = {},
+  onUpdate: ReturnType<typeof jest.fn> = jest.fn(),
+): ReturnType<typeof jest.fn> {
+  render({ ...BASE, damageResistances: ['fire'], ...overrides }, onUpdate);
+  return onUpdate;
+}
+
+/** renderWithModifiers + open the effects panel. Returns the onUpdate mock. */
+function openPanel(
+  overrides: Partial<CombatantState> = {},
+  onUpdate: ReturnType<typeof jest.fn> = jest.fn(),
+): ReturnType<typeof jest.fn> {
+  renderWithModifiers(overrides, onUpdate);
+  act(() => { findButton('+ Add effect').click(); });
+  return onUpdate;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -153,19 +173,17 @@ describe('CombatantCard – effects panel toggle', () => {
   });
 
   test('+ Add effect button visible when stat modifiers present', () => {
-    render({ ...BASE, damageResistances: ['fire'] }, jest.fn());
+    renderWithModifiers();
     expect(findButton('+ Add effect')).not.toBeNull();
   });
 
   test('clicking + Add effect shows preset panel', () => {
-    render({ ...BASE, damageResistances: ['fire'] }, jest.fn());
-    clickAddEffect();
+    openPanel();
     expect(container.textContent).toContain('Apply a combat damage effect');
   });
 
   test('clicking Hide effects collapses panel', () => {
-    render({ ...BASE, damageResistances: ['fire'] }, jest.fn());
-    clickAddEffect();
+    openPanel();
     act(() => { findButton('Hide effects').click(); });
     expect(container.textContent).not.toContain('Apply a combat damage effect');
   });
@@ -177,17 +195,13 @@ describe('CombatantCard – effects panel toggle', () => {
 
 describe('CombatantCard – preset application', () => {
   test('preset panel lists Rage preset', () => {
-    render({ ...BASE, damageResistances: ['fire'] }, jest.fn());
-    clickAddEffect();
+    openPanel();
     expect(container.textContent).toContain('Rage');
   });
 
   test('clicking Rage preset calls onUpdate with B/P/S resistances', () => {
-    const onUpdate = jest.fn();
-    render({ ...BASE, damageResistances: ['fire'] }, onUpdate);
-    clickAddEffect();
+    const onUpdate = openPanel();
     act(() => { findButton('Rage').click(); });
-    expect(onUpdate).toHaveBeenCalled();
     const arg = (onUpdate as jest.Mock).mock.calls[0][0] as { activeDamageEffects: ActiveDamageEffect[] };
     const types = arg.activeDamageEffects.map(e => e.type);
     expect(types).toContain('bludgeoning');
@@ -196,25 +210,20 @@ describe('CombatantCard – preset application', () => {
   });
 
   test('clicking Rage preset closes the effects panel', () => {
-    const onUpdate = jest.fn();
-    render({ ...BASE, damageResistances: ['fire'] }, onUpdate);
-    clickAddEffect();
+    openPanel();
     act(() => { findButton('Rage').click(); });
     expect(container.textContent).not.toContain('Apply a combat damage effect');
   });
 
   test('clicking Protection from Energy opens type picker', () => {
-    render({ ...BASE, damageResistances: ['fire'] }, jest.fn());
-    clickAddEffect();
+    openPanel();
     act(() => { findButton('Protection from Energy').click(); });
     expect(container.textContent).toContain('Protection from Energy: choose a damage type');
   });
 
   test('type picker for Protection from Energy only shows elemental choices', () => {
-    render({ ...BASE, damageResistances: ['fire'] }, jest.fn());
-    clickAddEffect();
+    openPanel();
     act(() => { findButton('Protection from Energy').click(); });
-    // choicesLimited = acid, cold, fire, lightning, thunder
     expect(findButton('fire')).not.toBeNull();
     expect(findButton('acid')).not.toBeNull();
     // bludgeoning is NOT a valid choice for Protection from Energy
@@ -222,19 +231,15 @@ describe('CombatantCard – preset application', () => {
   });
 
   test('selecting a type in the picker calls onUpdate with the chosen effect', () => {
-    const onUpdate = jest.fn();
-    render({ ...BASE, damageResistances: ['fire'] }, onUpdate);
-    clickAddEffect();
+    const onUpdate = openPanel();
     act(() => { findButton('Protection from Energy').click(); });
     act(() => { findButton('cold').click(); });
-    expect(onUpdate).toHaveBeenCalled();
     const arg = (onUpdate as jest.Mock).mock.calls[0][0] as { activeDamageEffects: ActiveDamageEffect[] };
     expect(arg.activeDamageEffects.some(e => e.type === 'cold' && e.kind === 'resistance')).toBe(true);
   });
 
   test('selecting a type closes both the picker and the panel', () => {
-    render({ ...BASE, damageResistances: ['fire'] }, jest.fn());
-    clickAddEffect();
+    openPanel();
     act(() => { findButton('Protection from Energy').click(); });
     act(() => { findButton('fire').click(); });
     expect(container.textContent).not.toContain('choose a damage type');
@@ -242,8 +247,7 @@ describe('CombatantCard – preset application', () => {
   });
 
   test('clicking Back in the type picker returns to preset list', () => {
-    render({ ...BASE, damageResistances: ['fire'] }, jest.fn());
-    clickAddEffect();
+    openPanel();
     act(() => { findButton('Protection from Energy').click(); });
     act(() => { findButton('← Back').click(); });
     expect(container.textContent).toContain('Apply a combat damage effect');
@@ -251,14 +255,10 @@ describe('CombatantCard – preset application', () => {
   });
 
   test('Absorb Elements (unconstrained) offers all 13 damage types in picker', () => {
-    render({ ...BASE, damageResistances: ['fire'] }, jest.fn());
-    clickAddEffect();
+    openPanel();
     act(() => { findButton('Absorb Elements').click(); });
-    // All 13 types should appear as buttons
     const allTypes = ['acid','bludgeoning','cold','fire','force','lightning','necrotic','piercing','poison','psychic','radiant','slashing','thunder'];
-    allTypes.forEach(t => {
-      expect(findButton(t)).not.toBeNull();
-    });
+    allTypes.forEach(t => { expect(findButton(t)).not.toBeNull(); });
   });
 });
 

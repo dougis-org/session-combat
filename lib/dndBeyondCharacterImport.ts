@@ -11,13 +11,7 @@ import {
   calculateTotalLevel,
 } from "./types";
 import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
-import { DAMAGE_TYPES, DamageType } from "./constants";
-
-function filterToDamageTypes(values: string[]): DamageType[] {
-  return values
-    .map(v => v.toLowerCase())
-    .filter((v): v is DamageType => (DAMAGE_TYPES as readonly string[]).includes(v));
-}
+import { filterToDamageTypes } from "./constants";
 
 const CANONICAL_HOST = "www.dndbeyond.com";
 const CHARACTER_PATH_PATTERN = /^\/characters\/(\d+)\/([A-Za-z0-9_-]+)\/?$/;

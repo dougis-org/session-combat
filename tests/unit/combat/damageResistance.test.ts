@@ -2,6 +2,12 @@ import { describe, test, expect } from '@jest/globals';
 import { applyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects } from '@/lib/utils/combat';
 import type { ActiveDamageEffect } from '@/lib/types';
 
+const eff = (
+  type: ActiveDamageEffect['type'],
+  kind: ActiveDamageEffect['kind'],
+  label = kind,
+): ActiveDamageEffect => ({ type, kind, label });
+
 // ---------------------------------------------------------------------------
 // applyDamageWithType
 // ---------------------------------------------------------------------------
@@ -88,7 +94,7 @@ describe('applyDamageWithType – resistance + vulnerability cancel', () => {
   test('stat resistance + active vulnerability = normal damage', () => {
     expect(applyDamageWithType(30, 0, 10, 'fire', {
       damageResistances: ['fire'],
-      activeDamageEffects: [{ type: 'fire', kind: 'vulnerability', label: 'Curse' }],
+      activeDamageEffects: [eff('fire', 'vulnerability', 'Curse')],
     })).toEqual({ hp: 20, tempHp: 0, effectiveDamage: 10 });
   });
 });
@@ -96,25 +102,25 @@ describe('applyDamageWithType – resistance + vulnerability cancel', () => {
 describe('applyDamageWithType – active damage effects', () => {
   test('resistance from activeDamageEffects: halves damage', () => {
     expect(applyDamageWithType(30, 0, 10, 'fire', {
-      activeDamageEffects: [{ type: 'fire', kind: 'resistance', label: 'Rage' }],
+      activeDamageEffects: [eff('fire', 'resistance', 'Rage')],
     })).toEqual({ hp: 25, tempHp: 0, effectiveDamage: 5 });
   });
 
   test('immunity from activeDamageEffects: deals 0 damage', () => {
     expect(applyDamageWithType(30, 0, 20, 'fire', {
-      activeDamageEffects: [{ type: 'fire', kind: 'immunity', label: 'Fire Immunity' }],
+      activeDamageEffects: [eff('fire', 'immunity', 'Fire Immunity')],
     })).toEqual({ hp: 30, tempHp: 0, effectiveDamage: 0 });
   });
 
   test('vulnerability from activeDamageEffects: doubles damage', () => {
     expect(applyDamageWithType(30, 0, 10, 'fire', {
-      activeDamageEffects: [{ type: 'fire', kind: 'vulnerability', label: 'Weakened' }],
+      activeDamageEffects: [eff('fire', 'vulnerability', 'Weakened')],
     })).toEqual({ hp: 10, tempHp: 0, effectiveDamage: 20 });
   });
 
   test('active effect on different type does not apply', () => {
     expect(applyDamageWithType(30, 0, 10, 'fire', {
-      activeDamageEffects: [{ type: 'cold', kind: 'resistance', label: 'Cold Resist' }],
+      activeDamageEffects: [eff('cold', 'resistance', 'Cold Resist')],
     })).toEqual({ hp: 20, tempHp: 0, effectiveDamage: 10 });
   });
 });
@@ -125,64 +131,58 @@ describe('applyDamageWithType – active damage effects', () => {
 
 describe('mergeActiveDamageEffects', () => {
   test('adds new effect when no existing effects', () => {
-    const result = mergeActiveDamageEffects([], [{ type: 'fire', kind: 'resistance', label: 'Rage' }]);
+    const result = mergeActiveDamageEffects([], [eff('fire', 'resistance', 'Rage')]);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ type: 'fire', kind: 'resistance' });
   });
 
   test('adds new effect when it targets a different type', () => {
-    const existing: ActiveDamageEffect[] = [{ type: 'fire', kind: 'resistance', label: 'A' }];
-    const result = mergeActiveDamageEffects(existing, [{ type: 'cold', kind: 'resistance', label: 'B' }]);
+    const result = mergeActiveDamageEffects([eff('fire', 'resistance', 'A')], [eff('cold', 'resistance', 'B')]);
     expect(result).toHaveLength(2);
   });
 
   test('same type + same kind: replaces existing with new entry', () => {
-    const existing: ActiveDamageEffect[] = [{ type: 'fire', kind: 'resistance', label: 'Old' }];
-    const result = mergeActiveDamageEffects(existing, [{ type: 'fire', kind: 'resistance', label: 'New' }]);
+    const result = mergeActiveDamageEffects([eff('fire', 'resistance', 'Old')], [eff('fire', 'resistance', 'New')]);
     expect(result).toHaveLength(1);
     expect(result[0].label).toBe('New');
   });
 
   test('immunity replaces resistance on same type (higher precedence wins)', () => {
-    const existing: ActiveDamageEffect[] = [{ type: 'fire', kind: 'resistance', label: 'A' }];
-    const result = mergeActiveDamageEffects(existing, [{ type: 'fire', kind: 'immunity', label: 'B' }]);
+    const result = mergeActiveDamageEffects([eff('fire', 'resistance', 'A')], [eff('fire', 'immunity', 'B')]);
     expect(result).toHaveLength(1);
     expect(result[0].kind).toBe('immunity');
   });
 
   test('immunity replaces vulnerability on same type', () => {
-    const existing: ActiveDamageEffect[] = [{ type: 'fire', kind: 'vulnerability', label: 'A' }];
-    const result = mergeActiveDamageEffects(existing, [{ type: 'fire', kind: 'immunity', label: 'B' }]);
+    const result = mergeActiveDamageEffects([eff('fire', 'vulnerability', 'A')], [eff('fire', 'immunity', 'B')]);
     expect(result).toHaveLength(1);
     expect(result[0].kind).toBe('immunity');
   });
 
   test('resistance does not overwrite existing immunity on same type', () => {
-    const existing: ActiveDamageEffect[] = [{ type: 'fire', kind: 'immunity', label: 'A' }];
-    const result = mergeActiveDamageEffects(existing, [{ type: 'fire', kind: 'resistance', label: 'B' }]);
+    const result = mergeActiveDamageEffects([eff('fire', 'immunity', 'A')], [eff('fire', 'resistance', 'B')]);
     expect(result).toHaveLength(1);
     expect(result[0].kind).toBe('immunity');
   });
 
   test('vulnerability does not overwrite existing immunity on same type', () => {
-    const existing: ActiveDamageEffect[] = [{ type: 'fire', kind: 'immunity', label: 'A' }];
-    const result = mergeActiveDamageEffects(existing, [{ type: 'fire', kind: 'vulnerability', label: 'B' }]);
+    const result = mergeActiveDamageEffects([eff('fire', 'immunity', 'A')], [eff('fire', 'vulnerability', 'B')]);
     expect(result).toHaveLength(1);
     expect(result[0].kind).toBe('immunity');
   });
 
   test('returns new array, does not mutate existing', () => {
-    const existing: ActiveDamageEffect[] = [{ type: 'fire', kind: 'resistance', label: 'A' }];
-    const result = mergeActiveDamageEffects(existing, [{ type: 'cold', kind: 'resistance', label: 'B' }]);
+    const existing = [eff('fire', 'resistance', 'A')];
+    const result = mergeActiveDamageEffects(existing, [eff('cold', 'resistance', 'B')]);
     expect(result).not.toBe(existing);
     expect(existing).toHaveLength(1);
   });
 
   test('merges multiple new effects at once', () => {
     const result = mergeActiveDamageEffects([], [
-      { type: 'fire', kind: 'resistance', label: 'A' },
-      { type: 'cold', kind: 'resistance', label: 'B' },
-      { type: 'lightning', kind: 'resistance', label: 'C' },
+      eff('fire', 'resistance', 'A'),
+      eff('cold', 'resistance', 'B'),
+      eff('lightning', 'resistance', 'C'),
     ]);
     expect(result).toHaveLength(3);
   });
@@ -194,34 +194,26 @@ describe('mergeActiveDamageEffects', () => {
 
 describe('removeActiveDamageEffects', () => {
   test('removes matching type + kind', () => {
-    const effects: ActiveDamageEffect[] = [
-      { type: 'fire', kind: 'resistance', label: 'A' },
-      { type: 'cold', kind: 'resistance', label: 'B' },
-    ];
+    const effects = [eff('fire', 'resistance', 'A'), eff('cold', 'resistance', 'B')];
     const result = removeActiveDamageEffects(effects, 'fire', 'resistance');
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe('cold');
   });
 
   test('returns unchanged array when no match found', () => {
-    const effects: ActiveDamageEffect[] = [{ type: 'fire', kind: 'resistance', label: 'A' }];
-    const result = removeActiveDamageEffects(effects, 'cold', 'resistance');
+    const result = removeActiveDamageEffects([eff('fire', 'resistance', 'A')], 'cold', 'resistance');
     expect(result).toHaveLength(1);
   });
 
   test('removes all effects matching a kind when type is null', () => {
-    const effects: ActiveDamageEffect[] = [
-      { type: 'fire', kind: 'resistance', label: 'A' },
-      { type: 'cold', kind: 'resistance', label: 'B' },
-      { type: 'fire', kind: 'immunity', label: 'C' },
-    ];
+    const effects = [eff('fire', 'resistance', 'A'), eff('cold', 'resistance', 'B'), eff('fire', 'immunity', 'C')];
     const result = removeActiveDamageEffects(effects, null, 'resistance');
     expect(result).toHaveLength(1);
     expect(result[0].kind).toBe('immunity');
   });
 
   test('returns new array, does not mutate existing', () => {
-    const effects: ActiveDamageEffect[] = [{ type: 'fire', kind: 'resistance', label: 'A' }];
+    const effects = [eff('fire', 'resistance', 'A')];
     const result = removeActiveDamageEffects(effects, 'fire', 'resistance');
     expect(result).not.toBe(effects);
     expect(effects).toHaveLength(1);
