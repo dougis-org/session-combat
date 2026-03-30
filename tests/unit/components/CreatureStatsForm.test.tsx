@@ -104,21 +104,19 @@ describe('CreatureStatsForm – checkbox toggle calls onChange', () => {
     const onChange = jest.fn();
     renderExpanded(BASE_STATS, onChange as any);
 
-    // Find the resistance section — it's the second group of 13 checkboxes
-    // We look for an unchecked checkbox adjacent to a span saying "fire"
-    const allLabels = Array.from(container.querySelectorAll('label'));
-    // The component renders: vulnerabilities (1st), resistances (2nd), immunities (3rd)
-    // Each group has 13 checkboxes. Find the fire checkbox in the resistance group (index 13..25).
-    const allCheckboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
-    // resistance group starts at index 13 (after 13 vulnerabilities)
-    const fireInResistances = allCheckboxes[13]; // first type 'bludgeoning' in resistance group...
-    // Actually we want 'fire' which is the 4th type in Physical+Elemental order
-    // Physical: bludgeoning(0), piercing(1), slashing(2) → indices 13, 14, 15 in resistance
-    // Elemental: acid(3), cold(4), fire(5) → indices 16, 17, 18 in resistance
-    const fireResistanceCheckbox = allCheckboxes[18]; // fire in the resistance section
+    // Find the "Damage Resistances" section label, then the "fire" checkbox within it
+    const sectionLabel = Array.from(container.querySelectorAll('label')).find(
+      l => l.textContent?.includes('Damage Resistances'),
+    )!;
+    const sectionDiv = sectionLabel.parentElement!;
+    const fireLabel = Array.from(sectionDiv.querySelectorAll('label')).find(
+      l => l.querySelector('span')?.textContent?.trim() === 'fire',
+    )!;
+    const fireResistanceCheckbox = fireLabel.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    expect(fireResistanceCheckbox).not.toBeNull();
 
     act(() => {
-      (fireResistanceCheckbox as HTMLInputElement).click();
+      fireResistanceCheckbox.click();
     });
 
     expect(onChange).toHaveBeenCalled();
@@ -151,14 +149,19 @@ describe('CreatureStatsForm – checkbox toggle calls onChange', () => {
     const onChange = jest.fn();
     renderExpanded(BASE_STATS, onChange as any);
 
-    // Immunity group is the third set of 13 (indices 26-38)
-    // DAMAGE_TYPE_GROUPS order: Physical (bludgeoning,piercing,slashing), Elemental (acid,cold,fire,lightning,thunder), Energy & Planar (force,necrotic,radiant), Other (poison,psychic)
-    // poison is index 11 within each group, so in immunity group: 26 + 11 = 37
-    const allCheckboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
-    const poisonImmunityCheckbox = allCheckboxes[37]; // poison in immunities
+    // Find the "Damage Immunities" section label, then the "poison" checkbox within it
+    const sectionLabel = Array.from(container.querySelectorAll('label')).find(
+      l => l.textContent?.includes('Damage Immunities'),
+    )!;
+    const sectionDiv = sectionLabel.parentElement!;
+    const poisonLabel = Array.from(sectionDiv.querySelectorAll('label')).find(
+      l => l.querySelector('span')?.textContent?.trim() === 'poison',
+    )!;
+    const poisonImmunityCheckbox = poisonLabel.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    expect(poisonImmunityCheckbox).not.toBeNull();
 
     act(() => {
-      (poisonImmunityCheckbox as HTMLInputElement).click();
+      poisonImmunityCheckbox.click();
     });
 
     expect(onChange).toHaveBeenCalled();

@@ -147,7 +147,7 @@ describe('mergeActiveDamageEffects', () => {
     expect(result[0].label).toBe('New');
   });
 
-  test('immunity replaces resistance on same type (higher precedence wins)', () => {
+  test('immunity replaces resistance on same type', () => {
     const result = mergeActiveDamageEffects([eff('fire', 'resistance', 'A')], [eff('fire', 'immunity', 'B')]);
     expect(result).toHaveLength(1);
     expect(result[0].kind).toBe('immunity');
@@ -155,6 +155,15 @@ describe('mergeActiveDamageEffects', () => {
 
   test('immunity replaces vulnerability on same type', () => {
     const result = mergeActiveDamageEffects([eff('fire', 'vulnerability', 'A')], [eff('fire', 'immunity', 'B')]);
+    expect(result).toHaveLength(1);
+    expect(result[0].kind).toBe('immunity');
+  });
+
+  test('immunity removes both resistance and vulnerability for same type', () => {
+    const result = mergeActiveDamageEffects(
+      [eff('fire', 'resistance', 'A'), eff('fire', 'vulnerability', 'B')],
+      [eff('fire', 'immunity', 'C')],
+    );
     expect(result).toHaveLength(1);
     expect(result[0].kind).toBe('immunity');
   });
@@ -169,6 +178,18 @@ describe('mergeActiveDamageEffects', () => {
     const result = mergeActiveDamageEffects([eff('fire', 'immunity', 'A')], [eff('fire', 'vulnerability', 'B')]);
     expect(result).toHaveLength(1);
     expect(result[0].kind).toBe('immunity');
+  });
+
+  test('resistance and vulnerability for same type can coexist', () => {
+    const result = mergeActiveDamageEffects([eff('fire', 'resistance', 'Warding Bond')], [eff('fire', 'vulnerability', 'Curse')]);
+    expect(result).toHaveLength(2);
+    expect(result.some(e => e.kind === 'resistance')).toBe(true);
+    expect(result.some(e => e.kind === 'vulnerability')).toBe(true);
+  });
+
+  test('vulnerability does not overwrite resistance for same type', () => {
+    const result = mergeActiveDamageEffects([eff('fire', 'vulnerability', 'Curse')], [eff('fire', 'resistance', 'Warding Bond')]);
+    expect(result).toHaveLength(2);
   });
 
   test('returns new array, does not mutate existing', () => {

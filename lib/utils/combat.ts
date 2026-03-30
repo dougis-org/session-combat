@@ -190,15 +190,20 @@ export function mergeActiveDamageEffects(
   existing: ActiveDamageEffect[],
   incoming: ActiveDamageEffect[],
 ): ActiveDamageEffect[] {
-  const result = [...existing];
+  let result = [...existing];
   for (const effect of incoming) {
-    const idx = result.findIndex(e => e.type === effect.type);
-    if (idx === -1) {
+    if (effect.kind === 'immunity') {
+      // Immunity supersedes all other effects for this type
+      result = result.filter(e => e.type !== effect.type);
       result.push(effect);
     } else {
-      const existingPrecedence = KIND_PRECEDENCE[result[idx].kind];
-      const incomingPrecedence = KIND_PRECEDENCE[effect.kind];
-      if (incomingPrecedence >= existingPrecedence) {
+      // Don't add resistance/vulnerability if already immune for this type
+      if (result.some(e => e.type === effect.type && e.kind === 'immunity')) continue;
+      // Key by (type, kind): replace same type+kind, or add new
+      const idx = result.findIndex(e => e.type === effect.type && e.kind === effect.kind);
+      if (idx === -1) {
+        result.push(effect);
+      } else {
         result[idx] = effect;
       }
     }

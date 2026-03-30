@@ -1677,7 +1677,7 @@ export function CombatantCard({
                     </span>
                   ))}
                   <button
-                    onClick={() => setShowEffectsPanel(!showEffectsPanel)}
+                    onClick={() => { setShowEffectsPanel(v => { if (v) setPendingPreset(null); return !v; }); }}
                     className="text-xs text-teal-400 hover:text-teal-300 underline"
                     title="Add temporary combat damage effects"
                   >
@@ -2013,6 +2013,7 @@ export function CombatantCard({
                         onChange={(e) => setTargetDamageType(e.target.value as DamageType | '')}
                         className="w-full bg-gray-700 rounded px-3 py-2 text-white border border-gray-600"
                         title="Damage type (applies target's resistances/immunities)"
+                        aria-label="Damage type (applies target's resistances and immunities)"
                       >
                         <option value="">No damage type</option>
                         {Object.entries(DAMAGE_TYPE_GROUPS).map(([group, types]) => (
