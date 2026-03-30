@@ -1291,7 +1291,7 @@ function CombatContent() {
   );
 }
 
-function CombatantCard({
+export function CombatantCard({
   combatant,
   isActive,
   onUpdate,
