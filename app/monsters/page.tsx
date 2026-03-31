@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { MonsterTemplate, VALID_ALIGNMENTS } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
+import { filterMonsters, getAvailableTypes } from './filterUtils';
 
 function MonstersContent() {
   const [userTemplates, setUserTemplates] = useState<MonsterTemplate[]>([]);
@@ -18,6 +19,23 @@ function MonstersContent() {
   const [editingTemplate, setEditingTemplate] = useState<MonsterTemplate | null>(null);
   const [editingMode, setEditingMode] = useState<'user' | 'global'>('user');
   const [copyingId, setCopyingId] = useState<string | null>(null);
+  const [filterText, setFilterText] = useState('');
+  const [filterType, setFilterType] = useState('');
+
+  const availableTypes = useMemo(
+    () => getAvailableTypes(userTemplates, globalTemplates),
+    [userTemplates, globalTemplates],
+  );
+
+  const filteredUserTemplates = useMemo(
+    () => filterMonsters(userTemplates, filterText, filterType),
+    [userTemplates, filterText, filterType],
+  );
+
+  const filteredGlobalTemplates = useMemo(
+    () => filterMonsters(globalTemplates, filterText, filterType),
+    [globalTemplates, filterText, filterType],
+  );
 
   useEffect(() => {
     fetchTemplates();
@@ -182,6 +200,27 @@ function MonstersContent() {
           </div>
         )}
 
+        {/* Filter Bar */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={filterText}
+            onChange={e => setFilterText(e.target.value)}
+            placeholder="Filter by name…"
+            className="flex-1 bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
+          />
+          <select
+            value={filterType}
+            onChange={e => setFilterType(e.target.value)}
+            className="sm:w-48 bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-purple-500"
+          >
+            <option value="">All types</option>
+            {availableTypes.map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        </div>
+
         {/* User Templates Section */}
         <div className="mb-12">
           <div className="flex justify-between items-center mb-4">
@@ -211,12 +250,14 @@ function MonstersContent() {
             </div>
           ) : (
             <div className="space-y-4">
-              {userTemplates.length === 0 ? (
+              {filteredUserTemplates.length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
-                  No personal monsters yet. Create one to get started!
+                  {userTemplates.length === 0
+                    ? 'No personal monsters yet. Create one to get started!'
+                    : 'No monsters match your filter.'}
                 </div>
               ) : (
-                userTemplates.map(template => (
+                filteredUserTemplates.map(template => (
                   <MonsterTemplateCard
                     key={template.id}
                     template={template}
@@ -260,13 +301,15 @@ function MonstersContent() {
               />
             )}
 
-            {globalTemplates.length === 0 ? (
+            {filteredGlobalTemplates.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
-                {isAdmin ? 'No global monsters yet.' : 'No global monsters available.'}
+                {globalTemplates.length === 0
+                  ? (isAdmin ? 'No global monsters yet.' : 'No global monsters available.')
+                  : 'No monsters match your filter.'}
               </div>
             ) : (
               <div className="space-y-4">
-                {globalTemplates.map(template => (
+                {filteredGlobalTemplates.map(template => (
                   <MonsterTemplateCard
                     key={template.id}
                     template={template}
