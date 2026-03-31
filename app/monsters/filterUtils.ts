@@ -5,9 +5,10 @@ export function filterMonsters(
   filterText: string,
   filterType: string,
 ): MonsterTemplate[] {
+  const normalizedText = filterText.trim().toLowerCase();
   return templates.filter(t => {
-    const nameMatch = filterText === '' || t.name.toLowerCase().includes(filterText.toLowerCase());
-    const typeMatch = filterType === '' || t.type === filterType;
+    const nameMatch = normalizedText === '' || t.name.toLowerCase().includes(normalizedText);
+    const typeMatch = filterType === '' || t.type.trim() === filterType;
     return nameMatch && typeMatch;
   });
 }
@@ -16,6 +17,8 @@ export function getAvailableTypes(
   userTemplates: MonsterTemplate[],
   globalTemplates: MonsterTemplate[],
 ): string[] {
-  const types = new Set([...userTemplates, ...globalTemplates].map(t => t.type));
+  const types = new Set(
+    [...userTemplates, ...globalTemplates].map(t => t.type.trim()).filter(Boolean),
+  );
   return Array.from(types).sort();
 }

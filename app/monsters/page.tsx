@@ -9,7 +9,7 @@ import { MonsterTemplate, VALID_ALIGNMENTS } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
 import { filterMonsters, getAvailableTypes } from './filterUtils';
 
-function MonstersContent() {
+export function MonstersContent() {
   const [userTemplates, setUserTemplates] = useState<MonsterTemplate[]>([]);
   const [globalTemplates, setGlobalTemplates] = useState<MonsterTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -207,11 +207,13 @@ function MonstersContent() {
             value={filterText}
             onChange={e => setFilterText(e.target.value)}
             placeholder="Filter by name…"
+            aria-label="Filter monsters by name"
             className="flex-1 bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
           />
           <select
             value={filterType}
             onChange={e => setFilterType(e.target.value)}
+            aria-label="Filter monsters by type"
             className="sm:w-48 bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-purple-500"
           >
             <option value="">All types</option>

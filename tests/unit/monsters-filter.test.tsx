@@ -63,6 +63,11 @@ describe('filterMonsters', () => {
       const result = filterMonsters([DRAGON, ZOMBIE, GOBLIN], 'beholder', '');
       expect(result).toHaveLength(0);
     });
+
+    test('whitespace-only filterText is treated as no filter', () => {
+      const result = filterMonsters([DRAGON, ZOMBIE, GOBLIN], '   ', '');
+      expect(result).toHaveLength(3);
+    });
   });
 
   describe('type filter', () => {
@@ -123,5 +128,17 @@ describe('getAvailableTypes', () => {
     const globalTemplates = [GOBLIN]; // humanoid
     const types = getAvailableTypes(userTemplates, globalTemplates);
     expect(types).toEqual(['dragon', 'humanoid', 'undead']);
+  });
+
+  test('trims whitespace from type values', () => {
+    const padded = makeMonster({ id: '5', type: '  beast  ' });
+    const types = getAvailableTypes([padded], []);
+    expect(types).toEqual(['beast']);
+  });
+
+  test('filters out empty type strings', () => {
+    const noType = makeMonster({ id: '6', type: '' });
+    const types = getAvailableTypes([noType, GOBLIN], []);
+    expect(types).toEqual(['humanoid']);
   });
 });
