@@ -363,11 +363,11 @@ describe("dndBeyondCharacterImport", () => {
       darkvision: "60 ft.",
       speed: "30 ft.",
     });
-    expect(result.character.damageImmunities).toContain("Poison");
+    expect(result.character.damageImmunities).toContain("poison");
     expect(result.character.damageImmunities).not.toContain("Poisoned");
     expect(result.character.conditionImmunities).toContain("Poisoned");
-    expect(result.character.damageResistances).toContain("Fire");
-    expect(result.character.damageVulnerabilities).toContain("Cold");
+    expect(result.character.damageResistances).toContain("fire");
+    expect(result.character.damageVulnerabilities).toContain("cold");
     expect(result.character.savingThrows.wisdom).toBe(5);
     expect(result.character.skills.stealth).toBe(9);
     expect(result.character.actions).toEqual(

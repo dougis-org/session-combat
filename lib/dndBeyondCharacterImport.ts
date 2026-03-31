@@ -11,6 +11,7 @@ import {
   calculateTotalLevel,
 } from "./types";
 import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
+import { filterToDamageTypes } from "./constants";
 
 const CANONICAL_HOST = "www.dndbeyond.com";
 const CHARACTER_PATH_PATTERN = /^\/characters\/(\d+)\/([A-Za-z0-9_-]+)\/?$/;
@@ -369,9 +370,9 @@ function buildNormalizedCharacter(
     abilityScores: details.abilityScores,
     savingThrows: details.savingThrows,
     skills: details.skills,
-    damageResistances: details.damageResistances,
-    damageImmunities: details.damageImmunities,
-    damageVulnerabilities: details.damageVulnerabilities,
+    damageResistances: filterToDamageTypes(details.damageResistances),
+    damageImmunities: filterToDamageTypes(details.damageImmunities),
+    damageVulnerabilities: filterToDamageTypes(details.damageVulnerabilities),
     conditionImmunities: details.conditionImmunities,
     senses: details.senses,
     languages: details.languages,

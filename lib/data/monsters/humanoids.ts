@@ -66,8 +66,9 @@ export const HUMANOIDS: Omit<
       history: 13,
     },
     damageResistances: [
-      "damage from spells",
-      "bludgeoning, piercing, and slashing from nonmagical attacks (from stoneskin)",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "12",
@@ -1909,7 +1910,9 @@ export const HUMANOIDS: Omit<
       perception: 7,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "17",
@@ -1967,7 +1970,9 @@ export const HUMANOIDS: Omit<
       perception: 7,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "17",
@@ -2022,7 +2027,9 @@ export const HUMANOIDS: Omit<
       perception: 7,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "17",
@@ -2089,7 +2096,9 @@ export const HUMANOIDS: Omit<
       perception: 2,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "12",
@@ -2141,7 +2150,9 @@ export const HUMANOIDS: Omit<
       perception: 2,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "12",
@@ -2196,7 +2207,9 @@ export const HUMANOIDS: Omit<
       perception: 2,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "12",
@@ -2262,7 +2275,9 @@ export const HUMANOIDS: Omit<
       stealth: 4,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "12",
@@ -2324,7 +2339,9 @@ export const HUMANOIDS: Omit<
       stealth: 4,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "12",
@@ -2392,7 +2409,9 @@ export const HUMANOIDS: Omit<
       stealth: 4,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       darkvision: "60 ft.",
@@ -2442,7 +2461,9 @@ export const HUMANOIDS: Omit<
       stealth: 4,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       darkvision: "60 ft.",
@@ -2505,7 +2526,9 @@ export const HUMANOIDS: Omit<
       stealth: 4,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       darkvision: "60 ft.",
@@ -2586,7 +2609,9 @@ export const HUMANOIDS: Omit<
       stealth: 4,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       darkvision: "60 ft.",
@@ -2647,7 +2672,9 @@ export const HUMANOIDS: Omit<
       perception: 4,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "14",
@@ -2702,7 +2729,9 @@ export const HUMANOIDS: Omit<
       perception: 4,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "14",
@@ -2763,7 +2792,9 @@ export const HUMANOIDS: Omit<
       perception: 4,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       passive_perception: "14",

@@ -25,7 +25,9 @@ export const MONSTROSITIES: Omit<
     },
     damageImmunities: [
       "psychic",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     conditionImmunities: [
       "Charmed",
@@ -822,7 +824,9 @@ export const MONSTROSITIES: Omit<
     hp: 27,
     speed: "30 ft., climb 30 ft.",
     damageResistances: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       darkvision: "60 ft.",
@@ -998,7 +1002,9 @@ export const MONSTROSITIES: Omit<
       religion: 8,
     },
     damageResistances: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "psychic",
@@ -1243,7 +1249,9 @@ export const MONSTROSITIES: Omit<
     },
     damageImmunities: [
       "lightning",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     conditionImmunities: [
       "Frightened",
@@ -2146,7 +2154,9 @@ export const MONSTROSITIES: Omit<
     damageImmunities: [
       "fire",
       "poison",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     conditionImmunities: [
       "Charmed",

@@ -2,6 +2,7 @@
 
 import { AbilityScores, CreatureStats, CreatureAbility } from '@/lib/types';
 import { ABILITY_SCORE_KEYS, SKILL_NAMES } from '@/lib/characterReference';
+import { DAMAGE_TYPE_GROUPS, DamageType } from '@/lib/constants';
 import { useState } from 'react';
 
 interface CreatureStatsFormProps {
@@ -183,49 +184,45 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
           Resistances & Immunities
         </button>
         {expandedSections.resistances && (
-          <div className="space-y-2">
-            <div>
-              <label className="text-xs font-bold">Damage Vulnerabilities</label>
-              <textarea
-                value={(stats.damageVulnerabilities || []).join(', ')}
-                onChange={e =>
-                  updateBasicStat('damageVulnerabilities',
-                    e.target.value ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : undefined
-                  )
-                }
-                className="w-full bg-gray-700 rounded px-2 py-1 text-white text-sm"
-                placeholder="Comma-separated"
-                rows={2}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold">Damage Resistances</label>
-              <textarea
-                value={(stats.damageResistances || []).join(', ')}
-                onChange={e =>
-                  updateBasicStat('damageResistances',
-                    e.target.value ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : undefined
-                  )
-                }
-                className="w-full bg-gray-700 rounded px-2 py-1 text-white text-sm"
-                placeholder="Comma-separated"
-                rows={2}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold">Damage Immunities</label>
-              <textarea
-                value={(stats.damageImmunities || []).join(', ')}
-                onChange={e =>
-                  updateBasicStat('damageImmunities',
-                    e.target.value ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : undefined
-                  )
-                }
-                className="w-full bg-gray-700 rounded px-2 py-1 text-white text-sm"
-                placeholder="Comma-separated"
-                rows={2}
-              />
-            </div>
+          <div className="space-y-3">
+            {(
+              [
+                { label: 'Damage Vulnerabilities', field: 'damageVulnerabilities' as const, color: 'text-red-300' },
+                { label: 'Damage Resistances', field: 'damageResistances' as const, color: 'text-green-300' },
+                { label: 'Damage Immunities', field: 'damageImmunities' as const, color: 'text-purple-300' },
+              ] as const
+            ).map(({ label, field, color }) => {
+              const current: DamageType[] = (stats[field] as DamageType[] | undefined) ?? [];
+              const toggle = (t: DamageType) => {
+                const next = current.includes(t)
+                  ? current.filter(x => x !== t)
+                  : [...current, t];
+                updateBasicStat(field, next.length > 0 ? next : undefined);
+              };
+              return (
+                <div key={field}>
+                  <label className={`text-xs font-bold ${color}`}>{label}</label>
+                  <div className="mt-1 space-y-1">
+                    {Object.entries(DAMAGE_TYPE_GROUPS).map(([group, types]) => (
+                      <div key={group} className="flex flex-wrap gap-x-3 gap-y-1">
+                        <span className="text-xs text-gray-500 w-full">{group}</span>
+                        {types.map(t => (
+                          <label key={t} className="flex items-center gap-1 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={current.includes(t)}
+                              onChange={() => toggle(t)}
+                              className="w-3 h-3 cursor-pointer"
+                            />
+                            <span className="text-xs text-gray-300 capitalize">{t}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
             <div>
               <label className="text-xs font-bold">Condition Immunities</label>
               <textarea

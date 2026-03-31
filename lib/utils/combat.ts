@@ -1,5 +1,6 @@
 // Pure combat math utilities for D&D 5e combat mechanics
-import type { CreatureAbility, CombatantState } from '@/lib/types';
+import type { ActiveDamageEffect, CreatureAbility, CombatantState, Monster, Character } from '@/lib/types';
+import type { DamageType } from '@/lib/constants';
 
 /**
  * Apply damage to a combatant, draining temp HP first.
@@ -50,8 +51,7 @@ export function useLegendaryAction(
   cost: number,
 ): { legendaryActionsRemaining: number } {
   const safeCost = Number.isFinite(cost) ? Math.max(0, Math.floor(cost)) : 0;
-  const safeRemaining = Number.isFinite(remaining) ? remaining : 0;
-  return { legendaryActionsRemaining: Math.max(0, safeRemaining - safeCost) };
+  return { legendaryActionsRemaining: Math.max(0, safeNonNeg(remaining) - safeCost) };
 }
 
 /**
@@ -61,8 +61,7 @@ export function useLegendaryAction(
 export function resetLegendaryActions(
   count: number,
 ): { legendaryActionsRemaining: number } {
-  const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0;
-  return { legendaryActionsRemaining: safeCount };
+  return { legendaryActionsRemaining: safeNonNeg(count) };
 }
 
 /**
@@ -89,12 +88,10 @@ export function decrementLegendaryPool(
   count: number,
   remaining: number,
 ): { legendaryActionCount: number; legendaryActionsRemaining: number } {
-  const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0;
-  const safeRemaining = Number.isFinite(remaining) ? Math.max(0, remaining) : 0;
-  const newCount = Math.max(0, safeCount - 1);
+  const newCount = Math.max(0, safeNonNeg(count) - 1);
   return {
     legendaryActionCount: newCount,
-    legendaryActionsRemaining: Math.min(safeRemaining, newCount),
+    legendaryActionsRemaining: Math.min(safeNonNeg(remaining), newCount),
   };
 }
 
@@ -106,13 +103,124 @@ export function incrementLegendaryPool(
   count: number,
   remaining: number,
 ): { legendaryActionCount: number; legendaryActionsRemaining: number } {
-  const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0;
-  const safeRemaining = Number.isFinite(remaining) ? Math.max(0, remaining) : 0;
-  const newCount = safeCount + 1;
+  const newCount = safeNonNeg(count) + 1;
   return {
     legendaryActionCount: newCount,
-    legendaryActionsRemaining: Math.min(safeRemaining, newCount),
+    legendaryActionsRemaining: Math.min(safeNonNeg(remaining), newCount),
   };
+}
+
+/** Clamp a potentially non-finite number to a non-negative finite value. */
+function safeNonNeg(n: number): number {
+  return Number.isFinite(n) ? Math.max(0, n) : 0;
+}
+
+type DamageModifierKind = ActiveDamageEffect['kind'];
+
+interface DamageModifierSources {
+  damageResistances?: DamageType[];
+  damageImmunities?: DamageType[];
+  damageVulnerabilities?: DamageType[];
+  activeDamageEffects?: ActiveDamageEffect[];
+}
+
+/**
+ * Apply damage with D&D 5e resistance/immunity/vulnerability logic.
+ * Priority: immunity (0 damage) > resistance+vulnerability cancel > resistance (½) > vulnerability (×2).
+ * Sources: creatureStats arrays AND activeDamageEffects, combined.
+ * Returns { hp, tempHp, effectiveDamage }.
+ */
+export function applyDamageWithType(
+  hp: number,
+  tempHp: number,
+  rawDamage: number,
+  damageType: DamageType,
+  sources: DamageModifierSources,
+): { hp: number; tempHp: number; effectiveDamage: number } {
+  const { damageResistances = [], damageImmunities = [], damageVulnerabilities = [], activeDamageEffects = [] } = sources;
+
+  const activeForType = activeDamageEffects.filter(e => e.type === damageType);
+
+  const isImmune =
+    damageImmunities.includes(damageType) ||
+    activeForType.some(e => e.kind === 'immunity');
+
+  if (isImmune) {
+    return { hp, tempHp, effectiveDamage: 0 };
+  }
+
+  const isResistant =
+    damageResistances.includes(damageType) ||
+    activeForType.some(e => e.kind === 'resistance');
+
+  const isVulnerable =
+    damageVulnerabilities.includes(damageType) ||
+    activeForType.some(e => e.kind === 'vulnerability');
+
+  let effectiveDamage: number;
+  if (isResistant && isVulnerable) {
+    effectiveDamage = rawDamage; // cancel out per 5e rules
+  } else if (isResistant) {
+    effectiveDamage = Math.floor(rawDamage / 2);
+  } else if (isVulnerable) {
+    effectiveDamage = rawDamage * 2;
+  } else {
+    effectiveDamage = rawDamage;
+  }
+
+  const { hp: newHp, tempHp: newTempHp } = applyDamage(hp, tempHp, effectiveDamage);
+  return { hp: newHp, tempHp: newTempHp, effectiveDamage };
+}
+
+/**
+ * Merge new ActiveDamageEffects into an existing array.
+ * Rules per incoming effect:
+ *   - Immunity: removes all existing effects for that damage type, then adds itself.
+ *   - Resistance/vulnerability: no-op if the type is already immune; otherwise
+ *     replaces any existing effect with the same (type, kind), or adds new.
+ *     Resistance and vulnerability for the same type can coexist (they cancel at
+ *     application time per 5e rules).
+ * Returns a new array; does not mutate existing.
+ */
+export function mergeActiveDamageEffects(
+  existing: ActiveDamageEffect[],
+  incoming: ActiveDamageEffect[],
+): ActiveDamageEffect[] {
+  let result = [...existing];
+  for (const effect of incoming) {
+    if (effect.kind === 'immunity') {
+      // Immunity supersedes all other effects for this type
+      result = result.filter(e => e.type !== effect.type);
+      result.push(effect);
+    } else {
+      // Don't add resistance/vulnerability if already immune for this type
+      if (result.some(e => e.type === effect.type && e.kind === 'immunity')) continue;
+      // Key by (type, kind): replace same type+kind, or add new
+      const idx = result.findIndex(e => e.type === effect.type && e.kind === effect.kind);
+      if (idx === -1) {
+        result.push(effect);
+      } else {
+        result[idx] = effect;
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Remove ActiveDamageEffects matching the given kind.
+ * If type is null, removes all effects matching the kind regardless of type.
+ * If type is specified, only removes effects matching both type and kind.
+ * Returns a new array; does not mutate existing.
+ */
+export function removeActiveDamageEffects(
+  effects: ActiveDamageEffect[],
+  type: DamageType | null,
+  kind: DamageModifierKind,
+): ActiveDamageEffect[] {
+  return effects.filter(e =>
+    !(e.kind === kind && (type === null || e.type === type))
+  );
 }
 
 const TYPE_ORDER: Record<CombatantState['type'], number> = { lair: 0, player: 1, monster: 2 };
@@ -161,6 +269,41 @@ export function restoreCharge(ability: CreatureAbility): CreatureAbility {
  */
 export function restoreAllCharges(actions: CreatureAbility[]): CreatureAbility[] {
   return actions.map(a => (Number.isFinite(a.usesRemaining) ? restoreCharge(a) : { ...a }));
+}
+
+/**
+ * Build a CombatantState from a Monster or Character source.
+ * Copies all combat-relevant fields including resistance/immunity/vulnerability arrays.
+ */
+export function buildCombatantFromSource(
+  source: Monster | Character,
+  type: 'monster' | 'player',
+  idPrefix: string,
+): CombatantState {
+  const lacCount = 'legendaryActionCount' in source ? source.legendaryActionCount : undefined;
+  return {
+    id: `${idPrefix}-${source.id}-${crypto.randomUUID()}`,
+    name: source.name,
+    type,
+    initiative: ('initiative' in source && typeof source.initiative === 'number') ? source.initiative : 0,
+    abilityScores: source.abilityScores ?? { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+    hp: source.hp,
+    maxHp: source.maxHp,
+    ac: source.ac,
+    conditions: [],
+    traits: source.traits,
+    actions: source.actions,
+    bonusActions: source.bonusActions,
+    reactions: source.reactions,
+    damageResistances: source.damageResistances,
+    damageImmunities: source.damageImmunities,
+    damageVulnerabilities: source.damageVulnerabilities,
+    conditionImmunities: source.conditionImmunities,
+    legendaryActions: 'legendaryActions' in source ? source.legendaryActions : undefined,
+    lairActions: 'lairActions' in source ? source.lairActions : undefined,
+    legendaryActionCount: lacCount,
+    legendaryActionsRemaining: lacCount,
+  };
 }
 
 /**

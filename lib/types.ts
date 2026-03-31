@@ -231,9 +231,9 @@ export interface CreatureStats {
   // Skills
   skills?: Record<string, number>; // e.g., { "acrobatics": 2, "arcana": 4 }
   // Resistances and Immunities
-  damageResistances?: string[];
-  damageImmunities?: string[];
-  damageVulnerabilities?: string[];
+  damageResistances?: import('@/lib/constants').DamageType[];
+  damageImmunities?: import('@/lib/constants').DamageType[];
+  damageVulnerabilities?: import('@/lib/constants').DamageType[];
   conditionImmunities?: string[];
   // Senses
   senses?: Record<string, string>; // e.g., { "darkvision": "60 ft.", "passive Perception": "14" }
@@ -350,6 +350,23 @@ export interface Encounter {
   updatedAt: Date;
 }
 
+export interface ActiveDamageEffect {
+  type: import('@/lib/constants').DamageType;
+  kind: 'resistance' | 'immunity' | 'vulnerability';
+  label: string;
+}
+
+export interface DamageEffectPreset {
+  id: string;
+  label: string;
+  description: string;
+  effects: Array<{
+    type: import('@/lib/constants').DamageType | null;
+    kind: 'resistance' | 'immunity' | 'vulnerability';
+    choicesLimited?: import('@/lib/constants').DamageType[];
+  }>;
+}
+
 export interface StatusCondition {
   id: string;
   name: string;
@@ -388,6 +405,7 @@ export interface CombatantState extends CreatureStats {
   legendaryActions?: CreatureAbility[];
   legendaryActionCount?: number; // DM-adjustable pool size (copied from template)
   legendaryActionsRemaining?: number; // Runtime counter; resets on turn start
+  activeDamageEffects?: ActiveDamageEffect[];
 }
 
 export interface CombatState {

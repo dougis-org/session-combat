@@ -22,7 +22,9 @@ export const CELESTIALS: Omit<
     ],
     damageImmunities: [
       "psychic",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       truesight: "120 ft.",
@@ -95,7 +97,9 @@ export const CELESTIALS: Omit<
     },
     damageResistances: [
       "radiant",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     conditionImmunities: [
       "Charmed",
@@ -218,7 +222,9 @@ export const CELESTIALS: Omit<
     },
     damageResistances: [
       "radiant",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     conditionImmunities: [
       "Charmed",
@@ -298,7 +304,9 @@ export const CELESTIALS: Omit<
     },
     damageResistances: [
       "radiant",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "necrotic",

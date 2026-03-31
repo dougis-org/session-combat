@@ -21,7 +21,9 @@ export const FIENDS: Omit<
     damageResistances: [
       "cold",
       "lightning",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -114,7 +116,9 @@ export const FIENDS: Omit<
     },
     damageResistances: [
       "cold",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -197,7 +201,9 @@ export const FIENDS: Omit<
     },
     damageResistances: [
       "cold",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -278,7 +284,9 @@ export const FIENDS: Omit<
     },
     damageResistances: [
       "cold",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -351,7 +359,9 @@ export const FIENDS: Omit<
     },
     damageResistances: [
       "cold",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -493,7 +503,9 @@ export const FIENDS: Omit<
     },
     damageResistances: [
       "cold",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -575,7 +587,9 @@ export const FIENDS: Omit<
       "cold",
       "fire",
       "lightning",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
@@ -708,7 +722,9 @@ export const FIENDS: Omit<
       "cold",
       "fire",
       "lightning",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
@@ -783,7 +799,9 @@ export const FIENDS: Omit<
     },
     damageResistances: [
       "cold",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -862,7 +880,9 @@ export const FIENDS: Omit<
       charisma: 9,
     },
     damageResistances: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -947,7 +967,9 @@ export const FIENDS: Omit<
     },
     damageResistances: [
       "cold",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -1079,7 +1101,9 @@ export const FIENDS: Omit<
       "cold",
       "fire",
       "lightning",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
@@ -1168,7 +1192,9 @@ export const FIENDS: Omit<
       "cold",
       "fire",
       "lightning",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
@@ -1248,7 +1274,9 @@ export const FIENDS: Omit<
     damageResistances: [
       "cold",
       "fire",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     conditionImmunities: [
       "Charmed",
@@ -1379,7 +1407,9 @@ export const FIENDS: Omit<
     },
     damageResistances: [
       "cold",
-      "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "fire",
@@ -1474,7 +1504,9 @@ export const FIENDS: Omit<
       "cold",
       "fire",
       "lightning",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
@@ -1544,10 +1576,12 @@ export const FIENDS: Omit<
       insight: 8,
     },
     damageImmunities: [
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageVulnerabilities: [
-      "piercing from magic weapons wielded by good creatures",
+      "piercing",
     ],
     senses: {
       darkvision: "60 ft.",
@@ -1612,7 +1646,9 @@ export const FIENDS: Omit<
       "fire",
       "lightning",
       "poison",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     senses: {
       darkvision: "60 ft.",
@@ -1687,7 +1723,9 @@ export const FIENDS: Omit<
       "cold",
       "fire",
       "lightning",
-      "bludgeoning, piercing, and slashing from nonmagical weapons",
+      "bludgeoning",
+      "piercing",
+      "slashing",
     ],
     damageImmunities: [
       "poison",
