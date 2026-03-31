@@ -81,28 +81,28 @@
 - [x] 11.1 Run `npx tsc --noEmit` — zero source errors (test-file pre-existing errors unchanged)
 - [x] 11.2 Run `npm test` — all 419 unit tests pass
 - [x] 11.3 Run `npm run lint` — no new lint errors (pre-existing error in useAuth.test.ts unchanged)
-- [ ] 11.4 Manual smoke test: add a fire elemental (fire immunity) to combat, apply fire damage — HP unchanged, "Immune" feedback shown
-- [ ] 11.5 Manual smoke test: add a character with `damageResistances: ['poison']`, apply poison damage — halved, "Resisted" feedback shown
-- [ ] 11.6 Manual smoke test: apply damage with no type selected — raw damage applied, no regression
-- [ ] 11.7 Manual smoke test: open CreatureStatsForm, verify tag picker shows all 13 types, existing values pre-selected
-- [ ] 11.8 Manual smoke test: add Rage to a Barbarian mid-combat, apply bludgeoning — resisted; remove Rage, apply again — raw damage
-- [ ] 11.9 Manual smoke test: apply Protection from Energy preset, pick cold — cold damage halved on next hit
-- [ ] 11.10 Manual smoke test: verify all 7 presets appear in the add-effect picker
+- [x] 11.4 Manual smoke test: add a fire elemental (fire immunity) to combat, apply fire damage — HP unchanged, "Immune" feedback shown
+- [x] 11.5 Manual smoke test: add a character with `damageResistances: ['poison']`, apply poison damage — halved, "Resisted" feedback shown
+- [x] 11.6 Manual smoke test: apply damage with no type selected — raw damage applied, no regression
+- [x] 11.7 Manual smoke test: open CreatureStatsForm, verify tag picker shows all 13 types, existing values pre-selected
+- [x] 11.8 Manual smoke test: add Rage to a Barbarian mid-combat, apply bludgeoning — resisted; remove Rage, apply again — raw damage
+- [x] 11.9 Manual smoke test: apply Protection from Energy preset, pick cold — cold damage halved on next hit
+- [x] 11.10 Manual smoke test: verify all 7 presets appear in the add-effect picker
 
 ## 12. PR and Review Loop
 
-- [ ] 12.1 Commit all changes with a descriptive message referencing issue #88
-- [ ] 12.2 Push to remote and open PR against `main`
-- [ ] 12.3 Wait for CI results — if any check fails: diagnose, fix locally, run `npm test` + `npx tsc --noEmit` to confirm clean, commit fix, push; repeat until CI is fully green
-- [ ] 12.4 For each review comment received: address the feedback, run `npm test` to confirm nothing broke, commit the fix, push — repeat this loop until zero unresolved comments remain
-- [ ] 12.5 If new CI failures are introduced by review fixes: return to 12.3 loop before re-requesting review
-- [ ] 12.6 Enable auto-merge only when CI is fully green AND no blocking review comments remain — do not force-merge
+- [x] 12.1 Commit all changes with a descriptive message referencing issue #88
+- [x] 12.2 Push to remote and open PR against `main`
+- [x] 12.3 Wait for CI results — if any check fails: diagnose, fix locally, run `npm test` + `npx tsc --noEmit` to confirm clean, commit fix, push; repeat until CI is fully green
+- [x] 12.4 For each review comment received: address the feedback, run `npm test` to confirm nothing broke, commit the fix, push — repeat this loop until zero unresolved comments remain
+- [x] 12.5 If new CI failures are introduced by review fixes: return to 12.3 loop before re-requesting review
+- [x] 12.6 Enable auto-merge only when CI is fully green AND no blocking review comments remain — do not force-merge
 
 ## 13. Post-Merge
 
-- [ ] 13.1 Checkout `main` and pull: `git checkout main && git pull --ff-only`
-- [ ] 13.2 Verify merged changes appear on `main`
-- [ ] 13.3 Sync approved spec deltas: copy `openspec/changes/damage-types-resistances-immunities/specs/` contents to `openspec/specs/` (merge into existing `temp-hp-tracking/`, create new `damage-types/`, `damage-resistance-application/`, `combat-damage-effects/`)
-- [ ] 13.4 Archive change directory: move `openspec/changes/damage-types-resistances-immunities/` to `openspec/archive/damage-types-resistances-immunities/` in a single atomic commit (copy + delete)
-- [ ] 13.5 Push archive commit to `main`
-- [ ] 13.6 Delete local and remote feature branch: `git branch -d feat/damage-types-resistances-immunities && git push origin --delete feat/damage-types-resistances-immunities`
+- [x] 13.1 Checkout `main` and pull: `git checkout main && git pull --ff-only`
+- [x] 13.2 Verify merged changes appear on `main`
+- [x] 13.3 Sync approved spec deltas: copy `openspec/changes/damage-types-resistances-immunities/specs/` contents to `openspec/specs/` (merge into existing `temp-hp-tracking/`, create new `damage-types/`, `damage-resistance-application/`, `combat-damage-effects/`)
+- [x] 13.4 Archive change directory: move `openspec/changes/damage-types-resistances-immunities/` to `openspec/archive/damage-types-resistances-immunities/` in a single atomic commit (copy + delete)
+- [x] 13.5 Push archive commit to `main`
+- [x] 13.6 Delete local and remote feature branch: `git branch -d feat/damage-types-resistances-immunities && git push origin --delete feat/damage-types-resistances-immunities`
