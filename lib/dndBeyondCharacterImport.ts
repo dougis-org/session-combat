@@ -83,7 +83,7 @@ interface DndBeyondStatValue {
 }
 
 interface DndBeyondModifier {
-  type?: string | null;
+  type?: "bonus" | "set" | "set-base" | string | null;
   subType?: string | null;
   fixedValue?: number | null;
   value?: number | null;
@@ -558,21 +558,20 @@ function normalizeMaxHp(
   const bonusHitPoints = data.bonusHitPoints || 0;
   const constitutionModifier = getAbilityModifier(abilityScores.constitution);
 
-  const perLevelBonus = modifiers
-    .filter((modifier) => modifier.subType === "hit-points-per-level")
-    .reduce(
-      (total, modifier) => total + (getModifierNumericValue(modifier) || 0),
-      0,
-    ) * totalLevel;
+  const { perLevel, flat } = modifiers.reduce(
+    (acc, modifier) => {
+      const value = getModifierNumericValue(modifier) || 0;
+      if (modifier.subType === "hit-points-per-level") {
+        acc.perLevel += value;
+      } else if (modifier.subType === "hit-points") {
+        acc.flat += value;
+      }
+      return acc;
+    },
+    { perLevel: 0, flat: 0 },
+  );
 
-  const flatHpBonus = modifiers
-    .filter((modifier) => modifier.subType === "hit-points")
-    .reduce(
-      (total, modifier) => total + (getModifierNumericValue(modifier) || 0),
-      0,
-    );
-
-  return baseHitPoints + bonusHitPoints + constitutionModifier * totalLevel + perLevelBonus + flatHpBonus;
+  return baseHitPoints + bonusHitPoints + constitutionModifier * totalLevel + perLevel * totalLevel + flat;
 }
 
 function normalizeArmorClass(
@@ -615,22 +614,20 @@ function getArmorBonuses(modifiers: DndBeyondModifier[]): number {
 }
 
 function getUnarmoredAcBonus(modifiers: DndBeyondModifier[]): number {
-  const unarmoredModifiers = modifiers.filter(
-    (modifier) => modifier.subType === "unarmored-armor-class",
+  const { maxSet, sumBonus } = modifiers.reduce(
+    (acc, modifier) => {
+      if (modifier.subType !== "unarmored-armor-class") return acc;
+      const value = getModifierNumericValue(modifier) || 0;
+      if (modifier.type === "set") {
+        acc.maxSet = Math.max(acc.maxSet, value);
+      } else if (modifier.type === "bonus") {
+        acc.sumBonus += value;
+      }
+      return acc;
+    },
+    { maxSet: 0, sumBonus: 0 },
   );
-  const maxSetValue = unarmoredModifiers
-    .filter((modifier) => modifier.type === "set")
-    .reduce(
-      (max, modifier) => Math.max(max, getModifierNumericValue(modifier) || 0),
-      0,
-    );
-  const sumBonusValues = unarmoredModifiers
-    .filter((modifier) => modifier.type === "bonus")
-    .reduce(
-      (total, modifier) => total + (getModifierNumericValue(modifier) || 0),
-      0,
-    );
-  return maxSetValue + sumBonusValues;
+  return maxSet + sumBonus;
 }
 
 function getArmorDexterityContribution(
