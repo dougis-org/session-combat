@@ -303,7 +303,7 @@ function normalizeCharacterDetails(
   const totalLevel = calculateTotalLevel(classes);
   const proficiencyBonus = getProficiencyBonus(totalLevel);
   const abilityScores = normalizeAbilityScores(data, modifiers);
-  const maxHp = normalizeMaxHp(data, abilityScores, totalLevel);
+  const maxHp = normalizeMaxHp(data, abilityScores, totalLevel, modifiers);
   const skills = normalizeSkills(abilityScores, modifiers, proficiencyBonus);
   const immunities = normalizeImmunities(modifiers);
   const categorizedAbilities = normalizeAbilities(
@@ -548,6 +548,7 @@ function normalizeMaxHp(
   data: DndBeyondCharacterData,
   abilityScores: AbilityScores,
   totalLevel: number,
+  modifiers: DndBeyondModifier[],
 ): number {
   if (typeof data.overrideHitPoints === "number") {
     return data.overrideHitPoints;
@@ -556,7 +557,22 @@ function normalizeMaxHp(
   const baseHitPoints = data.baseHitPoints || 0;
   const bonusHitPoints = data.bonusHitPoints || 0;
   const constitutionModifier = getAbilityModifier(abilityScores.constitution);
-  return baseHitPoints + bonusHitPoints + constitutionModifier * totalLevel;
+
+  const perLevelBonus = modifiers
+    .filter((modifier) => modifier.subType === "hit-points-per-level")
+    .reduce(
+      (total, modifier) => total + (getModifierNumericValue(modifier) || 0),
+      0,
+    ) * totalLevel;
+
+  const flatHpBonus = modifiers
+    .filter((modifier) => modifier.subType === "hit-points")
+    .reduce(
+      (total, modifier) => total + (getModifierNumericValue(modifier) || 0),
+      0,
+    );
+
+  return baseHitPoints + bonusHitPoints + constitutionModifier * totalLevel + perLevelBonus + flatHpBonus;
 }
 
 function normalizeArmorClass(
@@ -575,7 +591,8 @@ function normalizeArmorClass(
     !equippedArmor?.definition ||
     typeof equippedArmor.definition.armorClass !== "number"
   ) {
-    return 10 + dexterityModifier + armorBonuses;
+    const unarmoredBonus = getUnarmoredAcBonus(modifiers);
+    return 10 + dexterityModifier + unarmoredBonus + armorBonuses;
   }
 
   return (
@@ -595,6 +612,25 @@ function getArmorBonuses(modifiers: DndBeyondModifier[]): number {
       (total, modifier) => total + (getModifierNumericValue(modifier) || 0),
       0,
     );
+}
+
+function getUnarmoredAcBonus(modifiers: DndBeyondModifier[]): number {
+  const unarmoredModifiers = modifiers.filter(
+    (modifier) => modifier.subType === "unarmored-armor-class",
+  );
+  const maxSetValue = unarmoredModifiers
+    .filter((modifier) => modifier.type === "set")
+    .reduce(
+      (max, modifier) => Math.max(max, getModifierNumericValue(modifier) || 0),
+      0,
+    );
+  const sumBonusValues = unarmoredModifiers
+    .filter((modifier) => modifier.type === "bonus")
+    .reduce(
+      (total, modifier) => total + (getModifierNumericValue(modifier) || 0),
+      0,
+    );
+  return maxSetValue + sumBonusValues;
 }
 
 function getArmorDexterityContribution(
