@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
@@ -41,6 +41,7 @@ export function MonstersContent() {
     fetchTemplates();
     checkAdminStatus();
   }, []);
+
 
   const checkAdminStatus = async () => {
     try {
@@ -173,10 +174,24 @@ export function MonstersContent() {
     }
   };
 
-  const cancelEdit = () => {
+  const cancelEdit = useCallback(() => {
     setIsAddingTemplate(false);
     setEditingTemplate(null);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!editingTemplate) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') cancelEdit();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [editingTemplate, cancelEdit]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -236,22 +251,12 @@ export function MonstersContent() {
             </button>
           </div>
 
-          {editingTemplate && editingMode === 'user' && (
-            <MonsterTemplateEditor
-              template={editingTemplate}
-              onSave={saveTemplate}
-              onCancel={cancelEdit}
-              isNew={isAddingTemplate}
-              isGlobal={false}
-            />
-          )}
-
           {loading ? (
             <div className="text-center py-8">
               <p className="text-gray-400">Loading monster templates...</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredUserTemplates.length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   {userTemplates.length === 0
@@ -293,16 +298,6 @@ export function MonstersContent() {
               )}
             </div>
 
-            {editingTemplate && editingMode === 'global' && (
-              <MonsterTemplateEditor
-                template={editingTemplate}
-                onSave={saveTemplate}
-                onCancel={cancelEdit}
-                isNew={isAddingTemplate}
-                isGlobal={true}
-              />
-            )}
-
             {filteredGlobalTemplates.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
                 {globalTemplates.length === 0
@@ -310,7 +305,7 @@ export function MonstersContent() {
                   : 'No monsters match your filter.'}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredGlobalTemplates.map(template => (
                   <MonsterTemplateCard
                     key={template.id}
@@ -332,6 +327,25 @@ export function MonstersContent() {
           </div>
         )}
       </div>
+
+      {editingTemplate && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 flex items-start justify-center overflow-y-auto py-8"
+          onClick={cancelEdit}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="max-w-3xl w-full mx-4" onClick={e => e.stopPropagation()}>
+            <MonsterTemplateEditor
+              template={editingTemplate}
+              onSave={saveTemplate}
+              onCancel={cancelEdit}
+              isNew={isAddingTemplate}
+              isGlobal={editingMode === 'global'}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
