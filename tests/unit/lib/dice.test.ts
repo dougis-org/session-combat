@@ -16,7 +16,7 @@ describe("rollDie – supported die sizes and default count", () => {
     }
   );
 
-  it("default count of 1 produces the same result as explicit count 1", () => {
+  it("default count of 1 and explicit count 1 both return a one-element array", () => {
     const defaultResult = rollDie(20);
     const explicitResult = rollDie(20, 1);
     expect(defaultResult).toHaveLength(1);

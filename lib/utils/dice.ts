@@ -6,7 +6,8 @@ function getCrypto(): Crypto {
     (typeof crypto !== "undefined"
       ? crypto
       : typeof globalThis !== "undefined"
-      ? (globalThis as unknown as { crypto?: Crypto }).crypto
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? (globalThis as any).crypto
       : undefined);
 
   if (!cryptoObj || typeof cryptoObj.getRandomValues !== "function") {
