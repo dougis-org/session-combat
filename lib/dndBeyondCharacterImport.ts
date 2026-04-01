@@ -571,7 +571,13 @@ function normalizeMaxHp(
     { perLevel: 0, flat: 0 },
   );
 
-  return baseHitPoints + bonusHitPoints + constitutionModifier * totalLevel + perLevel * totalLevel + flat;
+  return (
+    baseHitPoints +
+    bonusHitPoints +
+    constitutionModifier * totalLevel +
+    perLevel * totalLevel +
+    flat
+  );
 }
 
 function normalizeArmorClass(

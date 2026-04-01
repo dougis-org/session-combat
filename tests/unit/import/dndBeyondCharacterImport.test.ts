@@ -509,6 +509,28 @@ describe("dndBeyondCharacterImport", () => {
     expect(result.character.ac).toBe(18);
   });
 
+  test("uses maximum of multiple set unarmored-armor-class modifiers regardless of order", () => {
+    // Two set modifiers (values 1 and 3): only max(3) applies, not the sum.
+    // DEX = 16 base, no bonuses → modifier +3. AC = 10 + 3 (max set) + 3 (DEX) = 16
+    const makeCharacter = (values: number[]) =>
+      normalizeDndBeyondCharacter({
+        ...sampleDndBeyondCharacterResponse.data,
+        inventory: [],
+        modifiers: {
+          class: values.map((value) => ({
+            type: "set",
+            subType: "unarmored-armor-class",
+            value,
+            fixedValue: null,
+            friendlySubtypeName: null,
+          })),
+        },
+      });
+
+    expect(makeCharacter([1, 3]).character.ac).toBe(16);
+    expect(makeCharacter([3, 1]).character.ac).toBe(16);
+  });
+
   test("adds hit-points-per-level modifier times total level to max HP", () => {
     // base max HP = 92 (68 base + 2*12 con); per-level bonus: 1 × 12 = +12 → 104
     const result = normalizeDndBeyondCharacter({
