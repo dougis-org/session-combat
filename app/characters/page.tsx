@@ -227,17 +227,18 @@ export function CharactersContent() {
             <div className="space-y-4">
               <div>
                 <label className="block mb-1 text-sm font-bold" htmlFor="dnd-beyond-url">
-                  Character URL
+                  Publicly Available Character URL
                 </label>
                 <input
                   id="dnd-beyond-url"
                   type="url"
                   value={importUrl}
                   onChange={(event) => setImportUrl(event.target.value)}
-                  placeholder="https://www.dndbeyond.com/characters/<id>/<shareCode>"
+                  placeholder="https://www.dndbeyond.com/characters/<id>"
                   className="w-full bg-gray-700 rounded px-3 py-2 text-white"
                   disabled={isImporting}
                 />
+                <p className="mt-1 text-xs text-gray-400">Enter a publicly available D&amp;D Beyond character URL.</p>
               </div>
 
               {importConflict && (

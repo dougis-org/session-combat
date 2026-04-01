@@ -151,6 +151,38 @@ describe("Characters page import UI", () => {
     });
   }
 
+  test("import form instructs users to enter a publicly available URL", async () => {
+    await renderPage();
+    await openImportPanel();
+
+    expect(container.textContent).toMatch(/publicly available/i);
+    const urlInput = container.querySelector(
+      'input[type="url"]',
+    ) as HTMLInputElement | null;
+    expect(urlInput?.placeholder).toMatch(/dndbeyond\.com\/characters\/<id>/i);
+  });
+
+  test("the entered URL is preserved verbatim in the input after a conflict", async () => {
+    await renderPage();
+    await openImportPanel();
+    await setImportUrl(DND_BEYOND_CHARACTER_URL);
+
+    const urlInput = container.querySelector(
+      'input[type="url"]',
+    ) as HTMLInputElement | null;
+
+    const submitButton = Array.from(container.querySelectorAll("button"))
+      .filter((button) => button.textContent?.match(/import from d&d beyond/i))
+      .at(-1);
+
+    await act(async () => {
+      submitButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(container.textContent).toContain("already exists");
+    expect(urlInput?.value).toBe(DND_BEYOND_CHARACTER_URL);
+  });
+
   test("shows duplicate-name confirmation and surfaces warnings after overwrite", async () => {
     await renderPage();
     await openImportPanel();
