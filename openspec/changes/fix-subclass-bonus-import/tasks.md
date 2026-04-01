@@ -42,7 +42,9 @@
 - [x] 5.5 Add test: max HP with flat `hit-points` modifier (fixedValue 4 → +4 HP)
 - [x] 5.6 Add test: max HP with both per-level and flat HP modifiers combined
 - [x] 5.7 Add test: `overrideHitPoints` still wins over all HP modifiers
-- [x] 5.8 Run full unit test suite: `npm test -- --testPathPattern=dndBeyondCharacterImport`
+- [x] 5.8 Add test: multiple `type=set` unarmored-armor-class modifiers — only max
+  value applies regardless of order (added during code review)
+- [x] 5.9 Run full unit test suite: `npm test -- --testPathPattern=dndBeyondCharacterImport`
 
 ## 6. Validation
 
@@ -55,11 +57,11 @@
 
 ## 7. PR and Merge
 
-- [ ] 7.1 Commit changes: `git add lib/dndBeyondCharacterImport.ts tests/unit/import/dndBeyondCharacterImport.test.ts`
-- [ ] 7.2 Push branch: `git push`
-- [ ] 7.3 Open PR targeting `main`, referencing issue #104
-- [ ] 7.4 Monitor CI — fix any failures, commit, push, repeat until green
-- [ ] 7.5 Address any review comments, push fixes, repeat until no unresolved comments
+- [x] 7.1 Commit changes: `git add lib/dndBeyondCharacterImport.ts tests/unit/import/dndBeyondCharacterImport.test.ts`
+- [x] 7.2 Push branch: `git push`
+- [x] 7.3 Open PR targeting `main`, referencing issue #104
+- [x] 7.4 Monitor CI — fix any failures, commit, push, repeat until green
+- [x] 7.5 Address any review comments, push fixes, repeat until no unresolved comments
 - [ ] 7.6 Enable auto-merge once all CI checks pass and no blocking review comments remain
 
 ## 8. Post-Merge

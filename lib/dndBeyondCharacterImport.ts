@@ -83,7 +83,7 @@ interface DndBeyondStatValue {
 }
 
 interface DndBeyondModifier {
-  type?: "bonus" | "set" | "set-base" | string | null;
+  type?: "bonus" | "set" | "set-base" | "proficiency" | "expertise" | "language" | "resistance" | "immunity" | "vulnerability" | null;
   subType?: string | null;
   fixedValue?: number | null;
   value?: number | null;
