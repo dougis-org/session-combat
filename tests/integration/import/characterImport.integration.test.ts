@@ -117,6 +117,28 @@ describe("Character import API integration", () => {
     expect(body.character.name).toBe(DND_BEYOND_CHARACTER_NAME);
     expect(body.character.id).toBeTruthy();
     expect(body.warnings).toEqual(expect.any(Array));
+    expect(body.sourceUrl).toBe(DND_BEYOND_CHARACTER_URL);
+  });
+
+  test("accepts a publicly available URL without a share code", async () => {
+    const urlWithoutShareCode =
+      "https://www.dndbeyond.com/characters/91913267";
+
+    const response = await fetch(`${baseUrl}/api/characters/import`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookie,
+      },
+      body: JSON.stringify({
+        url: urlWithoutShareCode,
+      }),
+    });
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.character.name).toBe(DND_BEYOND_CHARACTER_NAME);
+    expect(body.sourceUrl).toBe(urlWithoutShareCode);
   });
 
   test("returns a conflict for duplicate-name imports unless overwrite is requested", async () => {

@@ -113,7 +113,7 @@ describe("character import route", () => {
     expect(mockedSaveCharacter).not.toHaveBeenCalled();
   });
 
-  test("saves a new imported character and returns warnings", async () => {
+  test("saves a new imported character and returns warnings and sourceUrl", async () => {
     const response = await POST(
       createRequest({
         url: DND_BEYOND_CHARACTER_URL,
@@ -126,6 +126,7 @@ describe("character import route", () => {
     expect(body.character.id).toBeTruthy();
     expect(body.warnings).toEqual([IMPORT_WARNING]);
     expect(body.overwritten).toBe(false);
+    expect(body.sourceUrl).toBe(DND_BEYOND_CHARACTER_URL);
     expect(mockedSaveCharacter).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: "user-123",
@@ -178,7 +179,7 @@ describe("character import route", () => {
   test("maps importer validation errors to 400 responses", async () => {
     mockedImportCharacter.mockRejectedValue(
       new DndBeyondImportError(
-        "Use a public D&D Beyond character URL in the format /characters/<id>/<shareCode>.",
+        "Use a publicly available D&D Beyond character URL.",
         { status: 400 },
       ),
     );
@@ -191,7 +192,7 @@ describe("character import route", () => {
     const body = await response.json();
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/format/i);
+    expect(body.error).toMatch(/publicly available/i);
   });
 
   test("maps unexpected importer failures to 502 responses", async () => {

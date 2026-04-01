@@ -141,5 +141,28 @@ describe("dndBeyondCharacterImport server module", () => {
       { class: "Rogue", level: 5 },
       { class: "Warlock", level: 7 },
     ]);
+    expect(result.sourceUrl).toBe(DND_BEYOND_CHARACTER_URL);
+  });
+
+  test("accepts a publicly available URL without a share code and preserves it as sourceUrl", async () => {
+    const urlWithoutShareCode =
+      "https://www.dndbeyond.com/characters/91913267";
+    const fetchImpl = jest.fn(async (url: string) => ({
+      ok: true,
+      status: 200,
+      json: async () => sampleDndBeyondCharacterResponse,
+    })) as unknown as typeof fetch;
+
+    const result = await importDndBeyondCharacter(
+      urlWithoutShareCode,
+      fetchImpl,
+    );
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      expect.stringContaining("/character/91913267?includeCustomItems=true"),
+      expect.objectContaining({ cache: "no-store" }),
+    );
+    expect(result.character.name).toBe(DND_BEYOND_CHARACTER_NAME);
+    expect(result.sourceUrl).toBe(urlWithoutShareCode);
   });
 });
