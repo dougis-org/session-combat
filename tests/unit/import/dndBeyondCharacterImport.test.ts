@@ -438,4 +438,192 @@ describe("dndBeyondCharacterImport", () => {
       ]),
     );
   });
+
+  test("applies set unarmored-armor-class modifier to unarmored AC", () => {
+    // DEX = 16 base, no bonuses → modifier +3. set value=3 → AC = 10 + 3 + 3 = 16
+    const result = normalizeDndBeyondCharacter({
+      ...sampleDndBeyondCharacterResponse.data,
+      inventory: [],
+      modifiers: {
+        class: [
+          {
+            type: "set",
+            subType: "unarmored-armor-class",
+            value: 3,
+            fixedValue: null,
+            friendlySubtypeName: null,
+          },
+        ],
+      },
+    });
+
+    expect(result.character.ac).toBe(16);
+  });
+
+  test("applies bonus unarmored-armor-class modifier to unarmored AC", () => {
+    // DEX = 16 base, no bonuses → modifier +3. bonus value=2 → AC = 10 + 2 + 3 = 15
+    const result = normalizeDndBeyondCharacter({
+      ...sampleDndBeyondCharacterResponse.data,
+      inventory: [],
+      modifiers: {
+        class: [
+          {
+            type: "bonus",
+            subType: "unarmored-armor-class",
+            value: 2,
+            fixedValue: null,
+            friendlySubtypeName: null,
+          },
+        ],
+      },
+    });
+
+    expect(result.character.ac).toBe(15);
+  });
+
+  test("combines set and bonus unarmored-armor-class modifiers in unarmored AC", () => {
+    // DEX = 16 base, no bonuses → modifier +3. set value=3, bonus value=2 → AC = 10 + 3 + 2 + 3 = 18
+    const result = normalizeDndBeyondCharacter({
+      ...sampleDndBeyondCharacterResponse.data,
+      inventory: [],
+      modifiers: {
+        class: [
+          {
+            type: "set",
+            subType: "unarmored-armor-class",
+            value: 3,
+            fixedValue: null,
+            friendlySubtypeName: null,
+          },
+          {
+            type: "bonus",
+            subType: "unarmored-armor-class",
+            value: 2,
+            fixedValue: null,
+            friendlySubtypeName: null,
+          },
+        ],
+      },
+    });
+
+    expect(result.character.ac).toBe(18);
+  });
+
+  test("uses maximum of multiple set unarmored-armor-class modifiers regardless of order", () => {
+    // Two set modifiers (values 1 and 3): only max(3) applies, not the sum.
+    // DEX = 16 base, no bonuses → modifier +3. AC = 10 + 3 (max set) + 3 (DEX) = 16
+    const makeCharacter = (values: number[]) =>
+      normalizeDndBeyondCharacter({
+        ...sampleDndBeyondCharacterResponse.data,
+        inventory: [],
+        modifiers: {
+          class: values.map((value) => ({
+            type: "set",
+            subType: "unarmored-armor-class",
+            value,
+            fixedValue: null,
+            friendlySubtypeName: null,
+          })),
+        },
+      });
+
+    expect(makeCharacter([1, 3]).character.ac).toBe(16);
+    expect(makeCharacter([3, 1]).character.ac).toBe(16);
+  });
+
+  test("adds hit-points-per-level modifier times total level to max HP", () => {
+    // base max HP = 92 (68 base + 2*12 con); per-level bonus: 1 × 12 = +12 → 104
+    const result = normalizeDndBeyondCharacter({
+      ...sampleDndBeyondCharacterResponse.data,
+      modifiers: {
+        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        class: [
+          ...sampleDndBeyondCharacterResponse.data.modifiers.class,
+          {
+            type: "bonus",
+            subType: "hit-points-per-level",
+            value: 1,
+            fixedValue: null,
+            friendlySubtypeName: null,
+          },
+        ],
+      },
+    });
+
+    expect(result.character.maxHp).toBe(104);
+  });
+
+  test("adds flat hit-points modifier to max HP", () => {
+    // base max HP = 92; flat bonus: +4 → 96
+    const result = normalizeDndBeyondCharacter({
+      ...sampleDndBeyondCharacterResponse.data,
+      modifiers: {
+        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        item: [
+          {
+            type: "bonus",
+            subType: "hit-points",
+            fixedValue: 4,
+            value: null,
+            friendlySubtypeName: null,
+          },
+        ],
+      },
+    });
+
+    expect(result.character.maxHp).toBe(96);
+  });
+
+  test("adds both per-level and flat HP modifiers to max HP", () => {
+    // base max HP = 92; per-level: +12; flat: +4 → 108
+    const result = normalizeDndBeyondCharacter({
+      ...sampleDndBeyondCharacterResponse.data,
+      modifiers: {
+        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        class: [
+          ...sampleDndBeyondCharacterResponse.data.modifiers.class,
+          {
+            type: "bonus",
+            subType: "hit-points-per-level",
+            value: 1,
+            fixedValue: null,
+            friendlySubtypeName: null,
+          },
+        ],
+        item: [
+          {
+            type: "bonus",
+            subType: "hit-points",
+            fixedValue: 4,
+            value: null,
+            friendlySubtypeName: null,
+          },
+        ],
+      },
+    });
+
+    expect(result.character.maxHp).toBe(108);
+  });
+
+  test("overrideHitPoints ignores HP modifier contributions", () => {
+    const result = normalizeDndBeyondCharacter({
+      ...sampleDndBeyondCharacterResponse.data,
+      overrideHitPoints: 50,
+      modifiers: {
+        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        class: [
+          ...sampleDndBeyondCharacterResponse.data.modifiers.class,
+          {
+            type: "bonus",
+            subType: "hit-points-per-level",
+            value: 1,
+            fixedValue: null,
+            friendlySubtypeName: null,
+          },
+        ],
+      },
+    });
+
+    expect(result.character.maxHp).toBe(50);
+  });
 });

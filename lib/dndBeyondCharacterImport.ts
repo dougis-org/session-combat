@@ -83,7 +83,7 @@ interface DndBeyondStatValue {
 }
 
 interface DndBeyondModifier {
-  type?: string | null;
+  type?: "bonus" | "set" | "set-base" | "proficiency" | "expertise" | "language" | "resistance" | "immunity" | "vulnerability" | null;
   subType?: string | null;
   fixedValue?: number | null;
   value?: number | null;
@@ -303,7 +303,7 @@ function normalizeCharacterDetails(
   const totalLevel = calculateTotalLevel(classes);
   const proficiencyBonus = getProficiencyBonus(totalLevel);
   const abilityScores = normalizeAbilityScores(data, modifiers);
-  const maxHp = normalizeMaxHp(data, abilityScores, totalLevel);
+  const maxHp = normalizeMaxHp(data, abilityScores, totalLevel, modifiers);
   const skills = normalizeSkills(abilityScores, modifiers, proficiencyBonus);
   const immunities = normalizeImmunities(modifiers);
   const categorizedAbilities = normalizeAbilities(
@@ -548,6 +548,7 @@ function normalizeMaxHp(
   data: DndBeyondCharacterData,
   abilityScores: AbilityScores,
   totalLevel: number,
+  modifiers: DndBeyondModifier[],
 ): number {
   if (typeof data.overrideHitPoints === "number") {
     return data.overrideHitPoints;
@@ -556,7 +557,27 @@ function normalizeMaxHp(
   const baseHitPoints = data.baseHitPoints || 0;
   const bonusHitPoints = data.bonusHitPoints || 0;
   const constitutionModifier = getAbilityModifier(abilityScores.constitution);
-  return baseHitPoints + bonusHitPoints + constitutionModifier * totalLevel;
+
+  const { perLevel, flat } = modifiers.reduce(
+    (acc, modifier) => {
+      const value = getModifierNumericValue(modifier) || 0;
+      if (modifier.subType === "hit-points-per-level") {
+        acc.perLevel += value;
+      } else if (modifier.subType === "hit-points") {
+        acc.flat += value;
+      }
+      return acc;
+    },
+    { perLevel: 0, flat: 0 },
+  );
+
+  return (
+    baseHitPoints +
+    bonusHitPoints +
+    constitutionModifier * totalLevel +
+    perLevel * totalLevel +
+    flat
+  );
 }
 
 function normalizeArmorClass(
@@ -575,7 +596,8 @@ function normalizeArmorClass(
     !equippedArmor?.definition ||
     typeof equippedArmor.definition.armorClass !== "number"
   ) {
-    return 10 + dexterityModifier + armorBonuses;
+    const unarmoredBonus = getUnarmoredAcBonus(modifiers);
+    return 10 + dexterityModifier + unarmoredBonus + armorBonuses;
   }
 
   return (
@@ -595,6 +617,23 @@ function getArmorBonuses(modifiers: DndBeyondModifier[]): number {
       (total, modifier) => total + (getModifierNumericValue(modifier) || 0),
       0,
     );
+}
+
+function getUnarmoredAcBonus(modifiers: DndBeyondModifier[]): number {
+  const { maxSet, sumBonus } = modifiers.reduce(
+    (acc, modifier) => {
+      if (modifier.subType !== "unarmored-armor-class") return acc;
+      const value = getModifierNumericValue(modifier) || 0;
+      if (modifier.type === "set") {
+        acc.maxSet = Math.max(acc.maxSet, value);
+      } else if (modifier.type === "bonus") {
+        acc.sumBonus += value;
+      }
+      return acc;
+    },
+    { maxSet: 0, sumBonus: 0 },
+  );
+  return maxSet + sumBonus;
 }
 
 function getArmorDexterityContribution(
