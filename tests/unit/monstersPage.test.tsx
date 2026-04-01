@@ -224,34 +224,45 @@ describe('MonstersContent grid layout and modal editor', () => {
     });
   }
 
+  function getGridContainers() {
+    return Array.from(container.querySelectorAll('.grid')).filter(el =>
+      el.classList.contains('grid-cols-1') &&
+      el.classList.contains('md:grid-cols-2') &&
+      el.classList.contains('lg:grid-cols-3'),
+    );
+  }
+
   // Task 2.1: grid layout class on user and global card list containers
   test('user card list container has grid layout classes', async () => {
     await renderPage();
-    const grids = container.querySelectorAll('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3');
-    expect(grids.length).toBeGreaterThanOrEqual(1);
+    expect(getGridContainers().length).toBeGreaterThanOrEqual(1);
   });
 
   test('global card list container has grid layout classes', async () => {
     await renderPage();
-    const grids = container.querySelectorAll('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3');
-    expect(grids.length).toBeGreaterThanOrEqual(2);
+    expect(getGridContainers().length).toBeGreaterThanOrEqual(2);
   });
 
   // Task 2.2: MonsterTemplateEditor NOT rendered inline inside section body when editing
   test('MonsterTemplateEditor is not rendered inline in user section body when editing', async () => {
     await renderPage();
-    // Click Edit on the user monster card
     const editButtons = Array.from(container.querySelectorAll('button')).filter(
       b => b.textContent === 'Edit',
     );
     await act(async () => { editButtons[0].click(); });
 
-    // The user section body (sibling of grid) should NOT contain the editor form
+    // The editor's Save button should exist only inside the modal, not inside the .mb-12 section
     const userSection = container.querySelector('.mb-12');
-    const grids = userSection?.querySelectorAll('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3');
-    // Editor form should not be inside the grid or the section list area
-    const editorsInSection = userSection?.querySelectorAll('[data-testid="monster-editor-inline"]');
-    expect(editorsInSection?.length ?? 0).toBe(0);
+    const saveInSection = Array.from(userSection?.querySelectorAll('button') ?? []).some(
+      b => b.textContent?.includes('Save Personal Monster'),
+    );
+    expect(saveInSection).toBe(false);
+
+    const modal = container.querySelector('[role="dialog"]');
+    const saveInModal = Array.from(modal?.querySelectorAll('button') ?? []).some(
+      b => b.textContent?.includes('Save Personal Monster'),
+    );
+    expect(saveInModal).toBe(true);
   });
 
   // Task 2.3: modal overlay appears when editingTemplate is set

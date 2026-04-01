@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
@@ -42,14 +42,6 @@ export function MonstersContent() {
     checkAdminStatus();
   }, []);
 
-  useEffect(() => {
-    if (!editingTemplate) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') cancelEdit();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [editingTemplate]);
 
   const checkAdminStatus = async () => {
     try {
@@ -182,10 +174,24 @@ export function MonstersContent() {
     }
   };
 
-  const cancelEdit = () => {
+  const cancelEdit = useCallback(() => {
     setIsAddingTemplate(false);
     setEditingTemplate(null);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!editingTemplate) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') cancelEdit();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [editingTemplate, cancelEdit]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -326,6 +332,8 @@ export function MonstersContent() {
         <div
           className="fixed inset-0 z-50 bg-black/60 flex items-start justify-center overflow-y-auto py-8"
           onClick={cancelEdit}
+          role="dialog"
+          aria-modal="true"
         >
           <div className="max-w-3xl w-full mx-4" onClick={e => e.stopPropagation()}>
             <MonsterTemplateEditor
