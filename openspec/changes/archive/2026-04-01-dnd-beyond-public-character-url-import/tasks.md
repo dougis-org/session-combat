@@ -24,17 +24,17 @@ Approval expectation: proposal approval required before implementation begins
 
 ## PR and Merge
 
-- [ ] 4.1 Create a pull request from the feature branch to `main`
-- [ ] 4.2 Request review and monitor CI status until all required checks are green
-- [ ] 4.3 Address every review comment with targeted follow-up commits on the working branch, then push the updates
-- [ ] 4.4 Re-run validation after each round of fixes until no blocking comments or failures remain
-- [ ] 4.5 Enable auto-merge only when CI is green and no blocking review comments remain
+- [x] 4.1 Create a pull request from the feature branch to `main`
+- [x] 4.2 Request review and monitor CI status until all required checks are green
+- [x] 4.3 Address every review comment with targeted follow-up commits on the working branch, then push the updates
+- [x] 4.4 Re-run validation after each round of fixes until no blocking comments or failures remain
+- [x] 4.5 Enable auto-merge only when CI is green and no blocking review comments remain
 
 ## Post-Merge
 
-- [ ] 5.1 Checkout `main` and pull the merged changes after the PR is merged
-- [ ] 5.2 Verify the merged changes are present on `main`
-- [ ] 5.3 Mark all tasks complete and sync the approved spec delta back into `openspec/specs/dnd-beyond-character-import/spec.md` if required by the archive flow
+- [x] 5.1 Checkout `main` and pull the merged changes after the PR is merged
+- [x] 5.2 Verify the merged changes are present on `main`
+- [x] 5.3 Mark all tasks complete and sync the approved spec delta back into `openspec/specs/dnd-beyond-character-import/spec.md` if required by the archive flow
 - [ ] 5.4 Archive the change directory as a single atomic commit that includes both the archive copy and deletion of the original change directory
 - [ ] 5.5 Push the archive commit to `main`
 - [ ] 5.6 Prune merged local branches after archive and verify the repository is clean
