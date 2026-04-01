@@ -14,7 +14,7 @@ import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
 import { filterToDamageTypes } from "./constants";
 
 const CANONICAL_HOST = "www.dndbeyond.com";
-const CHARACTER_PATH_PATTERN = /^\/characters\/(\d+)\/([A-Za-z0-9_-]+)\/?$/;
+const CHARACTER_PATH_PATTERN = /^\/characters\/(\d+)(?:\/([A-Za-z0-9_-]+))?\/?$/;
 
 const ALIGNMENT_ID_MAP: Record<number, DnDAlignment> = {
   1: "Lawful Good",
@@ -154,7 +154,7 @@ export interface DndBeyondCharacterServiceResponse {
 
 export interface ParsedDndBeyondCharacterUrl {
   characterId: string;
-  shareCode: string;
+  shareCode?: string;
   normalizedUrl: string;
 }
 
@@ -226,7 +226,7 @@ export function parseDndBeyondCharacterUrl(
   const match = parsed.pathname.match(CHARACTER_PATH_PATTERN);
   if (!match) {
     throw createValidationError(
-      "Use a public D&D Beyond character URL in the format /characters/<id>/<shareCode>.",
+      "Use a publicly available D&D Beyond character URL.",
     );
   }
 
@@ -234,7 +234,9 @@ export function parseDndBeyondCharacterUrl(
   return {
     characterId,
     shareCode,
-    normalizedUrl: `https://${CANONICAL_HOST}/characters/${characterId}/${shareCode}`,
+    normalizedUrl: shareCode
+      ? `https://${CANONICAL_HOST}/characters/${characterId}/${shareCode}`
+      : `https://${CANONICAL_HOST}/characters/${characterId}`,
   };
 }
 

@@ -8,16 +8,10 @@ import {
 } from "@/tests/fixtures/dndBeyondCharacter";
 
 describe("dndBeyondCharacterImport", () => {
-  test("rejects invalid or incomplete D&D Beyond URLs", () => {
+  test("rejects a non-URL string", () => {
     expect(() => parseDndBeyondCharacterUrl("not-a-url")).toThrow(
       /enter a valid d&d beyond character url/i,
     );
-
-    expect(() =>
-      parseDndBeyondCharacterUrl(
-        "https://www.dndbeyond.com/characters/91913267",
-      ),
-    ).toThrow(/format \/characters\/<id>\/<shareCode>/i);
   });
 
   test("rejects unsupported D&D Beyond hosts", () => {
@@ -28,7 +22,7 @@ describe("dndBeyondCharacterImport", () => {
     ).toThrow(/canonical public D&D Beyond character URLs/i);
   });
 
-  test("parses a canonical D&D Beyond character URL", () => {
+  test("parses a publicly available D&D Beyond character URL with share code", () => {
     expect(
       parseDndBeyondCharacterUrl(
         "https://www.dndbeyond.com/characters/91913267/BRdgB3",
@@ -40,7 +34,19 @@ describe("dndBeyondCharacterImport", () => {
     });
   });
 
-  test("trims whitespace around a canonical D&D Beyond character URL", () => {
+  test("accepts a publicly available D&D Beyond character URL without a share code", () => {
+    expect(
+      parseDndBeyondCharacterUrl(
+        "https://www.dndbeyond.com/characters/91913267",
+      ),
+    ).toEqual({
+      characterId: "91913267",
+      shareCode: undefined,
+      normalizedUrl: "https://www.dndbeyond.com/characters/91913267",
+    });
+  });
+
+  test("trims whitespace around a publicly available D&D Beyond character URL", () => {
     expect(
       parseDndBeyondCharacterUrl(
         "  https://www.dndbeyond.com/characters/91913267/BRdgB3  ",

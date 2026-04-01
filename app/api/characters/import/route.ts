@@ -66,6 +66,7 @@ export async function POST(request: NextRequest) {
       character: characterToSave,
       warnings: imported.warnings,
       overwritten: Boolean(existingCharacter),
+      sourceUrl: url,
     });
   } catch (error) {
     const response = getImportErrorResponse(error);
