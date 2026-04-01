@@ -36,16 +36,16 @@
 
 ## 6. PR and Merge
 
-- [ ] 6.1 Commit all changes to `feat/monster-library-multi-column` and push
-- [ ] 6.2 Open PR from `feat/monster-library-multi-column` → `main` referencing issue #107
-- [ ] 6.3 Monitor CI — if checks fail: diagnose, fix, commit, push, repeat until green
-- [ ] 6.4 Address all review comments — commit fixes, push, repeat until no unresolved comments remain
-- [ ] 6.5 Enable auto-merge once all required CI checks are green and no blocking comments remain
+- [x] 6.1 Commit all changes to `feat/monster-library-multi-column` and push
+- [x] 6.2 Open PR from `feat/monster-library-multi-column` → `main` referencing issue #107
+- [x] 6.3 Monitor CI — if checks fail: diagnose, fix, commit, push, repeat until green
+- [x] 6.4 Address all review comments — commit fixes, push, repeat until no unresolved comments remain
+- [x] 6.5 Enable auto-merge once all required CI checks are green and no blocking comments remain
 
 ## 7. Post-Merge
 
-- [ ] 7.1 Checkout `main` and pull: `git checkout main && git pull --ff-only`
-- [ ] 7.2 Verify merged changes appear on `main`
-- [ ] 7.3 Sync approved spec delta to permanent location: copy `openspec/changes/monster-library-multi-column/specs/monster-library-grid-layout/spec.md` → `openspec/specs/monster-library-grid-layout/spec.md`
-- [ ] 7.4 Archive this change (single atomic commit): copy `openspec/changes/monster-library-multi-column/` → `openspec/archive/monster-library-multi-column/` and delete original — commit and push together
-- [ ] 7.5 Prune local feature branch: `git branch -d feat/monster-library-multi-column`
+- [x] 7.1 Checkout `main` and pull: `git checkout main && git pull --ff-only`
+- [x] 7.2 Verify merged changes appear on `main`
+- [x] 7.3 Sync approved spec delta to permanent location: copy `openspec/changes/monster-library-multi-column/specs/monster-library-grid-layout/spec.md` → `openspec/specs/monster-library-grid-layout/spec.md`
+- [x] 7.4 Archive this change (single atomic commit): copy `openspec/changes/monster-library-multi-column/` → `openspec/archive/monster-library-multi-column/` and delete original — commit and push together
+- [x] 7.5 Prune local feature branch: `git branch -d feat/monster-library-multi-column`
