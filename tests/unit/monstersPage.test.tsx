@@ -187,3 +187,133 @@ describe('MonstersContent filter bar', () => {
     expect(container.textContent).toContain('No personal monsters yet.');
   });
 });
+
+describe('MonstersContent grid layout and modal editor', () => {
+  let container: HTMLDivElement;
+  let root: Root;
+  let originalFetch: typeof global.fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+
+    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+      const url = input.toString();
+      if (url === '/api/monsters') {
+        return { ok: true, json: async () => ALL_MONSTERS } as Response;
+      }
+      if (url === '/api/auth/me') {
+        return { ok: true, json: async () => ({ isAdmin: true }) } as Response;
+      }
+      return { ok: false, json: async () => ({}) } as Response;
+    }) as typeof fetch;
+  });
+
+  afterEach(() => {
+    act(() => { root.unmount(); });
+    container.remove();
+    global.fetch = originalFetch;
+    jest.restoreAllMocks();
+  });
+
+  async function renderPage() {
+    await act(async () => {
+      root.render(React.createElement(MonstersContent));
+    });
+  }
+
+  function getGridContainers() {
+    return Array.from(container.querySelectorAll('.grid')).filter(el =>
+      el.classList.contains('grid-cols-1') &&
+      el.classList.contains('md:grid-cols-2') &&
+      el.classList.contains('lg:grid-cols-3'),
+    );
+  }
+
+  // Task 2.1: grid layout class on user and global card list containers
+  test('user card list container has grid layout classes', async () => {
+    await renderPage();
+    expect(getGridContainers().length).toBeGreaterThanOrEqual(1);
+  });
+
+  test('global card list container has grid layout classes', async () => {
+    await renderPage();
+    expect(getGridContainers().length).toBeGreaterThanOrEqual(2);
+  });
+
+  // Task 2.2: MonsterTemplateEditor NOT rendered inline inside section body when editing
+  test('MonsterTemplateEditor is not rendered inline in user section body when editing', async () => {
+    await renderPage();
+    const editButtons = Array.from(container.querySelectorAll('button')).filter(
+      b => b.textContent === 'Edit',
+    );
+    await act(async () => { editButtons[0].click(); });
+
+    // The editor's Save button should exist only inside the modal, not inside the .mb-12 section
+    const userSection = container.querySelector('.mb-12');
+    const saveInSection = Array.from(userSection?.querySelectorAll('button') ?? []).some(
+      b => b.textContent?.includes('Save Personal Monster'),
+    );
+    expect(saveInSection).toBe(false);
+
+    const modal = container.querySelector('[role="dialog"]');
+    const saveInModal = Array.from(modal?.querySelectorAll('button') ?? []).some(
+      b => b.textContent?.includes('Save Personal Monster'),
+    );
+    expect(saveInModal).toBe(true);
+  });
+
+  // Task 2.3: modal overlay appears when editingTemplate is set
+  test('modal overlay appears when editing a monster', async () => {
+    await renderPage();
+    const editButtons = Array.from(container.querySelectorAll('button')).filter(
+      b => b.textContent === 'Edit',
+    );
+    await act(async () => { editButtons[0].click(); });
+
+    const modal = container.querySelector('.fixed.inset-0.z-50');
+    expect(modal).not.toBeNull();
+  });
+
+  test('modal overlay is not present when not editing', async () => {
+    await renderPage();
+    const modal = container.querySelector('.fixed.inset-0.z-50');
+    expect(modal).toBeNull();
+  });
+
+  // Task 2.4: backdrop click calls cancelEdit (closes modal)
+  test('clicking the backdrop closes the modal', async () => {
+    await renderPage();
+    const editButtons = Array.from(container.querySelectorAll('button')).filter(
+      b => b.textContent === 'Edit',
+    );
+    await act(async () => { editButtons[0].click(); });
+
+    const backdrop = container.querySelector('.fixed.inset-0.z-50') as HTMLElement;
+    expect(backdrop).not.toBeNull();
+
+    await act(async () => { backdrop.click(); });
+
+    const modalAfterClick = container.querySelector('.fixed.inset-0.z-50');
+    expect(modalAfterClick).toBeNull();
+  });
+
+  // Task 2.5: Escape key press calls cancelEdit
+  test('pressing Escape closes the modal', async () => {
+    await renderPage();
+    const editButtons = Array.from(container.querySelectorAll('button')).filter(
+      b => b.textContent === 'Edit',
+    );
+    await act(async () => { editButtons[0].click(); });
+
+    expect(container.querySelector('.fixed.inset-0.z-50')).not.toBeNull();
+
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    });
+
+    expect(container.querySelector('.fixed.inset-0.z-50')).toBeNull();
+  });
+});
