@@ -8,7 +8,7 @@ import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate, ActiveDamageEffect } from '@/lib/types';
-import { rollD20 } from '@/lib/utils/dice';
+import { rollDie } from '@/lib/utils/dice';
 import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool, sortCombatants, buildLairCombatant, buildCombatantFromSource, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects } from '@/lib/utils/combat';
 import { DAMAGE_TYPE_GROUPS, DAMAGE_EFFECT_PRESETS, DamageType } from '@/lib/constants';
 import { LairForm } from '@/lib/components/LairForm';
@@ -377,7 +377,7 @@ function CombatContent() {
     // Roll initiative for all non-lair combatants (lair slots are always initiative 20)
     const updatedCombatants = combatState.combatants.map(c => {
       if (c.type === 'lair') return c;
-      const roll = rollD20();
+      const roll = rollDie(20)[0];
       const bonus = getInitiativeBonus(c);
       const total = roll + bonus;
 
@@ -2116,7 +2116,7 @@ function InitiativeEntry({ combatant, onSet, onClose }: InitiativeEntryProps) {
   };
 
   const handleRoll = () => {
-    const roll = rollD20();
+    const roll = rollDie(20)[0];
     const bonus = getBonus();
     const total = roll + bonus;
     
