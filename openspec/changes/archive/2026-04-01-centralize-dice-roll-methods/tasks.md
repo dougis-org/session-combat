@@ -24,16 +24,16 @@
 
 ## 4. PR and Merge
 
-- [ ] 4.1 Commit the implementation and tests on the feature branch
-- [ ] 4.2 Push the branch and open a PR targeting `main`
-- [ ] 4.3 Resolve CI failures before merge; do not merge with red checks
-- [ ] 4.4 Address all blocking review comments, then push fixes and re-run validation
-- [ ] 4.5 Enable auto-merge only after CI is green and review is clear
+- [x] 4.1 Commit the implementation and tests on the feature branch
+- [x] 4.2 Push the branch and open a PR targeting `main`
+- [x] 4.3 Resolve CI failures before merge; do not merge with red checks
+- [x] 4.4 Address all blocking review comments, then push fixes and re-run validation
+- [x] 4.5 Enable auto-merge only after CI is green and review is clear
 
 ## 5. Post-Merge
 
-- [ ] 5.1 Checkout `main` and pull the merged changes with fast-forward only
-- [ ] 5.2 Sync the approved spec delta back to `openspec/specs/dice-rolling/spec.md` before archive if required by the workflow
+- [x] 5.1 Checkout `main` and pull the merged changes with fast-forward only
+- [x] 5.2 Sync the approved spec delta back to `openspec/specs/dice-rolling/spec.md` before archive if required by the workflow
 - [ ] 5.3 Archive the change as a single atomic commit that includes both the archive copy and removal of the change directory
 - [ ] 5.4 Push the archive commit to `main`
 - [ ] 5.5 Prune the merged local feature branch after archive
