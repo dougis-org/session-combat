@@ -1336,21 +1336,20 @@ export function CombatantCard({
   const [targetDamageType, setTargetDamageType] = useState<DamageType | ''>('');
   const [showEffectsPanel, setShowEffectsPanel] = useState(false);
   const [pendingPreset, setPendingPreset] = useState<{ label: string; kind: 'resistance' | 'immunity' | 'vulnerability'; choices: DamageType[] } | null>(null);
+  // Bumped after this card's own push/pop to keep the Undo button enabled state in sync
+  const [historyVersion, setHistoryVersion] = useState(0);
 
   const adjustHp = (amount: number) => {
+    const prevHp = combatant.hp;
+    const prevTempHp = combatant.tempHp ?? 0;
     if (amount < 0) {
       const rawDamage = -amount;
-      pushHpHistory(combatId, combatant.id, {
-        hp: combatant.hp,
-        tempHp: combatant.tempHp ?? 0,
-        type: 'damage',
-        amount: rawDamage,
-        timestamp: Date.now(),
-      });
+      let resultHp: number;
+      let resultTempHp: number;
       if (selectedDamageType) {
         const result = calcApplyDamageWithType(
-          combatant.hp,
-          combatant.tempHp ?? 0,
+          prevHp,
+          prevTempHp,
           rawDamage,
           selectedDamageType,
           {
@@ -1360,20 +1359,24 @@ export function CombatantCard({
             activeDamageEffects: combatant.activeDamageEffects,
           },
         );
-        onUpdate({ hp: result.hp, tempHp: result.tempHp });
+        resultHp = result.hp;
+        resultTempHp = result.tempHp;
       } else {
-        const result = calcApplyDamage(combatant.hp, combatant.tempHp ?? 0, rawDamage);
-        onUpdate({ hp: result.hp, tempHp: result.tempHp });
+        const result = calcApplyDamage(prevHp, prevTempHp, rawDamage);
+        resultHp = result.hp;
+        resultTempHp = result.tempHp;
       }
+      if (resultHp !== prevHp || resultTempHp !== prevTempHp) {
+        pushHpHistory(combatId, combatant.id, { hp: prevHp, tempHp: prevTempHp, type: 'damage', amount: rawDamage, timestamp: Date.now() });
+        setHistoryVersion(v => v + 1);
+      }
+      onUpdate({ hp: resultHp, tempHp: resultTempHp });
     } else {
-      pushHpHistory(combatId, combatant.id, {
-        hp: combatant.hp,
-        tempHp: combatant.tempHp ?? 0,
-        type: 'healing',
-        amount,
-        timestamp: Date.now(),
-      });
-      const result = calcApplyHealing(combatant.hp, combatant.maxHp, amount);
+      const result = calcApplyHealing(prevHp, combatant.maxHp, amount);
+      if (result.hp !== prevHp) {
+        pushHpHistory(combatId, combatant.id, { hp: prevHp, tempHp: prevTempHp, type: 'healing', amount, timestamp: Date.now() });
+        setHistoryVersion(v => v + 1);
+      }
       onUpdate({ hp: result.hp });
     }
   };
@@ -1415,6 +1418,7 @@ export function CombatantCard({
         amount,
         timestamp: Date.now(),
       });
+      setHistoryVersion(v => v + 1);
       onUpdate({ tempHp: result.tempHp });
       setHpAdjustment('');
     }
@@ -1423,6 +1427,7 @@ export function CombatantCard({
   const undoHpChange = () => {
     const entry = popHpHistory(combatId, combatant.id);
     if (!entry) return;
+    setHistoryVersion(v => v + 1);
     onUpdate({ hp: entry.hp, tempHp: entry.tempHp });
   };
 
@@ -1462,17 +1467,14 @@ export function CombatantCard({
 
     const target = allCombatants?.find(c => c.id === selectedTargetId);
     if (target) {
-      pushHpHistory(combatId, target.id, {
-        hp: target.hp,
-        tempHp: target.tempHp ?? 0,
-        type: 'damage',
-        amount: damage,
-        timestamp: Date.now(),
-      });
+      const targetHp = target.hp;
+      const targetTempHp = target.tempHp ?? 0;
+      let resultHp: number;
+      let resultTempHp: number;
       if (targetDamageType) {
         const result = calcApplyDamageWithType(
-          target.hp,
-          target.tempHp ?? 0,
+          targetHp,
+          targetTempHp,
           damage,
           targetDamageType,
           {
@@ -1482,11 +1484,17 @@ export function CombatantCard({
             activeDamageEffects: target.activeDamageEffects,
           },
         );
-        onUpdateCombatant(selectedTargetId, { hp: result.hp, tempHp: result.tempHp });
+        resultHp = result.hp;
+        resultTempHp = result.tempHp;
       } else {
-        const result = calcApplyDamage(target.hp, target.tempHp ?? 0, damage);
-        onUpdateCombatant(selectedTargetId, { hp: result.hp, tempHp: result.tempHp });
+        const result = calcApplyDamage(targetHp, targetTempHp, damage);
+        resultHp = result.hp;
+        resultTempHp = result.tempHp;
       }
+      if (resultHp !== targetHp || resultTempHp !== targetTempHp) {
+        pushHpHistory(combatId, target.id, { hp: targetHp, tempHp: targetTempHp, type: 'damage', amount: damage, timestamp: Date.now() });
+      }
+      onUpdateCombatant(selectedTargetId, { hp: resultHp, tempHp: resultTempHp });
     }
 
     setDamageInput('');

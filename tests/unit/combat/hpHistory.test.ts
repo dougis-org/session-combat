@@ -157,11 +157,13 @@ describe('clearCombatHistory', () => {
 });
 
 // ---------------------------------------------------------------------------
-// undoHpChange logic (task 3.2)
-// Verifies: pop returns snapshot values; no new history entry recorded after pop
+// Undo behavior via storage (task 3.2)
+// Tests popHpHistory in the same way undoHpChange uses it:
+// pop returns snapshot values; no new entry is recorded after pop.
+// (Component-level handler tests are in CombatantCard.test.tsx)
 // ---------------------------------------------------------------------------
 
-describe('undoHpChange logic', () => {
+describe('undo behavior via storage', () => {
   test('popped entry has correct hp/tempHp snapshot values', () => {
     pushHpHistory('c', 'a', entry({ hp: 20, tempHp: 5, type: 'damage', amount: 10 }));
     const snapshot = popHpHistory('c', 'a');
@@ -187,11 +189,12 @@ describe('undoHpChange logic', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Context menu enabled/disabled logic (task 3.3)
-// The "Undo HP Change" button is enabled when stack.length > 0, disabled when empty.
+// Undo button enabling condition (task 3.3)
+// Tests the storage-level predicate: stack.length > 0 = enabled, 0 = disabled.
+// (Component-level disabled attribute tests are in CombatantCard.test.tsx)
 // ---------------------------------------------------------------------------
 
-describe('context menu enabled/disabled logic', () => {
+describe('undo button enabling condition via storage', () => {
   test('disabled when history stack is empty', () => {
     const hasHistory = getHpHistoryStack('c', 'a').length > 0;
     expect(hasHistory).toBe(false);

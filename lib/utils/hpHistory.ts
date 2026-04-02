@@ -9,7 +9,10 @@ function storageKey(combatId: string): string {
 function loadMap(combatId: string): Record<string, HpHistoryEntry[]> {
   try {
     const raw = localStorage.getItem(storageKey(combatId));
-    return raw ? (JSON.parse(raw) as Record<string, HpHistoryEntry[]>) : {};
+    if (!raw) return {};
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
+    return parsed as Record<string, HpHistoryEntry[]>;
   } catch {
     return {};
   }
