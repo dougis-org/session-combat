@@ -408,6 +408,14 @@ export interface CombatantState extends CreatureStats {
   activeDamageEffects?: ActiveDamageEffect[];
 }
 
+export interface HpHistoryEntry {
+  hp: number;
+  tempHp: number;
+  type: 'damage' | 'healing' | 'tempHp';
+  amount: number;
+  timestamp: number;
+}
+
 export interface CombatState {
   _id?: string;
   id: string;

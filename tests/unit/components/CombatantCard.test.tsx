@@ -45,6 +45,7 @@ let root: Root;
 beforeEach(() => {
   container = document.createElement('div');
   document.body.appendChild(container);
+  localStorage.clear();
 });
 
 afterEach(() => {
@@ -52,11 +53,12 @@ afterEach(() => {
   container.remove();
 });
 
-function render(combatant: CombatantState, onUpdate: ReturnType<typeof jest.fn>) {
+function render(combatant: CombatantState, onUpdate: ReturnType<typeof jest.fn>, combatId = 'test-combat') {
   act(() => {
     root = createRoot(container);
     root.render(
       <CombatantCard
+        combatId={combatId}
         combatant={combatant}
         isActive={false}
         onUpdate={onUpdate as any}
@@ -346,5 +348,83 @@ describe('CombatantCard – damage type select', () => {
     expect(onUpdate).toHaveBeenCalled();
     const arg = (onUpdate as jest.Mock).mock.calls[0][0] as { hp: number; tempHp: number };
     expect(arg.hp).toBe(20); // 30 - 10 = 20
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Undo HP button
+// ---------------------------------------------------------------------------
+
+describe('CombatantCard – Undo HP button', () => {
+  function setHpInput(value: string) {
+    const hpInput = container.querySelector('input[type="number"]') as HTMLInputElement;
+    act(() => {
+      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+      nativeSetter.call(hpInput, value);
+      hpInput.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  }
+
+  test('Undo HP button is disabled when history is empty', () => {
+    render(BASE, jest.fn());
+    const undoBtn = container.querySelector('[data-testid="undo-hp-change"]') as HTMLButtonElement;
+    expect(undoBtn).not.toBeNull();
+    expect(undoBtn.disabled).toBe(true);
+  });
+
+  test('Undo HP button is enabled after applying damage', () => {
+    render({ ...BASE, hp: 30 }, jest.fn());
+    setHpInput('5');
+    act(() => { findButton('Damage').click(); });
+    const undoBtn = container.querySelector('[data-testid="undo-hp-change"]') as HTMLButtonElement;
+    expect(undoBtn.disabled).toBe(false);
+  });
+
+  test('Undo HP button stays disabled when immune combatant receives typed damage', () => {
+    render({ ...BASE, hp: 30, damageImmunities: ['fire'] }, jest.fn());
+    setHpInput('10');
+    const dmgSelect = container.querySelector('select[aria-label="Damage type (for resistance/immunity/vulnerability)"]') as HTMLSelectElement;
+    act(() => {
+      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')!.set!;
+      nativeSetter.call(dmgSelect, 'fire');
+      dmgSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    act(() => { findButton('Damage').click(); });
+    const undoBtn = container.querySelector('[data-testid="undo-hp-change"]') as HTMLButtonElement;
+    // Fire immunity → no-op damage → no history entry → still disabled
+    expect(undoBtn.disabled).toBe(true);
+  });
+
+  test('clicking Undo HP calls onUpdate with the previous hp/tempHp snapshot', () => {
+    const onUpdate = jest.fn();
+    render({ ...BASE, hp: 30 }, onUpdate);
+    setHpInput('10');
+    act(() => { findButton('Damage').click(); });
+
+    // Undo should restore hp=30, tempHp=0
+    act(() => { findButton('Undo HP').click(); });
+    const lastCall = (onUpdate as jest.Mock).mock.calls.at(-1)![0] as { hp: number; tempHp: number };
+    expect(lastCall).toMatchObject({ hp: 30, tempHp: 0 });
+  });
+
+  test('Undo HP button becomes disabled again after undo exhausts history', () => {
+    const onUpdate = jest.fn();
+    render({ ...BASE, hp: 30 }, onUpdate);
+    setHpInput('5');
+    act(() => { findButton('Damage').click(); });
+    act(() => { findButton('Undo HP').click(); });
+    const undoBtn = container.querySelector('[data-testid="undo-hp-change"]') as HTMLButtonElement;
+    expect(undoBtn.disabled).toBe(true);
+  });
+
+  test('Undo HP does not push a new history entry (undo is not itself undoable)', () => {
+    const onUpdate = jest.fn();
+    render({ ...BASE, hp: 30 }, onUpdate);
+    setHpInput('5');
+    act(() => { findButton('Damage').click(); });
+    act(() => { findButton('Undo HP').click(); });
+    // After undo, button should be disabled (no lingering history)
+    const undoBtn = container.querySelector('[data-testid="undo-hp-change"]') as HTMLButtonElement;
+    expect(undoBtn.disabled).toBe(true);
   });
 });
