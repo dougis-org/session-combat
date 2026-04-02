@@ -31,19 +31,19 @@ Approval expectation: proposal approval required before implementation begins
 
 ## PR and Merge
 
-- [ ] 4.1 Commit all changes to `feat/hp-undo-damage-history` and push to remote
-- [ ] 4.2 Open a pull request from `feat/hp-undo-damage-history` to `main`
-- [ ] 4.3 Monitor CI status until all required checks are green
-- [ ] 4.4 Address every review comment with targeted follow-up commits on the working branch, then push
-- [ ] 4.5 Re-run validation after each round of fixes until no blocking comments or CI failures remain
-- [ ] 4.6 Enable auto-merge only when CI is green and no blocking review comments remain
+- [x] 4.1 Commit all changes to `feat/hp-undo-damage-history` and push to remote
+- [x] 4.2 Open a pull request from `feat/hp-undo-damage-history` to `main`
+- [x] 4.3 Monitor CI status until all required checks are green
+- [x] 4.4 Address every review comment with targeted follow-up commits on the working branch, then push
+- [x] 4.5 Re-run validation after each round of fixes until no blocking comments or CI failures remain
+- [x] 4.6 Enable auto-merge only when CI is green and no blocking review comments remain
 
 ## Post-Merge
 
-- [ ] 5.1 Check out `main` and pull the merged changes after the PR is merged
-- [ ] 5.2 Verify the merged changes are present on `main`
-- [ ] 5.3 Sync the approved `temp-hp-tracking` spec delta from `openspec/changes/hp-undo-damage-history/specs/temp-hp-tracking/spec.md` into `openspec/specs/temp-hp-tracking/spec.md`
-- [ ] 5.4 Sync the new `hp-undo-history` spec from `openspec/changes/hp-undo-damage-history/specs/hp-undo-history/spec.md` into `openspec/specs/hp-undo-history/spec.md`
+- [x] 5.1 Check out `main` and pull the merged changes after the PR is merged
+- [x] 5.2 Verify the merged changes are present on `main`
+- [x] 5.3 Sync the approved `temp-hp-tracking` spec delta from `openspec/changes/hp-undo-damage-history/specs/temp-hp-tracking/spec.md` into `openspec/specs/temp-hp-tracking/spec.md`
+- [x] 5.4 Sync the new `hp-undo-history` spec from `openspec/changes/hp-undo-damage-history/specs/hp-undo-history/spec.md` into `openspec/specs/hp-undo-history/spec.md`
 - [ ] 5.5 Archive the change directory as a single atomic commit that includes both the archive copy and deletion of `openspec/changes/hp-undo-damage-history/`
 - [ ] 5.6 Push the archive commit to `main`
 - [ ] 5.7 Prune merged local branches and verify the repository is clean
