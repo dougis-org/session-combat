@@ -16,6 +16,7 @@ import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
+import { pushHpHistory, popHpHistory, getHpHistoryStack, clearCombatHistory } from '@/lib/utils/hpHistory';
 
 function CombatContent() {
   const { user } = useAuth();
@@ -357,6 +358,7 @@ function CombatContent() {
 
   const endCombat = () => {
     if (confirm('Are you sure you want to end combat?')) {
+      if (combatState) clearCombatHistory(combatState.id);
       saveCombatState(null);
       setSetupCombatants([]);
       setSelectedPartyId(null);
@@ -940,6 +942,7 @@ function CombatContent() {
               return (
                 <CombatantCard
                   key={combatant.id}
+                  combatId={combatState.id}
                   combatant={combatant}
                   isActive={isActive}
                   onUpdate={(updates) => updateCombatant(combatant.id, updates)}
@@ -973,6 +976,7 @@ function CombatContent() {
                     return (
                       <CombatantCard
                         key={combatant.id}
+                        combatId={combatState.id}
                         combatant={combatant}
                         isActive={actualIdx === combatState.currentTurnIndex}
                         onUpdate={(updates) => updateCombatant(combatant.id, updates)}
@@ -1005,6 +1009,7 @@ function CombatContent() {
                     return (
                       <CombatantCard
                         key={combatant.id}
+                        combatId={combatState.id}
                         combatant={combatant}
                         isActive={actualIdx === combatState.currentTurnIndex}
                         onUpdate={(updates) => updateCombatant(combatant.id, updates)}
@@ -1292,6 +1297,7 @@ function CombatContent() {
 }
 
 export function CombatantCard({
+  combatId,
   combatant,
   isActive,
   onUpdate,
@@ -1303,6 +1309,7 @@ export function CombatantCard({
   allCombatants,
   onUpdateCombatant,
 }: {
+  combatId: string;
   combatant: CombatantState;
   isActive: boolean;
   onUpdate: (updates: Partial<CombatantState>) => void;
@@ -1333,6 +1340,13 @@ export function CombatantCard({
   const adjustHp = (amount: number) => {
     if (amount < 0) {
       const rawDamage = -amount;
+      pushHpHistory(combatId, combatant.id, {
+        hp: combatant.hp,
+        tempHp: combatant.tempHp ?? 0,
+        type: 'damage',
+        amount: rawDamage,
+        timestamp: Date.now(),
+      });
       if (selectedDamageType) {
         const result = calcApplyDamageWithType(
           combatant.hp,
@@ -1352,6 +1366,13 @@ export function CombatantCard({
         onUpdate({ hp: result.hp, tempHp: result.tempHp });
       }
     } else {
+      pushHpHistory(combatId, combatant.id, {
+        hp: combatant.hp,
+        tempHp: combatant.tempHp ?? 0,
+        type: 'healing',
+        amount,
+        timestamp: Date.now(),
+      });
       const result = calcApplyHealing(combatant.hp, combatant.maxHp, amount);
       onUpdate({ hp: result.hp });
     }
@@ -1387,9 +1408,22 @@ export function CombatantCard({
         setHpAdjustment('');
         return;
       }
+      pushHpHistory(combatId, combatant.id, {
+        hp: combatant.hp,
+        tempHp: currentTempHp,
+        type: 'tempHp',
+        amount,
+        timestamp: Date.now(),
+      });
       onUpdate({ tempHp: result.tempHp });
       setHpAdjustment('');
     }
+  };
+
+  const undoHpChange = () => {
+    const entry = popHpHistory(combatId, combatant.id);
+    if (!entry) return;
+    onUpdate({ hp: entry.hp, tempHp: entry.tempHp });
   };
 
   const addCondition = () => {
@@ -1428,6 +1462,13 @@ export function CombatantCard({
 
     const target = allCombatants?.find(c => c.id === selectedTargetId);
     if (target) {
+      pushHpHistory(combatId, target.id, {
+        hp: target.hp,
+        tempHp: target.tempHp ?? 0,
+        type: 'damage',
+        amount: damage,
+        timestamp: Date.now(),
+      });
       if (targetDamageType) {
         const result = calcApplyDamageWithType(
           target.hp,
@@ -1621,6 +1662,15 @@ export function CombatantCard({
               />
               Temp
             </label>
+            <button
+              onClick={undoHpChange}
+              disabled={getHpHistoryStack(combatId, combatant.id).length === 0}
+              title="Undo last HP change"
+              data-testid="undo-hp-change"
+              className="px-2 py-1 rounded text-xs bg-gray-600 hover:bg-gray-500 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Undo HP
+            </button>
             <div className="flex items-center gap-2 ml-auto pr-4">
               <button
                 onClick={() => onSetInitiative?.(combatant.id)}
