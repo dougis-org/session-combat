@@ -1670,12 +1670,22 @@ export function CombatantCard({
                     {combatant.initiativeRoll.method === 'rolled'
                       ? [
                           combatant.initiativeRoll.advantage
-                            ? `d20:${combatant.initiativeRoll.roll}↑(${combatant.initiativeRoll.altRoll})`
+                            ? `d20:${combatant.initiativeRoll.roll}↑ (dropped:${combatant.initiativeRoll.altRoll})`
                             : `d20:${combatant.initiativeRoll.roll}`,
                           `+${combatant.initiativeRoll.bonus}`,
-                          combatant.initiativeRoll.flatBonus ? `+${combatant.initiativeRoll.flatBonus}` : null,
+                          combatant.initiativeRoll.flatBonus
+                            ? `${combatant.initiativeRoll.flatBonus > 0 ? '+' : ''}${combatant.initiativeRoll.flatBonus}`
+                            : null,
                         ].filter(Boolean).join('')
-                      : 'Manual'}
+                      : [
+                          combatant.initiativeRoll.roll || null,
+                          combatant.initiativeRoll.bonus !== 0
+                            ? `${combatant.initiativeRoll.bonus > 0 ? '+' : ''}${combatant.initiativeRoll.bonus}`
+                            : null,
+                          combatant.initiativeRoll.flatBonus
+                            ? `${combatant.initiativeRoll.flatBonus > 0 ? '+' : ''}${combatant.initiativeRoll.flatBonus}`
+                            : null,
+                        ].filter(Boolean).join('') || 'Manual'}
                   </p>
                 )}
               </button>
@@ -2190,7 +2200,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
     const effectiveFlatBonus = flatBonus !== 0 ? flatBonus : undefined;
 
     onSet({
-      roll: 0,
+      roll: total,
       bonus: 0,
       total: total + (flatBonus ?? 0),
       method: 'manual',
@@ -2290,7 +2300,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
               type="number"
               value={flatBonus}
               onChange={(e) => {
-                const next = parseInt(e.target.value) || 0;
+                const next = e.target.value === '' ? 0 : parseInt(e.target.value);
                 setFlatBonus(next);
                 onSettingsChange?.(advantage, next);
               }}
@@ -2341,7 +2351,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
                 min="0"
                 value={totalValue}
                 onChange={(e) => setTotalValue(e.target.value)}
-                placeholder={flatBonus !== 0 ? `Value (+${flatBonus} bonus applied)` : "Total initiative"}
+                placeholder={flatBonus !== 0 ? `Value (${flatBonus > 0 ? '+' : ''}${flatBonus} bonus applied)` : "Total initiative"}
                 className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
               />
               <button
@@ -2369,13 +2379,16 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
                     <>d20: {combatant.initiativeRoll.roll}</>
                   )}{" "}
                   + {combatant.initiativeRoll.bonus}
-                  {combatant.initiativeRoll.flatBonus ? ` +${combatant.initiativeRoll.flatBonus}` : ""}{" "}
+                  {combatant.initiativeRoll.flatBonus ? ` ${combatant.initiativeRoll.flatBonus > 0 ? '+' : ''}${combatant.initiativeRoll.flatBonus}` : ""}{" "}
                   = {combatant.initiativeRoll.total}
                 </p>
               )}
-              {combatant.initiativeRoll.method === "manual" && combatant.initiativeRoll.flatBonus ? (
+              {combatant.initiativeRoll.method === "manual" && (combatant.initiativeRoll.bonus !== 0 || combatant.initiativeRoll.flatBonus) ? (
                 <p className="text-gray-500 text-xs">
-                  entered + {combatant.initiativeRoll.flatBonus} = {combatant.initiativeRoll.total}
+                  {combatant.initiativeRoll.roll}
+                  {combatant.initiativeRoll.bonus !== 0 && ` + ${combatant.initiativeRoll.bonus}`}
+                  {combatant.initiativeRoll.flatBonus ? ` ${combatant.initiativeRoll.flatBonus > 0 ? '+' : ''}${combatant.initiativeRoll.flatBonus}` : ""}
+                  {" "}= {combatant.initiativeRoll.total}
                 </p>
               ) : null}
             </div>

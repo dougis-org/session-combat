@@ -1,4 +1,4 @@
-// Pure combat math utilities for D&D 5e combat mechanics
+// Combat utilities for D&D 5e mechanics: deterministic math helpers and dice-based roll builders
 import type { ActiveDamageEffect, CreatureAbility, CombatantState, InitiativeRoll, Monster, Character } from '@/lib/types';
 import type { DamageType } from '@/lib/constants';
 import { rollDie } from '@/lib/utils/dice';
