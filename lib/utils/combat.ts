@@ -1,6 +1,7 @@
-// Pure combat math utilities for D&D 5e combat mechanics
-import type { ActiveDamageEffect, CreatureAbility, CombatantState, Monster, Character } from '@/lib/types';
+// Combat utilities for D&D 5e mechanics: deterministic math helpers and dice-based roll builders
+import type { ActiveDamageEffect, CreatureAbility, CombatantState, InitiativeRoll, Monster, Character } from '@/lib/types';
 import type { DamageType } from '@/lib/constants';
+import { rollDie } from '@/lib/utils/dice';
 
 /**
  * Apply damage to a combatant, draining temp HP first.
@@ -232,6 +233,38 @@ const TYPE_ORDER: Record<CombatantState['type'], number> = { lair: 0, player: 1,
  * Tertiary: lair before player before monster (lair fires before others at init 20).
  * Within multiple lairs at the same initiative: alphabetically by name.
  */
+export function getDexInitiativeBonus(combatant: CombatantState): number {
+  return Math.floor(((combatant.abilityScores?.dexterity ?? 10) - 10) / 2);
+}
+
+export function buildInitiativeRoll(combatant: CombatantState): InitiativeRoll {
+  const bonus = getDexInitiativeBonus(combatant);
+  const rawFb = combatant.initiativeFlatBonus ?? 0;
+  const fb = Number.isFinite(rawFb) ? rawFb : 0;
+
+  let roll: number;
+  let altRoll: number | undefined;
+  let advantage: true | undefined;
+
+  if (combatant.initiativeAdvantage) {
+    const [a, b] = rollDie(20, 2);
+    roll = Math.max(a, b);
+    altRoll = Math.min(a, b);
+    advantage = true;
+  } else {
+    roll = rollDie(20)[0];
+  }
+
+  return {
+    roll,
+    bonus,
+    total: roll + bonus + fb,
+    method: 'rolled',
+    ...(advantage && { advantage, altRoll }),
+    ...(fb !== 0 && { flatBonus: fb }),
+  };
+}
+
 export function sortCombatants(combatants: CombatantState[]): CombatantState[] {
   return [...combatants].sort((a, b) => {
     if (a.initiative !== b.initiative) return b.initiative - a.initiative;

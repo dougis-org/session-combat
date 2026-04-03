@@ -384,6 +384,9 @@ export interface InitiativeRoll {
   bonus: number;
   total: number;
   method: "rolled" | "manual"; // 'rolled' = automatic roll, 'manual' = user entered
+  advantage?: boolean;
+  altRoll?: number;
+  flatBonus?: number;
 }
 
 export interface CombatantState extends CreatureStats {
@@ -406,6 +409,8 @@ export interface CombatantState extends CreatureStats {
   legendaryActionCount?: number; // DM-adjustable pool size (copied from template)
   legendaryActionsRemaining?: number; // Runtime counter; resets on turn start
   activeDamageEffects?: ActiveDamageEffect[];
+  initiativeAdvantage?: boolean;
+  initiativeFlatBonus?: number;
 }
 
 export interface HpHistoryEntry {
