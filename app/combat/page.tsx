@@ -8,7 +8,6 @@ import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate, ActiveDamageEffect } from '@/lib/types';
-import { rollDie } from '@/lib/utils/dice';
 import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool, sortCombatants, buildLairCombatant, buildCombatantFromSource, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects, getDexInitiativeBonus, buildInitiativeRoll } from '@/lib/utils/combat';
 import { DAMAGE_TYPE_GROUPS, DAMAGE_EFFECT_PRESETS, DamageType } from '@/lib/constants';
 import { LairForm } from '@/lib/components/LairForm';
@@ -1678,14 +1677,16 @@ export function CombatantCard({
                             : null,
                         ].filter(Boolean).join('')
                       : [
-                          combatant.initiativeRoll.roll || null,
+                          combatant.initiativeRoll.roll != null
+                            ? String(combatant.initiativeRoll.roll)
+                            : null,
                           combatant.initiativeRoll.bonus !== 0
                             ? `${combatant.initiativeRoll.bonus > 0 ? '+' : ''}${combatant.initiativeRoll.bonus}`
                             : null,
                           combatant.initiativeRoll.flatBonus
                             ? `${combatant.initiativeRoll.flatBonus > 0 ? '+' : ''}${combatant.initiativeRoll.flatBonus}`
                             : null,
-                        ].filter(Boolean).join('') || 'Manual'}
+                        ].filter((part): part is string => part != null).join('') || 'Manual'}
                   </p>
                 )}
               </button>
@@ -2298,11 +2299,23 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
             <span className="text-sm text-gray-400">Flat bonus:</span>
             <input
               type="number"
+              step={1}
               value={flatBonus}
               onChange={(e) => {
+                const next = e.target.value === '' || !Number.isFinite(e.target.valueAsNumber)
+                  ? 0
+                  : e.target.valueAsNumber;
+                setFlatBonus(next);
+              }}
+              onBlur={(e) => {
                 const next = e.target.value === '' ? 0 : parseInt(e.target.value);
                 setFlatBonus(next);
                 onSettingsChange?.(advantage, next);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.currentTarget.blur();
+                }
               }}
               className="w-16 bg-gray-700 rounded px-2 py-1 text-sm text-white"
               aria-label="Flat initiative bonus"
