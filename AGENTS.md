@@ -27,7 +27,7 @@ Follow the [CONTRIBUTING.md](CONTRIBUTING.md) standards and these additional req
 ## Tooling
 
 - Use MCP servers first for any task they cover; never request a raw shell session.
-- If no MCP tool exists for the task, run the command via `start_process` (desktop commander)
+- If no MCP tool exists for the task, run the command via `start_process` (serena)
   only.
 - Examples: use MCP `read_file`/`write_file` for files; GitHub MCP for git; Jira/Confluence
   MCP for tickets; `start_process` for commands like `gradlew clean test` or `python -m pytest` when no
