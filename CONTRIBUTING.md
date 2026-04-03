@@ -14,7 +14,7 @@ Thank you for your interest in contributing to session-combat! This document out
 ### Git Workflow
 
 - Create feature branches from the default branch (pull the default first)
-- Use descriptive commit messages following conventional commits format when possible
+- Use descriptive commit messages following the conventional commits format when possible
 - Keep commits focused and atomic
 - Ensure all tests pass before submitting a pull request
 
@@ -62,11 +62,13 @@ When submitting a pull request:
 
 ## Pull Request Process
 
-1. Fill out the pull request template completely
-2. Ensure all tests pass locally
-3. Address any CI/CD failures
-4. Respond to reviewer feedback promptly
-5. Squash commits if requested before merging
+1. Self-review (or use an agentic reviewer) before cutting the PR, review for quality, duplication, and complexity issues
+2. Fill out the pull request template completely
+3. Ensure all tests pass locally
+4. Address any CI/CD failures
+5. Respond to reviewer feedback promptly
+6. All reviewer threads must be resolved before code can merge
+7. Squash commits if requested before merging
 
 ## Questions?
 
