@@ -2383,7 +2383,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
               {combatant.initiativeRoll.method === "rolled" && (
                 <p className="text-gray-500 text-xs">
                   {combatant.initiativeRoll.advantage ? (
-                    <>d20: {combatant.initiativeRoll.roll}↑ (dropped: {combatant.initiativeRoll.altRoll})</>
+                    <>d20: {combatant.initiativeRoll.roll}↑{combatant.initiativeRoll.altRoll != null ? ` (dropped: ${combatant.initiativeRoll.altRoll})` : ''}</>
                   ) : (
                     <>d20: {combatant.initiativeRoll.roll}</>
                   )}{" "}
