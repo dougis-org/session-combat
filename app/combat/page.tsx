@@ -1669,7 +1669,7 @@ export function CombatantCard({
                     {combatant.initiativeRoll.method === 'rolled'
                       ? [
                           combatant.initiativeRoll.advantage
-                            ? `d20:${combatant.initiativeRoll.roll}↑ (dropped:${combatant.initiativeRoll.altRoll})`
+                            ? `d20:${combatant.initiativeRoll.roll}↑${combatant.initiativeRoll.altRoll != null ? ` (dropped:${combatant.initiativeRoll.altRoll})` : ''}`
                             : `d20:${combatant.initiativeRoll.roll}`,
                           `+${combatant.initiativeRoll.bonus}`,
                           combatant.initiativeRoll.flatBonus
@@ -2304,11 +2304,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
               onChange={(e) => {
                 const next = e.target.value === '' || !Number.isFinite(e.target.valueAsNumber)
                   ? 0
-                  : e.target.valueAsNumber;
-                setFlatBonus(next);
-              }}
-              onBlur={(e) => {
-                const next = e.target.value === '' ? 0 : parseInt(e.target.value);
+                  : Math.trunc(e.target.valueAsNumber);
                 setFlatBonus(next);
                 onSettingsChange?.(advantage, next);
               }}

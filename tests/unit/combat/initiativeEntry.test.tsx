@@ -301,6 +301,6 @@ describe('initiative display — flat bonus', () => {
       ...BASE,
       initiativeRoll: { roll: 10, bonus: 3, total: 13, method: 'rolled' },
     });
-    expect(text).not.toContain('flatBonus');
+    expect(text).not.toContain('+0');
   });
 });

@@ -239,7 +239,8 @@ export function getDexInitiativeBonus(combatant: CombatantState): number {
 
 export function buildInitiativeRoll(combatant: CombatantState): InitiativeRoll {
   const bonus = getDexInitiativeBonus(combatant);
-  const fb = combatant.initiativeFlatBonus ?? 0;
+  const rawFb = combatant.initiativeFlatBonus ?? 0;
+  const fb = Number.isFinite(rawFb) ? rawFb : 0;
 
   let roll: number;
   let altRoll: number | undefined;

@@ -7,7 +7,7 @@ jest.mock('@/lib/utils/dice');
 
 const mockRollDie = jest.mocked(diceModule.rollDie);
 
-const makeCombatant = (dexterity?: number): CombatantState => ({
+const makeCombatant = (dexterity: number = 10): CombatantState => ({
   id: 'c1',
   name: 'Test',
   type: 'player',
@@ -16,9 +16,7 @@ const makeCombatant = (dexterity?: number): CombatantState => ({
   hp: 10,
   maxHp: 10,
   ac: 10,
-  ...(dexterity !== undefined
-    ? { abilityScores: { strength: 10, dexterity, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 } }
-    : {}),
+  abilityScores: { strength: 10, dexterity, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
 });
 
 beforeEach(() => { mockRollDie.mockReset(); });
@@ -37,7 +35,8 @@ describe('getDexInitiativeBonus', () => {
   });
 
   test('missing abilityScores defaults to DEX 10 → 0', () => {
-    expect(getDexInitiativeBonus(makeCombatant())).toBe(0);
+    const c = { ...makeCombatant(), abilityScores: undefined } as unknown as CombatantState;
+    expect(getDexInitiativeBonus(c)).toBe(0);
   });
 
   test('DEX 20 → +5', () => {
