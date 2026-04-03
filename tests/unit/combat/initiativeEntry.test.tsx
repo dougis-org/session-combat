@@ -261,6 +261,29 @@ describe('onSettingsChange — flat bonus input', () => {
 
     expect(onSettingsChange).toHaveBeenCalledWith(true, 0);
   });
+
+  test('invalid (NaN) flat bonus input fires onSettingsChange with 0', () => {
+    const onSettingsChange = jest.fn();
+    renderWithSettings({ ...BASE, initiativeAdvantage: false, initiativeFlatBonus: 0 }, onSettingsChange);
+
+    const bonusInput = container.querySelector('input[aria-label="Flat initiative bonus"]') as HTMLInputElement;
+    // Simulate typing just '-' which produces NaN via valueAsNumber
+    act(() => { setInputValue(bonusInput, 'abc'); });
+    expect(onSettingsChange).toHaveBeenCalledWith(false, 0);
+  });
+
+  test('pressing Enter on flat bonus input blurs the field', () => {
+    const onSettingsChange = jest.fn();
+    renderWithSettings({ ...BASE, initiativeAdvantage: false, initiativeFlatBonus: 0 }, onSettingsChange);
+
+    const bonusInput = container.querySelector('input[aria-label="Flat initiative bonus"]') as HTMLInputElement;
+    const blurSpy = jest.spyOn(bonusInput, 'blur');
+    act(() => {
+      bonusInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    });
+    expect(blurSpy).toHaveBeenCalled();
+    blurSpy.mockRestore();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -284,6 +307,37 @@ describe('initiative display — advantage roll', () => {
     });
     expect(text).not.toContain('↑');
     expect(text).not.toContain('dropped');
+  });
+});
+
+describe('initiative display — advantage without altRoll', () => {
+  test('shows ↑ notation without dropped die when altRoll is absent', () => {
+    const text = renderWithRoll({
+      ...BASE,
+      initiativeRoll: { roll: 15, advantage: true, bonus: 3, total: 18, method: 'rolled' },
+    });
+    expect(text).toContain('15↑');
+    expect(text).not.toContain('dropped');
+  });
+});
+
+describe('initiative display — manual dice breakdown', () => {
+  test('shows roll + DEX bonus + flat bonus breakdown for manual dice entry', () => {
+    const text = renderWithRoll({
+      ...BASE,
+      initiativeRoll: { roll: 12, bonus: 3, flatBonus: 2, total: 17, method: 'manual' },
+    });
+    expect(text).toContain('12');
+    expect(text).toContain('17');
+  });
+
+  test('shows no breakdown when manual entry has no bonus or flat bonus', () => {
+    const text = renderWithRoll({
+      ...BASE,
+      initiativeRoll: { roll: 15, bonus: 0, total: 15, method: 'manual' },
+    });
+    // No breakdown shown — total already visible, no addends
+    expect(text).toContain('15');
   });
 });
 

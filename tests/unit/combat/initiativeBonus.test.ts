@@ -95,4 +95,13 @@ describe('buildInitiativeRoll — flat bonus', () => {
     expect(result.total).toBe(10);
     expect(result.flatBonus).toBeUndefined();
   });
+
+  test('NaN flat bonus is treated as 0 and flatBonus field absent', () => {
+    mockRollDie.mockReturnValue([10]);
+    const combatant = { ...makeCombatant(10), initiativeFlatBonus: NaN };
+    const result = buildInitiativeRoll(combatant);
+
+    expect(result.total).toBe(10);
+    expect(result.flatBonus).toBeUndefined();
+  });
 });
