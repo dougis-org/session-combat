@@ -68,28 +68,28 @@
 ## 10. Pre-PR Code Review
 
 - [x] 10.1 Capture SHAs: `BASE_SHA=$(git rev-parse origin/main)` and `HEAD_SHA=$(git rev-parse HEAD)`
-- [ ] 10.2 Dispatch `superpowers:code-reviewer` subagent with:
+- [x] 10.2 Dispatch `superpowers:code-reviewer` subagent with:
   - **WHAT_WAS_IMPLEMENTED**: Per-combatant initiative advantage toggle and flat bonus, DEX modifier fix in `InitiativeEntry.getBonus()`, `getInitiativeBonus` simplification, richer `InitiativeRoll` record with `altRoll`/`flatBonus`/`advantage`, updated display breakdowns
   - **PLAN_OR_REQUIREMENTS**: `openspec/changes/initiative-modifiers-advantage/tasks.md` and `openspec/changes/initiative-modifiers-advantage/specs/initiative-modifiers/spec.md`
   - **BASE_SHA**: value from 10.1
   - **HEAD_SHA**: value from 10.1
   - **DESCRIPTION**: Initiative modifiers feature (issue #95) — advantage, flat bonus, DEX fix
-- [ ] 10.3 Fix all Critical issues from review before proceeding
-- [ ] 10.4 Fix all Important issues from review before proceeding
+- [x] 10.3 Fix all Critical issues from review before proceeding
+- [x] 10.4 Fix all Important issues from review before proceeding
 
 ## 11. PR and Merge
 
-- [ ] 11.1 Commit all changes to `feat/initiative-modifiers-advantage` with a message referencing issue #95
-- [ ] 11.2 Push branch and open PR to `main`
-- [ ] 11.3 Monitor CI checks — diagnose and fix any failures, push fixes to branch
-- [ ] 11.4 Address all review comments — commit fixes and push until no unresolved comments remain
-- [ ] 11.5 Enable auto-merge once all CI checks are green and no blocking review comments remain
+- [x] 11.1 Commit all changes to `feat/initiative-modifiers-advantage` with a message referencing issue #95
+- [x] 11.2 Push branch and open PR to `main`
+- [x] 11.3 Monitor CI checks — diagnose and fix any failures, push fixes to branch
+- [x] 11.4 Address all review comments — commit fixes and push until no unresolved comments remain
+- [x] 11.5 Enable auto-merge once all CI checks are green and no blocking review comments remain
 
 ## 12. Post-Merge
 
-- [ ] 12.1 Checkout `main` and pull (`git checkout main && git pull --ff-only`)
-- [ ] 12.2 Verify merged changes appear on `main`
-- [ ] 12.3 Sync approved spec delta to `openspec/specs/initiative-modifiers/spec.md` (copy from `openspec/changes/initiative-modifiers-advantage/specs/initiative-modifiers/spec.md`)
-- [ ] 12.4 Archive the change in a single atomic commit: copy `openspec/changes/initiative-modifiers-advantage/` to `openspec/archive/initiative-modifiers-advantage/` and delete the original — do not split into two commits
-- [ ] 12.5 Push archive commit to `main`
-- [ ] 12.6 Delete local feature branch (`git branch -d feat/initiative-modifiers-advantage`)
+- [x] 12.1 Checkout `main` and pull (`git checkout main && git pull --ff-only`)
+- [x] 12.2 Verify merged changes appear on `main`
+- [x] 12.3 Sync approved spec delta to `openspec/specs/initiative-modifiers/spec.md` (copy from `openspec/changes/initiative-modifiers-advantage/specs/initiative-modifiers/spec.md`)
+- [x] 12.4 Archive the change in a single atomic commit: copy `openspec/changes/initiative-modifiers-advantage/` to `openspec/archive/initiative-modifiers-advantage/` and delete the original — do not split into two commits
+- [x] 12.5 Push archive commit to `main`
+- [x] 12.6 Delete local feature branch (`git branch -d feat/initiative-modifiers-advantage`)
