@@ -67,7 +67,7 @@
 
 ## 10. Pre-PR Code Review
 
-- [ ] 10.1 Capture SHAs: `BASE_SHA=$(git rev-parse origin/main)` and `HEAD_SHA=$(git rev-parse HEAD)`
+- [x] 10.1 Capture SHAs: `BASE_SHA=$(git rev-parse origin/main)` and `HEAD_SHA=$(git rev-parse HEAD)`
 - [ ] 10.2 Dispatch `superpowers:code-reviewer` subagent with:
   - **WHAT_WAS_IMPLEMENTED**: Per-combatant initiative advantage toggle and flat bonus, DEX modifier fix in `InitiativeEntry.getBonus()`, `getInitiativeBonus` simplification, richer `InitiativeRoll` record with `altRoll`/`flatBonus`/`advantage`, updated display breakdowns
   - **PLAN_OR_REQUIREMENTS**: `openspec/changes/initiative-modifiers-advantage/tasks.md` and `openspec/changes/initiative-modifiers-advantage/specs/initiative-modifiers/spec.md`

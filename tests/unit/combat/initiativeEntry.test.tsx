@@ -178,8 +178,8 @@ describe('handleTotalEntry — flat bonus', () => {
 
     act(() => { findButton('Enter Total').click(); });
 
-    // Use placeholder to distinguish from flat bonus input
-    const input = container.querySelector('input[placeholder="Total initiative"]') as HTMLInputElement;
+    // Use min="0" attribute to distinguish total entry input from flat bonus input
+    const input = container.querySelector('input[type="number"][min="0"]') as HTMLInputElement;
     act(() => { setInputValue(input, '15'); });
     act(() => { findButton('Set').click(); });
 

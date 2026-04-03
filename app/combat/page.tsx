@@ -872,6 +872,7 @@ function CombatContent() {
         {initiativeEditId && combatState && !combatState.combatants.some(c => c.initiative === 0) && (
           <div className="mb-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
             <InitiativeEntry
+              key={initiativeEditId}
               combatant={combatState.combatants.find(c => c.id === initiativeEditId)!}
               onSet={(initiativeRoll) => {
                 setInitiativeRoll(initiativeEditId, initiativeRoll);
@@ -2340,7 +2341,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
                 min="0"
                 value={totalValue}
                 onChange={(e) => setTotalValue(e.target.value)}
-                placeholder="Total initiative"
+                placeholder={flatBonus !== 0 ? `Value (+${flatBonus} bonus applied)` : "Total initiative"}
                 className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
               />
               <button
@@ -2372,6 +2373,11 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
                   = {combatant.initiativeRoll.total}
                 </p>
               )}
+              {combatant.initiativeRoll.method === "manual" && combatant.initiativeRoll.flatBonus ? (
+                <p className="text-gray-500 text-xs">
+                  entered + {combatant.initiativeRoll.flatBonus} = {combatant.initiativeRoll.total}
+                </p>
+              ) : null}
             </div>
           )}
         </div>
