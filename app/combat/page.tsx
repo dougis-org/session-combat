@@ -9,7 +9,7 @@ import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { CombatState, CombatantState, Encounter, Character, Party, StatusCondition, InitiativeRoll, Monster, MonsterTemplate, ActiveDamageEffect } from '@/lib/types';
 import { rollDie } from '@/lib/utils/dice';
-import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool, sortCombatants, buildLairCombatant, buildCombatantFromSource, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects } from '@/lib/utils/combat';
+import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, resetIncomingLegendaryPool, sortCombatants, buildLairCombatant, buildCombatantFromSource, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects, getDexInitiativeBonus, buildInitiativeRoll } from '@/lib/utils/combat';
 import { DAMAGE_TYPE_GROUPS, DAMAGE_EFFECT_PRESETS, DamageType } from '@/lib/constants';
 import { LairForm } from '@/lib/components/LairForm';
 import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
@@ -379,18 +379,8 @@ function CombatContent() {
     // Roll initiative for all non-lair combatants (lair slots are always initiative 20)
     const updatedCombatants = combatState.combatants.map(c => {
       if (c.type === 'lair') return c;
-      const roll = rollDie(20)[0];
-      const bonus = getInitiativeBonus(c);
-      const total = roll + bonus;
-
-      const initiativeRoll: InitiativeRoll = {
-        roll,
-        bonus,
-        total,
-        method: 'rolled',
-      };
-
-      return { ...c, initiative: total, initiativeRoll };
+      const initiativeRoll = buildInitiativeRoll(c);
+      return { ...c, initiative: initiativeRoll.total, initiativeRoll };
     });
 
     saveCombatState({
@@ -401,25 +391,6 @@ function CombatContent() {
     setInitiativeMode(false);
   };
 
-  const getInitiativeBonus = (combatant: CombatantState): number => {
-    if (combatant.type === 'player') {
-      const character = characters.find(c => `character-${c.id}` === combatant.id);
-      // Calculate from DEX modifier
-      const dexterity = character?.abilityScores?.dexterity || 10;
-      return Math.floor((dexterity - 10) / 2);
-    } else {
-      // Extract initiative bonus from encounter monster
-      if (combatState?.encounterId) {
-        const encounter = encounters.find(e => e.id === combatState.encounterId);
-        if (encounter) {
-          const monster = encounter.monsters.find(m => combatant.id.includes(m.id));
-          const dexterity = monster?.abilityScores?.dexterity || 10;
-          return Math.floor((dexterity - 10) / 2);
-        }
-      }
-    }
-    return 0;
-  };
   const nextTurn = () => {
     if (!combatState) return;
 
@@ -462,6 +433,10 @@ function CombatContent() {
       ...combatState,
       combatants: updatedCombatants,
     });
+  };
+
+  const updateCombatantInitiativeSettings = (id: string, adv: boolean, fb: number) => {
+    updateCombatant(id, { initiativeAdvantage: adv, initiativeFlatBonus: fb });
   };
 
   const removeCombatant = (id: string) => {
@@ -739,6 +714,7 @@ function CombatContent() {
                 key={combatant.id}
                 combatant={combatant}
                 onSet={(initiativeRoll) => setInitiativeRoll(combatant.id, initiativeRoll)}
+                onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(combatant.id, adv, fb)}
               />
             ))}
           </div>
@@ -884,6 +860,7 @@ function CombatContent() {
                     onSet={(initiativeRoll) => {
                       setInitiativeRoll(combatant.id, initiativeRoll);
                     }}
+                    onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(combatant.id, adv, fb)}
                   />
                 </div>
               ))
@@ -901,6 +878,7 @@ function CombatContent() {
                 setInitiativeEditId(null);
               }}
               onClose={() => setInitiativeEditId(null)}
+              onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeEditId, adv, fb)}
             />
           </div>
         )}
@@ -1688,8 +1666,14 @@ export function CombatantCard({
                 <p className="text-lg font-bold">{combatant.initiative}</p>
                 {combatant.initiativeRoll && (
                   <p className="text-xs text-gray-500 whitespace-nowrap">
-                    {combatant.initiativeRoll.method === 'rolled' 
-                      ? `d20:${combatant.initiativeRoll.roll}+${combatant.initiativeRoll.bonus}`
+                    {combatant.initiativeRoll.method === 'rolled'
+                      ? [
+                          combatant.initiativeRoll.advantage
+                            ? `d20:${combatant.initiativeRoll.roll}↑(${combatant.initiativeRoll.altRoll})`
+                            : `d20:${combatant.initiativeRoll.roll}`,
+                          `+${combatant.initiativeRoll.bonus}`,
+                          combatant.initiativeRoll.flatBonus ? `+${combatant.initiativeRoll.flatBonus}` : null,
+                        ].filter(Boolean).join('')
                       : 'Manual'}
                   </p>
                 )}
@@ -2151,12 +2135,15 @@ interface InitiativeEntryProps {
   combatant: CombatantState;
   onSet: (initiativeRoll: InitiativeRoll) => void;
   onClose?: () => void; // optional: close the edit form (only valid when initiative exists)
+  onSettingsChange?: (advantage: boolean, flatBonus: number) => void;
 }
 
-function InitiativeEntry({ combatant, onSet, onClose }: InitiativeEntryProps) {
+export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }: InitiativeEntryProps) {
   const [entryMode, setEntryMode] = useState<'roll' | 'dice' | 'total'>('roll');
   const [diceRoll, setDiceRoll] = useState('');
   const [totalValue, setTotalValue] = useState('');
+  const [advantage, setAdvantage] = useState(combatant.initiativeAdvantage ?? false);
+  const [flatBonus, setFlatBonus] = useState(combatant.initiativeFlatBonus ?? 0);
 
   // Close with Escape only when there is an existing initiative and an onClose handler
   useEffect(() => {
@@ -2168,22 +2155,8 @@ function InitiativeEntry({ combatant, onSet, onClose }: InitiativeEntryProps) {
     return () => document.removeEventListener('keydown', handler);
   }, [combatant.initiativeRoll, onClose]);
 
-  const getBonus = (): number => {
-    // This is a simplified version - in real implementation, you'd need access to player/monster data
-    return 0;
-  };
-
   const handleRoll = () => {
-    const roll = rollDie(20)[0];
-    const bonus = getBonus();
-    const total = roll + bonus;
-    
-    onSet({
-      roll,
-      bonus,
-      total,
-      method: 'rolled',
-    });
+    onSet(buildInitiativeRoll({ ...combatant, initiativeAdvantage: advantage, initiativeFlatBonus: flatBonus }));
   };
 
   const handleDiceEntry = () => {
@@ -2192,15 +2165,17 @@ function InitiativeEntry({ combatant, onSet, onClose }: InitiativeEntryProps) {
       alert('Dice roll must be between 1 and 20');
       return;
     }
-    
-    const bonus = getBonus();
-    const total = roll + bonus;
-    
+
+    const bonus = getDexInitiativeBonus(combatant);
+    const effectiveFlatBonus = flatBonus !== 0 ? flatBonus : undefined;
+    const total = roll + bonus + (flatBonus ?? 0);
+
     onSet({
       roll,
       bonus,
       total,
       method: 'manual',
+      ...(effectiveFlatBonus !== undefined && { flatBonus: effectiveFlatBonus }),
     });
   };
 
@@ -2210,12 +2185,15 @@ function InitiativeEntry({ combatant, onSet, onClose }: InitiativeEntryProps) {
       alert('Initiative must be 0 or greater');
       return;
     }
-    
+
+    const effectiveFlatBonus = flatBonus !== 0 ? flatBonus : undefined;
+
     onSet({
       roll: 0,
       bonus: 0,
-      total,
+      total: total + (flatBonus ?? 0),
       method: 'manual',
+      ...(effectiveFlatBonus !== undefined && { flatBonus: effectiveFlatBonus }),
     });
   };
 
@@ -2291,6 +2269,49 @@ function InitiativeEntry({ combatant, onSet, onClose }: InitiativeEntryProps) {
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center gap-4 mt-2">
+          <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={advantage}
+              onChange={(e) => {
+                const next = e.target.checked;
+                setAdvantage(next);
+                onSettingsChange?.(next, flatBonus);
+              }}
+              className="w-4 h-4 accent-blue-500"
+            />
+            Advantage
+          </label>
+          <div className="flex items-center gap-1">
+            <span className="text-sm text-gray-400">Flat bonus:</span>
+            <input
+              type="number"
+              value={flatBonus}
+              onChange={(e) => {
+                const next = parseInt(e.target.value) || 0;
+                setFlatBonus(next);
+                onSettingsChange?.(advantage, next);
+              }}
+              className="w-16 bg-gray-700 rounded px-2 py-1 text-sm text-white"
+              aria-label="Flat initiative bonus"
+            />
+            {flatBonus !== 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFlatBonus(0);
+                  onSettingsChange?.(advantage, 0);
+                }}
+                className="text-gray-400 hover:text-gray-200 text-sm px-1"
+                aria-label="Clear flat bonus"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
         <div className="flex items-start gap-2">
           {entryMode === "dice" && (
             <div className="flex gap-2">
@@ -2341,9 +2362,14 @@ function InitiativeEntry({ combatant, onSet, onClose }: InitiativeEntryProps) {
               </p>
               {combatant.initiativeRoll.method === "rolled" && (
                 <p className="text-gray-500 text-xs">
-                  d20: {combatant.initiativeRoll.roll} +{" "}
-                  {combatant.initiativeRoll.bonus} ={" "}
-                  {combatant.initiativeRoll.total}
+                  {combatant.initiativeRoll.advantage ? (
+                    <>d20: {combatant.initiativeRoll.roll}↑ (dropped: {combatant.initiativeRoll.altRoll})</>
+                  ) : (
+                    <>d20: {combatant.initiativeRoll.roll}</>
+                  )}{" "}
+                  + {combatant.initiativeRoll.bonus}
+                  {combatant.initiativeRoll.flatBonus ? ` +${combatant.initiativeRoll.flatBonus}` : ""}{" "}
+                  = {combatant.initiativeRoll.total}
                 </p>
               )}
             </div>
