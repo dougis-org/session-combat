@@ -59,6 +59,30 @@ function render(combatant: CombatantState, onSet: ReturnType<typeof jest.fn>) {
   });
 }
 
+function renderWithSettings(
+  combatant: CombatantState,
+  onSettingsChange: ReturnType<typeof jest.fn>,
+) {
+  act(() => {
+    root = createRoot(container);
+    root.render(
+      <InitiativeEntry
+        combatant={combatant}
+        onSet={jest.fn() as any}
+        onSettingsChange={onSettingsChange as any}
+      />
+    );
+  });
+}
+
+function renderWithRoll(combatant: CombatantState) {
+  act(() => {
+    root = createRoot(container);
+    root.render(<InitiativeEntry combatant={combatant} onSet={jest.fn() as any} />);
+  });
+  return container.textContent ?? '';
+}
+
 function findButton(text: string): HTMLButtonElement {
   return Array.from(container.querySelectorAll('button')).find(
     b => b.textContent?.trim() === text,
@@ -197,39 +221,17 @@ describe('handleTotalEntry — flat bonus', () => {
 describe('onSettingsChange — advantage checkbox', () => {
   test('toggling advantage on fires onSettingsChange(true, currentFlatBonus)', () => {
     const onSettingsChange = jest.fn();
-    act(() => {
-      root = createRoot(container);
-      root.render(
-        <InitiativeEntry
-          combatant={{ ...BASE, initiativeAdvantage: false, initiativeFlatBonus: 4 }}
-          onSet={jest.fn() as any}
-          onSettingsChange={onSettingsChange as any}
-        />
-      );
-    });
+    renderWithSettings({ ...BASE, initiativeAdvantage: false, initiativeFlatBonus: 4 }, onSettingsChange);
 
-    const checkbox = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
-    act(() => { checkbox.click(); });
-
+    act(() => { (container.querySelector('input[type="checkbox"]') as HTMLInputElement).click(); });
     expect(onSettingsChange).toHaveBeenCalledWith(true, 4);
   });
 
   test('toggling advantage off fires onSettingsChange(false, currentFlatBonus)', () => {
     const onSettingsChange = jest.fn();
-    act(() => {
-      root = createRoot(container);
-      root.render(
-        <InitiativeEntry
-          combatant={{ ...BASE, initiativeAdvantage: true, initiativeFlatBonus: 0 }}
-          onSet={jest.fn() as any}
-          onSettingsChange={onSettingsChange as any}
-        />
-      );
-    });
+    renderWithSettings({ ...BASE, initiativeAdvantage: true, initiativeFlatBonus: 0 }, onSettingsChange);
 
-    const checkbox = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
-    act(() => { checkbox.click(); });
-
+    act(() => { (container.querySelector('input[type="checkbox"]') as HTMLInputElement).click(); });
     expect(onSettingsChange).toHaveBeenCalledWith(false, 0);
   });
 });
@@ -241,35 +243,16 @@ describe('onSettingsChange — advantage checkbox', () => {
 describe('onSettingsChange — flat bonus input', () => {
   test('changing flat bonus input fires onSettingsChange', () => {
     const onSettingsChange = jest.fn();
-    act(() => {
-      root = createRoot(container);
-      root.render(
-        <InitiativeEntry
-          combatant={{ ...BASE, initiativeAdvantage: false, initiativeFlatBonus: 0 }}
-          onSet={jest.fn() as any}
-          onSettingsChange={onSettingsChange as any}
-        />
-      );
-    });
+    renderWithSettings({ ...BASE, initiativeAdvantage: false, initiativeFlatBonus: 0 }, onSettingsChange);
 
     const bonusInput = container.querySelector('input[aria-label="Flat initiative bonus"]') as HTMLInputElement;
     act(() => { setInputValue(bonusInput, '5'); });
-
     expect(onSettingsChange).toHaveBeenCalledWith(false, 5);
   });
 
   test('clicking clear button fires onSettingsChange(currentAdvantage, 0)', () => {
     const onSettingsChange = jest.fn();
-    act(() => {
-      root = createRoot(container);
-      root.render(
-        <InitiativeEntry
-          combatant={{ ...BASE, initiativeAdvantage: true, initiativeFlatBonus: 5 }}
-          onSet={jest.fn() as any}
-          onSettingsChange={onSettingsChange as any}
-        />
-      );
-    });
+    renderWithSettings({ ...BASE, initiativeAdvantage: true, initiativeFlatBonus: 5 }, onSettingsChange);
 
     const clearBtn = Array.from(container.querySelectorAll('button')).find(
       b => b.textContent?.trim() === '✕'
@@ -286,31 +269,19 @@ describe('onSettingsChange — flat bonus input', () => {
 
 describe('initiative display — advantage roll', () => {
   test('shows winning die with ↑ notation and dropped die when advantage used', () => {
-    const combatant: CombatantState = {
+    const text = renderWithRoll({
       ...BASE,
       initiativeRoll: { roll: 15, altRoll: 7, advantage: true, bonus: 3, total: 18, method: 'rolled' },
-    };
-    act(() => {
-      root = createRoot(container);
-      root.render(<InitiativeEntry combatant={combatant} onSet={jest.fn() as any} />);
     });
-
-    const text = container.textContent ?? '';
     expect(text).toContain('15↑');
     expect(text).toContain('7');
   });
 
   test('shows no dropped die when no advantage', () => {
-    const combatant: CombatantState = {
+    const text = renderWithRoll({
       ...BASE,
       initiativeRoll: { roll: 15, bonus: 3, total: 18, method: 'rolled' },
-    };
-    act(() => {
-      root = createRoot(container);
-      root.render(<InitiativeEntry combatant={combatant} onSet={jest.fn() as any} />);
     });
-
-    const text = container.textContent ?? '';
     expect(text).not.toContain('↑');
     expect(text).not.toContain('dropped');
   });
@@ -318,31 +289,18 @@ describe('initiative display — advantage roll', () => {
 
 describe('initiative display — flat bonus', () => {
   test('shows flat bonus as separate addend when non-zero', () => {
-    const combatant: CombatantState = {
+    const text = renderWithRoll({
       ...BASE,
       initiativeRoll: { roll: 10, bonus: 3, flatBonus: 5, total: 18, method: 'rolled' },
-    };
-    act(() => {
-      root = createRoot(container);
-      root.render(<InitiativeEntry combatant={combatant} onSet={jest.fn() as any} />);
     });
-
-    const text = container.textContent ?? '';
     expect(text).toContain('+5');
   });
 
   test('does not show flat bonus addend when zero or absent', () => {
-    const combatant: CombatantState = {
+    const text = renderWithRoll({
       ...BASE,
       initiativeRoll: { roll: 10, bonus: 3, total: 13, method: 'rolled' },
-    };
-    act(() => {
-      root = createRoot(container);
-      root.render(<InitiativeEntry combatant={combatant} onSet={jest.fn() as any} />);
     });
-
-    // The breakdown should show roll + bonus = total only
-    const text = container.textContent ?? '';
     expect(text).not.toContain('flatBonus');
   });
 });
