@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Gorak the Fearless",
+    "class": "Barbarian",
+    "race": "Half-Orc",
+    "alignment": "Chaotic Neutral"
+  },
+  {
+    "name": "Sister Celeste",
+    "class": "Cleric",
+    "race": "Human",
+    "alignment": "Lawful Good"
+  },
+  {
+    "name": "Zara Shadowstep",
+    "class": "Rogue",
+    "race": "Tiefling",
+    "alignment": "Chaotic Good"
+  },
+  {
+    "name": "Wyn Leafwhisper",
+    "class": "Druid",
+    "race": "Elf",
+    "alignment": "Neutral Good"
+  },
+  {
+    "name": "Durbak Stonefist",
+    "class": "Fighter",
+    "race": "Dwarf",
+    "alignment": "Lawful Neutral"
+  },
+  {
+    "name": "Pip Tumblewick",
+    "class": "Bard",
+    "race": "Halfling",
+    "alignment": "Chaotic Good"
+  }
+]

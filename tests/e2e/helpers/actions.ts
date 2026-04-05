@@ -1,6 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import { expect, Page } from "@playwright/test";
 
+export const STRONG_PASSWORD = "TestPassword123!";
+
 /**
  * Generate a unique email address for test purposes using UUID
  */
@@ -59,6 +61,10 @@ export async function registerUser(
   password: string,
 ): Promise<void> {
   await page.goto("/register");
+  await page.waitForFunction(() => {
+    const emailField = document.querySelector("#email") as HTMLInputElement | null;
+    return emailField !== null && !emailField.disabled;
+  }, undefined, { timeout: 15000 });
   await fillRegistrationForm(page, email, password);
   await submitRegistrationForm(page);
   await expect(page.locator('[data-testid="logout-button"]')).toBeVisible({
@@ -75,6 +81,10 @@ export async function loginUser(
   password: string,
 ): Promise<void> {
   await page.goto("/login");
+  await page.waitForFunction(() => {
+    const emailField = document.querySelector("#email") as HTMLInputElement | null;
+    return emailField !== null && !emailField.disabled;
+  }, undefined, { timeout: 15000 });
   await page.fill("#email", email);
   await page.fill("#password", password);
   await page.click('button[type="submit"]');
@@ -98,7 +108,7 @@ export async function loginUser(
  */
 export async function createCharacter(
   page: Page,
-  character: { name: string; class: string; race: string },
+  character: { name: string; class: string; race: string; alignment?: string },
 ): Promise<void> {
   await page.goto("/characters");
   await page.getByRole("button", { name: "Add New Character" }).click();
@@ -106,6 +116,9 @@ export async function createCharacter(
   await page.getByLabel("Character name").fill(character.name);
   await page.getByLabel("Character class").selectOption(character.class);
   await page.getByLabel("Character race").selectOption(character.race);
+  if (character.alignment) {
+    await page.getByLabel("Character alignment").selectOption(character.alignment);
+  }
 
   await page.getByRole("button", { name: /Save Character/i }).click();
 
@@ -117,12 +130,15 @@ export async function createCharacter(
  */
 export async function createParty(
   page: Page,
-  party: { name: string; memberCount: number },
+  party: { name: string; memberCount: number; description?: string },
 ): Promise<void> {
   await page.goto("/parties");
   await page.getByRole("button", { name: "Add New Party" }).click();
 
   await page.getByLabel("Party Name").fill(party.name);
+  if (party.description) {
+    await page.getByPlaceholder("Optional party description").fill(party.description);
+  }
 
   const memberCheckboxes = page.locator('input[type="checkbox"]');
   const availableCount = await memberCheckboxes.count();
@@ -133,6 +149,40 @@ export async function createParty(
 
   await page.getByRole("button", { name: /Save Party/i }).click();
   await page.getByText(party.name).waitFor({ timeout: 15000 });
+}
+
+/**
+ * Seed a character via the API (bypasses UI for faster, isolated test setup).
+ * Returns the created character's id.
+ */
+export async function seedCharacter(
+  page: Page,
+  data: { name: string },
+): Promise<string> {
+  const response = await page.request.post("/api/characters", {
+    data: {
+      name: data.name,
+      classes: [{ class: "Fighter", level: 1 }],
+      hp: 10,
+      maxHp: 10,
+      ac: 10,
+      abilityScores: {
+        strength: 10,
+        dexterity: 10,
+        constitution: 10,
+        intelligence: 10,
+        wisdom: 10,
+        charisma: 10,
+      },
+    },
+  });
+  if (!response.ok()) {
+    throw new Error(
+      `seedCharacter failed: HTTP ${response.status()} — ${await response.text()}`,
+    );
+  }
+  const character = await response.json();
+  return character.id as string;
 }
 
 /**
