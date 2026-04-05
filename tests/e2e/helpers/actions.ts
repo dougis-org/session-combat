@@ -77,10 +77,7 @@ export async function loginUser(
   password: string,
 ): Promise<void> {
   await page.goto("/login");
-  const emailField = page.locator("#email");
-  await expect(emailField).toBeVisible({ timeout: 15000 });
-  await expect(emailField).toBeEnabled({ timeout: 15000 });
-  await emailField.fill(email);
+  await page.locator("#email").fill(email);
   await page.locator("#password").fill(password);
   await page.click('button[type="submit"]');
 

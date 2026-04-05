@@ -28,10 +28,10 @@ test.describe("Character creation — data-driven", () => {
 });
 
 // ────────────────────────────────────────────────────────────
-// Character creation — validation
+// Character creation — validation and form interactions
 // ────────────────────────────────────────────────────────────
 
-test.describe("Character creation — validation", () => {
+test.describe("Character creation — validation and form interactions", () => {
   test.beforeEach(async ({ page }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
@@ -62,19 +62,6 @@ test.describe("Character creation — validation", () => {
     await expect(
       page.getByText("Current HP cannot be greater than Max HP"),
     ).toBeVisible();
-  });
-});
-
-// ────────────────────────────────────────────────────────────
-// Character form interactions
-// ────────────────────────────────────────────────────────────
-
-test.describe("Character form interactions", () => {
-  test.beforeEach(async ({ page }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
-    await page.goto("/characters");
-    await page.getByRole("button", { name: "Add New Character" }).click();
   });
 
   test('class dropdown is visible and accepts "Rogue"', async ({ page }) => {

@@ -24,10 +24,10 @@ test.describe("Party creation — data-driven", () => {
 });
 
 // ────────────────────────────────────────────────────────────
-// Party creation — validation
+// Party creation — validation and form state
 // ────────────────────────────────────────────────────────────
 
-test.describe("Party creation — validation", () => {
+test.describe("Party creation — validation and form state", () => {
   test.beforeEach(async ({ page }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
@@ -49,19 +49,6 @@ test.describe("Party creation — validation", () => {
       page.getByRole("button", { name: /Save Party/i }),
     ).toBeDisabled();
   });
-});
-
-// ────────────────────────────────────────────────────────────
-// Party creation — member state
-// ────────────────────────────────────────────────────────────
-
-test.describe("Party creation — member state", () => {
-  test.beforeEach(async ({ page }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
-    await page.goto("/parties");
-    await page.getByRole("button", { name: "Add New Party" }).click();
-  });
 
   test("shows no-characters message when user has no characters", async ({ page }) => {
     await expect(page.getByText("No characters available")).toBeVisible();
@@ -74,47 +61,37 @@ test.describe("Party creation — member state", () => {
 // ────────────────────────────────────────────────────────────
 
 test.describe("Party persistence and display", () => {
-  test('party card shows "Members: 1" after creating party with one seeded member', async ({
-    page,
-  }, testInfo) => {
+  let seedName = "";
+  let partyName = "";
+
+  test.beforeEach(async ({ page }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
-    const seedName = identity.name("Seed Fighter");
+    seedName = identity.name("Seed Fighter");
+    partyName = identity.name("Seeded Party");
     await seedCharacter(page, { name: seedName });
 
     await page.goto("/parties");
     await page.getByRole("button", { name: "Add New Party" }).click();
-    await page.getByLabel("Party Name").fill(identity.name("Member Party"));
+    await page.getByLabel("Party Name").fill(partyName);
     await page
       .locator("label")
       .filter({ hasText: seedName })
       .locator('input[type="checkbox"]')
       .check();
     await page.getByRole("button", { name: /Save Party/i }).click();
-    await page.getByText(identity.name("Member Party")).waitFor({ timeout: 15000 });
+    await page.getByText(partyName).waitFor({ timeout: 15000 });
+  });
 
+  test('party card shows "Members: 1" after creating party with one seeded member', async ({
+    page,
+  }) => {
     await expect(page.getByText("Members: 1")).toBeVisible();
   });
 
   test("party card shows seeded character name in member list", async ({
     page,
-  }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
-    const seedName = identity.name("Seed Fighter");
-    await seedCharacter(page, { name: seedName });
-
-    await page.goto("/parties");
-    await page.getByRole("button", { name: "Add New Party" }).click();
-    await page.getByLabel("Party Name").fill(identity.name("Display Party"));
-    await page
-      .locator("label")
-      .filter({ hasText: seedName })
-      .locator('input[type="checkbox"]')
-      .check();
-    await page.getByRole("button", { name: /Save Party/i }).click();
-    await page.getByText(identity.name("Display Party")).waitFor({ timeout: 15000 });
-
+  }) => {
     await expect(page.getByText(seedName)).toBeVisible();
   });
 });
