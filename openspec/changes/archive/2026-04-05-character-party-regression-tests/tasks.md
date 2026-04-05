@@ -68,17 +68,17 @@
 ## 8. PR and Merge
 
 - [x] 8.1 Commit all changes with a clear message referencing issue #51
-- [ ] 8.2 Push to remote: `git push`
-- [ ] 8.3 Open PR from `feat/character-party-regression-tests` to `main`; reference issues #51 and link follow-ups #117 (createParty helper) and #118 (gender field)
-- [ ] 8.4 Monitor CI — if any test fails: diagnose, fix, commit, push, repeat until all checks pass
-- [ ] 8.5 Address all review comments; commit fixes and push until no unresolved comments remain
-- [ ] 8.6 Enable auto-merge once all required CI checks are green and no blocking review comments remain
+- [x] 8.2 Push to remote: `git push`
+- [x] 8.3 Open PR from `feat/character-party-regression-tests` to `main`; reference issues #51 and link follow-ups #117 (createParty helper) and #118 (gender field)
+- [x] 8.4 Monitor CI — if any test fails: diagnose, fix, commit, push, repeat until all checks pass
+- [x] 8.5 Address all review comments; commit fixes and push until no unresolved comments remain
+- [x] 8.6 Enable auto-merge once all required CI checks are green and no blocking review comments remain
 
 ## 9. Post-Merge
 
-- [ ] 9.1 Checkout `main` and pull: `git checkout main && git pull --ff-only`
-- [ ] 9.2 Verify merged files appear on `main` (`tests/e2e/characters.spec.ts`, `tests/e2e/parties.spec.ts`, `tests/e2e/fixtures/`)
-- [ ] 9.3 Sync approved spec deltas to `openspec/specs/`:
+- [x] 9.1 Checkout `main` and pull: `git checkout main && git pull --ff-only`
+- [x] 9.2 Verify merged files appear on `main` (`tests/e2e/characters.spec.ts`, `tests/e2e/parties.spec.ts`, `tests/e2e/fixtures/`)
+- [x] 9.3 Sync approved spec deltas to `openspec/specs/`:
   - Copy `openspec/changes/character-party-regression-tests/specs/character-regression-tests/spec.md` → `openspec/specs/character-regression-tests/spec.md`
   - Copy `openspec/changes/character-party-regression-tests/specs/party-regression-tests/spec.md` → `openspec/specs/party-regression-tests/spec.md`
   - Copy `openspec/changes/character-party-regression-tests/specs/e2e-fixture-data/spec.md` → `openspec/specs/e2e-fixture-data/spec.md`
