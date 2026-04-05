@@ -67,7 +67,7 @@
 
 ## 8. PR and Merge
 
-- [ ] 8.1 Commit all changes with a clear message referencing issue #51
+- [x] 8.1 Commit all changes with a clear message referencing issue #51
 - [ ] 8.2 Push to remote: `git push`
 - [ ] 8.3 Open PR from `feat/character-party-regression-tests` to `main`; reference issues #51 and link follow-ups #117 (createParty helper) and #118 (gender field)
 - [ ] 8.4 Monitor CI — if any test fails: diagnose, fix, commit, push, repeat until all checks pass
