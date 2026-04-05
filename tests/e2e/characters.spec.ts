@@ -32,51 +32,33 @@ test.describe("Character creation — data-driven", () => {
 // ────────────────────────────────────────────────────────────
 
 test.describe("Character creation — validation", () => {
-  test("Save button is disabled when name field is cleared", async ({
-    page,
-  }, testInfo) => {
+  test.beforeEach(async ({ page }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
     await page.goto("/characters");
     await page.getByRole("button", { name: "Add New Character" }).click();
+  });
 
+  test("Save button is disabled when name field is cleared", async ({ page }) => {
     await page.getByLabel("Character name").clear();
-
     await expect(
       page.getByRole("button", { name: /Save Character/i }),
     ).toBeDisabled();
   });
 
-  test("Save button is disabled for whitespace-only name", async ({
-    page,
-  }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
-    await page.goto("/characters");
-    await page.getByRole("button", { name: "Add New Character" }).click();
-
+  test("Save button is disabled for whitespace-only name", async ({ page }) => {
     await page.getByLabel("Character name").fill("   ");
-
     // Whitespace-only name does not bypass the empty-name check
     await expect(
       page.getByRole("button", { name: /Save Character/i }),
     ).toBeDisabled();
   });
 
-  test('shows "Current HP cannot be greater than Max HP" when hp > maxHp', async ({
-    page,
-  }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
-    await page.goto("/characters");
-    await page.getByRole("button", { name: "Add New Character" }).click();
-
+  test('shows "Current HP cannot be greater than Max HP" when hp > maxHp', async ({ page }) => {
     await page.getByLabel("Character name").fill("Validation Test");
     await page.getByLabel("Current Hit Points").fill("20");
     await page.getByLabel("Maximum Hit Points").fill("10");
-
     await page.getByRole("button", { name: /Save Character/i }).click();
-
     await expect(
       page.getByText("Current HP cannot be greater than Max HP"),
     ).toBeVisible();
@@ -88,69 +70,41 @@ test.describe("Character creation — validation", () => {
 // ────────────────────────────────────────────────────────────
 
 test.describe("Character form interactions", () => {
-  test('class dropdown is visible and accepts "Rogue"', async ({
-    page,
-  }, testInfo) => {
+  test.beforeEach(async ({ page }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
     await page.goto("/characters");
     await page.getByRole("button", { name: "Add New Character" }).click();
+  });
 
+  test('class dropdown is visible and accepts "Rogue"', async ({ page }) => {
     const classSelect = page.getByLabel("Character class");
     await expect(classSelect).toBeVisible();
     await classSelect.selectOption("Rogue");
     await expect(classSelect).toHaveValue("Rogue");
   });
 
-  test('race dropdown is visible and accepts "Tiefling"', async ({
-    page,
-  }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
-    await page.goto("/characters");
-    await page.getByRole("button", { name: "Add New Character" }).click();
-
+  test('race dropdown is visible and accepts "Tiefling"', async ({ page }) => {
     const raceSelect = page.getByLabel("Character race");
     await expect(raceSelect).toBeVisible();
     await raceSelect.selectOption("Tiefling");
     await expect(raceSelect).toHaveValue("Tiefling");
   });
 
-  test('alignment dropdown is visible and accepts "Chaotic Good"', async ({
-    page,
-  }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
-    await page.goto("/characters");
-    await page.getByRole("button", { name: "Add New Character" }).click();
-
+  test('alignment dropdown is visible and accepts "Chaotic Good"', async ({ page }) => {
     const alignmentSelect = page.getByLabel("Character alignment");
     await expect(alignmentSelect).toBeVisible();
     await alignmentSelect.selectOption("Chaotic Good");
     await expect(alignmentSelect).toHaveValue("Chaotic Good");
   });
 
-  test("Add Class button appends a second class row", async ({
-    page,
-  }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
-    await page.goto("/characters");
-    await page.getByRole("button", { name: "Add New Character" }).click();
-
+  test("Add Class button appends a second class row", async ({ page }) => {
     await expect(page.getByLabel("Character class")).toHaveCount(1);
     await page.getByRole("button", { name: "Add Class" }).click();
     await expect(page.getByLabel("Character class")).toHaveCount(2);
   });
 
-  test("Remove button is disabled when only one class exists", async ({
-    page,
-  }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
-    await page.goto("/characters");
-    await page.getByRole("button", { name: "Add New Character" }).click();
-
+  test("Remove button is disabled when only one class exists", async ({ page }) => {
     await expect(page.getByRole("button", { name: "Remove" })).toBeDisabled();
   });
 });
@@ -191,7 +145,10 @@ test.describe("Character editing", () => {
       race: "Elf",
     });
 
-    await page.getByRole("button", { name: "Edit" }).first().click();
+    await page
+      .locator("div", { has: page.getByRole("heading", { name: originalName }) })
+      .getByRole("button", { name: "Edit" })
+      .click();
     const nameInput = page.getByLabel("Character name");
     await nameInput.clear();
     await nameInput.fill(newName);
@@ -226,7 +183,10 @@ test.describe("Character deletion", () => {
         response.request().method() === "DELETE" &&
         response.url().includes("/api/characters/"),
     );
-    await page.getByRole("button", { name: "Delete" }).first().click();
+    await page
+      .locator("div", { has: page.getByRole("heading", { name: charName }) })
+      .getByRole("button", { name: "Delete" })
+      .click();
     const response = await deleteResponse;
     expect(response.ok()).toBeTruthy();
 

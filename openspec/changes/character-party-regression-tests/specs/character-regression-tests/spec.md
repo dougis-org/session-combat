@@ -1,10 +1,10 @@
 ## ADDED Requirements
 
 ### Requirement: Character creation happy-path is data-driven across class/race/alignment variants
-`tests/e2e/characters.spec.ts` SHALL use `test.each(characterFixtures)` where `characterFixtures` is imported from `tests/e2e/fixtures/characters.json`. Each fixture entry SHALL produce a named test that creates a character and asserts it appears in the character list. The fixture file SHALL contain at least 3 distinct entries covering different class/race/alignment combinations.
+`tests/e2e/characters.spec.ts` SHALL iterate over `characterFixtures` (imported from `tests/e2e/fixtures/characters.json`) to generate one test per entry. Each fixture entry SHALL produce a named test that creates a character and asserts it appears in the character list. The fixture file SHALL contain at least 3 distinct entries covering different class/race/alignment combinations.
 
 #### Scenario: Each fixture variant produces a named passing test
-- **WHEN** `test.each(characterFixtures)` runs with a fixture entry `{ name, class, race, alignment }`
+- **WHEN** a fixture entry `{ name, class, race, alignment }` is iterated
 - **THEN** a character is created via the UI using those values
 - **AND** the character's name appears in the character list after saving
 - **AND** the test title includes the character name, class, and race for traceability
@@ -20,9 +20,9 @@
 - **WHEN** the character creation form is open and the name field is cleared
 - **THEN** the Save Character button is disabled and cannot be clicked to submit
 
-#### Scenario: Validation error shown on programmatic empty-name save attempt
-- **WHEN** the name field contains only whitespace and a save is attempted
-- **THEN** the UI displays "Character name is required"
+#### Scenario: Save button disabled with whitespace-only name
+- **WHEN** the name field contains only whitespace
+- **THEN** the Save Character button is disabled and cannot be clicked to submit
 
 ### Requirement: Character creation validates HP exceeds maxHP
 `tests/e2e/characters.spec.ts` SHALL include a test asserting that attempting to save a character with current HP greater than max HP shows a validation error.

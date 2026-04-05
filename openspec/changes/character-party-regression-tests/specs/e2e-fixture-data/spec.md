@@ -1,16 +1,16 @@
 ## ADDED Requirements
 
-### Requirement: E2E fixture files are external JSON consumed by test.each
-`tests/e2e/fixtures/characters.json` and `tests/e2e/fixtures/parties.json` SHALL exist as standalone JSON files importable via `import fixtures from './fixtures/characters.json'`. Each file SHALL be a JSON array of objects whose fields match the corresponding `test.each` usage in the spec file. Fixture files SHALL NOT contain test logic, assertions, or Playwright API calls.
+### Requirement: E2E fixture files are external JSON consumed by parameterized tests
+`tests/e2e/fixtures/characters.json` and `tests/e2e/fixtures/parties.json` SHALL exist as standalone JSON files importable via `import fixtures from './fixtures/characters.json'`. Each file SHALL be a JSON array of objects whose fields match the fixture usage in the corresponding spec file. Fixture files SHALL NOT contain test logic, assertions, or Playwright API calls.
 
 #### Scenario: characters.json is a valid JSON array
 - **WHEN** `tests/e2e/fixtures/characters.json` is parsed
-- **THEN** it is a non-empty JSON array where each element has at minimum `name`, `class`, `race`, and `alignment` string fields
+- **THEN** it is a non-empty JSON array where each element has `name`, `class`, `race`, and `alignment` string fields
 - **AND** all `name` values are unique across the array
 
 #### Scenario: parties.json is a valid JSON array
 - **WHEN** `tests/e2e/fixtures/parties.json` is parsed
-- **THEN** it is a non-empty JSON array where each element has at minimum `name` and `description` string fields
+- **THEN** it is a non-empty JSON array where each element has `name` and `description` string fields
 - **AND** all `name` values are unique across the array
 
 ### Requirement: Fixture data covers meaningful domain variations
@@ -26,7 +26,7 @@
 #### Scenario: party fixtures include an empty description entry
 - **WHEN** `parties.json` fixture entries are enumerated
 - **THEN** at least one entry has `"description": ""`
-- **AND** the corresponding test asserts the party saves and appears in the list without a description shown
+- **AND** the corresponding parameterized party test covers saving the party and showing it in the list
 
 ### Requirement: Fixture files can be extended without touching spec code
 Adding a new entry to `characters.json` or `parties.json` SHALL automatically generate a new parameterized test on the next run without modifying any `.ts` file.

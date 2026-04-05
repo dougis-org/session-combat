@@ -28,31 +28,22 @@ test.describe("Party creation — data-driven", () => {
 // ────────────────────────────────────────────────────────────
 
 test.describe("Party creation — validation", () => {
-  test("Save Party button is disabled when name field is empty", async ({
-    page,
-  }, testInfo) => {
+  test.beforeEach(async ({ page }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
     await page.goto("/parties");
     await page.getByRole("button", { name: "Add New Party" }).click();
+  });
 
+  test("Save Party button is disabled when name field is empty", async ({ page }) => {
     await page.getByLabel("Party Name").clear();
-
     await expect(
       page.getByRole("button", { name: /Save Party/i }),
     ).toBeDisabled();
   });
 
-  test("Save Party button is disabled for whitespace-only name", async ({
-    page,
-  }, testInfo) => {
-    const identity = createTestIdentity(testInfo);
-    await registerUser(page, identity.email, STRONG_PASSWORD);
-    await page.goto("/parties");
-    await page.getByRole("button", { name: "Add New Party" }).click();
-
+  test("Save Party button is disabled for whitespace-only name", async ({ page }) => {
     await page.getByLabel("Party Name").fill("   ");
-
     // Whitespace-only name does not bypass the empty-name check
     await expect(
       page.getByRole("button", { name: /Save Party/i }),
@@ -65,17 +56,15 @@ test.describe("Party creation — validation", () => {
 // ────────────────────────────────────────────────────────────
 
 test.describe("Party creation — member state", () => {
-  test("shows no-characters message when user has no characters", async ({
-    page,
-  }, testInfo) => {
+  test.beforeEach(async ({ page }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
     await page.goto("/parties");
     await page.getByRole("button", { name: "Add New Party" }).click();
+  });
 
-    await expect(
-      page.getByText("No characters available"),
-    ).toBeVisible();
+  test("shows no-characters message when user has no characters", async ({ page }) => {
+    await expect(page.getByText("No characters available")).toBeVisible();
     await expect(page.locator('input[type="checkbox"]')).toHaveCount(0);
   });
 });
@@ -159,7 +148,10 @@ test.describe("Party editing", () => {
 
     await createParty(page, { name: originalName, memberCount: 0 });
 
-    await page.getByRole("button", { name: "Edit" }).first().click();
+    await page
+      .locator("div", { has: page.getByRole("heading", { name: originalName }) })
+      .getByRole("button", { name: "Edit" })
+      .click();
     const nameInput = page.getByLabel("Party Name");
     await nameInput.clear();
     await nameInput.fill(newName);
@@ -182,17 +174,16 @@ test.describe("Party deletion", () => {
 
     await createParty(page, { name: partyName, memberCount: 0 });
 
-    // Navigate to the list to ensure the editor is closed
-    await page.goto("/parties");
-    await expect(page.getByText(partyName)).toBeVisible({ timeout: 15000 });
-
     page.once("dialog", (dialog) => void dialog.accept());
     const deleteResponse = page.waitForResponse(
       (response) =>
         response.request().method() === "DELETE" &&
         response.url().includes("/api/parties/"),
     );
-    await page.getByRole("button", { name: "Delete" }).first().click();
+    await page
+      .locator("div", { has: page.getByRole("heading", { name: partyName }) })
+      .getByRole("button", { name: "Delete" })
+      .click();
     const response = await deleteResponse;
     expect(response.ok()).toBeTruthy();
 

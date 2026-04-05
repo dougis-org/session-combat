@@ -61,10 +61,6 @@ export async function registerUser(
   password: string,
 ): Promise<void> {
   await page.goto("/register");
-  await page.waitForFunction(() => {
-    const emailField = document.querySelector("#email") as HTMLInputElement | null;
-    return emailField !== null && !emailField.disabled;
-  }, undefined, { timeout: 15000 });
   await fillRegistrationForm(page, email, password);
   await submitRegistrationForm(page);
   await expect(page.locator('[data-testid="logout-button"]')).toBeVisible({
@@ -81,12 +77,11 @@ export async function loginUser(
   password: string,
 ): Promise<void> {
   await page.goto("/login");
-  await page.waitForFunction(() => {
-    const emailField = document.querySelector("#email") as HTMLInputElement | null;
-    return emailField !== null && !emailField.disabled;
-  }, undefined, { timeout: 15000 });
-  await page.fill("#email", email);
-  await page.fill("#password", password);
+  const emailField = page.locator("#email");
+  await expect(emailField).toBeVisible({ timeout: 15000 });
+  await expect(emailField).toBeEnabled({ timeout: 15000 });
+  await emailField.fill(email);
+  await page.locator("#password").fill(password);
   await page.click('button[type="submit"]');
 
   await page.waitForURL(

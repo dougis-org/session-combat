@@ -1,10 +1,10 @@
 ## ADDED Requirements
 
 ### Requirement: Party creation happy-path is data-driven across name/description variants
-`tests/e2e/parties.spec.ts` SHALL use `test.each(partyFixtures)` where `partyFixtures` is imported from `tests/e2e/fixtures/parties.json`. Each fixture entry SHALL produce a named test that creates a party and asserts it appears in the party list. The fixture file SHALL contain at least 3 distinct entries covering different name and description combinations (including an empty description).
+`tests/e2e/parties.spec.ts` SHALL iterate over `partyFixtures` (imported from `tests/e2e/fixtures/parties.json`) to generate one test per entry. Each fixture entry SHALL produce a named test that creates a party and asserts it appears in the party list. The fixture file SHALL contain at least 3 distinct entries covering different name and description combinations (including an empty description).
 
 #### Scenario: Each fixture variant produces a named passing test
-- **WHEN** `test.each(partyFixtures)` runs with a fixture entry `{ name, description }`
+- **WHEN** a fixture entry `{ name, description }` is iterated
 - **THEN** a party is created via the UI using those values
 - **AND** the party's name appears in the party list after saving
 - **AND** the test title includes the party name
@@ -20,9 +20,9 @@
 - **WHEN** the party creation form is open and the name field is empty or cleared
 - **THEN** the Save Party button is disabled and cannot be clicked to submit
 
-#### Scenario: Validation error shown when name is blank on save
-- **WHEN** the party name contains only whitespace and a save is attempted
-- **THEN** the UI displays "Party name is required"
+#### Scenario: Save button disabled with whitespace-only party name
+- **WHEN** the party name contains only whitespace
+- **THEN** the Save Party button remains disabled and cannot be clicked to submit
 
 ### Requirement: Party form shows no-members message when user has no characters
 `tests/e2e/parties.spec.ts` SHALL include a test verifying that the party form displays a "No characters available" message when the authenticated user has zero characters.
