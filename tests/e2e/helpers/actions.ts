@@ -108,7 +108,7 @@ export async function createCharacter(
   await page.getByLabel("Character name").fill(character.name);
   await page.getByLabel("Character class").selectOption(character.class);
   await page.getByLabel("Character race").selectOption(character.race);
-  if (character.alignment) {
+  if (character.alignment !== undefined) {
     await page.getByLabel("Character alignment").selectOption(character.alignment);
   }
 
@@ -128,7 +128,7 @@ export async function createParty(
   await page.getByRole("button", { name: "Add New Party" }).click();
 
   await page.getByLabel("Party Name").fill(party.name);
-  if (party.description) {
+  if (party.description !== undefined) {
     await page.getByPlaceholder("Optional party description").fill(party.description);
   }
 
@@ -152,21 +152,7 @@ export async function seedCharacter(
   data: { name: string },
 ): Promise<string> {
   const response = await page.request.post("/api/characters", {
-    data: {
-      name: data.name,
-      classes: [{ class: "Fighter", level: 1 }],
-      hp: 10,
-      maxHp: 10,
-      ac: 10,
-      abilityScores: {
-        strength: 10,
-        dexterity: 10,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 10,
-        charisma: 10,
-      },
-    },
+    data: { name: data.name },
   });
   if (!response.ok()) {
     throw new Error(
