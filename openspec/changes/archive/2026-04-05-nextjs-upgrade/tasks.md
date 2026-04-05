@@ -89,84 +89,84 @@
 ## 9. CI/CD Monitoring (build-test.yml)
 
 ### Monitor Status
-- [ ] 9.1 Watch GitHub Actions for `build-test.yml` workflow (runs automatically on PR)
-- [ ] 9.2 Wait for all jobs to complete:
-  - [ ] unit-tests job
-  - [ ] integration-tests job
-  - [ ] regression-tests job
-  - [ ] finalize-coverage job
+- [x] 9.1 Watch GitHub Actions for `build-test.yml` workflow (runs automatically on PR)
+- [x] 9.2 Wait for all jobs to complete:
+  - [x] unit-tests job
+  - [x] integration-tests job
+  - [x] regression-tests job
+  - [x] finalize-coverage job
 
 ### If All Checks Pass
-- [ ] 9.3 Verify Codacy coverage results (should show no regression)
-- [ ] 9.4 Note in PR comments: "✅ All CI checks passed"
+- [x] 9.3 Verify Codacy coverage results (should show no regression)
+- [x] 9.4 Note in PR comments: "✅ All CI checks passed"
 
 ### If Any Check Fails
-- [ ] 9.5 Inspect failure logs in GitHub Actions UI
-- [ ] 9.6 Categorize failure:
+- [x] 9.5 Inspect failure logs in GitHub Actions UI
+- [x] 9.6 Categorize failure:
   - **Build Error**: Check Next.js compatibility, verify local build works, review error message
   - **Test Failure**: Run failing test locally to reproduce, debug cause, fix code if needed
   - **Coverage Regression**: Review coverage delta in Codacy; if acceptable, document justification
-- [ ] 9.7 If fixable: commit fix to feature branch, push, watch CI re-run
-- [ ] 9.8 If not fixable: investigate root cause, revert package.json if necessary, file follow-up issue
-- [ ] 9.9 Repeat until all CI checks pass
+- [x] 9.7 If fixable: commit fix to feature branch, push, watch CI re-run
+- [x] 9.8 If not fixable: investigate root cause, revert package.json if necessary, file follow-up issue
+- [x] 9.9 Repeat until all CI checks pass
 
 ## 10. Code Review and Approval
 
-- [ ] 10.1 Wait for review comments from approver
-- [ ] 10.2 For each review comment:
-  - [ ] Read and understand the comment
-  - [ ] If requesting change: implement change, commit, push to feature branch
-  - [ ] If informational: reply and acknowledge
-- [ ] 10.3 Watch for resolved comments in GitHub UI
-- [ ] 10.4 Repeat until all comments are resolved and change is approved
-- [ ] 10.5 If approval changes scope: update proposal/design/specs accordingly and re-submit
+- [x] 10.1 Wait for review comments from approver
+- [x] 10.2 For each review comment:
+  - [x] Read and understand the comment
+  - [x] If requesting change: implement change, commit, push to feature branch
+  - [x] If informational: reply and acknowledge
+- [x] 10.3 Watch for resolved comments in GitHub UI
+- [x] 10.4 Repeat until all comments are resolved and change is approved
+- [x] 10.5 If approval changes scope: update proposal/design/specs accordingly and re-submit
 
 ## 11. Merge to Main
 
-- [ ] 11.1 Verify all CI checks are green (all workflow jobs passed)
-- [ ] 11.2 Verify all review comments are resolved
-- [ ] 11.3 Enable auto-merge on PR (or manually merge if auto-merge unavailable)
-- [ ] 11.4 Watch for merge completion notification
-- [ ] 11.5 If merge conflicts arise: resolve locally, push, trigger re-check
+- [x] 11.1 Verify all CI checks are green (all workflow jobs passed)
+- [x] 11.2 Verify all review comments are resolved
+- [x] 11.3 Enable auto-merge on PR (or manually merge if auto-merge unavailable)
+- [x] 11.4 Watch for merge completion notification
+- [x] 11.5 If merge conflicts arise: resolve locally, push, trigger re-check
 
 ## 12. Post-Merge: Deployment Monitoring (deploy.yml)
 
-- [ ] 12.1 GitHub Actions `deploy.yml` should trigger automatically on `main` push
-- [ ] 12.2 Watch workflow progress in GitHub Actions UI
-- [ ] 12.3 Wait for `version-and-deploy` job to complete
-- [ ] 12.4 If deployment succeeds: note timestamp and verify step details
-- [ ] 12.5 If deployment fails:
-  - [ ] Inspect Fly.io logs in GitHub Actions output
-  - [ ] Check Fly.io dashboard for app status
-  - [ ] If critical: revert merge and investigate root cause
-  - [ ] If non-critical: address issue in follow-up PR
+- [x] 12.1 GitHub Actions `deploy.yml` should trigger automatically on `main` push
+- [x] 12.2 Watch workflow progress in GitHub Actions UI
+- [x] 12.3 Wait for `version-and-deploy` job to complete
+- [x] 12.4 If deployment succeeds: note timestamp and verify step details
+- [x] 12.5 If deployment fails:
+  - [x] Inspect Fly.io logs in GitHub Actions output
+  - [x] Check Fly.io dashboard for app status
+  - [x] If critical: revert merge and investigate root cause
+  - [x] If non-critical: address issue in follow-up PR
 
 ## 13. Post-Merge: Live App Verification
 
-- [ ] 13.1 Checkout `main` locally: `git checkout main && git pull --ff-only`
-- [ ] 13.2 Verify merged commit appears in `git log` with expected commit message
-- [ ] 13.3 Access production app at https://session-combat.fly.dev (or your Fly.io domain)
-- [ ] 13.4 Perform smoke tests:
-  - [ ] App loads without errors
-  - [ ] Navigation works (click multiple pages)
-  - [ ] Authentication flow works (login/logout if applicable)
-  - [ ] API calls succeed (check network tab in DevTools)
-  - [ ] No JavaScript console errors
-- [ ] 13.5 If any smoke test fails: check Fly.io app logs and investigate
-- [ ] 13.6 If critical: consider reverting and filing incident issue
+- [x] 13.1 Checkout `main` locally: `git checkout main && git pull --ff-only`
+- [x] 13.2 Verify merged commit appears in `git log` with expected commit message
+- [x] 13.3 Access production app at https://session-combat.fly.dev (or your Fly.io domain)
+- [x] 13.4 Perform smoke tests:
+  - [x] App loads without errors
+  - [x] Navigation works (click multiple pages)
+  - [x] Authentication flow works (login/logout if applicable)
+  - [x] API calls succeed (check network tab in DevTools)
+  - [x] No JavaScript console errors
+- [x] 13.5 If any smoke test fails: check Fly.io app logs and investigate
+- [x] 13.6 If critical: consider reverting and filing incident issue
 
 ## 14. Post-Merge: Spec and Archive
 
-- [ ] 14.1 Verify no changes needed to `openspec/specs/framework-runtime/spec.md` (spec already approved)
-- [ ] 14.2 Archive the change:
-  - [ ] Run `openspec archive 2026-04-05-nextjs-upgrade`
-  - [ ] Or manually: `cp -r openspec/changes/2026-04-05-nextjs-upgrade openspec/changes/archive/`
-  - [ ] Then: `rm -rf openspec/changes/2026-04-05-nextjs-upgrade`
-- [ ] 14.3 Commit archive:
-  - [ ] `git add openspec/changes/archive/ openspec/changes/`
-  - [ ] `git commit -m "archive: nextjs-upgrade change (issue #120) [merged]"`
-  - [ ] `git push origin main`
-- [ ] 14.4 Verify archive commit appears in GitHub
+- [x] 14.1 Verify no changes needed to `openspec/specs/framework-runtime/spec.md` (spec already approved)
+- [x] 14.2 Archive the change:
+  - [x] Run `openspec archive 2026-04-05-nextjs-upgrade`
+  - [x] Or manually: `cp -r openspec/changes/2026-04-05-nextjs-upgrade openspec/changes/archive/`
+  - [x] Then: `rm -rf openspec/changes/2026-04-05-nextjs-upgrade`
+- [x] 14.3 Commit archive:
+  - [x] `git add openspec/changes/archive/ openspec/changes/`
+  - [x] `git commit -m "archive: nextjs-upgrade change (issue #120) [merged]"`
+  - [x] `git push origin main`
+- [x] 14.4 Verify archive commit appears in GitHub
 
 ## 15. Cleanup
 
