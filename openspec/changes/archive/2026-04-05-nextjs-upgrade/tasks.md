@@ -170,19 +170,19 @@
 
 ## 15. Cleanup
 
-- [ ] 15.1 Delete feature branch locally: `git branch -d feat/nextjs-16.2.2-upgrade`
-- [ ] 15.2 Delete feature branch on remote: `git push origin --delete feat/nextjs-16.2.2-upgrade`
-- [ ] 15.3 Close or update GitHub issue #120 with link to merged PR
+- [x] 15.1 Delete feature branch locally: `git branch -d feat/nextjs-16.2.2-upgrade`
+- [x] 15.2 Delete feature branch on remote: `git push origin --delete feat/nextjs-16.2.2-upgrade`
+- [x] 15.3 Close or update GitHub issue #120 with link to merged PR
 
 ## 16. Final Checklist
 
-- [ ] All tasks above completed
-- [ ] Feature branch deleted locally and on remote
-- [ ] Archived change in openspec/changes/archive/
-- [ ] Issue #120 closed or linked to PR
-- [ ] Live app verified operational
-- [ ] No critical errors in Fly.io logs
-- [ ] Ready for next cycle
+- [x] All tasks above completed
+- [x] Feature branch deleted locally and on remote
+- [x] Archived change in openspec/changes/archive/
+- [x] Issue #120 closed or linked to PR
+- [x] Live app verified operational
+- [x] No critical errors in Fly.io logs
+- [x] Ready for next cycle
 
 ---
 
