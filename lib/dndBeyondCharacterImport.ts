@@ -547,30 +547,18 @@ function normalizeRace(
     return caseInsensitiveMatch;
   }
 
-  // 3. Substring fallback to base races
-  // Note: Order matters; more specific names (like Half-Elf) must come before base names (like Elf)
-  const baseRaces: DnDRace[] = [
-    "Dragonborn",
-    "Half-Elf",
-    "Half-Orc",
-    "Tiefling",
-    "Dwarf",
-    "Elf",
-    "Gnome",
-    "Halfling",
-    "Human",
-    "Orc",
-    "Goliath",
-    "Aasimar",
-  ];
-
-  const substringMatch = baseRaces.find((base) =>
-    lowerRaceName.includes(base.toLowerCase()),
-  );
+  // 3. Substring fallback to supported races
+  // We sort by length descending to ensure more specific names (like "Half-Elf")
+  // are matched before base names (like "Elf").
+  const substringMatch = [...VALID_RACES]
+    .sort((a, b) => b.length - a.length)
+    .find((race) => new RegExp(`\\b${race}\\b`, "i").test(trimmedRaceName));
 
   if (substringMatch) {
     if (warnings) {
-      warnings.push(`Race "${raceName}" was normalized to "${substringMatch}".`);
+      warnings.push(
+        `Race "${trimmedRaceName}" was normalized to "${substringMatch}".`,
+      );
     }
     return substringMatch;
   }

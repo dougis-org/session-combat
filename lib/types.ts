@@ -1,6 +1,6 @@
 // Data types for the combat tracker
 
-// D&D 5e Classes - valid classes from https://www.dnd5eapi.co/api/2014/classes
+// D&D 5e Classes - includes official classes and common additions (e.g., Blood Hunter)
 export type DnDClass =
   | "Artificer"
   | "Barbarian"
@@ -41,7 +41,7 @@ export function isValidClass(className: unknown): className is DnDClass {
   );
 }
 
-// D&D 5e Races - valid races from https://www.dnd5eapi.co/api/2014/races
+// D&D 5e Races - includes official core races, common subraces, and non-SRD races
 export type DnDRace =
   | "Aasimar"
   | "Dragonborn"

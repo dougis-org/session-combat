@@ -16,7 +16,7 @@
 
 - Implementing racial traits, class features, or any mechanical logic beyond basic identity.
 - Redesigning the character storage schema or UI.
-- Supporting homebrew or non-official content.
+- Supporting arbitrary homebrew or non-official content beyond explicitly enumerated exceptions (for example, Blood Hunter if retained in `DnDClass` / `VALID_CLASSES`).
 
 ## Decisions
 
