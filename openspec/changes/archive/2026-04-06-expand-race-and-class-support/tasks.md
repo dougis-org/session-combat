@@ -50,10 +50,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Run the required pre-PR self-review from `skills/openspec-apply-change/SKILL.md` before committing
 - [x] Commit all changes to the working branch and push to remote
 - [x] Open PR from working branch to `main`
-- [ ] **Monitor PR comments** — address, validate, and push until resolved
+- [x] **Monitor PR comments** — address, validate, and push until resolved
 - [x] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — diagnose and fix any failures until all pass
-- [ ] Wait for the PR to merge
+- [x] **Monitor CI checks** — diagnose and fix any failures until all pass
+- [x] Wait for the PR to merge
 
 Ownership metadata:
 - Implementer: Gemini CLI
@@ -62,10 +62,10 @@ Ownership metadata:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/dnd-beyond-character-import/spec.md`
-- [ ] Archive the change: move `openspec/changes/expand-race-and-class-support/` to `openspec/archive/2026-04-06-expand-race-and-class-support/`
-- [ ] Commit and push the archive to the default branch
-- [ ] Prune merged local feature branches
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/dnd-beyond-character-import/spec.md`
+- [x] Archive the change: move `openspec/changes/expand-race-and-class-support/` to `openspec/archive/2026-04-06-expand-race-and-class-support/`
+- [x] Commit and push the archive to the default branch
+- [x] Prune merged local feature branches
