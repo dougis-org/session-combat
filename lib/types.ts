@@ -2,8 +2,10 @@
 
 // D&D 5e Classes - valid classes from https://www.dnd5eapi.co/api/2014/classes
 export type DnDClass =
+  | "Artificer"
   | "Barbarian"
   | "Bard"
+  | "Blood Hunter"
   | "Cleric"
   | "Druid"
   | "Fighter"
@@ -16,8 +18,10 @@ export type DnDClass =
   | "Wizard";
 
 export const VALID_CLASSES: DnDClass[] = [
+  "Artificer",
   "Barbarian",
   "Bard",
+  "Blood Hunter",
   "Cleric",
   "Druid",
   "Fighter",
@@ -39,26 +43,50 @@ export function isValidClass(className: unknown): className is DnDClass {
 
 // D&D 5e Races - valid races from https://www.dnd5eapi.co/api/2014/races
 export type DnDRace =
+  | "Aasimar"
   | "Dragonborn"
+  | "Drow"
   | "Dwarf"
   | "Elf"
+  | "Forest Gnome"
   | "Gnome"
+  | "Goliath"
   | "Half-Elf"
   | "Half-Orc"
   | "Halfling"
+  | "High Elf"
+  | "Hill Dwarf"
   | "Human"
-  | "Tiefling";
+  | "Lightfoot Halfling"
+  | "Mountain Dwarf"
+  | "Orc"
+  | "Rock Gnome"
+  | "Stout Halfling"
+  | "Tiefling"
+  | "Wood Elf";
 
 export const VALID_RACES: DnDRace[] = [
+  "Aasimar",
   "Dragonborn",
+  "Drow",
   "Dwarf",
   "Elf",
+  "Forest Gnome",
   "Gnome",
+  "Goliath",
   "Half-Elf",
   "Half-Orc",
   "Halfling",
+  "High Elf",
+  "Hill Dwarf",
   "Human",
+  "Lightfoot Halfling",
+  "Mountain Dwarf",
+  "Orc",
+  "Rock Gnome",
+  "Stout Halfling",
   "Tiefling",
+  "Wood Elf",
 ];
 
 export function isValidRace(raceName: unknown): raceName is DnDRace {

@@ -328,7 +328,7 @@ function normalizeCharacterDetails(
     hp: normalizeCurrentHp(data, maxHp),
     languages: normalizeLanguages(modifiers),
     maxHp,
-    race: normalizeRace(data.race?.fullName),
+    race: normalizeRace(data.race?.fullName, warnings),
     reactions: categorizedAbilities.reactions,
     savingThrows: normalizeSavingThrows(
       abilityScores,
@@ -524,16 +524,58 @@ function resolveAbilityScore(
 
 function normalizeRace(
   raceName: string | null | undefined,
+  warnings?: string[],
 ): DnDRace | undefined {
   if (!raceName) {
     return undefined;
   }
 
-  if (!VALID_RACES.includes(raceName as DnDRace)) {
-    return undefined;
+  const trimmedRaceName = raceName.trim();
+
+  // 1. Exact match
+  if (VALID_RACES.includes(trimmedRaceName as DnDRace)) {
+    return trimmedRaceName as DnDRace;
   }
 
-  return raceName as DnDRace;
+  // 2. Case-insensitive match
+  const lowerRaceName = trimmedRaceName.toLowerCase();
+  const caseInsensitiveMatch = VALID_RACES.find(
+    (race) => race.toLowerCase() === lowerRaceName,
+  );
+
+  if (caseInsensitiveMatch) {
+    return caseInsensitiveMatch;
+  }
+
+  // 3. Substring fallback to base races
+  // Note: Order matters; more specific names (like Half-Elf) must come before base names (like Elf)
+  const baseRaces: DnDRace[] = [
+    "Dragonborn",
+    "Half-Elf",
+    "Half-Orc",
+    "Tiefling",
+    "Dwarf",
+    "Elf",
+    "Gnome",
+    "Halfling",
+    "Human",
+    "Orc",
+    "Goliath",
+    "Aasimar",
+  ];
+
+  const substringMatch = baseRaces.find((base) =>
+    lowerRaceName.includes(base.toLowerCase()),
+  );
+
+  if (substringMatch) {
+    if (warnings) {
+      warnings.push(`Race "${raceName}" was normalized to "${substringMatch}".`);
+    }
+    return substringMatch;
+  }
+
+  return undefined;
 }
 
 function normalizeAlignment(
