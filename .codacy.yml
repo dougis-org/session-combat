@@ -1,0 +1,19 @@
+exclude:
+  - .agent/**
+  - .claude**
+  - .codegraph/**
+  - .codex/**
+  - .gemini/**
+  - .github/chatmodes/**
+  - .github/prompts/**
+  - .github/skills/**
+  - .idea/**
+  - .next/**
+  - coverage/**
+  - coverage-e2e/**
+  - eslint.config.mjs
+  - jest.config.js
+  - jest.*.config.js
+  - /openspec/**
+  - /playwright.config.js
+  - test-results.json
