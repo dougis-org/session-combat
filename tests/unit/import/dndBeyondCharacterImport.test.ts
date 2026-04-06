@@ -3,6 +3,8 @@ import {
   parseDndBeyondCharacterUrl,
 } from "@/lib/dndBeyondCharacterImport";
 import {
+  aasimarArtificerCharacterResponse,
+  mountainDwarfCharacterResponse,
   sampleDndBeyondCharacterResponse,
   unsupportedDndBeyondCharacterResponse,
 } from "@/tests/fixtures/dndBeyondCharacter";
@@ -106,7 +108,7 @@ describe("dndBeyondCharacterImport", () => {
     expect(result.character.alignment).toBeUndefined();
     expect(result.warnings).toEqual(
       expect.arrayContaining([
-        'Race "Aasimar" is not supported and was omitted.',
+        'Race "Warforged" is not supported and was omitted.',
         "Alignment was not supported and was omitted.",
       ]),
     );
@@ -174,7 +176,7 @@ describe("dndBeyondCharacterImport", () => {
           {
             level: 3,
             definition: {
-              name: "Artificer",
+              name: "Commoner",
             },
           },
         ],
@@ -212,7 +214,7 @@ describe("dndBeyondCharacterImport", () => {
         {
           level: 1,
           definition: {
-            name: "Artificer",
+            name: "Commoner",
           },
         },
         {
@@ -229,7 +231,7 @@ describe("dndBeyondCharacterImport", () => {
       { class: "Warlock", level: 1 },
     ]);
     expect(result.warnings).toContain(
-      'Class "Artificer" is not supported and was omitted.',
+      'Class "Commoner" is not supported and was omitted.',
     );
   });
 
@@ -631,5 +633,50 @@ describe("dndBeyondCharacterImport", () => {
     });
 
     expect(result.character.maxHp).toBe(50);
+  });
+
+  test("normalizes Mountain Dwarf successfully", () => {
+    const result = normalizeDndBeyondCharacter(
+      mountainDwarfCharacterResponse.data,
+    );
+
+    expect(result.character.race).toBe("Mountain Dwarf");
+    expect(result.warnings).toEqual([]);
+  });
+
+  test("normalizes Aasimar and Artificer successfully", () => {
+    const result = normalizeDndBeyondCharacter(
+      aasimarArtificerCharacterResponse.data,
+    );
+
+    expect(result.character.race).toBe("Aasimar");
+    expect(result.character.classes).toEqual([{ class: "Artificer", level: 3 }]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  test("normalizes race names with mixed casing and whitespace", () => {
+    const result = normalizeDndBeyondCharacter({
+      ...sampleDndBeyondCharacterResponse.data,
+      race: {
+        fullName: "  mountain DWARF  ",
+      },
+    });
+
+    expect(result.character.race).toBe("Mountain Dwarf");
+    expect(result.warnings).toEqual([]);
+  });
+
+  test("falls back to base race via substring matching", () => {
+    const result = normalizeDndBeyondCharacter({
+      ...sampleDndBeyondCharacterResponse.data,
+      race: {
+        fullName: "Custom Elf Variation",
+      },
+    });
+
+    expect(result.character.race).toBe("Elf");
+    expect(result.warnings).toContain(
+      'Race "Custom Elf Variation" was normalized to "Elf".',
+    );
   });
 });

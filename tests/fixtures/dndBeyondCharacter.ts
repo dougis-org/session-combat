@@ -283,7 +283,37 @@ export const unsupportedDndBeyondCharacterResponse = {
     alignmentId: 999,
     race: {
       ...sampleDndBeyondCharacterResponse.data.race,
+      fullName: "Warforged",
+    },
+  },
+};
+
+export const mountainDwarfCharacterResponse = {
+  ...sampleDndBeyondCharacterResponse,
+  data: {
+    ...sampleDndBeyondCharacterResponse.data,
+    race: {
+      ...sampleDndBeyondCharacterResponse.data.race,
+      fullName: "Mountain Dwarf",
+    },
+  },
+};
+
+export const aasimarArtificerCharacterResponse = {
+  ...sampleDndBeyondCharacterResponse,
+  data: {
+    ...sampleDndBeyondCharacterResponse.data,
+    race: {
+      ...sampleDndBeyondCharacterResponse.data.race,
       fullName: "Aasimar",
     },
+    classes: [
+      {
+        level: 3,
+        definition: {
+          name: "Artificer",
+        },
+      },
+    ],
   },
 };
