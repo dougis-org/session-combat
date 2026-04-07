@@ -1,6 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import { expect, Page } from "@playwright/test";
 
+export const STRONG_PASSWORD = "TestPassword123!";
+
 /**
  * Generate a unique email address for test purposes using UUID
  */
@@ -98,7 +100,12 @@ export async function loginUser(
  */
 export async function createCharacter(
   page: Page,
-  character: { name: string; class: string; race: string },
+  character: {
+    name: string;
+    class: string;
+    race: string;
+    alignment?: string;
+  },
 ): Promise<void> {
   await page.goto("/characters");
   await page.getByRole("button", { name: "Add New Character" }).click();
@@ -106,6 +113,11 @@ export async function createCharacter(
   await page.getByLabel("Character name").fill(character.name);
   await page.getByLabel("Character class").selectOption(character.class);
   await page.getByLabel("Character race").selectOption(character.race);
+  if (character.alignment) {
+    await page
+      .getByLabel("Character alignment")
+      .selectOption(character.alignment);
+  }
 
   await page.getByRole("button", { name: /Save Character/i }).click();
 
@@ -117,12 +129,15 @@ export async function createCharacter(
  */
 export async function createParty(
   page: Page,
-  party: { name: string; memberCount: number },
+  party: { name: string; description?: string; memberCount: number },
 ): Promise<void> {
   await page.goto("/parties");
   await page.getByRole("button", { name: "Add New Party" }).click();
 
   await page.getByLabel("Party Name").fill(party.name);
+  if (party.description) {
+    await page.getByLabel("Description").fill(party.description);
+  }
 
   const memberCheckboxes = page.locator('input[type="checkbox"]');
   const availableCount = await memberCheckboxes.count();
@@ -133,6 +148,36 @@ export async function createParty(
 
   await page.getByRole("button", { name: /Save Party/i }).click();
   await page.getByText(party.name).waitFor({ timeout: 15000 });
+}
+
+/**
+ * Seed a character directly through the API for tests that need an existing
+ * character without paying the full UI setup cost.
+ */
+export async function seedCharacter(
+  page: Page,
+  character: {
+    name: string;
+    class?: string;
+    race?: string;
+    alignment?: string;
+  },
+): Promise<string> {
+  const response = await page.request.post("/api/characters", {
+    data: {
+      name: character.name,
+      classes: [{ class: character.class ?? "Fighter", level: 1 }],
+      race: character.race ?? "Human",
+      alignment: character.alignment,
+      hp: 10,
+      maxHp: 10,
+      ac: 10,
+    },
+  });
+
+  expect(response.ok()).toBeTruthy();
+  const created = await response.json();
+  return created.id as string;
 }
 
 /**
