@@ -91,8 +91,8 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Wait 120 seconds for agentic reviewers to post comments
 - [x] **Monitor PR comments** — address each comment, commit fixes, run remote push validation, push; repeat until no unresolved comments remain
 - [x] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — diagnose and fix failures, commit, run remote push validation, push; repeat until all checks pass
-- [ ] Wait for PR to merge — never force-merge; if a human force-merges, continue to Post-Merge
+- [x] **Monitor CI checks** — diagnose and fix failures, commit, run remote push validation, push; repeat until all checks pass
+- [x] Wait for PR to merge — never force-merge; if a human force-merges, continue to Post-Merge
 
 Ownership metadata:
 
@@ -108,12 +108,12 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No documentation updates required for this change
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/add-character-gender-field/` to `openspec/changes/archive/YYYY-MM-DD-add-character-gender-field/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-add-character-gender-field/` exists and `openspec/changes/add-character-gender-field/` is gone
-- [ ] Commit and push the archive to `main` in one commit
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/add-character-gender-field`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No documentation updates required for this change
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive the change: move `openspec/changes/add-character-gender-field/` to `openspec/changes/archive/YYYY-MM-DD-add-character-gender-field/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-add-character-gender-field/` exists and `openspec/changes/add-character-gender-field/` is gone
+- [x] Commit and push the archive to `main` in one commit
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/add-character-gender-field`
