@@ -129,20 +129,6 @@ export async function createCharacter(
 }
 
 /**
- * Quickly seed a character with only a name (uses default class/race)
- */
-export async function seedCharacter(
-  page: Page,
-  character: { name: string },
-): Promise<void> {
-  await createCharacter(page, {
-    name: character.name,
-    class: "Fighter",
-    race: "Human",
-  });
-}
-
-/**
  * Create a party with given details
  */
 export async function createParty(
