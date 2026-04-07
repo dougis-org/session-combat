@@ -16,7 +16,7 @@ function normalizeStoredEntityId<T extends { id?: string; _id?: string }>(
 ): T & { id: string | undefined } {
   return {
     ...entity,
-    // Preserve the app-level UUID for reads; only expose _id when no stored id exists.
+    // Preserve the app-level UUID for reads; fall back to `_id` only when deriving the returned `id` value.
     id: entity.id || entity._id?.toString(),
   };
 }

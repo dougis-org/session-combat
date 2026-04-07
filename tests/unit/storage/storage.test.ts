@@ -2,6 +2,7 @@ import { describe, test, expect, jest, beforeEach } from "@jest/globals";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
 import { GLOBAL_USER_ID } from "@/lib/constants";
+import type { Encounter, MonsterTemplate } from "@/lib/types";
 
 jest.mock("@/lib/db", () => ({
   getDatabase: jest.fn(),
@@ -106,14 +107,22 @@ describe("storage entity loader normalization", () => {
   });
 
   test("loadEncounters preserves stored id when _id is also present", async () => {
+    const encounter: Encounter = {
+      id: "enc-uuid",
+      _id: "mongo-id",
+      name: "Encounter",
+      userId: "user1",
+      description: "test encounter",
+      monsters: [],
+      createdAt: new Date("2026-04-07T00:00:00Z"),
+      updatedAt: new Date("2026-04-07T00:00:00Z"),
+    };
+
     encountersMock.toArray.mockResolvedValue(
       [
         {
-          id: "enc-uuid",
+          ...encounter,
           _id: { toString: () => "mongo-id" },
-          name: "Encounter",
-          userId: "user1",
-          combatants: [],
         },
       ] as never,
     );
@@ -143,27 +152,36 @@ describe("storage entity loader normalization", () => {
   });
 
   test("loadMonsterTemplates preserves stored id when _id is also present", async () => {
+    const template: MonsterTemplate = {
+      id: "template-uuid",
+      _id: "mongo-id",
+      name: "Template",
+      userId: "user1",
+      size: "medium",
+      type: "humanoid",
+      alignment: "neutral",
+      speed: "30 ft.",
+      challengeRating: 1,
+      abilityScores: {
+        strength: 10,
+        dexterity: 10,
+        constitution: 10,
+        intelligence: 10,
+        wisdom: 10,
+        charisma: 10,
+      },
+      ac: 12,
+      hp: 10,
+      maxHp: 10,
+      createdAt: new Date("2026-04-07T00:00:00Z"),
+      updatedAt: new Date("2026-04-07T00:00:00Z"),
+    };
+
     templatesMock.toArray.mockResolvedValue(
       [
         {
-          id: "template-uuid",
+          ...template,
           _id: { toString: () => "mongo-id" },
-          name: "Template",
-          userId: "user1",
-          size: "Medium",
-          type: "Humanoid",
-          armorClass: 12,
-          hitPoints: 10,
-          speed: "30 ft.",
-          abilityScores: {
-            strength: 10,
-            dexterity: 10,
-            constitution: 10,
-            intelligence: 10,
-            wisdom: 10,
-            charisma: 10,
-          },
-          challengeRating: "1",
         },
       ] as never,
     );
