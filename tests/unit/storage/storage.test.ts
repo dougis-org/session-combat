@@ -1,6 +1,7 @@
 import { describe, test, expect, jest, beforeEach } from "@jest/globals";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
+import { GLOBAL_USER_ID } from "@/lib/constants";
 
 jest.mock("@/lib/db", () => ({
   getDatabase: jest.fn(),
@@ -79,6 +80,106 @@ describe("storage.loadCharacters", () => {
     const result = await storage.loadCharacters("user1");
 
     expect(result).toEqual([]);
+  });
+});
+
+describe("storage entity loader normalization", () => {
+  let encountersMock: ReturnType<typeof makeMockCollection>;
+  let partiesMock: ReturnType<typeof makeMockCollection>;
+  let templatesMock: ReturnType<typeof makeMockCollection>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let mockDb: any;
+
+  beforeEach(() => {
+    encountersMock = makeMockCollection();
+    partiesMock = makeMockCollection();
+    templatesMock = makeMockCollection();
+    mockDb = {
+      collection: jest.fn((name: string) => {
+        if (name === "encounters") return encountersMock;
+        if (name === "parties") return partiesMock;
+        if (name === "monsterTemplates") return templatesMock;
+        throw new Error(`unexpected collection: ${name}`);
+      }),
+    };
+    mockedGetDatabase.mockResolvedValue(mockDb);
+  });
+
+  test("loadEncounters preserves stored id when _id is also present", async () => {
+    encountersMock.toArray.mockResolvedValue(
+      [
+        {
+          id: "enc-uuid",
+          _id: { toString: () => "mongo-id" },
+          name: "Encounter",
+          userId: "user1",
+          combatants: [],
+        },
+      ] as never,
+    );
+
+    const result = await storage.loadEncounters("user1");
+
+    expect(encountersMock.find).toHaveBeenCalledWith({ userId: "user1" });
+    expect(result[0].id).toBe("enc-uuid");
+  });
+
+  test("loadParties falls back to _id when id is missing", async () => {
+    partiesMock.toArray.mockResolvedValue(
+      [
+        {
+          _id: { toString: () => "party-mongo-id" },
+          name: "Party",
+          userId: "user1",
+          characterIds: [],
+        },
+      ] as never,
+    );
+
+    const result = await storage.loadParties("user1");
+
+    expect(partiesMock.find).toHaveBeenCalledWith({ userId: "user1" });
+    expect(result[0].id).toBe("party-mongo-id");
+  });
+
+  test("loadMonsterTemplates preserves stored id when _id is also present", async () => {
+    templatesMock.toArray.mockResolvedValue(
+      [
+        {
+          id: "template-uuid",
+          _id: { toString: () => "mongo-id" },
+          name: "Template",
+          userId: "user1",
+          size: "Medium",
+          type: "Humanoid",
+          armorClass: 12,
+          hitPoints: 10,
+          speed: "30 ft.",
+          abilityScores: {
+            strength: 10,
+            dexterity: 10,
+            constitution: 10,
+            intelligence: 10,
+            wisdom: 10,
+            charisma: 10,
+          },
+          challengeRating: "1",
+        },
+      ] as never,
+    );
+
+    const result = await storage.loadMonsterTemplates("user1");
+
+    expect(templatesMock.find).toHaveBeenCalledWith({ userId: "user1" });
+    expect(result[0].id).toBe("template-uuid");
+  });
+
+  test("loadGlobalMonsterTemplates delegates to the global user template query", async () => {
+    templatesMock.toArray.mockResolvedValue([] as never);
+
+    await storage.loadGlobalMonsterTemplates();
+
+    expect(templatesMock.find).toHaveBeenCalledWith({ userId: GLOBAL_USER_ID });
   });
 });
 
