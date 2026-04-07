@@ -54,11 +54,20 @@ export async function POST(request: NextRequest) {
       race,
       background,
       alignment,
+      gender,
     } = body;
 
     if (!name || name.trim() === '') {
       return NextResponse.json(
         { error: 'Character name is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate gender if provided
+    if (gender != null && (typeof gender !== 'string' || gender.trim().length > 50)) {
+      return NextResponse.json(
+        { error: 'Gender must be a string of 50 characters or fewer' },
         { status: 400 }
       );
     }
@@ -126,6 +135,7 @@ export async function POST(request: NextRequest) {
       reactions: reactions || [],
       classes: characterClasses,
       race: race || undefined,
+      gender: gender?.trim() || undefined,
       background: background || undefined,
       alignment: alignment || undefined,
       createdAt: new Date(),
