@@ -438,7 +438,7 @@ function CharacterEditor({
         name,
         classes,
         race: (race as DnDRace) || undefined,
-        gender: gender || undefined,
+        gender: gender.trim(),
         alignment: alignment || undefined,
       };
       await onSave(characterData);
