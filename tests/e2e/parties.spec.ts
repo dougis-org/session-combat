@@ -157,6 +157,14 @@ test.describe("Party deletion", () => {
         response.request().method() === "DELETE" &&
         response.url().includes("/api/parties/"),
     );
+    // Set up waiter for the GET /api/parties re-fetch that deleteParty() triggers
+    // after a successful DELETE. This ensures we assert AFTER loading completes,
+    // not during the transient loading state when the list is temporarily hidden.
+    const partiesRefetch = page.waitForResponse(
+      (response) =>
+        response.request().method() === "GET" &&
+        /\/api\/parties(\/|\?|$)/.test(response.url()),
+    );
     await page
       .locator("div", { has: page.getByRole("heading", { name: partyName }) })
       .getByRole("button", { name: "Delete" })
@@ -164,6 +172,8 @@ test.describe("Party deletion", () => {
     const response = await deleteResponse;
     expect(response.ok()).toBeTruthy();
 
-    await expect(page.getByText(partyName)).toHaveCount(0, { timeout: 15000 });
+    // Wait for the re-fetch to complete before asserting absence
+    await partiesRefetch;
+    await expect(page.getByText(partyName)).toHaveCount(0, { timeout: 5000 });
   });
 });
