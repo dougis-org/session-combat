@@ -113,7 +113,7 @@ export async function createCharacter(
   await page.getByLabel("Character name").fill(character.name);
   await page.getByLabel("Character class").selectOption(character.class);
   await page.getByLabel("Character race").selectOption(character.race);
-  if (character.alignment) {
+  if (character.alignment !== undefined) {
     await page
       .getByLabel("Character alignment")
       .selectOption(character.alignment);
@@ -135,8 +135,10 @@ export async function createParty(
   await page.getByRole("button", { name: "Add New Party" }).click();
 
   await page.getByLabel("Party Name").fill(party.name);
-  if (party.description) {
-    await page.getByLabel("Description").fill(party.description);
+  if (party.description !== undefined) {
+    await page.getByPlaceholder("Optional party description").fill(
+      party.description,
+    );
   }
 
   const memberCheckboxes = page.locator('input[type="checkbox"]');
@@ -175,8 +177,9 @@ export async function seedCharacter(
     },
   });
 
-  expect(response.ok()).toBeTruthy();
+  expect(response).toBeOK();
   const created = await response.json();
+  expect(created.id).toBeDefined();
   return created.id as string;
 }
 
