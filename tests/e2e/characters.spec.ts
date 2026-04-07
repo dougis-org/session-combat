@@ -180,3 +180,47 @@ test.describe("Character deletion", () => {
     await expect(page.getByText(charName)).toHaveCount(0);
   });
 });
+
+// ────────────────────────────────────────────────────────────
+// Character gender field
+// ────────────────────────────────────────────────────────────
+
+test.describe("Character gender field", () => {
+  test("gender input is visible in character creation form", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await page.goto("/characters");
+    await page.getByRole("button", { name: "Add New Character" }).click();
+    await expect(page.getByLabel("Character gender")).toBeVisible();
+  });
+
+  test("gender persists after save and appears in character card", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const charName = identity.name("Gender Test");
+
+    await createCharacter(page, {
+      name: charName,
+      class: "Ranger",
+      race: "Elf",
+      gender: "Female",
+    });
+
+    await expect(page.getByText("Female Elf")).toBeVisible();
+  });
+
+  test("character without gender still shows race normally", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const charName = identity.name("NoGender Test");
+
+    await createCharacter(page, {
+      name: charName,
+      class: "Druid",
+      race: "Gnome",
+    });
+
+    const card = page.locator("div", { has: page.getByRole("heading", { name: charName }) });
+    await expect(card.getByText(/\bGnome\b/)).toBeVisible();
+  });
+});

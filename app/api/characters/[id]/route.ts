@@ -80,6 +80,7 @@ export async function PUT(
       race,
       background,
       alignment,
+      gender,
     } = body;
 
     // Get the existing character to verify ownership
@@ -96,6 +97,14 @@ export async function PUT(
     if (name !== undefined && name.trim() === "") {
       return NextResponse.json(
         { error: "Character name is required" },
+        { status: 400 },
+      );
+    }
+
+    // Validate gender if provided
+    if (gender && gender.length > 50) {
+      return NextResponse.json(
+        { error: "Gender must be 50 characters or fewer" },
         { status: 400 },
       );
     }
@@ -183,6 +192,7 @@ export async function PUT(
         reactions !== undefined ? reactions : existingCharacter.reactions,
       classes: characterClasses,
       race: race !== undefined ? race : existingCharacter.race,
+      gender: gender !== undefined ? (gender?.trim() || undefined) : existingCharacter.gender,
       background:
         background !== undefined ? background : existingCharacter.background,
       alignment:

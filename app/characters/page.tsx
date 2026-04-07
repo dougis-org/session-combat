@@ -339,7 +339,7 @@ export function CharactersContent() {
                       <span className="ml-2 font-semibold">
                         (Total Level {calculateTotalLevel(character.classes)})
                       </span>
-                      {character.race && ` - ${character.race}`}
+                      {(character.gender || character.race) && ` - ${[character.gender, character.race].filter(Boolean).join(' ')}`}
                     </div>
                   )}
                   <CreatureStatBlock
@@ -407,6 +407,7 @@ function CharacterEditor({
   const [name, setName] = useState(character.name);
   const [classes, setClasses] = useState(character.classes || [{ class: 'Fighter', level: 1 }]);
   const [race, setRace] = useState(character.race || '');
+  const [gender, setGender] = useState(character.gender || '');
   const [alignment, setAlignment] = useState(character.alignment || '');
   const [stats, setStats] = useState<CreatureStats>(character);
   const [saving, setSaving] = useState(false);
@@ -437,6 +438,7 @@ function CharacterEditor({
         name,
         classes,
         race: (race as DnDRace) || undefined,
+        gender: gender || undefined,
         alignment: alignment || undefined,
       };
       await onSave(characterData);
@@ -556,6 +558,20 @@ function CharacterEditor({
               <option key={align} value={align}>{align}</option>
             ))}
           </select>
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="block mb-1 text-sm font-bold">Gender</label>
+          <input
+            type="text"
+            value={gender}
+            onChange={e => setGender(e.target.value)}
+            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+            disabled={saving}
+            aria-label="Character gender"
+            placeholder="e.g., Female, Male, Non-binary, etc."
+            maxLength={50}
+          />
         </div>
       </div>
 
