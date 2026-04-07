@@ -11,6 +11,16 @@ import {
 import { GLOBAL_USER_ID } from "./constants";
 import { ObjectId } from "mongodb";
 
+function normalizeStoredEntityId<T extends { id?: string; _id?: string }>(
+  entity: T,
+): T & { id: string | undefined } {
+  return {
+    ...entity,
+    // Preserve the app-level UUID for reads; only expose _id when no stored id exists.
+    id: entity.id || entity._id?.toString(),
+  };
+}
+
 /**
  * Server-side storage functions for MongoDB
  * Note: Use API routes for client-side data fetching
@@ -24,11 +34,7 @@ export const storage = {
         .collection<Encounter>("encounters")
         .find({ userId })
         .toArray();
-      // Ensure id field is set — prefer stored UUID, fall back to _id string for legacy documents
-      return encounters.map((enc) => ({
-        ...enc,
-        id: enc.id || enc._id?.toString(),
-      }));
+      return encounters.map(normalizeStoredEntityId);
     } catch (error) {
       console.error("Error loading encounters:", error);
       return [];
@@ -59,11 +65,7 @@ export const storage = {
           .collection<Character>("characters_active")
           .find({ userId })
           .toArray();
-        // Ensure id field is set - prefer explicit id field, fallback to _id
-        return characters.map((char) => ({
-          ...char,
-          id: char.id || char._id?.toString(),
-        }));
+        return characters.map(normalizeStoredEntityId);
       } catch (viewError) {
         // Fall back to querying the underlying collection with an explicit filter
         // when the view is unavailable (e.g., initialization failed or missing privileges).
@@ -75,10 +77,7 @@ export const storage = {
           .collection<Character>("characters")
           .find({ userId, deletedAt: null as unknown as Date })
           .toArray();
-        return characters.map((char) => ({
-          ...char,
-          id: char.id || char._id?.toString(),
-        }));
+        return characters.map(normalizeStoredEntityId);
       }
     } catch (error) {
       console.error("Error loading characters:", error);
@@ -108,11 +107,7 @@ export const storage = {
         .collection<Party>("parties")
         .find({ userId })
         .toArray();
-      // Ensure id field is set — prefer stored UUID, fall back to _id string for legacy documents
-      return parties.map((party) => ({
-        ...party,
-        id: party.id || party._id?.toString(),
-      }));
+      return parties.map(normalizeStoredEntityId);
     } catch (error) {
       console.error("Error loading parties:", error);
       return [];
@@ -127,11 +122,7 @@ export const storage = {
         .collection<MonsterTemplate>("monsterTemplates")
         .find({ userId })
         .toArray();
-      // Ensure id field is set — prefer stored UUID, fall back to _id string for legacy documents
-      return templates.map((template) => ({
-        ...template,
-        id: template.id || template._id?.toString(),
-      }));
+      return templates.map(normalizeStoredEntityId);
     } catch (error) {
       console.error("Error loading monster templates:", error);
       return [];
@@ -140,21 +131,7 @@ export const storage = {
 
   // Load global monster templates (admin-controlled)
   async loadGlobalMonsterTemplates(): Promise<MonsterTemplate[]> {
-    try {
-      const db = await getDatabase();
-      const templates = await db
-        .collection<MonsterTemplate>("monsterTemplates")
-        .find({ userId: GLOBAL_USER_ID })
-        .toArray();
-      // Ensure id field is set — prefer stored UUID, fall back to _id string for legacy documents
-      return templates.map((template) => ({
-        ...template,
-        id: template.id || template._id?.toString(),
-      }));
-    } catch (error) {
-      console.error("Error loading global monster templates:", error);
-      return [];
-    }
+    return this.loadMonsterTemplates(GLOBAL_USER_ID);
   },
 
   // Load all monster templates (user + global)

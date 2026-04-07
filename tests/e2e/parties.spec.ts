@@ -163,7 +163,7 @@ test.describe("Party deletion", () => {
     const partiesRefetch = page.waitForResponse(
       (response) =>
         response.request().method() === "GET" &&
-        /\/api\/parties$/.test(response.url()),
+        /\/api\/parties(\/|\?|$)/.test(response.url()),
     );
     await page
       .locator("div", { has: page.getByRole("heading", { name: partyName }) })
