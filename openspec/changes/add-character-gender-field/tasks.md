@@ -86,11 +86,11 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 ## PR and Merge
 
 - [x] Run required pre-PR self-review from `skills/openspec-apply-change/SKILL.md` before committing
-- [ ] Commit all changes to `feat/add-character-gender-field` and push to remote
-- [ ] Open PR from `feat/add-character-gender-field` to `main`
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each comment, commit fixes, run remote push validation, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
+- [x] Commit all changes to `feat/add-character-gender-field` and push to remote
+- [x] Open PR from `feat/add-character-gender-field` to `main`
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each comment, commit fixes, run remote push validation, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
 - [ ] **Monitor CI checks** — diagnose and fix failures, commit, run remote push validation, push; repeat until all checks pass
 - [ ] Wait for PR to merge — never force-merge; if a human force-merges, continue to Post-Merge
 
