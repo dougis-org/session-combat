@@ -223,4 +223,35 @@ test.describe("Character gender field", () => {
     const card = page.locator("div", { has: page.getByRole("heading", { name: charName }) });
     await expect(card.getByText(/\bGnome\b/)).toBeVisible();
   });
+
+  test("gender updates and clears correctly on edit", async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    const charName = identity.name("Gender Edit Test");
+
+    await createCharacter(page, {
+      name: charName,
+      class: "Fighter",
+      race: "Human",
+      gender: "Male",
+    });
+
+    await expect(page.getByText("Male Human")).toBeVisible();
+
+    // Edit: change gender
+    const card = page.locator("div", { has: page.getByRole("heading", { name: charName }) });
+    await card.getByRole("button", { name: "Edit" }).click();
+    const genderInput = page.getByLabel("Character gender");
+    await genderInput.clear();
+    await genderInput.fill("Non-binary");
+    await page.getByRole("button", { name: /Save Character/i }).click();
+    await expect(page.getByText("Non-binary Human")).toBeVisible({ timeout: 15000 });
+
+    // Edit: clear gender
+    await card.getByRole("button", { name: "Edit" }).click();
+    await page.getByLabel("Character gender").clear();
+    await page.getByRole("button", { name: /Save Character/i }).click();
+    await expect(page.getByText(/\bHuman\b/)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("Non-binary Human")).toHaveCount(0);
+  });
 });

@@ -102,7 +102,7 @@ export async function PUT(
     }
 
     // Validate gender if provided
-    if (gender != null && (typeof gender !== 'string' || gender.length > 50)) {
+    if (gender != null && (typeof gender !== 'string' || gender.trim().length > 50)) {
       return NextResponse.json(
         { error: "Gender must be a string of 50 characters or fewer" },
         { status: 400 },
