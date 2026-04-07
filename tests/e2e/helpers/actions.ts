@@ -104,6 +104,7 @@ export async function createCharacter(
     name: string;
     class: string;
     race: string;
+    gender?: string;
     alignment?: string;
   },
 ): Promise<void> {
@@ -113,6 +114,9 @@ export async function createCharacter(
   await page.getByLabel("Character name").fill(character.name);
   await page.getByLabel("Character class").selectOption(character.class);
   await page.getByLabel("Character race").selectOption(character.race);
+  if (character.gender) {
+    await page.getByLabel("Character gender").fill(character.gender);
+  }
   if (character.alignment !== undefined) {
     await page
       .getByLabel("Character alignment")

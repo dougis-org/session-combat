@@ -348,6 +348,7 @@ export interface Character extends CreatureStats {
   // Character-specific metadata
   classes: CharacterClass[]; // Array of classes for multiclass support
   race?: DnDRace; // Must be one of the valid D&D 5e races
+  gender?: string;
   background?: string;
   alignment?: string;
   createdAt?: Date;

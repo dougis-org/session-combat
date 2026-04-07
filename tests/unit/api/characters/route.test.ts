@@ -72,6 +72,40 @@ describe("POST /api/characters", () => {
     expect(response.status).toBe(400);
   });
 
+  it("returns 400 when gender exceeds 50 characters", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const response = await POST(makeRequest({ name: "Hero", gender: "x".repeat(51) }));
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toContain("50");
+  });
+
+  it("returns 400 when gender is not a string", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const response = await POST(makeRequest({ name: "Hero", gender: 42 }));
+    expect(response.status).toBe(400);
+  });
+
+  it("creates character with gender and trims whitespace", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+
+    const response = await POST(makeRequest({ name: "Hero", gender: "  Female  " }));
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.gender).toBe("Female");
+  });
+
+  it("omits gender from response when not provided", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+
+    const response = await POST(makeRequest({ name: "Hero" }));
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.gender).toBeUndefined();
+  });
+
   it("creates character with defaults and returns 201", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
