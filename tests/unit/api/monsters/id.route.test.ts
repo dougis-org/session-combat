@@ -4,6 +4,7 @@ import { storage } from "@/lib/storage";
 import {
   MOCK_AUTH,
   makeRouteRequest,
+  itValidatesAlignmentFieldWithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
@@ -36,8 +37,11 @@ const EXISTING_TEMPLATE = {
 
 const PARAMS = Promise.resolve({ id: "monster-1" });
 const BASE_BODY = { name: "Goblin", maxHp: 7, hp: 7 };
-const makeRequest = (body: unknown) =>
-  makeRouteRequest("http://localhost/api/monsters/monster-1", "PUT", body);
+const makeReqWith = (alignment: string | undefined) =>
+  makeRouteRequest("http://localhost/api/monsters/monster-1", "PUT", {
+    ...BASE_BODY,
+    ...(alignment !== undefined && { alignment }),
+  });
 
 describe("PUT /api/monsters/[id] — alignment validation", () => {
   beforeEach(() => {
@@ -47,26 +51,5 @@ describe("PUT /api/monsters/[id] — alignment validation", () => {
     mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
   });
 
-  it("returns 400 for invalid alignment", async () => {
-    const response = await PUT(
-      makeRequest({ ...BASE_BODY, alignment: "chaotic pancake" }),
-      { params: PARAMS },
-    );
-    expect(response.status).toBe(400);
-    const body = await response.json();
-    expect(body.error).toBe("Invalid alignment");
-  });
-
-  it("returns 200 for valid alignment", async () => {
-    const response = await PUT(
-      makeRequest({ ...BASE_BODY, alignment: "Lawful Evil" }),
-      { params: PARAMS },
-    );
-    expect(response.status).toBe(200);
-  });
-
-  it("returns 200 when alignment is omitted", async () => {
-    const response = await PUT(makeRequest(BASE_BODY), { params: PARAMS });
-    expect(response.status).toBe(200);
-  });
+  itValidatesAlignmentFieldWithParams(PUT, makeReqWith, PARAMS, 200);
 });

@@ -128,3 +128,68 @@ export function itReturns500WithParams(
     expect(response.status).toBe(500);
   });
 }
+
+/**
+ * Register 3 alignment validation tests for a route handler without params.
+ * Assumes beforeEach has set up auth and storage, or pass setup() to do it per-test.
+ * Covers: invalid value → 400, valid value → successStatus, omitted → successStatus.
+ */
+export function itValidatesAlignmentField(
+  handler: RouteHandler,
+  makeReqWith: (alignment: string | undefined) => NextRequest,
+  successStatus: 200 | 201,
+  setup?: () => void,
+): void {
+  it("returns 400 for invalid alignment", async () => {
+    setup?.();
+    const response = await handler(makeReqWith("chaotic pancake"));
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toBe("Invalid alignment");
+  });
+
+  it(`returns ${successStatus} for valid alignment`, async () => {
+    setup?.();
+    const response = await handler(makeReqWith("Neutral Good"));
+    expect(response.status).toBe(successStatus);
+  });
+
+  it(`returns ${successStatus} when alignment is omitted`, async () => {
+    setup?.();
+    const response = await handler(makeReqWith(undefined));
+    expect(response.status).toBe(successStatus);
+  });
+}
+
+/**
+ * Register 3 alignment validation tests for a route handler with params.
+ * Assumes beforeEach has set up auth and storage, or pass setup() to do it per-test.
+ * Covers: invalid value → 400, valid value → successStatus, omitted → successStatus.
+ */
+export function itValidatesAlignmentFieldWithParams(
+  handler: ContextHandler,
+  makeReqWith: (alignment: string | undefined) => NextRequest,
+  params: Promise<{ id: string }>,
+  successStatus: 200 | 201,
+  setup?: () => void,
+): void {
+  it("returns 400 for invalid alignment", async () => {
+    setup?.();
+    const response = await handler(makeReqWith("chaotic pancake"), { params });
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toBe("Invalid alignment");
+  });
+
+  it(`returns ${successStatus} for valid alignment`, async () => {
+    setup?.();
+    const response = await handler(makeReqWith("Neutral Good"), { params });
+    expect(response.status).toBe(successStatus);
+  });
+
+  it(`returns ${successStatus} when alignment is omitted`, async () => {
+    setup?.();
+    const response = await handler(makeReqWith(undefined), { params });
+    expect(response.status).toBe(successStatus);
+  });
+}

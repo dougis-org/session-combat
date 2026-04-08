@@ -6,6 +6,7 @@ import {
   makeRouteRequest,
   itReturns401,
   itReturns500,
+  itValidatesAlignmentField,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
@@ -140,25 +141,13 @@ describe("POST /api/characters", () => {
     mockedRequireAuth
   );
 
-  it("returns 400 for invalid alignment", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    const response = await POST(makeRequest({ name: "Hero", alignment: "chaotic pancake" }));
-    expect(response.status).toBe(400);
-    const body = await response.json();
-    expect(body.error).toBe("Invalid alignment");
-  });
-
-  it("returns 201 for valid alignment", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-    const response = await POST(makeRequest({ name: "Hero", alignment: "Neutral Good" }));
-    expect(response.status).toBe(201);
-  });
-
-  it("returns 201 when alignment is omitted", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-    const response = await POST(makeRequest({ name: "Hero" }));
-    expect(response.status).toBe(201);
-  });
+  itValidatesAlignmentField(
+    POST,
+    (alignment) => makeRequest({ name: "Hero", ...(alignment !== undefined && { alignment }) }),
+    201,
+    () => {
+      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+      mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+    },
+  );
 });

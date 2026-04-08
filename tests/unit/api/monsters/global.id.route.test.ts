@@ -3,9 +3,9 @@ import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
 import {
-  MOCK_AUTH,
   makeRouteRequest,
   mockDbCollection,
+  itValidatesAlignmentFieldWithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
@@ -44,14 +44,11 @@ const EXISTING_GLOBAL_TEMPLATE = {
 
 const PARAMS = Promise.resolve({ id: "global-1" });
 const BASE_BODY = { name: "Zombie", maxHp: 22, hp: 22 };
-const makeRequest = (body: unknown) =>
-  makeRouteRequest("http://localhost/api/monsters/global/global-1", "PUT", body);
-
-function mockAdmin() {
-  mockDbCollection(mockedGetDatabase, {
-    findOne: jest.fn().mockResolvedValue({ isAdmin: true }),
+const makeReqWith = (alignment: string | undefined) =>
+  makeRouteRequest("http://localhost/api/monsters/global/global-1", "PUT", {
+    ...BASE_BODY,
+    ...(alignment !== undefined && { alignment }),
   });
-}
 
 describe("PUT /api/monsters/global/[id] — alignment validation", () => {
   beforeEach(() => {
@@ -59,29 +56,10 @@ describe("PUT /api/monsters/global/[id] — alignment validation", () => {
     mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
     mockedStorage.loadGlobalMonsterTemplates.mockResolvedValue([EXISTING_GLOBAL_TEMPLATE] as any);
     mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
-    mockAdmin();
+    mockDbCollection(mockedGetDatabase, {
+      findOne: jest.fn().mockResolvedValue({ isAdmin: true }),
+    });
   });
 
-  it("returns 400 for invalid alignment", async () => {
-    const response = await PUT(
-      makeRequest({ ...BASE_BODY, alignment: "chaotic pancake" }),
-      { params: PARAMS },
-    );
-    expect(response.status).toBe(400);
-    const body = await response.json();
-    expect(body.error).toBe("Invalid alignment");
-  });
-
-  it("returns 200 for valid alignment", async () => {
-    const response = await PUT(
-      makeRequest({ ...BASE_BODY, alignment: "Lawful Evil" }),
-      { params: PARAMS },
-    );
-    expect(response.status).toBe(200);
-  });
-
-  it("returns 200 when alignment is omitted", async () => {
-    const response = await PUT(makeRequest(BASE_BODY), { params: PARAMS });
-    expect(response.status).toBe(200);
-  });
+  itValidatesAlignmentFieldWithParams(PUT, makeReqWith, PARAMS, 200);
 });

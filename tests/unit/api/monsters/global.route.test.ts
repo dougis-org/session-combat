@@ -3,9 +3,9 @@ import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
 import {
-  MOCK_AUTH,
   makeRouteRequest,
   mockDbCollection,
+  itValidatesAlignmentField,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
@@ -28,37 +28,21 @@ const mockedGetDatabase = jest.mocked(getDatabase);
 const ADMIN_AUTH = { userId: "507f1f77bcf86cd799439011", email: "admin@example.com" };
 
 const BASE_BODY = { name: "Goblin", maxHp: 10, hp: 10 };
-const makeRequest = (body: unknown) =>
-  makeRouteRequest("http://localhost/api/monsters/global", "POST", body);
-
-function mockAdmin() {
-  mockDbCollection(mockedGetDatabase, {
-    findOne: jest.fn().mockResolvedValue({ isAdmin: true }),
+const makeReqWith = (alignment: string | undefined) =>
+  makeRouteRequest("http://localhost/api/monsters/global", "POST", {
+    ...BASE_BODY,
+    ...(alignment !== undefined && { alignment }),
   });
-}
 
 describe("POST /api/monsters/global — alignment validation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
     mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
-    mockAdmin();
+    mockDbCollection(mockedGetDatabase, {
+      findOne: jest.fn().mockResolvedValue({ isAdmin: true }),
+    });
   });
 
-  it("returns 400 for invalid alignment", async () => {
-    const response = await POST(makeRequest({ ...BASE_BODY, alignment: "chaotic pancake" }));
-    expect(response.status).toBe(400);
-    const body = await response.json();
-    expect(body.error).toBe("Invalid alignment");
-  });
-
-  it("returns 201 for valid alignment", async () => {
-    const response = await POST(makeRequest({ ...BASE_BODY, alignment: "Neutral Good" }));
-    expect(response.status).toBe(201);
-  });
-
-  it("returns 201 when alignment is omitted", async () => {
-    const response = await POST(makeRequest(BASE_BODY));
-    expect(response.status).toBe(201);
-  });
+  itValidatesAlignmentField(POST, makeReqWith, 201);
 });

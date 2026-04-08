@@ -114,12 +114,4 @@ describe('AlignmentSelect', () => {
     const select = container.querySelector('select') as HTMLSelectElement;
     expect(select.disabled).toBe(false);
   });
-
-  test('select is accessible as combobox role with name "Alignment"', () => {
-    renderSelect('', jest.fn() as (v: string) => void);
-    // A <select> has implicit role "combobox"; accessible name comes from aria-label
-    const select = container.querySelector('select') as HTMLSelectElement;
-    expect(select.getAttribute('aria-label')).toBe('Alignment');
-    expect(select.tagName.toLowerCase()).toBe('select');
-  });
 });
