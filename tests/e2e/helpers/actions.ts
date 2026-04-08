@@ -119,7 +119,7 @@ export async function createCharacter(
   }
   if (character.alignment !== undefined) {
     await page
-      .getByLabel("Character alignment")
+      .getByLabel("Alignment")
       .selectOption(character.alignment);
   }
 

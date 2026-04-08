@@ -23,7 +23,7 @@ The affected endpoints are:
 #### Scenario: Valid alignment value is accepted
 
 - **Given** a valid request body
-- **When** the request includes `alignment: "neutral good"` (in `VALID_ALIGNMENTS`)
+- **When** the request includes `alignment: "Neutral Good"` (in `VALID_ALIGNMENTS`)
 - **Then** the endpoint proceeds normally and returns HTTP 201 (POST) or HTTP 200 (PUT)
 
 #### Scenario: Omitted alignment is accepted

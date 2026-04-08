@@ -14,15 +14,15 @@ The system SHALL provide a reusable `AlignmentSelect` component in `lib/componen
 
 #### Scenario: Component reflects controlled value
 
-- **Given** `AlignmentSelect` is rendered with `value="lawful good"`
+- **Given** `AlignmentSelect` is rendered with `value="Lawful Good"`
 - **When** the component mounts
-- **Then** the select element's selected option is "lawful good"
+- **Then** the select element's selected option is "Lawful Good"
 
 #### Scenario: Component fires onChange when selection changes
 
 - **Given** `AlignmentSelect` is rendered with an `onChange` spy
-- **When** the user selects "chaotic neutral"
-- **Then** `onChange` is called once with the string `"chaotic neutral"`
+- **When** the user selects "Chaotic Neutral"
+- **Then** `onChange` is called once with the string `"Chaotic Neutral"`
 
 #### Scenario: Component is disabled when saving
 

@@ -6,7 +6,7 @@ import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
-import { MonsterTemplate, isValidAlignment } from '@/lib/types';
+import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
 import { filterMonsters, getAvailableTypes } from './filterUtils';
 
@@ -465,7 +465,9 @@ function MonsterTemplateEditor({
   const [name, setName] = useState(template.name);
   const [size, setSize] = useState(template.size);
   const [type, setType] = useState(template.type);
-  const [alignment, setAlignment] = useState(template.alignment || '');
+  const [alignment, setAlignment] = useState(
+    normalizeAlignment(template.alignment) ?? '',
+  );
   const [speed, setSpeed] = useState(normalizeSpeed(template.speed));
   const [challengeRating, setChallengeRating] = useState(template.challengeRating);
   const [source, setSource] = useState(template.source || '');
@@ -494,7 +496,7 @@ function MonsterTemplateEditor({
         name,
         size,
         type,
-        alignment: isValidAlignment(alignment) ? alignment : undefined,
+        alignment: normalizeAlignment(alignment),
         speed,
         challengeRating,
         source: source || undefined,

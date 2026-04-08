@@ -129,6 +129,25 @@ export function isValidAlignment(
   );
 }
 
+export function normalizeAlignment(
+  alignment: unknown,
+): DnDAlignment | undefined {
+  if (typeof alignment !== "string") {
+    return undefined;
+  }
+
+  const trimmed = alignment.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const normalized = VALID_ALIGNMENTS.find(
+    (candidate) => candidate.toLowerCase() === trimmed.toLowerCase(),
+  );
+
+  return normalized;
+}
+
 // Character Class Level - for multiclass support
 export interface CharacterClass {
   class: DnDClass;

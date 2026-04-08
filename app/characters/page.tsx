@@ -6,7 +6,7 @@ import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
-import { Character, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, DnDRace, isValidAlignment } from '@/lib/types';
+import { Character, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, DnDRace, normalizeAlignment } from '@/lib/types';
 
 interface ImportConflictState {
   existingCharacterName: string;
@@ -409,7 +409,9 @@ function CharacterEditor({
   const [classes, setClasses] = useState(character.classes || [{ class: 'Fighter', level: 1 }]);
   const [race, setRace] = useState(character.race || '');
   const [gender, setGender] = useState(character.gender || '');
-  const [alignment, setAlignment] = useState(character.alignment || '');
+  const [alignment, setAlignment] = useState(
+    normalizeAlignment(character.alignment) ?? '',
+  );
   const [stats, setStats] = useState<CreatureStats>(character);
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -440,7 +442,7 @@ function CharacterEditor({
         classes,
         race: (race as DnDRace) || undefined,
         gender: gender.trim(),
-        alignment: isValidAlignment(alignment) ? alignment : undefined,
+        alignment: normalizeAlignment(alignment),
       };
       await onSave(characterData);
     } finally {

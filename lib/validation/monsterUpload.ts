@@ -3,7 +3,7 @@
  * Validates and transforms user-uploaded monster data
  */
 
-import { MonsterTemplate, AbilityScores, CreatureAbility, isValidAlignment } from '@/lib/types';
+import { MonsterTemplate, AbilityScores, CreatureAbility, normalizeAlignment } from '@/lib/types';
 import { filterToDamageTypes } from '@/lib/constants';
 
 /**
@@ -651,9 +651,22 @@ export function transformMonsterData(
     size: (raw.size || 'medium') as ValidSize,
     type: (raw.type || 'humanoid') as string,
     alignment: (() => {
-      if (raw.alignment === undefined || raw.alignment === null || raw.alignment === '') return undefined;
-      if (isValidAlignment(raw.alignment)) return raw.alignment;
-      console.warn(`transformMonsterData: unrecognised alignment "${raw.alignment}" dropped`);
+      if (
+        raw.alignment === undefined ||
+        raw.alignment === null ||
+        raw.alignment === ''
+      ) {
+        return undefined;
+      }
+
+      const normalizedAlignment = normalizeAlignment(raw.alignment);
+      if (normalizedAlignment) {
+        return normalizedAlignment;
+      }
+
+      console.warn(
+        `transformMonsterData: unrecognised alignment "${raw.alignment}" dropped`,
+      );
       return undefined;
     })(),
     ac: (raw.ac || 10) as number,
