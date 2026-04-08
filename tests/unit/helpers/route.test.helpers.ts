@@ -152,6 +152,14 @@ function registerAlignmentTests(
     expect(response.status).toBe(successStatus);
   });
 
+  it(`normalizes valid alignment casing and whitespace`, async () => {
+    setup?.();
+    const response = await run(" neutral good ");
+    expect(response.status).toBe(successStatus);
+    const body = await response.json();
+    expect(body.alignment).toBe("Neutral Good");
+  });
+
   it(`returns ${successStatus} when alignment is omitted`, async () => {
     setup?.();
     const response = await run(undefined);

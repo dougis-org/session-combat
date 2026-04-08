@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { MonsterTemplate, isValidAlignment } from '@/lib/types';
+import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
 import { getDatabase } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
@@ -78,8 +78,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const normalizedAlignment = normalizeAlignment(alignment);
+
     // Validate alignment if provided
-    if (alignment !== undefined && alignment !== null && alignment !== '' && !isValidAlignment(alignment)) {
+    if (alignment !== undefined && alignment !== null && alignment !== '' && !normalizedAlignment) {
       return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
     }
 
@@ -106,7 +108,7 @@ export async function POST(request: NextRequest) {
       reactions: reactions || [],
       size: size || 'Medium',
       type: type || 'humanoid',
-      alignment: alignment || undefined,
+      alignment: normalizedAlignment,
       speed: speed || undefined,
       challengeRating: challengeRating || 0,
       experiencePoints: experiencePoints || 0,

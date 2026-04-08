@@ -10,7 +10,7 @@ import {
   CharacterClass,
   calculateTotalLevel,
   validateCharacterClasses,
-  isValidAlignment,
+  normalizeAlignment,
 } from "@/lib/types";
 
 export async function GET(
@@ -110,8 +110,10 @@ export async function PUT(
       );
     }
 
+    const normalizedAlignment = normalizeAlignment(alignment);
+
     // Validate alignment if provided
-    if (alignment !== undefined && alignment !== null && alignment !== '' && !isValidAlignment(alignment)) {
+    if (alignment !== undefined && alignment !== null && alignment !== '' && !normalizedAlignment) {
       return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
     }
 
@@ -202,7 +204,7 @@ export async function PUT(
       background:
         background !== undefined ? background : existingCharacter.background,
       alignment:
-        alignment !== undefined ? alignment : existingCharacter.alignment,
+        alignment !== undefined ? normalizedAlignment : existingCharacter.alignment,
       updatedAt: new Date(),
     };
 

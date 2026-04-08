@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { MonsterTemplate, isValidAlignment } from '@/lib/types';
+import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
 import { getDatabase } from '@/lib/db';
 
 // Helper to check if user is admin
@@ -122,8 +122,10 @@ export async function PUT(
       );
     }
 
+    const normalizedAlignment = normalizeAlignment(alignment);
+
     // Validate alignment if provided
-    if (alignment !== undefined && alignment !== null && alignment !== '' && !isValidAlignment(alignment)) {
+    if (alignment !== undefined && alignment !== null && alignment !== '' && !normalizedAlignment) {
       return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
     }
 
@@ -149,7 +151,7 @@ export async function PUT(
       reactions: reactions !== undefined ? reactions : existingTemplate.reactions,
       size: size !== undefined ? size : existingTemplate.size,
       type: type !== undefined ? type : existingTemplate.type,
-      alignment: alignment !== undefined ? alignment : existingTemplate.alignment,
+      alignment: alignment !== undefined ? normalizedAlignment : existingTemplate.alignment,
       speed: speed !== undefined ? speed : existingTemplate.speed,
       challengeRating: challengeRating !== undefined ? challengeRating : existingTemplate.challengeRating,
       experiencePoints: experiencePoints !== undefined ? experiencePoints : existingTemplate.experiencePoints,
