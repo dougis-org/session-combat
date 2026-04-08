@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
 import {
+  ADMIN_AUTH,
   makeRouteRequest,
   mockDbCollection,
   itValidatesAlignmentField,
@@ -23,9 +24,6 @@ jest.mock("mongodb", () => ({ ObjectId: jest.fn((id: string) => ({ id })) }));
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 const mockedGetDatabase = jest.mocked(getDatabase);
-
-// Must be a valid 24-char hex string for MongoDB ObjectId
-const ADMIN_AUTH = { userId: "507f1f77bcf86cd799439011", email: "admin@example.com" };
 
 const BASE_BODY = { name: "Goblin", maxHp: 10, hp: 10 };
 const makeReqWith = (alignment: string | undefined) =>

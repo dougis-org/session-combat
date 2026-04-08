@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 /** Shared auth payload used across route unit tests */
 export const MOCK_AUTH = { userId: "user-123", email: "user@example.com" };
 
+/** Admin auth payload — userId must be a valid 24-char hex string for MongoDB ObjectId */
+export const ADMIN_AUTH = { userId: "507f1f77bcf86cd799439011", email: "admin@example.com" };
+
 /** Configure a mocked requireAuth/verifyAuth to return a 401 Unauthorized response */
 export function mockUnauthorized(mockedFn: jest.Mock): void {
   mockedFn.mockReturnValue(
