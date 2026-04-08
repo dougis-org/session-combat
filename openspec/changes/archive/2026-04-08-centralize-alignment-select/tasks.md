@@ -124,3 +124,4 @@ Blocking resolution flow:
 - [x] Confirm `openspec/changes/archive/YYYY-MM-DD-centralize-alignment-select/` exists and `openspec/changes/centralize-alignment-select/` is gone
 - [x] Commit and push the archive commit to `main`
 - [x] `git fetch --prune` and `git branch -d feat/centralize-alignment-select`
+  - **Note:** Fetch/prune was completed. Local branch deletion was skipped because `feat/centralize-alignment-select` remains checked out in another worktree with unrelated local edits; forcing deletion there would be unsafe.
