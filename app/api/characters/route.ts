@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Character, isValidRace, VALID_RACES, isValidClass, VALID_CLASSES, CharacterClass, calculateTotalLevel, validateCharacterClasses } from '@/lib/types';
+import { Character, isValidRace, VALID_RACES, isValidClass, VALID_CLASSES, CharacterClass, calculateTotalLevel, validateCharacterClasses, normalizeAlignment } from '@/lib/types';
 
 export async function GET(request: NextRequest) {
   const auth = requireAuth(request);
@@ -72,6 +72,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const normalizedAlignment = normalizeAlignment(alignment);
+
+    // Validate alignment if provided
+    if (alignment !== undefined && alignment !== null && alignment !== '' && !normalizedAlignment) {
+      return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
+    }
+
     // Validate race if provided
     if (race !== undefined && race !== null && race !== '' && !isValidRace(race)) {
       return NextResponse.json(
@@ -137,7 +144,7 @@ export async function POST(request: NextRequest) {
       race: race || undefined,
       gender: gender?.trim() || undefined,
       background: background || undefined,
-      alignment: alignment || undefined,
+      alignment: normalizedAlignment,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

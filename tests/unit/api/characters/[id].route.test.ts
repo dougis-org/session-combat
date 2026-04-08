@@ -4,6 +4,7 @@ import { storage } from "@/lib/storage";
 import {
   MOCK_AUTH,
   makeRouteRequest,
+  itValidatesAlignmentFieldWithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
@@ -89,4 +90,20 @@ describe("PUT /api/characters/[id] — gender validation", () => {
     const body = await response.json();
     expect(body.gender).toBe("Female");
   });
+});
+
+describe("PUT /api/characters/[id] — alignment validation", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
+    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+  });
+
+  itValidatesAlignmentFieldWithParams(
+    PUT,
+    (alignment) => makeRequest(alignment !== undefined ? { alignment } : { name: "Lyra" }),
+    PARAMS,
+    200,
+  );
 });

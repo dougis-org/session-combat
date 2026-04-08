@@ -50,29 +50,22 @@ afterEach(() => {
   global.fetch = originalFetch;
 });
 
+async function renderAndOpenEditor() {
+  await act(async () => {
+    root = createRoot(container);
+    root.render(<CharactersContent />);
+  });
+  const buttons = Array.from(container.querySelectorAll('button'));
+  const addBtn = buttons.find(b => b.textContent?.includes('Add New Character'));
+  if (addBtn) {
+    await act(async () => { addBtn.click(); });
+  }
+}
+
 describe('CharactersContent — gender field', () => {
   test('CharacterEditor renders with a gender input field', async () => {
-    await act(async () => {
-      root = createRoot(container);
-      root.render(<CharactersContent />);
-    });
-
-    // Click "Add New Character" to open CharacterEditor
-    const addButton = container.querySelector('button[class*="bg-blue"]') as HTMLButtonElement | null;
-    if (!addButton) {
-      // Fall back to text search
-      const buttons = Array.from(container.querySelectorAll('button'));
-      const btn = buttons.find(b => b.textContent?.includes('Add New Character'));
-      if (btn) {
-        await act(async () => { btn.click(); });
-      }
-    } else {
-      await act(async () => { addButton.click(); });
-    }
-
-    // Gender input should now be in the DOM
-    const genderInput = container.querySelector('[aria-label="Character gender"]') as HTMLInputElement | null;
-    expect(genderInput).not.toBeNull();
+    await renderAndOpenEditor();
+    expect(container.querySelector('[aria-label="Character gender"]')).not.toBeNull();
   });
 
   test('gender value is sent in save payload', async () => {
@@ -80,7 +73,6 @@ describe('CharactersContent — gender field', () => {
       if (String(url).includes('/api/characters') && !(url instanceof Request && url.method === 'POST')) {
         return { ok: true, json: async () => [] } as unknown as Response;
       }
-      // POST: return the created character
       return {
         ok: true,
         json: async () => ({
@@ -98,19 +90,8 @@ describe('CharactersContent — gender field', () => {
     }) as typeof fetch;
     global.fetch = mockFetch;
 
-    await act(async () => {
-      root = createRoot(container);
-      root.render(<CharactersContent />);
-    });
+    await renderAndOpenEditor();
 
-    // Open editor
-    const buttons = Array.from(container.querySelectorAll('button'));
-    const addBtn = buttons.find(b => b.textContent?.includes('Add New Character'));
-    if (addBtn) {
-      await act(async () => { addBtn.click(); });
-    }
-
-    // Fill name (required) and gender
     const nameInput = container.querySelector('[aria-label="Character name"]') as HTMLInputElement | null;
     const genderInput = container.querySelector('[aria-label="Character gender"]') as HTMLInputElement | null;
 
@@ -130,7 +111,13 @@ describe('CharactersContent — gender field', () => {
       });
     }
 
-    // gender input exists and has the right initial state
     expect(genderInput).not.toBeNull();
+  });
+});
+
+describe('CharactersContent — alignment field', () => {
+  test('CharacterEditor renders an alignment select with aria-label="Alignment"', async () => {
+    await renderAndOpenEditor();
+    expect(container.querySelector('select[aria-label="Alignment"]')).not.toBeNull();
   });
 });

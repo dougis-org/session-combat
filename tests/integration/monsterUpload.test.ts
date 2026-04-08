@@ -305,7 +305,7 @@ describe("Monster Upload Validation", () => {
         name: "Aboleth",
         size: "large",
         type: "aberration",
-        alignment: "chaotic evil",
+        alignment: "Chaotic Evil",
         ac: 17,
         hp: 135,
         maxHp: 135,
@@ -336,7 +336,7 @@ describe("Monster Upload Validation", () => {
       expect(result.name).toBe("Aboleth");
       expect(result.size).toBe("large");
       expect(result.type).toBe("aberration");
-      expect(result.alignment).toBe("chaotic evil");
+      expect(result.alignment).toBe("Chaotic Evil");
       expect(result.ac).toBe(17);
       expect(result.hp).toBe(135);
       expect(result.maxHp).toBe(135);

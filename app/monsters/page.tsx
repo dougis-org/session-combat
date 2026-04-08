@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
-import { MonsterTemplate, VALID_ALIGNMENTS } from '@/lib/types';
+import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
+import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
 import { filterMonsters, getAvailableTypes } from './filterUtils';
 
@@ -464,7 +465,9 @@ function MonsterTemplateEditor({
   const [name, setName] = useState(template.name);
   const [size, setSize] = useState(template.size);
   const [type, setType] = useState(template.type);
-  const [alignment, setAlignment] = useState(template.alignment || '');
+  const [alignment, setAlignment] = useState(
+    normalizeAlignment(template.alignment) ?? '',
+  );
   const [speed, setSpeed] = useState(normalizeSpeed(template.speed));
   const [challengeRating, setChallengeRating] = useState(template.challengeRating);
   const [source, setSource] = useState(template.source || '');
@@ -493,7 +496,7 @@ function MonsterTemplateEditor({
         name,
         size,
         type,
-        alignment: alignment || undefined,
+        alignment: normalizeAlignment(alignment),
         speed,
         challengeRating,
         source: source || undefined,
@@ -563,18 +566,7 @@ function MonsterTemplateEditor({
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-bold">Alignment</label>
-            <select
-              value={alignment}
-              onChange={e => setAlignment(e.target.value)}
-              className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-              disabled={saving}
-            >
-              <option value="">Select Alignment</option>
-              {VALID_ALIGNMENTS.map(align => (
-                <option key={align} value={align}>{align}</option>
-              ))}
-            </select>
+            <AlignmentSelect value={alignment} onChange={setAlignment} disabled={saving} showExtendedAlignments />
           </div>
 
           <div>

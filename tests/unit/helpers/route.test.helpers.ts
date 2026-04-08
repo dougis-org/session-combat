@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 /** Shared auth payload used across route unit tests */
 export const MOCK_AUTH = { userId: "user-123", email: "user@example.com" };
 
+/** Admin auth payload — userId must be a valid 24-char hex string for MongoDB ObjectId */
+export const ADMIN_AUTH = { userId: "507f1f77bcf86cd799439011", email: "admin@example.com" };
+
 /** Configure a mocked requireAuth/verifyAuth to return a 401 Unauthorized response */
 export function mockUnauthorized(mockedFn: jest.Mock): void {
   mockedFn.mockReturnValue(
@@ -127,4 +130,72 @@ export function itReturns500WithParams(
     const response = await handler(makeReq(), { params });
     expect(response.status).toBe(500);
   });
+}
+
+/** Internal: registers 3 alignment tests using a run() that wraps handler + optional context */
+function registerAlignmentTests(
+  run: (alignment: string | undefined) => Promise<Response>,
+  successStatus: 200 | 201,
+  setup?: () => void,
+): void {
+  it("returns 400 for invalid alignment", async () => {
+    setup?.();
+    const response = await run("chaotic pancake");
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toBe("Invalid alignment");
+  });
+
+  it(`returns ${successStatus} for valid alignment`, async () => {
+    setup?.();
+    const response = await run("Neutral Good");
+    expect(response.status).toBe(successStatus);
+  });
+
+  it(`normalizes valid alignment casing and whitespace`, async () => {
+    setup?.();
+    const response = await run(" neutral good ");
+    expect(response.status).toBe(successStatus);
+    const body = await response.json();
+    expect(body.alignment).toBe("Neutral Good");
+  });
+
+  it(`returns ${successStatus} when alignment is omitted`, async () => {
+    setup?.();
+    const response = await run(undefined);
+    expect(response.status).toBe(successStatus);
+  });
+}
+
+/**
+ * Register 3 alignment validation tests for a route handler without params.
+ * Assumes beforeEach has set up auth and storage, or pass setup() to do it per-test.
+ * Covers: invalid value → 400, valid value → successStatus, omitted → successStatus.
+ */
+export function itValidatesAlignmentField(
+  handler: RouteHandler,
+  makeReqWith: (alignment: string | undefined) => NextRequest,
+  successStatus: 200 | 201,
+  setup?: () => void,
+): void {
+  registerAlignmentTests((alignment) => handler(makeReqWith(alignment)), successStatus, setup);
+}
+
+/**
+ * Register 3 alignment validation tests for a route handler with params.
+ * Assumes beforeEach has set up auth and storage, or pass setup() to do it per-test.
+ * Covers: invalid value → 400, valid value → successStatus, omitted → successStatus.
+ */
+export function itValidatesAlignmentFieldWithParams(
+  handler: ContextHandler,
+  makeReqWith: (alignment: string | undefined) => NextRequest,
+  params: Promise<{ id: string }>,
+  successStatus: 200 | 201,
+  setup?: () => void,
+): void {
+  registerAlignmentTests(
+    (alignment) => handler(makeReqWith(alignment), { params }),
+    successStatus,
+    setup,
+  );
 }

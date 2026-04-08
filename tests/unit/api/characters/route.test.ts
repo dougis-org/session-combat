@@ -6,6 +6,7 @@ import {
   makeRouteRequest,
   itReturns401,
   itReturns500,
+  itValidatesAlignmentField,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
@@ -138,5 +139,15 @@ describe("POST /api/characters", () => {
     () => makeRequest({ name: "Doomed Hero" }),
     () => mockedStorage.saveCharacter.mockRejectedValue(new Error("Storage error")),
     mockedRequireAuth
+  );
+
+  itValidatesAlignmentField(
+    POST,
+    (alignment) => makeRequest({ name: "Hero", ...(alignment !== undefined && { alignment }) }),
+    201,
+    () => {
+      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+      mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+    },
   );
 });

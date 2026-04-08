@@ -90,4 +90,12 @@ describe('transformMonsterData – damage type filtering', () => {
     expect(result.damageImmunities).toEqual(['poison']);
     expect(result.damageVulnerabilities).toEqual(['lightning']);
   });
+
+  test('normalizes alignment casing and whitespace to canonical values', () => {
+    const result = transformMonsterData(
+      { ...MINIMAL_RAW, alignment: ' chaotic evil ' },
+      'user1',
+    );
+    expect(result.alignment).toBe('Chaotic Evil');
+  });
 });

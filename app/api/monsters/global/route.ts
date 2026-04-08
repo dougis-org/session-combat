@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
 import { getDatabase } from '@/lib/db';
 import { ALL_SRD_MONSTERS } from '@/lib/data/monsters';
@@ -96,6 +96,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const normalizedAlignment = normalizeAlignment(alignment);
+
+    // Validate alignment if provided
+    if (alignment !== undefined && alignment !== null && alignment !== '' && !normalizedAlignment) {
+      return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
+    }
+
     const template: MonsterTemplate = {
       id: randomUUID(),
       userId: GLOBAL_USER_ID,
@@ -120,7 +127,7 @@ export async function POST(request: NextRequest) {
       reactions: reactions || [],
       size: size || 'Medium',
       type: type || 'humanoid',
-      alignment: alignment || undefined,
+      alignment: normalizedAlignment,
       speed: speed || undefined,
       challengeRating: challengeRating || 0,
       experiencePoints: experiencePoints || 0,

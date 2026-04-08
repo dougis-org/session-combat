@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
 
 export async function GET(
   request: NextRequest,
@@ -104,6 +104,13 @@ export async function PUT(
       );
     }
 
+    const normalizedAlignment = normalizeAlignment(alignment);
+
+    // Validate alignment if provided
+    if (alignment !== undefined && alignment !== null && alignment !== '' && !normalizedAlignment) {
+      return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
+    }
+
     const updatedTemplate: MonsterTemplate = {
       ...existingTemplate,
       name: name.trim(),
@@ -126,7 +133,7 @@ export async function PUT(
       reactions: reactions !== undefined ? reactions : existingTemplate.reactions,
       size: size !== undefined ? size : existingTemplate.size,
       type: type !== undefined ? type : existingTemplate.type,
-      alignment: alignment !== undefined ? alignment : existingTemplate.alignment,
+      alignment: alignment !== undefined ? normalizedAlignment : existingTemplate.alignment,
       speed: speed !== undefined ? speed : existingTemplate.speed,
       challengeRating: challengeRating !== undefined ? challengeRating : existingTemplate.challengeRating,
       experiencePoints: experiencePoints !== undefined ? experiencePoints : existingTemplate.experiencePoints,
