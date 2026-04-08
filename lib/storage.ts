@@ -340,17 +340,14 @@ export const storage = {
       const db = await getDatabase();
       const { _id, ...partyData } = party;
 
-      // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
-      let query: any = { userId: party.userId };
-      if (party._id) {
-        query._id = new ObjectId(party._id);
-      } else {
-        query.id = party.id;
-      }
-
+      // Parties are persisted by app-level id plus userId, not MongoDB _id.
       await db
         .collection<Party>("parties")
-        .updateOne(query, { $set: partyData }, { upsert: true });
+        .updateOne(
+          { id: party.id, userId: party.userId },
+          { $set: partyData },
+          { upsert: true }
+        );
     } catch (error) {
       console.error("Error saving party:", error);
       throw error;
