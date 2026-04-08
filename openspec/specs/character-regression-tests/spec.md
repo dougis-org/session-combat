@@ -48,7 +48,7 @@
 
 #### Scenario: Alignment dropdown accepts a valid alignment selection
 - **WHEN** the character creation form is open
-- **THEN** `aria-label="Character alignment"` select is visible and enabled
+- **THEN** `aria-label="Alignment"` select is visible and enabled
 - **AND** selecting "Chaotic Good" updates the displayed value to "Chaotic Good"
 
 ### Requirement: Multiclass support is testable via the character form

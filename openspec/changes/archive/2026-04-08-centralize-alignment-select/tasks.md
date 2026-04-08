@@ -75,8 +75,8 @@ Write tests first for each route, then add the guard.
 - [x] Run TypeScript check: `npx tsc --noEmit`
 - [x] Run ESLint: `npm run lint`
 - [x] Run build: `npm run build`
-- [ ] Manually verify character editor shows alignment select with label "Alignment"
-- [ ] Manually verify monster editor shows alignment select with label "Alignment"
+- [x] Manually verify character editor shows alignment select with label "Alignment"
+- [x] Manually verify monster editor shows alignment select with label "Alignment"
 - [x] All completed tasks marked as complete
 
 ## Remote push validation
@@ -95,11 +95,11 @@ If **ANY** of the above fail, diagnose and fix before pushing.
 - [x] Run pre-PR self-review per `openspec/skills/openspec-apply-change/SKILL.md` before committing
 - [ ] Commit all changes to `feat/centralize-alignment-select` and push to remote
 - [ ] Open PR from `feat/centralize-alignment-select` to `main`; reference `#20` in PR body
-- [ ] Wait 120 seconds for automated reviewer comments
-- [ ] **Monitor PR comments** — address, commit, validate locally, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — diagnose failures, fix, validate locally, push; repeat until all checks pass
-- [ ] Wait for PR to merge — **never force-merge**; if human force-merges, continue to Post-Merge
+- [x] Wait 120 seconds for automated reviewer comments
+- [x] **Monitor PR comments** — address, commit, validate locally, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — diagnose failures, fix, validate locally, push; repeat until all checks pass
+- [x] Wait for PR to merge — **never force-merge**; if human force-merges, continue to Post-Merge
 
 Ownership metadata:
 
@@ -115,12 +115,12 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update `README.md` or component docs if applicable
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/centralize-alignment-select/` to `openspec/changes/archive/YYYY-MM-DD-centralize-alignment-select/` — **stage both the copy and the deletion in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-centralize-alignment-select/` exists and `openspec/changes/centralize-alignment-select/` is gone
-- [ ] Commit and push the archive commit to `main`
-- [ ] `git fetch --prune` and `git branch -d feat/centralize-alignment-select`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No documentation updates required for this change
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive the change: move `openspec/changes/centralize-alignment-select/` to `openspec/changes/archive/YYYY-MM-DD-centralize-alignment-select/` — **stage both the copy and the deletion in a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-centralize-alignment-select/` exists and `openspec/changes/centralize-alignment-select/` is gone
+- [x] Commit and push the archive commit to `main`
+- [x] `git fetch --prune` and `git branch -d feat/centralize-alignment-select`
