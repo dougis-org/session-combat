@@ -3,7 +3,7 @@
  * Validates and transforms user-uploaded monster data
  */
 
-import { MonsterTemplate, AbilityScores, CreatureAbility } from '@/lib/types';
+import { MonsterTemplate, AbilityScores, CreatureAbility, isValidAlignment } from '@/lib/types';
 import { filterToDamageTypes } from '@/lib/constants';
 
 /**
@@ -650,7 +650,7 @@ export function transformMonsterData(
     name: (raw.name as string).trim(),
     size: (raw.size || 'medium') as ValidSize,
     type: (raw.type || 'humanoid') as string,
-    alignment: raw.alignment ? (raw.alignment as string) : undefined,
+    alignment: isValidAlignment(raw.alignment) ? raw.alignment : undefined,
     ac: (raw.ac || 10) as number,
     acNote: raw.acNote ? (raw.acNote as string) : undefined,
     hp: Math.min(

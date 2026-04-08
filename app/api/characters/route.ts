@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Character, isValidRace, VALID_RACES, isValidClass, VALID_CLASSES, CharacterClass, calculateTotalLevel, validateCharacterClasses } from '@/lib/types';
+import { Character, isValidRace, VALID_RACES, isValidClass, VALID_CLASSES, CharacterClass, calculateTotalLevel, validateCharacterClasses, isValidAlignment } from '@/lib/types';
 
 export async function GET(request: NextRequest) {
   const auth = requireAuth(request);
@@ -70,6 +70,11 @@ export async function POST(request: NextRequest) {
         { error: 'Gender must be a string of 50 characters or fewer' },
         { status: 400 }
       );
+    }
+
+    // Validate alignment if provided
+    if (alignment !== undefined && alignment !== '' && !isValidAlignment(alignment)) {
+      return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
     }
 
     // Validate race if provided

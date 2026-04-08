@@ -7,7 +7,7 @@ const baseMonster: Monster = {
   name: 'Fire Elemental',
   type: 'elemental',
   size: 'large',
-  alignment: 'neutral',
+  alignment: 'Neutral',
   speed: '50 ft.',
   challengeRating: 5,
   hp: 102,

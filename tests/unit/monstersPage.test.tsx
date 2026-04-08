@@ -316,4 +316,15 @@ describe('MonstersContent grid layout and modal editor', () => {
 
     expect(container.querySelector('.fixed.inset-0.z-50')).toBeNull();
   });
+
+  test('MonsterTemplateEditor renders an alignment select with aria-label="Alignment"', async () => {
+    await renderPage();
+    const editButtons = Array.from(container.querySelectorAll('button')).filter(
+      b => b.textContent === 'Edit',
+    );
+    await act(async () => { editButtons[0].click(); });
+
+    const alignmentSelect = container.querySelector('select[aria-label="Alignment"]') as HTMLSelectElement | null;
+    expect(alignmentSelect).not.toBeNull();
+  });
 });

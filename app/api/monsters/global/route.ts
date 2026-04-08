@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate, isValidAlignment } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
 import { getDatabase } from '@/lib/db';
 import { ALL_SRD_MONSTERS } from '@/lib/data/monsters';
@@ -94,6 +94,11 @@ export async function POST(request: NextRequest) {
         { error: 'Max HP must be greater than 0' },
         { status: 400 }
       );
+    }
+
+    // Validate alignment if provided
+    if (alignment !== undefined && alignment !== '' && !isValidAlignment(alignment)) {
+      return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
     }
 
     const template: MonsterTemplate = {

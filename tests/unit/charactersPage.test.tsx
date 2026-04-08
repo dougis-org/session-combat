@@ -134,3 +134,21 @@ describe('CharactersContent — gender field', () => {
     expect(genderInput).not.toBeNull();
   });
 });
+
+describe('CharactersContent — alignment field', () => {
+  test('CharacterEditor renders an alignment select with aria-label="Alignment"', async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<CharactersContent />);
+    });
+
+    const buttons = Array.from(container.querySelectorAll('button'));
+    const addBtn = buttons.find(b => b.textContent?.includes('Add New Character'));
+    if (addBtn) {
+      await act(async () => { addBtn.click(); });
+    }
+
+    const alignmentSelect = container.querySelector('select[aria-label="Alignment"]') as HTMLSelectElement | null;
+    expect(alignmentSelect).not.toBeNull();
+  });
+});

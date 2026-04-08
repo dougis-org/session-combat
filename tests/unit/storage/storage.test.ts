@@ -159,7 +159,7 @@ describe("storage entity loader normalization", () => {
       userId: "user1",
       size: "medium",
       type: "humanoid",
-      alignment: "neutral",
+      alignment: "Neutral",
       speed: "30 ft.",
       challengeRating: 1,
       abilityScores: {

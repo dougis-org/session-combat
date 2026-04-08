@@ -10,6 +10,7 @@ import {
   CharacterClass,
   calculateTotalLevel,
   validateCharacterClasses,
+  isValidAlignment,
 } from "@/lib/types";
 
 export async function GET(
@@ -107,6 +108,11 @@ export async function PUT(
         { error: "Gender must be a string of 50 characters or fewer" },
         { status: 400 },
       );
+    }
+
+    // Validate alignment if provided
+    if (alignment !== undefined && alignment !== '' && !isValidAlignment(alignment)) {
+      return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
     }
 
     // Validate race if provided

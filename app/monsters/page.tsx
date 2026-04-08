@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
-import { MonsterTemplate, VALID_ALIGNMENTS } from '@/lib/types';
+import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
+import { MonsterTemplate, DnDAlignment } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
 import { filterMonsters, getAvailableTypes } from './filterUtils';
 
@@ -493,7 +494,7 @@ function MonsterTemplateEditor({
         name,
         size,
         type,
-        alignment: alignment || undefined,
+        alignment: (alignment as DnDAlignment) || undefined,
         speed,
         challengeRating,
         source: source || undefined,
@@ -563,18 +564,7 @@ function MonsterTemplateEditor({
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-bold">Alignment</label>
-            <select
-              value={alignment}
-              onChange={e => setAlignment(e.target.value)}
-              className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-              disabled={saving}
-            >
-              <option value="">Select Alignment</option>
-              {VALID_ALIGNMENTS.map(align => (
-                <option key={align} value={align}>{align}</option>
-              ))}
-            </select>
+            <AlignmentSelect value={alignment} onChange={setAlignment} disabled={saving} showExtendedAlignments />
           </div>
 
           <div>

@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
-import { Character, AbilityScores, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, VALID_ALIGNMENTS, DnDRace } from '@/lib/types';
+import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
+import { Character, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, DnDRace, DnDAlignment } from '@/lib/types';
 
 interface ImportConflictState {
   existingCharacterName: string;
@@ -439,7 +440,7 @@ function CharacterEditor({
         classes,
         race: (race as DnDRace) || undefined,
         gender: gender.trim(),
-        alignment: alignment || undefined,
+        alignment: (alignment as DnDAlignment) || undefined,
       };
       await onSave(characterData);
     } finally {
@@ -545,19 +546,7 @@ function CharacterEditor({
         </div>
 
         <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-bold">Alignment</label>
-          <select
-            value={alignment}
-            onChange={e => setAlignment(e.target.value)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-            aria-label="Character alignment"
-          >
-            <option value="">Select Alignment</option>
-            {VALID_ALIGNMENTS.map(align => (
-              <option key={align} value={align}>{align}</option>
-            ))}
-          </select>
+          <AlignmentSelect value={alignment} onChange={setAlignment} disabled={saving} />
         </div>
 
         <div className="md:col-span-2">

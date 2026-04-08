@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { MonsterTemplate } from '@/lib/types';
+import { MonsterTemplate, isValidAlignment } from '@/lib/types';
 
 export async function GET(
   request: NextRequest,
@@ -102,6 +102,11 @@ export async function PUT(
         { error: 'Max HP must be greater than 0' },
         { status: 400 }
       );
+    }
+
+    // Validate alignment if provided
+    if (alignment !== undefined && alignment !== '' && !isValidAlignment(alignment)) {
+      return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
     }
 
     const updatedTemplate: MonsterTemplate = {

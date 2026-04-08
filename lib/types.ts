@@ -95,7 +95,7 @@ export function isValidRace(raceName: unknown): raceName is DnDRace {
   );
 }
 
-// D&D 5e Alignments - standard 9-alignment system
+// D&D 5e Alignments - the 9-alignment grid plus official stat block values
 export const VALID_ALIGNMENTS = [
   "Lawful Good",
   "Neutral Good",
@@ -106,6 +106,16 @@ export const VALID_ALIGNMENTS = [
   "Lawful Evil",
   "Neutral Evil",
   "Chaotic Evil",
+  // Official 5e stat block values for creatures outside the 9-alignment grid
+  "Unaligned",
+  "Any Alignment",
+  "Any Good Alignment",
+  "Any Evil Alignment",
+  "Any Chaotic Alignment",
+  "Any Lawful Alignment",
+  "Any Non-Good Alignment",
+  "Any Non-Lawful Alignment",
+  "Neutral Good (50%) or Neutral Evil (50%)",
 ] as const;
 
 export type DnDAlignment = (typeof VALID_ALIGNMENTS)[number];
@@ -287,7 +297,7 @@ export interface MonsterTemplate extends CreatureStats {
   name: string;
   size: "tiny" | "small" | "medium" | "large" | "huge" | "gargantuan";
   type: string; // e.g., 'humanoid', 'beast', 'dragon', 'undead', etc.
-  alignment?: string; // e.g., 'chaotic evil', 'neutral', etc.
+  alignment?: DnDAlignment; // e.g., 'chaotic evil', 'neutral', etc.
   // Speed
   speed: string; // e.g., "30 ft.", "30 ft., fly 60 ft."
   // Challenge Rating
@@ -315,7 +325,7 @@ export interface Monster extends CreatureStats {
   name: string;
   size: "tiny" | "small" | "medium" | "large" | "huge" | "gargantuan";
   type: string;
-  alignment?: string;
+  alignment?: DnDAlignment;
   // Speed
   speed: string;
   // Challenge
@@ -350,7 +360,7 @@ export interface Character extends CreatureStats {
   race?: DnDRace; // Must be one of the valid D&D 5e races
   gender?: string;
   background?: string;
-  alignment?: string;
+  alignment?: DnDAlignment;
   createdAt?: Date;
   updatedAt?: Date;
   /**

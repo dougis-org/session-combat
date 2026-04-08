@@ -90,3 +90,29 @@ describe("PUT /api/characters/[id] — gender validation", () => {
     expect(body.gender).toBe("Female");
   });
 });
+
+describe("PUT /api/characters/[id] — alignment validation", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
+    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+  });
+
+  it("returns 400 for invalid alignment", async () => {
+    const response = await PUT(makeRequest({ alignment: "true neutral" }), { params: PARAMS });
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toBe("Invalid alignment");
+  });
+
+  it("returns 200 for valid alignment", async () => {
+    const response = await PUT(makeRequest({ alignment: "Lawful Evil" }), { params: PARAMS });
+    expect(response.status).toBe(200);
+  });
+
+  it("returns 200 when alignment is omitted", async () => {
+    const response = await PUT(makeRequest({ name: "Lyra" }), { params: PARAMS });
+    expect(response.status).toBe(200);
+  });
+});
