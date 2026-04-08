@@ -40,21 +40,12 @@ describe("storage.saveParty", () => {
     };
 
     await storage.saveParty(party);
+    const { _id, ...expectedPartyData } = party;
 
     expect(mockCollection).toHaveBeenCalledWith("parties");
     expect(mockUpdateOne).toHaveBeenCalledWith(
-      { id: "party-123", userId: "user-1" },
-      {
-        $set: {
-          id: "party-123",
-          userId: "user-1",
-          name: "Updated Party",
-          description: "Edited without relying on MongoDB _id",
-          characterIds: ["char-1"],
-          createdAt: new Date("2026-04-07T00:00:00.000Z"),
-          updatedAt: new Date("2026-04-07T00:05:00.000Z"),
-        },
-      },
+      { id: party.id, userId: party.userId },
+      { $set: expectedPartyData },
       { upsert: true }
     );
   });
