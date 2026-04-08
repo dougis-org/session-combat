@@ -650,7 +650,12 @@ export function transformMonsterData(
     name: (raw.name as string).trim(),
     size: (raw.size || 'medium') as ValidSize,
     type: (raw.type || 'humanoid') as string,
-    alignment: isValidAlignment(raw.alignment) ? raw.alignment : undefined,
+    alignment: (() => {
+      if (raw.alignment === undefined || raw.alignment === null || raw.alignment === '') return undefined;
+      if (isValidAlignment(raw.alignment)) return raw.alignment;
+      console.warn(`transformMonsterData: unrecognised alignment "${raw.alignment}" dropped`);
+      return undefined;
+    })(),
     ac: (raw.ac || 10) as number,
     acNote: raw.acNote ? (raw.acNote as string) : undefined,
     hp: Math.min(

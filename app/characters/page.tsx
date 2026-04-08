@@ -6,7 +6,7 @@ import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
-import { Character, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, DnDRace, DnDAlignment } from '@/lib/types';
+import { Character, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, DnDRace, isValidAlignment } from '@/lib/types';
 
 interface ImportConflictState {
   existingCharacterName: string;
@@ -440,7 +440,7 @@ function CharacterEditor({
         classes,
         race: (race as DnDRace) || undefined,
         gender: gender.trim(),
-        alignment: (alignment as DnDAlignment) || undefined,
+        alignment: isValidAlignment(alignment) ? alignment : undefined,
       };
       await onSave(characterData);
     } finally {

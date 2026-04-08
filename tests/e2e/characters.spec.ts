@@ -79,7 +79,7 @@ test.describe("Character creation — validation and form interactions", () => {
   });
 
   test('alignment dropdown is visible and accepts "Chaotic Good"', async ({ page }) => {
-    const alignmentSelect = page.getByLabel("Character alignment");
+    const alignmentSelect = page.getByLabel("Alignment");
     await expect(alignmentSelect).toBeVisible();
     await alignmentSelect.selectOption("Chaotic Good");
     await expect(alignmentSelect).toHaveValue("Chaotic Good");

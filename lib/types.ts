@@ -297,7 +297,7 @@ export interface MonsterTemplate extends CreatureStats {
   name: string;
   size: "tiny" | "small" | "medium" | "large" | "huge" | "gargantuan";
   type: string; // e.g., 'humanoid', 'beast', 'dragon', 'undead', etc.
-  alignment?: DnDAlignment; // e.g., 'chaotic evil', 'neutral', etc.
+  alignment?: DnDAlignment; // e.g., 'Chaotic Evil', 'Neutral', etc.
   // Speed
   speed: string; // e.g., "30 ft.", "30 ft., fly 60 ft."
   // Challenge Rating

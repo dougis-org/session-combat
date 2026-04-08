@@ -6,7 +6,7 @@ import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
-import { MonsterTemplate, DnDAlignment } from '@/lib/types';
+import { MonsterTemplate, isValidAlignment } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
 import { filterMonsters, getAvailableTypes } from './filterUtils';
 
@@ -494,7 +494,7 @@ function MonsterTemplateEditor({
         name,
         size,
         type,
-        alignment: (alignment as DnDAlignment) || undefined,
+        alignment: isValidAlignment(alignment) ? alignment : undefined,
         speed,
         challengeRating,
         source: source || undefined,

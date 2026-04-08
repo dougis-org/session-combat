@@ -111,7 +111,7 @@ export async function PUT(
     }
 
     // Validate alignment if provided
-    if (alignment !== undefined && alignment !== '' && !isValidAlignment(alignment)) {
+    if (alignment !== undefined && alignment !== null && alignment !== '' && !isValidAlignment(alignment)) {
       return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
     }
 
