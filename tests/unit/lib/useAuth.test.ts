@@ -30,8 +30,12 @@ function renderHook(): { result: { current: HookResult }; unmount: () => void } 
   const resultRef: { current: HookResult } = { current: undefined as any };
 
   function Probe() {
-    // eslint-disable-next-line react-hooks/immutability
-    resultRef.current = useAuth();
+    const auth = useAuth();
+
+    React.useEffect(() => {
+      resultRef.current = auth;
+    }, [auth]);
+
     return null;
   }
 

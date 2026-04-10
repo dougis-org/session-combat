@@ -110,8 +110,8 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 - [x] Run the required pre-PR self-review before committing
 - [x] Commit all changes to `fix-lint-workflow` branch and push to remote
-- [ ] Open PR from `fix-lint-workflow` to `main` — reference issue #130 in the PR body
-- [ ] Wait 120 seconds for agentic reviewers to post comments
+- [x] Open PR from `fix-lint-workflow` to `main` — reference issue #130 in the PR body
+- [x] Wait 120 seconds for agentic reviewers to post comments
 - [ ] **Monitor PR comments** — address each one, commit fixes, follow all steps in Remote push validation, push; repeat until no unresolved comments remain
 - [ ] Enable auto-merge once no blocking review comments remain
 - [ ] **Monitor CI checks** — when any check fails, diagnose and fix, commit, follow Remote push validation, push; repeat until all checks pass

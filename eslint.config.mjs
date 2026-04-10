@@ -1,7 +1,11 @@
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 
+const baseConfig = Array.isArray(nextCoreWebVitals)
+  ? nextCoreWebVitals
+  : [nextCoreWebVitals];
+
 const config = [
-  ...nextCoreWebVitals,
+  ...baseConfig,
   {
     ignores: [
       ".next/**",
