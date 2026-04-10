@@ -27,10 +27,11 @@ function renderHook(): { result: { current: HookResult }; unmount: () => void } 
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  const result: { current: HookResult } = { current: undefined as any };
+  const resultRef: { current: HookResult } = { current: undefined as any };
 
   function Probe() {
-    result.current = useAuth();
+    // eslint-disable-next-line react-hooks/immutability
+    resultRef.current = useAuth();
     return null;
   }
 
@@ -39,7 +40,7 @@ function renderHook(): { result: { current: HookResult }; unmount: () => void } 
   });
 
   return {
-    result,
+    result: resultRef,
     unmount: () => {
       act(() => { root.unmount(); });
       container.remove();
