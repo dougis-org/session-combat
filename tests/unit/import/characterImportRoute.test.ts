@@ -11,6 +11,7 @@ import {
   EXISTING_IMPORTED_CHARACTER_ID,
   IMPORT_WARNING,
 } from "@/tests/helpers/dndBeyondImport";
+import { MOCK_AUTH } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({
   requireAuth: jest.fn(),
@@ -49,7 +50,7 @@ describe("character import route", () => {
     mockedSaveCharacter.mockReset();
     mockedImportCharacter.mockReset();
 
-    mockedRequireAuth.mockReturnValue({ userId: "user-123" });
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedLoadCharacters.mockResolvedValue([]);
     mockedSaveCharacter.mockResolvedValue(undefined);
     mockedImportCharacter.mockResolvedValue(createNormalizedImportResult());
