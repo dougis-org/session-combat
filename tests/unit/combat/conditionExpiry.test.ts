@@ -2,16 +2,27 @@ import { describe, test, expect } from '@jest/globals';
 import { getExpiringConditions, tickConditions, processRoundEnd } from '@/lib/combat/conditionExpiry';
 import { CombatantState } from '@/lib/types';
 
-function makeCombatant(overrides: Partial<CombatantState> & { name: string }): CombatantState {
+function makeCombatant({
+  name,
+  ...overrides
+}: Partial<CombatantState> & { name: string }): CombatantState {
   return {
-    id: overrides.name,
-    name: overrides.name,
+    id: name,
+    name,
     type: 'player',
     initiative: 10,
     initiativeRoll: { roll: 10, bonus: 0, total: 10, method: 'manual' },
     maxHp: 10,
-    currentHp: 10,
-    armorClass: 10,
+    hp: 10,
+    ac: 10,
+    abilityScores: {
+      strength: 10,
+      dexterity: 10,
+      constitution: 10,
+      intelligence: 10,
+      wisdom: 10,
+      charisma: 10,
+    },
     conditions: [],
     ...overrides,
   };

@@ -5,7 +5,7 @@ import type { ActiveDamageEffect } from '@/lib/types';
 const eff = (
   type: ActiveDamageEffect['type'],
   kind: ActiveDamageEffect['kind'],
-  label = kind,
+  label: string = kind,
 ): ActiveDamageEffect => ({ type, kind, label });
 
 // ---------------------------------------------------------------------------

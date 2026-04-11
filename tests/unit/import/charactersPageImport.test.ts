@@ -11,6 +11,7 @@ import {
 import React from "react";
 import { act } from "react";
 import { createRoot, Root } from "react-dom/client";
+import { Response as FetchResponse } from "node-fetch";
 import { CharactersContent } from "@/app/characters/page";
 import {
   CONFLICT_WARNING,
@@ -19,6 +20,13 @@ import {
   DND_BEYOND_CHARACTER_URL,
   IMPORT_WARNING,
 } from "@/tests/helpers/dndBeyondImport";
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return new FetchResponse(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  }) as unknown as Response;
+}
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -60,47 +68,24 @@ describe("Characters page import UI", () => {
         const url = input.toString();
 
         if (url === "/api/characters" && (!init || init.method === undefined)) {
-          return {
-            ok: true,
-            status: 200,
-            json: async () => [],
-          } as Response;
+          return jsonResponse([], 200);
         }
 
         if (url === "/api/characters/import") {
           const body = JSON.parse(String(init?.body || "{}"));
 
           if (!body.overwrite) {
-            return {
-              ok: false,
-              status: 409,
-              headers: new Headers({ "Content-Type": "application/json" }),
-              json: async () => createDuplicateNameConflictPayload(),
-            } as Response;
+            return jsonResponse(createDuplicateNameConflictPayload(), 409);
           }
 
-          return {
-            ok: true,
-            status: 200,
-            headers: new Headers({ "Content-Type": "application/json" }),
-            json: async () => createImportedCharacterApiPayload(),
-          } as Response;
+          return jsonResponse(createImportedCharacterApiPayload(), 200);
         }
 
         if (url.startsWith("/api/characters/") && init?.method === "DELETE") {
-          return {
-            ok: true,
-            status: 200,
-            json: async () => ({}),
-          } as Response;
+          return jsonResponse({}, 200);
         }
 
-        return {
-          ok: false,
-          status: 404,
-          headers: new Headers({ "Content-Type": "application/json" }),
-          json: async () => ({ error: "not found" }),
-        } as Response;
+        return jsonResponse({ error: "not found" }, 404);
       },
     ) as typeof fetch;
   });
@@ -243,32 +228,17 @@ describe("Characters page import UI", () => {
         const url = input.toString();
 
         if (url === "/api/characters" && (!init || init.method === undefined)) {
-          return {
-            ok: true,
-            status: 200,
-            headers: new Headers({ "Content-Type": "application/json" }),
-            json: async () => [],
-          } as Response;
+          return jsonResponse([], 200);
         }
 
         if (url === "/api/characters/import") {
-          return {
-            ok: false,
+          return new FetchResponse("gateway timeout", {
             status: 502,
-            headers: new Headers({ "Content-Type": "text/plain" }),
-            text: async () => "gateway timeout",
-            json: async () => {
-              throw new Error("not json");
-            },
-          } as Response;
+            headers: { "Content-Type": "text/plain" },
+          }) as unknown as Response;
         }
 
-        return {
-          ok: false,
-          status: 404,
-          headers: new Headers({ "Content-Type": "application/json" }),
-          json: async () => ({ error: "not found" }),
-        } as Response;
+        return jsonResponse({ error: "not found" }, 404);
       },
     ) as typeof fetch;
 

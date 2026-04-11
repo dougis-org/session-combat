@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { AuthPayload } from "@/lib/types";
 
 /** Shared auth payload used across route unit tests */
-export const MOCK_AUTH = { userId: "user-123", email: "user@example.com" };
+export const MOCK_AUTH: AuthPayload = {
+  userId: "user-123",
+  email: "user@example.com",
+};
 
 /** Admin auth payload — userId must be a valid 24-char hex string for MongoDB ObjectId */
-export const ADMIN_AUTH = { userId: "507f1f77bcf86cd799439011", email: "admin@example.com" };
+export const ADMIN_AUTH: AuthPayload = {
+  userId: "507f1f77bcf86cd799439011",
+  email: "admin@example.com",
+};
 
 /** Configure a mocked requireAuth/verifyAuth to return a 401 Unauthorized response */
 export function mockUnauthorized(mockedFn: jest.Mock): void {
@@ -47,13 +54,13 @@ export function makeRouteRequest(
 // describe() block. Use them to avoid repeating the identical 401/404/500
 // boilerplate in every describe block.
 
-type RouteHandler = (req: NextRequest) => Promise<Response> | Response;
+type RouteHandler = (req: NextRequest) => Promise<Response>;
 // Note: params is Promise<...> because Next.js 15 App Router made route params
 // async. Route handlers await params before reading id.
 type ContextHandler = (
   req: NextRequest,
   ctx: { params: Promise<{ id: string }> }
-) => Promise<Response> | Response;
+) => Promise<Response>;
 
 /** Register: returns 401 when requireAuth returns Unauthorized (no route params) */
 export function itReturns401(

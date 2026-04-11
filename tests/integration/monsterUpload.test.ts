@@ -347,8 +347,9 @@ describe("Monster Upload Validation", () => {
       expect(result.source).toBe("SRD");
       expect(result.abilityScores.strength).toBe(21);
       expect(result.languages).toHaveLength(1);
-      expect(result.traits).toHaveLength(1);
-      expect(result.traits[0].name).toBe("Amphibious");
+      const traits = result.traits ?? [];
+      expect(traits).toHaveLength(1);
+      expect(traits[0]?.name).toBe("Amphibious");
     });
 
     it("should clamp hp to maxHp if provided value is higher", () => {
