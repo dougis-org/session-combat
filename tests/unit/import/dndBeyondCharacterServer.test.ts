@@ -14,14 +14,17 @@ describe("dndBeyondCharacterImport server module", () => {
   const originalEnv = { ...process.env };
 
   function setEnv(overrides: Partial<NodeJS.ProcessEnv>): void {
-    process.env = {
-      ...process.env,
-      ...overrides,
-    };
+    Object.assign(process.env, overrides);
   }
 
   afterEach(() => {
-    process.env = { ...originalEnv };
+    for (const key of Object.keys(process.env)) {
+      if (!(key in originalEnv)) {
+        delete process.env[key];
+      }
+    }
+
+    Object.assign(process.env, originalEnv);
   });
 
   test("fetches the public character-service payload", async () => {
