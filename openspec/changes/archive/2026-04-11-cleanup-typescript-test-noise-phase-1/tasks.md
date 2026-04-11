@@ -2,7 +2,7 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git checkout main` and
+- [x] **Step 1 — Sync default branch:** `git checkout main` and
   `git pull --ff-only`
 - [x] **Step 2 — Create and publish working branch:**
   `git checkout -b cleanup-typescript-test-noise-phase-1` then immediately
@@ -68,16 +68,16 @@ Use the project's documented commands for each of the above (see `README.md`,
   `.github/openspec-shared/.codex/skills/openspec-apply-change/SKILL.md` before
   committing
 - [x] Commit all changes to the working branch and push to remote
-- [ ] Open PR from working branch to `main`
-- [ ] Wait for 120 seconds for the Agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — when comments appear, address them, commit
+- [x] Open PR from working branch to `main`
+- [x] Wait for 120 seconds for the Agentic reviewers to post their comments
+- [x] **Monitor PR comments** — when comments appear, address them, commit
   fixes, follow all steps in [Remote push validation] then push to the same
   working branch; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — when any CI check fails, diagnose and fix the
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — when any CI check fails, diagnose and fix the
   failure, commit fixes, follow all steps in [Remote push validation] then push
   to the same working branch; repeat until all checks pass
-- [ ] Wait for the PR to merge — **never force-merge**; if a human force-merges,
+- [x] Wait for the PR to merge — **never force-merge**; if a human force-merges,
   continue to Post-Merge
 
 The comment and CI resolution loops are iterative: address → validate locally →
@@ -101,21 +101,21 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change, if any
-- [ ] Sync approved spec deltas into `openspec/specs/` if this change is
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change, if any
+- [x] Sync approved spec deltas into `openspec/specs/` if this change is
   approved for long-term global spec retention
-- [ ] Archive the change: move
+- [x] Archive the change: move
   `openspec/changes/cleanup-typescript-test-noise-phase-1/` to
   `openspec/changes/archive/YYYY-MM-DD-cleanup-typescript-test-noise-phase-1/`
   **and stage both the new location and the deletion of the old location in a
   single commit** — do not commit the copy and delete separately
-- [ ] Confirm the archive location exists and the original change directory is
+- [x] Confirm the archive location exists and the original change directory is
   gone
-- [ ] Commit and push the archive to `main` in one commit
-- [ ] Prune merged local feature branches:
+- [x] Commit and push the archive to `main` in one commit
+- [x] Prune merged local feature branches:
   `git fetch --prune` and
   `git branch -d cleanup-typescript-test-noise-phase-1`
 
