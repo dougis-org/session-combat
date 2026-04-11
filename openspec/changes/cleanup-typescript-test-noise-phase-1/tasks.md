@@ -4,7 +4,7 @@
 
 - [ ] **Step 1 — Sync default branch:** `git checkout main` and
   `git pull --ff-only`
-- [ ] **Step 2 — Create and publish working branch:**
+- [x] **Step 2 — Create and publish working branch:**
   `git checkout -b cleanup-typescript-test-noise-phase-1` then immediately
   `git push -u origin cleanup-typescript-test-noise-phase-1`
 
@@ -64,10 +64,10 @@ Use the project's documented commands for each of the above (see `README.md`,
 
 ## PR and Merge
 
-- [ ] Run the required pre-PR self-review from
+- [x] Run the required pre-PR self-review from
   `.github/openspec-shared/.codex/skills/openspec-apply-change/SKILL.md` before
   committing
-- [ ] Commit all changes to the working branch and push to remote
+- [x] Commit all changes to the working branch and push to remote
 - [ ] Open PR from working branch to `main`
 - [ ] Wait for 120 seconds for the Agentic reviewers to post their comments
 - [ ] **Monitor PR comments** — when comments appear, address them, commit
