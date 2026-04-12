@@ -9,6 +9,14 @@ import {
   unsupportedDndBeyondCharacterResponse,
 } from "@/tests/fixtures/dndBeyondCharacter";
 
+function expectDefined<T>(value: T | undefined, label: string): T {
+  expect(value).toBeDefined();
+  if (value === undefined) {
+    throw new Error(`${label} should be defined`);
+  }
+  return value;
+}
+
 describe("dndBeyondCharacterImport", () => {
   test("rejects a non-URL string", () => {
     expect(() => parseDndBeyondCharacterUrl("not-a-url")).toThrow(
@@ -95,7 +103,8 @@ describe("dndBeyondCharacterImport", () => {
         description: "Use your reaction to halve the attack's damage.",
       },
     ]);
-    expect(result.character.senses["passive perception"]).toBe("18");
+    const senses = expectDefined(result.character.senses, "senses");
+    expect(senses["passive perception"]).toBe("18");
     expect(result.warnings).toEqual([]);
   });
 
@@ -366,7 +375,8 @@ describe("dndBeyondCharacterImport", () => {
     expect(result.character.languages).toEqual(
       expect.arrayContaining(["Common", "Infernal", "Deep Speech"]),
     );
-    expect(result.character.senses).toMatchObject({
+    const senses = expectDefined(result.character.senses, "senses");
+    expect(senses).toMatchObject({
       blindsight: "15 ft.",
       darkvision: "60 ft.",
       speed: "30 ft.",
@@ -376,8 +386,13 @@ describe("dndBeyondCharacterImport", () => {
     expect(result.character.conditionImmunities).toContain("Poisoned");
     expect(result.character.damageResistances).toContain("fire");
     expect(result.character.damageVulnerabilities).toContain("cold");
-    expect(result.character.savingThrows.wisdom).toBe(5);
-    expect(result.character.skills.stealth).toBe(9);
+    const savingThrows = expectDefined(
+      result.character.savingThrows,
+      "savingThrows",
+    );
+    const skills = expectDefined(result.character.skills, "skills");
+    expect(savingThrows.wisdom).toBe(5);
+    expect(skills.stealth).toBe(9);
     expect(result.character.actions).toEqual(
       expect.arrayContaining([
         {
@@ -418,9 +433,10 @@ describe("dndBeyondCharacterImport", () => {
       },
     });
 
-    expect(result.character.senses.speed).toBeUndefined();
-    expect(result.character.senses["passive insight"]).toBe("10");
-    expect(result.character.senses["passive investigation"]).toBe("13");
+    const senses = expectDefined(result.character.senses, "senses");
+    expect(senses.speed).toBeUndefined();
+    expect(senses["passive insight"]).toBe("10");
+    expect(senses["passive investigation"]).toBe("13");
   });
 
   test("omits actions whose sanitized descriptions are empty", () => {
