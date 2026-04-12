@@ -57,7 +57,7 @@ export function createNormalizedImportResult(
     character: createImportedCharacterDraft(),
     warnings: [IMPORT_WARNING],
     sourceCharacterId: String(sampleDndBeyondCharacterResponse.data.id),
-    sourceUrl: sampleDndBeyondCharacterResponse.data.readonlyUrl,
+    sourceUrl: sampleDndBeyondCharacterResponse.data.readonlyUrl ?? undefined,
     ...overrides,
   };
 }

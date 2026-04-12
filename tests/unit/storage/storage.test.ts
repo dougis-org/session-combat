@@ -22,7 +22,6 @@ function makeMockCollection() {
 describe("storage.loadCharacters", () => {
   let charactersActiveMock: ReturnType<typeof makeMockCollection>;
   let charactersMock: ReturnType<typeof makeMockCollection>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockDb: any;
 
   beforeEach(() => {
@@ -88,7 +87,6 @@ describe("storage entity loader normalization", () => {
   let encountersMock: ReturnType<typeof makeMockCollection>;
   let partiesMock: ReturnType<typeof makeMockCollection>;
   let templatesMock: ReturnType<typeof makeMockCollection>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockDb: any;
 
   beforeEach(() => {
@@ -204,7 +202,6 @@ describe("storage entity loader normalization", () => {
 describe("storage.deleteCharacter", () => {
   let charactersMock: ReturnType<typeof makeMockCollection>;
   let partiesMock: ReturnType<typeof makeMockCollection>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockDb: any;
 
   beforeEach(() => {
