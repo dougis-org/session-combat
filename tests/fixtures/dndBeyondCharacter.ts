@@ -8,7 +8,7 @@ type DndBeyondFixtureResponse = {
   pagination: null;
 };
 
-export const sampleDndBeyondCharacterResponse = {
+export const sampleDndBeyondCharacterResponse: DndBeyondFixtureResponse = {
   id: 91913267,
   success: true,
   message: "OK",
@@ -279,9 +279,9 @@ export const sampleDndBeyondCharacterResponse = {
     },
   },
   pagination: null,
-} satisfies DndBeyondFixtureResponse;
+};
 
-export const unsupportedDndBeyondCharacterResponse = {
+export const unsupportedDndBeyondCharacterResponse: DndBeyondFixtureResponse = {
   ...sampleDndBeyondCharacterResponse,
   data: {
     ...sampleDndBeyondCharacterResponse.data,
@@ -291,9 +291,9 @@ export const unsupportedDndBeyondCharacterResponse = {
       fullName: "Warforged",
     },
   },
-} satisfies DndBeyondFixtureResponse;
+};
 
-export const mountainDwarfCharacterResponse = {
+export const mountainDwarfCharacterResponse: DndBeyondFixtureResponse = {
   ...sampleDndBeyondCharacterResponse,
   data: {
     ...sampleDndBeyondCharacterResponse.data,
@@ -302,9 +302,9 @@ export const mountainDwarfCharacterResponse = {
       fullName: "Mountain Dwarf",
     },
   },
-} satisfies DndBeyondFixtureResponse;
+};
 
-export const aasimarArtificerCharacterResponse = {
+export const aasimarArtificerCharacterResponse: DndBeyondFixtureResponse = {
   ...sampleDndBeyondCharacterResponse,
   data: {
     ...sampleDndBeyondCharacterResponse.data,
@@ -321,4 +321,4 @@ export const aasimarArtificerCharacterResponse = {
       },
     ],
   },
-} satisfies DndBeyondFixtureResponse;
+};
