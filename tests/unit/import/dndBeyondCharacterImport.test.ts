@@ -9,10 +9,11 @@ import {
   unsupportedDndBeyondCharacterResponse,
 } from "@/tests/fixtures/dndBeyondCharacter";
 
-function expectDefined<T>(value: T | undefined, label: string): T {
+function expectDefined<T>(value: T | undefined | null, label: string): T {
   expect(value).toBeDefined();
-  if (value === undefined) {
-    throw new Error(`${label} should be defined`);
+  expect(value).not.toBeNull();
+  if (value === undefined || value === null) {
+    throw new Error(`${label} should be defined and not null`);
   }
   return value;
 }
