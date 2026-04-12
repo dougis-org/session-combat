@@ -2,7 +2,7 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git checkout main` and
+- [x] **Step 1 — Sync default branch:** `git checkout main` and
   `git pull --ff-only`
 - [x] **Step 2 — Create and publish working branch:** `git checkout -b fix/align-dnd-beyond-fixture-contracts`
   then immediately `git push -u origin fix/align-dnd-beyond-fixture-contracts`
@@ -33,14 +33,14 @@ Suggested start-of-work commands:
 
 - [x] Run targeted unit tests:
   `npm run test:unit -- tests/unit/import/dndBeyondCharacterImport.test.ts`
-- [ ] Run any directly related import integration tests if fixture changes touch
+- [x] Run any directly related import integration tests if fixture changes touch
   shared import helpers
 - [x] Run repo-wide typecheck: `npx tsc --noEmit`
 - [x] Run lint: `npm run lint`
 - [x] Run build: `npm run build`
-- [ ] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run security/code quality checks required by project standards
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -60,17 +60,17 @@ Use the project's documented commands for each of the above.
 
 - [x] Run the required pre-PR self-review from
   `skills/openspec-apply-change/SKILL.md` before committing
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from working branch to `main`
-- [ ] Wait for 120 seconds for the Agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — when comments appear, address them, commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from working branch to `main`
+- [x] Wait for 120 seconds for the Agentic reviewers to post their comments
+- [x] **Monitor PR comments** — when comments appear, address them, commit
   fixes, follow all steps in [Remote push validation] then push to the same
   working branch; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — when any CI check fails, diagnose and fix the
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — when any CI check fails, diagnose and fix the
   failure, commit fixes, follow all steps in [Remote push validation] then push
   to the same working branch; repeat until all checks pass
-- [ ] Wait for the PR to merge — **never force-merge**; if a human force-merges,
+- [x] Wait for the PR to merge — **never force-merge**; if a human force-merges,
   continue to Post-Merge
 
 Ownership metadata:
@@ -88,18 +88,18 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change
-- [ ] Sync approved spec deltas into `openspec/specs/`
-- [ ] Archive the change: move
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change
+- [x] Sync approved spec deltas into `openspec/specs/`
+- [x] Archive the change: move
   `openspec/changes/align-dnd-beyond-fixture-contracts/` to
   `openspec/changes/archive/YYYY-MM-DD-align-dnd-beyond-fixture-contracts/`
   **and stage both the new location and the deletion of the old location in a
   single commit**
-- [ ] Confirm the archived path exists and the original change directory is gone
-- [ ] Commit and push the archive to `main` in one commit
-- [ ] Prune merged local feature branches:
+- [x] Confirm the archived path exists and the original change directory is gone
+- [x] Commit and push the archive to `main` in one commit
+- [x] Prune merged local feature branches:
   `git fetch --prune` and
   `git branch -d fix/align-dnd-beyond-fixture-contracts`
