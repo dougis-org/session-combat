@@ -291,7 +291,7 @@ export const unsupportedDndBeyondCharacterResponse = {
       fullName: "Warforged",
     },
   },
-};
+} satisfies DndBeyondFixtureResponse;
 
 export const mountainDwarfCharacterResponse = {
   ...sampleDndBeyondCharacterResponse,
@@ -302,7 +302,7 @@ export const mountainDwarfCharacterResponse = {
       fullName: "Mountain Dwarf",
     },
   },
-};
+} satisfies DndBeyondFixtureResponse;
 
 export const aasimarArtificerCharacterResponse = {
   ...sampleDndBeyondCharacterResponse,
@@ -321,4 +321,4 @@ export const aasimarArtificerCharacterResponse = {
       },
     ],
   },
-};
+} satisfies DndBeyondFixtureResponse;
