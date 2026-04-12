@@ -9,6 +9,39 @@ import {
   unsupportedDndBeyondCharacterResponse,
 } from "@/tests/fixtures/dndBeyondCharacter";
 
+function expectDefined<T>(
+  value: T | undefined | null,
+  label: string,
+): NonNullable<T> {
+  if (value === undefined || value === null) {
+    throw new Error(`${label} should be defined and not null`);
+  }
+  expect(value).toBeDefined();
+  expect(value).not.toBeNull();
+  return value;
+}
+
+const sampleStats = expectDefined(
+  sampleDndBeyondCharacterResponse.data.stats,
+  "sample stats",
+);
+const sampleBonusStats = expectDefined(
+  sampleDndBeyondCharacterResponse.data.bonusStats,
+  "sample bonus stats",
+);
+const sampleOverrideStats = expectDefined(
+  sampleDndBeyondCharacterResponse.data.overrideStats,
+  "sample override stats",
+);
+const sampleModifiers = expectDefined(
+  sampleDndBeyondCharacterResponse.data.modifiers,
+  "sample modifiers",
+);
+const sampleClassModifiers = expectDefined(
+  sampleModifiers.class,
+  "sample class modifiers",
+);
+
 describe("dndBeyondCharacterImport", () => {
   test("rejects a non-URL string", () => {
     expect(() => parseDndBeyondCharacterUrl("not-a-url")).toThrow(
@@ -95,7 +128,8 @@ describe("dndBeyondCharacterImport", () => {
         description: "Use your reaction to halve the attack's damage.",
       },
     ]);
-    expect(result.character.senses["passive perception"]).toBe("18");
+    const senses = expectDefined(result.character.senses, "senses");
+    expect(senses["passive perception"]).toBe("18");
     expect(result.warnings).toEqual([]);
   });
 
@@ -188,9 +222,7 @@ describe("dndBeyondCharacterImport", () => {
     expect(() =>
       normalizeDndBeyondCharacter({
         ...sampleDndBeyondCharacterResponse.data,
-        stats: sampleDndBeyondCharacterResponse.data.stats.filter(
-          (stat) => stat.id !== 6,
-        ),
+        stats: sampleStats.filter((stat) => stat.id !== 6),
       }),
     ).toThrow(/missing charisma data/i);
   });
@@ -241,17 +273,16 @@ describe("dndBeyondCharacterImport", () => {
       currentHitPoints: 31,
       overrideHitPoints: 44,
       bonusHitPoints: 6,
-      bonusStats: sampleDndBeyondCharacterResponse.data.bonusStats.map(
-        (stat) => (stat.id === 2 ? { ...stat, value: 5 } : stat),
+      bonusStats: sampleBonusStats.map((stat) =>
+        stat.id === 2 ? { ...stat, value: 5 } : stat,
       ),
-      overrideStats: sampleDndBeyondCharacterResponse.data.overrideStats.map(
-        (stat) =>
-          stat.id === 2
-            ? {
-                ...stat,
-                value: 20,
-              }
-            : stat,
+      overrideStats: sampleOverrideStats.map((stat) =>
+        stat.id === 2
+          ? {
+              ...stat,
+              value: 20,
+            }
+          : stat,
       ),
     });
 
@@ -366,7 +397,8 @@ describe("dndBeyondCharacterImport", () => {
     expect(result.character.languages).toEqual(
       expect.arrayContaining(["Common", "Infernal", "Deep Speech"]),
     );
-    expect(result.character.senses).toMatchObject({
+    const senses = expectDefined(result.character.senses, "senses");
+    expect(senses).toMatchObject({
       blindsight: "15 ft.",
       darkvision: "60 ft.",
       speed: "30 ft.",
@@ -376,8 +408,13 @@ describe("dndBeyondCharacterImport", () => {
     expect(result.character.conditionImmunities).toContain("Poisoned");
     expect(result.character.damageResistances).toContain("fire");
     expect(result.character.damageVulnerabilities).toContain("cold");
-    expect(result.character.savingThrows.wisdom).toBe(5);
-    expect(result.character.skills.stealth).toBe(9);
+    const savingThrows = expectDefined(
+      result.character.savingThrows,
+      "savingThrows",
+    );
+    const skills = expectDefined(result.character.skills, "skills");
+    expect(savingThrows.wisdom).toBe(5);
+    expect(skills.stealth).toBe(9);
     expect(result.character.actions).toEqual(
       expect.arrayContaining([
         {
@@ -418,9 +455,10 @@ describe("dndBeyondCharacterImport", () => {
       },
     });
 
-    expect(result.character.senses.speed).toBeUndefined();
-    expect(result.character.senses["passive insight"]).toBe("10");
-    expect(result.character.senses["passive investigation"]).toBe("13");
+    const senses = expectDefined(result.character.senses, "senses");
+    expect(senses.speed).toBeUndefined();
+    expect(senses["passive insight"]).toBe("10");
+    expect(senses["passive investigation"]).toBe("13");
   });
 
   test("omits actions whose sanitized descriptions are empty", () => {
@@ -544,9 +582,9 @@ describe("dndBeyondCharacterImport", () => {
     const result = normalizeDndBeyondCharacter({
       ...sampleDndBeyondCharacterResponse.data,
       modifiers: {
-        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        ...sampleModifiers,
         class: [
-          ...sampleDndBeyondCharacterResponse.data.modifiers.class,
+          ...sampleClassModifiers,
           {
             type: "bonus",
             subType: "hit-points-per-level",
@@ -566,7 +604,7 @@ describe("dndBeyondCharacterImport", () => {
     const result = normalizeDndBeyondCharacter({
       ...sampleDndBeyondCharacterResponse.data,
       modifiers: {
-        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        ...sampleModifiers,
         item: [
           {
             type: "bonus",
@@ -587,9 +625,9 @@ describe("dndBeyondCharacterImport", () => {
     const result = normalizeDndBeyondCharacter({
       ...sampleDndBeyondCharacterResponse.data,
       modifiers: {
-        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        ...sampleModifiers,
         class: [
-          ...sampleDndBeyondCharacterResponse.data.modifiers.class,
+          ...sampleClassModifiers,
           {
             type: "bonus",
             subType: "hit-points-per-level",
@@ -618,9 +656,9 @@ describe("dndBeyondCharacterImport", () => {
       ...sampleDndBeyondCharacterResponse.data,
       overrideHitPoints: 50,
       modifiers: {
-        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        ...sampleModifiers,
         class: [
-          ...sampleDndBeyondCharacterResponse.data.modifiers.class,
+          ...sampleClassModifiers,
           {
             type: "bonus",
             subType: "hit-points-per-level",
