@@ -21,6 +21,27 @@ function expectDefined<T>(
   return value;
 }
 
+const sampleStats = expectDefined(
+  sampleDndBeyondCharacterResponse.data.stats,
+  "sample stats",
+);
+const sampleBonusStats = expectDefined(
+  sampleDndBeyondCharacterResponse.data.bonusStats,
+  "sample bonus stats",
+);
+const sampleOverrideStats = expectDefined(
+  sampleDndBeyondCharacterResponse.data.overrideStats,
+  "sample override stats",
+);
+const sampleModifiers = expectDefined(
+  sampleDndBeyondCharacterResponse.data.modifiers,
+  "sample modifiers",
+);
+const sampleClassModifiers = expectDefined(
+  sampleModifiers.class,
+  "sample class modifiers",
+);
+
 describe("dndBeyondCharacterImport", () => {
   test("rejects a non-URL string", () => {
     expect(() => parseDndBeyondCharacterUrl("not-a-url")).toThrow(
@@ -201,9 +222,7 @@ describe("dndBeyondCharacterImport", () => {
     expect(() =>
       normalizeDndBeyondCharacter({
         ...sampleDndBeyondCharacterResponse.data,
-        stats: sampleDndBeyondCharacterResponse.data.stats.filter(
-          (stat) => stat.id !== 6,
-        ),
+        stats: sampleStats.filter((stat) => stat.id !== 6),
       }),
     ).toThrow(/missing charisma data/i);
   });
@@ -254,17 +273,16 @@ describe("dndBeyondCharacterImport", () => {
       currentHitPoints: 31,
       overrideHitPoints: 44,
       bonusHitPoints: 6,
-      bonusStats: sampleDndBeyondCharacterResponse.data.bonusStats.map(
-        (stat) => (stat.id === 2 ? { ...stat, value: 5 } : stat),
+      bonusStats: sampleBonusStats.map((stat) =>
+        stat.id === 2 ? { ...stat, value: 5 } : stat,
       ),
-      overrideStats: sampleDndBeyondCharacterResponse.data.overrideStats.map(
-        (stat) =>
-          stat.id === 2
-            ? {
-                ...stat,
-                value: 20,
-              }
-            : stat,
+      overrideStats: sampleOverrideStats.map((stat) =>
+        stat.id === 2
+          ? {
+              ...stat,
+              value: 20,
+            }
+          : stat,
       ),
     });
 
@@ -564,9 +582,9 @@ describe("dndBeyondCharacterImport", () => {
     const result = normalizeDndBeyondCharacter({
       ...sampleDndBeyondCharacterResponse.data,
       modifiers: {
-        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        ...sampleModifiers,
         class: [
-          ...sampleDndBeyondCharacterResponse.data.modifiers.class,
+          ...sampleClassModifiers,
           {
             type: "bonus",
             subType: "hit-points-per-level",
@@ -586,7 +604,7 @@ describe("dndBeyondCharacterImport", () => {
     const result = normalizeDndBeyondCharacter({
       ...sampleDndBeyondCharacterResponse.data,
       modifiers: {
-        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        ...sampleModifiers,
         item: [
           {
             type: "bonus",
@@ -607,9 +625,9 @@ describe("dndBeyondCharacterImport", () => {
     const result = normalizeDndBeyondCharacter({
       ...sampleDndBeyondCharacterResponse.data,
       modifiers: {
-        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        ...sampleModifiers,
         class: [
-          ...sampleDndBeyondCharacterResponse.data.modifiers.class,
+          ...sampleClassModifiers,
           {
             type: "bonus",
             subType: "hit-points-per-level",
@@ -638,9 +656,9 @@ describe("dndBeyondCharacterImport", () => {
       ...sampleDndBeyondCharacterResponse.data,
       overrideHitPoints: 50,
       modifiers: {
-        ...sampleDndBeyondCharacterResponse.data.modifiers,
+        ...sampleModifiers,
         class: [
-          ...sampleDndBeyondCharacterResponse.data.modifiers.class,
+          ...sampleClassModifiers,
           {
             type: "bonus",
             subType: "hit-points-per-level",
