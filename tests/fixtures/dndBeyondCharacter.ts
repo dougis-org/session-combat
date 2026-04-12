@@ -1,3 +1,13 @@
+import type { DndBeyondCharacterData } from "@/lib/dndBeyondCharacterImport";
+
+type DndBeyondFixtureResponse = {
+  id: number;
+  success: boolean;
+  message: string;
+  data: DndBeyondCharacterData;
+  pagination: null;
+};
+
 export const sampleDndBeyondCharacterResponse = {
   id: 91913267,
   success: true,
@@ -41,10 +51,6 @@ export const sampleDndBeyondCharacterResponse = {
       weightSpeeds: {
         normal: {
           walk: 30,
-          fly: 0,
-          swim: 0,
-          climb: 0,
-          burrow: 0,
         },
       },
     },
@@ -255,7 +261,6 @@ export const sampleDndBeyondCharacterResponse = {
       {
         equipped: true,
         definition: {
-          name: "Lucky Leather Armor",
           armorClass: 12,
           armorTypeId: 1,
           baseArmorName: "Studded Leather",
@@ -274,7 +279,7 @@ export const sampleDndBeyondCharacterResponse = {
     },
   },
   pagination: null,
-};
+} satisfies DndBeyondFixtureResponse;
 
 export const unsupportedDndBeyondCharacterResponse = {
   ...sampleDndBeyondCharacterResponse,
