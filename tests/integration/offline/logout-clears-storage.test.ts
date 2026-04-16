@@ -1,5 +1,17 @@
 /** @jest-environment jsdom */
 
+/**
+ * Client-side integration test for logout storage cleanup.
+ *
+ * Integrates: useAuth, LocalStore, SyncQueue, clientStorage
+ * Intentional mocks (external boundaries only):
+ *   - next/navigation: no real router in test env
+ *   - fetch: simulates API response / network failure
+ *
+ * These mocks do NOT test whether auth/storage work individually.
+ * They test that all client storage layers clear correctly on logout.
+ */
+
 import {
   afterEach,
   beforeEach,

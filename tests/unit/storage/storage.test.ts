@@ -245,3 +245,41 @@ describe("storage.deleteCharacter", () => {
     await expect(storage.deleteCharacter("char1", "user1")).rejects.toThrow("db error");
   });
 });
+
+describe("storage.saveParty", () => {
+  let updateOne: jest.Mock;
+  let mockCollection: jest.Mock;
+
+  beforeEach(() => {
+    updateOne = jest.fn<() => Promise<unknown>>().mockResolvedValue({
+      matchedCount: 1,
+      modifiedCount: 1,
+      upsertedId: null,
+    });
+    mockCollection = jest.fn(() => ({ updateOne }));
+    mockedGetDatabase.mockResolvedValue({ collection: mockCollection } as any);
+  });
+
+  test("upserts by application id and userId, strips _id from $set payload", async () => {
+    const party = {
+      _id: "507f1f77bcf86cd799439011",
+      id: "party-123",
+      userId: "user-1",
+      name: "Updated Party",
+      description: "Edited without relying on MongoDB _id",
+      characterIds: ["char-1"],
+      createdAt: new Date("2026-04-07T00:00:00.000Z"),
+      updatedAt: new Date("2026-04-07T00:05:00.000Z"),
+    };
+
+    await storage.saveParty(party as any);
+    const { _id, ...expectedPartyData } = party;
+
+    expect(mockCollection).toHaveBeenCalledWith("parties");
+    expect(updateOne).toHaveBeenCalledWith(
+      { id: party.id, userId: party.userId },
+      { $set: expectedPartyData },
+      { upsert: true }
+    );
+  });
+});

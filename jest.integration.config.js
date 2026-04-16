@@ -3,13 +3,7 @@
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
-  testMatch: ["**/tests/integration/**/*.test.(ts|js)"],
-  // Exclude Docker-dependent tests that require Testcontainers
-  testPathIgnorePatterns: [
-    "/node_modules/",
-    "api.integration.test.ts",
-    "monsters.integration.test.ts",
-  ],
+  testMatch: ["**/tests/integration/**/*.test.ts"],
   testTimeout: 120000,
   // forceExit is NOT set here — use `npm run test:ci` (which passes --forceExit) for
   // pre-commit hooks and CI. Direct `npm run test:integration` runs without force-exit so
