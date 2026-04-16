@@ -89,8 +89,7 @@ describe("POST /api/parties", () => {
     expect(mockedStorage.saveParty).toHaveBeenCalledTimes(1);
     const savedParty = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
     expect(savedParty._id).toBeUndefined();
-    expect(savedParty.id).toEqual(expect.any(String));
-    expect(savedParty.id.length).toBeGreaterThan(0);
+    expect(savedParty.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
   });
 
   itReturns500(

@@ -19,7 +19,9 @@
       "Bash(npm ci:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(npx jest *)",
+      "Bash(rtk npm *)"
     ]
   }
 }

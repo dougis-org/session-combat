@@ -231,6 +231,18 @@ describe("validateMonsterData", () => {
       expect(result.valid).toBe(true);
     });
 
+    it("should accept legendaryActionCount of 0", () => {
+      const raw: RawMonsterData = { name: "Test", maxHp: 10, legendaryActionCount: 0 };
+      const result = validateMonsterData(raw);
+      expect(result.valid).toBe(true);
+    });
+
+    it("should accept omitted legendaryActionCount", () => {
+      const raw: RawMonsterData = { name: "Test", maxHp: 10 };
+      const result = validateMonsterData(raw);
+      expect(result.valid).toBe(true);
+    });
+
     it("should reject non-integer legendaryActionCount", () => {
       const raw: RawMonsterData = { name: "Test", maxHp: 10, legendaryActionCount: 1.5 };
       const result = validateMonsterData(raw);
