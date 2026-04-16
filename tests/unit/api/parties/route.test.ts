@@ -1,4 +1,5 @@
 import { GET, POST } from "@/app/api/parties/route";
+import { PUT } from "@/app/api/parties/[id]/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
@@ -86,6 +87,9 @@ describe("POST /api/parties", () => {
     expect(body.userId).toBe("user-123");
     expect(body.characterIds).toEqual(["char-1", "char-2"]);
     expect(mockedStorage.saveParty).toHaveBeenCalledTimes(1);
+    const savedParty = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
+    expect(savedParty._id).toBeUndefined();
+    expect(savedParty.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
   });
 
   itReturns500(
@@ -94,4 +98,59 @@ describe("POST /api/parties", () => {
     () => mockedStorage.saveParty.mockRejectedValue(new Error("Storage error")),
     mockedRequireAuth
   );
+});
+
+describe("PUT /api/parties/[id]", () => {
+  const EXISTING_PARTY = {
+    id: "party-123",
+    userId: "user-123",
+    name: "Old Name",
+    description: "",
+    characterIds: ["char-1"],
+    createdAt: new Date("2026-04-07T00:00:00.000Z"),
+    updatedAt: new Date("2026-04-07T00:01:00.000Z"),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.loadParties.mockResolvedValue([EXISTING_PARTY] as any);
+    mockedStorage.saveParty.mockResolvedValue(undefined as any);
+  });
+
+  it("updates party fields and returns 200", async () => {
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "New Name",
+        description: "Updated",
+        characterIds: ["char-1", "char-2"],
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockedStorage.saveParty).toHaveBeenCalledTimes(1);
+    const savedParty = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
+    expect(savedParty).toMatchObject({
+      id: "party-123",
+      userId: "user-123",
+      name: "New Name",
+      description: "Updated",
+      characterIds: ["char-1", "char-2"],
+    });
+  });
+
+  it("strips _id from saved payload", async () => {
+    await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "New Name",
+        description: "Updated",
+        characterIds: [],
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    const savedParty = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
+    expect(savedParty._id).toBeUndefined();
+  });
 });

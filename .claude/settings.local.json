@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo:*)",
+      "Bash(gh issue:*)",
+      "Bash(npm run:*)",
+      "Bash(npx eslint:*)",
+      "Bash(./node_modules/.bin/eslint --version)",
+      "Bash(./node_modules/.bin/eslint .)",
+      "Bash(openspec new:*)",
+      "Bash(openspec status:*)",
+      "Bash(openspec instructions:*)",
+      "Bash(openspec list:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(ls /home/doug/dev/session-combat/.eslintrc*)",
+      "Bash(python3:*)",
+      "Bash(npm ci:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh pr:*)",
+      "Bash(npx jest *)",
+      "Bash(rtk npm *)"
+    ]
+  }
+}

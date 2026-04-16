@@ -1,18 +1,18 @@
 const mockLoadAll = jest.fn();
 const mockSave = jest.fn();
 
-jest.mock("../../lib/middleware", () => ({
+jest.mock("@/lib/middleware", () => ({
   requireAuth: jest.fn(() => ({ userId: "user-1" })),
 }));
 
-jest.mock("../../lib/storage", () => ({
+jest.mock("@/lib/storage", () => ({
   storage: {
     loadAllMonsterTemplates: (...args: any[]) => mockLoadAll(...args),
     saveMonsterTemplate: (...args: any[]) => mockSave(...args),
   },
 }));
 
-import { POST } from "../../app/api/monsters/[id]/duplicate/route";
+import { POST } from "@/app/api/monsters/[id]/duplicate/route";
 
 describe("POST /api/monsters/[id]/duplicate", () => {
   beforeEach(() => {

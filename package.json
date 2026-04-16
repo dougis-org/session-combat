@@ -10,7 +10,6 @@
     "lint": "eslint .",
     "test:unit": "jest --testPathPattern='tests/unit' --coverage",
     "test:integration": "jest --config=jest.integration.config.js",
-    "test:docker": "jest --config=jest.docker.config.js",
     "test:ci": "npm run test:integration -- --forceExit",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
