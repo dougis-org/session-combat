@@ -147,44 +147,29 @@ describe("transformMonsterData", () => {
   });
 
   describe("damage type filtering", () => {
+    type DamageField = "damageResistances" | "damageImmunities" | "damageVulnerabilities";
+
+    const filterDamage = (field: DamageField, input: string[]) =>
+      transformMonsterData({ ...MINIMAL_RAW, [field]: input }, "user1")[field];
+
     it("passes through valid lowercase DamageType values unchanged", () => {
-      const result = transformMonsterData(
-        { ...MINIMAL_RAW, damageResistances: ["fire", "cold"] },
-        "user1",
-      );
-      expect(result.damageResistances).toEqual(["fire", "cold"]);
+      expect(filterDamage("damageResistances", ["fire", "cold"])).toEqual(["fire", "cold"]);
     });
 
     it("normalizes mixed-case values to lowercase canonical types", () => {
-      const result = transformMonsterData(
-        { ...MINIMAL_RAW, damageImmunities: ["Fire", "COLD", "Poison"] },
-        "user1",
-      );
-      expect(result.damageImmunities).toEqual(["fire", "cold", "poison"]);
+      expect(filterDamage("damageImmunities", ["Fire", "COLD", "Poison"])).toEqual(["fire", "cold", "poison"]);
     });
 
     it("trims whitespace from values", () => {
-      const result = transformMonsterData(
-        { ...MINIMAL_RAW, damageVulnerabilities: [" fire ", "cold "] },
-        "user1",
-      );
-      expect(result.damageVulnerabilities).toEqual(["fire", "cold"]);
+      expect(filterDamage("damageVulnerabilities", [" fire ", "cold "])).toEqual(["fire", "cold"]);
     });
 
     it("filters out freeform non-DamageType strings", () => {
-      const result = transformMonsterData(
-        { ...MINIMAL_RAW, damageResistances: ["fire", "from nonmagical weapons", "bludgeoning, piercing"] },
-        "user1",
-      );
-      expect(result.damageResistances).toEqual(["fire"]);
+      expect(filterDamage("damageResistances", ["fire", "from nonmagical weapons", "bludgeoning, piercing"])).toEqual(["fire"]);
     });
 
     it("produces empty array when all values are invalid", () => {
-      const result = transformMonsterData(
-        { ...MINIMAL_RAW, damageResistances: ["damage from spells", "nonmagical bludgeoning"] },
-        "user1",
-      );
-      expect(result.damageResistances).toEqual([]);
+      expect(filterDamage("damageResistances", ["damage from spells", "nonmagical bludgeoning"])).toEqual([]);
     });
 
     it("handles undefined resistance arrays (absent key) → empty array", () => {
@@ -206,11 +191,7 @@ describe("transformMonsterData", () => {
 
     it("all 13 canonical types pass through", () => {
       const all13 = ["acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic", "piercing", "poison", "psychic", "radiant", "slashing", "thunder"];
-      const result = transformMonsterData(
-        { ...MINIMAL_RAW, damageImmunities: all13 },
-        "user1",
-      );
-      expect(result.damageImmunities).toEqual(all13);
+      expect(filterDamage("damageImmunities", all13)).toEqual(all13);
     });
 
     it("mixed valid and invalid values: keeps only valid", () => {
