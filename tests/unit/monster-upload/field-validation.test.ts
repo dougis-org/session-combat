@@ -31,7 +31,7 @@ const createRawMonster = (overrides?: Partial<RawMonsterData>): RawMonsterData =
 describe("validateMonsterData", () => {
   describe("required fields", () => {
     it("should require name", () => {
-      const data: RawMonsterData = { maxHp: 10 };
+      const data: RawMonsterData = { maxHp: 10 } as any;
       const result = validateMonsterData(data);
 
       expect(result.valid).toBe(false);
@@ -50,7 +50,7 @@ describe("validateMonsterData", () => {
     });
 
     it("should require maxHp", () => {
-      const data: RawMonsterData = { name: "Goblin" };
+      const data: RawMonsterData = { name: "Goblin" } as any;
       const result = validateMonsterData(data);
 
       expect(result.valid).toBe(false);
@@ -148,7 +148,7 @@ describe("validateMonsterData", () => {
           strength: 10,
           dexterity: 11,
           // missing others
-        },
+        } as any,
       };
       const result = validateMonsterData(data);
 
