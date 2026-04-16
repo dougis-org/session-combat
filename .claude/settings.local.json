@@ -20,8 +20,7 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(gh pr:*)",
-      "Bash(npx jest *)",
-      "Bash(rtk npm *)"
+      "Bash(git rebase *)"
     ]
   }
 }
