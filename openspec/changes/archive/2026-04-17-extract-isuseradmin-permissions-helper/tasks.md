@@ -51,7 +51,7 @@
 - [x] `npm run test:integration` — `permissions.test.ts` passes alongside existing integration tests
 - [x] `npm run build` — production build succeeds
 - [x] `grep -r "function isUserAdmin" app/` returns empty (no local definitions remain)
-- [ ] All completed tasks marked as complete
+- [x] All completed tasks marked as complete
 
 ## Remote push validation
 
@@ -64,14 +64,14 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Run required pre-PR self-review before committing
-- [ ] Commit all changes to `feat/extract-isuseradmin-permissions` and push to remote
-- [ ] Open PR from `feat/extract-isuseradmin-permissions` to `main`; reference `#134` in PR body
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each comment, commit fixes, validate locally (remote push validation), push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — if any check fails, diagnose, fix, commit, validate locally, push; repeat until all checks pass
-- [ ] Wait for PR to merge — **never force-merge**; if human force-merges, continue to Post-Merge
+- [x] Run required pre-PR self-review before committing
+- [x] Commit all changes to `feat/extract-isuseradmin-permissions` and push to remote
+- [x] Open PR from `feat/extract-isuseradmin-permissions` to `main`; reference `#134` in PR body
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each comment, commit fixes, validate locally (remote push validation), push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — if any check fails, diagnose, fix, commit, validate locally, push; repeat until all checks pass
+- [x] Wait for PR to merge — **never force-merge**; if human force-merges, continue to Post-Merge
 
 Ownership metadata:
 
@@ -87,13 +87,13 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No doc updates required (no public API change)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec) if applicable
-- [ ] Archive: move `openspec/changes/extract-isuseradmin-permissions-helper/` to `openspec/changes/archive/YYYY-MM-DD-extract-isuseradmin-permissions-helper/` — stage both copy and deletion in a single commit
-- [ ] Confirm archive exists and original path is gone
-- [ ] Commit and push archive to `main` in one commit
-- [ ] Prune: `git fetch --prune` and `git branch -d feat/extract-isuseradmin-permissions`
-- [ ] Close GitHub issue #134
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No doc updates required (no public API change)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec) if applicable
+- [x] Archive: move `openspec/changes/extract-isuseradmin-permissions-helper/` to `openspec/changes/archive/YYYY-MM-DD-extract-isuseradmin-permissions-helper/` — stage both copy and deletion in a single commit
+- [x] Confirm archive exists and original path is gone
+- [x] Commit and push archive to `main` in one commit
+- [x] Prune: `git fetch --prune` and `git branch -d feat/extract-isuseradmin-permissions`
+- [x] Close GitHub issue #134
