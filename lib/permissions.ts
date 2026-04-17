@@ -7,9 +7,7 @@ export async function isUserAdmin(userId: string): Promise<boolean | null> {
     const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
     return user?.isAdmin === true;
   } catch (err) {
-    if (err instanceof Error && err.name !== 'BSONError') {
-      console.error('isUserAdmin: DB error for userId', userId, err);
-    }
+    console.error('isUserAdmin: error checking admin status for userId', userId, err);
     return null;
   }
 }
