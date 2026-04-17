@@ -1,21 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
-import { getDatabase } from '@/lib/db';
-
-// Helper to check if user is admin
-async function isUserAdmin(userId: string): Promise<boolean> {
-  try {
-    const db = await getDatabase();
-    const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
-    return user?.isAdmin === true;
-  } catch (error) {
-    console.error('Error checking admin status:', error);
-    return false;
-  }
-}
+import { isUserAdmin } from '@/lib/permissions';
 
 export async function GET(
   request: NextRequest,
@@ -55,8 +42,10 @@ export async function PUT(
     return auth;
   }
 
-  // Check if user is admin
   const admin = await isUserAdmin(auth.userId);
+  if (admin === null) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
   if (!admin) {
     return NextResponse.json(
       { error: 'Only administrators can modify global monster templates' },
@@ -185,8 +174,10 @@ export async function DELETE(
     return auth;
   }
 
-  // Check if user is admin
   const admin = await isUserAdmin(auth.userId);
+  if (admin === null) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
   if (!admin) {
     return NextResponse.json(
       { error: 'Only administrators can delete global monster templates' },

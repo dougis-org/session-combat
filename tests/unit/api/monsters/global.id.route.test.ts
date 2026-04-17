@@ -1,4 +1,4 @@
-import { PUT } from "@/app/api/monsters/global/[id]/route";
+import { PUT, DELETE } from "@/app/api/monsters/global/[id]/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
@@ -45,4 +45,43 @@ describe("PUT /api/monsters/global/[id] — alignment validation", () => {
   });
 
   itValidatesAlignmentFieldWithParams(PUT, makeReqWith, PARAMS, 200);
+});
+
+describe("PUT /api/monsters/global/[id] — DB error during admin check", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
+    mockedGetDatabase.mockRejectedValue(new Error("connection refused"));
+  });
+
+  it("returns 500 when isUserAdmin returns null", async () => {
+    const req = makeRouteRequest(
+      `http://localhost/api/monsters/global/${EXISTING_GLOBAL_MONSTER.id}`,
+      "PUT",
+      { name: "x", maxHp: 10 }
+    );
+    const res = await PUT(req, { params: PARAMS });
+    expect(res.status).toBe(500);
+    const data = await res.json();
+    expect(data.error).toBe("Internal server error");
+  });
+});
+
+describe("DELETE /api/monsters/global/[id] — DB error during admin check", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
+    mockedGetDatabase.mockRejectedValue(new Error("connection refused"));
+  });
+
+  it("returns 500 when isUserAdmin returns null", async () => {
+    const req = makeRouteRequest(
+      `http://localhost/api/monsters/global/${EXISTING_GLOBAL_MONSTER.id}`,
+      "DELETE"
+    );
+    const res = await DELETE(req, { params: PARAMS });
+    expect(res.status).toBe(500);
+    const data = await res.json();
+    expect(data.error).toBe("Internal server error");
+  });
 });
