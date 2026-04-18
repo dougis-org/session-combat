@@ -21,7 +21,19 @@
       "Bash(git commit:*)",
       "Bash(gh pr:*)",
       "Bash(git rebase *)",
-      "Bash(rtk git *)"
+      "Bash(rtk git *)",
+      "Bash(rtk ls *)",
+      "Bash(rtk read *)",
+      "Bash(rtk gh *)",
+      "Bash(rtk tsc *)",
+      "Bash(rtk grep *)",
+      "Bash(rtk npm *)",
+      "Bash(rtk ps *)",
+      "Bash(node *)",
+      "Bash(gh api *)",
+      "mcp__github_github-mcp-server__add_reply_to_pull_request_comment",
+      "Bash(cp -r openspec/changes/extract-isuseradmin-permissions-helper openspec/changes/archive/2026-04-17-extract-isuseradmin-permissions-helper)",
+      "Bash(git rm *)"
     ]
   }
 }
