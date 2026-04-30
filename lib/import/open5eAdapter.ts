@@ -1,5 +1,16 @@
 const OPEN5E_API_BASE = "https://api.open5e.com/v2";
 
+const ALLOWED_HOST = "api.open5e.com";
+
+function isAllowedUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname === ALLOWED_HOST;
+  } catch {
+    return false;
+  }
+}
+
 interface Open5ECreature {
   slug: string;
   name: string;
@@ -58,6 +69,10 @@ async function handleRateLimit(response: Response): Promise<Response> {
 }
 
 async function fetchWithBackoff(url: string, retries = 3): Promise<Response> {
+  if (!isAllowedUrl(url)) {
+    throw new Error(`URL host not allowed: ${url}`);
+  }
+
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
