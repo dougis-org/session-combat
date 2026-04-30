@@ -1,12 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
-import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
-import { GLOBAL_USER_ID } from '@/lib/constants';
-import { getDatabase } from '@/lib/db';
-import { ALL_SRD_MONSTERS } from '@/lib/data/monsters';
-import { randomUUID } from 'crypto';
-import { isUserAdmin } from '@/lib/permissions';
+import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/middleware";
+import { storage } from "@/lib/storage";
+import { MonsterTemplate, normalizeAlignment } from "@/lib/types";
+import { GLOBAL_USER_ID } from "@/lib/constants";
+import { getDatabase } from "@/lib/db";
+import { randomUUID } from "crypto";
+import { isUserAdmin } from "@/lib/permissions";
+import { getAllMonsters } from "@/lib/import/open5eAdapter";
+import { transformMonster } from "@/lib/import/transformMonster";
+import { shouldImport } from "@/lib/import/dedupeEngine";
 
 export async function GET(request: NextRequest) {
   try {
@@ -166,91 +168,41 @@ export async function PUT(request: NextRequest) {
 
   try {
     const db = await getDatabase();
-    const collection = db.collection<MonsterTemplate>('monsterTemplates');
+    const collection = db.collection<MonsterTemplate>("monsterTemplates");
 
-    // Delete existing global monsters
-    await collection.deleteMany({ userId: GLOBAL_USER_ID });
+    let inserted = 0;
+    let skipped = 0;
+    let errors = 0;
 
-    // Prepare monsters with required fields, normalizing data structure
-    const monstersToInsert = ALL_SRD_MONSTERS.map(monster => {
-      // Normalize the data from SRD format to MonsterTemplate format
-      const normalized: any = {
-        ...monster,
-        id: randomUUID(),
-        userId: GLOBAL_USER_ID,
-        isGlobal: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+    for await (const creature of getAllMonsters()) {
+      const { monster, valid } = transformMonster(creature);
 
-      // Map 'hp' to 'maxHp' if needed
-      if (monster.hp !== undefined && !normalized.maxHp) {
-        normalized.maxHp = monster.hp;
-      }
-      
-      // Map 'abilities' to 'abilityScores' if needed
-      if ((monster as any).abilities && !normalized.abilityScores) {
-        normalized.abilityScores = (monster as any).abilities;
+      if (!valid) {
+        errors++;
+        continue;
       }
 
-      return normalized;
-    });
+      const exists = await shouldImport("monsters", monster.name, monster.source || "");
+      if (!exists) {
+        skipped++;
+        continue;
+      }
 
-    // Separate valid and invalid monsters
-    const validMonsters: typeof monstersToInsert = [];
-    const invalidMonsters: Array<{ monster: typeof monstersToInsert[0]; reason: string }> = [];
-
-    for (const monster of monstersToInsert) {
-      if (!monster.name || monster.name.trim() === '') {
-        invalidMonsters.push({ monster, reason: 'missing name' });
-      } else if (!monster.maxHp || monster.maxHp <= 0) {
-        invalidMonsters.push({ monster, reason: 'invalid maxHp' });
-      } else if (!monster.size || !monster.type) {
-        invalidMonsters.push({ monster, reason: 'missing size or type' });
-      } else {
-        validMonsters.push(monster);
+      try {
+        await storage.saveMonsterTemplate(monster);
+        inserted++;
+      } catch {
+        errors++;
       }
     }
-
-    // Log invalid monsters for debugging
-    if (invalidMonsters.length > 0) {
-      console.warn(`Found ${invalidMonsters.length} monsters with bad data:`, invalidMonsters.slice(0, 5));
-    }
-
-    // Insert valid monsters
-    const result = validMonsters.length > 0 
-      ? await collection.insertMany(validMonsters)
-      : { insertedIds: {} };
-    
-    const insertedCount = Object.keys(result.insertedIds).length;
-
-    // Count inserted monsters by type
-    const countByType: Record<string, number> = {};
-    validMonsters.forEach(monster => {
-      const type = monster.type || 'unknown';
-      countByType[type] = (countByType[type] || 0) + 1;
-    });
-
-    // Count skipped monsters by type
-    const skippedByType: Record<string, number> = {};
-    invalidMonsters.forEach(({ monster }) => {
-      const type = monster.type || 'unknown';
-      skippedByType[type] = (skippedByType[type] || 0) + 1;
-    });
 
     return NextResponse.json({
       success: true,
-      message: `Seeded ${insertedCount} SRD monsters`,
-      count: insertedCount,
-      skipped: invalidMonsters.length,
-      total: monstersToInsert.length,
-      countByType,
-      skippedByType: Object.keys(skippedByType).length > 0 ? skippedByType : undefined,
-      importedMonsters: validMonsters.map(m => ({ id: m.id, name: m.name, cr: m.challengeRating })),
-      skippedMonsters: invalidMonsters.length > 0 
-        ? invalidMonsters.slice(0, 10).map(im => ({ name: im.monster.name, reason: im.reason }))
-        : undefined,
-    }, { status: 200 });
+      message: `Synced ${inserted} monsters from open5e`,
+      count: inserted,
+      skipped,
+      errors,
+    });
   } catch (error) {
     console.error('Error seeding monsters:', error);
     return NextResponse.json(

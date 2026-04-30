@@ -510,3 +510,59 @@ export interface SessionData {
   parties: Party[];
   combatState?: CombatState;
 }
+
+// D&D 5e Spell Schools
+export type DnDSpellSchool =
+  | "Abjuration"
+  | "Conjuration"
+  | "Divination"
+  | "Enchantment"
+  | "Evocation"
+  | "Illusion"
+  | "Necromancy"
+  | "Transmutation";
+
+export const VALID_SPELL_SCHOOLS: DnDSpellSchool[] = [
+  "Abjuration",
+  "Conjuration",
+  "Divination",
+  "Enchantment",
+  "Evocation",
+  "Illusion",
+  "Necromancy",
+  "Transmutation",
+];
+
+export function isValidSpellSchool(school: unknown): school is DnDSpellSchool {
+  return typeof school === "string" && VALID_SPELL_SCHOOLS.includes(school as DnDSpellSchool);
+}
+
+export interface SpellComponents {
+  verbal: boolean;
+  somatic: boolean;
+  material: boolean;
+}
+
+export interface SpellTemplate {
+  _id?: string;
+  id: string;
+  userId: string;
+  isGlobal?: boolean;
+  source?: string;
+  name: string;
+  level: number;
+  concentration: boolean;
+  school: DnDSpellSchool;
+  description: string;
+  castingTime: string;
+  range: string;
+  duration: string;
+  components: SpellComponents;
+  higherLevel?: string;
+  damageType?: string;
+  saveDc?: number;
+  saveType?: string;
+  attackRoll?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}

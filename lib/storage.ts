@@ -7,6 +7,7 @@ import {
   CombatState,
   Party,
   MonsterTemplate,
+  SpellTemplate,
 } from "./types";
 import { GLOBAL_USER_ID } from "./constants";
 import { ObjectId } from "mongodb";
@@ -411,6 +412,90 @@ export const storage = {
     } catch (error) {
       console.error("Error deleting monster template:", error);
       throw error;
+    }
+  },
+
+  // Load spells - load all global spells if no userId, or load user spells
+  async loadSpells(userId?: string): Promise<SpellTemplate[]> {
+    try {
+      const db = await getDatabase();
+      const query: { userId: string } = userId
+        ? { userId }
+        : { userId: GLOBAL_USER_ID };
+      const spells = await db
+        .collection<SpellTemplate>("spellTemplates")
+        .find(query)
+        .toArray();
+      return spells.map(normalizeStoredEntityId);
+    } catch (error) {
+      console.error("Error loading spells:", error);
+      return [];
+    }
+  },
+
+  // Load single spell by ID
+  async loadSpellById(id: string): Promise<SpellTemplate | null> {
+    try {
+      const db = await getDatabase();
+      const spell = await db
+        .collection<SpellTemplate>("spellTemplates")
+        .findOne({ id });
+      return spell ? normalizeStoredEntityId(spell) : null;
+    } catch (error) {
+      console.error("Error loading spell by ID:", error);
+      return null;
+    }
+  },
+
+  // Save spell template (upsert)
+  async saveSpellTemplate(spell: SpellTemplate): Promise<void> {
+    try {
+      const db = await getDatabase();
+      const { _id, ...spellData } = spell;
+
+      const query: Record<string, unknown> = { userId: spell.userId };
+      if (spell._id) {
+        query._id = new ObjectId(spell._id);
+      } else {
+        query.id = spell.id;
+      }
+
+      await db
+        .collection<SpellTemplate>("spellTemplates")
+        .updateOne(query, { $set: spellData }, { upsert: true });
+    } catch (error) {
+      console.error("Error saving spell template:", error);
+      throw error;
+    }
+  },
+
+  // Delete spell template
+  async deleteSpellTemplate(id: string): Promise<void> {
+    try {
+      const db = await getDatabase();
+      await db
+        .collection<SpellTemplate>("spellTemplates")
+        .deleteOne({ id });
+    } catch (error) {
+      console.error("Error deleting spell template:", error);
+      throw error;
+    }
+  },
+
+  // Check if spell exists by name and source (for dedupe)
+  async spellExistsByNameAndSource(
+    name: string,
+    source: string
+  ): Promise<boolean> {
+    try {
+      const db = await getDatabase();
+      const count = await db
+        .collection<SpellTemplate>("spellTemplates")
+        .countDocuments({ name, source });
+      return count > 0;
+    } catch (error) {
+      console.error("Error checking spell existence:", error);
+      return false;
     }
   },
 
