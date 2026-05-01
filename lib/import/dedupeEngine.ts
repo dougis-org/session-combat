@@ -30,6 +30,9 @@ export async function shouldImport(
   if (collection === "spells") {
     return !(await storage.spellExistsByNameAndSource(name, source));
   }
+  if (collection === "monsters") {
+    return !(await storage.monsterExistsByNameAndSource(name, source));
+  }
   return true;
 }
 

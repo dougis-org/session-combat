@@ -147,9 +147,7 @@ describe("DELETE /api/spells/[id]", () => {
     const req = makeDeleteReq();
     const res = await DELETE(req, { params });
 
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.success).toBe(true);
+    expect(res.status).toBe(204);
   });
 
   it("returns 401 when not authenticated", async () => {

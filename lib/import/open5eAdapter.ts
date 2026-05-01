@@ -71,9 +71,6 @@ export interface PaginatedResponse<T> {
 
 async function handleRateLimit(response: Response): Promise<Response> {
   if (response.status === 429) {
-    const retryAfter = response.headers.get("Retry-After");
-    const delay = retryAfter ? parseInt(retryAfter, 10) * 1000 : 1000;
-    await new Promise((resolve) => setTimeout(resolve, delay));
     return response.clone();
   }
   return response;

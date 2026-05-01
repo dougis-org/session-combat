@@ -2,9 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { storage } from "@/lib/storage";
 import { SpellTemplate, DnDSpellSchool, isValidSpellSchool } from "@/lib/types";
 import { requireAdmin } from "@/lib/api-helpers";
+import {
+  validateSpellName,
+  validateSpellLevel,
+  validateSpellSchool,
+  parseSpellSchool,
+} from "@/lib/import/spellValidation";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
+}
+
+function parseComponents(
+  components: unknown
+): SpellTemplate["components"] {
+  if (!components || typeof components !== "object") {
+    return { verbal: false, somatic: false, material: false };
+  }
+  const c = components as Record<string, unknown>;
+  return {
+    verbal: Boolean(c.verbal),
+    somatic: Boolean(c.somatic),
+    material: Boolean(c.material),
+  };
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
@@ -57,6 +77,27 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       attackRoll,
     } = body;
 
+    if (name !== undefined) {
+      const nameError = validateSpellName(name);
+      if (nameError) {
+        return NextResponse.json({ error: nameError.message }, { status: 400 });
+      }
+    }
+
+    if (level !== undefined) {
+      const levelError = validateSpellLevel(level);
+      if (levelError) {
+        return NextResponse.json({ error: levelError.message }, { status: 400 });
+      }
+    }
+
+    if (school !== undefined) {
+      const schoolError = validateSpellSchool(school);
+      if (schoolError) {
+        return NextResponse.json({ error: schoolError.message }, { status: 400 });
+      }
+    }
+
     const updated: SpellTemplate = {
       ...existing,
       name: name !== undefined ? name.trim() : existing.name,
@@ -73,7 +114,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       castingTime: castingTime !== undefined ? castingTime : existing.castingTime,
       range: range !== undefined ? range : existing.range,
       duration: duration !== undefined ? duration : existing.duration,
-      components: components !== undefined ? components : existing.components,
+      components:
+        components !== undefined
+          ? parseComponents(components)
+          : existing.components,
       higherLevel:
         higherLevel !== undefined ? higherLevel : existing.higherLevel,
       damageType: damageType !== undefined ? damageType : existing.damageType,
@@ -110,7 +154,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     await storage.deleteSpellTemplate(id);
 
-    return NextResponse.json({ success: true });
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error("Error deleting spell:", error);
     return NextResponse.json(

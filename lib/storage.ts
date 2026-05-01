@@ -499,6 +499,23 @@ export const storage = {
     }
   },
 
+  // Check if monster exists by name and source (for dedupe)
+  async monsterExistsByNameAndSource(
+    name: string,
+    source: string
+  ): Promise<boolean> {
+    try {
+      const db = await getDatabase();
+      const count = await db
+        .collection<MonsterTemplate>("monsterTemplates")
+        .countDocuments({ name, source: source || "" });
+      return count > 0;
+    } catch (error) {
+      console.error("Error checking monster existence:", error);
+      return false;
+    }
+  },
+
   // Clear all data for a user
   async clear(userId: string): Promise<void> {
     try {
