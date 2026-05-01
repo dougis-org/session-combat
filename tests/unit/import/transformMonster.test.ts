@@ -1,6 +1,7 @@
 import { Open5ECreature } from "@/lib/import/open5eAdapter";
 import { transformMonster } from "@/lib/import/transformMonster";
 import { GLOBAL_USER_ID } from "@/lib/constants";
+import { createBaseCreature } from "./testFactories";
 
 describe("transformMonster", () => {
   describe("alignment normalization", () => {
@@ -18,28 +19,10 @@ describe("transformMonster", () => {
       { input: " Chaotic Evil ", expected: "Chaotic Evil" },
       { input: undefined, expected: "Unaligned" },
       { input: "random alignment", expected: "Unaligned" },
-      { input: undefined, expected: "Unaligned" },
     ];
 
     test.each(CASES)("maps '$input' to '$expected'", ({ input, expected }) => {
-      const raw: Open5ECreature = {
-        slug: "test",
-        name: "Test Monster",
-        size: "medium",
-        type: "humanoid",
-        alignment: input,
-        speed: { walk: 30 },
-        strength: 10,
-        dexterity: 10,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 10,
-        charisma: 10,
-        hit_points: 10,
-        armor_class: [{ ac: 10 }],
-        challenge_rating: "1",
-        actions: [],
-      };
+      const raw = createBaseCreature({ alignment: input });
       const { monster } = transformMonster(raw);
       expect(monster.alignment).toBe(expected);
     });
@@ -60,24 +43,7 @@ describe("transformMonster", () => {
     ];
 
     test.each(SIZES)("maps '$input' to '$expected'", ({ input, expected }) => {
-      const raw: Open5ECreature = {
-        slug: "test",
-        name: "Test Monster",
-        size: input,
-        type: "humanoid",
-        alignment: "neutral",
-        speed: { walk: 30 },
-        strength: 10,
-        dexterity: 10,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 10,
-        charisma: 10,
-        hit_points: 10,
-        armor_class: [{ ac: 10 }],
-        challenge_rating: "1",
-        actions: [],
-      };
+      const raw = createBaseCreature({ size: input });
       const { monster } = transformMonster(raw);
       expect(monster.size).toBe(expected);
     });
@@ -85,93 +51,25 @@ describe("transformMonster", () => {
 
   describe("speed normalization", () => {
     it("handles record format", () => {
-      const raw: Open5ECreature = {
-        slug: "test",
-        name: "Test",
-        size: "medium",
-        type: "humanoid",
-        alignment: "neutral",
-        speed: { walk: 30, fly: 60 },
-        strength: 10,
-        dexterity: 10,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 10,
-        charisma: 10,
-        hit_points: 10,
-        armor_class: [{ ac: 10 }],
-        challenge_rating: "1",
-        actions: [],
-      };
+      const raw = createBaseCreature({ speed: { walk: 30, fly: 60 } });
       const { monster } = transformMonster(raw);
       expect(monster.speed).toBe("walk 30, fly 60");
     });
 
     it("handles string format", () => {
-      const raw: Open5ECreature = {
-        slug: "test",
-        name: "Test",
-        size: "medium",
-        type: "humanoid",
-        alignment: "neutral",
-        speed: "30 ft.",
-        strength: 10,
-        dexterity: 10,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 10,
-        charisma: 10,
-        hit_points: 10,
-        armor_class: [{ ac: 10 }],
-        challenge_rating: "1",
-        actions: [],
-      };
+      const raw = createBaseCreature({ speed: "30 ft." });
       const { monster } = transformMonster(raw);
       expect(monster.speed).toBe("30 ft.");
     });
 
     it("handles number format", () => {
-      const raw: Open5ECreature = {
-        slug: "test",
-        name: "Test",
-        size: "medium",
-        type: "humanoid",
-        alignment: "neutral",
-        speed: 30,
-        strength: 10,
-        dexterity: 10,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 10,
-        charisma: 10,
-        hit_points: 10,
-        armor_class: [{ ac: 10 }],
-        challenge_rating: "1",
-        actions: [],
-      };
+      const raw = createBaseCreature({ speed: 30 });
       const { monster } = transformMonster(raw);
       expect(monster.speed).toBe("30 ft.");
     });
 
     it("handles missing speed", () => {
-      const raw: Open5ECreature = {
-        slug: "test",
-        name: "Test",
-        size: "medium",
-        type: "humanoid",
-        alignment: "neutral",
-        speed: undefined,
-        strength: 10,
-        dexterity: 10,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 10,
-        charisma: 10,
-        hit_points: 10,
-        armor_class: [{ ac: 10 }],
-        challenge_rating: "1",
-        actions: [],
-      };
+      const raw = createBaseCreature({ speed: undefined });
       const { monster } = transformMonster(raw);
       expect(monster.speed).toBe("30 ft.");
     });
@@ -203,72 +101,21 @@ describe("transformMonster", () => {
     });
 
     it("returns valid=false with errors for missing name", () => {
-      const raw: Open5ECreature = {
-        slug: "test",
-        name: "",
-        size: "medium",
-        type: "humanoid",
-        alignment: "neutral",
-        speed: { walk: 30 },
-        strength: 10,
-        dexterity: 10,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 10,
-        charisma: 10,
-        hit_points: 10,
-        armor_class: [{ ac: 10 }],
-        challenge_rating: "1",
-        actions: [],
-      };
+      const raw = createBaseCreature({ name: "" });
       const result = transformMonster(raw);
       expect(result.valid).toBe(false);
       expect(result.errors).toContain("Missing required field: name");
     });
 
     it("returns valid=false with errors for missing type", () => {
-      const raw: Open5ECreature = {
-        slug: "test",
-        name: "Test",
-        size: "medium",
-        type: "",
-        alignment: "neutral",
-        speed: { walk: 30 },
-        strength: 10,
-        dexterity: 10,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 10,
-        charisma: 10,
-        hit_points: 10,
-        armor_class: [{ ac: 10 }],
-        challenge_rating: "1",
-        actions: [],
-      };
+      const raw = createBaseCreature({ type: "" });
       const result = transformMonster(raw);
       expect(result.valid).toBe(false);
       expect(result.errors).toContain("Missing required field: type");
     });
 
     it("collects multiple errors", () => {
-      const raw: Open5ECreature = {
-        slug: "test",
-        name: "",
-        size: "medium",
-        type: "",
-        alignment: "neutral",
-        speed: { walk: 30 },
-        strength: 10,
-        dexterity: 10,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 10,
-        charisma: 10,
-        hit_points: 10,
-        armor_class: [{ ac: 10 }],
-        challenge_rating: "1",
-        actions: [],
-      };
+      const raw = createBaseCreature({ name: "", type: "" });
       const result = transformMonster(raw);
       expect(result.valid).toBe(false);
       expect(result.errors).toHaveLength(2);
@@ -333,10 +180,8 @@ describe("transformMonster", () => {
     });
 
     it("applies defaults for missing optional fields", () => {
-      const raw: Open5ECreature = {
-        slug: "test",
+      const raw = createBaseCreature({
         name: "Test",
-        size: "medium",
         type: "unknown",
         strength: 0,
         dexterity: 0,
@@ -347,15 +192,14 @@ describe("transformMonster", () => {
         hit_points: 0,
         armor_class: [],
         challenge_rating: "invalid",
-        actions: [],
-      };
+      });
 
       const { monster } = transformMonster(raw);
 
       expect(monster.name).toBe("Test");
       expect(monster.size).toBe("medium");
       expect(monster.type).toBe("unknown");
-      expect(monster.alignment).toBe("Unaligned");
+      expect(monster.alignment).toBe("Neutral");
       expect(monster.speed).toBe("30 ft.");
       expect(monster.challengeRating).toBe(0);
       expect(monster.abilityScores).toEqual({

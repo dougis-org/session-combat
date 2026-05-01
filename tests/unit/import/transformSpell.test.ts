@@ -1,6 +1,7 @@
 import { Open5ESpell } from "@/lib/import/open5eAdapter";
 import { transformSpell } from "@/lib/import/transformSpell";
 import { GLOBAL_USER_ID } from "@/lib/constants";
+import { createBaseSpell } from "./testFactories";
 
 describe("transformSpell", () => {
   describe("school mapping", () => {
@@ -21,18 +22,7 @@ describe("transformSpell", () => {
     ];
 
     test.each(SCHOOLS)("maps '$input' to '$expected'", ({ input, expected }) => {
-      const raw: Open5ESpell = {
-        slug: "test-spell",
-        name: "Test Spell",
-        level: 1,
-        school: input,
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["V"],
-        description: "Test description",
-      };
+      const raw = createBaseSpell({ school: input });
       const { spell } = transformSpell(raw);
       expect(spell.school).toBe(expected);
     });
@@ -40,138 +30,55 @@ describe("transformSpell", () => {
 
   describe("components parsing", () => {
     it("parses verbal component", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test",
-        level: 0,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["V"],
-        description: "Test",
-      };
+      const raw = createBaseSpell({ components: ["V"] });
       const { spell } = transformSpell(raw);
       expect(spell.components).toEqual({ verbal: true, somatic: false, material: false });
     });
 
     it("parses somatic component", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test",
-        level: 0,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["S"],
-        description: "Test",
-      };
+      const raw = createBaseSpell({ components: ["S"] });
       const { spell } = transformSpell(raw);
       expect(spell.components).toEqual({ verbal: false, somatic: true, material: false });
     });
 
     it("parses material component", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test",
-        level: 0,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["M"],
-        description: "Test",
-      };
+      const raw = createBaseSpell({ components: ["M"] });
       const { spell } = transformSpell(raw);
       expect(spell.components).toEqual({ verbal: false, somatic: false, material: true });
     });
 
     it("parses V,S,M together", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test",
+      const raw = createBaseSpell({
         level: 3,
-        school: "evocation",
         concentration: true,
-        casting_time: "1 action",
-        range: "Self",
         duration: "Concentration, up to 1 minute",
         components: ["V", "S", "M"],
         material: "A pinch of sulfur",
-        description: "Test",
-      };
+      });
       const { spell } = transformSpell(raw);
       expect(spell.components).toEqual({ verbal: true, somatic: true, material: true });
     });
 
     it("parses verbal from full word", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test",
-        level: 0,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["verbal"],
-        description: "Test",
-      };
+      const raw = createBaseSpell({ components: ["verbal"] });
       const { spell } = transformSpell(raw);
       expect(spell.components.verbal).toBe(true);
     });
 
     it("parses somatic from full word", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test",
-        level: 0,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["somatic"],
-        description: "Test",
-      };
+      const raw = createBaseSpell({ components: ["somatic"] });
       const { spell } = transformSpell(raw);
       expect(spell.components.somatic).toBe(true);
     });
 
     it("parses material from full phrase", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test",
-        level: 0,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["a material component"],
-        description: "Test",
-      };
+      const raw = createBaseSpell({ components: ["a material component"] });
       const { spell } = transformSpell(raw);
       expect(spell.components.material).toBe(true);
     });
 
     it("handles empty components", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test",
-        level: 0,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: [],
-        description: "Test",
-      };
+      const raw = createBaseSpell({ components: [] });
       const { spell } = transformSpell(raw);
       expect(spell.components).toEqual({ verbal: false, somatic: false, material: false });
     });
@@ -203,90 +110,39 @@ describe("transformSpell", () => {
     });
 
     it("returns valid=false for missing name", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "",
-        level: 1,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["V"],
-        description: "Test",
-      };
+      const raw = createBaseSpell({ name: "" });
       const result = transformSpell(raw);
       expect(result.valid).toBe(false);
       expect(result.errors).toContain("Missing required field: name");
     });
 
     it("returns valid=false for missing level", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test",
-        level: undefined as unknown as number,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["V"],
-        description: "Test",
-      };
+      const raw = createBaseSpell({ level: undefined as unknown as number });
       const result = transformSpell(raw);
       expect(result.valid).toBe(false);
       expect(result.errors).toContain("Missing required field: level");
     });
 
     it("returns valid=false for null level", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test",
-        level: null as unknown as number,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["V"],
-        description: "Test",
-      };
+      const raw = createBaseSpell({ level: null as unknown as number });
       const result = transformSpell(raw);
       expect(result.valid).toBe(false);
       expect(result.errors).toContain("Missing required field: level");
     });
 
     it("returns valid=false for invalid school", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test",
-        level: 1,
-        school: "not a real school",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["V"],
-        description: "Test",
-      };
+      const raw = createBaseSpell({ school: "not a real school" });
       const result = transformSpell(raw);
       expect(result.valid).toBe(false);
       expect(result.errors.some(e => e.includes("Invalid school"))).toBe(true);
     });
 
     it("collects multiple errors", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
+      const raw = createBaseSpell({
         name: "",
         level: undefined as unknown as number,
         school: "invalid",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["V"],
-        description: "Test",
-      };
+      });
       const result = transformSpell(raw);
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThanOrEqual(2);
@@ -338,18 +194,15 @@ describe("transformSpell", () => {
     });
 
     it("applies defaults for missing optional fields", () => {
-      const raw: Open5ESpell = {
-        slug: "test",
-        name: "Test Spell",
+      const raw = createBaseSpell({
         level: 0,
         school: "divination",
-        concentration: false,
         casting_time: "",
         range: "",
         duration: "",
         components: [],
         description: "",
-      };
+      });
 
       const { spell } = transformSpell(raw);
 
@@ -370,32 +223,8 @@ describe("transformSpell", () => {
     });
 
     it("sets attackRoll=true only when dc_damage is present", () => {
-      const withDc: Open5ESpell = {
-        slug: "test1",
-        name: "Test1",
-        level: 1,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["V"],
-        description: "Test",
-        dc_damage: "8d6",
-      };
-
-      const withoutDc: Open5ESpell = {
-        slug: "test2",
-        name: "Test2",
-        level: 1,
-        school: "evocation",
-        concentration: false,
-        casting_time: "1 action",
-        range: "Self",
-        duration: "Instantaneous",
-        components: ["V"],
-        description: "Test",
-      };
+      const withDc = createBaseSpell({ name: "Test1", dc_damage: "8d6" });
+      const withoutDc = createBaseSpell({ name: "Test2" });
 
       const { spell: spell1 } = transformSpell(withDc);
       const { spell: spell2 } = transformSpell(withoutDc);
