@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { SpellTemplate, DnDSpellSchool, isValidSpellSchool } from "@/lib/types";
-import { isUserAdmin } from "@/lib/permissions";
-import { v4 as uuidv4 } from "uuid";
+import { requireAdmin } from "@/lib/api-helpers";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -29,23 +27,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
-  const auth = requireAuth(request);
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
-  const admin = await isUserAdmin(auth.userId);
-  if (admin === null) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-  if (!admin) {
-    return NextResponse.json(
-      { error: "Only administrators can update spells" },
-      { status: 403 }
-    );
+  const errorResponse = await requireAdmin(request);
+  if (errorResponse) {
+    return errorResponse;
   }
 
   try {
@@ -112,23 +96,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
-  const auth = requireAuth(request);
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
-  const admin = await isUserAdmin(auth.userId);
-  if (admin === null) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-  if (!admin) {
-    return NextResponse.json(
-      { error: "Only administrators can delete spells" },
-      { status: 403 }
-    );
+  const errorResponse = await requireAdmin(request);
+  if (errorResponse) {
+    return errorResponse;
   }
 
   try {

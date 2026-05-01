@@ -1,41 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/middleware";
-import { isUserAdmin } from "@/lib/permissions";
 import { storage } from "@/lib/storage";
 import {
-  fetchMonsters,
-  fetchSpells,
   getAllMonsters,
   getAllSpells,
-  Open5ECreature,
-  Open5ESpell,
 } from "@/lib/import/open5eAdapter";
 import { transformMonster } from "@/lib/import/transformMonster";
 import { transformSpell } from "@/lib/import/transformSpell";
 import { shouldImport } from "@/lib/import/dedupeEngine";
+import { requireAdmin } from "@/lib/api-helpers";
+import { MonsterTemplate } from "@/lib/types";
+import { SpellTemplate } from "@/lib/types";
 
 interface ImportRequest {
   type: "monsters" | "spells" | ["monsters", "spells"];
 }
 
-export async function POST(request: NextRequest) {
-  const auth = requireAuth(request);
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
+interface ImportResult {
+  inserted: number;
+  skipped: number;
+  errors: number;
+}
 
-  const admin = await isUserAdmin(auth.userId);
-  if (admin === null) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-  if (!admin) {
-    return NextResponse.json(
-      { error: "Only administrators can trigger sync" },
-      { status: 403 }
-    );
+export async function POST(request: NextRequest) {
+  const errorResponse = await requireAdmin(request);
+  if (errorResponse) {
+    return errorResponse;
   }
 
   try {
@@ -44,7 +33,7 @@ export async function POST(request: NextRequest) {
       ? body.type
       : [body.type];
 
-    const results: Record<string, unknown> = {};
+    const results: Record<string, ImportResult> = {};
 
     for (const type of types) {
       if (type === "monsters") {
@@ -67,27 +56,27 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function importMonsters() {
+async function importMonsters(): Promise<ImportResult> {
   let inserted = 0;
   let skipped = 0;
   let errors = 0;
 
   for await (const creature of getAllMonsters()) {
-    const { monster, valid } = transformMonster(creature);
+    const result = transformMonster(creature);
 
-    if (!valid) {
+    if (!result.valid) {
       errors++;
       continue;
     }
 
-    const exists = await shouldImport("monsters", monster.name, monster.source || "");
+    const exists = await shouldImport("monsters", result.monster.name, result.monster.source || "");
     if (!exists) {
       skipped++;
       continue;
     }
 
     try {
-      await storage.saveMonsterTemplate(monster);
+      await storage.saveMonsterTemplate(result.monster);
       inserted++;
     } catch {
       errors++;
@@ -97,27 +86,27 @@ async function importMonsters() {
   return { inserted, skipped, errors };
 }
 
-async function importSpells() {
+async function importSpells(): Promise<ImportResult> {
   let inserted = 0;
   let skipped = 0;
   let errors = 0;
 
   for await (const spellData of getAllSpells()) {
-    const { spell, valid } = transformSpell(spellData);
+    const result = transformSpell(spellData);
 
-    if (!valid) {
+    if (!result.valid) {
       errors++;
       continue;
     }
 
-    const exists = await shouldImport("spells", spell.name, spell.source || "");
+    const exists = await shouldImport("spells", result.spell.name, result.spell.source || "");
     if (!exists) {
       skipped++;
       continue;
     }
 
     try {
-      await storage.saveSpellTemplate(spell);
+      await storage.saveSpellTemplate(result.spell);
       inserted++;
     } catch {
       errors++;

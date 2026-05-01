@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { SpellTemplate, DnDSpellSchool, isValidSpellSchool } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";
-import { isUserAdmin } from "@/lib/permissions";
+import { requireAdmin } from "@/lib/api-helpers";
 import { v4 as uuidv4 } from "uuid";
 
 export async function GET(request: NextRequest) {
@@ -28,23 +27,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = requireAuth(request);
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
-  const admin = await isUserAdmin(auth.userId);
-  if (admin === null) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-  if (!admin) {
-    return NextResponse.json(
-      { error: "Only administrators can create spells" },
-      { status: 403 }
-    );
+  const errorResponse = await requireAdmin(request);
+  if (errorResponse) {
+    return errorResponse;
   }
 
   try {
