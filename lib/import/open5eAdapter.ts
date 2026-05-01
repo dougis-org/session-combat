@@ -1,5 +1,4 @@
 const OPEN5E_API_BASE = "https://api.open5e.com/v2";
-
 const ALLOWED_HOST = "api.open5e.com";
 
 export function isAllowedUrl(url: string): boolean {
@@ -80,7 +79,11 @@ async function handleRateLimit(response: Response): Promise<Response> {
   return response;
 }
 
-async function fetchWithBackoff(url: string, retries = 3): Promise<Response> {
+async function fetchWithBackoff(
+  fetchFn: typeof fetch,
+  url: string,
+  retries = 3
+): Promise<Response> {
   if (!isAllowedUrl(url)) {
     throw new Error(`URL host not allowed: ${url}`);
   }
@@ -89,7 +92,7 @@ async function fetchWithBackoff(url: string, retries = 3): Promise<Response> {
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const response = await fetch(url);
+      const response = await fetchFn(url);
 
       if (response.status === 429) {
         const handled = await handleRateLimit(response.clone());
@@ -115,10 +118,12 @@ async function fetchWithBackoff(url: string, retries = 3): Promise<Response> {
 }
 
 async function fetchPage<T>(
+  fetchFn: typeof fetch,
   endpoint: string,
   page = 1
 ): Promise<PaginatedResponse<T>> {
   const response = await fetchWithBackoff(
+    fetchFn,
     `${OPEN5E_API_BASE}/${endpoint}/?page=${page}`
   );
 
@@ -131,50 +136,91 @@ async function fetchPage<T>(
   return response.json();
 }
 
+export interface IOpen5EClient {
+  fetchMonsters(page?: number): Promise<PaginatedResponse<Open5ECreature>>;
+  fetchSpells(page?: number): Promise<PaginatedResponse<Open5ESpell>>;
+  getAllMonsters(): AsyncGenerator<Open5ECreature, void, unknown>;
+  getAllSpells(): AsyncGenerator<Open5ESpell, void, unknown>;
+}
+
+export class Open5EClient implements IOpen5EClient {
+  private fetcher: typeof fetch;
+
+  constructor(fetchFn: typeof fetch = fetch) {
+    this.fetcher = fetchFn;
+  }
+
+  async fetchMonsters(
+    page = 1
+  ): Promise<PaginatedResponse<Open5ECreature>> {
+    return fetchPage<Open5ECreature>(this.fetcher, "creatures", page);
+  }
+
+  async fetchSpells(
+    page = 1
+  ): Promise<PaginatedResponse<Open5ESpell>> {
+    return fetchPage<Open5ESpell>(this.fetcher, "spells", page);
+  }
+
+  async *getAllMonsters(): AsyncGenerator<Open5ECreature, void, unknown> {
+    let currentPage = 1;
+
+    while (true) {
+      const data = await this.fetchMonsters(currentPage);
+      for (const creature of data.results) {
+        yield creature;
+      }
+
+      if (!data.next) {
+        break;
+      }
+      currentPage++;
+    }
+  }
+
+  async *getAllSpells(): AsyncGenerator<Open5ESpell, void, unknown> {
+    let currentPage = 1;
+
+    while (true) {
+      const data = await this.fetchSpells(currentPage);
+      for (const spell of data.results) {
+        yield spell;
+      }
+
+      if (!data.next) {
+        break;
+      }
+      currentPage++;
+    }
+  }
+}
+
+export const defaultOpen5EClient = new Open5EClient();
+
 export async function fetchMonsters(
   page = 1
 ): Promise<PaginatedResponse<Open5ECreature>> {
-  return fetchPage<Open5ECreature>("creatures", page);
+  return defaultOpen5EClient.fetchMonsters(page);
 }
 
 export async function fetchSpells(
   page = 1
 ): Promise<PaginatedResponse<Open5ESpell>> {
-  return fetchPage<Open5ESpell>("spells", page);
+  return defaultOpen5EClient.fetchSpells(page);
 }
 
-export async function* getAllMonsters(
-  page = 1
-): AsyncGenerator<Open5ECreature, void, unknown> {
-  let currentPage = page;
-
-  while (true) {
-    const data = await fetchMonsters(currentPage);
-    for (const creature of data.results) {
-      yield creature;
-    }
-
-    if (!data.next) {
-      break;
-    }
-    currentPage++;
-  }
+export async function* getAllMonsters(): AsyncGenerator<
+  Open5ECreature,
+  void,
+  unknown
+> {
+  yield* defaultOpen5EClient.getAllMonsters();
 }
 
-export async function* getAllSpells(
-  page = 1
-): AsyncGenerator<Open5ESpell, void, unknown> {
-  let currentPage = page;
-
-  while (true) {
-    const data = await fetchSpells(currentPage);
-    for (const spell of data.results) {
-      yield spell;
-    }
-
-    if (!data.next) {
-      break;
-    }
-    currentPage++;
-  }
+export async function* getAllSpells(): AsyncGenerator<
+  Open5ESpell,
+  void,
+  unknown
+> {
+  yield* defaultOpen5EClient.getAllSpells();
 }

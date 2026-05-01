@@ -1,9 +1,34 @@
-import { shouldImport } from "@/lib/import/dedupeEngine";
+import { IOpen5EClient, Open5ECreature, Open5ESpell } from "@/lib/import/open5eAdapter";
+import {
+  shouldImport,
+  importMonstersFromOpen5E,
+  importSpellsFromOpen5E,
+} from "@/lib/import/dedupeEngine";
 import { storage } from "@/lib/storage";
+import { createBaseSpell } from "./testFactories";
 
 jest.mock("@/lib/storage");
 
 const mockedStorage = jest.mocked(storage);
+
+function createMockClient(creatures: Open5ECreature[], spells: Open5ESpell[]) {
+  const monsterGenerator = (async function* () {
+    for (const creature of creatures) {
+      yield creature;
+    }
+  })();
+
+  const spellGenerator = (async function* () {
+    for (const spell of spells) {
+      yield spell;
+    }
+  })();
+
+  return {
+    getAllMonsters: () => monsterGenerator,
+    getAllSpells: () => spellGenerator,
+  } as unknown as IOpen5EClient;
+}
 
 describe("dedupeEngine", () => {
   beforeEach(() => {
@@ -36,6 +61,223 @@ describe("dedupeEngine", () => {
 
       expect(result).toBe(true);
       expect(mockedStorage.spellExistsByNameAndSource).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("importMonstersFromOpen5E", () => {
+    it("inserts monster when not duplicate and valid", async () => {
+      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
+      mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
+
+      const creature: Open5ECreature = {
+        slug: "goblin",
+        name: "Goblin",
+        size: "small",
+        type: "humanoid",
+        alignment: "neutral evil",
+        speed: { walk: 30 },
+        strength: 8,
+        dexterity: 14,
+        constitution: 12,
+        intelligence: 10,
+        wisdom: 8,
+        charisma: 8,
+        hit_points: 7,
+        armor_class: [{ ac: 15 }],
+        challenge_rating: "0.25",
+        actions: [{ name: "Attack", desc: "Melee weapon attack" }],
+      };
+
+      const client = createMockClient([creature], []);
+
+      const result = await importMonstersFromOpen5E(client);
+
+      expect(result.inserted).toBe(1);
+      expect(result.skipped).toBe(0);
+      expect(result.errors).toBe(0);
+      expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(1);
+    });
+
+    it("inserts monster even when storage check would return exists (monsters have no dedup)", async () => {
+      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(true);
+      mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
+
+      const creature: Open5ECreature = {
+        slug: "goblin",
+        name: "Goblin",
+        size: "small",
+        type: "humanoid",
+        alignment: "neutral evil",
+        speed: { walk: 30 },
+        strength: 8,
+        dexterity: 14,
+        constitution: 12,
+        intelligence: 10,
+        wisdom: 8,
+        charisma: 8,
+        hit_points: 7,
+        armor_class: [{ ac: 15 }],
+        challenge_rating: "0.25",
+        actions: [],
+      };
+
+      const client = createMockClient([creature], []);
+
+      const result = await importMonstersFromOpen5E(client);
+
+      expect(result.inserted).toBe(1);
+      expect(result.skipped).toBe(0);
+      expect(result.errors).toBe(0);
+      expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(1);
+    });
+
+    it("counts error when monster transform is invalid", async () => {
+      const invalidCreature: Open5ECreature = {
+        slug: "bad",
+        name: "",
+        size: "small",
+        type: "humanoid",
+        speed: { walk: 30 },
+        strength: 8,
+        dexterity: 14,
+        constitution: 12,
+        intelligence: 10,
+        wisdom: 8,
+        charisma: 8,
+        hit_points: 7,
+        armor_class: [{ ac: 15 }],
+        challenge_rating: "0.25",
+        actions: [],
+      };
+
+      const client = createMockClient([invalidCreature], []);
+
+      const result = await importMonstersFromOpen5E(client);
+
+      expect(result.inserted).toBe(0);
+      expect(result.skipped).toBe(0);
+      expect(result.errors).toBe(1);
+      expect(mockedStorage.saveMonsterTemplate).not.toHaveBeenCalled();
+    });
+
+    it("processes multiple monsters", async () => {
+      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
+      mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
+
+      const creatures: Open5ECreature[] = [
+        {
+          slug: "goblin",
+          name: "Goblin",
+          size: "small",
+          type: "humanoid",
+          alignment: "neutral evil",
+          speed: { walk: 30 },
+          strength: 8,
+          dexterity: 14,
+          constitution: 12,
+          intelligence: 10,
+          wisdom: 8,
+          charisma: 8,
+          hit_points: 7,
+          armor_class: [{ ac: 15 }],
+          challenge_rating: "0.25",
+          actions: [],
+        },
+        {
+          slug: "orc",
+          name: "Orc",
+          size: "medium",
+          type: "humanoid",
+          alignment: "chaotic evil",
+          speed: { walk: 30 },
+          strength: 16,
+          dexterity: 12,
+          constitution: 16,
+          intelligence: 7,
+          wisdom: 11,
+          charisma: 10,
+          hit_points: 15,
+          armor_class: [{ ac: 13 }],
+          challenge_rating: "0.5",
+          actions: [],
+        },
+      ];
+
+      const client = createMockClient(creatures, []);
+
+      const result = await importMonstersFromOpen5E(client);
+
+      expect(result.inserted).toBe(2);
+      expect(result.skipped).toBe(0);
+      expect(result.errors).toBe(0);
+      expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("importSpellsFromOpen5E", () => {
+    it("inserts spell when not duplicate and valid", async () => {
+      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
+      mockedStorage.saveSpellTemplate.mockResolvedValue(undefined);
+
+      const spell = createBaseSpell({
+        slug: "fireball",
+        name: "Fireball",
+        level: 3,
+      });
+
+      const client = createMockClient([], [spell]);
+
+      const result = await importSpellsFromOpen5E(client);
+
+      expect(result.inserted).toBe(1);
+      expect(result.skipped).toBe(0);
+      expect(result.errors).toBe(0);
+      expect(mockedStorage.saveSpellTemplate).toHaveBeenCalledTimes(1);
+    });
+
+    it("skips spell when storage returns exists=true", async () => {
+      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(true);
+
+      const spell = createBaseSpell({
+        slug: "fireball",
+        name: "Fireball",
+        level: 3,
+      });
+
+      const client = createMockClient([], [spell]);
+
+      const result = await importSpellsFromOpen5E(client);
+
+      expect(result.inserted).toBe(0);
+      expect(result.skipped).toBe(1);
+      expect(result.errors).toBe(0);
+      expect(mockedStorage.saveSpellTemplate).not.toHaveBeenCalled();
+    });
+
+    it("counts error when spell transform is invalid", async () => {
+      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
+
+      const invalidSpell: Open5ESpell = {
+        slug: "bad",
+        name: "",
+        level: 1,
+        school: "evocation",
+        concentration: false,
+        casting_time: "1 action",
+        range: "Self",
+        duration: "Instantaneous",
+        components: [],
+        description: "",
+      };
+
+      const client = createMockClient([], [invalidSpell]);
+
+      const result = await importSpellsFromOpen5E(client);
+
+      expect(result.inserted).toBe(0);
+      expect(result.skipped).toBe(0);
+      expect(result.errors).toBe(1);
+      expect(mockedStorage.saveSpellTemplate).not.toHaveBeenCalled();
     });
   });
 });

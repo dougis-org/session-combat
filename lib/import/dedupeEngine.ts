@@ -1,11 +1,12 @@
 import { storage } from "@/lib/storage";
-import { MonsterTemplate } from "@/lib/types";
-import { SpellTemplate } from "@/lib/types";
-import { Open5ECreature } from "./open5eAdapter";
-import { Open5ESpell } from "./open5eAdapter";
+import {
+  Open5ECreature,
+  Open5ESpell,
+  IOpen5EClient,
+  Open5EClient,
+} from "./open5eAdapter";
 import { transformMonster } from "./transformMonster";
 import { transformSpell } from "./transformSpell";
-import { getAllMonsters, getAllSpells } from "./open5eAdapter";
 
 export type Collection = "monsters" | "spells";
 
@@ -74,12 +75,14 @@ async function importSingleSpell(
   return { inserted: true, skipped: false, error: false };
 }
 
-export async function importMonstersFromOpen5E(): Promise<ImportResult> {
+export async function importMonstersFromOpen5E(
+  client: IOpen5EClient = new Open5EClient()
+): Promise<ImportResult> {
   let inserted = 0;
   let skipped = 0;
   let errors = 0;
 
-  for await (const creature of getAllMonsters()) {
+  for await (const creature of client.getAllMonsters()) {
     const { inserted: ins, skipped: skp, error: err } =
       await importSingleMonster(creature);
     if (ins) inserted++;
@@ -90,12 +93,14 @@ export async function importMonstersFromOpen5E(): Promise<ImportResult> {
   return { inserted, skipped, errors };
 }
 
-export async function importSpellsFromOpen5E(): Promise<ImportResult> {
+export async function importSpellsFromOpen5E(
+  client: IOpen5EClient = new Open5EClient()
+): Promise<ImportResult> {
   let inserted = 0;
   let skipped = 0;
   let errors = 0;
 
-  for await (const spellData of getAllSpells()) {
+  for await (const spellData of client.getAllSpells()) {
     const { inserted: ins, skipped: skp, error: err } =
       await importSingleSpell(spellData);
     if (ins) inserted++;
