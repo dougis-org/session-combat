@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { storage } from "@/lib/storage";
 import {
-  getAllMonsters,
-  getAllSpells,
-} from "@/lib/import/open5eAdapter";
-import { transformMonster } from "@/lib/import/transformMonster";
-import { transformSpell } from "@/lib/import/transformSpell";
-import { shouldImport } from "@/lib/import/dedupeEngine";
+  importMonstersFromOpen5E,
+  importSpellsFromOpen5E,
+} from "@/lib/import/dedupeEngine";
 import { requireAdmin } from "@/lib/api-helpers";
-import { MonsterTemplate } from "@/lib/types";
-import { SpellTemplate } from "@/lib/types";
 
 interface ImportRequest {
   type: "monsters" | "spells" | ["monsters", "spells"];
@@ -37,9 +31,9 @@ export async function POST(request: NextRequest) {
 
     for (const type of types) {
       if (type === "monsters") {
-        results.monsters = await importMonsters();
+        results.monsters = await importMonstersFromOpen5E();
       } else if (type === "spells") {
-        results.spells = await importSpells();
+        results.spells = await importSpellsFromOpen5E();
       }
     }
 
@@ -54,64 +48,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-async function importMonsters(): Promise<ImportResult> {
-  let inserted = 0;
-  let skipped = 0;
-  let errors = 0;
-
-  for await (const creature of getAllMonsters()) {
-    const result = transformMonster(creature);
-
-    if (!result.valid) {
-      errors++;
-      continue;
-    }
-
-    const exists = await shouldImport("monsters", result.monster.name, result.monster.source || "");
-    if (!exists) {
-      skipped++;
-      continue;
-    }
-
-    try {
-      await storage.saveMonsterTemplate(result.monster);
-      inserted++;
-    } catch {
-      errors++;
-    }
-  }
-
-  return { inserted, skipped, errors };
-}
-
-async function importSpells(): Promise<ImportResult> {
-  let inserted = 0;
-  let skipped = 0;
-  let errors = 0;
-
-  for await (const spellData of getAllSpells()) {
-    const result = transformSpell(spellData);
-
-    if (!result.valid) {
-      errors++;
-      continue;
-    }
-
-    const exists = await shouldImport("spells", result.spell.name, result.spell.source || "");
-    if (!exists) {
-      skipped++;
-      continue;
-    }
-
-    try {
-      await storage.saveSpellTemplate(result.spell);
-      inserted++;
-    } catch {
-      errors++;
-    }
-  }
-
-  return { inserted, skipped, errors };
 }

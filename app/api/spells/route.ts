@@ -1,9 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { storage } from "@/lib/storage";
-import { SpellTemplate, DnDSpellSchool, isValidSpellSchool } from "@/lib/types";
+import { SpellTemplate, DnDSpellSchool } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";
 import { requireAdmin } from "@/lib/api-helpers";
 import { v4 as uuidv4 } from "uuid";
+import {
+  validateSpellName,
+  validateSpellLevel,
+  validateSpellSchool,
+  parseSpellSchool,
+} from "@/lib/import/spellValidation";
+
+function parseComponents(
+  components: unknown
+): SpellTemplate["components"] {
+  if (!components || typeof components !== "object") {
+    return { verbal: false, somatic: false, material: false };
+  }
+  const c = components as Record<string, unknown>;
+  return {
+    verbal: Boolean(c.verbal),
+    somatic: Boolean(c.somatic),
+    material: Boolean(c.material),
+  };
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -51,25 +71,19 @@ export async function POST(request: NextRequest) {
       attackRoll,
     } = body;
 
-    if (!name || name.trim() === "") {
-      return NextResponse.json(
-        { error: "Spell name is required" },
-        { status: 400 }
-      );
+    const nameError = validateSpellName(name);
+    if (nameError) {
+      return NextResponse.json({ error: nameError.message }, { status: 400 });
     }
 
-    if (level === undefined || level < 0 || level > 9) {
-      return NextResponse.json(
-        { error: "Level must be 0-9" },
-        { status: 400 }
-      );
+    const levelError = validateSpellLevel(level);
+    if (levelError) {
+      return NextResponse.json({ error: levelError.message }, { status: 400 });
     }
 
-    if (!isValidSpellSchool(school)) {
-      return NextResponse.json(
-        { error: "Invalid spell school" },
-        { status: 400 }
-      );
+    const schoolError = validateSpellSchool(school);
+    if (schoolError) {
+      return NextResponse.json({ error: schoolError.message }, { status: 400 });
     }
 
     const spell: SpellTemplate = {
@@ -80,16 +94,12 @@ export async function POST(request: NextRequest) {
       name: name.trim(),
       level,
       concentration: Boolean(concentration),
-      school: school as DnDSpellSchool,
+      school: parseSpellSchool(school),
       description: description || "",
       castingTime: castingTime || "1 action",
       range: range || "Self",
       duration: duration || "Instantaneous",
-      components: {
-        verbal: Boolean(components?.verbal),
-        somatic: Boolean(components?.somatic),
-        material: Boolean(components?.material),
-      },
+      components: parseComponents(components),
       higherLevel: higherLevel,
       damageType: damageType,
       saveDc: saveDc,
