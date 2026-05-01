@@ -23,7 +23,7 @@ export function isAllowedUrl(url: string): boolean {
   }
 }
 
-interface Open5ECreature {
+export interface Open5ECreature {
   slug: string;
   name: string;
   size: string;
@@ -44,7 +44,7 @@ interface Open5ECreature {
   legendary_actions?: Array<{ name: string; desc: string }>;
 }
 
-interface Open5ESpell {
+export interface Open5ESpell {
   slug: string;
   name: string;
   level: number;
@@ -63,7 +63,7 @@ interface Open5ESpell {
   save_ability?: string;
 }
 
-interface PaginatedResponse<T> {
+export interface PaginatedResponse<T> {
   results: T[];
   count: number;
   next: string | null;
@@ -114,36 +114,33 @@ async function fetchWithBackoff(url: string, retries = 3): Promise<Response> {
   throw lastError || new Error(`Failed to fetch ${url} after ${retries} retries`);
 }
 
-export async function fetchMonsters(
+async function fetchPage<T>(
+  endpoint: string,
   page = 1
-): Promise<PaginatedResponse<Open5ECreature>> {
+): Promise<PaginatedResponse<T>> {
   const response = await fetchWithBackoff(
-    `${OPEN5E_API_BASE}/creatures/?page=${page}`
+    `${OPEN5E_API_BASE}/${endpoint}/?page=${page}`
   );
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch monsters: ${response.status} ${response.statusText}`
+      `Failed to fetch ${endpoint}: ${response.status} ${response.statusText}`
     );
   }
 
   return response.json();
 }
 
+export async function fetchMonsters(
+  page = 1
+): Promise<PaginatedResponse<Open5ECreature>> {
+  return fetchPage<Open5ECreature>("creatures", page);
+}
+
 export async function fetchSpells(
   page = 1
 ): Promise<PaginatedResponse<Open5ESpell>> {
-  const response = await fetchWithBackoff(
-    `${OPEN5E_API_BASE}/spells/?page=${page}`
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch spells: ${response.status} ${response.statusText}`
-    );
-  }
-
-  return response.json();
+  return fetchPage<Open5ESpell>("spells", page);
 }
 
 export async function* getAllMonsters(
@@ -181,5 +178,3 @@ export async function* getAllSpells(
     currentPage++;
   }
 }
-
-export type { Open5ECreature, Open5ESpell, PaginatedResponse };
