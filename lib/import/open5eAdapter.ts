@@ -69,13 +69,6 @@ export interface PaginatedResponse<T> {
   previous: string | null;
 }
 
-async function handleRateLimit(response: Response): Promise<Response> {
-  if (response.status === 429) {
-    return response.clone();
-  }
-  return response;
-}
-
 async function fetchWithBackoff(
   fetchFn: typeof fetch,
   url: string,
@@ -92,13 +85,19 @@ async function fetchWithBackoff(
       const response = await fetchFn(url);
 
       if (response.status === 429) {
-        const handled = await handleRateLimit(response.clone());
+        const retryAfter = response.headers.get("Retry-After");
+        let backoffMs: number;
+        if (retryAfter) {
+          backoffMs = Math.min(parseInt(retryAfter, 10) * 1000, 10000);
+        } else {
+          backoffMs = Math.min(1000 * Math.pow(2, attempt), 10000);
+        }
+
         if (attempt < retries) {
-          const backoffMs = Math.min(1000 * Math.pow(2, attempt), 10000);
           await new Promise((resolve) => setTimeout(resolve, backoffMs));
           continue;
         }
-        return handled;
+        return response;
       }
 
       return response;

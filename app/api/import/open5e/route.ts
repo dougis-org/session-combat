@@ -27,6 +27,14 @@ export async function POST(request: NextRequest) {
       ? body.type
       : [body.type];
 
+    const invalid = types.filter((t) => t !== "monsters" && t !== "spells");
+    if (invalid.length > 0) {
+      return NextResponse.json(
+        { error: `Invalid import type: ${invalid.join(", ")}. Supported: monsters, spells` },
+        { status: 400 }
+      );
+    }
+
     const results: Record<string, ImportResult> = {};
 
     for (const type of types) {

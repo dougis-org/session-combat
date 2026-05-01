@@ -38,6 +38,15 @@ function mapSize(size: string): MonsterTemplate["size"] {
   return sizeMap[size.toLowerCase()] || "medium";
 }
 
+function parseChallengeRating(rating: unknown): number {
+  if (typeof rating === "number") return rating;
+  if (typeof rating === "string" && rating.includes("/")) {
+    const [num, den] = rating.split("/").map(Number);
+    return den > 0 ? num / den : 0;
+  }
+  return parseFloat(String(rating)) || 0;
+}
+
 function normalizeSpeed(speed: Open5ECreature["speed"]): string {
   if (!speed) return "30 ft.";
   const parts: string[] = [];
@@ -69,7 +78,7 @@ export function transformMonster(
     type: raw.type?.key || "unknown",
     alignment: normalizeAlignment(raw.alignment),
     speed: normalizeSpeed(raw.speed),
-    challengeRating: raw.challenge_rating || 0,
+    challengeRating: parseChallengeRating(raw.challenge_rating),
     abilityScores: {
       strength: raw.ability_scores?.strength || 10,
       dexterity: raw.ability_scores?.dexterity || 10,

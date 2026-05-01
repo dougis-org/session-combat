@@ -58,7 +58,7 @@ describe("storage", () => {
 
       const result = await storage.loadSpellById("spell-123");
 
-      expect(mockedCollection.findOne).toHaveBeenCalledWith({ id: "spell-123" });
+      expect(mockedCollection.findOne).toHaveBeenCalledWith({ id: "spell-123", userId: "GLOBAL" });
       expect(result?.id).toBe("spell-123");
     });
 
@@ -218,7 +218,7 @@ describe("storage", () => {
 
       await storage.deleteSpellTemplate("spell-to-delete");
 
-      expect(mockedCollection.deleteOne).toHaveBeenCalledWith({ id: "spell-to-delete" });
+      expect(mockedCollection.deleteOne).toHaveBeenCalledWith({ id: "spell-to-delete", userId: "GLOBAL" });
     });
 
     it("throws on database error", async () => {

@@ -49,7 +49,10 @@ describe("GET /api/spells", () => {
       { id: "1", name: "Fireball", concentration: false },
       { id: "2", name: "Hold Person", concentration: true },
     ];
-    mockedStorage.loadSpells.mockResolvedValue(allSpells);
+    mockedStorage.loadSpells.mockImplementation((userId?: string, conc?: boolean) => {
+      if (conc === true) return Promise.resolve([allSpells[1]]);
+      return Promise.resolve(allSpells);
+    });
 
     const req = makeRouteRequest("http://localhost/api/spells?concentration=true", "GET");
     const res = await GET(req);

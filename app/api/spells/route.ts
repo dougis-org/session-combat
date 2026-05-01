@@ -13,11 +13,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const concentration = searchParams.get("concentration");
 
-    let spells = await storage.loadSpells();
-
-    if (concentration === "true") {
-      spells = spells.filter((s) => s.concentration);
-    }
+    let spells = await storage.loadSpells(
+      undefined,
+      concentration === "true" ? true : undefined
+    );
 
     return NextResponse.json(spells);
   } catch (error) {

@@ -416,12 +416,15 @@ export const storage = {
   },
 
   // Load spells - load all global spells if no userId, or load user spells
-  async loadSpells(userId?: string): Promise<SpellTemplate[]> {
+  async loadSpells(userId?: string, concentration?: boolean): Promise<SpellTemplate[]> {
     try {
       const db = await getDatabase();
-      const query: { userId: string } = userId
+      const query: Record<string, unknown> = userId
         ? { userId }
         : { userId: GLOBAL_USER_ID };
+      if (concentration !== undefined) {
+        query.concentration = concentration;
+      }
       const spells = await db
         .collection<SpellTemplate>("spellTemplates")
         .find(query)
@@ -439,7 +442,7 @@ export const storage = {
       const db = await getDatabase();
       const spell = await db
         .collection<SpellTemplate>("spellTemplates")
-        .findOne({ id });
+        .findOne({ id, userId: GLOBAL_USER_ID });
       return spell ? normalizeStoredEntityId(spell) : null;
     } catch (error) {
       console.error("Error loading spell by ID:", error);
@@ -475,7 +478,7 @@ export const storage = {
       const db = await getDatabase();
       await db
         .collection<SpellTemplate>("spellTemplates")
-        .deleteOne({ id });
+        .deleteOne({ id, userId: GLOBAL_USER_ID });
     } catch (error) {
       console.error("Error deleting spell template:", error);
       throw error;
