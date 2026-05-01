@@ -2,10 +2,22 @@ const OPEN5E_API_BASE = "https://api.open5e.com/v2";
 
 const ALLOWED_HOST = "api.open5e.com";
 
-function isAllowedUrl(url: string): boolean {
+export function isAllowedUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.hostname === ALLOWED_HOST;
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return false;
+    }
+    if (parsed.hostname !== ALLOWED_HOST) {
+      return false;
+    }
+    if (parsed.username || parsed.password) {
+      return false;
+    }
+    if (parsed.hash && parsed.hash.includes("@")) {
+      return false;
+    }
+    return true;
   } catch {
     return false;
   }
@@ -16,8 +28,8 @@ interface Open5ECreature {
   name: string;
   size: string;
   type: string;
-  alignment: string;
-  speed: Record<string, string | number>;
+  alignment?: string;
+  speed?: Record<string, string | number> | string | number;
   strength: number;
   dexterity: number;
   constitution: number;

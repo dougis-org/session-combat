@@ -5,8 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 
 function normalizeAlignment(
   alignment: string | undefined
-): DnDAlignment | undefined {
-  if (!alignment) return undefined;
+): DnDAlignment {
+  if (!alignment) return "Unaligned";
 
   const trimmed = alignment.trim().toLowerCase();
 
@@ -23,7 +23,7 @@ function normalizeAlignment(
     unaligned: "Unaligned",
   };
 
-  return alignmentMap[trimmed] || "Unaligned";
+  return alignmentMap[trimmed] ?? "Unaligned";
 }
 
 function mapSize(size: string): MonsterTemplate["size"] {

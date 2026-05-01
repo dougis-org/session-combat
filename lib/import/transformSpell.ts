@@ -51,7 +51,9 @@ export function transformSpell(
     errors.push("Missing required field: level");
   }
 
-  if (!isValidSpellSchool(raw.school)) {
+  const schoolKey = raw.school?.toLowerCase().trim();
+  const mappedSchool = schoolKey ? mapSchool(raw.school) : "Evocation";
+  if (schoolKey && !SCHOOL_MAP[schoolKey]) {
     errors.push(`Invalid school: ${raw.school}`);
   }
 
