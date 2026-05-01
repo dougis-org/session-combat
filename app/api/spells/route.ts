@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { storage } from "@/lib/storage";
-import { SpellTemplate, DnDSpellSchool } from "@/lib/types";
+import { SpellTemplate } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";
 import { requireAdmin } from "@/lib/api-helpers";
 import { v4 as uuidv4 } from "uuid";
