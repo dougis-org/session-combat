@@ -1,34 +1,20 @@
-import { IOpen5EClient, Open5ECreature, Open5ESpell } from "@/lib/import/open5eAdapter";
+import { Open5ESpell } from "@/lib/import/open5eAdapter";
 import {
   shouldImport,
   importMonstersFromOpen5E,
   importSpellsFromOpen5E,
 } from "@/lib/import/dedupeEngine";
 import { storage } from "@/lib/storage";
-import { createBaseSpell } from "./testFactories";
+import {
+  createMockClient,
+  createTestCreature,
+  createTestSpell,
+  SAMPLE_CREATURE,
+} from "./open5e.mockHelpers";
 
 jest.mock("@/lib/storage");
 
 const mockedStorage = jest.mocked(storage);
-
-function createMockClient(creatures: Open5ECreature[], spells: Open5ESpell[]) {
-  const monsterGenerator = (async function* () {
-    for (const creature of creatures) {
-      yield creature;
-    }
-  })();
-
-  const spellGenerator = (async function* () {
-    for (const spell of spells) {
-      yield spell;
-    }
-  })();
-
-  return {
-    getAllMonsters: () => monsterGenerator,
-    getAllSpells: () => spellGenerator,
-  } as unknown as IOpen5EClient;
-}
 
 describe("dedupeEngine", () => {
   beforeEach(() => {
@@ -69,28 +55,7 @@ describe("dedupeEngine", () => {
       mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
       mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
 
-      const creature: Open5ECreature = {
-        key: "goblin",
-        name: "Goblin",
-        size: { Name: "Small", key: "small" },
-        type: { Name: "Humanoid", key: "humanoid" },
-        alignment: "neutral evil",
-        speed: { walk: 30 },
-        ability_scores: {
-          strength: 8,
-          dexterity: 14,
-          constitution: 12,
-          intelligence: 10,
-          wisdom: 8,
-          charisma: 8,
-        },
-        hit_points: 7,
-        armor_class: 15,
-        challenge_rating: 0.25,
-        actions: [{ name: "Attack", desc: "Melee weapon attack" }],
-        traits: [],
-      };
-
+      const creature = createTestCreature({ key: "goblin", name: "Goblin" });
       const client = createMockClient([creature], []);
 
       const result = await importMonstersFromOpen5E(client);
@@ -105,28 +70,7 @@ describe("dedupeEngine", () => {
       mockedStorage.spellExistsByNameAndSource.mockResolvedValue(true);
       mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
 
-      const creature: Open5ECreature = {
-        key: "goblin",
-        name: "Goblin",
-        size: { Name: "Small", key: "small" },
-        type: { Name: "Humanoid", key: "humanoid" },
-        alignment: "neutral evil",
-        speed: { walk: 30 },
-        ability_scores: {
-          strength: 8,
-          dexterity: 14,
-          constitution: 12,
-          intelligence: 10,
-          wisdom: 8,
-          charisma: 8,
-        },
-        hit_points: 7,
-        armor_class: 15,
-        challenge_rating: 0.25,
-        actions: [],
-        traits: [],
-      };
-
+      const creature = createTestCreature({ key: "goblin", name: "Goblin" });
       const client = createMockClient([creature], []);
 
       const result = await importMonstersFromOpen5E(client);
@@ -138,27 +82,7 @@ describe("dedupeEngine", () => {
     });
 
     it("counts error when monster transform is invalid", async () => {
-      const invalidCreature: Open5ECreature = {
-        key: "bad",
-        name: "",
-        size: { Name: "Small", key: "small" },
-        type: { Name: "Humanoid", key: "humanoid" },
-        speed: { walk: 30 },
-        ability_scores: {
-          strength: 8,
-          dexterity: 14,
-          constitution: 12,
-          intelligence: 10,
-          wisdom: 8,
-          charisma: 8,
-        },
-        hit_points: 7,
-        armor_class: 15,
-        challenge_rating: 0.25,
-        actions: [],
-        traits: [],
-      };
-
+      const invalidCreature = createTestCreature({ name: "" });
       const client = createMockClient([invalidCreature], []);
 
       const result = await importMonstersFromOpen5E(client);
@@ -173,52 +97,35 @@ describe("dedupeEngine", () => {
       mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
       mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
 
-      const creatures: Open5ECreature[] = [
-        {
-          key: "goblin",
-          name: "Goblin",
-          size: { Name: "Small", key: "small" },
-          type: { Name: "Humanoid", key: "humanoid" },
-          alignment: "neutral evil",
-          speed: { walk: 30 },
-          ability_scores: {
-            strength: 8,
-            dexterity: 14,
-            constitution: 12,
-            intelligence: 10,
-            wisdom: 8,
-            charisma: 8,
-          },
-          hit_points: 7,
-          armor_class: 15,
-          challenge_rating: 0.25,
-          actions: [],
-          traits: [],
+      const goblin = createTestCreature({
+        key: "goblin",
+        name: "Goblin",
+        ability_scores: {
+          strength: 8,
+          dexterity: 14,
+          constitution: 12,
+          intelligence: 10,
+          wisdom: 8,
+          charisma: 8,
         },
-        {
-          key: "orc",
-          name: "Orc",
-          size: { Name: "Medium", key: "medium" },
-          type: { Name: "Humanoid", key: "humanoid" },
-          alignment: "chaotic evil",
-          speed: { walk: 30 },
-          ability_scores: {
-            strength: 16,
-            dexterity: 12,
-            constitution: 16,
-            intelligence: 7,
-            wisdom: 11,
-            charisma: 10,
-          },
-          hit_points: 15,
-          armor_class: 13,
-          challenge_rating: 0.5,
-          actions: [],
-          traits: [],
+      });
+      const orc = createTestCreature({
+        key: "orc",
+        name: "Orc",
+        size: { Name: "Medium", key: "medium" },
+        type: { Name: "Humanoid", key: "humanoid" },
+        alignment: "chaotic evil",
+        ability_scores: {
+          strength: 16,
+          dexterity: 12,
+          constitution: 16,
+          intelligence: 7,
+          wisdom: 11,
+          charisma: 10,
         },
-      ];
+      });
 
-      const client = createMockClient(creatures, []);
+      const client = createMockClient([goblin, orc], []);
 
       const result = await importMonstersFromOpen5E(client);
 
@@ -234,12 +141,7 @@ describe("dedupeEngine", () => {
       mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
       mockedStorage.saveSpellTemplate.mockResolvedValue(undefined);
 
-      const spell = createBaseSpell({
-        key: "fireball",
-        name: "Fireball",
-        level: 3,
-      });
-
+      const spell = createTestSpell({ key: "fireball", name: "Fireball", level: 3 });
       const client = createMockClient([], [spell]);
 
       const result = await importSpellsFromOpen5E(client);
@@ -253,12 +155,7 @@ describe("dedupeEngine", () => {
     it("skips spell when storage returns exists=true", async () => {
       mockedStorage.spellExistsByNameAndSource.mockResolvedValue(true);
 
-      const spell = createBaseSpell({
-        key: "fireball",
-        name: "Fireball",
-        level: 3,
-      });
-
+      const spell = createTestSpell({ key: "fireball", name: "Fireball", level: 3 });
       const client = createMockClient([], [spell]);
 
       const result = await importSpellsFromOpen5E(client);
