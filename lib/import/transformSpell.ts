@@ -14,28 +14,10 @@ const SCHOOL_MAP: Record<string, DnDSpellSchool> = {
   transmutation: "Transmutation",
 };
 
-function mapSchool(school: string): DnDSpellSchool {
-  const normalized = school.toLowerCase().trim();
-  return SCHOOL_MAP[normalized] || "Evocation";
-}
-
-function parseComponents(
-  components: string[]
-): SpellTemplate["components"] {
-  return {
-    verbal: components.some(
-      (c) => c.toLowerCase() === "v" || c.toLowerCase().includes("verbal")
-    ),
-    somatic: components.some(
-      (c) => c.toLowerCase() === "s" || c.toLowerCase().includes("somatic")
-    ),
-    material: components.some(
-      (c) =>
-        c.toLowerCase() === "m" ||
-        c.toLowerCase().includes("material") ||
-        c.toLowerCase().includes("a material component")
-    ),
-  };
+function mapSchool(school: { key?: string } | string | undefined): DnDSpellSchool {
+  if (!school) return "Evocation";
+  const key = typeof school === "string" ? school.toLowerCase() : school.key?.toLowerCase();
+  return (key && SCHOOL_MAP[key]) || "Evocation";
 }
 
 export function transformSpell(
@@ -51,8 +33,7 @@ export function transformSpell(
     errors.push("Missing required field: level");
   }
 
-  const schoolKey = raw.school?.toLowerCase().trim();
-  const mappedSchool = schoolKey ? mapSchool(raw.school) : "Evocation";
+  const schoolKey = raw.school.key?.toLowerCase();
   if (schoolKey && !SCHOOL_MAP[schoolKey]) {
     errors.push(`Invalid school: ${raw.school}`);
   }
@@ -67,16 +48,16 @@ export function transformSpell(
     level: raw.level ?? 0,
     concentration: raw.concentration ?? false,
     school: mapSchool(raw.school),
-    description: raw.description || "",
+    description: raw.desc || "",
     castingTime: raw.casting_time || "1 action",
-    range: raw.range || "Self",
+    range: raw.range_text || `${raw.range} ft.`,
     duration: raw.duration || "Instantaneous",
-    components: parseComponents(raw.components || []),
+    components: {
+      verbal: raw.verbal ?? false,
+      somatic: raw.somatic ?? false,
+      material: raw.material ?? false,
+    },
     higherLevel: raw.higher_level,
-    damageType: raw.damage_type,
-    saveDc: raw.save_dc,
-    saveType: raw.save_ability,
-    attackRoll: Boolean(raw.dc_damage),
     createdAt: new Date(),
     updatedAt: new Date(),
   };

@@ -11,38 +11,29 @@ describe("Open5EClient", () => {
     });
   }
 
-  function createMockFetch429(retryAfter: string | null) {
-    return jest.fn().mockResolvedValue({
-      ok: false,
-      status: 429,
-      headers: {
-        get: jest.fn().mockImplementation((name: string) =>
-          name === "Retry-After" ? retryAfter : null
-        ),
-      },
-      clone: jest.fn().mockReturnThis(),
-    });
-  }
-
   describe("fetchMonsters", () => {
     it("returns paginated creatures from API", async () => {
       const mockData: PaginatedResponse<Open5ECreature> = {
         results: [
           {
-            slug: "goblin",
+            key: "goblin",
             name: "Goblin",
-            size: "small",
-            type: "humanoid",
-            strength: 8,
-            dexterity: 14,
-            constitution: 12,
-            intelligence: 10,
-            wisdom: 8,
-            charisma: 8,
+            size: { Name: "Small", key: "small" },
+            type: { Name: "Humanoid", key: "humanoid" },
+            ability_scores: {
+              strength: 8,
+              dexterity: 14,
+              constitution: 12,
+              intelligence: 10,
+              wisdom: 8,
+              charisma: 8,
+            },
             hit_points: 7,
-            armor_class: [{ ac: 15 }],
-            challenge_rating: "0.25",
+            armor_class: 15,
+            challenge_rating: 0.25,
             actions: [],
+            speed: { walk: 30 },
+            alignment: "neutral",
           },
         ],
         count: 1,
@@ -85,16 +76,19 @@ describe("Open5EClient", () => {
       const mockData: PaginatedResponse<Open5ESpell> = {
         results: [
           {
-            slug: "fireball",
+            key: "fireball",
             name: "Fireball",
             level: 3,
-            school: "evocation",
+            school: { Name: "Evocation", key: "evocation" },
             concentration: false,
             casting_time: "1 action",
-            range: "Self",
+            range: 0,
+            range_text: "Self",
             duration: "Instantaneous",
-            components: ["V", "S", "M"],
-            description: "A ball of fire",
+            verbal: true,
+            somatic: true,
+            material: true,
+            desc: "A ball of fire",
           },
         ],
         count: 1,
@@ -117,14 +111,52 @@ describe("Open5EClient", () => {
   describe("getAllMonsters", () => {
     it("yields all monsters from all pages", async () => {
       const page1: PaginatedResponse<Open5ECreature> = {
-        results: [{ slug: "goblin", name: "Goblin", size: "small", type: "humanoid", strength: 8, dexterity: 14, constitution: 12, intelligence: 10, wisdom: 8, charisma: 8, hit_points: 7, armor_class: [{ ac: 15 }], challenge_rating: "0.25", actions: [] }],
+        results: [{
+          key: "goblin",
+          name: "Goblin",
+          size: { Name: "Small", key: "small" },
+          type: { Name: "Humanoid", key: "humanoid" },
+          ability_scores: {
+            strength: 8,
+            dexterity: 14,
+            constitution: 12,
+            intelligence: 10,
+            wisdom: 8,
+            charisma: 8,
+          },
+          hit_points: 7,
+          armor_class: 15,
+          challenge_rating: 0.25,
+          actions: [],
+          speed: { walk: 30 },
+          alignment: "neutral",
+        }],
         count: 2,
         next: "https://api.open5e.com/v2/creatures/?page=2",
         previous: null,
       };
 
       const page2: PaginatedResponse<Open5ECreature> = {
-        results: [{ slug: "orc", name: "Orc", size: "medium", type: "humanoid", strength: 16, dexterity: 12, constitution: 16, intelligence: 7, wisdom: 11, charisma: 10, hit_points: 15, armor_class: [{ ac: 13 }], challenge_rating: "0.5", actions: [] }],
+        results: [{
+          key: "orc",
+          name: "Orc",
+          size: { Name: "Medium", key: "medium" },
+          type: { Name: "Humanoid", key: "humanoid" },
+          ability_scores: {
+            strength: 16,
+            dexterity: 12,
+            constitution: 16,
+            intelligence: 7,
+            wisdom: 11,
+            charisma: 10,
+          },
+          hit_points: 15,
+          armor_class: 13,
+          challenge_rating: 0.5,
+          actions: [],
+          speed: { walk: 30 },
+          alignment: "chaotic evil",
+        }],
         count: 2,
         next: null,
         previous: null,
@@ -150,14 +182,33 @@ describe("Open5EClient", () => {
       }
 
       expect(monsters).toHaveLength(2);
-      expect(monsters[0].slug).toBe("goblin");
-      expect(monsters[1].slug).toBe("orc");
+      expect(monsters[0].key).toBe("goblin");
+      expect(monsters[1].key).toBe("orc");
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
 
     it("stops when no more pages", async () => {
       const singlePage: PaginatedResponse<Open5ECreature> = {
-        results: [{ slug: "goblin", name: "Goblin", size: "small", type: "humanoid", strength: 8, dexterity: 14, constitution: 12, intelligence: 10, wisdom: 8, charisma: 8, hit_points: 7, armor_class: [{ ac: 15 }], challenge_rating: "0.25", actions: [] }],
+        results: [{
+          key: "goblin",
+          name: "Goblin",
+          size: { Name: "Small", key: "small" },
+          type: { Name: "Humanoid", key: "humanoid" },
+          ability_scores: {
+            strength: 8,
+            dexterity: 14,
+            constitution: 12,
+            intelligence: 10,
+            wisdom: 8,
+            charisma: 8,
+          },
+          hit_points: 7,
+          armor_class: 15,
+          challenge_rating: 0.25,
+          actions: [],
+          speed: { walk: 30 },
+          alignment: "neutral",
+        }],
         count: 1,
         next: null,
         previous: null,
@@ -179,14 +230,40 @@ describe("Open5EClient", () => {
   describe("getAllSpells", () => {
     it("yields all spells from all pages", async () => {
       const page1: PaginatedResponse<Open5ESpell> = {
-        results: [{ slug: "fireball", name: "Fireball", level: 3, school: "evocation", concentration: false, casting_time: "1 action", range: "Self", duration: "Instantaneous", components: ["V"], description: "Fire" }],
+        results: [{
+          key: "fireball",
+          name: "Fireball",
+          level: 3,
+          school: { Name: "Evocation", key: "evocation" },
+          concentration: false,
+          casting_time: "1 action",
+          range: 0,
+          range_text: "Self",
+          duration: "Instantaneous",
+          verbal: true,
+          somatic: true,
+          desc: "Fire",
+        }],
         count: 2,
         next: "https://api.open5e.com/v2/spells/?page=2",
         previous: null,
       };
 
       const page2: PaginatedResponse<Open5ESpell> = {
-        results: [{ slug: "magic-missile", name: "Magic Missile", level: 1, school: "evocation", concentration: false, casting_time: "1 action", range: "Self", duration: "Instantaneous", components: ["V"], description: " missiles" }],
+        results: [{
+          key: "magic-missile",
+          name: "Magic Missile",
+          level: 1,
+          school: { Name: "Evocation", key: "evocation" },
+          concentration: false,
+          casting_time: "1 action",
+          range: 0,
+          range_text: "Self",
+          duration: "Instantaneous",
+          verbal: true,
+          somatic: true,
+          desc: " missiles",
+        }],
         count: 2,
         next: null,
         previous: null,
@@ -212,17 +289,17 @@ describe("Open5EClient", () => {
       }
 
       expect(spells).toHaveLength(2);
-      expect(spells[0].slug).toBe("fireball");
-      expect(spells[1].slug).toBe("magic-missile");
+      expect(spells[0].key).toBe("fireball");
+      expect(spells[1].key).toBe("magic-missile");
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
   });
 });
 
 describe("SSRF protection", () => {
-    it("rejects URLs with different hosts via isAllowedUrl", () => {
-      const { isAllowedUrl } = require("@/lib/import/open5eAdapter");
-      expect(isAllowedUrl("https://evil.com/api")).toBe(false);
-      expect(isAllowedUrl("https://api.open5e.com/v2/creatures")).toBe(true);
-    });
+  it("rejects URLs with different hosts via isAllowedUrl", () => {
+    const { isAllowedUrl } = require("@/lib/import/open5eAdapter");
+    expect(isAllowedUrl("https://evil.com/api")).toBe(false);
+    expect(isAllowedUrl("https://api.open5e.com/v2/creatures")).toBe(true);
   });
+});

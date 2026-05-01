@@ -38,13 +38,13 @@ function mapSize(size: string): MonsterTemplate["size"] {
   return sizeMap[size.toLowerCase()] || "medium";
 }
 
-function normalizeSpeed(speed: Record<string, string | number> | string | number | undefined): string {
+function normalizeSpeed(speed: Open5ECreature["speed"]): string {
   if (!speed) return "30 ft.";
-  if (typeof speed === "string") return speed;
-  if (typeof speed === "number") return `${speed} ft.`;
-  return Object.entries(speed)
-    .map(([key, value]) => `${key} ${value}`)
-    .join(", ");
+  const parts: string[] = [];
+  if (speed.walk) parts.push(`walk ${speed.walk}`);
+  if (speed.swim) parts.push(`swim ${speed.swim}`);
+  if (speed.fly) parts.push(`fly ${speed.fly}`);
+  return parts.length > 0 ? parts.join(", ") : "30 ft.";
 }
 
 export function transformMonster(
@@ -56,7 +56,7 @@ export function transformMonster(
     errors.push("Missing required field: name");
   }
 
-  if (!raw.type) {
+  if (!raw.type?.key) {
     errors.push("Missing required field: type");
   }
 
@@ -65,28 +65,26 @@ export function transformMonster(
     id: uuidv4(),
     userId: GLOBAL_USER_ID,
     name: raw.name || "Unknown",
-    size: mapSize(raw.size || "medium"),
-    type: raw.type || "unknown",
+    size: mapSize(raw.size?.key || "medium"),
+    type: raw.type?.key || "unknown",
     alignment: normalizeAlignment(raw.alignment),
     speed: normalizeSpeed(raw.speed),
-    challengeRating: parseFloat(raw.challenge_rating) || 0,
+    challengeRating: raw.challenge_rating || 0,
     abilityScores: {
-      strength: raw.strength || 10,
-      dexterity: raw.dexterity || 10,
-      constitution: raw.constitution || 10,
-      intelligence: raw.intelligence || 10,
-      wisdom: raw.wisdom || 10,
-      charisma: raw.charisma || 10,
+      strength: raw.ability_scores?.strength || 10,
+      dexterity: raw.ability_scores?.dexterity || 10,
+      constitution: raw.ability_scores?.constitution || 10,
+      intelligence: raw.ability_scores?.intelligence || 10,
+      wisdom: raw.ability_scores?.wisdom || 10,
+      charisma: raw.ability_scores?.charisma || 10,
     },
-    ac:
-      raw.armor_class?.[0]?.ac ||
-      10,
-    acNote: raw.armor_class?.[0]?.note,
+    ac: raw.armor_class || 10,
+    acNote: undefined,
     hp: raw.hit_points || 1,
     maxHp: raw.hit_points || 1,
     isGlobal: true,
     source: "open5e",
-    traits: (raw.special_abilities || []).map((ability) => ({
+    traits: (raw.traits || []).map((ability) => ({
       name: ability.name,
       description: ability.desc,
     })),
@@ -94,10 +92,7 @@ export function transformMonster(
       name: action.name,
       description: action.desc,
     })),
-    legendaryActions: (raw.legendary_actions || []).map((action) => ({
-      name: action.name,
-      description: action.desc,
-    })),
+    legendaryActions: [],
     createdAt: new Date(),
     updatedAt: new Date(),
   };

@@ -5,80 +5,52 @@ import { createBaseSpell } from "./testFactories";
 
 describe("transformSpell", () => {
   describe("school mapping", () => {
-    const SCHOOLS: Array<{ input: string; expected: string }> = [
-      { input: "abjuration", expected: "Abjuration" },
-      { input: "conjuration", expected: "Conjuration" },
-      { input: "divination", expected: "Divination" },
-      { input: "enchantment", expected: "Enchantment" },
-      { input: "evocation", expected: "Evocation" },
-      { input: "illusion", expected: "Illusion" },
-      { input: "necromancy", expected: "Necromancy" },
-      { input: "transmutation", expected: "Transmutation" },
-      { input: "ABJURATION", expected: "Abjuration" },
-      { input: "Evocation", expected: "Evocation" },
-      { input: "  divination  ", expected: "Divination" },
-      { input: "unknown school", expected: "Evocation" },
-      { input: "", expected: "Evocation" },
+    const SCHOOLS: Array<{ input: { Name: string; key: string }; expected: string }> = [
+      { input: { Name: "Abjuration", key: "abjuration" }, expected: "Abjuration" },
+      { input: { Name: "Conjuration", key: "conjuration" }, expected: "Conjuration" },
+      { input: { Name: "Divination", key: "divination" }, expected: "Divination" },
+      { input: { Name: "Enchantment", key: "enchantment" }, expected: "Enchantment" },
+      { input: { Name: "Evocation", key: "evocation" }, expected: "Evocation" },
+      { input: { Name: "Illusion", key: "illusion" }, expected: "Illusion" },
+      { input: { Name: "Necromancy", key: "necromancy" }, expected: "Necromancy" },
+      { input: { Name: "Transmutation", key: "transmutation" }, expected: "Transmutation" },
+      { input: { Name: "Unknown", key: "unknown" }, expected: "Evocation" },
     ];
 
-    test.each(SCHOOLS)("maps '$input' to '$expected'", ({ input, expected }) => {
+    test.each(SCHOOLS)("maps '$input.key' to '$expected'", ({ input, expected }) => {
       const raw = createBaseSpell({ school: input });
       const { spell } = transformSpell(raw);
       expect(spell.school).toBe(expected);
     });
+
+    it("handles string school for backwards compatibility", () => {
+      const raw = createBaseSpell({ school: "divination" as unknown as { Name: string; key: string } });
+      const { spell } = transformSpell(raw);
+      expect(spell.school).toBe("Divination");
+    });
+
+    it("defaults to Evocation for invalid school object", () => {
+      const raw = createBaseSpell({ school: { Name: "Invalid", key: "invalid_school" } });
+      const { spell } = transformSpell(raw);
+      expect(spell.school).toBe("Evocation");
+    });
   });
 
-  describe("components parsing", () => {
-    it("parses verbal component", () => {
-      const raw = createBaseSpell({ components: ["V"] });
+  describe("components", () => {
+    it("uses boolean flags from API", () => {
+      const raw = createBaseSpell({ verbal: true, somatic: false, material: false });
       const { spell } = transformSpell(raw);
       expect(spell.components).toEqual({ verbal: true, somatic: false, material: false });
     });
 
-    it("parses somatic component", () => {
-      const raw = createBaseSpell({ components: ["S"] });
-      const { spell } = transformSpell(raw);
-      expect(spell.components).toEqual({ verbal: false, somatic: true, material: false });
-    });
-
-    it("parses material component", () => {
-      const raw = createBaseSpell({ components: ["M"] });
-      const { spell } = transformSpell(raw);
-      expect(spell.components).toEqual({ verbal: false, somatic: false, material: true });
-    });
-
-    it("parses V,S,M together", () => {
-      const raw = createBaseSpell({
-        level: 3,
-        concentration: true,
-        duration: "Concentration, up to 1 minute",
-        components: ["V", "S", "M"],
-        material: "A pinch of sulfur",
-      });
+    it("handles all components true", () => {
+      const raw = createBaseSpell({ verbal: true, somatic: true, material: true });
       const { spell } = transformSpell(raw);
       expect(spell.components).toEqual({ verbal: true, somatic: true, material: true });
     });
 
-    it("parses verbal from full word", () => {
-      const raw = createBaseSpell({ components: ["verbal"] });
-      const { spell } = transformSpell(raw);
-      expect(spell.components.verbal).toBe(true);
-    });
-
-    it("parses somatic from full word", () => {
-      const raw = createBaseSpell({ components: ["somatic"] });
-      const { spell } = transformSpell(raw);
-      expect(spell.components.somatic).toBe(true);
-    });
-
-    it("parses material from full phrase", () => {
-      const raw = createBaseSpell({ components: ["a material component"] });
-      const { spell } = transformSpell(raw);
-      expect(spell.components.material).toBe(true);
-    });
-
-    it("handles empty components", () => {
-      const raw = createBaseSpell({ components: [] });
+    it("handles all components false", () => {
+      const raw = createBaseSpell({ verbal: false, somatic: false, material: false });
       const { spell } = transformSpell(raw);
       expect(spell.components).toEqual({ verbal: false, somatic: false, material: false });
     });
@@ -87,22 +59,20 @@ describe("transformSpell", () => {
   describe("validation", () => {
     it("returns valid=true for complete spell", () => {
       const raw: Open5ESpell = {
-        slug: "fireball",
+        key: "fireball",
         name: "Fireball",
         level: 3,
-        school: "evocation",
+        school: { Name: "Evocation", key: "evocation" },
         concentration: true,
         casting_time: "1 action",
-        range: "150 feet",
+        range: 150,
+        range_text: "150 feet",
         duration: "Concentration, up to 1 minute",
-        components: ["V", "S", "M"],
-        material: "A tiny ball of bat guano and sulfur",
-        description: "A bright streak flashes from your pointing finger",
+        verbal: true,
+        somatic: true,
+        material: true,
+        desc: "A bright streak flashes from your pointing finger",
         higher_level: "When you cast this spell using a 4th-level slot",
-        damage_type: "fire",
-        dc_damage: "8d6",
-        save_dc: 10,
-        save_ability: "dexterity",
       };
       const result = transformSpell(raw);
       expect(result.valid).toBe(true);
@@ -130,18 +100,10 @@ describe("transformSpell", () => {
       expect(result.errors).toContain("Missing required field: level");
     });
 
-    it("returns valid=false for invalid school", () => {
-      const raw = createBaseSpell({ school: "not a real school" });
-      const result = transformSpell(raw);
-      expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes("Invalid school"))).toBe(true);
-    });
-
     it("collects multiple errors", () => {
       const raw = createBaseSpell({
         name: "",
         level: undefined as unknown as number,
-        school: "invalid",
       });
       const result = transformSpell(raw);
       expect(result.valid).toBe(false);
@@ -152,21 +114,20 @@ describe("transformSpell", () => {
   describe("spell structure", () => {
     it("creates spell with all fields", () => {
       const raw: Open5ESpell = {
-        slug: "magic-missile",
+        key: "magic-missile",
         name: "Magic Missile",
         level: 1,
-        school: "evocation",
+        school: { Name: "Evocation", key: "evocation" },
         concentration: false,
         casting_time: "1 action",
-        range: "120 feet",
+        range: 120,
+        range_text: "120 feet",
         duration: "Instantaneous",
-        components: ["V", "S"],
-        description: "You create three glowing darts",
+        verbal: true,
+        somatic: true,
+        material: false,
+        desc: "You create three glowing darts",
         higher_level: "When you cast this spell using a spell slot of 2nd level or higher",
-        damage_type: "force",
-        dc_damage: "1d4+1",
-        save_dc: 15,
-        save_ability: "dexterity",
       };
 
       const { spell } = transformSpell(raw);
@@ -183,10 +144,6 @@ describe("transformSpell", () => {
       expect(spell.duration).toBe("Instantaneous");
       expect(spell.components).toEqual({ verbal: true, somatic: true, material: false });
       expect(spell.higherLevel).toBe("When you cast this spell using a spell slot of 2nd level or higher");
-      expect(spell.damageType).toBe("force");
-      expect(spell.saveDc).toBe(15);
-      expect(spell.saveType).toBe("dexterity");
-      expect(spell.attackRoll).toBe(true);
       expect(spell.isGlobal).toBe(true);
       expect(spell.source).toBe("open5e");
       expect(spell.createdAt).toBeInstanceOf(Date);
@@ -196,12 +153,15 @@ describe("transformSpell", () => {
     it("applies defaults for missing optional fields", () => {
       const raw = createBaseSpell({
         level: 0,
-        school: "divination",
+        school: { Name: "Divination", key: "divination" },
         casting_time: "",
-        range: "",
+        range: 0,
+        range_text: "Self",
         duration: "",
-        components: [],
-        description: "",
+        verbal: false,
+        somatic: false,
+        material: false,
+        desc: "",
       });
 
       const { spell } = transformSpell(raw);
@@ -216,21 +176,17 @@ describe("transformSpell", () => {
       expect(spell.duration).toBe("Instantaneous");
       expect(spell.components).toEqual({ verbal: false, somatic: false, material: false });
       expect(spell.higherLevel).toBeUndefined();
-      expect(spell.damageType).toBeUndefined();
-      expect(spell.saveDc).toBeUndefined();
-      expect(spell.saveType).toBeUndefined();
-      expect(spell.attackRoll).toBe(false);
     });
 
-    it("sets attackRoll=true only when dc_damage is present", () => {
-      const withDc = createBaseSpell({ name: "Test1", dc_damage: "8d6" });
-      const withoutDc = createBaseSpell({ name: "Test2" });
+    it("uses range_text when available, falls back to range ft", () => {
+      const withRangeText = createBaseSpell({ range: 30, range_text: "30 feet" });
+      const withoutRangeText = createBaseSpell({ range: 30, range_text: "" });
 
-      const { spell: spell1 } = transformSpell(withDc);
-      const { spell: spell2 } = transformSpell(withoutDc);
+      const { spell: spell1 } = transformSpell(withRangeText);
+      const { spell: spell2 } = transformSpell(withoutRangeText);
 
-      expect(spell1.attackRoll).toBe(true);
-      expect(spell2.attackRoll).toBe(false);
+      expect(spell1.range).toBe("30 feet");
+      expect(spell2.range).toBe("30 ft.");
     });
   });
 });

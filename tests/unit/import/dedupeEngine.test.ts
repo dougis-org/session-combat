@@ -70,22 +70,25 @@ describe("dedupeEngine", () => {
       mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
 
       const creature: Open5ECreature = {
-        slug: "goblin",
+        key: "goblin",
         name: "Goblin",
-        size: "small",
-        type: "humanoid",
+        size: { Name: "Small", key: "small" },
+        type: { Name: "Humanoid", key: "humanoid" },
         alignment: "neutral evil",
         speed: { walk: 30 },
-        strength: 8,
-        dexterity: 14,
-        constitution: 12,
-        intelligence: 10,
-        wisdom: 8,
-        charisma: 8,
+        ability_scores: {
+          strength: 8,
+          dexterity: 14,
+          constitution: 12,
+          intelligence: 10,
+          wisdom: 8,
+          charisma: 8,
+        },
         hit_points: 7,
-        armor_class: [{ ac: 15 }],
-        challenge_rating: "0.25",
+        armor_class: 15,
+        challenge_rating: 0.25,
         actions: [{ name: "Attack", desc: "Melee weapon attack" }],
+        traits: [],
       };
 
       const client = createMockClient([creature], []);
@@ -103,22 +106,25 @@ describe("dedupeEngine", () => {
       mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
 
       const creature: Open5ECreature = {
-        slug: "goblin",
+        key: "goblin",
         name: "Goblin",
-        size: "small",
-        type: "humanoid",
+        size: { Name: "Small", key: "small" },
+        type: { Name: "Humanoid", key: "humanoid" },
         alignment: "neutral evil",
         speed: { walk: 30 },
-        strength: 8,
-        dexterity: 14,
-        constitution: 12,
-        intelligence: 10,
-        wisdom: 8,
-        charisma: 8,
+        ability_scores: {
+          strength: 8,
+          dexterity: 14,
+          constitution: 12,
+          intelligence: 10,
+          wisdom: 8,
+          charisma: 8,
+        },
         hit_points: 7,
-        armor_class: [{ ac: 15 }],
-        challenge_rating: "0.25",
+        armor_class: 15,
+        challenge_rating: 0.25,
         actions: [],
+        traits: [],
       };
 
       const client = createMockClient([creature], []);
@@ -133,21 +139,24 @@ describe("dedupeEngine", () => {
 
     it("counts error when monster transform is invalid", async () => {
       const invalidCreature: Open5ECreature = {
-        slug: "bad",
+        key: "bad",
         name: "",
-        size: "small",
-        type: "humanoid",
+        size: { Name: "Small", key: "small" },
+        type: { Name: "Humanoid", key: "humanoid" },
         speed: { walk: 30 },
-        strength: 8,
-        dexterity: 14,
-        constitution: 12,
-        intelligence: 10,
-        wisdom: 8,
-        charisma: 8,
+        ability_scores: {
+          strength: 8,
+          dexterity: 14,
+          constitution: 12,
+          intelligence: 10,
+          wisdom: 8,
+          charisma: 8,
+        },
         hit_points: 7,
-        armor_class: [{ ac: 15 }],
-        challenge_rating: "0.25",
+        armor_class: 15,
+        challenge_rating: 0.25,
         actions: [],
+        traits: [],
       };
 
       const client = createMockClient([invalidCreature], []);
@@ -166,40 +175,46 @@ describe("dedupeEngine", () => {
 
       const creatures: Open5ECreature[] = [
         {
-          slug: "goblin",
+          key: "goblin",
           name: "Goblin",
-          size: "small",
-          type: "humanoid",
+          size: { Name: "Small", key: "small" },
+          type: { Name: "Humanoid", key: "humanoid" },
           alignment: "neutral evil",
           speed: { walk: 30 },
-          strength: 8,
-          dexterity: 14,
-          constitution: 12,
-          intelligence: 10,
-          wisdom: 8,
-          charisma: 8,
+          ability_scores: {
+            strength: 8,
+            dexterity: 14,
+            constitution: 12,
+            intelligence: 10,
+            wisdom: 8,
+            charisma: 8,
+          },
           hit_points: 7,
-          armor_class: [{ ac: 15 }],
-          challenge_rating: "0.25",
+          armor_class: 15,
+          challenge_rating: 0.25,
           actions: [],
+          traits: [],
         },
         {
-          slug: "orc",
+          key: "orc",
           name: "Orc",
-          size: "medium",
-          type: "humanoid",
+          size: { Name: "Medium", key: "medium" },
+          type: { Name: "Humanoid", key: "humanoid" },
           alignment: "chaotic evil",
           speed: { walk: 30 },
-          strength: 16,
-          dexterity: 12,
-          constitution: 16,
-          intelligence: 7,
-          wisdom: 11,
-          charisma: 10,
+          ability_scores: {
+            strength: 16,
+            dexterity: 12,
+            constitution: 16,
+            intelligence: 7,
+            wisdom: 11,
+            charisma: 10,
+          },
           hit_points: 15,
-          armor_class: [{ ac: 13 }],
-          challenge_rating: "0.5",
+          armor_class: 13,
+          challenge_rating: 0.5,
           actions: [],
+          traits: [],
         },
       ];
 
@@ -220,7 +235,7 @@ describe("dedupeEngine", () => {
       mockedStorage.saveSpellTemplate.mockResolvedValue(undefined);
 
       const spell = createBaseSpell({
-        slug: "fireball",
+        key: "fireball",
         name: "Fireball",
         level: 3,
       });
@@ -239,7 +254,7 @@ describe("dedupeEngine", () => {
       mockedStorage.spellExistsByNameAndSource.mockResolvedValue(true);
 
       const spell = createBaseSpell({
-        slug: "fireball",
+        key: "fireball",
         name: "Fireball",
         level: 3,
       });
@@ -258,16 +273,16 @@ describe("dedupeEngine", () => {
       mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
 
       const invalidSpell: Open5ESpell = {
-        slug: "bad",
+        key: "bad",
         name: "",
         level: 1,
-        school: "evocation",
+        school: { Name: "Evocation", key: "evocation" },
         concentration: false,
         casting_time: "1 action",
-        range: "Self",
+        range: 0,
+        range_text: "Self",
         duration: "Instantaneous",
-        components: [],
-        description: "",
+        desc: "",
       };
 
       const client = createMockClient([], [invalidSpell]);

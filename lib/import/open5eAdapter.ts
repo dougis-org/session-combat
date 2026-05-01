@@ -23,43 +23,43 @@ export function isAllowedUrl(url: string): boolean {
 }
 
 export interface Open5ECreature {
-  slug: string;
+  key: string;
   name: string;
-  size: string;
-  type: string;
+  size: { Name: string; key: string };
+  type: { Name: string; key: string };
   alignment?: string;
-  speed?: Record<string, string | number> | string | number;
-  strength: number;
-  dexterity: number;
-  constitution: number;
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
+  speed: { walk?: number; swim?: number; fly?: number; unit?: string; [key: string]: unknown };
+  ability_scores: {
+    strength: number;
+    dexterity: number;
+    constitution: number;
+    intelligence: number;
+    wisdom: number;
+    charisma: number;
+  };
   hit_points: number;
-  armor_class: Array<{ ac: number; note?: string }>;
-  challenge_rating: string;
+  armor_class: number;
+  challenge_rating: number;
   actions: Array<{ name: string; desc: string }>;
-  special_abilities?: Array<{ name: string; desc: string }>;
-  legendary_actions?: Array<{ name: string; desc: string }>;
+  traits?: Array<{ name: string; desc: string }>;
 }
 
 export interface Open5ESpell {
-  slug: string;
+  key: string;
   name: string;
   level: number;
-  school: string;
+  school: { Name: string; key: string };
   concentration: boolean;
   casting_time: string;
-  range: string;
+  range: number;
+  range_text: string;
   duration: string;
-  components: string[];
-  material?: string;
-  description: string;
+  verbal?: boolean;
+  somatic?: boolean;
+  material?: boolean;
+  material_specified?: string;
+  desc: string;
   higher_level?: string;
-  damage_type?: string;
-  dc_damage?: string;
-  save_dc?: number;
-  save_ability?: string;
 }
 
 export interface PaginatedResponse<T> {
