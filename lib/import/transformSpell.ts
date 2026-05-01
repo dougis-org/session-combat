@@ -1,4 +1,4 @@
-import { SpellTemplate, DnDSpellSchool, isValidSpellSchool } from "@/lib/types";
+import { SpellTemplate, DnDSpellSchool } from "@/lib/types";
 import { Open5ESpell } from "./open5eAdapter";
 import { GLOBAL_USER_ID } from "@/lib/constants";
 import { v4 as uuidv4 } from "uuid";
@@ -31,11 +31,6 @@ export function transformSpell(
 
   if (raw.level === undefined || raw.level === null) {
     errors.push("Missing required field: level");
-  }
-
-  const schoolKey = raw.school.key?.toLowerCase();
-  if (schoolKey && !SCHOOL_MAP[schoolKey]) {
-    errors.push(`Invalid school: ${raw.school}`);
   }
 
   const spell: SpellTemplate = {

@@ -3,7 +3,6 @@ import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { MonsterTemplate, normalizeAlignment } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";
-import { getDatabase } from "@/lib/db";
 import { randomUUID } from "crypto";
 import { isUserAdmin } from "@/lib/permissions";
 import { getAllMonsters } from "@/lib/import/open5eAdapter";
@@ -167,9 +166,6 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const db = await getDatabase();
-    const collection = db.collection<MonsterTemplate>("monsterTemplates");
-
     let inserted = 0;
     let skipped = 0;
     let errors = 0;

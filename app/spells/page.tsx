@@ -139,7 +139,7 @@ function SpellsContent() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredSpells.map((spell) => (
-              <SpellCard key={spell.id} spell={spell} isAdmin={isAdmin} />
+              <SpellCard key={spell.id} spell={spell} />
             ))}
           </div>
         )}
@@ -150,10 +150,8 @@ function SpellsContent() {
 
 function SpellCard({
   spell,
-  isAdmin,
 }: {
   spell: SpellTemplate;
-  isAdmin: boolean;
 }) {
   const [showDetails, setShowDetails] = useState(false);
 

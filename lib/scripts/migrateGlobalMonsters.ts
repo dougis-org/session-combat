@@ -1,6 +1,7 @@
 import { getDatabase } from "../db";
 import { MonsterTemplate } from "../types";
 import { GLOBAL_USER_ID } from "../constants";
+import type { Filter } from "mongodb";
 
 async function migrateGlobalMonsters() {
   const db = await getDatabase();
@@ -8,12 +9,19 @@ async function migrateGlobalMonsters() {
 
   console.log("Starting migration: tagging existing global monsters with source 'SRD'...");
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filter: Filter<MonsterTemplate> = {
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    $or: [
+      { source: { $exists: false } },
+      { source: null as any },
+      { source: "" },
+    ],
+  };
+
   const result = await collection.updateMany(
-    {
-      userId: GLOBAL_USER_ID,
-      isGlobal: true,
-      source: { $exists: false },
-    },
+    filter,
     {
       $set: {
         source: "SRD",
