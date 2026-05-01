@@ -1,4 +1,4 @@
-import { DnDSpellSchool, isValidSpellSchool } from "@/lib/types";
+import { DnDSpellSchool, isValidSpellSchool, SpellTemplate } from "@/lib/types";
 
 export interface SpellValidationError {
   field: string;
@@ -50,4 +50,18 @@ export function parseSpellSchool(school: unknown): DnDSpellSchool {
     return school;
   }
   return "Evocation";
+}
+
+export function parseComponents(
+  components: unknown
+): SpellTemplate["components"] {
+  if (!components || typeof components !== "object") {
+    return { verbal: false, somatic: false, material: false };
+  }
+  const c = components as Record<string, unknown>;
+  return {
+    verbal: Boolean(c.verbal),
+    somatic: Boolean(c.somatic),
+    material: Boolean(c.material),
+  };
 }

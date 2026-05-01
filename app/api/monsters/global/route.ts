@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { MonsterTemplate, normalizeAlignment } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";
 import { randomUUID } from "crypto";
-import { isUserAdmin } from "@/lib/permissions";
+import { requireAdmin } from "@/lib/api-helpers";
 import { getAllMonsters } from "@/lib/import/open5eAdapter";
 import { transformMonster } from "@/lib/import/transformMonster";
 import { shouldImport } from "@/lib/import/dedupeEngine";
@@ -23,21 +22,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
-  const admin = await isUserAdmin(auth.userId);
-  if (admin === null) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-  if (!admin) {
-    return NextResponse.json(
-      { error: 'Only administrators can create global monster templates' },
-      { status: 403 }
-    );
+  const errorResponse = await requireAdmin(request);
+  if (errorResponse) {
+    return errorResponse;
   }
 
   try {
@@ -148,21 +135,9 @@ export async function POST(request: NextRequest) {
  * Admin only
  */
 export async function PUT(request: NextRequest) {
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
-  const admin = await isUserAdmin(auth.userId);
-  if (admin === null) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-  if (!admin) {
-    return NextResponse.json(
-      { error: 'Only administrators can seed the monster library' },
-      { status: 403 }
-    );
+  const errorResponse = await requireAdmin(request);
+  if (errorResponse) {
+    return errorResponse;
   }
 
   try {

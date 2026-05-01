@@ -159,13 +159,15 @@ export class Open5EClient implements IOpen5EClient {
     return fetchPage<Open5ESpell>(this.fetcher, "spells", page);
   }
 
-  async *getAllMonsters(): AsyncGenerator<Open5ECreature, void, unknown> {
+  private async *fetchAllPages<T>(
+    fetcher: (page: number) => Promise<PaginatedResponse<T>>
+  ): AsyncGenerator<T, void, unknown> {
     let currentPage = 1;
 
     while (true) {
-      const data = await this.fetchMonsters(currentPage);
-      for (const creature of data.results) {
-        yield creature;
+      const data = await fetcher(currentPage);
+      for (const item of data.results) {
+        yield item;
       }
 
       if (!data.next) {
@@ -175,20 +177,12 @@ export class Open5EClient implements IOpen5EClient {
     }
   }
 
+  async *getAllMonsters(): AsyncGenerator<Open5ECreature, void, unknown> {
+    yield* this.fetchAllPages((page) => this.fetchMonsters(page));
+  }
+
   async *getAllSpells(): AsyncGenerator<Open5ESpell, void, unknown> {
-    let currentPage = 1;
-
-    while (true) {
-      const data = await this.fetchSpells(currentPage);
-      for (const spell of data.results) {
-        yield spell;
-      }
-
-      if (!data.next) {
-        break;
-      }
-      currentPage++;
-    }
+    yield* this.fetchAllPages((page) => this.fetchSpells(page));
   }
 }
 

@@ -1,29 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { storage } from "@/lib/storage";
-import { SpellTemplate } from "@/lib/types";
-import { GLOBAL_USER_ID } from "@/lib/constants";
 import { requireAdmin } from "@/lib/api-helpers";
-import { v4 as uuidv4 } from "uuid";
 import {
   validateSpellName,
   validateSpellLevel,
   validateSpellSchool,
-  parseSpellSchool,
 } from "@/lib/import/spellValidation";
-
-function parseComponents(
-  components: unknown
-): SpellTemplate["components"] {
-  if (!components || typeof components !== "object") {
-    return { verbal: false, somatic: false, material: false };
-  }
-  const c = components as Record<string, unknown>;
-  return {
-    verbal: Boolean(c.verbal),
-    somatic: Boolean(c.somatic),
-    material: Boolean(c.material),
-  };
-}
+import { buildSpellFromBody } from "@/lib/api/spell-helpers";
 
 export async function GET(request: NextRequest) {
   try {
@@ -54,60 +37,23 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const {
-      name,
-      level,
-      concentration,
-      school,
-      description,
-      castingTime,
-      range,
-      duration,
-      components,
-      higherLevel,
-      damageType,
-      saveDc,
-      saveType,
-      attackRoll,
-    } = body;
 
-    const nameError = validateSpellName(name);
+    const nameError = validateSpellName(body.name);
     if (nameError) {
       return NextResponse.json({ error: nameError.message }, { status: 400 });
     }
 
-    const levelError = validateSpellLevel(level);
+    const levelError = validateSpellLevel(body.level);
     if (levelError) {
       return NextResponse.json({ error: levelError.message }, { status: 400 });
     }
 
-    const schoolError = validateSpellSchool(school);
+    const schoolError = validateSpellSchool(body.school);
     if (schoolError) {
       return NextResponse.json({ error: schoolError.message }, { status: 400 });
     }
 
-    const spell: SpellTemplate = {
-      id: uuidv4(),
-      userId: GLOBAL_USER_ID,
-      isGlobal: true,
-      source: "open5e",
-      name: name.trim(),
-      level,
-      concentration: Boolean(concentration),
-      school: parseSpellSchool(school),
-      description: description || "",
-      castingTime: castingTime || "1 action",
-      range: range || "Self",
-      duration: duration || "Instantaneous",
-      components: parseComponents(components),
-      higherLevel: higherLevel,
-      damageType: damageType,
-      saveDc: saveDc,
-      saveType: saveType,
-      attackRoll: Boolean(attackRoll),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const spell = buildSpellFromBody(body);
 
     await storage.saveSpellTemplate(spell);
 

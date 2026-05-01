@@ -35,6 +35,8 @@ The system SHALL provide RESTful API endpoints for managing spell templates.
 - **Given** authenticated admin user
 - **When** they send PUT /api/spells/[id] with updated data
 - **Then** the system SHALL update and return 200
+- **And** omitted fields SHALL be preserved from the existing spell (partial update)
+- **And** the `updatedAt` field SHALL be set to the current time
 
 #### Scenario: Delete spell
 
@@ -48,10 +50,35 @@ The system SHALL provide RESTful API endpoints for managing spell templates.
 - **When** they send GET /api/spells?concentration=true
 - **Then** the system SHALL return only spells where `concentration: true`
 
+### Design Decisions
+
+#### Shared validation and construction helpers
+
+Validation and request-body parsing logic shared across spell route handlers SHALL live in `lib/api/spell-helpers.ts`. This includes:
+
+- `SpellBody` interface — request body shape matching SpellTemplate optional fields
+- `applySpellUpdates(existing, updates)` — validates partial update fields and produces merged SpellTemplate; returns `{ spell, errors }`; if errors, returns existing unchanged
+- `parseComponents(components)` — parses the components object from a request body (imported from `lib/import/spellValidation.ts` for reuse)
+
+Individual route handlers are responsible for: auth checks, loading existing resources, calling storage, and serializing responses.
+
+#### PUT partial update field semantics
+
+When updating a spell via PUT /api/spells/[id]:
+
+- Fields **not present** in the request body → preserve existing value
+- Fields **present with valid values** → update to new value
+- Fields **present with `undefined`** → preserve existing value (same as omitted)
+- Optional fields (`higherLevel`, `damageType`, `saveDc`, `saveType`, `attackRoll`) may be explicitly set to `null` to clear them
+
+Required fields (`name`, `level`, `school`, etc.) are validated; if validation fails, return 400 with the first error message.
+
 ## Traceability
 
 - Proposal element: Spell collection stored in database + Admin import UI for spells
   - Requirement: Spell CRUD API
 - Design decision: GET/POST /api/spells, GET/PUT/DELETE /api/spells/[id]
   - Requirement: Spell CRUD API
+- Design decision: shared helpers in lib/api/spell-helpers.ts
+  - Requirement: avoid duplication between spell route handlers
 - Task(s): TBD in tasks.md
