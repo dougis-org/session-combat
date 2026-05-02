@@ -1,4 +1,4 @@
-import { Open5EClient, PaginatedResponse, Open5ECreature, Open5ESpell } from "@/lib/import/open5eAdapter";
+import { Open5EClient, Open5ECreature, Open5ESpell } from "@/lib/import/open5eAdapter";
 import {
   createMockFetch,
   createPaginatedResponse,

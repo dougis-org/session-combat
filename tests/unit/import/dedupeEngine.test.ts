@@ -9,7 +9,6 @@ import {
   createMockClient,
   createTestCreature,
   createTestSpell,
-  SAMPLE_CREATURE,
 } from "./open5e.mockHelpers";
 
 jest.mock("@/lib/storage");
@@ -22,37 +21,49 @@ describe("dedupeEngine", () => {
   });
 
   describe("shouldImport", () => {
-    it("returns false for spells that exist by name and source", async () => {
+    it("returns should=false for spells that exist by name and source", async () => {
       mockedStorage.spellExistsByNameAndSource.mockResolvedValue(true);
 
       const result = await shouldImport("spells", "Fireball", "open5e");
 
-      expect(result).toBe(false);
+      expect(result.should).toBe(false);
       expect(mockedStorage.spellExistsByNameAndSource).toHaveBeenCalledWith(
         "Fireball",
         "open5e"
       );
     });
 
-    it("returns true for spells that do not exist", async () => {
+    it("returns should=true for spells that do not exist", async () => {
       mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
 
       const result = await shouldImport("spells", "New Spell", "open5e");
 
-      expect(result).toBe(true);
+      expect(result.should).toBe(true);
     });
 
-    it("returns true for monsters (not checked against dedup)", async () => {
+    it("returns should=true and no existingId for new monsters", async () => {
+      mockedStorage.findMonsterByNameAndSource.mockResolvedValue(null);
+
       const result = await shouldImport("monsters", "Goblin", "open5e");
 
-      expect(result).toBe(true);
-      expect(mockedStorage.spellExistsByNameAndSource).not.toHaveBeenCalled();
+      expect(result.should).toBe(true);
+      expect(result.existingId).toBeUndefined();
+      expect(mockedStorage.findMonsterByNameAndSource).toHaveBeenCalledWith("Goblin", "open5e");
+    });
+
+    it("returns should=false and existingId for existing monsters", async () => {
+      mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id-123" } as any);
+
+      const result = await shouldImport("monsters", "Goblin", "open5e");
+
+      expect(result.should).toBe(false);
+      expect(result.existingId).toBe("existing-id-123");
     });
   });
 
   describe("importMonstersFromOpen5E", () => {
     it("inserts monster when not duplicate and valid", async () => {
-      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
+      mockedStorage.findMonsterByNameAndSource.mockResolvedValue(null);
       mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
 
       const creature = createTestCreature({ key: "goblin", name: "Goblin" });
@@ -66,8 +77,21 @@ describe("dedupeEngine", () => {
       expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(1);
     });
 
-    it("inserts monster even when storage check would return exists (monsters have no dedup)", async () => {
-      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(true);
+    it("skips monster when transform is invalid (not when it exists)", async () => {
+      mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
+
+      const creature = createTestCreature({ key: "goblin", name: "Goblin" });
+      const client = createMockClient([creature], []);
+
+      const result = await importMonstersFromOpen5E(client);
+
+      expect(result.inserted).toBe(1);
+      expect(result.skipped).toBe(0);
+      expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(1);
+    });
+
+    it("upserts existing monster with its original id", async () => {
+      mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
       mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
 
       const creature = createTestCreature({ key: "goblin", name: "Goblin" });
@@ -77,11 +101,12 @@ describe("dedupeEngine", () => {
 
       expect(result.inserted).toBe(1);
       expect(result.skipped).toBe(0);
-      expect(result.errors).toBe(0);
-      expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(1);
+      const saved = mockedStorage.saveMonsterTemplate.mock.calls[0][0];
+      expect(saved.id).toBe("existing-id");
     });
 
     it("counts error when monster transform is invalid", async () => {
+      mockedStorage.findMonsterByNameAndSource.mockResolvedValue(null);
       const invalidCreature = createTestCreature({ name: "" });
       const client = createMockClient([invalidCreature], []);
 
@@ -94,7 +119,7 @@ describe("dedupeEngine", () => {
     });
 
     it("processes multiple monsters", async () => {
-      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
+      mockedStorage.findMonsterByNameAndSource.mockResolvedValue(null);
       mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
 
       const goblin = createTestCreature({

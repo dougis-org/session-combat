@@ -21,14 +21,16 @@ export async function shouldImport(
   collection: Collection,
   name: string,
   source: string
-): Promise<boolean> {
+): Promise<{ should: boolean; existingId?: string }> {
   if (collection === "spells") {
-    return !(await storage.spellExistsByNameAndSource(name, source));
+    const exists = await storage.spellExistsByNameAndSource(name, source);
+    return { should: !exists };
   }
   if (collection === "monsters") {
-    return !(await storage.monsterExistsByNameAndSource(name, source));
+    const existing = await storage.findMonsterByNameAndSource(name, source);
+    return { should: !existing, existingId: existing?.id };
   }
-  return true;
+  return { should: true };
 }
 
 type TransformFn<T> = (raw: Open5ECreature | Open5ESpell) => { entity: T; valid: boolean; errors: string[] };
@@ -44,16 +46,38 @@ async function importSingle<T extends MonsterTemplate | SpellTemplate>(
     return { inserted: false, skipped: false, error: true };
   }
 
-  const exists = await shouldImport(
+  const { should } = await shouldImport(
     collection,
     result.entity.name,
     result.entity.source || ""
   );
-  if (!exists) {
+  if (!should) {
     return { inserted: false, skipped: true, error: false };
   }
 
   await save(result.entity);
+  return { inserted: true, skipped: false, error: false };
+}
+
+async function importMonsterSingle(
+  raw: Open5ECreature
+): Promise<{ inserted: boolean; skipped: boolean; error: boolean }> {
+  const { monster, valid, errors } = transformMonster(raw);
+  if (!valid) {
+    console.warn("Invalid monster skipped:", errors);
+    return { inserted: false, skipped: false, error: true };
+  }
+
+  const existing = await storage.findMonsterByNameAndSource(
+    monster.name,
+    monster.source || ""
+  );
+
+  if (existing) {
+    monster.id = existing.id;
+  }
+
+  await storage.saveMonsterTemplate(monster);
   return { inserted: true, skipped: false, error: false };
 }
 
@@ -84,15 +108,13 @@ async function runImport<T extends MonsterTemplate | SpellTemplate>(
 export async function importMonstersFromOpen5E(
   client: IOpen5EClient = new Open5EClient()
 ): Promise<ImportResult> {
-  return runImport(
-    client.getAllMonsters() as AsyncGenerator<Open5ECreature | Open5ESpell>,
-    "monsters",
-    (raw) => {
-      const r = transformMonster(raw as Open5ECreature);
-      return { entity: r.monster as unknown as MonsterTemplate, valid: r.valid, errors: r.errors };
-    },
-    (monster) => storage.saveMonsterTemplate(monster)
-  );
+  const result: ImportResult = { inserted: 0, skipped: 0, errors: 0 };
+
+  for await (const raw of client.getAllMonsters()) {
+    accumulate(result, await importMonsterSingle(raw));
+  }
+
+  return result;
 }
 
 export async function importSpellsFromOpen5E(

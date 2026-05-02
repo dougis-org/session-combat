@@ -1,5 +1,3 @@
-import { Open5ECreature, Open5ESpell } from "@/lib/import/open5eAdapter";
-
 const OPEN5E_API_BASE = "https://api.open5e.com/v2";
 
 describe("Open5E API connectivity", () => {

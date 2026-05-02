@@ -525,6 +525,21 @@ export const storage = {
     }
   },
 
+  async findMonsterByNameAndSource(
+    name: string,
+    source: string
+  ): Promise<MonsterTemplate | null> {
+    try {
+      const db = await getDatabase();
+      return await db
+        .collection<MonsterTemplate>("monsterTemplates")
+        .findOne({ name, source: source || "" }) as MonsterTemplate | null;
+    } catch (error) {
+      console.error("Error finding monster:", error);
+      return null;
+    }
+  },
+
   // Clear all data for a user
   async clear(userId: string): Promise<void> {
     try {

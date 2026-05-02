@@ -558,11 +558,11 @@ export interface SpellTemplate {
   range: string;
   duration: string;
   components: SpellComponents;
-  higherLevel?: string;
-  damageType?: string;
-  saveDc?: number;
-  saveType?: string;
-  attackRoll?: boolean;
+  higherLevel?: string | null;
+  damageType?: string | null;
+  saveDc?: number | null;
+  saveType?: string | null;
+  attackRoll?: boolean | null;
   createdAt: Date;
   updatedAt: Date;
 }
