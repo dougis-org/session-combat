@@ -1,5 +1,5 @@
 import { storage } from "@/lib/storage";
-import { SpellTemplate, MonsterTemplate } from "@/lib/types";
+import { SpellTemplate } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";
 
 jest.mock("@/lib/db", () => ({
