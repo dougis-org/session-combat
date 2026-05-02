@@ -438,6 +438,9 @@ export const storage = {
 
   // Load single spell by ID
   async loadSpellById(id: string): Promise<SpellTemplate | null> {
+    if (!id || typeof id !== "string" || id.length > 64) {
+      return null;
+    }
     try {
       const db = await getDatabase();
       const spell = await db
@@ -474,6 +477,9 @@ export const storage = {
 
   // Delete spell template
   async deleteSpellTemplate(id: string): Promise<void> {
+    if (!id || typeof id !== "string" || id.length > 64) {
+      return;
+    }
     try {
       const db = await getDatabase();
       await db
