@@ -1,19 +1,24 @@
 import { MongoDBContainer, StartedMongoDBContainer } from "@testcontainers/mongodb";
-import { importMonstersFromOpen5E } from "@/lib/import/dedupeEngine";
 import { createMockClient, createTestCreature } from "./testHelpers";
 
 describe("dedupeEngine integration", () => {
   let mongoContainer: StartedMongoDBContainer;
   let mongoUri: string;
+  let importMonstersFromOpen5E: (client: unknown) => Promise<{ inserted: number; skipped: number; errors: number }>;
 
   beforeAll(async () => {
+    jest.resetModules();
     mongoContainer = await new MongoDBContainer("mongo:8").withExposedPorts(27017).start();
     mongoUri = `mongodb://localhost:${mongoContainer.getMappedPort(27017)}/?directConnection=true`;
     process.env.MONGODB_URI = mongoUri;
     process.env.MONGODB_DB = "session-combat-test";
+    const mod = await import("@/lib/import/dedupeEngine");
+    importMonstersFromOpen5E = mod.importMonstersFromOpen5E;
   }, 120000);
 
   afterAll(async () => {
+    const { closeDatabase } = await import("@/lib/db");
+    await closeDatabase();
     await mongoContainer.stop();
   }, 30000);
 

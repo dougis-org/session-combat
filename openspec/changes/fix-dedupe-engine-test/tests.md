@@ -93,11 +93,11 @@ For each task in `tasks.md`:
 
 ```bash
 # Unit tests only
-npm test -- tests/unit/import/dedupeEngine.test.ts
+npm run test:unit -- --testPathPattern='tests/unit/import/dedupeEngine.test.ts'
 
 # Integration tests only
-npm test -- tests/integration/import/dedupeEngine.integration.test.ts
+npm run test:integration -- --testPathPattern='tests/integration/import/dedupeEngine.integration.test.ts'
 
 # Both
-npm test -- tests/unit/import/dedupeEngine.test.ts tests/integration/import/dedupeEngine.integration.test.ts
+npm run test:unit -- --testPathPattern='tests/unit/import/dedupeEngine.test.ts' && npm run test:integration -- --testPathPattern='tests/integration/import/dedupeEngine.integration.test.ts'
 ```

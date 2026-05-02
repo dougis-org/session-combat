@@ -26,8 +26,8 @@
 - [x] **2.2** Create `tests/integration/import/dedupeEngine.integration.test.ts`
 - [x] **2.3** Set up MongoDB testcontainer connection using pattern from `tests/integration/helpers/server.ts` (simplified for direct function calls)
 - [x] **2.4** Import `importMonstersFromOpen5E` from `@/lib/import/dedupeEngine`
-- [x] **2.5** Import `createMockClient`, `createTestCreature` from `tests/unit/import/open5e.mockHelpers`
-- [x] **2.6** Import `storage` from `@/lib/storage`
+- [x] **2.5** Import `createMockClient`, `createTestCreature` from `tests/integration/import/testHelpers` (new file created for integration helpers)
+- [x] **2.6** Use dynamic imports of `@/lib/db` for direct MongoDB access (not `storage` module)
 
 ### Task 3: Write integration test for "inserts when not duplicate"
 

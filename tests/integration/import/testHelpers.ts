@@ -1,21 +1,17 @@
 import { IOpen5EClient, Open5ECreature, Open5ESpell } from "@/lib/import/open5eAdapter";
 
 export function createMockClient(creatures: Open5ECreature[], spells: Open5ESpell[]) {
-  const monsterGenerator = (async function* () {
-    for (const creature of creatures) {
-      yield creature;
-    }
-  })();
-
-  const spellGenerator = (async function* () {
-    for (const spell of spells) {
-      yield spell;
-    }
-  })();
-
   return {
-    getAllMonsters: () => monsterGenerator,
-    getAllSpells: () => spellGenerator,
+    getAllMonsters: () => (async function* () {
+      for (const creature of creatures) {
+        yield creature;
+      }
+    })(),
+    getAllSpells: () => (async function* () {
+      for (const spell of spells) {
+        yield spell;
+      }
+    })(),
   } as unknown as IOpen5EClient;
 }
 
