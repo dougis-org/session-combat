@@ -90,19 +90,18 @@ describe("dedupeEngine", () => {
       expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(1);
     });
 
-    it("upserts existing monster with its original id", async () => {
+    it("skips monster when it already exists", async () => {
       mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
-      mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
 
       const creature = createTestCreature({ key: "goblin", name: "Goblin" });
       const client = createMockClient([creature], []);
 
       const result = await importMonstersFromOpen5E(client);
 
-      expect(result.inserted).toBe(1);
-      expect(result.skipped).toBe(0);
-      const saved = mockedStorage.saveMonsterTemplate.mock.calls[0][0];
-      expect(saved.id).toBe("existing-id");
+      expect(result.inserted).toBe(0);
+      expect(result.skipped).toBe(1);
+      expect(result.errors).toBe(0);
+      expect(mockedStorage.saveMonsterTemplate).not.toHaveBeenCalled();
     });
 
     it("counts error when monster transform is invalid", async () => {

@@ -74,7 +74,7 @@ async function importMonsterSingle(
   );
 
   if (existing) {
-    monster.id = existing.id;
+    return { inserted: false, skipped: true, error: false };
   }
 
   await storage.saveMonsterTemplate(monster);
