@@ -77,6 +77,19 @@ describe("dedupeEngine", () => {
       expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(1);
     });
 
+    it("skips monster when transform is invalid (not when it exists)", async () => {
+      mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
+
+      const creature = createTestCreature({ key: "goblin", name: "Goblin" });
+      const client = createMockClient([creature], []);
+
+      const result = await importMonstersFromOpen5E(client);
+
+      expect(result.inserted).toBe(1);
+      expect(result.skipped).toBe(0);
+      expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(1);
+    });
+
     it("skips monster when it already exists", async () => {
       mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
 
