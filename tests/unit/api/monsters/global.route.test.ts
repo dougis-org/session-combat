@@ -17,8 +17,16 @@ jest.mock("@/lib/storage", () => ({
   },
 }));
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
+jest.mock("@/lib/import/open5eAdapter", () => ({
+  getAllMonsters: jest.fn(),
+}));
+jest.mock("@/lib/import/transformMonster", () => ({
+  transformMonster: jest.fn(),
+}));
+jest.mock("@/lib/import/dedupeEngine", () => ({
+  shouldImport: jest.fn(),
+}));
 jest.mock("crypto", () => ({ randomUUID: jest.fn(() => "test-uuid") }));
-jest.mock("@/lib/data/monsters", () => ({ ALL_SRD_MONSTERS: [] }));
 jest.mock("mongodb", () => ({ ObjectId: jest.fn((id: string) => ({ id })) }));
 
 const mockedRequireAuth = jest.mocked(requireAuth);
