@@ -39,3 +39,22 @@ export function createTestCreature(overrides: Partial<Open5ECreature> = {}): Ope
     ...overrides,
   };
 }
+
+export function createTestSpell(overrides: Partial<Open5ESpell> = {}): Open5ESpell {
+  return {
+    key: "test-spell",
+    name: "Test Spell",
+    level: 1,
+    school: { Name: "Evocation", key: "evocation" },
+    concentration: false,
+    casting_time: "1 action",
+    range: 0,
+    range_text: "Self",
+    duration: "Instantaneous",
+    verbal: false,
+    somatic: false,
+    material: false,
+    desc: "Test description",
+    ...overrides,
+  };
+}
