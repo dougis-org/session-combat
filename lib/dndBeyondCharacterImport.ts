@@ -4,27 +4,29 @@ import {
   CharacterClass,
   CreatureAbility,
   DnDAlignment,
-  DnDClass,
   DnDRace,
-  VALID_CLASSES,
-  VALID_RACES,
   calculateTotalLevel,
 } from "./types";
 import { getAbilityModifier, getProficiencyBonus } from "./import/utils";
 import {
   ABILITY_ID_MAP,
   ABILITY_KEYS,
+  createValidationError,
+  DndBeyondImportError,
   getModifierNumericValue,
   indexStatValues,
   isBonusLikeModifier,
+  isPresent,
   resolveAbilityScore,
   sumModifierBonusesBySubtype,
 } from "./import/dndBeyond-utils";
+export { DndBeyondImportError };
 import {
   normalizeAbilityScores,
   normalizeCurrentHp,
   normalizeMaxHp,
 } from "./import/dndBeyond-ability-scores";
+import { normalizeClasses, normalizeRace } from "./import/dndBeyond-classes";
 import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
 import { filterToDamageTypes } from "./constants";
 
@@ -173,21 +175,6 @@ export interface NormalizedDndBeyondCharacter {
   warnings: string[];
   sourceCharacterId: string;
   sourceUrl?: string;
-}
-
-export class DndBeyondImportError extends Error {
-  readonly status: number;
-  readonly exposeMessage: boolean;
-
-  constructor(
-    message: string,
-    options: { status: number; exposeMessage?: boolean },
-  ) {
-    super(message);
-    this.name = "DndBeyondImportError";
-    this.status = options.status;
-    this.exposeMessage = options.exposeMessage ?? options.status < 500;
-  }
 }
 
 interface CharacterIdentity {
@@ -402,100 +389,6 @@ function normalizeLanguages(modifiers: DndBeyondModifier[]): string[] {
           modifier.friendlySubtypeName || titleize(modifier.subType || ""),
       ),
   );
-}
-
-function normalizeClasses(
-  classes: DndBeyondClassEntry[] | null | undefined,
-  warnings: string[],
-): CharacterClass[] {
-  const merged = (classes || [])
-    .map((entry) => normalizeClassEntry(entry, warnings))
-    .filter(isPresent)
-    .reduce((classLevels, entry) => {
-      classLevels.set(
-        entry.className,
-        (classLevels.get(entry.className) || 0) + entry.level,
-      );
-      return classLevels;
-    }, new Map<DnDClass, number>());
-
-  const normalized = Array.from(merged.entries()).map(([className, level]) => ({
-    class: className,
-    level,
-  }));
-
-  if (normalized.length === 0) {
-    throw createValidationError(
-      "The imported D&D Beyond character did not include any supported classes.",
-    );
-  }
-
-  return normalized;
-}
-
-function normalizeClassEntry(
-  entry: DndBeyondClassEntry,
-  warnings: string[],
-): { className: DnDClass; level: number } | null {
-  const className = entry.definition?.name?.trim();
-
-  if (!className) {
-    return null;
-  }
-
-  if (!VALID_CLASSES.includes(className as DnDClass)) {
-    warnings.push(`Class "${className}" is not supported and was omitted.`);
-    return null;
-  }
-
-  return {
-    className: className as DnDClass,
-    level: Math.max(1, Math.trunc(entry.level || 0)),
-  };
-}
-
-function normalizeRace(
-  raceName: string | null | undefined,
-  warnings?: string[],
-): DnDRace | undefined {
-  if (!raceName) {
-    return undefined;
-  }
-
-  const trimmedRaceName = raceName.trim();
-
-  // 1. Exact match
-  if (VALID_RACES.includes(trimmedRaceName as DnDRace)) {
-    return trimmedRaceName as DnDRace;
-  }
-
-  // 2. Case-insensitive match
-  const lowerRaceName = trimmedRaceName.toLowerCase();
-  const caseInsensitiveMatch = VALID_RACES.find(
-    (race) => race.toLowerCase() === lowerRaceName,
-  );
-
-  if (caseInsensitiveMatch) {
-    return caseInsensitiveMatch;
-  }
-
-  // 3. Substring fallback to supported races
-  // We sort by length descending to ensure more specific names (like "Half-Elf")
-  // are matched before base names (like "Elf").
-  const substringMatch = [...VALID_RACES]
-    .sort((a, b) => b.length - a.length)
-    .find((race) => new RegExp(`\\b${race}\\b`, "i").test(trimmedRaceName));
-
-  if (substringMatch) {
-    if (warnings) {
-      warnings.push(
-        `Race "${trimmedRaceName}" was normalized to "${substringMatch}".`,
-      );
-    }
-    return substringMatch;
-  }
-
-  return undefined;
 }
 
 function normalizeAlignment(
@@ -869,12 +762,4 @@ function titleize(value: string): string {
 
 function dedupeStrings(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean)));
-}
-
-function isPresent<T>(value: T | null | undefined): value is T {
-  return value !== null && value !== undefined;
-}
-
-function createValidationError(message: string): DndBeyondImportError {
-  return new DndBeyondImportError(message, { status: 400 });
 }
