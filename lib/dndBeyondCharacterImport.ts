@@ -26,7 +26,7 @@ import {
   normalizeCurrentHp,
   normalizeMaxHp,
 } from "./import/dndBeyond-ability-scores";
-import { normalizeClasses, normalizeClassEntry, normalizeRace } from "./import/dndBeyond-classes";
+import { normalizeClasses, normalizeRace } from "./import/dndBeyond-classes";
 import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
 import { filterToDamageTypes } from "./constants";
 
