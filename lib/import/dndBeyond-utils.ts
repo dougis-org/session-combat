@@ -1,5 +1,25 @@
 import { AbilityScores } from "../types";
 
+export class DndBeyondImportError extends Error {
+  readonly status: number;
+  readonly exposeMessage: boolean;
+
+  constructor(message: string, status = 400, exposeMessage = true) {
+    super(message);
+    this.name = "DndBeyondImportError";
+    this.status = status;
+    this.exposeMessage = exposeMessage;
+  }
+}
+
+export function createValidationError(message: string): DndBeyondImportError {
+  return new DndBeyondImportError(message);
+}
+
+export function isPresent<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
+
 export const ABILITY_ID_MAP: Record<number, keyof AbilityScores> = {
   1: "strength",
   2: "dexterity",
@@ -22,22 +42,6 @@ interface DndBeyondModifier {
   fixedValue?: number | null;
   value?: number | null;
   friendlySubtypeName?: string | null;
-}
-
-class DndBeyondImportError extends Error {
-  readonly status: number;
-  readonly exposeMessage: boolean;
-
-  constructor(message: string, status = 400, exposeMessage = true) {
-    super(message);
-    this.name = "DndBeyondImportError";
-    this.status = status;
-    this.exposeMessage = exposeMessage;
-  }
-}
-
-function createValidationError(message: string): DndBeyondImportError {
-  return new DndBeyondImportError(message);
 }
 
 export function indexStatValues(
