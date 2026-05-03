@@ -1,5 +1,5 @@
 import { DnDClass, DnDRace, VALID_CLASSES, VALID_RACES, CharacterClass } from "../types";
-import { isPresent, createValidationError } from "./dndBeyond-utils";
+import { isPresent, createValidationError, escapeRegExp } from "./dndBeyond-utils";
 
 interface DndBeyondClassEntry {
   level?: number | null;
@@ -88,7 +88,7 @@ export function normalizeRace(
   // are matched before base names (like "Elf").
   const substringMatch = [...VALID_RACES]
     .sort((a, b) => b.length - a.length)
-    .find((race) => new RegExp(`\\b${race}\\b`, "i").test(trimmedRaceName));
+    .find((race) => new RegExp(`\\b${escapeRegExp(race)}\\b`, "i").test(trimmedRaceName));
 
   if (substringMatch) {
     if (warnings) {

@@ -4,20 +4,27 @@ export class DndBeyondImportError extends Error {
   readonly status: number;
   readonly exposeMessage: boolean;
 
-  constructor(message: string, status = 400, exposeMessage = true) {
+  constructor(
+    message: string,
+    options: { status: number; exposeMessage?: boolean } = { status: 400 },
+  ) {
     super(message);
     this.name = "DndBeyondImportError";
-    this.status = status;
-    this.exposeMessage = exposeMessage;
+    this.status = options.status;
+    this.exposeMessage = options.exposeMessage ?? options.status < 500;
   }
 }
 
 export function createValidationError(message: string): DndBeyondImportError {
-  return new DndBeyondImportError(message);
+  return new DndBeyondImportError(message, { status: 400 });
 }
 
 export function isPresent<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
+}
+
+export function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export const ABILITY_ID_MAP: Record<number, keyof AbilityScores> = {

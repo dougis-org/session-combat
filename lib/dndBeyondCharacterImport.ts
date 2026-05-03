@@ -12,6 +12,7 @@ import {
   ABILITY_ID_MAP,
   ABILITY_KEYS,
   createValidationError,
+  DndBeyondImportError,
   getModifierNumericValue,
   indexStatValues,
   isBonusLikeModifier,
@@ -19,6 +20,7 @@ import {
   resolveAbilityScore,
   sumModifierBonusesBySubtype,
 } from "./import/dndBeyond-utils";
+export { DndBeyondImportError };
 import {
   normalizeAbilityScores,
   normalizeCurrentHp,
@@ -174,23 +176,6 @@ export interface NormalizedDndBeyondCharacter {
   sourceCharacterId: string;
   sourceUrl?: string;
 }
-
-class DndBeyondImportError extends Error {
-  readonly status: number;
-  readonly exposeMessage: boolean;
-
-  constructor(
-    message: string,
-    options: { status: number; exposeMessage?: boolean },
-  ) {
-    super(message);
-    this.name = "DndBeyondImportError";
-    this.status = options.status;
-    this.exposeMessage = options.exposeMessage ?? options.status < 500;
-  }
-}
-
-export { DndBeyondImportError };
 
 interface CharacterIdentity {
   name: string;
