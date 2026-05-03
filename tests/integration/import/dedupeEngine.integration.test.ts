@@ -1,5 +1,5 @@
 import { MongoDBContainer, StartedMongoDBContainer } from "@testcontainers/mongodb";
-import { createMockClient, createTestCreature, createTestSpell } from "./testHelpers";
+import { createMockClient, createTestCreature, createTestSpell } from "@/tests/helpers/importTestHelpers";
 import type { IOpen5EClient } from "@/lib/import/open5eAdapter";
 import type { ImportResult } from "@/lib/import/dedupeEngine";
 import type { Db } from "mongodb";
@@ -35,7 +35,7 @@ describe("dedupeEngine integration", () => {
     if (closeDatabase) {
       await closeDatabase();
     }
-    await mongoContainer.stop();
+    await mongoContainer?.stop();
   }, 30000);
 
   beforeEach(async () => {

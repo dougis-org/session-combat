@@ -9,7 +9,7 @@ import {
   createMockClient,
   createTestCreature,
   createTestSpell,
-} from "./open5e.mockHelpers";
+} from "@/tests/helpers/importTestHelpers";
 
 jest.mock("@/lib/storage");
 
