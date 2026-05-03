@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-18T14:20:54.780Z
-> Files: 534 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-02T14:37:09.006Z
+> Files: 541 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -740,3 +740,22 @@
 - `save-163348.log` (~188 tok)
 - `save-163352.log` (~0 tok)
 - `save-163400.log` (~0 tok)
+
+## openspec/changes/extract-dnd-ability-scores-foundation/
+
+- `design.md` — Context (~2186 tok)
+- `proposal.md` — GitHub Issues (~1070 tok)
+- `tasks.md` — Tasks (~1649 tok)
+- `tests.md` — Tests (~1244 tok)
+
+## openspec/changes/extract-dnd-ability-scores-foundation/specs/dndBeyond-ability-scores-extraction/
+
+- `spec.md` — ADDED Requirements (~968 tok)
+
+## openspec/changes/extract-dnd-ability-scores-foundation/specs/dndBeyond-utils/
+
+- `spec.md` — ADDED Requirements (~803 tok)
+
+## openspec/changes/extract-dnd-ability-scores-foundation/specs/import-utils/
+
+- `spec.md` — ADDED Requirements (~702 tok)

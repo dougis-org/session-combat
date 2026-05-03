@@ -10,6 +10,21 @@ import {
   VALID_RACES,
   calculateTotalLevel,
 } from "./types";
+import { getAbilityModifier, getProficiencyBonus } from "./import/utils";
+import {
+  ABILITY_ID_MAP,
+  ABILITY_KEYS,
+  getModifierNumericValue,
+  indexStatValues,
+  isBonusLikeModifier,
+  resolveAbilityScore,
+  sumModifierBonusesBySubtype,
+} from "./import/dndBeyond-utils";
+import {
+  normalizeAbilityScores,
+  normalizeCurrentHp,
+  normalizeMaxHp,
+} from "./import/dndBeyond-ability-scores";
 import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
 import { filterToDamageTypes } from "./constants";
 
@@ -28,16 +43,6 @@ const ALIGNMENT_ID_MAP: Record<number, DnDAlignment> = {
   9: "Chaotic Evil",
 };
 
-const ABILITY_ID_MAP: Record<number, keyof AbilityScores> = {
-  1: "strength",
-  2: "dexterity",
-  3: "constitution",
-  4: "intelligence",
-  5: "wisdom",
-  6: "charisma",
-};
-
-const ABILITY_KEYS = Object.values(ABILITY_ID_MAP);
 const ARMOR_TYPE_MAX_DEX_MODIFIER: Partial<Record<number, number>> = {
   2: 2,
   3: 0,
@@ -388,15 +393,6 @@ function buildNormalizedCharacter(
   };
 }
 
-function normalizeCurrentHp(
-  data: DndBeyondCharacterData,
-  maxHp: number,
-): number {
-  return typeof data.currentHitPoints === "number"
-    ? Math.min(Math.max(0, data.currentHitPoints), maxHp)
-    : Math.max(0, maxHp - (data.removedHitPoints || 0));
-}
-
 function normalizeLanguages(modifiers: DndBeyondModifier[]): string[] {
   return dedupeStrings(
     modifiers
@@ -458,70 +454,6 @@ function normalizeClassEntry(
   };
 }
 
-function normalizeAbilityScores(
-  data: DndBeyondCharacterData,
-  modifiers: DndBeyondModifier[],
-): AbilityScores {
-  const baseScores = indexStatValues(data.stats);
-  const bonusScores = indexStatValues(data.bonusStats);
-  const overrideScores = indexStatValues(data.overrideStats);
-
-  const scoreBonuses = sumModifierBonusesBySubtype(modifiers);
-  const abilityScores = {} as AbilityScores;
-
-  for (const [id, ability] of Object.entries(ABILITY_ID_MAP) as Array<
-    [string, keyof AbilityScores]
-  >) {
-    abilityScores[ability] = resolveAbilityScore(
-      Number(id),
-      ability,
-      baseScores,
-      bonusScores,
-      overrideScores,
-      scoreBonuses,
-    );
-  }
-
-  return abilityScores;
-}
-
-function indexStatValues(
-  stats: DndBeyondStatValue[] | null | undefined,
-): Map<number, number> {
-  return new Map(
-    (stats || [])
-      .filter(
-        (stat): stat is DndBeyondStatValue & { value: number } =>
-          typeof stat.value === "number",
-      )
-      .map((stat) => [stat.id, stat.value]),
-  );
-}
-
-function resolveAbilityScore(
-  statId: number,
-  ability: keyof AbilityScores,
-  baseScores: Map<number, number>,
-  bonusScores: Map<number, number>,
-  overrideScores: Map<number, number>,
-  scoreBonuses: Record<string, number>,
-): number {
-  const baseValue = baseScores.get(statId);
-
-  if (typeof baseValue !== "number") {
-    throw createValidationError(
-      `The imported D&D Beyond character is missing ${ability} data.`,
-    );
-  }
-
-  return (
-    overrideScores.get(statId) ??
-    baseValue +
-      (bonusScores.get(statId) || 0) +
-      (scoreBonuses[`${ability}-score`] || 0)
-  );
-}
-
 function normalizeRace(
   raceName: string | null | undefined,
   warnings?: string[],
@@ -574,42 +506,6 @@ function normalizeAlignment(
   }
 
   return ALIGNMENT_ID_MAP[alignmentId];
-}
-
-function normalizeMaxHp(
-  data: DndBeyondCharacterData,
-  abilityScores: AbilityScores,
-  totalLevel: number,
-  modifiers: DndBeyondModifier[],
-): number {
-  if (typeof data.overrideHitPoints === "number") {
-    return data.overrideHitPoints;
-  }
-
-  const baseHitPoints = data.baseHitPoints || 0;
-  const bonusHitPoints = data.bonusHitPoints || 0;
-  const constitutionModifier = getAbilityModifier(abilityScores.constitution);
-
-  const { perLevel, flat } = modifiers.reduce(
-    (acc, modifier) => {
-      const value = getModifierNumericValue(modifier) || 0;
-      if (modifier.subType === "hit-points-per-level") {
-        acc.perLevel += value;
-      } else if (modifier.subType === "hit-points") {
-        acc.flat += value;
-      }
-      return acc;
-    },
-    { perLevel: 0, flat: 0 },
-  );
-
-  return (
-    baseHitPoints +
-    bonusHitPoints +
-    constitutionModifier * totalLevel +
-    perLevel * totalLevel +
-    flat
-  );
 }
 
 function normalizeArmorClass(
@@ -914,25 +810,6 @@ function mapNarrativeEntries(
     }));
 }
 
-function sumModifierBonusesBySubtype(
-  modifiers: DndBeyondModifier[],
-): Record<string, number> {
-  return modifiers.reduce<Record<string, number>>((accumulator, modifier) => {
-    if (!isBonusLikeModifier(modifier) || !modifier.subType) {
-      return accumulator;
-    }
-
-    const numericValue = getModifierNumericValue(modifier);
-    if (typeof numericValue !== "number") {
-      return accumulator;
-    }
-
-    accumulator[modifier.subType] =
-      (accumulator[modifier.subType] || 0) + numericValue;
-    return accumulator;
-  }, {});
-}
-
 function collectModifierSubtypeSet(
   modifiers: DndBeyondModifier[],
   predicate: (modifier: DndBeyondModifier) => boolean,
@@ -962,26 +839,6 @@ function collectSenseModifiers(
       `${getModifierNumericValue(modifier)} ft.`;
     return senses;
   }, {});
-}
-
-function isBonusLikeModifier(modifier: DndBeyondModifier): boolean {
-  return modifier.type === "bonus" || modifier.type === "set-base";
-}
-
-function getModifierNumericValue(modifier: DndBeyondModifier): number | null {
-  return typeof modifier.value === "number"
-    ? modifier.value
-    : typeof modifier.fixedValue === "number"
-      ? modifier.fixedValue
-      : null;
-}
-
-function getProficiencyBonus(totalLevel: number): number {
-  return 2 + Math.floor(Math.max(totalLevel - 1, 0) / 4);
-}
-
-function getAbilityModifier(score: number): number {
-  return Math.floor((score - 10) / 2);
 }
 
 function normalizeSkillName(subType: string): string {
