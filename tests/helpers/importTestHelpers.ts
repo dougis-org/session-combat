@@ -117,20 +117,16 @@ export function createTestSpell(overrides: Partial<Open5ESpell> = {}): Open5ESpe
 }
 
 export function createMockClient(creatures: Open5ECreature[], spells: Open5ESpell[]) {
-  const monsterGenerator = (async function* () {
-    for (const creature of creatures) {
-      yield creature;
-    }
-  })();
-
-  const spellGenerator = (async function* () {
-    for (const spell of spells) {
-      yield spell;
-    }
-  })();
-
   return {
-    getAllMonsters: () => monsterGenerator,
-    getAllSpells: () => spellGenerator,
+    async *getAllMonsters() {
+      for (const creature of creatures) {
+        yield creature;
+      }
+    },
+    async *getAllSpells() {
+      for (const spell of spells) {
+        yield spell;
+      }
+    },
   } as unknown as IOpen5EClient;
 }

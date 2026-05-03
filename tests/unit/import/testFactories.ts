@@ -1,6 +1,6 @@
 import {
   createTestCreature,
   createTestSpell,
-} from "./open5e.mockHelpers";
+} from "@/tests/helpers/importTestHelpers";
 
 export { createTestCreature as createBaseCreature, createTestSpell as createBaseSpell };
