@@ -24,20 +24,20 @@ interface DndBeyondModifier {
   friendlySubtypeName?: string | null;
 }
 
-interface DndBeyondImportError {
+class DndBeyondImportError extends Error {
   readonly status: number;
   readonly exposeMessage: boolean;
-  name: string;
-  message: string;
+
+  constructor(message: string, status = 400, exposeMessage = true) {
+    super(message);
+    this.name = "DndBeyondImportError";
+    this.status = status;
+    this.exposeMessage = exposeMessage;
+  }
 }
 
 function createValidationError(message: string): DndBeyondImportError {
-  return {
-    name: "DndBeyondImportError",
-    message,
-    status: 400,
-    exposeMessage: true,
-  };
+  return new DndBeyondImportError(message);
 }
 
 export function indexStatValues(

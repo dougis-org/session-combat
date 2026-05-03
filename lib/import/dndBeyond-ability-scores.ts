@@ -1,4 +1,4 @@
-import { AbilityScores, DnDClass } from "../types";
+import { AbilityScores } from "../types";
 import { getAbilityModifier } from "./utils";
 import {
   ABILITY_ID_MAP,
