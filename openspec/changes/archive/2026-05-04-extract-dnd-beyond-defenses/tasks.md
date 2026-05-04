@@ -38,14 +38,14 @@ If **ANY** of the above fail, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Run the required pre-PR self-review from `skills/openspec-apply-change/SKILL.md` before committing
-- [ ] Commit all changes to `extract-dnd-beyond-defenses` branch and push to remote
-- [ ] Open PR from `extract-dnd-beyond-defenses` to `main`
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] Enable auto-merge: `gh pr merge --auto --merge`
-- [ ] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, follow all steps in [Remote push validation] then push; wait 180 seconds then repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll for check status autonomously; when any CI check fails, diagnose and fix, commit fixes, follow all steps in [Remote push validation] then push; wait 180 seconds then repeat until all checks pass
-- [ ] **Poll for merge** — after each iteration run `gh pr view --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
+- [x] Run the required pre-PR self-review from `skills/openspec-apply-change/SKILL.md` before committing
+- [x] Commit all changes to `extract-dnd-beyond-defenses` branch and push to remote
+- [x] Open PR from `extract-dnd-beyond-defenses` to `main`
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] Enable auto-merge: `gh pr merge --auto --merge`
+- [x] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, follow all steps in [Remote push validation] then push; wait 180 seconds then repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll for check status autonomously; when any CI check fails, diagnose and fix, commit fixes, follow all steps in [Remote push validation] then push; wait 180 seconds then repeat until all checks pass
+- [x] **Poll for merge** — after each iteration run `gh pr view --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
 
 Ownership metadata:
 
@@ -60,10 +60,10 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on main
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No doc updates needed — purely structural refactor
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on main
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No doc updates needed — purely structural refactor
 - [ ] Archive the change: move `openspec/changes/extract-dnd-beyond-defenses/` to `openspec/changes/archive/YYYY-MM-DD-extract-dnd-beyond-defenses/` — stage both the new location and deletion of the old in a single commit
 - [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-extract-dnd-beyond-defenses/` exists and `openspec/changes/extract-dnd-beyond-defenses/` is gone
 - [ ] Commit and push the archive to main in one commit
