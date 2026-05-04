@@ -27,6 +27,7 @@ import {
   normalizeMaxHp,
 } from "./import/dndBeyond-ability-scores";
 import { normalizeClasses, normalizeRace } from "./import/dndBeyond-classes";
+import { normalizeImmunities, normalizeByModifierType, normalizeLanguages } from "./import/dndBeyond-defenses";
 import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
 import { filterToDamageTypes } from "./constants";
 
@@ -365,17 +366,6 @@ function buildNormalizedCharacter(
   };
 }
 
-function normalizeLanguages(modifiers: DndBeyondModifier[]): string[] {
-  return dedupeStrings(
-    modifiers
-      .filter((modifier) => modifier.type === "language")
-      .map(
-        (modifier) =>
-          modifier.friendlySubtypeName || titleize(modifier.subType || ""),
-      ),
-  );
-}
-
 function normalizeAlignment(
   alignmentId: number | null | undefined,
 ): DnDAlignment | undefined {
@@ -537,55 +527,6 @@ function normalizeSenses(
   );
 
   return senses;
-}
-
-function normalizeByModifierType(
-  modifiers: DndBeyondModifier[],
-  type: string,
-): string[] {
-  return dedupeStrings(
-    modifiers
-      .filter((modifier) => modifier.type === type)
-      .map(
-        (modifier) =>
-          modifier.friendlySubtypeName || titleize(modifier.subType || ""),
-      ),
-  );
-}
-
-function normalizeImmunities(modifiers: DndBeyondModifier[]): {
-  damageImmunities: string[];
-  conditionImmunities: string[];
-} {
-  const classified = modifiers
-    .filter((modifier) => modifier.type === "immunity")
-    .reduce(
-      (result, modifier) => {
-        const label =
-          modifier.friendlySubtypeName || titleize(modifier.subType || "");
-
-        if (!label) {
-          return result;
-        }
-
-        if (isDamageTypeModifier(modifier)) {
-          result.damageImmunities.push(label);
-        } else {
-          result.conditionImmunities.push(label);
-        }
-
-        return result;
-      },
-      {
-        damageImmunities: [] as string[],
-        conditionImmunities: [] as string[],
-      },
-    );
-
-  return {
-    damageImmunities: dedupeStrings(classified.damageImmunities),
-    conditionImmunities: dedupeStrings(classified.conditionImmunities),
-  };
 }
 
 function normalizeAbilities(
