@@ -56,12 +56,5 @@ export function normalizeByModifierType(
 }
 
 export function normalizeLanguages(modifiers: DndBeyondModifier[]): string[] {
-  return dedupeStrings(
-    modifiers
-      .filter((modifier) => modifier.type === "language")
-      .map(
-        (modifier) =>
-          modifier.friendlySubtypeName || titleize(modifier.subType || ""),
-      ),
-  );
+  return normalizeByModifierType(modifiers, "language");
 }
