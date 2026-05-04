@@ -19,14 +19,6 @@ export function createValidationError(message: string): DndBeyondImportError {
   return new DndBeyondImportError(message, { status: 400 });
 }
 
-export function isPresent<T>(value: T | null | undefined): value is T {
-  return value !== null && value !== undefined;
-}
-
-export function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 export const ABILITY_ID_MAP: Record<number, keyof AbilityScores> = {
   1: "strength",
   2: "dexterity",
@@ -35,8 +27,6 @@ export const ABILITY_ID_MAP: Record<number, keyof AbilityScores> = {
   5: "wisdom",
   6: "charisma",
 };
-
-export const ABILITY_KEYS = Object.values(ABILITY_ID_MAP);
 
 interface DndBeyondStatValue {
   id: number;
@@ -117,4 +107,10 @@ export function sumModifierBonusesBySubtype(
       (accumulator[modifier.subType] || 0) + numericValue;
     return accumulator;
   }, {});
+}
+
+export function flattenModifiers(
+  modifierGroups?: Record<string, DndBeyondModifier[] | null> | null,
+): DndBeyondModifier[] {
+  return Object.values(modifierGroups || {}).flatMap((items) => items || []);
 }
