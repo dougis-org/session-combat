@@ -7,16 +7,15 @@ import {
   DnDRace,
   calculateTotalLevel,
 } from "./types";
-import { getAbilityModifier, getProficiencyBonus, dedupeStrings, titleize, DAMAGE_TYPE_NAMES, isDamageTypeModifier, normalizeModifierCategory } from "./import/utils";
+import { getAbilityModifier, getProficiencyBonus, dedupeStrings, titleize, DAMAGE_TYPE_NAMES, isDamageTypeModifier, normalizeModifierCategory, isPresent, escapeRegExp, ABILITY_KEYS } from "./import/utils";
 import {
   ABILITY_ID_MAP,
-  ABILITY_KEYS,
   createValidationError,
   DndBeyondImportError,
+  flattenModifiers,
   getModifierNumericValue,
   indexStatValues,
   isBonusLikeModifier,
-  isPresent,
   resolveAbilityScore,
   sumModifierBonusesBySubtype,
 } from "./import/dndBeyond-utils";
@@ -232,12 +231,6 @@ export function normalizeDndBeyondCharacter(
     sourceCharacterId: identity.sourceCharacterId,
     sourceUrl: data.readonlyUrl || undefined,
   };
-}
-
-function flattenModifiers(
-  modifierGroups?: Record<string, DndBeyondModifier[] | null> | null,
-): DndBeyondModifier[] {
-  return Object.values(modifierGroups || {}).flatMap((items) => items || []);
 }
 
 function parseUrlOrThrow(url: string): URL {

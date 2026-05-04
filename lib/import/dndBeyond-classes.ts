@@ -1,5 +1,6 @@
 import { DnDClass, DnDRace, VALID_CLASSES, VALID_RACES, CharacterClass } from "../types";
-import { isPresent, createValidationError, escapeRegExp } from "./dndBeyond-utils";
+import { isPresent, escapeRegExp } from "./utils";
+import { createValidationError } from "./dndBeyond-utils";
 
 interface DndBeyondClassEntry {
   level?: number | null;
