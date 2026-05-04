@@ -1,5 +1,4 @@
 import { AbilityScores } from "../types";
-import { ABILITY_KEYS } from "./utils";
 
 export class DndBeyondImportError extends Error {
   readonly status: number;

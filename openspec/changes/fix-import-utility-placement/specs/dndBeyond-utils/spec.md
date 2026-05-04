@@ -4,7 +4,7 @@ This document details *changes* to requirements and is additive to the `design.m
 
 ### Requirement: ADDED `flattenModifiers()` exported from `dndBeyond-utils.ts`
 
-The system SHALL export `flattenModifiers()` from `lib/import/dndBeyond-utils.ts`. This function collects all modifier arrays from a `DndBeyondCharacterData` payload and returns them as a single flat array of `DndBeyondModifier`.
+The system SHALL export `flattenModifiers()` from `lib/import/dndBeyond-utils.ts`. This function collects all modifier arrays from a `modifierGroups` record (typically `data.modifiers` from a `DndBeyondCharacterData` payload) and returns them as a single flat array of `DndBeyondModifier`.
 
 #### Scenario: Function accessible to extraction modules
 

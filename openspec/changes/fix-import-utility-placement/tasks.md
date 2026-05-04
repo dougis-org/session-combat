@@ -53,7 +53,7 @@
 ### Task 6 — Compile and test
 
 - [x] `tsc --noEmit` — must exit 0
-- [x] `npm test` — all tests must pass
+- [x] `npm run test:unit` — all tests must pass
 
 ## Validation
 
@@ -62,13 +62,13 @@
 - [x] `grep -n "^export.*flattenModifiers" lib/import/dndBeyond-utils.ts` returns a result
 - [x] `grep -n "function flattenModifiers" lib/dndBeyondCharacterImport.ts` returns no results (moved)
 - [x] `tsc --noEmit` exits 0
-- [x] `npm test` — all tests pass
+- [x] `npm run test:unit` — all tests pass
 
 ## Remote push validation
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test` — all tests must pass
+- **Unit tests** — `npm run test:unit` — all tests must pass
 - **Integration tests** — `npm run test:integration` — all tests must pass
 - **Build** — `npm run build` — must succeed with no errors
 - If **ANY** of the above fail, iterate and address the failure before pushing

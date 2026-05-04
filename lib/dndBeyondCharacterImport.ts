@@ -7,16 +7,12 @@ import {
   DnDRace,
   calculateTotalLevel,
 } from "./types";
-import { getAbilityModifier, getProficiencyBonus, dedupeStrings, titleize, DAMAGE_TYPE_NAMES, isDamageTypeModifier, normalizeModifierCategory, isPresent, escapeRegExp, ABILITY_KEYS } from "./import/utils";
+import { getAbilityModifier, getProficiencyBonus, titleize, isPresent, ABILITY_KEYS } from "./import/utils";
 import {
-  ABILITY_ID_MAP,
   createValidationError,
   DndBeyondImportError,
   flattenModifiers,
   getModifierNumericValue,
-  indexStatValues,
-  isBonusLikeModifier,
-  resolveAbilityScore,
   sumModifierBonusesBySubtype,
 } from "./import/dndBeyond-utils";
 export { DndBeyondImportError };

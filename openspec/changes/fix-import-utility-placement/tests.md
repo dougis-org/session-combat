@@ -59,7 +59,7 @@ For each task in `tasks.md`:
 
 ### Task 6 — Compile and test (applies after all moves)
 
-- [ ] **TypeScript compiles cleanly:** `tsc --noEmit` exits 0 with no errors
+- [ ] **TypeScript compiles cleanly:** `npx tsc --noEmit` exits 0 with no errors
   - Spec ref: both specs — "TypeScript strict compile"
-- [ ] **All existing tests pass:** `npm test` produces identical pass/fail counts to pre-change baseline
+- [ ] **All existing tests pass:** `npm run test:unit` produces identical pass/fail counts to pre-change baseline; `npm run test:integration` passes
   - Spec ref: both specs — "Existing tests unaffected"

@@ -5,6 +5,7 @@ import {
   ABILITY_ID_MAP,
   indexStatValues,
   resolveAbilityScore,
+  flattenModifiers,
 } from "@/lib/import/dndBeyond-utils";
 
 describe("dndBeyond-utils", () => {
@@ -159,6 +160,51 @@ describe("dndBeyond-utils", () => {
       expect(ABILITY_ID_MAP[4]).toBe("intelligence");
       expect(ABILITY_ID_MAP[5]).toBe("wisdom");
       expect(ABILITY_ID_MAP[6]).toBe("charisma");
+    });
+  });
+
+  describe("flattenModifiers", () => {
+    it("returns empty array for undefined input", () => {
+      expect(flattenModifiers(undefined)).toEqual([]);
+    });
+
+    it("returns empty array for null input", () => {
+      expect(flattenModifiers(null)).toEqual([]);
+    });
+
+    it("returns empty array when modifier groups are empty object", () => {
+      expect(flattenModifiers({})).toEqual([]);
+    });
+
+    it("flattens multiple modifier arrays into single array", () => {
+      const modifierGroups: Record<string, { type: "bonus"; subType: string; value: number }[] | null> = {
+        strength: [{ type: "bonus", subType: "strength-score", value: 2 }],
+        dexterity: [{ type: "bonus", subType: "dexterity-score", value: 1 }],
+      };
+      const result = flattenModifiers(modifierGroups);
+      expect(result).toHaveLength(2);
+      expect(result[0].subType).toBe("strength-score");
+      expect(result[1].subType).toBe("dexterity-score");
+    });
+
+    it("skips null arrays in modifier groups", () => {
+      const modifierGroups: Record<string, { type: "bonus"; subType: string; value: number }[] | null> = {
+        strength: [{ type: "bonus", subType: "strength-score", value: 2 }],
+        dexterity: null,
+      };
+      const result = flattenModifiers(modifierGroups);
+      expect(result).toHaveLength(1);
+      expect(result[0].subType).toBe("strength-score");
+    });
+
+    it("skips undefined arrays in modifier groups", () => {
+      const modifierGroups: Record<string, { type: "bonus"; subType: string; value: number }[] | null | undefined> = {
+        strength: undefined,
+        charisma: [{ type: "bonus", subType: "charisma-score", value: 3 }],
+      };
+      const result = flattenModifiers(modifierGroups);
+      expect(result).toHaveLength(1);
+      expect(result[0].subType).toBe("charisma-score");
     });
   });
 });
