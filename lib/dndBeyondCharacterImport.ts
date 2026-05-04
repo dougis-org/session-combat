@@ -7,7 +7,7 @@ import {
   DnDRace,
   calculateTotalLevel,
 } from "./types";
-import { getAbilityModifier, getProficiencyBonus } from "./import/utils";
+import { getAbilityModifier, getProficiencyBonus, dedupeStrings, titleize, DAMAGE_TYPE_NAMES, isDamageTypeModifier, normalizeModifierCategory } from "./import/utils";
 import {
   ABILITY_ID_MAP,
   ABILITY_KEYS,
@@ -49,21 +49,6 @@ const ARMOR_TYPE_MAX_DEX_MODIFIER: Partial<Record<number, number>> = {
   2: 2,
   3: 0,
 };
-const DAMAGE_TYPE_NAMES = new Set([
-  "acid",
-  "bludgeoning",
-  "cold",
-  "fire",
-  "force",
-  "lightning",
-  "necrotic",
-  "piercing",
-  "poison",
-  "psychic",
-  "radiant",
-  "slashing",
-  "thunder",
-]);
 const ACTIONS_BY_ACTIVATION_TYPE: Partial<
   Record<number, "actions" | "bonusActions" | "reactions">
 > = {
@@ -89,7 +74,7 @@ interface DndBeyondStatValue {
   value: number | null;
 }
 
-interface DndBeyondModifier {
+export interface DndBeyondModifier {
   type?: "bonus" | "set" | "set-base" | "proficiency" | "expertise" | "language" | "resistance" | "immunity" | "vulnerability" | null;
   subType?: string | null;
   fixedValue?: number | null;
@@ -603,16 +588,6 @@ function normalizeImmunities(modifiers: DndBeyondModifier[]): {
   };
 }
 
-function isDamageTypeModifier(modifier: DndBeyondModifier): boolean {
-  return [modifier.subType, modifier.friendlySubtypeName]
-    .filter((value): value is string => typeof value === "string")
-    .some((value) => DAMAGE_TYPE_NAMES.has(normalizeModifierCategory(value)));
-}
-
-function normalizeModifierCategory(value: string): string {
-  return value.toLowerCase().replace(/-/g, " ").trim();
-}
-
 function normalizeAbilities(
   actions: Record<string, DndBeyondActionEntry[] | null> | null | undefined,
   traits: Record<string, string | null> | null | undefined,
@@ -751,15 +726,4 @@ function sanitizeHtmlSnippet(snippet: string): string {
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function titleize(value: string): string {
-  return value
-    .replace(/[_-]+/g, " ")
-    .replace(/\b\w/g, (character) => character.toUpperCase())
-    .trim();
-}
-
-function dedupeStrings(values: string[]): string[] {
-  return Array.from(new Set(values.filter(Boolean)));
 }
