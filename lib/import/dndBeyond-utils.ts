@@ -114,3 +114,16 @@ export function flattenModifiers(
 ): DndBeyondModifier[] {
   return Object.values(modifierGroups || {}).flatMap((items) => items || []);
 }
+
+export function collectModifierSubtypeSet(
+  modifiers: DndBeyondModifier[],
+  predicate: (modifier: DndBeyondModifier) => boolean,
+  mapSubtype: (modifier: DndBeyondModifier) => string,
+): Set<string> {
+  return new Set(
+    modifiers
+      .filter(predicate)
+      .map(mapSubtype)
+      .filter((value) => value.length > 0),
+  );
+}

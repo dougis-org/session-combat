@@ -37,7 +37,13 @@
       "Bash(git remote *)",
       "mcp__plugin_github_github__issue_read",
       "mcp__plugin_github_github__list_issues",
-      "mcp__plugin_github_github__issue_write"
+      "mcp__plugin_github_github__issue_write",
+      "Bash(rtk wc *)",
+      "Bash(tokensave_status)",
+      "Bash(mcp__tokensave__tokensave_context *)",
+      "Bash(npm test *)",
+      "Bash(cat)",
+      "Read(//tmp/**)"
     ]
   }
 }

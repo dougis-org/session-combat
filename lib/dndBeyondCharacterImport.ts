@@ -13,7 +13,6 @@ import {
   DndBeyondImportError,
   flattenModifiers,
   getModifierNumericValue,
-  sumModifierBonusesBySubtype,
 } from "./import/dndBeyond-utils";
 export { DndBeyondImportError };
 import {
@@ -23,6 +22,7 @@ import {
 } from "./import/dndBeyond-ability-scores";
 import { normalizeClasses, normalizeRace } from "./import/dndBeyond-classes";
 import { normalizeImmunities, normalizeByModifierType, normalizeLanguages } from "./import/dndBeyond-defenses";
+import { normalizeSavingThrows, normalizeSkills, normalizeSenses } from "./import/dndBeyond-skills-senses";
 import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
 import { filterToDamageTypes } from "./constants";
 
@@ -435,88 +435,6 @@ function getArmorDexterityContribution(
     : dexterityModifier;
 }
 
-function normalizeSavingThrows(
-  abilityScores: AbilityScores,
-  modifiers: DndBeyondModifier[],
-  proficiencyBonus: number,
-): Partial<Record<keyof AbilityScores, number>> {
-  const bonusesBySubtype = sumModifierBonusesBySubtype(modifiers);
-  const proficientSaves = collectModifierSubtypeSet(
-    modifiers,
-    (modifier) =>
-      modifier.type === "proficiency" &&
-      Boolean(modifier.subType?.endsWith("-saving-throws")),
-    (modifier) => (modifier.subType || "").replace("-saving-throws", ""),
-  );
-
-  return Object.fromEntries(
-    ABILITY_KEYS.map((ability) => [
-      ability,
-      getAbilityModifier(abilityScores[ability]) +
-        (proficientSaves.has(ability) ? proficiencyBonus : 0) +
-        (bonusesBySubtype[`${ability}-saving-throws`] || 0),
-    ]),
-  );
-}
-
-function normalizeSkills(
-  abilityScores: AbilityScores,
-  modifiers: DndBeyondModifier[],
-  proficiencyBonus: number,
-): Record<string, number> {
-  const expertise = collectModifierSubtypeSet(
-    modifiers,
-    (modifier) => modifier.type === "expertise",
-    (modifier) => normalizeSkillName(modifier.subType || ""),
-  );
-  const proficiency = collectModifierSubtypeSet(
-    modifiers,
-    (modifier) => modifier.type === "proficiency",
-    (modifier) => normalizeSkillName(modifier.subType || ""),
-  );
-  const bonusesBySubtype = sumModifierBonusesBySubtype(modifiers);
-
-  return Object.fromEntries(
-    Object.entries(SKILL_ABILITY_MAP).map(([skill, ability]) => {
-      const base = getAbilityModifier(abilityScores[ability]);
-      const multiplier = expertise.has(skill)
-        ? 2
-        : proficiency.has(skill)
-          ? 1
-          : 0;
-      const bonus = bonusesBySubtype[denormalizeSkillSubtype(skill)] || 0;
-      return [skill, base + proficiencyBonus * multiplier + bonus];
-    }),
-  );
-}
-
-function normalizeSenses(
-  data: DndBeyondCharacterData,
-  modifiers: DndBeyondModifier[],
-  skills: Record<string, number>,
-  abilityScores: AbilityScores,
-): Record<string, string> {
-  const senses = collectSenseModifiers(modifiers);
-
-  const walkSpeed = data.race?.weightSpeeds?.normal?.walk;
-  if (typeof walkSpeed === "number" && walkSpeed > 0) {
-    senses.speed = `${walkSpeed} ft.`;
-  }
-
-  Object.assign(
-    senses,
-    Object.fromEntries(
-      PASSIVE_SENSE_SKILLS.map(([label, skill, ability]) => [
-        label,
-        String(
-          10 + (skills[skill] ?? getAbilityModifier(abilityScores[ability])),
-        ),
-      ]),
-    ),
-  );
-
-  return senses;
-}
 
 function normalizeAbilities(
   actions: Record<string, DndBeyondActionEntry[] | null> | null | undefined,
@@ -606,49 +524,6 @@ function mapNarrativeEntries(
       name: titleMap[key] || titleize(key),
       description: value!.trim(),
     }));
-}
-
-function collectModifierSubtypeSet(
-  modifiers: DndBeyondModifier[],
-  predicate: (modifier: DndBeyondModifier) => boolean,
-  mapSubtype: (modifier: DndBeyondModifier) => string,
-): Set<string> {
-  return new Set(
-    modifiers
-      .filter(predicate)
-      .map(mapSubtype)
-      .filter((value) => value.length > 0),
-  );
-}
-
-function collectSenseModifiers(
-  modifiers: DndBeyondModifier[],
-): Record<string, string> {
-  return modifiers.reduce<Record<string, string>>((senses, modifier) => {
-    if (
-      modifier.type !== "set-base" ||
-      !modifier.subType ||
-      typeof getModifierNumericValue(modifier) !== "number"
-    ) {
-      return senses;
-    }
-
-    senses[normalizeSenseKey(modifier.subType)] =
-      `${getModifierNumericValue(modifier)} ft.`;
-    return senses;
-  }, {});
-}
-
-function normalizeSkillName(subType: string): string {
-  return subType.replace(/-/g, " ").trim().toLowerCase();
-}
-
-function denormalizeSkillSubtype(skill: string): string {
-  return skill.replace(/ /g, "-");
-}
-
-function normalizeSenseKey(subType: string): string {
-  return subType.replace(/-/g, " ").toLowerCase();
 }
 
 function sanitizeHtmlSnippet(snippet: string): string {

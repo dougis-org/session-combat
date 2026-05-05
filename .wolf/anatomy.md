@@ -1,7 +1,12 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-02T14:37:09.006Z
-> Files: 541 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-05T13:02:33.469Z
+> Files: 563 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../.claude/plans/
+
+- `extract-dnd-skills-senses.md` — Plan: Extract D&D Beyond Skills, Senses, Saving Throws (~654 tok)
+- `github-issue-153-giggly-ullman.md` — Plan: GitHub Issue #153 — Skills, Senses & Saving Throws Extraction (~952 tok)
 
 ## ./
 
@@ -741,6 +746,15 @@
 - `save-163352.log` (~0 tok)
 - `save-163400.log` (~0 tok)
 
+## lib/
+
+- `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~4252 tok)
+
+## lib/import/
+
+- `dndBeyond-skills-senses.ts` — Exports normalizeSavingThrows, normalizeSkills, normalizeSenses (~1155 tok)
+- `dndBeyond-utils.ts` — Exports DndBeyondImportError, createValidationError, ABILITY_ID_MAP, indexStatValues + 6 more (~1014 tok)
+
 ## openspec/changes/extract-dnd-ability-scores-foundation/
 
 - `design.md` — Context (~2186 tok)
@@ -759,3 +773,41 @@
 ## openspec/changes/extract-dnd-ability-scores-foundation/specs/import-utils/
 
 - `spec.md` — ADDED Requirements (~702 tok)
+
+## openspec/changes/extract-dnd-beyond-defenses/
+
+- `design.md` — Context (~1579 tok)
+- `proposal.md` — GitHub Issues (~904 tok)
+- `tasks.md` — Tasks (~977 tok)
+- `tests.md` — Tests (~519 tok)
+
+## openspec/changes/extract-dnd-beyond-defenses/specs/dndBeyond-defenses-extraction/
+
+- `spec.md` — ADDED Requirements (~1007 tok)
+
+## openspec/changes/extract-dnd-skills-senses/
+
+- `.openspec.yaml` (~15 tok)
+- `design.md` — Context (~2024 tok)
+- `proposal.md` — GitHub Issues (~1133 tok)
+- `tasks.md` — Tasks (~1408 tok)
+- `tests.md` — Tests: Extract D&D Beyond Skills, Senses, Saving Throws (~728 tok)
+
+## openspec/changes/extract-dnd-skills-senses/specs/dndBeyond-skills-senses-extraction/
+
+- `spec.md` — ADDED Requirements (~1795 tok)
+
+## openspec/changes/fix-import-utility-placement/
+
+- `design.md` — Context (~2079 tok)
+- `proposal.md` — GitHub Issues (~1290 tok)
+- `tasks.md` — Tasks (~1500 tok)
+- `tests.md` — Tests (~1171 tok)
+
+## openspec/changes/fix-import-utility-placement/specs/dndBeyond-utils/
+
+- `spec.md` — ADDED Requirements (~810 tok)
+
+## openspec/changes/fix-import-utility-placement/specs/import-utils/
+
+- `spec.md` — ADDED Requirements (~1032 tok)

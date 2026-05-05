@@ -76,9 +76,9 @@ Blocking resolution flow:
 - [x] Mark all remaining tasks as complete (`- [x]`)
 - [x] Update repository documentation impacted by the change
 - [x] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/extract-generic-import-helpers/` to `openspec/changes/archive/YYYY-MM-DD-extract-generic-import-helpers/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-extract-generic-import-helpers/` exists and `openspec/changes/extract-generic-import-helpers/` is gone
-- [ ] Commit and push the archive to the default branch in one commit
-- [ ] Prune merged local feature branches: `git fetch --prune` and `git branch -d extract-generic-import-helpers`
+- [x] Archive the change: move `openspec/changes/extract-generic-import-helpers/` to `openspec/changes/archive/YYYY-MM-DD-extract-generic-import-helpers/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-extract-generic-import-helpers/` exists and `openspec/changes/extract-generic-import-helpers/` is gone
+- [x] Commit and push the archive to the default branch in one commit
+- [x] Prune merged local feature branches: `git fetch --prune` and `git branch -d extract-generic-import-helpers`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -d extract-generic-import-helpers`
