@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-05T04:41:55.159Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-05T13:02:33.469Z
 > Files: 563 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
@@ -748,7 +748,7 @@
 
 ## lib/
 
-- `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~4269 tok)
+- `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~4252 tok)
 
 ## lib/import/
 

@@ -87,3 +87,7 @@
 | 21:41 | Edited lib/dndBeyondCharacterImport.ts | — | ~0 |
 | 21:41 | Edited lib/dndBeyondCharacterImport.ts | — | ~0 |
 | 21:41 | Edited lib/dndBeyondCharacterImport.ts | — | ~0 |
+| 05:58 | Session end: 12 writes across 5 files (extract-dnd-skills-senses.md, tests.md, dndBeyond-utils.ts, dndBeyond-skills-senses.ts, dndBeyondCharacterImport.ts) | 7 reads | ~7570 tok |
+| 05:58 | Session end: 12 writes across 5 files (extract-dnd-skills-senses.md, tests.md, dndBeyond-utils.ts, dndBeyond-skills-senses.ts, dndBeyondCharacterImport.ts) | 7 reads | ~7570 tok |
+| 05:59 | Session end: 12 writes across 5 files (extract-dnd-skills-senses.md, tests.md, dndBeyond-utils.ts, dndBeyond-skills-senses.ts, dndBeyondCharacterImport.ts) | 7 reads | ~7570 tok |
+| 06:02 | Edited lib/dndBeyondCharacterImport.ts | 8→6 lines | ~40 |

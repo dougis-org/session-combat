@@ -41,7 +41,9 @@
       "Bash(rtk wc *)",
       "Bash(tokensave_status)",
       "Bash(mcp__tokensave__tokensave_context *)",
-      "Bash(npm test *)"
+      "Bash(npm test *)",
+      "Bash(cat)",
+      "Read(//tmp/**)"
     ]
   }
 }

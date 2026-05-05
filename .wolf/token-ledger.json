@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-18T14:20:54.749Z",
   "lifetime": {
-    "total_tokens_estimated": 32932,
-    "total_reads": 45,
-    "total_writes": 24,
+    "total_tokens_estimated": 55642,
+    "total_reads": 66,
+    "total_writes": 60,
     "total_sessions": 9,
-    "anatomy_hits": 12,
-    "anatomy_misses": 33,
-    "repeated_reads_blocked": 26,
-    "estimated_savings_vs_bare_cli": 2400
+    "anatomy_hits": 24,
+    "anatomy_misses": 42,
+    "repeated_reads_blocked": 32,
+    "estimated_savings_vs_bare_cli": 4800
   },
   "sessions": [
     {
@@ -577,6 +577,363 @@
         "output_tokens_estimated": 8373,
         "reads_count": 11,
         "writes_count": 6,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 4
+      }
+    },
+    {
+      "id": "session-2026-05-05-2132",
+      "started": "2026-05-05T04:32:39.316Z",
+      "ended": "2026-05-05T12:58:35.848Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/proposal.md",
+          "tokens_estimated": 1133,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/tasks.md",
+          "tokens_estimated": 1408,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/specs/dndBeyond-skills-senses-extraction/spec.md",
+          "tokens_estimated": 1795,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/.github/openspec-shared/schemas/sdd-with-feedback-loop/templates/tests.md",
+          "tokens_estimated": 179,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-ability-scores.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-utils.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/.claude/plans/extract-dnd-skills-senses.md",
+          "tokens_estimated": 747,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/tests.md",
+          "tokens_estimated": 832,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-utils.ts",
+          "tokens_estimated": 156,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-skills-senses.ts",
+          "tokens_estimated": 1155,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 57,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 108,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 4515,
+        "output_tokens_estimated": 3055,
+        "reads_count": 7,
+        "writes_count": 12,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 4
+      }
+    },
+    {
+      "id": "session-2026-05-05-2132",
+      "started": "2026-05-05T04:32:39.316Z",
+      "ended": "2026-05-05T12:58:54.667Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/proposal.md",
+          "tokens_estimated": 1133,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/tasks.md",
+          "tokens_estimated": 1408,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/specs/dndBeyond-skills-senses-extraction/spec.md",
+          "tokens_estimated": 1795,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/.github/openspec-shared/schemas/sdd-with-feedback-loop/templates/tests.md",
+          "tokens_estimated": 179,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-ability-scores.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-utils.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/.claude/plans/extract-dnd-skills-senses.md",
+          "tokens_estimated": 747,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/tests.md",
+          "tokens_estimated": 832,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-utils.ts",
+          "tokens_estimated": 156,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-skills-senses.ts",
+          "tokens_estimated": 1155,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 57,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 108,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 4515,
+        "output_tokens_estimated": 3055,
+        "reads_count": 7,
+        "writes_count": 12,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 4
+      }
+    },
+    {
+      "id": "session-2026-05-05-2132",
+      "started": "2026-05-05T04:32:39.316Z",
+      "ended": "2026-05-05T12:59:33.595Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/proposal.md",
+          "tokens_estimated": 1133,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/tasks.md",
+          "tokens_estimated": 1408,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/specs/dndBeyond-skills-senses-extraction/spec.md",
+          "tokens_estimated": 1795,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/.github/openspec-shared/schemas/sdd-with-feedback-loop/templates/tests.md",
+          "tokens_estimated": 179,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-ability-scores.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-utils.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/.claude/plans/extract-dnd-skills-senses.md",
+          "tokens_estimated": 747,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-skills-senses/tests.md",
+          "tokens_estimated": 832,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-utils.ts",
+          "tokens_estimated": 156,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-skills-senses.ts",
+          "tokens_estimated": 1155,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 57,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 108,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 0,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 4515,
+        "output_tokens_estimated": 3055,
+        "reads_count": 7,
+        "writes_count": 12,
         "repeated_reads_blocked": 2,
         "anatomy_lookups": 4
       }

@@ -1,4 +1,21 @@
 {
   "version": 1,
-  "bugs": []
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-05-05T13:02:33.478Z",
+      "error_message": "Significant refactor of ",
+      "file": "lib/dndBeyondCharacterImport.ts",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 8→6 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-05T13:02:33.478Z"
+    }
+  ]
 }

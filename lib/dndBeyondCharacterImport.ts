@@ -9,12 +9,10 @@ import {
 } from "./types";
 import { getAbilityModifier, getProficiencyBonus, titleize, isPresent, ABILITY_KEYS } from "./import/utils";
 import {
-  collectModifierSubtypeSet,
   createValidationError,
   DndBeyondImportError,
   flattenModifiers,
   getModifierNumericValue,
-  sumModifierBonusesBySubtype,
 } from "./import/dndBeyond-utils";
 export { DndBeyondImportError };
 import {
