@@ -43,7 +43,10 @@
       "Bash(mcp__tokensave__tokensave_context *)",
       "Bash(npm test *)",
       "Bash(cat)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "mcp__tokensave__tokensave_context",
+      "mcp__tokensave__tokensave_search",
+      "mcp__tokensave__tokensave_body"
     ]
   }
 }

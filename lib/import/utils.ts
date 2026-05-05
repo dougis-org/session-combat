@@ -1,4 +1,4 @@
-import type { AbilityScores } from "../types";
+import type { AbilityScores, CreatureAbility } from "../types";
 
 export interface ModifierLike {
   subType?: string | null;
@@ -67,3 +67,22 @@ export const ABILITY_KEYS: ReadonlyArray<keyof AbilityScores> = [
   "wisdom",
   "charisma",
 ] as const;
+
+export function sanitizeHtmlSnippet(snippet: string): string {
+  return snippet
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function mapNarrativeEntries(
+  entries: Record<string, string | null> | null | undefined,
+  titleMap: Record<string, string>,
+): CreatureAbility[] {
+  return Object.entries(entries || {})
+    .filter(([, value]) => typeof value === "string" && value.trim().length > 0)
+    .map(([key, value]) => ({
+      name: titleMap[key] || titleize(key),
+      description: value!.trim(),
+    }));
+}
