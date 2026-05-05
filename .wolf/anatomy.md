@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-05T13:02:33.469Z
-> Files: 563 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-05T22:36:12.201Z
+> Files: 572 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -748,12 +748,14 @@
 
 ## lib/
 
-- `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~4252 tok)
+- `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~3363 tok)
 
 ## lib/import/
 
+- `dndBeyond-abilities.ts` — Exports DndBeyondActionEntry, ACTIONS_BY_ACTIVATION_TYPE, TRAIT_TITLE_MAP, NOTE_TITLE_MAP, normalize (~814 tok)
 - `dndBeyond-skills-senses.ts` — Exports normalizeSavingThrows, normalizeSkills, normalizeSenses (~1155 tok)
 - `dndBeyond-utils.ts` — Exports DndBeyondImportError, createValidationError, ABILITY_ID_MAP, indexStatValues + 6 more (~1014 tok)
+- `utils.ts` — Exports ModifierLike, getAbilityModifier, getProficiencyBonus, dedupeStrings + 9 more (~676 tok)
 
 ## openspec/changes/extract-dnd-ability-scores-foundation/
 
@@ -773,6 +775,17 @@
 ## openspec/changes/extract-dnd-ability-scores-foundation/specs/import-utils/
 
 - `spec.md` — ADDED Requirements (~702 tok)
+
+## openspec/changes/extract-dnd-beyond-abilities/
+
+- `design.md` — Context (~2523 tok)
+- `proposal.md` — GitHub Issues (~1566 tok)
+- `tasks.md` — Tasks (~2744 tok)
+- `tests.md` — Tests (~3538 tok)
+
+## openspec/changes/extract-dnd-beyond-abilities/specs/dndBeyond-abilities-extraction/
+
+- `spec.md` — ADDED Requirements (~2962 tok)
 
 ## openspec/changes/extract-dnd-beyond-defenses/
 
@@ -811,3 +824,8 @@
 ## openspec/changes/fix-import-utility-placement/specs/import-utils/
 
 - `spec.md` — ADDED Requirements (~1032 tok)
+
+## tests/unit/import/
+
+- `dndBeyond-abilities.test.ts` — Declares DndBeyondActionEntry (~2414 tok)
+- `utils.test.ts` — Declares input (~1899 tok)

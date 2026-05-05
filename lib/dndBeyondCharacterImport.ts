@@ -23,6 +23,7 @@ import {
 import { normalizeClasses, normalizeRace } from "./import/dndBeyond-classes";
 import { normalizeImmunities, normalizeByModifierType, normalizeLanguages } from "./import/dndBeyond-defenses";
 import { normalizeSavingThrows, normalizeSkills, normalizeSenses } from "./import/dndBeyond-skills-senses";
+import { normalizeAbilities, type DndBeyondActionEntry } from "./import/dndBeyond-abilities";
 import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
 import { filterToDamageTypes } from "./constants";
 
@@ -45,26 +46,6 @@ const ARMOR_TYPE_MAX_DEX_MODIFIER: Partial<Record<number, number>> = {
   2: 2,
   3: 0,
 };
-const ACTIONS_BY_ACTIVATION_TYPE: Partial<
-  Record<number, "actions" | "bonusActions" | "reactions">
-> = {
-  3: "bonusActions",
-  4: "reactions",
-};
-const TRAIT_TITLE_MAP = {
-  personalityTraits: "Personality Traits",
-  ideals: "Ideals",
-  bonds: "Bonds",
-  flaws: "Flaws",
-  appearance: "Appearance",
-};
-const NOTE_TITLE_MAP = {
-  backstory: "Backstory",
-  allies: "Allies",
-  enemies: "Enemies",
-  organizations: "Organizations",
-  otherNotes: "Other Notes",
-};
 interface DndBeyondStatValue {
   id: number;
   value: number | null;
@@ -82,15 +63,6 @@ interface DndBeyondClassEntry {
   level?: number | null;
   definition?: {
     name?: string | null;
-  } | null;
-}
-
-interface DndBeyondActionEntry {
-  name?: string | null;
-  snippet?: string | null;
-  description?: string | null;
-  activation?: {
-    activationType?: number | null;
   } | null;
 }
 
@@ -436,99 +408,3 @@ function getArmorDexterityContribution(
 }
 
 
-function normalizeAbilities(
-  actions: Record<string, DndBeyondActionEntry[] | null> | null | undefined,
-  traits: Record<string, string | null> | null | undefined,
-  notes: Record<string, string | null> | null | undefined,
-): {
-  traits: CreatureAbility[];
-  actions: CreatureAbility[];
-  bonusActions: CreatureAbility[];
-  reactions: CreatureAbility[];
-} {
-  const categorizedAbilities = {
-    actions: [] as CreatureAbility[],
-    bonusActions: [] as CreatureAbility[],
-    reactions: [] as CreatureAbility[],
-  };
-
-  Object.values(actions || {})
-    .flatMap((entries) => entries || [])
-    .map((entry) => ({ entry, ability: normalizeActionEntry(entry) }))
-    .filter(
-      (
-        item,
-      ): item is { entry: DndBeyondActionEntry; ability: CreatureAbility } =>
-        isPresent(item.ability),
-    )
-    .forEach(({ entry, ability }) => {
-      pushAbilityByActivation(categorizedAbilities, entry, ability);
-    });
-
-  const mappedTraits = [
-    ...mapNarrativeEntries(traits, TRAIT_TITLE_MAP),
-    ...mapNarrativeEntries(notes, NOTE_TITLE_MAP),
-  ];
-
-  return {
-    traits: mappedTraits,
-    actions: categorizedAbilities.actions,
-    bonusActions: categorizedAbilities.bonusActions,
-    reactions: categorizedAbilities.reactions,
-  };
-}
-
-function normalizeActionEntry(
-  entry: DndBeyondActionEntry,
-): CreatureAbility | null {
-  if (!entry.name || !(entry.snippet || entry.description)) {
-    return null;
-  }
-
-  const description = sanitizeHtmlSnippet(
-    entry.snippet || entry.description || "",
-  );
-
-  if (!description) {
-    return null;
-  }
-
-  return {
-    name: entry.name,
-    description,
-  };
-}
-
-function pushAbilityByActivation(
-  categorizedAbilities: {
-    actions: CreatureAbility[];
-    bonusActions: CreatureAbility[];
-    reactions: CreatureAbility[];
-  },
-  entry: DndBeyondActionEntry,
-  ability: CreatureAbility,
-): void {
-  const targetKey =
-    ACTIONS_BY_ACTIVATION_TYPE[entry.activation?.activationType || 0] ||
-    "actions";
-  categorizedAbilities[targetKey].push(ability);
-}
-
-function mapNarrativeEntries(
-  entries: Record<string, string | null> | null | undefined,
-  titleMap: Record<string, string>,
-): CreatureAbility[] {
-  return Object.entries(entries || {})
-    .filter(([, value]) => typeof value === "string" && value.trim().length > 0)
-    .map(([key, value]) => ({
-      name: titleMap[key] || titleize(key),
-      description: value!.trim(),
-    }));
-}
-
-function sanitizeHtmlSnippet(snippet: string): string {
-  return snippet
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
