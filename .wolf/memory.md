@@ -3,6 +3,20 @@
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
 
+## Session: 2026-05-05 22:30 (extract-dnd-beyond-abilities)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 22:30 | Sync main, create branch, extract abilities normalization to dndBeyond-abilities.ts | lib/import/dndBeyond-abilities.ts | Created new module with normalizeAbilities, constants, and helper functions | ~5k |
+| 22:33 | Move generic functions to lib/import/utils.ts | lib/import/utils.ts | Added sanitizeHtmlSnippet() and mapNarrativeEntries() exports | ~2k |
+| 22:35 | Update dndBeyondCharacterImport.ts, remove old functions, add import | lib/dndBeyondCharacterImport.ts | Removed 5 functions and 3 constants, added import from new module | ~3k |
+| 22:36 | Write comprehensive unit tests | tests/unit/import/dndBeyond-abilities.test.ts, tests/unit/import/utils.test.ts | 30+ test cases covering all scenarios, all 947 tests pass | ~8k |
+| 22:37 | Build and validate | (build, lint, test) | No regressions, all checks pass (build, lint, 947 tests) | ~5k |
+| 22:38 | Commit and push | refactor commit on extract-dnd-beyond-abilities | Committed 23 files, created branch, pushed to remote | ~2k |
+| 22:39 | Create PR #179 and enable auto-merge | PR #179 | PR created, auto-merge enabled, PR auto-merged in ~1min | ~3k |
+| 22:40 | Archive change and cleanup | openspec/changes/archive/2026-05-05-extract-dnd-beyond-abilities | Successfully archived, local branch deleted, pushed main | ~2k |
+| 22:41 | Session end: Refactor complete, all 56 tasks complete, PR merged, archived | 8 core files modified | Issue #154 fully resolved; enables multi-provider architecture | ~30k total |
+
 ## Session: 2026-05-02 22:27
 
 | Time | Action | File(s) | Outcome | ~Tokens |
