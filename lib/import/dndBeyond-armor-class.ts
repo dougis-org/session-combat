@@ -92,7 +92,10 @@ export function normalizeArmorClass(
   const armorBonuses = getArmorBonuses(modifiers);
 
   const equippedArmor = (inventory || []).find(
-    (item) => item.equipped && typeof item.definition?.armorClass === "number",
+    (item) =>
+      item.equipped &&
+      typeof item.definition?.armorClass === "number" &&
+      item.definition?.armorTypeId !== 4,
   );
 
   if (

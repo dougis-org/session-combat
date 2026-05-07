@@ -10,5 +10,6 @@ export function capDexterityByArmorType(
   maxDexterityModifier?: number | null,
 ): number {
   if (maxDexterityModifier == null) return dexterityModifier;
+  if (maxDexterityModifier === 0) return 0;
   return Math.min(dexterityModifier, maxDexterityModifier);
 }
