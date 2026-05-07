@@ -196,3 +196,39 @@
 | 23:57 | Update .wolf/cerebrum.md: Add key learning + decision log | cerebrum.md | Documented generic+provider split pattern, decision rationale | ~1k |
 | 23:58 | .wolf/anatomy.md auto-updated with new files, memory.md logged | — | All files auto-tracked, ready for future refactors | ~0.5k |
 | **COMPLETE** | **Issue #155 extraction done: Generic+Provider architecture for multi-provider support** | **lib/import/armor-class.ts, lib/import/dndBeyond-armor-class.ts, lib/dndBeyondCharacterImport.ts** | **4 new files, 3 commits, 975 tests pass, 0 regressions, pattern documented** | **~16.5k total** |
+| 17:13 | Session end: 12 writes across 6 files (staged-jingling-lagoon.md, armor-class.test.ts, armor-class.ts, dndBeyond-armor-class.test.ts, dndBeyond-armor-class.ts) | 7 reads | ~9800 tok |
+
+## Session: 2026-05-07 18:14
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 21:38 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 9→9 lines | ~125 |
+| 21:38 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | modified signature() | ~230 |
+| 21:38 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | modified capDexterityByArmorType() | ~241 |
+| 21:38 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 29→29 lines | ~358 |
+| 21:39 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 26→26 lines | ~387 |
+| 21:39 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 14→14 lines | ~201 |
+| 21:39 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 12→12 lines | ~144 |
+| 21:39 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | modified output() | ~216 |
+| 21:39 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 11→11 lines | ~128 |
+| 21:39 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 13→13 lines | ~192 |
+| 21:40 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | modified feat() | ~202 |
+| 21:40 | Session end: 11 writes across 1 files (tasks.md) | 1 reads | ~2597 tok |
+
+## Session: 2026-05-07 21:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 21:47 | Edited lib/import/armor-class.ts | added 1 condition(s) | ~83 |
+| 21:47 | Edited lib/import/dndBeyond-armor-class.ts | 3→6 lines | ~54 |
+| 21:55 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 13→13 lines | ~160 |
+| 11:35 | Session end: 3 writes across 3 files (armor-class.ts, dndBeyond-armor-class.ts, tasks.md) | 4 reads | ~5496 tok |
+| 11:37 | Edited lib/import/dndBeyond-armor-class.ts | 9→14 lines | ~117 |
+| 11:38 | Edited lib/import/dndBeyond-armor-class.ts | 6→6 lines | ~63 |
+| 11:38 | Edited lib/import/armor-class.ts | 7→12 lines | ~186 |
+| 11:38 | Edited tests/unit/import/armor-class.test.ts | 6→11 lines | ~143 |
+| 11:38 | Edited tests/unit/import/dndBeyond-armor-class.test.ts | "Given: leather armor (AC " → "Given: medium armor (AC 1" | ~34 |
+| 11:38 | Edited tests/unit/import/dndBeyond-armor-class.test.ts | expanded (+21 lines) | ~367 |
+| 11:38 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 6→6 lines | ~91 |
+| 11:38 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 8→8 lines | ~123 |
+| 11:38 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | modified fixes() | ~273 |

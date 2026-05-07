@@ -21,6 +21,11 @@ interface DndBeyondModifier {
 }
 
 /**
+ * D&D Beyond armor type IDs (used for filtering and dex cap mapping).
+ */
+const DNDEBEYOND_ARMOR_TYPE_ID_SHIELD = 4;
+
+/**
  * Map of D&D Beyond armor type IDs to their maximum dexterity modifier cap.
  * armorTypeId 2 = medium armor (max dex +2)
  * armorTypeId 3 = heavy armor (no dex, max 0)
@@ -95,7 +100,7 @@ export function normalizeArmorClass(
     (item) =>
       item.equipped &&
       typeof item.definition?.armorClass === "number" &&
-      item.definition?.armorTypeId !== 4,
+      item.definition?.armorTypeId !== DNDEBEYOND_ARMOR_TYPE_ID_SHIELD,
   );
 
   if (

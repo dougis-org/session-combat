@@ -27,6 +27,11 @@ describe("armor-class", () => {
       expect(result).toBe(0);
     });
 
+    it("Given: dex -1 (penalty), max 0 (heavy armor); When: cap applied; Then: returns 0 (heavy armor ignores all dex)", () => {
+      const result = capDexterityByArmorType(-1, 0);
+      expect(result).toBe(0);
+    });
+
     it("Given: dex +3, max undefined; When: cap applied; Then: returns 3 (undefined max)", () => {
       const result = capDexterityByArmorType(3, undefined);
       expect(result).toBe(3);

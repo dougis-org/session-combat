@@ -1,164 +1,122 @@
 {
-  "session_id": "session-2026-05-05-1531",
-  "started": "2026-05-05T22:31:24.699Z",
+  "session_id": "session-2026-05-07-2146",
+  "started": "2026-05-07T04:46:07.070Z",
   "files_read": {
-    "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-beyond-abilities/proposal.md": {
-      "count": 1,
-      "tokens": 1566,
-      "first_read": "2026-05-05T22:31:46.563Z"
+    "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md": {
+      "count": 5,
+      "tokens": 4039,
+      "first_read": "2026-05-07T04:46:51.974Z"
     },
-    "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-beyond-abilities/design.md": {
+    "/home/doug/dev2/session-combat/lib/import/armor-class.ts": {
       "count": 1,
-      "tokens": 2523,
-      "first_read": "2026-05-05T22:31:46.733Z"
+      "tokens": 170,
+      "first_read": "2026-05-07T04:47:29.593Z"
     },
-    "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-beyond-abilities/specs/dndBeyond-abilities-extraction/spec.md": {
+    "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts": {
       "count": 1,
-      "tokens": 2962,
-      "first_read": "2026-05-05T22:31:46.954Z"
+      "tokens": 983,
+      "first_read": "2026-05-07T04:47:29.813Z"
     },
-    "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts": {
-      "count": 7,
-      "tokens": 3366,
-      "first_read": "2026-05-05T22:32:01.355Z"
-    },
-    "/home/doug/dev2/session-combat/lib/import/utils.ts": {
-      "count": 1,
+    "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/design.md": {
+      "count": 2,
       "tokens": 0,
-      "first_read": "2026-05-05T22:32:08.868Z"
+      "first_read": "2026-05-07T18:35:43.850Z"
     },
-    "/home/doug/dev2/session-combat/lib/types.ts": {
+    "/home/doug/dev2/session-combat/tests/unit/import/armor-class.test.ts": {
       "count": 1,
-      "tokens": 0,
-      "first_read": "2026-05-05T22:32:14.675Z"
+      "tokens": 470,
+      "first_read": "2026-05-07T18:38:12.717Z"
     },
-    "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-beyond-abilities/tasks.md": {
-      "count": 3,
-      "tokens": 2740,
-      "first_read": "2026-05-05T22:33:13.274Z"
+    "/home/doug/dev2/session-combat/tests/unit/import/dndBeyond-armor-class.test.ts": {
+      "count": 2,
+      "tokens": 2296,
+      "first_read": "2026-05-07T18:38:18.370Z"
     }
   },
   "files_written": [
     {
-      "file": "/home/doug/dev2/session-combat/lib/import/utils.ts",
+      "file": "/home/doug/dev2/session-combat/lib/import/armor-class.ts",
       "action": "edit",
-      "tokens": 28,
-      "at": "2026-05-05T22:32:17.860Z"
+      "tokens": 83,
+      "at": "2026-05-07T04:47:35.825Z"
     },
     {
-      "file": "/home/doug/dev2/session-combat/lib/import/utils.ts",
+      "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts",
       "action": "edit",
-      "tokens": 205,
-      "at": "2026-05-05T22:32:19.739Z"
+      "tokens": 54,
+      "at": "2026-05-07T04:47:39.930Z"
     },
     {
-      "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-abilities.ts",
-      "action": "create",
-      "tokens": 814,
-      "at": "2026-05-05T22:32:27.287Z"
-    },
-    {
-      "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+      "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
       "action": "edit",
-      "tokens": 227,
-      "at": "2026-05-05T22:32:47.445Z"
+      "tokens": 172,
+      "at": "2026-05-07T04:55:34.661Z"
     },
     {
-      "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+      "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts",
       "action": "edit",
-      "tokens": 26,
-      "at": "2026-05-05T22:32:51.063Z"
+      "tokens": 117,
+      "at": "2026-05-07T18:37:59.003Z"
     },
     {
-      "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+      "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts",
       "action": "edit",
-      "tokens": 345,
-      "at": "2026-05-05T22:32:56.866Z"
+      "tokens": 63,
+      "at": "2026-05-07T18:38:01.849Z"
     },
     {
-      "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+      "file": "/home/doug/dev2/session-combat/lib/import/armor-class.ts",
       "action": "edit",
-      "tokens": 0,
-      "at": "2026-05-05T22:33:08.359Z"
+      "tokens": 186,
+      "at": "2026-05-07T18:38:06.201Z"
     },
     {
-      "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-beyond-abilities/tasks.md",
+      "file": "/home/doug/dev2/session-combat/tests/unit/import/armor-class.test.ts",
       "action": "edit",
-      "tokens": 821,
-      "at": "2026-05-05T22:33:21.995Z"
+      "tokens": 143,
+      "at": "2026-05-07T18:38:15.890Z"
     },
     {
-      "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-beyond-abilities/tasks.md",
+      "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyond-armor-class.test.ts",
       "action": "edit",
-      "tokens": 264,
-      "at": "2026-05-05T22:33:29.382Z"
+      "tokens": 34,
+      "at": "2026-05-07T18:38:26.174Z"
     },
     {
-      "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+      "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyond-armor-class.test.ts",
       "action": "edit",
-      "tokens": 0,
-      "at": "2026-05-05T22:33:57.374Z"
+      "tokens": 367,
+      "at": "2026-05-07T18:38:31.735Z"
     },
     {
-      "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+      "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
       "action": "edit",
-      "tokens": 51,
-      "at": "2026-05-05T22:34:15.584Z"
+      "tokens": 97,
+      "at": "2026-05-07T18:38:37.420Z"
     },
     {
-      "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyond-abilities.test.ts",
-      "action": "create",
-      "tokens": 2414,
-      "at": "2026-05-05T22:34:59.291Z"
-    },
-    {
-      "file": "/home/doug/dev2/session-combat/tests/unit/import/utils.test.ts",
-      "action": "create",
-      "tokens": 1886,
-      "at": "2026-05-05T22:35:16.309Z"
-    },
-    {
-      "file": "/home/doug/dev2/session-combat/tests/unit/import/utils.test.ts",
+      "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
       "action": "edit",
-      "tokens": 68,
-      "at": "2026-05-05T22:35:27.733Z"
+      "tokens": 132,
+      "at": "2026-05-07T18:38:42.528Z"
     },
     {
-      "file": "/home/doug/dev2/session-combat/tests/unit/import/utils.test.ts",
+      "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
       "action": "edit",
-      "tokens": 188,
-      "at": "2026-05-05T22:35:33.369Z"
-    },
-    {
-      "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-beyond-abilities/tasks.md",
-      "action": "edit",
-      "tokens": 598,
-      "at": "2026-05-05T22:35:52.494Z"
-    },
-    {
-      "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-beyond-abilities/tasks.md",
-      "action": "edit",
-      "tokens": 390,
-      "at": "2026-05-05T22:35:59.439Z"
-    },
-    {
-      "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dnd-beyond-abilities/tasks.md",
-      "action": "edit",
-      "tokens": 110,
-      "at": "2026-05-05T22:36:12.208Z"
+      "tokens": 293,
+      "at": "2026-05-07T18:38:55.274Z"
     }
   ],
   "edit_counts": {
-    "lib/import/utils.ts": 2,
-    "lib/import/dndBeyond-abilities.ts": 1,
-    "lib/dndBeyondCharacterImport.ts": 6,
-    "openspec/changes/extract-dnd-beyond-abilities/tasks.md": 5,
-    "tests/unit/import/dndBeyond-abilities.test.ts": 1,
-    "tests/unit/import/utils.test.ts": 3
+    "lib/import/armor-class.ts": 2,
+    "lib/import/dndBeyond-armor-class.ts": 3,
+    "openspec/changes/extract-armor-class-normalization/tasks.md": 4,
+    "tests/unit/import/armor-class.test.ts": 1,
+    "tests/unit/import/dndBeyond-armor-class.test.ts": 2
   },
   "anatomy_hits": 5,
-  "anatomy_misses": 2,
-  "repeated_reads_warned": 8,
+  "anatomy_misses": 1,
+  "repeated_reads_warned": 6,
   "cerebrum_warnings": 0,
-  "stop_count": 0
+  "stop_count": 1
 }

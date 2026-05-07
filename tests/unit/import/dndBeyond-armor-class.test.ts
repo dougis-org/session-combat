@@ -32,7 +32,7 @@ describe("dndBeyond-armor-class", () => {
       charisma: 10,
     };
 
-    it("Given: leather armor (AC 11, medium, max dex +2), dex +3, no bonuses; When: AC calculated; Then: returns 13", () => {
+    it("Given: medium armor (AC 11, max dex +2), dex +3, no bonuses; When: AC calculated; Then: returns 13", () => {
       const inventory: MockDndBeyondInventoryEntry[] = [
         {
           equipped: true,
@@ -58,6 +58,27 @@ describe("dndBeyond-armor-class", () => {
       ];
       const result = normalizeArmorClass(inventory, baseAbilityScores, []);
       expect(result).toBe(18); // 18 + min(3, 0) = 18
+    });
+
+    it("Given: inventory with shield (armorTypeId 4, AC 2) before actual armor; When: AC calculated; Then: uses actual armor, not shield", () => {
+      const inventory: MockDndBeyondInventoryEntry[] = [
+        {
+          equipped: true,
+          definition: {
+            armorClass: 2,
+            armorTypeId: 4, // shield
+          },
+        },
+        {
+          equipped: true,
+          definition: {
+            armorClass: 14,
+            armorTypeId: 2, // medium armor
+          },
+        },
+      ];
+      const result = normalizeArmorClass(inventory, baseAbilityScores, []);
+      expect(result).toBe(16); // 14 (armor) + min(3, 2) (dex cap) = 16, not 2 + 3 = 5
     });
 
     it("Given: no armor (null inventory), dex 17 (+3 mod); When: unarmored AC calculated; Then: returns 13 (10 + dex +3)", () => {

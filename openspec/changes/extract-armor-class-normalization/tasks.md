@@ -19,8 +19,8 @@
 - [ ] Create feature branch: `git checkout -b extract-armor-class-155`
 - [ ] Verify Node.js/npm versions match project requirements
 - [ ] Run `npm install` (fresh dependencies)
-- [ ] Verify TypeScript compilation: `npm run typecheck`
-- [ ] Verify test environment: `npm run test -- --listTests` (confirms jest is working)
+- [ ] Verify TypeScript compilation: `npx tsc --noEmit`
+- [ ] Verify test environment: `npm run test:unit -- --listTests` (confirms jest is working)
 
 **Owner**: Implementer  
 **Blocker for**: All execution tasks
@@ -201,12 +201,12 @@
 **Description**: Verify all tests pass (existing + new)
 
 **Subtasks**:
-- [x] Run unit tests: `npm run test -- tests/unit/import/`
+- [x] Run unit tests: `npm run test:unit -- tests/unit/import/`
 - [x] Verify armor-class.test.ts all pass (100%)
 - [x] Verify dndBeyond-armor-class.test.ts all pass (100%)
 - [x] Verify existing dndBeyond character import tests still pass (regression check)
-- [x] Run full test suite: `npm run test` (catch any unexpected failures)
-- [x] Generate coverage report: `npm run test -- --coverage`
+- [x] Run full test suite: `npm run test:unit` (catch any unexpected failures)
+- [x] Generate coverage report: `npm run test:unit -- --coverage`
 - [x] Verify coverage for new modules ≥ 80%
 
 **Owner**: Implementer  
@@ -215,25 +215,28 @@
 
 ---
 
-### Task V-2: Property-Based Test (AC Calculation Equivalence)
+### Task V-2: Test Coverage for Rules Fixes
 
-**Description**: Verify AC calculation is identical before/after extraction (no behavioral changes)
+**Description**: Verify AC calculation rules are correct (D&D 5e compliance + code review fixes)
+
+**Note**: This extraction included intentional rules fixes (not a pure refactor):
+1. Heavy armor now correctly ignores ALL dex modifiers (positive, negative, zero)
+2. Shields are excluded from base armor selection (handled via modifiers instead)
 
 **Approach**: 
-- Generate 100+ random character configurations (armor types, dex scores, modifiers)
-- Compare old function output (via snapshot/backup) to new function output
-- Verify every character has identical AC
+- Add unit tests for both rules fixes
+- Verify negative DEX with heavy armor returns 0 (not negative)
+- Verify shield exclusion when inventory has mixed items
 
 **Subtasks**:
-- [x] Create test file: `tests/unit/import/dndBeyond-armor-class.equivalence.test.ts`
-- [x] Generate test data: variety of armor types (none, light, medium, heavy)
-- [x] Generate test data: dex scores (low, medium, high)
-- [x] Generate test data: modifier combinations (no bonuses, AC bonuses, unarmored bonuses)
-- [x] Run comparison test: verify all outputs match (GREEN)
-- [x] Document any edge cases discovered
+- [x] Add test: negative DEX with max 0 (heavy armor) should return 0
+- [x] Add test: shield (armorTypeId 4) excluded from base armor selection
+- [x] Add test: mixed inventory (shield + armor) uses correct base AC
+- [x] Verify all existing tests still pass (no regressions)
+- [x] Document rules fixes in docstrings and comments
 
 **Owner**: Implementer  
-**Verification**: All 100+ test cases match pre-extraction behavior  
+**Verification**: All tests pass, rules fixes documented and tested  
 **Blocker for**: V-3
 
 ---
