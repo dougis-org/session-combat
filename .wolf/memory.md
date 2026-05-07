@@ -152,3 +152,47 @@
 | 15:35 | Edited openspec/changes/extract-dnd-beyond-abilities/tasks.md | modified succeeds() | ~558 |
 | 15:35 | Edited openspec/changes/extract-dnd-beyond-abilities/tasks.md | 29→29 lines | ~364 |
 | 15:36 | Edited openspec/changes/extract-dnd-beyond-abilities/tasks.md | 5→5 lines | ~103 |
+| 15:37 | Edited openspec/changes/extract-dnd-beyond-abilities/tasks.md | 4→4 lines | ~139 |
+| 15:38 | Edited openspec/changes/extract-dnd-beyond-abilities/tasks.md | 4→4 lines | ~115 |
+| 06:44 | Session end: 20 writes across 6 files (utils.ts, dndBeyond-abilities.ts, dndBeyondCharacterImport.ts, tasks.md, dndBeyond-abilities.test.ts) | 7 reads | ~21869 tok |
+| 10:49 | Session end: 20 writes across 6 files (utils.ts, dndBeyond-abilities.ts, dndBeyondCharacterImport.ts, tasks.md, dndBeyond-abilities.test.ts) | 7 reads | ~21869 tok |
+
+## Session: 2026-05-06 10:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-05-06 16:43
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:45 | Created ../../.claude/plans/staged-jingling-lagoon.md | — | ~1632 |
+| 16:47 | Created tests/unit/import/armor-class.test.ts | — | ~470 |
+| 16:47 | Created lib/import/armor-class.ts | — | ~170 |
+| 16:47 | Created tests/unit/import/dndBeyond-armor-class.test.ts | — | ~2267 |
+| 16:48 | Created lib/import/dndBeyond-armor-class.ts | — | ~983 |
+| 16:48 | Edited tests/unit/import/dndBeyond-armor-class.test.ts | 20→20 lines | ~311 |
+| 16:48 | Edited tests/unit/import/dndBeyond-armor-class.test.ts | 13→13 lines | ~140 |
+| 16:49 | Edited tests/unit/import/dndBeyond-armor-class.test.ts | 13→13 lines | ~138 |
+| 16:49 | Edited tests/unit/import/dndBeyond-armor-class.test.ts | 7→7 lines | ~116 |
+| 16:49 | Edited lib/dndBeyondCharacterImport.ts | added 1 import(s) | ~84 |
+| 16:49 | Edited lib/dndBeyondCharacterImport.ts | 5→1 lines | ~9 |
+| 16:49 | Edited lib/dndBeyondCharacterImport.ts | — | ~0 |
+| 16:55 | Session end: 12 writes across 6 files (staged-jingling-lagoon.md, armor-class.test.ts, armor-class.ts, dndBeyond-armor-class.test.ts, dndBeyond-armor-class.ts) | 7 reads | ~9800 tok |
+
+## Session: 2026-05-06 23:46 (extract-armor-class-normalization — COMPLETE)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 23:46 | Create branch extract-armor-class-155, verify env (npm install, jest, tsc) | — | Branch created, dependencies fresh, all checks pass | ~2k |
+| 23:48 | TDD RED: Write armor-class.test.ts (8 test cases) | armor-class.test.ts | Tests fail as expected (module doesn't exist) | ~1k |
+| 23:48 | TDD GREEN: Implement lib/import/armor-class.ts | armor-class.ts | capDexterityByArmorType() function, 8 tests pass | ~0.5k |
+| 23:50 | TDD RED: Write dndBeyond-armor-class.test.ts (25 test cases) | dndBeyond-armor-class.test.ts | Tests fail as expected (module doesn't exist) | ~2k |
+| 23:50 | TDD GREEN: Implement lib/import/dndBeyond-armor-class.ts | dndBeyond-armor-class.ts | Exports: normalizeArmorClass, getArmorBonuses, getUnarmoredAcBonus, constant | ~2k |
+| 23:52 | Fix test expectations (dex 16 → +3 mod, unarmored logic) | dndBeyond-armor-class.test.ts | All 25 tests pass, integration with existing code verified | ~1k |
+| 23:53 | Refactor: Remove 5 symbols from dndBeyondCharacterImport.ts | dndBeyondCharacterImport.ts | Add import, remove functions & constant, call site unchanged | ~1k |
+| 23:54 | Validation: ESLint, TypeScript, full test suite (975 tests) | — | All checks pass, 0 regressions, same 4 pre-existing TS errors | ~3k |
+| 23:56 | Create 3 atomic commits | extract-armor-class-155 | Commit 1: generic, Commit 2: adapter, Commit 3: update main | ~2k |
+| 23:57 | Update .wolf/cerebrum.md: Add key learning + decision log | cerebrum.md | Documented generic+provider split pattern, decision rationale | ~1k |
+| 23:58 | .wolf/anatomy.md auto-updated with new files, memory.md logged | — | All files auto-tracked, ready for future refactors | ~0.5k |
+| **COMPLETE** | **Issue #155 extraction done: Generic+Provider architecture for multi-provider support** | **lib/import/armor-class.ts, lib/import/dndBeyond-armor-class.ts, lib/dndBeyondCharacterImport.ts** | **4 new files, 3 commits, 975 tests pass, 0 regressions, pattern documented** | **~16.5k total** |
