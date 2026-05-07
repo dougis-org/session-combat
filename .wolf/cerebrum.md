@@ -23,6 +23,13 @@
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
 <!-- Format: [YYYY-MM-DD] Description of what went wrong and what to do instead. -->
 
+**[2026-05-07] D&D 5e Heavy Armor Rule: Don't apply negative DEX modifiers**
+- Heavy armor (max dex modifier = 0) should ignore ALL dex modifiers, not just cap at 0 via Math.min
+- Math.min(dex, 0) incorrectly applies negative dex as penalty (e.g., dex -1 → -1)
+- Correct approach: if maxDexterityModifier === 0, return 0 (not the dex value)
+- Also applies to shields (armorTypeId 4): exclude from base armor selection, handle via modifiers instead
+- These are D&D 5e rules bugs, not code bugs—fix them explicitly with tests covering edge cases
+
 ## Decision Log
 
 <!-- Significant technical decisions with rationale. Why X was chosen over Y. -->

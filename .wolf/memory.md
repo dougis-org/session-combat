@@ -3,6 +3,17 @@
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
 
+## Session: 2026-05-07 04:50 (extract-armor-class-normalization - review fixes)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|---------|
+| 04:50 | Address code review on PR #180: Fixed shield exclusion and heavy armor dex rules | lib/import/armor-class.ts, lib/import/dndBeyond-armor-class.ts | Added DNDEBEYOND_ARMOR_TYPE_ID_SHIELD constant, improved docstrings, all tests pass | ~4k |
+| 04:51 | Add comprehensive tests for rules fixes | tests/unit/import/armor-class.test.ts, tests/unit/import/dndBeyond-armor-class.test.ts | Added tests for negative DEX with max=0, shield exclusion, all 977 tests passing | ~3k |
+| 04:52 | Fix test descriptions and update npm script references in tasks.md | openspec/changes/extract-armor-class-normalization/tasks.md | Corrected leather→medium armor descriptions, fixed npm scripts (typecheck, test) | ~2k |
+| 04:53 | Respond to all Copilot review comments with resolutions | PR #180 comments | Documented all fixes, magic number extraction, behavior changes explained | ~2k |
+| 04:54 | Commit all changes, push, monitor CI/approval | PR #180 | Awaiting CI completion and reviewer approval for merge | ~1k |
+| Session: Addressed 6+ Copilot review comments, rules fixes documented, all tests passing, ready for merge | 9 files modified, 1 commit | Intentional D&D 5e rules fixes: heavy armor + shield handling | ~12k total |
+
 ## Session: 2026-05-05 22:30 (extract-dnd-beyond-abilities)
 
 | Time | Action | File(s) | Outcome | ~Tokens |
