@@ -24,6 +24,7 @@ import { normalizeClasses, normalizeRace } from "./import/dndBeyond-classes";
 import { normalizeImmunities, normalizeByModifierType, normalizeLanguages } from "./import/dndBeyond-defenses";
 import { normalizeSavingThrows, normalizeSkills, normalizeSenses } from "./import/dndBeyond-skills-senses";
 import { normalizeAbilities, type DndBeyondActionEntry } from "./import/dndBeyond-abilities";
+import { normalizeArmorClass } from "./import/dndBeyond-armor-class";
 import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
 import { filterToDamageTypes } from "./constants";
 
@@ -42,10 +43,6 @@ const ALIGNMENT_ID_MAP: Record<number, DnDAlignment> = {
   9: "Chaotic Evil",
 };
 
-const ARMOR_TYPE_MAX_DEX_MODIFIER: Partial<Record<number, number>> = {
-  2: 2,
-  3: 0,
-};
 interface DndBeyondStatValue {
   id: number;
   value: number | null;
@@ -335,76 +332,6 @@ function normalizeAlignment(
   }
 
   return ALIGNMENT_ID_MAP[alignmentId];
-}
-
-function normalizeArmorClass(
-  inventory: DndBeyondInventoryEntry[] | null | undefined,
-  abilityScores: AbilityScores,
-  modifiers: DndBeyondModifier[],
-): number {
-  const dexterityModifier = getAbilityModifier(abilityScores.dexterity);
-  const armorBonuses = getArmorBonuses(modifiers);
-
-  const equippedArmor = (inventory || []).find(
-    (item) => item.equipped && typeof item.definition?.armorClass === "number",
-  );
-
-  if (
-    !equippedArmor?.definition ||
-    typeof equippedArmor.definition.armorClass !== "number"
-  ) {
-    const unarmoredBonus = getUnarmoredAcBonus(modifiers);
-    return 10 + dexterityModifier + unarmoredBonus + armorBonuses;
-  }
-
-  return (
-    equippedArmor.definition.armorClass +
-    getArmorDexterityContribution(
-      dexterityModifier,
-      equippedArmor.definition.armorTypeId,
-    ) +
-    armorBonuses
-  );
-}
-
-function getArmorBonuses(modifiers: DndBeyondModifier[]): number {
-  return modifiers
-    .filter((modifier) => modifier.subType === "armor-class")
-    .reduce(
-      (total, modifier) => total + (getModifierNumericValue(modifier) || 0),
-      0,
-    );
-}
-
-function getUnarmoredAcBonus(modifiers: DndBeyondModifier[]): number {
-  const { maxSet, sumBonus } = modifiers.reduce(
-    (acc, modifier) => {
-      if (modifier.subType !== "unarmored-armor-class") return acc;
-      const value = getModifierNumericValue(modifier) || 0;
-      if (modifier.type === "set") {
-        acc.maxSet = Math.max(acc.maxSet, value);
-      } else if (modifier.type === "bonus") {
-        acc.sumBonus += value;
-      }
-      return acc;
-    },
-    { maxSet: 0, sumBonus: 0 },
-  );
-  return maxSet + sumBonus;
-}
-
-function getArmorDexterityContribution(
-  dexterityModifier: number,
-  armorTypeId?: number | null,
-): number {
-  const maxModifier =
-    typeof armorTypeId === "number"
-      ? ARMOR_TYPE_MAX_DEX_MODIFIER[armorTypeId]
-      : undefined;
-
-  return typeof maxModifier === "number"
-    ? Math.min(dexterityModifier, maxModifier)
-    : dexterityModifier;
 }
 
 

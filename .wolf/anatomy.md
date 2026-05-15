@@ -1,12 +1,13 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-05T22:36:12.201Z
-> Files: 572 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-07T18:38:55.266Z
+> Files: 578 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
 - `extract-dnd-skills-senses.md` — Plan: Extract D&D Beyond Skills, Senses, Saving Throws (~654 tok)
 - `github-issue-153-giggly-ullman.md` — Plan: GitHub Issue #153 — Skills, Senses & Saving Throws Extraction (~952 tok)
+- `staged-jingling-lagoon.md` — Plan: extract-armor-class-normalization (~1530 tok)
 
 ## ./
 
@@ -748,14 +749,20 @@
 
 ## lib/
 
-- `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~3363 tok)
+- `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~2785 tok)
 
 ## lib/import/
 
+- `armor-class.ts` — Cap a dexterity modifier by armor's maximum dexterity modifier. (~269 tok)
 - `dndBeyond-abilities.ts` — Exports DndBeyondActionEntry, ACTIONS_BY_ACTIVATION_TYPE, TRAIT_TITLE_MAP, NOTE_TITLE_MAP, normalize (~814 tok)
+- `dndBeyond-armor-class.ts` — D&D Beyond armor type IDs (used for filtering and dex cap mapping). (~1042 tok)
 - `dndBeyond-skills-senses.ts` — Exports normalizeSavingThrows, normalizeSkills, normalizeSenses (~1155 tok)
 - `dndBeyond-utils.ts` — Exports DndBeyondImportError, createValidationError, ABILITY_ID_MAP, indexStatValues + 6 more (~1014 tok)
 - `utils.ts` — Exports ModifierLike, getAbilityModifier, getProficiencyBonus, dedupeStrings + 9 more (~676 tok)
+
+## openspec/changes/extract-armor-class-normalization/
+
+- `tasks.md` — Implementation Task List (~4063 tok)
 
 ## openspec/changes/extract-dnd-ability-scores-foundation/
 
@@ -827,5 +834,7 @@
 
 ## tests/unit/import/
 
+- `armor-class.test.ts` — Declares result (~534 tok)
 - `dndBeyond-abilities.test.ts` — Declares DndBeyondActionEntry (~2414 tok)
+- `dndBeyond-armor-class.test.ts` — Declares MockDndBeyondModifier (~2491 tok)
 - `utils.test.ts` — Declares input (~1899 tok)

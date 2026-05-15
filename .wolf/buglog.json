@@ -32,6 +32,38 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-05T22:32:51.064Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-05-07T18:38:06.202Z",
+      "error_message": "Significant refactor of ",
+      "file": "lib/import/armor-class.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 7→12 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-07T18:38:06.202Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-05-07T18:38:26.175Z",
+      "error_message": "Incorrect value in code",
+      "file": "tests/unit/import/dndBeyond-armor-class.test.ts",
+      "root_cause": "Had \"Given: leather armor (AC 11, medium, max dex +2),",
+      "fix": "Changed to \"Given: medium armor (AC 11, max dex +2), dex +3, ",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-07T18:38:26.175Z"
     }
   ]
 }
