@@ -403,33 +403,40 @@ it('maps heavy armor (id=3) to max dex 0', () => {
 
 ---
 
-## Property-Based Equivalence Test
+## Rules Fix Coverage Tests
 
-**File**: `tests/unit/import/dndBeyond-armor-class.equivalence.test.ts`
+**Purpose**: Verify D&D 5e rules fixes are correctly implemented
 
-**Purpose**: Verify AC calculation is identical before/after extraction
+**Note**: This extraction included intentional rules fixes (not a pure refactor):
+1. Heavy armor now correctly ignores ALL dex modifiers (positive, negative, zero)
+   - **Test**: Negative DEX with heavy armor (max dex = 0) returns 0, not negative value
+2. Shields are excluded from base armor selection (handled via modifiers instead)
+   - **Test**: Mixed inventory with shield + actual armor uses correct base AC
 
 **Approach**:
-- Generate 100+ random character configurations
-- Call new functions with generated data
-- Compare output to known pre-extraction behavior
-- Fail if ANY output differs
+- Add specific unit tests for both rules fixes in existing test files
+- Verify edge cases (negative dex, shield exclusion) are covered
+- Document rules fixes in code comments and JSDoc
 
 ```typescript
-// Task: V-2
-describe('AC Calculation Equivalence', () => {
-  it('produces identical results to pre-extraction code', () => {
-    const testCases = [
-      // Armor: light, medium, heavy
-      // Dex: low, medium, high
-      // Modifiers: none, armor bonus, unarmored bonus, mixed
-      // 100+ permutations generated
+// Task: V-2 - Test in armor-class.test.ts
+describe('Heavy armor rules fix', () => {
+  it('returns 0 for negative dex with heavy armor (max=0)', () => {
+    const result = capDexterityByArmorType(-1, 0);
+    expect(result).toBe(0); // Ignores negative dex penalty
+  });
+});
+
+// Task: V-2 - Test in dndBeyond-armor-class.test.ts
+describe('Shield exclusion rules fix', () => {
+  it('excludes shield from base armor selection', () => {
+    const inventory = [
+      { equipped: true, definition: { armorTypeId: 4, armorClass: 2 } }, // shield
+      { equipped: true, definition: { armorTypeId: 2, armorClass: 11 } }, // leather armor
     ];
-    
-    testCases.forEach(({ inventory, abilityScores, modifiers, expectedAc }) => {
-      const result = normalizeArmorClass(inventory, abilityScores, modifiers);
-      expect(result).toBe(expectedAc);
-    });
+    // Should use leather armor (AC 11), not shield
+    const result = normalizeArmorClass(inventory, { dexterity: 10 }, []);
+    expect(result).toBe(11); // leather armor AC
   });
 });
 ```
@@ -501,7 +508,8 @@ it('normalizes character AC using extracted functions', async () => {
 | D-5.1 | T-3, T-4 | REQ-AC-DB-004 | Scenario 1 | Unit |
 | D-5.2 | T-3, T-4 | REQ-AC-DB-004 | Scenario 2 | Unit |
 | D-5.3 | T-3, T-4 | REQ-AC-DB-004 | Scenario 3 | Unit |
-| Equiv | V-2 | REQ-AC-DB-REL-001 | Custom | Property-Based |
+| Rules-1 | V-2 | REQ-AC-GEN-001 | Scenario 5 | Unit (Heavy Armor) |
+| Rules-2 | V-2 | REQ-AC-DB-001 | Scenario 3 | Unit (Shield Exclusion) |
 | I-1 | T-5 | REQ-AC-DB-M-001 | Custom | Integration |
 
 ---

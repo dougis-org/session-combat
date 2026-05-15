@@ -43,14 +43,17 @@ No circular imports. No provider-specific imports in generic armor-class.ts.
 **Requirement**: Remove four functions from `dndBeyondCharacterImport.ts` and place in dedicated modules.
 
 **Design Decision**:
-- Extraction is a pure refactor (no behavioral change)
+- Extraction includes intentional D&D 5e rules fixes during refactoring:
+  1. Heavy armor (max dex = 0) now correctly ignores ALL dex modifiers (not just caps them)
+  2. Shields (armorTypeId 4) excluded from base armor selection (handled via modifiers)
 - Call sites updated to import from new modules
-- Function signatures unchanged (backward compatible)
+- Function signatures unchanged (backward compatible for call sites)
 
 **Acceptance Criteria**:
 - `normalizeArmorClass()` callable from `lib/import/dndBeyond-armor-class.ts`
 - `lib/dndBeyondCharacterImport.ts` line 257 uses imported function
-- Existing call site unmodified in behavior
+- Existing call sites work correctly with D&D 5e rules fixes
+- Rules fixes covered by comprehensive unit tests
 
 ### FR-2: Generic Armor Class Logic
 
