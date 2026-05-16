@@ -1,7 +1,13 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-18T14:20:54.780Z
-> Files: 534 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-07T18:38:55.266Z
+> Files: 578 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../.claude/plans/
+
+- `extract-dnd-skills-senses.md` — Plan: Extract D&D Beyond Skills, Senses, Saving Throws (~654 tok)
+- `github-issue-153-giggly-ullman.md` — Plan: GitHub Issue #153 — Skills, Senses & Saving Throws Extraction (~952 tok)
+- `staged-jingling-lagoon.md` — Plan: extract-armor-class-normalization (~1530 tok)
 
 ## ./
 
@@ -740,3 +746,95 @@
 - `save-163348.log` (~188 tok)
 - `save-163352.log` (~0 tok)
 - `save-163400.log` (~0 tok)
+
+## lib/
+
+- `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~2785 tok)
+
+## lib/import/
+
+- `armor-class.ts` — Cap a dexterity modifier by armor's maximum dexterity modifier. (~269 tok)
+- `dndBeyond-abilities.ts` — Exports DndBeyondActionEntry, ACTIONS_BY_ACTIVATION_TYPE, TRAIT_TITLE_MAP, NOTE_TITLE_MAP, normalize (~814 tok)
+- `dndBeyond-armor-class.ts` — D&D Beyond armor type IDs (used for filtering and dex cap mapping). (~1042 tok)
+- `dndBeyond-skills-senses.ts` — Exports normalizeSavingThrows, normalizeSkills, normalizeSenses (~1155 tok)
+- `dndBeyond-utils.ts` — Exports DndBeyondImportError, createValidationError, ABILITY_ID_MAP, indexStatValues + 6 more (~1014 tok)
+- `utils.ts` — Exports ModifierLike, getAbilityModifier, getProficiencyBonus, dedupeStrings + 9 more (~676 tok)
+
+## openspec/changes/extract-armor-class-normalization/
+
+- `tasks.md` — Implementation Task List (~4063 tok)
+
+## openspec/changes/extract-dnd-ability-scores-foundation/
+
+- `design.md` — Context (~2186 tok)
+- `proposal.md` — GitHub Issues (~1070 tok)
+- `tasks.md` — Tasks (~1649 tok)
+- `tests.md` — Tests (~1244 tok)
+
+## openspec/changes/extract-dnd-ability-scores-foundation/specs/dndBeyond-ability-scores-extraction/
+
+- `spec.md` — ADDED Requirements (~968 tok)
+
+## openspec/changes/extract-dnd-ability-scores-foundation/specs/dndBeyond-utils/
+
+- `spec.md` — ADDED Requirements (~803 tok)
+
+## openspec/changes/extract-dnd-ability-scores-foundation/specs/import-utils/
+
+- `spec.md` — ADDED Requirements (~702 tok)
+
+## openspec/changes/extract-dnd-beyond-abilities/
+
+- `design.md` — Context (~2523 tok)
+- `proposal.md` — GitHub Issues (~1566 tok)
+- `tasks.md` — Tasks (~2744 tok)
+- `tests.md` — Tests (~3538 tok)
+
+## openspec/changes/extract-dnd-beyond-abilities/specs/dndBeyond-abilities-extraction/
+
+- `spec.md` — ADDED Requirements (~2962 tok)
+
+## openspec/changes/extract-dnd-beyond-defenses/
+
+- `design.md` — Context (~1579 tok)
+- `proposal.md` — GitHub Issues (~904 tok)
+- `tasks.md` — Tasks (~977 tok)
+- `tests.md` — Tests (~519 tok)
+
+## openspec/changes/extract-dnd-beyond-defenses/specs/dndBeyond-defenses-extraction/
+
+- `spec.md` — ADDED Requirements (~1007 tok)
+
+## openspec/changes/extract-dnd-skills-senses/
+
+- `.openspec.yaml` (~15 tok)
+- `design.md` — Context (~2024 tok)
+- `proposal.md` — GitHub Issues (~1133 tok)
+- `tasks.md` — Tasks (~1408 tok)
+- `tests.md` — Tests: Extract D&D Beyond Skills, Senses, Saving Throws (~728 tok)
+
+## openspec/changes/extract-dnd-skills-senses/specs/dndBeyond-skills-senses-extraction/
+
+- `spec.md` — ADDED Requirements (~1795 tok)
+
+## openspec/changes/fix-import-utility-placement/
+
+- `design.md` — Context (~2079 tok)
+- `proposal.md` — GitHub Issues (~1290 tok)
+- `tasks.md` — Tasks (~1500 tok)
+- `tests.md` — Tests (~1171 tok)
+
+## openspec/changes/fix-import-utility-placement/specs/dndBeyond-utils/
+
+- `spec.md` — ADDED Requirements (~810 tok)
+
+## openspec/changes/fix-import-utility-placement/specs/import-utils/
+
+- `spec.md` — ADDED Requirements (~1032 tok)
+
+## tests/unit/import/
+
+- `armor-class.test.ts` — Declares result (~534 tok)
+- `dndBeyond-abilities.test.ts` — Declares DndBeyondActionEntry (~2414 tok)
+- `dndBeyond-armor-class.test.ts` — Declares MockDndBeyondModifier (~2491 tok)
+- `utils.test.ts` — Declares input (~1899 tok)

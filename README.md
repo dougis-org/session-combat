@@ -124,8 +124,8 @@ To make the monsters available in your instance, an administrator can seed them 
 # API endpoint (admin only)
 curl -X PUT http://localhost:3000/api/monsters/global/seed
 
-# Or use the CLI script
-npx ts-node lib/scripts/seedMonsters.ts
+# Or use the open5e sync endpoint (admin only)
+curl -X PUT http://localhost:3000/api/monsters/global
 ```
 
 See [docs/MONSTER_LIBRARY.md](docs/MONSTER_LIBRARY.md) for complete documentation on the monster library system.

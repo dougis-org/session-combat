@@ -70,26 +70,22 @@ curl -X PUT http://localhost:3000/api/monsters/global/seed \
 For development or direct database access:
 
 ```bash
-# Run from project root
-npx ts-node lib/scripts/seedMonsters.ts
+# Seed monsters from open5e API (admin only)
+curl -X PUT http://localhost:3000/api/monsters/global
 ```
 
 **Output:**
 ```
-✓ Successfully seeded 18 monsters
+✓ Monster seeding started...
 
-Seeded Monsters:
-  - Aboleth (CR 10)
-  - Adult Gold Dragon (CR 17)
-  - ... (more monsters)
-
-✓ Seeding complete! 18 monsters are now available globally.
+Fetching monsters from open5e API...
+✓ Seeding complete! Monsters are now available globally.
 ```
 
 **Requirements:**
-- Node.js with TypeScript support
+- Admin authentication required
 - Database connection configured in `.env.local`
-- Direct filesystem access
+- Network access to open5e API (api.open5e.com)
 
 ## Using Global Monsters
 
@@ -207,36 +203,13 @@ For questions about licensing, consult:
 
 ## Extending the Library
 
-To add more monsters to the library:
+Monsters are now sourced from the open5e API automatically. To add new monsters:
 
-1. Edit `lib/data/srd-monsters.ts`
-2. Add new monster objects following the existing format
-3. Update the `SRD_MONSTERS` array export
-4. Run seeding to update the database
+1. The open5e API is queried via `PUT /api/monsters/global`
+2. New monsters from open5e are automatically imported
+3. Existing monsters (by name + source) are skipped to avoid duplicates
 
-Example:
-
-```typescript
-{
-  name: 'Griffon',
-  size: 'large',
-  type: 'monstrosity',
-  alignment: 'unaligned',
-  ac: 12,
-  hp: 59,
-  maxHp: 59,
-  speed: '30 ft., fly 80 ft.',
-  abilityScores: {
-    strength: 18,
-    dexterity: 14,
-    constitution: 16,
-    intelligence: 2,
-    wisdom: 12,
-    charisma: 8,
-  },
-  // ... more fields
-}
-```
+For custom monsters, use the admin UI or upload a JSON monster file.
 
 ## Technical Details
 
