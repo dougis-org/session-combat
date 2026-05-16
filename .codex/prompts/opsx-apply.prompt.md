@@ -1,1 +1,0 @@
-../commands/opsx/apply.md

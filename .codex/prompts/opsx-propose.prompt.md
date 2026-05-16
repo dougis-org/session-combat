@@ -1,1 +1,0 @@
-../commands/opsx/propose.md
