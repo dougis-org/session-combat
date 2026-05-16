@@ -64,6 +64,38 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-07T18:38:26.175Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-05-15T00:12:35.196Z",
+      "error_message": "Incorrect value in code",
+      "file": "openspec/changes/extract-armor-class-normalization/tasks.md",
+      "root_cause": "Had `npm run typecheck`",
+      "fix": "Changed to `npx tsc --noEmit`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-15T00:12:35.196Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-05-15T00:12:44.498Z",
+      "error_message": "Significant refactor of ",
+      "file": "openspec/changes/extract-armor-class-normalization/design.md",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 9→12 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-15T00:12:44.498Z"
     }
   ]
 }

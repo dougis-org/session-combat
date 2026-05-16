@@ -243,3 +243,33 @@
 | 11:38 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 6→6 lines | ~91 |
 | 11:38 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 8→8 lines | ~123 |
 | 11:38 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | modified fixes() | ~273 |
+| 17:10 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 14→15 lines | ~147 |
+| 17:10 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 12→13 lines | ~144 |
+| 17:11 | Session end: 14 writes across 5 files (armor-class.ts, dndBeyond-armor-class.ts, tasks.md, armor-class.test.ts, dndBeyond-armor-class.test.ts) | 6 reads | ~10035 tok |
+| 17:12 | Session end: 14 writes across 5 files (armor-class.ts, dndBeyond-armor-class.ts, tasks.md, armor-class.test.ts, dndBeyond-armor-class.test.ts) | 6 reads | ~10035 tok |
+| 17:12 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | 3→3 lines | ~69 |
+| 17:12 | Edited openspec/changes/extract-armor-class-normalization/design.md | 9→12 lines | ~180 |
+
+## Session: 2026-05-15 17:13
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-05-06 (Continuation: Address PR #180 Review Comments)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|---------|
+| 13:45 | Fixed npm script references in tasks.md | openspec/changes/extract-armor-class-normalization/tasks.md | Changed `npm run typecheck` → `npx tsc --noEmit` (2 instances) | ~0.5k |
+| 13:46 | Updated tests.md to remove non-existent equivalence test file reference | openspec/changes/extract-armor-class-normalization/tests.md | Replaced equivalence test section with rules fix coverage (V-2 focus) | ~1k |
+| 13:47 | Updated traceability matrix to reflect rules fix tests | openspec/changes/extract-armor-class-normalization/tests.md | Changed V-2 from property-based test to heavy armor + shield exclusion tests | ~0.5k |
+| **Session complete** | **All code review comment documentation addressed** | **openspec/changes/extract-armor-class-normalization/** | **npm scripts fixed, design/test docs aligned with rules fixes** | **~2k total** |
+
+## Session: 2026-05-15 17:38
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:48 | Created ../../.claude/projects/-home-doug-dev2-session-combat/memory/feedback_resolve_pr_comments.md | — | ~246 |
+| 17:48 | Created ../../.claude/projects/-home-doug-dev2-session-combat/memory/MEMORY.md | — | ~48 |
+| 18:04 | Session end: 2 writes across 2 files (feedback_resolve_pr_comments.md, MEMORY.md) | 1 reads | ~316 tok |
+| 21:31 | Session end: 2 writes across 2 files (feedback_resolve_pr_comments.md, MEMORY.md) | 1 reads | ~316 tok |
+| 21:35 | Session end: 2 writes across 2 files (feedback_resolve_pr_comments.md, MEMORY.md) | 1 reads | ~316 tok |

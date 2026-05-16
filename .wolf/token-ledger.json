@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-18T14:20:54.749Z",
   "lifetime": {
-    "total_tokens_estimated": 166062,
-    "total_reads": 113,
-    "total_writes": 169,
-    "total_sessions": 15,
-    "anatomy_hits": 47,
-    "anatomy_misses": 66,
-    "repeated_reads_blocked": 64,
-    "estimated_savings_vs_bare_cli": 102630
+    "total_tokens_estimated": 187080,
+    "total_reads": 128,
+    "total_writes": 203,
+    "total_sessions": 17,
+    "anatomy_hits": 57,
+    "anatomy_misses": 71,
+    "repeated_reads_blocked": 78,
+    "estimated_savings_vs_bare_cli": 149852
   },
   "sessions": [
     {
@@ -1915,6 +1915,351 @@
         "writes_count": 3,
         "repeated_reads_blocked": 2,
         "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-05-07-2146",
+      "started": "2026-05-07T04:46:07.070Z",
+      "ended": "2026-05-15T00:11:47.588Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 4063,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/armor-class.ts",
+          "tokens_estimated": 170,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts",
+          "tokens_estimated": 983,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/design.md",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/armor-class.test.ts",
+          "tokens_estimated": 470,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyond-armor-class.test.ts",
+          "tokens_estimated": 2296,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/armor-class.ts",
+          "tokens_estimated": 83,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts",
+          "tokens_estimated": 54,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts",
+          "tokens_estimated": 117,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts",
+          "tokens_estimated": 63,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/armor-class.ts",
+          "tokens_estimated": 186,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/armor-class.test.ts",
+          "tokens_estimated": 143,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyond-armor-class.test.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyond-armor-class.test.ts",
+          "tokens_estimated": 367,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 97,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 132,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 293,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 158,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 154,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 7982,
+        "output_tokens_estimated": 2053,
+        "reads_count": 6,
+        "writes_count": 14,
+        "repeated_reads_blocked": 7,
+        "anatomy_lookups": 5
+      }
+    },
+    {
+      "id": "session-2026-05-07-2146",
+      "started": "2026-05-07T04:46:07.070Z",
+      "ended": "2026-05-15T00:12:14.196Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 4063,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/armor-class.ts",
+          "tokens_estimated": 170,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts",
+          "tokens_estimated": 983,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/design.md",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/armor-class.test.ts",
+          "tokens_estimated": 470,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyond-armor-class.test.ts",
+          "tokens_estimated": 2296,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/armor-class.ts",
+          "tokens_estimated": 83,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts",
+          "tokens_estimated": 54,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts",
+          "tokens_estimated": 117,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-armor-class.ts",
+          "tokens_estimated": 63,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/armor-class.ts",
+          "tokens_estimated": 186,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/armor-class.test.ts",
+          "tokens_estimated": 143,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyond-armor-class.test.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyond-armor-class.test.ts",
+          "tokens_estimated": 367,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 97,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 132,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 293,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 158,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-armor-class-normalization/tasks.md",
+          "tokens_estimated": 154,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 7982,
+        "output_tokens_estimated": 2053,
+        "reads_count": 6,
+        "writes_count": 14,
+        "repeated_reads_blocked": 7,
+        "anatomy_lookups": 5
+      }
+    },
+    {
+      "id": "session-2026-05-15-1738",
+      "started": "2026-05-15T00:38:58.795Z",
+      "ended": "2026-05-15T01:04:56.407Z",
+      "reads": [
+        {
+          "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/MEMORY.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/feedback_resolve_pr_comments.md",
+          "tokens_estimated": 264,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/MEMORY.md",
+          "tokens_estimated": 52,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 316,
+        "reads_count": 1,
+        "writes_count": 2,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-05-15-1738",
+      "started": "2026-05-15T00:38:58.795Z",
+      "ended": "2026-05-15T04:31:55.717Z",
+      "reads": [
+        {
+          "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/MEMORY.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/feedback_resolve_pr_comments.md",
+          "tokens_estimated": 264,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/MEMORY.md",
+          "tokens_estimated": 52,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 316,
+        "reads_count": 1,
+        "writes_count": 2,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-05-15-1738",
+      "started": "2026-05-15T00:38:58.795Z",
+      "ended": "2026-05-15T04:35:30.959Z",
+      "reads": [
+        {
+          "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/MEMORY.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/feedback_resolve_pr_comments.md",
+          "tokens_estimated": 264,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/MEMORY.md",
+          "tokens_estimated": 52,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 316,
+        "reads_count": 1,
+        "writes_count": 2,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
       }
     }
   ],

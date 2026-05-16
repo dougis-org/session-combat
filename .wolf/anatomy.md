@@ -1,13 +1,18 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-07T18:38:55.266Z
-> Files: 578 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-15T00:48:53.252Z
+> Files: 581 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
 - `extract-dnd-skills-senses.md` — Plan: Extract D&D Beyond Skills, Senses, Saving Throws (~654 tok)
 - `github-issue-153-giggly-ullman.md` — Plan: GitHub Issue #153 — Skills, Senses & Saving Throws Extraction (~952 tok)
 - `staged-jingling-lagoon.md` — Plan: extract-armor-class-normalization (~1530 tok)
+
+## ../../.claude/projects/-home-doug-dev2-session-combat/memory/
+
+- `feedback_resolve_pr_comments.md` (~244 tok)
+- `MEMORY.md` — Memory Index (~45 tok)
 
 ## ./
 
@@ -762,7 +767,8 @@
 
 ## openspec/changes/extract-armor-class-normalization/
 
-- `tasks.md` — Implementation Task List (~4063 tok)
+- `design.md` — Context (~3051 tok)
+- `tasks.md` — Implementation Task List (~4102 tok)
 
 ## openspec/changes/extract-dnd-ability-scores-foundation/
 
