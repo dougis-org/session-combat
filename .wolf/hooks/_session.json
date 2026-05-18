@@ -1,34 +1,12 @@
 {
-  "session_id": "session-2026-05-15-1738",
-  "started": "2026-05-15T00:38:58.795Z",
-  "files_read": {
-    "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/MEMORY.md": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-05-15T00:48:49.316Z"
-    }
-  },
-  "files_written": [
-    {
-      "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/feedback_resolve_pr_comments.md",
-      "action": "create",
-      "tokens": 264,
-      "at": "2026-05-15T00:48:43.519Z"
-    },
-    {
-      "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/MEMORY.md",
-      "action": "create",
-      "tokens": 52,
-      "at": "2026-05-15T00:48:53.260Z"
-    }
-  ],
-  "edit_counts": {
-    "../../.claude/projects/-home-doug-dev2-session-combat/memory/feedback_resolve_pr_comments.md": 1,
-    "../../.claude/projects/-home-doug-dev2-session-combat/memory/MEMORY.md": 1
-  },
+  "session_id": "session-2026-05-18-1531",
+  "started": "2026-05-18T22:31:14.755Z",
+  "files_read": {},
+  "files_written": [],
+  "edit_counts": {},
   "anatomy_hits": 0,
-  "anatomy_misses": 1,
+  "anatomy_misses": 0,
   "repeated_reads_warned": 0,
   "cerebrum_warnings": 0,
-  "stop_count": 3
+  "stop_count": 0
 }
