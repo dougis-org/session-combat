@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Buttons</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--sc-surface-0);color:var(--sc-fg-1);font-family:var(--sc-font-sans);padding:18px;}
+  h4{margin:0 0 8px 0;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--sc-fg-3);font-weight:700;}
+  .row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  button{cursor:default;}
+</style></head><body>
+
+<h4>Action buttons — sized px-4 py-2 rounded font-semibold</h4>
+<div class="row">
+  <button class="sc-btn sc-btn--party">+ Add Party Member</button>
+  <button class="sc-btn sc-btn--enemy">+ Add Enemy</button>
+  <button class="sc-btn sc-btn--lair">+ Add Lair</button>
+  <button class="sc-btn sc-btn--go">Start Combat</button>
+  <button class="sc-btn sc-btn--ghost">Back to Home</button>
+  <button class="sc-btn" disabled>Saving…</button>
+</div>
+
+<h4>In-card buttons — px-3 py-1 text-sm</h4>
+<div class="row">
+  <button class="sc-btn sc-btn--party" style="padding:4px 12px;font-size:13px">Edit</button>
+  <button class="sc-btn sc-btn--enemy" style="padding:4px 12px;font-size:13px">Delete</button>
+  <button class="sc-btn sc-btn--go" style="padding:4px 12px;font-size:13px">Save</button>
+  <button class="sc-btn sc-btn--ghost" style="padding:4px 12px;font-size:13px">Cancel</button>
+</div>
+
+<h4>Stepper HP buttons</h4>
+<div class="row">
+  <button class="sc-btn sc-btn--go" style="padding:4px 10px;font-size:12px;min-width:42px">+5</button>
+  <button class="sc-btn sc-btn--go" style="padding:4px 10px;font-size:12px;min-width:42px">+1</button>
+  <button class="sc-btn sc-btn--enemy" style="padding:4px 10px;font-size:12px;min-width:42px">−1</button>
+  <button class="sc-btn sc-btn--enemy" style="padding:4px 10px;font-size:12px;min-width:42px">−5</button>
+</div>
+</body></html>

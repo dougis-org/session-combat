@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Elevation & Borders</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--sc-surface-0);color:var(--sc-fg-1);font-family:var(--sc-font-sans);padding:22px;}
+  .row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .lvl{background:#1f2937;border-radius:8px;padding:18px;display:flex;flex-direction:column;justify-content:flex-end;height:96px;}
+  .lvl h5{margin:0;font-size:13px;font-weight:700;}
+  .lvl p{margin:2px 0 0;font-size:10px;color:var(--sc-fg-3);font-family:var(--sc-font-mono);}
+  .b1{box-shadow:0 1px 2px 0 rgba(0,0,0,.5);}
+  .b2{box-shadow:0 4px 6px -2px rgba(0,0,0,.5);}
+  .b3{box-shadow:0 10px 15px -3px rgba(0,0,0,.5), 0 4px 6px -4px rgba(0,0,0,.5);}
+  .b-accent{border:2px solid #3b82f6;}
+  .b-soft{border:1px solid #374151;}
+</style></head><body>
+<div class="row">
+  <div class="lvl b-soft"><h5>Border · soft</h5><p>border-gray-700</p></div>
+  <div class="lvl b-accent"><h5>Border · active</h5><p>border-blue-500</p></div>
+  <div class="lvl b2"><h5>Card shadow</h5><p>shadow</p></div>
+  <div class="lvl b3"><h5>Modal shadow</h5><p>shadow-lg</p></div>
+</div>
+<div style="margin-top:14px;font-size:11px;color:var(--sc-fg-3);max-width:640px;line-height:1.55;">
+  Cards mostly sit flat on the page — depth comes from <b style="color:#d1d5db">surface contrast</b> (900 → 800 → 700) not shadow. Shadow appears only on modals and floating popups. Active items use a <b style="color:#60a5fa">blue ring</b> rather than a glow.
+</div>
+</body></html>

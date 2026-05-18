@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Spacing & Radius</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--sc-surface-0);color:var(--sc-fg-1);font-family:var(--sc-font-sans);padding:22px;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  h4{margin:0 0 10px 0;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--sc-fg-3);}
+  .scale{display:flex;align-items:flex-end;gap:8px;height:60px;}
+  .step{display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .step .b{background:#2563eb;width:14px;border-radius:2px;}
+  .step .l{font-family:var(--sc-font-mono);font-size:9px;color:var(--sc-fg-4);}
+  .step .v{font-family:var(--sc-font-mono);font-size:10px;color:var(--sc-fg-3);}
+  .radii{display:flex;gap:14px;align-items:flex-end;}
+  .r{display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .r .box{background:#1f2937;border:1px solid #374151;width:60px;height:48px;}
+  .r .lbl{font-size:10px;color:var(--sc-fg-3);font-family:var(--sc-font-mono);}
+</style></head><body>
+<div class="cols">
+  <div>
+    <h4>Spacing — Tailwind 4px base</h4>
+    <div class="scale">
+      <div class="step"><div class="b" style="height:4px"></div><div class="v">4</div><div class="l">1</div></div>
+      <div class="step"><div class="b" style="height:8px"></div><div class="v">8</div><div class="l">2</div></div>
+      <div class="step"><div class="b" style="height:12px"></div><div class="v">12</div><div class="l">3</div></div>
+      <div class="step"><div class="b" style="height:16px"></div><div class="v">16</div><div class="l">4</div></div>
+      <div class="step"><div class="b" style="height:24px"></div><div class="v">24</div><div class="l">6</div></div>
+      <div class="step"><div class="b" style="height:32px"></div><div class="v">32</div><div class="l">8</div></div>
+      <div class="step"><div class="b" style="height:48px"></div><div class="v">48</div><div class="l">12</div></div>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--sc-fg-3)">Card padding <b style="color:#d1d5db">p-4 / p-6</b> · row gap <b style="color:#d1d5db">space-y-2 / space-y-4</b> · button <b style="color:#d1d5db">px-4 py-2</b>.</div>
+  </div>
+  <div>
+    <h4>Radius</h4>
+    <div class="radii">
+      <div class="r"><div class="box" style="border-radius:0"></div><div class="lbl">none · table cell</div></div>
+      <div class="r"><div class="box" style="border-radius:4px"></div><div class="lbl">rounded · 4 · btn/input</div></div>
+      <div class="r"><div class="box" style="border-radius:8px"></div><div class="lbl">rounded-lg · 8 · card</div></div>
+      <div class="r"><div class="box" style="border-radius:999px;width:80px;height:24px"></div><div class="lbl">full · pill badge</div></div>
+    </div>
+  </div>
+</div>
+</body></html>

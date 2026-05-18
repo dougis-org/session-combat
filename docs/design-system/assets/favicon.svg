@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="16" height="16" style="background:transparent">
+
+  
+  <g transform="rotate(-44 500 560)">
+    
+    <polygon points="500,-90 545,140 525,790 475,790 455,140" fill="#888"></polygon>
+    
+    <rect x="445" y="790" width="110" height="20" rx="4" fill="#555"></rect>
+    <rect x="470" y="810" width="60" height="60" rx="10" fill="#6b3f2c"></rect>
+    <circle cx="500" cy="870" r="20" fill="#555"></circle>
+  </g>
+
+  
+  <g transform="rotate(44 500 560)">
+    
+    <polygon points="500,-90 545,140 525,790 475,790 455,140" fill="#888"></polygon>
+    
+    <rect x="445" y="790" width="110" height="20" rx="4" fill="#555"></rect>
+    <rect x="470" y="810" width="60" height="60" rx="10" fill="#6b3f2c"></rect>
+    <circle cx="500" cy="870" r="20" fill="#555"></circle>
+  </g>
+</svg>

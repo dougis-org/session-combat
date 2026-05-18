@@ -1,0 +1,19 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Colors — Surfaces</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--sc-surface-0);color:var(--sc-fg-1);font-family:var(--sc-font-sans);}
+  .wrap{padding:20px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+  .sw{height:90px;border-radius:8px;display:flex;flex-direction:column;justify-content:flex-end;padding:10px;}
+  .name{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+  .val{font-family:var(--sc-font-mono);font-size:11px;color:var(--sc-fg-3);}
+  .border{box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);}
+</style></head><body>
+<div class="wrap">
+  <div class="sw border" style="background:#0a0a0a"><div class="name">bg</div><div class="val">#0a0a0a · gray-950</div></div>
+  <div class="sw border" style="background:#111827"><div class="name">surface-0</div><div class="val">#111827 · gray-900</div></div>
+  <div class="sw border" style="background:#1f2937"><div class="name">surface-1</div><div class="val">#1f2937 · gray-800</div></div>
+  <div class="sw" style="background:#374151"><div class="name">surface-2</div><div class="val">#374151 · gray-700</div></div>
+  <div class="sw" style="background:#4b5563"><div class="name">surface-3</div><div class="val">#4b5563 · gray-600</div></div>
+</div>
+</body></html>

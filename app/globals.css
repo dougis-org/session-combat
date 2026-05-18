@@ -1,1 +1,48 @@
+/* app/globals.css — drop-in replacement.
+ *
+ * Adds the Session Combat design tokens to Tailwind v4's @theme block so they
+ * become native utilities: font-sans / font-mono / font-serif, bg-party,
+ * text-enemy, border-lair, ring-init, etc.
+ *
+ * The CSS vars --font-sans/--font-mono/--font-serif are supplied by
+ * next/font in app/layout.tsx — that's why we reference them here rather
+ * than @import-ing Google Fonts directly.
+ */
+
 @import "tailwindcss";
+
+@theme {
+  /* ── Type ────────────────────────────────────────────────────── */
+  --font-sans:  var(--font-sans),  ui-sans-serif, system-ui, -apple-system,
+                "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:  var(--font-mono),  ui-monospace, SFMono-Regular, Menlo,
+                Consolas, "Liberation Mono", monospace;
+  --font-serif: var(--font-serif), Georgia, "Times New Roman", serif;
+
+  /* ── Semantic role colors ───────────────────────────────────────
+     Use these for ANYTHING role-coded: players, monsters, lair, etc.
+     They're aliases over Tailwind's neutral palette, so bg-gray-800
+     etc still works exactly as before. */
+  --color-party:        #2563eb;   /* blue-600   — players, primary actions */
+  --color-party-hover:  #1d4ed8;   /* blue-700 */
+  --color-party-soft:   #60a5fa;   /* blue-400  — links, headers */
+
+  --color-enemy:        #dc2626;   /* red-600   — monsters, destructive */
+  --color-enemy-hover:  #b91c1c;   /* red-700 */
+  --color-enemy-soft:   #f87171;   /* red-400 */
+
+  --color-lair:         #9333ea;   /* purple-600 — lair, library indicator */
+  --color-lair-hover:   #7e22ce;
+  --color-lair-soft:    #c084fc;
+
+  --color-go:           #16a34a;   /* green-600 — save / start / next */
+  --color-go-hover:     #15803d;
+
+  --color-init:         #facc15;   /* yellow-400 — initiative / active turn */
+
+  /* HP bar ramp */
+  --color-hp-full:      #22c55e;   /* > 50% */
+  --color-hp-bloodied:  #eab308;   /* 25–50% */
+  --color-hp-critical:  #ef4444;   /* < 25% */
+  --color-hp-down:      #6b7280;   /* 0 */
+}

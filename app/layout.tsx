@@ -1,5 +1,32 @@
+// app/layout.tsx — drop-in replacement.
+// Adds IBM Plex (Sans / Mono / Serif) via next/font for zero-CLS, self-hosted fonts.
+// Existing footer / version / metadata behavior is preserved exactly.
+
 import type { Metadata } from 'next'
+import { IBM_Plex_Sans, IBM_Plex_Mono, IBM_Plex_Serif } from 'next/font/google'
 import './globals.css'
+
+const plexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-mono',
+  display: 'swap',
+})
+
+const plexSerif = IBM_Plex_Serif({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'D&D Session Combat Tracker',
@@ -18,7 +45,7 @@ async function getVersionData() {
     return {
       version: '0.0.0',
       buildDate: new Date().toISOString(),
-      buildNumber: 0
+      buildNumber: 0,
     }
   }
 }
@@ -42,13 +69,17 @@ export default async function RootLayout({
       return dateString
     }
   }
-  
+
+  // Wire all three variables onto <html> so global utilities and
+  // mono/serif overrides work anywhere in the tree.
+  const fontVars = `${plexSans.variable} ${plexMono.variable} ${plexSerif.variable}`
+
   return (
-    <html lang="en">
-      <body className="flex flex-col h-screen overflow-hidden">
+    <html lang="en" className={fontVars}>
+      <body className="flex flex-col h-screen overflow-hidden font-sans">
         <div className="flex-1 overflow-auto">{children}</div>
         <footer className="flex-shrink-0 bg-gray-950 border-t border-gray-800 py-2 px-4 text-center text-xs text-gray-500">
-          <div className="flex justify-center items-center gap-3">
+          <div className="flex justify-center items-center gap-3 font-mono">
             <span>v{versionData.version}</span>
             <span>•</span>
             <span>{formatDate(versionData.buildDate)}</span>

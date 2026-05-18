@@ -1,0 +1,60 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Colors — Roles</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--sc-surface-0);color:var(--sc-fg-1);font-family:var(--sc-font-sans);padding:20px;}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .role{border-radius:10px;padding:14px;background:var(--sc-surface-1);}
+  .role h4{margin:0 0 10px 0;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--sc-fg-3);}
+  .ramp{display:flex;border-radius:6px;overflow:hidden;height:36px;}
+  .ramp div{flex:1;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:var(--sc-font-mono);color:rgba(255,255,255,.85);}
+  .label{margin-top:8px;font-size:13px;font-weight:700;}
+  .desc{font-size:11px;color:var(--sc-fg-3);margin-top:2px;}
+</style></head><body>
+<div class="grid">
+  <div class="role">
+    <h4>Party · Primary</h4>
+    <div class="ramp">
+      <div style="background:#172554">950</div>
+      <div style="background:#1d4ed8">700</div>
+      <div style="background:#2563eb">600</div>
+      <div style="background:#60a5fa">400</div>
+    </div>
+    <div class="label" style="color:#60a5fa">Players & primary actions</div>
+    <div class="desc">"Edit", "Add Party Member", links</div>
+  </div>
+  <div class="role">
+    <h4>Enemy · Destructive</h4>
+    <div class="ramp">
+      <div style="background:#7f1d1d">900</div>
+      <div style="background:#b91c1c">700</div>
+      <div style="background:#dc2626">600</div>
+      <div style="background:#f87171">400</div>
+    </div>
+    <div class="label" style="color:#f87171">Monsters, delete, logout</div>
+    <div class="desc">"+ Add Enemy", "Delete", "End Combat"</div>
+  </div>
+  <div class="role">
+    <h4>Lair · Special</h4>
+    <div class="ramp">
+      <div style="background:#581c87">900</div>
+      <div style="background:#7e22ce">700</div>
+      <div style="background:#9333ea">600</div>
+      <div style="background:#c084fc">400</div>
+    </div>
+    <div class="label" style="color:#c084fc">Library / Lair actions</div>
+    <div class="desc">"Add Lair", "(from library)" tag</div>
+  </div>
+  <div class="role">
+    <h4>Go · Positive</h4>
+    <div class="ramp">
+      <div style="background:#14532d">900</div>
+      <div style="background:#15803d">700</div>
+      <div style="background:#16a34a">600</div>
+      <div style="background:#4ade80">400</div>
+    </div>
+    <div class="label" style="color:#4ade80">Save / Start / Confirm</div>
+    <div class="desc">"Save Encounter", "Start Combat"</div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,178 @@
+/* ──────────────────────────────────────────────────────────────────
+   Session Combat — Colors & Type
+   Source: dougis-org/session-combat (Next.js + Tailwind v4).
+   Dark-first. Type family: IBM Plex (Sans / Mono / Serif).
+   ────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+:root {
+  /* ── Surfaces ────────────────────────────────────────────────── */
+  --sc-bg:           #0a0a0a;  /* footer / chrome   (gray-950) */
+  --sc-surface-0:    #111827;  /* page background   (gray-900) */
+  --sc-surface-1:    #1f2937;  /* card              (gray-800) */
+  --sc-surface-2:    #374151;  /* sub-card / input  (gray-700) */
+  --sc-surface-3:    #4b5563;  /* hover / muted btn (gray-600) */
+
+  /* ── Borders & strokes ───────────────────────────────────────── */
+  --sc-border:       #374151;  /* default card border (gray-700) */
+  --sc-border-soft:  #1f2937;  /* divider on dark     (gray-800) */
+  --sc-border-focus: #3b82f6;  /* input focus         (blue-500) */
+
+  /* ── Foreground (text) ───────────────────────────────────────── */
+  --sc-fg-1:         #ffffff;  /* primary text */
+  --sc-fg-2:         #d1d5db;  /* body / labels   (gray-300) */
+  --sc-fg-3:         #9ca3af;  /* secondary       (gray-400) */
+  --sc-fg-4:         #6b7280;  /* tertiary / hint (gray-500) */
+
+  /* ── Brand / role accents ────────────────────────────────────── */
+  --sc-party:        #60a5fa;  /* PARTY / players  (blue-400)   */
+  --sc-party-strong: #2563eb;  /* blue-600 button bg */
+  --sc-party-hover:  #1d4ed8;  /* blue-700 */
+  --sc-party-deep:   #172554;  /* blue-950 panel */
+
+  --sc-enemy:        #f87171;  /* ENEMY / monsters (red-400) */
+  --sc-enemy-strong: #dc2626;  /* red-600 destructive btn */
+  --sc-enemy-hover:  #b91c1c;  /* red-700 */
+  --sc-enemy-deep:   #7f1d1d;  /* red-900 toast bg */
+
+  --sc-lair:         #c084fc;  /* LAIR / library (purple-400) */
+  --sc-lair-strong:  #9333ea;  /* purple-600 btn */
+  --sc-lair-hover:   #7e22ce;  /* purple-700 */
+
+  --sc-go:           #16a34a;  /* SAVE / start    (green-600) */
+  --sc-go-hover:     #15803d;  /* green-700 */
+  --sc-go-soft:      #14532d;  /* green-900 toast */
+
+  --sc-initiative:   #facc15;  /* INITIATIVE order (yellow-400) */
+  --sc-initiative-soft: #fde047; /* yellow-300 */
+
+  /* ── HP bar ramp (green → yellow → red as HP drops) ──────────── */
+  --sc-hp-full:      #22c55e;  /* green-500 */
+  --sc-hp-bloodied:  #eab308;  /* yellow-500 (~50%) */
+  --sc-hp-critical:  #ef4444;  /* red-500    (~25%) */
+  --sc-hp-down:      #6b7280;  /* gray-500   (0)   */
+
+  /* ── Type scale ──────────────────────────────────────────────── */
+  /* IBM Plex — primary family across the whole product. */
+  --sc-font-sans:   "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system,
+                    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sc-font-serif:  "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --sc-font-mono:   "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo,
+                    Consolas, "Liberation Mono", monospace;
+
+  /* sizes — Tailwind text-* defaults */
+  --sc-text-xs:   0.75rem;   /* 12 */
+  --sc-text-sm:   0.875rem;  /* 14 */
+  --sc-text-base: 1rem;      /* 16 */
+  --sc-text-lg:   1.125rem;  /* 18 */
+  --sc-text-xl:   1.25rem;   /* 20 — card heading */
+  --sc-text-2xl:  1.5rem;    /* 24 — section heading */
+  --sc-text-3xl:  1.875rem;  /* 30 — page title */
+  --sc-text-4xl:  2.25rem;   /* 36 — hero */
+
+  /* weight — only 400 / 600 / 700 used by app */
+  --sc-fw-regular: 400;
+  --sc-fw-semibold: 600;
+  --sc-fw-bold:    700;
+
+  /* ── Radius, shadow, spacing ─────────────────────────────────── */
+  --sc-radius-sm:   0.25rem;   /* rounded     — chips / inputs */
+  --sc-radius-md:   0.5rem;    /* rounded-lg  — cards / panels */
+  --sc-radius-full: 9999px;    /* pill badges */
+
+  --sc-shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --sc-shadow-lg:   0 10px 15px -3px rgb(0 0 0 / 0.5),
+                    0 4px 6px -4px rgb(0 0 0 / 0.5);
+
+  --sc-space-1: 0.25rem;
+  --sc-space-2: 0.5rem;
+  --sc-space-3: 0.75rem;
+  --sc-space-4: 1rem;
+  --sc-space-6: 1.5rem;
+  --sc-space-8: 2rem;
+}
+
+/* ── Semantic element styles ─────────────────────────────────────
+   Use these utility classes when you want the app's defaults
+   without hand-mapping Tailwind classes again.                     */
+
+.sc-body {
+  background: var(--sc-surface-0);
+  color: var(--sc-fg-1);
+  font-family: var(--sc-font-sans);
+  font-size: var(--sc-text-base);
+  line-height: 1.5;
+}
+
+.sc-h1 { font-size: var(--sc-text-4xl); font-weight: var(--sc-fw-bold); line-height: 1.15; }
+.sc-h2 { font-size: var(--sc-text-3xl); font-weight: var(--sc-fw-bold); line-height: 1.2; }
+.sc-h3 { font-size: var(--sc-text-2xl); font-weight: var(--sc-fw-bold); line-height: 1.25; }
+.sc-h4 { font-size: var(--sc-text-xl);  font-weight: var(--sc-fw-semibold); }
+.sc-h5 { font-size: var(--sc-text-lg);  font-weight: var(--sc-fw-semibold); }
+
+.sc-label { font-size: var(--sc-text-sm);  color: var(--sc-fg-2); font-weight: var(--sc-fw-semibold); }
+.sc-muted { color: var(--sc-fg-3); }
+.sc-tiny  { font-size: var(--sc-text-xs);  color: var(--sc-fg-3); }
+.sc-mono  { font-family: var(--sc-font-mono); }
+
+.sc-card {
+  background: var(--sc-surface-1);
+  border-radius: var(--sc-radius-md);
+  padding: var(--sc-space-6);
+}
+.sc-card--sub {
+  background: var(--sc-surface-2);
+  border-radius: var(--sc-radius-sm);
+  padding: var(--sc-space-3);
+}
+
+/* ── Button system (matches app exactly) ────────────────────────── */
+.sc-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: var(--sc-radius-sm);
+  font-weight: var(--sc-fw-semibold);
+  font-size: var(--sc-text-sm);
+  color: #fff; border: 0; cursor: pointer;
+  transition: background-color 150ms ease;
+}
+.sc-btn--party { background: var(--sc-party-strong); }
+.sc-btn--party:hover { background: var(--sc-party-hover); }
+
+.sc-btn--enemy { background: var(--sc-enemy-strong); }
+.sc-btn--enemy:hover { background: var(--sc-enemy-hover); }
+
+.sc-btn--lair  { background: var(--sc-lair-strong); }
+.sc-btn--lair:hover  { background: var(--sc-lair-hover); }
+
+.sc-btn--go    { background: var(--sc-go); }
+.sc-btn--go:hover    { background: var(--sc-go-hover); }
+
+.sc-btn--ghost { background: var(--sc-surface-2); }
+.sc-btn--ghost:hover { background: var(--sc-surface-3); }
+
+.sc-btn:disabled { background: var(--sc-surface-3); cursor: not-allowed; opacity: 0.85; }
+
+/* ── Pill badge (Party / Enemy / Lair tags) ─────────────────────── */
+.sc-pill {
+  display: inline-flex; align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: var(--sc-radius-full);
+  font-size: var(--sc-text-xs); font-weight: var(--sc-fw-semibold);
+  color: #fff;
+}
+.sc-pill--party { background: var(--sc-party-strong); }
+.sc-pill--enemy { background: var(--sc-enemy-strong); }
+.sc-pill--lair  { background: var(--sc-lair-strong); }
+
+/* ── Input ───────────────────────────────────────────────────────── */
+.sc-input {
+  width: 100%;
+  background: var(--sc-surface-2);
+  border: 1px solid transparent;
+  border-radius: var(--sc-radius-sm);
+  padding: 0.5rem 0.75rem;
+  color: #fff; font: inherit;
+}
+.sc-input:focus { outline: none; border-color: var(--sc-border-focus); }

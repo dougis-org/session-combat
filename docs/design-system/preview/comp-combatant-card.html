@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Combatant card · active</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--sc-surface-0);color:var(--sc-fg-1);font-family:var(--sc-font-sans);padding:18px;}
+  .card{background:#1f2937;border:2px solid #facc15;border-radius:8px;padding:14px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;}
+  .init{width:54px;height:54px;border-radius:8px;background:#facc15;color:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-family:var(--sc-font-mono);}
+  .init .n{font-size:22px;line-height:1;}
+  .init .l{font-size:9px;letter-spacing:.1em;}
+  .body{min-width:0;}
+  .top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .name{font-size:18px;font-weight:700;}
+  .pill{padding:1px 10px;border-radius:999px;font-size:11px;font-weight:600;background:#dc2626;color:#fff;}
+  .meta{font-size:12px;color:#9ca3af;display:flex;gap:14px;font-family:var(--sc-font-mono);}
+  .hp{display:flex;align-items:center;gap:8px;}
+  .bar{width:120px;height:8px;background:#111827;border-radius:4px;overflow:hidden;}
+  .fill{height:100%;background:#eab308;width:62%;}
+  .conds{display:flex;gap:4px;margin-top:6px;}
+  .cond{padding:2px 8px;background:#7e22ce;color:#fff;border-radius:999px;font-size:10px;font-weight:600;}
+  .right{display:flex;gap:6px;}
+  .btn{padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;color:#fff;background:#374151;border:0;cursor:default;}
+  .btn.next{background:#16a34a;}
+</style></head><body>
+<div class="card">
+  <div class="init"><div class="n">22</div><div class="l">INIT</div></div>
+  <div class="body">
+    <div class="top">
+      <span class="name">Ancient Red Dragon</span>
+      <span class="pill">enemy</span>
+    </div>
+    <div class="meta"><span>AC 22</span><span>DEX +0</span><span>CR 24</span></div>
+    <div class="hp" style="margin-top:6px"><span class="meta">HP 348 / 546</span><div class="bar"><div class="fill"></div></div></div>
+    <div class="conds"><span class="cond">Frightened · 2r</span><span class="cond">Concentrating</span></div>
+  </div>
+  <div class="right">
+    <button class="btn">−5</button>
+    <button class="btn">−1</button>
+    <button class="btn">+1</button>
+    <button class="btn next">Next ▸</button>
+  </div>
+</div>
+</body></html>

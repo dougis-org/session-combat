@@ -1,0 +1,32 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Type — Families</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--sc-surface-0);color:var(--sc-fg-1);font-family:var(--sc-font-sans);padding:22px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;}
+  .col h4{margin:0 0 6px 0;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--sc-fg-3);font-weight:600;font-family:var(--sc-font-sans);}
+  .spec{font-size:32px;line-height:1;margin:6px 0;}
+  .stack{font-family:var(--sc-font-mono);font-size:10px;color:var(--sc-fg-4);line-height:1.5;word-break:break-all;}
+  .use{font-size:12px;color:var(--sc-fg-3);margin-top:4px;}
+</style></head><body>
+<div class="grid">
+  <div class="col">
+    <h4>Plex Sans · UI default</h4>
+    <div class="spec" style="font-family:var(--sc-font-sans);font-weight:600">Aa Bb Cc 123</div>
+    <div class="stack">IBM Plex Sans → ui-sans-serif → system-ui</div>
+    <div class="use">All app UI, body, headings, buttons. 400 / 500 / 600 / 700.</div>
+  </div>
+  <div class="col">
+    <h4>Plex Serif · Lore / hero</h4>
+    <div class="spec" style="font-family:var(--sc-font-serif);font-style:italic">A roar in the dark</div>
+    <div class="stack">IBM Plex Serif → Georgia → "Times New Roman"</div>
+    <div class="use">Reserved: marquee headings, lore/encounter descriptions, print.</div>
+  </div>
+  <div class="col">
+    <h4>Plex Mono · Stats / dice</h4>
+    <div class="spec" style="font-family:var(--sc-font-mono);font-weight:500">2d10+3 · 17 AC</div>
+    <div class="stack">IBM Plex Mono → ui-monospace → SFMono-Regular</div>
+    <div class="use">Dice notation, HP inline, init chip, build numbers.</div>
+  </div>
+</div>
+</body></html>

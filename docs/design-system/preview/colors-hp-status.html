@@ -1,0 +1,43 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>HP & Status Ramps</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--sc-surface-0);color:var(--sc-fg-1);font-family:var(--sc-font-sans);padding:20px;}
+  h4{margin:0 0 8px 0;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--sc-fg-3);}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .bar{height:14px;border-radius:7px;background:#1f2937;position:relative;overflow:hidden;margin-bottom:6px;}
+  .fill{position:absolute;left:0;top:0;bottom:0;border-radius:7px;}
+  .pair{margin-bottom:10px;}
+  .pair-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--sc-fg-3);font-family:var(--sc-font-mono);}
+  .badges{display:flex;flex-wrap:wrap;gap:6px;}
+  .badge{padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;}
+</style></head><body>
+<div class="row">
+  <div>
+    <h4>HP — Health bars</h4>
+    <div class="pair"><div class="bar"><div class="fill" style="width:100%;background:#22c55e"></div></div><div class="pair-meta"><span>Full · 88/88</span><span>green-500</span></div></div>
+    <div class="pair"><div class="bar"><div class="fill" style="width:50%;background:#eab308"></div></div><div class="pair-meta"><span>Bloodied · 44/88</span><span>yellow-500</span></div></div>
+    <div class="pair"><div class="bar"><div class="fill" style="width:18%;background:#ef4444"></div></div><div class="pair-meta"><span>Critical · 16/88</span><span>red-500</span></div></div>
+    <div class="pair"><div class="bar"><div class="fill" style="width:0%;background:#6b7280"></div></div><div class="pair-meta"><span>Down · 0/88</span><span>gray-500</span></div></div>
+  </div>
+  <div>
+    <h4>Condition badges</h4>
+    <div class="badges">
+      <span class="badge" style="background:#7e22ce">Stunned</span>
+      <span class="badge" style="background:#b91c1c">Poisoned</span>
+      <span class="badge" style="background:#1d4ed8">Frightened</span>
+      <span class="badge" style="background:#854d0e">Prone</span>
+      <span class="badge" style="background:#0e7490">Restrained</span>
+      <span class="badge" style="background:#9a3412">Grappled</span>
+      <span class="badge" style="background:#374151">Unconscious</span>
+      <span class="badge" style="background:#facc15;color:#0a0a0a">Concentrating</span>
+    </div>
+    <h4 style="margin-top:14px">Initiative & legendary</h4>
+    <div class="badges">
+      <span class="badge" style="background:#facc15;color:#0a0a0a">Initiative 22</span>
+      <span class="badge" style="background:#a16207;color:#fef3c7">Legendary ● ● ●</span>
+      <span class="badge" style="background:#9333ea">Lair Slot · 20</span>
+    </div>
+  </div>
+</div>
+</body></html>
