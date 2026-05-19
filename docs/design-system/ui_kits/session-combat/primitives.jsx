@@ -58,6 +58,7 @@ function Button({ variant = 'ghost', size = 'md', disabled, children, onClick, s
   };
   return (
     <button
+      type="button"
       title={title}
       disabled={disabled}
       onClick={onClick}

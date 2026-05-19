@@ -1,6 +1,7 @@
 import { GET, POST } from "@/app/api/spells/route";
 import { storage } from "@/lib/storage";
 import { requireAdmin } from "@/lib/api-helpers";
+import { SpellTemplate } from "@/lib/types";
 import { makeRouteRequest, mockUnauthorized } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/storage", () => ({
@@ -33,7 +34,38 @@ describe("GET /api/spells", () => {
   });
 
   it("returns all spells", async () => {
-    const spells = [{ id: "1", name: "Fireball" }, { id: "2", name: "Magic Missile" }];
+    const spells: SpellTemplate[] = [
+      {
+        id: "1",
+        userId: "user1",
+        name: "Fireball",
+        level: 3,
+        concentration: false,
+        school: "Evocation",
+        description: "",
+        castingTime: "1 action",
+        range: "150 feet",
+        duration: "Instantaneous",
+        components: { verbal: true, somatic: true, material: false },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "2",
+        userId: "user1",
+        name: "Magic Missile",
+        level: 1,
+        concentration: false,
+        school: "Evocation",
+        description: "",
+        castingTime: "1 action",
+        range: "60 feet",
+        duration: "Instantaneous",
+        components: { verbal: true, somatic: true, material: false },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
     mockedStorage.loadSpells.mockResolvedValue(spells);
 
     const req = makeRouteRequest("http://localhost/api/spells", "GET");
@@ -41,15 +73,58 @@ describe("GET /api/spells", () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual(spells);
+    expect(body).toHaveLength(2);
+    expect(body[0]).toMatchObject({
+      id: "1",
+      name: "Fireball",
+      level: 3,
+      concentration: false,
+      school: "Evocation",
+      components: { verbal: true, somatic: true, material: false },
+    });
+    expect(body[1]).toMatchObject({
+      id: "2",
+      name: "Magic Missile",
+      level: 1,
+      concentration: false,
+      school: "Evocation",
+    });
   });
 
   it("filters to concentration spells when concentration=true", async () => {
-    const allSpells = [
-      { id: "1", name: "Fireball", concentration: false },
-      { id: "2", name: "Hold Person", concentration: true },
+    const allSpells: SpellTemplate[] = [
+      {
+        id: "1",
+        userId: "user1",
+        name: "Fireball",
+        level: 3,
+        concentration: false,
+        school: "Evocation",
+        description: "",
+        castingTime: "1 action",
+        range: "150 feet",
+        duration: "Instantaneous",
+        components: { verbal: true, somatic: true, material: false },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "2",
+        userId: "user1",
+        name: "Hold Person",
+        level: 2,
+        concentration: true,
+        school: "Enchantment",
+        description: "",
+        castingTime: "1 action",
+        range: "60 feet",
+        duration: "Concentration, up to 1 minute",
+        components: { verbal: true, somatic: true, material: false },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ];
-    mockedStorage.loadSpells.mockImplementation((userId?: string, conc?: boolean) => {
+    mockedStorage.loadSpells.mockImplementation((userId?: string, conc?: boolean): Promise<SpellTemplate[]> => {
       if (conc === true) return Promise.resolve([allSpells[1]]);
       return Promise.resolve(allSpells);
     });

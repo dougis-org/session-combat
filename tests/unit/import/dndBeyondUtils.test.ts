@@ -106,7 +106,7 @@ describe("dndBeyond-utils", () => {
         { id: 1, value: 10 },
         { id: 2, value: 14 },
         { id: 3, value: null },
-      ] as const;
+      ];
       const result = indexStatValues(stats);
       expect(result.get(1)).toBe(10);
       expect(result.get(2)).toBe(14);
@@ -197,9 +197,9 @@ describe("dndBeyond-utils", () => {
       expect(result[0].subType).toBe("strength-score");
     });
 
-    it("skips undefined arrays in modifier groups", () => {
-      const modifierGroups: Record<string, { type: "bonus"; subType: string; value: number }[] | null | undefined> = {
-        strength: undefined,
+    it("skips null modifier groups", () => {
+      const modifierGroups: Record<string, { type: "bonus"; subType: string; value: number }[] | null> = {
+        strength: null,
         charisma: [{ type: "bonus", subType: "charisma-score", value: 3 }],
       };
       const result = flattenModifiers(modifierGroups);

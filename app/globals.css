@@ -4,20 +4,20 @@
  * become native utilities: font-sans / font-mono / font-serif, bg-party,
  * text-enemy, border-lair, ring-init, etc.
  *
- * The CSS vars --font-sans/--font-mono/--font-serif are supplied by
- * next/font in app/layout.tsx — that's why we reference them here rather
- * than @import-ing Google Fonts directly.
+ * The CSS vars --sc-font-sans/--sc-font-mono/--sc-font-serif are supplied by
+ * next/font in app/layout.tsx — distinct names avoid circular self-references
+ * when Tailwind's @theme defines --font-sans/--font-mono/--font-serif.
  */
 
 @import "tailwindcss";
 
 @theme {
   /* ── Type ────────────────────────────────────────────────────── */
-  --font-sans:  var(--font-sans),  ui-sans-serif, system-ui, -apple-system,
+  --font-sans:  var(--sc-font-sans),  ui-sans-serif, system-ui, -apple-system,
                 "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono:  var(--font-mono),  ui-monospace, SFMono-Regular, Menlo,
+  --font-mono:  var(--sc-font-mono),  ui-monospace, SFMono-Regular, Menlo,
                 Consolas, "Liberation Mono", monospace;
-  --font-serif: var(--font-serif), Georgia, "Times New Roman", serif;
+  --font-serif: var(--sc-font-serif), Georgia, "Times New Roman", serif;
 
   /* ── Semantic role colors ───────────────────────────────────────
      Use these for ANYTHING role-coded: players, monsters, lair, etc.

@@ -51,7 +51,8 @@ function HomeScreen({ onNav, onLogout }) {
 function NavTile({ title, desc, onClick, span = 1 }) {
   const [hover, setHover] = React.useState(false);
   return (
-    <div
+    <button
+      type="button"
       onClick={onClick}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -60,11 +61,12 @@ function NavTile({ title, desc, onClick, span = 1 }) {
         background: hover ? sc.surface2 : sc.surface1,
         borderRadius: 8, padding: 24, cursor: 'pointer',
         transition: 'background 120ms ease',
+        border: 0, textAlign: 'left', width: '100%',
       }}
     >
       <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 600 }}>{title}</h2>
       <p style={{ margin: 0, color: sc.fg3, fontSize: 14, lineHeight: 1.4 }}>{desc}</p>
-    </div>
+    </button>
   );
 }
 

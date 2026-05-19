@@ -14,6 +14,7 @@ const config = [
       "coverage-e2e/**",
       "playwright-report/**",
       ".codacy/**",
+      "docs/**",
     ],
   },
 ];
