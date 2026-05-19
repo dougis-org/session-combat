@@ -43,7 +43,7 @@ export function validateString(
       valid: false,
       error: {
         field: fieldName,
-        message: `${fieldName} must be at least ${minLength} characters`,
+        message: `${fieldName} must be at least ${minLength} character${minLength === 1 ? '' : 's'}`,
       },
     };
   }

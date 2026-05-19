@@ -1,8 +1,7 @@
 import { MonsterTemplate, AbilityScores, CreatureAbility, normalizeAlignment } from '@/lib/types';
 import { filterToDamageTypes } from '@/lib/constants';
+import type { ValidationError, ValidationResult } from './core';
 import {
-  ValidationError,
-  ValidationResult,
   validateString,
   validateNumber,
   validateStringArray,

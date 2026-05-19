@@ -1,5 +1,6 @@
-import { AbilityScores, CreatureAbility } from '@/lib/types';
-import { validateString, validateNumber, ValidationError } from './core';
+import type { AbilityScores, CreatureAbility } from '@/lib/types';
+import type { ValidationError } from './core';
+import { validateString, validateNumber } from './core';
 
 export function validateAbilityScores(
   value: unknown,
