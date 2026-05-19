@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
+import { ErrorBanner, LoadingState, FormField, EditorShell, textInputClass } from '@/lib/components/ui';
 import { Campaign } from '@/lib/types';
 
 function CampaignsContent() {
@@ -32,7 +32,7 @@ function CampaignsContent() {
   };
 
   const addCampaign = () => {
-    const newCampaign: Campaign = {
+    setEditingCampaign({
       id: '',
       userId: '',
       name: '',
@@ -42,8 +42,7 @@ function CampaignsContent() {
       active: false,
       createdAt: new Date(),
       updatedAt: new Date(),
-    };
-    setEditingCampaign(newCampaign);
+    });
     setIsAdding(true);
   };
 
@@ -52,18 +51,15 @@ function CampaignsContent() {
       setError(null);
       const url = isAdding ? '/api/campaigns' : `/api/campaigns/${campaign.id}`;
       const method = isAdding ? 'POST' : 'PATCH';
-
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(campaign),
       });
-
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || 'Failed to save campaign');
       }
-
       await fetchCampaigns();
       setIsAdding(false);
       setEditingCampaign(null);
@@ -94,24 +90,9 @@ function CampaignsContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Campaigns</h1>
-          <nav className="flex gap-3">
-            <Link href="/encounters" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
-              Encounters
-            </Link>
-            <Link href="/parties" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
-              Parties
-            </Link>
-            <Link href="/characters" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
-              Characters
-            </Link>
-          </nav>
         </div>
 
-        {error && (
-          <div className="p-4 bg-red-900 border border-red-700 rounded text-red-200 mb-6">
-            {error}
-          </div>
-        )}
+        <ErrorBanner message={error} />
 
         <button
           onClick={addCampaign}
@@ -123,6 +104,7 @@ function CampaignsContent() {
 
         {editingCampaign && (
           <CampaignEditor
+            key={editingCampaign.id || 'new'}
             campaign={editingCampaign}
             onSave={saveCampaign}
             onCancel={cancelEdit}
@@ -131,9 +113,7 @@ function CampaignsContent() {
         )}
 
         {loading ? (
-          <div className="text-center py-8">
-            <p className="text-gray-400">Loading campaigns...</p>
-          </div>
+          <LoadingState label="Loading campaigns..." />
         ) : campaigns.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-gray-400 text-lg mb-4">No campaigns yet.</p>
@@ -167,10 +147,7 @@ function CampaignsContent() {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => {
-                        setEditingCampaign(campaign);
-                        setIsAdding(false);
-                      }}
+                      onClick={() => { setEditingCampaign(campaign); setIsAdding(false); }}
                       className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
                     >
                       Edit
@@ -213,117 +190,58 @@ function CampaignEditor({
 
   const handleSave = async () => {
     setValidationError(null);
-
     if (!name.trim()) {
       setValidationError('Campaign name is required');
       return;
     }
-
     setSaving(true);
     try {
-      await onSave({
-        ...campaign,
-        name: name.trim(),
-        moduleName: moduleName.trim(),
-        currentChapter: currentChapter.trim(),
-        currentChapterOrder,
-        active,
-      });
+      await onSave({ ...campaign, name: name.trim(), moduleName: moduleName.trim(), currentChapter: currentChapter.trim(), currentChapterOrder, active });
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 mb-6 border-2 border-blue-500">
-      <h2 className="text-2xl font-bold mb-4">{isNew ? 'Create Campaign' : 'Edit Campaign'}</h2>
-
-      {validationError && (
-        <div className="p-3 bg-red-900 border border-red-700 rounded text-red-200 mb-4">
-          {validationError}
-        </div>
-      )}
-
+    <EditorShell
+      title={isNew ? 'Create Campaign' : 'Edit Campaign'}
+      validationError={validationError}
+      onSave={handleSave}
+      onCancel={onCancel}
+      saving={saving}
+      canSave={!!name.trim()}
+      saveLabel="Save Campaign"
+    >
       <div className="grid md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label className="block mb-1 text-sm font-semibold">Campaign Name *</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-            placeholder="e.g., Curse of Strahd"
-          />
-        </div>
+        <FormField label="Campaign Name *">
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+            className={textInputClass()} disabled={saving} placeholder="e.g., Curse of Strahd" />
+        </FormField>
 
-        <div>
-          <label className="block mb-1 text-sm font-semibold">Module / Adventure</label>
-          <input
-            type="text"
-            value={moduleName}
-            onChange={(e) => setModuleName(e.target.value)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-            placeholder="e.g., Curse of Strahd"
-          />
-        </div>
+        <FormField label="Module / Adventure">
+          <input type="text" value={moduleName} onChange={(e) => setModuleName(e.target.value)}
+            className={textInputClass()} disabled={saving} placeholder="e.g., Curse of Strahd" />
+        </FormField>
 
-        <div>
-          <label className="block mb-1 text-sm font-semibold">Current Chapter</label>
-          <input
-            type="text"
-            value={currentChapter}
-            onChange={(e) => setCurrentChapter(e.target.value)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-            placeholder="e.g., Chapter 4: The Sunken Temple"
-          />
-        </div>
+        <FormField label="Current Chapter">
+          <input type="text" value={currentChapter} onChange={(e) => setCurrentChapter(e.target.value)}
+            className={textInputClass()} disabled={saving} placeholder="e.g., Chapter 4: The Sunken Temple" />
+        </FormField>
 
-        <div>
-          <label className="block mb-1 text-sm font-semibold">Chapter Order</label>
-          <input
-            type="number"
-            value={currentChapterOrder}
-            onChange={(e) => setCurrentChapterOrder(Number(e.target.value))}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-            min={0}
-          />
-        </div>
+        <FormField label="Chapter Order">
+          <input type="number" value={currentChapterOrder} onChange={(e) => { const v = parseInt(e.target.value, 10); setCurrentChapterOrder(isNaN(v) ? 0 : v); }}
+            className={textInputClass()} disabled={saving} min={0} />
+        </FormField>
       </div>
 
       <div className="mb-4">
         <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={active}
-            onChange={(e) => setActive(e.target.checked)}
-            disabled={saving}
-            className="cursor-pointer"
-          />
+          <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)}
+            disabled={saving} className="cursor-pointer" />
           <span className="text-sm font-semibold">Active</span>
         </label>
       </div>
-
-      <div className="flex gap-2">
-        <button
-          onClick={handleSave}
-          disabled={saving || !name.trim()}
-          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded"
-        >
-          {saving ? 'Saving...' : 'Save Campaign'}
-        </button>
-        <button
-          onClick={onCancel}
-          disabled={saving}
-          className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 px-4 py-2 rounded"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
+    </EditorShell>
   );
 }
 

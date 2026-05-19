@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       name: name.trim(),
       description: description?.trim() || '',
       characterIds: Array.isArray(characterIds) ? characterIds : [],
-      ...(campaignId && { campaignId }),
+      ...(typeof campaignId === 'string' && campaignId.trim() && { campaignId: campaignId.trim() }),
       createdAt: new Date(),
       updatedAt: new Date(),
     };

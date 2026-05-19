@@ -412,8 +412,8 @@ test.describe("Auth", () => {
     });
     await expect(registerResponse).toBeOK();
 
-    await page.goto("/");
-    await expect(page).toHaveURL(/.*\/$/);
+    await page.goto("/campaigns");
+    await expect(page).toHaveURL(/\/campaigns/);
 
     await page.evaluate(() => {
       localStorage.setItem("sessionData", JSON.stringify({ dummy: true }));

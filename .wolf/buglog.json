@@ -96,6 +96,182 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-15T00:12:44.498Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-05-19T00:23:37.884Z",
+      "error_message": "Wrong return value",
+      "file": "lib/clientStorage.ts",
+      "root_cause": "Was returning: { encounters: [], characters: [], parties: [] };",
+      "fix": "Now returns: { encounters: [], characters: [], parties: [], cam",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T00:23:37.884Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-05-19T00:23:53.605Z",
+      "error_message": "Significant refactor of ",
+      "file": "lib/storage.ts",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 21→81 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T00:23:53.605Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-05-19T00:27:07.478Z",
+      "error_message": "Null/undefined access in ",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: campaigns,; campaigns: Campaign[];",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-19T00:27:12.136Z"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-05-19T16:16:08.026Z",
+      "error_message": "Significant refactor of ",
+      "file": "app/parties/page.tsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→3 lines (3 removed) | Also: <div className=\"bg-gray-800 rounded-lg p-6 mb-6 bo; <h2 className=\"text-2xl font-bold mb-4\">{isNew ? '",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-19T16:16:26.022Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-05-19T16:20:58.221Z",
+      "error_message": "Significant refactor of ",
+      "file": "app/api/campaigns/[id]/route.ts",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 12→18 lines (5 removed) | Also: name: name !== undefined ? name.trim() : existingP; description: description !== undefined ? descripti",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-19T16:21:07.568Z"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-05-19T16:21:02.353Z",
+      "error_message": "Wrong reference: campaignId should be typeof",
+      "file": "app/api/parties/route.ts",
+      "root_cause": "Used \"campaignId\" instead of \"typeof\"",
+      "fix": "Changed campaignId → typeof",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T16:21:02.353Z"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-05-19T16:21:26.089Z",
+      "error_message": "Null/undefined access in ",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T16:21:26.089Z"
+    },
+    {
+      "id": "bug-014",
+      "timestamp": "2026-05-19T16:21:40.022Z",
+      "error_message": "CSS fix: Campaign",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Campaign: {party.campaignId ? (campaigns.find(c => c.id === party.campaignId)?.name ?? 'No Campaign') : 'No Campaign' → {party.campaignId ? (campaignMap.get(party.campaignId) ?? 'No Campaign') : 'No Campaign'",
+      "fix": "Changed Campaign: {party.campaignId ? (campaigns.find(c => c.id === party.campaignId)?.name ?? 'No Campaign') : 'No Campaign' → {party.campaignId ? (campaignMap.get(party.campaignId) ?? 'No Campaign') : 'No Campaign'",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T16:21:40.022Z"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-05-19T16:21:53.547Z",
+      "error_message": "Significant refactor of ",
+      "file": "app/campaigns/page.tsx",
+      "root_cause": "11 lines replaced/restructured",
+      "fix": "Rewrote 14→3 lines (11 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T16:21:53.547Z"
+    },
+    {
+      "id": "bug-016",
+      "timestamp": "2026-05-19T16:22:04.328Z",
+      "error_message": "Type error",
+      "file": "app/campaigns/page.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T16:22:04.328Z"
+    },
+    {
+      "id": "bug-017",
+      "timestamp": "2026-05-19T16:22:08.082Z",
+      "error_message": "Incorrect value in code",
+      "file": "openspec/changes/campaign-management/tasks.md",
+      "root_cause": "Had `npm test`",
+      "fix": "Changed to `npm run test:unit`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-19T16:22:20.016Z"
     }
   ]
 }

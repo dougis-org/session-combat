@@ -73,11 +73,11 @@
 ### 7. Unit tests
 
 - [x] Add unit tests for `storage.loadCampaigns`, `storage.saveCampaign`, `storage.deleteCampaign`, `storage.loadCampaignById`
-- [x] Verify: `npm test`
+- [x] Verify: `npm run test:unit`
 
 ## Validation
 
-- [x] `npm test` — all unit tests pass
+- [x] `npm run test:unit` — all unit tests pass
 - [x] `npm run test:integration` — all integration tests pass
 - [x] `npx tsc --noEmit` — no type errors
 - [x] `npm run build` — build succeeds
@@ -91,7 +91,7 @@
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test` — all tests must pass
+- **Unit tests** — `npm run test:unit` — all tests must pass
 - **Integration tests** — `npm run test:integration` — all tests must pass
 - **Build** — `npm run build` — must succeed with no errors
 - **Type check** — `npx tsc --noEmit` — no errors

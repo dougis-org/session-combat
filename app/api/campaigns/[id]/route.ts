@@ -57,13 +57,19 @@ export async function PATCH(
     const body = await request.json();
     const { name, moduleName, currentChapter, currentChapterOrder, active } = body;
 
+    if (name !== undefined) {
+      if (typeof name !== 'string' || name.trim() === '') {
+        return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
+      }
+    }
+
     const updated = {
       ...campaign,
-      ...(name !== undefined && { name: name.trim() }),
-      ...(moduleName !== undefined && { moduleName: moduleName.trim() }),
-      ...(currentChapter !== undefined && { currentChapter: currentChapter.trim() }),
-      ...(currentChapterOrder !== undefined && { currentChapterOrder }),
-      ...(active !== undefined && { active }),
+      ...(name !== undefined && typeof name === 'string' && { name: name.trim() }),
+      ...(moduleName !== undefined && typeof moduleName === 'string' && { moduleName: moduleName.trim() }),
+      ...(currentChapter !== undefined && typeof currentChapter === 'string' && { currentChapter: currentChapter.trim() }),
+      ...(currentChapterOrder !== undefined && typeof currentChapterOrder === 'number' && isFinite(currentChapterOrder) && { currentChapterOrder }),
+      ...(active !== undefined && typeof active === 'boolean' && { active }),
       updatedAt: new Date(),
     };
 

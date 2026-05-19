@@ -2,6 +2,8 @@
 
 > Auto-maintained by OpenWolf. Last scanned: 2026-05-19T00:22:58.921Z
 > Files: 581 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-19T16:23:04.739Z
+> Files: 604 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -752,9 +754,46 @@
 - `save-163352.log` (~0 tok)
 - `save-163400.log` (~0 tok)
 
+## app/
+
+- `layout.tsx` — app/layout.tsx — drop-in replacement. (~758 tok)
+- `page.tsx` — RootPage (~32 tok)
+
+## app/api/campaigns/
+
+- `route.ts` — Next.js API route: GET, POST (~512 tok)
+
+## app/api/campaigns/[id]/
+
+- `route.ts` — Next.js API route: GET, PATCH, DELETE (~926 tok)
+
+## app/api/parties/
+
+- `route.ts` — Next.js API route: GET, POST (~487 tok)
+
+## app/api/parties/[id]/
+
+- `route.ts` — Next.js API route: GET, PUT, DELETE (~975 tok)
+
+## app/campaigns/
+
+- `page.tsx` — CampaignsContent — renders form (~2488 tok)
+
+## app/parties/
+
+- `page.tsx` — PartiesContent — renders form (~2897 tok)
+
 ## lib/
 
+- `clientStorage.ts` — Client-side storage using localStorage (~616 tok)
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~2785 tok)
+- `storage.ts` — Server-side storage functions for MongoDB (~5520 tok)
+- `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4294 tok)
+
+## lib/components/
+
+- `NavBar.tsx` — NavBar (~426 tok)
+- `ui.tsx` — ErrorBanner (~592 tok)
 
 ## lib/import/
 
@@ -764,6 +803,25 @@
 - `dndBeyond-skills-senses.ts` — Exports normalizeSavingThrows, normalizeSkills, normalizeSenses (~1155 tok)
 - `dndBeyond-utils.ts` — Exports DndBeyondImportError, createValidationError, ABILITY_ID_MAP, indexStatValues + 6 more (~1014 tok)
 - `utils.ts` — Exports ModifierLike, getAbilityModifier, getProficiencyBonus, dedupeStrings + 9 more (~676 tok)
+
+## openspec/changes/campaign-management/
+
+- `design.md` — Context (~2560 tok)
+- `proposal.md` — GitHub Issues (~1276 tok)
+- `tasks.md` — Tasks (~1727 tok)
+- `tests.md` — Tests (~1227 tok)
+
+## openspec/changes/campaign-management/specs/campaign-crud/
+
+- `spec.md` — ADDED Requirements (~1055 tok)
+
+## openspec/changes/campaign-management/specs/campaign-dashboard/
+
+- `spec.md` — ADDED Requirements (~823 tok)
+
+## openspec/changes/campaign-management/specs/campaign-party-association/
+
+- `spec.md` — ADDED Requirements (~927 tok)
 
 ## openspec/changes/extract-armor-class-normalization/
 
@@ -838,9 +896,21 @@
 
 - `spec.md` — ADDED Requirements (~1032 tok)
 
+## tests/e2e/
+
+- `auth.spec.ts` — Declares STRONG_PASSWORD (~4702 tok)
+
+## tests/integration/
+
+- `campaigns.integration.test.ts` — CampaignResponse: authed (~3674 tok)
+
 ## tests/unit/import/
 
 - `armor-class.test.ts` — Declares result (~534 tok)
 - `dndBeyond-abilities.test.ts` — Declares DndBeyondActionEntry (~2414 tok)
 - `dndBeyond-armor-class.test.ts` — Declares MockDndBeyondModifier (~2491 tok)
 - `utils.test.ts` — Declares input (~1899 tok)
+
+## tests/unit/storage/
+
+- `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~1667 tok)

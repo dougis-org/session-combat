@@ -68,12 +68,13 @@ export async function PUT(
       );
     }
 
+    const normalizedCampaignId = typeof campaignId === 'string' ? campaignId.trim() || undefined : undefined;
     const updatedParty: Party = {
       ...existingParty,
-      name: name !== undefined ? name.trim() : existingParty.name,
-      description: description !== undefined ? description.trim() : (existingParty.description || ''),
+      name: name !== undefined && typeof name === 'string' ? name.trim() : existingParty.name,
+      description: description !== undefined && typeof description === 'string' ? description.trim() : (existingParty.description || ''),
       characterIds: Array.isArray(characterIds) ? characterIds : existingParty.characterIds,
-      ...(campaignId !== undefined && { campaignId: campaignId || undefined }),
+      ...(campaignId !== undefined && { campaignId: normalizedCampaignId }),
       updatedAt: new Date(),
     };
 

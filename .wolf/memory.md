@@ -290,3 +290,73 @@
 |------|--------|---------|---------|--------|
 | 17:22 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | inline fix | ~16 |
 | 17:23 | Session end: 1 writes across 1 files (tasks.md) | 1 reads | ~4119 tok |
+## Session: 2026-05-19 17:10
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:18 | Created openspec/changes/campaign-management/proposal.md | — | ~1361 |
+| 17:19 | Created openspec/changes/campaign-management/design.md | — | ~2731 |
+| 17:20 | Created openspec/changes/campaign-management/specs/campaign-crud/spec.md | — | ~1126 |
+| 17:20 | Created openspec/changes/campaign-management/specs/campaign-dashboard/spec.md | — | ~878 |
+| 17:20 | Created openspec/changes/campaign-management/specs/campaign-party-association/spec.md | — | ~989 |
+| 17:21 | Created openspec/changes/campaign-management/tasks.md | — | ~1835 |
+| 17:21 | Created openspec/changes/campaign-management/tests.md | — | ~1308 |
+| 17:21 | Session end: 7 writes across 5 files (proposal.md, design.md, spec.md, tasks.md, tests.md) | 3 reads | ~10959 tok |
+
+## Session: 2026-05-19 17:22
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:23 | Edited lib/types.ts | expanded (+15 lines) | ~181 |
+| 17:23 | Edited lib/clientStorage.ts | inline fix | ~22 |
+| 17:23 | Edited lib/storage.ts | 9→10 lines | ~40 |
+| 17:23 | Edited lib/storage.ts | modified loadCampaigns() | ~684 |
+| 17:24 | Created app/api/campaigns/route.ts | — | ~512 |
+| 17:24 | Created app/api/campaigns/[id]/route.ts | — | ~811 |
+| 17:25 | Created app/campaigns/page.tsx | — | ~3052 |
+| 17:25 | Edited app/layout.tsx | added 1 import(s) | ~48 |
+| 17:26 | Edited app/layout.tsx | expanded (+22 lines) | ~350 |
+| 17:26 | Created app/page.tsx | — | ~32 |
+| 17:26 | Edited app/parties/page.tsx | modified PartiesContent() | ~131 |
+| 17:26 | Edited app/parties/page.tsx | modified catch() | ~232 |
+| 17:27 | Edited app/parties/page.tsx | 9→10 lines | ~78 |
+| 17:27 | Edited app/parties/page.tsx | added optional chaining | ~232 |
+| 17:27 | Edited app/parties/page.tsx | added nullish coalescing | ~152 |
+| 17:27 | Edited app/parties/page.tsx | CSS: campaignId | ~60 |
+| 17:27 | Edited app/parties/page.tsx | expanded (+15 lines) | ~275 |
+| 17:28 | Created tests/integration/campaigns.integration.test.ts | — | ~3674 |
+| 17:28 | Edited app/api/parties/route.ts | 18→19 lines | ~158 |
+| 17:28 | Edited app/api/parties/[id]/route.ts | modified if() | ~291 |
+| 17:28 | Created tests/unit/storage/campaigns.test.ts | — | ~1667 |
+| 21:09 | Created openspec/changes/campaign-management/tasks.md | — | ~1835 |
+| 06:38 | Session end: 22 writes across 9 files (types.ts, clientStorage.ts, storage.ts, route.ts, page.tsx) | 18 reads | ~22609 tok |
+| 09:15 | Created lib/components/ui.tsx | — | ~592 |
+| 09:15 | Created app/campaigns/page.tsx | — | ~2616 |
+| 09:15 | Edited app/parties/page.tsx | added 1 import(s) | ~87 |
+| 09:16 | Edited app/parties/page.tsx | 5→1 lines | ~12 |
+| 09:16 | Edited app/parties/page.tsx | 5→3 lines | ~26 |
+| 09:16 | Edited app/parties/page.tsx | reduced (-42 lines) | ~594 |
+
+## Session: 2026-05-19 09:18
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 09:20 | Edited app/api/campaigns/[id]/route.ts | added 2 condition(s) | ~269 |
+| 09:21 | Edited app/api/parties/route.ts | inline fix | ~29 |
+| 09:21 | Edited app/api/parties/[id]/route.ts | modified trim() | ~174 |
+| 09:21 | Edited lib/clientStorage.ts | modified load() | ~121 |
+| 09:21 | Edited app/parties/page.tsx | 7→7 lines | ~94 |
+| 09:21 | Edited app/parties/page.tsx | added optional chaining | ~238 |
+| 09:21 | Edited app/parties/page.tsx | 5→10 lines | ~84 |
+| 09:21 | Edited app/parties/page.tsx | inline fix | ~38 |
+| 09:21 | Edited app/campaigns/page.tsx | 7→6 lines | ~78 |
+| 09:21 | Edited app/campaigns/page.tsx | reduced (-11 lines) | ~40 |
+| 09:21 | Edited app/campaigns/page.tsx | 8→9 lines | ~75 |
+| 09:22 | Edited app/campaigns/page.tsx | inline fix | ~30 |
+| 09:22 | Edited openspec/changes/campaign-management/tasks.md | "npm test" → "npm run test:unit" | ~9 |
+| 09:22 | Edited openspec/changes/campaign-management/tasks.md | 5→5 lines | ~61 |
+| 09:22 | Edited openspec/changes/campaign-management/tasks.md | "npm test" → "npm run test:unit" | ~16 |
+| 09:22 | Created lib/components/NavBar.tsx | — | ~426 |
+| 09:22 | Edited app/layout.tsx | 4→4 lines | ~54 |
+| 09:22 | Edited app/layout.tsx | removed 22 lines | ~6 |
+| 09:23 | Edited tests/e2e/auth.spec.ts | 2→2 lines | ~24 |
