@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-15T00:48:53.252Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-19T00:22:58.921Z
 > Files: 581 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
@@ -768,7 +768,7 @@
 ## openspec/changes/extract-armor-class-normalization/
 
 - `design.md` — Context (~3051 tok)
-- `tasks.md` — Implementation Task List (~4102 tok)
+- `tasks.md` — Implementation Task List (~4108 tok)
 
 ## openspec/changes/extract-dnd-ability-scores-foundation/
 

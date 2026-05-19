@@ -283,3 +283,10 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-05-19 17:21
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:22 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | inline fix | ~16 |
+| 17:23 | Session end: 1 writes across 1 files (tasks.md) | 1 reads | ~4119 tok |
