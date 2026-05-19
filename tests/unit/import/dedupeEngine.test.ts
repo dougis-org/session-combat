@@ -5,6 +5,7 @@ import {
   importSpellsFromOpen5E,
 } from "@/lib/import/dedupeEngine";
 import { storage } from "@/lib/storage";
+import { transformMonster } from "@/lib/import/transformMonster";
 import {
   createMockClient,
   createTestCreature,
@@ -12,12 +13,25 @@ import {
 } from "@/tests/helpers/importTestHelpers";
 
 jest.mock("@/lib/storage");
+jest.mock("@/lib/import/transformMonster");
 
 const mockedStorage = jest.mocked(storage);
+const mockedTransformMonster = jest.mocked(transformMonster);
 
 describe("dedupeEngine", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedTransformMonster.mockImplementation((raw) => {
+      const name = (raw as { name?: string }).name ?? "";
+      if (!name) {
+        return { monster: {} as any, valid: false, errors: ["Missing required field: name"] };
+      }
+      return {
+        monster: { name, source: "open5e" } as any,
+        valid: true,
+        errors: [],
+      };
+    });
   });
 
   describe("shouldImport", () => {
@@ -89,6 +103,36 @@ describe("dedupeEngine", () => {
       expect(result.skipped).toBe(1);
       expect(result.errors).toBe(0);
       expect(mockedStorage.saveMonsterTemplate).not.toHaveBeenCalled();
+    });
+
+    it("does not call transformMonster when duplicate is detected", async () => {
+      mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
+
+      const creature = createTestCreature({ key: "goblin", name: "Goblin" });
+      const client = createMockClient([creature], []);
+
+      await importMonstersFromOpen5E(client);
+
+      expect(mockedTransformMonster).not.toHaveBeenCalled();
+    });
+
+    it("returns skipped (not error) for invalid+duplicate monster", async () => {
+      mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
+      mockedTransformMonster.mockReturnValue({
+        monster: {} as any,
+        valid: false,
+        errors: ["Missing required field: name"],
+      });
+
+      const creature = createTestCreature({ key: "goblin", name: "Goblin" });
+      const client = createMockClient([creature], []);
+
+      const result = await importMonstersFromOpen5E(client);
+
+      expect(result.inserted).toBe(0);
+      expect(result.skipped).toBe(1);
+      expect(result.errors).toBe(0);
+      expect(mockedTransformMonster).not.toHaveBeenCalled();
     });
 
     it("counts error when monster transform is invalid", async () => {
