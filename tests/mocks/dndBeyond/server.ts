@@ -2,11 +2,13 @@ import { createServer, Server } from "http";
 import { sampleDndBeyondCharacterResponse } from "@/tests/fixtures/dndBeyondCharacter";
 
 function listen(server: Server): Promise<number> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    server.once("error", reject);
     server.listen(0, "127.0.0.1", () => {
       const address = server.address();
       if (!address || typeof address === "string") {
-        throw new Error("Failed to bind mock character service");
+        reject(new Error("Failed to bind mock character service"));
+        return;
       }
       resolve(address.port);
     });

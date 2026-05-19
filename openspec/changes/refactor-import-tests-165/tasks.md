@@ -14,7 +14,7 @@
   - Assert `transformMonster` is NOT called when duplicate detected
   - Assert invalid+duplicate monster returns `skipped: true` (not `error: true`)
 - [x] **1.2 — Refactor `importMonsterSingle`** in `lib/import/dedupeEngine.ts`:
-  - Replace inline `storage.findMonsterByNameAndSource` call with `shouldImport("monsters", raw.name, raw.source ?? "")`
+  - Replace inline `storage.findMonsterByNameAndSource` call with `shouldImport("monsters", raw.name, "open5e")` (Open5ECreature has no source field; "open5e" matches what transformMonster hardcodes)
   - Move existence check before `transformMonster` call
   - Return `{ inserted: false, skipped: true, error: false }` when `!should`
 - [x] **1.3 — Verify dedupeEngine integration tests** in `tests/integration/import/dedupeEngine.integration.test.ts` still pass; update if any assertions relied on old order
@@ -35,10 +35,10 @@
 
 ## Validation
 
-- [x] Run unit tests: `npm test -- --testPathPattern="dedupeEngine"`
+- [x] Run unit tests: `npm run test:unit -- --testPathPattern="dedupeEngine"`
 - [x] Run integration tests: `npm run test:integration -- --testPathPattern="import"`
-- [x] Run full unit suite: `npm test`
-- [x] Run type check: `npm run type-check` (or `npx tsc --noEmit`)
+- [x] Run full unit suite: `npm run test:unit`
+- [x] Run type check: `npx tsc --noEmit`
 - [x] Run build: `npm run build`
 - [x] Confirm no new entries in `package.json`
 - [x] All tasks above marked complete
@@ -54,9 +54,9 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Run the required pre-PR self-review from `skills/openspec-apply-change/SKILL.md` before committing
-- [ ] Commit all changes to `refactor/import-tests-165` and push to remote
-- [ ] Open PR from `refactor/import-tests-165` to `main` — title: `refactor: centralize D&D Beyond mock server and unify importMonsterSingle dedupe check (closes #165)`
+- [x] Run the required pre-PR self-review from `skills/openspec-apply-change/SKILL.md` before committing
+- [x] Commit all changes to `refactor/import-tests-165` and push to remote
+- [x] Open PR from `refactor/import-tests-165` to `main` — title: `refactor: centralize D&D Beyond mock server and unify importMonsterSingle dedupe check (closes #165)`
 - [ ] Wait 120 seconds for agentic reviewers to post comments
 - [ ] **Monitor PR comments** — address each, commit fixes, follow Remote push validation, push; repeat until no unresolved comments remain
 - [ ] Enable auto-merge once no blocking review comments remain

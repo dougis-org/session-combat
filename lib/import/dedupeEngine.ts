@@ -62,9 +62,11 @@ async function importSingle<T extends MonsterTemplate | SpellTemplate>(
 async function importMonsterSingle(
   raw: Open5ECreature
 ): Promise<{ inserted: boolean; skipped: boolean; error: boolean }> {
-  const { should } = await shouldImport("monsters", raw.name, "open5e");
-  if (!should) {
-    return { inserted: false, skipped: true, error: false };
+  if (raw.name) {
+    const { should } = await shouldImport("monsters", raw.name, "open5e");
+    if (!should) {
+      return { inserted: false, skipped: true, error: false };
+    }
   }
 
   const { monster, valid, errors } = transformMonster(raw);
