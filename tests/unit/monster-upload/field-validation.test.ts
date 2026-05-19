@@ -69,6 +69,36 @@ describe("validateMonsterData", () => {
     });
   });
 
+  describe("hp validation", () => {
+    it("should accept hp equal to maxHp", () => {
+      expectValid(createRawMonster({ hp: 10, maxHp: 10 }));
+    });
+
+    it("should accept hp less than maxHp", () => {
+      expectValid(createRawMonster({ hp: 5, maxHp: 10 }));
+    });
+
+    it("should reject hp greater than maxHp", () => {
+      const result = validateMonsterData(createRawMonster({ hp: 11, maxHp: 10 }));
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContainEqual(
+        expect.objectContaining({ field: expect.stringContaining("hp") }),
+      );
+    });
+
+    it("should reject non-number hp", () => {
+      const result = validateMonsterData(createRawMonster({ hp: "five" as any }));
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContainEqual(
+        expect.objectContaining({ field: expect.stringContaining("hp") }),
+      );
+    });
+
+    it("should accept omitted hp", () => {
+      expectValid(createRawMonster());
+    });
+  });
+
   describe("optional fields with validation", () => {
     it("should accept valid size values", () => {
       for (const size of VALID_SIZES) {

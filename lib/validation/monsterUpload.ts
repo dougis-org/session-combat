@@ -1,10 +1,16 @@
-/**
- * Validation utilities for monster JSON document format
- * Validates and transforms user-uploaded monster data
- */
-
 import { MonsterTemplate, AbilityScores, CreatureAbility, normalizeAlignment } from '@/lib/types';
 import { filterToDamageTypes } from '@/lib/constants';
+import type { ValidationError, ValidationResult } from './core';
+import {
+  validateString,
+  validateNumber,
+  validateStringArray,
+  validateNumberRecord,
+  validateStringRecord,
+} from './core';
+import { validateAbilityScores, validateAbilityArray } from './dnd';
+
+export type { ValidationError, ValidationResult } from './core';
 
 /**
  * Valid monster sizes in D&D 5e
@@ -19,23 +25,6 @@ export const VALID_SIZES = [
 ] as const;
 
 export type ValidSize = (typeof VALID_SIZES)[number];
-
-/**
- * Validation error with field context
- */
-export interface ValidationError {
-  field?: string;
-  message: string;
-  index?: number; // For array items
-}
-
-/**
- * Validation result
- */
-export interface ValidationResult {
-  valid: boolean;
-  errors: ValidationError[];
-}
 
 /**
  * Raw monster data from JSON upload
@@ -80,341 +69,6 @@ export interface MonsterUploadDocument {
 }
 
 /**
- * Validates a string value
- */
-function validateString(
-  value: unknown,
-  fieldName: string,
-  options: { required?: boolean; minLength?: number } = {}
-): { valid: true; value: string } | { valid: false; error: ValidationError } {
-  const { required = false, minLength = 0 } = options;
-
-  if (value === undefined || value === null) {
-    if (required) {
-      return {
-        valid: false,
-        error: { field: fieldName, message: `${fieldName} is required` },
-      };
-    }
-    return { valid: true, value: '' };
-  }
-
-  if (typeof value !== 'string') {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be a string, got ${typeof value}`,
-      },
-    };
-  }
-
-  if (value.length < minLength) {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be at least ${minLength} characters`,
-      },
-    };
-  }
-
-  return { valid: true, value };
-}
-
-/**
- * Validates a number value
- */
-function validateNumber(
-  value: unknown,
-  fieldName: string,
-  options: { required?: boolean; min?: number; max?: number } = {}
-): { valid: true; value: number } | { valid: false; error: ValidationError } {
-  const { required = false, min, max } = options;
-
-  if (value === undefined || value === null) {
-    if (required) {
-      return {
-        valid: false,
-        error: { field: fieldName, message: `${fieldName} is required` },
-      };
-    }
-    return { valid: true, value: 0 };
-  }
-
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be a valid number, got ${typeof value}`,
-      },
-    };
-  }
-
-  if (min !== undefined && value < min) {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be at least ${min}`,
-      },
-    };
-  }
-
-  if (max !== undefined && value > max) {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be at most ${max}`,
-      },
-    };
-  }
-
-  return { valid: true, value };
-}
-
-/**
- * Validates ability scores object
- */
-function validateAbilityScores(
-  value: unknown,
-  fieldName: string = 'abilityScores'
-): { valid: true; value: AbilityScores } | { valid: false; error: ValidationError } {
-  if (!value || typeof value !== 'object') {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be an object`,
-      },
-    };
-  }
-
-  const obj = value as Record<string, unknown>;
-  const abilityNames = [
-    'strength',
-    'dexterity',
-    'constitution',
-    'intelligence',
-    'wisdom',
-    'charisma',
-  ];
-  const scores: Partial<AbilityScores> = {};
-
-  for (const ability of abilityNames) {
-    const scoreResult = validateNumber(obj[ability], `${fieldName}.${ability}`, {
-      required: true,
-      min: 1,
-      max: 30,
-    });
-    if (!scoreResult.valid) {
-      return { valid: false, error: scoreResult.error };
-    }
-    scores[ability as keyof AbilityScores] = scoreResult.value;
-  }
-
-  return {
-    valid: true,
-    value: scores as AbilityScores,
-  };
-}
-
-/**
- * Validates an array of strings
- */
-function validateStringArray(
-  value: unknown,
-  fieldName: string = 'array'
-): { valid: true; value: string[] } | { valid: false; error: ValidationError } {
-  if (value === undefined || value === null) {
-    return { valid: true, value: [] };
-  }
-
-  if (!Array.isArray(value)) {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be an array of strings`,
-      },
-    };
-  }
-
-  for (let i = 0; i < value.length; i++) {
-    if (typeof value[i] !== 'string') {
-      return {
-        valid: false,
-        error: {
-          field: fieldName,
-          index: i,
-          message: `${fieldName}[${i}] must be a string, got ${typeof value[i]}`,
-        },
-      };
-    }
-  }
-
-  return { valid: true, value: value as string[] };
-}
-
-/**
- * Generic record validator
- */
-function validateRecord<T extends string | number | (string | number)>(
-  value: unknown,
-  fieldName: string,
-  isValid: (val: unknown) => boolean
-): { valid: true; value: Record<string, T> } | { valid: false; error: ValidationError } {
-  if (value === undefined || value === null) {
-    return { valid: true, value: {} as Record<string, T> };
-  }
-
-  if (typeof value !== 'object' || Array.isArray(value)) {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be an object`,
-      },
-    };
-  }
-
-  const result: Record<string, T> = {};
-  const obj = value as Record<string, unknown>;
-
-  for (const [key, val] of Object.entries(obj)) {
-    if (!isValid(val)) {
-      return {
-        valid: false,
-        error: {
-          field: `${fieldName}.${key}`,
-          message: `${fieldName}.${key} has invalid type`,
-        },
-      };
-    }
-    result[key] = val as T;
-  }
-
-  return { valid: true, value: result };
-}
-
-/**
- * Validates a string-only record (key-value pairs with string values)
- */
-function validateStringRecord(
-  value: unknown,
-  fieldName: string = 'record'
-): { valid: true; value: Record<string, string> } | { valid: false; error: ValidationError } {
-  return validateRecord<string>(value, fieldName, (val) => typeof val === 'string') as
-    | { valid: true; value: Record<string, string> }
-    | { valid: false; error: ValidationError };
-}
-
-/**
- * Validates a numeric record (key-value pairs with number values)
- */
-function validateNumberRecord(
-  value: unknown,
-  fieldName: string = 'record'
-): { valid: true; value: Record<string, number> } | { valid: false; error: ValidationError } {
-  return validateRecord<number>(value, fieldName, (val) => typeof val === 'number' && Number.isFinite(val as number)) as
-    | { valid: true; value: Record<string, number> }
-    | { valid: false; error: ValidationError };
-}
-
-/**
- * Validates a record of strings or numbers
- */
-function validateStringNumberRecord(
-  value: unknown,
-  fieldName: string = 'record'
-): {
-  valid: true;
-  value: Record<string, string | number>;
-} | { valid: false; error: ValidationError } {
-  return validateRecord<string | number>(value, fieldName, (val) => typeof val === 'string' || typeof val === 'number') as
-    | { valid: true; value: Record<string, string | number> }
-    | { valid: false; error: ValidationError };
-}
-
-/**
- * Validates a creature ability (trait, action, etc)
- */
-function validateAbility(ability: unknown, fieldName: string = 'ability') {
-  if (!ability || typeof ability !== 'object') {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be an object`,
-      },
-    };
-  }
-
-  const obj = ability as Record<string, unknown>;
-
-  const nameResult = validateString(obj.name, `${fieldName}.name`, { required: true });
-  if (!nameResult.valid) {
-    return { valid: false, error: nameResult.error };
-  }
-
-  const descResult = validateString(obj.description, `${fieldName}.description`, {
-    required: true,
-  });
-  if (!descResult.valid) {
-    return { valid: false, error: descResult.error };
-  }
-
-  return {
-    valid: true,
-    value: {
-      name: nameResult.value,
-      description: descResult.value,
-      attackBonus: typeof obj.attackBonus === 'number' ? obj.attackBonus : undefined,
-      damageDescription:
-        typeof obj.damageDescription === 'string' ? obj.damageDescription : undefined,
-      saveDC: typeof obj.saveDC === 'number' ? obj.saveDC : undefined,
-      saveType: typeof obj.saveType === 'string' ? obj.saveType : undefined,
-      recharge: typeof obj.recharge === 'string' ? obj.recharge : undefined,
-    },
-  };
-}
-
-/**
- * Validates an array of abilities
- */
-function validateAbilityArray(
-  value: unknown,
-  fieldName: string = 'abilities'
-): { valid: true; value: any[] } | { valid: false; error: ValidationError } {
-  if (value === undefined || value === null) {
-    return { valid: true, value: [] };
-  }
-
-  if (!Array.isArray(value)) {
-    return {
-      valid: false,
-      error: {
-        field: fieldName,
-        message: `${fieldName} must be an array`,
-      },
-    };
-  }
-
-  const result = [];
-  for (let i = 0; i < value.length; i++) {
-    const abilityResult = validateAbility(value[i], `${fieldName}[${i}]`);
-    if (!abilityResult.valid) {
-      return { valid: false, error: abilityResult.error as ValidationError };
-    }
-    result.push(abilityResult.value);
-  }
-
-  return { valid: true, value: result };
-}
-
-/**
  * Validates a single monster from raw JSON data
  */
 export function validateMonsterData(
@@ -425,32 +79,19 @@ export function validateMonsterData(
   const prefix = `monsters[${index}]`;
 
   // Required: name
-  if (typeof data.name !== 'string' || data.name.trim() === '') {
-    errors.push({
-      field: `${prefix}.name`,
-      message: 'Monster name is required and must be a non-empty string',
-      index,
-    });
-  }
+  const nameResult = validateString(data.name, `${prefix}.name`, { required: true, minLength: 1 });
+  if (!nameResult.valid) errors.push({ ...nameResult.error, index });
 
   // Required: maxHp
-  if (typeof data.maxHp !== 'number' || data.maxHp <= 0) {
-    errors.push({
-      field: `${prefix}.maxHp`,
-      message: 'maxHp is required and must be greater than 0',
-      index,
-    });
-  }
+  const maxHpResult = validateNumber(data.maxHp, `${prefix}.maxHp`, { required: true, min: 1 });
+  if (!maxHpResult.valid) errors.push({ ...maxHpResult.error, index });
 
-  // Optional but with defaults: hp (must be <= maxHp)
+  // Optional: hp (type check only; cross-field check inline)
   if (data.hp !== undefined && data.hp !== null) {
-    if (typeof data.hp !== 'number') {
-      errors.push({
-        field: `${prefix}.hp`,
-        message: 'hp must be a number',
-        index,
-      });
-    } else if (data.maxHp && typeof data.maxHp === 'number' && data.hp > data.maxHp) {
+    const hpResult = validateNumber(data.hp, `${prefix}.hp`);
+    if (!hpResult.valid) {
+      errors.push({ ...hpResult.error, index });
+    } else if (typeof data.maxHp === 'number' && hpResult.value > data.maxHp) {
       errors.push({
         field: `${prefix}.hp`,
         message: 'hp must be less than or equal to maxHp',
@@ -460,17 +101,10 @@ export function validateMonsterData(
   }
 
   // Optional: ac (valid range 0-30)
-  if (data.ac !== undefined && data.ac !== null) {
-    if (typeof data.ac !== 'number' || data.ac < 0 || data.ac > 30) {
-      errors.push({
-        field: `${prefix}.ac`,
-        message: 'ac must be a number between 0 and 30',
-        index,
-      });
-    }
-  }
+  const acResult = validateNumber(data.ac, `${prefix}.ac`, { min: 0, max: 30 });
+  if (!acResult.valid) errors.push({ ...acResult.error, index });
 
-  // Optional: size
+  // Optional: size (enum check inline — no helper for enum validation)
   if (data.size !== undefined && data.size !== null) {
     if (typeof data.size !== 'string' || !VALID_SIZES.includes(data.size as any)) {
       errors.push({
@@ -482,26 +116,12 @@ export function validateMonsterData(
   }
 
   // Optional: type
-  if (data.type !== undefined && data.type !== null) {
-    if (typeof data.type !== 'string' || data.type.trim() === '') {
-      errors.push({
-        field: `${prefix}.type`,
-        message: 'type must be a non-empty string',
-        index,
-      });
-    }
-  }
+  const typeResult = validateString(data.type, `${prefix}.type`, { minLength: 1 });
+  if (!typeResult.valid) errors.push({ ...typeResult.error, index });
 
   // Optional: challengeRating
-  if (data.challengeRating !== undefined && data.challengeRating !== null) {
-    if (typeof data.challengeRating !== 'number' || data.challengeRating < 0) {
-      errors.push({
-        field: `${prefix}.challengeRating`,
-        message: 'challengeRating must be a non-negative number',
-        index,
-      });
-    }
-  }
+  const crResult = validateNumber(data.challengeRating, `${prefix}.challengeRating`, { min: 0 });
+  if (!crResult.valid) errors.push({ ...crResult.error, index });
 
   // Optional: abilityScores
   if (data.abilityScores !== undefined && data.abilityScores !== null) {
