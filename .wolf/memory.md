@@ -375,3 +375,11 @@
 | 13:16 | Edited tests/unit/api/parties/route.test.ts | added 2 condition(s) | ~251 |
 | 13:16 | Edited tests/unit/api/parties/route.test.ts | _requireAuth() → mockRequireAuthFn() | ~209 |
 | 13:16 | Edited tests/unit/api/parties/route.test.ts | mockRequireAuthFn() → requireAuth() | ~211 |
+| 13:19 | Session end: 33 writes across 12 files (route.ts, clientStorage.ts, page.tsx, tasks.md, NavBar.tsx) | 16 reads | ~27214 tok |
+| 13:25 | Edited app/api/campaigns/route.ts | modified trim() | ~141 |
+| 13:26 | Edited app/api/parties/[id]/route.ts | added 2 condition(s) | ~206 |
+| 13:26 | Edited app/parties/page.tsx | 7→7 lines | ~59 |
+| 13:26 | Edited app/parties/page.tsx | inline fix | ~9 |
+| 13:26 | Edited lib/components/ui.tsx | modified FormField() | ~76 |
+| 13:26 | Edited tests/e2e/auth.spec.ts | 1→6 lines | ~73 |
+| 13:26 | Edited .gitignore | 2→5 lines | ~32 |

@@ -35,15 +35,22 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
       return NextResponse.json({ error: 'Party name is required' }, { status: 400 });
     }
 
-    const normalizedCampaignId = typeof campaignId === 'string' ? campaignId.trim() || undefined : undefined;
     const updatedParty: Party = {
       ...existingParty,
       name: name !== undefined && typeof name === 'string' ? name.trim() : existingParty.name,
       description: description !== undefined && typeof description === 'string' ? description.trim() : (existingParty.description || ''),
       characterIds: Array.isArray(characterIds) ? characterIds : existingParty.characterIds,
-      ...(campaignId !== undefined && { campaignId: normalizedCampaignId }),
       updatedAt: new Date(),
     };
+
+    if (campaignId !== undefined) {
+      const normalized = typeof campaignId === 'string' ? campaignId.trim() : '';
+      if (normalized) {
+        updatedParty.campaignId = normalized;
+      } else {
+        delete updatedParty.campaignId;
+      }
+    }
 
     await storage.saveParty(updatedParty);
 

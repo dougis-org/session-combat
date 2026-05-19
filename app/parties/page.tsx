@@ -229,7 +229,7 @@ function PartyEditor({
         ...party,
         name: name.trim(),
         description: description.trim(),
-        campaignId: campaignId || undefined,
+        campaignId: campaignId,
         characterIds: Array.from(characterIds),
       });
     } finally {

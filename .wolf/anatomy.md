@@ -1,10 +1,14 @@
 # anatomy.md
 
+<<<<<<< Updated upstream
 > Auto-maintained by OpenWolf. Last scanned: 2026-05-19T00:22:58.921Z
 > Files: 581 tracked | Anatomy hits: 0 | Misses: 0
 > Auto-maintained by OpenWolf. Last scanned: 2026-05-19T16:23:04.739Z
 > Files: 604 tracked | Anatomy hits: 0 | Misses: 0
 > Auto-maintained by OpenWolf. Last scanned: 2026-05-19T20:16:56.481Z
+=======
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-19T20:26:57.751Z
+>>>>>>> Stashed changes
 > Files: 606 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
@@ -22,7 +26,7 @@
 
 - `.codacy.yml` — - .claude** (~98 tok)
 - `.dockerignore` — Docker ignore rules (~123 tok)
-- `.gitignore` — Git ignore rules (~271 tok)
+- `.gitignore` — Git ignore rules (~297 tok)
 - `.gitmodules` (~33 tok)
 - `AGENTS.md` — AI Agent Contribution Guidelines (~289 tok)
 - `AGENTS.original.md` — AI Agent Contribution Guidelines (~301 tok)
@@ -763,7 +767,7 @@
 
 ## app/api/campaigns/
 
-- `route.ts` — Next.js API route (~443 tok)
+- `route.ts` — Next.js API route (~461 tok)
 
 ## app/api/campaigns/[id]/
 
@@ -775,7 +779,7 @@
 
 ## app/api/parties/[id]/
 
-- `route.ts` — Next.js API route (~795 tok)
+- `route.ts` — Next.js API route (~815 tok)
 
 ## app/campaigns/
 
@@ -783,7 +787,7 @@
 
 ## app/parties/
 
-- `page.tsx` — PartiesContent — renders form (~2897 tok)
+- `page.tsx` — PartiesContent — renders form (~2893 tok)
 
 ## lib/
 
@@ -796,7 +800,7 @@
 ## lib/components/
 
 - `NavBar.tsx` — NavBar (~426 tok)
-- `ui.tsx` — ErrorBanner — renders form (~734 tok)
+- `ui.tsx` — ErrorBanner — renders form (~747 tok)
 
 ## lib/import/
 
@@ -901,7 +905,7 @@
 
 ## tests/e2e/
 
-- `auth.spec.ts` — Declares STRONG_PASSWORD (~4702 tok)
+- `auth.spec.ts` — Declares STRONG_PASSWORD (~4754 tok)
 
 ## tests/integration/
 

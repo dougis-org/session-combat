@@ -148,6 +148,11 @@ test.describe("Auth", () => {
   // Navigation & routing
   // ────────────────────────────────────────────────────────────
 
+  test("root path redirects to /campaigns", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/campaigns/);
+  });
+
   test("register and login pages are accessible", async ({ page }) => {
     const registerResponse = await page.goto("/register", {
       waitUntil: "domcontentloaded",

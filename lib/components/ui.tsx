@@ -28,10 +28,10 @@ export function LoadingState({ label }: { label: string }) {
   );
 }
 
-export function FormField({ label, children }: { label: string; children: ReactNode }) {
+export function FormField({ label, htmlFor, children }: { label: string; htmlFor?: string; children: ReactNode }) {
   return (
     <div>
-      <label className="block mb-1 text-sm font-semibold">{label}</label>
+      <label htmlFor={htmlFor} className="block mb-1 text-sm font-semibold">{label}</label>
       {children}
     </div>
   );

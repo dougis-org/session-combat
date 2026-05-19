@@ -336,6 +336,38 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-19T20:16:12.623Z"
+    },
+    {
+      "id": "bug-022",
+      "timestamp": "2026-05-19T20:26:05.534Z",
+      "error_message": "CSS fix: campaignId",
+      "file": "app/parties/page.tsx",
+      "root_cause": "campaignId: campaignId || undefined, → campaignId || null,",
+      "fix": "Changed campaignId: campaignId || undefined, → campaignId || null,",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-19T20:26:28.805Z"
+    },
+    {
+      "id": "bug-023",
+      "timestamp": "2026-05-19T20:26:49.442Z",
+      "error_message": "Missing await",
+      "file": "tests/e2e/auth.spec.ts",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T20:26:49.442Z"
     }
   ]
 }
