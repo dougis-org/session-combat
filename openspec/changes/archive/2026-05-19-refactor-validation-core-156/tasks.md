@@ -83,13 +83,13 @@ If **ANY** of the above fail, diagnose and fix before pushing.
 ## PR and Merge
 
 - [x] Run pre-PR self-review per `openspec/changes/refactor-validation-core-156/` checklist
-- [ ] Commit all changes and push to `refactor/validation-core-156`
-- [ ] Open PR from `refactor/validation-core-156` to `main` — title: `refactor: Extract validation core and dnd layers (#156)`
-- [ ] Wait 120 seconds for agentic reviewers
-- [ ] **Monitor PR comments** — address each comment, commit, validate locally (run all validation commands above), push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — fix any failure, commit, validate locally, push; repeat until all checks pass
-- [ ] Wait for PR to merge — never force-merge
+- [x] Commit all changes and push to `refactor/validation-core-156`
+- [x] Open PR from `refactor/validation-core-156` to `main` — title: `refactor: Extract validation core and dnd layers (#156)`
+- [x] Wait 120 seconds for agentic reviewers
+- [x] **Monitor PR comments** — address each comment, commit, validate locally (run all validation commands above), push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — fix any failure, commit, validate locally, push; repeat until all checks pass
+- [x] Wait for PR to merge — never force-merge
 
 Ownership metadata:
 
@@ -105,12 +105,12 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify `lib/validation/core.ts` and `lib/validation/dnd.ts` appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No external documentation impacted (no user-facing behaviour changed)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec) if applicable
-- [ ] Archive: move `openspec/changes/refactor-validation-core-156/` to `openspec/changes/archive/YYYY-MM-DD-refactor-validation-core-156/` — stage both new location and deletion in a single commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-refactor-validation-core-156/` exists and `openspec/changes/refactor-validation-core-156/` is gone
-- [ ] Commit and push archive to `main`
-- [ ] `git fetch --prune` and `git branch -d refactor/validation-core-156`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify `lib/validation/core.ts` and `lib/validation/dnd.ts` appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No external documentation impacted (no user-facing behaviour changed)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec) if applicable
+- [x] Archive: move `openspec/changes/refactor-validation-core-156/` to `openspec/changes/archive/YYYY-MM-DD-refactor-validation-core-156/` — stage both new location and deletion in a single commit
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-refactor-validation-core-156/` exists and `openspec/changes/refactor-validation-core-156/` is gone
+- [x] Commit and push archive to `main`
+- [x] `git fetch --prune` and `git branch -d refactor/validation-core-156`
