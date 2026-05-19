@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { ErrorBanner, LoadingState, FormField, EditorShell, textInputClass } from '@/lib/components/ui';
+import { ErrorBanner, LoadingState, TextInputField, FormField, EditorShell, textInputClass } from '@/lib/components/ui';
 import { Campaign } from '@/lib/types';
 
 function CampaignsContent() {
@@ -213,23 +213,18 @@ function CampaignEditor({
       saveLabel="Save Campaign"
     >
       <div className="grid md:grid-cols-2 gap-4 mb-4">
-        <FormField label="Campaign Name *">
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-            className={textInputClass()} disabled={saving} placeholder="e.g., Curse of Strahd" />
-        </FormField>
+        <TextInputField label="Campaign Name *" value={name} onChange={setName}
+          disabled={saving} placeholder="e.g., Curse of Strahd" />
 
-        <FormField label="Module / Adventure">
-          <input type="text" value={moduleName} onChange={(e) => setModuleName(e.target.value)}
-            className={textInputClass()} disabled={saving} placeholder="e.g., Curse of Strahd" />
-        </FormField>
+        <TextInputField label="Module / Adventure" value={moduleName} onChange={setModuleName}
+          disabled={saving} placeholder="e.g., Curse of Strahd" />
 
-        <FormField label="Current Chapter">
-          <input type="text" value={currentChapter} onChange={(e) => setCurrentChapter(e.target.value)}
-            className={textInputClass()} disabled={saving} placeholder="e.g., Chapter 4: The Sunken Temple" />
-        </FormField>
+        <TextInputField label="Current Chapter" value={currentChapter} onChange={setCurrentChapter}
+          disabled={saving} placeholder="e.g., Chapter 4: The Sunken Temple" />
 
         <FormField label="Chapter Order">
-          <input type="number" value={currentChapterOrder} onChange={(e) => { const v = parseInt(e.target.value, 10); setCurrentChapterOrder(isNaN(v) ? 0 : v); }}
+          <input type="number" value={currentChapterOrder}
+            onChange={(e) => { const v = parseInt(e.target.value, 10); setCurrentChapterOrder(isNaN(v) ? 0 : v); }}
             className={textInputClass()} disabled={saving} min={0} />
         </FormField>
       </div>

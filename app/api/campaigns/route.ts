@@ -1,43 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware';
+import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { Campaign } from '@/lib/types';
 
-export async function GET(request: NextRequest) {
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const GET = withAuth(async (_request, auth) => {
   try {
     const campaigns = await storage.loadCampaigns(auth.userId);
     return NextResponse.json(campaigns);
   } catch (error) {
     console.error('Error fetching campaigns:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch campaigns' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch campaigns' }, { status: 500 });
   }
-}
+});
 
-export async function POST(request: NextRequest) {
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const POST = withAuth(async (request, auth) => {
   try {
     const body = await request.json();
     const { name, moduleName, currentChapter, currentChapterOrder, active } = body;
 
     if (!name || name.trim() === '') {
-      return NextResponse.json(
-        { error: 'Campaign name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
     }
 
     const campaign: Campaign = {
@@ -57,9 +39,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(campaign, { status: 201 });
   } catch (error) {
     console.error('Error creating campaign:', error);
-    return NextResponse.json(
-      { error: 'Failed to create campaign' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create campaign' }, { status: 500 });
   }
-}
+});

@@ -360,3 +360,18 @@
 | 09:22 | Edited app/layout.tsx | 4→4 lines | ~54 |
 | 09:22 | Edited app/layout.tsx | removed 22 lines | ~6 |
 | 09:23 | Edited tests/e2e/auth.spec.ts | 2→2 lines | ~24 |
+| 09:25 | Session end: 19 writes across 7 files (route.ts, clientStorage.ts, page.tsx, tasks.md, NavBar.tsx) | 11 reads | ~12936 tok |
+| 13:13 | Created tests/unit/storage/campaigns.test.ts | — | ~1512 |
+| 13:13 | Created tests/integration/campaigns.integration.test.ts | — | ~3115 |
+| 13:14 | Edited lib/middleware.ts | added 2 condition(s) | ~346 |
+| 13:14 | Created app/api/campaigns/route.ts | — | ~443 |
+| 13:14 | Created app/api/campaigns/[id]/route.ts | — | ~769 |
+| 13:14 | Created app/api/parties/route.ts | — | ~417 |
+| 13:14 | Created app/api/parties/[id]/route.ts | — | ~795 |
+| 13:14 | Edited lib/components/ui.tsx | modified textInputClass() | ~170 |
+| 13:14 | Edited app/campaigns/page.tsx | inline fix | ~32 |
+| 13:14 | Edited app/campaigns/page.tsx | 21→16 lines | ~248 |
+| 13:15 | Edited app/campaigns/page.tsx | inline fix | ~35 |
+| 13:16 | Edited tests/unit/api/parties/route.test.ts | added 2 condition(s) | ~251 |
+| 13:16 | Edited tests/unit/api/parties/route.test.ts | _requireAuth() → mockRequireAuthFn() | ~209 |
+| 13:16 | Edited tests/unit/api/parties/route.test.ts | mockRequireAuthFn() → requireAuth() | ~211 |

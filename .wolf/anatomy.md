@@ -4,6 +4,8 @@
 > Files: 581 tracked | Anatomy hits: 0 | Misses: 0
 > Auto-maintained by OpenWolf. Last scanned: 2026-05-19T16:23:04.739Z
 > Files: 604 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-19T20:16:56.481Z
+> Files: 606 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -761,23 +763,23 @@
 
 ## app/api/campaigns/
 
-- `route.ts` — Next.js API route: GET, POST (~512 tok)
+- `route.ts` — Next.js API route (~443 tok)
 
 ## app/api/campaigns/[id]/
 
-- `route.ts` — Next.js API route: GET, PATCH, DELETE (~926 tok)
+- `route.ts` — Next.js API route (~769 tok)
 
 ## app/api/parties/
 
-- `route.ts` — Next.js API route: GET, POST (~487 tok)
+- `route.ts` — Next.js API route (~417 tok)
 
 ## app/api/parties/[id]/
 
-- `route.ts` — Next.js API route: GET, PUT, DELETE (~975 tok)
+- `route.ts` — Next.js API route (~795 tok)
 
 ## app/campaigns/
 
-- `page.tsx` — CampaignsContent — renders form (~2488 tok)
+- `page.tsx` — CampaignsContent — renders form (~2410 tok)
 
 ## app/parties/
 
@@ -787,13 +789,14 @@
 
 - `clientStorage.ts` — Client-side storage using localStorage (~616 tok)
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~2785 tok)
+- `middleware.ts` — Extract auth token from request (~695 tok)
 - `storage.ts` — Server-side storage functions for MongoDB (~5520 tok)
 - `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4294 tok)
 
 ## lib/components/
 
 - `NavBar.tsx` — NavBar (~426 tok)
-- `ui.tsx` — ErrorBanner (~592 tok)
+- `ui.tsx` — ErrorBanner — renders form (~734 tok)
 
 ## lib/import/
 
@@ -902,7 +905,11 @@
 
 ## tests/integration/
 
-- `campaigns.integration.test.ts` — CampaignResponse: authed (~3674 tok)
+- `campaigns.integration.test.ts` — CampaignResponse: authed, createCampaign (~3115 tok)
+
+## tests/unit/api/parties/
+
+- `route.test.ts` — Declares requireAuth (~1598 tok)
 
 ## tests/unit/import/
 
@@ -913,4 +920,4 @@
 
 ## tests/unit/storage/
 
-- `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~1667 tok)
+- `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~1512 tok)

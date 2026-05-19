@@ -42,6 +42,15 @@ describe("Campaign API Integration Tests", () => {
     return { "Content-Type": "application/json", Cookie: cookie };
   }
 
+  async function createCampaign(name: string, cookie = authCookie): Promise<CampaignResponse> {
+    const res = await fetch(`${baseUrl}/api/campaigns`, {
+      method: "POST",
+      headers: authed(cookie),
+      body: JSON.stringify({ name }),
+    });
+    return res.json() as Promise<CampaignResponse>;
+  }
+
   // --- GET /api/campaigns ---
 
   it("returns 401 for unauthenticated GET /api/campaigns", async () => {
@@ -58,14 +67,8 @@ describe("Campaign API Integration Tests", () => {
   });
 
   it("returns only the authenticated user's campaigns (user isolation)", async () => {
-    // User 1 creates a campaign
-    await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "User1 Campaign" }),
-    });
+    await createCampaign("User1 Campaign");
 
-    // User 2 should see empty list
     const res = await fetch(`${baseUrl}/api/campaigns`, { headers: authed(authCookie2) });
     const data = await res.json() as CampaignResponse[];
     expect(data.every(c => c.name !== "User1 Campaign")).toBe(true);
@@ -125,13 +128,7 @@ describe("Campaign API Integration Tests", () => {
   });
 
   it("returns 201 with correct defaults when only name is provided", async () => {
-    const res = await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "Minimal Campaign" }),
-    });
-    expect(res.status).toBe(201);
-    const data = await res.json() as CampaignResponse;
+    const data = await createCampaign("Minimal Campaign");
     expect(data.moduleName).toBe("");
     expect(data.currentChapter).toBe("");
     expect(data.currentChapterOrder).toBe(0);
@@ -146,16 +143,9 @@ describe("Campaign API Integration Tests", () => {
   });
 
   it("returns 200 with campaign when it belongs to the authenticated user", async () => {
-    const createRes = await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "Get By ID Test" }),
-    });
-    const created = await createRes.json() as CampaignResponse;
+    const created = await createCampaign("Get By ID Test");
 
-    const res = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
-      headers: authed(),
-    });
+    const res = await fetch(`${baseUrl}/api/campaigns/${created.id}`, { headers: authed() });
     expect(res.status).toBe(200);
     const data = await res.json() as CampaignResponse;
     expect(data.id).toBe(created.id);
@@ -163,23 +153,14 @@ describe("Campaign API Integration Tests", () => {
   });
 
   it("returns 404 when campaign does not exist", async () => {
-    const res = await fetch(`${baseUrl}/api/campaigns/nonexistent-id`, {
-      headers: authed(),
-    });
+    const res = await fetch(`${baseUrl}/api/campaigns/nonexistent-id`, { headers: authed() });
     expect(res.status).toBe(404);
   });
 
   it("returns 404 when campaign exists but belongs to different user", async () => {
-    const createRes = await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "User1 Private Campaign" }),
-    });
-    const created = await createRes.json() as CampaignResponse;
+    const created = await createCampaign("User1 Private Campaign");
 
-    const res = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
-      headers: authed(authCookie2),
-    });
+    const res = await fetch(`${baseUrl}/api/campaigns/${created.id}`, { headers: authed(authCookie2) });
     expect(res.status).toBe(404);
   });
 
@@ -195,12 +176,7 @@ describe("Campaign API Integration Tests", () => {
   });
 
   it("returns 200 with updated campaign when single field is patched", async () => {
-    const createRes = await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "Patch Test Campaign" }),
-    });
-    const created = await createRes.json() as CampaignResponse;
+    const created = await createCampaign("Patch Test Campaign");
 
     const res = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
       method: "PATCH",
@@ -210,19 +186,12 @@ describe("Campaign API Integration Tests", () => {
     expect(res.status).toBe(200);
     const data = await res.json() as CampaignResponse;
     expect(data.name).toBe("Updated Name");
-    // Other fields unchanged
     expect(data.moduleName).toBe(created.moduleName);
     expect(data.active).toBe(created.active);
   });
 
   it("updates updatedAt on every PATCH", async () => {
-    const createRes = await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "UpdatedAt Test" }),
-    });
-    const created = await createRes.json() as CampaignResponse;
-
+    const created = await createCampaign("UpdatedAt Test");
     await new Promise(r => setTimeout(r, 10));
 
     const patchRes = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
@@ -252,12 +221,7 @@ describe("Campaign API Integration Tests", () => {
   });
 
   it("returns 404 when PATCHing a campaign that does not exist or belongs to another user", async () => {
-    const createRes = await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "Patch 404 Test" }),
-    });
-    const created = await createRes.json() as CampaignResponse;
+    const created = await createCampaign("Patch 404 Test");
 
     const res = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
       method: "PATCH",
@@ -275,12 +239,7 @@ describe("Campaign API Integration Tests", () => {
   });
 
   it("returns 200/204 on successful delete", async () => {
-    const createRes = await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "Delete Me" }),
-    });
-    const created = await createRes.json() as CampaignResponse;
+    const created = await createCampaign("Delete Me");
 
     const res = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
       method: "DELETE",
@@ -290,31 +249,19 @@ describe("Campaign API Integration Tests", () => {
   });
 
   it("subsequent GET returns 404 after delete", async () => {
-    const createRes = await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "Delete Then Get" }),
-    });
-    const created = await createRes.json() as CampaignResponse;
+    const created = await createCampaign("Delete Then Get");
 
     await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
       method: "DELETE",
       headers: authed(),
     });
 
-    const res = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
-      headers: authed(),
-    });
+    const res = await fetch(`${baseUrl}/api/campaigns/${created.id}`, { headers: authed() });
     expect(res.status).toBe(404);
   });
 
   it("returns 404 when deleting a campaign that belongs to another user", async () => {
-    const createRes = await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "Delete Auth Test" }),
-    });
-    const created = await createRes.json() as CampaignResponse;
+    const created = await createCampaign("Delete Auth Test");
 
     const res = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
       method: "DELETE",
@@ -326,12 +273,7 @@ describe("Campaign API Integration Tests", () => {
   // --- Party + Campaign association ---
 
   it("creating a party with valid campaignId persists and returns the campaignId", async () => {
-    const campaignRes = await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "Party Association Campaign" }),
-    });
-    const campaign = await campaignRes.json() as CampaignResponse;
+    const campaign = await createCampaign("Party Association Campaign");
 
     const partyRes = await fetch(`${baseUrl}/api/parties`, {
       method: "POST",
@@ -355,12 +297,7 @@ describe("Campaign API Integration Tests", () => {
   });
 
   it("deleting a campaign does not delete associated parties", async () => {
-    const campaignRes = await fetch(`${baseUrl}/api/campaigns`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "Campaign To Delete" }),
-    });
-    const campaign = await campaignRes.json() as CampaignResponse;
+    const campaign = await createCampaign("Campaign To Delete");
 
     const partyRes = await fetch(`${baseUrl}/api/parties`, {
       method: "POST",
@@ -374,9 +311,7 @@ describe("Campaign API Integration Tests", () => {
       headers: authed(),
     });
 
-    const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, {
-      headers: authed(),
-    });
+    const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed() });
     expect(getPartyRes.status).toBe(200);
   });
 });

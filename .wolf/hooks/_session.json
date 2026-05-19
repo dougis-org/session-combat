@@ -38,8 +38,8 @@
       "first_read": "2026-05-19T16:21:15.312Z"
     },
     "/home/doug/dev2/session-combat/app/campaigns/page.tsx": {
-      "count": 1,
-      "tokens": 2616,
+      "count": 2,
+      "tokens": 2488,
       "first_read": "2026-05-19T16:21:42.769Z"
     },
     "/home/doug/dev2/session-combat/openspec/changes/campaign-management/tasks.md": {
@@ -56,6 +56,31 @@
       "count": 1,
       "tokens": 0,
       "first_read": "2026-05-19T16:23:00.987Z"
+    },
+    "/home/doug/dev2/session-combat/tests/integration/campaigns.integration.test.ts": {
+      "count": 1,
+      "tokens": 3674,
+      "first_read": "2026-05-19T20:11:54.384Z"
+    },
+    "/home/doug/dev2/session-combat/app/api/campaigns/route.ts": {
+      "count": 1,
+      "tokens": 512,
+      "first_read": "2026-05-19T20:11:54.467Z"
+    },
+    "/home/doug/dev2/session-combat/tests/unit/storage/campaigns.test.ts": {
+      "count": 1,
+      "tokens": 1667,
+      "first_read": "2026-05-19T20:12:11.011Z"
+    },
+    "/home/doug/dev2/session-combat/lib/middleware.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-05-19T20:12:54.481Z"
+    },
+    "/home/doug/dev2/session-combat/tests/unit/api/parties/route.test.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-05-19T20:16:05.587Z"
     }
   },
   "files_written": [
@@ -172,23 +197,113 @@
       "action": "edit",
       "tokens": 24,
       "at": "2026-05-19T16:23:04.747Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/tests/unit/storage/campaigns.test.ts",
+      "action": "create",
+      "tokens": 1512,
+      "at": "2026-05-19T20:13:26.785Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/tests/integration/campaigns.integration.test.ts",
+      "action": "create",
+      "tokens": 3115,
+      "at": "2026-05-19T20:13:59.141Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/lib/middleware.ts",
+      "action": "edit",
+      "tokens": 346,
+      "at": "2026-05-19T20:14:06.521Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/app/api/campaigns/route.ts",
+      "action": "create",
+      "tokens": 443,
+      "at": "2026-05-19T20:14:12.941Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/app/api/campaigns/[id]/route.ts",
+      "action": "create",
+      "tokens": 769,
+      "at": "2026-05-19T20:14:20.579Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/app/api/parties/route.ts",
+      "action": "create",
+      "tokens": 417,
+      "at": "2026-05-19T20:14:26.157Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/app/api/parties/[id]/route.ts",
+      "action": "create",
+      "tokens": 795,
+      "at": "2026-05-19T20:14:34.046Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/lib/components/ui.tsx",
+      "action": "edit",
+      "tokens": 170,
+      "at": "2026-05-19T20:14:39.110Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/app/campaigns/page.tsx",
+      "action": "edit",
+      "tokens": 32,
+      "at": "2026-05-19T20:14:42.698Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/app/campaigns/page.tsx",
+      "action": "edit",
+      "tokens": 248,
+      "at": "2026-05-19T20:14:53.023Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/app/campaigns/page.tsx",
+      "action": "edit",
+      "tokens": 35,
+      "at": "2026-05-19T20:15:00.302Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/tests/unit/api/parties/route.test.ts",
+      "action": "edit",
+      "tokens": 251,
+      "at": "2026-05-19T20:16:12.622Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/tests/unit/api/parties/route.test.ts",
+      "action": "edit",
+      "tokens": 209,
+      "at": "2026-05-19T20:16:23.814Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/tests/unit/api/parties/route.test.ts",
+      "action": "edit",
+      "tokens": 211,
+      "at": "2026-05-19T20:16:56.490Z"
     }
   ],
   "edit_counts": {
-    "app/api/campaigns/[id]/route.ts": 1,
-    "app/api/parties/route.ts": 1,
-    "app/api/parties/[id]/route.ts": 1,
+    "app/api/campaigns/[id]/route.ts": 2,
+    "app/api/parties/route.ts": 2,
+    "app/api/parties/[id]/route.ts": 2,
     "lib/clientStorage.ts": 1,
     "app/parties/page.tsx": 4,
-    "app/campaigns/page.tsx": 4,
+    "app/campaigns/page.tsx": 7,
     "openspec/changes/campaign-management/tasks.md": 3,
     "lib/components/NavBar.tsx": 1,
     "app/layout.tsx": 2,
-    "tests/e2e/auth.spec.ts": 1
+    "tests/e2e/auth.spec.ts": 1,
+    "tests/unit/storage/campaigns.test.ts": 1,
+    "tests/integration/campaigns.integration.test.ts": 1,
+    "lib/middleware.ts": 1,
+    "app/api/campaigns/route.ts": 1,
+    "lib/components/ui.tsx": 1,
+    "tests/unit/api/parties/route.test.ts": 3
   },
-  "anatomy_hits": 8,
-  "anatomy_misses": 3,
-  "repeated_reads_warned": 3,
+  "anatomy_hits": 11,
+  "anatomy_misses": 5,
+  "repeated_reads_warned": 4,
   "cerebrum_warnings": 0,
-  "stop_count": 0
+  "stop_count": 1
 }

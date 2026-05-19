@@ -1,57 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware';
+import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const auth = requireAuth(request);
+type Params = { id: string };
 
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const GET = withAuthAndParams<Params>(async (_request, auth, { id }) => {
   try {
     const campaign = await storage.loadCampaignById(id, auth.userId);
-
     if (!campaign) {
-      return NextResponse.json(
-        { error: 'Campaign not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
-
     return NextResponse.json(campaign);
   } catch (error) {
     console.error('Error fetching campaign:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch campaign' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch campaign' }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => {
   try {
     const campaign = await storage.loadCampaignById(id, auth.userId);
-
     if (!campaign) {
-      return NextResponse.json(
-        { error: 'Campaign not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
 
     const body = await request.json();
@@ -78,42 +48,20 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating campaign:', error);
-    return NextResponse.json(
-      { error: 'Failed to update campaign' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update campaign' }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id }) => {
   try {
     const campaign = await storage.loadCampaignById(id, auth.userId);
-
     if (!campaign) {
-      return NextResponse.json(
-        { error: 'Campaign not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
-
     await storage.deleteCampaign(id, auth.userId);
-
     return NextResponse.json({ message: 'Campaign deleted successfully' });
   } catch (error) {
     console.error('Error deleting campaign:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete campaign' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete campaign' }, { status: 500 });
   }
-}
+});

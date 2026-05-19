@@ -272,6 +272,70 @@
       "related_bugs": [],
       "occurrences": 2,
       "last_seen": "2026-05-19T16:22:20.016Z"
+    },
+    {
+      "id": "bug-018",
+      "timestamp": "2026-05-19T20:14:06.522Z",
+      "error_message": "Missing guard clause",
+      "file": "lib/middleware.ts",
+      "root_cause": "No early return/throw for edge case: !auth",
+      "fix": "Added guard clause: if (!auth)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T20:14:06.522Z"
+    },
+    {
+      "id": "bug-019",
+      "timestamp": "2026-05-19T20:14:39.111Z",
+      "error_message": "Type error",
+      "file": "lib/components/ui.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T20:14:39.111Z"
+    },
+    {
+      "id": "bug-020",
+      "timestamp": "2026-05-19T20:14:42.699Z",
+      "error_message": "Wrong reference: FormField should be TextInputField",
+      "file": "app/campaigns/page.tsx",
+      "root_cause": "Used \"FormField\" instead of \"TextInputField\"",
+      "fix": "Changed FormField → TextInputField",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T20:14:42.699Z"
+    },
+    {
+      "id": "bug-021",
+      "timestamp": "2026-05-19T20:16:12.623Z",
+      "error_message": "Missing guard clause",
+      "file": "tests/unit/api/parties/route.test.ts",
+      "root_cause": "No early return/throw for edge case: auth && typeof auth.json === 'function'",
+      "fix": "Added guard clause: if (auth && typeof auth.json === 'function')",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19T20:16:12.623Z"
     }
   ]
 }
