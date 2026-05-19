@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Party } from '@/lib/types';
+import { Campaign } from '@/lib/types';
 
 export async function GET(request: NextRequest) {
   const auth = requireAuth(request);
@@ -11,12 +11,12 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const parties = await storage.loadParties(auth.userId);
-    return NextResponse.json(parties);
+    const campaigns = await storage.loadCampaigns(auth.userId);
+    return NextResponse.json(campaigns);
   } catch (error) {
-    console.error('Error fetching parties:', error);
+    console.error('Error fetching campaigns:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch parties' },
+      { error: 'Failed to fetch campaigns' },
       { status: 500 }
     );
   }
@@ -31,33 +31,34 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, description, characterIds, campaignId } = body;
+    const { name, moduleName, currentChapter, currentChapterOrder, active } = body;
 
     if (!name || name.trim() === '') {
       return NextResponse.json(
-        { error: 'Party name is required' },
+        { error: 'Campaign name is required' },
         { status: 400 }
       );
     }
 
-    const party: Party = {
+    const campaign: Campaign = {
       id: crypto.randomUUID(),
       userId: auth.userId,
       name: name.trim(),
-      description: description?.trim() || '',
-      characterIds: Array.isArray(characterIds) ? characterIds : [],
-      ...(campaignId && { campaignId }),
+      moduleName: moduleName?.trim() ?? '',
+      currentChapter: currentChapter?.trim() ?? '',
+      currentChapterOrder: typeof currentChapterOrder === 'number' ? currentChapterOrder : 0,
+      active: typeof active === 'boolean' ? active : false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    await storage.saveParty(party);
+    await storage.saveCampaign(campaign);
 
-    return NextResponse.json(party, { status: 201 });
+    return NextResponse.json(campaign, { status: 201 });
   } catch (error) {
-    console.error('Error creating party:', error);
+    console.error('Error creating campaign:', error);
     return NextResponse.json(
-      { error: 'Failed to create party' },
+      { error: 'Failed to create campaign' },
       { status: 500 }
     );
   }

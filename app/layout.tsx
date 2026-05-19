@@ -4,6 +4,7 @@
 
 import type { Metadata } from 'next'
 import { IBM_Plex_Sans, IBM_Plex_Mono, IBM_Plex_Serif } from 'next/font/google'
+import Link from 'next/link'
 import './globals.css'
 
 const plexSans = IBM_Plex_Sans({
@@ -77,6 +78,28 @@ export default async function RootLayout({
   return (
     <html lang="en" className={fontVars}>
       <body className="flex flex-col h-screen overflow-hidden font-sans">
+        <nav className="flex-shrink-0 bg-gray-950 border-b border-gray-800 px-4 py-2">
+          <div className="container mx-auto flex gap-4 items-center">
+            <Link href="/campaigns" className="text-white font-semibold hover:text-blue-400 transition-colors">
+              Campaigns
+            </Link>
+            <Link href="/encounters" className="text-gray-400 hover:text-white transition-colors text-sm">
+              Encounters
+            </Link>
+            <Link href="/parties" className="text-gray-400 hover:text-white transition-colors text-sm">
+              Parties
+            </Link>
+            <Link href="/characters" className="text-gray-400 hover:text-white transition-colors text-sm">
+              Characters
+            </Link>
+            <Link href="/monsters" className="text-gray-400 hover:text-white transition-colors text-sm">
+              Monsters
+            </Link>
+            <Link href="/combat" className="text-gray-400 hover:text-white transition-colors text-sm">
+              Combat
+            </Link>
+          </div>
+        </nav>
         <div className="flex-1 overflow-auto">{children}</div>
         <footer className="flex-shrink-0 bg-gray-950 border-t border-gray-800 py-2 px-4 text-center text-xs text-gray-500">
           <div className="flex justify-center items-center gap-3 font-mono">

@@ -48,7 +48,7 @@ export async function PUT(
 
   try {
     const body = await request.json();
-    const { name, description, characterIds } = body;
+    const { name, description, characterIds, campaignId } = body;
 
     // Get the existing party to verify ownership
     const parties = await storage.loadParties(auth.userId);
@@ -73,6 +73,7 @@ export async function PUT(
       name: name !== undefined ? name.trim() : existingParty.name,
       description: description !== undefined ? description.trim() : (existingParty.description || ''),
       characterIds: Array.isArray(characterIds) ? characterIds : existingParty.characterIds,
+      ...(campaignId !== undefined && { campaignId: campaignId || undefined }),
       updatedAt: new Date(),
     };
 

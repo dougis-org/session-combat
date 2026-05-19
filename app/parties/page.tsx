@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { Party, Character } from '@/lib/types';
+import { Party, Character, Campaign } from '@/lib/types';
 
 function PartiesContent() {
   const [parties, setParties] = useState<Party[]>([]);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingParty, setEditingParty] = useState<Party | null>(null);
@@ -21,15 +22,18 @@ function PartiesContent() {
     try {
       setLoading(true);
       setError(null);
-      const [partiesRes, charactersRes] = await Promise.all([
+      const [partiesRes, charactersRes, campaignsRes] = await Promise.all([
         fetch('/api/parties'),
         fetch('/api/characters'),
+        fetch('/api/campaigns'),
       ]);
-      if (!partiesRes.ok || !charactersRes.ok) throw new Error('Failed to fetch data');
+      if (!partiesRes.ok || !charactersRes.ok || !campaignsRes.ok) throw new Error('Failed to fetch data');
       const partiesData = await partiesRes.json();
       const charactersData = await charactersRes.json();
+      const campaignsData = await campaignsRes.json();
       setParties(partiesData || []);
       setCharacters(charactersData || []);
+      setCampaigns(campaignsData || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -127,6 +131,7 @@ function PartiesContent() {
           <PartyEditor
             party={editingParty}
             characters={characters}
+            campaigns={campaigns}
             onSave={saveParty}
             onCancel={cancelEdit}
             isNew={isAdding}
@@ -153,6 +158,7 @@ function PartiesContent() {
                         <p className="text-gray-400 text-sm mt-1">{party.description}</p>
                       )}
                       <div className="text-gray-400 text-sm mt-2">
+                        <p>Campaign: {party.campaignId ? (campaigns.find(c => c.id === party.campaignId)?.name ?? 'No Campaign') : 'No Campaign'}</p>
                         <p>Members: {party.characterIds.length}</p>
                         {party.characterIds.length > 0 && (
                           <p className="mt-1 text-xs">{getCharacterNames(party.characterIds)}</p>
@@ -190,18 +196,21 @@ function PartiesContent() {
 function PartyEditor({
   party,
   characters,
+  campaigns,
   onSave,
   onCancel,
   isNew,
 }: {
   party: Party;
   characters: Character[];
+  campaigns: Campaign[];
   onSave: (party: Party) => void;
   onCancel: () => void;
   isNew: boolean;
 }) {
   const [name, setName] = useState(party.name);
   const [description, setDescription] = useState(party.description || '');
+  const [campaignId, setCampaignId] = useState(party.campaignId ?? '');
   const [characterIds, setCharacterIds] = useState<Set<string>>(new Set(party.characterIds));
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -220,6 +229,7 @@ function PartyEditor({
         ...party,
         name: name.trim(),
         description: description.trim(),
+        campaignId: campaignId || undefined,
         characterIds: Array.from(characterIds),
       });
     } finally {
@@ -271,6 +281,21 @@ function PartyEditor({
             disabled={saving}
             placeholder="Optional party description"
           />
+        </div>
+
+        <div>
+          <label className="block mb-1 text-sm font-semibold">Campaign</label>
+          <select
+            value={campaignId}
+            onChange={(e) => setCampaignId(e.target.value)}
+            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+            disabled={saving}
+          >
+            <option value="">None</option>
+            {campaigns.map(campaign => (
+              <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 

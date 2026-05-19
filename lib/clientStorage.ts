@@ -16,7 +16,7 @@ export const clientStorage = {
     } catch (error) {
       console.error('Error loading from localStorage:', error);
     }
-    return { encounters: [], characters: [], parties: [] };
+    return { encounters: [], characters: [], parties: [], campaigns: [] };
   },
 
   saveEncounters(encounters: Encounter[]): void {
