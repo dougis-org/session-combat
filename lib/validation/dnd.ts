@@ -5,7 +5,7 @@ export function validateAbilityScores(
   value: unknown,
   fieldName: string = 'abilityScores'
 ): { valid: true; value: AbilityScores } | { valid: false; error: ValidationError } {
-  if (!value || typeof value !== 'object') {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return {
       valid: false,
       error: {
@@ -48,7 +48,7 @@ export function validateAbility(
   ability: unknown,
   fieldName: string = 'ability'
 ): { valid: true; value: CreatureAbility } | { valid: false; error: ValidationError } {
-  if (!ability || typeof ability !== 'object') {
+  if (!ability || typeof ability !== 'object' || Array.isArray(ability)) {
     return {
       valid: false,
       error: {

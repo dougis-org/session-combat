@@ -177,16 +177,12 @@ export function validateStringRecord(
   value: unknown,
   fieldName: string = 'record'
 ): { valid: true; value: Record<string, string> } | { valid: false; error: ValidationError } {
-  return validateRecord<string>(value, fieldName, (val) => typeof val === 'string') as
-    | { valid: true; value: Record<string, string> }
-    | { valid: false; error: ValidationError };
+  return validateRecord<string>(value, fieldName, (val) => typeof val === 'string');
 }
 
 export function validateNumberRecord(
   value: unknown,
   fieldName: string = 'record'
 ): { valid: true; value: Record<string, number> } | { valid: false; error: ValidationError } {
-  return validateRecord<number>(value, fieldName, (val) => typeof val === 'number' && Number.isFinite(val as number)) as
-    | { valid: true; value: Record<string, number> }
-    | { valid: false; error: ValidationError };
+  return validateRecord<number>(value, fieldName, (val) => typeof val === 'number' && Number.isFinite(val as number));
 }
