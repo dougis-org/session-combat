@@ -1,12 +1,10 @@
 'use client';
 
 import { FormEvent, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 export default function LoginPage() {
-  const router = useRouter();
   const { login, loading, error, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,9 +13,9 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      window.location.href = '/campaigns';
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,7 +39,7 @@ export default function LoginPage() {
 
     const success = await login(email, password);
     if (success) {
-      router.push('/');
+      window.location.href = '/campaigns';
     } else {
       setFormError(error || 'Login failed');
     }
