@@ -18,12 +18,12 @@ interface QueryableEntity {
   userId: string;
 }
 
-function buildEntityQuery(entity: QueryableEntity): Filter<Document> {
+function buildEntityQuery<T extends QueryableEntity>(entity: T): Filter<T> {
   const query: Filter<Document> = { userId: entity.userId };
-  if (entity._id) {
-    return { ...query, _id: new ObjectId(entity._id) };
+  if (typeof entity._id !== "undefined") {
+    return { ...query, _id: new ObjectId(entity._id) } as Filter<T>;
   }
-  return { ...query, id: entity.id };
+  return { ...query, id: entity.id } as Filter<T>;
 }
 
 function normalizeStoredEntityId<T extends { id?: string; _id?: string }>(
@@ -202,7 +202,7 @@ export const storage = {
 
       const result = await db
         .collection<Encounter>("encounters")
-        .updateOne(query as Filter<Encounter>, { $set: encounterData }, { upsert: true });
+        .updateOne(query, { $set: encounterData }, { upsert: true });
       console.log("updateOne result:", {
         matchedCount: result.matchedCount,
         modifiedCount: result.modifiedCount,
@@ -236,7 +236,7 @@ export const storage = {
       const query = buildEntityQuery(character);
       await db
         .collection<Character>("characters")
-        .updateOne(query as Filter<Character>, { $set: characterData }, { upsert: true });
+        .updateOne(query, { $set: characterData }, { upsert: true });
     } catch (error) {
       console.error("Error saving character:", error);
       throw error;
@@ -268,7 +268,7 @@ export const storage = {
       const query = buildEntityQuery(combatState);
       await db
         .collection<CombatState>("combatStates")
-        .updateOne(query as Filter<CombatState>, { $set: combatStateData }, { upsert: true });
+        .updateOne(query, { $set: combatStateData }, { upsert: true });
     } catch (error) {
       console.error("Error saving combat state:", error);
       throw error;
@@ -381,7 +381,7 @@ export const storage = {
       const query = buildEntityQuery(template);
       await db
         .collection<MonsterTemplate>("monsterTemplates")
-        .updateOne(query as Filter<MonsterTemplate>, { $set: templateData }, { upsert: true });
+        .updateOne(query, { $set: templateData }, { upsert: true });
     } catch (error) {
       console.error("Error saving monster template:", error);
       throw error;
@@ -448,7 +448,7 @@ export const storage = {
       const query = buildEntityQuery(spell);
       await db
         .collection<SpellTemplate>("spellTemplates")
-        .updateOne(query as Filter<SpellTemplate>, { $set: spellData }, { upsert: true });
+        .updateOne(query, { $set: spellData }, { upsert: true });
     } catch (error) {
       console.error("Error saving spell template:", error);
       throw error;
