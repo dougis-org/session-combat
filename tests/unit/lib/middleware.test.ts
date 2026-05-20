@@ -5,6 +5,8 @@ import {
   setAuthCookie,
   clearAuthCookie,
   requireAuth,
+  withAuth,
+  withAuthAndParams,
 } from "@/lib/middleware";
 import { verifyToken } from "@/lib/auth";
 
@@ -116,6 +118,58 @@ describe("lib/middleware", () => {
       const result = requireAuth(request);
       expect(result).toBeInstanceOf(NextResponse);
       expect((result as NextResponse).status).toBe(401);
+    });
+  });
+
+  describe("withAuth", () => {
+    it("calls handler with auth payload when authenticated", async () => {
+      mockedVerifyToken.mockReturnValue(MOCK_PAYLOAD);
+      const handler = jest.fn().mockResolvedValue(NextResponse.json({ ok: true }));
+      const wrapped = withAuth(handler);
+
+      const request = makeRequest({ cookie: "auth-token=valid.token" });
+      const response = await wrapped(request);
+
+      expect(handler).toHaveBeenCalledWith(request, MOCK_PAYLOAD);
+      expect(response.status).toBe(200);
+    });
+
+    it("returns 401 and does not call handler when not authenticated", async () => {
+      const handler = jest.fn();
+      const wrapped = withAuth(handler);
+
+      const request = makeRequest();
+      const response = await wrapped(request);
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe("withAuthAndParams", () => {
+    it("calls handler with auth payload and resolved params when authenticated", async () => {
+      mockedVerifyToken.mockReturnValue(MOCK_PAYLOAD);
+      const handler = jest.fn().mockResolvedValue(NextResponse.json({ ok: true }));
+      const wrapped = withAuthAndParams(handler);
+
+      const request = makeRequest({ cookie: "auth-token=valid.token" });
+      const params = Promise.resolve({ id: "item-1" });
+      const response = await wrapped(request, { params });
+
+      expect(handler).toHaveBeenCalledWith(request, MOCK_PAYLOAD, { id: "item-1" });
+      expect(response.status).toBe(200);
+    });
+
+    it("returns 401 and does not call handler when not authenticated", async () => {
+      const handler = jest.fn();
+      const wrapped = withAuthAndParams(handler);
+
+      const request = makeRequest();
+      const params = Promise.resolve({ id: "item-1" });
+      const response = await wrapped(request, { params });
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(response.status).toBe(401);
     });
   });
 });

@@ -1,5 +1,5 @@
 import { GET, POST } from "@/app/api/parties/route";
-import { PUT } from "@/app/api/parties/[id]/route";
+import { GET as GET_ONE, PUT, DELETE } from "@/app/api/parties/[id]/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
@@ -7,6 +7,9 @@ import {
   makeRouteRequest,
   itReturns401,
   itReturns500,
+  itReturns401WithParams,
+  itReturns404WithParams,
+  itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => {
@@ -32,6 +35,7 @@ jest.mock("@/lib/storage", () => ({
   storage: {
     loadParties: jest.fn(),
     saveParty: jest.fn(),
+    deleteParty: jest.fn(),
   },
 }));
 
@@ -171,4 +175,123 @@ describe("PUT /api/parties/[id]", () => {
     const savedParty = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
     expect(savedParty._id).toBeUndefined();
   });
+
+  it("returns 400 when name is blank", async () => {
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", { name: "  " }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+    expect(response.status).toBe(400);
+  });
+
+  it("sets campaignId when non-empty string provided", async () => {
+    await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        campaignId: " camp-1 ",
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+    const saved = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
+    expect(saved.campaignId).toBe("camp-1");
+  });
+
+  it("removes campaignId when empty string provided", async () => {
+    mockedStorage.loadParties.mockResolvedValue([
+      { ...EXISTING_PARTY, campaignId: "old-camp" },
+    ] as any);
+    await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        campaignId: "",
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+    const saved = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
+    expect(saved.campaignId).toBeUndefined();
+  });
+
+  it("returns 404 when party not found", async () => {
+    mockedStorage.loadParties.mockResolvedValue([]);
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/missing", "PUT", { name: "X" }),
+      { params: Promise.resolve({ id: "missing" }) }
+    );
+    expect(response.status).toBe(404);
+  });
+});
+
+describe("GET /api/parties/[id]", () => {
+  const PARAMS = Promise.resolve({ id: "party-123" });
+  const makeReq = () => makeRouteRequest("http://localhost/api/parties/party-123", "GET");
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.loadParties.mockResolvedValue([
+      { id: "party-123", userId: "user-123", name: "Fellowship", characterIds: [] },
+    ] as any);
+  });
+
+  itReturns401WithParams(GET_ONE, makeReq, PARAMS, mockedRequireAuth);
+
+  it("returns party when found", async () => {
+    const response = await GET_ONE(makeReq(), { params: PARAMS });
+    expect(response.status).toBe(200);
+    expect((await response.json()).name).toBe("Fellowship");
+  });
+
+  itReturns404WithParams(
+    GET_ONE,
+    makeReq,
+    PARAMS,
+    () => mockedStorage.loadParties.mockResolvedValue([]),
+    mockedRequireAuth
+  );
+
+  itReturns500WithParams(
+    GET_ONE,
+    makeReq,
+    PARAMS,
+    () => mockedStorage.loadParties.mockRejectedValue(new Error("DB error")),
+    mockedRequireAuth
+  );
+});
+
+describe("DELETE /api/parties/[id]", () => {
+  const PARAMS = Promise.resolve({ id: "party-123" });
+  const makeReq = () => makeRouteRequest("http://localhost/api/parties/party-123", "DELETE");
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.loadParties.mockResolvedValue([
+      { id: "party-123", userId: "user-123", name: "Fellowship", characterIds: [] },
+    ] as any);
+    mockedStorage.deleteParty.mockResolvedValue(undefined as any);
+  });
+
+  itReturns401WithParams(DELETE, makeReq, PARAMS, mockedRequireAuth);
+
+  it("deletes party and returns 200", async () => {
+    const response = await DELETE(makeReq(), { params: PARAMS });
+    expect(response.status).toBe(200);
+    expect(mockedStorage.deleteParty).toHaveBeenCalledWith("party-123", "user-123");
+  });
+
+  itReturns404WithParams(
+    DELETE,
+    makeReq,
+    PARAMS,
+    () => mockedStorage.loadParties.mockResolvedValue([]),
+    mockedRequireAuth
+  );
+
+  itReturns500WithParams(
+    DELETE,
+    makeReq,
+    PARAMS,
+    () => mockedStorage.loadParties.mockRejectedValue(new Error("DB error")),
+    mockedRequireAuth
+  );
 });
