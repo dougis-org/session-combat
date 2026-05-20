@@ -258,7 +258,7 @@ function PartyEditor({
       saveLabel="Save Party"
     >
       <div className="grid md:grid-cols-2 gap-4 mb-4">
-        <FormField label="Party Name">
+        <FormField label="Party Name" htmlFor="party-name">
           <input id="party-name" type="text" value={name} onChange={(e) => setName(e.target.value)}
             className={textInputClass()} disabled={saving} placeholder="e.g., The Adventurers Guild" />
         </FormField>
