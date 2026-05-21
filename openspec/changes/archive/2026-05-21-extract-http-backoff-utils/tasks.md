@@ -86,13 +86,13 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Commit all changes to `extract-http-backoff-utils` and push to remote
-- [ ] Open PR from `extract-http-backoff-utils` to `main`; reference `closes #158` in the PR body
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each comment, commit fixes, follow Remote push validation steps, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — diagnose failures, fix, commit, follow Remote push validation steps, push; repeat until all checks pass
-- [ ] Wait for PR to merge — never force-merge; if a human force-merges, proceed to Post-Merge
+- [x] Commit all changes to `extract-http-backoff-utils` and push to remote
+- [x] Open PR from `extract-http-backoff-utils` to `main`; reference `closes #158` in the PR body
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each comment, commit fixes, follow Remote push validation steps, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — diagnose failures, fix, commit, follow Remote push validation steps, push; repeat until all checks pass
+- [x] Wait for PR to merge — never force-merge; if a human force-merges, proceed to Post-Merge
 
 Ownership metadata:
 
@@ -108,12 +108,12 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on main
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No doc updates required (pure refactor, no public API change)
-- [ ] Sync approved spec deltas: copy `openspec/changes/extract-http-backoff-utils/specs/http-utils/spec.md` to `openspec/specs/http-utils/spec.md`
-- [ ] Archive the change: move `openspec/changes/extract-http-backoff-utils/` to `openspec/changes/archive/YYYY-MM-DD-extract-http-backoff-utils/` — stage both the new location and the deletion of the old location in a **single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-extract-http-backoff-utils/` exists and `openspec/changes/extract-http-backoff-utils/` is gone
-- [ ] Commit and push the archive commit to main
-- [ ] Prune merged branch: `git fetch --prune` and `git branch -d extract-http-backoff-utils`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on main
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No doc updates required (pure refactor, no public API change)
+- [x] Sync approved spec deltas: copy `openspec/changes/extract-http-backoff-utils/specs/http-utils/spec.md` to `openspec/specs/http-utils/spec.md`
+- [x] Archive the change: move `openspec/changes/extract-http-backoff-utils/` to `openspec/changes/archive/YYYY-MM-DD-extract-http-backoff-utils/` — stage both the new location and the deletion of the old location in a **single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-extract-http-backoff-utils/` exists and `openspec/changes/extract-http-backoff-utils/` is gone
+- [x] Commit and push the archive commit to main
+- [x] Prune merged branch: `git fetch --prune` and `git branch -d extract-http-backoff-utils`
