@@ -16,8 +16,9 @@ jest.mock('@/lib/hooks/useAuth', () => ({
 }));
 
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 import { act } from 'react';
+import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
 import { NavBar } from '@/lib/components/NavBar';
 import { useAuth } from '@/lib/hooks/useAuth';
 
@@ -27,28 +28,26 @@ let container: HTMLDivElement;
 let root: Root;
 
 beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
+  ({ container, root } = createReactRoot());
 });
 
 afterEach(() => {
-  act(() => { root?.unmount(); });
-  container.remove();
+  unmountReactRoot(container, root);
 });
 
-function render() {
-  act(() => {
-    root = createRoot(container);
-    root.render(<NavBar />);
+function mockAuth(overrides: Partial<ReturnType<typeof useAuth>>) {
+  mockedUseAuth.mockReturnValue({
+    isAuthenticated: false, loading: false, logout: jest.fn() as any,
+    user: null, login: jest.fn() as any, register: jest.fn() as any, error: null,
+    ...overrides,
   });
 }
 
 describe('NavBar', () => {
   it('renders navigation links', () => {
-    mockedUseAuth.mockReturnValue({ isAuthenticated: false, loading: false, logout: jest.fn() as any, user: null, login: jest.fn() as any, register: jest.fn() as any, error: null });
-    render();
-    const links = container.querySelectorAll('a');
-    const hrefs = Array.from(links).map(a => a.getAttribute('href'));
+    mockAuth({});
+    act(() => { root.render(<NavBar />); });
+    const hrefs = Array.from(container.querySelectorAll('a')).map(a => a.getAttribute('href'));
     expect(hrefs).toContain('/campaigns');
     expect(hrefs).toContain('/encounters');
     expect(hrefs).toContain('/parties');
@@ -56,30 +55,28 @@ describe('NavBar', () => {
   });
 
   it('does not show logout button when not authenticated', () => {
-    mockedUseAuth.mockReturnValue({ isAuthenticated: false, loading: false, logout: jest.fn() as any, user: null, login: jest.fn() as any, register: jest.fn() as any, error: null });
-    render();
+    mockAuth({});
+    act(() => { root.render(<NavBar />); });
     expect(container.querySelector('[data-testid="logout-button"]')).toBeNull();
   });
 
   it('does not show logout button while loading', () => {
-    mockedUseAuth.mockReturnValue({ isAuthenticated: true, loading: true, logout: jest.fn() as any, user: null, login: jest.fn() as any, register: jest.fn() as any, error: null });
-    render();
+    mockAuth({ isAuthenticated: true, loading: true });
+    act(() => { root.render(<NavBar />); });
     expect(container.querySelector('[data-testid="logout-button"]')).toBeNull();
   });
 
   it('shows logout button when authenticated and not loading', () => {
-    mockedUseAuth.mockReturnValue({ isAuthenticated: true, loading: false, logout: jest.fn() as any, user: { userId: 'u1', email: 'u@test.com' }, login: jest.fn() as any, register: jest.fn() as any, error: null });
-    render();
+    mockAuth({ isAuthenticated: true, user: { userId: 'u1', email: 'u@test.com' } });
+    act(() => { root.render(<NavBar />); });
     expect(container.querySelector('[data-testid="logout-button"]')).not.toBeNull();
   });
 
   it('calls logout when logout button clicked', () => {
     const logout = jest.fn() as any;
-    mockedUseAuth.mockReturnValue({ isAuthenticated: true, loading: false, logout, user: { userId: 'u1', email: 'u@test.com' }, login: jest.fn() as any, register: jest.fn() as any, error: null });
-    render();
-    act(() => {
-      (container.querySelector('[data-testid="logout-button"]') as HTMLButtonElement).click();
-    });
+    mockAuth({ isAuthenticated: true, user: { userId: 'u1', email: 'u@test.com' }, logout });
+    act(() => { root.render(<NavBar />); });
+    act(() => { (container.querySelector('[data-testid="logout-button"]') as HTMLButtonElement).click(); });
     expect(logout).toHaveBeenCalledTimes(1);
   });
 });

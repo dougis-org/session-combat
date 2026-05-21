@@ -6,8 +6,9 @@
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 import { act } from 'react';
+import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
 import { CampaignEditor } from '@/app/campaigns/CampaignEditor';
 import type { Campaign } from '@/lib/types';
 
@@ -27,21 +28,16 @@ const BASE_CAMPAIGN: Campaign = {
 };
 
 beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
+  ({ container, root } = createReactRoot());
 });
 
 afterEach(() => {
-  act(() => { root?.unmount(); });
-  container.remove();
+  unmountReactRoot(container, root);
   jest.clearAllMocks();
 });
 
 function render(props: { campaign: Campaign; onSave: (...args: any[]) => any; onCancel: (...args: any[]) => any; isNew: boolean }) {
-  act(() => {
-    root = createRoot(container);
-    root.render(<CampaignEditor {...props} />);
-  });
+  act(() => { root.render(<CampaignEditor {...props} />); });
 }
 
 function findButton(text: string): HTMLButtonElement {
@@ -70,14 +66,12 @@ describe('CampaignEditor', () => {
 
     it('populates name input from campaign', () => {
       render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
-      const inputs = container.querySelectorAll<HTMLInputElement>('input[type="text"]');
-      expect(inputs[0].value).toBe('Test Campaign');
+      expect(container.querySelectorAll<HTMLInputElement>('input[type="text"]')[0].value).toBe('Test Campaign');
     });
 
     it('populates moduleName input from campaign', () => {
       render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
-      const inputs = container.querySelectorAll<HTMLInputElement>('input[type="text"]');
-      expect(inputs[1].value).toBe('LMoP');
+      expect(container.querySelectorAll<HTMLInputElement>('input[type="text"]')[1].value).toBe('LMoP');
     });
 
     it('renders active checkbox unchecked when campaign.active is false', () => {
@@ -119,12 +113,10 @@ describe('CampaignEditor', () => {
       expect((onSave.mock.calls[0][0] as Campaign).moduleName).toBe('DH');
     });
 
-    it('calls onSave with active value from checkbox', async () => {
+    it('calls onSave with toggled active value', async () => {
       const onSave = jest.fn() as any;
       render({ campaign: BASE_CAMPAIGN, onSave, onCancel: jest.fn(), isNew: false });
-      act(() => {
-        getInput('checkbox').click();
-      });
+      act(() => { getInput('checkbox').click(); });
       await act(async () => { findButton('Save Campaign').click(); });
       expect((onSave.mock.calls[0][0] as Campaign).active).toBe(true);
     });

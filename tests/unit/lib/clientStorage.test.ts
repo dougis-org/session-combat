@@ -11,6 +11,13 @@ const localStorageMock = {
 
 Object.defineProperty(global, 'localStorage', { value: localStorageMock });
 
+function itDoesNotThrowOnSetItemError(action: () => void) {
+  it('does not throw when setItem fails', () => {
+    localStorageMock.setItem.mockImplementationOnce(() => { throw new Error('QuotaExceededError'); });
+    expect(action).not.toThrow();
+  });
+}
+
 describe('clientStorage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,10 +66,7 @@ describe('clientStorage', () => {
       expect(saved.characters).toHaveLength(1);
     });
 
-    it('does not throw when setItem fails', () => {
-      localStorageMock.setItem.mockImplementationOnce(() => { throw new Error('QuotaExceededError'); });
-      expect(() => clientStorage.saveEncounters([])).not.toThrow();
-    });
+    itDoesNotThrowOnSetItemError(() => clientStorage.saveEncounters([]));
   });
 
   describe('saveCharacters', () => {
@@ -72,10 +76,7 @@ describe('clientStorage', () => {
       expect(saved.characters[0].id).toBe('c1');
     });
 
-    it('does not throw when setItem fails', () => {
-      localStorageMock.setItem.mockImplementationOnce(() => { throw new Error('QuotaExceededError'); });
-      expect(() => clientStorage.saveCharacters([])).not.toThrow();
-    });
+    itDoesNotThrowOnSetItemError(() => clientStorage.saveCharacters([]));
   });
 
   describe('saveCombatState', () => {
@@ -91,10 +92,7 @@ describe('clientStorage', () => {
       expect(saved.combatState).toBeUndefined();
     });
 
-    it('does not throw when setItem fails', () => {
-      localStorageMock.setItem.mockImplementationOnce(() => { throw new Error('QuotaExceededError'); });
-      expect(() => clientStorage.saveCombatState(undefined)).not.toThrow();
-    });
+    itDoesNotThrowOnSetItemError(() => clientStorage.saveCombatState(undefined));
   });
 
   describe('saveParties', () => {
@@ -104,10 +102,7 @@ describe('clientStorage', () => {
       expect(saved.parties[0].id).toBe('p1');
     });
 
-    it('does not throw when setItem fails', () => {
-      localStorageMock.setItem.mockImplementationOnce(() => { throw new Error('QuotaExceededError'); });
-      expect(() => clientStorage.saveParties([])).not.toThrow();
-    });
+    itDoesNotThrowOnSetItemError(() => clientStorage.saveParties([]));
   });
 
   describe('clear', () => {

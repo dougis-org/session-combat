@@ -11,7 +11,7 @@ export function createReactRoot(): { container: HTMLDivElement; root: Root } {
   return { container, root };
 }
 
-export async function unmountReactRoot(container: HTMLDivElement, root: Root): Promise<void> {
-  await act(async () => { root.unmount(); });
-  document.body.removeChild(container);
+export function unmountReactRoot(container: HTMLDivElement, root: Root): void {
+  act(() => { root.unmount(); });
+  container.remove();
 }

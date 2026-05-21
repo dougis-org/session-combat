@@ -368,6 +368,198 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-19T20:26:49.442Z"
+    },
+    {
+      "id": "bug-024",
+      "timestamp": "2026-05-20T16:57:35.780Z",
+      "error_message": "Incorrect value in code",
+      "file": "app/register/page.tsx",
+      "root_cause": "Had 'next/navigation'",
+      "fix": "Changed to 'next/link'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-20T16:57:45.145Z"
+    },
+    {
+      "id": "bug-025",
+      "timestamp": "2026-05-20T19:09:43.352Z",
+      "error_message": "Incorrect value in code",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Had \"text\"",
+      "fix": "Changed to \"party-name\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-20T19:09:43.352Z"
+    },
+    {
+      "id": "bug-026",
+      "timestamp": "2026-05-20T23:03:15.379Z",
+      "error_message": "Missing await",
+      "file": "tests/unit/lib/middleware.test.ts",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-20T23:03:15.379Z"
+    },
+    {
+      "id": "bug-027",
+      "timestamp": "2026-05-20T23:03:23.464Z",
+      "error_message": "Type error",
+      "file": "tests/unit/api/parties/route.test.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-20T23:03:23.464Z"
+    },
+    {
+      "id": "bug-028",
+      "timestamp": "2026-05-20T23:04:29.022Z",
+      "error_message": "Null/undefined access in ",
+      "file": "tests/unit/lib/clientStorage.test.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-20T23:04:29.022Z"
+    },
+    {
+      "id": "bug-029",
+      "timestamp": "2026-05-21T02:11:40.578Z",
+      "error_message": "CSS fix: campaign",
+      "file": "tests/unit/components/CampaignEditor.test.tsx",
+      "root_cause": "campaign: { ...BASE_CAMPAIGN, name: '' → BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false",
+      "fix": "Changed campaign: { ...BASE_CAMPAIGN, name: '' → BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-21T02:13:29.093Z"
+    },
+    {
+      "id": "bug-030",
+      "timestamp": "2026-05-21T02:12:03.785Z",
+      "error_message": "Significant refactor of ",
+      "file": "tests/unit/components/CampaignEditor.test.tsx",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 6→3 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-21T02:12:03.785Z"
+    },
+    {
+      "id": "bug-031",
+      "timestamp": "2026-05-21T02:13:34.283Z",
+      "error_message": "CSS fix: isAuthenticated",
+      "file": "tests/unit/components/NavBar.test.tsx",
+      "root_cause": "isAuthenticated: false, loading: false, logout: jest.fn() as any, user: null, login: jest.fn() as any, register: jest.fn() as any, checkAuth: jest.fn() as any → false, loading: false, logout: jest.fn() as any, user: null, login: jest.fn() as any, register: jest.fn() as any, error: null",
+      "fix": "Changed isAuthenticated: false, loading: false, logout: jest.fn() as any, user: null, login: jest.fn() as any, register: jest.fn() as any, checkAuth: jest.fn() as any → false, loading: false, logout: jest.fn() as any, user: null, login: jest.fn() as any, register: jest.fn() as any, error: null",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-21T02:14:06.407Z"
+    },
+    {
+      "id": "bug-032",
+      "timestamp": "2026-05-21T02:14:16.173Z",
+      "error_message": "Type error",
+      "file": "tests/unit/components/CampaignEditor.test.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation | Also: expect((onSave as jest.Mock).mock.calls[0][0].active).toBe(t",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-21T02:14:20.504Z"
+    },
+    {
+      "id": "bug-033",
+      "timestamp": "2026-05-21T18:48:19.696Z",
+      "error_message": "Wrong condition in logic",
+      "file": "app/api/campaigns/route.ts",
+      "root_cause": "Condition was: if (!name || name.trim()",
+      "fix": "Changed to: if (typeof name !== 'string' || name.trim()",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-21T18:48:22.580Z"
+    },
+    {
+      "id": "bug-034",
+      "timestamp": "2026-05-21T18:48:40.543Z",
+      "error_message": "Significant refactor of ",
+      "file": "lib/hooks/useAuth.ts",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→5 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-21T18:48:40.543Z"
+    },
+    {
+      "id": "bug-035",
+      "timestamp": "2026-05-21T18:49:07.374Z",
+      "error_message": "Significant refactor of ",
+      "file": "app/register/page.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5→5 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-21T18:49:07.374Z"
     }
   ]
 }

@@ -1,16 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import { Campaign } from '@/lib/types';
 
 type Params = { id: string };
 
+async function findCampaign(id: string, userId: string): Promise<Campaign | NextResponse> {
+  const campaign = await storage.loadCampaignById(id, userId);
+  if (!campaign) return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+  return campaign;
+}
+
 export const GET = withAuthAndParams<Params>(async (_request, auth, { id }) => {
   try {
-    const campaign = await storage.loadCampaignById(id, auth.userId);
-    if (!campaign) {
-      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
-    }
-    return NextResponse.json(campaign);
+    const result = await findCampaign(id, auth.userId);
+    if (result instanceof NextResponse) return result;
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching campaign:', error);
     return NextResponse.json({ error: 'Failed to fetch campaign' }, { status: 500 });
@@ -19,10 +24,9 @@ export const GET = withAuthAndParams<Params>(async (_request, auth, { id }) => {
 
 export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => {
   try {
-    const campaign = await storage.loadCampaignById(id, auth.userId);
-    if (!campaign) {
-      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
-    }
+    const result = await findCampaign(id, auth.userId);
+    if (result instanceof NextResponse) return result;
+    const campaign = result;
 
     const body = await request.json();
     const { name, moduleName, currentChapter, currentChapterOrder, active } = body;
@@ -54,10 +58,8 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
 
 export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id }) => {
   try {
-    const campaign = await storage.loadCampaignById(id, auth.userId);
-    if (!campaign) {
-      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
-    }
+    const result = await findCampaign(id, auth.userId);
+    if (result instanceof NextResponse) return result;
     await storage.deleteCampaign(id, auth.userId);
     return NextResponse.json({ message: 'Campaign deleted successfully' });
   } catch (error) {

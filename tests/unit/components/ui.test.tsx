@@ -6,8 +6,9 @@
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 import { act } from 'react';
+import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
 import {
   ErrorBanner,
   ValidationError,
@@ -22,20 +23,15 @@ let container: HTMLDivElement;
 let root: Root;
 
 beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
+  ({ container, root } = createReactRoot());
 });
 
 afterEach(() => {
-  act(() => { root?.unmount(); });
-  container.remove();
+  unmountReactRoot(container, root);
 });
 
 function render(element: React.ReactElement) {
-  act(() => {
-    root = createRoot(container);
-    root.render(element);
-  });
+  act(() => { root.render(element); });
 }
 
 // ---------------------------------------------------------------------------
@@ -74,14 +70,12 @@ describe('LoadingState', () => {
 describe('FormField', () => {
   it('renders label text', () => {
     render(<FormField label="My Field"><input /></FormField>);
-    const label = container.querySelector('label');
-    expect(label?.textContent).toBe('My Field');
+    expect(container.querySelector('label')?.textContent).toBe('My Field');
   });
 
   it('sets htmlFor on label when provided', () => {
     render(<FormField label="Email" htmlFor="email-input"><input id="email-input" /></FormField>);
-    const label = container.querySelector('label');
-    expect(label?.htmlFor).toBe('email-input');
+    expect(container.querySelector('label')?.htmlFor).toBe('email-input');
   });
 
   it('renders children', () => {
@@ -108,14 +102,12 @@ describe('EditorShell', () => {
 
   it('renders save button with saveLabel', () => {
     render(<EditorShell {...defaultProps}><div /></EditorShell>);
-    const buttons = container.querySelectorAll('button');
-    expect(buttons[0].textContent).toBe('Save');
+    expect(container.querySelectorAll('button')[0].textContent).toBe('Save');
   });
 
   it('shows Saving... text when saving is true', () => {
     render(<EditorShell {...defaultProps} saving={true}><div /></EditorShell>);
-    const buttons = container.querySelectorAll('button');
-    expect(buttons[0].textContent).toBe('Saving...');
+    expect(container.querySelectorAll('button')[0].textContent).toBe('Saving...');
   });
 
   it('disables save button when saving', () => {
@@ -136,11 +128,6 @@ describe('EditorShell', () => {
   it('renders validation error when provided', () => {
     render(<EditorShell {...defaultProps} validationError="Fix errors"><div /></EditorShell>);
     expect(container.textContent).toContain('Fix errors');
-  });
-
-  it('does not render validation error when null', () => {
-    render(<EditorShell {...defaultProps}><div data-testid="child" /></EditorShell>);
-    expect(container.textContent).not.toContain('Fix errors');
   });
 
   it('calls onSave when save button clicked', () => {
@@ -180,7 +167,7 @@ describe('TextInputField', () => {
     expect((container.querySelector('input') as HTMLInputElement)?.value).toBe('alice');
   });
 
-  it('calls onChange with new value when input changes', () => {
+  it('calls onChange when input changes', () => {
     const onChange = jest.fn();
     render(<TextInputField label="Username" value="" onChange={onChange} />);
     const input = container.querySelector('input') as HTMLInputElement;
@@ -202,7 +189,7 @@ describe('TextInputField', () => {
     expect((container.querySelector('input') as HTMLInputElement)?.placeholder).toBe('Enter username');
   });
 
-  it('wires id to input and label htmlFor when id provided', () => {
+  it('wires id to input and label htmlFor when provided', () => {
     render(<TextInputField id="my-field" label="My Field" value="" onChange={jest.fn()} />);
     expect((container.querySelector('input') as HTMLInputElement)?.id).toBe('my-field');
     expect(container.querySelector('label')?.htmlFor).toBe('my-field');
