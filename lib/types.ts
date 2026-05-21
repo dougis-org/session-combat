@@ -493,6 +493,19 @@ export interface CombatState {
   updatedAt: Date;
 }
 
+export interface Campaign {
+  _id?: string;
+  id: string;
+  userId: string;
+  name: string;
+  moduleName: string;
+  currentChapter: string;
+  currentChapterOrder: number;
+  active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Party {
   _id?: string;
   id: string;
@@ -500,6 +513,7 @@ export interface Party {
   name: string;
   description?: string;
   characterIds: string[]; // ObjectId references to characters
+  campaignId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -508,6 +522,7 @@ export interface SessionData {
   encounters: Encounter[];
   characters: Character[];
   parties: Party[];
+  campaigns: Campaign[];
   combatState?: CombatState;
 }
 

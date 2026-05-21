@@ -11,12 +11,13 @@ export const clientStorage = {
     try {
       const data = localStorage.getItem(SESSION_DATA_KEY);
       if (data) {
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        return { encounters: [], characters: [], parties: [], campaigns: [], ...parsed };
       }
     } catch (error) {
       console.error('Error loading from localStorage:', error);
     }
-    return { encounters: [], characters: [], parties: [] };
+    return { encounters: [], characters: [], parties: [], campaigns: [] };
   },
 
   saveEncounters(encounters: Encounter[]): void {

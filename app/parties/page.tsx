@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { Party, Character } from '@/lib/types';
+import { ErrorBanner, LoadingState, FormField, EditorShell, textInputClass } from '@/lib/components/ui';
+import { Party, Character, Campaign } from '@/lib/types';
 
 function PartiesContent() {
   const [parties, setParties] = useState<Party[]>([]);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingParty, setEditingParty] = useState<Party | null>(null);
@@ -21,15 +23,18 @@ function PartiesContent() {
     try {
       setLoading(true);
       setError(null);
-      const [partiesRes, charactersRes] = await Promise.all([
+      const [partiesRes, charactersRes, campaignsRes] = await Promise.all([
         fetch('/api/parties'),
         fetch('/api/characters'),
+        fetch('/api/campaigns').catch(() => null),
       ]);
       if (!partiesRes.ok || !charactersRes.ok) throw new Error('Failed to fetch data');
       const partiesData = await partiesRes.json();
       const charactersData = await charactersRes.json();
+      const campaignsData = campaignsRes?.ok ? await campaignsRes.json() : [];
       setParties(partiesData || []);
       setCharacters(charactersData || []);
+      setCampaigns(campaignsData || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -93,6 +98,11 @@ function PartiesContent() {
     setEditingParty(null);
   };
 
+  const campaignMap = useMemo(
+    () => new Map(campaigns.map(c => [c.id, c.name])),
+    [campaigns]
+  );
+
   const getCharacterNames = (characterIds: string[]): string => {
     return characterIds
       .map(id => characters.find(c => c.id === id)?.name || 'Unknown')
@@ -109,11 +119,7 @@ function PartiesContent() {
           </Link>
         </div>
 
-        {error && (
-          <div className="p-4 bg-red-900 border border-red-700 rounded text-red-200 mb-6">
-            {error}
-          </div>
-        )}
+        <ErrorBanner message={error} />
 
         <button
           onClick={addParty}
@@ -127,6 +133,7 @@ function PartiesContent() {
           <PartyEditor
             party={editingParty}
             characters={characters}
+            campaigns={campaigns}
             onSave={saveParty}
             onCancel={cancelEdit}
             isNew={isAdding}
@@ -134,9 +141,7 @@ function PartiesContent() {
         )}
 
         {loading ? (
-          <div className="text-center py-8">
-            <p className="text-gray-400">Loading parties...</p>
-          </div>
+          <LoadingState label="Loading parties..." />
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
             {parties.length === 0 ? (
@@ -153,6 +158,7 @@ function PartiesContent() {
                         <p className="text-gray-400 text-sm mt-1">{party.description}</p>
                       )}
                       <div className="text-gray-400 text-sm mt-2">
+                        <p>Campaign: {party.campaignId ? (campaignMap.get(party.campaignId) ?? 'No Campaign') : 'No Campaign'}</p>
                         <p>Members: {party.characterIds.length}</p>
                         {party.characterIds.length > 0 && (
                           <p className="mt-1 text-xs">{getCharacterNames(party.characterIds)}</p>
@@ -190,18 +196,21 @@ function PartiesContent() {
 function PartyEditor({
   party,
   characters,
+  campaigns,
   onSave,
   onCancel,
   isNew,
 }: {
   party: Party;
   characters: Character[];
+  campaigns: Campaign[];
   onSave: (party: Party) => void;
   onCancel: () => void;
   isNew: boolean;
 }) {
   const [name, setName] = useState(party.name);
   const [description, setDescription] = useState(party.description || '');
+  const [campaignId, setCampaignId] = useState(party.campaignId ?? '');
   const [characterIds, setCharacterIds] = useState<Set<string>>(new Set(party.characterIds));
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -220,6 +229,7 @@ function PartyEditor({
         ...party,
         name: name.trim(),
         description: description.trim(),
+        campaignId: campaignId,
         characterIds: Array.from(characterIds),
       });
     } finally {
@@ -238,40 +248,35 @@ function PartyEditor({
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 mb-6 border-2 border-blue-500">
-      <h2 className="text-2xl font-bold mb-4">{isNew ? 'Create Party' : 'Edit Party'}</h2>
-      
-      {validationError && (
-        <div className="p-3 bg-red-900 border border-red-700 rounded text-red-200 mb-4">
-          {validationError}
-        </div>
-      )}
-      
+    <EditorShell
+      title={isNew ? 'Create Party' : 'Edit Party'}
+      validationError={validationError}
+      onSave={handleSave}
+      onCancel={onCancel}
+      saving={saving}
+      canSave={!!name.trim()}
+      saveLabel="Save Party"
+    >
       <div className="grid md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label htmlFor="party-name" className="block mb-1 text-sm font-semibold">Party Name</label>
-          <input
-            id="party-name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-            placeholder="e.g., The Adventurers Guild"
-          />
-        </div>
-        
-        <div>
-          <label className="block mb-1 text-sm font-semibold">Description</label>
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-            disabled={saving}
-            placeholder="Optional party description"
-          />
-        </div>
+        <FormField label="Party Name" htmlFor="party-name">
+          <input id="party-name" type="text" value={name} onChange={(e) => setName(e.target.value)}
+            className={textInputClass()} disabled={saving} placeholder="e.g., The Adventurers Guild" />
+        </FormField>
+
+        <FormField label="Description">
+          <input type="text" value={description} onChange={(e) => setDescription(e.target.value)}
+            className={textInputClass()} disabled={saving} placeholder="Optional party description" />
+        </FormField>
+
+        <FormField label="Campaign">
+          <select value={campaignId} onChange={(e) => setCampaignId(e.target.value)}
+            className={textInputClass()} disabled={saving}>
+            <option value="">None</option>
+            {campaigns.map(campaign => (
+              <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
+            ))}
+          </select>
+        </FormField>
       </div>
 
       <div className="mb-4">
@@ -282,37 +287,15 @@ function PartyEditor({
           <div className="grid md:grid-cols-2 gap-2">
             {characters.map(character => (
               <label key={character.id} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={characterIds.has(character.id)}
-                  onChange={() => toggleCharacter(character.id)}
-                  disabled={saving}
-                  className="cursor-pointer"
-                />
+                <input type="checkbox" checked={characterIds.has(character.id)}
+                  onChange={() => toggleCharacter(character.id)} disabled={saving} className="cursor-pointer" />
                 <span className="text-sm">{character.name}</span>
               </label>
             ))}
           </div>
         )}
       </div>
-
-      <div className="flex gap-2">
-        <button
-          onClick={handleSave}
-          disabled={saving || !name.trim()}
-          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded"
-        >
-          {saving ? 'Saving...' : 'Save Party'}
-        </button>
-        <button
-          onClick={onCancel}
-          disabled={saving}
-          className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 px-4 py-2 rounded"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
+    </EditorShell>
   );
 }
 

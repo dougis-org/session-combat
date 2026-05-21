@@ -64,3 +64,29 @@ export function requireAuth(request: NextRequest) {
 
   return auth;
 }
+
+/** Wrap a route handler with auth — no dynamic params. */
+export function withAuth(
+  handler: (request: NextRequest, auth: AuthPayload) => Promise<NextResponse>
+) {
+  return async (request: NextRequest): Promise<NextResponse> => {
+    const auth = requireAuth(request);
+    if (auth instanceof NextResponse) return auth;
+    return handler(request, auth);
+  };
+}
+
+/** Wrap a route handler with auth — with dynamic params (e.g. [id]). */
+export function withAuthAndParams<P extends Record<string, string>>(
+  handler: (request: NextRequest, auth: AuthPayload, params: P) => Promise<NextResponse>
+) {
+  return async (
+    request: NextRequest,
+    { params }: { params: Promise<P> }
+  ): Promise<NextResponse> => {
+    const resolvedParams = await params;
+    const auth = requireAuth(request);
+    if (auth instanceof NextResponse) return auth;
+    return handler(request, auth, resolvedParams);
+  };
+}

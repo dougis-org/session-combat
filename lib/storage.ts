@@ -6,6 +6,7 @@ import {
   Character,
   CombatState,
   Party,
+  Campaign,
   MonsterTemplate,
   SpellTemplate,
 } from "./types";
@@ -163,13 +164,72 @@ export const storage = {
     }
   },
 
+  // Load campaigns for a user
+  async loadCampaigns(userId: string): Promise<Campaign[]> {
+    try {
+      const db = await getDatabase();
+      const campaigns = await db
+        .collection<Campaign>("campaigns")
+        .find({ userId })
+        .toArray();
+      return campaigns.map(normalizeStoredEntityId);
+    } catch (error) {
+      console.error("Error loading campaigns:", error);
+      return [];
+    }
+  },
+
+  // Load single campaign by ID
+  async loadCampaignById(id: string, userId: string): Promise<Campaign | null> {
+    try {
+      const db = await getDatabase();
+      const campaign = await db
+        .collection<Campaign>("campaigns")
+        .findOne({ id, userId });
+      return campaign ? normalizeStoredEntityId(campaign) : null;
+    } catch (error) {
+      console.error("Error loading campaign by ID:", error);
+      return null;
+    }
+  },
+
+  // Save campaign (upsert)
+  async saveCampaign(campaign: Campaign): Promise<void> {
+    try {
+      const db = await getDatabase();
+      const { _id, ...campaignData } = campaign;
+      await db
+        .collection<Campaign>("campaigns")
+        .updateOne(
+          { id: campaign.id, userId: campaign.userId },
+          { $set: campaignData },
+          { upsert: true }
+        );
+    } catch (error) {
+      console.error("Error saving campaign:", error);
+      throw error;
+    }
+  },
+
+  // Delete campaign
+  async deleteCampaign(id: string, userId: string): Promise<void> {
+    try {
+      const db = await getDatabase();
+      await db.collection<Campaign>("campaigns").deleteOne({ id, userId });
+    } catch (error) {
+      console.error("Error deleting campaign:", error);
+      throw error;
+    }
+  },
+
   // Load all session data for a user
   async load(userId: string): Promise<SessionData> {
     try {
-      const [encounters, characters, parties, combatState] = await Promise.all([
+      const [encounters, characters, parties, campaigns, combatState] = await Promise.all([
         this.loadEncounters(userId),
         this.loadCharacters(userId),
         this.loadParties(userId),
+        this.loadCampaigns(userId),
         this.loadCombatState(userId),
       ]);
 
@@ -177,11 +237,12 @@ export const storage = {
         encounters,
         characters,
         parties,
+        campaigns,
         combatState: combatState || undefined,
       };
     } catch (error) {
       console.error("Error loading session data:", error);
-      return { encounters: [], characters: [], parties: [] };
+      return { encounters: [], characters: [], parties: [], campaigns: [] };
     }
   },
 

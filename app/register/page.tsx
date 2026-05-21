@@ -1,14 +1,14 @@
 'use client';
 
 import { FormEvent, useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { validatePasswordForClient } from '@/lib/validation/password';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const { register, loading, error, isAuthenticated } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,7 +17,7 @@ export default function RegisterPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      router.replace('/campaigns');
     }
   }, [isAuthenticated, router]);
 
@@ -78,8 +78,8 @@ export default function RegisterPage() {
 
     const success = await register(email, password);
     if (success) {
-      router.push('/');
-      return; // Exit early after successful registration and redirect
+      router.replace('/campaigns');
+      return;
     } else {
       setFormError(error || 'Registration failed');
     }

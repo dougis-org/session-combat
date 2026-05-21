@@ -148,6 +148,11 @@ test.describe("Auth", () => {
   // Navigation & routing
   // ────────────────────────────────────────────────────────────
 
+  test("root path redirects to /campaigns", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/campaigns/);
+  });
+
   test("register and login pages are accessible", async ({ page }) => {
     const registerResponse = await page.goto("/register", {
       waitUntil: "domcontentloaded",
@@ -412,8 +417,8 @@ test.describe("Auth", () => {
     });
     await expect(registerResponse).toBeOK();
 
-    await page.goto("/");
-    await expect(page).toHaveURL(/.*\/$/);
+    await page.goto("/campaigns");
+    await expect(page).toHaveURL(/\/campaigns/);
 
     await page.evaluate(() => {
       localStorage.setItem("sessionData", JSON.stringify({ dummy: true }));
