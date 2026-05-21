@@ -120,6 +120,12 @@ describe("POST /api/campaigns", () => {
     expect(response.status).toBe(400);
   });
 
+  it("returns 400 when name is a non-string type", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const response = await POST(makePostRequest({ name: 123 }));
+    expect(response.status).toBe(400);
+  });
+
   it("creates campaign with required fields and returns 201", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makePostRequest({ name: "  Dragon Heist  " }));

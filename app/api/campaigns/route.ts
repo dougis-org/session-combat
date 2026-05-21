@@ -18,7 +18,7 @@ export const POST = withAuth(async (request, auth) => {
     const body = await request.json();
     const { name, moduleName, currentChapter, currentChapterOrder, active } = body;
 
-    if (!name || name.trim() === '') {
+    if (typeof name !== 'string' || name.trim() === '') {
       return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
     }
 

@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 const mockRouterReplace = jest.fn();
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: mockRouterReplace }),
+  usePathname: () => '/',
 }));
 
 // Mock offline storage

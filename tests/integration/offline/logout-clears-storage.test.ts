@@ -34,6 +34,7 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({
     replace: replaceMock,
   }),
+  usePathname: () => '/',
 }));
 
 describe("logout clears storage integration", () => {

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { clientStorage } from "@/lib/clientStorage";
 import { LocalStore, SyncQueue } from "@/lib/offline";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export interface AuthUser {
   userId: string;
@@ -16,6 +16,7 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   // Check if user is authenticated
   const checkAuth = useCallback(async () => {
@@ -43,10 +44,11 @@ export function useAuth() {
     }
   }, []);
 
-  // Check auth on mount
+  // Check auth on mount and on route changes so shared layout components (e.g. NavBar)
+  // see updated auth state after client-side login/register navigation.
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, [checkAuth, pathname]);
 
   // Register function
   const register = useCallback(async (email: string, password: string) => {

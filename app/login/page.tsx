@@ -2,10 +2,12 @@
 
 import { FormEvent, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 export default function LoginPage() {
   const { login, loading, error, isAuthenticated } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
@@ -13,9 +15,9 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      window.location.href = '/campaigns';
+      router.replace('/campaigns');
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,7 +41,7 @@ export default function LoginPage() {
 
     const success = await login(email, password);
     if (success) {
-      window.location.href = '/campaigns';
+      router.replace('/campaigns');
     } else {
       setFormError(error || 'Login failed');
     }

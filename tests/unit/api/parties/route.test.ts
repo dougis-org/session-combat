@@ -91,6 +91,12 @@ describe("POST /api/parties", () => {
     expect(response.status).toBe(400);
   });
 
+  it("returns 400 when name is a non-string type", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const response = await POST(makeRequest({ name: 123 }));
+    expect(response.status).toBe(400);
+  });
+
   it("creates party and returns 201", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.saveParty.mockResolvedValue(undefined as any);

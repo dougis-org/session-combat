@@ -1,15 +1,7 @@
 # anatomy.md
 
-<<<<<<< Updated upstream
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-19T00:22:58.921Z
-> Files: 581 tracked | Anatomy hits: 0 | Misses: 0
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-19T16:23:04.739Z
-> Files: 604 tracked | Anatomy hits: 0 | Misses: 0
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-19T20:16:56.481Z
-=======
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-19T20:26:57.751Z
->>>>>>> Stashed changes
-> Files: 606 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-21T20:49:25.334Z
+> Files: 617 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -767,7 +759,7 @@
 
 ## app/api/campaigns/
 
-- `route.ts` — Next.js API route (~461 tok)
+- `route.ts` — Next.js API route (~466 tok)
 
 ## app/api/campaigns/[id]/
 
@@ -775,7 +767,7 @@
 
 ## app/api/parties/
 
-- `route.ts` — Next.js API route (~417 tok)
+- `route.ts` — Next.js API route (~423 tok)
 
 ## app/api/parties/[id]/
 
@@ -783,11 +775,20 @@
 
 ## app/campaigns/
 
-- `page.tsx` — CampaignsContent — renders form (~2410 tok)
+- `CampaignEditor.tsx` — CampaignEditor — renders form (~791 tok)
+- `page.tsx` — CampaignsContent (~1673 tok)
+
+## app/login/
+
+- `page.tsx` — LoginPage — renders form (~1049 tok)
 
 ## app/parties/
 
-- `page.tsx` — PartiesContent — renders form (~2893 tok)
+- `page.tsx` — PartiesContent — renders form (~2899 tok)
+
+## app/register/
+
+- `page.tsx` — RegisterPage — renders form (~2304 tok)
 
 ## lib/
 
@@ -800,7 +801,11 @@
 ## lib/components/
 
 - `NavBar.tsx` — NavBar (~426 tok)
-- `ui.tsx` — ErrorBanner — renders form (~747 tok)
+- `ui.tsx` — ErrorBanner — renders form (~761 tok)
+
+## lib/hooks/
+
+- `useAuth.ts` — Exports AuthUser, useAuth (~1197 tok)
 
 ## lib/import/
 
@@ -911,9 +916,19 @@
 
 - `campaigns.integration.test.ts` — CampaignResponse: authed, createCampaign (~3115 tok)
 
+## tests/unit/api/campaigns/
+
+- `route.test.ts` — Declares requireAuth (~3094 tok)
+
 ## tests/unit/api/parties/
 
-- `route.test.ts` — Declares requireAuth (~1598 tok)
+- `route.test.ts` — Declares requireAuth (~2775 tok)
+
+## tests/unit/components/
+
+- `CampaignEditor.test.tsx` — BASE_CAMPAIGN (~1526 tok)
+- `NavBar.test.tsx` — mockedUseAuth (~922 tok)
+- `ui.test.tsx` — render — renders form (~2132 tok)
 
 ## tests/unit/import/
 
@@ -921,6 +936,12 @@
 - `dndBeyond-abilities.test.ts` — Declares DndBeyondActionEntry (~2414 tok)
 - `dndBeyond-armor-class.test.ts` — Declares MockDndBeyondModifier (~2491 tok)
 - `utils.test.ts` — Declares input (~1899 tok)
+
+## tests/unit/lib/
+
+- `clientStorage.test.ts` — Mock localStorage for Node.js test environment (~1485 tok)
+- `middleware.test.ts` — API routes: GET (2 endpoints) (~1721 tok)
+- `useAuth.test.ts` — Mock next/navigation (~1552 tok)
 
 ## tests/unit/storage/
 

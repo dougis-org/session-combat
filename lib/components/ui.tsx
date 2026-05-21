@@ -86,12 +86,14 @@ export function textInputClass() {
 }
 
 export function TextInputField({
+  id,
   label,
   value,
   onChange,
   disabled,
   placeholder,
 }: {
+  id?: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -99,8 +101,9 @@ export function TextInputField({
   placeholder?: string;
 }) {
   return (
-    <FormField label={label}>
+    <FormField label={label} htmlFor={id}>
       <input
+        id={id}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}

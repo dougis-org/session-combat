@@ -18,7 +18,7 @@ export const POST = withAuth(async (request, auth) => {
     const body = await request.json();
     const { name, description, characterIds, campaignId } = body;
 
-    if (!name || name.trim() === '') {
+    if (typeof name !== 'string' || name.trim() === '') {
       return NextResponse.json({ error: 'Party name is required' }, { status: 400 });
     }
 
