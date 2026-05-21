@@ -20,7 +20,7 @@ interface QueryableEntity {
 
 function buildEntityQuery<T extends QueryableEntity>(entity: T): Filter<T> {
   const query: Filter<Document> = { userId: entity.userId };
-  if (typeof entity._id !== "undefined") {
+  if (entity._id) {
     return { ...query, _id: new ObjectId(entity._id) } as Filter<T>;
   }
   return { ...query, id: entity.id } as Filter<T>;
