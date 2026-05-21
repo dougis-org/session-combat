@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-18T14:20:54.749Z",
   "lifetime": {
-    "total_tokens_estimated": 345204,
-    "total_reads": 235,
-    "total_writes": 407,
-    "total_sessions": 24,
-    "anatomy_hits": 115,
-    "anatomy_misses": 119,
-    "repeated_reads_blocked": 120,
-    "estimated_savings_vs_bare_cli": 214684
+    "total_tokens_estimated": 371135,
+    "total_reads": 253,
+    "total_writes": 440,
+    "total_sessions": 27,
+    "anatomy_hits": 128,
+    "anatomy_misses": 124,
+    "repeated_reads_blocked": 129,
+    "estimated_savings_vs_bare_cli": 226353
   },
   "sessions": [
     {
@@ -4124,6 +4124,296 @@
         "writes_count": 33,
         "repeated_reads_blocked": 7,
         "anatomy_lookups": 11
+      }
+    },
+    {
+      "id": "session-2026-05-21-1909",
+      "started": "2026-05-21T02:09:03.403Z",
+      "ended": "2026-05-21T21:35:16.077Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/lib/components/ui.tsx",
+          "tokens_estimated": 747,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/components/NavBar.tsx",
+          "tokens_estimated": 426,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/CombatantCard.test.tsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/campaigns/page.tsx",
+          "tokens_estimated": 1673,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/hooks/useAuth.ts",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/CampaignEditor.test.tsx",
+          "tokens_estimated": 1527,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/NavBar.test.tsx",
+          "tokens_estimated": 946,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/api/campaigns/route.ts",
+          "tokens_estimated": 461,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/api/parties/route.ts",
+          "tokens_estimated": 417,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/login/page.tsx",
+          "tokens_estimated": 1029,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/register/page.tsx",
+          "tokens_estimated": 2300,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/api/campaigns/route.test.ts",
+          "tokens_estimated": 3094,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/api/parties/route.test.ts",
+          "tokens_estimated": 2775,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/lib/useAuth.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/integration/offline/logout-clears-storage.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/api/campaigns/[id]/route.ts",
+          "tokens_estimated": 769,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/lib/clientStorage.test.ts",
+          "tokens_estimated": 1485,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/helpers/reactRoot.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/ui.test.tsx",
+          "tokens_estimated": 2024,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/NavBar.test.tsx",
+          "tokens_estimated": 955,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/campaigns/CampaignEditor.tsx",
+          "tokens_estimated": 791,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/campaigns/page.tsx",
+          "tokens_estimated": 64,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/campaigns/page.tsx",
+          "tokens_estimated": 12,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/CampaignEditor.test.tsx",
+          "tokens_estimated": 1607,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/ui.test.tsx",
+          "tokens_estimated": 150,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/CampaignEditor.test.tsx",
+          "tokens_estimated": 148,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/CampaignEditor.test.tsx",
+          "tokens_estimated": 186,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/CampaignEditor.test.tsx",
+          "tokens_estimated": 19,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/CampaignEditor.test.tsx",
+          "tokens_estimated": 38,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/NavBar.test.tsx",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/NavBar.test.tsx",
+          "tokens_estimated": 292,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/CampaignEditor.test.tsx",
+          "tokens_estimated": 256,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/CampaignEditor.test.tsx",
+          "tokens_estimated": 41,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/CampaignEditor.test.tsx",
+          "tokens_estimated": 246,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/api/campaigns/route.ts",
+          "tokens_estimated": 17,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/api/parties/route.ts",
+          "tokens_estimated": 17,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/hooks/useAuth.ts",
+          "tokens_estimated": 64,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/hooks/useAuth.ts",
+          "tokens_estimated": 66,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/hooks/useAuth.ts",
+          "tokens_estimated": 65,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/login/page.tsx",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/login/page.tsx",
+          "tokens_estimated": 124,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/login/page.tsx",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/register/page.tsx",
+          "tokens_estimated": 54,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/register/page.tsx",
+          "tokens_estimated": 144,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/register/page.tsx",
+          "tokens_estimated": 39,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/components/ui.tsx",
+          "tokens_estimated": 156,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/api/campaigns/route.test.ts",
+          "tokens_estimated": 190,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/api/parties/route.test.ts",
+          "tokens_estimated": 141,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/components/ui.test.tsx",
+          "tokens_estimated": 170,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/lib/useAuth.test.ts",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/integration/offline/logout-clears-storage.test.ts",
+          "tokens_estimated": 35,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 17649,
+        "output_tokens_estimated": 8282,
+        "reads_count": 18,
+        "writes_count": 33,
+        "repeated_reads_blocked": 9,
+        "anatomy_lookups": 13
       }
     }
   ],

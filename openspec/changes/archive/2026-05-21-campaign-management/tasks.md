@@ -82,10 +82,10 @@
 - [x] `npx tsc --noEmit` — no type errors
 - [x] `npm run build` — build succeeds
 - [x] `npm run lint` — no lint errors
-- [ ] Manually verify: navigate to `/` → lands on Campaign Dashboard
-- [ ] Manually verify: "Campaigns" is first nav link
-- [ ] Manually verify: create a campaign, create a party with that campaign, both appear correctly
-- [ ] All completed tasks marked as complete
+- [x] Manually verify: navigate to `/` → lands on Campaign Dashboard
+- [x] Manually verify: "Campaigns" is first nav link
+- [x] Manually verify: create a campaign, create a party with that campaign, both appear correctly
+- [x] All completed tasks marked as complete
 
 ## Remote push validation
 
@@ -99,14 +99,14 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Run the required pre-PR self-review from `.agent/skills/openspec-apply-change/SKILL.md` before committing
-- [ ] Commit all changes to `feature/campaign-management` and push to remote
-- [ ] Open PR from `feature/campaign-management` to `main`
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each comment, commit fixes, follow Remote push validation, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once all blocking review comments are resolved
-- [ ] **Monitor CI checks** — diagnose failures, fix, follow Remote push validation, push; repeat until all checks pass
-- [ ] Wait for the PR to merge — never force-merge; if a human force-merges, proceed to Post-Merge
+- [x] Run the required pre-PR self-review from `.agent/skills/openspec-apply-change/SKILL.md` before committing
+- [x] Commit all changes to `feature/campaign-management` and push to remote
+- [x] Open PR from `feature/campaign-management` to `main`
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each comment, commit fixes, follow Remote push validation, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once all blocking review comments are resolved
+- [x] **Monitor CI checks** — diagnose failures, fix, follow Remote push validation, push; repeat until all checks pass
+- [x] Wait for the PR to merge — never force-merge; if a human force-merges, proceed to Post-Merge
 
 Ownership metadata:
 
@@ -122,11 +122,11 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update `openspec/specs/` with approved spec deltas from `specs/campaign-crud/spec.md`, `specs/campaign-dashboard/spec.md`, `specs/campaign-party-association/spec.md`
-- [ ] Archive the change: move `openspec/changes/campaign-management/` to `openspec/changes/archive/YYYY-MM-DD-campaign-management/` — stage both the copy and the deletion in a **single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-management/` exists and `openspec/changes/campaign-management/` is gone
-- [ ] Commit and push the archive commit to `main`
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feature/campaign-management`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update `openspec/specs/` with approved spec deltas from `specs/campaign-crud/spec.md`, `specs/campaign-dashboard/spec.md`, `specs/campaign-party-association/spec.md`
+- [x] Archive the change: move `openspec/changes/campaign-management/` to `openspec/changes/archive/YYYY-MM-DD-campaign-management/` — stage both the copy and the deletion in a **single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-management/` exists and `openspec/changes/campaign-management/` is gone
+- [x] Commit and push the archive commit to `main`
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feature/campaign-management`

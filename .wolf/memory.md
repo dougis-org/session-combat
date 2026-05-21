@@ -450,3 +450,17 @@
 | 13:49 | Edited tests/unit/lib/useAuth.test.ts | 3→4 lines | ~35 |
 | 13:57 | Edited tests/integration/offline/logout-clears-storage.test.ts | 5→6 lines | ~35 |
 | 14:01 | Session end: 33 writes across 11 files (ui.test.tsx, NavBar.test.tsx, CampaignEditor.tsx, page.tsx, CampaignEditor.test.tsx) | 15 reads | ~23549 tok |
+| 14:35 | Session end: 33 writes across 11 files (ui.test.tsx, NavBar.test.tsx, CampaignEditor.tsx, page.tsx, CampaignEditor.test.tsx) | 18 reads | ~25931 tok |
+
+## Session: 2026-05-21 14:35
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-05-21 14:36
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:41 | Edited openspec/changes/campaign-management/tasks.md | 4→4 lines | ~71 |
+| 14:41 | Edited openspec/changes/campaign-management/tasks.md | 8→8 lines | ~200 |
+| 14:41 | Edited openspec/changes/campaign-management/tasks.md | 8→8 lines | ~215 |
