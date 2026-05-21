@@ -1,3 +1,5 @@
+import { calculateBackoffMs, handleRateLimitResponse } from "./http-utils";
+
 const OPEN5E_API_BASE = "https://api.open5e.com/v2";
 const ALLOWED_HOST = "api.open5e.com";
 
@@ -85,18 +87,7 @@ async function fetchWithBackoff(
       const response = await fetchFn(url);
 
       if (response.status === 429) {
-        const retryAfter = response.headers.get("Retry-After");
-        let backoffMs: number;
-        if (retryAfter) {
-          backoffMs = Math.min(parseInt(retryAfter, 10) * 1000, 10000);
-        } else {
-          backoffMs = Math.min(1000 * Math.pow(2, attempt), 10000);
-        }
-
-        if (attempt < retries) {
-          await new Promise((resolve) => setTimeout(resolve, backoffMs));
-          continue;
-        }
+        if (await handleRateLimitResponse(response, attempt, retries)) continue;
         return response;
       }
 
@@ -104,8 +95,9 @@ async function fetchWithBackoff(
     } catch (error) {
       lastError = error as Error;
       if (attempt < retries) {
-        const backoffMs = Math.min(1000 * Math.pow(2, attempt), 10000);
-        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+        await new Promise((resolve) =>
+          setTimeout(resolve, calculateBackoffMs(attempt))
+        );
       }
     }
   }
