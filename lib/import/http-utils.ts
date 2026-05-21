@@ -4,8 +4,11 @@ export function calculateBackoffMs(
   attempt: number,
   retryAfterHeader?: string | null
 ): number {
-  if (retryAfterHeader != null) {
-    return Math.min(parseInt(retryAfterHeader, 10) * 1000, MAX_BACKOFF_MS);
+  if (retryAfterHeader) {
+    const parsed = parseInt(retryAfterHeader, 10);
+    if (!isNaN(parsed)) {
+      return Math.max(0, Math.min(parsed * 1000, MAX_BACKOFF_MS));
+    }
   }
   return Math.min(1000 * Math.pow(2, attempt), MAX_BACKOFF_MS);
 }
