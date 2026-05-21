@@ -11,7 +11,21 @@ import {
   SpellTemplate,
 } from "./types";
 import { GLOBAL_USER_ID } from "./constants";
-import { ObjectId } from "mongodb";
+import { ObjectId, Filter, Document } from "mongodb";
+
+interface QueryableEntity {
+  _id?: string;
+  id: string;
+  userId: string;
+}
+
+function buildEntityQuery<T extends QueryableEntity>(entity: T): Filter<T> {
+  const query: Filter<Document> = { userId: entity.userId };
+  if (entity._id) {
+    return { ...query, _id: new ObjectId(entity._id) } as Filter<T>;
+  }
+  return { ...query, id: entity.id } as Filter<T>;
+}
 
 function normalizeStoredEntityId<T extends { id?: string; _id?: string }>(
   entity: T,
@@ -244,14 +258,7 @@ export const storage = {
         userId: encounter.userId,
       });
 
-      // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
-      let query: any = { userId: encounter.userId };
-      if (encounter._id) {
-        query._id = new ObjectId(encounter._id);
-      } else {
-        query.id = encounter.id;
-      }
-
+      const query = buildEntityQuery(encounter);
       console.log("Query for updateOne:", query);
 
       const result = await db
@@ -287,14 +294,7 @@ export const storage = {
       const db = await getDatabase();
       const { _id, ...characterData } = character;
 
-      // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
-      let query: any = { userId: character.userId };
-      if (character._id) {
-        query._id = new ObjectId(character._id);
-      } else {
-        query.id = character.id;
-      }
-
+      const query = buildEntityQuery(character);
       await db
         .collection<Character>("characters")
         .updateOne(query, { $set: characterData }, { upsert: true });
@@ -326,14 +326,7 @@ export const storage = {
       const db = await getDatabase();
       const { _id, ...combatStateData } = combatState;
 
-      // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
-      let query: any = { userId: combatState.userId };
-      if (combatState._id) {
-        query._id = new ObjectId(combatState._id);
-      } else {
-        query.id = combatState.id;
-      }
-
+      const query = buildEntityQuery(combatState);
       await db
         .collection<CombatState>("combatStates")
         .updateOne(query, { $set: combatStateData }, { upsert: true });
@@ -446,14 +439,7 @@ export const storage = {
       const db = await getDatabase();
       const { _id, ...templateData } = template;
 
-      // Build the query: if we have a MongoDB _id, use that; otherwise use the custom id field
-      let query: any = { userId: template.userId };
-      if (template._id) {
-        query._id = new ObjectId(template._id);
-      } else {
-        query.id = template.id;
-      }
-
+      const query = buildEntityQuery(template);
       await db
         .collection<MonsterTemplate>("monsterTemplates")
         .updateOne(query, { $set: templateData }, { upsert: true });
@@ -520,13 +506,7 @@ export const storage = {
       const db = await getDatabase();
       const { _id, ...spellData } = spell;
 
-      const query: Record<string, unknown> = { userId: spell.userId };
-      if (spell._id) {
-        query._id = new ObjectId(spell._id);
-      } else {
-        query.id = spell.id;
-      }
-
+      const query = buildEntityQuery(spell);
       await db
         .collection<SpellTemplate>("spellTemplates")
         .updateOne(query, { $set: spellData }, { upsert: true });

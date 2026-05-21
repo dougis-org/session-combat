@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-21T20:49:25.334Z
-> Files: 617 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-21T20:49:32.055Z
+> Files: 582 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -18,7 +18,7 @@
 
 - `.codacy.yml` — - .claude** (~98 tok)
 - `.dockerignore` — Docker ignore rules (~123 tok)
-- `.gitignore` — Git ignore rules (~297 tok)
+- `.gitignore` — Git ignore rules (~271 tok)
 - `.gitmodules` (~33 tok)
 - `AGENTS.md` — AI Agent Contribution Guidelines (~289 tok)
 - `AGENTS.original.md` — AI Agent Contribution Guidelines (~301 tok)
@@ -752,60 +752,9 @@
 - `save-163352.log` (~0 tok)
 - `save-163400.log` (~0 tok)
 
-## app/
-
-- `layout.tsx` — app/layout.tsx — drop-in replacement. (~758 tok)
-- `page.tsx` — RootPage (~32 tok)
-
-## app/api/campaigns/
-
-- `route.ts` — Next.js API route (~466 tok)
-
-## app/api/campaigns/[id]/
-
-- `route.ts` — Next.js API route (~769 tok)
-
-## app/api/parties/
-
-- `route.ts` — Next.js API route (~423 tok)
-
-## app/api/parties/[id]/
-
-- `route.ts` — Next.js API route (~815 tok)
-
-## app/campaigns/
-
-- `CampaignEditor.tsx` — CampaignEditor — renders form (~791 tok)
-- `page.tsx` — CampaignsContent (~1673 tok)
-
-## app/login/
-
-- `page.tsx` — LoginPage — renders form (~1049 tok)
-
-## app/parties/
-
-- `page.tsx` — PartiesContent — renders form (~2899 tok)
-
-## app/register/
-
-- `page.tsx` — RegisterPage — renders form (~2304 tok)
-
 ## lib/
 
-- `clientStorage.ts` — Client-side storage using localStorage (~616 tok)
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~2785 tok)
-- `middleware.ts` — Extract auth token from request (~695 tok)
-- `storage.ts` — Server-side storage functions for MongoDB (~5520 tok)
-- `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4294 tok)
-
-## lib/components/
-
-- `NavBar.tsx` — NavBar (~426 tok)
-- `ui.tsx` — ErrorBanner — renders form (~761 tok)
-
-## lib/hooks/
-
-- `useAuth.ts` — Exports AuthUser, useAuth (~1197 tok)
 
 ## lib/import/
 
@@ -815,25 +764,6 @@
 - `dndBeyond-skills-senses.ts` — Exports normalizeSavingThrows, normalizeSkills, normalizeSenses (~1155 tok)
 - `dndBeyond-utils.ts` — Exports DndBeyondImportError, createValidationError, ABILITY_ID_MAP, indexStatValues + 6 more (~1014 tok)
 - `utils.ts` — Exports ModifierLike, getAbilityModifier, getProficiencyBonus, dedupeStrings + 9 more (~676 tok)
-
-## openspec/changes/campaign-management/
-
-- `design.md` — Context (~2560 tok)
-- `proposal.md` — GitHub Issues (~1276 tok)
-- `tasks.md` — Tasks (~1727 tok)
-- `tests.md` — Tests (~1227 tok)
-
-## openspec/changes/campaign-management/specs/campaign-crud/
-
-- `spec.md` — ADDED Requirements (~1055 tok)
-
-## openspec/changes/campaign-management/specs/campaign-dashboard/
-
-- `spec.md` — ADDED Requirements (~823 tok)
-
-## openspec/changes/campaign-management/specs/campaign-party-association/
-
-- `spec.md` — ADDED Requirements (~927 tok)
 
 ## openspec/changes/extract-armor-class-normalization/
 
@@ -893,6 +823,10 @@
 
 - `spec.md` — ADDED Requirements (~1795 tok)
 
+## openspec/changes/extract-query-helper-storage/
+
+- `tasks.md` — Tasks (~1256 tok)
+
 ## openspec/changes/fix-import-utility-placement/
 
 - `design.md` — Context (~2079 tok)
@@ -908,41 +842,9 @@
 
 - `spec.md` — ADDED Requirements (~1032 tok)
 
-## tests/e2e/
-
-- `auth.spec.ts` — Declares STRONG_PASSWORD (~4754 tok)
-
-## tests/integration/
-
-- `campaigns.integration.test.ts` — CampaignResponse: authed, createCampaign (~3115 tok)
-
-## tests/unit/api/campaigns/
-
-- `route.test.ts` — Declares requireAuth (~3094 tok)
-
-## tests/unit/api/parties/
-
-- `route.test.ts` — Declares requireAuth (~2775 tok)
-
-## tests/unit/components/
-
-- `CampaignEditor.test.tsx` — BASE_CAMPAIGN (~1526 tok)
-- `NavBar.test.tsx` — mockedUseAuth (~922 tok)
-- `ui.test.tsx` — render — renders form (~2132 tok)
-
 ## tests/unit/import/
 
 - `armor-class.test.ts` — Declares result (~534 tok)
 - `dndBeyond-abilities.test.ts` — Declares DndBeyondActionEntry (~2414 tok)
 - `dndBeyond-armor-class.test.ts` — Declares MockDndBeyondModifier (~2491 tok)
 - `utils.test.ts` — Declares input (~1899 tok)
-
-## tests/unit/lib/
-
-- `clientStorage.test.ts` — Mock localStorage for Node.js test environment (~1485 tok)
-- `middleware.test.ts` — API routes: GET (2 endpoints) (~1721 tok)
-- `useAuth.test.ts` — Mock next/navigation (~1552 tok)
-
-## tests/unit/storage/
-
-- `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~1512 tok)

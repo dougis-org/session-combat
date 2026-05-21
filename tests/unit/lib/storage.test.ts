@@ -1,6 +1,11 @@
 import { storage } from "@/lib/storage";
-import { SpellTemplate } from "@/lib/types";
+import { Character, CombatState, Encounter, SpellTemplate } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";
+
+const ABILITY_SCORES = {
+  strength: 10, dexterity: 10, constitution: 10,
+  intelligence: 10, wisdom: 10, charisma: 10,
+};
 
 jest.mock("@/lib/db", () => ({
   getDatabase: jest.fn(),
@@ -27,6 +32,116 @@ jest.mocked(mockedDb.collection).mockReturnValue(mockedCollection as any);
 describe("storage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe("saveEncounter", () => {
+    const base: Encounter = {
+      id: "enc-123",
+      userId: "user-456",
+      name: "Cave Encounter",
+      description: "A dark cave",
+      monsters: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it("upserts by id when _id not present", async () => {
+      mockedCollection.updateOne.mockResolvedValue({} as any);
+
+      await storage.saveEncounter(base);
+
+      expect(mockedCollection.updateOne).toHaveBeenCalledWith(
+        { userId: "user-456", id: "enc-123" },
+        expect.anything(),
+        { upsert: true }
+      );
+    });
+
+    it("upserts by _id when _id present", async () => {
+      mockedCollection.updateOne.mockResolvedValue({} as any);
+
+      await storage.saveEncounter({ ...base, _id: "507f1f77bcf86cd799439011" });
+
+      const filter = mockedCollection.updateOne.mock.calls[0][0];
+      expect(filter).toHaveProperty("_id");
+      expect(filter).toHaveProperty("userId", "user-456");
+    });
+  });
+
+  describe("saveCharacter", () => {
+    const base: Character = {
+      id: "char-123",
+      userId: "user-456",
+      name: "Hero",
+      classes: [],
+      abilityScores: ABILITY_SCORES,
+      ac: 10,
+      hp: 10,
+      maxHp: 10,
+    };
+
+    it("upserts by id when _id not present", async () => {
+      mockedCollection.updateOne.mockResolvedValue({} as any);
+
+      await storage.saveCharacter(base);
+
+      expect(mockedCollection.updateOne).toHaveBeenCalledWith(
+        { userId: "user-456", id: "char-123" },
+        expect.anything(),
+        { upsert: true }
+      );
+    });
+
+    it("upserts by _id when _id present", async () => {
+      mockedCollection.updateOne.mockResolvedValue({} as any);
+
+      await storage.saveCharacter({ ...base, _id: "507f1f77bcf86cd799439011" });
+
+      const filter = mockedCollection.updateOne.mock.calls[0][0];
+      expect(filter).toHaveProperty("_id");
+      expect(filter).toHaveProperty("userId", "user-456");
+    });
+  });
+
+  describe("saveCombatState", () => {
+    const base: CombatState = {
+      id: "cs-123",
+      userId: "user-456",
+      combatants: [],
+      currentRound: 1,
+      currentTurnIndex: 0,
+      isActive: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it("upserts by id when _id not present", async () => {
+      mockedCollection.updateOne.mockResolvedValue({} as any);
+
+      await storage.saveCombatState(base);
+
+      expect(mockedCollection.updateOne).toHaveBeenCalledWith(
+        { userId: "user-456", id: "cs-123" },
+        expect.anything(),
+        { upsert: true }
+      );
+    });
+
+    it("upserts by _id when _id present", async () => {
+      mockedCollection.updateOne.mockResolvedValue({} as any);
+
+      await storage.saveCombatState({ ...base, _id: "507f1f77bcf86cd799439011" });
+
+      const filter = mockedCollection.updateOne.mock.calls[0][0];
+      expect(filter).toHaveProperty("_id");
+      expect(filter).toHaveProperty("userId", "user-456");
+    });
+
+    it("returns early when combatState is undefined", async () => {
+      await storage.saveCombatState(undefined);
+
+      expect(mockedCollection.updateOne).not.toHaveBeenCalled();
+    });
   });
 
   describe("loadSpellById", () => {

@@ -57,11 +57,11 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Run the required pre-PR self-review from `skills/openspec-apply-change/SKILL.md` before committing
 - [x] Commit all changes to `refactor/import-tests-165` and push to remote
 - [x] Open PR from `refactor/import-tests-165` to `main` — title: `refactor: centralize D&D Beyond mock server and unify importMonsterSingle dedupe check (closes #165)`
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each, commit fixes, follow Remote push validation, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — diagnose and fix any failure, commit, follow Remote push validation, push; repeat until all checks pass
-- [ ] Wait for PR to merge — **never force-merge**; if human force-merges, continue to Post-Merge
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each, commit fixes, follow Remote push validation, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — diagnose and fix any failure, commit, follow Remote push validation, push; repeat until all checks pass
+- [x] Wait for PR to merge — **never force-merge**; if human force-merges, continue to Post-Merge
 
 Ownership metadata:
 
@@ -77,12 +77,12 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No documentation updates needed (test-only change)
-- [ ] Sync approved spec deltas into `openspec/specs/` (dedupe-engine and mock-server specs)
-- [ ] Archive the change: move `openspec/changes/refactor-import-tests-165/` to `openspec/changes/archive/2026-05-19-refactor-import-tests-165/` **in a single commit** (stage both copy and deletion together)
-- [ ] Confirm `openspec/changes/archive/2026-05-19-refactor-import-tests-165/` exists and `openspec/changes/refactor-import-tests-165/` is gone
-- [ ] Commit and push archive to `main`
-- [ ] Prune: `git fetch --prune` and `git branch -d refactor/import-tests-165`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No documentation updates needed (test-only change)
+- [x] Sync approved spec deltas into `openspec/specs/` (dedupe-engine and mock-server specs)
+- [x] Archive the change: move `openspec/changes/refactor-import-tests-165/` to `openspec/changes/archive/2026-05-19-refactor-import-tests-165/` **in a single commit** (stage both copy and deletion together)
+- [x] Confirm `openspec/changes/archive/2026-05-19-refactor-import-tests-165/` exists and `openspec/changes/refactor-import-tests-165/` is gone
+- [x] Commit and push archive to `main`
+- [x] Prune: `git fetch --prune` and `git branch -d refactor/import-tests-165`
