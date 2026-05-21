@@ -38,7 +38,7 @@
   - attempt=0, retries=3, no Retry-After → resolves `true`, sleep called with 1000
   - attempt=1, retries=3, Retry-After="3" → resolves `true`, sleep called with 3000
   - attempt=3, retries=3 → resolves `false`, no sleep called
-- [x] Verify: `npm test -- tests/unit/import/http-utils.test.ts` passes
+- [x] Verify: `npm run test:unit -- --testPathPattern=tests/unit/import/http-utils.test.ts` passes
 
 ### Task 3 — Refactor `lib/import/open5eAdapter.ts`
 
@@ -63,12 +63,12 @@
 
 ### Task 4 — Run existing open5eAdapter tests
 
-- [x] Run `npm test -- tests/unit/import/open5eAdapter` (or equivalent)
+- [x] Run `npm run test:unit -- --testPathPattern=tests/unit/import/open5eAdapter` (or equivalent)
 - [x] All existing tests must pass without modification
 
 ## Validation
 
-- [x] Run full unit test suite: `npm test`
+- [x] Run full unit test suite: `npm run test:unit`
 - [x] Run type check: `tsc --noEmit` (zero errors)
 - [x] Run build: `npm run build` (succeeds)
 - [x] Confirm no literal `10000` / `10_000` in `lib/import/open5eAdapter.ts`
@@ -79,7 +79,7 @@
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test`; all tests must pass
+- **Unit tests** — `npm run test:unit`; all tests must pass
 - **Type check** — `tsc --noEmit`; zero errors
 - **Build** — `npm run build`; must succeed with no errors
 - If **ANY** of the above fail, iterate and address the failure before pushing

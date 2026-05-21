@@ -19,6 +19,18 @@ describe("calculateBackoffMs", () => {
     it("returns exponential value when retryAfterHeader is null", () => {
       expect(calculateBackoffMs(0, null)).toBe(1000);
     });
+
+    it('returns exponential value when retryAfterHeader is empty string ""', () => {
+      expect(calculateBackoffMs(0, "")).toBe(1000);
+    });
+
+    it("returns exponential value when retryAfterHeader is non-numeric", () => {
+      expect(calculateBackoffMs(0, "not-a-number")).toBe(1000);
+    });
+
+    it("returns exponential value when retryAfterHeader is whitespace", () => {
+      expect(calculateBackoffMs(0, "   ")).toBe(1000);
+    });
   });
 
   describe("Retry-After header", () => {
@@ -74,6 +86,12 @@ describe("handleRateLimitResponse", () => {
 
   it("returns false with no sleep on final attempt (attempt=retries)", async () => {
     const result = await handleRateLimitResponse(makeResponse(), 3, 3);
+    expect(result).toBe(false);
+    expect(setTimeoutSpy).not.toHaveBeenCalled();
+  });
+
+  it("returns false with no sleep when attempt exceeds retries", async () => {
+    const result = await handleRateLimitResponse(makeResponse(), 5, 3);
     expect(result).toBe(false);
     expect(setTimeoutSpy).not.toHaveBeenCalled();
   });

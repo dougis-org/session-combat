@@ -18,7 +18,7 @@ export async function handleRateLimitResponse(
   attempt: number,
   retries: number
 ): Promise<boolean> {
-  if (attempt === retries) {
+  if (attempt >= retries) {
     return false;
   }
   const retryAfter = response.headers.get("Retry-After");

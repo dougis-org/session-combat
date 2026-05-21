@@ -153,6 +153,77 @@ describe("Open5EClient", () => {
   });
 });
 
+describe("fetchWithBackoff retry behavior", () => {
+  let setTimeoutSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    setTimeoutSpy = jest
+      .spyOn(globalThis, "setTimeout")
+      .mockImplementation((fn: TimerHandler) => {
+        if (typeof fn === "function") fn();
+        return 0 as unknown as ReturnType<typeof setTimeout>;
+      });
+  });
+
+  afterEach(() => {
+    setTimeoutSpy.mockRestore();
+  });
+
+  it("retries after 429 and returns data on success", async () => {
+    const mockData = createPaginatedResponse<Open5ECreature>([SAMPLE_CREATURE]);
+    let callCount = 0;
+    const mockFetch = jest.fn().mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return Promise.resolve({
+          ok: false,
+          status: 429,
+          headers: { get: jest.fn().mockReturnValue(null) },
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockResolvedValue(mockData),
+        headers: { get: jest.fn().mockReturnValue(null) },
+        clone: jest.fn().mockReturnThis(),
+      });
+    });
+
+    const client = new Open5EClient(mockFetch as unknown as typeof fetch);
+    const result = await client.fetchMonsters(1);
+
+    expect(result).toEqual(mockData);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 1000);
+  });
+
+  it("retries after network error and returns data on success", async () => {
+    const mockData = createPaginatedResponse<Open5ECreature>([SAMPLE_CREATURE]);
+    let callCount = 0;
+    const mockFetch = jest.fn().mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return Promise.reject(new Error("Network failure"));
+      }
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockResolvedValue(mockData),
+        headers: { get: jest.fn().mockReturnValue(null) },
+        clone: jest.fn().mockReturnThis(),
+      });
+    });
+
+    const client = new Open5EClient(mockFetch as unknown as typeof fetch);
+    const result = await client.fetchMonsters(1);
+
+    expect(result).toEqual(mockData);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 1000);
+  });
+});
+
 describe("SSRF protection", () => {
   it("rejects URLs with different hosts via isAllowedUrl", () => {
     const { isAllowedUrl } = require("@/lib/import/open5eAdapter");
