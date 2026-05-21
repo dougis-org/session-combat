@@ -1,5 +1,5 @@
 import { createValidationError } from "./dndBeyond-utils";
-import { DnDAlignment } from "../types";
+import type { DnDAlignment } from "../types";
 
 const CANONICAL_HOST = "www.dndbeyond.com";
 const CHARACTER_PATH_PATTERN = /^\/characters\/(\d+)(?:\/([A-Za-z0-9_-]+))?\/?$/;

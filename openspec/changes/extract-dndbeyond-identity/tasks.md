@@ -40,8 +40,8 @@
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test`; all tests must pass
-- **Build** — `npm run build` or `tsc --noEmit`; must succeed with no errors
+- **Unit tests** — `npm run test:unit`; all tests must pass
+- **Build** — `tsc --noEmit`; must succeed with no errors
 - If **ANY** of the above fail, iterate and fix before pushing
 
 ## PR and Merge

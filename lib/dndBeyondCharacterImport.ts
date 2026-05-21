@@ -15,12 +15,11 @@ import {
 } from "./import/dndBeyond-utils";
 export { DndBeyondImportError };
 import {
-  parseDndBeyondCharacterUrl,
   requireCharacterIdentity,
   buildNormalizationWarnings,
   normalizeAlignmentId,
 } from "./import/dndBeyond-identity";
-export { parseDndBeyondCharacterUrl };
+export { parseDndBeyondCharacterUrl } from "./import/dndBeyond-identity";
 export type { ParsedDndBeyondCharacterUrl } from "./import/dndBeyond-identity";
 import {
   normalizeAbilityScores,
