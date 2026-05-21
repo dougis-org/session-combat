@@ -290,3 +290,5 @@
 |------|--------|---------|---------|--------|
 | 17:22 | Edited openspec/changes/extract-armor-class-normalization/tasks.md | inline fix | ~16 |
 | 17:23 | Session end: 1 writes across 1 files (tasks.md) | 1 reads | ~4119 tok |
+| 13:49 | Edited openspec/changes/extract-query-helper-storage/tasks.md | 8→8 lines | ~253 |
+| 13:49 | Edited openspec/changes/extract-query-helper-storage/tasks.md | 9→9 lines | ~248 |

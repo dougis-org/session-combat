@@ -55,7 +55,8 @@
       "mcp__plugin_github_github__pull_request_read",
       "mcp__plugin_serena_serena__execute_shell_command",
       "mcp__plugin_serena_serena__get_symbols_overview",
-      "mcp__plugin_github_github__add_reply_to_pull_request_comment"
+      "mcp__plugin_github_github__add_reply_to_pull_request_comment",
+      "Bash(git mv *)"
     ]
   }
 }

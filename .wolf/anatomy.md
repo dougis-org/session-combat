@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-19T00:22:58.921Z
-> Files: 581 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-21T20:49:32.055Z
+> Files: 582 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -822,6 +822,10 @@
 ## openspec/changes/extract-dnd-skills-senses/specs/dndBeyond-skills-senses-extraction/
 
 - `spec.md` — ADDED Requirements (~1795 tok)
+
+## openspec/changes/extract-query-helper-storage/
+
+- `tasks.md` — Tasks (~1256 tok)
 
 ## openspec/changes/fix-import-utility-placement/
 
