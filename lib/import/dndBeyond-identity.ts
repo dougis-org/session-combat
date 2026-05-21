@@ -1,5 +1,5 @@
 import { createValidationError } from "./dndBeyond-utils";
-import type { DnDAlignment } from "../types";
+import type { DnDAlignment, DnDRace } from "../types";
 
 const CANONICAL_HOST = "www.dndbeyond.com";
 const CHARACTER_PATH_PATTERN = /^\/characters\/(\d+)(?:\/([A-Za-z0-9_-]+))?\/?$/;
@@ -29,7 +29,7 @@ interface IdentityCharacterData {
 }
 
 interface IdentityNormalizedDetails {
-  race?: unknown;
+  race?: DnDRace;
   alignment?: DnDAlignment;
 }
 
@@ -83,7 +83,7 @@ export function parseDndBeyondCharacterUrl(
 export function requireCharacterIdentity(
   data: IdentityCharacterData,
 ): CharacterIdentity {
-  const sourceCharacterId = String(data.id || "");
+  const sourceCharacterId = String(data.id ?? "");
   const name = data.name?.trim();
 
   if (!sourceCharacterId) {
