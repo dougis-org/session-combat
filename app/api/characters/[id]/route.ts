@@ -8,9 +8,11 @@ import {
   isValidClass,
   VALID_CLASSES,
   CharacterClass,
+  CharacterType,
   calculateTotalLevel,
   validateCharacterClasses,
   normalizeAlignment,
+  isValidCharacterType,
 } from "@/lib/types";
 
 export async function GET(
@@ -35,7 +37,10 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(character);
+    return NextResponse.json({
+      ...character,
+      characterType: character.characterType ?? 'character',
+    });
   } catch (error) {
     console.error("Error fetching character:", error);
     return NextResponse.json(
@@ -82,6 +87,7 @@ export async function PUT(
       background,
       alignment,
       gender,
+      characterType,
     } = body;
 
     // Get the existing character to verify ownership
@@ -98,6 +104,13 @@ export async function PUT(
     if (name !== undefined && name.trim() === "") {
       return NextResponse.json(
         { error: "Character name is required" },
+        { status: 400 },
+      );
+    }
+
+    if (characterType !== undefined && !isValidCharacterType(characterType)) {
+      return NextResponse.json(
+        { error: "Invalid characterType. Must be one of: character, npc, companion" },
         { status: 400 },
       );
     }
@@ -205,6 +218,9 @@ export async function PUT(
         background !== undefined ? background : existingCharacter.background,
       alignment:
         alignment !== undefined ? normalizedAlignment : existingCharacter.alignment,
+      characterType: characterType !== undefined
+        ? (characterType as CharacterType)
+        : (existingCharacter.characterType ?? 'character'),
       updatedAt: new Date(),
     };
 

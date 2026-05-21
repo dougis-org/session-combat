@@ -150,4 +150,104 @@ describe("POST /api/characters", () => {
       mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
     },
   );
+
+  it("defaults characterType to 'character' when omitted", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+
+    const response = await POST(makeRequest({ name: "Gandalf" }));
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.characterType).toBe("character");
+  });
+
+  it("accepts characterType 'npc'", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+
+    const response = await POST(makeRequest({ name: "Innkeeper", characterType: "npc" }));
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.characterType).toBe("npc");
+  });
+
+  it("accepts characterType 'companion'", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+
+    const response = await POST(makeRequest({ name: "Familiar", characterType: "companion" }));
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.characterType).toBe("companion");
+  });
+
+  it("accepts characterType 'character'", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+
+    const response = await POST(makeRequest({ name: "Hero", characterType: "character" }));
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.characterType).toBe("character");
+  });
+
+  it("returns 400 for invalid characterType", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+
+    const response = await POST(makeRequest({ name: "Villain", characterType: "villain" }));
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toMatch(/characterType/i);
+  });
+});
+
+describe("GET /api/characters — characterType filter", () => {
+  const MOCK_CHARS = [
+    { id: "c1", name: "Hero", userId: "user-123", characterType: "character" },
+    { id: "c2", name: "Innkeeper", userId: "user-123", characterType: "npc" },
+    { id: "c3", name: "Familiar", userId: "user-123", characterType: "companion" },
+  ];
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it("returns all characters when no filter provided", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARS as any);
+
+    const response = await GET(new (require("next/server").NextRequest)(
+      "http://localhost/api/characters",
+      { method: "GET", headers: { cookie: "auth-token=t" } }
+    ));
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toHaveLength(3);
+  });
+
+  it("returns all characters when characterType=all", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARS as any);
+
+    const response = await GET(new (require("next/server").NextRequest)(
+      "http://localhost/api/characters?characterType=all",
+      { method: "GET", headers: { cookie: "auth-token=t" } }
+    ));
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toHaveLength(3);
+  });
+
+  it("returns only NPCs when characterType=npc", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARS as any);
+
+    const response = await GET(new (require("next/server").NextRequest)(
+      "http://localhost/api/characters?characterType=npc",
+      { method: "GET", headers: { cookie: "auth-token=t" } }
+    ));
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toHaveLength(1);
+    expect(body[0].name).toBe("Innkeeper");
+  });
 });

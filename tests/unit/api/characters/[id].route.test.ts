@@ -92,6 +92,46 @@ describe("PUT /api/characters/[id] — gender validation", () => {
   });
 });
 
+describe("PUT /api/characters/[id] — characterType", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
+    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+  });
+
+  it("updates characterType from 'character' to 'npc'", async () => {
+    const response = await PUT(makeRequest({ characterType: "npc" }), { params: PARAMS });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.characterType).toBe("npc");
+  });
+
+  it("updates characterType to 'companion'", async () => {
+    const response = await PUT(makeRequest({ characterType: "companion" }), { params: PARAMS });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.characterType).toBe("companion");
+  });
+
+  it("preserves existing characterType when field omitted", async () => {
+    const charWithType = { ...EXISTING_CHARACTER, characterType: "companion" as const };
+    mockedStorage.loadCharacters.mockResolvedValue([charWithType] as any);
+
+    const response = await PUT(makeRequest({ name: "Lyra Renamed" }), { params: PARAMS });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.characterType).toBe("companion");
+  });
+
+  it("returns 400 for invalid characterType", async () => {
+    const response = await PUT(makeRequest({ characterType: "villain" }), { params: PARAMS });
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toMatch(/characterType/i);
+  });
+});
+
 describe("PUT /api/characters/[id] — alignment validation", () => {
   beforeEach(() => {
     jest.clearAllMocks();

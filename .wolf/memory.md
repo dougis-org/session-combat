@@ -464,3 +464,47 @@
 | 14:41 | Edited openspec/changes/campaign-management/tasks.md | 4→4 lines | ~71 |
 | 14:41 | Edited openspec/changes/campaign-management/tasks.md | 8→8 lines | ~200 |
 | 14:41 | Edited openspec/changes/campaign-management/tasks.md | 8→8 lines | ~215 |
+| 14:46 | Edited openspec/changes/archive/2026-05-21-extract-http-backoff-utils/tasks.md | 7→7 lines | ~182 |
+| 14:46 | Edited openspec/changes/archive/2026-05-21-extract-http-backoff-utils/tasks.md | 9→9 lines | ~237 |
+| 14:48 | Session end: 5 writes across 1 files (tasks.md) | 2 reads | ~2696 tok |
+
+## Session: 2026-05-21 14:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:01 | Created openspec/changes/travelling-npcs-character-type/proposal.md | — | ~1328 |
+| 15:02 | Created openspec/changes/travelling-npcs-character-type/design.md | — | ~2394 |
+| 15:03 | Created openspec/changes/travelling-npcs-character-type/specs/character-type/spec.md | — | ~2444 |
+| 15:03 | Created openspec/changes/travelling-npcs-character-type/tasks.md | — | ~1936 |
+| 15:04 | Created openspec/changes/travelling-npcs-character-type/tests.md | — | ~1556 |
+| 15:04 | Session end: 5 writes across 5 files (proposal.md, design.md, spec.md, tasks.md, tests.md) | 0 reads | ~10349 tok |
+
+## Session: 2026-05-21 16:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:27 | Edited lib/types.ts | modified isValidCharacterType() | ~314 |
+| 16:28 | Edited tests/unit/api/characters/route.test.ts | expanded (+100 lines) | ~1212 |
+| 16:28 | Edited tests/unit/api/characters/[id].route.test.ts | expanded (+40 lines) | ~494 |
+| 16:28 | Created tests/integration/characters/characterType.integration.test.ts | — | ~2388 |
+| 16:28 | Edited app/api/characters/route.ts | added nullish coalescing | ~344 |
+| 16:29 | Edited app/api/characters/route.ts | 25→26 lines | ~126 |
+| 16:29 | Edited app/api/characters/route.ts | added 1 condition(s) | ~114 |
+| 16:29 | Edited app/api/characters/route.ts | added nullish coalescing | ~92 |
+| 16:29 | Edited app/api/characters/[id]/route.ts | 11→13 lines | ~68 |
+| 16:29 | Edited app/api/characters/[id]/route.ts | 6→7 lines | ~32 |
+| 16:29 | Edited app/api/characters/[id]/route.ts | added 1 condition(s) | ~118 |
+| 16:29 | Edited app/api/characters/[id]/route.ts | added nullish coalescing | ~165 |
+| 16:30 | Edited app/api/characters/[id]/route.ts | added nullish coalescing | ~96 |
+| 16:42 | Edited app/characters/page.tsx | inline fix | ~43 |
+| 16:43 | Edited app/characters/page.tsx | modified CharactersContent() | ~284 |
+| 16:43 | Edited app/characters/page.tsx | added nullish coalescing | ~1466 |
+| 16:43 | Edited app/characters/page.tsx | 10→11 lines | ~192 |
+| 16:43 | Edited app/characters/page.tsx | 9→10 lines | ~93 |
+| 16:43 | Edited app/characters/page.tsx | expanded (+15 lines) | ~312 |
+| 16:44 | Created tests/unit/characterTypeUI.test.tsx | — | ~1562 |
+| 16:44 | Edited tests/unit/characterTypeUI.test.tsx | 7→8 lines | ~114 |
+| 16:44 | Edited app/parties/page.tsx | inline fix | ~21 |
+| 16:44 | Edited app/parties/page.tsx | added nullish coalescing | ~446 |
+| 16:45 | Created tests/unit/partyCharacterTypeUI.test.tsx | — | ~1613 |
+| 16:47 | Created openspec/changes/travelling-npcs-character-type/tasks.md | — | ~1936 |
