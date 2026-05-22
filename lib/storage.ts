@@ -38,6 +38,13 @@ function normalizeStoredEntityId<T extends { id?: string; _id?: string }>(
   };
 }
 
+function normalizeCampaign(campaign: Campaign): Campaign {
+  return {
+    ...campaign,
+    chapters: Array.isArray(campaign.chapters) ? campaign.chapters : [],
+  };
+}
+
 /**
  * Server-side storage functions for MongoDB
  * Note: Use API routes for client-side data fetching
@@ -180,6 +187,20 @@ export const storage = {
     }
   },
 
+  // Load a single global campaign template by id
+  async loadGlobalCampaignTemplateById(id: string): Promise<CampaignTemplate | null> {
+    try {
+      const db = await getDatabase();
+      const template = await db
+        .collection<CampaignTemplate>("campaignTemplates")
+        .findOne({ id, userId: GLOBAL_USER_ID });
+      return template ? normalizeStoredEntityId(template) : null;
+    } catch (error) {
+      console.error("Error loading global campaign template by id:", error);
+      return null;
+    }
+  },
+
   // Save campaign template (upsert)
   async saveCampaignTemplate(template: CampaignTemplate): Promise<void> {
     try {
@@ -198,13 +219,14 @@ export const storage = {
     }
   },
 
-  // Delete campaign template
-  async deleteCampaignTemplate(id: string): Promise<void> {
+  // Delete campaign template — returns true if deleted, false if not found
+  async deleteCampaignTemplate(id: string): Promise<boolean> {
     try {
       const db = await getDatabase();
-      await db
+      const result = await db
         .collection<CampaignTemplate>("campaignTemplates")
         .deleteOne({ id, userId: GLOBAL_USER_ID });
+      return result.deletedCount > 0;
     } catch (error) {
       console.error("Error deleting campaign template:", error);
       throw error;
@@ -219,7 +241,7 @@ export const storage = {
         .collection<Campaign>("campaigns")
         .find({ userId })
         .toArray();
-      return campaigns.map(normalizeStoredEntityId);
+      return campaigns.map(normalizeStoredEntityId).map(normalizeCampaign);
     } catch (error) {
       console.error("Error loading campaigns:", error);
       return [];
@@ -233,7 +255,7 @@ export const storage = {
       const campaign = await db
         .collection<Campaign>("campaigns")
         .findOne({ id, userId });
-      return campaign ? normalizeStoredEntityId(campaign) : null;
+      return campaign ? normalizeCampaign(normalizeStoredEntityId(campaign)) : null;
     } catch (error) {
       console.error("Error loading campaign by ID:", error);
       return null;

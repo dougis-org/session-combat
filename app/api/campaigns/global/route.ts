@@ -29,6 +29,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Template name is required' }, { status: 400 });
     }
 
+    const validatedChapters = Array.isArray(chapters)
+      ? chapters
+          .filter((ch): boolean =>
+            ch && typeof ch === 'object' &&
+            typeof ch.id === 'string' && ch.id.trim() !== '' &&
+            typeof ch.title === 'string' && ch.title.trim() !== '' &&
+            typeof ch.order === 'number' && Number.isFinite(ch.order)
+          )
+          .map((ch: Record<string, unknown>) => ({
+            id: (ch.id as string).trim(),
+            title: (ch.title as string).trim(),
+            order: ch.order as number,
+            ...(typeof ch.description === 'string' && { description: ch.description }),
+            ...(typeof ch.levelRange === 'string' && { levelRange: ch.levelRange }),
+            ...(typeof ch.location === 'string' && { location: ch.location }),
+          }))
+      : [];
+
     const template: CampaignTemplate = {
       id: randomUUID(),
       userId: GLOBAL_USER_ID,
@@ -36,7 +54,7 @@ export async function POST(request: NextRequest) {
       name: name.trim(),
       moduleName: typeof moduleName === 'string' ? moduleName.trim() : '',
       description: typeof description === 'string' ? description : undefined,
-      chapters: Array.isArray(chapters) ? chapters : [],
+      chapters: validatedChapters,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

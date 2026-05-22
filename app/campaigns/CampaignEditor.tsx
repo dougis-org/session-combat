@@ -53,7 +53,7 @@ export function CampaignEditor({
           disabled={saving} placeholder="e.g., Curse of Strahd" />
       </div>
 
-      {campaign.chapters.length > 0 && (
+      {campaign.chapters && campaign.chapters.length > 0 && (
         <div className="mb-4">
           <p className="text-sm font-semibold mb-2">Chapters</p>
           <ul className="space-y-1">

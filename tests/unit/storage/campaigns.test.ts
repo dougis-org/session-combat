@@ -1,7 +1,7 @@
 import { describe, test, expect, jest, beforeEach } from "@jest/globals";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
-import type { Campaign } from "@/lib/types";
+import type { Campaign, CampaignTemplate } from "@/lib/types";
 
 jest.mock("@/lib/db", () => ({
   getDatabase: jest.fn(),
@@ -148,6 +148,144 @@ describe("Campaign storage functions", () => {
       campaignsMock.deleteOne.mockRejectedValue(new Error("delete failed") as never);
 
       await expect(storage.deleteCampaign("campaign-1", "user-1")).rejects.toThrow("delete failed");
+    });
+  });
+
+  describe("storage.loadCampaigns normalizes legacy chapters", () => {
+    test("defaults missing chapters to empty array", async () => {
+      const legacyCampaign = { ...baseCampaign, chapters: undefined };
+      campaignsMock.toArray.mockResolvedValue([legacyCampaign] as never);
+
+      const result = await storage.loadCampaigns("user-1");
+
+      expect(result[0].chapters).toEqual([]);
+    });
+  });
+});
+
+const baseTemplate: CampaignTemplate = {
+  id: "template-1",
+  userId: "GLOBAL",
+  isGlobal: true,
+  name: "Test Template",
+  moduleName: "TT",
+  chapters: [],
+  createdAt: new Date("2024-01-01"),
+  updatedAt: new Date("2024-01-01"),
+};
+
+describe("Campaign template storage functions", () => {
+  let templatesMock: ReturnType<typeof makeMockCollection>;
+  let mockDb: { collection: ReturnType<typeof jest.fn> };
+
+  beforeEach(() => {
+    templatesMock = makeMockCollection();
+    mockDb = { collection: jest.fn(() => templatesMock) };
+    mockedGetDatabase.mockResolvedValue(mockDb as never);
+  });
+
+  describe("storage.loadGlobalCampaignTemplates", () => {
+    test("returns all global templates", async () => {
+      templatesMock.toArray.mockResolvedValue([baseTemplate] as never);
+
+      const result = await storage.loadGlobalCampaignTemplates();
+
+      expect(mockDb.collection).toHaveBeenCalledWith("campaignTemplates");
+      expect(templatesMock.find).toHaveBeenCalledWith({ userId: "GLOBAL" });
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe("Test Template");
+    });
+
+    test("returns empty array when no templates exist", async () => {
+      templatesMock.toArray.mockResolvedValue([] as never);
+
+      const result = await storage.loadGlobalCampaignTemplates();
+
+      expect(result).toEqual([]);
+    });
+
+    test("returns empty array when getDatabase fails", async () => {
+      mockedGetDatabase.mockRejectedValue(new Error("connection failed") as never);
+
+      const result = await storage.loadGlobalCampaignTemplates();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("storage.loadGlobalCampaignTemplateById", () => {
+    test("returns template when found", async () => {
+      templatesMock.findOne.mockResolvedValue(baseTemplate as never);
+
+      const result = await storage.loadGlobalCampaignTemplateById("template-1");
+
+      expect(templatesMock.findOne).toHaveBeenCalledWith({ id: "template-1", userId: "GLOBAL" });
+      expect(result?.name).toBe("Test Template");
+    });
+
+    test("returns null when not found", async () => {
+      templatesMock.findOne.mockResolvedValue(null as never);
+
+      const result = await storage.loadGlobalCampaignTemplateById("nonexistent");
+
+      expect(result).toBeNull();
+    });
+
+    test("returns null when getDatabase fails", async () => {
+      mockedGetDatabase.mockRejectedValue(new Error("connection failed") as never);
+
+      const result = await storage.loadGlobalCampaignTemplateById("template-1");
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe("storage.saveCampaignTemplate", () => {
+    beforeEach(() => {
+      templatesMock.updateOne.mockResolvedValue({} as never);
+    });
+
+    test("persists template with upsert by id and userId", async () => {
+      await storage.saveCampaignTemplate(baseTemplate);
+
+      expect(mockDb.collection).toHaveBeenCalledWith("campaignTemplates");
+      expect(templatesMock.updateOne).toHaveBeenCalledWith(
+        { id: baseTemplate.id, userId: baseTemplate.userId },
+        expect.objectContaining({ $set: expect.any(Object) }),
+        { upsert: true }
+      );
+    });
+
+    test("throws when database operation fails", async () => {
+      templatesMock.updateOne.mockRejectedValue(new Error("write failed") as never);
+
+      await expect(storage.saveCampaignTemplate(baseTemplate)).rejects.toThrow("write failed");
+    });
+  });
+
+  describe("storage.deleteCampaignTemplate", () => {
+    test("returns true when template is deleted", async () => {
+      templatesMock.deleteOne.mockResolvedValue({ deletedCount: 1 } as never);
+
+      const result = await storage.deleteCampaignTemplate("template-1");
+
+      expect(mockDb.collection).toHaveBeenCalledWith("campaignTemplates");
+      expect(templatesMock.deleteOne).toHaveBeenCalledWith({ id: "template-1", userId: "GLOBAL" });
+      expect(result).toBe(true);
+    });
+
+    test("returns false when template does not exist", async () => {
+      templatesMock.deleteOne.mockResolvedValue({ deletedCount: 0 } as never);
+
+      const result = await storage.deleteCampaignTemplate("nonexistent");
+
+      expect(result).toBe(false);
+    });
+
+    test("throws when database operation fails", async () => {
+      templatesMock.deleteOne.mockRejectedValue(new Error("delete failed") as never);
+
+      await expect(storage.deleteCampaignTemplate("template-1")).rejects.toThrow("delete failed");
     });
   });
 });

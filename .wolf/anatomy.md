@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T15:13:14.844Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T15:24:39.570Z
 > Files: 652 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
@@ -767,15 +767,15 @@
 
 ## app/api/campaigns/global/
 
-- `route.ts` — Next.js API route: GET, POST, PUT (~587 tok)
+- `route.ts` — Next.js API route: GET, POST, PUT (~816 tok)
 
 ## app/api/campaigns/global/[id]/
 
-- `route.ts` — Next.js API route: DELETE (~270 tok)
+- `route.ts` — Next.js API route: DELETE (~238 tok)
 
 ## app/api/campaigns/global/[id]/copy/
 
-- `route.ts` — Next.js API route: POST (~435 tok)
+- `route.ts` — Next.js API route: POST (~420 tok)
 
 ## app/api/characters/
 
@@ -795,8 +795,8 @@
 
 ## app/campaigns/
 
-- `CampaignEditor.tsx` — CampaignEditor (~750 tok)
-- `page.tsx` — CampaignsContent (~2648 tok)
+- `CampaignEditor.tsx` — CampaignEditor (~756 tok)
+- `page.tsx` — CampaignsContent (~2675 tok)
 
 ## app/characters/
 
@@ -819,7 +819,7 @@
 - `clientStorage.ts` — Client-side storage using localStorage (~616 tok)
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ImportedCharac (~2046 tok)
 - `middleware.ts` — Extract auth token from request (~695 tok)
-- `storage.ts` — Server-side storage functions for MongoDB (~5735 tok)
+- `storage.ts` — Server-side storage functions for MongoDB (~5973 tok)
 - `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4628 tok)
 
 ## lib/components/
@@ -1024,7 +1024,7 @@
 ## tests/unit/components/
 
 - `CampaignEditor.test.tsx` — BASE_CAMPAIGN (~1984 tok)
-- `CampaignsPage.test.tsx` — jsonResponse (~2220 tok)
+- `CampaignsPage.test.tsx` — jsonResponse (~2226 tok)
 - `NavBar.test.tsx` — mockedUseAuth (~922 tok)
 - `ui.test.tsx` — render — renders form (~2132 tok)
 
@@ -1043,4 +1043,4 @@
 
 ## tests/unit/storage/
 
-- `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~1501 tok)
+- `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~2885 tok)

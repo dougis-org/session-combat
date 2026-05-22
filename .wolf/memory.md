@@ -586,3 +586,20 @@
 | 08:11 | Created tests/unit/components/CampaignsPage.test.tsx | — | ~2220 |
 | 08:12 | Edited openspec/changes/campaign-library/tasks.md | modified loadGlobalCampaignTemplates() | ~399 |
 | 08:13 | Edited openspec/changes/campaign-library/tasks.md | modified display() | ~898 |
+| 08:15 | Session end: 29 writes across 12 files (types.ts, route.ts, CampaignEditor.tsx, page.tsx, storage.ts) | 21 reads | ~44118 tok |
+| 08:18 | Session end: 29 writes across 12 files (types.ts, route.ts, CampaignEditor.tsx, page.tsx, storage.ts) | 21 reads | ~44118 tok |
+| 08:22 | Edited lib/storage.ts | modified loadGlobalCampaignTemplates() | ~587 |
+| 08:22 | Edited lib/storage.ts | modified normalizeStoredEntityId() | ~137 |
+| 08:22 | Edited lib/storage.ts | modified loadCampaigns() | ~261 |
+| 08:23 | Edited app/api/campaigns/global/[id]/route.ts | modified if() | ~74 |
+| 08:23 | Edited app/api/campaigns/global/[id]/copy/route.ts | modified if() | ~29 |
+| 08:23 | Edited app/api/campaigns/global/route.ts | modified filter() | ~331 |
+| 08:23 | Edited app/campaigns/page.tsx | 2→2 lines | ~42 |
+| 08:23 | Edited app/campaigns/page.tsx | modified if() | ~204 |
+| 08:23 | Edited app/campaigns/page.tsx | 7→7 lines | ~114 |
+| 08:23 | Edited app/campaigns/page.tsx | 3→3 lines | ~70 |
+| 08:23 | Edited app/campaigns/CampaignEditor.tsx | inline fix | ~18 |
+| 08:23 | Edited tests/unit/storage/campaigns.test.ts | 4→4 lines | ~62 |
+| 08:24 | Edited tests/unit/storage/campaigns.test.ts | added optional chaining | ~1456 |
+| 08:24 | Edited tests/unit/components/CampaignsPage.test.tsx | CSS: value | ~351 |
+| 08:24 | Edited app/api/campaigns/global/route.ts | modified filter() | ~236 |

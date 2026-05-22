@@ -15,7 +15,7 @@ export function CampaignsContent() {
   const [templates, setTemplates] = useState<CampaignTemplate[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState<string | null>(null);
-  const [copyingId, setCopyingId] = useState<string | null>(null);
+  const [copyingIds, setCopyingIds] = useState<Set<string>>(new Set());
   const [copyError, setCopyError] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -54,8 +54,8 @@ export function CampaignsContent() {
   };
 
   const copyTemplate = async (templateId: string) => {
-    setCopyingId(templateId);
-    setCopyError((prev) => { const next = { ...prev }; delete next[templateId]; return next; });
+    setCopyingIds((prev) => new Set(prev).add(templateId));
+    setCopyError(({ [templateId]: _, ...rest }) => rest);
     try {
       const res = await fetch(`/api/campaigns/global/${templateId}/copy`, { method: 'POST' });
       if (!res.ok) {
@@ -66,7 +66,7 @@ export function CampaignsContent() {
     } catch (err) {
       setCopyError((prev) => ({ ...prev, [templateId]: err instanceof Error ? err.message : 'Failed to copy campaign' }));
     } finally {
-      setCopyingId(null);
+      setCopyingIds((prev) => { const next = new Set(prev); next.delete(templateId); return next; });
     }
   };
 
@@ -179,7 +179,7 @@ export function CampaignsContent() {
                     {campaign.moduleName && (
                       <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
                     )}
-                    {campaign.chapters.length > 0 && (
+                    {campaign.chapters && campaign.chapters.length > 0 && (
                       <p className="text-gray-500 text-xs mt-1">{campaign.chapters.length} chapter{campaign.chapters.length !== 1 ? 's' : ''}</p>
                     )}
                   </div>
@@ -230,10 +230,10 @@ export function CampaignsContent() {
                     </div>
                     <button
                       onClick={() => copyTemplate(template.id)}
-                      disabled={copyingId === template.id}
+                      disabled={copyingIds.has(template.id)}
                       className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-3 py-1 rounded text-sm ml-4"
                     >
-                      {copyingId === template.id ? 'Copying...' : 'Copy'}
+                      {copyingIds.has(template.id) ? 'Copying...' : 'Copy'}
                     </button>
                   </div>
                 </div>

@@ -14,14 +14,11 @@ export async function DELETE(
   }
 
   try {
-    const templates = await storage.loadGlobalCampaignTemplates();
-    const template = templates.find((t) => t.id === id);
+    const deleted = await storage.deleteCampaignTemplate(id);
 
-    if (!template) {
+    if (!deleted) {
       return NextResponse.json({ error: 'Campaign template not found' }, { status: 404 });
     }
-
-    await storage.deleteCampaignTemplate(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

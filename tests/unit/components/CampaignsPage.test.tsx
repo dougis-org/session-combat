@@ -144,8 +144,8 @@ describe('Campaign Catalog UI', () => {
   });
 
   it('Copy button shows loading state during in-flight request', async () => {
-    let resolveCopy!: () => void;
-    const copyPromise = new Promise<void>(resolve => { resolveCopy = resolve; });
+    let resolveCopy!: (value: unknown) => void;
+    const copyPromise = new Promise((resolve) => { resolveCopy = resolve; });
 
     global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input.toString();
@@ -172,7 +172,7 @@ describe('Campaign Catalog UI', () => {
     expect(loadingButton).toBeTruthy();
     expect((loadingButton as HTMLButtonElement).disabled).toBe(true);
 
-    resolveCopy();
+    resolveCopy(undefined);
     await act(async () => { await copyPromise; });
   });
 
