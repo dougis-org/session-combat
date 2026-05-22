@@ -16,10 +16,31 @@ export const GET = withAuth(async (_request, auth) => {
 export const POST = withAuth(async (request, auth) => {
   try {
     const body = await request.json();
-    const { name, moduleName, active } = body;
+    const { name, moduleName, active, chapters, currentChapterId } = body;
 
     if (typeof name !== 'string' || name.trim() === '') {
       return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
+    }
+
+    let sanitizedChapters: any[] = [];
+    if (Array.isArray(chapters)) {
+      sanitizedChapters = chapters
+        .map((ch: any, index: number) => {
+          const id = typeof ch?.id === 'string' ? ch.id : crypto.randomUUID();
+          const title = typeof ch?.title === 'string' ? ch.title.trim() : '';
+          const order = typeof ch?.order === 'number' ? ch.order : index;
+          return { id, title, order };
+        })
+        .sort((a, b) => a.order - b.order)
+        .map((ch, index) => ({ ...ch, order: index }));
+    }
+
+    let sanitizedCurrentChapterId: string | undefined = undefined;
+    if (typeof currentChapterId === 'string' && currentChapterId.trim() !== '') {
+      const exists = sanitizedChapters.some((ch) => ch.id === currentChapterId);
+      if (exists) {
+        sanitizedCurrentChapterId = currentChapterId;
+      }
     }
 
     const campaign: Campaign = {
@@ -27,7 +48,8 @@ export const POST = withAuth(async (request, auth) => {
       userId: auth.userId,
       name: name.trim(),
       moduleName: typeof moduleName === 'string' ? moduleName.trim() : '',
-      chapters: [],
+      chapters: sanitizedChapters,
+      currentChapterId: sanitizedCurrentChapterId,
       active: typeof active === 'boolean' ? active : false,
       createdAt: new Date(),
       updatedAt: new Date(),

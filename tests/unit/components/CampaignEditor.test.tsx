@@ -168,4 +168,151 @@ describe('CampaignEditor', () => {
       expect((onSave.mock.calls[0][0] as Campaign).chapters).toEqual([]);
     });
   });
+
+  describe('chapters editing', () => {
+    it('toggles chapters editing section when accordion button is clicked', async () => {
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      // Initially, the chapters editor section is collapsed, so '+ Add Chapter' is not in DOM
+      expect(container.textContent).not.toContain('+ Add Chapter');
+      
+      const accordionBtn = findButton('Chapters');
+      expect(accordionBtn).toBeDefined();
+      
+      await act(async () => { accordionBtn.click(); });
+      expect(container.textContent).toContain('+ Add Chapter');
+      
+      await act(async () => { accordionBtn.click(); });
+      expect(container.textContent).not.toContain('+ Add Chapter');
+    });
+
+    it('adds a new chapter row when "+ Add Chapter" is clicked', async () => {
+      const campaign = { ...BASE_CAMPAIGN, chapters: [] };
+      render({ campaign, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      
+      const accordionBtn = findButton('Chapters');
+      await act(async () => { accordionBtn.click(); });
+      
+      expect(container.textContent).toContain('No chapters defined');
+      
+      const addBtn = findButton('+ Add Chapter');
+      await act(async () => { addBtn.click(); });
+      
+      const inputs = container.querySelectorAll<HTMLInputElement>('input[data-testid="chapter-title-input"]');
+      expect(inputs.length).toBe(1);
+      expect(inputs[0].value).toBe('');
+      expect(container.textContent).not.toContain('No chapters defined');
+      
+      const select = container.querySelector('select[data-testid="current-chapter-select"]') as HTMLSelectElement;
+      expect(select).toBeDefined();
+    });
+
+    it('removes a chapter, shifts subsequent ones, and clears active chapter if deleted', async () => {
+      const onSave = jest.fn() as any;
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        currentChapterId: 'ch-2',
+        chapters: [
+          { id: 'ch-1', title: 'Arrival', order: 0 },
+          { id: 'ch-2', title: 'The Inn', order: 1 },
+          { id: 'ch-3', title: 'The Dungeon', order: 2 },
+        ],
+      };
+      render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
+      
+      const accordionBtn = findButton('Chapters');
+      if (!container.textContent.includes('+ Add Chapter')) {
+        await act(async () => { accordionBtn.click(); });
+      }
+      
+      const removeBtn = container.querySelector('button[data-testid="remove-chapter-1"]') as HTMLButtonElement;
+      await act(async () => { removeBtn.click(); });
+      
+      const inputs = container.querySelectorAll<HTMLInputElement>('input[data-testid="chapter-title-input"]');
+      expect(inputs.length).toBe(2);
+      expect(inputs[0].value).toBe('Arrival');
+      expect(inputs[1].value).toBe('The Dungeon');
+      
+      await act(async () => { findButton('Save Campaign').click(); });
+      expect(onSave).toHaveBeenCalledTimes(1);
+      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
+      expect(savedCampaign.chapters).toEqual([
+        { id: 'ch-1', title: 'Arrival', order: 0 },
+        { id: 'ch-3', title: 'The Dungeon', order: 1 },
+      ]);
+      expect(savedCampaign.currentChapterId).toBeUndefined();
+    });
+
+    it('reorders chapters with move buttons and updates order index', async () => {
+      const onSave = jest.fn() as any;
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        chapters: [
+          { id: 'ch-1', title: 'Arrival', order: 0 },
+          { id: 'ch-2', title: 'The Inn', order: 1 },
+          { id: 'ch-3', title: 'The Dungeon', order: 2 },
+        ],
+      };
+      render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
+      
+      const accordionBtn = findButton('Chapters');
+      if (!container.textContent.includes('+ Add Chapter')) {
+        await act(async () => { accordionBtn.click(); });
+      }
+      
+      const moveUpBtn = container.querySelector('button[data-testid="move-up-1"]') as HTMLButtonElement;
+      await act(async () => { moveUpBtn.click(); });
+      
+      let inputs = container.querySelectorAll<HTMLInputElement>('input[data-testid="chapter-title-input"]');
+      expect(inputs[0].value).toBe('The Inn');
+      expect(inputs[1].value).toBe('Arrival');
+      expect(inputs[2].value).toBe('The Dungeon');
+      
+      const moveDownBtn = container.querySelector('button[data-testid="move-down-0"]') as HTMLButtonElement;
+      await act(async () => { moveDownBtn.click(); });
+      
+      inputs = container.querySelectorAll<HTMLInputElement>('input[data-testid="chapter-title-input"]');
+      expect(inputs[0].value).toBe('Arrival');
+      expect(inputs[1].value).toBe('The Inn');
+      expect(inputs[2].value).toBe('The Dungeon');
+      
+      await act(async () => { findButton('Save Campaign').click(); });
+      expect(onSave).toHaveBeenCalledTimes(1);
+      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
+      expect(savedCampaign.chapters).toEqual([
+        { id: 'ch-1', title: 'Arrival', order: 0 },
+        { id: 'ch-2', title: 'The Inn', order: 1 },
+        { id: 'ch-3', title: 'The Dungeon', order: 2 },
+      ]);
+    });
+
+    it('updates currentChapterId when a chapter is selected in active chapter select', async () => {
+      const onSave = jest.fn() as any;
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        chapters: [
+          { id: 'ch-1', title: 'Arrival', order: 0 },
+          { id: 'ch-2', title: 'The Inn', order: 1 },
+        ],
+      };
+      render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
+      
+      const accordionBtn = findButton('Chapters');
+      if (!container.textContent.includes('+ Add Chapter')) {
+        await act(async () => { accordionBtn.click(); });
+      }
+      
+      const select = container.querySelector('select[data-testid="current-chapter-select"]') as HTMLSelectElement;
+      expect(select).toBeDefined();
+      
+      await act(async () => {
+        select.value = 'ch-2';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      
+      await act(async () => { findButton('Save Campaign').click(); });
+      expect(onSave).toHaveBeenCalledTimes(1);
+      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
+      expect(savedCampaign.currentChapterId).toBe('ch-2');
+    });
+  });
 });

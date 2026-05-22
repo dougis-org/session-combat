@@ -29,11 +29,47 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
     const campaign = result;
 
     const body = await request.json();
-    const { name, moduleName, active } = body;
+    const { name, moduleName, active, chapters, currentChapterId } = body;
 
     if (name !== undefined) {
       if (typeof name !== 'string' || name.trim() === '') {
         return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
+      }
+    }
+
+    let sanitizedChapters = campaign.chapters;
+    let chaptersUpdated = false;
+    if (chapters !== undefined) {
+      chaptersUpdated = true;
+      if (Array.isArray(chapters)) {
+        sanitizedChapters = chapters
+          .map((ch: any, index: number) => {
+            const id = typeof ch?.id === 'string' ? ch.id : crypto.randomUUID();
+            const title = typeof ch?.title === 'string' ? ch.title.trim() : '';
+            const order = typeof ch?.order === 'number' ? ch.order : index;
+            return { id, title, order };
+          })
+          .sort((a, b) => a.order - b.order)
+          .map((ch, index) => ({ ...ch, order: index }));
+      } else {
+        sanitizedChapters = [];
+      }
+    }
+
+    let sanitizedCurrentChapterId = campaign.currentChapterId;
+    if (currentChapterId !== undefined) {
+      if (typeof currentChapterId === 'string' && currentChapterId.trim() !== '') {
+        const exists = (sanitizedChapters || []).some((ch) => ch.id === currentChapterId);
+        sanitizedCurrentChapterId = exists ? currentChapterId : undefined;
+      } else {
+        sanitizedCurrentChapterId = undefined;
+      }
+    } else if (chaptersUpdated) {
+      if (campaign.currentChapterId) {
+        const exists = (sanitizedChapters || []).some((ch) => ch.id === campaign.currentChapterId);
+        if (!exists) {
+          sanitizedCurrentChapterId = undefined;
+        }
       }
     }
 
@@ -42,6 +78,8 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
       ...(name !== undefined && typeof name === 'string' && { name: name.trim() }),
       ...(moduleName !== undefined && typeof moduleName === 'string' && { moduleName: moduleName.trim() }),
       ...(active !== undefined && typeof active === 'boolean' && { active }),
+      ...(chapters !== undefined && { chapters: sanitizedChapters }),
+      currentChapterId: sanitizedCurrentChapterId,
       updatedAt: new Date(),
     };
 

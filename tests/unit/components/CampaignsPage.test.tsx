@@ -210,4 +210,34 @@ describe('Campaign Catalog UI', () => {
     expect(container.textContent).toContain('My Campaign');
     expect(container.textContent).toContain('Campaign Catalog');
   });
+
+  describe('Campaign active chapter display', () => {
+    it('displays active chapter when campaign has currentChapterId', async () => {
+      const campaignWithActiveCh = {
+        ...MOCK_CAMPAIGN,
+        currentChapterId: 'ch-2',
+        chapters: [
+          { id: 'ch-1', title: 'Arrival', order: 0 },
+          { id: 'ch-2', title: 'The Inn', order: 1 },
+        ],
+      };
+      setupFetch([campaignWithActiveCh], []);
+      await renderPage();
+      expect(container.textContent).toContain('📖 Current Chapter: Ch. 2: The Inn');
+    });
+
+    it('displays standard chapter count when no active chapter is selected', async () => {
+      const campaignNoActiveCh = {
+        ...MOCK_CAMPAIGN,
+        chapters: [
+          { id: 'ch-1', title: 'Arrival', order: 0 },
+          { id: 'ch-2', title: 'The Inn', order: 1 },
+        ],
+      };
+      setupFetch([campaignNoActiveCh], []);
+      await renderPage();
+      expect(container.textContent).not.toContain('📖 Current Chapter:');
+      expect(container.textContent).toContain('2 chapters');
+    });
+  });
 });
