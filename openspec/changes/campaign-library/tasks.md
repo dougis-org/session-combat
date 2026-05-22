@@ -2,8 +2,8 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Create and publish working branch:** `git checkout -b feature/campaign-library` then immediately `git push -u origin feature/campaign-library`
+- [x] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
+- [x] **Step 2 — Create and publish working branch:** `git checkout -b feature/campaign-library` then immediately `git push -u origin feature/campaign-library`
 
 ## Execution
 
@@ -11,11 +11,11 @@
 
 File: `lib/types.ts`
 
-- [ ] Add `CampaignChapter` interface: `id`, `title`, `order`, `description?`, `levelRange?`, `location?`
-- [ ] Add `CampaignTemplate` interface: `id`, `userId`, `isGlobal`, `name`, `moduleName`, `description?`, `chapters: CampaignChapter[]`, `createdAt`, `updatedAt`
-- [ ] Add `chapters: CampaignChapter[]` and `currentChapterId?: string` and `templateId?: string` to `Campaign`
-- [ ] Remove `currentChapter: string` and `currentChapterOrder: number` from `Campaign`
-- [ ] Grep entire codebase for `currentChapter` and `currentChapterOrder` and fix all remaining references: `grep -rn "currentChapter\|currentChapterOrder" --include="*.ts" --include="*.tsx" .`
+- [x] Add `CampaignChapter` interface: `id`, `title`, `order`, `description?`, `levelRange?`, `location?`
+- [x] Add `CampaignTemplate` interface: `id`, `userId`, `isGlobal`, `name`, `moduleName`, `description?`, `chapters: CampaignChapter[]`, `createdAt`, `updatedAt`
+- [x] Add `chapters: CampaignChapter[]` and `currentChapterId?: string` and `templateId?: string` to `Campaign`
+- [x] Remove `currentChapter: string` and `currentChapterOrder: number` from `Campaign`
+- [x] Grep entire codebase for `currentChapter` and `currentChapterOrder` and fix all remaining references: `grep -rn "currentChapter\|currentChapterOrder" --include="*.ts" --include="*.tsx" .`
 
 Verification: `npx tsc --noEmit` — zero type errors.
 
@@ -25,9 +25,9 @@ Verification: `npx tsc --noEmit` — zero type errors.
 
 File: `lib/storage.ts`
 
-- [ ] Add `loadGlobalCampaignTemplates(): Promise<CampaignTemplate[]>` — queries `campaignTemplates` collection where `userId === GLOBAL_USER_ID`
-- [ ] Add `saveCampaignTemplate(template: CampaignTemplate): Promise<void>` — upsert by `id`
-- [ ] Add `deleteCampaignTemplate(id: string): Promise<void>` — delete by `id`
+- [x] Add `loadGlobalCampaignTemplates(): Promise<CampaignTemplate[]>` — queries `campaignTemplates` collection where `userId === GLOBAL_USER_ID`
+- [x] Add `saveCampaignTemplate(template: CampaignTemplate): Promise<void>` — upsert by `id`
+- [x] Add `deleteCampaignTemplate(id: string): Promise<void>` — delete by `id`
 
 Verification: `npx tsc --noEmit` — zero type errors.
 
@@ -37,10 +37,10 @@ Verification: `npx tsc --noEmit` — zero type errors.
 
 File: `app/api/campaigns/global/route.ts`
 
-- [ ] `GET` — call `storage.loadGlobalCampaignTemplates()`, return `200` JSON array (no auth required)
-- [ ] `POST` — call `requireAdmin(request)` first; validate `name` is present; construct `CampaignTemplate` with `userId: GLOBAL_USER_ID`, `isGlobal: true`, new UUID; call `storage.saveCampaignTemplate()`; return `201`
-- [ ] `PUT` — call `requireAdmin(request)` first; return `501 Not Implemented` with message `"Seed not yet implemented"`
-- [ ] Handle DB errors with `500` responses and `console.error` logging
+- [x] `GET` — call `storage.loadGlobalCampaignTemplates()`, return `200` JSON array (no auth required)
+- [x] `POST` — call `requireAdmin(request)` first; validate `name` is present; construct `CampaignTemplate` with `userId: GLOBAL_USER_ID`, `isGlobal: true`, new UUID; call `storage.saveCampaignTemplate()`; return `201`
+- [x] `PUT` — call `requireAdmin(request)` first; return `501 Not Implemented` with message `"Seed not yet implemented"`
+- [x] Handle DB errors with `500` responses and `console.error` logging
 
 Verification: `npx tsc --noEmit`
 
@@ -50,8 +50,8 @@ Verification: `npx tsc --noEmit`
 
 File: `app/api/campaigns/global/[id]/route.ts`
 
-- [ ] `DELETE` — call `requireAdmin(request)` first; call `storage.deleteCampaignTemplate(id)`; return `200` on success, `404` if not found
-- [ ] Handle DB errors with `500`
+- [x] `DELETE` — call `requireAdmin(request)` first; call `storage.deleteCampaignTemplate(id)`; return `200` on success, `404` if not found
+- [x] Handle DB errors with `500`
 
 Verification: `npx tsc --noEmit`
 
@@ -61,12 +61,12 @@ Verification: `npx tsc --noEmit`
 
 File: `app/api/campaigns/global/[id]/copy/route.ts`
 
-- [ ] Require session auth (use existing session pattern — return `401` if no session)
-- [ ] Load template by id; return `404` if not found
-- [ ] Deep-copy chapters array, generating a new UUID for each chapter
-- [ ] Construct new `Campaign`: `userId` from session, `name` and `moduleName` from template, `chapters` (deep copy), `currentChapterId` = first chapter's id if chapters present, `templateId` = template id, `active: false`
-- [ ] Save via existing `storage.saveCampaign()` (or equivalent); return `201` with the new campaign
-- [ ] Handle DB errors with `500`
+- [x] Require session auth (use existing session pattern — return `401` if no session)
+- [x] Load template by id; return `404` if not found
+- [x] Deep-copy chapters array, generating a new UUID for each chapter
+- [x] Construct new `Campaign`: `userId` from session, `name` and `moduleName` from template, `chapters` (deep copy), `currentChapterId` = first chapter's id if chapters present, `templateId` = template id, `active: false`
+- [x] Save via existing `storage.saveCampaign()` (or equivalent); return `201` with the new campaign
+- [x] Handle DB errors with `500`
 
 Verification: `npx tsc --noEmit`
 
@@ -76,11 +76,11 @@ Verification: `npx tsc --noEmit`
 
 File: `app/campaigns/CampaignEditor.tsx`
 
-- [ ] Remove `currentChapter` text input and `currentChapterOrder` number input
-- [ ] Remove corresponding `useState` hooks for those fields
-- [ ] Update `handleSave` to omit the removed fields
-- [ ] Add a read-only chapter list display (for copied campaigns): if `campaign.chapters.length > 0`, render the list of chapter titles with the current chapter indicated
-- [ ] Do not add chapter editing UI in this iteration (out of scope)
+- [x] Remove `currentChapter` text input and `currentChapterOrder` number input
+- [x] Remove corresponding `useState` hooks for those fields
+- [x] Update `handleSave` to omit the removed fields
+- [x] Add a read-only chapter list display (for copied campaigns): if `campaign.chapters.length > 0`, render the list of chapter titles with the current chapter indicated
+- [x] Do not add chapter editing UI in this iteration (out of scope)
 
 Verification: `npx tsc --noEmit`; page renders without errors in browser.
 
@@ -90,13 +90,13 @@ Verification: `npx tsc --noEmit`; page renders without errors in browser.
 
 File: `app/campaigns/page.tsx`
 
-- [ ] Add `useEffect` / fetch call to `GET /api/campaigns/global` to load templates on mount
-- [ ] Add loading and error state for the catalog fetch
-- [ ] Render "Campaign Catalog" section below user campaigns
-- [ ] Each template card: name, moduleName, chapter count, Copy button
-- [ ] Copy button handler: POST to `/api/campaigns/global/${template.id}/copy`; on success refresh user campaigns list; show loading state during request; show inline error on failure
-- [ ] Empty state message when catalog is empty
-- [ ] Catalog fetch failure does not crash the page (caught and shown as error state)
+- [x] Add `useEffect` / fetch call to `GET /api/campaigns/global` to load templates on mount
+- [x] Add loading and error state for the catalog fetch
+- [x] Render "Campaign Catalog" section below user campaigns
+- [x] Each template card: name, moduleName, chapter count, Copy button
+- [x] Copy button handler: POST to `/api/campaigns/global/${template.id}/copy`; on success refresh user campaigns list; show loading state during request; show inline error on failure
+- [x] Empty state message when catalog is empty
+- [x] Catalog fetch failure does not crash the page (caught and shown as error state)
 
 Verification: Manual browser test — catalog renders, Copy creates a new campaign in the list.
 
@@ -104,10 +104,10 @@ Verification: Manual browser test — catalog renders, Copy creates a new campai
 
 ## Validation
 
-- [ ] `npx tsc --noEmit` — zero type errors
-- [ ] `npm run test` — all unit tests pass
+- [x] `npx tsc --noEmit` — zero type errors
+- [x] `npm run test:unit` — all unit tests pass
 - [ ] `npm run test:integration` — all integration tests pass (includes new tests from tests.md)
-- [ ] `npm run build` — build succeeds with no errors
+- [x] `npm run build` — build succeeds with no errors
 - [ ] Manual smoke test: campaign dashboard loads, catalog section visible, Copy button creates campaign
 - [ ] All tasks above marked complete
 

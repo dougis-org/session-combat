@@ -7,6 +7,7 @@ import {
   CombatState,
   Party,
   Campaign,
+  CampaignTemplate,
   MonsterTemplate,
   SpellTemplate,
 } from "./types";
@@ -161,6 +162,52 @@ export const storage = {
     } catch (error) {
       console.error("Error loading all monster templates:", error);
       return [];
+    }
+  },
+
+  // Load global campaign templates (admin-controlled)
+  async loadGlobalCampaignTemplates(): Promise<CampaignTemplate[]> {
+    try {
+      const db = await getDatabase();
+      const templates = await db
+        .collection<CampaignTemplate>("campaignTemplates")
+        .find({ userId: GLOBAL_USER_ID })
+        .toArray();
+      return templates.map(normalizeStoredEntityId);
+    } catch (error) {
+      console.error("Error loading global campaign templates:", error);
+      return [];
+    }
+  },
+
+  // Save campaign template (upsert)
+  async saveCampaignTemplate(template: CampaignTemplate): Promise<void> {
+    try {
+      const db = await getDatabase();
+      const { _id, ...templateData } = template;
+      await db
+        .collection<CampaignTemplate>("campaignTemplates")
+        .updateOne(
+          { id: template.id, userId: template.userId },
+          { $set: templateData },
+          { upsert: true }
+        );
+    } catch (error) {
+      console.error("Error saving campaign template:", error);
+      throw error;
+    }
+  },
+
+  // Delete campaign template
+  async deleteCampaignTemplate(id: string): Promise<void> {
+    try {
+      const db = await getDatabase();
+      await db
+        .collection<CampaignTemplate>("campaignTemplates")
+        .deleteOne({ id, userId: GLOBAL_USER_ID });
+    } catch (error) {
+      console.error("Error deleting campaign template:", error);
+      throw error;
     }
   },
 

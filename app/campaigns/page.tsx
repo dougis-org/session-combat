@@ -3,18 +3,24 @@
 import { useState, useEffect } from 'react';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState } from '@/lib/components/ui';
-import { Campaign } from '@/lib/types';
+import { Campaign, CampaignTemplate } from '@/lib/types';
 import { CampaignEditor } from './CampaignEditor';
 
-function CampaignsContent() {
+export function CampaignsContent() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [templates, setTemplates] = useState<CampaignTemplate[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [copyingId, setCopyingId] = useState<string | null>(null);
+  const [copyError, setCopyError] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchCampaigns();
+    fetchTemplates();
   }, []);
 
   const fetchCampaigns = async () => {
@@ -32,14 +38,45 @@ function CampaignsContent() {
     }
   };
 
+  const fetchTemplates = async () => {
+    try {
+      setCatalogLoading(true);
+      setCatalogError(null);
+      const res = await fetch('/api/campaigns/global');
+      if (!res.ok) throw new Error('Failed to fetch campaign catalog');
+      const data = await res.json();
+      setTemplates(data || []);
+    } catch (err) {
+      setCatalogError(err instanceof Error ? err.message : 'Failed to load campaign catalog');
+    } finally {
+      setCatalogLoading(false);
+    }
+  };
+
+  const copyTemplate = async (templateId: string) => {
+    setCopyingId(templateId);
+    setCopyError((prev) => { const next = { ...prev }; delete next[templateId]; return next; });
+    try {
+      const res = await fetch(`/api/campaigns/global/${templateId}/copy`, { method: 'POST' });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to copy campaign');
+      }
+      await fetchCampaigns();
+    } catch (err) {
+      setCopyError((prev) => ({ ...prev, [templateId]: err instanceof Error ? err.message : 'Failed to copy campaign' }));
+    } finally {
+      setCopyingId(null);
+    }
+  };
+
   const addCampaign = () => {
     setEditingCampaign({
       id: '',
       userId: '',
       name: '',
       moduleName: '',
-      currentChapter: '',
-      currentChapterOrder: 0,
+      chapters: [],
       active: false,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -142,8 +179,8 @@ function CampaignsContent() {
                     {campaign.moduleName && (
                       <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
                     )}
-                    {campaign.currentChapter && (
-                      <p className="text-gray-500 text-xs mt-1">{campaign.currentChapter}</p>
+                    {campaign.chapters.length > 0 && (
+                      <p className="text-gray-500 text-xs mt-1">{campaign.chapters.length} chapter{campaign.chapters.length !== 1 ? 's' : ''}</p>
                     )}
                   </div>
                   <div className="flex gap-2">
@@ -165,6 +202,45 @@ function CampaignsContent() {
             ))}
           </div>
         )}
+
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-4">Campaign Catalog</h2>
+          {catalogLoading ? (
+            <LoadingState label="Loading campaign catalog..." />
+          ) : catalogError ? (
+            <p className="text-red-400 text-sm">{catalogError}</p>
+          ) : templates.length === 0 ? (
+            <p className="text-gray-400">No campaign templates available yet.</p>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4">
+              {templates.map((template) => (
+                <div key={template.id} className="bg-gray-800 rounded-lg p-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold">{template.name}</h3>
+                      {template.moduleName && (
+                        <p className="text-gray-400 text-sm">{template.moduleName}</p>
+                      )}
+                      <p className="text-gray-500 text-xs mt-1">
+                        {template.chapters.length} chapter{template.chapters.length !== 1 ? 's' : ''}
+                      </p>
+                      {copyError[template.id] && (
+                        <p className="text-red-400 text-xs mt-1">{copyError[template.id]}</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => copyTemplate(template.id)}
+                      disabled={copyingId === template.id}
+                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-3 py-1 rounded text-sm ml-4"
+                    >
+                      {copyingId === template.id ? 'Copying...' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

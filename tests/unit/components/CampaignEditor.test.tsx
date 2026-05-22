@@ -20,8 +20,7 @@ const BASE_CAMPAIGN: Campaign = {
   userId: 'user-1',
   name: 'Test Campaign',
   moduleName: 'LMoP',
-  currentChapter: 'Chapter 1',
-  currentChapterOrder: 1,
+  chapters: [],
   active: false,
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
@@ -128,6 +127,45 @@ describe('CampaignEditor', () => {
       render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel, isNew: false });
       act(() => { findButton('Cancel').click(); });
       expect(onCancel).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('legacy fields removed', () => {
+    it('does not render currentChapter input', () => {
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      const labels = Array.from(container.querySelectorAll('label')).map(l => l.textContent);
+      expect(labels.some(l => l?.includes('Current Chapter'))).toBe(false);
+    });
+
+    it('does not render currentChapterOrder input', () => {
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      const labels = Array.from(container.querySelectorAll('label')).map(l => l.textContent);
+      expect(labels.some(l => l?.includes('Chapter Order'))).toBe(false);
+    });
+  });
+
+  describe('chapters display', () => {
+    it('renders chapter list when chapters present', () => {
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        chapters: [
+          { id: 'ch-1', title: 'Arrival', order: 0 },
+          { id: 'ch-2', title: 'The Inn', order: 1 },
+          { id: 'ch-3', title: 'The Dungeon', order: 2 },
+        ],
+      };
+      render({ campaign, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      expect(container.textContent).toContain('Arrival');
+      expect(container.textContent).toContain('The Inn');
+      expect(container.textContent).toContain('The Dungeon');
+    });
+
+    it('save with no chapters calls onSave with chapters: []', async () => {
+      const onSave = jest.fn() as any;
+      render({ campaign: BASE_CAMPAIGN, onSave, onCancel: jest.fn(), isNew: false });
+      await act(async () => { findButton('Save Campaign').click(); });
+      expect(onSave).toHaveBeenCalledTimes(1);
+      expect((onSave.mock.calls[0][0] as Campaign).chapters).toEqual([]);
     });
   });
 });

@@ -784,6 +784,118 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-22T01:37:46.217Z"
+    },
+    {
+      "id": "bug-050",
+      "timestamp": "2026-05-22T14:56:50.905Z",
+      "error_message": "Significant refactor of ",
+      "file": "lib/types.ts",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 12→35 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T14:56:50.905Z"
+    },
+    {
+      "id": "bug-051",
+      "timestamp": "2026-05-22T14:57:12.482Z",
+      "error_message": "Significant refactor of ",
+      "file": "app/api/campaigns/[id]/route.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 18→16 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T14:57:12.482Z"
+    },
+    {
+      "id": "bug-052",
+      "timestamp": "2026-05-22T14:57:30.451Z",
+      "error_message": "CSS fix: name",
+      "file": "app/campaigns/CampaignEditor.tsx",
+      "root_cause": "name: name.trim(), moduleName: moduleName.trim(), currentChapter: currentChapter.trim(), currentChapterOrder, active → name.trim(), moduleName: moduleName.trim(), active",
+      "fix": "Changed name: name.trim(), moduleName: moduleName.trim(), currentChapter: currentChapter.trim(), currentChapterOrder, active → name.trim(), moduleName: moduleName.trim(), active",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T14:57:30.451Z"
+    },
+    {
+      "id": "bug-053",
+      "timestamp": "2026-05-22T14:58:02.785Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "app/campaigns/page.tsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T14:58:02.785Z"
+    },
+    {
+      "id": "bug-054",
+      "timestamp": "2026-05-22T14:58:29.790Z",
+      "error_message": "Missing error handling in loadGlobalCampaignTemplates",
+      "file": "lib/storage.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T14:58:29.790Z"
+    },
+    {
+      "id": "bug-055",
+      "timestamp": "2026-05-22T15:08:59.416Z",
+      "error_message": "Null/undefined access in ",
+      "file": "tests/unit/components/CampaignEditor.test.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T15:08:59.416Z"
+    },
+    {
+      "id": "bug-056",
+      "timestamp": "2026-05-22T15:09:21.954Z",
+      "error_message": "Significant refactor of ",
+      "file": "tests/unit/api/campaigns/route.test.ts",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 42→29 lines (9 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T15:09:21.954Z"
     }
   ]
 }

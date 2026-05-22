@@ -29,7 +29,7 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
     const campaign = result;
 
     const body = await request.json();
-    const { name, moduleName, currentChapter, currentChapterOrder, active } = body;
+    const { name, moduleName, active } = body;
 
     if (name !== undefined) {
       if (typeof name !== 'string' || name.trim() === '') {
@@ -41,8 +41,6 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
       ...campaign,
       ...(name !== undefined && typeof name === 'string' && { name: name.trim() }),
       ...(moduleName !== undefined && typeof moduleName === 'string' && { moduleName: moduleName.trim() }),
-      ...(currentChapter !== undefined && typeof currentChapter === 'string' && { currentChapter: currentChapter.trim() }),
-      ...(currentChapterOrder !== undefined && typeof currentChapterOrder === 'number' && isFinite(currentChapterOrder) && { currentChapterOrder }),
       ...(active !== undefined && typeof active === 'boolean' && { active }),
       updatedAt: new Date(),
     };

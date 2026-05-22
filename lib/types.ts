@@ -514,14 +514,37 @@ export interface CombatState {
   updatedAt: Date;
 }
 
+export interface CampaignChapter {
+  id: string;
+  title: string;
+  order: number;
+  description?: string;
+  levelRange?: string;
+  location?: string;
+}
+
+export interface CampaignTemplate {
+  _id?: string;
+  id: string;
+  userId: string;
+  isGlobal: boolean;
+  name: string;
+  moduleName: string;
+  description?: string;
+  chapters: CampaignChapter[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Campaign {
   _id?: string;
   id: string;
   userId: string;
   name: string;
   moduleName: string;
-  currentChapter: string;
-  currentChapterOrder: number;
+  chapters: CampaignChapter[];
+  currentChapterId?: string;
+  templateId?: string;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
