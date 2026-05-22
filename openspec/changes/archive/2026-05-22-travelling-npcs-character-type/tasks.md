@@ -70,7 +70,7 @@
 - [x] Run build: `npm run build`
 - [x] Run lint: `npm run lint`
 - [x] All completed tasks marked complete
-- [ ] All steps in Remote push validation below pass
+- [x] All steps in Remote push validation below pass
 
 ## Remote push validation
 
@@ -85,14 +85,14 @@ If **ANY** of the above fail, diagnose and fix the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Run the required pre-PR self-review from `.agent/skills/openspec-apply-change/SKILL.md` before committing
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `feature/travelling-npcs-character-type` to `main`; reference issue #183 in the PR description
-- [ ] Wait 120 seconds for Agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each, commit fixes, run Remote push validation, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — for any failure: diagnose, fix, commit, run Remote push validation, push; repeat until all checks pass
-- [ ] Wait for the PR to merge — **never force-merge**; if a human force-merges, continue to Post-Merge
+- [x] Run the required pre-PR self-review from `.agent/skills/openspec-apply-change/SKILL.md` before committing
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `feature/travelling-npcs-character-type` to `main`; reference issue #183 in the PR description
+- [x] Wait 120 seconds for Agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each, commit fixes, run Remote push validation, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — for any failure: diagnose, fix, commit, run Remote push validation, push; repeat until all checks pass
+- [x] Wait for the PR to merge — **never force-merge**; if a human force-merges, continue to Post-Merge
 
 The comment and CI resolution loops are iterative: address → validate locally → push → sleep 120 s → re-check → repeat until PR is fully clean.
 
@@ -110,11 +110,11 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas: copy `openspec/changes/travelling-npcs-character-type/specs/character-type/spec.md` to `openspec/specs/character-type/spec.md`
-- [ ] Archive the change: move `openspec/changes/travelling-npcs-character-type/` to `openspec/changes/archive/YYYY-MM-DD-travelling-npcs-character-type/` — stage both the new location and the deletion of the old location in a **single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-travelling-npcs-character-type/` exists and `openspec/changes/travelling-npcs-character-type/` is gone
-- [ ] Commit and push the archive to `main` in one commit
-- [ ] Prune merged local feature branches: `git fetch --prune` and `git branch -d feature/travelling-npcs-character-type`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas: copy `openspec/changes/travelling-npcs-character-type/specs/character-type/spec.md` to `openspec/specs/character-type/spec.md`
+- [x] Archive the change: move `openspec/changes/travelling-npcs-character-type/` to `openspec/changes/archive/YYYY-MM-DD-travelling-npcs-character-type/` — stage both the new location and the deletion of the old location in a **single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-travelling-npcs-character-type/` exists and `openspec/changes/travelling-npcs-character-type/` is gone
+- [x] Commit and push the archive to `main` in one commit
+- [x] Prune merged local feature branches: `git fetch --prune` and `git branch -d feature/travelling-npcs-character-type`
