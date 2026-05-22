@@ -4,11 +4,8 @@ import { useState } from 'react';
 import { TextInputField, EditorShell } from '@/lib/components/ui';
 import { Campaign } from '@/lib/types';
 
-const generateId = () => {
-  return typeof crypto !== 'undefined' && crypto.randomUUID
-    ? crypto.randomUUID()
-    : 'ch-' + Date.now().toString(36) + '-' + Math.floor(Date.now() / 1000).toString(36);
-};
+const generateId = () => crypto.randomUUID();
+
 
 export function CampaignEditor({
   campaign,
