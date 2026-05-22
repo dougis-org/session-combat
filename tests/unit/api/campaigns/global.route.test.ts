@@ -127,8 +127,12 @@ describe("POST /api/campaigns/global — success", () => {
     const res = await POST(makeRouteRequest(BASE_URL, "POST", {
       name: "Test",
       chapters: [{
-        id: "ch-1", title: "Chapter 1", order: 0,
-        description: "Intro", levelRange: "1-4", location: "Phandalin",
+        id: "ch-1",
+        title: "Chapter 1",
+        order: 0,
+        description: "Intro",
+        levelRange: "1-4",
+        location: "Phandalin",
       }],
     }));
     const ch = (await res.json()).chapters[0];
