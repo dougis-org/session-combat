@@ -1,6 +1,6 @@
 'use client';
 
-import { CharacterType, CharacterClass } from '@/lib/types';
+import { CharacterType, CharacterClass, calculateTotalLevel } from '@/lib/types';
 import { CombatStatsRow } from '@/lib/components/CombatStatsRow';
 
 const BADGE_LABELS: Partial<Record<CharacterType, string>> = {
@@ -14,6 +14,7 @@ interface CharacterMiniSummaryProps {
   characterType?: CharacterType;
   classes?: CharacterClass[];
   ac: number;
+  acNote?: string;
   hp: number;
   maxHp: number;
 }
@@ -24,10 +25,11 @@ export function CharacterMiniSummary({
   characterType,
   classes,
   ac,
+  acNote,
   hp,
   maxHp,
 }: CharacterMiniSummaryProps) {
-  const totalLevel = classes?.reduce((sum, c) => sum + (c.level ?? 0), 0) ?? 0;
+  const totalLevel = classes ? calculateTotalLevel(classes) : 0;
   const classNames = classes?.map(c => c.class).join('/');
   const hasClasses = classes && classes.length > 0;
   const badge = characterType ? BADGE_LABELS[characterType] : undefined;
@@ -46,7 +48,7 @@ export function CharacterMiniSummary({
         {race ?? '—'}
         {hasClasses && ` · ${classNames} · Lv ${totalLevel}`}
       </div>
-      <CombatStatsRow ac={ac} hp={hp} maxHp={maxHp} />
+      <CombatStatsRow ac={ac} acNote={acNote} hp={hp} maxHp={maxHp} />
     </div>
   );
 }

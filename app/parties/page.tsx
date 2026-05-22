@@ -104,6 +104,11 @@ function PartiesContent() {
     [campaigns]
   );
 
+  const characterMap = useMemo(
+    () => new Map(characters.map(c => [c.id, c])),
+    [characters]
+  );
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
@@ -158,7 +163,7 @@ function PartiesContent() {
                       </div>
                       {party.characterIds.length > 0 && (() => {
                         const partyCharacters = party.characterIds
-                          .map(id => characters.find(c => c.id === id))
+                          .map(id => characterMap.get(id))
                           .filter((c): c is Character => c !== undefined);
                         return (
                           <div className="mt-3 space-y-3">
@@ -182,6 +187,7 @@ function PartiesContent() {
                                         characterType={character.characterType}
                                         classes={character.classes}
                                         ac={character.ac}
+                                        acNote={character.acNote}
                                         hp={character.hp}
                                         maxHp={character.maxHp}
                                       />

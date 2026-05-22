@@ -5,16 +5,21 @@
 
 import React from 'react';
 import { act } from 'react';
-import { describe, test, expect } from '@jest/globals';
-import { createRoot } from 'react-dom/client';
+import { describe, test, expect, afterEach } from '@jest/globals';
 import { CharacterMiniSummary } from '@/lib/components/CharacterMiniSummary';
+import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
+import type { Root } from 'react-dom/client';
+
+let container: HTMLDivElement;
+let root: Root;
+
+afterEach(() => {
+  unmountReactRoot(container, root);
+});
 
 function renderComponent(element: React.ReactElement): HTMLDivElement {
-  const container = document.createElement('div');
-  document.body.appendChild(container);
-  act(() => {
-    createRoot(container).render(element);
-  });
+  ({ container, root } = createReactRoot());
+  act(() => { root.render(element); });
   return container;
 }
 

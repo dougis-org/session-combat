@@ -9,7 +9,7 @@ interface CombatStatsRowProps {
 
 export function CombatStatsRow({ ac, acNote, hp, maxHp }: CombatStatsRowProps) {
   return (
-    <div className="grid grid-cols-3 gap-4 text-sm border-b border-gray-700 pb-4">
+    <div className="grid grid-cols-3 gap-4 text-sm">
       <div>
         <div className="text-gray-400">AC</div>
         <div className="text-lg font-bold">

@@ -62,7 +62,9 @@ export function CreatureStatBlock({
   return (
     <div className="bg-gray-800 rounded p-4 space-y-4">
       {/* Combat Stats Row */}
-      <CombatStatsRow ac={ac} acNote={acNote} hp={hp} maxHp={maxHp} />
+      <div className="border-b border-gray-700 pb-4">
+        <CombatStatsRow ac={ac} acNote={acNote} hp={hp} maxHp={maxHp} />
+      </div>
 
       {!isCompact && (
         <>
