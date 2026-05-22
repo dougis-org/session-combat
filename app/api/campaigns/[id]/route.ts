@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { Campaign } from '@/lib/types';
+import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
 
 type Params = { id: string };
 
@@ -41,36 +42,14 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
     let chaptersUpdated = false;
     if (chapters !== undefined) {
       chaptersUpdated = true;
-      if (Array.isArray(chapters)) {
-        sanitizedChapters = chapters
-          .map((ch: any, index: number) => {
-            const id = typeof ch?.id === 'string' ? ch.id : crypto.randomUUID();
-            const title = typeof ch?.title === 'string' ? ch.title.trim() : '';
-            const order = typeof ch?.order === 'number' ? ch.order : index;
-            return { id, title, order };
-          })
-          .sort((a, b) => a.order - b.order)
-          .map((ch, index) => ({ ...ch, order: index }));
-      } else {
-        sanitizedChapters = [];
-      }
+      sanitizedChapters = sanitizeChapters(chapters);
     }
 
     let sanitizedCurrentChapterId = campaign.currentChapterId;
     if (currentChapterId !== undefined) {
-      if (typeof currentChapterId === 'string' && currentChapterId.trim() !== '') {
-        const exists = (sanitizedChapters || []).some((ch) => ch.id === currentChapterId);
-        sanitizedCurrentChapterId = exists ? currentChapterId : undefined;
-      } else {
-        sanitizedCurrentChapterId = undefined;
-      }
+      sanitizedCurrentChapterId = sanitizeCurrentChapterId(currentChapterId, sanitizedChapters);
     } else if (chaptersUpdated) {
-      if (campaign.currentChapterId) {
-        const exists = (sanitizedChapters || []).some((ch) => ch.id === campaign.currentChapterId);
-        if (!exists) {
-          sanitizedCurrentChapterId = undefined;
-        }
-      }
+      sanitizedCurrentChapterId = sanitizeCurrentChapterId(campaign.currentChapterId, sanitizedChapters);
     }
 
     const updated = {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { Campaign } from '@/lib/types';
+import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
 
 export const GET = withAuth(async (_request, auth) => {
   try {
@@ -22,26 +23,8 @@ export const POST = withAuth(async (request, auth) => {
       return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
     }
 
-    let sanitizedChapters: any[] = [];
-    if (Array.isArray(chapters)) {
-      sanitizedChapters = chapters
-        .map((ch: any, index: number) => {
-          const id = typeof ch?.id === 'string' ? ch.id : crypto.randomUUID();
-          const title = typeof ch?.title === 'string' ? ch.title.trim() : '';
-          const order = typeof ch?.order === 'number' ? ch.order : index;
-          return { id, title, order };
-        })
-        .sort((a, b) => a.order - b.order)
-        .map((ch, index) => ({ ...ch, order: index }));
-    }
-
-    let sanitizedCurrentChapterId: string | undefined = undefined;
-    if (typeof currentChapterId === 'string' && currentChapterId.trim() !== '') {
-      const exists = sanitizedChapters.some((ch) => ch.id === currentChapterId);
-      if (exists) {
-        sanitizedCurrentChapterId = currentChapterId;
-      }
-    }
+    const sanitizedChapters = sanitizeChapters(chapters);
+    const sanitizedCurrentChapterId = sanitizeCurrentChapterId(currentChapterId, sanitizedChapters);
 
     const campaign: Campaign = {
       id: crypto.randomUUID(),

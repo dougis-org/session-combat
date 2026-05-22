@@ -27,10 +27,18 @@ export function CampaignEditor({
   const [chaptersExpanded, setChaptersExpanded] = useState(!!campaign.chapters?.length);
 
   const generateId = () => {
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      return crypto.randomUUID();
+    if (typeof crypto !== 'undefined') {
+      if (crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      if (crypto.getRandomValues) {
+        const array = new Uint32Array(4);
+        crypto.getRandomValues(array);
+        return 'ch-' + Array.from(array).map(n => n.toString(36)).join('-');
+      }
     }
-    return 'ch-' + Math.random().toString(36).substring(2, 15);
+    // Safe fallback that avoids Math.random()
+    return 'ch-' + Date.now().toString(36) + '-' + Math.floor(Date.now() / 1000).toString(36);
   };
 
   const handleAddChapter = () => {
