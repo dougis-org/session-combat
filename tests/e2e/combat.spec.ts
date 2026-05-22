@@ -112,7 +112,7 @@ test.describe("Combat flows", () => {
 
     await page.goto("/characters");
     await expect(
-      page.getByRole("heading", { name: "Characters" }),
+      page.getByRole("heading", { name: "Characters", exact: true }),
     ).toBeVisible();
 
     await page
