@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState, FormField, EditorShell, textInputClass } from '@/lib/components/ui';
-import { Party, Character, Campaign } from '@/lib/types';
+import { Party, Character, Campaign, CHARACTER_TYPE_ORDER, CHARACTER_TYPE_LABELS, getCharacterType } from '@/lib/types';
 
 function PartiesContent() {
   const [parties, setParties] = useState<Party[]>([]);
@@ -284,14 +284,26 @@ function PartyEditor({
         {characters.length === 0 ? (
           <p className="text-gray-400 text-sm">No characters available. Create characters first.</p>
         ) : (
-          <div className="grid md:grid-cols-2 gap-2">
-            {characters.map(character => (
-              <label key={character.id} className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={characterIds.has(character.id)}
-                  onChange={() => toggleCharacter(character.id)} disabled={saving} className="cursor-pointer" />
-                <span className="text-sm">{character.name}</span>
-              </label>
-            ))}
+          <div className="space-y-4">
+            {CHARACTER_TYPE_ORDER.map(type => {
+              const label = CHARACTER_TYPE_LABELS[type];
+              const group = characters.filter(c => getCharacterType(c.characterType) === type);
+              if (group.length === 0) return null;
+              return (
+                <div key={type}>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1" aria-label={`Party section: ${label}`}>{label}</p>
+                  <div className="grid md:grid-cols-2 gap-2">
+                    {group.map(character => (
+                      <label key={character.id} className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={characterIds.has(character.id)}
+                          onChange={() => toggleCharacter(character.id)} disabled={saving} className="cursor-pointer" />
+                        <span className="text-sm">{character.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

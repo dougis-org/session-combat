@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-21T21:41:41.531Z
-> Files: 618 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T01:38:00.037Z
+> Files: 632 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -765,6 +765,14 @@
 
 - `route.ts` — Next.js API route (~769 tok)
 
+## app/api/characters/
+
+- `route.ts` — Next.js API route: GET, POST (~1637 tok)
+
+## app/api/characters/[id]/
+
+- `route.ts` — Next.js API route: GET, PUT, DELETE (~2229 tok)
+
 ## app/api/parties/
 
 - `route.ts` — Next.js API route (~423 tok)
@@ -778,13 +786,17 @@
 - `CampaignEditor.tsx` — CampaignEditor — renders form (~791 tok)
 - `page.tsx` — CampaignsContent (~1673 tok)
 
+## app/characters/
+
+- `page.tsx` — CharactersContent (~6631 tok)
+
 ## app/login/
 
 - `page.tsx` — LoginPage — renders form (~1049 tok)
 
 ## app/parties/
 
-- `page.tsx` — PartiesContent — renders form (~2899 tok)
+- `page.tsx` — PartiesContent — renders form (~3099 tok)
 
 ## app/register/
 
@@ -796,7 +808,7 @@
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~2785 tok)
 - `middleware.ts` — Extract auth token from request (~695 tok)
 - `storage.ts` — Server-side storage functions for MongoDB (~5520 tok)
-- `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4294 tok)
+- `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4508 tok)
 
 ## lib/components/
 
@@ -815,6 +827,10 @@
 - `dndBeyond-skills-senses.ts` — Exports normalizeSavingThrows, normalizeSkills, normalizeSenses (~1155 tok)
 - `dndBeyond-utils.ts` — Exports DndBeyondImportError, createValidationError, ABILITY_ID_MAP, indexStatValues + 6 more (~1014 tok)
 - `utils.ts` — Exports ModifierLike, getAbilityModifier, getProficiencyBonus, dedupeStrings + 9 more (~676 tok)
+
+## openspec/changes/archive/2026-05-21-extract-http-backoff-utils/
+
+- `tasks.md` — Tasks (~1390 tok)
 
 ## openspec/changes/campaign-management/
 
@@ -908,6 +924,17 @@
 
 - `spec.md` — ADDED Requirements (~1032 tok)
 
+## openspec/changes/travelling-npcs-character-type/
+
+- `design.md` — Context (~2244 tok)
+- `proposal.md` — GitHub Issues (~1245 tok)
+- `tasks.md` — Tasks (~1819 tok)
+- `tests.md` — Tests (~1459 tok)
+
+## openspec/changes/travelling-npcs-character-type/specs/character-type/
+
+- `spec.md` — ADDED Requirements (~2291 tok)
+
 ## tests/e2e/
 
 - `auth.spec.ts` — Declares STRONG_PASSWORD (~4754 tok)
@@ -916,13 +943,27 @@
 
 - `campaigns.integration.test.ts` — CampaignResponse: authed, createCampaign (~3115 tok)
 
+## tests/integration/characters/
+
+- `characterType.integration.test.ts` — CharacterResponse: authed, createCharacter (~2388 tok)
+
 ## tests/integration/offline/
 
 - `logout-clears-storage.test.ts` — replaceMock: Harness, Harness, Harness (~1556 tok)
 
+## tests/unit/
+
+- `characterTypeUI.test.tsx` — PC (~1974 tok)
+- `partyCharacterTypeUI.test.tsx` — PC (~1606 tok)
+
 ## tests/unit/api/campaigns/
 
 - `route.test.ts` — Declares requireAuth (~3094 tok)
+
+## tests/unit/api/characters/
+
+- `[id].route.test.ts` — Declares mockedRequireAuth (~1686 tok)
+- `route.test.ts` — Declares mockedRequireAuth (~3114 tok)
 
 ## tests/unit/api/parties/
 

@@ -361,6 +361,26 @@ export interface Monster extends CreatureStats {
   initiative?: number;
 }
 
+export type CharacterType = 'character' | 'npc' | 'companion';
+
+export const VALID_CHARACTER_TYPES: CharacterType[] = ['character', 'npc', 'companion'];
+
+export const CHARACTER_TYPE_ORDER: CharacterType[] = ['character', 'npc', 'companion'];
+
+export const CHARACTER_TYPE_LABELS: Record<CharacterType, string> = {
+  character: 'Player Characters',
+  npc: 'Travelling NPCs',
+  companion: 'Companions',
+};
+
+export function isValidCharacterType(value: unknown): value is CharacterType {
+  return typeof value === 'string' && VALID_CHARACTER_TYPES.includes(value as CharacterType);
+}
+
+export function getCharacterType(characterType: CharacterType | undefined): CharacterType {
+  return characterType ?? 'character';
+}
+
 // Character - player character with shared creature stats
 /**
  * Represents a player character with D&D 5e statistics and metadata.
@@ -374,6 +394,7 @@ export interface Character extends CreatureStats {
   id: string;
   userId: string;
   name: string;
+  characterType?: CharacterType;
   // Character-specific metadata
   classes: CharacterClass[]; // Array of classes for multiclass support
   race?: DnDRace; // Must be one of the valid D&D 5e races

@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Character, isValidRace, VALID_RACES, isValidClass, VALID_CLASSES, CharacterClass, calculateTotalLevel, validateCharacterClasses, normalizeAlignment } from '@/lib/types';
+import {
+  Character,
+  isValidRace,
+  VALID_RACES,
+  VALID_CLASSES,
+  CharacterClass,
+  validateCharacterClasses,
+  normalizeAlignment,
+  isValidCharacterType,
+  getCharacterType,
+  CharacterType,
+} from '@/lib/types';
 
 export async function GET(request: NextRequest) {
   const auth = requireAuth(request);
@@ -11,8 +22,27 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const characters = await storage.loadCharacters(auth.userId);
-    return NextResponse.json(characters);
+    const characterTypeParam = request.nextUrl.searchParams.get('characterType');
+
+    if (characterTypeParam && characterTypeParam !== 'all' && !isValidCharacterType(characterTypeParam)) {
+      return NextResponse.json(
+        { error: 'Invalid characterType. Must be one of: character, npc, companion, all' },
+        { status: 400 }
+      );
+    }
+
+    let characters = await storage.loadCharacters(auth.userId);
+
+    if (characterTypeParam && characterTypeParam !== 'all') {
+      characters = characters.filter(
+        c => getCharacterType(c.characterType) === characterTypeParam
+      );
+    }
+
+    return NextResponse.json(characters.map(c => ({
+      ...c,
+      characterType: getCharacterType(c.characterType),
+    })));
   } catch (error) {
     console.error('Error fetching characters:', error);
     return NextResponse.json(
@@ -55,11 +85,19 @@ export async function POST(request: NextRequest) {
       background,
       alignment,
       gender,
+      characterType,
     } = body;
 
     if (!name || name.trim() === '') {
       return NextResponse.json(
         { error: 'Character name is required' },
+        { status: 400 }
+      );
+    }
+
+    if (characterType !== undefined && !isValidCharacterType(characterType)) {
+      return NextResponse.json(
+        { error: 'Invalid characterType. Must be one of: character, npc, companion' },
         { status: 400 }
       );
     }
@@ -145,6 +183,7 @@ export async function POST(request: NextRequest) {
       gender: gender?.trim() || undefined,
       background: background || undefined,
       alignment: normalizedAlignment,
+      characterType: getCharacterType(characterType as CharacterType | undefined),
       createdAt: new Date(),
       updatedAt: new Date(),
     };

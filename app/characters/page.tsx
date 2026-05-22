@@ -6,7 +6,19 @@ import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
-import { Character, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, DnDRace, normalizeAlignment } from '@/lib/types';
+import {
+  Character,
+  CharacterType,
+  CHARACTER_TYPE_LABELS,
+  CHARACTER_TYPE_ORDER,
+  CreatureStats,
+  calculateTotalLevel,
+  getCharacterType,
+  VALID_CLASSES,
+  VALID_RACES,
+  DnDRace,
+  normalizeAlignment,
+} from '@/lib/types';
 
 interface ImportConflictState {
   existingCharacterName: string;
@@ -33,6 +45,7 @@ export function CharactersContent() {
   const [importConflict, setImportConflict] = useState<ImportConflictState | null>(null);
   const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<CharacterType | 'all'>('all');
 
   useEffect(() => {
     fetchCharacters();
@@ -289,6 +302,7 @@ export function CharactersContent() {
 
         {editingCharacter && (
           <CharacterEditor
+            key={isAdding ? 'new' : editingCharacter.id}
             character={editingCharacter}
             onSave={saveCharacter}
             onCancel={cancelEdit}
@@ -296,76 +310,109 @@ export function CharactersContent() {
           />
         )}
 
+        {!loading && characters.length > 0 && (
+          <div className="flex gap-2 mb-4 flex-wrap">
+            <button
+              onClick={() => setTypeFilter('all')}
+              className={`px-3 py-1 rounded text-sm ${typeFilter === 'all' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'}`}
+              aria-label="Filter: All"
+            >
+              All
+            </button>
+            {CHARACTER_TYPE_ORDER.map(type => (
+              <button
+                key={type}
+                onClick={() => setTypeFilter(type)}
+                className={`px-3 py-1 rounded text-sm ${typeFilter === type ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'}`}
+                aria-label={`Filter: ${CHARACTER_TYPE_LABELS[type]}`}
+              >
+                {CHARACTER_TYPE_LABELS[type]}
+              </button>
+            ))}
+          </div>
+        )}
+
         {loading ? (
           <div className="text-center py-8">
             <p className="text-gray-400">Loading characters...</p>
           </div>
+        ) : characters.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            No characters yet. Create one to get started!
+          </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-4">
-            {characters.length === 0 ? (
-              <div className="col-span-full text-center py-8 text-gray-400">
-                No characters yet. Create one to get started!
-              </div>
-            ) : (
-              characters.map(character => (
-                <div key={character.id} className="bg-gray-800 rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-4">
-                    <h2 className="text-xl font-semibold">{character.name}</h2>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setEditingCharacter(character);
-                          setIsAdding(false);
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteCharacter(character.id)}
-                        className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
+          <div>
+            {CHARACTER_TYPE_ORDER.filter(type => typeFilter === 'all' || typeFilter === type).map(type => {
+              const group = characters.filter(c => getCharacterType(c.characterType) === type);
+              if (group.length === 0) return null;
+              return (
+                <div key={type} className="mb-8">
+                  <h2 className="text-lg font-semibold text-gray-300 mb-3" aria-label={`Section: ${CHARACTER_TYPE_LABELS[type]}`}>
+                    {CHARACTER_TYPE_LABELS[type]}
+                  </h2>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {group.map(character => (
+                      <div key={character.id} className="bg-gray-800 rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-4">
+                          <h3 className="text-xl font-semibold">{character.name}</h3>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setEditingCharacter(character);
+                                setIsAdding(false);
+                              }}
+                              className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteCharacter(character.id)}
+                              className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                        {character.classes && character.classes.length > 0 && (
+                          <div className="text-sm text-gray-400 mb-2">
+                            {character.classes.map((c, idx) => (
+                              <span key={idx}>
+                                {c.class} Level {c.level}
+                                {idx < character.classes.length - 1 && ' / '}
+                              </span>
+                            ))}
+                            <span className="ml-2 font-semibold">
+                              (Total Level {calculateTotalLevel(character.classes)})
+                            </span>
+                            {(character.gender || character.race) && ` - ${[character.gender, character.race].filter(Boolean).join(' ')}`}
+                          </div>
+                        )}
+                        <CreatureStatBlock
+                          abilityScores={character.abilityScores}
+                          ac={character.ac}
+                          acNote={character.acNote}
+                          hp={character.hp}
+                          maxHp={character.maxHp}
+                          skills={character.skills}
+                          savingThrows={character.savingThrows}
+                          damageResistances={character.damageResistances}
+                          damageImmunities={character.damageImmunities}
+                          damageVulnerabilities={character.damageVulnerabilities}
+                          conditionImmunities={character.conditionImmunities}
+                          senses={character.senses}
+                          languages={character.languages}
+                          traits={character.traits}
+                          actions={character.actions}
+                          bonusActions={character.bonusActions}
+                          reactions={character.reactions}
+                          isCompact={false}
+                        />
+                      </div>
+                    ))}
                   </div>
-                  {character.classes && character.classes.length > 0 && (
-                    <div className="text-sm text-gray-400 mb-2">
-                      {character.classes.map((c, idx) => (
-                        <span key={idx}>
-                          {c.class} Level {c.level}
-                          {idx < character.classes.length - 1 && ' / '}
-                        </span>
-                      ))}
-                      <span className="ml-2 font-semibold">
-                        (Total Level {calculateTotalLevel(character.classes)})
-                      </span>
-                      {(character.gender || character.race) && ` - ${[character.gender, character.race].filter(Boolean).join(' ')}`}
-                    </div>
-                  )}
-                  <CreatureStatBlock
-                    abilityScores={character.abilityScores}
-                    ac={character.ac}
-                    acNote={character.acNote}
-                    hp={character.hp}
-                    maxHp={character.maxHp}
-                    skills={character.skills}
-                    savingThrows={character.savingThrows}
-                    damageResistances={character.damageResistances}
-                    damageImmunities={character.damageImmunities}
-                    damageVulnerabilities={character.damageVulnerabilities}
-                    conditionImmunities={character.conditionImmunities}
-                    senses={character.senses}
-                    languages={character.languages}
-                    traits={character.traits}
-                    actions={character.actions}
-                    bonusActions={character.bonusActions}
-                    reactions={character.reactions}
-                    isCompact={false}
-                  />
                 </div>
-              ))
-            )}
+              );
+            })}
           </div>
         )}
       </div>
@@ -412,6 +459,7 @@ function CharacterEditor({
   const [alignment, setAlignment] = useState(
     normalizeAlignment(character.alignment) ?? '',
   );
+  const [characterType, setCharacterType] = useState<CharacterType>(character.characterType ?? 'character');
   const [stats, setStats] = useState<CreatureStats>(character);
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -437,12 +485,14 @@ function CharacterEditor({
     try {
       const characterData: Character = {
         ...stats,
-        ...character, // Preserve id, userId, and any other original fields
+        id: character.id,
+        userId: character.userId,
         name,
         classes,
         race: (race as DnDRace) || undefined,
         gender: gender.trim(),
         alignment: normalizeAlignment(alignment),
+        characterType,
       };
       await onSave(characterData);
     } finally {
@@ -563,6 +613,21 @@ function CharacterEditor({
             placeholder="e.g., Female, Male, Non-binary, etc."
             maxLength={50}
           />
+        </div>
+
+        <div>
+          <label className="block mb-1 text-sm font-bold">Type</label>
+          <select
+            value={characterType}
+            onChange={e => setCharacterType(e.target.value as CharacterType)}
+            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+            disabled={saving}
+            aria-label="Character type"
+          >
+            <option value="character">Player Character</option>
+            <option value="npc">Travelling NPC</option>
+            <option value="companion">Companion</option>
+          </select>
         </div>
       </div>
 

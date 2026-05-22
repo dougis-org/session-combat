@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-18T14:20:54.749Z",
   "lifetime": {
-    "total_tokens_estimated": 371135,
-    "total_reads": 253,
-    "total_writes": 440,
-    "total_sessions": 27,
-    "anatomy_hits": 128,
-    "anatomy_misses": 124,
-    "repeated_reads_blocked": 129,
-    "estimated_savings_vs_bare_cli": 226353
+    "total_tokens_estimated": 417897,
+    "total_reads": 269,
+    "total_writes": 475,
+    "total_sessions": 29,
+    "anatomy_hits": 135,
+    "anatomy_misses": 133,
+    "repeated_reads_blocked": 130,
+    "estimated_savings_vs_bare_cli": 229568
   },
   "sessions": [
     {
@@ -4414,6 +4414,327 @@
         "writes_count": 33,
         "repeated_reads_blocked": 9,
         "anatomy_lookups": 13
+      }
+    },
+    {
+      "id": "session-2026-05-21-1436",
+      "started": "2026-05-21T21:36:27.989Z",
+      "ended": "2026-05-21T21:48:32.276Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-management/tasks.md",
+          "tokens_estimated": 1727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/archive/2026-05-21-extract-http-backoff-utils/tasks.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-management/tasks.md",
+          "tokens_estimated": 76,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-management/tasks.md",
+          "tokens_estimated": 214,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-management/tasks.md",
+          "tokens_estimated": 230,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/archive/2026-05-21-extract-http-backoff-utils/tasks.md",
+          "tokens_estimated": 195,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/archive/2026-05-21-extract-http-backoff-utils/tasks.md",
+          "tokens_estimated": 254,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 1727,
+        "output_tokens_estimated": 969,
+        "reads_count": 2,
+        "writes_count": 5,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-05-21-1449",
+      "started": "2026-05-21T21:49:57.465Z",
+      "ended": "2026-05-21T22:04:20.253Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/proposal.md",
+          "tokens_estimated": 1423,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/design.md",
+          "tokens_estimated": 2565,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/specs/character-type/spec.md",
+          "tokens_estimated": 2619,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/tasks.md",
+          "tokens_estimated": 2074,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/tests.md",
+          "tokens_estimated": 1668,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 10349,
+        "reads_count": 0,
+        "writes_count": 5,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-05-21-1625",
+      "started": "2026-05-21T23:25:06.436Z",
+      "ended": "2026-05-21T23:51:20.614Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/tasks.md",
+          "tokens_estimated": 1815,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/specs/character-type/spec.md",
+          "tokens_estimated": 2291,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/types.ts",
+          "tokens_estimated": 4294,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/storage.ts",
+          "tokens_estimated": 5520,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/parties/page.tsx",
+          "tokens_estimated": 2899,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/charactersPage.test.tsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/integration/campaigns.integration.test.ts",
+          "tokens_estimated": 3115,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/integration",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/integration/characters/gender.integration.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/characters/route.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/characters/[id].route.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/lib/types.ts",
+          "tokens_estimated": 314,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/characters/route.test.ts",
+          "tokens_estimated": 1212,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/characters/[id].route.test.ts",
+          "tokens_estimated": 494,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/integration/characters/characterType.integration.test.ts",
+          "tokens_estimated": 2388,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
+          "tokens_estimated": 344,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
+          "tokens_estimated": 126,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
+          "tokens_estimated": 92,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
+          "tokens_estimated": 68,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
+          "tokens_estimated": 118,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
+          "tokens_estimated": 165,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
+          "tokens_estimated": 96,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
+          "tokens_estimated": 43,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
+          "tokens_estimated": 284,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
+          "tokens_estimated": 1466,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
+          "tokens_estimated": 93,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
+          "tokens_estimated": 312,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/characterTypeUI.test.tsx",
+          "tokens_estimated": 1562,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/characterTypeUI.test.tsx",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/parties/page.tsx",
+          "tokens_estimated": 21,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/parties/page.tsx",
+          "tokens_estimated": 446,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/partyCharacterTypeUI.test.tsx",
+          "tokens_estimated": 1613,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/tasks.md",
+          "tokens_estimated": 2074,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 19934,
+        "output_tokens_estimated": 13783,
+        "reads_count": 14,
+        "writes_count": 25,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 6
       }
     }
   ],

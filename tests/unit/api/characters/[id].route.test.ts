@@ -50,13 +50,14 @@ const PARAMS = Promise.resolve({ id: "char-1" });
 const makeRequest = (body: unknown) =>
   makeRouteRequest("http://localhost/api/characters/char-1", "PUT", body);
 
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+  mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
+  mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+});
+
 describe("PUT /api/characters/[id] — gender validation", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-  });
 
   it("returns 400 when gender exceeds 50 characters", async () => {
     const response = await PUT(makeRequest({ gender: "x".repeat(51) }), { params: PARAMS });
@@ -92,13 +93,56 @@ describe("PUT /api/characters/[id] — gender validation", () => {
   });
 });
 
-describe("PUT /api/characters/[id] — alignment validation", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+describe("GET /api/characters/[id] — backward compat coercion", () => {
+
+  it("coerces missing characterType to 'character' for legacy document", async () => {
+    // EXISTING_CHARACTER has no characterType — simulates a legacy BSON document
     mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+
+    const { GET } = await import("@/app/api/characters/[id]/route");
+    const req = makeRouteRequest("http://localhost/api/characters/char-1", "GET");
+    const response = await GET(req, { params: PARAMS });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.characterType).toBe("character");
   });
+});
+
+describe("PUT /api/characters/[id] — characterType", () => {
+
+  it("updates characterType from 'character' to 'npc'", async () => {
+    const response = await PUT(makeRequest({ characterType: "npc" }), { params: PARAMS });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.characterType).toBe("npc");
+  });
+
+  it("updates characterType to 'companion'", async () => {
+    const response = await PUT(makeRequest({ characterType: "companion" }), { params: PARAMS });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.characterType).toBe("companion");
+  });
+
+  it("preserves existing characterType when field omitted", async () => {
+    const charWithType = { ...EXISTING_CHARACTER, characterType: "companion" as const };
+    mockedStorage.loadCharacters.mockResolvedValue([charWithType] as any);
+
+    const response = await PUT(makeRequest({ name: "Lyra Renamed" }), { params: PARAMS });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.characterType).toBe("companion");
+  });
+
+  it("returns 400 for invalid characterType", async () => {
+    const response = await PUT(makeRequest({ characterType: "villain" }), { params: PARAMS });
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toMatch(/characterType/i);
+  });
+});
+
+describe("PUT /api/characters/[id] — alignment validation", () => {
 
   itValidatesAlignmentFieldWithParams(
     PUT,
