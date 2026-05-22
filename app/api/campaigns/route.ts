@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { Campaign } from '@/lib/types';
+import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
 
 export const GET = withAuth(async (_request, auth) => {
   try {
@@ -16,18 +17,22 @@ export const GET = withAuth(async (_request, auth) => {
 export const POST = withAuth(async (request, auth) => {
   try {
     const body = await request.json();
-    const { name, moduleName, active } = body;
+    const { name, moduleName, active, chapters, currentChapterId } = body;
 
     if (typeof name !== 'string' || name.trim() === '') {
       return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
     }
+
+    const sanitizedChapters = sanitizeChapters(chapters);
+    const sanitizedCurrentChapterId = sanitizeCurrentChapterId(currentChapterId, sanitizedChapters);
 
     const campaign: Campaign = {
       id: crypto.randomUUID(),
       userId: auth.userId,
       name: name.trim(),
       moduleName: typeof moduleName === 'string' ? moduleName.trim() : '',
-      chapters: [],
+      chapters: sanitizedChapters,
+      currentChapterId: sanitizedCurrentChapterId,
       active: typeof active === 'boolean' ? active : false,
       createdAt: new Date(),
       updatedAt: new Date(),

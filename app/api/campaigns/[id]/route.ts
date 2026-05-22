@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { Campaign } from '@/lib/types';
+import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
 
 type Params = { id: string };
 
@@ -29,7 +30,7 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
     const campaign = result;
 
     const body = await request.json();
-    const { name, moduleName, active } = body;
+    const { name, moduleName, active, chapters, currentChapterId } = body;
 
     if (name !== undefined) {
       if (typeof name !== 'string' || name.trim() === '') {
@@ -37,11 +38,30 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
       }
     }
 
+    let sanitizedChapters = campaign.chapters;
+    let chaptersUpdated = false;
+    if (chapters !== undefined) {
+      if (!Array.isArray(chapters)) {
+        return NextResponse.json({ error: 'chapters must be an array' }, { status: 400 });
+      }
+      chaptersUpdated = true;
+      sanitizedChapters = sanitizeChapters(chapters);
+    }
+
+    let sanitizedCurrentChapterId = campaign.currentChapterId;
+    if (currentChapterId !== undefined) {
+      sanitizedCurrentChapterId = sanitizeCurrentChapterId(currentChapterId, sanitizedChapters);
+    } else if (chaptersUpdated) {
+      sanitizedCurrentChapterId = sanitizeCurrentChapterId(campaign.currentChapterId, sanitizedChapters);
+    }
+
     const updated = {
       ...campaign,
       ...(name !== undefined && typeof name === 'string' && { name: name.trim() }),
       ...(moduleName !== undefined && typeof moduleName === 'string' && { moduleName: moduleName.trim() }),
       ...(active !== undefined && typeof active === 'boolean' && { active }),
+      ...(chapters !== undefined && { chapters: sanitizedChapters }),
+      currentChapterId: sanitizedCurrentChapterId,
       updatedAt: new Date(),
     };
 

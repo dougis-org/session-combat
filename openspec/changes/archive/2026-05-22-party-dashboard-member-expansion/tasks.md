@@ -78,14 +78,14 @@ If **ANY** of the above fail, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Run the required pre-PR self-review before committing
-- [ ] Commit all changes to `feature/party-dashboard-member-expansion` and push to remote
-- [ ] Open PR from `feature/party-dashboard-member-expansion` to `main` with title: `feat: party dashboard member expansion (closes #195)`
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each comment, commit fixes, run all validation steps, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once all blocking review comments are resolved
-- [ ] **Monitor CI checks** — fix any failures, commit, validate locally, push; repeat until all checks pass
-- [ ] Wait for the PR to merge — **never force-merge**; if a human force-merges, proceed to Post-Merge
+- [x] Run the required pre-PR self-review before committing
+- [x] Commit all changes to `feature/party-dashboard-member-expansion` and push to remote
+- [x] Open PR from `feature/party-dashboard-member-expansion` to `main` with title: `feat: party dashboard member expansion (closes #195)`
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each comment, commit fixes, run all validation steps, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once all blocking review comments are resolved
+- [x] **Monitor CI checks** — fix any failures, commit, validate locally, push; repeat until all checks pass
+- [x] Wait for the PR to merge — **never force-merge**; if a human force-merges, proceed to Post-Merge
 
 Ownership metadata:
 
@@ -101,14 +101,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/`:
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/`:
   - Copy `specs/combat-stats-row/spec.md` → `openspec/specs/combat-stats-row/spec.md`
   - Copy `specs/character-mini-summary/spec.md` → `openspec/specs/character-mini-summary/spec.md`
   - Merge `specs/party-member-expansion/spec.md` additions into `openspec/specs/party-member-expansion/spec.md` (create if absent)
-- [ ] Archive the change: move `openspec/changes/party-dashboard-member-expansion/` to `openspec/changes/archive/2026-05-22-party-dashboard-member-expansion/` — stage both copy and deletion in a **single commit**
-- [ ] Confirm `openspec/changes/archive/2026-05-22-party-dashboard-member-expansion/` exists and `openspec/changes/party-dashboard-member-expansion/` is gone
-- [ ] Commit and push the archive commit to `main`
-- [ ] Prune merged local branch: `git fetch --prune` and `git branch -d feature/party-dashboard-member-expansion`
+- [x] Archive the change: move `openspec/changes/party-dashboard-member-expansion/` to `openspec/changes/archive/2026-05-22-party-dashboard-member-expansion/` — stage both copy and deletion in a **single commit**
+- [x] Confirm `openspec/changes/archive/2026-05-22-party-dashboard-member-expansion/` exists and `openspec/changes/party-dashboard-member-expansion/` is gone
+- [x] Commit and push the archive commit to `main`
+- [x] Prune merged local branch: `git fetch --prune` and `git branch -d feature/party-dashboard-member-expansion`

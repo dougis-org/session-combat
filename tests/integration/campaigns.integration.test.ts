@@ -16,6 +16,11 @@ interface ErrorResponse {
   error: string;
 }
 
+const CHAPTER_PAIR = [
+  { id: "ch-1", title: "Arrival", order: 0 },
+  { id: "ch-2", title: "Inn", order: 1 },
+];
+
 describe("Campaign API Integration Tests", () => {
   let server: TestServer;
   let baseUrl: string;
@@ -308,5 +313,110 @@ describe("Campaign API Integration Tests", () => {
 
     const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed() });
     expect(getPartyRes.status).toBe(200);
+  });
+
+  // --- Chapters and active chapter ID integration ---
+
+  it("persists chapters and active chapter on POST", async () => {
+    const res = await fetch(`${baseUrl}/api/campaigns`, {
+      method: "POST",
+      headers: authed(),
+      body: JSON.stringify({
+        name: "Campaign with Chapters",
+        chapters: CHAPTER_PAIR,
+        currentChapterId: "ch-2",
+      }),
+    });
+    expect(res.status).toBe(201);
+    const data = await res.json() as CampaignResponse & { currentChapterId?: string };
+    expect(data.chapters).toEqual(CHAPTER_PAIR);
+    expect(data.currentChapterId).toBe("ch-2");
+
+    // Fetch to verify persistence
+    const getRes = await fetch(`${baseUrl}/api/campaigns/${data.id}`, { headers: authed() });
+    expect(getRes.status).toBe(200);
+    const getData = await getRes.json() as CampaignResponse & { currentChapterId?: string };
+    expect(getData.chapters).toEqual(CHAPTER_PAIR);
+    expect(getData.currentChapterId).toBe("ch-2");
+  });
+
+  it("clears invalid currentChapterId on POST", async () => {
+    const res = await fetch(`${baseUrl}/api/campaigns`, {
+      method: "POST",
+      headers: authed(),
+      body: JSON.stringify({
+        name: "Campaign with Invalid Chapter",
+        chapters: [
+          { id: "ch-1", title: "Arrival", order: 0 }
+        ],
+        currentChapterId: "invalid-ch",
+      }),
+    });
+    expect(res.status).toBe(201);
+    const data = await res.json() as CampaignResponse & { currentChapterId?: string };
+    expect(data.currentChapterId).toBeUndefined();
+  });
+
+  it("persists chapters and active chapter on PATCH", async () => {
+    const created = await createCampaign("Campaign for PATCH");
+
+    const patchRes = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
+      method: "PATCH",
+      headers: authed(),
+      body: JSON.stringify({
+        chapters: [
+          { id: "ch-a", title: "Alpha", order: 0 },
+          { id: "ch-b", title: "Beta", order: 1 },
+        ],
+        currentChapterId: "ch-b",
+      }),
+    });
+    expect(patchRes.status).toBe(200);
+    const data = await patchRes.json() as CampaignResponse & { currentChapterId?: string };
+    expect(data.chapters).toEqual([
+      { id: "ch-a", title: "Alpha", order: 0 },
+      { id: "ch-b", title: "Beta", order: 1 },
+    ]);
+    expect(data.currentChapterId).toBe("ch-b");
+
+    // Clear currentChapterId if invalid in PATCH
+    const patchResInvalid = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
+      method: "PATCH",
+      headers: authed(),
+      body: JSON.stringify({
+        currentChapterId: "invalid-ch-id",
+      }),
+    });
+    expect(patchResInvalid.status).toBe(200);
+    const dataInvalid = await patchResInvalid.json() as CampaignResponse & { currentChapterId?: string };
+    expect(dataInvalid.currentChapterId).toBeUndefined();
+  });
+
+  it("clears currentChapterId if the active chapter is deleted from the chapters array in PATCH", async () => {
+    const createdRes = await fetch(`${baseUrl}/api/campaigns`, {
+      method: "POST",
+      headers: authed(),
+      body: JSON.stringify({
+        name: "Active Chapter Delete Test",
+        chapters: CHAPTER_PAIR,
+        currentChapterId: "ch-2",
+      }),
+    });
+    const created = await createdRes.json() as CampaignResponse & { currentChapterId?: string };
+    expect(created.currentChapterId).toBe("ch-2");
+
+    // Patch to remove ch-2 without explicitly sending currentChapterId
+    const patchRes = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
+      method: "PATCH",
+      headers: authed(),
+      body: JSON.stringify({
+        chapters: [
+          { id: "ch-1", title: "Arrival", order: 0 }
+        ]
+      }),
+    });
+    expect(patchRes.status).toBe(200);
+    const patchedData = await patchRes.json() as CampaignResponse & { currentChapterId?: string };
+    expect(patchedData.currentChapterId).toBeUndefined();
   });
 });

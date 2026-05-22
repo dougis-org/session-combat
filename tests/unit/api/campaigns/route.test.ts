@@ -43,6 +43,7 @@ const makePostRequest = (body: unknown) => makeRouteRequest(BASE_URL, "POST", bo
 const makeIdRequest = (method: string, body?: unknown) =>
   makeRouteRequest(`${BASE_URL}/campaign-1`, method, body);
 const PARAMS = Promise.resolve({ id: "campaign-1" });
+const PATCH_SINGLE_CHAPTER = [{ id: "ch-5", title: "New Chapter 5", order: 0 }];
 
 // ─── GET /api/campaigns ───────────────────────────────────────────────────────
 
@@ -144,6 +145,43 @@ describe("POST /api/campaigns", () => {
     expect((await response.json()).moduleName).toBe("");
   });
 
+  it("creates campaign with chapters and valid currentChapterId", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const response = await POST(
+      makePostRequest({
+        name: "Lost Mine",
+        chapters: [
+          { id: "ch-1", title: "Chapter 1", order: 1 },
+          { id: "ch-2", title: "Chapter 2", order: 0 },
+        ],
+        currentChapterId: "ch-2",
+      })
+    );
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.chapters).toEqual([
+      { id: "ch-2", title: "Chapter 2", order: 0 },
+      { id: "ch-1", title: "Chapter 1", order: 1 },
+    ]);
+    expect(body.currentChapterId).toBe("ch-2");
+  });
+
+  it("clears currentChapterId if it does not exist in chapters", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const response = await POST(
+      makePostRequest({
+        name: "Lost Mine",
+        chapters: [
+          { id: "ch-1", title: "Chapter 1", order: 0 },
+        ],
+        currentChapterId: "nonexistent-id",
+      })
+    );
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.currentChapterId).toBeUndefined();
+  });
+
   itReturns500(
     POST,
     () => makePostRequest({ name: "Doomed" }),
@@ -238,6 +276,43 @@ describe("PATCH /api/campaigns/[id]", () => {
     expect(body.moduleName).toBe(MOCK_CAMPAIGN.moduleName);
   });
 
+
+  it("returns 400 when chapters is not an array on PATCH", async () => {
+    const response = await PATCH(
+      makeIdRequest("PATCH", { chapters: "not-an-array" }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(400);
+  });
+
+  it("updates chapters and currentChapterId on PATCH", async () => {
+    const response = await PATCH(
+      makeIdRequest("PATCH", {
+        chapters: PATCH_SINGLE_CHAPTER,
+        currentChapterId: "ch-5",
+      }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.chapters).toEqual([
+      { id: "ch-5", title: "New Chapter 5", order: 0 },
+    ]);
+    expect(body.currentChapterId).toBe("ch-5");
+  });
+
+  it("clears currentChapterId on PATCH if it is invalid", async () => {
+    const response = await PATCH(
+      makeIdRequest("PATCH", {
+        chapters: PATCH_SINGLE_CHAPTER,
+        currentChapterId: "invalid-id",
+      }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.currentChapterId).toBeUndefined();
+  });
 
   itReturns404WithParams(
     PATCH,

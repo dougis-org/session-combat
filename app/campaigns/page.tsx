@@ -6,6 +6,27 @@ import { ErrorBanner, LoadingState } from '@/lib/components/ui';
 import { Campaign, CampaignTemplate } from '@/lib/types';
 import { CampaignEditor } from './CampaignEditor';
 
+function CampaignChapterInfo({ campaign }: { campaign: Campaign }) {
+  const currentCh = campaign.currentChapterId
+    ? campaign.chapters?.find((ch) => ch.id === campaign.currentChapterId)
+    : undefined;
+  if (currentCh) {
+    return (
+      <p className="text-blue-400 text-xs font-semibold mt-1">
+        📖 Current Chapter: Ch. {currentCh.order + 1}: {currentCh.title || 'Untitled Chapter'}
+      </p>
+    );
+  }
+  if (campaign.chapters && campaign.chapters.length > 0) {
+    return (
+      <p className="text-gray-500 text-xs mt-1">
+        {campaign.chapters.length} chapter{campaign.chapters.length !== 1 ? 's' : ''}
+      </p>
+    );
+  }
+  return null;
+}
+
 export function CampaignsContent() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
@@ -179,9 +200,7 @@ export function CampaignsContent() {
                     {campaign.moduleName && (
                       <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
                     )}
-                    {campaign.chapters && campaign.chapters.length > 0 && (
-                      <p className="text-gray-500 text-xs mt-1">{campaign.chapters.length} chapter{campaign.chapters.length !== 1 ? 's' : ''}</p>
-                    )}
+                    <CampaignChapterInfo campaign={campaign} />
                   </div>
                   <div className="flex gap-2">
                     <button
