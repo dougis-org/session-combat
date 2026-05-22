@@ -1,6 +1,7 @@
 'use client';
 
 import { AbilityScores, CreatureAbility } from '@/lib/types';
+import { CombatStatsRow } from '@/lib/components/CombatStatsRow';
 
 interface CreatureStatBlockProps {
   abilityScores: AbilityScores;
@@ -61,21 +62,7 @@ export function CreatureStatBlock({
   return (
     <div className="bg-gray-800 rounded p-4 space-y-4">
       {/* Combat Stats Row */}
-      <div className="grid grid-cols-3 gap-4 text-sm border-b border-gray-700 pb-4">
-        <div>
-          <div className="text-gray-400">AC</div>
-          <div className="text-lg font-bold">
-            {ac}
-            {acNote && <span className="text-xs text-gray-400 ml-1">({acNote})</span>}
-          </div>
-        </div>
-        <div>
-          <div className="text-gray-400">HP</div>
-          <div className="text-lg font-bold">
-            {hp}/{maxHp}
-          </div>
-        </div>
-      </div>
+      <CombatStatsRow ac={ac} acNote={acNote} hp={hp} maxHp={maxHp} />
 
       {!isCompact && (
         <>
