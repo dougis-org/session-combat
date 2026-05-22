@@ -9,12 +9,18 @@ import {
 } from "./types";
 import { getAbilityModifier, getProficiencyBonus, titleize, isPresent, ABILITY_KEYS } from "./import/utils";
 import {
-  createValidationError,
   DndBeyondImportError,
   flattenModifiers,
   getModifierNumericValue,
 } from "./import/dndBeyond-utils";
 export { DndBeyondImportError };
+import {
+  requireCharacterIdentity,
+  buildNormalizationWarnings,
+  normalizeAlignmentId,
+} from "./import/dndBeyond-identity";
+export { parseDndBeyondCharacterUrl } from "./import/dndBeyond-identity";
+export type { ParsedDndBeyondCharacterUrl } from "./import/dndBeyond-identity";
 import {
   normalizeAbilityScores,
   normalizeCurrentHp,
@@ -27,21 +33,6 @@ import { normalizeAbilities, type DndBeyondActionEntry } from "./import/dndBeyon
 import { normalizeArmorClass } from "./import/dndBeyond-armor-class";
 import { PASSIVE_SENSE_SKILLS, SKILL_ABILITY_MAP } from "./characterReference";
 import { filterToDamageTypes } from "./constants";
-
-const CANONICAL_HOST = "www.dndbeyond.com";
-const CHARACTER_PATH_PATTERN = /^\/characters\/(\d+)(?:\/([A-Za-z0-9_-]+))?\/?$/;
-
-const ALIGNMENT_ID_MAP: Record<number, DnDAlignment> = {
-  1: "Lawful Good",
-  2: "Neutral Good",
-  3: "Chaotic Good",
-  4: "Lawful Neutral",
-  5: "Neutral",
-  6: "Chaotic Neutral",
-  7: "Lawful Evil",
-  8: "Neutral Evil",
-  9: "Chaotic Evil",
-};
 
 interface DndBeyondStatValue {
   id: number;
@@ -109,12 +100,6 @@ export interface DndBeyondCharacterServiceResponse {
   data?: DndBeyondCharacterData | null;
 }
 
-export interface ParsedDndBeyondCharacterUrl {
-  characterId: string;
-  shareCode?: string;
-  normalizedUrl: string;
-}
-
 export type ImportedCharacterDraft = Omit<
   Character,
   "_id" | "id" | "userId" | "createdAt" | "updatedAt"
@@ -125,11 +110,6 @@ export interface NormalizedDndBeyondCharacter {
   warnings: string[];
   sourceCharacterId: string;
   sourceUrl?: string;
-}
-
-interface CharacterIdentity {
-  name: string;
-  sourceCharacterId: string;
 }
 
 interface NormalizedCharacterDetails {
@@ -154,34 +134,6 @@ interface NormalizedCharacterDetails {
   actions: CreatureAbility[];
 }
 
-export function parseDndBeyondCharacterUrl(
-  url: string,
-): ParsedDndBeyondCharacterUrl {
-  const parsed = parseUrlOrThrow(url);
-
-  if (!isSupportedDndBeyondHostname(parsed.hostname)) {
-    throw createValidationError(
-      "Only canonical public D&D Beyond character URLs are supported.",
-    );
-  }
-
-  const match = parsed.pathname.match(CHARACTER_PATH_PATTERN);
-  if (!match) {
-    throw createValidationError(
-      "Use a publicly available D&D Beyond character URL.",
-    );
-  }
-
-  const [, characterId, shareCode] = match;
-  return {
-    characterId,
-    shareCode,
-    normalizedUrl: shareCode
-      ? `https://${CANONICAL_HOST}/characters/${characterId}/${shareCode}`
-      : `https://${CANONICAL_HOST}/characters/${characterId}`,
-  };
-}
-
 export function normalizeDndBeyondCharacter(
   data: DndBeyondCharacterData,
 ): NormalizedDndBeyondCharacter {
@@ -196,40 +148,6 @@ export function normalizeDndBeyondCharacter(
     sourceCharacterId: identity.sourceCharacterId,
     sourceUrl: data.readonlyUrl || undefined,
   };
-}
-
-function parseUrlOrThrow(url: string): URL {
-  try {
-    return new URL(url.trim());
-  } catch {
-    throw createValidationError("Enter a valid D&D Beyond character URL.");
-  }
-}
-
-function isSupportedDndBeyondHostname(hostname: string): boolean {
-  const normalized = hostname.toLowerCase();
-  return normalized === CANONICAL_HOST || normalized === "dndbeyond.com";
-}
-
-function requireCharacterIdentity(
-  data: DndBeyondCharacterData,
-): CharacterIdentity {
-  const sourceCharacterId = String(data.id || "");
-  const name = data.name?.trim();
-
-  if (!sourceCharacterId) {
-    throw createValidationError(
-      "The imported D&D Beyond character is missing an ID.",
-    );
-  }
-
-  if (!name) {
-    throw createValidationError(
-      "The imported D&D Beyond character is missing a name.",
-    );
-  }
-
-  return { name, sourceCharacterId };
 }
 
 function normalizeCharacterDetails(
@@ -253,7 +171,7 @@ function normalizeCharacterDetails(
   return {
     abilityScores,
     ac: normalizeArmorClass(data.inventory, abilityScores, modifiers),
-    alignment: normalizeAlignment(data.alignmentId),
+    alignment: normalizeAlignmentId(data.alignmentId),
     actions: categorizedAbilities.actions,
     bonusActions: categorizedAbilities.bonusActions,
     classes,
@@ -275,25 +193,6 @@ function normalizeCharacterDetails(
     skills,
     traits: categorizedAbilities.traits,
   };
-}
-
-function buildNormalizationWarnings(
-  data: DndBeyondCharacterData,
-  details: NormalizedCharacterDetails,
-): string[] {
-  const warnings: string[] = [];
-
-  if (!details.race && data.race?.fullName) {
-    warnings.push(
-      `Race "${data.race.fullName}" is not supported and was omitted.`,
-    );
-  }
-
-  if (!details.alignment && typeof data.alignmentId === "number") {
-    warnings.push("Alignment was not supported and was omitted.");
-  }
-
-  return warnings;
 }
 
 function buildNormalizedCharacter(
@@ -322,16 +221,6 @@ function buildNormalizedCharacter(
     race: details.race,
     alignment: details.alignment,
   };
-}
-
-function normalizeAlignment(
-  alignmentId: number | null | undefined,
-): DnDAlignment | undefined {
-  if (typeof alignmentId !== "number") {
-    return undefined;
-  }
-
-  return ALIGNMENT_ID_MAP[alignmentId];
 }
 
 
