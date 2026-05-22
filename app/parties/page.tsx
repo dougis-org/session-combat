@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState, FormField, EditorShell, textInputClass } from '@/lib/components/ui';
 import { Party, Character, Campaign, CHARACTER_TYPE_ORDER, CHARACTER_TYPE_LABELS, getCharacterType } from '@/lib/types';
+import { CharacterMiniSummary } from '@/lib/components/CharacterMiniSummary';
 
 function PartiesContent() {
   const [parties, setParties] = useState<Party[]>([]);
@@ -103,11 +104,10 @@ function PartiesContent() {
     [campaigns]
   );
 
-  const getCharacterNames = (characterIds: string[]): string => {
-    return characterIds
-      .map(id => characters.find(c => c.id === id)?.name || 'Unknown')
-      .join(', ');
-  };
+  const characterMap = useMemo(
+    () => new Map(characters.map(c => [c.id, c])),
+    [characters]
+  );
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -149,42 +149,95 @@ function PartiesContent() {
                 No parties yet. Create one to get started!
               </div>
             ) : (
-              parties.map(party => (
-                <div key={party.id} className="bg-gray-800 rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1">
-                      <h2 className="text-xl font-semibold">{party.name}</h2>
-                      {party.description && (
-                        <p className="text-gray-400 text-sm mt-1">{party.description}</p>
-                      )}
-                      <div className="text-gray-400 text-sm mt-2">
-                        <p>Campaign: {party.campaignId ? (campaignMap.get(party.campaignId) ?? 'No Campaign') : 'No Campaign'}</p>
-                        <p>Members: {party.characterIds.length}</p>
-                        {party.characterIds.length > 0 && (
-                          <p className="mt-1 text-xs">{getCharacterNames(party.characterIds)}</p>
+              parties.map(party => {
+                const partyCharacters = party.characterIds.map(
+                  id =>
+                    characterMap.get(id) ?? ({
+                      id,
+                      userId: '',
+                      name: 'Unknown',
+                      characterType: 'character',
+                      ac: 0,
+                      hp: 0,
+                      maxHp: 0,
+                      classes: [],
+                      abilityScores: {
+                        strength: 10,
+                        dexterity: 10,
+                        constitution: 10,
+                        intelligence: 10,
+                        wisdom: 10,
+                        charisma: 10,
+                      },
+                    } as Character)
+                );
+                return (
+                  <div key={party.id} className="bg-gray-800 rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <h2 className="text-xl font-semibold">{party.name}</h2>
+                        {party.description && (
+                          <p className="text-gray-400 text-sm mt-1">{party.description}</p>
+                        )}
+                        <div className="text-gray-400 text-sm mt-2">
+                          <p>Campaign: {party.campaignId ? (campaignMap.get(party.campaignId) ?? 'No Campaign') : 'No Campaign'}</p>
+                          <p>Members: {party.characterIds.length}</p>
+                        </div>
+                        {partyCharacters.length > 0 && (
+                          <div className="mt-3 space-y-3">
+                            {CHARACTER_TYPE_ORDER.map(type => {
+                              const group = partyCharacters.filter(
+                                c => getCharacterType(c.characterType) === type
+                              );
+                              if (group.length === 0) return null;
+                              return (
+                                <div key={type}>
+                                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1"
+                                    aria-label={`Member section: ${CHARACTER_TYPE_LABELS[type]}`}>
+                                    {CHARACTER_TYPE_LABELS[type]}
+                                  </p>
+                                  <div className="grid md:grid-cols-2 gap-2">
+                                    {group.map(character => (
+                                      <CharacterMiniSummary
+                                        key={character.id}
+                                        name={character.name}
+                                        race={character.race}
+                                        characterType={character.characterType}
+                                        classes={character.classes}
+                                        ac={character.ac}
+                                        acNote={character.acNote}
+                                        hp={character.hp}
+                                        maxHp={character.maxHp}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
                         )}
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setEditingParty(party);
-                          setIsAdding(false);
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteParty(party.id)}
-                        className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
-                      >
-                        Delete
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingParty(party);
+                            setIsAdding(false);
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteParty(party.id)}
+                          className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}

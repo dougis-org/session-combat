@@ -603,3 +603,41 @@
 | 08:24 | Edited tests/unit/storage/campaigns.test.ts | added optional chaining | ~1456 |
 | 08:24 | Edited tests/unit/components/CampaignsPage.test.tsx | CSS: value | ~351 |
 | 08:24 | Edited app/api/campaigns/global/route.ts | modified filter() | ~236 |
+| 09:32 | Created lib/components/CombatStatsRow.tsx | — | ~199 |
+| 09:32 | Edited lib/components/CreatureStatBlock.tsx | added 1 import(s) | ~37 |
+| 09:32 | Edited lib/components/CreatureStatBlock.tsx | removed 16 lines | ~29 |
+| 09:33 | Created lib/components/CharacterMiniSummary.tsx | — | ~386 |
+| 09:33 | Edited lib/components/CharacterMiniSummary.tsx | CSS: BADGE_LABELS, npc, companion | ~332 |
+| 09:33 | Edited app/parties/page.tsx | added 1 import(s) | ~57 |
+| 09:33 | Edited app/parties/page.tsx | removed 7 lines | ~3 |
+| 09:33 | Edited app/parties/page.tsx | CSS: md | ~656 |
+| 09:34 | Created tests/unit/CombatStatsRow.test.tsx | — | ~430 |
+| 09:34 | Created tests/unit/CharacterMiniSummary.test.tsx | — | ~1019 |
+| 09:34 | Edited app/parties/page.tsx | CSS: section | ~87 |
+| 09:35 | Created tests/unit/components/PartiesPage.test.tsx | — | ~1794 |
+| 09:42 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | 2→2 lines | ~74 |
+| 09:42 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | 14→14 lines | ~239 |
+| 09:42 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | 32→32 lines | ~528 |
+| 09:42 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | 7→7 lines | ~85 |
+| 09:56 | Edited lib/components/CombatStatsRow.tsx | 2→2 lines | ~18 |
+| 09:56 | Edited lib/components/CreatureStatBlock.tsx | 2→4 lines | ~49 |
+| 09:56 | Edited lib/components/CharacterMiniSummary.tsx | inline fix | ~24 |
+| 09:56 | Edited lib/components/CharacterMiniSummary.tsx | reduce() → calculateTotalLevel() | ~335 |
+| 09:56 | Edited app/parties/page.tsx | 4→9 lines | ~61 |
+| 09:57 | Edited app/parties/page.tsx | find() → get() | ~58 |
+| 09:57 | Edited app/parties/page.tsx | 10→11 lines | ~194 |
+| 09:57 | Edited tests/unit/CombatStatsRow.test.tsx | CSS: container, root | ~174 |
+| 09:57 | Edited tests/unit/CharacterMiniSummary.test.tsx | CSS: container, root | ~177 |
+| 09:57 | Created tests/unit/components/CreatureStatBlock.test.tsx | — | ~640 |
+| 10:36 | Session end: 70 writes across 19 files (types.ts, route.ts, CampaignEditor.tsx, page.tsx, storage.ts) | 29 reads | ~67454 tok |
+| 10:38 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | 3→3 lines | ~37 |
+| 10:38 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | "npm test" → "npm run test:unit" | ~16 |
+| 10:38 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | "npm test -- --testPathPat" → "npm run test:unit -- --te" | ~33 |
+| 10:39 | Edited app/parties/page.tsx | modified filter() | ~178 |
+| 10:40 | Edited app/parties/page.tsx | modified filter() | ~1068 |
+| 10:55 | Edited app/parties/page.tsx | inline fix | ~20 |
+
+## Session: 2026-05-22 10:55
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
