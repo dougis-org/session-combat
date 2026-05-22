@@ -34,7 +34,7 @@
 - [x] `grep -n "normalizeAlignment[^I]" lib/dndBeyondCharacterImport.ts lib/import/dndBeyond-identity.ts` — must return empty (confirms rename is complete; `normalizeAlignmentId` won't match)
 - [x] `grep -rn "from.*dndBeyondCharacterImport" --include="*.ts" .` — confirm no external consumer has lost its import
 - [x] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation] pass
+- [x] All steps in [Remote push validation] pass
 
 ## Remote push validation
 
@@ -46,14 +46,14 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Run the required pre-PR self-review before committing
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `extract-dndbeyond-identity` to `main` — title: `refactor: Extract alignment and character identity helpers into dndBeyond-identity.ts (closes #159)`
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each, commit fixes, follow Remote push validation, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — diagnose failures, fix, validate locally, push; repeat until all checks pass
-- [ ] Wait for PR to merge — never force-merge; if a human force-merges, continue to Post-Merge
+- [x] Run the required pre-PR self-review before committing
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `extract-dndbeyond-identity` to `main` — title: `refactor: Extract alignment and character identity helpers into dndBeyond-identity.ts (closes #159)`
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each, commit fixes, follow Remote push validation, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — diagnose failures, fix, validate locally, push; repeat until all checks pass
+- [x] Wait for PR to merge — never force-merge; if a human force-merges, continue to Post-Merge
 
 Ownership metadata:
 
@@ -69,12 +69,12 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No documentation updates required (pure internal refactor)
-- [ ] Sync approved spec deltas into `openspec/specs/` if spec content was revised during review
-- [ ] Archive the change: move `openspec/changes/extract-dndbeyond-identity/` to `openspec/changes/archive/YYYY-MM-DD-extract-dndbeyond-identity/` — stage both the copy and deletion in a single commit, never split
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-extract-dndbeyond-identity/` exists and `openspec/changes/extract-dndbeyond-identity/` is gone
-- [ ] Commit and push the archive to `main` in one commit
-- [ ] Prune merged local branch: `git fetch --prune` and `git branch -d extract-dndbeyond-identity`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No documentation updates required (pure internal refactor)
+- [x] Sync approved spec deltas into `openspec/specs/` if spec content was revised during review
+- [x] Archive the change: move `openspec/changes/extract-dndbeyond-identity/` to `openspec/changes/archive/YYYY-MM-DD-extract-dndbeyond-identity/` — stage both the copy and deletion in a single commit, never split
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-extract-dndbeyond-identity/` exists and `openspec/changes/extract-dndbeyond-identity/` is gone
+- [x] Commit and push the archive to `main` in one commit
+- [x] Prune merged local branch: `git fetch --prune` and `git branch -d extract-dndbeyond-identity`
