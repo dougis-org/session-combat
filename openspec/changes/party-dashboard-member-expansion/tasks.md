@@ -18,7 +18,7 @@
 - [x] Import `CombatStatsRow` into `lib/components/CreatureStatBlock.tsx`
 - [x] Replace the inline AC/HP grid block with `<CombatStatsRow ac={ac} acNote={acNote} hp={hp} maxHp={maxHp} />`
 - [x] Confirm all other props and rendering logic in `CreatureStatBlock` are untouched
-- [x] Verify no visual change by running existing unit tests: `npm test -- --testPathPattern="CreatureStatBlock"`
+- [x] Verify no visual change by running existing unit tests: `npm run test:unit -- --testPathPattern="CreatureStatBlock"`
 
 ### 3. Create `CharacterMiniSummary` component
 
@@ -57,9 +57,9 @@
 
 ## Validation
 
-- [x] Run unit tests: `npm test`
+- [x] Run unit tests: `npm run test:unit`
 - [x] Run integration tests: `npm run test:integration`
-- [x] Run type check: `npm run typecheck` (or `npx tsc --noEmit`)
+- [x] Run type check: `npx tsc --noEmit`
 - [x] Run build: `npm run build`
 - [x] Run lint: `npm run lint`
 - [x] All tasks in Execution marked complete
@@ -69,7 +69,7 @@
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test` — all tests must pass
+- **Unit tests** — `npm run test:unit` — all tests must pass
 - **Integration tests** — `npm run test:integration` — all tests must pass
 - **Build** — `npm run build` — must succeed with no errors
 - **Lint / type check** — `npm run lint` and `npx tsc --noEmit` — no errors

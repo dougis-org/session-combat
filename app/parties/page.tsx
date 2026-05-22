@@ -149,23 +149,23 @@ function PartiesContent() {
                 No parties yet. Create one to get started!
               </div>
             ) : (
-              parties.map(party => (
-                <div key={party.id} className="bg-gray-800 rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1">
-                      <h2 className="text-xl font-semibold">{party.name}</h2>
-                      {party.description && (
-                        <p className="text-gray-400 text-sm mt-1">{party.description}</p>
-                      )}
-                      <div className="text-gray-400 text-sm mt-2">
-                        <p>Campaign: {party.campaignId ? (campaignMap.get(party.campaignId) ?? 'No Campaign') : 'No Campaign'}</p>
-                        <p>Members: {party.characterIds.length}</p>
-                      </div>
-                      {party.characterIds.length > 0 && (() => {
-                        const partyCharacters = party.characterIds
-                          .map(id => characterMap.get(id))
-                          .filter((c): c is Character => c !== undefined);
-                        return (
+              parties.map(party => {
+                const partyCharacters = party.characterIds
+                  .map(id => characterMap.get(id))
+                  .filter((c): c is Character => c !== undefined);
+                return (
+                  <div key={party.id} className="bg-gray-800 rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <h2 className="text-xl font-semibold">{party.name}</h2>
+                        {party.description && (
+                          <p className="text-gray-400 text-sm mt-1">{party.description}</p>
+                        )}
+                        <div className="text-gray-400 text-sm mt-2">
+                          <p>Campaign: {party.campaignId ? (campaignMap.get(party.campaignId) ?? 'No Campaign') : 'No Campaign'}</p>
+                          <p>Members: {partyCharacters.length}</p>
+                        </div>
+                        {partyCharacters.length > 0 && (
                           <div className="mt-3 space-y-3">
                             {CHARACTER_TYPE_ORDER.map(type => {
                               const group = partyCharacters.filter(
@@ -197,29 +197,29 @@ function PartiesContent() {
                               );
                             })}
                           </div>
-                        );
-                      })()}
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setEditingParty(party);
-                          setIsAdding(false);
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteParty(party.id)}
-                        className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
-                      >
-                        Delete
-                      </button>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingParty(party);
+                            setIsAdding(false);
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteParty(party.id)}
+                          className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}
