@@ -314,5 +314,58 @@ describe('CampaignEditor', () => {
       const savedCampaign = onSave.mock.calls[0][0] as Campaign;
       expect(savedCampaign.currentChapterId).toBe('ch-2');
     });
+
+    it('updates chapter title correctly when typing in the input field', async () => {
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        chapters: [
+          { id: 'ch-1', title: 'Arrival', order: 0 },
+        ],
+      };
+      render({ campaign, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      
+      const accordionBtn = findButton('Chapters');
+      if (!container.textContent.includes('+ Add Chapter')) {
+        await act(async () => { accordionBtn.click(); });
+      }
+      
+      const input = container.querySelector('input[data-testid="chapter-title-input"]') as HTMLInputElement;
+      expect(input.value).toBe('Arrival');
+      
+      await act(async () => {
+        input.value = 'New Arrival';
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      
+      expect(input.value).toBe('New Arrival');
+    });
+
+    it('sets currentChapterId to undefined when active chapter is removed', async () => {
+      const onSave = jest.fn() as any;
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        chapters: [
+          { id: 'ch-1', title: 'Arrival', order: 0 },
+          { id: 'ch-2', title: 'The Inn', order: 1 },
+        ],
+        currentChapterId: 'ch-2',
+      };
+      render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
+      
+      const accordionBtn = findButton('Chapters');
+      if (!container.textContent.includes('+ Add Chapter')) {
+        await act(async () => { accordionBtn.click(); });
+      }
+      
+      const removeBtn = container.querySelector('button[data-testid="remove-chapter-1"]') as HTMLButtonElement;
+      expect(removeBtn).toBeDefined();
+      
+      await act(async () => { removeBtn.click(); });
+      
+      await act(async () => { findButton('Save Campaign').click(); });
+      expect(onSave).toHaveBeenCalledTimes(1);
+      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
+      expect(savedCampaign.currentChapterId).toBeUndefined();
+    });
   });
 });

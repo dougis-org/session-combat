@@ -186,7 +186,7 @@ export function CampaignsContent() {
                       if (currentCh) {
                         return (
                           <p className="text-blue-400 text-xs font-semibold mt-1">
-                            📖 Current Chapter: Ch. {currentCh.order + 1}: {currentCh.title}
+                            📖 Current Chapter: Ch. {currentCh.order + 1}: {currentCh.title || 'Untitled Chapter'}
                           </p>
                         );
                       }

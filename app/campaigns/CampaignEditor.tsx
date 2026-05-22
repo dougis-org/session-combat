@@ -4,6 +4,12 @@ import { useState } from 'react';
 import { TextInputField, EditorShell } from '@/lib/components/ui';
 import { Campaign } from '@/lib/types';
 
+const generateId = () => {
+  return typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : 'ch-' + Date.now().toString(36) + '-' + Math.floor(Date.now() / 1000).toString(36);
+};
+
 export function CampaignEditor({
   campaign,
   onSave,
@@ -26,28 +32,15 @@ export function CampaignEditor({
   const [currentChapterId, setCurrentChapterId] = useState(campaign.currentChapterId);
   const [chaptersExpanded, setChaptersExpanded] = useState(!!campaign.chapters?.length);
 
-  const generateId = () => {
-    if (typeof crypto !== 'undefined') {
-      if (crypto.randomUUID) {
-        return crypto.randomUUID();
-      }
-      if (crypto.getRandomValues) {
-        const array = new Uint32Array(4);
-        crypto.getRandomValues(array);
-        return 'ch-' + Array.from(array).map(n => n.toString(36)).join('-');
-      }
-    }
-    // Safe fallback that avoids Math.random()
-    return 'ch-' + Date.now().toString(36) + '-' + Math.floor(Date.now() / 1000).toString(36);
-  };
-
   const handleAddChapter = () => {
-    const newChapter = {
-      id: generateId(),
-      title: '',
-      order: chapters.length,
-    };
-    setChapters([...chapters, newChapter]);
+    setChapters((prev) => [
+      ...prev,
+      {
+        id: generateId(),
+        title: '',
+        order: prev.length,
+      },
+    ]);
   };
 
   const handleRemoveChapter = (index: number) => {

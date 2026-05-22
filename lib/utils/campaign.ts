@@ -1,4 +1,4 @@
-import { CampaignChapter } from '../types';
+import type { CampaignChapter } from '@/lib/types';
 
 /**
  * Sanitizes and normalizes an input array of chapters.
@@ -10,12 +10,31 @@ export function sanitizeChapters(chapters: unknown): CampaignChapter[] {
     return [];
   }
 
+  const seenIds = new Set<string>();
+
   return chapters
     .map((ch: any, index: number) => {
-      const id = typeof ch?.id === 'string' ? ch.id : crypto.randomUUID();
       const title = typeof ch?.title === 'string' ? ch.title.trim() : '';
       const order = typeof ch?.order === 'number' ? ch.order : index;
-      return { id, title, order };
+      
+      let id = typeof ch?.id === 'string' ? ch.id.trim() : '';
+      if (!id || seenIds.has(id)) {
+        id = crypto.randomUUID();
+      }
+      seenIds.add(id);
+
+      const sanitized: CampaignChapter = { id, title, order };
+      if (typeof ch?.description === 'string') {
+        sanitized.description = ch.description.trim();
+      }
+      if (typeof ch?.levelRange === 'string') {
+        sanitized.levelRange = ch.levelRange.trim();
+      }
+      if (typeof ch?.location === 'string') {
+        sanitized.location = ch.location.trim();
+      }
+
+      return sanitized;
     })
     .sort((a, b) => a.order - b.order)
     .map((ch, index) => ({ ...ch, order: index }));
@@ -28,9 +47,12 @@ export function sanitizeCurrentChapterId(
   currentChapterId: unknown,
   chapters: CampaignChapter[]
 ): string | undefined {
-  if (typeof currentChapterId === 'string' && currentChapterId.trim() !== '') {
-    const exists = chapters.some((ch) => ch.id === currentChapterId);
-    return exists ? currentChapterId : undefined;
+  if (typeof currentChapterId === 'string') {
+    const trimmed = currentChapterId.trim();
+    if (trimmed !== '') {
+      const exists = chapters.some((ch) => ch.id === trimmed);
+      return exists ? trimmed : undefined;
+    }
   }
   return undefined;
 }
