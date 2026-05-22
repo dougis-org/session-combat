@@ -27,8 +27,12 @@ export function CampaignEditor({
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  // Chapters & Active Chapter States
-  const [chapters, setChapters] = useState(campaign.chapters || []);
+  const [chapters, setChapters] = useState(() => {
+    const initialChapters = campaign.chapters || [];
+    return [...initialChapters]
+      .sort((a, b) => a.order - b.order)
+      .map((ch, i) => ({ ...ch, order: i }));
+  });
   const [currentChapterId, setCurrentChapterId] = useState(campaign.currentChapterId);
   const [chaptersExpanded, setChaptersExpanded] = useState(!!campaign.chapters?.length);
 

@@ -13,24 +13,25 @@ export function sanitizeChapters(chapters: unknown): CampaignChapter[] {
   const seenIds = new Set<string>();
 
   return chapters
-    .map((ch: any, index: number) => {
-      const title = typeof ch?.title === 'string' ? ch.title.trim() : '';
-      const order = typeof ch?.order === 'number' ? ch.order : index;
+    .filter((ch): ch is Record<string, any> => ch !== null && typeof ch === 'object')
+    .map((ch, index) => {
+      const title = typeof ch.title === 'string' ? ch.title.trim() : '';
+      const order = typeof ch.order === 'number' && Number.isFinite(ch.order) ? ch.order : index;
       
-      let id = typeof ch?.id === 'string' ? ch.id.trim() : '';
+      let id = typeof ch.id === 'string' ? ch.id.trim() : '';
       if (!id || seenIds.has(id)) {
         id = crypto.randomUUID();
       }
       seenIds.add(id);
 
       const sanitized: CampaignChapter = { id, title, order };
-      if (typeof ch?.description === 'string') {
+      if (typeof ch.description === 'string') {
         sanitized.description = ch.description.trim();
       }
-      if (typeof ch?.levelRange === 'string') {
+      if (typeof ch.levelRange === 'string') {
         sanitized.levelRange = ch.levelRange.trim();
       }
-      if (typeof ch?.location === 'string') {
+      if (typeof ch.location === 'string') {
         sanitized.location = ch.location.trim();
       }
 
