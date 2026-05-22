@@ -153,7 +153,7 @@ export function CampaignEditor({
                 <select
                   data-testid="current-chapter-select"
                   value={currentChapterId || ''}
-                  onChange={(e) => setCurrentChapterId(e.target.value || undefined)}
+                  onChange={(e) => setCurrentChapterId(e.target.value)}
                   disabled={saving}
                   className="w-full text-sm bg-gray-950 border border-gray-700 hover:border-gray-600 rounded px-3 py-2 text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer"
                 >

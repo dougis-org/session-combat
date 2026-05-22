@@ -43,6 +43,7 @@ const makePostRequest = (body: unknown) => makeRouteRequest(BASE_URL, "POST", bo
 const makeIdRequest = (method: string, body?: unknown) =>
   makeRouteRequest(`${BASE_URL}/campaign-1`, method, body);
 const PARAMS = Promise.resolve({ id: "campaign-1" });
+const PATCH_SINGLE_CHAPTER = [{ id: "ch-5", title: "New Chapter 5", order: 0 }];
 
 // ─── GET /api/campaigns ───────────────────────────────────────────────────────
 
@@ -276,12 +277,18 @@ describe("PATCH /api/campaigns/[id]", () => {
   });
 
 
+  it("returns 400 when chapters is not an array on PATCH", async () => {
+    const response = await PATCH(
+      makeIdRequest("PATCH", { chapters: "not-an-array" }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(400);
+  });
+
   it("updates chapters and currentChapterId on PATCH", async () => {
     const response = await PATCH(
       makeIdRequest("PATCH", {
-        chapters: [
-          { id: "ch-5", title: "New Chapter 5", order: 0 },
-        ],
+        chapters: PATCH_SINGLE_CHAPTER,
         currentChapterId: "ch-5",
       }),
       { params: PARAMS }
@@ -297,9 +304,7 @@ describe("PATCH /api/campaigns/[id]", () => {
   it("clears currentChapterId on PATCH if it is invalid", async () => {
     const response = await PATCH(
       makeIdRequest("PATCH", {
-        chapters: [
-          { id: "ch-5", title: "New Chapter 5", order: 0 },
-        ],
+        chapters: PATCH_SINGLE_CHAPTER,
         currentChapterId: "invalid-id",
       }),
       { params: PARAMS }

@@ -16,6 +16,11 @@ interface ErrorResponse {
   error: string;
 }
 
+const CHAPTER_PAIR = [
+  { id: "ch-1", title: "Arrival", order: 0 },
+  { id: "ch-2", title: "Inn", order: 1 },
+];
+
 describe("Campaign API Integration Tests", () => {
   let server: TestServer;
   let baseUrl: string;
@@ -318,29 +323,20 @@ describe("Campaign API Integration Tests", () => {
       headers: authed(),
       body: JSON.stringify({
         name: "Campaign with Chapters",
-        chapters: [
-          { id: "ch-1", title: "Arrival", order: 0 },
-          { id: "ch-2", title: "Inn", order: 1 }
-        ],
+        chapters: CHAPTER_PAIR,
         currentChapterId: "ch-2",
       }),
     });
     expect(res.status).toBe(201);
     const data = await res.json() as CampaignResponse & { currentChapterId?: string };
-    expect(data.chapters).toEqual([
-      { id: "ch-1", title: "Arrival", order: 0 },
-      { id: "ch-2", title: "Inn", order: 1 }
-    ]);
+    expect(data.chapters).toEqual(CHAPTER_PAIR);
     expect(data.currentChapterId).toBe("ch-2");
 
     // Fetch to verify persistence
     const getRes = await fetch(`${baseUrl}/api/campaigns/${data.id}`, { headers: authed() });
     expect(getRes.status).toBe(200);
     const getData = await getRes.json() as CampaignResponse & { currentChapterId?: string };
-    expect(getData.chapters).toEqual([
-      { id: "ch-1", title: "Arrival", order: 0 },
-      { id: "ch-2", title: "Inn", order: 1 }
-    ]);
+    expect(getData.chapters).toEqual(CHAPTER_PAIR);
     expect(getData.currentChapterId).toBe("ch-2");
   });
 
@@ -370,7 +366,7 @@ describe("Campaign API Integration Tests", () => {
       body: JSON.stringify({
         chapters: [
           { id: "ch-a", title: "Alpha", order: 0 },
-          { id: "ch-b", title: "Beta", order: 1 }
+          { id: "ch-b", title: "Beta", order: 1 },
         ],
         currentChapterId: "ch-b",
       }),
@@ -379,7 +375,7 @@ describe("Campaign API Integration Tests", () => {
     const data = await patchRes.json() as CampaignResponse & { currentChapterId?: string };
     expect(data.chapters).toEqual([
       { id: "ch-a", title: "Alpha", order: 0 },
-      { id: "ch-b", title: "Beta", order: 1 }
+      { id: "ch-b", title: "Beta", order: 1 },
     ]);
     expect(data.currentChapterId).toBe("ch-b");
 
@@ -402,10 +398,7 @@ describe("Campaign API Integration Tests", () => {
       headers: authed(),
       body: JSON.stringify({
         name: "Active Chapter Delete Test",
-        chapters: [
-          { id: "ch-1", title: "Arrival", order: 0 },
-          { id: "ch-2", title: "Inn", order: 1 }
-        ],
+        chapters: CHAPTER_PAIR,
         currentChapterId: "ch-2",
       }),
     });

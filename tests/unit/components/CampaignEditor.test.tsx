@@ -49,6 +49,23 @@ function getInput(type: string, index = 0): HTMLInputElement {
   return container.querySelectorAll<HTMLInputElement>(`input[type="${type}"]`)[index];
 }
 
+async function openChapters() {
+  if (!container.textContent?.includes('+ Add Chapter')) {
+    await act(async () => { findButton('Chapters').click(); });
+  }
+}
+
+const CHAPTER_PAIR = [
+  { id: 'ch-1', title: 'Arrival', order: 0 },
+  { id: 'ch-2', title: 'The Inn', order: 1 },
+];
+
+const CHAPTER_TRIO = [
+  { id: 'ch-1', title: 'Arrival', order: 0 },
+  { id: 'ch-2', title: 'The Inn', order: 1 },
+  { id: 'ch-3', title: 'The Dungeon', order: 2 },
+];
+
 // ---------------------------------------------------------------------------
 
 describe('CampaignEditor', () => {
@@ -177,10 +194,10 @@ describe('CampaignEditor', () => {
       
       const accordionBtn = findButton('Chapters');
       expect(accordionBtn).toBeDefined();
-      
+
       await act(async () => { accordionBtn.click(); });
       expect(container.textContent).toContain('+ Add Chapter');
-      
+
       await act(async () => { accordionBtn.click(); });
       expect(container.textContent).not.toContain('+ Add Chapter');
     });
@@ -188,9 +205,8 @@ describe('CampaignEditor', () => {
     it('adds a new chapter row when "+ Add Chapter" is clicked', async () => {
       const campaign = { ...BASE_CAMPAIGN, chapters: [] };
       render({ campaign, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
-      
-      const accordionBtn = findButton('Chapters');
-      await act(async () => { accordionBtn.click(); });
+
+      await openChapters();
       
       expect(container.textContent).toContain('No chapters defined');
       
@@ -211,19 +227,12 @@ describe('CampaignEditor', () => {
       const campaign = {
         ...BASE_CAMPAIGN,
         currentChapterId: 'ch-2',
-        chapters: [
-          { id: 'ch-1', title: 'Arrival', order: 0 },
-          { id: 'ch-2', title: 'The Inn', order: 1 },
-          { id: 'ch-3', title: 'The Dungeon', order: 2 },
-        ],
+        chapters: CHAPTER_TRIO,
       };
       render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
-      
-      const accordionBtn = findButton('Chapters');
-      if (!container.textContent.includes('+ Add Chapter')) {
-        await act(async () => { accordionBtn.click(); });
-      }
-      
+
+      await openChapters();
+
       const removeBtn = container.querySelector('button[data-testid="remove-chapter-1"]') as HTMLButtonElement;
       await act(async () => { removeBtn.click(); });
       
@@ -246,19 +255,12 @@ describe('CampaignEditor', () => {
       const onSave = jest.fn() as any;
       const campaign = {
         ...BASE_CAMPAIGN,
-        chapters: [
-          { id: 'ch-1', title: 'Arrival', order: 0 },
-          { id: 'ch-2', title: 'The Inn', order: 1 },
-          { id: 'ch-3', title: 'The Dungeon', order: 2 },
-        ],
+        chapters: CHAPTER_TRIO,
       };
       render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
-      
-      const accordionBtn = findButton('Chapters');
-      if (!container.textContent.includes('+ Add Chapter')) {
-        await act(async () => { accordionBtn.click(); });
-      }
-      
+
+      await openChapters();
+
       const moveUpBtn = container.querySelector('button[data-testid="move-up-1"]') as HTMLButtonElement;
       await act(async () => { moveUpBtn.click(); });
       
@@ -289,18 +291,12 @@ describe('CampaignEditor', () => {
       const onSave = jest.fn() as any;
       const campaign = {
         ...BASE_CAMPAIGN,
-        chapters: [
-          { id: 'ch-1', title: 'Arrival', order: 0 },
-          { id: 'ch-2', title: 'The Inn', order: 1 },
-        ],
+        chapters: CHAPTER_PAIR,
       };
       render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
-      
-      const accordionBtn = findButton('Chapters');
-      if (!container.textContent.includes('+ Add Chapter')) {
-        await act(async () => { accordionBtn.click(); });
-      }
-      
+
+      await openChapters();
+
       const select = container.querySelector('select[data-testid="current-chapter-select"]') as HTMLSelectElement;
       expect(select).toBeDefined();
       
@@ -324,11 +320,8 @@ describe('CampaignEditor', () => {
       };
       render({ campaign, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
       
-      const accordionBtn = findButton('Chapters');
-      if (!container.textContent.includes('+ Add Chapter')) {
-        await act(async () => { accordionBtn.click(); });
-      }
-      
+      await openChapters();
+
       const input = container.querySelector('input[data-testid="chapter-title-input"]') as HTMLInputElement;
       expect(input.value).toBe('Arrival');
       
@@ -344,19 +337,13 @@ describe('CampaignEditor', () => {
       const onSave = jest.fn() as any;
       const campaign = {
         ...BASE_CAMPAIGN,
-        chapters: [
-          { id: 'ch-1', title: 'Arrival', order: 0 },
-          { id: 'ch-2', title: 'The Inn', order: 1 },
-        ],
+        chapters: CHAPTER_PAIR,
         currentChapterId: 'ch-2',
       };
       render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
-      
-      const accordionBtn = findButton('Chapters');
-      if (!container.textContent.includes('+ Add Chapter')) {
-        await act(async () => { accordionBtn.click(); });
-      }
-      
+
+      await openChapters();
+
       const removeBtn = container.querySelector('button[data-testid="remove-chapter-1"]') as HTMLButtonElement;
       expect(removeBtn).toBeDefined();
       

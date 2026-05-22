@@ -41,6 +41,9 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
     let sanitizedChapters = campaign.chapters;
     let chaptersUpdated = false;
     if (chapters !== undefined) {
+      if (!Array.isArray(chapters)) {
+        return NextResponse.json({ error: 'chapters must be an array' }, { status: 400 });
+      }
       chaptersUpdated = true;
       sanitizedChapters = sanitizeChapters(chapters);
     }
