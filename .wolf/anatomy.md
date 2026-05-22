@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T01:38:00.037Z
-> Files: 632 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T14:43:42.149Z
+> Files: 633 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -805,7 +805,7 @@
 ## lib/
 
 - `clientStorage.ts` — Client-side storage using localStorage (~616 tok)
-- `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~2785 tok)
+- `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ImportedCharac (~2046 tok)
 - `middleware.ts` — Extract auth token from request (~695 tok)
 - `storage.ts` — Server-side storage functions for MongoDB (~5520 tok)
 - `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4508 tok)
@@ -824,6 +824,7 @@
 - `armor-class.ts` — Cap a dexterity modifier by armor's maximum dexterity modifier. (~269 tok)
 - `dndBeyond-abilities.ts` — Exports DndBeyondActionEntry, ACTIONS_BY_ACTIVATION_TYPE, TRAIT_TITLE_MAP, NOTE_TITLE_MAP, normalize (~814 tok)
 - `dndBeyond-armor-class.ts` — D&D Beyond armor type IDs (used for filtering and dex cap mapping). (~1042 tok)
+- `dndBeyond-identity.ts` — Exports ParsedDndBeyondCharacterUrl, parseDndBeyondCharacterUrl, requireCharacterIdentity, buildNorm (~925 tok)
 - `dndBeyond-skills-senses.ts` — Exports normalizeSavingThrows, normalizeSkills, normalizeSenses (~1155 tok)
 - `dndBeyond-utils.ts` — Exports DndBeyondImportError, createValidationError, ABILITY_ID_MAP, indexStatValues + 6 more (~1014 tok)
 - `utils.ts` — Exports ModifierLike, getAbilityModifier, getProficiencyBonus, dedupeStrings + 9 more (~676 tok)
@@ -831,6 +832,33 @@
 ## openspec/changes/archive/2026-05-21-extract-http-backoff-utils/
 
 - `tasks.md` — Tasks (~1390 tok)
+
+## openspec/changes/archive/2026-05-22-extract-dndbeyond-identity/
+
+- `tasks.md` — Tasks (~1354 tok)
+
+## openspec/changes/campaign-library/
+
+- `design.md` — Context (~2337 tok)
+- `proposal.md` — GitHub Issues (~1456 tok)
+- `tasks.md` — Tasks (~1805 tok)
+- `tests.md` — Tests (~2670 tok)
+
+## openspec/changes/campaign-library/specs/campaign-catalog-ui/
+
+- `spec.md` — ADDED Requirements (~1358 tok)
+
+## openspec/changes/campaign-library/specs/campaign-copy/
+
+- `spec.md` — ADDED Requirements (~945 tok)
+
+## openspec/changes/campaign-library/specs/campaign-model-expansion/
+
+- `spec.md` — ADDED Requirements (~1285 tok)
+
+## openspec/changes/campaign-library/specs/campaign-template-admin/
+
+- `spec.md` — ADDED Requirements (~1505 tok)
 
 ## openspec/changes/campaign-management/
 
@@ -908,6 +936,17 @@
 ## openspec/changes/extract-dnd-skills-senses/specs/dndBeyond-skills-senses-extraction/
 
 - `spec.md` — ADDED Requirements (~1795 tok)
+
+## openspec/changes/extract-dndbeyond-identity/
+
+- `design.md` — Context (~2296 tok)
+- `proposal.md` — GitHub Issues (~1389 tok)
+- `tasks.md` — Tasks (~1354 tok)
+- `tests.md` — Tests (~1256 tok)
+
+## openspec/changes/extract-dndbeyond-identity/specs/dndBeyond-identity-extraction/
+
+- `spec.md` — ADDED Requirements (~2285 tok)
 
 ## openspec/changes/fix-import-utility-placement/
 

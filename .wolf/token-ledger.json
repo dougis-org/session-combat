@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-18T14:20:54.749Z",
   "lifetime": {
-    "total_tokens_estimated": 417897,
-    "total_reads": 269,
-    "total_writes": 475,
-    "total_sessions": 29,
-    "anatomy_hits": 135,
-    "anatomy_misses": 133,
-    "repeated_reads_blocked": 130,
-    "estimated_savings_vs_bare_cli": 229568
+    "total_tokens_estimated": 478042,
+    "total_reads": 297,
+    "total_writes": 523,
+    "total_sessions": 34,
+    "anatomy_hits": 161,
+    "anatomy_misses": 135,
+    "repeated_reads_blocked": 141,
+    "estimated_savings_vs_bare_cli": 260715
   },
   "sessions": [
     {
@@ -4419,17 +4419,11 @@
     {
       "id": "session-2026-05-21-1436",
       "started": "2026-05-21T21:36:27.989Z",
-      "ended": "2026-05-21T21:48:32.276Z",
+      "ended": "2026-05-21T21:45:12.178Z",
       "reads": [
         {
           "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-management/tasks.md",
           "tokens_estimated": 1727,
-          "was_repeated": false,
-          "anatomy_had_description": false
-        },
-        {
-          "file": "/home/doug/dev/session-combat/openspec/changes/archive/2026-05-21-extract-http-backoff-utils/tasks.md",
-          "tokens_estimated": 0,
           "was_repeated": false,
           "anatomy_had_description": false
         }
@@ -4449,153 +4443,769 @@
           "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-management/tasks.md",
           "tokens_estimated": 230,
           "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/openspec/changes/archive/2026-05-21-extract-http-backoff-utils/tasks.md",
-          "tokens_estimated": 195,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/openspec/changes/archive/2026-05-21-extract-http-backoff-utils/tasks.md",
-          "tokens_estimated": 254,
-          "action": "edit"
         }
       ],
       "totals": {
         "input_tokens_estimated": 1727,
-        "output_tokens_estimated": 969,
-        "reads_count": 2,
-        "writes_count": 5,
+        "output_tokens_estimated": 520,
+        "reads_count": 1,
+        "writes_count": 3,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 1
       }
     },
     {
-      "id": "session-2026-05-21-1449",
-      "started": "2026-05-21T21:49:57.465Z",
-      "ended": "2026-05-21T22:04:20.253Z",
-      "reads": [],
-      "writes": [
-        {
-          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/proposal.md",
-          "tokens_estimated": 1423,
-          "action": "create"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/design.md",
-          "tokens_estimated": 2565,
-          "action": "create"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/specs/character-type/spec.md",
-          "tokens_estimated": 2619,
-          "action": "create"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/tasks.md",
-          "tokens_estimated": 2074,
-          "action": "create"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/tests.md",
-          "tokens_estimated": 1668,
-          "action": "create"
-        }
-      ],
-      "totals": {
-        "input_tokens_estimated": 0,
-        "output_tokens_estimated": 10349,
-        "reads_count": 0,
-        "writes_count": 5,
-        "repeated_reads_blocked": 0,
-        "anatomy_lookups": 0
-      }
-    },
-    {
-      "id": "session-2026-05-21-1625",
-      "started": "2026-05-21T23:25:06.436Z",
-      "ended": "2026-05-21T23:51:20.614Z",
+      "id": "session-2026-05-21-1446",
+      "started": "2026-05-21T21:46:06.127Z",
+      "ended": "2026-05-21T21:51:19.785Z",
       "reads": [
         {
-          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/tasks.md",
-          "tokens_estimated": 1815,
-          "was_repeated": true,
-          "anatomy_had_description": false
-        },
-        {
-          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/specs/character-type/spec.md",
-          "tokens_estimated": 2291,
+          "file": "/home/doug/dev2/session-combat/lib/import/armor-class.ts",
+          "tokens_estimated": 269,
           "was_repeated": false,
           "anatomy_had_description": false
         },
         {
-          "file": "/home/doug/dev/session-combat/lib/types.ts",
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 2785,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/types.ts",
+          "tokens_estimated": 4294,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/open5eAdapter.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 7348,
+        "output_tokens_estimated": 0,
+        "reads_count": 4,
+        "writes_count": 0,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-05-21-1446",
+      "started": "2026-05-21T21:46:06.127Z",
+      "ended": "2026-05-21T22:04:08.268Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/armor-class.ts",
+          "tokens_estimated": 269,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 2785,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/types.ts",
+          "tokens_estimated": 4294,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/open5eAdapter.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/proposal.md",
+          "tokens_estimated": 1587,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/design.md",
+          "tokens_estimated": 2624,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/specs/dndBeyond-identity-extraction/spec.md",
+          "tokens_estimated": 2612,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 1550,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tests.md",
+          "tokens_estimated": 1436,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 7348,
+        "output_tokens_estimated": 9809,
+        "reads_count": 4,
+        "writes_count": 5,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-05-21-1627",
+      "started": "2026-05-21T23:27:54.730Z",
+      "ended": "2026-05-21T23:48:44.873Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/proposal.md",
+          "tokens_estimated": 1389,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/design.md",
+          "tokens_estimated": 2296,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/specs/dndBeyond-identity-extraction/spec.md",
+          "tokens_estimated": 2285,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 1356,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 2045,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 919,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 194,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 11,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 13,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 1,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 1550,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 9371,
+        "output_tokens_estimated": 2743,
+        "reads_count": 5,
+        "writes_count": 11,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 5
+      }
+    },
+    {
+      "id": "session-2026-05-21-1627",
+      "started": "2026-05-21T23:27:54.730Z",
+      "ended": "2026-05-22T03:09:00.517Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/proposal.md",
+          "tokens_estimated": 1389,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/design.md",
+          "tokens_estimated": 2296,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/specs/dndBeyond-identity-extraction/spec.md",
+          "tokens_estimated": 2285,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 1356,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 2045,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyondCharacterImport.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 919,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 194,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 11,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 13,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 1,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 1550,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 81,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 25,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 15,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 9371,
+        "output_tokens_estimated": 2961,
+        "reads_count": 6,
+        "writes_count": 17,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 5
+      }
+    },
+    {
+      "id": "session-2026-05-21-1627",
+      "started": "2026-05-21T23:27:54.730Z",
+      "ended": "2026-05-22T13:48:54.349Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/proposal.md",
+          "tokens_estimated": 1389,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/design.md",
+          "tokens_estimated": 2296,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/specs/dndBeyond-identity-extraction/spec.md",
+          "tokens_estimated": 2285,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 1356,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 2045,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyondCharacterImport.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 919,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 194,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 11,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 13,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 1,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 1550,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 81,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 25,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 15,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 19,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 9371,
+        "output_tokens_estimated": 2980,
+        "reads_count": 6,
+        "writes_count": 18,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 5
+      }
+    },
+    {
+      "id": "session-2026-05-21-1627",
+      "started": "2026-05-21T23:27:54.730Z",
+      "ended": "2026-05-22T13:59:10.077Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/proposal.md",
+          "tokens_estimated": 1389,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/design.md",
+          "tokens_estimated": 2296,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/specs/dndBeyond-identity-extraction/spec.md",
+          "tokens_estimated": 2285,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 1356,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 2045,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/import/dndBeyondCharacterImport.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/archive/2026-05-22-extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 919,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 194,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 11,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 13,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 1,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 1550,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/dndBeyondCharacterImport.ts",
+          "tokens_estimated": 81,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 25,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 15,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/import/dndBeyond-identity.ts",
+          "tokens_estimated": 19,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/archive/2026-05-22-extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 27,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/archive/2026-05-22-extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 218,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/archive/2026-05-22-extract-dndbeyond-identity/tasks.md",
+          "tokens_estimated": 238,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 9371,
+        "output_tokens_estimated": 3463,
+        "reads_count": 7,
+        "writes_count": 21,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 5
+      }
+    },
+    {
+      "id": "session-2026-05-22-0659",
+      "started": "2026-05-22T13:59:59.839Z",
+      "ended": "2026-05-22T14:03:09.417Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/lib/types.ts",
           "tokens_estimated": 4294,
           "was_repeated": false,
           "anatomy_had_description": false
         },
         {
-          "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
+          "file": "/home/doug/dev2/session-combat/docs/MONSTER_CATALOG.md",
           "tokens_estimated": 0,
           "was_repeated": false,
           "anatomy_had_description": false
         },
         {
-          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
+          "file": "/home/doug/dev2/session-combat/app/campaigns/CampaignEditor.tsx",
+          "tokens_estimated": 791,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 5085,
+        "output_tokens_estimated": 0,
+        "reads_count": 3,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-05-22-0659",
+      "started": "2026-05-22T13:59:59.839Z",
+      "ended": "2026-05-22T14:14:15.211Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/lib/types.ts",
+          "tokens_estimated": 4294,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/docs/MONSTER_CATALOG.md",
           "tokens_estimated": 0,
           "was_repeated": false,
           "anatomy_had_description": false
         },
         {
-          "file": "/home/doug/dev/session-combat/lib/storage.ts",
-          "tokens_estimated": 5520,
+          "file": "/home/doug/dev2/session-combat/app/campaigns/CampaignEditor.tsx",
+          "tokens_estimated": 791,
           "was_repeated": false,
           "anatomy_had_description": false
         },
         {
-          "file": "/home/doug/dev/session-combat/app/parties/page.tsx",
-          "tokens_estimated": 2899,
+          "file": "/home/doug/dev2/session-combat/app/api/monsters/global/route.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 5085,
+        "output_tokens_estimated": 0,
+        "reads_count": 4,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-05-22-0659",
+      "started": "2026-05-22T13:59:59.839Z",
+      "ended": "2026-05-22T14:43:53.346Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/lib/types.ts",
+          "tokens_estimated": 4294,
           "was_repeated": false,
           "anatomy_had_description": false
         },
         {
-          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
+          "file": "/home/doug/dev2/session-combat/docs/MONSTER_CATALOG.md",
           "tokens_estimated": 0,
           "was_repeated": false,
           "anatomy_had_description": false
         },
         {
-          "file": "/home/doug/dev/session-combat/tests/unit/charactersPage.test.tsx",
-          "tokens_estimated": 0,
+          "file": "/home/doug/dev2/session-combat/app/campaigns/CampaignEditor.tsx",
+          "tokens_estimated": 791,
           "was_repeated": false,
           "anatomy_had_description": false
         },
         {
-          "file": "/home/doug/dev/session-combat/tests/integration/campaigns.integration.test.ts",
-          "tokens_estimated": 3115,
-          "was_repeated": false,
-          "anatomy_had_description": false
-        },
-        {
-          "file": "/home/doug/dev/session-combat/tests/integration",
-          "tokens_estimated": 0,
-          "was_repeated": false,
-          "anatomy_had_description": false
-        },
-        {
-          "file": "/home/doug/dev/session-combat/tests/integration/characters/gender.integration.test.ts",
-          "tokens_estimated": 0,
-          "was_repeated": false,
-          "anatomy_had_description": false
-        },
-        {
-          "file": "/home/doug/dev/session-combat/tests/unit/api/characters/route.test.ts",
-          "tokens_estimated": 0,
-          "was_repeated": false,
-          "anatomy_had_description": false
-        },
-        {
-          "file": "/home/doug/dev/session-combat/tests/unit/api/characters/[id].route.test.ts",
+          "file": "/home/doug/dev2/session-combat/app/api/monsters/global/route.ts",
           "tokens_estimated": 0,
           "was_repeated": false,
           "anatomy_had_description": false
@@ -4603,138 +5213,53 @@
       ],
       "writes": [
         {
-          "file": "/home/doug/dev/session-combat/lib/types.ts",
-          "tokens_estimated": 314,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/tests/unit/api/characters/route.test.ts",
-          "tokens_estimated": 1212,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/tests/unit/api/characters/[id].route.test.ts",
-          "tokens_estimated": 494,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/tests/integration/characters/characterType.integration.test.ts",
-          "tokens_estimated": 2388,
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-library/proposal.md",
+          "tokens_estimated": 1664,
           "action": "create"
         },
         {
-          "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
-          "tokens_estimated": 344,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
-          "tokens_estimated": 126,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
-          "tokens_estimated": 114,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
-          "tokens_estimated": 92,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
-          "tokens_estimated": 68,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
-          "tokens_estimated": 32,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
-          "tokens_estimated": 118,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
-          "tokens_estimated": 165,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
-          "tokens_estimated": 96,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
-          "tokens_estimated": 43,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
-          "tokens_estimated": 284,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
-          "tokens_estimated": 1466,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
-          "tokens_estimated": 192,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
-          "tokens_estimated": 93,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
-          "tokens_estimated": 312,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/tests/unit/characterTypeUI.test.tsx",
-          "tokens_estimated": 1562,
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-library/design.md",
+          "tokens_estimated": 2670,
           "action": "create"
         },
         {
-          "file": "/home/doug/dev/session-combat/tests/unit/characterTypeUI.test.tsx",
-          "tokens_estimated": 114,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/parties/page.tsx",
-          "tokens_estimated": 21,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/app/parties/page.tsx",
-          "tokens_estimated": 446,
-          "action": "edit"
-        },
-        {
-          "file": "/home/doug/dev/session-combat/tests/unit/partyCharacterTypeUI.test.tsx",
-          "tokens_estimated": 1613,
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-library/specs/campaign-model-expansion/spec.md",
+          "tokens_estimated": 1469,
           "action": "create"
         },
         {
-          "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/tasks.md",
-          "tokens_estimated": 2074,
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-library/specs/campaign-template-admin/spec.md",
+          "tokens_estimated": 1720,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-library/specs/campaign-copy/spec.md",
+          "tokens_estimated": 1080,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-library/specs/campaign-catalog-ui/spec.md",
+          "tokens_estimated": 1552,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-library/tasks.md",
+          "tokens_estimated": 2063,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-library/tests.md",
+          "tokens_estimated": 3051,
           "action": "create"
         }
       ],
       "totals": {
-        "input_tokens_estimated": 19934,
-        "output_tokens_estimated": 13783,
-        "reads_count": 14,
-        "writes_count": 25,
-        "repeated_reads_blocked": 1,
-        "anatomy_lookups": 6
+        "input_tokens_estimated": 5085,
+        "output_tokens_estimated": 15269,
+        "reads_count": 4,
+        "writes_count": 8,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 2
       }
     }
   ],
