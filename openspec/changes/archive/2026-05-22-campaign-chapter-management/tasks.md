@@ -55,7 +55,7 @@ Use the project's documented commands for each of the above (see project README 
 - [x] **Monitor PR comments** — when comments appear, address them, commit fixes, follow all steps in [Remote push validation] then push to the same working branch; repeat until no unresolved comments remain
 - [x] Enable auto-merge once no blocking review comments remain
 - [x] **Monitor CI checks** — when any CI check fails, diagnose and fix the failure, commit fixes, follow all steps in [Remote push validation] then push to the same working branch; repeat until all checks pass
-- [ ] Wait for the PR to merge — **never force-merge**; if a human force-merges, continue to Post-Merge
+- [x] Wait for the PR to merge — **never force-merge**; if a human force-merges, continue to Post-Merge
 
 The comment and CI resolution loops are iterative: address → validate locally → push → sleep for 120 seconds → re-check → repeat until the PR is fully clean. If a human force-merges before the PR is clean, proceed directly to Post-Merge steps.
 
@@ -73,14 +73,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/campaign-chapter-management/` to `openspec/changes/archive/2026-05-22-campaign-chapter-management/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
-- [ ] Confirm `openspec/changes/archive/2026-05-22-campaign-chapter-management/` exists and `openspec/changes/campaign-chapter-management/` is gone
-- [ ] Commit and push the archive to the default branch in one commit
-- [ ] Prune merged local feature branches: `git fetch --prune` and `git branch -d feat/campaign-chapter-management`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive the change: move `openspec/changes/campaign-chapter-management/` to `openspec/changes/archive/2026-05-22-campaign-chapter-management/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
+- [x] Confirm `openspec/changes/archive/2026-05-22-campaign-chapter-management/` exists and `openspec/changes/campaign-chapter-management/` is gone
+- [x] Commit and push the archive to the default branch in one commit
+- [x] Prune merged local feature branches: `git fetch --prune` and `git branch -d feat/campaign-chapter-management`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -d feat/campaign-chapter-management`
