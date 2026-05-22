@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T17:55:17.356Z
-> Files: 660 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T22:12:25.855Z
+> Files: 664 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -11,8 +11,9 @@
 
 ## ../../.claude/projects/-home-doug-dev2-session-combat/memory/
 
+- `feedback_no_admin_merge.md` (~210 tok)
 - `feedback_resolve_pr_comments.md` (~244 tok)
-- `MEMORY.md` — Memory Index (~45 tok)
+- `MEMORY.md` — Memory Index (~79 tok)
 
 ## ./
 
@@ -808,7 +809,7 @@
 
 ## app/parties/
 
-- `page.tsx` — PartiesContent — renders form (~3660 tok)
+- `page.tsx` — PartiesContent — renders form (~3099 tok)
 
 ## app/register/
 
@@ -824,9 +825,6 @@
 
 ## lib/components/
 
-- `CharacterMiniSummary.tsx` — BADGE_LABELS (~413 tok)
-- `CombatStatsRow.tsx` — CombatStatsRow (~190 tok)
-- `CreatureStatBlock.tsx` — abilityNames (~2304 tok)
 - `NavBar.tsx` — NavBar (~426 tok)
 - `ui.tsx` — ErrorBanner — renders form (~761 tok)
 
@@ -843,6 +841,10 @@
 - `dndBeyond-skills-senses.ts` — Exports normalizeSavingThrows, normalizeSkills, normalizeSenses (~1155 tok)
 - `dndBeyond-utils.ts` — Exports DndBeyondImportError, createValidationError, ABILITY_ID_MAP, indexStatValues + 6 more (~1014 tok)
 - `utils.ts` — Exports ModifierLike, getAbilityModifier, getProficiencyBonus, dedupeStrings + 9 more (~676 tok)
+
+## lib/scripts/
+
+- `seedCampaignTemplates.ts` — one-time ingestion: seeds 50 global campaign templates with chapters and level ranges (~2800 tok)
 
 ## openspec/changes/archive/2026-05-21-extract-http-backoff-utils/
 
@@ -963,6 +965,17 @@
 
 - `spec.md` — ADDED Requirements (~2285 tok)
 
+## openspec/changes/extract-dndbeyond-unit-tests/
+
+- `design.md` — Context (~2587 tok)
+- `proposal.md` — GitHub Issues (~1530 tok)
+- `tasks.md` — Tasks (~2002 tok)
+- `tests.md` — Tests (~1842 tok)
+
+## openspec/changes/extract-dndbeyond-unit-tests/specs/
+
+- `test-migration.md` — ADDED Requirements (~1746 tok)
+
 ## openspec/changes/fix-import-utility-placement/
 
 - `design.md` — Context (~2079 tok)
@@ -978,10 +991,6 @@
 
 - `spec.md` — ADDED Requirements (~1032 tok)
 
-## openspec/changes/party-dashboard-member-expansion/
-
-- `tasks.md` — Tasks (~1543 tok)
-
 ## openspec/changes/travelling-npcs-character-type/
 
 - `design.md` — Context (~2244 tok)
@@ -996,6 +1005,7 @@
 ## tests/e2e/
 
 - `auth.spec.ts` — Declares STRONG_PASSWORD (~4754 tok)
+- `combat.spec.ts` — STRONG_PASSWORD: registerTestUser (~8424 tok)
 
 ## tests/integration/
 
@@ -1012,13 +1022,14 @@
 
 ## tests/unit/
 
-- `CharacterMiniSummary.test.tsx` — renderComponent (~1057 tok)
 - `characterTypeUI.test.tsx` — PC (~1974 tok)
-- `CombatStatsRow.test.tsx` — renderComponent (~468 tok)
 - `partyCharacterTypeUI.test.tsx` — PC (~1606 tok)
 
 ## tests/unit/api/campaigns/
 
+- `global.id.copy.route.test.ts` — Declares mockedRequireAuth (~1490 tok)
+- `global.id.route.test.ts` — Declares mockedRequireAdmin (~631 tok)
+- `global.route.test.ts` — Declares mockedRequireAdmin (~1870 tok)
 - `route.test.ts` — Declares mockedRequireAuth (~2600 tok)
 
 ## tests/unit/api/characters/
@@ -1034,10 +1045,12 @@
 
 - `CampaignEditor.test.tsx` — BASE_CAMPAIGN (~1984 tok)
 - `CampaignsPage.test.tsx` — jsonResponse (~2226 tok)
-- `CreatureStatBlock.test.tsx` — BASE_ABILITY_SCORES (~640 tok)
 - `NavBar.test.tsx` — mockedUseAuth (~922 tok)
-- `PartiesPage.test.tsx` — PC (~1794 tok)
 - `ui.test.tsx` — render — renders form (~2132 tok)
+
+## tests/unit/helpers/
+
+- `route.test.helpers.ts` — Shared auth payload used across route unit tests (~2060 tok)
 
 ## tests/unit/import/
 

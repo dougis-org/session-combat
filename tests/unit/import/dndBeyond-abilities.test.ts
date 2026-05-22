@@ -203,6 +203,26 @@ describe("dndBeyond-abilities", () => {
 
       expect(result.actions[0].description).toBe("Description content");
     });
+
+    it("should omit actions whose description sanitizes to empty (no snippet)", () => {
+      const actions = {
+        action: [
+          {
+            name: "Markup Only",
+            description: "<p><br></p>",
+            activation: { activationType: 1 },
+          },
+        ],
+      };
+
+      const result = normalizeAbilities(actions, null, null);
+
+      expect(result.actions).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: "Markup Only" }),
+        ]),
+      );
+    });
   });
 
   describe("ACTIONS_BY_ACTIVATION_TYPE", () => {

@@ -603,41 +603,56 @@
 | 08:24 | Edited tests/unit/storage/campaigns.test.ts | added optional chaining | ~1456 |
 | 08:24 | Edited tests/unit/components/CampaignsPage.test.tsx | CSS: value | ~351 |
 | 08:24 | Edited app/api/campaigns/global/route.ts | modified filter() | ~236 |
-| 09:32 | Created lib/components/CombatStatsRow.tsx | — | ~199 |
-| 09:32 | Edited lib/components/CreatureStatBlock.tsx | added 1 import(s) | ~37 |
-| 09:32 | Edited lib/components/CreatureStatBlock.tsx | removed 16 lines | ~29 |
-| 09:33 | Created lib/components/CharacterMiniSummary.tsx | — | ~386 |
-| 09:33 | Edited lib/components/CharacterMiniSummary.tsx | CSS: BADGE_LABELS, npc, companion | ~332 |
-| 09:33 | Edited app/parties/page.tsx | added 1 import(s) | ~57 |
-| 09:33 | Edited app/parties/page.tsx | removed 7 lines | ~3 |
-| 09:33 | Edited app/parties/page.tsx | CSS: md | ~656 |
-| 09:34 | Created tests/unit/CombatStatsRow.test.tsx | — | ~430 |
-| 09:34 | Created tests/unit/CharacterMiniSummary.test.tsx | — | ~1019 |
-| 09:34 | Edited app/parties/page.tsx | CSS: section | ~87 |
-| 09:35 | Created tests/unit/components/PartiesPage.test.tsx | — | ~1794 |
-| 09:42 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | 2→2 lines | ~74 |
-| 09:42 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | 14→14 lines | ~239 |
-| 09:42 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | 32→32 lines | ~528 |
-| 09:42 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | 7→7 lines | ~85 |
-| 09:56 | Edited lib/components/CombatStatsRow.tsx | 2→2 lines | ~18 |
-| 09:56 | Edited lib/components/CreatureStatBlock.tsx | 2→4 lines | ~49 |
-| 09:56 | Edited lib/components/CharacterMiniSummary.tsx | inline fix | ~24 |
-| 09:56 | Edited lib/components/CharacterMiniSummary.tsx | reduce() → calculateTotalLevel() | ~335 |
-| 09:56 | Edited app/parties/page.tsx | 4→9 lines | ~61 |
-| 09:57 | Edited app/parties/page.tsx | find() → get() | ~58 |
-| 09:57 | Edited app/parties/page.tsx | 10→11 lines | ~194 |
-| 09:57 | Edited tests/unit/CombatStatsRow.test.tsx | CSS: container, root | ~174 |
-| 09:57 | Edited tests/unit/CharacterMiniSummary.test.tsx | CSS: container, root | ~177 |
-| 09:57 | Created tests/unit/components/CreatureStatBlock.test.tsx | — | ~640 |
-| 10:36 | Session end: 70 writes across 19 files (types.ts, route.ts, CampaignEditor.tsx, page.tsx, storage.ts) | 29 reads | ~67454 tok |
-| 10:38 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | 3→3 lines | ~37 |
-| 10:38 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | "npm test" → "npm run test:unit" | ~16 |
-| 10:38 | Edited openspec/changes/party-dashboard-member-expansion/tasks.md | "npm test -- --testPathPat" → "npm run test:unit -- --te" | ~33 |
-| 10:39 | Edited app/parties/page.tsx | modified filter() | ~178 |
-| 10:40 | Edited app/parties/page.tsx | modified filter() | ~1068 |
-| 10:55 | Edited app/parties/page.tsx | inline fix | ~20 |
 
-## Session: 2026-05-22 10:55
+## Session: 2026-05-22 08:28
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 09:29 | Edited openspec/changes/campaign-library/tasks.md | 4→4 lines | ~79 |
+| 09:29 | Edited openspec/changes/campaign-library/tasks.md | 8→8 lines | ~159 |
+| 09:29 | Edited openspec/changes/campaign-library/tasks.md | 8→8 lines | ~192 |
+| 09:31 | Session end: 3 writes across 1 files (tasks.md) | 1 reads | ~2267 tok |
+| 09:56 | Session end: 3 writes across 1 files (tasks.md) | 1 reads | ~2267 tok |
+| 09:57 | Created ../../.claude/projects/-home-doug-dev2-session-combat/memory/feedback_no_admin_merge.md | — | ~203 |
+| 09:57 | Edited ../../.claude/projects/-home-doug-dev2-session-combat/memory/MEMORY.md | 1→2 lines | ~80 |
+| 09:59 | Created tests/unit/api/campaigns/global.route.test.ts | — | ~1762 |
+| 09:59 | Created tests/unit/api/campaigns/global.id.route.test.ts | — | ~734 |
+| 09:59 | Created tests/unit/api/campaigns/global.id.copy.route.test.ts | — | ~1584 |
+| 10:01 | Edited tests/unit/helpers/route.test.helpers.ts | modified mockUnauthorized() | ~172 |
+| 10:01 | Created tests/unit/api/campaigns/global.route.test.ts | — | ~1860 |
+| 10:01 | Created tests/unit/api/campaigns/global.id.route.test.ts | — | ~631 |
+| 10:02 | Created tests/unit/api/campaigns/global.id.copy.route.test.ts | — | ~1490 |
+| 10:05 | Session end: 12 writes across 7 files (tasks.md, feedback_no_admin_merge.md, MEMORY.md, global.route.test.ts, global.id.route.test.ts) | 14 reads | ~18958 tok |
+| 10:36 | Edited tests/unit/api/campaigns/global.route.test.ts | 4→8 lines | ~52 |
+| 10:38 | Session end: 13 writes across 7 files (tasks.md, feedback_no_admin_merge.md, MEMORY.md, global.route.test.ts, global.id.route.test.ts) | 14 reads | ~19010 tok |
+| 10:54 | Edited tests/e2e/combat.spec.ts | inline fix | ~20 |
+| 12:21 | Session end: 14 writes across 8 files (tasks.md, feedback_no_admin_merge.md, MEMORY.md, global.route.test.ts, global.id.route.test.ts) | 15 reads | ~19030 tok |
+
+## Session: 2026-05-22 12:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:30 | Created lib/scripts/seedCampaignTemplates.ts | — | ~13978 |
+| 13:54 | Created seedCampaignTemplates.ts — 50 campaign catalog seed script with chapters/levels from web research | lib/scripts/seedCampaignTemplates.ts | success | ~2800 |
+| 13:54 | Session end: 1 writes across 1 files (seedCampaignTemplates.ts) | 7 reads | ~25395 tok |
+
+## Session: 2026-05-22 13:57
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-05-22 14:10
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:09 | Created openspec/changes/extract-dndbeyond-unit-tests/proposal.md | — | ~1632 |
+| 15:10 | Created openspec/changes/extract-dndbeyond-unit-tests/design.md | — | ~2759 |
+| 15:10 | Created openspec/changes/extract-dndbeyond-unit-tests/specs/test-migration.md | — | ~1863 |
+| 15:11 | Created openspec/changes/extract-dndbeyond-unit-tests/tasks.md | — | ~2136 |
+| 15:12 | Created openspec/changes/extract-dndbeyond-unit-tests/tests.md | — | ~1965 |
+| 15:12 | Session end: 5 writes across 5 files (proposal.md, design.md, test-migration.md, tasks.md, tests.md) | 2 reads | ~11094 tok |
+
+## Session: 2026-05-22 15:19
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
