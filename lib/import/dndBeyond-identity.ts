@@ -4,7 +4,7 @@ import type { DnDAlignment, DnDRace } from "../types";
 const CANONICAL_HOST = "www.dndbeyond.com";
 const CHARACTER_PATH_PATTERN = /^\/characters\/(\d+)(?:\/([A-Za-z0-9_-]+))?\/?$/;
 
-const ALIGNMENT_ID_MAP: Record<number, DnDAlignment> = {
+const ALIGNMENT_ID_MAP: Partial<Record<number, DnDAlignment>> = {
   1: "Lawful Good",
   2: "Neutral Good",
   3: "Chaotic Good",
