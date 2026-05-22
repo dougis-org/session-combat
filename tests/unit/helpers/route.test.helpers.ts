@@ -20,6 +20,14 @@ export function mockUnauthorized(mockedFn: jest.Mock): void {
   );
 }
 
+/** Configure a mocked requireAdmin (async) to return a 401 or 403 response */
+export function mockAdminDenied(mockedFn: jest.Mock, status: 401 | 403): void {
+  const message = status === 401 ? "Unauthorized" : "Only administrators can perform this action";
+  mockedFn.mockResolvedValue(
+    NextResponse.json({ error: message }, { status })
+  );
+}
+
 /**
  * Configure a mocked getDatabase to return a collection with the given methods.
  * Used by route handlers that access MongoDB directly.
