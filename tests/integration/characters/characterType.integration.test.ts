@@ -36,16 +36,19 @@ describe("Character characterType field — API integration", () => {
     return res.json() as Promise<CharacterResponse>;
   }
 
+  async function putCharacter(id: string, body: Record<string, unknown>): Promise<{ status: number; char: CharacterResponse }> {
+    const res = await fetch(`${baseUrl}/api/characters/${id}`, {
+      method: "PUT",
+      headers: authed(),
+      body: JSON.stringify(body),
+    });
+    return { status: res.status, char: await res.json() as CharacterResponse };
+  }
+
   // POST tests
 
   it("defaults characterType to 'character' when field omitted", async () => {
-    const res = await fetch(`${baseUrl}/api/characters`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "Default Type" }),
-    });
-    expect(res.status).toBe(201);
-    const char = await res.json() as CharacterResponse;
+    const char = await createCharacter({ name: "Default Type" });
     expect(char.characterType).toBe("character");
   });
 
@@ -60,13 +63,7 @@ describe("Character characterType field — API integration", () => {
   });
 
   it("creates character with characterType 'companion'", async () => {
-    const res = await fetch(`${baseUrl}/api/characters`, {
-      method: "POST",
-      headers: authed(),
-      body: JSON.stringify({ name: "Familiar", characterType: "companion" }),
-    });
-    expect(res.status).toBe(201);
-    const char = await res.json() as CharacterResponse;
+    const char = await createCharacter({ name: "Familiar", characterType: "companion" });
     expect(char.characterType).toBe("companion");
   });
 
@@ -87,13 +84,8 @@ describe("Character characterType field — API integration", () => {
     const created = await createCharacter({ name: "Shapeshifter", characterType: "character" });
     expect(created.characterType).toBe("character");
 
-    const putRes = await fetch(`${baseUrl}/api/characters/${created.id}`, {
-      method: "PUT",
-      headers: authed(),
-      body: JSON.stringify({ characterType: "companion" }),
-    });
-    expect(putRes.status).toBe(200);
-    const updated = await putRes.json() as CharacterResponse;
+    const { status, char: updated } = await putCharacter(created.id, { characterType: "companion" });
+    expect(status).toBe(200);
     expect(updated.characterType).toBe("companion");
 
     const getRes = await fetch(`${baseUrl}/api/characters/${created.id}`, { headers: authed() });
@@ -104,25 +96,15 @@ describe("Character characterType field — API integration", () => {
   it("preserves characterType when not in PUT body", async () => {
     const created = await createCharacter({ name: "Unchanged", characterType: "npc" });
 
-    const putRes = await fetch(`${baseUrl}/api/characters/${created.id}`, {
-      method: "PUT",
-      headers: authed(),
-      body: JSON.stringify({ name: "Still NPC" }),
-    });
-    expect(putRes.status).toBe(200);
-    const updated = await putRes.json() as CharacterResponse;
+    const { status, char: updated } = await putCharacter(created.id, { name: "Still NPC" });
+    expect(status).toBe(200);
     expect(updated.characterType).toBe("npc");
   });
 
   it("returns 400 for invalid characterType on PUT", async () => {
     const created = await createCharacter({ name: "Bad Update" });
-
-    const putRes = await fetch(`${baseUrl}/api/characters/${created.id}`, {
-      method: "PUT",
-      headers: authed(),
-      body: JSON.stringify({ characterType: "villain" }),
-    });
-    expect(putRes.status).toBe(400);
+    const { status } = await putCharacter(created.id, { characterType: "villain" });
+    expect(status).toBe(400);
   });
 
   // GET filter tests

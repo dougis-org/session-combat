@@ -5,10 +5,10 @@
 
 import React from 'react';
 import { act } from 'react';
-import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { describe, test, expect, jest } from '@jest/globals';
 import { createRoot } from 'react-dom/client';
-import type { Root } from 'react-dom/client';
 import { CharactersContent } from '@/app/characters/page';
+import { setupUiTest, clickButton } from '@/tests/unit/helpers/uiTestSetup';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -50,21 +50,7 @@ const COMPANION = {
   abilityScores: { strength: 12, dexterity: 15, constitution: 12, intelligence: 3, wisdom: 12, charisma: 6 },
 };
 
-let container: HTMLDivElement;
-let root: Root;
-let originalFetch: typeof global.fetch;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  originalFetch = global.fetch;
-});
-
-afterEach(() => {
-  act(() => { root?.unmount(); });
-  container.remove();
-  global.fetch = originalFetch;
-});
+const ctx = setupUiTest();
 
 function mockFetchWithCharacters(characters: object[]) {
   global.fetch = jest.fn(async () => ({
@@ -75,26 +61,26 @@ function mockFetchWithCharacters(characters: object[]) {
 
 async function render() {
   await act(async () => {
-    root = createRoot(container);
-    root.render(<CharactersContent />);
+    ctx.root = createRoot(ctx.container);
+    ctx.root.render(<CharactersContent />);
   });
 }
 
 function getSections() {
-  return container.querySelectorAll('[aria-label^="Section:"]');
+  return ctx.container.querySelectorAll('[aria-label^="Section:"]');
 }
 
 function getSectionLabels() {
   return Array.from(getSections()).map(s => s.getAttribute('aria-label'));
 }
 
+function getTypeSelect() {
+  return ctx.container.querySelector('select[aria-label="Character type"]') as HTMLSelectElement | null;
+}
+
 async function renderAndOpenEditor() {
   await render();
-  const buttons = Array.from(container.querySelectorAll('button'));
-  const addBtn = buttons.find(b => b.textContent?.includes('Add New Character'));
-  if (addBtn) {
-    await act(async () => { addBtn.click(); });
-  }
+  await clickButton(ctx.container, b => !!b.textContent?.includes('Add New Character'));
 }
 
 describe('CharactersContent — character type grouping', () => {
@@ -124,7 +110,7 @@ describe('CharactersContent — character type grouping', () => {
     mockFetchWithCharacters([PC, NPC, COMPANION]);
     await render();
 
-    const npcFilterBtn = container.querySelector('[aria-label="Filter: Travelling NPCs"]') as HTMLButtonElement | null;
+    const npcFilterBtn = ctx.container.querySelector('[aria-label="Filter: Travelling NPCs"]') as HTMLButtonElement | null;
     expect(npcFilterBtn).not.toBeNull();
 
     await act(async () => { npcFilterBtn!.click(); });
@@ -139,7 +125,7 @@ describe('CharactersContent — CharacterEditor type selector', () => {
     mockFetchWithCharacters([]);
     await renderAndOpenEditor();
 
-    const typeSelect = container.querySelector('select[aria-label="Character type"]') as HTMLSelectElement | null;
+    const typeSelect = getTypeSelect();
     expect(typeSelect).not.toBeNull();
     expect(typeSelect!.value).toBe('character');
   });
@@ -157,7 +143,7 @@ describe('CharactersContent — CharacterEditor type selector', () => {
 
     await renderAndOpenEditor();
 
-    const typeSelect = container.querySelector('select[aria-label="Character type"]') as HTMLSelectElement | null;
+    const typeSelect = getTypeSelect();
     expect(typeSelect).not.toBeNull();
 
     await act(async () => {
@@ -167,7 +153,7 @@ describe('CharactersContent — CharacterEditor type selector', () => {
 
     expect(typeSelect!.value).toBe('npc');
 
-    const saveBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Save Character'));
+    const saveBtn = Array.from(ctx.container.querySelectorAll('button')).find(b => b.textContent?.includes('Save Character'));
     expect(saveBtn).not.toBeUndefined();
     await act(async () => { saveBtn!.click(); });
 
@@ -179,12 +165,9 @@ describe('CharactersContent — CharacterEditor type selector', () => {
     mockFetchWithCharacters([NPC]);
     await render();
 
-    const buttons = Array.from(container.querySelectorAll('button'));
-    const editBtn = buttons.find(b => b.textContent === 'Edit') as HTMLButtonElement | undefined;
-    expect(editBtn).not.toBeUndefined();
-    await act(async () => { editBtn!.click(); });
+    await clickButton(ctx.container, b => b.textContent === 'Edit');
 
-    const typeSelect = container.querySelector('select[aria-label="Character type"]') as HTMLSelectElement | null;
+    const typeSelect = getTypeSelect();
     expect(typeSelect).not.toBeNull();
     expect(typeSelect!.value).toBe('npc');
   });

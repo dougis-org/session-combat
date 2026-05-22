@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState, FormField, EditorShell, textInputClass } from '@/lib/components/ui';
-import { Party, Character, Campaign, CharacterType, CHARACTER_TYPE_ORDER, CHARACTER_TYPE_LABELS, getCharacterType } from '@/lib/types';
+import { Party, Character, Campaign, CHARACTER_TYPE_ORDER, CHARACTER_TYPE_LABELS, getCharacterType } from '@/lib/types';
 
 function PartiesContent() {
   const [parties, setParties] = useState<Party[]>([]);

@@ -51,30 +51,30 @@ describe("GET /api/characters", () => {
 });
 
 describe("POST /api/characters", () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+  });
 
   itReturns401(POST, () => makeRequest({ name: "Hero" }), mockedRequireAuth);
 
   it("returns 400 when name is missing", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makeRequest({ hp: 10 }));
     expect(response.status).toBe(400);
   });
 
   it("returns 400 when name is empty string", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makeRequest({ name: "  " }));
     expect(response.status).toBe(400);
   });
 
   it("returns 400 for invalid race", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makeRequest({ name: "Hero", race: "Alien" }));
     expect(response.status).toBe(400);
   });
 
   it("returns 400 when gender exceeds 50 characters", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makeRequest({ name: "Hero", gender: "x".repeat(51) }));
     expect(response.status).toBe(400);
     const body = await response.json();
@@ -82,15 +82,11 @@ describe("POST /api/characters", () => {
   });
 
   it("returns 400 when gender is not a string", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makeRequest({ name: "Hero", gender: 42 }));
     expect(response.status).toBe(400);
   });
 
   it("creates character with gender and trims whitespace", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-
     const response = await POST(makeRequest({ name: "Hero", gender: "  Female  " }));
     expect(response.status).toBe(201);
     const body = await response.json();
@@ -98,9 +94,6 @@ describe("POST /api/characters", () => {
   });
 
   it("omits gender from response when not provided", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-
     const response = await POST(makeRequest({ name: "Hero" }));
     expect(response.status).toBe(201);
     const body = await response.json();
@@ -108,9 +101,6 @@ describe("POST /api/characters", () => {
   });
 
   it("creates character with defaults and returns 201", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-
     const response = await POST(makeRequest({ name: "Gandalf" }));
 
     expect(response.status).toBe(201);
@@ -122,9 +112,6 @@ describe("POST /api/characters", () => {
   });
 
   it("creates character with provided classes", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-
     const response = await POST(
       makeRequest({ name: "Wizard", classes: [{ class: "Wizard", level: 5 }] })
     );
@@ -145,16 +132,9 @@ describe("POST /api/characters", () => {
     POST,
     (alignment) => makeRequest({ name: "Hero", ...(alignment !== undefined && { alignment }) }),
     201,
-    () => {
-      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-      mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-    },
   );
 
   it("defaults characterType to 'character' when omitted", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-
     const response = await POST(makeRequest({ name: "Gandalf" }));
     expect(response.status).toBe(201);
     const body = await response.json();
@@ -162,9 +142,6 @@ describe("POST /api/characters", () => {
   });
 
   it("accepts characterType 'npc'", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-
     const response = await POST(makeRequest({ name: "Innkeeper", characterType: "npc" }));
     expect(response.status).toBe(201);
     const body = await response.json();
@@ -172,9 +149,6 @@ describe("POST /api/characters", () => {
   });
 
   it("accepts characterType 'companion'", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-
     const response = await POST(makeRequest({ name: "Familiar", characterType: "companion" }));
     expect(response.status).toBe(201);
     const body = await response.json();
@@ -182,9 +156,6 @@ describe("POST /api/characters", () => {
   });
 
   it("accepts characterType 'character'", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-
     const response = await POST(makeRequest({ name: "Hero", characterType: "character" }));
     expect(response.status).toBe(201);
     const body = await response.json();
@@ -192,9 +163,6 @@ describe("POST /api/characters", () => {
   });
 
   it("returns 400 for invalid characterType", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-
     const response = await POST(makeRequest({ name: "Villain", characterType: "villain" }));
     expect(response.status).toBe(400);
     const body = await response.json();

@@ -302,6 +302,7 @@ export function CharactersContent() {
 
         {editingCharacter && (
           <CharacterEditor
+            key={isAdding ? 'new' : editingCharacter.id}
             character={editingCharacter}
             onSave={saveCharacter}
             onCancel={cancelEdit}
@@ -484,7 +485,8 @@ function CharacterEditor({
     try {
       const characterData: Character = {
         ...stats,
-        ...character, // Preserve id, userId, and any other original fields
+        id: character.id,
+        userId: character.userId,
         name,
         classes,
         race: (race as DnDRace) || undefined,

@@ -5,9 +5,9 @@
 
 import React from 'react';
 import { act } from 'react';
-import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { describe, test, expect, jest } from '@jest/globals';
 import { createRoot } from 'react-dom/client';
-import type { Root } from 'react-dom/client';
+import { setupUiTest, clickButton } from '@/tests/unit/helpers/uiTestSetup';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -49,21 +49,7 @@ const COMPANION = { id: 'c3', name: 'Bill', characterType: 'companion', userId: 
 
 const PARTY = { id: 'p1', name: 'Fellowship', characterIds: ['c1', 'c2', 'c3'], userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
 
-let container: HTMLDivElement;
-let root: Root;
-let originalFetch: typeof global.fetch;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  originalFetch = global.fetch;
-});
-
-afterEach(() => {
-  act(() => { root?.unmount(); });
-  container.remove();
-  global.fetch = originalFetch;
-});
+const ctx = setupUiTest();
 
 async function renderWithData(characters: object[], parties: object[] = []) {
   global.fetch = jest.fn(async (url: RequestInfo | URL) => {
@@ -76,23 +62,21 @@ async function renderWithData(characters: object[], parties: object[] = []) {
 
   const { default: PartiesPage } = await import('@/app/parties/page');
   await act(async () => {
-    root = createRoot(container);
-    root.render(React.createElement(PartiesPage));
+    ctx.root = createRoot(ctx.container);
+    ctx.root.render(React.createElement(PartiesPage));
   });
 }
 
 async function openNewPartyEditor() {
-  const addBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Add New Party'));
-  if (addBtn) await act(async () => { addBtn.click(); });
+  await clickButton(ctx.container, b => !!b.textContent?.includes('Add New Party'));
 }
 
 async function openExistingPartyEditor() {
-  const editBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Edit');
-  if (editBtn) await act(async () => { editBtn.click(); });
+  await clickButton(ctx.container, b => b.textContent === 'Edit');
 }
 
 function getPartySections() {
-  return container.querySelectorAll('[aria-label^="Party section:"]');
+  return ctx.container.querySelectorAll('[aria-label^="Party section:"]');
 }
 
 function getPartySectionLabels() {
