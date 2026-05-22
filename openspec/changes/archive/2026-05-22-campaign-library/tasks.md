@@ -106,10 +106,10 @@ Verification: Manual browser test — catalog renders, Copy creates a new campai
 
 - [x] `npx tsc --noEmit` — zero type errors
 - [x] `npm run test:unit` — all unit tests pass
-- [ ] `npm run test:integration` — all integration tests pass (includes new tests from tests.md)
+- [x] `npm run test:integration` — all integration tests pass (includes new tests from tests.md)
 - [x] `npm run build` — build succeeds with no errors
-- [ ] Manual smoke test: campaign dashboard loads, catalog section visible, Copy button creates campaign
-- [ ] All tasks above marked complete
+- [x] Manual smoke test: campaign dashboard loads, catalog section visible, Copy button creates campaign
+- [x] All tasks above marked complete
 
 ## Remote push validation
 
@@ -122,14 +122,14 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Run pre-PR self-review before committing
-- [ ] Commit all changes to `feature/campaign-library` and push to remote
-- [ ] Open PR from `feature/campaign-library` to `main`
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each, commit fixes, run remote push validation, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — diagnose any failure, fix, validate locally, push; repeat until all checks pass
-- [ ] Wait for PR to merge — never force-merge
+- [x] Run pre-PR self-review before committing
+- [x] Commit all changes to `feature/campaign-library` and push to remote
+- [x] Open PR from `feature/campaign-library` to `main`
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each, commit fixes, run remote push validation, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — diagnose any failure, fix, validate locally, push; repeat until all checks pass
+- [x] Wait for PR to merge — never force-merge
 
 Ownership metadata:
 
@@ -145,13 +145,13 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on main
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/` (copy new spec directories from `openspec/changes/campaign-library/specs/` to `openspec/specs/`)
-- [ ] Archive: move `openspec/changes/campaign-library/` to `openspec/changes/archive/YYYY-MM-DD-campaign-library/` — stage both new location and deletion in a **single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-library/` exists and `openspec/changes/campaign-library/` is gone
-- [ ] Commit and push the archive commit to main
-- [ ] `git fetch --prune` and `git branch -d feature/campaign-library`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on main
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/` (copy new spec directories from `openspec/changes/campaign-library/specs/` to `openspec/specs/`)
+- [x] Archive: move `openspec/changes/campaign-library/` to `openspec/changes/archive/YYYY-MM-DD-campaign-library/` — stage both new location and deletion in a **single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-library/` exists and `openspec/changes/campaign-library/` is gone
+- [x] Commit and push the archive commit to main
+- [x] `git fetch --prune` and `git branch -d feature/campaign-library`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -d feature/campaign-library`
