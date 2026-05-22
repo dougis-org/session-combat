@@ -960,6 +960,118 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-22T15:24:39.579Z"
+    },
+    {
+      "id": "bug-061",
+      "timestamp": "2026-05-22T16:33:14.418Z",
+      "error_message": "Wrong operator: === should be >>",
+      "file": "lib/components/CharacterMiniSummary.tsx",
+      "root_cause": "Used \"===\" instead of \">>\"",
+      "fix": "Changed operator === → >>",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T16:33:14.418Z"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-05-22T16:33:42.553Z",
+      "error_message": "Null/undefined access in ",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T16:33:42.553Z"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-05-22T16:34:49.279Z",
+      "error_message": "Type error",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T16:34:49.279Z"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-05-22T16:56:34.657Z",
+      "error_message": "Incorrect value in code",
+      "file": "lib/components/CombatStatsRow.tsx",
+      "root_cause": "Had \"grid grid-cols-3 gap-4 text-sm border-b border-gr",
+      "fix": "Changed to \"grid grid-cols-3 gap-4 text-sm\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T16:56:34.657Z"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-05-22T17:38:49.442Z",
+      "error_message": "Incorrect value in code",
+      "file": "openspec/changes/party-dashboard-member-expansion/tasks.md",
+      "root_cause": "Had `npm test`",
+      "fix": "Changed to `npm run test:unit`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-05-22T17:38:56.473Z"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-05-22T17:39:16.194Z",
+      "error_message": "CSS fix: Members",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Members: {party.characterIds.length → {partyCharacters.length",
+      "fix": "Changed Members: {party.characterIds.length → {partyCharacters.length",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T17:39:16.194Z"
+    },
+    {
+      "id": "bug-067",
+      "timestamp": "2026-05-22T17:55:17.365Z",
+      "error_message": "CSS fix: Members",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Members: {partyCharacters.length → {party.characterIds.length",
+      "fix": "Changed Members: {partyCharacters.length → {party.characterIds.length",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T17:55:17.365Z"
     }
   ]
 }

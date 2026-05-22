@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T15:24:39.570Z
-> Files: 652 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T17:55:17.356Z
+> Files: 660 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -808,7 +808,7 @@
 
 ## app/parties/
 
-- `page.tsx` — PartiesContent — renders form (~3099 tok)
+- `page.tsx` — PartiesContent — renders form (~3660 tok)
 
 ## app/register/
 
@@ -824,6 +824,9 @@
 
 ## lib/components/
 
+- `CharacterMiniSummary.tsx` — BADGE_LABELS (~413 tok)
+- `CombatStatsRow.tsx` — CombatStatsRow (~190 tok)
+- `CreatureStatBlock.tsx` — abilityNames (~2304 tok)
 - `NavBar.tsx` — NavBar (~426 tok)
 - `ui.tsx` — ErrorBanner — renders form (~761 tok)
 
@@ -975,6 +978,10 @@
 
 - `spec.md` — ADDED Requirements (~1032 tok)
 
+## openspec/changes/party-dashboard-member-expansion/
+
+- `tasks.md` — Tasks (~1543 tok)
+
 ## openspec/changes/travelling-npcs-character-type/
 
 - `design.md` — Context (~2244 tok)
@@ -1005,7 +1012,9 @@
 
 ## tests/unit/
 
+- `CharacterMiniSummary.test.tsx` — renderComponent (~1057 tok)
 - `characterTypeUI.test.tsx` — PC (~1974 tok)
+- `CombatStatsRow.test.tsx` — renderComponent (~468 tok)
 - `partyCharacterTypeUI.test.tsx` — PC (~1606 tok)
 
 ## tests/unit/api/campaigns/
@@ -1025,7 +1034,9 @@
 
 - `CampaignEditor.test.tsx` — BASE_CAMPAIGN (~1984 tok)
 - `CampaignsPage.test.tsx` — jsonResponse (~2226 tok)
+- `CreatureStatBlock.test.tsx` — BASE_ABILITY_SCORES (~640 tok)
 - `NavBar.test.tsx` — mockedUseAuth (~922 tok)
+- `PartiesPage.test.tsx` — PC (~1794 tok)
 - `ui.test.tsx` — render — renders form (~2132 tok)
 
 ## tests/unit/import/

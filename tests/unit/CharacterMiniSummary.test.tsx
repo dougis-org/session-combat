@@ -126,4 +126,24 @@ describe('CharacterMiniSummary', () => {
     );
     expect(container.textContent).not.toContain('Lv');
   });
+
+  test('makes no network requests on mount', () => {
+    const fetchSpy = jest.fn();
+    const originalFetch = global.fetch;
+    global.fetch = fetchSpy as any;
+    try {
+      renderComponent(
+        React.createElement(CharacterMiniSummary, {
+          name: 'No Fetch',
+          classes: [],
+          ac: 10,
+          hp: 8,
+          maxHp: 8,
+        })
+      );
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
 });

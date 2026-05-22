@@ -8,7 +8,7 @@ The system SHALL provide a `CharacterMiniSummary` component in `lib/components/C
 
 #### Scenario: Renders full character identity and stats
 
-- **Given** `CharacterMiniSummary` is rendered with `name="Aragorn"`, `race="Human"`, `characterType="character"`, `classes=[{name:"Fighter",level:5}]`, `ac={18}`, `hp={45}`, `maxHp={58}`
+- **Given** `CharacterMiniSummary` is rendered with `name="Aragorn"`, `race="Human"`, `characterType="character"`, `classes=[{class:"Fighter",level:5}]`, `ac={18}`, `hp={45}`, `maxHp={58}`
 - **When** the component mounts
 - **Then** "Aragorn", "Human", "Fighter", "Lv 5", "18" (AC), and "45/58" (HP) are all visible in the rendered output
 
@@ -32,7 +32,7 @@ The system SHALL provide a `CharacterMiniSummary` component in `lib/components/C
 
 #### Scenario: Multiclass level is summed across all classes
 
-- **Given** `CharacterMiniSummary` is rendered with `classes=[{name:"Fighter",level:3},{name:"Rogue",level:2}]`
+- **Given** `CharacterMiniSummary` is rendered with `classes=[{class:"Fighter",level:3},{class:"Rogue",level:2}]`
 - **When** the component mounts
 - **Then** "Lv 5" appears in the identity line
 

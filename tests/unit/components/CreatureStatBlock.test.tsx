@@ -59,7 +59,7 @@ describe('CreatureStatBlock — CombatStatsRow integration', () => {
     expect(container.textContent).not.toContain('(');
   });
 
-  test('renders ability scores in compact mode', () => {
+  test('renders ability scores in full mode', () => {
     renderBlock({ isCompact: false });
     expect(container.textContent).toContain('STR');
     expect(container.textContent).toContain('DEX');

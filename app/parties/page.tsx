@@ -150,9 +150,27 @@ function PartiesContent() {
               </div>
             ) : (
               parties.map(party => {
-                const partyCharacters = party.characterIds
-                  .map(id => characterMap.get(id))
-                  .filter((c): c is Character => c !== undefined);
+                const partyCharacters = party.characterIds.map(
+                  id =>
+                    characterMap.get(id) ?? ({
+                      id,
+                      userId: '',
+                      name: 'Unknown',
+                      characterType: 'character',
+                      ac: 0,
+                      hp: 0,
+                      maxHp: 0,
+                      classes: [],
+                      abilityScores: {
+                        strength: 10,
+                        dexterity: 10,
+                        constitution: 10,
+                        intelligence: 10,
+                        wisdom: 10,
+                        charisma: 10,
+                      },
+                    } as Character)
+                );
                 return (
                   <div key={party.id} className="bg-gray-800 rounded-lg p-4">
                     <div className="flex justify-between items-start mb-2">
@@ -163,7 +181,7 @@ function PartiesContent() {
                         )}
                         <div className="text-gray-400 text-sm mt-2">
                           <p>Campaign: {party.campaignId ? (campaignMap.get(party.campaignId) ?? 'No Campaign') : 'No Campaign'}</p>
-                          <p>Members: {partyCharacters.length}</p>
+                          <p>Members: {party.characterIds.length}</p>
                         </div>
                         {partyCharacters.length > 0 && (
                           <div className="mt-3 space-y-3">

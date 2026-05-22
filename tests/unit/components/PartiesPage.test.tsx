@@ -156,4 +156,46 @@ describe('PartiesPage — party card member display', () => {
     expect(ctx.container.textContent).toContain('Barliman');
     expect(ctx.container.textContent).toContain('Bill');
   });
+
+  test('no additional fetches on render', async () => {
+    await renderWithData([PC, NPC], [PARTY_ALL]);
+    expect(global.fetch).toHaveBeenCalledTimes(3);
+  });
+
+  test('NPC-only party renders only NPC section and hides PC and Companion sections', async () => {
+    const partyNpcOnly = {
+      id: 'p4', name: 'NPC Party', characterIds: ['c2'],
+      userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    };
+    await renderWithData([NPC], [partyNpcOnly]);
+
+    const labels = getMemberSectionLabels();
+    expect(labels).toContain('Member section: Travelling NPCs');
+    expect(labels).not.toContain('Member section: Player Characters');
+    expect(labels).not.toContain('Member section: Companions');
+  });
+
+  test('member summaries render all six fields (name, race, class, level, AC, HP)', async () => {
+    await renderWithData([PC], [PARTY_PC_ONLY]);
+
+    const text = ctx.container.textContent ?? '';
+    expect(text).toContain('Thorin');
+    expect(text).toContain('Dwarf');
+    expect(text).toContain('Fighter');
+    expect(text).toContain('Lv 5');
+    expect(text).toContain('16');
+    expect(text).toContain('40/40');
+  });
+
+  test('renders placeholder Unknown card for missing character ID', async () => {
+    const partyWithMissing = {
+      id: 'p5', name: 'Missing Party', characterIds: ['nonexistent-id'],
+      userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    };
+    await renderWithData([], [partyWithMissing]);
+
+    expect(ctx.container.textContent).toContain('Unknown');
+    const labels = getMemberSectionLabels();
+    expect(labels).toContain('Member section: Player Characters');
+  });
 });

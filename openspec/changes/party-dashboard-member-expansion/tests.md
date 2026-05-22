@@ -33,11 +33,11 @@ For each task in `tasks.md`:
 
 ### Task 3 — `CharacterMiniSummary` component (`tests/unit/CharacterMiniSummary.test.tsx`)
 
-- [ ] **Full render — all fields present** — render with `name="Aragorn"`, `race="Human"`, `characterType="character"`, `classes=[{name:"Fighter",level:5}]`, `ac={18}`, `hp={45}`, `maxHp={58}`; assert name, "Human", "Fighter", "Lv 5", "18", "45/58" all visible. → Spec: `specs/character-mini-summary/spec.md` — "Renders full character identity and stats"
+- [ ] **Full render — all fields present** — render with `name="Aragorn"`, `race="Human"`, `characterType="character"`, `classes=[{class:"Fighter",level:5}]`, `ac={18}`, `hp={45}`, `maxHp={58}`; assert name, "Human", "Fighter", "Lv 5", "18", "45/58" all visible. → Spec: `specs/character-mini-summary/spec.md` — "Renders full character identity and stats"
 - [ ] **NPC badge shown for npc** — render with `characterType="npc"`; assert "NPC" label/badge visible. → Spec: "Renders NPC badge for characterType npc"
 - [ ] **Companion badge shown for companion** — render with `characterType="companion"`; assert "Companion" label/badge visible. → Spec: "Renders Companion badge for characterType companion"
 - [ ] **No badge for character type** — render with `characterType="character"`; assert neither "NPC" nor "Companion" badge present. → Spec: "Renders no badge for characterType character"
-- [ ] **Multiclass level summed** — render with `classes=[{name:"Fighter",level:3},{name:"Rogue",level:2}]`; assert "Lv 5" present. → Spec: "Multiclass level is summed across all classes"
+- [ ] **Multiclass level summed** — render with `classes=[{class:"Fighter",level:3},{class:"Rogue",level:2}]`; assert "Lv 5" present. → Spec: "Multiclass level is summed across all classes"
 - [ ] **Graceful render — undefined race** — render with `race={undefined}`; assert no throw; "—" or no race text visible. → Spec: "Graceful render when race is undefined"
 - [ ] **Graceful render — empty classes** — render with `classes={[]}`; assert no throw; no class/level line rendered. → Spec: "Graceful render when classes is empty"
 - [ ] **No fetch calls made** — verify `CharacterMiniSummary` makes no `fetch` or HTTP calls on mount. → Spec: "No network requests made by CharacterMiniSummary"
