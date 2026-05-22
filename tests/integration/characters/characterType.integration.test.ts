@@ -127,23 +127,27 @@ describe("Character characterType field — API integration", () => {
 
   // GET filter tests
 
-  it("GET /api/characters?characterType=npc returns only NPCs", async () => {
-    const email = `filter-test-${Date.now()}@example.com`;
+  async function setupFilterUser(emailPrefix: string) {
+    const email = `${emailPrefix}-${Date.now()}@example.com`;
     const filterCookie = await registerAndGetCookie(baseUrl, email, "TestPassword123!");
     const filterAuthed = { "Content-Type": "application/json", Cookie: filterCookie };
 
-    await fetch(`${baseUrl}/api/characters`, {
-      method: "POST", headers: filterAuthed,
-      body: JSON.stringify({ name: "PC", characterType: "character" }),
-    });
-    await fetch(`${baseUrl}/api/characters`, {
-      method: "POST", headers: filterAuthed,
-      body: JSON.stringify({ name: "NPC", characterType: "npc" }),
-    });
-    await fetch(`${baseUrl}/api/characters`, {
-      method: "POST", headers: filterAuthed,
-      body: JSON.stringify({ name: "Companion", characterType: "companion" }),
-    });
+    async function postChar(name: string, characterType: string) {
+      return fetch(`${baseUrl}/api/characters`, {
+        method: "POST",
+        headers: filterAuthed,
+        body: JSON.stringify({ name, characterType }),
+      });
+    }
+
+    return { filterAuthed, postChar };
+  }
+
+  it("GET /api/characters?characterType=npc returns only NPCs", async () => {
+    const { filterAuthed, postChar } = await setupFilterUser("filter-npc");
+    await postChar("PC", "character");
+    await postChar("NPC", "npc");
+    await postChar("Companion", "companion");
 
     const res = await fetch(`${baseUrl}/api/characters?characterType=npc`, { headers: filterAuthed });
     expect(res.status).toBe(200);
@@ -154,18 +158,9 @@ describe("Character characterType field — API integration", () => {
   });
 
   it("GET /api/characters?characterType=all returns all characters", async () => {
-    const email = `filter-all-${Date.now()}@example.com`;
-    const filterCookie = await registerAndGetCookie(baseUrl, email, "TestPassword123!");
-    const filterAuthed = { "Content-Type": "application/json", Cookie: filterCookie };
-
-    await fetch(`${baseUrl}/api/characters`, {
-      method: "POST", headers: filterAuthed,
-      body: JSON.stringify({ name: "PC", characterType: "character" }),
-    });
-    await fetch(`${baseUrl}/api/characters`, {
-      method: "POST", headers: filterAuthed,
-      body: JSON.stringify({ name: "NPC", characterType: "npc" }),
-    });
+    const { filterAuthed, postChar } = await setupFilterUser("filter-all");
+    await postChar("PC", "character");
+    await postChar("NPC", "npc");
 
     const res = await fetch(`${baseUrl}/api/characters?characterType=all`, { headers: filterAuthed });
     expect(res.status).toBe(200);
@@ -174,18 +169,9 @@ describe("Character characterType field — API integration", () => {
   });
 
   it("GET /api/characters (no filter) returns all characters", async () => {
-    const email = `filter-bare-${Date.now()}@example.com`;
-    const filterCookie = await registerAndGetCookie(baseUrl, email, "TestPassword123!");
-    const filterAuthed = { "Content-Type": "application/json", Cookie: filterCookie };
-
-    await fetch(`${baseUrl}/api/characters`, {
-      method: "POST", headers: filterAuthed,
-      body: JSON.stringify({ name: "PC", characterType: "character" }),
-    });
-    await fetch(`${baseUrl}/api/characters`, {
-      method: "POST", headers: filterAuthed,
-      body: JSON.stringify({ name: "Companion", characterType: "companion" }),
-    });
+    const { filterAuthed, postChar } = await setupFilterUser("filter-bare");
+    await postChar("PC", "character");
+    await postChar("Companion", "companion");
 
     const res = await fetch(`${baseUrl}/api/characters`, { headers: filterAuthed });
     expect(res.status).toBe(200);
@@ -194,14 +180,8 @@ describe("Character characterType field — API integration", () => {
   });
 
   it("GET /api/characters?characterType=npc returns empty array when no NPCs", async () => {
-    const email = `filter-empty-${Date.now()}@example.com`;
-    const filterCookie = await registerAndGetCookie(baseUrl, email, "TestPassword123!");
-    const filterAuthed = { "Content-Type": "application/json", Cookie: filterCookie };
-
-    await fetch(`${baseUrl}/api/characters`, {
-      method: "POST", headers: filterAuthed,
-      body: JSON.stringify({ name: "Only PC", characterType: "character" }),
-    });
+    const { filterAuthed, postChar } = await setupFilterUser("filter-empty");
+    await postChar("Only PC", "character");
 
     const res = await fetch(`${baseUrl}/api/characters?characterType=npc`, { headers: filterAuthed });
     expect(res.status).toBe(200);

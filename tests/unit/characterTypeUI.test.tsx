@@ -80,6 +80,14 @@ async function render() {
   });
 }
 
+function getSections() {
+  return container.querySelectorAll('[aria-label^="Section:"]');
+}
+
+function getSectionLabels() {
+  return Array.from(getSections()).map(s => s.getAttribute('aria-label'));
+}
+
 async function renderAndOpenEditor() {
   await render();
   const buttons = Array.from(container.querySelectorAll('button'));
@@ -94,9 +102,8 @@ describe('CharactersContent — character type grouping', () => {
     mockFetchWithCharacters([PC, NPC, COMPANION]);
     await render();
 
-    const sections = container.querySelectorAll('[aria-label^="Section:"]');
-    expect(sections).toHaveLength(3);
-    const labels = Array.from(sections).map(s => s.getAttribute('aria-label'));
+    expect(getSections()).toHaveLength(3);
+    const labels = getSectionLabels();
     expect(labels).toContain('Section: Player Characters');
     expect(labels).toContain('Section: Travelling NPCs');
     expect(labels).toContain('Section: Companions');
@@ -106,9 +113,8 @@ describe('CharactersContent — character type grouping', () => {
     mockFetchWithCharacters([PC, COMPANION]);
     await render();
 
-    const sections = container.querySelectorAll('[aria-label^="Section:"]');
-    expect(sections).toHaveLength(2);
-    const labels = Array.from(sections).map(s => s.getAttribute('aria-label'));
+    expect(getSections()).toHaveLength(2);
+    const labels = getSectionLabels();
     expect(labels).not.toContain('Section: Travelling NPCs');
     expect(labels).toContain('Section: Player Characters');
     expect(labels).toContain('Section: Companions');
@@ -123,9 +129,8 @@ describe('CharactersContent — character type grouping', () => {
 
     await act(async () => { npcFilterBtn!.click(); });
 
-    const sections = container.querySelectorAll('[aria-label^="Section:"]');
-    expect(sections).toHaveLength(1);
-    expect(sections[0].getAttribute('aria-label')).toBe('Section: Travelling NPCs');
+    expect(getSections()).toHaveLength(1);
+    expect(getSections()[0].getAttribute('aria-label')).toBe('Section: Travelling NPCs');
   });
 });
 

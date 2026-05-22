@@ -211,42 +211,36 @@ describe("GET /api/characters — characterType filter", () => {
 
   const CHAR_WITHOUT_TYPE = { id: "c4", name: "Legacy", userId: "user-123" };
 
-  beforeEach(() => jest.clearAllMocks());
+  function makeGetRequest(path: string) {
+    const { NextRequest } = require("next/server");
+    return new NextRequest(`http://localhost${path}`, {
+      method: "GET",
+      headers: { cookie: "auth-token=t" },
+    });
+  }
 
-  it("returns all characters when no filter provided", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARS as any);
+  });
 
-    const response = await GET(new (require("next/server").NextRequest)(
-      "http://localhost/api/characters",
-      { method: "GET", headers: { cookie: "auth-token=t" } }
-    ));
+  it("returns all characters when no filter provided", async () => {
+    const response = await GET(makeGetRequest("/api/characters"));
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toHaveLength(3);
   });
 
   it("returns all characters when characterType=all", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARS as any);
-
-    const response = await GET(new (require("next/server").NextRequest)(
-      "http://localhost/api/characters?characterType=all",
-      { method: "GET", headers: { cookie: "auth-token=t" } }
-    ));
+    const response = await GET(makeGetRequest("/api/characters?characterType=all"));
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toHaveLength(3);
   });
 
   it("returns only NPCs when characterType=npc", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARS as any);
-
-    const response = await GET(new (require("next/server").NextRequest)(
-      "http://localhost/api/characters?characterType=npc",
-      { method: "GET", headers: { cookie: "auth-token=t" } }
-    ));
+    const response = await GET(makeGetRequest("/api/characters?characterType=npc"));
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toHaveLength(1);
@@ -254,39 +248,23 @@ describe("GET /api/characters — characterType filter", () => {
   });
 
   it("returns 400 for invalid characterType query param", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARS as any);
-
-    const response = await GET(new (require("next/server").NextRequest)(
-      "http://localhost/api/characters?characterType=villain",
-      { method: "GET", headers: { cookie: "auth-token=t" } }
-    ));
+    const response = await GET(makeGetRequest("/api/characters?characterType=villain"));
     expect(response.status).toBe(400);
     const body = await response.json();
     expect(body.error).toMatch(/characterType/i);
   });
 
   it("coerces missing characterType to 'character' for legacy documents", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadCharacters.mockResolvedValue([CHAR_WITHOUT_TYPE] as any);
-
-    const response = await GET(new (require("next/server").NextRequest)(
-      "http://localhost/api/characters",
-      { method: "GET", headers: { cookie: "auth-token=t" } }
-    ));
+    const response = await GET(makeGetRequest("/api/characters"));
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body[0].characterType).toBe("character");
   });
 
   it("legacy document without characterType is included in 'character' filter", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadCharacters.mockResolvedValue([CHAR_WITHOUT_TYPE] as any);
-
-    const response = await GET(new (require("next/server").NextRequest)(
-      "http://localhost/api/characters?characterType=character",
-      { method: "GET", headers: { cookie: "auth-token=t" } }
-    ));
+    const response = await GET(makeGetRequest("/api/characters?characterType=character"));
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toHaveLength(1);

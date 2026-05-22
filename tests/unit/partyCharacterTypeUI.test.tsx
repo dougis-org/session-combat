@@ -91,14 +91,21 @@ async function openExistingPartyEditor() {
   if (editBtn) await act(async () => { editBtn.click(); });
 }
 
+function getPartySections() {
+  return container.querySelectorAll('[aria-label^="Party section:"]');
+}
+
+function getPartySectionLabels() {
+  return Array.from(getPartySections()).map(s => s.getAttribute('aria-label'));
+}
+
 describe('PartyEditor — character type sections', () => {
   test('renders three sections when party has all three character types', async () => {
     await renderWithData([PC, NPC, COMPANION], [PARTY]);
     await openExistingPartyEditor();
 
-    const sections = container.querySelectorAll('[aria-label^="Party section:"]');
-    expect(sections).toHaveLength(3);
-    const labels = Array.from(sections).map(s => s.getAttribute('aria-label'));
+    expect(getPartySections()).toHaveLength(3);
+    const labels = getPartySectionLabels();
     expect(labels).toContain('Party section: Player Characters');
     expect(labels).toContain('Party section: Travelling NPCs');
     expect(labels).toContain('Party section: Companions');
@@ -109,17 +116,15 @@ describe('PartyEditor — character type sections', () => {
     await renderWithData([PC, PC2]);
     await openNewPartyEditor();
 
-    const sections = container.querySelectorAll('[aria-label^="Party section:"]');
-    expect(sections).toHaveLength(1);
-    expect(sections[0].getAttribute('aria-label')).toBe('Party section: Player Characters');
+    expect(getPartySections()).toHaveLength(1);
+    expect(getPartySections()[0].getAttribute('aria-label')).toBe('Party section: Player Characters');
   });
 
   test('does not render NPC or Companion sections when only PCs present', async () => {
     await renderWithData([PC]);
     await openNewPartyEditor();
 
-    const labels = Array.from(container.querySelectorAll('[aria-label^="Party section:"]'))
-      .map(s => s.getAttribute('aria-label'));
+    const labels = getPartySectionLabels();
     expect(labels).not.toContain('Party section: Travelling NPCs');
     expect(labels).not.toContain('Party section: Companions');
   });

@@ -50,13 +50,14 @@ const PARAMS = Promise.resolve({ id: "char-1" });
 const makeRequest = (body: unknown) =>
   makeRouteRequest("http://localhost/api/characters/char-1", "PUT", body);
 
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+  mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
+  mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+});
+
 describe("PUT /api/characters/[id] — gender validation", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-  });
 
   it("returns 400 when gender exceeds 50 characters", async () => {
     const response = await PUT(makeRequest({ gender: "x".repeat(51) }), { params: PARAMS });
@@ -93,10 +94,6 @@ describe("PUT /api/characters/[id] — gender validation", () => {
 });
 
 describe("GET /api/characters/[id] — backward compat coercion", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-  });
 
   it("coerces missing characterType to 'character' for legacy document", async () => {
     // EXISTING_CHARACTER has no characterType — simulates a legacy BSON document
@@ -112,12 +109,6 @@ describe("GET /api/characters/[id] — backward compat coercion", () => {
 });
 
 describe("PUT /api/characters/[id] — characterType", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-  });
 
   it("updates characterType from 'character' to 'npc'", async () => {
     const response = await PUT(makeRequest({ characterType: "npc" }), { params: PARAMS });
@@ -152,12 +143,6 @@ describe("PUT /api/characters/[id] — characterType", () => {
 });
 
 describe("PUT /api/characters/[id] — alignment validation", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
-  });
 
   itValidatesAlignmentFieldWithParams(
     PUT,
