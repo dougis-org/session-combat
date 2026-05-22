@@ -221,6 +221,80 @@ describe("dndBeyond-armor-class", () => {
     });
   });
 
+  describe("armor type rules with sample character modifiers", () => {
+    // Sample character: dex 17 (+3 mod), item modifiers include +1+1 armor-class bonus (+2 total)
+    const sampleAbilityScores = {
+      strength: 10,
+      dexterity: 17,
+      constitution: 14,
+      intelligence: 16,
+      wisdom: 10,
+      charisma: 21,
+    };
+    const itemArmorBonuses = [
+      { type: "bonus" as const, subType: "armor-class", value: 1, fixedValue: null, friendlySubtypeName: null },
+      { type: "bonus" as const, subType: "armor-class", value: 1, fixedValue: null, friendlySubtypeName: null },
+    ];
+
+    it("Given: medium armor (AC 14, armorTypeId 2), sample character; When: AC calculated; Then: returns 18", () => {
+      const inventory = [{ equipped: true, definition: { armorClass: 14, armorTypeId: 2 } }];
+      expect(normalizeArmorClass(inventory, sampleAbilityScores, itemArmorBonuses)).toBe(18);
+      // 14 + min(3, 2) + 2 = 18
+    });
+
+    it("Given: heavy armor (AC 16, armorTypeId 3), sample character; When: AC calculated; Then: returns 18", () => {
+      const inventory = [{ equipped: true, definition: { armorClass: 16, armorTypeId: 3 } }];
+      expect(normalizeArmorClass(inventory, sampleAbilityScores, itemArmorBonuses)).toBe(18);
+      // 16 + min(3, 0) + 2 = 18
+    });
+
+    it("Given: no armor, sample character; When: AC calculated; Then: returns 15", () => {
+      expect(normalizeArmorClass([], sampleAbilityScores, itemArmorBonuses)).toBe(15);
+      // 10 + 3 + 0 (no unarmored bonus) + 2 = 15
+    });
+  });
+
+  describe("unarmored AC modifiers with base dex 16 (+3 mod)", () => {
+    const dex16Scores = {
+      strength: 10,
+      dexterity: 16,
+      constitution: 10,
+      intelligence: 10,
+      wisdom: 10,
+      charisma: 10,
+    };
+
+    it("Given: set unarmored-armor-class modifier value 3; When: AC calculated; Then: returns 16", () => {
+      const modifiers = [{ type: "set" as const, subType: "unarmored-armor-class", value: 3, fixedValue: null, friendlySubtypeName: null }];
+      expect(normalizeArmorClass([], dex16Scores, modifiers)).toBe(16);
+      // 10 + 3 + 3 = 16
+    });
+
+    it("Given: bonus unarmored-armor-class modifier value 2; When: AC calculated; Then: returns 15", () => {
+      const modifiers = [{ type: "bonus" as const, subType: "unarmored-armor-class", value: 2, fixedValue: null, friendlySubtypeName: null }];
+      expect(normalizeArmorClass([], dex16Scores, modifiers)).toBe(15);
+      // 10 + 3 + 2 = 15
+    });
+
+    it("Given: set value 3 and bonus value 2; When: AC calculated; Then: returns 18", () => {
+      const modifiers = [
+        { type: "set" as const, subType: "unarmored-armor-class", value: 3, fixedValue: null, friendlySubtypeName: null },
+        { type: "bonus" as const, subType: "unarmored-armor-class", value: 2, fixedValue: null, friendlySubtypeName: null },
+      ];
+      expect(normalizeArmorClass([], dex16Scores, modifiers)).toBe(18);
+      // 10 + 3 + 2 + 3 = 18
+    });
+
+    it("Given: two set modifiers (values 1 and 3); When: AC calculated; Then: uses max set regardless of order", () => {
+      const makeModifiers = (values: number[]) =>
+        values.map((value) => ({ type: "set" as const, subType: "unarmored-armor-class", value, fixedValue: null, friendlySubtypeName: null }));
+
+      expect(normalizeArmorClass([], dex16Scores, makeModifiers([1, 3]))).toBe(16);
+      expect(normalizeArmorClass([], dex16Scores, makeModifiers([3, 1]))).toBe(16);
+      // 10 + 3 (max set) + 3 (dex) = 16
+    });
+  });
+
   describe("DNDEBEYOND_ARMOR_TYPE_MAX_DEX_MODIFIER", () => {
     it("Given: medium armor type ID (2); When: constant accessed; Then: returns 2", () => {
       expect(DNDEBEYOND_ARMOR_TYPE_MAX_DEX_MODIFIER[2]).toBe(2);

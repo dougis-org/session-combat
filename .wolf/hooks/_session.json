@@ -1,10 +1,36 @@
 {
-  "session_id": "session-2026-05-22-1055",
-  "started": "2026-05-22T17:55:18.469Z",
-  "files_read": {},
+  "session_id": "session-2026-05-22-1519",
+  "started": "2026-05-22T22:19:10.263Z",
+  "files_read": {
+    "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-unit-tests/proposal.md": {
+      "count": 1,
+      "tokens": 1530,
+      "first_read": "2026-05-22T22:19:41.926Z"
+    },
+    "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-unit-tests/design.md": {
+      "count": 1,
+      "tokens": 2587,
+      "first_read": "2026-05-22T22:19:42.443Z"
+    },
+    "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-unit-tests/specs/test-migration.md": {
+      "count": 1,
+      "tokens": 1746,
+      "first_read": "2026-05-22T22:19:43.013Z"
+    },
+    "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-unit-tests/tasks.md": {
+      "count": 1,
+      "tokens": 2002,
+      "first_read": "2026-05-22T22:19:43.455Z"
+    },
+    "/home/doug/dev2/session-combat/openspec/changes/extract-dndbeyond-unit-tests/tests.md": {
+      "count": 1,
+      "tokens": 1842,
+      "first_read": "2026-05-22T22:19:43.895Z"
+    }
+  },
   "files_written": [],
   "edit_counts": {},
-  "anatomy_hits": 0,
+  "anatomy_hits": 5,
   "anatomy_misses": 0,
   "repeated_reads_warned": 0,
   "cerebrum_warnings": 0,

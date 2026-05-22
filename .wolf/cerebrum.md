@@ -30,6 +30,11 @@
 - Also applies to shields (armorTypeId 4): exclude from base armor selection, handle via modifiers instead
 - These are D&D 5e rules bugs, not code bugs—fix them explicitly with tests covering edge cases
 
+**[2026-05-22] Never use --admin to bypass branch protection on PR merges**
+- Using `gh pr merge --admin` silently bypasses required checks (CI, coverage, security scans)
+- If `mergeable_state: blocked`, investigate the blocking check and fix it — don't bypass it
+- This allowed a PR with Codacy security findings and insufficient diff coverage to land on main
+
 ## Decision Log
 
 <!-- Significant technical decisions with rationale. Why X was chosen over Y. -->
