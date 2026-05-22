@@ -16,7 +16,7 @@ export const GET = withAuth(async (_request, auth) => {
 export const POST = withAuth(async (request, auth) => {
   try {
     const body = await request.json();
-    const { name, moduleName, currentChapter, currentChapterOrder, active } = body;
+    const { name, moduleName, active } = body;
 
     if (typeof name !== 'string' || name.trim() === '') {
       return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
@@ -27,8 +27,7 @@ export const POST = withAuth(async (request, auth) => {
       userId: auth.userId,
       name: name.trim(),
       moduleName: typeof moduleName === 'string' ? moduleName.trim() : '',
-      currentChapter: typeof currentChapter === 'string' ? currentChapter.trim() : '',
-      currentChapterOrder: Number.isFinite(currentChapterOrder) ? currentChapterOrder : 0,
+      chapters: [],
       active: typeof active === 'boolean' ? active : false,
       createdAt: new Date(),
       updatedAt: new Date(),

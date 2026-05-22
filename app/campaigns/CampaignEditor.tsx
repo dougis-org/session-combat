@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TextInputField, FormField, EditorShell, textInputClass } from '@/lib/components/ui';
+import { TextInputField, EditorShell } from '@/lib/components/ui';
 import { Campaign } from '@/lib/types';
 
 export function CampaignEditor({
@@ -17,8 +17,6 @@ export function CampaignEditor({
 }) {
   const [name, setName] = useState(campaign.name);
   const [moduleName, setModuleName] = useState(campaign.moduleName);
-  const [currentChapter, setCurrentChapter] = useState(campaign.currentChapter);
-  const [currentChapterOrder, setCurrentChapterOrder] = useState(campaign.currentChapterOrder);
   const [active, setActive] = useState(campaign.active);
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -31,7 +29,7 @@ export function CampaignEditor({
     }
     setSaving(true);
     try {
-      await onSave({ ...campaign, name: name.trim(), moduleName: moduleName.trim(), currentChapter: currentChapter.trim(), currentChapterOrder, active });
+      await onSave({ ...campaign, name: name.trim(), moduleName: moduleName.trim(), active });
     } finally {
       setSaving(false);
     }
@@ -53,16 +51,21 @@ export function CampaignEditor({
 
         <TextInputField label="Module / Adventure" value={moduleName} onChange={setModuleName}
           disabled={saving} placeholder="e.g., Curse of Strahd" />
-
-        <TextInputField label="Current Chapter" value={currentChapter} onChange={setCurrentChapter}
-          disabled={saving} placeholder="e.g., Chapter 4: The Sunken Temple" />
-
-        <FormField label="Chapter Order">
-          <input type="number" value={currentChapterOrder}
-            onChange={(e) => { const v = parseInt(e.target.value, 10); setCurrentChapterOrder(isNaN(v) ? 0 : v); }}
-            className={textInputClass()} disabled={saving} min={0} />
-        </FormField>
       </div>
+
+      {campaign.chapters && campaign.chapters.length > 0 && (
+        <div className="mb-4">
+          <p className="text-sm font-semibold mb-2">Chapters</p>
+          <ul className="space-y-1">
+            {campaign.chapters.map((ch) => (
+              <li key={ch.id} className={`text-sm px-2 py-1 rounded ${ch.id === campaign.currentChapterId ? 'bg-blue-700 text-white' : 'text-gray-300'}`}>
+                {ch.order + 1}. {ch.title}
+                {ch.id === campaign.currentChapterId && <span className="ml-2 text-xs opacity-75">(current)</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="mb-4">
         <label className="flex items-center gap-2 cursor-pointer">

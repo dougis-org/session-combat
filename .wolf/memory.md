@@ -547,3 +547,59 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-05-22 07:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-05-22 07:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 07:56 | Edited lib/types.ts | expanded (+23 lines) | ~186 |
+| 07:57 | Edited app/api/campaigns/route.ts | modified trim() | ~154 |
+| 07:57 | Edited app/api/campaigns/[id]/route.ts | modified if() | ~180 |
+| 07:57 | Edited app/campaigns/CampaignEditor.tsx | 58→61 lines | ~650 |
+| 07:57 | Edited app/campaigns/CampaignEditor.tsx | inline fix | ~19 |
+| 07:57 | Edited app/campaigns/page.tsx | 7→7 lines | ~86 |
+| 07:57 | Edited app/campaigns/page.tsx | modified CampaignsContent() | ~215 |
+| 07:58 | Edited app/campaigns/page.tsx | added error handling | ~397 |
+| 07:58 | Edited app/campaigns/page.tsx | 6→6 lines | ~108 |
+| 07:58 | Edited app/campaigns/page.tsx | CSS: md, hover, disabled | ~558 |
+| 07:58 | Edited lib/storage.ts | 10→11 lines | ~46 |
+| 07:58 | Edited lib/storage.ts | added error handling | ~418 |
+| 07:58 | Created app/api/campaigns/global/route.ts | — | ~587 |
+| 08:08 | Created app/api/campaigns/global/[id]/route.ts | — | ~270 |
+| 08:08 | Created app/api/campaigns/global/[id]/copy/route.ts | — | ~435 |
+| 08:08 | Edited tests/unit/components/CampaignEditor.test.tsx | CSS: chapters | ~65 |
+| 08:08 | Edited tests/unit/components/CampaignEditor.test.tsx | added optional chaining | ~594 |
+| 08:09 | Edited tests/unit/storage/campaigns.test.ts | 11→10 lines | ~68 |
+| 08:09 | Edited tests/unit/api/campaigns/route.test.ts | 11→10 lines | ~66 |
+| 08:09 | Edited tests/unit/api/campaigns/route.test.ts | reduced (-13 lines) | ~295 |
+| 08:09 | Edited tests/unit/api/campaigns/route.test.ts | 17→13 lines | ~109 |
+| 08:09 | Edited tests/unit/api/campaigns/route.test.ts | — | ~0 |
+| 08:09 | Edited tests/integration/campaigns.integration.test.ts | 11→10 lines | ~53 |
+| 08:09 | Edited tests/integration/campaigns.integration.test.ts | 29→25 lines | ~255 |
+| 08:10 | Created tests/integration/campaign-global-api.integration.test.ts | — | ~2747 |
+| 08:11 | Edited app/campaigns/page.tsx | inline fix | ~11 |
+| 08:11 | Created tests/unit/components/CampaignsPage.test.tsx | — | ~2220 |
+| 08:12 | Edited openspec/changes/campaign-library/tasks.md | modified loadGlobalCampaignTemplates() | ~399 |
+| 08:13 | Edited openspec/changes/campaign-library/tasks.md | modified display() | ~898 |
+| 08:15 | Session end: 29 writes across 12 files (types.ts, route.ts, CampaignEditor.tsx, page.tsx, storage.ts) | 21 reads | ~44118 tok |
+| 08:18 | Session end: 29 writes across 12 files (types.ts, route.ts, CampaignEditor.tsx, page.tsx, storage.ts) | 21 reads | ~44118 tok |
+| 08:22 | Edited lib/storage.ts | modified loadGlobalCampaignTemplates() | ~587 |
+| 08:22 | Edited lib/storage.ts | modified normalizeStoredEntityId() | ~137 |
+| 08:22 | Edited lib/storage.ts | modified loadCampaigns() | ~261 |
+| 08:23 | Edited app/api/campaigns/global/[id]/route.ts | modified if() | ~74 |
+| 08:23 | Edited app/api/campaigns/global/[id]/copy/route.ts | modified if() | ~29 |
+| 08:23 | Edited app/api/campaigns/global/route.ts | modified filter() | ~331 |
+| 08:23 | Edited app/campaigns/page.tsx | 2→2 lines | ~42 |
+| 08:23 | Edited app/campaigns/page.tsx | modified if() | ~204 |
+| 08:23 | Edited app/campaigns/page.tsx | 7→7 lines | ~114 |
+| 08:23 | Edited app/campaigns/page.tsx | 3→3 lines | ~70 |
+| 08:23 | Edited app/campaigns/CampaignEditor.tsx | inline fix | ~18 |
+| 08:23 | Edited tests/unit/storage/campaigns.test.ts | 4→4 lines | ~62 |
+| 08:24 | Edited tests/unit/storage/campaigns.test.ts | added optional chaining | ~1456 |
+| 08:24 | Edited tests/unit/components/CampaignsPage.test.tsx | CSS: value | ~351 |
+| 08:24 | Edited app/api/campaigns/global/route.ts | modified filter() | ~236 |

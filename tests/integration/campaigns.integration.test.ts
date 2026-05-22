@@ -6,8 +6,7 @@ interface CampaignResponse {
   userId: string;
   name: string;
   moduleName: string;
-  currentChapter: string;
-  currentChapterOrder: number;
+  chapters: unknown[];
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -112,8 +111,6 @@ describe("Campaign API Integration Tests", () => {
       body: JSON.stringify({
         name: "Curse of Strahd",
         moduleName: "Curse of Strahd",
-        currentChapter: "Chapter 1: Into Barovia",
-        currentChapterOrder: 1,
         active: true,
       }),
     });
@@ -122,16 +119,14 @@ describe("Campaign API Integration Tests", () => {
     expect(data.id).toBeTruthy();
     expect(data.name).toBe("Curse of Strahd");
     expect(data.moduleName).toBe("Curse of Strahd");
-    expect(data.currentChapter).toBe("Chapter 1: Into Barovia");
-    expect(data.currentChapterOrder).toBe(1);
+    expect(data.chapters).toEqual([]);
     expect(data.active).toBe(true);
   });
 
   it("returns 201 with correct defaults when only name is provided", async () => {
     const data = await createCampaign("Minimal Campaign");
     expect(data.moduleName).toBe("");
-    expect(data.currentChapter).toBe("");
-    expect(data.currentChapterOrder).toBe(0);
+    expect(data.chapters).toEqual([]);
     expect(data.active).toBe(false);
   });
 

@@ -31,8 +31,7 @@ const MOCK_CAMPAIGN = {
   userId: "user-123",
   name: "Lost Mine of Phandelver",
   moduleName: "LMoP",
-  currentChapter: "Goblin Arrows",
-  currentChapterOrder: 1,
+  chapters: [],
   active: true,
   createdAt: new Date("2026-01-01"),
   updatedAt: new Date("2026-01-01"),
@@ -116,37 +115,24 @@ describe("POST /api/campaigns", () => {
     expect(body.name).toBe("Dragon Heist");
     expect(body.userId).toBe("user-123");
     expect(body.moduleName).toBe("");
-    expect(body.currentChapterOrder).toBe(0);
+    expect(body.chapters).toEqual([]);
     expect(body.active).toBe(false);
     expect(body.id).toMatch(/^[0-9a-f-]{36}$/i);
   });
 
-  it("creates campaign with all optional fields", async () => {
+  it("creates campaign with optional moduleName and active", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(
       makePostRequest({
         name: "Dragon Heist",
         moduleName: " DH ",
-        currentChapter: " Chapter 1 ",
-        currentChapterOrder: 1,
         active: true,
       })
     );
     expect(response.status).toBe(201);
     const body = await response.json();
     expect(body.moduleName).toBe("DH");
-    expect(body.currentChapter).toBe("Chapter 1");
-    expect(body.currentChapterOrder).toBe(1);
     expect(body.active).toBe(true);
-  });
-
-  it("defaults non-finite chapterOrder to 0", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    const response = await POST(
-      makePostRequest({ name: "Test", currentChapterOrder: NaN })
-    );
-    expect(response.status).toBe(201);
-    expect((await response.json()).currentChapterOrder).toBe(0);
   });
 
   it("ignores non-string moduleName", async () => {
@@ -220,12 +206,10 @@ describe("PATCH /api/campaigns/[id]", () => {
     expect((await response.json()).name).toBe("New Name");
   });
 
-  it("updates all optional fields", async () => {
+  it("updates moduleName and active fields", async () => {
     const response = await PATCH(
       makeIdRequest("PATCH", {
         moduleName: " DH2 ",
-        currentChapter: " Chapter 2 ",
-        currentChapterOrder: 2,
         active: false,
       }),
       { params: PARAMS }
@@ -233,8 +217,6 @@ describe("PATCH /api/campaigns/[id]", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.moduleName).toBe("DH2");
-    expect(body.currentChapter).toBe("Chapter 2");
-    expect(body.currentChapterOrder).toBe(2);
     expect(body.active).toBe(false);
   });
 
@@ -256,14 +238,6 @@ describe("PATCH /api/campaigns/[id]", () => {
     expect(body.moduleName).toBe(MOCK_CAMPAIGN.moduleName);
   });
 
-  it("ignores non-finite chapterOrder", async () => {
-    const response = await PATCH(
-      makeIdRequest("PATCH", { currentChapterOrder: Infinity }),
-      { params: PARAMS }
-    );
-    expect(response.status).toBe(200);
-    expect((await response.json()).currentChapterOrder).toBe(MOCK_CAMPAIGN.currentChapterOrder);
-  });
 
   itReturns404WithParams(
     PATCH,

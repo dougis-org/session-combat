@@ -7,6 +7,7 @@ import {
   CombatState,
   Party,
   Campaign,
+  CampaignTemplate,
   MonsterTemplate,
   SpellTemplate,
 } from "./types";
@@ -34,6 +35,13 @@ function normalizeStoredEntityId<T extends { id?: string; _id?: string }>(
     ...entity,
     // Preserve the app-level UUID for reads; fall back to `_id` only when deriving the returned `id` value.
     id: entity.id || entity._id?.toString(),
+  };
+}
+
+function normalizeCampaign(campaign: Campaign): Campaign {
+  return {
+    ...campaign,
+    chapters: Array.isArray(campaign.chapters) ? campaign.chapters : [],
   };
 }
 
@@ -164,6 +172,67 @@ export const storage = {
     }
   },
 
+  // Load global campaign templates (admin-controlled)
+  async loadGlobalCampaignTemplates(): Promise<CampaignTemplate[]> {
+    try {
+      const db = await getDatabase();
+      const templates = await db
+        .collection<CampaignTemplate>("campaignTemplates")
+        .find({ userId: GLOBAL_USER_ID })
+        .toArray();
+      return templates.map(normalizeStoredEntityId);
+    } catch (error) {
+      console.error("Error loading global campaign templates:", error);
+      return [];
+    }
+  },
+
+  // Load a single global campaign template by id
+  async loadGlobalCampaignTemplateById(id: string): Promise<CampaignTemplate | null> {
+    try {
+      const db = await getDatabase();
+      const template = await db
+        .collection<CampaignTemplate>("campaignTemplates")
+        .findOne({ id, userId: GLOBAL_USER_ID });
+      return template ? normalizeStoredEntityId(template) : null;
+    } catch (error) {
+      console.error("Error loading global campaign template by id:", error);
+      return null;
+    }
+  },
+
+  // Save campaign template (upsert)
+  async saveCampaignTemplate(template: CampaignTemplate): Promise<void> {
+    try {
+      const db = await getDatabase();
+      const { _id, ...templateData } = template;
+      await db
+        .collection<CampaignTemplate>("campaignTemplates")
+        .updateOne(
+          { id: template.id, userId: template.userId },
+          { $set: templateData },
+          { upsert: true }
+        );
+    } catch (error) {
+      console.error("Error saving campaign template:", error);
+      throw error;
+    }
+  },
+
+  // Delete campaign template — returns true if deleted, false if not found
+  async deleteCampaignTemplate(id: string): Promise<boolean> {
+    try {
+      const db = await getDatabase();
+      const result = await db
+        .collection<CampaignTemplate>("campaignTemplates")
+        .deleteOne({ id, userId: GLOBAL_USER_ID });
+      return result.deletedCount > 0;
+    } catch (error) {
+      console.error("Error deleting campaign template:", error);
+      throw error;
+    }
+  },
+
   // Load campaigns for a user
   async loadCampaigns(userId: string): Promise<Campaign[]> {
     try {
@@ -172,7 +241,7 @@ export const storage = {
         .collection<Campaign>("campaigns")
         .find({ userId })
         .toArray();
-      return campaigns.map(normalizeStoredEntityId);
+      return campaigns.map(normalizeStoredEntityId).map(normalizeCampaign);
     } catch (error) {
       console.error("Error loading campaigns:", error);
       return [];
@@ -186,7 +255,7 @@ export const storage = {
       const campaign = await db
         .collection<Campaign>("campaigns")
         .findOne({ id, userId });
-      return campaign ? normalizeStoredEntityId(campaign) : null;
+      return campaign ? normalizeCampaign(normalizeStoredEntityId(campaign)) : null;
     } catch (error) {
       console.error("Error loading campaign by ID:", error);
       return null;

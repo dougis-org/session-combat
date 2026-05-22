@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T14:43:42.149Z
-> Files: 633 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T15:24:39.570Z
+> Files: 652 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -759,11 +759,23 @@
 
 ## app/api/campaigns/
 
-- `route.ts` — Next.js API route (~466 tok)
+- `route.ts` — Next.js API route (~410 tok)
 
 ## app/api/campaigns/[id]/
 
-- `route.ts` — Next.js API route (~769 tok)
+- `route.ts` — Next.js API route (~718 tok)
+
+## app/api/campaigns/global/
+
+- `route.ts` — Next.js API route: GET, POST, PUT (~816 tok)
+
+## app/api/campaigns/global/[id]/
+
+- `route.ts` — Next.js API route: DELETE (~238 tok)
+
+## app/api/campaigns/global/[id]/copy/
+
+- `route.ts` — Next.js API route: POST (~420 tok)
 
 ## app/api/characters/
 
@@ -783,8 +795,8 @@
 
 ## app/campaigns/
 
-- `CampaignEditor.tsx` — CampaignEditor — renders form (~791 tok)
-- `page.tsx` — CampaignsContent (~1673 tok)
+- `CampaignEditor.tsx` — CampaignEditor (~756 tok)
+- `page.tsx` — CampaignsContent (~2675 tok)
 
 ## app/characters/
 
@@ -807,8 +819,8 @@
 - `clientStorage.ts` — Client-side storage using localStorage (~616 tok)
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ImportedCharac (~2046 tok)
 - `middleware.ts` — Extract auth token from request (~695 tok)
-- `storage.ts` — Server-side storage functions for MongoDB (~5520 tok)
-- `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4508 tok)
+- `storage.ts` — Server-side storage functions for MongoDB (~5973 tok)
+- `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4628 tok)
 
 ## lib/components/
 
@@ -841,7 +853,7 @@
 
 - `design.md` — Context (~2337 tok)
 - `proposal.md` — GitHub Issues (~1456 tok)
-- `tasks.md` — Tasks (~1805 tok)
+- `tasks.md` — Tasks (~1806 tok)
 - `tests.md` — Tests (~2670 tok)
 
 ## openspec/changes/campaign-library/specs/campaign-catalog-ui/
@@ -980,7 +992,8 @@
 
 ## tests/integration/
 
-- `campaigns.integration.test.ts` — CampaignResponse: authed, createCampaign (~3115 tok)
+- `campaign-global-api.integration.test.ts` — TemplateResponse: authedUser, authedAdmin (~2747 tok)
+- `campaigns.integration.test.ts` — CampaignResponse: authed, createCampaign (~3047 tok)
 
 ## tests/integration/characters/
 
@@ -997,7 +1010,7 @@
 
 ## tests/unit/api/campaigns/
 
-- `route.test.ts` — Declares requireAuth (~3094 tok)
+- `route.test.ts` — Declares mockedRequireAuth (~2600 tok)
 
 ## tests/unit/api/characters/
 
@@ -1010,7 +1023,8 @@
 
 ## tests/unit/components/
 
-- `CampaignEditor.test.tsx` — BASE_CAMPAIGN (~1526 tok)
+- `CampaignEditor.test.tsx` — BASE_CAMPAIGN (~1984 tok)
+- `CampaignsPage.test.tsx` — jsonResponse (~2226 tok)
 - `NavBar.test.tsx` — mockedUseAuth (~922 tok)
 - `ui.test.tsx` — render — renders form (~2132 tok)
 
@@ -1029,4 +1043,4 @@
 
 ## tests/unit/storage/
 
-- `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~1512 tok)
+- `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~2885 tok)
