@@ -5,9 +5,14 @@ import {
 } from "@/lib/import/dndBeyond-ability-scores";
 import { sampleDndBeyondCharacterResponse } from "@/tests/fixtures/dndBeyondCharacter";
 
-const sampleStats = sampleDndBeyondCharacterResponse.data.stats!;
-const sampleBonusStats = sampleDndBeyondCharacterResponse.data.bonusStats!;
-const sampleOverrideStats = sampleDndBeyondCharacterResponse.data.overrideStats!;
+function requireDefined<T>(value: T | undefined | null, label: string): T {
+  if (value == null) throw new Error(`${label} must be defined in fixture`);
+  return value;
+}
+
+const sampleStats = requireDefined(sampleDndBeyondCharacterResponse.data.stats, "stats");
+const sampleBonusStats = requireDefined(sampleDndBeyondCharacterResponse.data.bonusStats, "bonusStats");
+const sampleOverrideStats = requireDefined(sampleDndBeyondCharacterResponse.data.overrideStats, "overrideStats");
 
 const baseAbilityScores = {
   strength: 10,
