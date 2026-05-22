@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Character, isValidRace, VALID_RACES, isValidClass, VALID_CLASSES, CharacterClass, calculateTotalLevel, validateCharacterClasses, normalizeAlignment, isValidCharacterType, CharacterType } from '@/lib/types';
+import {
+  Character,
+  isValidRace,
+  VALID_RACES,
+  isValidClass,
+  VALID_CLASSES,
+  CharacterClass,
+  calculateTotalLevel,
+  validateCharacterClasses,
+  normalizeAlignment,
+  isValidCharacterType,
+  getCharacterType,
+  CharacterType,
+} from '@/lib/types';
 
 export async function GET(request: NextRequest) {
   const auth = requireAuth(request);
@@ -11,20 +24,26 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { searchParams } = new URL(request.url);
-    const characterTypeParam = searchParams.get('characterType');
+    const characterTypeParam = request.nextUrl.searchParams.get('characterType');
+
+    if (characterTypeParam && characterTypeParam !== 'all' && !isValidCharacterType(characterTypeParam)) {
+      return NextResponse.json(
+        { error: 'Invalid characterType. Must be one of: character, npc, companion, all' },
+        { status: 400 }
+      );
+    }
 
     let characters = await storage.loadCharacters(auth.userId);
 
     if (characterTypeParam && characterTypeParam !== 'all') {
       characters = characters.filter(
-        c => (c.characterType ?? 'character') === characterTypeParam
+        c => getCharacterType(c.characterType) === characterTypeParam
       );
     }
 
     return NextResponse.json(characters.map(c => ({
       ...c,
-      characterType: c.characterType ?? 'character',
+      characterType: getCharacterType(c.characterType),
     })));
   } catch (error) {
     console.error('Error fetching characters:', error);
@@ -166,7 +185,7 @@ export async function POST(request: NextRequest) {
       gender: gender?.trim() || undefined,
       background: background || undefined,
       alignment: normalizedAlignment,
-      characterType: (characterType as CharacterType) ?? 'character',
+      characterType: getCharacterType(characterType as CharacterType | undefined),
       createdAt: new Date(),
       updatedAt: new Date(),
     };

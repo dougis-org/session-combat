@@ -139,6 +139,37 @@ describe('CharactersContent — CharacterEditor type selector', () => {
     expect(typeSelect!.value).toBe('character');
   });
 
+  test('changing Type selector updates state and is sent in save payload', async () => {
+    let capturedBody: Record<string, unknown> | undefined;
+    global.fetch = jest.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      const urlStr = String(url);
+      if (urlStr === '/api/characters' && init?.method === 'POST') {
+        capturedBody = JSON.parse(init?.body as string) as Record<string, unknown>;
+        return { ok: true, json: async () => ({ id: 'new-id', ...capturedBody, classes: [{ class: 'Fighter', level: 1 }] }) } as unknown as Response;
+      }
+      return { ok: true, json: async () => [] } as unknown as Response;
+    }) as typeof fetch;
+
+    await renderAndOpenEditor();
+
+    const typeSelect = container.querySelector('select[aria-label="Character type"]') as HTMLSelectElement | null;
+    expect(typeSelect).not.toBeNull();
+
+    await act(async () => {
+      typeSelect!.value = 'npc';
+      typeSelect!.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    expect(typeSelect!.value).toBe('npc');
+
+    const saveBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Save Character'));
+    expect(saveBtn).not.toBeUndefined();
+    await act(async () => { saveBtn!.click(); });
+
+    expect(capturedBody).toBeDefined();
+    expect(capturedBody!.characterType).toBe('npc');
+  });
+
   test('Type selector shows current value when editing existing NPC', async () => {
     mockFetchWithCharacters([NPC]);
     await render();

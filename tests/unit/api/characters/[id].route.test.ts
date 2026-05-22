@@ -92,6 +92,25 @@ describe("PUT /api/characters/[id] — gender validation", () => {
   });
 });
 
+describe("GET /api/characters/[id] — backward compat coercion", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+  });
+
+  it("coerces missing characterType to 'character' for legacy document", async () => {
+    // EXISTING_CHARACTER has no characterType — simulates a legacy BSON document
+    mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
+
+    const { GET } = await import("@/app/api/characters/[id]/route");
+    const req = makeRouteRequest("http://localhost/api/characters/char-1", "GET");
+    const response = await GET(req, { params: PARAMS });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.characterType).toBe("character");
+  });
+});
+
 describe("PUT /api/characters/[id] — characterType", () => {
   beforeEach(() => {
     jest.clearAllMocks();

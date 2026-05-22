@@ -81,20 +81,20 @@ async function renderWithData(characters: object[], parties: object[] = []) {
   });
 }
 
-async function openPartyEditor(partyName = 'New Party') {
-  if (partyName === 'New Party') {
-    const addBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Add New Party'));
-    if (addBtn) await act(async () => { addBtn.click(); });
-  } else {
-    const editBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Edit');
-    if (editBtn) await act(async () => { editBtn.click(); });
-  }
+async function openNewPartyEditor() {
+  const addBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Add New Party'));
+  if (addBtn) await act(async () => { addBtn.click(); });
+}
+
+async function openExistingPartyEditor() {
+  const editBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Edit');
+  if (editBtn) await act(async () => { editBtn.click(); });
 }
 
 describe('PartyEditor — character type sections', () => {
   test('renders three sections when party has all three character types', async () => {
     await renderWithData([PC, NPC, COMPANION], [PARTY]);
-    await openPartyEditor('Edit');
+    await openExistingPartyEditor();
 
     const sections = container.querySelectorAll('[aria-label^="Party section:"]');
     expect(sections).toHaveLength(3);
@@ -107,7 +107,7 @@ describe('PartyEditor — character type sections', () => {
   test('renders only Player Characters section when all characters are PCs', async () => {
     const PC2 = { ...NPC, id: 'c2b', name: 'Gandalf', characterType: 'character' };
     await renderWithData([PC, PC2]);
-    await openPartyEditor();
+    await openNewPartyEditor();
 
     const sections = container.querySelectorAll('[aria-label^="Party section:"]');
     expect(sections).toHaveLength(1);
@@ -116,7 +116,7 @@ describe('PartyEditor — character type sections', () => {
 
   test('does not render NPC or Companion sections when only PCs present', async () => {
     await renderWithData([PC]);
-    await openPartyEditor();
+    await openNewPartyEditor();
 
     const labels = Array.from(container.querySelectorAll('[aria-label^="Party section:"]'))
       .map(s => s.getAttribute('aria-label'));

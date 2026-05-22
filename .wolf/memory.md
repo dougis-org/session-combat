@@ -508,3 +508,29 @@
 | 16:44 | Edited app/parties/page.tsx | added nullish coalescing | ~446 |
 | 16:45 | Created tests/unit/partyCharacterTypeUI.test.tsx | — | ~1613 |
 | 16:47 | Created openspec/changes/travelling-npcs-character-type/tasks.md | — | ~1936 |
+| 16:50 | Implemented travelling-npcs-character-type: added CharacterType to types, API filter+validation, CharacterEditor type selector, CharactersContent grouping+filter, PartyEditor type sections, 20 tests added | lib/types.ts, app/api/characters/*, app/characters/page.tsx, app/parties/page.tsx | PR #200 opened | ~8000 |
+| 16:51 | Session end: 25 writes across 9 files (types.ts, route.test.ts, [id].route.test.ts, characterType.integration.test.ts, route.ts) | 14 reads | ~33717 tok |
+| 18:34 | Edited lib/types.ts | added nullish coalescing | ~204 |
+| 18:34 | Edited app/api/characters/route.ts | added 1 condition(s) | ~383 |
+| 18:34 | Edited app/api/characters/route.ts | inline fix | ~24 |
+| 18:34 | Edited app/api/characters/[id]/route.ts | 13→14 lines | ~74 |
+| 18:35 | Edited app/api/characters/[id]/route.ts | 4→4 lines | ~35 |
+| 18:35 | Edited app/api/characters/[id]/route.ts | 3→3 lines | ~44 |
+| 18:35 | Edited app/characters/page.tsx | expanded (+12 lines) | ~67 |
+| 18:35 | Edited app/characters/page.tsx | removed 9 lines | ~11 |
+| 18:35 | Edited app/characters/page.tsx | inline fix | ~28 |
+| 18:35 | Edited app/parties/page.tsx | inline fix | ~39 |
+| 18:35 | Edited app/parties/page.tsx | 9→4 lines | ~68 |
+| 18:35 | Edited openspec/changes/travelling-npcs-character-type/tasks.md | "npm test" → "npm run test:unit" | ~16 |
+| 18:35 | Edited openspec/changes/travelling-npcs-character-type/tasks.md | "npm test" → "npm run test:unit" | ~11 |
+| 18:35 | Edited tests/unit/partyCharacterTypeUI.test.tsx | modified openNewPartyEditor() | ~122 |
+| 18:36 | Edited tests/unit/partyCharacterTypeUI.test.tsx | 31→31 lines | ~422 |
+| 18:36 | Edited tests/unit/api/characters/route.test.ts | 6→8 lines | ~118 |
+| 18:36 | Edited tests/unit/api/characters/route.test.ts | expanded (+40 lines) | ~638 |
+| 18:36 | Edited tests/unit/api/characters/[id].route.test.ts | expanded (+20 lines) | ~248 |
+| 18:36 | Edited tests/unit/characterTypeUI.test.tsx | added optional chaining | ~415 |
+| 18:37 | Edited tests/unit/api/characters/[id].route.test.ts | 4→3 lines | ~79 |
+| 18:37 | Edited tests/unit/api/characters/[id].route.test.ts | 3→3 lines | ~72 |
+| 18:37 | Edited tests/unit/characterTypeUI.test.tsx | inline fix | ~16 |
+| 18:37 | Edited tests/unit/characterTypeUI.test.tsx | added optional chaining | ~24 |
+| 18:38 | Edited tests/unit/characterTypeUI.test.tsx | toBeNull() → toBeDefined() | ~27 |

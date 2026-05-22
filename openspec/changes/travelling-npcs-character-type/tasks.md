@@ -64,7 +64,7 @@
 
 ## Validation
 
-- [x] Run unit tests: `npm test`
+- [x] Run unit tests: `npm run test:unit`
 - [x] Run integration tests: `npm run test:integration`
 - [x] Run type check: `npx tsc --noEmit`
 - [x] Run build: `npm run build`
@@ -76,7 +76,7 @@
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test` — all tests must pass
+- **Unit tests** — `npm run test:unit` — all tests must pass
 - **Integration tests** — `npm run test:integration` — all tests must pass
 - **Build** — `npm run build` — must succeed with no errors
 - **Type check** — `npx tsc --noEmit` — must produce no errors

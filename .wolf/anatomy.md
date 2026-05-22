@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-21T23:47:48.988Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T01:38:00.037Z
 > Files: 632 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
@@ -767,11 +767,11 @@
 
 ## app/api/characters/
 
-- `route.ts` — Next.js API route: GET, POST (~1552 tok)
+- `route.ts` — Next.js API route: GET, POST (~1637 tok)
 
 ## app/api/characters/[id]/
 
-- `route.ts` — Next.js API route: GET, PUT, DELETE (~2222 tok)
+- `route.ts` — Next.js API route: GET, PUT, DELETE (~2229 tok)
 
 ## app/api/parties/
 
@@ -788,7 +788,7 @@
 
 ## app/characters/
 
-- `page.tsx` — CHARACTER_TYPE_LABELS (~6673 tok)
+- `page.tsx` — CharactersContent (~6631 tok)
 
 ## app/login/
 
@@ -796,7 +796,7 @@
 
 ## app/parties/
 
-- `page.tsx` — PartiesContent — renders form (~3124 tok)
+- `page.tsx` — PartiesContent — renders form (~3099 tok)
 
 ## app/register/
 
@@ -808,7 +808,7 @@
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ParsedDndBeyon (~2785 tok)
 - `middleware.ts` — Extract auth token from request (~695 tok)
 - `storage.ts` — Server-side storage functions for MongoDB (~5520 tok)
-- `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4398 tok)
+- `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4508 tok)
 
 ## lib/components/
 
@@ -928,7 +928,7 @@
 
 - `design.md` — Context (~2244 tok)
 - `proposal.md` — GitHub Issues (~1245 tok)
-- `tasks.md` — Tasks (~1815 tok)
+- `tasks.md` — Tasks (~1819 tok)
 - `tests.md` — Tests (~1459 tok)
 
 ## openspec/changes/travelling-npcs-character-type/specs/character-type/
@@ -953,8 +953,8 @@
 
 ## tests/unit/
 
-- `characterTypeUI.test.tsx` — PC (~1584 tok)
-- `partyCharacterTypeUI.test.tsx` — PC (~1613 tok)
+- `characterTypeUI.test.tsx` — PC (~1974 tok)
+- `partyCharacterTypeUI.test.tsx` — PC (~1606 tok)
 
 ## tests/unit/api/campaigns/
 
@@ -962,8 +962,8 @@
 
 ## tests/unit/api/characters/
 
-- `[id].route.test.ts` — Declares mockedRequireAuth (~1464 tok)
-- `route.test.ts` — Declares mockedRequireAuth (~2611 tok)
+- `[id].route.test.ts` — Declares mockedRequireAuth (~1686 tok)
+- `route.test.ts` — Declares mockedRequireAuth (~3114 tok)
 
 ## tests/unit/api/parties/
 

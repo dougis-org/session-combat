@@ -6,7 +6,19 @@ import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
-import { Character, CharacterType, CreatureStats, calculateTotalLevel, VALID_CLASSES, VALID_RACES, DnDRace, normalizeAlignment } from '@/lib/types';
+import {
+  Character,
+  CharacterType,
+  CHARACTER_TYPE_LABELS,
+  CHARACTER_TYPE_ORDER,
+  CreatureStats,
+  calculateTotalLevel,
+  getCharacterType,
+  VALID_CLASSES,
+  VALID_RACES,
+  DnDRace,
+  normalizeAlignment,
+} from '@/lib/types';
 
 interface ImportConflictState {
   existingCharacterName: string;
@@ -21,14 +33,6 @@ interface ImportResponseBody {
   };
   warnings?: string[];
 }
-
-const CHARACTER_TYPE_LABELS: Record<CharacterType, string> = {
-  character: 'Player Characters',
-  npc: 'Travelling NPCs',
-  companion: 'Companions',
-};
-
-const CHARACTER_TYPE_ORDER: CharacterType[] = ['character', 'npc', 'companion'];
 
 export function CharactersContent() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -338,7 +342,7 @@ export function CharactersContent() {
         ) : (
           <div>
             {CHARACTER_TYPE_ORDER.filter(type => typeFilter === 'all' || typeFilter === type).map(type => {
-              const group = characters.filter(c => (c.characterType ?? 'character') === type);
+              const group = characters.filter(c => getCharacterType(c.characterType) === type);
               if (group.length === 0) return null;
               return (
                 <div key={type} className="mb-8">

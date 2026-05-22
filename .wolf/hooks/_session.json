@@ -18,8 +18,8 @@
       "first_read": "2026-05-21T23:25:35.235Z"
     },
     "/home/doug/dev/session-combat/app/api/characters/route.ts": {
-      "count": 1,
-      "tokens": 0,
+      "count": 2,
+      "tokens": 1552,
       "first_read": "2026-05-21T23:25:41.648Z"
     },
     "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts": {
@@ -63,8 +63,8 @@
       "first_read": "2026-05-21T23:26:51.076Z"
     },
     "/home/doug/dev/session-combat/tests/unit/api/characters/route.test.ts": {
-      "count": 1,
-      "tokens": 0,
+      "count": 2,
+      "tokens": 2611,
       "first_read": "2026-05-21T23:26:51.232Z"
     },
     "/home/doug/dev/session-combat/tests/unit/api/characters/[id].route.test.ts": {
@@ -223,24 +223,168 @@
       "action": "create",
       "tokens": 2074,
       "at": "2026-05-21T23:47:48.998Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/lib/types.ts",
+      "action": "edit",
+      "tokens": 204,
+      "at": "2026-05-22T01:34:23.085Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
+      "action": "edit",
+      "tokens": 383,
+      "at": "2026-05-22T01:34:45.138Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/app/api/characters/route.ts",
+      "action": "edit",
+      "tokens": 24,
+      "at": "2026-05-22T01:34:49.391Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
+      "action": "edit",
+      "tokens": 74,
+      "at": "2026-05-22T01:34:58.164Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
+      "action": "edit",
+      "tokens": 35,
+      "at": "2026-05-22T01:35:02.133Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/app/api/characters/[id]/route.ts",
+      "action": "edit",
+      "tokens": 44,
+      "at": "2026-05-22T01:35:06.204Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
+      "action": "edit",
+      "tokens": 67,
+      "at": "2026-05-22T01:35:12.109Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
+      "action": "edit",
+      "tokens": 11,
+      "at": "2026-05-22T01:35:17.516Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/app/characters/page.tsx",
+      "action": "edit",
+      "tokens": 28,
+      "at": "2026-05-22T01:35:22.280Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/app/parties/page.tsx",
+      "action": "edit",
+      "tokens": 39,
+      "at": "2026-05-22T01:35:28.805Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/app/parties/page.tsx",
+      "action": "edit",
+      "tokens": 68,
+      "at": "2026-05-22T01:35:34.494Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/tasks.md",
+      "action": "edit",
+      "tokens": 18,
+      "at": "2026-05-22T01:35:38.973Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/openspec/changes/travelling-npcs-character-type/tasks.md",
+      "action": "edit",
+      "tokens": 12,
+      "at": "2026-05-22T01:35:46.285Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/tests/unit/partyCharacterTypeUI.test.tsx",
+      "action": "edit",
+      "tokens": 122,
+      "at": "2026-05-22T01:35:55.486Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/tests/unit/partyCharacterTypeUI.test.tsx",
+      "action": "edit",
+      "tokens": 422,
+      "at": "2026-05-22T01:36:08.641Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/tests/unit/api/characters/route.test.ts",
+      "action": "edit",
+      "tokens": 118,
+      "at": "2026-05-22T01:36:21.455Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/tests/unit/api/characters/route.test.ts",
+      "action": "edit",
+      "tokens": 638,
+      "at": "2026-05-22T01:36:32.432Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/tests/unit/api/characters/[id].route.test.ts",
+      "action": "edit",
+      "tokens": 248,
+      "at": "2026-05-22T01:36:41.618Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/tests/unit/characterTypeUI.test.tsx",
+      "action": "edit",
+      "tokens": 415,
+      "at": "2026-05-22T01:36:53.361Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/tests/unit/api/characters/[id].route.test.ts",
+      "action": "edit",
+      "tokens": 79,
+      "at": "2026-05-22T01:37:31.166Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/tests/unit/api/characters/[id].route.test.ts",
+      "action": "edit",
+      "tokens": 72,
+      "at": "2026-05-22T01:37:41.228Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/tests/unit/characterTypeUI.test.tsx",
+      "action": "edit",
+      "tokens": 16,
+      "at": "2026-05-22T01:37:46.215Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/tests/unit/characterTypeUI.test.tsx",
+      "action": "edit",
+      "tokens": 24,
+      "at": "2026-05-22T01:37:55.759Z"
+    },
+    {
+      "file": "/home/doug/dev/session-combat/tests/unit/characterTypeUI.test.tsx",
+      "action": "edit",
+      "tokens": 27,
+      "at": "2026-05-22T01:38:00.051Z"
     }
   ],
   "edit_counts": {
-    "lib/types.ts": 1,
-    "tests/unit/api/characters/route.test.ts": 1,
-    "tests/unit/api/characters/[id].route.test.ts": 1,
+    "lib/types.ts": 2,
+    "tests/unit/api/characters/route.test.ts": 3,
+    "tests/unit/api/characters/[id].route.test.ts": 4,
     "tests/integration/characters/characterType.integration.test.ts": 1,
-    "app/api/characters/route.ts": 4,
-    "app/api/characters/[id]/route.ts": 5,
-    "app/characters/page.tsx": 6,
-    "tests/unit/characterTypeUI.test.tsx": 2,
-    "app/parties/page.tsx": 2,
-    "tests/unit/partyCharacterTypeUI.test.tsx": 1,
-    "openspec/changes/travelling-npcs-character-type/tasks.md": 1
+    "app/api/characters/route.ts": 6,
+    "app/api/characters/[id]/route.ts": 8,
+    "app/characters/page.tsx": 9,
+    "tests/unit/characterTypeUI.test.tsx": 6,
+    "app/parties/page.tsx": 4,
+    "tests/unit/partyCharacterTypeUI.test.tsx": 3,
+    "openspec/changes/travelling-npcs-character-type/tasks.md": 3
   },
   "anatomy_hits": 6,
   "anatomy_misses": 8,
-  "repeated_reads_warned": 1,
+  "repeated_reads_warned": 3,
   "cerebrum_warnings": 0,
-  "stop_count": 0
+  "stop_count": 1
 }

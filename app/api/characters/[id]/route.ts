@@ -13,6 +13,7 @@ import {
   validateCharacterClasses,
   normalizeAlignment,
   isValidCharacterType,
+  getCharacterType,
 } from "@/lib/types";
 
 export async function GET(
@@ -39,7 +40,7 @@ export async function GET(
 
     return NextResponse.json({
       ...character,
-      characterType: character.characterType ?? 'character',
+      characterType: getCharacterType(character.characterType),
     });
   } catch (error) {
     console.error("Error fetching character:", error);
@@ -220,7 +221,7 @@ export async function PUT(
         alignment !== undefined ? normalizedAlignment : existingCharacter.alignment,
       characterType: characterType !== undefined
         ? (characterType as CharacterType)
-        : (existingCharacter.characterType ?? 'character'),
+        : getCharacterType(existingCharacter.characterType),
       updatedAt: new Date(),
     };
 

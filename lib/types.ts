@@ -365,8 +365,20 @@ export type CharacterType = 'character' | 'npc' | 'companion';
 
 export const VALID_CHARACTER_TYPES: CharacterType[] = ['character', 'npc', 'companion'];
 
+export const CHARACTER_TYPE_ORDER: CharacterType[] = ['character', 'npc', 'companion'];
+
+export const CHARACTER_TYPE_LABELS: Record<CharacterType, string> = {
+  character: 'Player Characters',
+  npc: 'Travelling NPCs',
+  companion: 'Companions',
+};
+
 export function isValidCharacterType(value: unknown): value is CharacterType {
   return typeof value === 'string' && VALID_CHARACTER_TYPES.includes(value as CharacterType);
+}
+
+export function getCharacterType(characterType: CharacterType | undefined): CharacterType {
+  return characterType ?? 'character';
 }
 
 // Character - player character with shared creature stats

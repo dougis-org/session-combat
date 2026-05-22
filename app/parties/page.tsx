@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState, FormField, EditorShell, textInputClass } from '@/lib/components/ui';
-import { Party, Character, Campaign, CharacterType } from '@/lib/types';
+import { Party, Character, Campaign, CharacterType, CHARACTER_TYPE_ORDER, CHARACTER_TYPE_LABELS, getCharacterType } from '@/lib/types';
 
 function PartiesContent() {
   const [parties, setParties] = useState<Party[]>([]);
@@ -285,14 +285,9 @@ function PartyEditor({
           <p className="text-gray-400 text-sm">No characters available. Create characters first.</p>
         ) : (
           <div className="space-y-4">
-            {(
-              [
-                ['character', 'Player Characters'],
-                ['npc', 'Travelling NPCs'],
-                ['companion', 'Companions'],
-              ] as [CharacterType, string][]
-            ).map(([type, label]) => {
-              const group = characters.filter(c => (c.characterType ?? 'character') === type);
+            {CHARACTER_TYPE_ORDER.map(type => {
+              const label = CHARACTER_TYPE_LABELS[type];
+              const group = characters.filter(c => getCharacterType(c.characterType) === type);
               if (group.length === 0) return null;
               return (
                 <div key={type}>
