@@ -131,6 +131,7 @@ export function CampaignEditor({
       <div className="mb-6 border border-gray-700/50 rounded-lg overflow-hidden bg-gray-900/30 backdrop-blur-sm transition-all duration-300">
         <button
           type="button"
+          aria-expanded={chaptersExpanded}
           onClick={() => setChaptersExpanded(!chaptersExpanded)}
           className="w-full flex items-center justify-between px-4 py-3 bg-gray-800/40 hover:bg-gray-800/60 text-gray-200 font-semibold text-sm transition-all duration-200 cursor-pointer"
         >
@@ -197,6 +198,7 @@ export function CampaignEditor({
                       <button
                         type="button"
                         data-testid={`move-up-${index}`}
+                        aria-label={`Move chapter ${index + 1} up`}
                         onClick={() => handleMoveUp(index)}
                         disabled={saving || index === 0}
                         className="px-2 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 disabled:pointer-events-none text-xs rounded text-gray-300 font-bold transition-all cursor-pointer"
@@ -207,6 +209,7 @@ export function CampaignEditor({
                       <button
                         type="button"
                         data-testid={`move-down-${index}`}
+                        aria-label={`Move chapter ${index + 1} down`}
                         onClick={() => handleMoveDown(index)}
                         disabled={saving || index === chapters.length - 1}
                         className="px-2 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 disabled:pointer-events-none text-xs rounded text-gray-300 font-bold transition-all cursor-pointer"
