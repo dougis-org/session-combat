@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T22:12:25.855Z
-> Files: 664 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T01:16:12.493Z
+> Files: 667 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -846,6 +846,11 @@
 
 - `seedCampaignTemplates.ts` — one-time ingestion: seeds 50 global campaign templates with chapters and level ranges (~2800 tok)
 
+## openspec/changes/add-password-reset-ability/
+
+- `design.md` — Context (~929 tok)
+- `tasks.md` — Tasks (~500 tok)
+
 ## openspec/changes/archive/2026-05-21-extract-http-backoff-utils/
 
 - `tasks.md` — Tasks (~1390 tok)
@@ -853,6 +858,10 @@
 ## openspec/changes/archive/2026-05-22-extract-dndbeyond-identity/
 
 - `tasks.md` — Tasks (~1354 tok)
+
+## openspec/changes/campaign-chapter-management/
+
+- `tasks.md` — Tasks (~1448 tok)
 
 ## openspec/changes/campaign-library/
 

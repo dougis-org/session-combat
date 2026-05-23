@@ -656,3 +656,35 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 16:35 | Edited openspec/changes/campaign-chapter-management/tasks.md | inline fix | ~28 |
+| 16:35 | Edited openspec/changes/campaign-chapter-management/tasks.md | 9→9 lines | ~245 |
+
+## Session: 2026-05-22 16:37
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-05-22 16:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-05-22 16:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-05-23 17:57
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-05-23 17:59
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 18:03 | Edited openspec/changes/add-password-reset-ability/design.md | store() → memory() | ~91 |
+| 18:04 | Session end: 1 writes across 1 files (design.md) | 7 reads | ~97 tok |
+| 18:04 | Edited openspec/changes/add-password-reset-ability/design.md | expanded (+8 lines) | ~194 |
+| 18:05 | Session end: 2 writes across 1 files (design.md) | 8 reads | ~4933 tok |
+| 18:16 | Created openspec/changes/add-password-reset-ability/tasks.md | — | ~533 |
