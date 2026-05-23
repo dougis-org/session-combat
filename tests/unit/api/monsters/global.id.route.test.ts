@@ -33,7 +33,11 @@ jest.mock("@/lib/storage", () => ({
   },
 }));
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
-jest.mock("mongodb", () => ({ ObjectId: jest.fn((id: string) => ({ id })) }));
+jest.mock("mongodb", () => {
+  const ObjectId = jest.fn((id: string) => ({ id })) as jest.Mock & { isValid: jest.Mock };
+  ObjectId.isValid = jest.fn(() => true);
+  return { ObjectId };
+});
 
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);

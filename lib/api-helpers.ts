@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ObjectId } from "mongodb";
 import { requireAuth } from "@/lib/middleware";
-import { getDatabase } from "@/lib/db";
-import { isUserAdmin } from "@/lib/permissions";
+import { getUserById, InvalidUserIdError } from "@/lib/permissions";
 
 export async function requireAdmin(request: NextRequest): Promise<NextResponse | null> {
   const auth = requireAuth(request);
@@ -10,25 +8,21 @@ export async function requireAdmin(request: NextRequest): Promise<NextResponse |
     return auth;
   }
 
-  // Verify tokenVersion matches the DB to reject invalidated sessions
-  if (!ObjectId.isValid(auth.userId)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  let user: Record<string, unknown> | null;
   try {
-    const db = await getDatabase();
-    const user = await db.collection('users').findOne({ _id: new ObjectId(auth.userId) });
-    if (!user || user['tokenVersion'] !== auth.tokenVersion) {
+    user = await getUserById(auth.userId);
+  } catch (err) {
+    if (err instanceof InvalidUserIdError) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
-  const admin = await isUserAdmin(auth.userId);
-  if (admin === null) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  if (!user || typeof auth.tokenVersion !== 'number' || user['tokenVersion'] !== auth.tokenVersion) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!admin) {
+
+  if (user['isAdmin'] !== true) {
     return NextResponse.json(
       { error: "Only administrators can perform this action" },
       { status: 403 }

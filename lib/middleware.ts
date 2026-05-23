@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
 import { verifyToken, AuthPayload } from './auth';
-import { getDatabase } from './db';
+import { getUserById, InvalidUserIdError } from './permissions';
 
 const COOKIE_NAME = 'auth-token';
 
@@ -69,14 +68,14 @@ export function requireAuth(request: NextRequest) {
   return auth;
 }
 
+// Returns false for invalid/missing user or tokenVersion mismatch. Throws on DB error.
 async function verifyTokenVersion(auth: AuthPayload): Promise<boolean> {
-  if (!ObjectId.isValid(auth.userId)) return false;
   try {
-    const db = await getDatabase();
-    const user = await db.collection('users').findOne({ _id: new ObjectId(auth.userId) });
-    return user !== null && user['tokenVersion'] === auth.tokenVersion;
-  } catch {
-    return false;
+    const user = await getUserById(auth.userId);
+    return user !== null && typeof auth.tokenVersion === 'number' && user['tokenVersion'] === auth.tokenVersion;
+  } catch (err) {
+    if (err instanceof InvalidUserIdError) return false;
+    throw err;
   }
 }
 
@@ -87,8 +86,12 @@ export function withAuth(
   return async (request: NextRequest): Promise<NextResponse> => {
     const auth = requireAuth(request);
     if (auth instanceof NextResponse) return auth;
-    if (!await verifyTokenVersion(auth)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    try {
+      if (!await verifyTokenVersion(auth)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    } catch {
+      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
     }
     return handler(request, auth);
   };
@@ -102,12 +105,16 @@ export function withAuthAndParams<P extends Record<string, string>>(
     request: NextRequest,
     { params }: { params: Promise<P> }
   ): Promise<NextResponse> => {
-    const resolvedParams = await params;
     const auth = requireAuth(request);
     if (auth instanceof NextResponse) return auth;
-    if (!await verifyTokenVersion(auth)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    try {
+      if (!await verifyTokenVersion(auth)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    } catch {
+      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
     }
+    const resolvedParams = await params;
     return handler(request, auth, resolvedParams);
   };
 }
