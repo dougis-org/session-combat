@@ -765,3 +765,17 @@
 | 07:20 | Session end: 5 writes across 3 files (page.tsx, storage.ts, tasks.md) | 4 reads | ~13383 tok |
 | 07:30 | Edited tests/integration/api.integration.test.ts | 3→3 lines | ~73 |
 | 07:32 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~15 |
+| 08:48 | Session end: 7 writes across 4 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts) | 7 reads | ~13472 tok |
+| 08:49 | Edited lib/storage.ts | 6→7 lines | ~87 |
+| 08:49 | Edited lib/storage.ts | added 1 condition(s) | ~163 |
+| 08:49 | Edited lib/utils/sessionEvents.ts | added 2 condition(s) | ~485 |
+| 08:49 | Edited app/api/parties/[id]/route.ts | modified for() | ~50 |
+| 08:49 | Edited app/campaigns/[id]/sessions/page.tsx | "Up" → "undefined" | ~24 |
+| 08:49 | Edited app/campaigns/[id]/sessions/page.tsx | inline fix | ~34 |
+| 08:50 | Edited app/campaigns/[id]/sessions/page.tsx | modified Date() | ~50 |
+| 08:50 | Edited app/api/campaigns/[id]/sessions/route.ts | 4→4 lines | ~64 |
+| 08:50 | Edited app/api/campaigns/[id]/sessions/[sessionId]/route.ts | 3→5 lines | ~86 |
+| 08:50 | Edited openspec/changes/campaign-session-journal/tasks.md | "npm test" → "npm run test:unit" | ~11 |
+| 08:50 | Edited openspec/changes/campaign-session-journal/tasks.md | "npm test" → "npm run test:unit" | ~16 |
+| 08:50 | Edited openspec/changes/campaign-session-journal/tasks.md | 3→3 lines | ~45 |
+| 08:50 | Edited tests/unit/utils/sessionEvents.test.ts | 9→11 lines | ~155 |

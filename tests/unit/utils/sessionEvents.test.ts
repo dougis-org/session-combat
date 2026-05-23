@@ -29,14 +29,16 @@ describe('buildNpcEventsFromMemberChanges', () => {
     expect(events).toHaveLength(0);
   });
 
-  it('includes all active members as npc_joined when windowStart is null (first session)', () => {
+  it('includes only active members as npc_joined when windowStart is null (first session)', () => {
     const members: PartyMember[] = [
       { characterId: 'char-1', addedAt: T1 },
       { characterId: 'char-2', addedAt: T2 },
+      { characterId: 'departed', addedAt: T0, leftAt: T1 },
     ];
     const events = buildNpcEventsFromMemberChanges(members, null);
     expect(events).toHaveLength(2);
     expect(events.every(e => e.type === 'npc_joined')).toBe(true);
+    expect(events.map(e => e.characterId)).not.toContain('departed');
   });
 
   it('returns exactly 2 events for mixed party: 1 joined + 1 departed, 1 unchanged', () => {

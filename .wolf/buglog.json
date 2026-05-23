@@ -1312,6 +1312,70 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-23T01:16:11.479Z"
+    },
+    {
+      "id": "bug-083",
+      "timestamp": "2026-05-23T15:49:32.102Z",
+      "error_message": "Type error",
+      "file": "lib/storage.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T15:49:32.102Z"
+    },
+    {
+      "id": "bug-084",
+      "timestamp": "2026-05-23T15:49:44.211Z",
+      "error_message": "Wrong operator: ?? should be ===",
+      "file": "lib/utils/sessionEvents.ts",
+      "root_cause": "Used \"??\" instead of \"===\"",
+      "fix": "Changed operator ?? → ===",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T15:49:44.211Z"
+    },
+    {
+      "id": "bug-085",
+      "timestamp": "2026-05-23T15:49:54.162Z",
+      "error_message": "Incorrect value in code",
+      "file": "app/campaigns/[id]/sessions/page.tsx",
+      "root_cause": "Had 'Up'",
+      "fix": "Changed to 'undefined'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T15:49:54.162Z"
+    },
+    {
+      "id": "bug-086",
+      "timestamp": "2026-05-23T15:50:12.931Z",
+      "error_message": "Incorrect value in code",
+      "file": "openspec/changes/campaign-session-journal/tasks.md",
+      "root_cause": "Had `npm test`",
+      "fix": "Changed to `npm run test:unit`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-23T15:50:19.021Z"
     }
   ]
 }

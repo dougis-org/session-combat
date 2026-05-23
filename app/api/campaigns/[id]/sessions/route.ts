@@ -34,7 +34,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     }
 
     const resolvedSessionNumber =
-      typeof sessionNumber === 'number'
+      typeof sessionNumber === 'number' && Number.isInteger(sessionNumber) && sessionNumber > 0
         ? sessionNumber
         : await storage.getNextSessionNumber(auth.userId, campaignId);
 

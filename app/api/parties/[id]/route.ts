@@ -48,7 +48,7 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
         }
         return m;
       });
-      for (const charId of characterIds) {
+      for (const charId of newIdSet) {
         if (!existingActiveIds.has(charId)) {
           updatedMembers.push({ characterId: charId, addedAt: now });
         }

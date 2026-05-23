@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T14:32:58.741Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T15:50:56.361Z
 > Files: 686 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
@@ -768,11 +768,11 @@
 
 ## app/api/campaigns/[id]/sessions/
 
-- `route.ts` — Next.js API route (~664 tok)
+- `route.ts` — Next.js API route (~680 tok)
 
 ## app/api/campaigns/[id]/sessions/[sessionId]/
 
-- `route.ts` — Next.js API route (~377 tok)
+- `route.ts` — Next.js API route (~422 tok)
 
 ## app/api/campaigns/global/
 
@@ -800,7 +800,7 @@
 
 ## app/api/parties/[id]/
 
-- `route.ts` — Next.js API route (~998 tok)
+- `route.ts` — Next.js API route (~996 tok)
 
 ## app/campaigns/
 
@@ -809,7 +809,7 @@
 
 ## app/campaigns/[id]/sessions/
 
-- `page.tsx` — formatDate — renders form (~4144 tok)
+- `page.tsx` — formatDate — renders form (~4153 tok)
 
 ## app/characters/
 
@@ -832,7 +832,7 @@
 - `clientStorage.ts` — Client-side storage using localStorage (~616 tok)
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ImportedCharac (~2046 tok)
 - `middleware.ts` — Extract auth token from request (~695 tok)
-- `storage.ts` — Server-side storage functions for MongoDB (~6938 tok)
+- `storage.ts` — Server-side storage functions for MongoDB (~7008 tok)
 - `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4854 tok)
 
 ## lib/components/
@@ -861,7 +861,7 @@
 ## lib/utils/
 
 - `partySelection.ts` — Returns the Character objects that belong to the given party. (~604 tok)
-- `sessionEvents.ts` — Computes auto-populated NPC events from party membership changes in a time window. (~375 tok)
+- `sessionEvents.ts` — Computes auto-populated NPC events from party membership changes in a time window. (~502 tok)
 
 ## openspec/changes/archive/2026-05-21-extract-http-backoff-utils/
 
@@ -917,7 +917,7 @@
 
 - `design.md` — Context (~2857 tok)
 - `proposal.md` — GitHub Issues (~1550 tok)
-- `tasks.md` — Tasks (~2376 tok)
+- `tasks.md` — Tasks (~2381 tok)
 - `tests.md` — Tests (~1875 tok)
 
 ## openspec/changes/campaign-session-journal/specs/
@@ -1113,4 +1113,4 @@
 ## tests/unit/utils/
 
 - `partySelection.test.ts` — Declares makeCharacter (~702 tok)
-- `sessionEvents.test.ts` — Declares T0 (~745 tok)
+- `sessionEvents.test.ts` — Declares T0 (~783 tok)

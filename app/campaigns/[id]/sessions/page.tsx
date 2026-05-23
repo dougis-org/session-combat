@@ -35,7 +35,7 @@ function SessionEntryCard({
             <span className="text-gray-400 text-sm">{formatDate(log.datePlayed)}</span>
             {log.milestone && (
               <span className="bg-yellow-700 text-yellow-100 text-xs px-2 py-0.5 rounded">
-                Level {log.newLevel ? log.newLevel : 'Up'}
+                Level {typeof log.newLevel !== 'undefined' ? log.newLevel : 'Up'}
               </span>
             )}
           </div>
@@ -177,7 +177,7 @@ function SessionForm({
             id="session-number"
             type="number"
             value={sessionNumber}
-            onChange={e => setSessionNumber(parseInt(e.target.value, 10))}
+            onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v > 0) setSessionNumber(v); }}
             className={textInputClass()}
             disabled={saving}
             min={1}
@@ -358,10 +358,10 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
   };
 
   const lastSessionDate = logs.length > 0
-    ? new Date(logs[logs.length - 1].datePlayed)
+    ? new Date(logs[0].datePlayed)
     : null;
   const nextSessionNumber = logs.length > 0
-    ? Math.max(...logs.map(l => l.sessionNumber)) + 1
+    ? logs[0].sessionNumber + 1
     : 1;
 
   return (

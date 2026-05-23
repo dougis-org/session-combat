@@ -7,7 +7,9 @@ type Params = { id: string; sessionId: string };
 export const PATCH = withAuthAndParams<Params>(async (request, auth, { id: campaignId, sessionId }) => {
   try {
     const body = await request.json();
-    const updated = await storage.updateSessionLog(sessionId, auth.userId, campaignId, body);
+    const { title, datePlayed, summary, events, milestone, newLevel } = body;
+    const patch = { title, datePlayed, summary, events, milestone, newLevel };
+    const updated = await storage.updateSessionLog(sessionId, auth.userId, campaignId, patch);
     if (!updated) {
       return NextResponse.json({ error: 'Session log not found' }, { status: 404 });
     }

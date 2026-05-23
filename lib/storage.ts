@@ -56,8 +56,9 @@ function migrateParty(party: LegacyPartyDoc): Party {
   }
   const legacyIds: string[] = Array.isArray(party.characterIds) ? party.characterIds : [];
   const addedAt = party.createdAt ?? new Date(0);
+  const { characterIds: _discarded, ...rest } = party;
   return {
-    ...party,
+    ...rest,
     members: legacyIds.map(characterId => ({ characterId, addedAt })),
   } as Party;
 }
@@ -722,14 +723,19 @@ export const storage = {
   ): Promise<SessionLog | null> {
     try {
       const db = await getDatabase();
+      const { datePlayed, campaignId: _ignored, ...restPatch } = patch;
+      const updateData: Record<string, unknown> = { ...restPatch, updatedAt: new Date() };
+      if (typeof datePlayed !== 'undefined') {
+        updateData.datePlayed = new Date(datePlayed);
+      }
       const result = await db
         .collection<SessionLog>("sessionLogs")
         .findOneAndUpdate(
           { id, userId, campaignId },
-          { $set: { ...patch, datePlayed: patch.datePlayed ? new Date(patch.datePlayed) : undefined, updatedAt: new Date() } },
+          { $set: updateData },
           { returnDocument: "after" }
         );
-      return result ? normalizeStoredEntityId(result) : null;
+      return result ? normalizeStoredEntityId(result as SessionLog) : null;
     } catch (error) {
       console.error("Error updating session log:", error);
       throw error;
