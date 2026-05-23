@@ -1,8 +1,8 @@
 ## GitHub Issues
 
-- dougis-org/session-combat#197
-- Prerequisite issue: transactional email provider integration (**blocked: issue create permission unavailable in this environment**)
-- Prerequisite issue: auth rate-limiting foundation for password reset endpoints (**blocked: issue create permission unavailable in this environment**)
+- dougis-org/session-combat#208 (this change)
+- Prerequisite: dougis-org/session-combat#207 (session-invalidation-foundation)
+- Related: dougis-org/session-combat#197
 
 ## Why
 

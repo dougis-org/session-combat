@@ -113,7 +113,7 @@ Verify: `npx jest tests/unit/import/dndBeyondCharacterImport.test.ts` — exactl
 - [x] Confirm no new test file imports from `lib/dndBeyondCharacterImport` (grep check): `grep -r "dndBeyondCharacterImport" tests/unit/import/dndBeyond-*.test.ts` → should return nothing
 - [x] Confirm monolith has exactly 3 tests remaining
 - [x] Confirm all 7 module test files exist: `ls tests/unit/import/dndBeyond-*.test.ts`
-- [ ] All completed tasks marked as complete
+- [x] All completed tasks marked as complete
 
 ## Remote push validation
 
@@ -125,13 +125,13 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Commit all changes to `test/extract-dndbeyond-unit-tests` and push to remote
-- [ ] Open PR from `test/extract-dndbeyond-unit-tests` to `main`
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each one, commit fixes, validate locally, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — diagnose and fix any failure, commit, validate locally, push; repeat until all checks pass
-- [ ] Wait for PR to merge — never force-merge
+- [x] Commit all changes to `test/extract-dndbeyond-unit-tests` and push to remote
+- [x] Open PR from `test/extract-dndbeyond-unit-tests` to `main`
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each one, commit fixes, validate locally, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — diagnose and fix any failure, commit, validate locally, push; repeat until all checks pass
+- [x] Wait for PR to merge — never force-merge
 
 Ownership metadata:
 
@@ -146,12 +146,12 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on main
-- [ ] Mark all remaining tasks as complete
-- [ ] No documentation changes required (test-only change)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec) if applicable
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on main
+- [x] Mark all remaining tasks as complete
+- [x] No documentation changes required (test-only change)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec) if applicable
 - [ ] Archive the change: move `openspec/changes/extract-dndbeyond-unit-tests/` to `openspec/changes/archive/YYYY-MM-DD-extract-dndbeyond-unit-tests/` — stage both the copy and deletion in a single commit
 - [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-extract-dndbeyond-unit-tests/` exists and `openspec/changes/extract-dndbeyond-unit-tests/` is gone
 - [ ] Commit and push the archive commit to main
-- [ ] `git fetch --prune` and `git branch -d test/extract-dndbeyond-unit-tests`
+- [x] `git fetch --prune` and `git branch -d test/extract-dndbeyond-unit-tests`

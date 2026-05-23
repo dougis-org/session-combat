@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-18T14:20:54.749Z",
   "lifetime": {
-    "total_tokens_estimated": 675716,
-    "total_reads": 403,
-    "total_writes": 632,
-    "total_sessions": 41,
-    "anatomy_hits": 223,
-    "anatomy_misses": 173,
-    "repeated_reads_blocked": 175,
-    "estimated_savings_vs_bare_cli": 293787
+    "total_tokens_estimated": 710086,
+    "total_reads": 436,
+    "total_writes": 635,
+    "total_sessions": 46,
+    "anatomy_hits": 236,
+    "anatomy_misses": 193,
+    "repeated_reads_blocked": 178,
+    "estimated_savings_vs_bare_cli": 304412
   },
   "sessions": [
     {
@@ -6642,6 +6642,333 @@
         "writes_count": 5,
         "repeated_reads_blocked": 3,
         "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-05-22-1649",
+      "started": "2026-05-22T23:49:58.807Z",
+      "ended": "2026-05-22T23:51:42.460Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/app/page.tsx",
+          "tokens_estimated": 32,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/campaigns/page.tsx",
+          "tokens_estimated": 2675,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/types.ts",
+          "tokens_estimated": 4628,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 7335,
+        "output_tokens_estimated": 0,
+        "reads_count": 3,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-05-22-1649",
+      "started": "2026-05-22T23:49:58.807Z",
+      "ended": "2026-05-22T23:57:34.084Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/app/page.tsx",
+          "tokens_estimated": 32,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/campaigns/page.tsx",
+          "tokens_estimated": 2675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/types.ts",
+          "tokens_estimated": 4628,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 7335,
+        "output_tokens_estimated": 0,
+        "reads_count": 3,
+        "writes_count": 0,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-05-22-1649",
+      "started": "2026-05-22T23:49:58.807Z",
+      "ended": "2026-05-23T00:24:40.915Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/app/page.tsx",
+          "tokens_estimated": 32,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/campaigns/page.tsx",
+          "tokens_estimated": 2675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/types.ts",
+          "tokens_estimated": 4628,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 7335,
+        "output_tokens_estimated": 0,
+        "reads_count": 3,
+        "writes_count": 0,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-05-22-1649",
+      "started": "2026-05-22T23:49:58.807Z",
+      "ended": "2026-05-23T00:27:39.123Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/app/page.tsx",
+          "tokens_estimated": 32,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/campaigns/page.tsx",
+          "tokens_estimated": 2675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/types.ts",
+          "tokens_estimated": 4628,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 7335,
+        "output_tokens_estimated": 0,
+        "reads_count": 3,
+        "writes_count": 0,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-05-23-1759",
+      "started": "2026-05-23T00:59:06.437Z",
+      "ended": "2026-05-23T01:00:44.551Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/proposal.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tasks.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tests.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/auth.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/login/route.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 0,
+        "reads_count": 6,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-05-23-1759",
+      "started": "2026-05-23T00:59:06.437Z",
+      "ended": "2026-05-23T01:04:07.676Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/proposal.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tasks.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tests.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/auth.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/login/route.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/specs/password-reset/spec.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 97,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 97,
+        "reads_count": 7,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-05-23-1759",
+      "started": "2026-05-23T00:59:06.437Z",
+      "ended": "2026-05-23T01:05:52.685Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/proposal.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tasks.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tests.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/auth.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/login/route.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/specs/password-reset/spec.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/types.ts",
+          "tokens_estimated": 4628,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 97,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 208,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 4628,
+        "output_tokens_estimated": 305,
+        "reads_count": 8,
+        "writes_count": 2,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
       }
     }
   ],

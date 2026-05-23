@@ -1,10 +1,8 @@
 # Tasks
 
-## Prerequisites (must be created and resolved first)
+## Prerequisites
 
-- [ ] Create GitHub issue: transactional email provider integration for auth notifications
-- [ ] Create GitHub issue: reusable API rate-limiting middleware/store for auth-sensitive endpoints
-- [ ] Confirm prerequisite issues are implemented or accepted for parallel delivery
+- [ ] `session-invalidation-foundation` change merged (tokenVersion auth, withAuth migration)
 
 ## Design completion
 
@@ -12,16 +10,23 @@
 - [x] Define token storage and lifecycle model
 - [x] Define abuse protections and privacy constraints
 - [x] Define requirement/spec deltas and validation expectations
+- [x] Resolve email provider: Mailtrap.io (`mailtrap` npm SDK)
+- [x] Resolve rate limiter backing store: in-memory Map + TTL (single instance)
+- [x] Resolve session invalidation strategy: tokenVersion on User (D6, tracked in session-invalidation-foundation)
 
-## Implementation plan (deferred intentionally)
+## Implementation
 
+- [ ] Add in-memory rate limiter module (`lib/rate-limit.ts`)
+- [ ] Add Mailtrap email sender module (`lib/email.ts`)
+- [ ] Add reset token storage helpers (`lib/reset-tokens.ts`): generate, hash, store, validate, consume
 - [ ] Add `POST /api/auth/password/forgot` endpoint
-- [ ] Add `POST /api/auth/password/reset` endpoint
-- [ ] Add password reset token storage helpers and TTL/index management
-- [ ] Add reset request and reset submit UI pages
-- [ ] Add unit + integration tests for token lifecycle, privacy responses, and session invalidation
-- [ ] Validate with lint/unit/integration/typecheck
+- [ ] Add `POST /api/auth/password/reset` endpoint (increments tokenVersion on success)
+- [ ] Add forgot-password UI page (`app/forgot-password/page.tsx`)
+- [ ] Add reset-password UI page (`app/reset-password/page.tsx`)
 
-## Stop condition for this issue execution
+## Tests and validation
 
-- [x] Do not implement beyond design phase until prerequisite issues are created and acknowledged
+- [ ] Unit tests: token lifecycle (TTL expiry, consumed token, hash-only storage)
+- [ ] Unit tests: forgot endpoint returns identical body for known vs unknown email
+- [ ] Integration tests: full reset flow, session invalidation, rate limiting
+- [ ] Validate with lint / unit / integration / typecheck

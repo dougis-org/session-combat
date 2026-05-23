@@ -1072,6 +1072,22 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-22T17:55:17.365Z"
+    },
+    {
+      "id": "bug-068",
+      "timestamp": "2026-05-23T01:03:48.908Z",
+      "error_message": "Significant refactor of ",
+      "file": "openspec/changes/add-password-reset-ability/design.md",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 4→4 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T01:03:48.908Z"
     }
   ]
 }
