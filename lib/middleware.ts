@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import { verifyToken, AuthPayload } from './auth';
 import { getDatabase } from './db';
-import { User } from './types';
 
 const COOKIE_NAME = 'auth-token';
 
@@ -71,9 +70,9 @@ export function requireAuth(request: NextRequest) {
 }
 
 async function verifyTokenVersion(auth: AuthPayload): Promise<boolean> {
+  if (!ObjectId.isValid(auth.userId)) return false;
   try {
     const db = await getDatabase();
-    // Use untyped collection to avoid _id string vs ObjectId type mismatch
     const user = await db.collection('users').findOne({ _id: new ObjectId(auth.userId) });
     return user !== null && user['tokenVersion'] === auth.tokenVersion;
   } catch {

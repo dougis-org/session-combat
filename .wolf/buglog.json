@@ -1264,6 +1264,22 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-23T15:49:56.644Z"
+    },
+    {
+      "id": "bug-080",
+      "timestamp": "2026-05-23T21:14:33.948Z",
+      "error_message": "Type error",
+      "file": "tests/unit/api/monsters/global.route.test.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T21:14:33.948Z"
     }
   ]
 }

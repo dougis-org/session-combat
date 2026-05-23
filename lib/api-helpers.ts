@@ -11,9 +11,11 @@ export async function requireAdmin(request: NextRequest): Promise<NextResponse |
   }
 
   // Verify tokenVersion matches the DB to reject invalidated sessions
+  if (!ObjectId.isValid(auth.userId)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const db = await getDatabase();
-    // Use untyped collection to avoid _id string vs ObjectId type mismatch
     const user = await db.collection('users').findOne({ _id: new ObjectId(auth.userId) });
     if (!user || user['tokenVersion'] !== auth.tokenVersion) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

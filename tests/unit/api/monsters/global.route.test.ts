@@ -42,7 +42,11 @@ jest.mock("@/lib/import/dedupeEngine", () => ({
   shouldImport: jest.fn(),
 }));
 jest.mock("crypto", () => ({ randomUUID: jest.fn(() => "test-uuid") }));
-jest.mock("mongodb", () => ({ ObjectId: jest.fn((id: string) => ({ id })) }));
+jest.mock("mongodb", () => {
+  const ObjectId = jest.fn((id: string) => ({ id })) as jest.Mock & { isValid: jest.Mock };
+  ObjectId.isValid = jest.fn(() => true);
+  return { ObjectId };
+});
 
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);

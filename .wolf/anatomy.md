@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T16:20:38.248Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T21:14:33.934Z
 > Files: 696 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
@@ -764,7 +764,7 @@
 
 ## app/api/auth/me/
 
-- `route.ts` — Next.js API route (~299 tok)
+- `route.ts` — Next.js API route (~315 tok)
 
 ## app/api/auth/register/
 
@@ -873,10 +873,10 @@
 
 ## lib/
 
-- `api-helpers.ts` — Exports requireAdmin (~362 tok)
+- `api-helpers.ts` — Exports requireAdmin (~374 tok)
 - `clientStorage.ts` — Client-side storage using localStorage (~616 tok)
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ImportedCharac (~2046 tok)
-- `middleware.ts` — Extract auth token from request (~966 tok)
+- `middleware.ts` — Extract auth token from request (~950 tok)
 - `storage.ts` — Server-side storage functions for MongoDB (~5973 tok)
 - `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4641 tok)
 
@@ -1119,8 +1119,8 @@
 
 ## tests/unit/api/monsters/
 
-- `duplicate.test.ts` — Declares mockLoadAll (~593 tok)
-- `global.route.test.ts` — Declares requireAuth (~988 tok)
+- `duplicate.test.ts` — Declares mockLoadAll (~596 tok)
+- `global.route.test.ts` — Declares requireAuth (~1020 tok)
 
 ## tests/unit/api/parties/
 

@@ -2,7 +2,7 @@ const mockLoadAll = jest.fn();
 const mockSave = jest.fn();
 
 jest.mock("@/lib/middleware", () => {
-  const requireAuth = jest.fn(() => ({ userId: "user-1", email: "user@example.com", tokenVersion: 0 }));
+  const requireAuth = jest.fn().mockReturnValue({ userId: "user-1", email: "user@example.com", tokenVersion: 0 });
   return {
     requireAuth,
     withAuth: (handler: any) => async (request: any) => {

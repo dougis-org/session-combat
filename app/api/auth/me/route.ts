@@ -8,8 +8,10 @@ export const GET = withAuth(async (request, auth) => {
     const db = await getDatabase();
     let isAdmin = false;
     try {
-      const user = await db.collection('users').findOne({ _id: new ObjectId(auth.userId) });
-      isAdmin = user?.isAdmin === true;
+      if (ObjectId.isValid(auth.userId)) {
+        const user = await db.collection('users').findOne({ _id: new ObjectId(auth.userId) });
+        isAdmin = user?.isAdmin === true;
+      }
     } catch (error) {
       console.error('Error fetching user admin status:', error);
     }
