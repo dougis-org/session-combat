@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-18T14:20:54.749Z",
   "lifetime": {
-    "total_tokens_estimated": 1014283,
-    "total_reads": 581,
-    "total_writes": 847,
+    "total_tokens_estimated": 1049525,
+    "total_reads": 601,
+    "total_writes": 873,
     "total_sessions": 44,
-    "anatomy_hits": 341,
-    "anatomy_misses": 233,
-    "repeated_reads_blocked": 257,
-    "estimated_savings_vs_bare_cli": 635466
+    "anatomy_hits": 356,
+    "anatomy_misses": 238,
+    "repeated_reads_blocked": 269,
+    "estimated_savings_vs_bare_cli": 683250
   },
   "sessions": [
     {
@@ -9104,6 +9104,273 @@
         "writes_count": 20,
         "repeated_reads_blocked": 7,
         "anatomy_lookups": 9
+      }
+    },
+    {
+      "id": "session-2026-05-23-1815",
+      "started": "2026-05-23T01:15:48.053Z",
+      "ended": "2026-05-23T16:33:35.981Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev2/session-combat/app/parties/page.tsx",
+          "tokens_estimated": 3852,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/storage.ts",
+          "tokens_estimated": 7008,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-session-journal/tasks.md",
+          "tokens_estimated": 2381,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/tmp/claude-1000/-home-doug-dev2-session-combat/c2bf9084-19cf-47c8-93f8-7175c5b15abf/tasks/bknu7741e.output",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/tmp/claude-1000/-home-doug-dev2-session-combat/c2bf9084-19cf-47c8-93f8-7175c5b15abf/tasks/bkyxg8gg6.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/integration/api.integration.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/tmp/claude-1000/-home-doug-dev2-session-combat/c2bf9084-19cf-47c8-93f8-7175c5b15abf/tasks/b6o333mjc.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/utils/sessionEvents.ts",
+          "tokens_estimated": 375,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/api/parties/[id]/route.ts",
+          "tokens_estimated": 998,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/campaigns/[id]/sessions/page.tsx",
+          "tokens_estimated": 4144,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/api/campaigns/[id]/sessions/route.ts",
+          "tokens_estimated": 680,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/api/campaigns/[id]/sessions/[sessionId]/route.ts",
+          "tokens_estimated": 422,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/utils/sessionEvents.test.ts",
+          "tokens_estimated": 745,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/tmp/claude-1000/-home-doug-dev2-session-combat/c2bf9084-19cf-47c8-93f8-7175c5b15abf/tasks/bmb6d8qgm.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/storage/sessionLog.test.ts",
+          "tokens_estimated": 472,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/api/campaigns/route.test.ts",
+          "tokens_estimated": 2600,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/helpers/route.test.helpers.ts",
+          "tokens_estimated": 2060,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/api/campaigns/global.route.test.ts",
+          "tokens_estimated": 1870,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/api/campaigns/global.id.route.test.ts",
+          "tokens_estimated": 631,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/middleware.ts",
+          "tokens_estimated": 695,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev2/session-combat/app/parties/page.tsx",
+          "tokens_estimated": 17,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/parties/page.tsx",
+          "tokens_estimated": 117,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/storage.ts",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-session-journal/tasks.md",
+          "tokens_estimated": 56,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-session-journal/tasks.md",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/integration/api.integration.test.ts",
+          "tokens_estimated": 73,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-session-journal/tasks.md",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/storage.ts",
+          "tokens_estimated": 87,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/storage.ts",
+          "tokens_estimated": 163,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/lib/utils/sessionEvents.ts",
+          "tokens_estimated": 485,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/api/parties/[id]/route.ts",
+          "tokens_estimated": 50,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/campaigns/[id]/sessions/page.tsx",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/campaigns/[id]/sessions/page.tsx",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/campaigns/[id]/sessions/page.tsx",
+          "tokens_estimated": 50,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/api/campaigns/[id]/sessions/route.ts",
+          "tokens_estimated": 64,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/app/api/campaigns/[id]/sessions/[sessionId]/route.ts",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-session-journal/tasks.md",
+          "tokens_estimated": 12,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-session-journal/tasks.md",
+          "tokens_estimated": 18,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/openspec/changes/campaign-session-journal/tasks.md",
+          "tokens_estimated": 48,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/utils/sessionEvents.test.ts",
+          "tokens_estimated": 155,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/api/campaigns/sessions.route.test.ts",
+          "tokens_estimated": 1524,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/api/campaigns/sessions.id.route.test.ts",
+          "tokens_estimated": 1214,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/storage/sessionLog.test.ts",
+          "tokens_estimated": 200,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/storage/sessionLog.test.ts",
+          "tokens_estimated": 1515,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/storage/sessionLog.test.ts",
+          "tokens_estimated": 47,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev2/session-combat/tests/unit/storage/sessionLog.test.ts",
+          "tokens_estimated": 207,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 28933,
+        "output_tokens_estimated": 6309,
+        "reads_count": 20,
+        "writes_count": 26,
+        "repeated_reads_blocked": 12,
+        "anatomy_lookups": 15
       }
     }
   ],

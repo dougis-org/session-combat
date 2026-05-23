@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T16:22:19.708Z
-> Files: 688 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T16:35:49.361Z
+> Files: 689 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -1082,9 +1082,10 @@
 ## tests/unit/components/
 
 - `CampaignEditor.test.tsx` — BASE_CAMPAIGN (~1984 tok)
-- `CampaignsPage.test.tsx` — jsonResponse (~2226 tok)
+- `CampaignsPage.test.tsx` — jsonResponse (~2672 tok)
 - `NavBar.test.tsx` — mockedUseAuth (~922 tok)
 - `PartiesPage.test.tsx` — PC (~2381 tok)
+- `SessionsPage.test.tsx` — MOCK_LOG (~1323 tok)
 - `ui.test.tsx` — render — renders form (~2132 tok)
 
 ## tests/unit/helpers/

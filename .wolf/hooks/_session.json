@@ -48,8 +48,8 @@
       "first_read": "2026-05-23T15:49:10.874Z"
     },
     "/home/doug/dev2/session-combat/app/campaigns/[id]/sessions/page.tsx": {
-      "count": 3,
-      "tokens": 4144,
+      "count": 6,
+      "tokens": 4153,
       "first_read": "2026-05-23T15:49:13.846Z"
     },
     "/home/doug/dev2/session-combat/app/api/campaigns/[id]/sessions/route.ts": {
@@ -101,6 +101,11 @@
       "count": 1,
       "tokens": 695,
       "first_read": "2026-05-23T16:19:48.213Z"
+    },
+    "/home/doug/dev2/session-combat/tests/unit/components/CampaignsPage.test.tsx": {
+      "count": 3,
+      "tokens": 2226,
+      "first_read": "2026-05-23T16:33:50.353Z"
     }
   },
   "files_written": [
@@ -259,6 +264,24 @@
       "action": "edit",
       "tokens": 207,
       "at": "2026-05-23T16:22:19.718Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/tests/unit/components/SessionsPage.test.tsx",
+      "action": "create",
+      "tokens": 1327,
+      "at": "2026-05-23T16:34:34.370Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/tests/unit/components/CampaignsPage.test.tsx",
+      "action": "edit",
+      "tokens": 290,
+      "at": "2026-05-23T16:35:04.037Z"
+    },
+    {
+      "file": "/home/doug/dev2/session-combat/tests/unit/components/SessionsPage.test.tsx",
+      "action": "edit",
+      "tokens": 288,
+      "at": "2026-05-23T16:35:49.371Z"
     }
   ],
   "edit_counts": {
@@ -274,11 +297,13 @@
     "tests/unit/utils/sessionEvents.test.ts": 1,
     "tests/unit/api/campaigns/sessions.route.test.ts": 1,
     "tests/unit/api/campaigns/sessions.id.route.test.ts": 1,
-    "tests/unit/storage/sessionLog.test.ts": 4
+    "tests/unit/storage/sessionLog.test.ts": 4,
+    "tests/unit/components/SessionsPage.test.tsx": 2,
+    "tests/unit/components/CampaignsPage.test.tsx": 1
   },
-  "anatomy_hits": 15,
+  "anatomy_hits": 16,
   "anatomy_misses": 5,
-  "repeated_reads_warned": 12,
+  "repeated_reads_warned": 17,
   "cerebrum_warnings": 0,
-  "stop_count": 13
+  "stop_count": 14
 }
