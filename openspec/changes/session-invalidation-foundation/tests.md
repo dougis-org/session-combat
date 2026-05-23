@@ -23,7 +23,7 @@ For each task in `tasks.md`:
 
 TypeScript compilation is the test. No separate test file needed.
 
-- [ ] `User` interface has `tokenVersion: number` — verified by TS typecheck (`npm run type-check`)
+- [ ] `User` interface has `tokenVersion: number` — verified by TS typecheck (`npm run typecheck`)
 - [ ] `AuthPayload` interface has `tokenVersion: number` — verified by TS typecheck
 
 ### Task 2: `lib/auth.ts` — `generateToken()` includes `tokenVersion`
@@ -99,8 +99,8 @@ No new test files needed for the migration itself. The following existing tests 
 ### Validation tasks (Tasks 8–11)
 
 - [ ] `npm run lint` — passes with no errors
-- [ ] `npm run type-check` — passes with no errors
-- [ ] `npm test` — all unit tests pass
+- [ ] `npm run typecheck` — passes with no errors
+- [ ] `npm run test:unit` — all unit tests pass
 - [ ] Integration tests pass — `npm run test:integration` (auth-protected routes still return correct responses)
 
 ### Task 12: Manual smoke test

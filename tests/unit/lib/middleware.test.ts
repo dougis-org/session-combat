@@ -185,6 +185,20 @@ describe("lib/middleware", () => {
       expect(handler).not.toHaveBeenCalled();
       expect(response.status).toBe(401);
     });
+
+    it("allows legacy user with no tokenVersion in DB when JWT tokenVersion is 0", async () => {
+      const legacyPayload = { ...MOCK_PAYLOAD, tokenVersion: 0 };
+      mockedVerifyToken.mockReturnValue(legacyPayload);
+      mockDb({});
+      const handler = jest.fn().mockResolvedValue(NextResponse.json({ ok: true }));
+      const wrapped = withAuth(handler);
+
+      const request = makeRequest({ cookie: "auth-token=valid.token" });
+      const response = await wrapped(request);
+
+      expect(handler).toHaveBeenCalledWith(request, legacyPayload);
+      expect(response.status).toBe(200);
+    });
   });
 
   describe("withAuthAndParams", () => {

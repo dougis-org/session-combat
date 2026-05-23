@@ -72,7 +72,7 @@ export function requireAuth(request: NextRequest) {
 async function verifyTokenVersion(auth: AuthPayload): Promise<boolean> {
   try {
     const user = await getUserById(auth.userId);
-    return user !== null && typeof auth.tokenVersion === 'number' && user['tokenVersion'] === auth.tokenVersion;
+    return user !== null && typeof auth.tokenVersion === 'number' && (user['tokenVersion'] ?? 0) === auth.tokenVersion;
   } catch (err) {
     if (err instanceof InvalidUserIdError) return false;
     throw err;

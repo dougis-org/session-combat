@@ -56,6 +56,17 @@ describe("requireAdmin", () => {
     expect(result?.status).toBe(401);
   });
 
+  it("allows legacy user with no tokenVersion in DB when JWT tokenVersion is 0", async () => {
+    const legacyAuth = { ...ADMIN_AUTH, tokenVersion: 0 };
+    mockedRequireAuth.mockReturnValue(legacyAuth);
+    mockedGetUserById.mockResolvedValue({ isAdmin: true });
+
+    const req = makeRouteRequest("http://localhost/api/test", "POST", {});
+    const result = await requireAdmin(req);
+
+    expect(result).toBeNull();
+  });
+
   it("returns 401 when userId is invalid", async () => {
     mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
     const { InvalidUserIdError: MockInvalidUserIdError } = jest.requireMock("@/lib/permissions");

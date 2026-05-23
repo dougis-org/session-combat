@@ -18,7 +18,7 @@ export async function requireAdmin(request: NextRequest): Promise<NextResponse |
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
-  if (!user || typeof auth.tokenVersion !== 'number' || user['tokenVersion'] !== auth.tokenVersion) {
+  if (!user || typeof auth.tokenVersion !== 'number' || (user['tokenVersion'] ?? 0) !== auth.tokenVersion) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
