@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
   MOCK_AUTH,
+  MOCK_SESSION_LOG,
   makeRouteRequest,
   itReturns401WithParams,
   itReturns404WithParams,
@@ -30,17 +31,6 @@ const makeGetReq = () => makeRouteRequest(BASE_URL, "GET");
 const makePostReq = (body: unknown) => makeRouteRequest(BASE_URL, "POST", body);
 
 const MOCK_CAMPAIGN = { id: CAMPAIGN_ID, userId: "user-123", name: "Test Campaign" };
-const MOCK_LOG = {
-  id: "log-1",
-  userId: "user-123",
-  campaignId: CAMPAIGN_ID,
-  sessionNumber: 1,
-  datePlayed: new Date("2026-05-01"),
-  events: [],
-  milestone: false,
-  createdAt: new Date("2026-05-01"),
-  updatedAt: new Date("2026-05-01"),
-};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -54,7 +44,7 @@ describe("GET /api/campaigns/[id]/sessions", () => {
   itReturns401WithParams(GET, makeGetReq, PARAMS, mockedRequireAuth);
 
   it("returns 200 with session logs", async () => {
-    mockedStorage.loadSessionLogs.mockResolvedValue([MOCK_LOG] as any);
+    mockedStorage.loadSessionLogs.mockResolvedValue([MOCK_SESSION_LOG] as any);
     const res = await GET(makeGetReq(), { params: PARAMS });
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -145,14 +135,14 @@ describe("POST /api/campaigns/[id]/sessions", () => {
     expect(body.newLevel).toBe(5);
   });
 
-  it("returns 404 when campaign not found", async () => {
-    mockedStorage.loadCampaignById.mockResolvedValue(null as any);
-    const res = await POST(
-      makePostReq({ datePlayed: "2026-05-01" }),
-      { params: PARAMS }
-    );
-    expect(res.status).toBe(404);
-  });
+  itReturns404WithParams(
+    POST,
+    () => makePostReq({ datePlayed: "2026-05-01" }),
+    PARAMS,
+    () => mockedStorage.loadCampaignById.mockResolvedValue(null as any),
+    mockedRequireAuth,
+    "returns 404 when campaign not found"
+  );
 
   itReturns500WithParams(
     POST,

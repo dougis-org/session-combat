@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { startTestServer, registerAndGetCookie, TestServer } from "../helpers/server";
+import { startTestServer, registerAndGetCookie, makeAuthedHeaders, TestServer } from "../helpers/server";
 
 interface SessionLogResponse {
   id: string;
@@ -47,9 +47,7 @@ describe("Session Log API Integration Tests", () => {
     await server.cleanup();
   }, 30000);
 
-  function authed(cookie = authCookie) {
-    return { "Content-Type": "application/json", Cookie: cookie };
-  }
+  const authed = (cookie = authCookie) => makeAuthedHeaders(cookie);
 
   async function createSession(
     overrides: Record<string, unknown> = {},

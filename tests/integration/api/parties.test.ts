@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { startTestServer, registerAndGetCookie, TestServer } from "../helpers/server";
+import { startTestServer, registerAndGetCookie, makeAuthedHeaders, TestServer } from "../helpers/server";
 
 interface PartyResponse {
   id: string;
@@ -27,8 +27,21 @@ describe("Party Members Integration Tests", () => {
     await server.cleanup();
   }, 30000);
 
-  function authed() {
-    return { "Content-Type": "application/json", Cookie: authCookie };
+  const authed = () => makeAuthedHeaders(authCookie);
+
+  async function putParty(partyId: string, body: object) {
+    return fetch(`${baseUrl}/api/parties/${partyId}`, {
+      method: "PUT",
+      headers: authed(),
+      body: JSON.stringify(body),
+    });
+  }
+
+  async function getParty(partyId: string): Promise<PartyResponse> {
+    const res = await fetch(`${baseUrl}/api/parties/${partyId}`, {
+      headers: authed(),
+    });
+    return res.json() as Promise<PartyResponse>;
   }
 
   async function createCharacter(name = "Test Character"): Promise<string> {
@@ -79,11 +92,7 @@ describe("Party Members Integration Tests", () => {
     const charId2 = await createCharacter("New Member");
     const party = await createParty("PUT Add Test", [charId1]);
 
-    const res = await fetch(`${baseUrl}/api/parties/${party.id}`, {
-      method: "PUT",
-      headers: authed(),
-      body: JSON.stringify({ name: party.name, characterIds: [charId1, charId2] }),
-    });
+    const res = await putParty(party.id, { name: party.name, characterIds: [charId1, charId2] });
     expect(res.status).toBe(200);
     const updated = await res.json() as PartyResponse;
 
@@ -99,11 +108,7 @@ describe("Party Members Integration Tests", () => {
     const charId = await createCharacter("To Remove");
     const party = await createParty("PUT Remove Test", [charId]);
 
-    const res = await fetch(`${baseUrl}/api/parties/${party.id}`, {
-      method: "PUT",
-      headers: authed(),
-      body: JSON.stringify({ name: party.name, characterIds: [] }),
-    });
+    const res = await putParty(party.id, { name: party.name, characterIds: [] });
     expect(res.status).toBe(200);
     const updated = await res.json() as PartyResponse;
 
@@ -117,11 +122,7 @@ describe("Party Members Integration Tests", () => {
     const party = await createParty("PUT Unchanged Test", [charId]);
     const originalAddedAt = party.members[0].addedAt;
 
-    const res = await fetch(`${baseUrl}/api/parties/${party.id}`, {
-      method: "PUT",
-      headers: authed(),
-      body: JSON.stringify({ name: party.name, characterIds: [charId] }),
-    });
+    const res = await putParty(party.id, { name: party.name, characterIds: [charId] });
     expect(res.status).toBe(200);
     const updated = await res.json() as PartyResponse;
 
@@ -142,12 +143,7 @@ describe("Party Members Integration Tests", () => {
     });
     expect(deleteRes.status).toBe(200);
 
-    const partyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, {
-      headers: authed(),
-    });
-    expect(partyRes.status).toBe(200);
-    const updatedParty = await partyRes.json() as PartyResponse;
-
+    const updatedParty = await getParty(party.id);
     const member = updatedParty.members.find(m => m.characterId === charId);
     expect(member?.leftAt).toBeTruthy();
   });

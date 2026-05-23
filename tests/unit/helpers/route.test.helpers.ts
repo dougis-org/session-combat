@@ -57,6 +57,20 @@ export function makeRouteRequest(
   });
 }
 
+// ─── Shared session log fixture ──────────────────────────────────────────────
+
+export const MOCK_SESSION_LOG = {
+  id: "log-1",
+  userId: "user-123",
+  campaignId: "campaign-1",
+  sessionNumber: 1,
+  datePlayed: new Date("2026-05-01"),
+  events: [],
+  milestone: false,
+  createdAt: new Date("2026-05-01"),
+  updatedAt: new Date("2026-05-01"),
+};
+
 // ─── Test factory helpers ────────────────────────────────────────────────────
 // These call it() synchronously, so Jest registers them in the enclosing
 // describe() block. Use them to avoid repeating the identical 401/404/500
@@ -64,10 +78,11 @@ export function makeRouteRequest(
 
 type RouteHandler = (req: NextRequest) => Promise<Response>;
 // Note: params is Promise<...> because Next.js 15 App Router made route params
-// async. Route handlers await params before reading id.
-type ContextHandler = (
+// async. Route handlers await params before reading id. Generic P lets callers
+// with multi-segment params (e.g. { id; sessionId }) use these helpers too.
+type ContextHandler<P extends Record<string, string> = { id: string }> = (
   req: NextRequest,
-  ctx: { params: Promise<{ id: string }> }
+  ctx: { params: Promise<P> }
 ) => Promise<Response>;
 
 /** Register: returns 401 when requireAuth returns Unauthorized (no route params) */
@@ -100,10 +115,10 @@ export function itReturns500(
 }
 
 /** Register: returns 401 when requireAuth returns Unauthorized (with route params) */
-export function itReturns401WithParams(
-  handler: ContextHandler,
+export function itReturns401WithParams<P extends Record<string, string>>(
+  handler: ContextHandler<P>,
   makeReq: () => NextRequest,
-  params: Promise<{ id: string }>,
+  params: Promise<P>,
   mockedRequireAuth: jest.Mock
 ): void {
   it("returns 401 when not authenticated", async () => {
@@ -114,10 +129,10 @@ export function itReturns401WithParams(
 }
 
 /** Register: returns 404 when setupNotFound configures mock to return no result (with route params) */
-export function itReturns404WithParams(
-  handler: ContextHandler,
+export function itReturns404WithParams<P extends Record<string, string>>(
+  handler: ContextHandler<P>,
   makeReq: () => NextRequest,
-  params: Promise<{ id: string }>,
+  params: Promise<P>,
   setupNotFound: () => void,
   mockedRequireAuth: jest.Mock,
   description = "returns 404 when not found"
@@ -131,10 +146,10 @@ export function itReturns404WithParams(
 }
 
 /** Register: returns 500 when setupError configures the mock to throw (with route params) */
-export function itReturns500WithParams(
-  handler: ContextHandler,
+export function itReturns500WithParams<P extends Record<string, string>>(
+  handler: ContextHandler<P>,
   makeReq: () => NextRequest,
-  params: Promise<{ id: string }>,
+  params: Promise<P>,
   setupError: () => void,
   mockedRequireAuth: jest.Mock,
   description = "returns 500 on error"

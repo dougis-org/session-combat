@@ -3,7 +3,11 @@ import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
   MOCK_AUTH,
+  MOCK_SESSION_LOG,
   makeRouteRequest,
+  itReturns401WithParams,
+  itReturns404WithParams,
+  itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware");
@@ -25,18 +29,6 @@ const PARAMS = Promise.resolve({ id: CAMPAIGN_ID, sessionId: SESSION_ID });
 const makePatchReq = (body: unknown) => makeRouteRequest(BASE_URL, "PATCH", body);
 const makeDeleteReq = () => makeRouteRequest(BASE_URL, "DELETE");
 
-const MOCK_LOG = {
-  id: SESSION_ID,
-  userId: "user-123",
-  campaignId: CAMPAIGN_ID,
-  sessionNumber: 1,
-  datePlayed: new Date("2026-05-01"),
-  events: [],
-  milestone: false,
-  createdAt: new Date("2026-05-01"),
-  updatedAt: new Date("2026-05-01"),
-};
-
 beforeEach(() => {
   jest.clearAllMocks();
   mockedRequireAuth.mockReturnValue(MOCK_AUTH);
@@ -45,16 +37,10 @@ beforeEach(() => {
 // ─── PATCH /api/campaigns/[id]/sessions/[sessionId] ───────────────────────────
 
 describe("PATCH /api/campaigns/[id]/sessions/[sessionId]", () => {
-  it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      new (await import("next/server")).NextResponse(null, { status: 401 })
-    );
-    const res = await PATCH(makePatchReq({ title: "Updated" }), { params: PARAMS });
-    expect(res.status).toBe(401);
-  });
+  itReturns401WithParams(PATCH, () => makePatchReq({ title: "Updated" }), PARAMS, mockedRequireAuth);
 
   it("returns 200 with updated log", async () => {
-    const updated = { ...MOCK_LOG, title: "Updated Title" };
+    const updated = { ...MOCK_SESSION_LOG, title: "Updated Title" };
     mockedStorage.updateSessionLog.mockResolvedValue(updated as any);
     const res = await PATCH(makePatchReq({ title: "Updated Title" }), { params: PARAMS });
     expect(res.status).toBe(200);
@@ -62,7 +48,7 @@ describe("PATCH /api/campaigns/[id]/sessions/[sessionId]", () => {
   });
 
   it("whitelists only allowed fields — does not pass campaignId to storage", async () => {
-    mockedStorage.updateSessionLog.mockResolvedValue(MOCK_LOG as any);
+    mockedStorage.updateSessionLog.mockResolvedValue(MOCK_SESSION_LOG as any);
     await PATCH(
       makePatchReq({ title: "Safe", campaignId: "hacked-campaign" }),
       { params: PARAMS }
@@ -72,29 +58,28 @@ describe("PATCH /api/campaigns/[id]/sessions/[sessionId]", () => {
     expect(patch.title).toBe("Safe");
   });
 
-  it("returns 404 when session log not found", async () => {
-    mockedStorage.updateSessionLog.mockResolvedValue(null);
-    const res = await PATCH(makePatchReq({ title: "X" }), { params: PARAMS });
-    expect(res.status).toBe(404);
-  });
+  itReturns404WithParams(
+    PATCH,
+    () => makePatchReq({ title: "X" }),
+    PARAMS,
+    () => mockedStorage.updateSessionLog.mockResolvedValue(null),
+    mockedRequireAuth,
+    "returns 404 when session log not found"
+  );
 
-  it("returns 500 on error", async () => {
-    mockedStorage.updateSessionLog.mockRejectedValue(new Error("DB error"));
-    const res = await PATCH(makePatchReq({ title: "X" }), { params: PARAMS });
-    expect(res.status).toBe(500);
-  });
+  itReturns500WithParams(
+    PATCH,
+    () => makePatchReq({ title: "X" }),
+    PARAMS,
+    () => mockedStorage.updateSessionLog.mockRejectedValue(new Error("DB error")),
+    mockedRequireAuth
+  );
 });
 
 // ─── DELETE /api/campaigns/[id]/sessions/[sessionId] ──────────────────────────
 
 describe("DELETE /api/campaigns/[id]/sessions/[sessionId]", () => {
-  it("returns 401 when not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      new (await import("next/server")).NextResponse(null, { status: 401 })
-    );
-    const res = await DELETE(makeDeleteReq(), { params: PARAMS });
-    expect(res.status).toBe(401);
-  });
+  itReturns401WithParams(DELETE, makeDeleteReq, PARAMS, mockedRequireAuth);
 
   it("returns 200 when deleted", async () => {
     mockedStorage.deleteSessionLog.mockResolvedValue(true as any);
@@ -103,15 +88,20 @@ describe("DELETE /api/campaigns/[id]/sessions/[sessionId]", () => {
     expect(mockedStorage.deleteSessionLog).toHaveBeenCalledWith(SESSION_ID, "user-123", CAMPAIGN_ID);
   });
 
-  it("returns 404 when session log not found", async () => {
-    mockedStorage.deleteSessionLog.mockResolvedValue(null as any);
-    const res = await DELETE(makeDeleteReq(), { params: PARAMS });
-    expect(res.status).toBe(404);
-  });
+  itReturns404WithParams(
+    DELETE,
+    makeDeleteReq,
+    PARAMS,
+    () => mockedStorage.deleteSessionLog.mockResolvedValue(null as any),
+    mockedRequireAuth,
+    "returns 404 when session log not found"
+  );
 
-  it("returns 500 on error", async () => {
-    mockedStorage.deleteSessionLog.mockRejectedValue(new Error("DB error"));
-    const res = await DELETE(makeDeleteReq(), { params: PARAMS });
-    expect(res.status).toBe(500);
-  });
+  itReturns500WithParams(
+    DELETE,
+    makeDeleteReq,
+    PARAMS,
+    () => mockedStorage.deleteSessionLog.mockRejectedValue(new Error("DB error")),
+    mockedRequireAuth
+  );
 });
