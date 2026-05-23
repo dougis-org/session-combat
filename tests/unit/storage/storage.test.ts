@@ -138,7 +138,7 @@ describe("storage entity loader normalization", () => {
           _id: { toString: () => "party-mongo-id" },
           name: "Party",
           userId: "user1",
-          characterIds: [],
+          members: [],
         },
       ] as never,
     );
@@ -229,13 +229,14 @@ describe("storage.deleteCharacter", () => {
     );
   });
 
-  test("removes character from all parties for referential integrity", async () => {
+  test("sets leftAt on all active party memberships for the deleted character", async () => {
     await storage.deleteCharacter("char1", "user1");
 
     expect(mockDb.collection).toHaveBeenCalledWith("parties");
     expect(partiesMock.updateMany).toHaveBeenCalledWith(
-      { userId: "user1" },
-      { $pull: { characterIds: "char1" } },
+      { userId: "user1", "members.characterId": "char1", "members.leftAt": { $exists: false } },
+      { $set: { "members.$[elem].leftAt": expect.any(Date) } },
+      { arrayFilters: [{ "elem.characterId": "char1", "elem.leftAt": { $exists: false } }] },
     );
   });
 
@@ -267,7 +268,7 @@ describe("storage.saveParty", () => {
       userId: "user-1",
       name: "Updated Party",
       description: "Edited without relying on MongoDB _id",
-      characterIds: ["char-1"],
+      members: [{ characterId: "char-1", addedAt: new Date("2026-04-07T00:00:00.000Z") }],
       createdAt: new Date("2026-04-07T00:00:00.000Z"),
       updatedAt: new Date("2026-04-07T00:05:00.000Z"),
     };

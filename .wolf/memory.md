@@ -656,35 +656,112 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
-| 16:35 | Edited openspec/changes/campaign-chapter-management/tasks.md | inline fix | ~28 |
-| 16:35 | Edited openspec/changes/campaign-chapter-management/tasks.md | 9→9 lines | ~245 |
-
-## Session: 2026-05-22 16:37
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-
-## Session: 2026-05-22 16:46
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+| 16:37 | Edited tests/unit/import/dndBeyond-ability-scores.test.ts | added 1 condition(s) | ~198 |
+| 16:37 | Edited tests/unit/import/dndBeyond-armor-class.test.ts | expanded (+22 lines) | ~327 |
+| 16:37 | Edited tests/unit/import/dndBeyond-armor-class.test.ts | expanded (+34 lines) | ~527 |
+| 16:40 | Edited openspec/changes/extract-dndbeyond-unit-tests/tasks.md | inline fix | ~12 |
+| 16:40 | Edited openspec/changes/extract-dndbeyond-unit-tests/tasks.md | 7→7 lines | ~153 |
+| 16:40 | Edited openspec/changes/extract-dndbeyond-unit-tests/tasks.md | 9→9 lines | ~204 |
+| 16:48 | Session end: 6 writes across 3 files (dndBeyond-ability-scores.test.ts, dndBeyond-armor-class.test.ts, tasks.md) | 7 reads | ~13645 tok |
 
 ## Session: 2026-05-22 16:49
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 17:24 | Created openspec/changes/campaign-session-journal/proposal.md | — | ~1654 |
+| 17:25 | Created openspec/changes/campaign-session-journal/design.md | — | ~3048 |
+| 17:26 | Created openspec/changes/campaign-session-journal/specs/party-members.md | — | ~1431 |
+| 17:26 | Created openspec/changes/campaign-session-journal/specs/session-log.md | — | ~1619 |
+| 17:27 | Created openspec/changes/campaign-session-journal/specs/npc-auto-capture.md | — | ~927 |
+| 17:28 | Created openspec/changes/campaign-session-journal/tasks.md | — | ~2535 |
+| 17:28 | Created openspec/changes/campaign-session-journal/tests.md | — | ~2000 |
+| 17:28 | Session end: 7 writes across 7 files (proposal.md, design.md, party-members.md, session-log.md, npc-auto-capture.md) | 6 reads | ~25984 tok |
 
 ## Session: 2026-05-23 17:57
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 17:58 | Edited openspec/changes/campaign-session-journal/tasks.md | 2→2 lines | ~68 |
+| 17:59 | Edited lib/types.ts | expanded (+41 lines) | ~287 |
+| 17:59 | Edited lib/types.ts | 7→8 lines | ~55 |
+| 17:59 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~11 |
+| 17:59 | Edited lib/utils/partySelection.ts | modified expandPartyToCharacters() | ~107 |
+| 17:59 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~20 |
+| 17:59 | Edited lib/storage.ts | 13→16 lines | ~79 |
+| 17:59 | Edited lib/storage.ts | modified loadParties() | ~120 |
+| 17:59 | Edited lib/storage.ts | added nullish coalescing | ~248 |
+| 17:59 | Edited lib/storage.ts | modified migrateParty() | ~137 |
+| 17:59 | Edited lib/storage.ts | modified loadParties() | ~123 |
+| 18:00 | Edited lib/storage.ts | 4→8 lines | ~116 |
+| 18:00 | Edited lib/storage.ts | added error handling | ~751 |
+| 18:00 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~20 |
+| 18:00 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~19 |
+| 18:00 | Edited app/api/parties/route.ts | 4→4 lines | ~55 |
+| 18:00 | Edited app/api/parties/route.ts | 10→14 lines | ~148 |
+| 18:00 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~17 |
+| 18:00 | Edited app/api/parties/[id]/route.ts | 4→4 lines | ~58 |
+| 18:00 | Edited app/api/parties/[id]/route.ts | added 3 condition(s) | ~299 |
+| 18:00 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~18 |
+| 18:01 | Edited app/parties/page.tsx | CSS: members | ~80 |
+| 18:01 | Edited app/parties/page.tsx | 22→23 lines | ~254 |
+| 18:01 | Edited app/parties/page.tsx | 4→4 lines | ~84 |
+| 18:01 | Edited app/parties/page.tsx | 1→3 lines | ~41 |
+| 18:01 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~14 |
+| 18:03 | Created app/api/campaigns/[id]/sessions/route.ts | — | ~664 |
+| 18:03 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~22 |
+| 18:03 | Created app/api/campaigns/[id]/sessions/[sessionId]/route.ts | — | ~377 |
+| 18:04 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~26 |
+| 18:05 | Created app/campaigns/[id]/sessions/page.tsx | — | ~4361 |
+| 18:05 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~22 |
+| 18:05 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~14 |
+| 18:05 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~31 |
+| 18:05 | Edited app/campaigns/page.tsx | expanded (+6 lines) | ~256 |
+| 18:05 | Edited app/campaigns/page.tsx | added 1 import(s) | ~94 |
+| 18:06 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~47 |
+| 18:06 | Created lib/utils/sessionEvents.ts | — | ~375 |
+| 18:06 | Edited app/campaigns/[id]/sessions/page.tsx | added 1 import(s) | ~40 |
+| 18:07 | Edited app/campaigns/[id]/sessions/page.tsx | removed 30 lines | ~51 |
+| 18:07 | Created tests/unit/utils/partySelection.test.ts | — | ~702 |
+| 18:07 | Created tests/unit/utils/sessionEvents.test.ts | — | ~745 |
+| 18:07 | Created tests/unit/storage/sessionLog.test.ts | — | ~472 |
+| 18:08 | Created tests/integration/api/parties.test.ts | — | ~1864 |
+| 18:08 | Created tests/integration/api/sessions.test.ts | — | ~2726 |
+| 18:09 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~12 |
+| 18:09 | Edited openspec/changes/campaign-session-journal/tasks.md | 5→5 lines | ~56 |
+| 18:09 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~15 |
+| 18:09 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~14 |
+| 18:09 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~12 |
+| 18:09 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~15 |
+| 18:10 | Edited tests/unit/lib/partySelection.test.ts | 9→9 lines | ~80 |
+| 18:10 | Edited tests/unit/lib/partySelection.test.ts | 5→5 lines | ~76 |
+| 18:10 | Edited tests/unit/partyCharacterTypeUI.test.tsx | 1→5 lines | ~94 |
+| 18:11 | Edited tests/unit/components/PartiesPage.test.tsx | expanded (+6 lines) | ~210 |
+| 18:11 | Edited tests/unit/components/PartiesPage.test.tsx | CSS: members, characterId, addedAt | ~73 |
+| 18:11 | Edited tests/unit/components/PartiesPage.test.tsx | CSS: members, characterId, addedAt | ~95 |
+| 18:11 | Edited tests/unit/components/PartiesPage.test.tsx | CSS: members, characterId, addedAt | ~96 |
+| 18:11 | Edited tests/unit/storage/storage.test.ts | 9→10 lines | ~153 |
+| 18:11 | Edited tests/unit/storage/storage.test.ts | 17→17 lines | ~138 |
+| 18:12 | Edited tests/unit/storage/storage.test.ts | 11→11 lines | ~141 |
+| 18:12 | Edited tests/unit/api/parties/route.test.ts | 3→3 lines | ~29 |
+| 18:12 | Edited tests/unit/api/parties/route.test.ts | 22→23 lines | ~279 |
+| 18:12 | Edited tests/unit/api/parties/route.test.ts | 9→9 lines | ~90 |
+| 18:12 | Edited tests/unit/api/parties/route.test.ts | 7→9 lines | ~107 |
+| 18:12 | Edited tests/unit/api/parties/route.test.ts | 6→6 lines | ~64 |
+| 18:12 | Edited tests/unit/api/parties/route.test.ts | 4→4 lines | ~61 |
+| 18:13 | Edited app/parties/page.tsx | 7→7 lines | ~78 |
+| 18:14 | Edited app/parties/page.tsx | 7→4 lines | ~46 |
 
-## Session: 2026-05-23 17:59
+## Session: 2026-05-23 18:15
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
-| 18:03 | Edited openspec/changes/add-password-reset-ability/design.md | store() → memory() | ~91 |
-| 18:04 | Session end: 1 writes across 1 files (design.md) | 7 reads | ~97 tok |
-| 18:04 | Edited openspec/changes/add-password-reset-ability/design.md | expanded (+8 lines) | ~194 |
-| 18:05 | Session end: 2 writes across 1 files (design.md) | 8 reads | ~4933 tok |
-| 18:16 | Created openspec/changes/add-password-reset-ability/tasks.md | — | ~533 |
+| 18:16 | Edited app/parties/page.tsx | inline fix | ~17 |
+| 18:16 | Edited app/parties/page.tsx | CSS: characterIds | ~117 |
+| 18:16 | Edited lib/storage.ts | inline fix | ~37 |
+| 18:17 | Edited openspec/changes/campaign-session-journal/tasks.md | 5→5 lines | ~52 |
+| 18:21 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~9 |
+| 18:21 | Session end: 5 writes across 3 files (page.tsx, storage.ts, tasks.md) | 4 reads | ~13383 tok |
+| 18:38 | Session end: 5 writes across 3 files (page.tsx, storage.ts, tasks.md) | 4 reads | ~13383 tok |
+| 07:20 | Session end: 5 writes across 3 files (page.tsx, storage.ts, tasks.md) | 4 reads | ~13383 tok |
+| 07:30 | Edited tests/integration/api.integration.test.ts | 3→3 lines | ~73 |
+| 07:32 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~15 |

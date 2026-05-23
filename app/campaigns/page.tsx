@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState } from '@/lib/components/ui';
 import { Campaign, CampaignTemplate } from '@/lib/types';
@@ -203,6 +204,12 @@ export function CampaignsContent() {
                     <CampaignChapterInfo campaign={campaign} />
                   </div>
                   <div className="flex gap-2">
+                    <Link
+                      href={`/campaigns/${campaign.id}/sessions`}
+                      className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
+                    >
+                      Session Log
+                    </Link>
                     <button
                       onClick={() => { setEditingCampaign(campaign); setIsAdding(false); }}
                       className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"

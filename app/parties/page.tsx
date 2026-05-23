@@ -49,7 +49,7 @@ function PartiesContent() {
       userId: '',
       name: 'New Party',
       description: '',
-      characterIds: [],
+      members: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -57,7 +57,7 @@ function PartiesContent() {
     setIsAdding(true);
   };
 
-  const saveParty = async (party: Party) => {
+  const saveParty = async (party: Party, characterIds: string[]) => {
     try {
       setError(null);
       const url = isAdding ? '/api/parties' : `/api/parties/${party.id}`;
@@ -66,7 +66,7 @@ function PartiesContent() {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(party),
+        body: JSON.stringify({ ...party, characterIds }),
       });
 
       if (!response.ok) {
@@ -150,7 +150,8 @@ function PartiesContent() {
               </div>
             ) : (
               parties.map(party => {
-                const partyCharacters = party.characterIds.map(
+                const activeIds = party.members.filter(m => !m.leftAt).map(m => m.characterId);
+                const partyCharacters = activeIds.map(
                   id =>
                     characterMap.get(id) ?? ({
                       id,
@@ -181,7 +182,7 @@ function PartiesContent() {
                         )}
                         <div className="text-gray-400 text-sm mt-2">
                           <p>Campaign: {party.campaignId ? (campaignMap.get(party.campaignId) ?? 'No Campaign') : 'No Campaign'}</p>
-                          <p>Members: {party.characterIds.length}</p>
+                          <p>Members: {activeIds.length}</p>
                         </div>
                         {partyCharacters.length > 0 && (
                           <div className="mt-3 space-y-3">
@@ -257,14 +258,16 @@ function PartyEditor({
   party: Party;
   characters: Character[];
   campaigns: Campaign[];
-  onSave: (party: Party) => void;
+  onSave: (party: Party, characterIds: string[]) => void;
   onCancel: () => void;
   isNew: boolean;
 }) {
   const [name, setName] = useState(party.name);
   const [description, setDescription] = useState(party.description || '');
   const [campaignId, setCampaignId] = useState(party.campaignId ?? '');
-  const [characterIds, setCharacterIds] = useState<Set<string>>(new Set(party.characterIds));
+  const [characterIds, setCharacterIds] = useState<Set<string>>(
+    new Set(party.members.filter(m => !m.leftAt).map(m => m.characterId))
+  );
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -278,13 +281,10 @@ function PartyEditor({
 
     setSaving(true);
     try {
-      await onSave({
-        ...party,
-        name: name.trim(),
-        description: description.trim(),
-        campaignId: campaignId,
-        characterIds: Array.from(characterIds),
-      });
+      await onSave(
+        { ...party, name: name.trim(), description: description.trim(), campaignId: campaignId },
+        Array.from(characterIds)
+      );
     } finally {
       setSaving(false);
     }

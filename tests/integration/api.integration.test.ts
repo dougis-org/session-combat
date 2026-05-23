@@ -69,9 +69,9 @@ describe("API Integration Tests", () => {
       body: JSON.stringify({ name: "The Fellowship", characterIds: ["char-1", "char-2"] }),
     });
     expect(createResponse.status).toBe(201);
-    const created = await createResponse.json() as { id: string; name: string; characterIds: string[] };
+    const created = await createResponse.json() as { id: string; name: string; members: Array<{ characterId: string }> };
     expect(created.name).toBe("The Fellowship");
-    expect(created.characterIds).toEqual(["char-1", "char-2"]);
+    expect(created.members.map((m) => m.characterId)).toEqual(["char-1", "char-2"]);
 
     const listResponse = await fetch(`${baseUrl}/api/parties`, {
       headers: { Cookie: cookie },

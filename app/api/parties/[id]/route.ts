@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Party } from '@/lib/types';
+import { Party, PartyMember } from '@/lib/types';
 
 type Params = { id: string };
 
@@ -35,12 +35,32 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
       return NextResponse.json({ error: 'Party name is required' }, { status: 400 });
     }
 
+    const now = new Date();
+    let updatedMembers: PartyMember[] = existingParty.members;
+    if (Array.isArray(characterIds)) {
+      const newIdSet = new Set<string>(characterIds);
+      const existingActiveIds = new Set<string>(
+        existingParty.members.filter(m => !m.leftAt).map(m => m.characterId)
+      );
+      updatedMembers = existingParty.members.map(m => {
+        if (!m.leftAt && !newIdSet.has(m.characterId)) {
+          return { ...m, leftAt: now };
+        }
+        return m;
+      });
+      for (const charId of characterIds) {
+        if (!existingActiveIds.has(charId)) {
+          updatedMembers.push({ characterId: charId, addedAt: now });
+        }
+      }
+    }
+
     const updatedParty: Party = {
       ...existingParty,
       name: name !== undefined && typeof name === 'string' ? name.trim() : existingParty.name,
       description: description !== undefined && typeof description === 'string' ? description.trim() : (existingParty.description || ''),
-      characterIds: Array.isArray(characterIds) ? characterIds : existingParty.characterIds,
-      updatedAt: new Date(),
+      members: updatedMembers,
+      updatedAt: now,
     };
 
     if (campaignId !== undefined) {

@@ -550,17 +550,58 @@ export interface Campaign {
   updatedAt: Date;
 }
 
+export interface PartyMember {
+  characterId: string;
+  addedAt: Date;
+  leftAt?: Date;
+}
+
 export interface Party {
   _id?: string;
   id: string;
   userId: string;
   name: string;
   description?: string;
-  characterIds: string[]; // ObjectId references to characters
+  members: PartyMember[];
   campaignId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface SessionEvent {
+  type: 'npc_joined' | 'npc_left' | 'combat_completed' | 'custom';
+  description: string;
+  characterId?: string;
+  characterName?: string;
+  timestamp?: Date;
+}
+
+export interface SessionLog {
+  _id?: string;
+  id: string;
+  userId: string;
+  campaignId: string;
+  sessionNumber: number;
+  title?: string;
+  datePlayed: Date;
+  summary?: string;
+  events: SessionEvent[];
+  milestone: boolean;
+  newLevel?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type SessionLogInput = {
+  campaignId: string;
+  datePlayed: Date | string;
+  sessionNumber?: number;
+  title?: string;
+  summary?: string;
+  events?: SessionEvent[];
+  milestone?: boolean;
+  newLevel?: number;
+};
 
 export interface SessionData {
   encounters: Encounter[];
@@ -568,6 +609,7 @@ export interface SessionData {
   parties: Party[];
   campaigns: Campaign[];
   combatState?: CombatState;
+  sessionLogs?: SessionLog[];
 }
 
 // D&D 5e Spell Schools

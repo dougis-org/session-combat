@@ -16,7 +16,7 @@ const makeParty = (id: string, characterIds: string[]): Party =>
     id,
     userId: 'user-1',
     name: `Party ${id}`,
-    characterIds,
+    members: characterIds.map(characterId => ({ characterId, addedAt: new Date() })),
     createdAt: new Date(),
     updatedAt: new Date(),
   } as Party);
@@ -46,8 +46,8 @@ describe('expandPartyToCharacters', () => {
     expect(result.map(c => c.id)).toEqual(['char-1']);
   });
 
-  it('returns empty array when party has no characterIds', () => {
-    const party = { ...makeParty('p-4', []), characterIds: undefined as unknown as string[] };
+  it('returns empty array when party has no members array', () => {
+    const party = { ...makeParty('p-4', []), members: undefined as unknown as Party['members'] };
     const result = expandPartyToCharacters(party, characters);
     expect(result).toEqual([]);
   });
