@@ -111,7 +111,7 @@
   - All endpoints return 401 without auth
   - User B cannot access user A's session logs
 
-- [ ] **D7 — Integration: Unmigrated party document**
+- [x] **D7 — Integration: Unmigrated party document**
   - Seed a party with `characterIds` and no `members`
   - Assert `loadParties()` returns correct derived members
 
@@ -122,8 +122,8 @@
 - [x] Run type check: `npx tsc --noEmit`
 - [x] Run build: `npm run build`
 - [x] Run linter: `npm run lint`
-- [ ] Manually test: create a campaign, link a party, add/remove an NPC, open session journal, verify NPC events pre-populate
-- [ ] All tasks in Execution marked complete
+- [x] Manually test: create a campaign, link a party, add/remove an NPC, open session journal, verify NPC events pre-populate
+- [x] All tasks in Execution marked complete
 
 ## Remote push validation
 
@@ -138,14 +138,14 @@ If **ANY** of the above fail, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Run the required pre-PR self-review from `.agent/skills/openspec-apply-change/SKILL.md` before committing
-- [ ] Commit all changes to `feat/campaign-session-journal` and push to remote
-- [ ] Open PR from `feat/campaign-session-journal` to `main`
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each comment, commit fixes, follow remote push validation, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — diagnose and fix any failure, commit, follow remote push validation, push; repeat until all checks pass
-- [ ] Wait for PR to merge — **never force-merge**; if a human force-merges, continue to Post-Merge
+- [x] Run the required pre-PR self-review from `.agent/skills/openspec-apply-change/SKILL.md` before committing
+- [x] Commit all changes to `feat/campaign-session-journal` and push to remote
+- [x] Open PR from `feat/campaign-session-journal` to `main`
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each comment, commit fixes, follow remote push validation, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — diagnose and fix any failure, commit, follow remote push validation, push; repeat until all checks pass
+- [x] Wait for PR to merge — **never force-merge**; if a human force-merges, continue to Post-Merge
 
 Ownership metadata:
 - Implementer: doug@dougis.com
@@ -159,11 +159,11 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update `lib/types.ts` JSDoc if any interfaces need documentation cleanup post-review
-- [ ] Sync approved spec deltas into `openspec/specs/`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update `lib/types.ts` JSDoc if any interfaces need documentation cleanup post-review
+- [x] Sync approved spec deltas into `openspec/specs/`
 - [ ] Archive the change: move `openspec/changes/campaign-session-journal/` to `openspec/changes/archive/YYYY-MM-DD-campaign-session-journal/` — stage both the new location and the deletion in a single commit
 - [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-session-journal/` exists and `openspec/changes/campaign-session-journal/` is gone
 - [ ] Commit and push the archive commit to `main`

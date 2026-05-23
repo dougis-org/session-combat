@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T16:35:49.361Z
-> Files: 689 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T22:38:06.539Z
+> Files: 690 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -768,7 +768,7 @@
 
 ## app/api/campaigns/[id]/sessions/
 
-- `route.ts` — Next.js API route (~680 tok)
+- `route.ts` — Next.js API route (~700 tok)
 
 ## app/api/campaigns/[id]/sessions/[sessionId]/
 
@@ -809,7 +809,7 @@
 
 ## app/campaigns/[id]/sessions/
 
-- `page.tsx` — formatDate — renders form (~4153 tok)
+- `page.tsx` — formatDate — renders form (~4167 tok)
 
 ## app/characters/
 
@@ -821,7 +821,7 @@
 
 ## app/parties/
 
-- `page.tsx` — PartiesContent — renders form (~3872 tok)
+- `page.tsx` — PartiesContent — renders form (~3874 tok)
 
 ## app/register/
 
@@ -832,7 +832,7 @@
 - `clientStorage.ts` — Client-side storage using localStorage (~616 tok)
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ImportedCharac (~2046 tok)
 - `middleware.ts` — Extract auth token from request (~695 tok)
-- `storage.ts` — Server-side storage functions for MongoDB (~7008 tok)
+- `storage.ts` — Server-side storage functions for MongoDB (~7041 tok)
 - `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4854 tok)
 
 ## lib/components/
@@ -861,7 +861,7 @@
 ## lib/utils/
 
 - `partySelection.ts` — Returns the Character objects that belong to the given party. (~604 tok)
-- `sessionEvents.ts` — Computes auto-populated NPC events from party membership changes in a time window. (~502 tok)
+- `sessionEvents.ts` — Computes auto-populated NPC events from party membership changes in a time window. (~503 tok)
 
 ## openspec/changes/archive/2026-05-21-extract-http-backoff-utils/
 
@@ -1045,12 +1045,16 @@
 
 ## tests/integration/api/
 
-- `parties.test.ts` — PartyResponse: authed, createCharacter, createParty (~1864 tok)
-- `sessions.test.ts` — SessionLogResponse: authed, createSession (~2726 tok)
+- `parties.test.ts` — PartyResponse: putParty, getParty, createCharacter, createParty (~1842 tok)
+- `sessions.test.ts` — SessionLogResponse: createSession (~2785 tok)
 
 ## tests/integration/characters/
 
 - `characterType.integration.test.ts` — CharacterResponse: authed, createCharacter (~2388 tok)
+
+## tests/integration/helpers/
+
+- `server.ts` — Wait for the server to respond OK on the given URL. (~1636 tok)
 
 ## tests/integration/offline/
 
@@ -1067,8 +1071,8 @@
 - `global.id.route.test.ts` — Declares mockedRequireAdmin (~631 tok)
 - `global.route.test.ts` — Declares mockedRequireAdmin (~1870 tok)
 - `route.test.ts` — Declares mockedRequireAuth (~2600 tok)
-- `sessions.id.route.test.ts` — Declares mockedRequireAuth (~1214 tok)
-- `sessions.route.test.ts` — Declares mockedRequireAuth (~1524 tok)
+- `sessions.id.route.test.ts` — Declares mockedRequireAuth (~1022 tok)
+- `sessions.route.test.ts` — Declares mockedRequireAuth (~1648 tok)
 
 ## tests/unit/api/characters/
 
@@ -1085,12 +1089,12 @@
 - `CampaignsPage.test.tsx` — jsonResponse (~2672 tok)
 - `NavBar.test.tsx` — mockedUseAuth (~922 tok)
 - `PartiesPage.test.tsx` — PC (~2381 tok)
-- `SessionsPage.test.tsx` — MOCK_LOG (~1323 tok)
+- `SessionsPage.test.tsx` — MOCK_LOG (~1324 tok)
 - `ui.test.tsx` — render — renders form (~2132 tok)
 
 ## tests/unit/helpers/
 
-- `route.test.helpers.ts` — Shared auth payload used across route unit tests (~2060 tok)
+- `route.test.helpers.ts` — Shared auth payload used across route unit tests (~2220 tok)
 
 ## tests/unit/import/
 
@@ -1111,7 +1115,7 @@
 
 - `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~2885 tok)
 - `sessionLog.test.ts` — mockedGetDatabase: makeCollectionMock (~1965 tok)
-- `storage.test.ts` — mockedGetDatabase: makeMockCollection (~2691 tok)
+- `storage.test.ts` — mockedGetDatabase: makeMockCollection (~2917 tok)
 
 ## tests/unit/utils/
 
