@@ -34,7 +34,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     }
 
     const resolvedSessionNumber =
-      typeof sessionNumber === 'number' && Number.isInteger(sessionNumber) && sessionNumber > 0
+      typeof sessionNumber === 'number' && Number.isInteger(sessionNumber) && sessionNumber >= 0
         ? sessionNumber
         : await storage.getNextSessionNumber(auth.userId, campaignId);
 
@@ -49,7 +49,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       summary: typeof summary === 'string' ? summary : undefined,
       events: Array.isArray(events) ? events : [],
       milestone: milestone === true,
-      ...(typeof newLevel === 'number' && { newLevel }),
+      ...(milestone === true && typeof newLevel === 'number' && Number.isInteger(newLevel) && newLevel > 0 && { newLevel }),
       createdAt: now,
       updatedAt: now,
     };

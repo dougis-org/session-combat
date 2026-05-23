@@ -93,7 +93,7 @@ describe('SessionsPage — session log display', () => {
   test('renders milestone badge as "Level Up" when newLevel is 0', async () => {
     const log = { ...MILESTONE_LOG, newLevel: 0 };
     await renderWithData([log]);
-    expect(ctx.container.textContent).toContain('Level 0');
+    expect(ctx.container.textContent).toContain('Level Up');
   });
 
   test('shows empty state when no logs', async () => {

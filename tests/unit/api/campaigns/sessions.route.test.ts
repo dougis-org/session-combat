@@ -124,6 +124,25 @@ describe("POST /api/campaigns/[id]/sessions", () => {
     expect((await res.json()).sessionNumber).toBe(2);
   });
 
+  it("accepts sessionNumber 0 (session zero is valid for intro sessions)", async () => {
+    const res = await POST(
+      makePostReq({ datePlayed: "2026-05-01", sessionNumber: 0 }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(201);
+    expect((await res.json()).sessionNumber).toBe(0);
+    expect(mockedStorage.getNextSessionNumber).not.toHaveBeenCalled();
+  });
+
+  it("only persists newLevel when milestone is true", async () => {
+    const res = await POST(
+      makePostReq({ datePlayed: "2026-05-01", milestone: false, newLevel: 5 }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(201);
+    expect((await res.json()).newLevel).toBeUndefined();
+  });
+
   it("sets milestone true and newLevel when provided", async () => {
     const res = await POST(
       makePostReq({ datePlayed: "2026-05-01", milestone: true, newLevel: 5 }),

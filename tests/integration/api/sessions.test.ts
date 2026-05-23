@@ -192,8 +192,14 @@ describe("Session Log API Integration Tests", () => {
 
   // --- PATCH ---
 
-  it("PATCH updates specified fields and returns updated document", async () => {
-    const log = await createSession({ title: "Original Title", sessionNumber: 20 });
+  it("PATCH updates specified fields and leaves others unchanged", async () => {
+    const log = await createSession({
+      title: "Original Title",
+      sessionNumber: 20,
+      summary: "Keep this summary",
+      milestone: true,
+      newLevel: 5,
+    });
 
     const res = await fetch(`${baseUrl}/api/campaigns/${campaignId}/sessions/${log.id}`, {
       method: "PATCH",
@@ -204,6 +210,9 @@ describe("Session Log API Integration Tests", () => {
     const updated = await res.json() as SessionLogResponse;
     expect(updated.title).toBe("New Title");
     expect(updated.sessionNumber).toBe(20);
+    expect(updated.summary).toBe("Keep this summary");
+    expect(updated.milestone).toBe(true);
+    expect(updated.newLevel).toBe(5);
   });
 
   it("PATCH returns 404 for non-existent session", async () => {

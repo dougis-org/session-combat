@@ -1,4 +1,4 @@
-import { PartyMember, SessionEvent } from '@/lib/types';
+import type { PartyMember, SessionEvent } from '@/lib/types';
 
 /**
  * Computes auto-populated NPC events from party membership changes in a time window.

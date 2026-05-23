@@ -724,7 +724,10 @@ export const storage = {
     try {
       const db = await getDatabase();
       const { datePlayed, campaignId: _ignored, ...restPatch } = patch;
-      const updateData: Record<string, unknown> = { ...restPatch, updatedAt: new Date() };
+      const updateData: Record<string, unknown> = { updatedAt: new Date() };
+      for (const [key, value] of Object.entries(restPatch)) {
+        if (value !== undefined) updateData[key] = value;
+      }
       if (typeof datePlayed !== 'undefined') {
         updateData.datePlayed = new Date(datePlayed);
       }

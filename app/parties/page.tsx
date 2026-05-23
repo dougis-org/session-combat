@@ -258,7 +258,7 @@ function PartyEditor({
   party: Party;
   characters: Character[];
   campaigns: Campaign[];
-  onSave: (party: Party, characterIds: string[]) => void;
+  onSave: (party: Party, characterIds: string[]) => Promise<void>;
   onCancel: () => void;
   isNew: boolean;
 }) {

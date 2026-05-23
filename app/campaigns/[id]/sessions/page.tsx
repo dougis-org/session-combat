@@ -9,7 +9,8 @@ import { SessionLog, SessionEvent, Party } from '@/lib/types';
 import { buildNpcEventsFromMemberChanges } from '@/lib/utils/sessionEvents';
 
 function formatDate(d: Date | string): string {
-  return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  const date = typeof d === 'string' ? new Date(d + 'T12:00:00') : d;
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function SessionEntryCard({
@@ -35,7 +36,7 @@ function SessionEntryCard({
             <span className="text-gray-400 text-sm">{formatDate(log.datePlayed)}</span>
             {log.milestone && (
               <span className="bg-yellow-700 text-yellow-100 text-xs px-2 py-0.5 rounded">
-                Level {typeof log.newLevel !== 'undefined' ? log.newLevel : 'Up'}
+                Level {log.newLevel && log.newLevel > 0 ? log.newLevel : 'Up'}
               </span>
             )}
           </div>
@@ -177,7 +178,7 @@ function SessionForm({
             id="session-number"
             type="number"
             value={sessionNumber}
-            onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v > 0) setSessionNumber(v); }}
+            onChange={e => { const v = parseInt(e.target.value, 10); setSessionNumber(isNaN(v) ? 0 : v); }}
             className={textInputClass()}
             disabled={saving}
             min={1}

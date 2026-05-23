@@ -149,6 +149,29 @@ describe("storage entity loader normalization", () => {
     expect(result[0].id).toBe("party-mongo-id");
   });
 
+  test("loadParties migrates legacy party with characterIds and no members", async () => {
+    const createdAt = new Date("2026-01-01");
+    partiesMock.toArray.mockResolvedValue(
+      [
+        {
+          id: "legacy-party",
+          userId: "user1",
+          name: "Legacy Party",
+          characterIds: ["char-1", "char-2"],
+          createdAt,
+          updatedAt: new Date("2026-01-01"),
+        },
+      ] as never,
+    );
+
+    const result = await storage.loadParties("user1");
+
+    expect(result[0].members).toHaveLength(2);
+    expect(result[0].members[0]).toEqual({ characterId: "char-1", addedAt: createdAt });
+    expect(result[0].members[1]).toEqual({ characterId: "char-2", addedAt: createdAt });
+    expect(Object.keys(result[0])).not.toContain("characterIds");
+  });
+
   test("loadMonsterTemplates preserves stored id when _id is also present", async () => {
     const template: MonsterTemplate = {
       id: "template-uuid",
