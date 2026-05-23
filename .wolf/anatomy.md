@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T15:50:56.361Z
-> Files: 686 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T16:22:19.708Z
+> Files: 688 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -1067,6 +1067,8 @@
 - `global.id.route.test.ts` — Declares mockedRequireAdmin (~631 tok)
 - `global.route.test.ts` — Declares mockedRequireAdmin (~1870 tok)
 - `route.test.ts` — Declares mockedRequireAuth (~2600 tok)
+- `sessions.id.route.test.ts` — Declares mockedRequireAuth (~1214 tok)
+- `sessions.route.test.ts` — Declares mockedRequireAuth (~1524 tok)
 
 ## tests/unit/api/characters/
 
@@ -1107,7 +1109,7 @@
 ## tests/unit/storage/
 
 - `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~2885 tok)
-- `sessionLog.test.ts` — Declares mockedGetDatabase (~472 tok)
+- `sessionLog.test.ts` — mockedGetDatabase: makeCollectionMock (~1965 tok)
 - `storage.test.ts` — mockedGetDatabase: makeMockCollection (~2691 tok)
 
 ## tests/unit/utils/

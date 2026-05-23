@@ -779,3 +779,18 @@
 | 08:50 | Edited openspec/changes/campaign-session-journal/tasks.md | "npm test" → "npm run test:unit" | ~16 |
 | 08:50 | Edited openspec/changes/campaign-session-journal/tasks.md | 3→3 lines | ~45 |
 | 08:50 | Edited tests/unit/utils/sessionEvents.test.ts | 9→11 lines | ~155 |
+| 08:59 | Session end: 20 writes across 7 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 14 reads | ~22092 tok |
+| 09:13 | Session end: 20 writes across 7 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 14 reads | ~22092 tok |
+| 09:13 | Session end: 20 writes across 7 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 14 reads | ~22092 tok |
+| 09:13 | Session end: 20 writes across 7 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 14 reads | ~22092 tok |
+| 09:14 | Session end: 20 writes across 7 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 14 reads | ~22092 tok |
+| 09:14 | Session end: 20 writes across 7 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 14 reads | ~22092 tok |
+| 09:16 | Session end: 20 writes across 7 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 14 reads | ~22092 tok |
+| 09:16 | Session end: 20 writes across 7 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 14 reads | ~22092 tok |
+| 09:17 | Session end: 20 writes across 7 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 14 reads | ~22092 tok |
+| 09:20 | Created tests/unit/api/campaigns/sessions.route.test.ts | — | ~1524 |
+| 09:20 | Created tests/unit/api/campaigns/sessions.id.route.test.ts | — | ~1214 |
+| 09:21 | Edited tests/unit/storage/sessionLog.test.ts | modified makeCollectionMock() | ~200 |
+| 09:21 | Edited tests/unit/storage/sessionLog.test.ts | expanded (+115 lines) | ~1515 |
+| 09:22 | Edited tests/unit/storage/sessionLog.test.ts | 3→3 lines | ~47 |
+| 09:22 | Edited tests/unit/storage/sessionLog.test.ts | 14→14 lines | ~207 |
