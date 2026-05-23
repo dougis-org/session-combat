@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware';
+import { withAuth } from '@/lib/middleware';
 import { getDatabase } from '@/lib/db';
 
 interface Item {
@@ -12,13 +12,7 @@ interface Item {
   updatedAt: Date;
 }
 
-export async function GET(request: NextRequest) {
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const GET = withAuth(async (request, auth) => {
   try {
     const db = await getDatabase();
     const items = await db
@@ -33,15 +27,9 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(request: NextRequest) {
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const POST = withAuth(async (request, auth) => {
   try {
     const body = await request.json();
     const { name, description } = body;
@@ -73,4 +61,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

@@ -1,16 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware';
+import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
 import { getDatabase } from '@/lib/db';
 
-export async function GET(request: NextRequest) {
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const GET = withAuth(async (request, auth) => {
   try {
     // Return all templates (user's private + global)
     const templates = await storage.loadAllMonsterTemplates(auth.userId);
@@ -22,15 +16,9 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(request: NextRequest) {
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const POST = withAuth(async (request, auth) => {
   try {
     const body = await request.json();
     const {
@@ -131,4 +119,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

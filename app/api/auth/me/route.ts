@@ -1,31 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
-import { verifyAuth } from '@/lib/middleware';
+import { withAuth } from '@/lib/middleware';
+import { getDatabase } from '@/lib/db';
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request, auth) => {
   try {
-    const auth = verifyAuth(request);
-    
-    if (!auth) {
-      return NextResponse.json(
-        { authenticated: false },
-        { status: 401 }
-      );
-    }
-
-    // Get user info including admin status
-    const db = require('@/lib/db').getDatabase;
+    const db = await getDatabase();
     let isAdmin = false;
     try {
-      const database = await db();
-      const user = await database.collection('users').findOne({ _id: new ObjectId(auth.userId) });
+      const user = await db.collection('users').findOne({ _id: new ObjectId(auth.userId) });
       isAdmin = user?.isAdmin === true;
     } catch (error) {
       console.error('Error fetching user admin status:', error);
     }
 
     const response = NextResponse.json(
-      { 
+      {
         authenticated: true,
         userId: auth.userId,
         email: auth.email,
@@ -33,10 +23,10 @@ export async function GET(request: NextRequest) {
       },
       { status: 200 }
     );
-    
+
     // Prevent caching — auth state changes when cookies change
     response.headers.set('Cache-Control', 'no-store');
-    
+
     return response;
   } catch (error) {
     console.error('Me endpoint error:', error);
@@ -45,4 +35,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

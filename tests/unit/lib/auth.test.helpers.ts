@@ -14,26 +14,32 @@ export const TEST_PAYLOADS = {
   basic: {
     userId: "test-user-123",
     email: "test@example.com",
+    tokenVersion: 0,
   },
   special: {
     userId: "user-special",
     email: "user+test@example.co.uk",
+    tokenVersion: 0,
   },
   timestamps: {
     userId: "user-timestamps",
     email: "timestamps@test.com",
+    tokenVersion: 0,
   },
   valid: {
     userId: "user-valid",
     email: "valid@example.com",
+    tokenVersion: 0,
   },
   corrupt: {
     userId: "user-corrupt",
     email: "corrupt@test.com",
+    tokenVersion: 0,
   },
   wrongSecret: {
     userId: "user-wrong-secret",
     email: "wrongsecret@test.com",
+    tokenVersion: 0,
   },
 };
 

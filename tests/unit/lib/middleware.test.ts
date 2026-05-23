@@ -9,12 +9,26 @@ import {
   withAuthAndParams,
 } from "@/lib/middleware";
 import { verifyToken } from "@/lib/auth";
+import { getDatabase } from "@/lib/db";
 
 jest.mock("@/lib/auth", () => ({
   verifyToken: jest.fn(),
 }));
 
+jest.mock("@/lib/db", () => ({
+  getDatabase: jest.fn(),
+}));
+
 const mockedVerifyToken = jest.mocked(verifyToken);
+const mockedGetDatabase = jest.mocked(getDatabase);
+
+function mockDb(user: Record<string, unknown> | null) {
+  mockedGetDatabase.mockResolvedValue({
+    collection: jest.fn().mockReturnValue({
+      findOne: jest.fn().mockResolvedValue(user),
+    }),
+  } as any);
+}
 
 function makeRequest(options: {
   cookie?: string;
@@ -26,7 +40,7 @@ function makeRequest(options: {
   return new NextRequest("http://localhost/api/test", { headers });
 }
 
-const MOCK_PAYLOAD = { userId: "user-123", email: "user@example.com" };
+const MOCK_PAYLOAD = { userId: "507f1f77bcf86cd799439011", email: "user@example.com", tokenVersion: 1 };
 
 describe("lib/middleware", () => {
   beforeEach(() => {
@@ -122,8 +136,9 @@ describe("lib/middleware", () => {
   });
 
   describe("withAuth", () => {
-    it("calls handler with auth payload when authenticated", async () => {
+    it("calls handler with auth payload when token is valid and tokenVersion matches", async () => {
       mockedVerifyToken.mockReturnValue(MOCK_PAYLOAD);
+      mockDb({ tokenVersion: 1 });
       const handler = jest.fn().mockResolvedValue(NextResponse.json({ ok: true }));
       const wrapped = withAuth(handler);
 
@@ -132,6 +147,32 @@ describe("lib/middleware", () => {
 
       expect(handler).toHaveBeenCalledWith(request, MOCK_PAYLOAD);
       expect(response.status).toBe(200);
+    });
+
+    it("returns 401 when tokenVersion does not match user document (stale token)", async () => {
+      mockedVerifyToken.mockReturnValue(MOCK_PAYLOAD);
+      mockDb({ tokenVersion: 99 });
+      const handler = jest.fn();
+      const wrapped = withAuth(handler);
+
+      const request = makeRequest({ cookie: "auth-token=valid.token" });
+      const response = await wrapped(request);
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(response.status).toBe(401);
+    });
+
+    it("returns 401 when user document is not found in DB", async () => {
+      mockedVerifyToken.mockReturnValue(MOCK_PAYLOAD);
+      mockDb(null);
+      const handler = jest.fn();
+      const wrapped = withAuth(handler);
+
+      const request = makeRequest({ cookie: "auth-token=valid.token" });
+      const response = await wrapped(request);
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(response.status).toBe(401);
     });
 
     it("returns 401 and does not call handler when not authenticated", async () => {
@@ -147,8 +188,9 @@ describe("lib/middleware", () => {
   });
 
   describe("withAuthAndParams", () => {
-    it("calls handler with auth payload and resolved params when authenticated", async () => {
+    it("calls handler with auth payload and params when token is valid and tokenVersion matches", async () => {
       mockedVerifyToken.mockReturnValue(MOCK_PAYLOAD);
+      mockDb({ tokenVersion: 1 });
       const handler = jest.fn().mockResolvedValue(NextResponse.json({ ok: true }));
       const wrapped = withAuthAndParams(handler);
 
@@ -158,6 +200,34 @@ describe("lib/middleware", () => {
 
       expect(handler).toHaveBeenCalledWith(request, MOCK_PAYLOAD, { id: "item-1" });
       expect(response.status).toBe(200);
+    });
+
+    it("returns 401 when tokenVersion does not match user document", async () => {
+      mockedVerifyToken.mockReturnValue(MOCK_PAYLOAD);
+      mockDb({ tokenVersion: 99 });
+      const handler = jest.fn();
+      const wrapped = withAuthAndParams(handler);
+
+      const request = makeRequest({ cookie: "auth-token=valid.token" });
+      const params = Promise.resolve({ id: "item-1" });
+      const response = await wrapped(request, { params });
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(response.status).toBe(401);
+    });
+
+    it("returns 401 when user document is not found in DB", async () => {
+      mockedVerifyToken.mockReturnValue(MOCK_PAYLOAD);
+      mockDb(null);
+      const handler = jest.fn();
+      const wrapped = withAuthAndParams(handler);
+
+      const request = makeRequest({ cookie: "auth-token=valid.token" });
+      const params = Promise.resolve({ id: "item-1" });
+      const response = await wrapped(request, { params });
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(response.status).toBe(401);
     });
 
     it("returns 401 and does not call handler when not authenticated", async () => {

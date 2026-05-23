@@ -10,7 +10,22 @@ import {
   itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
+jest.mock("@/lib/middleware", () => {
+  const requireAuth = jest.fn();
+  return {
+    requireAuth,
+    withAuth: (handler: any) => async (request: any) => {
+      const auth = requireAuth(request);
+      if (auth && 'status' in auth) return auth;
+      return handler(request, auth);
+    },
+    withAuthAndParams: (handler: any) => async (request: any, { params }: any) => {
+      const auth = requireAuth(request);
+      if (auth && 'status' in auth) return auth;
+      return handler(request, auth, await params);
+    },
+  };
+});
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 
 const mockedRequireAuth = jest.mocked(requireAuth);

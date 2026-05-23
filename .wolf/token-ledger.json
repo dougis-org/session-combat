@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-18T14:20:54.749Z",
   "lifetime": {
-    "total_tokens_estimated": 710086,
-    "total_reads": 436,
-    "total_writes": 635,
-    "total_sessions": 46,
-    "anatomy_hits": 236,
-    "anatomy_misses": 193,
-    "repeated_reads_blocked": 178,
-    "estimated_savings_vs_bare_cli": 304412
+    "total_tokens_estimated": 724724,
+    "total_reads": 458,
+    "total_writes": 652,
+    "total_sessions": 48,
+    "anatomy_hits": 240,
+    "anatomy_misses": 211,
+    "repeated_reads_blocked": 180,
+    "estimated_savings_vs_bare_cli": 305212
   },
   "sessions": [
     {
@@ -6966,6 +6966,291 @@
         "input_tokens_estimated": 4628,
         "output_tokens_estimated": 305,
         "reads_count": 8,
+        "writes_count": 2,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-05-23-1759",
+      "started": "2026-05-23T00:59:06.437Z",
+      "ended": "2026-05-23T01:38:55.901Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/proposal.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tasks.md",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tests.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/auth.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/login/route.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/specs/password-reset/spec.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/types.ts",
+          "tokens_estimated": 4628,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 97,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 208,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tasks.md",
+          "tokens_estimated": 571,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 4628,
+        "output_tokens_estimated": 876,
+        "reads_count": 8,
+        "writes_count": 3,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-05-23-1759",
+      "started": "2026-05-23T00:59:06.437Z",
+      "ended": "2026-05-23T14:18:54.163Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/proposal.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tasks.md",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tests.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/auth.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/login/route.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/specs/password-reset/spec.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/types.ts",
+          "tokens_estimated": 4628,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 97,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/design.md",
+          "tokens_estimated": 208,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tasks.md",
+          "tokens_estimated": 571,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/.openspec.yaml",
+          "tokens_estimated": 15,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/proposal.md",
+          "tokens_estimated": 776,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/design.md",
+          "tokens_estimated": 711,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 273,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/tasks.md",
+          "tokens_estimated": 421,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/add-password-reset-ability/proposal.md",
+          "tokens_estimated": 53,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/proposal.md",
+          "tokens_estimated": 815,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 4628,
+        "output_tokens_estimated": 3940,
+        "reads_count": 8,
+        "writes_count": 10,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-05-23-0853",
+      "started": "2026-05-23T15:53:32.829Z",
+      "ended": "2026-05-23T16:13:36.311Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.route.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/tmp/claude-1000/-home-doug-dev-session-combat/15291f90-2c4b-4d3a-b348-e7f3fa692a00/tasks/biqk0h3es.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 239,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.route.test.ts",
+          "tokens_estimated": 23,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 21,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 239,
+        "output_tokens_estimated": 44,
+        "reads_count": 3,
+        "writes_count": 2,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-05-23-0853",
+      "started": "2026-05-23T15:53:32.829Z",
+      "ended": "2026-05-23T16:17:38.243Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.route.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/tmp/claude-1000/-home-doug-dev-session-combat/15291f90-2c4b-4d3a-b348-e7f3fa692a00/tasks/biqk0h3es.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 239,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.route.test.ts",
+          "tokens_estimated": 23,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 21,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 239,
+        "output_tokens_estimated": 44,
+        "reads_count": 3,
         "writes_count": 2,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 1

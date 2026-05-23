@@ -1,19 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware';
+import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const GET = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
     const templates = await storage.loadMonsterTemplates(auth.userId);
     const template = templates.find((t) => t.id === id);
@@ -33,19 +23,9 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
     const body = await request.json();
     const {
@@ -154,19 +134,9 @@ export async function PUT(
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
     const templates = await storage.loadMonsterTemplates(auth.userId);
     const template = templates.find((t) => t.id === id);
@@ -188,4 +158,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-}
+});

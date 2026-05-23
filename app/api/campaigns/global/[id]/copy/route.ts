@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { storage } from '@/lib/storage';
-import { requireAuth } from '@/lib/middleware';
+import { withAuthAndParams } from '@/lib/middleware';
 import { Campaign, CampaignChapter } from '@/lib/types';
 import { randomUUID } from 'crypto';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-
-  const auth = requireAuth(request);
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
     const template = await storage.loadGlobalCampaignTemplateById(id);
 
@@ -47,4 +37,4 @@ export async function POST(
     console.error('Error copying campaign template:', error);
     return NextResponse.json({ error: 'Failed to copy campaign template' }, { status: 500 });
   }
-}
+});

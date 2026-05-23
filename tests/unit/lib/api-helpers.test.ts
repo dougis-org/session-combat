@@ -3,9 +3,21 @@ import { requireAuth } from "@/lib/middleware";
 import { isUserAdmin } from "@/lib/permissions";
 import { NextResponse } from "next/server";
 import { makeRouteRequest, ADMIN_AUTH, MOCK_AUTH } from "@/tests/unit/helpers/route.test.helpers";
+import { getDatabase } from "@/lib/db";
 
 jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
 jest.mock("@/lib/permissions", () => ({ isUserAdmin: jest.fn() }));
+jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
+
+const mockedGetDatabase = jest.mocked(getDatabase);
+
+function mockDbUser(tokenVersion: number) {
+  mockedGetDatabase.mockResolvedValue({
+    collection: jest.fn().mockReturnValue({
+      findOne: jest.fn().mockResolvedValue({ tokenVersion }),
+    }),
+  } as any);
+}
 
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedIsUserAdmin = jest.mocked(isUserAdmin);
@@ -17,6 +29,7 @@ describe("requireAdmin", () => {
 
   it("returns null when user is authenticated and is an admin", async () => {
     mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
+    mockDbUser(ADMIN_AUTH.tokenVersion);
     mockedIsUserAdmin.mockResolvedValue(true);
 
     const req = makeRouteRequest("http://localhost/api/test", "POST", {});
@@ -38,8 +51,20 @@ describe("requireAdmin", () => {
     expect(mockedIsUserAdmin).not.toHaveBeenCalled();
   });
 
+  it("returns 401 when tokenVersion does not match DB", async () => {
+    mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
+    mockDbUser(99); // mismatch
+
+    const req = makeRouteRequest("http://localhost/api/test", "POST", {});
+    const result = await requireAdmin(req);
+
+    expect(result?.status).toBe(401);
+    expect(mockedIsUserAdmin).not.toHaveBeenCalled();
+  });
+
   it("returns 500 when isUserAdmin returns null (DB error)", async () => {
     mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
+    mockDbUser(ADMIN_AUTH.tokenVersion);
     mockedIsUserAdmin.mockResolvedValue(null);
 
     const req = makeRouteRequest("http://localhost/api/test", "POST", {});
@@ -51,7 +76,8 @@ describe("requireAdmin", () => {
   });
 
   it("returns 403 when isUserAdmin returns false (not an admin)", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
+    mockDbUser(ADMIN_AUTH.tokenVersion);
     mockedIsUserAdmin.mockResolvedValue(false);
 
     const req = makeRouteRequest("http://localhost/api/test", "POST", {});

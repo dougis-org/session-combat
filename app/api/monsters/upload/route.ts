@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware';
+import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import {
   validateMonsterUploadDocument,
@@ -16,14 +16,7 @@ import {
   RawMonsterData,
 } from '@/lib/validation/monsterUpload';
 
-export async function POST(request: NextRequest) {
-  const auth = requireAuth(request);
-
-  // Check authentication
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const POST = withAuth(async (request, auth) => {
   try {
     // Parse request body as JSON
     let document: unknown;
@@ -110,4 +103,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

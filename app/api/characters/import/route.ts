@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DndBeyondImportError } from "@/lib/dndBeyondCharacterImport";
-import { requireAuth } from "@/lib/middleware";
+import { withAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { importDndBeyondCharacter } from "@/lib/server/dndBeyondCharacterImport";
 import { Character } from "@/lib/types";
 
-export async function POST(request: NextRequest) {
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const POST = withAuth(async (request, auth) => {
   try {
     const body = await request.json();
     const url = typeof body?.url === "string" ? body.url.trim() : "";
@@ -80,7 +74,7 @@ export async function POST(request: NextRequest) {
       { status: response.status },
     );
   }
-}
+});
 
 function getImportErrorResponse(error: unknown): {
   message: string;

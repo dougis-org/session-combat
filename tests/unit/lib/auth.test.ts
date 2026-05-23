@@ -33,6 +33,7 @@ describe("lib/auth.ts - Unit Tests", () => {
       const payload: AuthPayload = {
         userId: "user-456",
         email: "user456@test.org",
+        tokenVersion: 0,
       };
       const token = generateToken(payload);
       const verified = verifyToken(token);
@@ -255,10 +256,12 @@ describe("lib/auth.ts - Unit Tests", () => {
       const payload1: AuthPayload = {
         userId: "user-parallel-1",
         email: "parallel1@test.com",
+        tokenVersion: 0,
       };
       const payload2: AuthPayload = {
         userId: "user-parallel-2",
         email: "parallel2@test.com",
+        tokenVersion: 0,
       };
 
       const [token1, token2] = await Promise.all([

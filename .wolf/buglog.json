@@ -1088,6 +1088,182 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-23T01:03:48.908Z"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-05-23T14:16:33.785Z",
+      "error_message": "Significant refactor of ",
+      "file": "openspec/changes/add-password-reset-ability/proposal.md",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→5 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T14:16:33.785Z"
+    },
+    {
+      "id": "bug-070",
+      "timestamp": "2026-05-23T14:22:59.278Z",
+      "error_message": "Missing error handling in function",
+      "file": "lib/middleware.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T14:22:59.278Z"
+    },
+    {
+      "id": "bug-071",
+      "timestamp": "2026-05-23T14:23:16.340Z",
+      "error_message": "Type error",
+      "file": "app/api/auth/login/route.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T14:23:16.340Z"
+    },
+    {
+      "id": "bug-072",
+      "timestamp": "2026-05-23T14:26:16.981Z",
+      "error_message": "Wrong reference: requireAuth should be withAuth",
+      "file": "app/api/monsters/route.ts",
+      "root_cause": "Used \"requireAuth\" instead of \"withAuth\"",
+      "fix": "Changed requireAuth → withAuth",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-23T14:26:33.109Z"
+    },
+    {
+      "id": "bug-073",
+      "timestamp": "2026-05-23T14:30:18.701Z",
+      "error_message": "Type error",
+      "file": "tests/unit/lib/middleware.test.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T14:30:18.701Z"
+    },
+    {
+      "id": "bug-074",
+      "timestamp": "2026-05-23T14:30:21.546Z",
+      "error_message": "Incorrect value in code",
+      "file": "tests/unit/lib/middleware.test.ts",
+      "root_cause": "Had \"user-123\"",
+      "fix": "Changed to \"507f1f77bcf86cd799439011\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T14:30:21.546Z"
+    },
+    {
+      "id": "bug-075",
+      "timestamp": "2026-05-23T14:30:41.859Z",
+      "error_message": "Significant refactor of ",
+      "file": "tests/unit/lib/middleware.test.ts",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 52→108 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T14:30:41.859Z"
+    },
+    {
+      "id": "bug-076",
+      "timestamp": "2026-05-23T15:49:00.250Z",
+      "error_message": "Missing guard clause",
+      "file": "tests/unit/api/monsters/duplicate.test.ts",
+      "root_cause": "No early return/throw for edge case: auth && 'status' in auth",
+      "fix": "Added guard clause: if (auth && 'status' in auth)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T15:49:00.250Z"
+    },
+    {
+      "id": "bug-077",
+      "timestamp": "2026-05-23T15:49:23.760Z",
+      "error_message": "Missing guard clause",
+      "file": "tests/unit/api/campaigns/route.test.ts",
+      "root_cause": "No early return/throw for edge case: auth && 'status' in auth",
+      "fix": "Added guard clause: if (auth && 'status' in auth)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-23T15:49:30.422Z"
+    },
+    {
+      "id": "bug-078",
+      "timestamp": "2026-05-23T15:49:39.381Z",
+      "error_message": "Missing guard clause",
+      "file": "tests/unit/import/characterImportRoute.test.ts",
+      "root_cause": "No early return/throw for edge case: auth && 'status' in auth",
+      "fix": "Added guard clause: if (auth && 'status' in auth)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T15:49:39.381Z"
+    },
+    {
+      "id": "bug-079",
+      "timestamp": "2026-05-23T15:49:56.644Z",
+      "error_message": "Type error",
+      "file": "tests/unit/lib/api-helpers.test.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T15:49:56.644Z"
     }
   ]
 }
