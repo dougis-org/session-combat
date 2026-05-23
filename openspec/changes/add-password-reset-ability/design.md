@@ -49,7 +49,15 @@
 
 - Reuse existing password strength validator.
 - Hash new password with existing bcrypt settings.
-- Invalidate all prior auth sessions/tokens for user after successful reset.
+- Invalidate all prior auth sessions/tokens for user after successful reset via `tokenVersion` increment (Option A).
+
+### D6: Session invalidation via tokenVersion
+
+- Add `tokenVersion: number` field to User document (default `0`).
+- Include `tokenVersion` in JWT payload at issue time.
+- Auth middleware rejects any JWT whose `tokenVersion` does not match the current value in the DB.
+- On successful password reset, atomically increment `tokenVersion` alongside the password hash update.
+- Cost: one extra DB read per authenticated request. Accepted trade-off for correct revocation semantics.
 
 ## Functional Requirements Mapping
 
@@ -75,7 +83,7 @@
 - Feature-flag password reset routes/pages.
 - If incident occurs, disable reset endpoints and purge outstanding reset tokens.
 
-## Open Questions
+## Resolved Decisions
 
-- Final provider choice and sender identity for reset emails.
-- Preferred rate limiter backing store (memory vs Redis-like store).
+- **Email provider:** Mailtrap.io (official Node.js SDK: `mailtrap`). Use the Email Sending API for production delivery.
+- **Rate limiter backing store:** In-memory (`Map` + TTL). Acceptable for current single-instance deployment. Document as a known limitation for horizontal scaling if Fly.io instance count grows.
