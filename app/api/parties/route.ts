@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Party } from '@/lib/types';
+import { Party, PartyMember } from '@/lib/types';
 
 export const GET = withAuth(async (_request, auth) => {
   try {
@@ -22,15 +22,19 @@ export const POST = withAuth(async (request, auth) => {
       return NextResponse.json({ error: 'Party name is required' }, { status: 400 });
     }
 
+    const now = new Date();
+    const ids: string[] = Array.isArray(characterIds) ? characterIds : [];
+    const members: PartyMember[] = ids.map(characterId => ({ characterId, addedAt: now }));
+
     const party: Party = {
       id: crypto.randomUUID(),
       userId: auth.userId,
       name: name.trim(),
       description: description?.trim() || '',
-      characterIds: Array.isArray(characterIds) ? characterIds : [],
+      members,
       ...(typeof campaignId === 'string' && campaignId.trim() && { campaignId: campaignId.trim() }),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
     };
 
     await storage.saveParty(party);

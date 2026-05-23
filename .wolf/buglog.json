@@ -1075,19 +1075,323 @@
     },
     {
       "id": "bug-068",
-      "timestamp": "2026-05-23T01:03:48.908Z",
-      "error_message": "Significant refactor of ",
-      "file": "openspec/changes/add-password-reset-ability/design.md",
-      "root_cause": "3 lines replaced/restructured",
-      "fix": "Rewrote 4→4 lines (3 removed)",
+      "timestamp": "2026-05-22T23:37:04.883Z",
+      "error_message": "Missing guard clause",
+      "file": "tests/unit/import/dndBeyond-ability-scores.test.ts",
+      "root_cause": "No early return/throw for edge case: value == null",
+      "fix": "Added guard clause: if (value == null)",
       "tags": [
         "auto-detected",
-        "refactor",
-        "md"
+        "guard-clause",
+        "ts"
       ],
       "related_bugs": [],
       "occurrences": 1,
-      "last_seen": "2026-05-23T01:03:48.908Z"
+      "last_seen": "2026-05-22T23:37:04.883Z"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-05-23T00:59:41.272Z",
+      "error_message": "Null/undefined access in ",
+      "file": "lib/storage.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T00:59:41.272Z"
+    },
+    {
+      "id": "bug-070",
+      "timestamp": "2026-05-23T00:59:52.804Z",
+      "error_message": "Significant refactor of ",
+      "file": "lib/storage.ts",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 15→13 lines (6 removed) | Also: // Also remove character from all parties to ensur; .updateMany({ userId }, { $pull: { characterIds: i",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-23T01:00:06.364Z"
+    },
+    {
+      "id": "bug-071",
+      "timestamp": "2026-05-23T01:00:16.523Z",
+      "error_message": "Missing error handling in loadSessionLogs",
+      "file": "lib/storage.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T01:00:16.523Z"
+    },
+    {
+      "id": "bug-072",
+      "timestamp": "2026-05-23T01:00:37.916Z",
+      "error_message": "Significant refactor of ",
+      "file": "app/api/parties/route.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 10→14 lines (3 removed) | Also: characterIds: Array.isArray(characterIds) ? charac; updatedAt: new Date(),",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-23T01:00:53.383Z"
+    },
+    {
+      "id": "bug-073",
+      "timestamp": "2026-05-23T01:01:28.259Z",
+      "error_message": "CSS fix: Members",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Members: {party.characterIds.length → {activeIds.length",
+      "fix": "Changed Members: {party.characterIds.length → {activeIds.length",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T01:01:28.259Z"
+    },
+    {
+      "id": "bug-074",
+      "timestamp": "2026-05-23T01:01:32.311Z",
+      "error_message": "Wrong reference: characterIds should be members",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Used \"characterIds\" instead of \"members\"",
+      "fix": "Changed characterIds → members",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T01:01:32.311Z"
+    },
+    {
+      "id": "bug-075",
+      "timestamp": "2026-05-23T01:07:03.356Z",
+      "error_message": "Significant refactor of ",
+      "file": "app/campaigns/[id]/sessions/page.tsx",
+      "root_cause": "27 lines replaced/restructured",
+      "fix": "Rewrote 30→4 lines (27 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T01:07:03.356Z"
+    },
+    {
+      "id": "bug-076",
+      "timestamp": "2026-05-23T01:10:59.091Z",
+      "error_message": "CSS fix: id",
+      "file": "tests/unit/partyCharacterTypeUI.test.tsx",
+      "root_cause": "id: 'p1', name: 'Fellowship', characterIds: ['c1', 'c2', 'c3'], userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() → 'p1', name: 'Fellowship', members: [",
+      "fix": "Changed id: 'p1', name: 'Fellowship', characterIds: ['c1', 'c2', 'c3'], userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() → 'p1', name: 'Fellowship', members: [",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T01:10:59.091Z"
+    },
+    {
+      "id": "bug-077",
+      "timestamp": "2026-05-23T01:11:25.227Z",
+      "error_message": "CSS fix: id",
+      "file": "tests/unit/components/PartiesPage.test.tsx",
+      "root_cause": "id: 'p3', name: 'Empty Party', characterIds: [], → 'p3', name: 'Empty Party', members: [],",
+      "fix": "Changed id: 'p3', name: 'Empty Party', characterIds: [], → 'p3', name: 'Empty Party', members: [],",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-05-23T01:11:38.122Z"
+    },
+    {
+      "id": "bug-078",
+      "timestamp": "2026-05-23T01:11:51.282Z",
+      "error_message": "Significant refactor of ",
+      "file": "tests/unit/storage/storage.test.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 9→10 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T01:11:51.282Z"
+    },
+    {
+      "id": "bug-079",
+      "timestamp": "2026-05-23T01:12:08.797Z",
+      "error_message": "Wrong reference: characterIds should be members",
+      "file": "tests/unit/api/parties/route.test.ts",
+      "root_cause": "Used \"characterIds\" instead of \"members\"",
+      "fix": "Changed characterIds → members",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T01:12:08.797Z"
+    },
+    {
+      "id": "bug-080",
+      "timestamp": "2026-05-23T01:13:39.489Z",
+      "error_message": "Type error",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T01:13:39.489Z"
+    },
+    {
+      "id": "bug-081",
+      "timestamp": "2026-05-23T01:14:14.270Z",
+      "error_message": "CSS fix: name",
+      "file": "app/parties/page.tsx",
+      "root_cause": "name: name.trim(), → name.trim(), description: description.trim(), campaignId: campaignId",
+      "fix": "Changed name: name.trim(), → name.trim(), description: description.trim(), campaignId: campaignId",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-23T01:16:17.430Z"
+    },
+    {
+      "id": "bug-082",
+      "timestamp": "2026-05-23T01:16:11.479Z",
+      "error_message": "Wrong reference: void should be characterIds",
+      "file": "app/parties/page.tsx",
+      "root_cause": "Used \"void\" instead of \"characterIds\"",
+      "fix": "Changed void → characterIds",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T01:16:11.479Z"
+    },
+    {
+      "id": "bug-083",
+      "timestamp": "2026-05-23T15:49:32.102Z",
+      "error_message": "Type error",
+      "file": "lib/storage.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T15:49:32.102Z"
+    },
+    {
+      "id": "bug-084",
+      "timestamp": "2026-05-23T15:49:44.211Z",
+      "error_message": "Wrong operator: ?? should be ===",
+      "file": "lib/utils/sessionEvents.ts",
+      "root_cause": "Used \"??\" instead of \"===\"",
+      "fix": "Changed operator ?? → ===",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T15:49:44.211Z"
+    },
+    {
+      "id": "bug-085",
+      "timestamp": "2026-05-23T15:49:54.162Z",
+      "error_message": "Incorrect value in code",
+      "file": "app/campaigns/[id]/sessions/page.tsx",
+      "root_cause": "Had 'Up'",
+      "fix": "Changed to 'undefined'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T15:49:54.162Z"
+    },
+    {
+      "id": "bug-086",
+      "timestamp": "2026-05-23T15:50:12.931Z",
+      "error_message": "Incorrect value in code",
+      "file": "openspec/changes/campaign-session-journal/tasks.md",
+      "root_cause": "Had `npm test`",
+      "fix": "Changed to `npm run test:unit`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-23T15:50:19.021Z"
+    },
+    {
+      "id": "bug-087",
+      "timestamp": "2026-05-23T16:35:04.038Z",
+      "error_message": "Null/undefined access in ",
+      "file": "tests/unit/components/CampaignsPage.test.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T16:35:04.038Z"
     }
   ]
 }

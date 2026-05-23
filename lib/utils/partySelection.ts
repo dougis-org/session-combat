@@ -9,10 +9,11 @@ export function expandPartyToCharacters(
   party: Party,
   characters: Character[]
 ): Character[] {
-  if (!party || !Array.isArray(party.characterIds)) return [];
+  if (!party || !Array.isArray(party.members)) return [];
   const characterMap = new Map(characters.map(c => [c.id, c]));
-  return party.characterIds
-    .map(id => characterMap.get(id))
+  return party.members
+    .filter(m => !m.leftAt)
+    .map(m => characterMap.get(m.characterId))
     .filter((c): c is Character => c !== undefined);
 }
 

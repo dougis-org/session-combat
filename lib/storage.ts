@@ -6,10 +6,13 @@ import {
   Character,
   CombatState,
   Party,
+  PartyMember,
   Campaign,
   CampaignTemplate,
   MonsterTemplate,
   SpellTemplate,
+  SessionLog,
+  SessionLogInput,
 } from "./types";
 import { GLOBAL_USER_ID } from "./constants";
 import { ObjectId, Filter, Document } from "mongodb";
@@ -43,6 +46,21 @@ function normalizeCampaign(campaign: Campaign): Campaign {
     ...campaign,
     chapters: Array.isArray(campaign.chapters) ? campaign.chapters : [],
   };
+}
+
+type LegacyPartyDoc = Omit<Party, 'members'> & { members?: PartyMember[]; characterIds?: string[] };
+
+function migrateParty(party: LegacyPartyDoc): Party {
+  if (Array.isArray(party.members)) {
+    return party as Party;
+  }
+  const legacyIds: string[] = Array.isArray(party.characterIds) ? party.characterIds : [];
+  const addedAt = party.createdAt ?? new Date(0);
+  const { characterIds: _discarded, ...rest } = party;
+  return {
+    ...rest,
+    members: legacyIds.map(characterId => ({ characterId, addedAt })),
+  } as Party;
 }
 
 /**
@@ -128,10 +146,10 @@ export const storage = {
     try {
       const db = await getDatabase();
       const parties = await db
-        .collection<Party>("parties")
+        .collection<LegacyPartyDoc>("parties")
         .find({ userId })
         .toArray();
-      return parties.map(normalizeStoredEntityId);
+      return parties.map(normalizeStoredEntityId).map(migrateParty);
     } catch (error) {
       console.error("Error loading parties:", error);
       return [];
@@ -448,10 +466,14 @@ export const storage = {
       await db
         .collection<Character>("characters")
         .updateOne({ id, userId }, { $set: { deletedAt: new Date() } });
-      // Also remove character from all parties to ensure referential integrity
+      // Set leftAt on all active party memberships for the deleted character
       await db
         .collection<Party>("parties")
-        .updateMany({ userId }, { $pull: { characterIds: id } });
+        .updateMany(
+          { userId, "members.characterId": id, "members.leftAt": { $exists: false } },
+          { $set: { "members.$[elem].leftAt": new Date() } },
+          { arrayFilters: [{ "elem.characterId": id, "elem.leftAt": { $exists: false } }] }
+        );
     } catch (error) {
       console.error("Error deleting character:", error);
       throw error;
@@ -647,6 +669,93 @@ export const storage = {
     } catch (error) {
       console.error("Error finding monster:", error);
       return null;
+    }
+  },
+
+  // Load session logs for a campaign, sorted by sessionNumber descending
+  async loadSessionLogs(userId: string, campaignId: string): Promise<SessionLog[]> {
+    try {
+      const db = await getDatabase();
+      const logs = await db
+        .collection<SessionLog>("sessionLogs")
+        .find({ userId, campaignId })
+        .sort({ sessionNumber: -1 })
+        .toArray();
+      return logs.map(normalizeStoredEntityId);
+    } catch (error) {
+      console.error("Error loading session logs:", error);
+      return [];
+    }
+  },
+
+  // Get the next session number (MAX + 1, or 1 if none exist)
+  async getNextSessionNumber(userId: string, campaignId: string): Promise<number> {
+    try {
+      const db = await getDatabase();
+      const latest = await db
+        .collection<SessionLog>("sessionLogs")
+        .findOne({ userId, campaignId }, { sort: { sessionNumber: -1 } });
+      return latest ? latest.sessionNumber + 1 : 1;
+    } catch (error) {
+      console.error("Error getting next session number:", error);
+      return 1;
+    }
+  },
+
+  // Save a new session log (insert)
+  async saveSessionLog(log: SessionLog): Promise<void> {
+    try {
+      const db = await getDatabase();
+      const { _id, ...logData } = log;
+      await db.collection<SessionLog>("sessionLogs").insertOne(logData as SessionLog);
+    } catch (error) {
+      console.error("Error saving session log:", error);
+      throw error;
+    }
+  },
+
+  // Update an existing session log (partial update)
+  async updateSessionLog(
+    id: string,
+    userId: string,
+    campaignId: string,
+    patch: Partial<SessionLogInput>
+  ): Promise<SessionLog | null> {
+    try {
+      const db = await getDatabase();
+      const { datePlayed, campaignId: _ignored, ...restPatch } = patch;
+      const updateData: Record<string, unknown> = { updatedAt: new Date() };
+      for (const [key, value] of Object.entries(restPatch)) {
+        if (value !== undefined) updateData[key] = value;
+      }
+      if (typeof datePlayed !== 'undefined') {
+        updateData.datePlayed = new Date(datePlayed);
+      }
+      const result = await db
+        .collection<SessionLog>("sessionLogs")
+        .findOneAndUpdate(
+          { id, userId, campaignId },
+          { $set: updateData },
+          { returnDocument: "after" }
+        );
+      return result ? normalizeStoredEntityId(result as SessionLog) : null;
+    } catch (error) {
+      console.error("Error updating session log:", error);
+      throw error;
+    }
+  },
+
+  // Delete a session log
+  async deleteSessionLog(id: string, userId: string, campaignId: string): Promise<boolean> {
+    try {
+      const db = await getDatabase();
+      const result = await db
+        .collection<SessionLog>("sessionLogs")
+        .deleteOne({ id, userId, campaignId });
+      return result.deletedCount > 0;
+    } catch (error) {
+      console.error("Error deleting session log:", error);
+      throw error;
     }
   },
 
