@@ -1,16 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { clearAuthCookie, verifyAuth } from "@/lib/middleware";
+import { clearAuthCookie } from "@/lib/middleware";
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
-    // Verify auth token exists and is valid
-    const auth = verifyAuth(request);
-
-    if (!auth) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Token is valid, clear it and return success
     const response = NextResponse.json(
       { message: "Logout successful" },
       { status: 200 },

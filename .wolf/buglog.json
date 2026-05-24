@@ -1664,6 +1664,54 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-24T18:45:04.716Z"
+    },
+    {
+      "id": "bug-105",
+      "timestamp": "2026-05-24T19:00:04.911Z",
+      "error_message": "Missing error handling in function",
+      "file": "app/campaigns/[id]/prompts/page.tsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-24T19:00:04.911Z"
+    },
+    {
+      "id": "bug-106",
+      "timestamp": "2026-05-24T19:00:20.059Z",
+      "error_message": "CSS fix: templates, build",
+      "file": "tests/integration/prompts/promptBuilder.test.tsx",
+      "root_cause": "templates: 5 tabs (real ids), but the first has no required fields for generate tests → NPC tab has optional-only fields (Generate works without filling them).; build: () => ({ systemPrompt: 'Campaign: Curse of Strahd', userMessage: 'Create an NPC named Bob.', fullText: 'Campaign: Curse of Strahd\\n\\nCreate an NPC named Bob.' → () => ({ systemPrompt: '', userMessage: '', fullText: ''",
+      "fix": "Changed templates: 5 tabs (real ids), but the first has no required fields for generate tests → NPC tab has optional-only fields (Generate works without filling them).; build: () => ({ systemPrompt: 'Campaign: Curse of Strahd', userMessage: 'Create an NPC named Bob.', fullText: 'Campaign: Curse of Strahd\\n\\nCreate an NPC named Bob.' → () => ({ systemPrompt: '', userMessage: '', fullText: ''",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-24T19:00:20.059Z"
+    },
+    {
+      "id": "bug-107",
+      "timestamp": "2026-05-24T19:00:32.049Z",
+      "error_message": "Null/undefined access in ",
+      "file": "tests/integration/prompts/promptBuilder.test.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-24T19:00:32.049Z"
     }
   ]
 }

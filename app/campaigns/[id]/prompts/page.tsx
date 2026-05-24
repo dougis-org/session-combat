@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
@@ -18,6 +18,13 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
   const [copied, setCopied] = useState(false);
 
   const activeTemplate: PromptTemplate = TEMPLATES.find(t => t.id === activeTemplateId) ?? TEMPLATES[0];
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    };
+  }, []);
 
   function selectTemplate(template: PromptTemplate) {
     setActiveTemplateId(template.id);
@@ -52,10 +59,15 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
   }
 
   async function handleCopy() {
-    if (!builtPrompt) return;
-    await navigator.clipboard.writeText(builtPrompt.fullText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (!builtPrompt || !navigator.clipboard) return;
+    try {
+      await navigator.clipboard.writeText(builtPrompt.fullText);
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+      setCopied(true);
+      copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard write rejected (permissions / insecure context)
+    }
   }
 
   if (loading) {
@@ -114,29 +126,21 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
             <div className="bg-gray-800 rounded-lg p-6 mb-6">
               <h2 className="text-xl font-semibold mb-4">{activeTemplate.label}</h2>
               <div className="space-y-4 mb-6">
-                {activeTemplate.fields.map(field => (
-                  <FormField key={field.key} label={field.label + (field.optional ? ' (optional)' : '')} htmlFor={field.key}>
-                    {field.multiline ? (
-                      <textarea
+                {activeTemplate.fields.map(field => {
+                  const Tag = field.multiline ? 'textarea' : 'input';
+                  return (
+                    <FormField key={field.key} label={field.label + (field.optional ? ' (optional)' : '')} htmlFor={field.key}>
+                      <Tag
                         id={field.key}
                         value={fields[field.key] ?? ''}
                         onChange={e => handleFieldChange(field.key, e.target.value)}
                         placeholder={field.placeholder}
-                        rows={3}
-                        className={textInputClass() + ' resize-y'}
+                        className={textInputClass() + (field.multiline ? ' resize-y' : '')}
+                        {...(Tag === 'textarea' ? { rows: 3 } : { type: 'text' })}
                       />
-                    ) : (
-                      <input
-                        id={field.key}
-                        type="text"
-                        value={fields[field.key] ?? ''}
-                        onChange={e => handleFieldChange(field.key, e.target.value)}
-                        placeholder={field.placeholder}
-                        className={textInputClass()}
-                      />
-                    )}
-                  </FormField>
-                ))}
+                    </FormField>
+                  );
+                })}
               </div>
 
               {validationError && (

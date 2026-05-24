@@ -45,11 +45,12 @@ const { useCampaignContext } = require('@/lib/hooks/useCampaignContext') as {
 
 const FULL_PROMPT = 'Campaign: Curse of Strahd\n\nCreate an NPC named Bob.';
 
-// Mock templates: 5 tabs (real ids), but the first has no required fields for generate tests
+// Mock templates: NPC tab has optional-only fields (Generate works without filling them).
+// Location tab has one required field (used by C1-5 to verify validation fires).
 jest.mock('@/lib/prompts/templates', () => ({
   TEMPLATES: [
     { id: 'npc', label: 'NPC', fields: [{ key: 'role', label: 'Role / Occupation', placeholder: 'e.g. innkeeper, guard, merchant', optional: true }], build: () => ({ systemPrompt: 'Campaign: Curse of Strahd', userMessage: 'Create an NPC named Bob.', fullText: 'Campaign: Curse of Strahd\n\nCreate an NPC named Bob.' }) },
-    { id: 'location', label: 'Location Description', fields: [], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
+    { id: 'location', label: 'Location Description', fields: [{ key: 'locationName', label: 'Location Name', placeholder: 'e.g. Tavern' }], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
     { id: 'shop', label: 'Shop / Establishment', fields: [], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
     { id: 'magic-item', label: 'Magic Item', fields: [], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
     { id: 'room', label: 'Room Description', fields: [], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
@@ -148,28 +149,22 @@ describe('Prompt Builder Page', () => {
   });
 
   test('C1-5: clicking Generate with missing required field shows validation message', async () => {
-    // Use real templates for this validation test
-    jest.mock('@/lib/prompts/templates', () => ({
-      TEMPLATES: [
-        { id: 'npc', label: 'NPC', fields: [{ key: 'role', label: 'Role', placeholder: 'role' }, { key: 'location', label: 'Location', placeholder: 'location' }], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
-        { id: 'location', label: 'Location Description', fields: [], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
-        { id: 'shop', label: 'Shop / Establishment', fields: [], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
-        { id: 'magic-item', label: 'Magic Item', fields: [], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
-        { id: 'room', label: 'Room Description', fields: [], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
-      ],
-    }));
-
     useCampaignContext.mockReturnValue({ context: makeContext(), loading: false, error: null, refresh: jest.fn() });
     await renderPage();
 
-    // Don't fill fields - click Generate immediately
+    // Switch to Location Description tab — it has a required 'Location Name' field
+    const locationBtn = Array.from(container.querySelectorAll('button'))
+      .find(b => b.textContent?.includes('Location Description'));
+    await act(async () => { locationBtn?.click(); });
+
+    // Click Generate without filling the required field
     const generateBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Generate'));
     await act(async () => { generateBtn?.click(); });
 
-    // The mock template has no required fields (optional field only), so this test checks our validation logic
-    // Note: if mock template has no required fields, no validation fires — that's expected
-    // The page should handle gracefully
-    expect(container.textContent).toBeDefined();
+    // Validation should fire: no read-only textarea rendered, required field name in error message
+    const textarea = container.querySelector('textarea[readOnly]') ?? container.querySelector('[readonly]');
+    expect(textarea).toBeNull();
+    expect(container.textContent).toContain('Location Name');
   });
 
   test('C1-6: after Generate, Copy button calls navigator.clipboard.writeText with fullText', async () => {

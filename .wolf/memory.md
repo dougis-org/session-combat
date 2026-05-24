@@ -1086,3 +1086,19 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 11:55 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | 7→7 lines | ~87 |
+| 11:55 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | 4→4 lines | ~112 |
+| 11:55 | Session end: 2 writes across 1 files (tasks.md) | 3 reads | ~4045 tok |
+| 11:55 | Session end: 2 writes across 1 files (tasks.md) | 3 reads | ~4045 tok |
+| 11:59 | Edited app/campaigns/[id]/prompts/page.tsx | inline fix | ~15 |
+| 11:59 | Edited app/campaigns/[id]/prompts/page.tsx | added 1 condition(s) | ~89 |
+| 12:00 | Edited app/campaigns/[id]/prompts/page.tsx | added error handling | ~114 |
+| 12:00 | Edited tests/integration/prompts/promptBuilder.test.tsx | 10→11 lines | ~332 |
+| 12:00 | Edited tests/integration/prompts/promptBuilder.test.tsx | added nullish coalescing | ~304 |
+| 12:11 | Edited lib/prompts/templates.ts | inline fix | ~26 |
+| 12:11 | Edited lib/prompts/templates.ts | reduce() → calculateTotalLevel() | ~61 |
+| 12:11 | Edited lib/utils/campaignContext.ts | 2→4 lines | ~55 |
+| 12:11 | Edited app/campaigns/[id]/prompts/page.tsx | unavailable() → rejected() | ~120 |
+| 12:11 | Edited app/campaigns/[id]/prompts/page.tsx | CSS: rows, type | ~233 |
+| 13:53 | Edited app/api/auth/logout/route.ts | modified POST() | ~142 |
+| 13:53 | Edited app/api/auth/logout/route.ts | modified POST() | ~144 |

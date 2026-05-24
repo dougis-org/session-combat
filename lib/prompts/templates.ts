@@ -1,4 +1,4 @@
-import { BuiltPrompt, CampaignContext, Character } from '@/lib/types';
+import { BuiltPrompt, CampaignContext, Character, calculateTotalLevel } from '@/lib/types';
 
 export interface PromptField {
   key: string;
@@ -16,7 +16,7 @@ export interface PromptTemplate {
 }
 
 function formatCharacter(c: Character): string {
-  const level = c.classes.reduce((sum, cl) => sum + cl.level, 0);
+  const level = calculateTotalLevel(c.classes);
   const classNames = c.classes.map(cl => cl.class).join('/');
   return `${c.name} (Level ${level} ${classNames})`;
 }

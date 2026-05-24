@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-24T18:43:39.667Z
-> Files: 721 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-24T20:53:48.133Z
+> Files: 739 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -762,6 +762,10 @@
 
 - `route.ts` — Next.js API route: POST (~554 tok)
 
+## app/api/auth/logout/
+
+- `route.ts` — Next.js API route: POST (~144 tok)
+
 ## app/api/auth/me/
 
 - `route.ts` — Next.js API route (~186 tok)
@@ -865,7 +869,7 @@
 
 ## app/campaigns/[id]/prompts/
 
-- `page.tsx` — PromptBuilderContent — renders form (~2060 tok)
+- `page.tsx` — PromptBuilderContent — renders form (~2109 tok)
 
 ## app/campaigns/[id]/sessions/
 
@@ -923,7 +927,7 @@
 
 ## lib/prompts/
 
-- `templates.ts` — Exports PromptField, PromptTemplate, buildSystemPrompt, npcTemplate + 5 more (~1689 tok)
+- `templates.ts` — Exports PromptField, PromptTemplate, buildSystemPrompt, npcTemplate + 5 more (~1690 tok)
 
 ## lib/scripts/
 
@@ -931,7 +935,7 @@
 
 ## lib/utils/
 
-- `campaignContext.ts` — Exports fetchCampaignContext (~365 tok)
+- `campaignContext.ts` — Exports fetchCampaignContext (~384 tok)
 - `partySelection.ts` — Returns the Character objects that belong to the given party. (~604 tok)
 - `sessionEvents.ts` — Computes auto-populated NPC events from party membership changes in a time window. (~502 tok)
 
@@ -1093,13 +1097,6 @@
 
 - `spec.md` — ADDED Requirements (~1032 tok)
 
-## openspec/changes/session-invalidation-foundation/
-
-- `.openspec.yaml` (~15 tok)
-- `design.md` — Context (~622 tok)
-- `proposal.md` — GitHub Issues (~713 tok)
-- `tasks.md` — Tasks (~566 tok)
-- `tests.md` — Tests (~1417 tok)
 ## openspec/changes/prompt-builder-campaign-child/
 
 - `design.md` — Context (~3145 tok)
@@ -1122,6 +1119,14 @@
 ## openspec/changes/prompt-builder-campaign-child/specs/session-logs-refactor/
 
 - `spec.md` — ADDED Requirements (~774 tok)
+
+## openspec/changes/session-invalidation-foundation/
+
+- `.openspec.yaml` (~15 tok)
+- `design.md` — Context (~622 tok)
+- `proposal.md` — GitHub Issues (~713 tok)
+- `tasks.md` — Tasks (~566 tok)
+- `tests.md` — Tests (~1417 tok)
 
 ## openspec/changes/travelling-npcs-character-type/
 
@@ -1160,7 +1165,7 @@
 
 ## tests/integration/prompts/
 
-- `promptBuilder.test.tsx` — FULL_PROMPT (~3258 tok)
+- `promptBuilder.test.tsx` — FULL_PROMPT (~3126 tok)
 
 ## tests/integration/sessions/
 

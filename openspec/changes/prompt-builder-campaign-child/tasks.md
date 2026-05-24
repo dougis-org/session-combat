@@ -93,13 +93,13 @@
 
 ## Validation
 
-- [ ] `npm run test` — all unit tests pass
-- [ ] `npm run test:integration` — all integration tests pass
-- [ ] `npx tsc --noEmit` — no TypeScript errors
-- [ ] `npm run build` — build succeeds
-- [ ] `npm run lint` — no lint errors
-- [ ] All tasks in groups A–D marked complete
-- [ ] All steps in Remote push validation below
+- [x] `npm run test` — all unit tests pass
+- [x] `npm run test:integration` — all integration tests pass
+- [x] `npx tsc --noEmit` — no TypeScript errors
+- [x] `npm run build` — build succeeds
+- [x] `npm run lint` — no lint errors
+- [x] All tasks in groups A–D marked complete
+- [x] All steps in Remote push validation below
 
 ## Remote push validation
 
@@ -114,10 +114,10 @@ If **ANY** of the above fail, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Run the required pre-PR self-review from `.agent/skills/openspec-apply-change/SKILL.md` before committing
-- [ ] Commit all changes to `feature/prompt-builder-campaign-child` and push to remote
-- [ ] Open PR from `feature/prompt-builder-campaign-child` to `main` — title: "feat: Prompt Builder as campaign child route + shared context helper (fixes #212)"
-- [ ] Reference issues #184 and #212 in the PR description
+- [x] Run the required pre-PR self-review from `.agent/skills/openspec-apply-change/SKILL.md` before committing
+- [x] Commit all changes to `feature/prompt-builder-campaign-child` and push to remote
+- [x] Open PR from `feature/prompt-builder-campaign-child` to `main` — title: "feat: Prompt Builder as campaign child route + shared context helper (fixes #212)"
+- [x] Reference issues #184 and #212 in the PR description
 - [ ] Wait 120 seconds for agentic reviewers to post comments
 - [ ] **Monitor PR comments** — address each comment, commit fixes, run all validation steps, push; repeat until no unresolved comments remain
 - [ ] Enable auto-merge once no blocking review comments remain
