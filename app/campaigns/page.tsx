@@ -225,6 +225,12 @@ export function CampaignsContent() {
                       </div>
                       <div className="flex gap-2 flex-shrink-0 ml-4">
                         <Link
+                          href={`/campaigns/${campaign.id}/prompts`}
+                          className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
+                        >
+                          Prompt Builder
+                        </Link>
+                        <Link
                           href="/encounters"
                           className="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm"
                         >

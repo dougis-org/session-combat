@@ -38,6 +38,15 @@ jest.mock('@/lib/utils/sessionEvents', () => ({
   buildNpcEventsFromMemberChanges: jest.fn(() => []),
 }));
 
+jest.mock('@/lib/hooks/useCampaignContext', () => ({
+  useCampaignContext: jest.fn(() => ({
+    context: null,
+    loading: false,
+    error: null,
+    refresh: jest.fn(),
+  })),
+}));
+
 const MOCK_LOG = {
   id: 'log-1',
   userId: 'u1',
@@ -117,15 +126,17 @@ describe('SessionsPage — session log display', () => {
   });
 
   test('shows no-linked-party notice when no party found', async () => {
-    await renderWithData([], []);
+    // useCampaignContext mock returns no parties by default (context: null)
+    await renderWithData([]);
     const btn = Array.from(ctx.container.querySelectorAll('button'))
       .find(b => b.textContent?.includes('New Session'));
     await act(async () => { btn?.click(); });
     expect(ctx.container.textContent).toContain('No linked party found');
   });
 
-  test('fetches sessions and parties on load', async () => {
+  test('fetches sessions on load', async () => {
     await renderWithData([MOCK_LOG]);
-    expect(global.fetch).toHaveBeenCalledTimes(2);
+    // useCampaignContext is mocked, so only the sessions fetch is real
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 });
