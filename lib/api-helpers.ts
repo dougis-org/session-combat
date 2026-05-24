@@ -15,6 +15,7 @@ export async function requireAdmin(request: NextRequest): Promise<NextResponse |
     if (err instanceof InvalidUserIdError) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    console.error("requireAdmin: error fetching user for admin check:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
