@@ -79,6 +79,18 @@ async function verifyTokenVersion(auth: AuthPayload): Promise<boolean> {
   }
 }
 
+async function checkAuth(auth: AuthPayload): Promise<NextResponse | null> {
+  try {
+    if (!await verifyTokenVersion(auth)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    return null;
+  } catch (err) {
+    console.error('tokenVersion verification failed:', err);
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+  }
+}
+
 /** Wrap a route handler with auth — no dynamic params. */
 export function withAuth(
   handler: (request: NextRequest, auth: AuthPayload) => Promise<NextResponse>
@@ -86,14 +98,8 @@ export function withAuth(
   return async (request: NextRequest): Promise<NextResponse> => {
     const auth = requireAuth(request);
     if (auth instanceof NextResponse) return auth;
-    try {
-      if (!await verifyTokenVersion(auth)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    } catch (err) {
-      console.error('tokenVersion verification failed:', err);
-      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
-    }
+    const denied = await checkAuth(auth);
+    if (denied) return denied;
     return handler(request, auth);
   };
 }
@@ -108,15 +114,8 @@ export function withAuthAndParams<P extends Record<string, string>>(
   ): Promise<NextResponse> => {
     const auth = requireAuth(request);
     if (auth instanceof NextResponse) return auth;
-    try {
-      if (!await verifyTokenVersion(auth)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    } catch (err) {
-      console.error('tokenVersion verification failed:', err);
-      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
-    }
-    const resolvedParams = await params;
-    return handler(request, auth, resolvedParams);
+    const denied = await checkAuth(auth);
+    if (denied) return denied;
+    return handler(request, auth, await params);
   };
 }

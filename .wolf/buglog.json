@@ -1360,6 +1360,102 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-23T22:35:01.020Z"
+    },
+    {
+      "id": "bug-086",
+      "timestamp": "2026-05-24T13:07:14.600Z",
+      "error_message": "Incorrect value in code",
+      "file": "lib/middleware.ts",
+      "root_cause": "Had 'number'",
+      "fix": "Changed to 'tokenVersion'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-24T13:07:14.600Z"
+    },
+    {
+      "id": "bug-087",
+      "timestamp": "2026-05-24T13:07:26.312Z",
+      "error_message": "Incorrect value in code",
+      "file": "lib/api-helpers.ts",
+      "root_cause": "Had 'number'",
+      "fix": "Changed to 'tokenVersion'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-24T13:07:26.312Z"
+    },
+    {
+      "id": "bug-088",
+      "timestamp": "2026-05-24T13:08:01.966Z",
+      "error_message": "Type error",
+      "file": "tests/unit/lib/middleware.test.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation | Also: it(\"allows pre-rollout JWT with no tokenVersion field when D; const preRolloutPayload = { userId: MOCK_PAYLOAD.userId, ema",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-24T13:08:10.672Z"
+    },
+    {
+      "id": "bug-089",
+      "timestamp": "2026-05-24T13:08:22.641Z",
+      "error_message": "Type error",
+      "file": "tests/unit/lib/api-helpers.test.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-24T13:08:22.641Z"
+    },
+    {
+      "id": "bug-090",
+      "timestamp": "2026-05-24T17:27:05.792Z",
+      "error_message": "Null/undefined access in ",
+      "file": "app/api/monsters/[id]/route.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-24T17:27:05.792Z"
+    },
+    {
+      "id": "bug-091",
+      "timestamp": "2026-05-24T17:27:11.568Z",
+      "error_message": "Missing guard clause",
+      "file": "app/api/monsters/[id]/route.ts",
+      "root_cause": "No early return/throw for edge case: template instanceof NextResponse",
+      "fix": "Added guard clause: if (template instanceof NextResponse)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-05-24T17:27:19.800Z"
     }
   ]
 }

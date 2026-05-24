@@ -8,22 +8,7 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 import { EXISTING_MONSTER } from "./fixtures";
 
-jest.mock("@/lib/middleware", () => {
-  const requireAuth = jest.fn();
-  return {
-    requireAuth,
-    withAuth: (handler: any) => async (request: any) => {
-      const auth = requireAuth(request);
-      if (auth && 'status' in auth) return auth;
-      return handler(request, auth);
-    },
-    withAuthAndParams: (handler: any) => async (request: any, { params }: any) => {
-      const auth = requireAuth(request);
-      if (auth && 'status' in auth) return auth;
-      return handler(request, auth, await params);
-    },
-  };
-});
+jest.mock("@/lib/middleware");
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadMonsterTemplates: jest.fn(),

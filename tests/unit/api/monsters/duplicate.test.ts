@@ -1,23 +1,7 @@
 const mockLoadAll = jest.fn();
 const mockSave = jest.fn();
 
-jest.mock("@/lib/middleware", () => {
-  const requireAuth = jest.fn().mockReturnValue({ userId: "user-1", email: "user@example.com", tokenVersion: 0 });
-  return {
-    requireAuth,
-    withAuth: (handler: any) => async (request: any) => {
-      const auth = requireAuth(request);
-      if (auth && 'status' in auth) return auth;
-      return handler(request, auth);
-    },
-    withAuthAndParams: (handler: any) => async (request: any, { params }: any) => {
-      const auth = requireAuth(request);
-      if (auth && 'status' in auth) return auth;
-      return handler(request, auth, await params);
-    },
-  };
-});
-
+jest.mock("@/lib/middleware");
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadAllMonsterTemplates: (...args: any[]) => mockLoadAll(...args),
@@ -26,11 +10,15 @@ jest.mock("@/lib/storage", () => ({
 }));
 
 import { POST } from "@/app/api/monsters/[id]/duplicate/route";
+import { requireAuth } from "@/lib/middleware";
+
+const mockedRequireAuth = jest.mocked(requireAuth);
 
 describe("POST /api/monsters/[id]/duplicate", () => {
   beforeEach(() => {
     mockLoadAll.mockReset();
     mockSave.mockReset();
+    mockedRequireAuth.mockReturnValue({ userId: "user-1", email: "user@example.com", tokenVersion: 0 });
   });
 
   it("duplicates an existing template into the user library", async () => {
@@ -67,7 +55,6 @@ describe("POST /api/monsters/[id]/duplicate", () => {
     expect(saved.userId).toBe("user-1");
     expect(saved.id).not.toBe("orig-1");
     expect(saved.name).toMatch(/Goblin/);
-    // Expect a 201 NextResponse
     expect(res && (res as any).status).toBe(201);
   });
 });

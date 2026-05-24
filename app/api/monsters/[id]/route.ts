@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
+import { AuthPayload, MonsterTemplate, normalizeAlignment } from '@/lib/types';
+
+async function loadUserTemplate(auth: AuthPayload, id: string): Promise<MonsterTemplate | NextResponse> {
+  const templates = await storage.loadMonsterTemplates(auth.userId);
+  return templates.find((t) => t.id === id) ?? NextResponse.json(
+    { error: 'Monster template not found' },
+    { status: 404 }
+  );
+}
 
 export const GET = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
-    const templates = await storage.loadMonsterTemplates(auth.userId);
-    const template = templates.find((t) => t.id === id);
-
-    if (!template) {
-      return NextResponse.json(
-        { error: 'Monster template not found' },
-        { status: 404 }
-      );
-    }
-
+    const template = await loadUserTemplate(auth, id);
+    if (template instanceof NextResponse) return template;
     return NextResponse.json(template);
   } catch (error) {
     console.error('Error fetching monster template:', error);
@@ -59,16 +59,8 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
       description,
     } = body;
 
-    // Get the existing template to verify ownership
-    const templates = await storage.loadMonsterTemplates(auth.userId);
-    const existingTemplate = templates.find((t) => t.id === id);
-
-    if (!existingTemplate) {
-      return NextResponse.json(
-        { error: 'Monster template not found' },
-        { status: 404 }
-      );
-    }
+    const existingTemplate = await loadUserTemplate(auth, id);
+    if (existingTemplate instanceof NextResponse) return existingTemplate;
 
     if (!name || name.trim() === '') {
       return NextResponse.json(
@@ -138,15 +130,8 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
 
 export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
-    const templates = await storage.loadMonsterTemplates(auth.userId);
-    const template = templates.find((t) => t.id === id);
-
-    if (!template) {
-      return NextResponse.json(
-        { error: 'Monster template not found' },
-        { status: 404 }
-      );
-    }
+    const template = await loadUserTemplate(auth, id);
+    if (template instanceof NextResponse) return template;
 
     await storage.deleteMonsterTemplate(id, auth.userId);
 
