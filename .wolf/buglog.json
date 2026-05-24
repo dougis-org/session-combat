@@ -1280,6 +1280,86 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-23T21:14:33.948Z"
+    },
+    {
+      "id": "bug-081",
+      "timestamp": "2026-05-23T21:34:18.721Z",
+      "error_message": "Null/undefined access in ",
+      "file": "app/api/auth/login/route.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T21:34:18.721Z"
+    },
+    {
+      "id": "bug-082",
+      "timestamp": "2026-05-23T21:39:59.898Z",
+      "error_message": "Type error",
+      "file": "tests/unit/api/monsters/global.id.route.test.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T21:39:59.898Z"
+    },
+    {
+      "id": "bug-083",
+      "timestamp": "2026-05-23T22:34:46.914Z",
+      "error_message": "Null/undefined access in ",
+      "file": "lib/middleware.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T22:34:46.914Z"
+    },
+    {
+      "id": "bug-084",
+      "timestamp": "2026-05-23T22:34:49.702Z",
+      "error_message": "Null/undefined access in ",
+      "file": "lib/api-helpers.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T22:34:49.702Z"
+    },
+    {
+      "id": "bug-085",
+      "timestamp": "2026-05-23T22:35:01.020Z",
+      "error_message": "Incorrect value in code",
+      "file": "openspec/changes/session-invalidation-foundation/tests.md",
+      "root_cause": "Had `npm run type-check`",
+      "fix": "Changed to `npm run typecheck`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23T22:35:01.020Z"
     }
   ]
 }

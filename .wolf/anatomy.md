@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T21:14:33.934Z
-> Files: 696 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T22:35:28.031Z
+> Files: 699 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -760,11 +760,11 @@
 
 ## app/api/auth/login/
 
-- `route.ts` — Next.js API route: POST (~523 tok)
+- `route.ts` — Next.js API route: POST (~554 tok)
 
 ## app/api/auth/me/
 
-- `route.ts` — Next.js API route (~315 tok)
+- `route.ts` — Next.js API route (~186 tok)
 
 ## app/api/auth/register/
 
@@ -873,10 +873,11 @@
 
 ## lib/
 
-- `api-helpers.ts` — Exports requireAdmin (~374 tok)
+- `api-helpers.ts` — Exports requireAdmin (~302 tok)
 - `clientStorage.ts` — Client-side storage using localStorage (~616 tok)
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ImportedCharac (~2046 tok)
-- `middleware.ts` — Extract auth token from request (~950 tok)
+- `middleware.ts` — Extract auth token from request (~1035 tok)
+- `permissions.ts` — Fetch a user document by userId. (~294 tok)
 - `storage.ts` — Server-side storage functions for MongoDB (~5973 tok)
 - `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4641 tok)
 
@@ -1064,7 +1065,7 @@
 - `design.md` — Context (~622 tok)
 - `proposal.md` — GitHub Issues (~713 tok)
 - `tasks.md` — Tasks (~566 tok)
-- `tests.md` — Tests (~1415 tok)
+- `tests.md` — Tests (~1417 tok)
 
 ## openspec/changes/travelling-npcs-character-type/
 
@@ -1120,6 +1121,7 @@
 ## tests/unit/api/monsters/
 
 - `duplicate.test.ts` — Declares mockLoadAll (~596 tok)
+- `global.id.route.test.ts` — Declares requireAuth (~1065 tok)
 - `global.route.test.ts` — Declares requireAuth (~1020 tok)
 
 ## tests/unit/api/parties/
@@ -1147,11 +1149,12 @@
 
 ## tests/unit/lib/
 
-- `api-helpers.test.ts` — mockedGetDatabase: mockDbUser (~935 tok)
+- `api-helpers.test.ts` — Declares InvalidUserIdError (~1134 tok)
 - `auth.test.helpers.ts` — Test data and helpers for unit tests of auth.ts (~894 tok)
 - `auth.test.ts` — Declares payload (~2747 tok)
 - `clientStorage.test.ts` — Mock localStorage for Node.js test environment (~1485 tok)
-- `middleware.test.ts` — API routes: GET (2 endpoints) (~2434 tok)
+- `middleware.test.ts` — API routes: GET (2 endpoints) (~2606 tok)
+- `permissions.test.ts` — ObjectId: mockCollection (~1104 tok)
 - `useAuth.test.ts` — Mock next/navigation (~1552 tok)
 
 ## tests/unit/storage/

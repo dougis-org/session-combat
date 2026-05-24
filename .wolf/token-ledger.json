@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-18T14:20:54.749Z",
   "lifetime": {
-    "total_tokens_estimated": 730379,
-    "total_reads": 479,
-    "total_writes": 664,
-    "total_sessions": 48,
-    "anatomy_hits": 246,
-    "anatomy_misses": 226,
-    "repeated_reads_blocked": 180,
-    "estimated_savings_vs_bare_cli": 306412
+    "total_tokens_estimated": 761262,
+    "total_reads": 516,
+    "total_writes": 704,
+    "total_sessions": 49,
+    "anatomy_hits": 270,
+    "anatomy_misses": 239,
+    "repeated_reads_blocked": 190,
+    "estimated_savings_vs_bare_cli": 323122
   },
   "sessions": [
     {
@@ -7491,6 +7491,513 @@
         "writes_count": 4,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-05-23-0853",
+      "started": "2026-05-23T15:53:32.829Z",
+      "ended": "2026-05-23T21:15:00.891Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.route.test.ts",
+          "tokens_estimated": 988,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/tmp/claude-1000/-home-doug-dev-session-combat/15291f90-2c4b-4d3a-b348-e7f3fa692a00/tasks/biqk0h3es.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 239,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/schemas/sdd-with-feedback-loop/schema.yaml",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/schemas/sdd-with-feedback-loop/templates/tasks.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/.agent/skills/openspec-apply-change/SKILL.md",
+          "tokens_estimated": 1178,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/tmp/claude-1000/-home-doug-dev-session-combat/15291f90-2c4b-4d3a-b348-e7f3fa692a00/tasks/bnc6rqbb5.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 966,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/api-helpers.ts",
+          "tokens_estimated": 362,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/me/route.ts",
+          "tokens_estimated": 299,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/duplicate.test.ts",
+          "tokens_estimated": 593,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.route.test.ts",
+          "tokens_estimated": 23,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 21,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 338,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 105,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/api-helpers.ts",
+          "tokens_estimated": 162,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/me/route.ts",
+          "tokens_estimated": 83,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/duplicate.test.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.route.test.ts",
+          "tokens_estimated": 54,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 4625,
+        "output_tokens_estimated": 940,
+        "reads_count": 11,
+        "writes_count": 10,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 6
+      }
+    },
+    {
+      "id": "session-2026-05-23-0853",
+      "started": "2026-05-23T15:53:32.829Z",
+      "ended": "2026-05-23T21:17:08.324Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.route.test.ts",
+          "tokens_estimated": 988,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/tmp/claude-1000/-home-doug-dev-session-combat/15291f90-2c4b-4d3a-b348-e7f3fa692a00/tasks/biqk0h3es.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 239,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/schemas/sdd-with-feedback-loop/schema.yaml",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/schemas/sdd-with-feedback-loop/templates/tasks.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/.agent/skills/openspec-apply-change/SKILL.md",
+          "tokens_estimated": 1178,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/tmp/claude-1000/-home-doug-dev-session-combat/15291f90-2c4b-4d3a-b348-e7f3fa692a00/tasks/bnc6rqbb5.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 966,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/api-helpers.ts",
+          "tokens_estimated": 362,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/me/route.ts",
+          "tokens_estimated": 299,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/duplicate.test.ts",
+          "tokens_estimated": 593,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.route.test.ts",
+          "tokens_estimated": 23,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 21,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 338,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 105,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/api-helpers.ts",
+          "tokens_estimated": 162,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/me/route.ts",
+          "tokens_estimated": 83,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/duplicate.test.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.route.test.ts",
+          "tokens_estimated": 54,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 4625,
+        "output_tokens_estimated": 940,
+        "reads_count": 11,
+        "writes_count": 10,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 6
+      }
+    },
+    {
+      "id": "session-2026-05-23-1438",
+      "started": "2026-05-23T21:38:57.537Z",
+      "ended": "2026-05-23T21:42:36.680Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 1032,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.id.route.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/monsters/global/[id]/route.ts",
+          "tokens_estimated": 1898,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 21,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.id.route.test.ts",
+          "tokens_estimated": 54,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 2930,
+        "output_tokens_estimated": 75,
+        "reads_count": 3,
+        "writes_count": 2,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-05-23-1438",
+      "started": "2026-05-23T21:38:57.537Z",
+      "ended": "2026-05-23T22:38:40.904Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 1032,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.id.route.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/monsters/global/[id]/route.ts",
+          "tokens_estimated": 1898,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/login/route.ts",
+          "tokens_estimated": 525,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tests.md",
+          "tokens_estimated": 1415,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/middleware.test.ts",
+          "tokens_estimated": 2434,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 21,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.id.route.test.ts",
+          "tokens_estimated": 54,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/api-helpers.ts",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/login/route.ts",
+          "tokens_estimated": 75,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tests.md",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tests.md",
+          "tokens_estimated": 73,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/middleware.test.ts",
+          "tokens_estimated": 505,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/api-helpers.test.ts",
+          "tokens_estimated": 225,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 7304,
+        "output_tokens_estimated": 1070,
+        "reads_count": 6,
+        "writes_count": 9,
+        "repeated_reads_blocked": 3,
+        "anatomy_lookups": 5
+      }
+    },
+    {
+      "id": "session-2026-05-23-1438",
+      "started": "2026-05-23T21:38:57.537Z",
+      "ended": "2026-05-24T03:56:40.482Z",
+      "reads": [
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 1032,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.id.route.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/monsters/global/[id]/route.ts",
+          "tokens_estimated": 1898,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/login/route.ts",
+          "tokens_estimated": 525,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tests.md",
+          "tokens_estimated": 1415,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/middleware.test.ts",
+          "tokens_estimated": 2434,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 21,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/global.id.route.test.ts",
+          "tokens_estimated": 54,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/api-helpers.ts",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/auth/login/route.ts",
+          "tokens_estimated": 75,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tests.md",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tests.md",
+          "tokens_estimated": 73,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/middleware.test.ts",
+          "tokens_estimated": 505,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/api-helpers.test.ts",
+          "tokens_estimated": 225,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 7304,
+        "output_tokens_estimated": 1070,
+        "reads_count": 6,
+        "writes_count": 9,
+        "repeated_reads_blocked": 3,
+        "anatomy_lookups": 5
       }
     }
   ],
