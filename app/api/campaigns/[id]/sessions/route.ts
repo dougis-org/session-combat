@@ -5,14 +5,16 @@ import { SessionLog } from '@/lib/types';
 
 type Params = { id: string };
 
-export const GET = withAuthAndParams<Params>(async (_request, auth, { id: campaignId }) => {
+export const GET = withAuthAndParams<Params>(async (request, auth, { id: campaignId }) => {
   try {
     const campaign = await storage.loadCampaignById(campaignId, auth.userId);
     if (!campaign) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
     const logs = await storage.loadSessionLogs(auth.userId, campaignId);
-    return NextResponse.json(logs);
+    const limitParam = new URL(request.url).searchParams.get('limit');
+    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+    return NextResponse.json(limit && limit > 0 ? logs.slice(0, limit) : logs);
   } catch (error) {
     console.error('Error fetching session logs:', error);
     return NextResponse.json({ error: 'Failed to fetch session logs' }, { status: 500 });
