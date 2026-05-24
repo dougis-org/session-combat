@@ -1,13 +1,11 @@
 import { NextRequest } from "next/server";
 import { POST } from "@/app/api/auth/logout/route";
-import { verifyAuth, clearAuthCookie } from "@/lib/middleware";
+import { clearAuthCookie } from "@/lib/middleware";
 
 jest.mock("@/lib/middleware", () => ({
-  verifyAuth: jest.fn(),
   clearAuthCookie: jest.fn(),
 }));
 
-const mockedVerifyAuth = jest.mocked(verifyAuth);
 const mockedClearAuthCookie = jest.mocked(clearAuthCookie);
 
 function makeRequest(cookie?: string): NextRequest {
@@ -22,33 +20,23 @@ describe("POST /api/auth/logout", () => {
     jest.clearAllMocks();
   });
 
-  it("returns 401 when no auth token is present", async () => {
-    mockedVerifyAuth.mockReturnValue(null);
-
+  it("returns 200 and clears cookie even when no auth token is present (idempotent)", async () => {
     const response = await POST(makeRequest());
 
-    expect(response.status).toBe(401);
-    const body = await response.json();
-    expect(body.error).toBeDefined();
-    expect(mockedClearAuthCookie).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(mockedClearAuthCookie).toHaveBeenCalledTimes(1);
   });
 
   it("returns 200 and clears cookie when auth token is valid", async () => {
-    mockedVerifyAuth.mockReturnValue({
-      userId: "user-123",
-      email: "user@example.com",
-      tokenVersion: 0,
-    });
-
     const response = await POST(makeRequest("auth-token=valid.jwt.token"));
 
     expect(response.status).toBe(200);
     expect(mockedClearAuthCookie).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 500 when verifyAuth throws unexpectedly", async () => {
-    mockedVerifyAuth.mockImplementation(() => {
-      throw new Error("Unexpected auth error");
+  it("returns 500 when clearAuthCookie throws unexpectedly", async () => {
+    mockedClearAuthCookie.mockImplementation(() => {
+      throw new Error("Unexpected cookie error");
     });
 
     const response = await POST(makeRequest("auth-token=valid.jwt.token"));
