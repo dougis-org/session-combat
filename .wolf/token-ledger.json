@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-18T14:20:54.749Z",
   "lifetime": {
-    "total_tokens_estimated": 1102364,
-    "total_reads": 630,
-    "total_writes": 909,
+    "total_tokens_estimated": 1132039,
+    "total_reads": 650,
+    "total_writes": 928,
     "total_sessions": 45,
-    "anatomy_hits": 378,
-    "anatomy_misses": 245,
-    "repeated_reads_blocked": 289,
-    "estimated_savings_vs_bare_cli": 755709
+    "anatomy_hits": 391,
+    "anatomy_misses": 252,
+    "repeated_reads_blocked": 294,
+    "estimated_savings_vs_bare_cli": 771311
   },
   "sessions": [
     {
@@ -9759,6 +9759,238 @@
         "writes_count": 7,
         "repeated_reads_blocked": 3,
         "anatomy_lookups": 6
+      }
+    },
+    {
+      "id": "session-2026-05-24-0604",
+      "started": "2026-05-24T13:04:57.012Z",
+      "ended": "2026-05-24T18:44:15.808Z",
+      "reads": [
+        {
+          "file": "/home/doug/.claude/projects/-home-doug-dev2-session-combat/memory/feedback_resolve_pr_comments.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 1035,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/api-helpers.ts",
+          "tokens_estimated": 302,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/monsters/global/[id]/route.ts",
+          "tokens_estimated": 1898,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/types.ts",
+          "tokens_estimated": 4854,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/middleware.test.ts",
+          "tokens_estimated": 3482,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/api-helpers.test.ts",
+          "tokens_estimated": 1278,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/tmp/claude-1000/-home-doug-dev-session-combat/15291f90-2c4b-4d3a-b348-e7f3fa692a00/tasks/b4h8xkw3j.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/auth/me.test.ts",
+          "tokens_estimated": 1028,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/parties/route.test.ts",
+          "tokens_estimated": 2716,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/helpers/route.test.helpers.ts",
+          "tokens_estimated": 2070,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/encounters/route.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/encounters/id.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/id.route.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/duplicate.test.ts",
+          "tokens_estimated": 596,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/permissions.test.ts",
+          "tokens_estimated": 1104,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/monsters/[id]/route.ts",
+          "tokens_estimated": 1678,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/campaigns/sessions.route.test.ts",
+          "tokens_estimated": 1524,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/__mocks__/middleware.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/doug/dev/session-combat/docs/improvements.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 25,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 82,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 61,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/api-helpers.ts",
+          "tokens_estimated": 22,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/middleware.test.ts",
+          "tokens_estimated": 587,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/middleware.test.ts",
+          "tokens_estimated": 585,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/api-helpers.test.ts",
+          "tokens_estimated": 266,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/__mocks__/middleware.ts",
+          "tokens_estimated": 172,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/api/monsters/duplicate.test.ts",
+          "tokens_estimated": 478,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/tests/unit/lib/middleware.test.ts",
+          "tokens_estimated": 2450,
+          "action": "create"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/lib/middleware.ts",
+          "tokens_estimated": 515,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/monsters/[id]/route.ts",
+          "tokens_estimated": 156,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/monsters/[id]/route.ts",
+          "tokens_estimated": 129,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/monsters/[id]/route.ts",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/app/api/monsters/[id]/route.ts",
+          "tokens_estimated": 78,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 49,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 195,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 118,
+          "action": "edit"
+        },
+        {
+          "file": "/home/doug/dev/session-combat/openspec/changes/session-invalidation-foundation/tasks.md",
+          "tokens_estimated": 91,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 23565,
+        "output_tokens_estimated": 6110,
+        "reads_count": 20,
+        "writes_count": 19,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 13
       }
     }
   ],

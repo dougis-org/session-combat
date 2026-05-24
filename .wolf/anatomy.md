@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-24T17:27:19.787Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-24T18:43:39.667Z
 > Files: 721 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/

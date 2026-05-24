@@ -39,18 +39,15 @@ describe("POST /api/auth/logout - Integration Tests", () => {
     expect(setCookie).toContain("auth-token=");
   });
 
-  it("should reject logout without token or with invalid tokens", async () => {
-    // No session - should return 401
+  it("should clear cookie and return 200 even without a token (idempotent)", async () => {
     let response = await logoutUser(baseUrl);
-    expect(response.status).toBe(401);
+    expect(response.status).toBe(200);
 
-    // Invalid token - should return 401
     response = await logoutUser(baseUrl, "auth-token=invalid-token-xyz");
-    expect(response.status).toBe(401);
+    expect(response.status).toBe(200);
 
-    // Empty cookie value - should return 401
     response = await logoutUser(baseUrl, "auth-token=");
-    expect(response.status).toBe(401);
+    expect(response.status).toBe(200);
   });
 
   it("should allow repeated logout with same token (idempotent)", async () => {
