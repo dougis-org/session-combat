@@ -46,8 +46,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate token
-    const userId = user._id?.toString() || '';
-    const token = generateToken({ userId, email });
+    const userId = user._id?.toString();
+    if (!userId) {
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+    const token = generateToken({ userId, email, tokenVersion: user.tokenVersion ?? 0 });
 
     // Create response with cookie
     const response = NextResponse.json(

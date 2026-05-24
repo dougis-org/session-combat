@@ -9,7 +9,7 @@ import {
   itValidatesAlignmentField,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
+jest.mock("@/lib/middleware");
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadGlobalMonsterTemplates: jest.fn(),
@@ -27,7 +27,11 @@ jest.mock("@/lib/import/dedupeEngine", () => ({
   shouldImport: jest.fn(),
 }));
 jest.mock("crypto", () => ({ randomUUID: jest.fn(() => "test-uuid") }));
-jest.mock("mongodb", () => ({ ObjectId: jest.fn((id: string) => ({ id })) }));
+jest.mock("mongodb", () => {
+  const ObjectId = jest.fn((id: string) => ({ id })) as jest.Mock & { isValid: jest.Mock };
+  ObjectId.isValid = jest.fn(() => true);
+  return { ObjectId };
+});
 
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
@@ -46,7 +50,7 @@ describe("POST /api/monsters/global — alignment validation", () => {
     mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
     mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
     mockDbCollection(mockedGetDatabase, {
-      findOne: jest.fn().mockResolvedValue({ isAdmin: true }),
+      findOne: jest.fn().mockResolvedValue({ tokenVersion: 0, isAdmin: true }),
     });
   });
 

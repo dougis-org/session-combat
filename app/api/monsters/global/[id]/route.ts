@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware';
+import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
 import { isUserAdmin } from '@/lib/permissions';
@@ -31,17 +31,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   const admin = await isUserAdmin(auth.userId);
   if (admin === null) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -161,19 +151,9 @@ export async function PUT(
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   const admin = await isUserAdmin(auth.userId);
   if (admin === null) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -206,4 +186,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-}
+});

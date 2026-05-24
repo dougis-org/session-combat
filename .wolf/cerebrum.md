@@ -35,6 +35,20 @@
 - If `mergeable_state: blocked`, investigate the blocking check and fix it — don't bypass it
 - This allowed a PR with Codacy security findings and insufficient diff coverage to land on main
 
+**[2026-05-23] jest.mock() factory TDZ — don't reference const variables inside jest.mock()**
+- `jest.mock()` factories are hoisted above variable declarations; referencing a `const mockX = jest.fn()` inside the factory causes TDZ errors
+- Fix: import the real module and use `jest.mocked()` on the import, then call `.mockResolvedValue()` in tests instead of inside the factory
+
+**[2026-05-23] MongoDB ObjectId type mismatch with `User._id: string`**
+- `User._id` is typed as `string?` in TypeScript, but MongoDB stores it as ObjectId
+- Using `db.collection<User>('users').findOne({ _id: new ObjectId(...) })` causes TS error: ObjectId not assignable to Condition<string>
+- Fix: use `db.collection('users')` (no generic) and bracket access `user['tokenVersion']` instead of dot notation
+
+**[2026-05-23] tokenVersion DB check in requireAdmin — tests need matching tokenVersion in findOne mock**
+- `requireAdmin` now checks tokenVersion before checking isAdmin
+- Any test that mocks `findOne` for the admin check must include `tokenVersion: <n>` in the returned doc matching `ADMIN_AUTH.tokenVersion`
+- Returning `{ isAdmin: true }` alone causes `undefined !== 0` → 401
+
 ## Decision Log
 
 <!-- Significant technical decisions with rationale. Why X was chosen over Y. -->

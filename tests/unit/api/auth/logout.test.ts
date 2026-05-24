@@ -37,6 +37,7 @@ describe("POST /api/auth/logout", () => {
     mockedVerifyAuth.mockReturnValue({
       userId: "user-123",
       email: "user@example.com",
+      tokenVersion: 0,
     });
 
     const response = await POST(makeRequest("auth-token=valid.jwt.token"));

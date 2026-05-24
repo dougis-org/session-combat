@@ -7,7 +7,7 @@ import {
   itValidatesAlignmentFieldWithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
+jest.mock("@/lib/middleware");
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadCharacters: jest.fn(),

@@ -1,18 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '../../../../../lib/middleware';
+import { withAuthAndParams } from '../../../../../lib/middleware';
 import { storage } from '../../../../../lib/storage';
 import { MonsterTemplate } from '../../../../../lib/types';
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = requireAuth(request);
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
+export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
-    const { id } = await params;
-
     const templates = await storage.loadAllMonsterTemplates(auth.userId);
     const original = templates.find((t: MonsterTemplate) => t.id === id);
 
@@ -37,4 +29,4 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     console.error('Error duplicating monster template:', error);
     return NextResponse.json({ error: 'Failed to duplicate monster' }, { status: 500 });
   }
-}
+});

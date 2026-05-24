@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-23T22:38:06.539Z
-> Files: 690 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-24T17:27:19.787Z
+> Files: 721 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -758,6 +758,18 @@
 - `layout.tsx` — app/layout.tsx — drop-in replacement. (~758 tok)
 - `page.tsx` — RootPage (~32 tok)
 
+## app/api/auth/login/
+
+- `route.ts` — Next.js API route: POST (~554 tok)
+
+## app/api/auth/me/
+
+- `route.ts` — Next.js API route (~186 tok)
+
+## app/api/auth/register/
+
+- `route.ts` — Next.js API route: POST (~632 tok)
+
 ## app/api/campaigns/
 
 - `route.ts` — Next.js API route (~410 tok)
@@ -768,7 +780,7 @@
 
 ## app/api/campaigns/[id]/sessions/
 
-- `route.ts` — Next.js API route (~700 tok)
+- `route.ts` — Next.js API route (~680 tok)
 
 ## app/api/campaigns/[id]/sessions/[sessionId]/
 
@@ -784,15 +796,59 @@
 
 ## app/api/campaigns/global/[id]/copy/
 
-- `route.ts` — Next.js API route: POST (~420 tok)
+- `route.ts` — Next.js API route (~381 tok)
 
 ## app/api/characters/
 
-- `route.ts` — Next.js API route: GET, POST (~1637 tok)
+- `route.ts` — Next.js API route (~1573 tok)
 
 ## app/api/characters/[id]/
 
-- `route.ts` — Next.js API route: GET, PUT, DELETE (~2229 tok)
+- `route.ts` — Next.js API route (~2096 tok)
+
+## app/api/characters/import/
+
+- `route.ts` — Next.js API route (~1027 tok)
+
+## app/api/combat/
+
+- `route.ts` — Next.js API route (~471 tok)
+
+## app/api/combat/[id]/
+
+- `route.ts` — Next.js API route (~872 tok)
+
+## app/api/encounters/
+
+- `route.ts` — Next.js API route (~409 tok)
+
+## app/api/encounters/[id]/
+
+- `route.ts` — Next.js API route (~890 tok)
+
+## app/api/items/
+
+- `route.ts` — Next.js API route (~445 tok)
+
+## app/api/monsters/
+
+- `route.ts` — Next.js API route (~1006 tok)
+
+## app/api/monsters/[id]/
+
+- `route.ts` — Next.js API route (~1624 tok)
+
+## app/api/monsters/[id]/duplicate/
+
+- `route.ts` — Next.js API route (~344 tok)
+
+## app/api/monsters/global/[id]/
+
+- `route.ts` — Next.js API route: GET (~1898 tok)
+
+## app/api/monsters/upload/
+
+- `route.ts` — API endpoint for bulk uploading monster templates from JSON documents (~899 tok)
 
 ## app/api/parties/
 
@@ -809,7 +865,7 @@
 
 ## app/campaigns/[id]/sessions/
 
-- `page.tsx` — formatDate — renders form (~4167 tok)
+- `page.tsx` — formatDate — renders form (~4153 tok)
 
 ## app/characters/
 
@@ -821,7 +877,7 @@
 
 ## app/parties/
 
-- `page.tsx` — PartiesContent — renders form (~3874 tok)
+- `page.tsx` — PartiesContent — renders form (~3872 tok)
 
 ## app/register/
 
@@ -829,11 +885,17 @@
 
 ## lib/
 
+- `api-helpers.ts` — Exports requireAdmin (~292 tok)
 - `clientStorage.ts` — Client-side storage using localStorage (~616 tok)
 - `dndBeyondCharacterImport.ts` — Exports DndBeyondModifier, DndBeyondCharacterData, DndBeyondCharacterServiceResponse, ImportedCharac (~2046 tok)
-- `middleware.ts` — Extract auth token from request (~695 tok)
-- `storage.ts` — Server-side storage functions for MongoDB (~7041 tok)
+- `middleware.ts` — Extract auth token from request (~1027 tok)
+- `permissions.ts` — Fetch a user document by userId. (~294 tok)
+- `storage.ts` — Server-side storage functions for MongoDB (~7008 tok)
 - `types.ts` — Represents a player character with D&D 5e statistics and metadata. (~4854 tok)
+
+## lib/__mocks__/
+
+- `middleware.ts` — Declares requireAuth (~172 tok)
 
 ## lib/components/
 
@@ -861,7 +923,7 @@
 ## lib/utils/
 
 - `partySelection.ts` — Returns the Character objects that belong to the given party. (~604 tok)
-- `sessionEvents.ts` — Computes auto-populated NPC events from party membership changes in a time window. (~503 tok)
+- `sessionEvents.ts` — Computes auto-populated NPC events from party membership changes in a time window. (~502 tok)
 
 ## openspec/changes/archive/2026-05-21-extract-http-backoff-utils/
 
@@ -1021,6 +1083,14 @@
 
 - `spec.md` — ADDED Requirements (~1032 tok)
 
+## openspec/changes/session-invalidation-foundation/
+
+- `.openspec.yaml` (~15 tok)
+- `design.md` — Context (~622 tok)
+- `proposal.md` — GitHub Issues (~713 tok)
+- `tasks.md` — Tasks (~566 tok)
+- `tests.md` — Tests (~1417 tok)
+
 ## openspec/changes/travelling-npcs-character-type/
 
 - `design.md` — Context (~2244 tok)
@@ -1045,16 +1115,12 @@
 
 ## tests/integration/api/
 
-- `parties.test.ts` — PartyResponse: putParty, getParty, createCharacter, createParty (~1842 tok)
-- `sessions.test.ts` — SessionLogResponse: createSession (~2785 tok)
+- `parties.test.ts` — PartyResponse: authed, createCharacter, createParty (~1864 tok)
+- `sessions.test.ts` — SessionLogResponse: authed, createSession (~2726 tok)
 
 ## tests/integration/characters/
 
 - `characterType.integration.test.ts` — CharacterResponse: authed, createCharacter (~2388 tok)
-
-## tests/integration/helpers/
-
-- `server.ts` — Wait for the server to respond OK on the given URL. (~1636 tok)
 
 ## tests/integration/offline/
 
@@ -1065,23 +1131,34 @@
 - `characterTypeUI.test.tsx` — PC (~1974 tok)
 - `partyCharacterTypeUI.test.tsx` — PC (~1502 tok)
 
+## tests/unit/api/auth/
+
+- `logout.test.ts` — mockedVerifyAuth: makeRequest (~503 tok)
+- `me.test.ts` — API routes: GET (1 endpoints) (~1028 tok)
+
 ## tests/unit/api/campaigns/
 
 - `global.id.copy.route.test.ts` — Declares mockedRequireAuth (~1490 tok)
 - `global.id.route.test.ts` — Declares mockedRequireAdmin (~631 tok)
 - `global.route.test.ts` — Declares mockedRequireAdmin (~1870 tok)
-- `route.test.ts` — Declares mockedRequireAuth (~2600 tok)
-- `sessions.id.route.test.ts` — Declares mockedRequireAuth (~1022 tok)
-- `sessions.route.test.ts` — Declares mockedRequireAuth (~1648 tok)
+- `route.test.ts` — Declares mockedRequireAuth (~3426 tok)
+- `sessions.id.route.test.ts` — Declares mockedRequireAuth (~1214 tok)
+- `sessions.route.test.ts` — Declares mockedRequireAuth (~1524 tok)
 
 ## tests/unit/api/characters/
 
 - `[id].route.test.ts` — Declares mockedRequireAuth (~1686 tok)
 - `route.test.ts` — Declares mockedRequireAuth (~3114 tok)
 
+## tests/unit/api/monsters/
+
+- `duplicate.test.ts` — Declares mockLoadAll (~478 tok)
+- `global.id.route.test.ts` — Declares requireAuth (~1065 tok)
+- `global.route.test.ts` — Declares requireAuth (~1020 tok)
+
 ## tests/unit/api/parties/
 
-- `route.test.ts` — Declares mockedRequireAuth (~2662 tok)
+- `route.test.ts` — Declares mockedRequireAuth (~2716 tok)
 
 ## tests/unit/components/
 
@@ -1089,16 +1166,17 @@
 - `CampaignsPage.test.tsx` — jsonResponse (~2672 tok)
 - `NavBar.test.tsx` — mockedUseAuth (~922 tok)
 - `PartiesPage.test.tsx` — PC (~2381 tok)
-- `SessionsPage.test.tsx` — MOCK_LOG (~1324 tok)
+- `SessionsPage.test.tsx` — MOCK_LOG (~1323 tok)
 - `ui.test.tsx` — render — renders form (~2132 tok)
 
 ## tests/unit/helpers/
 
-- `route.test.helpers.ts` — Shared auth payload used across route unit tests (~2220 tok)
+- `route.test.helpers.ts` — Shared auth payload used across route unit tests (~2070 tok)
 
 ## tests/unit/import/
 
 - `armor-class.test.ts` — Declares result (~534 tok)
+- `characterImportRoute.test.ts` — requireAuth: createRequest (~1976 tok)
 - `dndBeyond-abilities.test.ts` — Declares DndBeyondActionEntry (~2414 tok)
 - `dndBeyond-ability-scores.test.ts` — Declares requireDefined (~1441 tok)
 - `dndBeyond-armor-class.test.ts` — MockDndBeyondModifier: modifiers (~3642 tok)
@@ -1106,16 +1184,20 @@
 
 ## tests/unit/lib/
 
+- `api-helpers.test.ts` — Declares InvalidUserIdError (~1278 tok)
+- `auth.test.helpers.ts` — Test data and helpers for unit tests of auth.ts (~894 tok)
+- `auth.test.ts` — Declares payload (~2747 tok)
 - `clientStorage.test.ts` — Mock localStorage for Node.js test environment (~1485 tok)
-- `middleware.test.ts` — API routes: GET (2 endpoints) (~1721 tok)
+- `middleware.test.ts` — Registers common tokenVersion behaviour tests for both withAuth and withAuthAndParams. (~2450 tok)
 - `partySelection.test.ts` — Declares makeCharacter (~1640 tok)
+- `permissions.test.ts` — ObjectId: mockCollection (~1104 tok)
 - `useAuth.test.ts` — Mock next/navigation (~1552 tok)
 
 ## tests/unit/storage/
 
 - `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~2885 tok)
 - `sessionLog.test.ts` — mockedGetDatabase: makeCollectionMock (~1965 tok)
-- `storage.test.ts` — mockedGetDatabase: makeMockCollection (~2917 tok)
+- `storage.test.ts` — mockedGetDatabase: makeMockCollection (~2691 tok)
 
 ## tests/unit/utils/
 

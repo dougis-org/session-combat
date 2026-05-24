@@ -1,48 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
-import { verifyAuth } from '@/lib/middleware';
+import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/middleware';
+import { getUserById } from '@/lib/permissions';
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request, auth) => {
+  let isAdmin = false;
   try {
-    const auth = verifyAuth(request);
-    
-    if (!auth) {
-      return NextResponse.json(
-        { authenticated: false },
-        { status: 401 }
-      );
-    }
-
-    // Get user info including admin status
-    const db = require('@/lib/db').getDatabase;
-    let isAdmin = false;
-    try {
-      const database = await db();
-      const user = await database.collection('users').findOne({ _id: new ObjectId(auth.userId) });
-      isAdmin = user?.isAdmin === true;
-    } catch (error) {
-      console.error('Error fetching user admin status:', error);
-    }
-
-    const response = NextResponse.json(
-      { 
-        authenticated: true,
-        userId: auth.userId,
-        email: auth.email,
-        isAdmin
-      },
-      { status: 200 }
-    );
-    
-    // Prevent caching — auth state changes when cookies change
-    response.headers.set('Cache-Control', 'no-store');
-    
-    return response;
+    const user = await getUserById(auth.userId);
+    isAdmin = user?.['isAdmin'] === true;
   } catch (error) {
-    console.error('Me endpoint error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Error fetching user admin status:', error);
   }
-}
+
+  const response = NextResponse.json(
+    {
+      authenticated: true,
+      userId: auth.userId,
+      email: auth.email,
+      isAdmin
+    },
+    { status: 200 }
+  );
+
+  response.headers.set('Cache-Control', 'no-store');
+
+  return response;
+});

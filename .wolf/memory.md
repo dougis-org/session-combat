@@ -755,6 +755,134 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 18:03 | Edited openspec/changes/add-password-reset-ability/design.md | store() → memory() | ~91 |
+| 18:04 | Session end: 1 writes across 1 files (design.md) | 7 reads | ~97 tok |
+| 18:04 | Edited openspec/changes/add-password-reset-ability/design.md | expanded (+8 lines) | ~194 |
+| 18:05 | Session end: 2 writes across 1 files (design.md) | 8 reads | ~4933 tok |
+| 18:16 | Created openspec/changes/add-password-reset-ability/tasks.md | — | ~533 |
+| 18:38 | Session end: 3 writes across 2 files (design.md, tasks.md) | 8 reads | ~5504 tok |
+| 07:15 | Created openspec/changes/session-invalidation-foundation/.openspec.yaml | — | ~15 |
+| 07:15 | Created openspec/changes/session-invalidation-foundation/proposal.md | — | ~724 |
+| 07:15 | Created openspec/changes/session-invalidation-foundation/design.md | — | ~664 |
+| 07:15 | Created openspec/changes/session-invalidation-foundation/tasks.md | — | ~255 |
+| 07:16 | Created openspec/changes/add-password-reset-ability/tasks.md | — | ~393 |
+| 07:16 | Edited openspec/changes/add-password-reset-ability/proposal.md | 5→5 lines | ~50 |
+| 07:16 | Created openspec/changes/session-invalidation-foundation/proposal.md | — | ~760 |
+| 07:18 | Session end: 10 writes across 4 files (design.md, tasks.md, .openspec.yaml, proposal.md) | 8 reads | ~8568 tok |
+
+## Session: 2026-05-23 07:19
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 07:22 | Created openspec/changes/session-invalidation-foundation/tests.md | — | ~1509 |
+| 07:22 | Edited lib/types.ts | 14→16 lines | ~93 |
+| 07:22 | Edited openspec/changes/session-invalidation-foundation/tasks.md | inline fix | ~24 |
+| 07:22 | Edited openspec/changes/session-invalidation-foundation/tasks.md | inline fix | ~26 |
+| 07:22 | Edited lib/middleware.ts | added 3 import(s) | ~61 |
+| 07:22 | Edited lib/middleware.ts | added error handling | ~421 |
+| 07:23 | Edited openspec/changes/session-invalidation-foundation/tasks.md | inline fix | ~28 |
+| 07:23 | Edited lib/middleware.ts | modified verifyAuth() | ~63 |
+| 07:23 | Edited lib/middleware.ts | modified requireAuth() | ~69 |
+| 07:23 | Edited openspec/changes/session-invalidation-foundation/tasks.md | inline fix | ~22 |
+| 07:23 | Edited app/api/auth/login/route.ts | 3→3 lines | ~44 |
+| 07:23 | Edited openspec/changes/session-invalidation-foundation/tasks.md | inline fix | ~25 |
+| 07:23 | Edited app/api/auth/register/route.ts | 14→15 lines | ~127 |
+| 07:23 | Edited openspec/changes/session-invalidation-foundation/tasks.md | inline fix | ~32 |
+| 07:24 | Edited app/api/campaigns/global/[id]/copy/route.ts | reduced (-10 lines) | ~98 |
+| 07:25 | Edited app/api/campaigns/global/[id]/copy/route.ts | modified catch() | ~53 |
+| 07:25 | Edited app/api/combat/route.ts | modified if() | ~471 |
+| 07:25 | Edited app/api/characters/import/route.ts | reduced (-6 lines) | ~115 |
+| 07:25 | Edited app/api/characters/import/route.ts | modified getImportErrorResponse() | ~42 |
+| 07:25 | Edited app/api/items/route.ts | modified catch() | ~445 |
+| 07:25 | Edited app/api/monsters/upload/route.ts | reduced (-7 lines) | ~102 |
+| 07:26 | Edited app/api/monsters/upload/route.ts | modified catch() | ~84 |
+| 07:26 | Edited app/api/encounters/route.ts | modified catch() | ~408 |
+| 07:26 | Edited app/api/monsters/route.ts | 2→2 lines | ~29 |
+| 07:26 | Edited app/api/monsters/route.ts | modified catch() | ~143 |
+| 07:26 | Edited app/api/monsters/route.ts | modified catch() | ~74 |
+| 07:26 | Edited app/api/characters/route.ts | 2→2 lines | ~29 |
+| 07:26 | Edited app/api/characters/route.ts | reduced (-6 lines) | ~18 |
+| 07:26 | Edited app/api/characters/route.ts | modified catch() | ~110 |
+| 07:26 | Edited app/api/characters/route.ts | 7→7 lines | ~48 |
+| 07:27 | Created app/api/characters/[id]/route.ts | — | ~2096 |
+| 07:27 | Created app/api/monsters/[id]/route.ts | — | ~1678 |
+| 07:27 | Created app/api/encounters/[id]/route.ts | — | ~890 |
+| 07:28 | Created app/api/combat/[id]/route.ts | — | ~872 |
+| 07:28 | Created app/api/monsters/[id]/duplicate/route.ts | — | ~344 |
+| 07:28 | Created app/api/monsters/global/[id]/route.ts | — | ~1898 |
+| 07:28 | Created app/api/auth/me/route.ts | — | ~299 |
+| 07:29 | Created lib/api-helpers.ts | — | ~351 |
+| 07:29 | Edited openspec/changes/session-invalidation-foundation/tasks.md | inline fix | ~27 |
+| 07:29 | Edited lib/middleware.ts | modified verifyTokenVersion() | ~112 |
+| 07:30 | Edited lib/api-helpers.ts | modified requireAdmin() | ~253 |
+| 07:30 | Edited tests/unit/helpers/route.test.helpers.ts | 11→13 lines | ~112 |
+| 07:30 | Edited tests/unit/lib/middleware.test.ts | modified mockDb() | ~210 |
+| 07:30 | Edited tests/unit/lib/middleware.test.ts | "user-123" → "507f1f77bcf86cd799439011" | ~30 |
+| 07:30 | Edited tests/unit/lib/middleware.test.ts | expanded (+56 lines) | ~1155 |
+| 07:30 | Edited tests/unit/lib/auth.test.helpers.ts | expanded (+6 lines) | ~185 |
+| 07:31 | Edited tests/unit/lib/auth.test.ts | 5→6 lines | ~53 |
+| 07:31 | Edited tests/unit/lib/auth.test.ts | 9→11 lines | ~102 |
+| 07:31 | Created tests/unit/api/auth/me.test.ts | — | ~1022 |
+| 07:32 | Edited tests/unit/api/auth/logout.test.ts | 4→5 lines | ~37 |
+| 08:49 | Edited tests/unit/api/monsters/duplicate.test.ts | added 2 condition(s) | ~173 |
+| 08:49 | Edited tests/unit/api/campaigns/route.test.ts | added 2 condition(s) | ~152 |
+| 08:49 | Edited tests/unit/api/parties/route.test.ts | added 2 condition(s) | ~152 |
+| 08:49 | Edited tests/unit/import/characterImportRoute.test.ts | added 2 condition(s) | ~152 |
+| 08:49 | Edited tests/unit/lib/api-helpers.test.ts | modified mockDbUser() | ~226 |
+| 08:50 | Edited tests/unit/lib/api-helpers.test.ts | expanded (+14 lines) | ~678 |
+| 08:51 | Edited tests/unit/lib/api-helpers.test.ts | 4→4 lines | ~63 |
+| 08:51 | Created tests/unit/api/auth/me.test.ts | — | ~1028 |
+
+## Session: 2026-05-23 08:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 08:53 | Edited tests/unit/api/monsters/global.route.test.ts | inline fix | ~23 |
+| 09:13 | Edited openspec/changes/session-invalidation-foundation/tasks.md | 3→3 lines | ~20 |
+| 09:13 | Fixed last failing test suite (global.route.test.ts) by adding tokenVersion:0 to findOne mock | tests/unit/api/monsters/global.route.test.ts | All 95 unit suites pass (1310 tests) | ~100 |
+| 09:13 | Session end: 2 writes across 2 files (global.route.test.ts, tasks.md) | 3 reads | ~283 tok |
+| 09:17 | Session end: 2 writes across 2 files (global.route.test.ts, tasks.md) | 3 reads | ~283 tok |
+| 09:20 | Edited openspec/changes/session-invalidation-foundation/tasks.md | 3→8 lines | ~80 |
+| 09:20 | Edited openspec/changes/session-invalidation-foundation/tasks.md | modified Reviewer() | ~316 |
+| 09:23 | Session end: 4 writes across 2 files (global.route.test.ts, tasks.md) | 7 reads | ~1885 tok |
+| 09:23 | Session end: 4 writes across 2 files (global.route.test.ts, tasks.md) | 7 reads | ~1885 tok |
+| 09:24 | Session end: 4 writes across 2 files (global.route.test.ts, tasks.md) | 7 reads | ~1885 tok |
+| 10:45 | Edited lib/middleware.ts | 4→3 lines | ~35 |
+| 10:45 | Edited lib/middleware.ts | added 1 condition(s) | ~105 |
+| 10:46 | Edited lib/api-helpers.ts | added 1 condition(s) | ~162 |
+| 10:46 | Edited app/api/auth/me/route.ts | added 1 condition(s) | ~83 |
+| 10:47 | Edited tests/unit/api/monsters/duplicate.test.ts | inline fix | ~33 |
+| 14:14 | Edited tests/unit/api/monsters/global.route.test.ts | 1→5 lines | ~54 |
+| 14:15 | Session end: 10 writes across 6 files (global.route.test.ts, tasks.md, middleware.ts, api-helpers.ts, route.ts) | 11 reads | ~5565 tok |
+| 14:17 | Session end: 10 writes across 6 files (global.route.test.ts, tasks.md, middleware.ts, api-helpers.ts, route.ts) | 11 reads | ~5565 tok |
+| 14:33 | Created lib/permissions.ts | — | ~228 |
+| 14:34 | Created lib/middleware.ts | — | ~972 |
+| 14:34 | Created lib/api-helpers.ts | — | ~256 |
+| 14:34 | Created app/api/auth/me/route.ts | — | ~186 |
+| 14:34 | Edited app/api/auth/login/route.ts | added nullish coalescing | ~26 |
+| 14:34 | Created tests/unit/lib/permissions.test.ts | — | ~1095 |
+| 14:35 | Created lib/permissions.ts | — | ~294 |
+| 14:36 | Created lib/middleware.ts | — | ~1032 |
+| 14:36 | Created lib/api-helpers.ts | — | ~300 |
+| 14:36 | Created tests/unit/lib/permissions.test.ts | — | ~1104 |
+| 14:36 | Created tests/unit/lib/api-helpers.test.ts | — | ~1013 |
+
+## Session: 2026-05-23 14:38
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:39 | Edited lib/middleware.ts | 2→2 lines | ~21 |
+| 14:39 | Edited tests/unit/api/monsters/global.id.route.test.ts | 1→5 lines | ~54 |
+| 14:42 | Session end: 2 writes across 2 files (middleware.ts, global.id.route.test.ts) | 3 reads | ~3005 tok |
+| 15:34 | Edited lib/middleware.ts | added nullish coalescing | ~34 |
+| 15:34 | Edited lib/api-helpers.ts | added nullish coalescing | ~31 |
+| 15:34 | Edited app/api/auth/login/route.ts | added 1 condition(s) | ~75 |
+| 15:35 | Edited openspec/changes/session-invalidation-foundation/tests.md | 2→2 lines | ~49 |
+| 15:35 | Edited openspec/changes/session-invalidation-foundation/tests.md | 4→4 lines | ~68 |
+| 15:35 | Edited tests/unit/lib/middleware.test.ts | expanded (+14 lines) | ~505 |
+| 15:35 | Edited tests/unit/lib/api-helpers.test.ts | expanded (+11 lines) | ~225 |
+| 15:38 | Session end: 9 writes across 7 files (middleware.ts, global.id.route.test.ts, api-helpers.ts, route.ts, tests.md) | 6 reads | ~8374 tok |
+| 20:56 | Session end: 9 writes across 7 files (middleware.ts, global.id.route.test.ts, api-helpers.ts, route.ts, tests.md) | 6 reads | ~8374 tok |
 | 18:16 | Edited app/parties/page.tsx | inline fix | ~17 |
 | 18:16 | Edited app/parties/page.tsx | CSS: characterIds | ~117 |
 | 18:16 | Edited lib/storage.ts | inline fix | ~37 |
@@ -798,53 +926,26 @@
 | 09:34 | Created tests/unit/components/SessionsPage.test.tsx | — | ~1327 |
 | 09:35 | Edited tests/unit/components/CampaignsPage.test.tsx | added optional chaining | ~290 |
 | 09:35 | Edited tests/unit/components/SessionsPage.test.tsx | 22→22 lines | ~288 |
-| 09:37 | Session end: 29 writes across 12 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 21 reads | ~39382 tok |
+| 21:09 | Session end: 29 writes across 12 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 21 reads | ~39382 tok |
 
-## Session: 2026-05-23 09:38
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 09:43 | Edited tests/unit/helpers/route.test.helpers.ts | expanded (+15 lines) | ~306 |
-| 09:43 | Edited tests/unit/helpers/route.test.helpers.ts | modified itReturns401WithParams() | ~468 |
-| 09:43 | Edited tests/unit/api/campaigns/sessions.id.route.test.ts | reduced (-10 lines) | ~1021 |
-| 09:44 | Edited tests/unit/api/campaigns/sessions.route.test.ts | 10→11 lines | ~100 |
-| 09:44 | Edited tests/unit/api/campaigns/sessions.route.test.ts | reduced (-11 lines) | ~25 |
-| 09:44 | Edited tests/unit/api/campaigns/sessions.route.test.ts | inline fix | ~5 |
-| 09:44 | Edited tests/unit/api/campaigns/sessions.route.test.ts | 8→8 lines | ~70 |
-| 09:44 | Edited tests/integration/helpers/server.ts | modified makeAuthedHeaders() | ~65 |
-| 09:44 | Edited tests/integration/api/parties.test.ts | 2→2 lines | ~40 |
-| 09:44 | Edited tests/integration/api/parties.test.ts | modified putParty() | ~161 |
-| 09:44 | Edited tests/integration/api/parties.test.ts | reduced (-12 lines) | ~553 |
-| 09:44 | Edited tests/integration/api/parties.test.ts | json() → getParty() | ~162 |
-| 09:45 | Edited tests/integration/api/sessions.test.ts | 2→2 lines | ~40 |
-| 09:45 | Edited tests/integration/api/sessions.test.ts | authed() → makeAuthedHeaders() | ~20 |
-| 10:43 | Refactor: generalize ContextHandler to generic, add MOCK_SESSION_LOG, makeAuthedHeaders; remove clones in sessions route tests and integration test helpers | route.test.helpers.ts, sessions.id.route.test.ts, sessions.route.test.ts, server.ts, parties.test.ts, sessions.test.ts | 22→15 clone reduction | ~2k |
-| 10:46 | Session end: 14 writes across 6 files (route.test.helpers.ts, sessions.id.route.test.ts, sessions.route.test.ts, server.ts, parties.test.ts) | 16 reads | ~25198 tok |
-| 14:17 | Session end: 14 writes across 6 files (route.test.helpers.ts, sessions.id.route.test.ts, sessions.route.test.ts, server.ts, parties.test.ts) | 16 reads | ~25198 tok |
-| 14:28 | Edited lib/utils/sessionEvents.ts | inline fix | ~18 |
-| 14:28 | Edited lib/storage.ts | added 1 condition(s) | ~110 |
-| 14:29 | Edited app/api/campaigns/[id]/sessions/route.ts | 4→4 lines | ~65 |
-| 14:29 | Edited app/api/campaigns/[id]/sessions/route.ts | 2→2 lines | ~46 |
-| 14:29 | Edited app/campaigns/[id]/sessions/page.tsx | CSS: T12, 00 | ~62 |
-| 14:29 | Edited app/campaigns/[id]/sessions/page.tsx | 5→5 lines | ~68 |
-| 14:29 | Edited app/campaigns/[id]/sessions/page.tsx | inline fix | ~31 |
-| 14:29 | Edited app/parties/page.tsx | inline fix | ~19 |
-| 14:30 | Edited tests/unit/components/SessionsPage.test.tsx | 5→5 lines | ~66 |
-| 14:30 | Edited tests/integration/api/sessions.test.ts | expanded (+9 lines) | ~224 |
-| 14:30 | Edited tests/unit/storage/storage.test.ts | expanded (+23 lines) | ~288 |
-| 14:31 | Edited tests/unit/api/campaigns/sessions.route.test.ts | expanded (+19 lines) | ~284 |
-
-## Session: 2026-05-23 14:39
+## Session: 2026-05-24 06:04
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
-
-## Session: 2026-05-23 15:34
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 15:37 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~15 |
-| 15:37 | Edited openspec/changes/campaign-session-journal/tasks.md | 2→2 lines | ~46 |
-| 15:37 | Edited openspec/changes/campaign-session-journal/tasks.md | 8→8 lines | ~203 |
-| 15:37 | Edited openspec/changes/campaign-session-journal/tasks.md | 3→3 lines | ~39 |
-| 15:38 | Edited openspec/changes/campaign-session-journal/tasks.md | 6→6 lines | ~174 |
+| 06:07 | Edited lib/middleware.ts | "number" → "tokenVersion" | ~25 |
+| 06:07 | Edited lib/middleware.ts | modified catch() | ~82 |
+| 06:07 | Edited lib/middleware.ts | modified catch() | ~61 |
+| 06:07 | Edited lib/api-helpers.ts | "number" → "tokenVersion" | ~22 |
+| 06:08 | Edited tests/unit/lib/middleware.test.ts | expanded (+31 lines) | ~587 |
+| 06:08 | Edited tests/unit/lib/middleware.test.ts | expanded (+33 lines) | ~585 |
+| 06:08 | Edited tests/unit/lib/api-helpers.test.ts | expanded (+11 lines) | ~266 |
+| 08:27 | addressed 5 unresolved PR #210 comments: legacy JWT tokenVersion backward compat + 503 error logging | lib/middleware.ts, lib/api-helpers.ts, tests | fixed+resolved | ~800 |
+| 08:27 | Session end: 7 writes across 4 files (middleware.ts, api-helpers.ts, middleware.test.ts, api-helpers.test.ts) | 8 reads | ~13457 tok |
+| 10:24 | Created lib/__mocks__/middleware.ts | — | ~172 |
+| 10:26 | Created tests/unit/api/monsters/duplicate.test.ts | — | ~478 |
+| 10:26 | Created tests/unit/lib/middleware.test.ts | — | ~2450 |
+| 10:26 | Edited lib/middleware.ts | added 1 condition(s) | ~515 |
+| 10:27 | Edited app/api/monsters/[id]/route.ts | added nullish coalescing | ~156 |
+| 10:27 | Edited app/api/monsters/[id]/route.ts | modified catch() | ~129 |
+| 10:27 | Edited app/api/monsters/[id]/route.ts | reduced (-8 lines) | ~51 |
+| 10:27 | Edited app/api/monsters/[id]/route.ts | reduced (-7 lines) | ~78 |

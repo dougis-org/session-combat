@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken, AuthPayload } from './auth';
+import { getUserById, InvalidUserIdError } from './permissions';
 
 const COOKIE_NAME = 'auth-token';
 
@@ -18,6 +19,7 @@ export function extractToken(request: NextRequest): string | null {
 
 /**
  * Verify auth and extract user payload
+ * @deprecated Use `withAuth` or `withAuthAndParams` which also verify tokenVersion against the DB.
  */
 export function verifyAuth(request: NextRequest): AuthPayload | null {
   const token = extractToken(request);
@@ -51,6 +53,7 @@ export function clearAuthCookie(response: NextResponse): void {
 /**
  * Middleware to protect API routes
  * Returns 401 if user is not authenticated
+ * @deprecated Use `withAuth` or `withAuthAndParams` which also verify tokenVersion against the DB.
  */
 export function requireAuth(request: NextRequest) {
   const auth = verifyAuth(request);
@@ -65,6 +68,29 @@ export function requireAuth(request: NextRequest) {
   return auth;
 }
 
+// Returns false for invalid/missing user or tokenVersion mismatch. Throws on DB error.
+async function verifyTokenVersion(auth: AuthPayload): Promise<boolean> {
+  try {
+    const user = await getUserById(auth.userId);
+    return user !== null && (user['tokenVersion'] ?? 0) === (auth.tokenVersion ?? 0);
+  } catch (err) {
+    if (err instanceof InvalidUserIdError) return false;
+    throw err;
+  }
+}
+
+async function checkAuth(auth: AuthPayload): Promise<NextResponse | null> {
+  try {
+    if (!await verifyTokenVersion(auth)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    return null;
+  } catch (err) {
+    console.error('tokenVersion verification failed:', err);
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+  }
+}
+
 /** Wrap a route handler with auth — no dynamic params. */
 export function withAuth(
   handler: (request: NextRequest, auth: AuthPayload) => Promise<NextResponse>
@@ -72,6 +98,8 @@ export function withAuth(
   return async (request: NextRequest): Promise<NextResponse> => {
     const auth = requireAuth(request);
     if (auth instanceof NextResponse) return auth;
+    const denied = await checkAuth(auth);
+    if (denied) return denied;
     return handler(request, auth);
   };
 }
@@ -84,9 +112,10 @@ export function withAuthAndParams<P extends Record<string, string>>(
     request: NextRequest,
     { params }: { params: Promise<P> }
   ): Promise<NextResponse> => {
-    const resolvedParams = await params;
     const auth = requireAuth(request);
     if (auth instanceof NextResponse) return auth;
-    return handler(request, auth, resolvedParams);
+    const denied = await checkAuth(auth);
+    if (denied) return denied;
+    return handler(request, auth, await params);
   };
 }

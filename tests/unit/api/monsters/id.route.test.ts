@@ -8,7 +8,7 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 import { EXISTING_MONSTER } from "./fixtures";
 
-jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
+jest.mock("@/lib/middleware");
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadMonsterTemplates: jest.fn(),

@@ -5,12 +5,14 @@ import type { AuthPayload } from "@/lib/types";
 export const MOCK_AUTH: AuthPayload = {
   userId: "user-123",
   email: "user@example.com",
+  tokenVersion: 0,
 };
 
 /** Admin auth payload — userId must be a valid 24-char hex string for MongoDB ObjectId */
 export const ADMIN_AUTH: AuthPayload = {
   userId: "507f1f77bcf86cd799439011",
   email: "admin@example.com",
+  tokenVersion: 0,
 };
 
 /** Configure a mocked requireAuth/verifyAuth to return a 401 Unauthorized response */

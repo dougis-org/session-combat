@@ -9,7 +9,7 @@ import {
   itReturns500,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({ requireAuth: jest.fn() }));
+jest.mock("@/lib/middleware");
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 
 const mockedRequireAuth = jest.mocked(requireAuth);

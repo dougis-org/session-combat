@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
     const newUser: User = {
       email,
       passwordHash,
+      tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
     const userId = result.insertedId.toString();
 
     // Generate token
-    const token = generateToken({ userId, email });
+    const token = generateToken({ userId, email, tokenVersion: 0 });
 
     // Create response with cookie
     const response = NextResponse.json(

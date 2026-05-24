@@ -241,6 +241,7 @@ export interface User {
   id?: string;
   email: string;
   passwordHash: string;
+  tokenVersion: number;
   isAdmin?: boolean; // Admin users can manage global monster templates
   createdAt: Date;
   updatedAt: Date;
@@ -249,6 +250,7 @@ export interface User {
 export interface AuthPayload {
   userId: string;
   email: string;
+  tokenVersion: number;
 }
 
 // Ability scores interface
