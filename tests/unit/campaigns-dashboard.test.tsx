@@ -124,7 +124,7 @@ interface FetchSetup {
   parties?: unknown[];
   characters?: unknown[];
   templates?: unknown[];
-  sessionsByCanpaignId?: Record<string, unknown[]>;
+  sessionsByCampaignId?: Record<string, unknown[]>;
 }
 
 function setupFetch({
@@ -132,7 +132,7 @@ function setupFetch({
   parties = [],
   characters = [],
   templates = [],
-  sessionsByCanpaignId = {},
+  sessionsByCampaignId = {},
 }: FetchSetup = {}) {
   global.fetch = jest.fn(async (input: RequestInfo | URL) => {
     const url = input.toString();
@@ -143,7 +143,7 @@ function setupFetch({
     const sessionMatch = url.match(/\/api\/campaigns\/([^/]+)\/sessions/);
     if (sessionMatch) {
       const id = sessionMatch[1];
-      return jsonResponse(sessionsByCanpaignId[id] ?? []);
+      return jsonResponse(sessionsByCampaignId[id] ?? []);
     }
     return jsonResponse({ error: 'not found' }, 404);
   }) as typeof fetch;
@@ -195,7 +195,7 @@ describe('T4 — Dashboard section UI', () => {
     setupFetch({ campaigns: [INACTIVE_CAMPAIGN], parties: [], characters: [] });
     await renderPage();
     expect(container.textContent).toContain('No active campaigns');
-    expect(container.textContent).not.toContain('Open Prompt Builder');
+    expect(container.textContent).not.toContain('Start Encounter');
   });
 
   it('T4.2 — two active campaigns render two campaign cards', async () => {
@@ -204,10 +204,10 @@ describe('T4 — Dashboard section UI', () => {
     await renderPage();
     expect(container.textContent).toContain('My Campaign');
     expect(container.textContent).toContain('Second Campaign');
-    const promptLinks = Array.from(container.querySelectorAll('a')).filter(
-      a => a.textContent?.includes('Open Prompt Builder')
+    const encounterLinks = Array.from(container.querySelectorAll('a')).filter(
+      a => a.textContent?.includes('Start Encounter')
     );
-    expect(promptLinks).toHaveLength(2);
+    expect(encounterLinks).toHaveLength(2);
   });
 
   it('T4.3 — active campaign with two linked parties renders two party sub-cards', async () => {
@@ -267,7 +267,7 @@ describe('T5 — Last Session card', () => {
       campaigns: [BASE_CAMPAIGN],
       parties: [],
       characters: [],
-      sessionsByCanpaignId: { 'camp-1': [MOCK_SESSION] },
+      sessionsByCampaignId: { 'camp-1': [MOCK_SESSION] },
     });
     await renderPage();
     expect(container.textContent).toContain('Session 11');
@@ -279,7 +279,7 @@ describe('T5 — Last Session card', () => {
       campaigns: [BASE_CAMPAIGN],
       parties: [],
       characters: [],
-      sessionsByCanpaignId: { 'camp-1': [{ ...MOCK_SESSION, milestone: true }] },
+      sessionsByCampaignId: { 'camp-1': [{ ...MOCK_SESSION, milestone: true }] },
     });
     await renderPage();
     expect(container.textContent).toContain('Milestone');
@@ -290,7 +290,7 @@ describe('T5 — Last Session card', () => {
       campaigns: [BASE_CAMPAIGN],
       parties: [],
       characters: [],
-      sessionsByCanpaignId: { 'camp-1': [] },
+      sessionsByCampaignId: { 'camp-1': [] },
     });
     await renderPage();
     expect(container.textContent).not.toContain('Session 11');
@@ -317,7 +317,7 @@ describe('T5 — Last Session card', () => {
 
     // Campaign card visible before session resolves
     expect(container.textContent).toContain('My Campaign');
-    expect(container.textContent).toContain('Open Prompt Builder');
+    expect(container.textContent).toContain('Start Encounter');
     expect(container.textContent).not.toContain('Session 11');
 
     resolveSession(undefined);
@@ -350,7 +350,7 @@ describe('T6 — Integration smoke test', () => {
       campaigns: [BASE_CAMPAIGN],
       parties: [PARTY],
       characters: [PC_CHARACTER, NPC_CHARACTER, DEPARTED_CHARACTER],
-      sessionsByCanpaignId: { 'camp-1': [MOCK_SESSION] },
+      sessionsByCampaignId: { 'camp-1': [MOCK_SESSION] },
     });
     await renderPage();
 

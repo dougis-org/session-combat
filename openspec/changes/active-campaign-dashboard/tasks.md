@@ -103,8 +103,8 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 ## PR and Merge
 
 - [x] Run the required pre-PR self-review before committing
-- [ ] Commit all changes to `feature/active-campaign-dashboard` and push to remote
-- [ ] Open PR from `feature/active-campaign-dashboard` to `main` — title: "feat: Active Campaign Dashboard (#186)"
+- [x] Commit all changes to `feature/active-campaign-dashboard` and push to remote
+- [x] Open PR from `feature/active-campaign-dashboard` to `main` — title: "feat: Active Campaign Dashboard (#186)"
 - [ ] Wait 120 seconds for agentic reviewers to post comments
 - [ ] **Monitor PR comments** — address each comment, commit fixes, follow Remote push validation, push; repeat until no unresolved comments remain
 - [ ] Enable auto-merge once no blocking review comments remain

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState } from '@/lib/components/ui';
-import { Campaign, CampaignTemplate, Party, Character, SessionLog } from '@/lib/types';
+import { Campaign, CampaignTemplate, Party, Character, SessionLog, getCharacterType } from '@/lib/types';
 import { CampaignEditor } from './CampaignEditor';
 import { CharacterRosterCard } from '@/lib/components/CharacterRosterCard';
 import { CampaignChapterInfo } from '@/lib/components/CampaignChapterInfo';
@@ -45,51 +45,55 @@ export function CampaignsContent() {
   const [copyingIds, setCopyingIds] = useState<Set<string>>(new Set());
   const [copyError, setCopyError] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    const loadAll = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        setCatalogLoading(true);
-        setCatalogError(null);
+  const loadAll = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setCatalogLoading(true);
+      setCatalogError(null);
 
-        const [campRes, partyRes, charRes, globalRes] = await Promise.all([
-          fetch('/api/campaigns'),
-          fetch('/api/parties'),
-          fetch('/api/characters'),
-          fetch('/api/campaigns/global'),
-        ]);
+      const [campRes, partyRes, charRes, globalRes] = await Promise.all([
+        fetch('/api/campaigns'),
+        fetch('/api/parties'),
+        fetch('/api/characters'),
+        fetch('/api/campaigns/global'),
+      ]);
 
-        if (!campRes.ok) throw new Error('Failed to fetch campaigns');
-        setCampaigns((await campRes.json()) || []);
+      if (!campRes.ok) throw new Error('Failed to fetch campaigns');
+      setCampaigns((await campRes.json()) || []);
 
-        if (partyRes.ok) setParties((await partyRes.json()) || []);
-        if (charRes.ok) setCharacters((await charRes.json()) || []);
+      if (partyRes.ok) setParties((await partyRes.json()) || []);
+      if (charRes.ok) setCharacters((await charRes.json()) || []);
 
-        if (globalRes.ok) {
-          setTemplates((await globalRes.json()) || []);
-        } else {
-          setCatalogError('Failed to load campaign catalog');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-        setCatalogLoading(false);
+      if (globalRes.ok) {
+        setTemplates((await globalRes.json()) || []);
+      } else {
+        setCatalogError('Failed to load campaign catalog');
       }
-    };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+      setCatalogLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadAll();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const activeCampaigns = campaigns.filter(c => c.active);
     if (activeCampaigns.length === 0) return;
 
+    const controller = new AbortController();
+
     const fetchSessions = async () => {
       const results = await Promise.all(
         activeCampaigns.map(async (campaign) => {
           try {
-            const res = await fetch(`/api/campaigns/${campaign.id}/sessions?limit=1`);
+            const res = await fetch(`/api/campaigns/${campaign.id}/sessions?limit=1`, { signal: controller.signal });
             if (!res.ok) return [campaign.id, null] as const;
             const data: SessionLog[] = await res.json();
             return [campaign.id, data[0] ?? null] as const;
@@ -98,26 +102,14 @@ export function CampaignsContent() {
           }
         })
       );
-      setSessionsByCampaign(Object.fromEntries(results));
+      if (!controller.signal.aborted) {
+        setSessionsByCampaign(Object.fromEntries(results));
+      }
     };
 
     fetchSessions();
+    return () => controller.abort();
   }, [campaigns]);
-
-  const fetchCampaigns = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch('/api/campaigns');
-      if (!res.ok) throw new Error('Failed to fetch campaigns');
-      const data = await res.json();
-      setCampaigns(data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const copyTemplate = async (templateId: string) => {
     setCopyingIds((prev) => new Set(prev).add(templateId));
@@ -128,7 +120,7 @@ export function CampaignsContent() {
         const data = await res.json();
         throw new Error(data.error || 'Failed to copy campaign');
       }
-      await fetchCampaigns();
+      await loadAll();
     } catch (err) {
       setCopyError((prev) => ({ ...prev, [templateId]: err instanceof Error ? err.message : 'Failed to copy campaign' }));
     } finally {
@@ -164,7 +156,7 @@ export function CampaignsContent() {
         const data = await response.json();
         throw new Error(data.error || 'Failed to save campaign');
       }
-      await fetchCampaigns();
+      await loadAll();
       setIsAdding(false);
       setEditingCampaign(null);
     } catch (err) {
@@ -178,7 +170,7 @@ export function CampaignsContent() {
       setError(null);
       const response = await fetch(`/api/campaigns/${id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete campaign');
-      await fetchCampaigns();
+      await loadAll();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete campaign');
     }
@@ -233,12 +225,6 @@ export function CampaignsContent() {
                       </div>
                       <div className="flex gap-2 flex-shrink-0 ml-4">
                         <Link
-                          href="/prompts"
-                          className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
-                        >
-                          Open Prompt Builder
-                        </Link>
-                        <Link
                           href="/encounters"
                           className="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm"
                         >
@@ -290,10 +276,10 @@ export function CampaignsContent() {
                             .filter((c): c is Character => !!c);
 
                           const pcs = resolvedMembers.filter(
-                            c => !c.characterType || c.characterType === 'character'
+                            c => getCharacterType(c.characterType) === 'character'
                           );
                           const npcs = resolvedMembers.filter(
-                            c => c.characterType === 'npc' || c.characterType === 'companion'
+                            c => getCharacterType(c.characterType) !== 'character'
                           );
 
                           return (
