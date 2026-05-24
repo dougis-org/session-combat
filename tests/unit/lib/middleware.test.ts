@@ -199,6 +199,37 @@ describe("lib/middleware", () => {
       expect(handler).toHaveBeenCalledWith(request, legacyPayload);
       expect(response.status).toBe(200);
     });
+
+    it("allows pre-rollout JWT with no tokenVersion field when DB tokenVersion is also 0", async () => {
+      const preRolloutPayload = { userId: MOCK_PAYLOAD.userId, email: MOCK_PAYLOAD.email, tokenVersion: undefined as unknown as number };
+      mockedVerifyToken.mockReturnValue(preRolloutPayload);
+      mockDb({});
+      const handler = jest.fn().mockResolvedValue(NextResponse.json({ ok: true }));
+      const wrapped = withAuth(handler);
+
+      const request = makeRequest({ cookie: "auth-token=valid.token" });
+      const response = await wrapped(request);
+
+      expect(handler).toHaveBeenCalledWith(request, preRolloutPayload);
+      expect(response.status).toBe(200);
+    });
+
+    it("returns 503 and logs error when DB throws during tokenVersion check", async () => {
+      const dbError = new Error("DB connection failed");
+      mockedVerifyToken.mockReturnValue(MOCK_PAYLOAD);
+      mockedGetDatabase.mockRejectedValue(dbError);
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const handler = jest.fn();
+      const wrapped = withAuth(handler);
+
+      const request = makeRequest({ cookie: "auth-token=valid.token" });
+      const response = await wrapped(request);
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(response.status).toBe(503);
+      expect(consoleSpy).toHaveBeenCalledWith("tokenVersion verification failed:", dbError);
+      consoleSpy.mockRestore();
+    });
   });
 
   describe("withAuthAndParams", () => {
@@ -254,6 +285,39 @@ describe("lib/middleware", () => {
 
       expect(handler).not.toHaveBeenCalled();
       expect(response.status).toBe(401);
+    });
+
+    it("allows pre-rollout JWT with no tokenVersion field when DB tokenVersion is also 0", async () => {
+      const preRolloutPayload = { userId: MOCK_PAYLOAD.userId, email: MOCK_PAYLOAD.email, tokenVersion: undefined as unknown as number };
+      mockedVerifyToken.mockReturnValue(preRolloutPayload);
+      mockDb({});
+      const handler = jest.fn().mockResolvedValue(NextResponse.json({ ok: true }));
+      const wrapped = withAuthAndParams(handler);
+
+      const request = makeRequest({ cookie: "auth-token=valid.token" });
+      const params = Promise.resolve({ id: "item-1" });
+      const response = await wrapped(request, { params });
+
+      expect(handler).toHaveBeenCalledWith(request, preRolloutPayload, { id: "item-1" });
+      expect(response.status).toBe(200);
+    });
+
+    it("returns 503 and logs error when DB throws during tokenVersion check", async () => {
+      const dbError = new Error("DB connection failed");
+      mockedVerifyToken.mockReturnValue(MOCK_PAYLOAD);
+      mockedGetDatabase.mockRejectedValue(dbError);
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const handler = jest.fn();
+      const wrapped = withAuthAndParams(handler);
+
+      const request = makeRequest({ cookie: "auth-token=valid.token" });
+      const params = Promise.resolve({ id: "item-1" });
+      const response = await wrapped(request, { params });
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(response.status).toBe(503);
+      expect(consoleSpy).toHaveBeenCalledWith("tokenVersion verification failed:", dbError);
+      consoleSpy.mockRestore();
     });
   });
 });

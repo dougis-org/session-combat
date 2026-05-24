@@ -67,6 +67,17 @@ describe("requireAdmin", () => {
     expect(result).toBeNull();
   });
 
+  it("allows pre-rollout JWT with no tokenVersion field when DB tokenVersion is also 0", async () => {
+    const preRolloutAuth = { userId: ADMIN_AUTH.userId, email: ADMIN_AUTH.email, tokenVersion: undefined as unknown as number };
+    mockedRequireAuth.mockReturnValue(preRolloutAuth);
+    mockedGetUserById.mockResolvedValue({ isAdmin: true });
+
+    const req = makeRouteRequest("http://localhost/api/test", "POST", {});
+    const result = await requireAdmin(req);
+
+    expect(result).toBeNull();
+  });
+
   it("returns 401 when userId is invalid", async () => {
     mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
     const { InvalidUserIdError: MockInvalidUserIdError } = jest.requireMock("@/lib/permissions");

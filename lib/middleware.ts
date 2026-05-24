@@ -72,7 +72,7 @@ export function requireAuth(request: NextRequest) {
 async function verifyTokenVersion(auth: AuthPayload): Promise<boolean> {
   try {
     const user = await getUserById(auth.userId);
-    return user !== null && typeof auth.tokenVersion === 'number' && (user['tokenVersion'] ?? 0) === auth.tokenVersion;
+    return user !== null && (user['tokenVersion'] ?? 0) === (auth.tokenVersion ?? 0);
   } catch (err) {
     if (err instanceof InvalidUserIdError) return false;
     throw err;
@@ -90,7 +90,8 @@ export function withAuth(
       if (!await verifyTokenVersion(auth)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
-    } catch {
+    } catch (err) {
+      console.error('tokenVersion verification failed:', err);
       return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
     }
     return handler(request, auth);
@@ -111,7 +112,8 @@ export function withAuthAndParams<P extends Record<string, string>>(
       if (!await verifyTokenVersion(auth)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
-    } catch {
+    } catch (err) {
+      console.error('tokenVersion verification failed:', err);
       return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
     }
     const resolvedParams = await params;
