@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState } from '@/lib/components/ui';
-import { Campaign, CampaignTemplate } from '@/lib/types';
+import { Campaign, CampaignTemplate, Party, Character, SessionLog } from '@/lib/types';
 import { CampaignEditor } from './CampaignEditor';
+import { CharacterRosterCard } from '@/lib/components/CharacterRosterCard';
+import { CampaignChapterInfo } from '@/lib/components/CampaignChapterInfo';
 
-function CampaignChapterInfo({ campaign }: { campaign: Campaign }) {
+function ManagementChapterInfo({ campaign }: { campaign: Campaign }) {
   const currentCh = campaign.currentChapterId
     ? campaign.chapters?.find((ch) => ch.id === campaign.currentChapterId)
     : undefined;
@@ -30,6 +32,9 @@ function CampaignChapterInfo({ campaign }: { campaign: Campaign }) {
 
 export function CampaignsContent() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [parties, setParties] = useState<Party[]>([]);
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [sessionsByCampaign, setSessionsByCampaign] = useState<Record<string, SessionLog | null>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
@@ -41,9 +46,63 @@ export function CampaignsContent() {
   const [copyError, setCopyError] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    fetchCampaigns();
-    fetchTemplates();
+    const loadAll = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        setCatalogLoading(true);
+        setCatalogError(null);
+
+        const [campRes, partyRes, charRes, globalRes] = await Promise.all([
+          fetch('/api/campaigns'),
+          fetch('/api/parties'),
+          fetch('/api/characters'),
+          fetch('/api/campaigns/global'),
+        ]);
+
+        if (!campRes.ok) throw new Error('Failed to fetch campaigns');
+        setCampaigns((await campRes.json()) || []);
+
+        if (partyRes.ok) setParties((await partyRes.json()) || []);
+        if (charRes.ok) setCharacters((await charRes.json()) || []);
+
+        if (globalRes.ok) {
+          setTemplates((await globalRes.json()) || []);
+        } else {
+          setCatalogError('Failed to load campaign catalog');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+        setCatalogLoading(false);
+      }
+    };
+    loadAll();
   }, []);
+
+  useEffect(() => {
+    const activeCampaigns = campaigns.filter(c => c.active);
+    if (activeCampaigns.length === 0) return;
+
+    const fetchSessions = async () => {
+      const results = await Promise.all(
+        activeCampaigns.map(async (campaign) => {
+          try {
+            const res = await fetch(`/api/campaigns/${campaign.id}/sessions?limit=1`);
+            if (!res.ok) return [campaign.id, null] as const;
+            const data: SessionLog[] = await res.json();
+            return [campaign.id, data[0] ?? null] as const;
+          } catch {
+            return [campaign.id, null] as const;
+          }
+        })
+      );
+      setSessionsByCampaign(Object.fromEntries(results));
+    };
+
+    fetchSessions();
+  }, [campaigns]);
 
   const fetchCampaigns = async () => {
     try {
@@ -57,21 +116,6 @@ export function CampaignsContent() {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchTemplates = async () => {
-    try {
-      setCatalogLoading(true);
-      setCatalogError(null);
-      const res = await fetch('/api/campaigns/global');
-      if (!res.ok) throw new Error('Failed to fetch campaign catalog');
-      const data = await res.json();
-      setTemplates(data || []);
-    } catch (err) {
-      setCatalogError(err instanceof Error ? err.message : 'Failed to load campaign catalog');
-    } finally {
-      setCatalogLoading(false);
     }
   };
 
@@ -145,6 +189,8 @@ export function CampaignsContent() {
     setEditingCampaign(null);
   };
 
+  const activeCampaigns = campaigns.filter(c => c.active);
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
@@ -153,6 +199,155 @@ export function CampaignsContent() {
         </div>
 
         <ErrorBanner message={error} />
+
+        {/* Active Campaigns Dashboard */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-4">Active Campaigns</h2>
+          {activeCampaigns.length === 0 ? (
+            <div className="bg-gray-800 rounded-lg p-6 text-center">
+              <p className="text-gray-400 mb-2">
+                No active campaigns — mark one active or create a new one.
+              </p>
+              <a href="#campaigns-list" className="text-blue-400 hover:text-blue-300 text-sm">
+                Go to campaign list ↓
+              </a>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {activeCampaigns.map(campaign => {
+                const linkedParties = parties.filter(p => p.campaignId === campaign.id);
+                const lastSession = sessionsByCampaign[campaign.id];
+
+                return (
+                  <div key={campaign.id} className="bg-gray-800 rounded-lg p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-xl font-bold">{campaign.name}</h3>
+                        {campaign.moduleName && (
+                          <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
+                        )}
+                        <CampaignChapterInfo
+                          chapters={campaign.chapters || []}
+                          currentChapterId={campaign.currentChapterId}
+                        />
+                      </div>
+                      <div className="flex gap-2 flex-shrink-0 ml-4">
+                        <Link
+                          href="/prompts"
+                          className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+                        >
+                          Open Prompt Builder
+                        </Link>
+                        <Link
+                          href="/encounters"
+                          className="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm"
+                        >
+                          Start Encounter
+                        </Link>
+                      </div>
+                    </div>
+
+                    {lastSession && (
+                      <div className="bg-gray-700 rounded p-3 mb-4">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium">
+                            Session {lastSession.sessionNumber}
+                            {lastSession.title ? ` — ${lastSession.title}` : ''}
+                          </p>
+                          {lastSession.milestone && (
+                            <span className="bg-yellow-600 text-yellow-100 text-xs px-2 py-0.5 rounded">
+                              Milestone
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gray-400 text-xs mt-1">
+                          {new Date(lastSession.datePlayed).toLocaleDateString()}
+                        </p>
+                        <Link
+                          href={`/campaigns/${campaign.id}/sessions`}
+                          className="text-blue-400 text-xs hover:underline mt-1 inline-block"
+                        >
+                          View all sessions →
+                        </Link>
+                      </div>
+                    )}
+
+                    {linkedParties.length === 0 ? (
+                      <div className="bg-gray-700 rounded p-4 text-center">
+                        <p className="text-gray-400 text-sm">
+                          No party linked —{' '}
+                          <Link href="/parties" className="text-blue-400 hover:underline">
+                            add one in Parties
+                          </Link>
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {linkedParties.map(party => {
+                          const activeMembers = party.members.filter(m => !m.leftAt);
+                          const resolvedMembers = activeMembers
+                            .map(m => characters.find(c => c.id === m.characterId))
+                            .filter((c): c is Character => !!c);
+
+                          const pcs = resolvedMembers.filter(
+                            c => !c.characterType || c.characterType === 'character'
+                          );
+                          const npcs = resolvedMembers.filter(
+                            c => c.characterType === 'npc' || c.characterType === 'companion'
+                          );
+
+                          return (
+                            <div key={party.id} className="bg-gray-700 rounded-lg p-4">
+                              <h4 className="font-semibold mb-3">{party.name}</h4>
+
+                              {pcs.length > 0 && (
+                                <div className="mb-3">
+                                  <p className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+                                    Player Characters
+                                  </p>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {pcs.map(c => (
+                                      <CharacterRosterCard
+                                        key={c.id}
+                                        name={c.name}
+                                        race={c.race}
+                                        characterType={c.characterType}
+                                        classes={c.classes}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {npcs.length > 0 && (
+                                <div>
+                                  <p className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+                                    Travelling NPCs & Companions
+                                  </p>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {npcs.map(c => (
+                                      <CharacterRosterCard
+                                        key={c.id}
+                                        name={c.name}
+                                        race={c.race}
+                                        characterType={c.characterType}
+                                        classes={c.classes}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={addCampaign}
@@ -172,62 +367,64 @@ export function CampaignsContent() {
           />
         )}
 
-        {loading ? (
-          <LoadingState label="Loading campaigns..." />
-        ) : campaigns.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-gray-400 text-lg mb-4">No campaigns yet.</p>
-            <button
-              onClick={addCampaign}
-              className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded text-lg font-semibold"
-            >
-              New Campaign
-            </button>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 gap-4">
-            {campaigns.map(campaign => (
-              <div key={campaign.id} className="bg-gray-800 rounded-lg p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h2 className="text-xl font-semibold">{campaign.name}</h2>
-                      {campaign.active && (
-                        <span className="bg-green-700 text-green-100 text-xs px-2 py-0.5 rounded">
-                          Active
-                        </span>
+        <div id="campaigns-list">
+          {loading ? (
+            <LoadingState label="Loading campaigns..." />
+          ) : campaigns.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-gray-400 text-lg mb-4">No campaigns yet.</p>
+              <button
+                onClick={addCampaign}
+                className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded text-lg font-semibold"
+              >
+                New Campaign
+              </button>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4">
+              {campaigns.map(campaign => (
+                <div key={campaign.id} className="bg-gray-800 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h2 className="text-xl font-semibold">{campaign.name}</h2>
+                        {campaign.active && (
+                          <span className="bg-green-700 text-green-100 text-xs px-2 py-0.5 rounded">
+                            Active
+                          </span>
+                        )}
+                      </div>
+                      {campaign.moduleName && (
+                        <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
                       )}
+                      <ManagementChapterInfo campaign={campaign} />
                     </div>
-                    {campaign.moduleName && (
-                      <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
-                    )}
-                    <CampaignChapterInfo campaign={campaign} />
-                  </div>
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/campaigns/${campaign.id}/sessions`}
-                      className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
-                    >
-                      Session Log
-                    </Link>
-                    <button
-                      onClick={() => { setEditingCampaign(campaign); setIsAdding(false); }}
-                      className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => deleteCampaign(campaign.id)}
-                      className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/campaigns/${campaign.id}/sessions`}
+                        className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
+                      >
+                        Session Log
+                      </Link>
+                      <button
+                        onClick={() => { setEditingCampaign(campaign); setIsAdding(false); }}
+                        className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteCampaign(campaign.id)}
+                        className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="mt-12">
           <h2 className="text-2xl font-bold mb-4">Campaign Catalog</h2>
