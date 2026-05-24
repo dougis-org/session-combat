@@ -17,7 +17,10 @@ export async function getUserById(userId: string): Promise<Record<string, unknow
   if (!ObjectId.isValid(userId)) throw new InvalidUserIdError(userId);
   const db = await getDatabase();
   const id = new ObjectId(userId);
-  return db.collection('users').findOne({ _id: { $eq: id } });
+  return db.collection('users').findOne(
+    { _id: { $eq: id } },
+    { projection: { email: 1, tokenVersion: 1, isAdmin: 1 } }
+  );
 }
 
 export async function isUserAdmin(userId: string): Promise<boolean | null> {
