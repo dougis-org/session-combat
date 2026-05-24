@@ -21,9 +21,7 @@ export async function fetchCampaignContext(
   ]);
 
   const parties = allParties.filter(p => p.campaignId === campaignId);
-  const allMembers = Array.from(
-    new Map(parties.flatMap(p => p.members).map(m => [m.characterId, m])).values(),
-  );
+  const allMembers = parties.flatMap(p => p.members);
   const memberIds = new Set(allMembers.map(m => m.characterId));
 
   const chapter = campaign.currentChapterId
