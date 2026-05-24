@@ -70,3 +70,7 @@ regression-test-output.txt
 
 .remember/
 .tokensave
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md

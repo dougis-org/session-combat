@@ -40,7 +40,7 @@ const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 
 const MOCK_PARTIES = [
-  { id: "party-1", userId: "user-123", name: "Fellowship", characterIds: [] },
+  { id: "party-1", userId: "user-123", name: "Fellowship", members: [] },
 ];
 
 const BASE_URL = "http://localhost/api/parties";
@@ -110,7 +110,8 @@ describe("POST /api/parties", () => {
     const body = await response.json();
     expect(body.name).toBe("The Avengers");
     expect(body.userId).toBe("user-123");
-    expect(body.characterIds).toEqual(["char-1", "char-2"]);
+    expect(body.members).toHaveLength(2);
+    expect(body.members.map((m: { characterId: string }) => m.characterId)).toEqual(["char-1", "char-2"]);
     expect(mockedStorage.saveParty).toHaveBeenCalledTimes(1);
     const savedParty = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
     expect(savedParty._id).toBeUndefined();
@@ -131,7 +132,7 @@ describe("PUT /api/parties/[id]", () => {
     userId: "user-123",
     name: "Old Name",
     description: "",
-    characterIds: ["char-1"],
+    members: [{ characterId: "char-1", addedAt: new Date("2026-04-07T00:00:00.000Z") }],
     createdAt: new Date("2026-04-07T00:00:00.000Z"),
     updatedAt: new Date("2026-04-07T00:01:00.000Z"),
   };
@@ -161,8 +162,10 @@ describe("PUT /api/parties/[id]", () => {
       userId: "user-123",
       name: "New Name",
       description: "Updated",
-      characterIds: ["char-1", "char-2"],
     });
+    const activeIds = savedParty.members.filter((m: { leftAt?: Date }) => !m.leftAt).map((m: { characterId: string }) => m.characterId);
+    expect(activeIds).toContain("char-1");
+    expect(activeIds).toContain("char-2");
   });
 
   it("strips _id from saved payload", async () => {
@@ -232,7 +235,7 @@ describe("GET /api/parties/[id]", () => {
     jest.clearAllMocks();
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadParties.mockResolvedValue([
-      { id: "party-123", userId: "user-123", name: "Fellowship", characterIds: [] },
+      { id: "party-123", userId: "user-123", name: "Fellowship", members: [] },
     ] as any);
   });
 
@@ -269,7 +272,7 @@ describe("DELETE /api/parties/[id]", () => {
     jest.clearAllMocks();
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadParties.mockResolvedValue([
-      { id: "party-123", userId: "user-123", name: "Fellowship", characterIds: [] },
+      { id: "party-123", userId: "user-123", name: "Fellowship", members: [] },
     ] as any);
     mockedStorage.deleteParty.mockResolvedValue(undefined as any);
   });

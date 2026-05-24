@@ -47,7 +47,11 @@ const PC = { id: 'c1', name: 'Thorin', characterType: 'character', userId: 'u1',
 const NPC = { id: 'c2', name: 'Barliman', characterType: 'npc', userId: 'u1', classes: [{ class: 'Fighter', level: 1 }], hp: 10, maxHp: 10, ac: 10, abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 } };
 const COMPANION = { id: 'c3', name: 'Bill', characterType: 'companion', userId: 'u1', classes: [{ class: 'Fighter', level: 1 }], hp: 5, maxHp: 5, ac: 10, abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 } };
 
-const PARTY = { id: 'p1', name: 'Fellowship', characterIds: ['c1', 'c2', 'c3'], userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+const PARTY = { id: 'p1', name: 'Fellowship', members: [
+  { characterId: 'c1', addedAt: new Date().toISOString() },
+  { characterId: 'c2', addedAt: new Date().toISOString() },
+  { characterId: 'c3', addedAt: new Date().toISOString() },
+], userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
 
 const ctx = setupUiTest();
 

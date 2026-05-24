@@ -62,15 +62,21 @@ const COMPANION = {
   abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
 };
 const PARTY_ALL = {
-  id: 'p1', name: 'Fellowship', characterIds: ['c1', 'c2', 'c3'],
+  id: 'p1', name: 'Fellowship', members: [
+    { characterId: 'c1', addedAt: new Date().toISOString() },
+    { characterId: 'c2', addedAt: new Date().toISOString() },
+    { characterId: 'c3', addedAt: new Date().toISOString() },
+  ],
   userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
 };
 const PARTY_PC_ONLY = {
-  id: 'p2', name: 'PC Party', characterIds: ['c1'],
+  id: 'p2', name: 'PC Party', members: [
+    { characterId: 'c1', addedAt: new Date().toISOString() },
+  ],
   userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
 };
 const PARTY_EMPTY = {
-  id: 'p3', name: 'Empty Party', characterIds: [],
+  id: 'p3', name: 'Empty Party', members: [],
   userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
 };
 const PC_NO_TYPE = {
@@ -132,7 +138,7 @@ describe('PartiesPage — party card member display', () => {
   });
 
   test('member with undefined characterType defaults to Player Characters section', async () => {
-    const party = { ...PARTY_PC_ONLY, characterIds: ['c4'] };
+    const party = { ...PARTY_PC_ONLY, members: [{ characterId: 'c4', addedAt: new Date().toISOString() }] };
     await renderWithData([PC_NO_TYPE], [party]);
 
     const labels = getMemberSectionLabels();
@@ -164,7 +170,7 @@ describe('PartiesPage — party card member display', () => {
 
   test('NPC-only party renders only NPC section and hides PC and Companion sections', async () => {
     const partyNpcOnly = {
-      id: 'p4', name: 'NPC Party', characterIds: ['c2'],
+      id: 'p4', name: 'NPC Party', members: [{ characterId: 'c2', addedAt: new Date().toISOString() }],
       userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
     };
     await renderWithData([NPC], [partyNpcOnly]);
@@ -189,7 +195,7 @@ describe('PartiesPage — party card member display', () => {
 
   test('renders placeholder Unknown card for missing character ID', async () => {
     const partyWithMissing = {
-      id: 'p5', name: 'Missing Party', characterIds: ['nonexistent-id'],
+      id: 'p5', name: 'Missing Party', members: [{ characterId: 'nonexistent-id', addedAt: new Date().toISOString() }],
       userId: 'u1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
     };
     await renderWithData([], [partyWithMissing]);

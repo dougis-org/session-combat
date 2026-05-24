@@ -4,6 +4,31 @@ Thank you for your interest in contributing to session-combat! This document out
 
 ## Repository Standards
 
+### Change Management (OpenSpec)
+
+This repository requires the use of **OpenSpec** for all feature development, bug fixes, and non-trivial changes. 
+
+#### Prerequisites & Setup
+The repository utilizes a custom OpenSpec schema defined in the [openspec-shared](https://github.com/dougis-org/openspec-shared) repository. This must be initialized and updated as a Git submodule:
+1. **Initialize/update the submodule**:
+   ```sh
+   git submodule update --init --recursive
+   ```
+   Or if configuring from scratch, add the submodule and run the bootstrap script as outlined in the [openspec-shared README](https://github.com/dougis-org/openspec-shared/blob/main/README.md):
+   ```sh
+   git submodule add https://github.com/dougis-org/openspec-shared .github/openspec-shared
+   sh .github/openspec-shared/bootstrap.sh
+   ```
+
+#### Contribution & Change Flow
+All work in this repository must follow this specific process:
+1. **Capture details in a GitHub issue**: Create a GitHub issue representing the work (it can be a detailed spec or a simple one-liner).
+2. **Self-assign**: When starting work on any issue, assign it to yourself.
+3. **Explore**: Use `/openspec:explore` (or the `/opsx-explore` workflow) to brainstorm design decisions, passing the GitHub issue as the context. The custom schema will facilitate reading the issue details.
+4. **Propose**: Once all questions in explore are answered, switch to proposal mode to generate all required OpenSpec change artifacts (e.g. proposal, design, tasks).
+5. **Apply & Implement**: Run `/openspec:apply` (or `/opsx-apply`) to begin implementation. Note that the tasks in our custom schema include performing a PR review, addressing feedback/comments, and ensuring all required CI/CD checks pass.
+6. **Complete & Sync**: Once the PR is merged (which requires all reviewer comment threads to be fully resolved), run `/openspec:apply` (or `/opsx-apply`) again, noting that the PR has been merged. This will complete the change flow, triggering the archiving of the change folder and updating the main branch with the merged specifications.
+
 ### Code Quality
 
 - Follow the existing code style and conventions

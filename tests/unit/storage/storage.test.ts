@@ -138,7 +138,7 @@ describe("storage entity loader normalization", () => {
           _id: { toString: () => "party-mongo-id" },
           name: "Party",
           userId: "user1",
-          characterIds: [],
+          members: [],
         },
       ] as never,
     );
@@ -147,6 +147,29 @@ describe("storage entity loader normalization", () => {
 
     expect(partiesMock.find).toHaveBeenCalledWith({ userId: "user1" });
     expect(result[0].id).toBe("party-mongo-id");
+  });
+
+  test("loadParties migrates legacy party with characterIds and no members", async () => {
+    const createdAt = new Date("2026-01-01");
+    partiesMock.toArray.mockResolvedValue(
+      [
+        {
+          id: "legacy-party",
+          userId: "user1",
+          name: "Legacy Party",
+          characterIds: ["char-1", "char-2"],
+          createdAt,
+          updatedAt: new Date("2026-01-01"),
+        },
+      ] as never,
+    );
+
+    const result = await storage.loadParties("user1");
+
+    expect(result[0].members).toHaveLength(2);
+    expect(result[0].members[0]).toEqual({ characterId: "char-1", addedAt: createdAt });
+    expect(result[0].members[1]).toEqual({ characterId: "char-2", addedAt: createdAt });
+    expect(Object.keys(result[0])).not.toContain("characterIds");
   });
 
   test("loadMonsterTemplates preserves stored id when _id is also present", async () => {
@@ -229,13 +252,14 @@ describe("storage.deleteCharacter", () => {
     );
   });
 
-  test("removes character from all parties for referential integrity", async () => {
+  test("sets leftAt on all active party memberships for the deleted character", async () => {
     await storage.deleteCharacter("char1", "user1");
 
     expect(mockDb.collection).toHaveBeenCalledWith("parties");
     expect(partiesMock.updateMany).toHaveBeenCalledWith(
-      { userId: "user1" },
-      { $pull: { characterIds: "char1" } },
+      { userId: "user1", "members.characterId": "char1", "members.leftAt": { $exists: false } },
+      { $set: { "members.$[elem].leftAt": expect.any(Date) } },
+      { arrayFilters: [{ "elem.characterId": "char1", "elem.leftAt": { $exists: false } }] },
     );
   });
 
@@ -267,7 +291,7 @@ describe("storage.saveParty", () => {
       userId: "user-1",
       name: "Updated Party",
       description: "Edited without relying on MongoDB _id",
-      characterIds: ["char-1"],
+      members: [{ characterId: "char-1", addedAt: new Date("2026-04-07T00:00:00.000Z") }],
       createdAt: new Date("2026-04-07T00:00:00.000Z"),
       updatedAt: new Date("2026-04-07T00:05:00.000Z"),
     };

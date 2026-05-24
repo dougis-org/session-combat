@@ -8,6 +8,10 @@ export interface TestServer {
   cleanup: () => Promise<void>;
 }
 
+export function makeAuthedHeaders(cookie: string): Record<string, string> {
+  return { "Content-Type": "application/json", Cookie: cookie };
+}
+
 /**
  * Wait for the server to respond OK on the given URL.
  * Logs each retry attempt and includes attempt count and last error in the

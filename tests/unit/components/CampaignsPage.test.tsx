@@ -240,4 +240,15 @@ describe('Campaign Catalog UI', () => {
       expect(container.textContent).toContain('2 chapters');
     });
   });
+
+  describe('Session Log link', () => {
+    it('renders a Session Log link pointing to /campaigns/[id]/sessions', async () => {
+      setupFetch([MOCK_CAMPAIGN], []);
+      await renderPage();
+      const links = Array.from(container.querySelectorAll('a'));
+      const sessionLink = links.find(a => a.textContent?.includes('Session Log'));
+      expect(sessionLink).toBeTruthy();
+      expect(sessionLink?.getAttribute('href')).toBe(`/campaigns/${MOCK_CAMPAIGN.id}/sessions`);
+    });
+  });
 });
