@@ -954,3 +954,151 @@
 | 11:42 | Edited openspec/changes/session-invalidation-foundation/tasks.md | 7→7 lines | ~110 |
 | 11:43 | Edited openspec/changes/session-invalidation-foundation/tasks.md | 5→5 lines | ~85 |
 | 11:44 | Session end: 19 writes across 7 files (middleware.ts, api-helpers.ts, middleware.test.ts, api-helpers.test.ts, duplicate.test.ts) | 20 reads | ~29675 tok |
+| 09:43 | Edited tests/unit/helpers/route.test.helpers.ts | expanded (+15 lines) | ~306 |
+| 09:43 | Edited tests/unit/helpers/route.test.helpers.ts | modified itReturns401WithParams() | ~468 |
+| 09:43 | Edited tests/unit/api/campaigns/sessions.id.route.test.ts | reduced (-10 lines) | ~1021 |
+| 09:44 | Edited tests/unit/api/campaigns/sessions.route.test.ts | 10→11 lines | ~100 |
+| 09:44 | Edited tests/unit/api/campaigns/sessions.route.test.ts | reduced (-11 lines) | ~25 |
+| 09:44 | Edited tests/unit/api/campaigns/sessions.route.test.ts | inline fix | ~5 |
+| 09:44 | Edited tests/unit/api/campaigns/sessions.route.test.ts | 8→8 lines | ~70 |
+| 09:44 | Edited tests/integration/helpers/server.ts | modified makeAuthedHeaders() | ~65 |
+| 09:44 | Edited tests/integration/api/parties.test.ts | 2→2 lines | ~40 |
+| 09:44 | Edited tests/integration/api/parties.test.ts | modified putParty() | ~161 |
+| 09:44 | Edited tests/integration/api/parties.test.ts | reduced (-12 lines) | ~553 |
+| 09:44 | Edited tests/integration/api/parties.test.ts | json() → getParty() | ~162 |
+| 09:45 | Edited tests/integration/api/sessions.test.ts | 2→2 lines | ~40 |
+| 09:45 | Edited tests/integration/api/sessions.test.ts | authed() → makeAuthedHeaders() | ~20 |
+| 10:43 | Refactor: generalize ContextHandler to generic, add MOCK_SESSION_LOG, makeAuthedHeaders; remove clones in sessions route tests and integration test helpers | route.test.helpers.ts, sessions.id.route.test.ts, sessions.route.test.ts, server.ts, parties.test.ts, sessions.test.ts | 22→15 clone reduction | ~2k |
+| 10:46 | Session end: 14 writes across 6 files (route.test.helpers.ts, sessions.id.route.test.ts, sessions.route.test.ts, server.ts, parties.test.ts) | 16 reads | ~25198 tok |
+| 14:17 | Session end: 14 writes across 6 files (route.test.helpers.ts, sessions.id.route.test.ts, sessions.route.test.ts, server.ts, parties.test.ts) | 16 reads | ~25198 tok |
+| 14:28 | Edited lib/utils/sessionEvents.ts | inline fix | ~18 |
+| 14:28 | Edited lib/storage.ts | added 1 condition(s) | ~110 |
+| 14:29 | Edited app/api/campaigns/[id]/sessions/route.ts | 4→4 lines | ~65 |
+| 14:29 | Edited app/api/campaigns/[id]/sessions/route.ts | 2→2 lines | ~46 |
+| 14:29 | Edited app/campaigns/[id]/sessions/page.tsx | CSS: T12, 00 | ~62 |
+| 14:29 | Edited app/campaigns/[id]/sessions/page.tsx | 5→5 lines | ~68 |
+| 14:29 | Edited app/campaigns/[id]/sessions/page.tsx | inline fix | ~31 |
+| 14:29 | Edited app/parties/page.tsx | inline fix | ~19 |
+| 14:30 | Edited tests/unit/components/SessionsPage.test.tsx | 5→5 lines | ~66 |
+| 14:30 | Edited tests/integration/api/sessions.test.ts | expanded (+9 lines) | ~224 |
+| 14:30 | Edited tests/unit/storage/storage.test.ts | expanded (+23 lines) | ~288 |
+| 14:31 | Edited tests/unit/api/campaigns/sessions.route.test.ts | expanded (+19 lines) | ~284 |
+
+## Session: 2026-05-23 14:39
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-05-23 15:34
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:37 | Edited openspec/changes/campaign-session-journal/tasks.md | inline fix | ~15 |
+| 15:37 | Edited openspec/changes/campaign-session-journal/tasks.md | 2→2 lines | ~46 |
+| 15:37 | Edited openspec/changes/campaign-session-journal/tasks.md | 8→8 lines | ~203 |
+| 15:37 | Edited openspec/changes/campaign-session-journal/tasks.md | 3→3 lines | ~39 |
+| 15:38 | Edited openspec/changes/campaign-session-journal/tasks.md | 6→6 lines | ~174 |
+| 10:28 | Session end: 29 writes across 12 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 21 reads | ~39382 tok |
+| 10:29 | Session end: 29 writes across 12 files (page.tsx, storage.ts, tasks.md, api.integration.test.ts, sessionEvents.ts) | 21 reads | ~39382 tok |
+
+## Session: 2026-05-24 10:36
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:16 | Created openspec/changes/prompt-builder-campaign-child/proposal.md | — | ~1687 |
+| 11:17 | Created openspec/changes/prompt-builder-campaign-child/design.md | — | ~3355 |
+| 11:18 | Created openspec/changes/prompt-builder-campaign-child/specs/campaign-context/spec.md | — | ~1363 |
+| 11:18 | Created openspec/changes/prompt-builder-campaign-child/specs/prompt-templates/spec.md | — | ~1215 |
+| 11:18 | Created openspec/changes/prompt-builder-campaign-child/specs/prompt-builder-ui/spec.md | — | ~1483 |
+| 11:19 | Created openspec/changes/prompt-builder-campaign-child/specs/session-logs-refactor/spec.md | — | ~826 |
+| 11:20 | Created openspec/changes/prompt-builder-campaign-child/tasks.md | — | ~2400 |
+| 11:20 | Created openspec/changes/prompt-builder-campaign-child/tests.md | — | ~1773 |
+| 11:20 | Session end: 8 writes across 5 files (proposal.md, design.md, spec.md, tasks.md, tests.md) | 3 reads | ~24633 tok |
+
+## Session: 2026-05-24 11:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-05-24 11:24
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:26 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~23 |
+| 11:26 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~50 |
+| 11:26 | Edited lib/types.ts | expanded (+14 lines) | ~136 |
+| 11:27 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~23 |
+| 11:27 | Created tests/unit/utils/campaignContext.test.ts | — | ~1992 |
+| 11:27 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~21 |
+| 11:27 | Created lib/utils/campaignContext.ts | — | ~365 |
+| 11:28 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~15 |
+| 11:28 | Created tests/unit/hooks/useCampaignContext.test.ts | — | ~1006 |
+| 11:28 | Created lib/hooks/useCampaignContext.ts | — | ~328 |
+| 11:28 | Created tests/unit/hooks/useCampaignContext.test.ts | — | ~1491 |
+| 11:29 | Created tests/unit/hooks/useCampaignContext.test.ts | — | ~992 |
+| 11:29 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~16 |
+| 11:30 | Created tests/unit/prompts/templates.test.ts | — | ~2559 |
+| 11:30 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~20 |
+| 11:30 | Created lib/prompts/templates.ts | — | ~1689 |
+| 11:30 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~14 |
+| 11:32 | Created tests/integration/prompts/promptBuilder.test.tsx | — | ~3306 |
+| 11:32 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~22 |
+| 11:35 | Created app/campaigns/[id]/prompts/page.tsx | — | ~2036 |
+| 11:36 | Edited app/campaigns/[id]/prompts/page.tsx | 27→31 lines | ~346 |
+| 11:36 | Edited tests/integration/prompts/promptBuilder.test.tsx | modified if() | ~336 |
+| 11:36 | Edited tests/integration/prompts/promptBuilder.test.tsx | modified if() | ~327 |
+| 11:36 | Edited tests/integration/prompts/promptBuilder.test.tsx | modified if() | ~202 |
+| 11:38 | Edited tests/integration/prompts/promptBuilder.test.tsx | added nullish coalescing | ~437 |
+| 11:39 | Created tests/integration/prompts/promptBuilder.test.tsx | — | ~3264 |
+| 11:39 | Edited tests/integration/prompts/promptBuilder.test.tsx | inline fix | ~92 |
+| 11:39 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~17 |
+| 11:40 | Edited app/campaigns/page.tsx | expanded (+6 lines) | ~190 |
+| 11:40 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~19 |
+| 11:40 | Created tests/integration/sessions/sessionLogs.test.tsx | — | ~1768 |
+| 11:40 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~20 |
+| 11:40 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~16 |
+| 11:40 | Edited app/campaigns/[id]/sessions/page.tsx | added 1 import(s) | ~149 |
+| 11:41 | Edited app/campaigns/[id]/sessions/page.tsx | CSS: allMembers, hasParty | ~387 |
+| 11:41 | Edited app/campaigns/[id]/sessions/page.tsx | 3→3 lines | ~40 |
+| 11:41 | Edited app/campaigns/[id]/sessions/page.tsx | CSS: loading, error | ~306 |
+| 11:41 | Edited app/campaigns/[id]/sessions/page.tsx | modified catch() | ~150 |
+| 11:41 | Edited app/campaigns/[id]/sessions/page.tsx | added optional chaining | ~138 |
+| 11:41 | Edited tests/integration/sessions/sessionLogs.test.tsx | CSS: useCampaignContext, useCampaignContext | ~166 |
+| 11:41 | Edited tests/integration/sessions/sessionLogs.test.tsx | modified makeContext() | ~166 |
+| 11:41 | Edited tests/integration/sessions/sessionLogs.test.tsx | modified renderSessions() | ~193 |
+| 11:42 | Edited tests/unit/prompts/templates.test.ts | 14→14 lines | ~176 |
+| 11:42 | Edited tests/integration/prompts/promptBuilder.test.tsx | inline fix | ~9 |
+| 11:42 | Edited tests/unit/hooks/useCampaignContext.test.ts | 4→2 lines | ~60 |
+| 11:42 | Edited tests/integration/sessions/sessionLogs.test.tsx | 8→8 lines | ~85 |
+| 11:43 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | inline fix | ~24 |
+| 11:43 | Edited tests/unit/components/SessionsPage.test.tsx | expanded (+9 lines) | ~84 |
+| 11:43 | Edited tests/unit/components/SessionsPage.test.tsx | 4→5 lines | ~62 |
+| 11:43 | Edited tests/unit/components/SessionsPage.test.tsx | CSS: context | ~124 |
+| 11:45 | Edited lib/hooks/useCampaignContext.ts | then() → load() | ~160 |
+| 11:45 | Edited tests/integration/prompts/promptBuilder.test.tsx | 2→1 lines | ~40 |
+| 11:45 | Edited tests/integration/sessions/sessionLogs.test.tsx | 9→7 lines | ~106 |
+| 11:45 | Edited tests/unit/hooks/useCampaignContext.test.ts | 2→1 lines | ~58 |
+| 11:46 | Edited lib/hooks/useCampaignContext.ts | modified catch() | ~160 |
+| 11:47 | Created lib/hooks/useCampaignContext.ts | — | ~336 |
+| 11:47 | Edited tests/integration/prompts/promptBuilder.test.tsx | 1→2 lines | ~41 |
+
+## Session: 2026-05-24 11:50
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:55 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | 7→7 lines | ~87 |
+| 11:55 | Edited openspec/changes/prompt-builder-campaign-child/tasks.md | 4→4 lines | ~112 |
+| 11:55 | Session end: 2 writes across 1 files (tasks.md) | 3 reads | ~4045 tok |
+| 11:55 | Session end: 2 writes across 1 files (tasks.md) | 3 reads | ~4045 tok |
+| 11:59 | Edited app/campaigns/[id]/prompts/page.tsx | inline fix | ~15 |
+| 11:59 | Edited app/campaigns/[id]/prompts/page.tsx | added 1 condition(s) | ~89 |
+| 12:00 | Edited app/campaigns/[id]/prompts/page.tsx | added error handling | ~114 |
+| 12:00 | Edited tests/integration/prompts/promptBuilder.test.tsx | 10→11 lines | ~332 |
+| 12:00 | Edited tests/integration/prompts/promptBuilder.test.tsx | added nullish coalescing | ~304 |
+| 12:11 | Edited lib/prompts/templates.ts | inline fix | ~26 |
+| 12:11 | Edited lib/prompts/templates.ts | reduce() → calculateTotalLevel() | ~61 |
+| 12:11 | Edited lib/utils/campaignContext.ts | 2→4 lines | ~55 |
+| 12:11 | Edited app/campaigns/[id]/prompts/page.tsx | unavailable() → rejected() | ~120 |
+| 12:11 | Edited app/campaigns/[id]/prompts/page.tsx | CSS: rows, type | ~233 |
+| 13:53 | Edited app/api/auth/logout/route.ts | modified POST() | ~142 |
+| 13:53 | Edited app/api/auth/logout/route.ts | modified POST() | ~144 |

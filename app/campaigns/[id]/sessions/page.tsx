@@ -5,11 +5,17 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState, FormField, textInputClass } from '@/lib/components/ui';
-import { SessionLog, SessionEvent, Party } from '@/lib/types';
+import { SessionLog, SessionEvent, PartyMember } from '@/lib/types';
+import { useCampaignContext } from '@/lib/hooks/useCampaignContext';
 import { buildNpcEventsFromMemberChanges } from '@/lib/utils/sessionEvents';
 
 function formatDate(d: Date | string): string {
-  const date = typeof d === 'string' ? new Date(d + 'T12:00:00') : d;
+  const date = typeof d === 'string'
+    ? (d.includes('T') ? new Date(d) : new Date(d + 'T12:00:00'))
+    : d;
+  if (isNaN(date.getTime())) {
+    return typeof d === 'string' ? d : '';
+  }
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
@@ -84,7 +90,8 @@ function SessionEntryCard({
 function SessionForm({
   campaignId,
   existing,
-  party,
+  allMembers,
+  hasParty,
   lastSessionDate,
   nextSessionNumber,
   onSave,
@@ -92,7 +99,8 @@ function SessionForm({
 }: {
   campaignId: string;
   existing?: SessionLog;
-  party: Party | null;
+  allMembers: PartyMember[];
+  hasParty: boolean;
   lastSessionDate: Date | null;
   nextSessionNumber: number;
   onSave: () => void;
@@ -112,9 +120,9 @@ function SessionForm({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (existing || !party) return;
-    setEvents(buildNpcEventsFromMemberChanges(party.members, lastSessionDate));
-  }, [party, lastSessionDate, existing]);
+    if (existing || !hasParty) return;
+    setEvents(buildNpcEventsFromMemberChanges(allMembers, lastSessionDate));
+  }, [allMembers, hasParty, lastSessionDate, existing]);
 
   const removeEvent = (index: number) => {
     setEvents(ev => ev.filter((_, i) => i !== index));
@@ -168,7 +176,7 @@ function SessionForm({
     <div className="bg-gray-800 rounded-lg p-4 mb-6">
       <h2 className="text-lg font-semibold mb-4">{existing ? 'Edit Session' : 'New Session'}</h2>
       <ErrorBanner message={error} />
-      {!party && !existing && (
+      {!hasParty && !existing && (
         <p className="text-yellow-400 text-sm mb-3">No linked party found for this campaign.</p>
       )}
 
@@ -308,54 +316,49 @@ function SessionForm({
 
 function SessionsContent({ campaignId }: { campaignId: string }) {
   const [logs, setLogs] = useState<SessionLog[]>([]);
-  const [party, setParty] = useState<Party | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [logsLoading, setLogsLoading] = useState(true);
+  const [logsError, setLogsError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingLog, setEditingLog] = useState<SessionLog | null>(null);
 
-  const fetchData = useCallback(async () => {
+  const { context, loading: contextLoading, error: contextError } = useCampaignContext(campaignId);
+
+  const fetchLogs = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const [logsRes, partiesRes] = await Promise.all([
-        fetch(`/api/campaigns/${campaignId}/sessions`),
-        fetch('/api/parties'),
-      ]);
-      if (!logsRes.ok) throw new Error('Failed to fetch session logs');
-      const logsData: SessionLog[] = await logsRes.json();
-      setLogs(logsData);
-      if (partiesRes.ok) {
-        const partiesData: Party[] = await partiesRes.json();
-        const linked = partiesData.find(p => p.campaignId === campaignId) ?? null;
-        setParty(linked);
-      }
+      setLogsLoading(true);
+      setLogsError(null);
+      const res = await fetch(`/api/campaigns/${campaignId}/sessions`);
+      if (!res.ok) throw new Error('Failed to fetch session logs');
+      setLogs(await res.json());
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setLogsError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
-      setLoading(false);
+      setLogsLoading(false);
     }
   }, [campaignId]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchLogs();
+  }, [fetchLogs]);
+
+  const loading = logsLoading || contextLoading;
+  const error = logsError ?? contextError;
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this session log?')) return;
     try {
       const res = await fetch(`/api/campaigns/${campaignId}/sessions/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete session log');
-      await fetchData();
+      await fetchLogs();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete');
+      setLogsError(err instanceof Error ? err.message : 'Failed to delete');
     }
   };
 
   const handleSaved = async () => {
     setShowForm(false);
     setEditingLog(null);
-    await fetchData();
+    await fetchLogs();
   };
 
   const lastSessionDate = logs.length > 0
@@ -391,7 +394,8 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
           <SessionForm
             campaignId={campaignId}
             existing={editingLog ?? undefined}
-            party={party}
+            allMembers={context?.allMembers ?? []}
+            hasParty={(context?.parties.length ?? 0) > 0}
             lastSessionDate={lastSessionDate}
             nextSessionNumber={nextSessionNumber}
             onSave={handleSaved}

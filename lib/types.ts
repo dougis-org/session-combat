@@ -570,6 +570,20 @@ export interface Party {
   updatedAt: Date;
 }
 
+export interface CampaignContext {
+  campaign: Campaign;
+  chapter: CampaignChapter | null;
+  parties: Party[];
+  allMembers: PartyMember[];
+  characters: Character[];
+}
+
+export interface BuiltPrompt {
+  systemPrompt: string;
+  userMessage: string;
+  fullText: string;
+}
+
 export interface SessionEvent {
   type: 'npc_joined' | 'npc_left' | 'combat_completed' | 'custom';
   description: string;

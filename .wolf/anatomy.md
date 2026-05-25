@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-24T18:43:39.667Z
-> Files: 721 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-24T20:53:48.133Z
+> Files: 739 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -762,6 +762,10 @@
 
 - `route.ts` — Next.js API route: POST (~554 tok)
 
+## app/api/auth/logout/
+
+- `route.ts` — Next.js API route: POST (~144 tok)
+
 ## app/api/auth/me/
 
 - `route.ts` — Next.js API route (~186 tok)
@@ -861,7 +865,11 @@
 ## app/campaigns/
 
 - `CampaignEditor.tsx` — CampaignEditor (~756 tok)
-- `page.tsx` — CampaignChapterInfo (~2900 tok)
+- `page.tsx` — ManagementChapterInfo (~5405 tok)
+
+## app/campaigns/[id]/prompts/
+
+- `page.tsx` — PromptBuilderContent — renders form (~2109 tok)
 
 ## app/campaigns/[id]/sessions/
 
@@ -905,6 +913,7 @@
 ## lib/hooks/
 
 - `useAuth.ts` — Exports AuthUser, useAuth (~1197 tok)
+- `useCampaignContext.ts` — Exports useCampaignContext (~336 tok)
 
 ## lib/import/
 
@@ -916,12 +925,17 @@
 - `dndBeyond-utils.ts` — Exports DndBeyondImportError, createValidationError, ABILITY_ID_MAP, indexStatValues + 6 more (~1014 tok)
 - `utils.ts` — Exports ModifierLike, getAbilityModifier, getProficiencyBonus, dedupeStrings + 9 more (~676 tok)
 
+## lib/prompts/
+
+- `templates.ts` — Exports PromptField, PromptTemplate, buildSystemPrompt, npcTemplate + 5 more (~1690 tok)
+
 ## lib/scripts/
 
 - `seedCampaignTemplates.ts` — one-time ingestion: seeds 50 global campaign templates with chapters and level ranges (~2800 tok)
 
 ## lib/utils/
 
+- `campaignContext.ts` — Exports fetchCampaignContext (~384 tok)
 - `partySelection.ts` — Returns the Character objects that belong to the given party. (~604 tok)
 - `sessionEvents.ts` — Computes auto-populated NPC events from party membership changes in a time window. (~502 tok)
 
@@ -1083,6 +1097,29 @@
 
 - `spec.md` — ADDED Requirements (~1032 tok)
 
+## openspec/changes/prompt-builder-campaign-child/
+
+- `design.md` — Context (~3145 tok)
+- `proposal.md` — GitHub Issues (~1582 tok)
+- `tasks.md` — Tasks (~2250 tok)
+- `tests.md` — Tests (~1662 tok)
+
+## openspec/changes/prompt-builder-campaign-child/specs/campaign-context/
+
+- `spec.md` — ADDED Requirements (~1278 tok)
+
+## openspec/changes/prompt-builder-campaign-child/specs/prompt-builder-ui/
+
+- `spec.md` — ADDED Requirements (~1390 tok)
+
+## openspec/changes/prompt-builder-campaign-child/specs/prompt-templates/
+
+- `spec.md` — ADDED Requirements (~1139 tok)
+
+## openspec/changes/prompt-builder-campaign-child/specs/session-logs-refactor/
+
+- `spec.md` — ADDED Requirements (~774 tok)
+
 ## openspec/changes/session-invalidation-foundation/
 
 - `.openspec.yaml` (~15 tok)
@@ -1126,6 +1163,14 @@
 
 - `logout-clears-storage.test.ts` — replaceMock: Harness, Harness, Harness (~1556 tok)
 
+## tests/integration/prompts/
+
+- `promptBuilder.test.tsx` — FULL_PROMPT (~3126 tok)
+
+## tests/integration/sessions/
+
+- `sessionLogs.test.tsx` — MOCK_LOG (~1958 tok)
+
 ## tests/unit/
 
 - `characterTypeUI.test.tsx` — PC (~1974 tok)
@@ -1166,12 +1211,16 @@
 - `CampaignsPage.test.tsx` — jsonResponse (~2672 tok)
 - `NavBar.test.tsx` — mockedUseAuth (~922 tok)
 - `PartiesPage.test.tsx` — PC (~2381 tok)
-- `SessionsPage.test.tsx` — MOCK_LOG (~1323 tok)
+- `SessionsPage.test.tsx` — MOCK_LOG (~1414 tok)
 - `ui.test.tsx` — render — renders form (~2132 tok)
 
 ## tests/unit/helpers/
 
 - `route.test.helpers.ts` — Shared auth payload used across route unit tests (~2070 tok)
+
+## tests/unit/hooks/
+
+- `useCampaignContext.test.ts` — makeContext: renderHook, Probe (~998 tok)
 
 ## tests/unit/import/
 
@@ -1193,6 +1242,10 @@
 - `permissions.test.ts` — ObjectId: mockCollection (~1104 tok)
 - `useAuth.test.ts` — Mock next/navigation (~1552 tok)
 
+## tests/unit/prompts/
+
+- `templates.test.ts` — Declares makeContext (~2538 tok)
+
 ## tests/unit/storage/
 
 - `campaigns.test.ts` — mockedGetDatabase: makeMockCollection (~2885 tok)
@@ -1201,5 +1254,6 @@
 
 ## tests/unit/utils/
 
+- `campaignContext.test.ts` — makeCampaign: makeFetch (~1992 tok)
 - `partySelection.test.ts` — Declares makeCharacter (~702 tok)
 - `sessionEvents.test.ts` — Declares T0 (~783 tok)
