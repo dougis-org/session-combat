@@ -63,6 +63,14 @@ function findButton(text: string): HTMLButtonElement {
   return found;
 }
 
+function renderDefault() {
+  const onClose = jest.fn();
+  const onApplyDamage = jest.fn();
+  const onAddCondition = jest.fn();
+  render(TARGET, onClose, onApplyDamage, onAddCondition);
+  return { onClose, onApplyDamage, onAddCondition };
+}
+
 function changeInputValue(element: HTMLInputElement | HTMLSelectElement, value: string) {
   act(() => {
     const proto = element instanceof HTMLInputElement ? HTMLInputElement.prototype : HTMLSelectElement.prototype;
@@ -75,10 +83,7 @@ function changeInputValue(element: HTMLInputElement | HTMLSelectElement, value: 
 
 describe('TargetActionModal', () => {
   test('renders target info and buttons', () => {
-    const onClose = jest.fn();
-    const onApplyDamage = jest.fn();
-    const onAddCondition = jest.fn();
-    render(TARGET, onClose, onApplyDamage, onAddCondition);
+    renderDefault();
 
     expect(container.textContent).toContain('Goblin Target');
     expect(container.textContent).toContain('HP: 7/7');
@@ -89,10 +94,7 @@ describe('TargetActionModal', () => {
   });
 
   test('calls onClose when Cancel is clicked', () => {
-    const onClose = jest.fn();
-    const onApplyDamage = jest.fn();
-    const onAddCondition = jest.fn();
-    render(TARGET, onClose, onApplyDamage, onAddCondition);
+    const { onClose } = renderDefault();
 
     act(() => {
       findButton('Cancel').click();
@@ -102,10 +104,7 @@ describe('TargetActionModal', () => {
   });
 
   test('transitions to damage screen and fires onApplyDamage', () => {
-    const onClose = jest.fn();
-    const onApplyDamage = jest.fn();
-    const onAddCondition = jest.fn();
-    render(TARGET, onClose, onApplyDamage, onAddCondition);
+    const { onApplyDamage } = renderDefault();
 
     act(() => {
       findButton('Apply Damage').click();
@@ -132,10 +131,7 @@ describe('TargetActionModal', () => {
   });
 
   test('transitions to condition screen and fires onAddCondition', () => {
-    const onClose = jest.fn();
-    const onApplyDamage = jest.fn();
-    const onAddCondition = jest.fn();
-    render(TARGET, onClose, onApplyDamage, onAddCondition);
+    const { onAddCondition } = renderDefault();
 
     act(() => {
       findButton('Add Condition').click();

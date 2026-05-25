@@ -180,6 +180,15 @@ function renderHook() {
   };
 }
 
+function getLastPostBody(fetchMock: jest.Mock) {
+  const postCalls = fetchMock.mock.calls.filter(([, opts]: [string, RequestInit?]) => opts?.method === 'POST');
+  return JSON.parse(String(postCalls[postCalls.length - 1][1]?.body));
+}
+
+function getPostCallCount(fetchMock: jest.Mock) {
+  return fetchMock.mock.calls.filter(([, opts]: [string, RequestInit?]) => opts?.method === 'POST').length;
+}
+
 // Shared helper to drastically reduce duplication and complexity
 async function testHook(
   callback: (result: { current: HookResult }, fetchMock: jest.Mock) => void | Promise<void>,
@@ -302,8 +311,7 @@ describe('useCombat', () => {
         result.current.confirmAddLair();
       });
 
-      const postCalls = fetchMock.mock.calls.filter(([, options]) => options?.method === 'POST');
-      const lastBody = JSON.parse(String(postCalls[postCalls.length - 1][1]?.body));
+      const lastBody = getLastPostBody(fetchMock);
       expect(lastBody.combatants.some((c: CombatantState) => c.type === 'lair' && c.name === 'Crypt Lair')).toBe(true);
     });
   });
@@ -315,8 +323,7 @@ describe('useCombat', () => {
       });
 
       expect(result.current.setupCombatants).toHaveLength(1);
-      const postCalls = fetchMock.mock.calls.filter(([, options]) => options?.method === 'POST');
-      expect(postCalls).toHaveLength(0);
+      expect(getPostCallCount(fetchMock)).toBe(0);
     });
   });
 
@@ -330,8 +337,7 @@ describe('useCombat', () => {
         result.current.addCombatantFromLibrary({ name: 'Bandit', hp: 11, maxHp: 11, ac: 12 } as never, 'monster', 'monster');
       });
 
-      const postCalls = fetchMock.mock.calls.filter(([, options]) => options?.method === 'POST');
-      expect(postCalls.length).toBeGreaterThanOrEqual(2);
+      expect(getPostCallCount(fetchMock)).toBeGreaterThanOrEqual(2);
     });
   });
 
@@ -344,8 +350,7 @@ describe('useCombat', () => {
       expect(result.current.combatState?.isActive).toBe(true);
       expect(result.current.combatState?.combatants.length).toBeGreaterThanOrEqual(1);
 
-      const postCalls = fetchMock.mock.calls.filter(([, options]) => options?.method === 'POST');
-      expect(postCalls.length).toBeGreaterThanOrEqual(1);
+      expect(getPostCallCount(fetchMock)).toBeGreaterThanOrEqual(1);
     }, {
       characters: [{ id: 'ch1', name: 'Aria', hp: 12, maxHp: 12, ac: 14 }],
     });
@@ -377,13 +382,12 @@ describe('useCombat', () => {
         ]));
       });
 
-      const postCallsBefore = fetchMock.mock.calls.filter(([, opts]) => opts?.method === 'POST').length;
+      const postCallsBefore = getPostCallCount(fetchMock);
 
       act(() => { result.current.nextTurn(); });
 
-      const postCalls = fetchMock.mock.calls.filter(([, opts]) => opts?.method === 'POST');
-      const lastBody = JSON.parse(String(postCalls[postCalls.length - 1][1]?.body));
-      expect(postCalls.length).toBeGreaterThan(postCallsBefore);
+      const lastBody = getLastPostBody(fetchMock);
+      expect(getPostCallCount(fetchMock)).toBeGreaterThan(postCallsBefore);
       expect(lastBody.currentTurnIndex).toBe(1);
       expect(lastBody.currentRound).toBe(1);
     });
@@ -397,8 +401,7 @@ describe('useCombat', () => {
 
       act(() => { result.current.nextTurn(); });
 
-      const postCalls = fetchMock.mock.calls.filter(([, opts]) => opts?.method === 'POST');
-      const lastBody = JSON.parse(String(postCalls[postCalls.length - 1][1]?.body));
+      const lastBody = getLastPostBody(fetchMock);
       expect(lastBody.currentTurnIndex).toBe(0);
       expect(lastBody.currentRound).toBe(2);
     });
@@ -415,8 +418,7 @@ describe('useCombat', () => {
 
       act(() => { result.current.rollInitiative(); });
 
-      const postCalls = fetchMock.mock.calls.filter(([, opts]) => opts?.method === 'POST');
-      const lastBody = JSON.parse(String(postCalls[postCalls.length - 1][1]?.body));
+      const lastBody = getLastPostBody(fetchMock);
 
       const updatedFighter = lastBody.combatants.find((c: CombatantState) => c.id === 'c1');
       expect(updatedFighter.initiativeRoll).toBeDefined();

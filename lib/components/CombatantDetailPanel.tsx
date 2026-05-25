@@ -10,6 +10,22 @@ export interface CombatantDetailPanelProps {
   onUpdate: (id: string, updates: Partial<CombatantState>) => void;
 }
 
+function ActionList({ label, actions }: { label: string; actions: { name: string; description: string }[] }) {
+  return (
+    <div>
+      <p className="text-gray-400 text-sm mb-2 font-semibold">{label}</p>
+      <div className="space-y-2">
+        {actions.map((action) => (
+          <div key={action.name} className="text-xs">
+            <p className="font-bold text-white">{action.name}</p>
+            <p className="text-gray-300">{action.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function CombatantDetailPanel({
   combatant,
   detailPosition,
@@ -67,49 +83,13 @@ export function CombatantDetailPanel({
           </div>
 
           {combatant.actions && combatant.actions.length > 0 && (
-            <div>
-              <p className="text-gray-400 text-sm mb-2 font-semibold">Actions</p>
-              <div className="space-y-2">
-                {combatant.actions.map((action) => (
-                  <div key={action.name} className="text-xs">
-                    <p className="font-bold text-white">{action.name}</p>
-                    <p className="text-gray-300">{action.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ActionList label="Actions" actions={combatant.actions} />
           )}
-
           {combatant.bonusActions && combatant.bonusActions.length > 0 && (
-            <div>
-              <p className="text-gray-400 text-sm mb-2 font-semibold">
-                Bonus Actions
-              </p>
-              <div className="space-y-2">
-                {combatant.bonusActions.map((action) => (
-                  <div key={action.name} className="text-xs">
-                    <p className="font-bold text-white">{action.name}</p>
-                    <p className="text-gray-300">{action.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ActionList label="Bonus Actions" actions={combatant.bonusActions} />
           )}
-
           {combatant.reactions && combatant.reactions.length > 0 && (
-            <div>
-              <p className="text-gray-400 text-sm mb-2 font-semibold">
-                Reactions
-              </p>
-              <div className="space-y-2">
-                {combatant.reactions.map((action) => (
-                  <div key={action.name} className="text-xs">
-                    <p className="font-bold text-white">{action.name}</p>
-                    <p className="text-gray-300">{action.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ActionList label="Reactions" actions={combatant.reactions} />
           )}
 
           <LegendaryActionsPanel
@@ -118,19 +98,7 @@ export function CombatantDetailPanel({
           />
 
           {combatant.lairActions && combatant.lairActions.length > 0 && (
-            <div>
-              <p className="text-gray-400 text-sm mb-2 font-semibold">
-                Lair Actions
-              </p>
-              <div className="space-y-2">
-                {combatant.lairActions.map((action) => (
-                  <div key={action.name} className="text-xs">
-                    <p className="font-bold text-white">{action.name}</p>
-                    <p className="text-gray-300">{action.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ActionList label="Lair Actions" actions={combatant.lairActions} />
           )}
 
           {combatant.abilityScores && (
