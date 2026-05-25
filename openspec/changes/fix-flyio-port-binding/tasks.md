@@ -47,9 +47,9 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Commit `fly.toml` change to `fix/flyio-health-check` and push to remote
-- [ ] Open PR from `fix/flyio-health-check` to `main` with title: `fix: add fly.io HTTP health check to resolve false-positive port alert`
-- [ ] PR description should note: this is a false positive caused by the redirect in PR #217; the app is healthy; this change adds an internal health check so fly.io has a reliable liveness signal
+- [x] Commit `fly.toml` change to `fix/flyio-health-check` and push to remote
+- [x] Open PR from `fix/flyio-health-check` to `main` with title: `fix: add fly.io HTTP health check to resolve false-positive port alert`
+- [x] PR description should note: this is a false positive caused by the redirect in PR #217; the app is healthy; this change adds an internal health check so fly.io has a reliable liveness signal
 - [ ] Wait 120 seconds for agentic reviewers to post comments
 - [ ] **Monitor PR comments** — address, commit fixes, validate locally, push; repeat until no unresolved comments remain
 - [ ] Enable auto-merge once no blocking review comments remain

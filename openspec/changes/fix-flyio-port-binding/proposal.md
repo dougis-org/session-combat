@@ -18,7 +18,7 @@
 - Assumptions: fly.io `[http_service.checks]` probes use the machine's internal IP and port (3000), not the public hostname. This means the host-based redirect in Next.js does not apply to internal checks. Verified: `session-combat.fly.dev/api/health` → 308; `dnd.dougis.com/api/health` → 200.
 - Edge cases considered:
   - `auto_stop_machines = 'stop'` with `min_machines_running = 0` means the machine is stopped when idle. If Fly Doctor runs while the machine is stopped, it would also report "not listening" — but this would be a separate issue from the redirect.
-  - The `/api/health` route is a Next.js API route and is not subject to the host-based redirect (which fires at the routing layer for all paths from the fly.dev host).
+  - fly.io's internal health probes do not send `Host: session-combat.fly.dev` — they use the machine's internal IP address. The redirect rule's `has: [{ type: "host", value: "session-combat.fly.dev" }]` condition is never satisfied, so the redirect does not fire for internal probes regardless of path.
 
 ## Scope
 

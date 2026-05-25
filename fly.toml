@@ -22,12 +22,12 @@ primary_region = 'sjc'
   min_machines_running = 0
   processes = ['app']
 
-[http_service.checks]
-  grace_period = "30s"
-  interval = "15s"
-  method = "GET"
-  timeout = "5s"
-  path = "/api/health"
+[[http_service.checks]]
+  grace_period = '30s'
+  interval = '15s'
+  method = 'GET'
+  timeout = '5s'
+  path = '/api/health'
 
 [[vm]]
   memory = '1gb'

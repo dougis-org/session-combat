@@ -29,7 +29,7 @@ No requirements are removed by this spec.
 ## Traceability
 
 - Proposal element "Add `[http_service.checks]` to `fly.toml`" -> Requirement: ADDED fly.io performs HTTP health check
-- Design decision 3 (health check config) -> Requirement: ADDED fly.io performs HTTP health check
+- Design decision 1 (health check config) -> Requirement: ADDED fly.io performs HTTP health check
 - Requirement: ADDED fly.io performs HTTP health check -> Task: Add health check to fly.toml
 
 ## Non-Functional Acceptance Criteria
@@ -46,6 +46,6 @@ No requirements are removed by this spec.
 
 #### Scenario: Health check does not redirect
 
-- **Given** the `/api/health` route is an API route (not subject to the `session-combat.fly.dev` → `dnd.dougis.com` redirect in `next.config.js`)
+- **Given** fly.io's internal health probe does not send `Host: session-combat.fly.dev` (it uses the machine's internal IP address), so the redirect rule's host condition is never satisfied
 - **When** fly.io probes `GET /api/health` on the machine's internal IP
 - **Then** the response is HTTP 200 with no redirect interception
