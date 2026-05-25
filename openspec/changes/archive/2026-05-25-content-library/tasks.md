@@ -140,8 +140,8 @@ Follow BDD/TDD: write tests before implementing the UI.
 - [x] `npm run typecheck` — no type errors
 - [x] `npm run test:unit` — all unit and integration tests pass (including new tests from Tasks 4, 6, 9)
 - [x] `npm run build` — production build succeeds
-- [ ] Manual smoke test: generate a prompt → save to library → navigate to library → expand card → paste response → save → delete
-- [ ] Auth check: confirm unauthenticated requests to `/api/content` return 401
+- [x] Manual smoke test: generate a prompt → save to library → navigate to library → expand card → paste response → save → delete
+- [x] Auth check: confirm unauthenticated requests to `/api/content` return 401
 - [x] All tasks marked complete
 
 ## Remote push validation
@@ -158,13 +158,13 @@ If **ANY** of the above fail, iterate and address the failure before pushing.
 ## PR and Merge
 
 - [x] Run required pre-PR self-review before committing
-- [ ] Commit all changes to `feature/content-library` and push to remote
-- [ ] Open PR from `feature/content-library` to `main` — title: "feat: Content Library (#185)"
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each comment, commit fixes, run all validation steps, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — diagnose and fix any failure, commit, run validation, push; repeat until all checks pass
-- [ ] Wait for PR to merge — never force-merge
+- [x] Commit all changes to `feature/content-library` and push to remote
+- [x] Open PR from `feature/content-library` to `main` — title: "feat: Content Library (#185)"
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each comment, commit fixes, run all validation steps, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — diagnose and fix any failure, commit, run validation, push; repeat until all checks pass
+- [x] Wait for PR to merge — never force-merge
 
 Ownership metadata:
 - Implementer: dougis
@@ -178,11 +178,11 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on main (library page accessible, nav button present)
-- [ ] Mark all remaining tasks complete
-- [ ] Update `docs/feature_list.md` if Content Library should appear there
-- [ ] Sync approved spec deltas into `openspec/specs/content-library/` (copy `specs/content-library/spec.md`)
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on main (library page accessible, nav button present)
+- [x] Mark all remaining tasks complete
+- [x] Update `docs/feature_list.md` if Content Library should appear there
+- [x] Sync approved spec deltas into `openspec/specs/content-library/` (copy `specs/content-library/spec.md`)
 - [ ] Archive the change: move `openspec/changes/content-library/` to `openspec/changes/archive/YYYY-MM-DD-content-library/` **in a single atomic commit** (stage both the new location and deletion of the old location together — never split into two commits)
 - [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-content-library/` exists and `openspec/changes/content-library/` is gone
 - [ ] Commit and push the archive commit to main

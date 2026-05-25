@@ -9,6 +9,21 @@ document section where more detail can be found.
 
 ---
 
+## Shipped
+
+### AI Prompt Content Library (#185)
+DMs can save AI-generated prompts (NPC, location, shop, magic item, room) to a per-campaign
+library. Each saved item stores the full system prompt, user message, and combined text for
+clipboard copy. After running the prompt through an AI, DMs can paste the response and add
+notes directly in the library card.
+
+- Filter tabs: All / NPC / Location / Shop / Magic Item / Room
+- Expandable cards: system prompt, user message, Copy Full Prompt button, response textarea, notes textarea
+- Inline Save to Library panel in Prompt Builder with pre-filled title and chapter
+- PUT updates result/notes; DELETE removes card from list; all operations auth-scoped by userId
+
+---
+
 ## 1. Combat Mechanics (Core Gaps)
 
 ### 1.1 Temporary HP Tracking
