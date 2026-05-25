@@ -608,6 +608,23 @@ export interface SessionLog {
   updatedAt: Date;
 }
 
+export interface SavedContent {
+  _id?: string;
+  id: string;
+  userId: string;
+  campaignId: string;
+  type: 'npc' | 'location' | 'shop' | 'magic-item' | 'room';
+  title: string;
+  systemPrompt: string;
+  userMessage: string;
+  prompt: string;
+  result?: string;
+  notes?: string;
+  chapter?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export type SessionLogInput = {
   campaignId: string;
   datePlayed: Date | string;

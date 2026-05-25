@@ -1,4 +1,4 @@
-import { BuiltPrompt, CampaignContext, Character, calculateTotalLevel } from '@/lib/types';
+import { BuiltPrompt, CampaignContext, Character, SavedContent, calculateTotalLevel } from '@/lib/types';
 
 export interface PromptField {
   key: string;
@@ -9,7 +9,7 @@ export interface PromptField {
 }
 
 export interface PromptTemplate {
-  id: string;
+  id: SavedContent['type'];
   label: string;
   fields: PromptField[];
   build(fields: Record<string, string>, context: CampaignContext): BuiltPrompt;

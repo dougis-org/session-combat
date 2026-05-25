@@ -242,6 +242,9 @@ export function CombatantCard(props: CombatantCardProps) {
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
   const [isTempMode, setIsTempMode] = useState(false);
   const [selectedDamageType, setSelectedDamageType] = useState<DamageType | ''>('');
+  const [historyLength, setHistoryLength] = useState(
+    () => getHpHistoryStack(combatId, combatant.id).length
+  );
   const adjustHp = (amount: number) => {
     const prevHp = combatant.hp;
     const prevTempHp = combatant.tempHp ?? 0;
@@ -250,12 +253,14 @@ export function CombatantCard(props: CombatantCardProps) {
       const { hp: resultHp, tempHp: resultTempHp } = applyTypedDamage(prevHp, prevTempHp, rawDamage, selectedDamageType, combatant);
       if (resultHp !== prevHp || resultTempHp !== prevTempHp) {
         pushHpHistory(combatId, combatant.id, { hp: prevHp, tempHp: prevTempHp, type: 'damage', amount: rawDamage, timestamp: Date.now() });
+        setHistoryLength(getHpHistoryStack(combatId, combatant.id).length);
       }
       onUpdate({ hp: resultHp, tempHp: resultTempHp });
     } else {
       const result = calcApplyHealing(prevHp, combatant.maxHp, amount);
       if (result.hp !== prevHp) {
         pushHpHistory(combatId, combatant.id, { hp: prevHp, tempHp: prevTempHp, type: 'healing', amount, timestamp: Date.now() });
+        setHistoryLength(getHpHistoryStack(combatId, combatant.id).length);
       }
       onUpdate({ hp: result.hp });
     }
@@ -298,6 +303,7 @@ export function CombatantCard(props: CombatantCardProps) {
         amount,
         timestamp: Date.now(),
       });
+      setHistoryLength(getHpHistoryStack(combatId, combatant.id).length);
       onUpdate({ tempHp: result.tempHp });
       setHpAdjustment('');
     }
@@ -306,6 +312,7 @@ export function CombatantCard(props: CombatantCardProps) {
   const undoHpChange = () => {
     const entry = popHpHistory(combatId, combatant.id);
     if (!entry) return;
+    setHistoryLength(getHpHistoryStack(combatId, combatant.id).length);
     onUpdate({ hp: entry.hp, tempHp: entry.tempHp });
   };
 
@@ -515,7 +522,7 @@ export function CombatantCard(props: CombatantCardProps) {
             </label>
             <button
               onClick={undoHpChange}
-              disabled={getHpHistoryStack(combatId, combatant.id).length === 0}
+              disabled={historyLength === 0}
               title="Undo last HP change"
               data-testid="undo-hp-change"
               className="px-2 py-1 rounded text-xs bg-gray-600 hover:bg-gray-500 disabled:opacity-40 disabled:cursor-not-allowed"

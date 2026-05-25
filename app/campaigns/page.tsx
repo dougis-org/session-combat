@@ -231,6 +231,12 @@ export function CampaignsContent() {
                           Prompt Builder
                         </Link>
                         <Link
+                          href={`/campaigns/${campaign.id}/library`}
+                          className="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded text-sm"
+                        >
+                          Library
+                        </Link>
+                        <Link
                           href="/encounters"
                           className="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm"
                         >
