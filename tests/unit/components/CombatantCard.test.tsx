@@ -20,7 +20,7 @@ jest.mock('next/navigation', () => ({
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { act } from 'react';
-import { CombatantCard } from '@/app/combat/page';
+import { CombatantCard } from '@/lib/components/CombatantCard';
 import type { CombatantState, ActiveDamageEffect } from '@/lib/types';
 
 // ---------------------------------------------------------------------------
@@ -280,6 +280,62 @@ describe('CombatantCard – remove active effect', () => {
     expect(onUpdate).toHaveBeenCalled();
     const arg = (onUpdate as jest.Mock).mock.calls[0][0] as { activeDamageEffects: ActiveDamageEffect[] };
     expect(arg.activeDamageEffects).toEqual([]);
+  });
+});
+
+describe('CombatantCard – detail/remove callbacks', () => {
+  test('detail toggle triggers onShowDetails with id and numeric position', () => {
+    const onShowDetails = jest.fn();
+
+    act(() => {
+      root = createRoot(container);
+      root.render(
+        <CombatantCard
+          combatId="test-combat"
+          combatant={BASE}
+          isActive={false}
+          onUpdate={jest.fn() as any}
+          onRemove={jest.fn() as any}
+          onShowDetails={onShowDetails as any}
+        />,
+      );
+    });
+
+    const detailBtn = container.querySelector('[data-testid="combatant-detail-toggle"]') as HTMLButtonElement;
+    act(() => { detailBtn.click(); });
+
+    expect(onShowDetails).toHaveBeenCalledTimes(1);
+    const [id, pos] = onShowDetails.mock.calls[0] as [string, { top: number; left: number }];
+    expect(id).toBe('c1');
+    expect(typeof pos.top).toBe('number');
+    expect(typeof pos.left).toBe('number');
+  });
+
+  test('remove button triggers onShowRemoveConfirm with id and position', () => {
+    const onShowRemoveConfirm = jest.fn();
+
+    act(() => {
+      root = createRoot(container);
+      root.render(
+        <CombatantCard
+          combatId="test-combat"
+          combatant={BASE}
+          isActive={false}
+          onUpdate={jest.fn() as any}
+          onRemove={jest.fn() as any}
+          onShowRemoveConfirm={onShowRemoveConfirm as any}
+        />,
+      );
+    });
+
+    const removeBtn = container.querySelector('button[title="Remove combatant"]') as HTMLButtonElement;
+    act(() => { removeBtn.click(); });
+
+    expect(onShowRemoveConfirm).toHaveBeenCalledTimes(1);
+    const [id, pos] = onShowRemoveConfirm.mock.calls[0] as [string, { top: number; left: number }];
+    expect(id).toBe('c1');
+    expect(typeof pos.top).toBe('number');
+    expect(typeof pos.left).toBe('number');
   });
 });
 
