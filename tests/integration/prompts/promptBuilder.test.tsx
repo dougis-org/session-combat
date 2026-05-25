@@ -39,24 +39,25 @@ jest.mock('@/lib/hooks/useCampaignContext', () => ({
   useCampaignContext: jest.fn(),
 }));
 
- 
+jest.mock('@/lib/prompts/templates', () => {
+  const npcBuild = () => ({ systemPrompt: 'Campaign: Curse of Strahd', userMessage: 'Create an NPC named Bob.', fullText: 'Campaign: Curse of Strahd\n\nCreate an NPC named Bob.' });
+  const emptyBuild = () => ({ systemPrompt: '', userMessage: '', fullText: '' });
+  return {
+    TEMPLATES: [
+      { id: 'npc', label: 'NPC', fields: [{ key: 'role', label: 'Role / Occupation', placeholder: 'e.g. innkeeper, guard, merchant', optional: true }], build: npcBuild },
+      { id: 'location', label: 'Location Description', fields: [{ key: 'locationName', label: 'Location Name', placeholder: 'e.g. Tavern' }], build: emptyBuild },
+      { id: 'shop', label: 'Shop / Establishment', fields: [], build: emptyBuild },
+      { id: 'magic-item', label: 'Magic Item', fields: [], build: emptyBuild },
+      { id: 'room', label: 'Room Description', fields: [], build: emptyBuild },
+    ],
+  };
+});
+
 const { useCampaignContext } = require('@/lib/hooks/useCampaignContext') as {
   useCampaignContext: jest.Mock;
 };
 
 const FULL_PROMPT = 'Campaign: Curse of Strahd\n\nCreate an NPC named Bob.';
-
-// Mock templates: NPC tab has optional-only fields (Generate works without filling them).
-// Location tab has one required field (used by C1-5 to verify validation fires).
-jest.mock('@/lib/prompts/templates', () => ({
-  TEMPLATES: [
-    { id: 'npc', label: 'NPC', fields: [{ key: 'role', label: 'Role / Occupation', placeholder: 'e.g. innkeeper, guard, merchant', optional: true }], build: () => ({ systemPrompt: 'Campaign: Curse of Strahd', userMessage: 'Create an NPC named Bob.', fullText: 'Campaign: Curse of Strahd\n\nCreate an NPC named Bob.' }) },
-    { id: 'location', label: 'Location Description', fields: [{ key: 'locationName', label: 'Location Name', placeholder: 'e.g. Tavern' }], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
-    { id: 'shop', label: 'Shop / Establishment', fields: [], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
-    { id: 'magic-item', label: 'Magic Item', fields: [], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
-    { id: 'room', label: 'Room Description', fields: [], build: () => ({ systemPrompt: '', userMessage: '', fullText: '' }) },
-  ],
-}));
 
 const makeContext = (): CampaignContext => ({
   campaign: {
@@ -79,6 +80,19 @@ const makeContext = (): CampaignContext => ({
 
 let container: HTMLDivElement;
 let root: Root;
+
+function findButton(el: HTMLElement, text: string): HTMLButtonElement | undefined {
+  return Array.from(el.querySelectorAll<HTMLButtonElement>('button'))
+    .find(b => b.textContent?.includes(text));
+}
+
+async function clickButton(el: HTMLElement, text: string): Promise<void> {
+  await act(async () => { findButton(el, text)?.click(); });
+}
+
+function setupContext() {
+  useCampaignContext.mockReturnValue({ context: makeContext(), loading: false, error: null, refresh: jest.fn() });
+}
 
 beforeEach(() => {
   container = document.createElement('div');
@@ -106,13 +120,13 @@ async function renderPage() {
 
 describe('Prompt Builder Page', () => {
   test('C1-1: renders campaign name in heading when context resolves', async () => {
-    useCampaignContext.mockReturnValue({ context: makeContext(), loading: false, error: null, refresh: jest.fn() });
+    setupContext();
     await renderPage();
     expect(container.textContent).toContain('Curse of Strahd');
   });
 
   test('C1-2: all five template tabs visible; NPC tab active by default with its fields rendered', async () => {
-    useCampaignContext.mockReturnValue({ context: makeContext(), loading: false, error: null, refresh: jest.fn() });
+    setupContext();
     await renderPage();
 
     expect(container.textContent).toContain('NPC');
@@ -120,85 +134,59 @@ describe('Prompt Builder Page', () => {
     expect(container.textContent).toContain('Shop');
     expect(container.textContent).toContain('Magic Item');
     expect(container.textContent).toContain('Room Description');
-    // NPC fields visible by default
     expect(container.textContent).toContain('Role / Occupation');
   });
 
   test('C1-3: clicking "Room Description" tab renders room fields and hides NPC fields', async () => {
-    useCampaignContext.mockReturnValue({ context: makeContext(), loading: false, error: null, refresh: jest.fn() });
+    setupContext();
     await renderPage();
-
-    const roomBtn = Array.from(container.querySelectorAll('button'))
-      .find(b => b.textContent?.includes('Room Description'));
-    await act(async () => { roomBtn?.click(); });
-
+    await clickButton(container, 'Room Description');
     expect(container.textContent).not.toContain('Role / Occupation');
   });
 
   test('C1-4: clicking Generate produces prompt textarea containing campaign name', async () => {
-    useCampaignContext.mockReturnValue({ context: makeContext(), loading: false, error: null, refresh: jest.fn() });
+    setupContext();
     await renderPage();
+    await clickButton(container, 'Generate');
 
-    // NPC template has 1 optional-ish field; Generate will produce output regardless (mock build ignores fields)
-    const generateBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Generate'));
-    await act(async () => { generateBtn?.click(); });
-
-    const textarea = container.querySelector('textarea[readOnly]') ?? container.querySelector('[readonly]');
+    const textarea = container.querySelector('textarea[readonly]') as HTMLTextAreaElement | null;
     expect(textarea).not.toBeNull();
-    expect((textarea as HTMLTextAreaElement).value).toContain('Curse of Strahd');
+    expect(textarea?.value).toContain('Curse of Strahd');
   });
 
   test('C1-5: clicking Generate with missing required field shows validation message', async () => {
-    useCampaignContext.mockReturnValue({ context: makeContext(), loading: false, error: null, refresh: jest.fn() });
+    setupContext();
     await renderPage();
+    await clickButton(container, 'Location Description');
+    await clickButton(container, 'Generate');
 
-    // Switch to Location Description tab — it has a required 'Location Name' field
-    const locationBtn = Array.from(container.querySelectorAll('button'))
-      .find(b => b.textContent?.includes('Location Description'));
-    await act(async () => { locationBtn?.click(); });
-
-    // Click Generate without filling the required field
-    const generateBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Generate'));
-    await act(async () => { generateBtn?.click(); });
-
-    // Validation should fire: no read-only textarea rendered, required field name in error message
-    const textarea = container.querySelector('textarea[readOnly]') ?? container.querySelector('[readonly]');
-    expect(textarea).toBeNull();
+    expect(container.querySelector('textarea[readonly]')).toBeNull();
     expect(container.textContent).toContain('Location Name');
   });
 
   test('C1-6: after Generate, Copy button calls navigator.clipboard.writeText with fullText', async () => {
-    useCampaignContext.mockReturnValue({ context: makeContext(), loading: false, error: null, refresh: jest.fn() });
+    setupContext();
     await renderPage();
-
-    const generateBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Generate'));
-    await act(async () => { generateBtn?.click(); });
-
-    const copyBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Copy'));
-    await act(async () => { copyBtn?.click(); });
+    await clickButton(container, 'Generate');
+    await clickButton(container, 'Copy');
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(FULL_PROMPT);
   });
 
   test('C1-7: after Copy, "Copied!" confirmation appears', async () => {
-    useCampaignContext.mockReturnValue({ context: makeContext(), loading: false, error: null, refresh: jest.fn() });
+    setupContext();
     await renderPage();
-
-    const generateBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Generate'));
-    await act(async () => { generateBtn?.click(); });
-
-    const copyBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Copy'));
-    await act(async () => { copyBtn?.click(); });
+    await clickButton(container, 'Generate');
+    await clickButton(container, 'Copy');
 
     expect(container.textContent).toContain('Copied');
   });
 
   test('C1-8: "Save to Library" button is present and disabled', async () => {
-    useCampaignContext.mockReturnValue({ context: makeContext(), loading: false, error: null, refresh: jest.fn() });
+    setupContext();
     await renderPage();
 
-    const saveBtn = Array.from(container.querySelectorAll('button'))
-      .find(b => b.textContent?.includes('Save to Library'));
+    const saveBtn = findButton(container, 'Save to Library');
     expect(saveBtn).not.toBeUndefined();
     expect(saveBtn?.disabled).toBe(true);
   });
@@ -224,7 +212,7 @@ describe('Prompt Builder Page', () => {
   });
 
   test('C1-12: ProtectedRoute is used in the component tree', async () => {
-    useCampaignContext.mockReturnValue({ context: makeContext(), loading: false, error: null, refresh: jest.fn() });
+    setupContext();
     const ProtectedRouteMock = jest.requireMock('@/lib/components/ProtectedRoute') as {
       ProtectedRoute: jest.Mock;
     };

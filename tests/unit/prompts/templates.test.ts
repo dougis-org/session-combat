@@ -50,6 +50,14 @@ const makeContext = (overrides: Partial<CampaignContext> = {}): CampaignContext 
 const nullChapterCtx = makeContext({ chapter: null });
 const emptyPartyCtx = makeContext({ characters: [], allMembers: [] });
 
+const TEMPLATE_CASES: Array<[string, typeof npcTemplate, Record<string, string>]> = [
+  ['npc', npcTemplate, { role: 'innkeeper', location: 'Barovia', requirements: '' }],
+  ['location', locationTemplate, { type: 'tavern', atmosphere: 'cozy', details: '' }],
+  ['shop', shopTemplate, { shopType: 'blacksmith', setting: 'busy district', inventory: '' }],
+  ['magic-item', magicItemTemplate, { itemType: 'sword', rarity: 'rare', theme: '' }],
+  ['room', roomTemplate, { roomName: 'Throne Room', purpose: 'seat of power', features: '' }],
+];
+
 describe('buildSystemPrompt', () => {
   test('B1-10: full context contains campaign name, module, chapter, character list', () => {
     const result = buildSystemPrompt(makeContext());
@@ -92,17 +100,6 @@ describe('NPC template', () => {
     expect(result.userMessage).toContain('Barovia');
   });
 
-  test('B1-6: fullText === systemPrompt + "\\n\\n" + userMessage', () => {
-    const result = npcTemplate.build({ role: 'innkeeper', location: 'Barovia', requirements: '' }, makeContext());
-    expect(result.fullText).toBe(result.systemPrompt + '\n\n' + result.userMessage);
-  });
-
-  test('B1-7: null chapter — no "undefined" or "null" in output', () => {
-    const result = npcTemplate.build({ role: 'guard', location: 'Village', requirements: '' }, nullChapterCtx);
-    expect(result.fullText).not.toContain('undefined');
-    expect(result.fullText).not.toContain('null');
-  });
-
   test('B1-8: empty party — no runtime error, notes no party members', () => {
     expect(() => npcTemplate.build({ role: 'merchant', location: 'Market', requirements: '' }, emptyPartyCtx)).not.toThrow();
   });
@@ -120,17 +117,6 @@ describe('Location template', () => {
     expect(result.userMessage).toContain('cozy');
   });
 
-  test('B1-6: fullText === systemPrompt + "\\n\\n" + userMessage', () => {
-    const result = locationTemplate.build({ type: 'tavern', atmosphere: 'cozy', details: '' }, makeContext());
-    expect(result.fullText).toBe(result.systemPrompt + '\n\n' + result.userMessage);
-  });
-
-  test('B1-7: null chapter — no "undefined" or "null"', () => {
-    const result = locationTemplate.build({ type: 'dungeon', atmosphere: 'dark', details: '' }, nullChapterCtx);
-    expect(result.fullText).not.toContain('undefined');
-    expect(result.fullText).not.toContain('null');
-  });
-
   test('B1-8: empty party — no error', () => {
     expect(() => locationTemplate.build({ type: 'forest', atmosphere: 'eerie', details: '' }, emptyPartyCtx)).not.toThrow();
   });
@@ -143,17 +129,6 @@ describe('Shop template', () => {
     expect(result.userMessage).toContain('blacksmith');
     expect(result.userMessage).toContain('busy district');
   });
-
-  test('B1-6: fullText === systemPrompt + "\\n\\n" + userMessage', () => {
-    const result = shopTemplate.build({ shopType: 'apothecary', setting: 'market', inventory: '' }, makeContext());
-    expect(result.fullText).toBe(result.systemPrompt + '\n\n' + result.userMessage);
-  });
-
-  test('B1-7: null chapter — no "undefined" or "null"', () => {
-    const result = shopTemplate.build({ shopType: 'armorer', setting: 'town', inventory: '' }, nullChapterCtx);
-    expect(result.fullText).not.toContain('undefined');
-    expect(result.fullText).not.toContain('null');
-  });
 });
 
 describe('Magic Item template', () => {
@@ -162,17 +137,6 @@ describe('Magic Item template', () => {
     expect(result.systemPrompt).toContain('Curse of Strahd');
     expect(result.userMessage).toContain('sword');
     expect(result.userMessage).toContain('rare');
-  });
-
-  test('B1-6: fullText === systemPrompt + "\\n\\n" + userMessage', () => {
-    const result = magicItemTemplate.build({ itemType: 'amulet', rarity: 'uncommon', theme: '' }, makeContext());
-    expect(result.fullText).toBe(result.systemPrompt + '\n\n' + result.userMessage);
-  });
-
-  test('B1-7: null chapter — no "undefined" or "null"', () => {
-    const result = magicItemTemplate.build({ itemType: 'ring', rarity: 'common', theme: '' }, nullChapterCtx);
-    expect(result.fullText).not.toContain('undefined');
-    expect(result.fullText).not.toContain('null');
   });
 });
 
@@ -184,18 +148,24 @@ describe('Room Description template', () => {
     expect(result.userMessage).toContain('seat of power');
   });
 
-  test('B1-6: fullText === systemPrompt + "\\n\\n" + userMessage', () => {
-    const result = roomTemplate.build({ roomName: 'Dungeon Cell', purpose: 'prison', features: '' }, makeContext());
-    expect(result.fullText).toBe(result.systemPrompt + '\n\n' + result.userMessage);
-  });
-
-  test('B1-7: null chapter — no "undefined" or "null"', () => {
-    const result = roomTemplate.build({ roomName: 'Library', purpose: 'study', features: '' }, nullChapterCtx);
-    expect(result.fullText).not.toContain('undefined');
-    expect(result.fullText).not.toContain('null');
-  });
-
   test('B1-8: empty party — no error', () => {
     expect(() => roomTemplate.build({ roomName: 'Crypt', purpose: 'burial', features: '' }, emptyPartyCtx)).not.toThrow();
   });
 });
+
+test.each(TEMPLATE_CASES)(
+  'B1-6: %s template — fullText equals systemPrompt + \\n\\n + userMessage',
+  (_, template, fields) => {
+    const result = template.build(fields, makeContext());
+    expect(result.fullText).toBe(result.systemPrompt + '\n\n' + result.userMessage);
+  },
+);
+
+test.each(TEMPLATE_CASES)(
+  'B1-7: %s template — null chapter produces no "undefined" or "null" in output',
+  (_, template, fields) => {
+    const result = template.build(fields, nullChapterCtx);
+    expect(result.fullText).not.toContain('undefined');
+    expect(result.fullText).not.toContain('null');
+  },
+);

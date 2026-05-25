@@ -165,22 +165,44 @@ describe('fetchCampaignContext', () => {
 
   test('A2-8: all three fetches initiated in parallel via Promise.all', async () => {
     const campaign = makeCampaign();
-    const callOrder: string[] = [];
+    const started: string[] = [];
+    const resolvers: Record<string, (r: Response) => void> = {};
 
-    const parallelFetch = jest.fn(async (url: RequestInfo | URL) => {
+    const parallelFetch = jest.fn((url: RequestInfo | URL) => {
       const s = String(url);
-      if (s.includes('/api/campaigns')) callOrder.push('campaign');
-      else if (s.includes('/api/parties')) callOrder.push('parties');
-      else if (s.includes('/api/characters')) callOrder.push('characters');
-      await Promise.resolve();
-      return { ok: true, json: async () => s.includes('/api/campaigns') ? campaign : [] } as unknown as Response;
+      return new Promise<Response>(resolve => {
+        if (s.includes('/api/campaigns/')) {
+          started.push('campaign');
+          resolvers.campaign = resolve;
+        } else if (s.includes('/api/parties')) {
+          started.push('parties');
+          resolvers.parties = resolve;
+        } else {
+          started.push('characters');
+          resolvers.characters = resolve;
+        }
+      });
     }) as typeof fetch;
 
-    await fetchCampaignContext('camp-1', parallelFetch);
+    const fetchPromise = fetchCampaignContext('camp-1', parallelFetch);
 
+    // Yield to the microtask queue so Promise.all registers all three fetches
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // All three must have been started before any resolved
+    expect(started).toContain('campaign');
+    expect(started).toContain('parties');
+    expect(started).toContain('characters');
+
+    // Now resolve all three
+    const ok = (data: unknown) => ({ ok: true, json: async () => data } as unknown as Response);
+    resolvers.campaign(ok(campaign));
+    resolvers.parties(ok([]));
+    resolvers.characters(ok([]));
+
+    await fetchPromise;
     expect(parallelFetch).toHaveBeenCalledTimes(3);
-    // All three should have been registered before any awaited result consumed
-    expect(callOrder).toHaveLength(3);
   });
 
   test('A2-9: non-OK response rejects with error', async () => {

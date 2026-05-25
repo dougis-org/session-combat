@@ -42,11 +42,11 @@ jest.mock('@/lib/hooks/useCampaignContext', () => ({
   useCampaignContext: jest.fn(),
 }));
 
-const { buildNpcEventsFromMemberChanges } = require('@/lib/utils/sessionEvents') as {  
+const { buildNpcEventsFromMemberChanges } = require('@/lib/utils/sessionEvents') as {
   buildNpcEventsFromMemberChanges: jest.Mock;
 };
 
-const { useCampaignContext } = require('@/lib/hooks/useCampaignContext') as {  
+const { useCampaignContext } = require('@/lib/hooks/useCampaignContext') as {
   useCampaignContext: jest.Mock;
 };
 
@@ -81,14 +81,29 @@ let container: HTMLDivElement;
 let root: Root;
 
 function makeContext(parties: typeof PARTY_ALICE_BOB[]) {
-  const allMembers = parties.flatMap(p => p.members);
   return {
     campaign: { id: 'camp-1', userId: 'u1', name: 'Test Campaign', moduleName: 'TCM', chapters: [], active: true, createdAt: new Date(), updatedAt: new Date() },
     chapter: null,
     parties,
-    allMembers,
+    allMembers: parties.flatMap(p => p.members),
     characters: [],
   };
+}
+
+function makeFetchForLogs(logs: object[]) {
+  return jest.fn(async (url: RequestInfo | URL) => {
+    const ok = true;
+    const json = String(url).includes('/sessions')
+      ? async () => logs
+      : async () => [];
+    return { ok, json } as unknown as Response;
+  }) as typeof fetch;
+}
+
+async function clickButton(el: HTMLElement, text: string): Promise<void> {
+  const btn = Array.from(el.querySelectorAll<HTMLButtonElement>('button'))
+    .find(b => b.textContent?.includes(text));
+  await act(async () => { btn?.click(); });
 }
 
 beforeEach(() => {
@@ -105,29 +120,15 @@ afterEach(() => {
 });
 
 async function renderSessions(logs: object[], parties: typeof PARTY_ALICE_BOB[]) {
-  global.fetch = jest.fn(async (url: RequestInfo | URL) => {
-    const s = String(url);
-    if (s.includes('/sessions')) return { ok: true, json: async () => logs } as unknown as Response;
-    return { ok: true, json: async () => [] } as unknown as Response;
-  }) as typeof fetch;
-
-  useCampaignContext.mockReturnValue({
-    context: makeContext(parties),
-    loading: false,
-    error: null,
-    refresh: jest.fn(),
-  });
-
+  global.fetch = makeFetchForLogs(logs);
+  useCampaignContext.mockReturnValue({ context: makeContext(parties), loading: false, error: null, refresh: jest.fn() });
   await act(async () => { root.render(React.createElement(SessionsPage)); });
 }
 
 describe('Session Logs — D1 regression tests (before refactor)', () => {
   test('D1-1: single party linked to campaign → NPC events built from that party members', async () => {
     await renderSessions([], [PARTY_ALICE_BOB]);
-
-    const newSessionBtn = Array.from(container.querySelectorAll('button'))
-      .find(b => b.textContent?.includes('New Session'));
-    await act(async () => { newSessionBtn?.click(); });
+    await clickButton(container, 'New Session');
 
     expect(buildNpcEventsFromMemberChanges).toHaveBeenCalledWith(
       expect.arrayContaining([
@@ -146,10 +147,7 @@ describe('Session Logs — D1 regression tests (before refactor)', () => {
 
   test('D1-3: opening editor for new session shows the form', async () => {
     await renderSessions([], [PARTY_ALICE_BOB]);
-
-    const newSessionBtn = Array.from(container.querySelectorAll('button'))
-      .find(b => b.textContent?.includes('New Session'));
-    await act(async () => { newSessionBtn?.click(); });
+    await clickButton(container, 'New Session');
 
     expect(container.textContent).toContain('Session #');
     expect(container.textContent).toContain('Date Played');
@@ -157,11 +155,7 @@ describe('Session Logs — D1 regression tests (before refactor)', () => {
 
   test('D1-4: no party linked to campaign → "No linked party found" message shown', async () => {
     await renderSessions([], []);
-
-    const newSessionBtn = Array.from(container.querySelectorAll('button'))
-      .find(b => b.textContent?.includes('New Session'));
-    await act(async () => { newSessionBtn?.click(); });
-
+    await clickButton(container, 'New Session');
     expect(container.textContent).toContain('No linked party found');
   });
 });
@@ -169,13 +163,8 @@ describe('Session Logs — D1 regression tests (before refactor)', () => {
 describe('Session Logs — D2 multi-party test (fails until D3 refactor)', () => {
   test('D2-1: two parties linked to same campaign → NPC events include members from both parties', async () => {
     await renderSessions([], [PARTY_ALICE_BOB, PARTY_CAROL]);
+    await clickButton(container, 'New Session');
 
-    const newSessionBtn = Array.from(container.querySelectorAll('button'))
-      .find(b => b.textContent?.includes('New Session'));
-    await act(async () => { newSessionBtn?.click(); });
-
-    // After refactor, buildNpcEventsFromMemberChanges should be called with ALL 3 members
-    // (Alice, Bob from Party A + Carol from Party B)
     expect(buildNpcEventsFromMemberChanges).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({ characterId: 'c-1' }),
