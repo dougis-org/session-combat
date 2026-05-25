@@ -41,9 +41,9 @@ export const POST = withAuth(async (request: NextRequest, auth) => {
 
     const item = await storage.savedContent.create({
       userId: auth.userId,
-      campaignId,
+      campaignId: campaignId.trim(),
       type: type as SavedContent['type'],
-      title,
+      title: title.trim(),
       systemPrompt,
       userMessage,
       prompt,

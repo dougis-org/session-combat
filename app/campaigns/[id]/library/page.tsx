@@ -60,6 +60,7 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
   const [notes, setNotes] = useState(item.notes ?? '');
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [hasSavedResult, setHasSavedResult] = useState(!!(item.result));
   const [actionError, setActionError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -85,6 +86,7 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
       });
       if (!res.ok) throw new Error('Save failed');
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      setHasSavedResult(result !== '');
       setSaveSuccess(true);
       saveTimerRef.current = setTimeout(() => setSaveSuccess(false), 3000);
     } catch {
@@ -132,7 +134,7 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
           <span className="text-gray-400 text-sm">{item.chapter}</span>
         )}
         <span className="text-gray-500 text-xs">{formatDate(item.createdAt)}</span>
-        {result && (
+        {hasSavedResult && (
           <span className="text-green-400 text-sm" title="Response saved">✓</span>
         )}
         <span className="text-gray-400 ml-2">{expanded ? '▲' : '▼'}</span>
