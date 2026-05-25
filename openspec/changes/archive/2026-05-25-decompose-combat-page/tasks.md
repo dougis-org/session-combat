@@ -147,13 +147,13 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run before the final commit
-- [ ] Commit all changes and push to `refactor/decompose-combat-page`
-- [ ] Open PR from `refactor/decompose-combat-page` to `main`. PR body MUST include `Closes #215`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge`
-- [ ] Wait 180 seconds for CI to start
-- [ ] **Monitor PR comments** — poll autonomously; address each comment, commit fixes, validate locally, push; wait 180 seconds; repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll `gh pr checks <PR-URL> --json isRequired,state`; fix any required failures, commit, validate, push; wait 180 seconds; repeat until all required checks pass
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify user
+- [x] Commit all changes and push to `refactor/decompose-combat-page`
+- [x] Open PR from `refactor/decompose-combat-page` to `main`. PR body MUST include `Closes #215`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge`
+- [x] Wait 180 seconds for CI to start
+- [x] **Monitor PR comments** — poll autonomously; address each comment, commit fixes, validate locally, push; wait 180 seconds; repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll `gh pr checks <PR-URL> --json isRequired,state`; fix any required failures, commit, validate, push; wait 180 seconds; repeat until all required checks pass
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify user
 
 Ownership metadata:
 
@@ -169,12 +169,12 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No documentation updates required (pure structural refactor)
-- [ ] Sync approved spec deltas into `openspec/specs/` if any capability specs were added
-- [ ] Archive: move `openspec/changes/decompose-combat-page/` to `openspec/changes/archive/YYYY-MM-DD-decompose-combat-page/` — stage both the copy and the deletion in a **single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-decompose-combat-page/` exists and `openspec/changes/decompose-combat-page/` is gone
-- [ ] Commit and push archive commit to `main`
-- [ ] `git fetch --prune` and `git branch -d refactor/decompose-combat-page`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No documentation updates required (pure structural refactor)
+- [x] Sync approved spec deltas into `openspec/specs/` if any capability specs were added
+- [x] Archive: move `openspec/changes/decompose-combat-page/` to `openspec/changes/archive/YYYY-MM-DD-decompose-combat-page/` — stage both the copy and the deletion in a **single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-decompose-combat-page/` exists and `openspec/changes/decompose-combat-page/` is gone
+- [x] Commit and push archive commit to `main`
+- [x] `git fetch --prune` and `git branch -d refactor/decompose-combat-page`

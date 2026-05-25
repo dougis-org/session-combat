@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo, MouseEvent } from 'react';
+import { useState, useMemo } from 'react';
 import { CombatantState, ActiveDamageEffect, StatusCondition } from '@/lib/types';
 import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects } from '@/lib/utils/combat';
 import { pushHpHistory, popHpHistory, getHpHistoryStack } from '@/lib/utils/hpHistory';
@@ -235,7 +235,6 @@ export function CombatantCard(props: CombatantCardProps) {
   } = props;
   const combatantMap = useMemo(() => new Map(allCombatants?.map(c => [c.id, c])), [allCombatants]);
 
-  const [isEditing, setIsEditing] = useState(false);
   const [showConditions, setShowConditions] = useState(false);
   const [hpAdjustment, setHpAdjustment] = useState('');
   const [showTargeting, setShowTargeting] = useState(false);
@@ -243,9 +242,6 @@ export function CombatantCard(props: CombatantCardProps) {
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
   const [isTempMode, setIsTempMode] = useState(false);
   const [selectedDamageType, setSelectedDamageType] = useState<DamageType | ''>('');
-  // Bumped after this card's own push/pop to keep the Undo button enabled state in sync
-  const [historyVersion, setHistoryVersion] = useState(0);
-
   const adjustHp = (amount: number) => {
     const prevHp = combatant.hp;
     const prevTempHp = combatant.tempHp ?? 0;
@@ -254,14 +250,12 @@ export function CombatantCard(props: CombatantCardProps) {
       const { hp: resultHp, tempHp: resultTempHp } = applyTypedDamage(prevHp, prevTempHp, rawDamage, selectedDamageType, combatant);
       if (resultHp !== prevHp || resultTempHp !== prevTempHp) {
         pushHpHistory(combatId, combatant.id, { hp: prevHp, tempHp: prevTempHp, type: 'damage', amount: rawDamage, timestamp: Date.now() });
-        setHistoryVersion(v => v + 1);
       }
       onUpdate({ hp: resultHp, tempHp: resultTempHp });
     } else {
       const result = calcApplyHealing(prevHp, combatant.maxHp, amount);
       if (result.hp !== prevHp) {
         pushHpHistory(combatId, combatant.id, { hp: prevHp, tempHp: prevTempHp, type: 'healing', amount, timestamp: Date.now() });
-        setHistoryVersion(v => v + 1);
       }
       onUpdate({ hp: result.hp });
     }
@@ -304,7 +298,6 @@ export function CombatantCard(props: CombatantCardProps) {
         amount,
         timestamp: Date.now(),
       });
-      setHistoryVersion(v => v + 1);
       onUpdate({ tempHp: result.tempHp });
       setHpAdjustment('');
     }
@@ -313,7 +306,6 @@ export function CombatantCard(props: CombatantCardProps) {
   const undoHpChange = () => {
     const entry = popHpHistory(combatId, combatant.id);
     if (!entry) return;
-    setHistoryVersion(v => v + 1);
     onUpdate({ hp: entry.hp, tempHp: entry.tempHp });
   };
 
