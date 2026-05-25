@@ -37,6 +37,7 @@ describe("POST /api/auth/logout - Integration Tests", () => {
     const setCookie = response.headers.get("set-cookie");
     expect(setCookie).toBeDefined();
     expect(setCookie).toContain("auth-token=");
+    expect(setCookie).toMatch(/Max-Age=0|Expires=/i);
   });
 
   it("should clear cookie and return 200 even without a token (idempotent)", async () => {
