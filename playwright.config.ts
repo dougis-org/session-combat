@@ -5,6 +5,8 @@ import { defineCoverageReporterConfig } from "@bgotink/playwright-coverage";
 const e2eDbName = process.env.MONGODB_DB || "session-combat-e2e";
 process.env.MONGODB_DB = e2eDbName;
 
+const testPort = process.env.PORT || "3000";
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -70,7 +72,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: "http://localhost:3000",
+    baseURL: `http://localhost:${testPort}`,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
     /* Screenshot on failure for debugging */
@@ -82,7 +84,14 @@ export default defineConfig({
     const allProjects = [
       {
         name: "chromium",
-        use: { ...devices["Desktop Chrome"] },
+        use: {
+          ...devices["Desktop Chrome"],
+          launchOptions: {
+            ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH && {
+              executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+            }),
+          },
+        },
       },
 
       {
@@ -143,8 +152,9 @@ export default defineConfig({
      In CI, use the production build (next start) so V8 coverage source maps resolve
      to real source files. Locally, reuse any running dev server for speed. */
   webServer: {
-    command: process.env.CI ? "npm start" : "npm run dev",
-    url: "http://localhost:3000",
+    // In CI, call next start directly so PORT env var is respected even when npm start hardcodes 3000.
+    command: process.env.CI ? `HOSTNAME=0.0.0.0 PORT=${testPort} next start` : "npm run dev",
+    url: `http://localhost:${testPort}`,
     // No explicit env — process inherits parent env, including MONGODB_DB
     // (set above) and MONGODB_URI (set by globalSetup before the webServer is launched).
     reuseExistingServer: !process.env.CI,

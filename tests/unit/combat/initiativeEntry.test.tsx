@@ -20,7 +20,7 @@ jest.mock('@/lib/utils/dice');
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { act } from 'react';
-import { InitiativeEntry } from '@/app/combat/page';
+import { InitiativeEntry } from '@/lib/components/InitiativeEntry';
 import type { CombatantState, InitiativeRoll } from '@/lib/types';
 import * as diceModule from '@/lib/utils/dice';
 
