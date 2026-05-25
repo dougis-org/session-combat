@@ -50,11 +50,11 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit `fly.toml` change to `fix/flyio-health-check` and push to remote
 - [x] Open PR from `fix/flyio-health-check` to `main` with title: `fix: add fly.io HTTP health check to resolve false-positive port alert`
 - [x] PR description should note: this is a false positive caused by the redirect in PR #217; the app is healthy; this change adds an internal health check so fly.io has a reliable liveness signal
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address, commit fixes, validate locally, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — diagnose failures, fix, validate locally, push; repeat until all checks pass
-- [ ] Wait for the PR to merge — never force-merge; if a human force-merges, continue to Post-Merge
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address, commit fixes, validate locally, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — diagnose failures, fix, validate locally, push; repeat until all checks pass
+- [x] Wait for the PR to merge — never force-merge; if a human force-merges, continue to Post-Merge
 
 Ownership metadata:
 
@@ -69,11 +69,11 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Confirm `fly.toml` has `[http_service.checks]` on main
-- [ ] After fly.io deploys: `flyctl checks list --app session-combat` — confirm health check shows passing
-- [ ] Confirm `curl -s https://dnd.dougis.com/api/health` still returns `{"ok":true}`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Archive the change: move `openspec/changes/fix-flyio-port-binding/` to `openspec/changes/archive/2026-05-25-fix-flyio-port-binding/` in a single commit (stage both the new location and deletion of old location together)
-- [ ] Confirm archive location exists and original is gone; commit and push to main
-- [ ] Prune merged local branch: `git fetch --prune` and `git branch -d fix/flyio-health-check`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Confirm `fly.toml` has `[http_service.checks]` on main
+- [x] After fly.io deploys: `flyctl checks list --app session-combat` — confirm health check shows passing
+- [x] Confirm `curl -s https://dnd.dougis.com/api/health` still returns `{"ok":true}`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Archive the change: move `openspec/changes/fix-flyio-port-binding/` to `openspec/changes/archive/2026-05-25-fix-flyio-port-binding/` in a single commit (stage both the new location and deletion of old location together)
+- [x] Confirm archive location exists and original is gone; commit and push to main
+- [x] Prune merged local branch: `git fetch --prune` and `git branch -d fix/flyio-health-check`
