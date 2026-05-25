@@ -14,7 +14,7 @@ echo ""
 
 # Run tests
 echo "→ Running tests..."
-if ! npm run test:ci; then
+if ! npm run test:unit; then
   echo "❌ Tests failed. Commit aborted."
   exit 1
 fi
