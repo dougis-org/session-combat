@@ -178,13 +178,14 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
             {builtPrompt && <PromptOutput builtPrompt={builtPrompt} />}
 
             <div className="mt-4">
-              <button
-                disabled
-                title="Available with Content Library (#185)"
-                className="bg-gray-600 text-gray-400 cursor-not-allowed px-4 py-2 rounded text-sm"
-              >
-                Save to Library
-              </button>
+              <span title="Available with Content Library (#185)">
+                <button
+                  disabled
+                  className="bg-gray-600 text-gray-400 cursor-not-allowed px-4 py-2 rounded text-sm"
+                >
+                  Save to Library
+                </button>
+              </span>
             </div>
           </>
         )}

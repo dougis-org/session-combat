@@ -149,6 +149,20 @@ describe('fetchCampaignContext', () => {
     expect(ctx.characters[0].id).toBe('c-1');
   });
 
+  test('A2-7b: departed member excluded from context.characters but kept in allMembers', async () => {
+    const campaign = makeCampaign();
+    const departed = { characterId: 'c-2', addedAt: new Date(), leftAt: new Date() };
+    const members = [makeMember('c-1'), departed];
+    const party = makeParty('p-1', 'camp-1', members);
+    const characters = [makeCharacter('c-1', 'Alice'), makeCharacter('c-2', 'Bob')];
+
+    const ctx = await fetchCampaignContext('camp-1', makeFetch(campaign, [party], characters));
+
+    expect(ctx.allMembers).toHaveLength(2);
+    expect(ctx.characters).toHaveLength(1);
+    expect(ctx.characters[0].id).toBe('c-1');
+  });
+
   test('A2-8: all three fetches initiated in parallel via Promise.all', async () => {
     const campaign = makeCampaign();
     const callOrder: string[] = [];

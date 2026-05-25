@@ -22,7 +22,9 @@ export async function fetchCampaignContext(
 
   const parties = allParties.filter(p => p.campaignId === campaignId);
   const allMembers = parties.flatMap(p => p.members);
-  const memberIds = new Set(allMembers.map(m => m.characterId));
+  // Only active members (no leftAt) determine which characters appear in prompt context;
+  // allMembers retains the full history for session-event timeline diffing.
+  const memberIds = new Set(allMembers.filter(m => !m.leftAt).map(m => m.characterId));
 
   const chapter = campaign.currentChapterId
     ? (campaign.chapters.find(c => c.id === campaign.currentChapterId) ?? null)
