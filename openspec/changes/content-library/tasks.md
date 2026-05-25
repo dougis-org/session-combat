@@ -157,7 +157,7 @@ If **ANY** of the above fail, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Run required pre-PR self-review before committing
+- [x] Run required pre-PR self-review before committing
 - [ ] Commit all changes to `feature/content-library` and push to remote
 - [ ] Open PR from `feature/content-library` to `main` — title: "feat: Content Library (#185)"
 - [ ] Wait 120 seconds for agentic reviewers to post comments

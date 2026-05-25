@@ -28,6 +28,32 @@ function formatDate(dateStr: string | Date): string {
   return new Date(dateStr).toLocaleDateString();
 }
 
+function PromptSection({ label, text, muted }: { label: string; text: string; muted: boolean }) {
+  return (
+    <div>
+      <p className={`text-xs font-semibold ${muted ? 'text-gray-500' : 'text-gray-300'} mb-1 uppercase tracking-wide`}>{label}</p>
+      <pre className={`${muted ? 'text-gray-400' : 'text-gray-100'} font-mono text-sm whitespace-pre-wrap bg-gray-900 rounded p-3`}>{text}</pre>
+    </div>
+  );
+}
+
+function LabeledTextarea({ label, value, onChange, rows, placeholder }: {
+  label: string; value: string; onChange: (v: string) => void; rows: number; placeholder: string;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
+      <textarea
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        rows={rows}
+        className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm text-white resize-y"
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}
+
 function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: string) => void }) {
   const [expanded, setExpanded] = useState(false);
   const [result, setResult] = useState(item.result ?? '');
@@ -114,15 +140,8 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
 
       {expanded && (
         <div className="p-4 border-t border-gray-700 space-y-4">
-          <div>
-            <p className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">System</p>
-            <pre className="text-gray-400 font-mono text-sm whitespace-pre-wrap bg-gray-900 rounded p-3">{item.systemPrompt}</pre>
-          </div>
-
-          <div>
-            <p className="text-xs font-semibold text-gray-300 mb-1 uppercase tracking-wide">User</p>
-            <pre className="text-gray-100 font-mono text-sm whitespace-pre-wrap bg-gray-900 rounded p-3">{item.userMessage}</pre>
-          </div>
+          <PromptSection label="System" text={item.systemPrompt} muted={true} />
+          <PromptSection label="User" text={item.userMessage} muted={false} />
 
           <button
             onClick={handleCopy}
@@ -131,27 +150,8 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
             {copied ? 'Copied!' : 'Copy Full Prompt'}
           </button>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Response</label>
-            <textarea
-              value={result}
-              onChange={e => setResult(e.target.value)}
-              rows={6}
-              className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm text-white resize-y"
-              placeholder="Paste AI response here..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Notes</label>
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              rows={3}
-              className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm text-white resize-y"
-              placeholder="Add notes..."
-            />
-          </div>
+          <LabeledTextarea label="Response" value={result} onChange={setResult} rows={6} placeholder="Paste AI response here..." />
+          <LabeledTextarea label="Notes" value={notes} onChange={setNotes} rows={3} placeholder="Add notes..." />
 
           {actionError && (
             <p className="text-red-400 text-sm">{actionError}</p>

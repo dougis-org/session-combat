@@ -71,8 +71,12 @@ async function render() {
     root = createRoot(container);
     root.render(React.createElement(LibraryPage));
   });
-  // allow async effects to complete
   await act(async () => { await new Promise(r => setTimeout(r, 0)); });
+}
+
+async function expandFirstCard() {
+  const cardBtn = container.querySelector('button[aria-expanded="false"]') as HTMLButtonElement;
+  await act(async () => { cardBtn.click(); });
 }
 
 describe('Library Page', () => {
@@ -115,10 +119,8 @@ describe('Library Page', () => {
     mockFetch([item]);
     await render();
 
-    // click the card toggle button
-    const cardBtn = container.querySelector('button[aria-expanded="false"]');
-    expect(cardBtn).toBeTruthy();
-    await act(async () => { (cardBtn as HTMLButtonElement).click(); });
+    expect(container.querySelector('button[aria-expanded="false"]')).toBeTruthy();
+    await expandFirstCard();
 
     const pres = container.querySelectorAll('pre');
     const texts = Array.from(pres).map(p => p.textContent ?? '');
@@ -146,9 +148,7 @@ describe('Library Page', () => {
       configurable: true,
     });
 
-    // expand card
-    const cardBtn = container.querySelector('button[aria-expanded="false"]');
-    await act(async () => { (cardBtn as HTMLButtonElement).click(); });
+    await expandFirstCard();
 
     const copyBtn = Array.from(container.querySelectorAll('button'))
       .find(b => b.textContent?.includes('Copy Full Prompt'));
@@ -172,10 +172,7 @@ describe('Library Page', () => {
     }) as typeof fetch;
 
     await render();
-
-    // expand
-    const cardBtn = container.querySelector('button[aria-expanded="false"]');
-    await act(async () => { (cardBtn as HTMLButtonElement).click(); });
+    await expandFirstCard();
 
     // edit response textarea
     const textareas = container.querySelectorAll('textarea');
@@ -208,9 +205,7 @@ describe('Library Page', () => {
     await render();
     expect(container.textContent).toContain('To Be Deleted');
 
-    // expand
-    const cardBtn = container.querySelector('button[aria-expanded="false"]');
-    await act(async () => { (cardBtn as HTMLButtonElement).click(); });
+    await expandFirstCard();
 
     const deleteBtn = Array.from(container.querySelectorAll('button'))
       .find(b => b.textContent?.trim() === 'Delete');
