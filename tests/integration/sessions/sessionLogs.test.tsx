@@ -7,6 +7,7 @@ import React from 'react';
 import { act } from 'react';
 import { describe, test, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { createRoot, Root } from 'react-dom/client';
+import SessionsPage from '@/app/campaigns/[id]/sessions/page';
 
 jest.mock('next/navigation', () => ({
   useParams: () => ({ id: 'camp-1' }),
@@ -41,11 +42,11 @@ jest.mock('@/lib/hooks/useCampaignContext', () => ({
   useCampaignContext: jest.fn(),
 }));
 
-const { buildNpcEventsFromMemberChanges } = require('@/lib/utils/sessionEvents') as { // eslint-disable-line @typescript-eslint/no-require-imports
+const { buildNpcEventsFromMemberChanges } = require('@/lib/utils/sessionEvents') as {  
   buildNpcEventsFromMemberChanges: jest.Mock;
 };
 
-const { useCampaignContext } = require('@/lib/hooks/useCampaignContext') as { // eslint-disable-line @typescript-eslint/no-require-imports
+const { useCampaignContext } = require('@/lib/hooks/useCampaignContext') as {  
   useCampaignContext: jest.Mock;
 };
 
@@ -117,7 +118,6 @@ async function renderSessions(logs: object[], parties: typeof PARTY_ALICE_BOB[])
     refresh: jest.fn(),
   });
 
-  const { default: SessionsPage } = await import('@/app/campaigns/[id]/sessions/page');
   await act(async () => { root.render(React.createElement(SessionsPage)); });
 }
 

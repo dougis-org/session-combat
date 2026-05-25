@@ -8,6 +8,7 @@ import { act } from 'react';
 import { describe, test, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { createRoot, Root } from 'react-dom/client';
 import { CampaignContext } from '@/lib/types';
+import PromptBuilderPage from '@/app/campaigns/[id]/prompts/page';
 
 jest.mock('next/navigation', () => ({
   useParams: () => ({ id: 'camp-1' }),
@@ -38,7 +39,7 @@ jest.mock('@/lib/hooks/useCampaignContext', () => ({
   useCampaignContext: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const { useCampaignContext } = require('@/lib/hooks/useCampaignContext') as {
   useCampaignContext: jest.Mock;
 };
@@ -98,7 +99,6 @@ afterEach(() => {
 });
 
 async function renderPage() {
-  const { default: PromptBuilderPage } = await import('@/app/campaigns/[id]/prompts/page');
   await act(async () => {
     root.render(React.createElement(PromptBuilderPage));
   });
