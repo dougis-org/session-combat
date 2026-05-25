@@ -7,6 +7,7 @@ import { pushHpHistory, popHpHistory, getHpHistoryStack } from '@/lib/utils/hpHi
 import { DAMAGE_TYPE_GROUPS, DAMAGE_EFFECT_PRESETS, DamageType } from '@/lib/constants';
 import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
+import { TargetActionModal } from '@/lib/components/TargetActionModal';
 
 export interface CombatantCardProps {
   combatId: string;
@@ -76,14 +77,9 @@ export function CombatantCard(props: CombatantCardProps) {
   const [hpAdjustment, setHpAdjustment] = useState('');
   const [showTargeting, setShowTargeting] = useState(false);
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
-  const [damageInput, setDamageInput] = useState('');
-  const [newCondition, setNewCondition] = useState('');
-  const [conditionDuration, setConditionDuration] = useState('');
-  const [targetActionMode, setTargetActionMode] = useState<'damage' | 'condition' | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
   const [isTempMode, setIsTempMode] = useState(false);
   const [selectedDamageType, setSelectedDamageType] = useState<DamageType | ''>('');
-  const [targetDamageType, setTargetDamageType] = useState<DamageType | ''>('');
   const [showEffectsPanel, setShowEffectsPanel] = useState(false);
   const [pendingPreset, setPendingPreset] = useState<{ label: string; kind: 'resistance' | 'immunity' | 'vulnerability'; choices: DamageType[] } | null>(null);
   // Bumped after this card's own push/pop to keep the Undo button enabled state in sync
@@ -206,14 +202,8 @@ export function CombatantCard(props: CombatantCardProps) {
     });
   };
 
-  const applyDamageToTarget = () => {
-    if (!selectedTargetId || !damageInput || !onUpdateCombatant) return;
-
-    const damage = parseInt(damageInput);
-    if (isNaN(damage) || damage <= 0) {
-      alert('Please enter a valid damage amount');
-      return;
-    }
+  const applyDamageToTarget = (damage: number, damageType: DamageType | '') => {
+    if (!selectedTargetId || !onUpdateCombatant) return;
 
     const target = allCombatants?.find(c => c.id === selectedTargetId);
     if (target) {
@@ -221,12 +211,12 @@ export function CombatantCard(props: CombatantCardProps) {
       const targetTempHp = target.tempHp ?? 0;
       let resultHp: number;
       let resultTempHp: number;
-      if (targetDamageType) {
+      if (damageType) {
         const result = calcApplyDamageWithType(
           targetHp,
           targetTempHp,
           damage,
-          targetDamageType,
+          damageType,
           {
             damageResistances: target.damageResistances,
             damageImmunities: target.damageImmunities,
@@ -247,22 +237,19 @@ export function CombatantCard(props: CombatantCardProps) {
       onUpdateCombatant(selectedTargetId, { hp: resultHp, tempHp: resultTempHp });
     }
 
-    setDamageInput('');
-    setTargetDamageType('');
     setSelectedTargetId(null);
-    setTargetActionMode(null);
   };
 
-  const addConditionToTarget = () => {
-    if (!selectedTargetId || !newCondition || !onUpdateCombatant) return;
+  const addConditionToTarget = (name: string, duration?: number) => {
+    if (!selectedTargetId || !onUpdateCombatant) return;
 
     const target = allCombatants?.find(c => c.id === selectedTargetId);
     if (target) {
       const condition: StatusCondition = {
         id: crypto.randomUUID(),
-        name: newCondition,
+        name,
         description: '',
-        duration: conditionDuration ? parseInt(conditionDuration) : undefined,
+        duration,
       };
 
       onUpdateCombatant(selectedTargetId, {
@@ -270,10 +257,7 @@ export function CombatantCard(props: CombatantCardProps) {
       });
     }
 
-    setNewCondition('');
-    setConditionDuration('');
     setSelectedTargetId(null);
-    setTargetActionMode(null);
   };
 
   const tempHp = combatant.tempHp ?? 0;
@@ -636,7 +620,6 @@ export function CombatantCard(props: CombatantCardProps) {
                       <button
                         onClick={() => {
                           setSelectedTargetId(targetId);
-                          setTargetActionMode(null);
                         }}
                         onMouseEnter={() => setHoveredTargetId(targetId)}
                         onMouseLeave={() => setHoveredTargetId(null)}
@@ -742,128 +725,18 @@ export function CombatantCard(props: CombatantCardProps) {
       )}
 
       {/* Target Action Modal */}
-      {selectedTargetId && allCombatants && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-sm mx-auto">
-            {(() => {
-              const target = allCombatants.find(c => c.id === selectedTargetId);
-              if (!target) return null;
-
-              return (
-                <>
-                  <h3 className="text-lg font-semibold mb-4 text-white">
-                    {target.name}
-                  </h3>
-
-                  {!targetActionMode ? (
-                    <div className="space-y-3">
-                      <p className="text-sm text-gray-400 mb-4">
-                        HP: {target.hp}/{target.maxHp} | AC: {target.ac}
-                      </p>
-                      <button
-                        onClick={() => setTargetActionMode('damage')}
-                        className="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white font-semibold transition-colors"
-                      >
-                        Apply Damage
-                      </button>
-                      <button
-                        onClick={() => setTargetActionMode('condition')}
-                        className="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white font-semibold transition-colors"
-                      >
-                        Add Condition
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedTargetId(null);
-                          setTargetActionMode(null);
-                        }}
-                        className="w-full bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-white font-semibold transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : targetActionMode === 'damage' ? (
-                    <div className="space-y-3">
-                      <input
-                        type="number"
-                        min="0"
-                        value={damageInput}
-                        onChange={(e) => setDamageInput(e.target.value)}
-                        placeholder="Damage amount"
-                        className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
-                        autoFocus
-                      />
-                      <select
-                        value={targetDamageType}
-                        onChange={(e) => setTargetDamageType(e.target.value as DamageType | '')}
-                        className="w-full bg-gray-700 rounded px-3 py-2 text-white border border-gray-600"
-                        title="Damage type (applies target's resistances, immunities, and vulnerabilities)"
-                        aria-label="Damage type (applies target's resistances, immunities, and vulnerabilities)"
-                      >
-                        <option value="">No damage type</option>
-                        {Object.entries(DAMAGE_TYPE_GROUPS).map(([group, types]) => (
-                          <optgroup key={group} label={group}>
-                            {types.map(t => (
-                              <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
-                            ))}
-                          </optgroup>
-                        ))}
-                      </select>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={applyDamageToTarget}
-                          className={`flex-1 px-3 py-2 rounded text-white font-semibold transition-colors ${targetDamageType ? 'bg-orange-600 hover:bg-orange-700' : 'bg-red-600 hover:bg-red-700'}`}
-                        >
-                          Apply{targetDamageType ? ` (${targetDamageType})` : ''}
-                        </button>
-                        <button
-                          onClick={() => setTargetActionMode(null)}
-                          className="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-white font-semibold transition-colors"
-                        >
-                          Back
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <input
-                        type="text"
-                        value={newCondition}
-                        onChange={(e) => setNewCondition(e.target.value)}
-                        placeholder="Condition name"
-                        className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        autoFocus
-                      />
-                      <input
-                        type="number"
-                        min="0"
-                        value={conditionDuration}
-                        onChange={(e) => setConditionDuration(e.target.value)}
-                        placeholder="Duration in rounds (optional)"
-                        className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={addConditionToTarget}
-                          className="flex-1 bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-white font-semibold transition-colors"
-                        >
-                          Add
-                        </button>
-                        <button
-                          onClick={() => setTargetActionMode(null)}
-                          className="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-white font-semibold transition-colors"
-                        >
-                          Back
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-          </div>
-        </div>
-      )}
+      {selectedTargetId && allCombatants && (() => {
+        const target = allCombatants.find(c => c.id === selectedTargetId);
+        if (!target) return null;
+        return (
+          <TargetActionModal
+            target={target}
+            onClose={() => setSelectedTargetId(null)}
+            onApplyDamage={applyDamageToTarget}
+            onAddCondition={addConditionToTarget}
+          />
+        );
+      })()}
     </div>
   );
 }
