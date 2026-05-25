@@ -33,7 +33,6 @@ export function useCampaignContext(campaignId: string): {
 
   useEffect(() => {
     void load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load, tick]);
 
   return { context, loading, error, refresh };

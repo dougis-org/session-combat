@@ -6,7 +6,7 @@
 import React from 'react';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { describe, test, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import { describe, test, expect, jest, beforeEach } from '@jest/globals';
 import { useCampaignContext } from '@/lib/hooks/useCampaignContext';
 import { CampaignContext } from '@/lib/types';
 
@@ -14,7 +14,7 @@ jest.mock('@/lib/utils/campaignContext', () => ({
   fetchCampaignContext: jest.fn(),
 }));
 
-const { fetchCampaignContext } = require('@/lib/utils/campaignContext') as { fetchCampaignContext: any }; // eslint-disable-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
+const { fetchCampaignContext } = require('@/lib/utils/campaignContext') as { fetchCampaignContext: any };  
 
 const makeContext = (): CampaignContext => ({
   campaign: {

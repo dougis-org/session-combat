@@ -63,7 +63,7 @@ function PromptOutput({ builtPrompt }: { builtPrompt: BuiltPrompt }) {
   }, []);
 
   async function handleCopy() {
-    if (!navigator.clipboard) return;
+    if (typeof navigator === 'undefined' || !navigator.clipboard) return;
     try {
       await navigator.clipboard.writeText(builtPrompt.fullText);
       if (timerRef.current) clearTimeout(timerRef.current);

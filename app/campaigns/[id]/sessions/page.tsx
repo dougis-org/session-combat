@@ -10,7 +10,12 @@ import { useCampaignContext } from '@/lib/hooks/useCampaignContext';
 import { buildNpcEventsFromMemberChanges } from '@/lib/utils/sessionEvents';
 
 function formatDate(d: Date | string): string {
-  const date = typeof d === 'string' ? new Date(d + 'T12:00:00') : d;
+  const date = typeof d === 'string'
+    ? (d.includes('T') ? new Date(d) : new Date(d + 'T12:00:00'))
+    : d;
+  if (isNaN(date.getTime())) {
+    return typeof d === 'string' ? d : '';
+  }
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
