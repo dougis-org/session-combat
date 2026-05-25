@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import type { SavedContent } from '@/lib/types';
 
 type Params = { id: string };
 
@@ -16,7 +17,12 @@ export const PUT = withAuthAndParams<Params>(async (request: NextRequest, auth, 
       return NextResponse.json({ error: 'notes must be a string' }, { status: 400 });
     }
 
-    await storage.savedContent.update(id, auth.userId, { result, notes });
+    const patch: Pick<SavedContent, 'result' | 'notes'> = {};
+    if (result !== undefined) patch.result = result;
+    if (notes !== undefined) patch.notes = notes;
+
+    const found = await storage.savedContent.update(id, auth.userId, patch);
+    if (!found) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error updating saved content:', error);
@@ -26,7 +32,8 @@ export const PUT = withAuthAndParams<Params>(async (request: NextRequest, auth, 
 
 export const DELETE = withAuthAndParams<Params>(async (_request: NextRequest, auth, { id }) => {
   try {
-    await storage.savedContent.remove(id, auth.userId);
+    const found = await storage.savedContent.remove(id, auth.userId);
+    if (!found) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error('Error deleting saved content:', error);

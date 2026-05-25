@@ -795,27 +795,29 @@ export const storage = {
       }
     },
 
-    async update(id: string, userId: string, patch: Pick<SavedContent, 'result' | 'notes'>): Promise<void> {
+    async update(id: string, userId: string, patch: Pick<SavedContent, 'result' | 'notes'>): Promise<boolean> {
       try {
         const db = await getDatabase();
-        await db
+        const updateData: Record<string, unknown> = { updatedAt: new Date() };
+        if (patch.result !== undefined) updateData.result = patch.result;
+        if (patch.notes !== undefined) updateData.notes = patch.notes;
+        const result = await db
           .collection<SavedContent>("savedContent")
-          .updateOne(
-            { id, userId },
-            { $set: { ...patch, updatedAt: new Date() } }
-          );
+          .updateOne({ id, userId }, { $set: updateData });
+        return result.matchedCount > 0;
       } catch (error) {
         console.error("Error updating saved content:", error);
         throw error;
       }
     },
 
-    async remove(id: string, userId: string): Promise<void> {
+    async remove(id: string, userId: string): Promise<boolean> {
       try {
         const db = await getDatabase();
-        await db
+        const result = await db
           .collection<SavedContent>("savedContent")
           .deleteOne({ id, userId });
+        return result.deletedCount > 0;
       } catch (error) {
         console.error("Error removing saved content:", error);
         throw error;
@@ -832,6 +834,7 @@ export const storage = {
         db.collection<Character>("characters").deleteMany({ userId }),
         db.collection<Party>("parties").deleteMany({ userId }),
         db.collection<CombatState>("combatStates").deleteMany({ userId }),
+        db.collection<SavedContent>("savedContent").deleteMany({ userId }),
       ]);
     } catch (error) {
       console.error("Error clearing data:", error);

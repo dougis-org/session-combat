@@ -132,7 +132,7 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
           <span className="text-gray-400 text-sm">{item.chapter}</span>
         )}
         <span className="text-gray-500 text-xs">{formatDate(item.createdAt)}</span>
-        {item.result && (
+        {result && (
           <span className="text-green-400 text-sm" title="Response saved">✓</span>
         )}
         <span className="text-gray-400 ml-2">{expanded ? '▲' : '▼'}</span>

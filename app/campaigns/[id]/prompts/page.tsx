@@ -87,7 +87,7 @@ function SavePanel({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           campaignId,
-          type: template.id as SavedContent['type'],
+          type: template.id,
           title: title.trim(),
           systemPrompt: builtPrompt.systemPrompt,
           userMessage: builtPrompt.userMessage,

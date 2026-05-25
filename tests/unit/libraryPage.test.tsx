@@ -29,7 +29,7 @@ import LibraryPage from '@/app/campaigns/[id]/library/page';
 
 function makeItem(overrides: Partial<SavedContent> = {}): SavedContent {
   return {
-    id: `item-${Math.random()}`,
+    id: crypto.randomUUID(),
     userId: 'user-1',
     campaignId: 'campaign-123',
     type: 'npc',
@@ -160,13 +160,14 @@ describe('Library Page', () => {
 
   it('editing response and clicking Save calls PUT; success message shown', async () => {
     const item = makeItem({ id: 'save-item-1' });
-    mockFetch([item]);
 
-    const putSpy = jest.fn(async () => ({ ok: true, json: async () => ({}) }) as unknown as Response);
-    global.fetch = jest.fn(async (input: unknown) => {
+    let capturedMethod: string | undefined;
+    global.fetch = jest.fn(async (input: unknown, init?: unknown) => {
       const url = String(input);
-      if (url.includes('/api/content/save-item-1') && url === `/api/content/${item.id}`) {
-        return putSpy();
+      const method = (init as RequestInit | undefined)?.method;
+      if (url === `/api/content/${item.id}`) {
+        capturedMethod = method;
+        return { ok: true, json: async () => ({}) } as unknown as Response;
       }
       return { ok: true, json: async () => [item] } as unknown as Response;
     }) as typeof fetch;
@@ -174,21 +175,19 @@ describe('Library Page', () => {
     await render();
     await expandFirstCard();
 
-    // edit response textarea
-    const textareas = container.querySelectorAll('textarea');
-    const responseTA = textareas[0];
+    const responseTA = container.querySelectorAll('textarea')[0];
     await act(async () => {
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')!.set!;
       nativeInputValueSetter.call(responseTA, 'My AI response');
       responseTA.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
-    // click Save
     const saveBtn = Array.from(container.querySelectorAll('button'))
-      .find(b => b.textContent?.trim() === 'Save');
-    await act(async () => { (saveBtn as HTMLButtonElement).click(); });
+      .find(b => b.textContent?.trim() === 'Save') as HTMLButtonElement;
+    await act(async () => { saveBtn.click(); });
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
 
+    expect(capturedMethod).toBe('PUT');
     expect(container.textContent).toContain('Saved successfully');
   });
 

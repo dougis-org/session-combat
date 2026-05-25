@@ -23,19 +23,26 @@ export const POST = withAuth(async (request: NextRequest, auth) => {
     const body = await request.json();
     const { campaignId, type, title, systemPrompt, userMessage, prompt, chapter } = body;
 
-    if (!campaignId || !type || !title || !systemPrompt || !userMessage || !prompt) {
+    if (
+      typeof campaignId !== 'string' || !campaignId.trim() ||
+      typeof type !== 'string' ||
+      typeof title !== 'string' || !title.trim() ||
+      typeof systemPrompt !== 'string' || !systemPrompt.trim() ||
+      typeof userMessage !== 'string' || !userMessage.trim() ||
+      typeof prompt !== 'string' || !prompt.trim()
+    ) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const validTypes: SavedContent['type'][] = ['npc', 'location', 'shop', 'magic-item', 'room'];
-    if (!validTypes.includes(type)) {
+    if (!(validTypes as string[]).includes(type)) {
       return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
     }
 
     const item = await storage.savedContent.create({
       userId: auth.userId,
       campaignId,
-      type,
+      type: type as SavedContent['type'],
       title,
       systemPrompt,
       userMessage,

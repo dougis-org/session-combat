@@ -28,7 +28,7 @@
     updatedAt: Date;
   }
   ```
-- [x] Verify: `npm run type-check` passes with no new errors
+- [x] Verify: `npm run typecheck` passes with no new errors
 
 ### Task 2 — Add savedContent CRUD to lib/storage.ts
 
@@ -38,7 +38,7 @@
   - `update(id: string, userId: string, patch: Pick<SavedContent, 'result' | 'notes'>): Promise<void>` — update `result`, `notes`, `updatedAt`
   - `remove(id: string, userId: string): Promise<void>` — delete by `{ _id, userId }`
 - [x] All queries include `userId` filter (security requirement)
-- [x] Verify: `npm run type-check` passes
+- [x] Verify: `npm run typecheck` passes
 
 ### Task 3 — Add API routes
 
@@ -50,7 +50,7 @@
   - `PUT` — parse body `{ result, notes }`, call `storage.savedContent.update`, return 200
   - `DELETE` — call `storage.savedContent.remove`, return 204
   - Both protected by auth middleware
-- [x] Verify: `npm run type-check` passes
+- [x] Verify: `npm run typecheck` passes
 
 ### Task 4 — Write integration tests for API routes (before UI)
 
@@ -64,7 +64,7 @@ Follow BDD/TDD: write tests before implementing the UI.
   - DELETE removes item; subsequent GET does not include it
   - GET with no auth returns 401
   - DELETE with no auth returns 401
-- [x] Verify: `npm test` passes
+- [x] Verify: `npm run test:unit` passes
 
 ### Task 5 — Build library page app/campaigns/[id]/library/page.tsx
 
@@ -84,7 +84,7 @@ Follow BDD/TDD: write tests before implementing the UI.
     - "Delete" button — `DELETE /api/content/[id]`; remove card from list on success
   - Empty state message when no items
   - Error banner on load failure
-- [x] Verify: `npm run type-check` passes
+- [x] Verify: `npm run typecheck` passes
 
 ### Task 6 — Write integration tests for library page
 
@@ -95,7 +95,7 @@ Follow BDD/TDD: write tests before implementing the UI.
 - [x] Integration test: editing response and clicking Save calls PUT; success message shown
 - [x] Integration test: Delete calls DELETE; item removed from list
 - [x] Integration test: empty state renders when GET returns empty array
-- [x] Verify: `npm test` passes
+- [x] Verify: `npm run test:unit` passes
 
 ### Task 7 — Add Library nav button to campaign cards
 
@@ -121,7 +121,7 @@ Follow BDD/TDD: write tests before implementing the UI.
   - On save success: show confirmation with a link to `/campaigns/[id]/library`
   - On save failure: show error banner; panel stays open, prompt remains visible
 - [x] Capture `chapter` from `context.chapter?.title` (available via `useCampaignContext`)
-- [x] Verify: `npm run type-check` passes
+- [x] Verify: `npm run typecheck` passes
 
 ### Task 9 — Write integration tests for Save to Library flow
 
@@ -131,14 +131,14 @@ Follow BDD/TDD: write tests before implementing the UI.
 - [x] Integration test: successful save shows confirmation with library link
 - [x] Integration test: API failure shows error banner and panel stays open
 - [x] Integration test: Cancel closes panel without API call
-- [x] Verify: `npm test` passes
+- [x] Verify: `npm run test:unit` passes
 
 ---
 
 ## Validation
 
-- [x] `npm run type-check` — no type errors
-- [x] `npm test` — all unit and integration tests pass (including new tests from Tasks 4, 6, 9)
+- [x] `npm run typecheck` — no type errors
+- [x] `npm run test:unit` — all unit and integration tests pass (including new tests from Tasks 4, 6, 9)
 - [x] `npm run build` — production build succeeds
 - [ ] Manual smoke test: generate a prompt → save to library → navigate to library → expand card → paste response → save → delete
 - [ ] Auth check: confirm unauthenticated requests to `/api/content` return 401
@@ -148,10 +148,10 @@ Follow BDD/TDD: write tests before implementing the UI.
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test`; all tests must pass
-- **Integration tests** — `npm test`; all integration tests must pass
+- **Unit tests** — `npm run test:unit`; all tests must pass
+- **Integration tests** — `npm run test:integration`; all integration tests must pass
 - **Build** — `npm run build`; must succeed with no errors
-- **Type check** — `npm run type-check`; zero errors
+- **Type check** — `npm run typecheck`; zero errors
 
 If **ANY** of the above fail, iterate and address the failure before pushing.
 
