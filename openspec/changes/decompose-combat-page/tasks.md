@@ -146,7 +146,7 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run before the final commit
+- [x] Ensure the `openspec-review-code` sub-agent was run before the final commit
 - [ ] Commit all changes and push to `refactor/decompose-combat-page`
 - [ ] Open PR from `refactor/decompose-combat-page` to `main`. PR body MUST include `Closes #215`
 - [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge`
