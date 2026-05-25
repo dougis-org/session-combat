@@ -63,6 +63,16 @@ function findButton(text: string): HTMLButtonElement {
   return found;
 }
 
+function changeInputValue(element: HTMLInputElement | HTMLSelectElement, value: string) {
+  act(() => {
+    const proto = element instanceof HTMLInputElement ? HTMLInputElement.prototype : HTMLSelectElement.prototype;
+    const nativeSetter = Object.getOwnPropertyDescriptor(proto, 'value')!.set!;
+    nativeSetter.call(element, value);
+    const eventType = element instanceof HTMLInputElement ? 'input' : 'change';
+    element.dispatchEvent(new Event(eventType, { bubbles: true }));
+  });
+}
+
 describe('TargetActionModal', () => {
   test('renders target info and buttons', () => {
     const onClose = jest.fn();
@@ -106,20 +116,12 @@ describe('TargetActionModal', () => {
     expect(input).not.toBeNull();
 
     // Fill damage input
-    act(() => {
-      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
-      nativeSetter.call(input, '5');
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    });
+    changeInputValue(input, '5');
 
     // Select damage type
     const select = container.querySelector('select') as HTMLSelectElement;
     expect(select).not.toBeNull();
-    act(() => {
-      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')!.set!;
-      nativeSetter.call(select, 'fire');
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    changeInputValue(select, 'fire');
 
     // Click Apply
     act(() => {
@@ -146,14 +148,8 @@ describe('TargetActionModal', () => {
     expect(durationInput).not.toBeNull();
 
     // Fill inputs
-    act(() => {
-      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
-      nativeSetter.call(nameInput, 'Stunned');
-      nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-      nativeSetter.call(durationInput, '3');
-      durationInput.dispatchEvent(new Event('input', { bubbles: true }));
-    });
+    changeInputValue(nameInput, 'Stunned');
+    changeInputValue(durationInput, '3');
 
     // Click Add
     act(() => {

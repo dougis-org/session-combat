@@ -8,8 +8,7 @@ import { CombatantCard } from '@/lib/components/CombatantCard';
 import { CombatantDetailPanel } from '@/lib/components/CombatantDetailPanel';
 import { InitiativeEntry } from '@/lib/components/InitiativeEntry';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
-import { LairForm } from '@/lib/components/LairForm';
-import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
+import { CombatSetupAndActiveModals } from '@/lib/components/CombatSetupAndActiveModals';
 import { CombatantState } from '@/lib/types';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
 
@@ -357,29 +356,11 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
           </div>
         )}
 
-        {showCombatantModal && (
-          <QuickCombatantModal
-            onAddMonster={(monster) => addCombatantFromLibrary(monster, 'monster', 'monster')}
-            onAddCharacter={(character) => addCombatantFromLibrary(character, 'player', 'character')}
-            onClose={() => setShowCombatantModal(false)}
-            monsterTemplates={monsterTemplates}
-            characterTemplates={characters}
-            loadingTemplates={loadingTemplates}
-            userId={user?.userId}
-          />
-        )}
-
-        {showLairForm && (
-          <LairForm
-            seedOptions={combatState.combatants.filter(c => c.type !== 'lair' && (c.lairActions ?? []).length > 0).map(c => c.name)}
-            lairName={lairFormName}
-            seedMonster={lairFormSeedMonster}
-            onNameChange={setLairFormName}
-            onSeedChange={setLairFormSeedMonster}
-            onConfirm={confirmAddLair}
-            onCancel={cancelLairForm}
-          />
-        )}
+        <CombatSetupAndActiveModals
+          combat={combat}
+          user={user}
+          seedOptions={combatState.combatants.filter(c => c.type !== 'lair' && (c.lairActions ?? []).length > 0).map(c => c.name)}
+        />
 
         {selectedDetailCombatantId && detailPosition && (() => {
           const combatant = combatState.combatants.find(c => c.id === selectedDetailCombatantId);

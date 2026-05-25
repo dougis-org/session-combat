@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
-import { LairForm } from '@/lib/components/LairForm';
+import { CombatSetupAndActiveModals } from '@/lib/components/CombatSetupAndActiveModals';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
 import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { AuthUser } from '@/lib/hooks/useAuth';
@@ -188,29 +187,11 @@ export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
           </div>
         </div>
 
-        {showCombatantModal && (
-          <QuickCombatantModal
-            onAddMonster={(monster) => addCombatantFromLibrary(monster, 'monster', 'monster')}
-            onAddCharacter={(character) => addCombatantFromLibrary(character, 'player', 'character')}
-            onClose={() => setShowCombatantModal(false)}
-            monsterTemplates={monsterTemplates}
-            characterTemplates={characters}
-            loadingTemplates={loadingTemplates}
-            userId={user?.userId}
-          />
-        )}
-
-        {showLairForm && (
-          <LairForm
-            seedOptions={setupCombatants.filter(c => c.type !== 'lair' && (c.lairActions ?? []).length > 0).map(c => c.name)}
-            lairName={lairFormName}
-            seedMonster={lairFormSeedMonster}
-            onNameChange={setLairFormName}
-            onSeedChange={setLairFormSeedMonster}
-            onConfirm={confirmAddLair}
-            onCancel={cancelLairForm}
-          />
-        )}
+        <CombatSetupAndActiveModals
+          combat={combat}
+          user={user}
+          seedOptions={setupCombatants.filter(c => c.type !== 'lair' && (c.lairActions ?? []).length > 0).map(c => c.name)}
+        />
       </div>
     </div>
   );
