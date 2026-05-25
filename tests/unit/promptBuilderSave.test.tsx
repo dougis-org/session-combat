@@ -24,7 +24,17 @@ jest.mock('@/lib/components/ProtectedRoute', () => ({
 }));
 
 const mockContext = {
-  campaign: { id: 'campaign-abc', name: 'Test Campaign', moduleName: 'CoS', chapters: [], active: true, userId: 'u1', currentChapterId: undefined, createdAt: new Date(), updatedAt: new Date() },
+  campaign: {
+    id: 'campaign-abc',
+    name: 'Test Campaign',
+    moduleName: 'CoS',
+    chapters: [],
+    active: true,
+    userId: 'u1',
+    currentChapterId: undefined,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
   chapter: { id: 'ch1', title: 'Chapter One', order: 0 },
   parties: [],
   allMembers: [],

@@ -8,6 +8,14 @@ export const PUT = withAuthAndParams<Params>(async (request: NextRequest, auth, 
   try {
     const body = await request.json();
     const { result, notes } = body;
+
+    if (result !== undefined && typeof result !== 'string') {
+      return NextResponse.json({ error: 'result must be a string' }, { status: 400 });
+    }
+    if (notes !== undefined && typeof notes !== 'string') {
+      return NextResponse.json({ error: 'notes must be a string' }, { status: 400 });
+    }
+
     await storage.savedContent.update(id, auth.userId, { result, notes });
     return NextResponse.json({ success: true });
   } catch (error) {

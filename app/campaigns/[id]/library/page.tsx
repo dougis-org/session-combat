@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
@@ -34,12 +34,22 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
   const [notes, setNotes] = useState(item.notes ?? '');
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   async function handleSave() {
     setSaving(true);
-    setSaveError(null);
+    setActionError(null);
     setSaveSuccess(false);
     try {
       const res = await fetch(`/api/content/${item.id}`, {
@@ -48,21 +58,24 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
         body: JSON.stringify({ result, notes }),
       });
       if (!res.ok) throw new Error('Save failed');
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      saveTimerRef.current = setTimeout(() => setSaveSuccess(false), 3000);
     } catch {
-      setSaveError('Failed to save. Please try again.');
+      setActionError('Failed to save. Please try again.');
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete() {
+    setActionError(null);
     try {
       const res = await fetch(`/api/content/${item.id}`, { method: 'DELETE' });
-      if (res.ok) onDelete(item.id);
+      if (!res.ok) throw new Error('Delete failed');
+      onDelete(item.id);
     } catch {
-      // ignore
+      setActionError('Failed to delete. Please try again.');
     }
   }
 
@@ -70,8 +83,9 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
     if (!navigator?.clipboard) return;
     try {
       await navigator.clipboard.writeText(item.prompt);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     } catch {
       // clipboard write rejected
     }
@@ -139,8 +153,8 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
             />
           </div>
 
-          {saveError && (
-            <p className="text-red-400 text-sm">{saveError}</p>
+          {actionError && (
+            <p className="text-red-400 text-sm">{actionError}</p>
           )}
           {saveSuccess && (
             <p className="text-green-400 text-sm">Saved successfully.</p>
@@ -174,18 +188,21 @@ function LibraryContent({ campaignId }: { campaignId: string }) {
   const [activeFilter, setActiveFilter] = useState<SavedContent['type'] | 'all'>('all');
 
   useEffect(() => {
+    let active = true;
     async function load() {
       try {
         const res = await fetch(`/api/content?campaignId=${campaignId}`);
         if (!res.ok) throw new Error('Failed to load library');
-        setItems(await res.json());
+        const data = await res.json() as SavedContent[];
+        if (active) setItems(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load library');
+        if (active) setError(err instanceof Error ? err.message : 'Failed to load library');
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
     load();
+    return () => { active = false; };
   }, [campaignId]);
 
   function handleDelete(id: string) {
