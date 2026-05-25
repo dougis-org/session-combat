@@ -118,11 +118,11 @@ If **ANY** of the above fail, iterate and address the failure before pushing.
 - [x] Commit all changes to `feature/prompt-builder-campaign-child` and push to remote
 - [x] Open PR from `feature/prompt-builder-campaign-child` to `main` — title: "feat: Prompt Builder as campaign child route + shared context helper (fixes #212)"
 - [x] Reference issues #184 and #212 in the PR description
-- [ ] Wait 120 seconds for agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address each comment, commit fixes, run all validation steps, push; repeat until no unresolved comments remain
-- [ ] Enable auto-merge once no blocking review comments remain
-- [ ] **Monitor CI checks** — fix any failure, commit, run all validation steps, push; repeat until all checks pass
-- [ ] Wait for the PR to merge — **never force-merge**; if a human force-merges, continue to Post-Merge
+- [x] Wait 120 seconds for agentic reviewers to post comments
+- [x] **Monitor PR comments** — address each comment, commit fixes, run all validation steps, push; repeat until no unresolved comments remain
+- [x] Enable auto-merge once no blocking review comments remain
+- [x] **Monitor CI checks** — fix any failure, commit, run all validation steps, push; repeat until all checks pass
+- [x] Wait for the PR to merge — **never force-merge**; if a human force-merges, continue to Post-Merge
 
 Ownership metadata:
 
@@ -138,13 +138,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main` (`lib/utils/campaignContext.ts`, `lib/hooks/useCampaignContext.ts`, `lib/prompts/templates.ts`, `app/campaigns/[id]/prompts/page.tsx` all exist)
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/` (add `campaign-context`, `prompt-templates`, `prompt-builder-ui`, `session-logs-refactor` specs)
-- [ ] Archive the change: move `openspec/changes/prompt-builder-campaign-child/` to `openspec/changes/archive/YYYY-MM-DD-prompt-builder-campaign-child/` — stage both the new location and deletion of old location in a **single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-prompt-builder-campaign-child/` exists and `openspec/changes/prompt-builder-campaign-child/` is gone
-- [ ] Commit and push the archive commit to `main`
-- [ ] `git fetch --prune` and `git branch -d feature/prompt-builder-campaign-child`
-- [ ] Close GitHub issue #184 referencing the merged PR
-- [ ] Add comment to GitHub issue #212 noting it is fixed by this change; close if not auto-closed
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main` (`lib/utils/campaignContext.ts`, `lib/hooks/useCampaignContext.ts`, `lib/prompts/templates.ts`, `app/campaigns/[id]/prompts/page.tsx` all exist)
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/` (add `campaign-context`, `prompt-templates`, `prompt-builder-ui`, `session-logs-refactor` specs)
+- [x] Archive the change: move `openspec/changes/prompt-builder-campaign-child/` to `openspec/changes/archive/YYYY-MM-DD-prompt-builder-campaign-child/` — stage both the new location and deletion of old location in a **single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-prompt-builder-campaign-child/` exists and `openspec/changes/prompt-builder-campaign-child/` is gone
+- [x] Commit and push the archive commit to `main`
+- [x] `git fetch --prune` and `git branch -d feature/prompt-builder-campaign-child`
+- [x] Close GitHub issue #184 referencing the merged PR
+- [x] Add comment to GitHub issue #212 noting it is fixed by this change; close if not auto-closed
+
