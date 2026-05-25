@@ -40,7 +40,8 @@ export function TargetActionModal({
       alert('Please enter a condition name');
       return;
     }
-    const duration = conditionDuration ? parseInt(conditionDuration) : undefined;
+    const parsedDuration = parseInt(conditionDuration);
+    const duration = conditionDuration && !isNaN(parsedDuration) ? parsedDuration : undefined;
     onAddCondition(newCondition.trim(), duration);
     setNewCondition('');
     setConditionDuration('');

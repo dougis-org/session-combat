@@ -40,7 +40,7 @@ export function CombatantDetailPanel({
       />
       <div
         className="absolute bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-xl border border-gray-700 z-50"
-        style={{ top: '10px', left: `${detailPosition.left}px` }}
+        style={{ top: `${detailPosition.top}px`, left: `${detailPosition.left}px` }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-start gap-4 mb-4">

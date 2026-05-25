@@ -136,18 +136,19 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
   if (!combatState) return null;
 
+  const activeCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
+
   const renderCard = (combatant: CombatantState) => (
     <CombatantCard
       key={combatant.id}
       combatId={combatState.id}
       combatant={combatant}
-      isActive={combatState.combatants.findIndex(c => c.id === combatant.id) === combatState.currentTurnIndex}
+      isActive={combatant.id === activeCombatantId}
       onUpdate={(updates) => updateCombatant(combatant.id, updates)}
       onRemove={() => removeCombatant(combatant.id)}
       onNextTurn={nextTurn}
       onShowDetails={(id, pos) => {
         setSelectedDetailCombatantId(id);
-        setRemoveConfirmId(null);
         setDetailPosition(pos);
       }}
       onSetInitiative={setInitiativeEditId}
@@ -284,20 +285,23 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
           </div>
         )}
 
-        {initiativeEditId && !combatState.combatants.some(c => c.initiative === 0) && (
-          <div className="mb-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <InitiativeEntry
-              key={initiativeEditId}
-              combatant={combatState.combatants.find(c => c.id === initiativeEditId)!}
-              onSet={(initiativeRoll) => {
-                setInitiativeRoll(initiativeEditId, initiativeRoll);
-                setInitiativeEditId(null);
-              }}
-              onClose={() => setInitiativeEditId(null)}
-              onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeEditId, adv, fb)}
-            />
-          </div>
-        )}
+        {initiativeEditId && !combatState.combatants.some(c => c.initiative === 0) && (() => {
+          const combatant = combatState.combatants.find(c => c.id === initiativeEditId);
+          return combatant ? (
+            <div className="mb-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <InitiativeEntry
+                key={initiativeEditId}
+                combatant={combatant}
+                onSet={(initiativeRoll) => {
+                  setInitiativeRoll(initiativeEditId, initiativeRoll);
+                  setInitiativeEditId(null);
+                }}
+                onClose={() => setInitiativeEditId(null)}
+                onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeEditId, adv, fb)}
+              />
+            </div>
+          ) : null;
+        })()}
 
         {hasInitiativeBeenRolled() ? (
           <div className="space-y-2" data-testid="initiative-order">

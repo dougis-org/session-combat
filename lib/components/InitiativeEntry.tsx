@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { CombatantState, InitiativeRoll } from '@/lib/types';
 import { buildInitiativeRoll, getDexInitiativeBonus } from '@/lib/utils/combat';
 

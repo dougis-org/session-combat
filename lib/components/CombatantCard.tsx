@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, MouseEvent } from 'react';
+import { useState, useRef, useEffect, useMemo, MouseEvent } from 'react';
 import { CombatantState, ActiveDamageEffect, StatusCondition } from '@/lib/types';
 import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects } from '@/lib/utils/combat';
 import { pushHpHistory, popHpHistory, getHpHistoryStack } from '@/lib/utils/hpHistory';
@@ -233,6 +233,8 @@ export function CombatantCard(props: CombatantCardProps) {
     allCombatants,
     onUpdateCombatant,
   } = props;
+  const combatantMap = useMemo(() => new Map(allCombatants?.map(c => [c.id, c])), [allCombatants]);
+
   const [isEditing, setIsEditing] = useState(false);
   const [showConditions, setShowConditions] = useState(false);
   const [hpAdjustment, setHpAdjustment] = useState('');
@@ -343,7 +345,7 @@ export function CombatantCard(props: CombatantCardProps) {
   const applyDamageToTarget = (damage: number, damageType: DamageType | '') => {
     if (!selectedTargetId || !onUpdateCombatant) return;
 
-    const target = allCombatants?.find(c => c.id === selectedTargetId);
+    const target = combatantMap.get(selectedTargetId);
     if (target) {
       const targetHp = target.hp;
       const targetTempHp = target.tempHp ?? 0;
@@ -360,7 +362,7 @@ export function CombatantCard(props: CombatantCardProps) {
   const addConditionToTarget = (name: string, duration?: number) => {
     if (!selectedTargetId || !onUpdateCombatant) return;
 
-    const target = allCombatants?.find(c => c.id === selectedTargetId);
+    const target = combatantMap.get(selectedTargetId);
     if (target) {
       const condition: StatusCondition = {
         id: crypto.randomUUID(),
@@ -429,8 +431,8 @@ export function CombatantCard(props: CombatantCardProps) {
                 onClick={(e) => {
                   const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
                   onShowRemoveConfirm?.(combatant.id, {
-                    top: rect.bottom,
-                    left: rect.left,
+                    top: rect.bottom + window.scrollY,
+                    left: rect.left + window.scrollX,
                   });
                 }}
                 className="text-red-500 hover:text-red-400 text-xl leading-none"
@@ -614,7 +616,7 @@ export function CombatantCard(props: CombatantCardProps) {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm text-purple-400 font-semibold">Targets:</span>
                 {combatant.targetIds.map(targetId => {
-                  const target = allCombatants?.find(c => c.id === targetId);
+                  const target = combatantMap.get(targetId);
                   return target ? (
                     <div key={targetId} className="relative inline-block">
                       <button
