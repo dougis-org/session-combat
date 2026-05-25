@@ -13,6 +13,7 @@ import {
   SpellTemplate,
   SessionLog,
   SessionLogInput,
+  SavedContent,
 } from "./types";
 import { GLOBAL_USER_ID } from "./constants";
 import { ObjectId, Filter, Document } from "mongodb";
@@ -757,6 +758,69 @@ export const storage = {
       console.error("Error deleting session log:", error);
       throw error;
     }
+  },
+
+  savedContent: {
+    async list(campaignId: string, userId: string): Promise<SavedContent[]> {
+      try {
+        const db = await getDatabase();
+        const items = await db
+          .collection<SavedContent>("savedContent")
+          .find({ campaignId, userId })
+          .sort({ createdAt: -1 })
+          .toArray();
+        return items.map(normalizeStoredEntityId);
+      } catch (error) {
+        console.error("Error listing saved content:", error);
+        return [];
+      }
+    },
+
+    async create(item: Omit<SavedContent, 'id' | '_id' | 'createdAt' | 'updatedAt'>): Promise<SavedContent> {
+      try {
+        const db = await getDatabase();
+        const now = new Date();
+        const doc: SavedContent = {
+          ...item,
+          id: crypto.randomUUID(),
+          createdAt: now,
+          updatedAt: now,
+        };
+        const { _id, ...insertData } = doc;
+        await db.collection<SavedContent>("savedContent").insertOne(insertData as SavedContent);
+        return doc;
+      } catch (error) {
+        console.error("Error creating saved content:", error);
+        throw error;
+      }
+    },
+
+    async update(id: string, userId: string, patch: Pick<SavedContent, 'result' | 'notes'>): Promise<void> {
+      try {
+        const db = await getDatabase();
+        await db
+          .collection<SavedContent>("savedContent")
+          .updateOne(
+            { id, userId },
+            { $set: { ...patch, updatedAt: new Date() } }
+          );
+      } catch (error) {
+        console.error("Error updating saved content:", error);
+        throw error;
+      }
+    },
+
+    async remove(id: string, userId: string): Promise<void> {
+      try {
+        const db = await getDatabase();
+        await db
+          .collection<SavedContent>("savedContent")
+          .deleteOne({ id, userId });
+      } catch (error) {
+        console.error("Error removing saved content:", error);
+        throw error;
+      }
+    },
   },
 
   // Clear all data for a user

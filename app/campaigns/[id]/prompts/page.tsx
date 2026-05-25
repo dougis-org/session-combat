@@ -7,7 +7,7 @@ import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState, FormField, textInputClass } from '@/lib/components/ui';
 import { useCampaignContext } from '@/lib/hooks/useCampaignContext';
 import { TEMPLATES, PromptField, PromptTemplate } from '@/lib/prompts/templates';
-import type { BuiltPrompt, CampaignContext } from '@/lib/types';
+import type { BuiltPrompt, CampaignContext, SavedContent } from '@/lib/types';
 
 function TemplateField({ field, value, onChange }: {
   field: PromptField;
@@ -54,6 +54,105 @@ function TemplateForm({ template, fields, validationError, onFieldChange, onGene
   );
 }
 
+function SavePanel({
+  campaignId,
+  template,
+  fields,
+  builtPrompt,
+  chapter,
+  onClose,
+}: {
+  campaignId: string;
+  template: PromptTemplate;
+  fields: Record<string, string>;
+  builtPrompt: BuiltPrompt;
+  chapter?: string;
+  onClose: () => void;
+}) {
+  const suggestedTitle = template.fields
+    .map(f => fields[f.key]?.trim())
+    .find(v => v) ?? '';
+  const [title, setTitle] = useState(suggestedTitle);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedId, setSavedId] = useState<string | null>(null);
+
+  async function handleSave() {
+    if (!title.trim()) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          campaignId,
+          type: template.id as SavedContent['type'],
+          title: title.trim(),
+          systemPrompt: builtPrompt.systemPrompt,
+          userMessage: builtPrompt.userMessage,
+          prompt: builtPrompt.fullText,
+          chapter,
+        }),
+      });
+      if (!res.ok) throw new Error('Save failed');
+      const item = await res.json() as SavedContent;
+      setSavedId(item.id);
+    } catch {
+      setSaveError('Failed to save. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (savedId) {
+    return (
+      <div className="bg-gray-800 rounded-lg p-4 mt-4">
+        <p className="text-green-400 text-sm mb-2">Saved to library.</p>
+        <Link
+          href={`/campaigns/${campaignId}/library`}
+          className="text-blue-400 hover:underline text-sm"
+        >
+          Go to Library →
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-gray-800 rounded-lg p-4 mt-4">
+      <h3 className="text-sm font-semibold mb-3">Save to Library</h3>
+      <div className="mb-3">
+        <label htmlFor="save-title" className="block text-sm text-gray-300 mb-1">Title</label>
+        <input
+          id="save-title"
+          type="text"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          className={textInputClass()}
+          placeholder="Enter a title"
+        />
+      </div>
+      {saveError && <p className="text-red-400 text-sm mb-3">{saveError}</p>}
+      <div className="flex gap-3">
+        <button
+          onClick={handleSave}
+          disabled={saving || !title.trim()}
+          className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 px-4 py-2 rounded text-sm"
+        >
+          {saving ? 'Saving…' : 'Save'}
+        </button>
+        <button
+          onClick={onClose}
+          className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function PromptOutput({ builtPrompt }: { builtPrompt: BuiltPrompt }) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -93,6 +192,7 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
   const [fields, setFields] = useState<Record<string, string>>({});
   const [builtPrompt, setBuiltPrompt] = useState<BuiltPrompt | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [showSavePanel, setShowSavePanel] = useState(false);
 
   const activeTemplate = TEMPLATES.find(t => t.id === activeTemplateId) ?? TEMPLATES[0];
 
@@ -101,12 +201,14 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
     setFields({});
     setBuiltPrompt(null);
     setValidationError(null);
+    setShowSavePanel(false);
   }
 
   function handleFieldChange(key: string, value: string) {
     setFields(prev => ({ ...prev, [key]: value }));
     setBuiltPrompt(null);
     setValidationError(null);
+    setShowSavePanel(false);
   }
 
   function handleGenerate(ctx: CampaignContext) {
@@ -178,15 +280,25 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
             {builtPrompt && <PromptOutput builtPrompt={builtPrompt} />}
 
             <div className="mt-4">
-              <span title="Available with Content Library (#185)">
-                <button
-                  disabled
-                  className="bg-gray-600 text-gray-400 cursor-not-allowed px-4 py-2 rounded text-sm"
-                >
-                  Save to Library
-                </button>
-              </span>
+              <button
+                disabled={!builtPrompt}
+                onClick={() => setShowSavePanel(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed px-4 py-2 rounded text-sm"
+              >
+                Save to Library
+              </button>
             </div>
+
+            {builtPrompt && showSavePanel && (
+              <SavePanel
+                campaignId={campaignId}
+                template={activeTemplate}
+                fields={fields}
+                builtPrompt={builtPrompt}
+                chapter={context?.chapter?.title}
+                onClose={() => setShowSavePanel(false)}
+              />
+            )}
           </>
         )}
       </div>

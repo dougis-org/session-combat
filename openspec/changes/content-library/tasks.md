@@ -2,14 +2,14 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Create and publish working branch:** `git checkout -b feature/content-library` then immediately `git push -u origin feature/content-library`
+- [x] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
+- [x] **Step 2 — Create and publish working branch:** `git checkout -b feature/content-library` then immediately `git push -u origin feature/content-library`
 
 ## Execution
 
 ### Task 1 — Add SavedContent type to lib/types.ts
 
-- [ ] Add `SavedContent` interface to `lib/types.ts` after `SessionLog`:
+- [x] Add `SavedContent` interface to `lib/types.ts` after `SessionLog`:
   ```ts
   export interface SavedContent {
     _id?: string;
@@ -28,35 +28,35 @@
     updatedAt: Date;
   }
   ```
-- [ ] Verify: `npm run type-check` passes with no new errors
+- [x] Verify: `npm run type-check` passes with no new errors
 
 ### Task 2 — Add savedContent CRUD to lib/storage.ts
 
-- [ ] Add `savedContent` object to `lib/storage.ts` following the `sessionLogs` pattern:
+- [x] Add `savedContent` object to `lib/storage.ts` following the `sessionLogs` pattern:
   - `list(campaignId: string, userId: string): Promise<SavedContent[]>` — query `{ campaignId, userId }`, sort `{ createdAt: -1 }`
   - `create(item: Omit<SavedContent, 'id' | '_id' | 'createdAt' | 'updatedAt'>): Promise<SavedContent>` — insert with timestamps
   - `update(id: string, userId: string, patch: Pick<SavedContent, 'result' | 'notes'>): Promise<void>` — update `result`, `notes`, `updatedAt`
   - `remove(id: string, userId: string): Promise<void>` — delete by `{ _id, userId }`
-- [ ] All queries include `userId` filter (security requirement)
-- [ ] Verify: `npm run type-check` passes
+- [x] All queries include `userId` filter (security requirement)
+- [x] Verify: `npm run type-check` passes
 
 ### Task 3 — Add API routes
 
-- [ ] Create `app/api/content/route.ts`:
+- [x] Create `app/api/content/route.ts`:
   - `GET` — extract `campaignId` from query params, call `storage.savedContent.list`, return 200 JSON array
   - `POST` — parse body, call `storage.savedContent.create`, return 201 with created item
   - Both protected by existing auth middleware (pattern: copy from `app/api/campaigns/route.ts`)
-- [ ] Create `app/api/content/[id]/route.ts`:
+- [x] Create `app/api/content/[id]/route.ts`:
   - `PUT` — parse body `{ result, notes }`, call `storage.savedContent.update`, return 200
   - `DELETE` — call `storage.savedContent.remove`, return 204
   - Both protected by auth middleware
-- [ ] Verify: `npm run type-check` passes
+- [x] Verify: `npm run type-check` passes
 
 ### Task 4 — Write integration tests for API routes (before UI)
 
 Follow BDD/TDD: write tests before implementing the UI.
 
-- [ ] Create `lib/api/__tests__/content.test.ts` (or equivalent test location used by the project):
+- [x] Create `lib/api/__tests__/content.test.ts` (or equivalent test location used by the project):
   - POST creates item; response contains all fields including `systemPrompt`, `userMessage`, `prompt`
   - GET lists items for campaignId, newest first
   - GET filters by userId (item from another user not returned)
@@ -64,11 +64,11 @@ Follow BDD/TDD: write tests before implementing the UI.
   - DELETE removes item; subsequent GET does not include it
   - GET with no auth returns 401
   - DELETE with no auth returns 401
-- [ ] Verify: `npm test` passes
+- [x] Verify: `npm test` passes
 
 ### Task 5 — Build library page app/campaigns/[id]/library/page.tsx
 
-- [ ] Create `app/campaigns/[id]/library/page.tsx`:
+- [x] Create `app/campaigns/[id]/library/page.tsx`:
   - Wrap in `ProtectedRoute` (same pattern as `app/campaigns/[id]/prompts/page.tsx`)
   - On mount: `GET /api/content?campaignId=[id]`
   - Filter tabs: All / NPC / Location / Shop / Magic Item / Room
@@ -84,22 +84,22 @@ Follow BDD/TDD: write tests before implementing the UI.
     - "Delete" button — `DELETE /api/content/[id]`; remove card from list on success
   - Empty state message when no items
   - Error banner on load failure
-- [ ] Verify: `npm run type-check` passes
+- [x] Verify: `npm run type-check` passes
 
 ### Task 6 — Write integration tests for library page
 
-- [ ] Integration test: renders library page with mocked GET returning mixed-type items; all items appear
-- [ ] Integration test: filter tab click shows only matching type items
-- [ ] Integration test: clicking a card expands it and shows systemPrompt in muted section, userMessage in bright section
-- [ ] Integration test: "Copy Full Prompt" copies `prompt` field value
-- [ ] Integration test: editing response and clicking Save calls PUT; success message shown
-- [ ] Integration test: Delete calls DELETE; item removed from list
-- [ ] Integration test: empty state renders when GET returns empty array
-- [ ] Verify: `npm test` passes
+- [x] Integration test: renders library page with mocked GET returning mixed-type items; all items appear
+- [x] Integration test: filter tab click shows only matching type items
+- [x] Integration test: clicking a card expands it and shows systemPrompt in muted section, userMessage in bright section
+- [x] Integration test: "Copy Full Prompt" copies `prompt` field value
+- [x] Integration test: editing response and clicking Save calls PUT; success message shown
+- [x] Integration test: Delete calls DELETE; item removed from list
+- [x] Integration test: empty state renders when GET returns empty array
+- [x] Verify: `npm test` passes
 
 ### Task 7 — Add Library nav button to campaign cards
 
-- [ ] In `app/campaigns/page.tsx`, add a "Library" button alongside "Prompt Builder" in the campaign card action row:
+- [x] In `app/campaigns/page.tsx`, add a "Library" button alongside "Prompt Builder" in the campaign card action row:
   ```tsx
   <Link
     href={`/campaigns/${campaign.id}/library`}
@@ -108,11 +108,11 @@ Follow BDD/TDD: write tests before implementing the UI.
     Library
   </Link>
   ```
-- [ ] Verify: campaigns page renders with Library button visible on each card
+- [x] Verify: campaigns page renders with Library button visible on each card
 
 ### Task 8 — Wire Save to Library button in Prompt Builder
 
-- [ ] In `app/campaigns/[id]/prompts/page.tsx`, replace the disabled stub with functional save panel:
+- [x] In `app/campaigns/[id]/prompts/page.tsx`, replace the disabled stub with functional save panel:
   - Button enabled only when `builtPrompt` is non-null
   - Clicking opens an inline save panel (not a modal):
     - Title text input — pre-filled with the first non-empty template field value
@@ -120,29 +120,29 @@ Follow BDD/TDD: write tests before implementing the UI.
     - "Cancel" button — closes panel, no API call
   - On save success: show confirmation with a link to `/campaigns/[id]/library`
   - On save failure: show error banner; panel stays open, prompt remains visible
-- [ ] Capture `chapter` from `context.chapter?.title` (available via `useCampaignContext`)
-- [ ] Verify: `npm run type-check` passes
+- [x] Capture `chapter` from `context.chapter?.title` (available via `useCampaignContext`)
+- [x] Verify: `npm run type-check` passes
 
 ### Task 9 — Write integration tests for Save to Library flow
 
-- [ ] Integration test: "Save to Library" button is disabled before generate
-- [ ] Integration test: after generate, clicking "Save to Library" opens save panel with pre-filled title
-- [ ] Integration test: editing title then saving calls POST with the edited title
-- [ ] Integration test: successful save shows confirmation with library link
-- [ ] Integration test: API failure shows error banner and panel stays open
-- [ ] Integration test: Cancel closes panel without API call
-- [ ] Verify: `npm test` passes
+- [x] Integration test: "Save to Library" button is disabled before generate
+- [x] Integration test: after generate, clicking "Save to Library" opens save panel with pre-filled title
+- [x] Integration test: editing title then saving calls POST with the edited title
+- [x] Integration test: successful save shows confirmation with library link
+- [x] Integration test: API failure shows error banner and panel stays open
+- [x] Integration test: Cancel closes panel without API call
+- [x] Verify: `npm test` passes
 
 ---
 
 ## Validation
 
-- [ ] `npm run type-check` — no type errors
-- [ ] `npm test` — all unit and integration tests pass (including new tests from Tasks 4, 6, 9)
-- [ ] `npm run build` — production build succeeds
+- [x] `npm run type-check` — no type errors
+- [x] `npm test` — all unit and integration tests pass (including new tests from Tasks 4, 6, 9)
+- [x] `npm run build` — production build succeeds
 - [ ] Manual smoke test: generate a prompt → save to library → navigate to library → expand card → paste response → save → delete
 - [ ] Auth check: confirm unauthenticated requests to `/api/content` return 401
-- [ ] All tasks marked complete
+- [x] All tasks marked complete
 
 ## Remote push validation
 
