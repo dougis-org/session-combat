@@ -119,15 +119,15 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main` (check `git log --oneline -1` shows the upgrade commit)
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No documentation updates required (dependency bump, pure technical change)
-- [ ] No spec deltas to sync (no capability changes)
-- [ ] Archive the change: `git checkout -b doc/archive-$(date +%Y-%m-%d)-upgrade-nextjs && mkdir -p openspec/changes/archive/$(date +%Y-%m-%d)-upgrade-nextjs-to-16-2-6 && cp -r openspec/changes/upgrade-nextjs-to-16-2-6/* openspec/changes/archive/$(date +%Y-%m-%d)-upgrade-nextjs-to-16-2-6/ && rm -rf openspec/changes/upgrade-nextjs-to-16-2-6 && git add openspec/changes/archive/ openspec/changes/ && git commit -m "docs: archive upgrade-nextjs-to-16.2.6 ($(date +%Y-%m-%d))"`
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-upgrade-nextjs-to-16-2-6/` exists and `openspec/changes/upgrade-nextjs-to-16-2-6/` is gone
-- [ ] Push the archive commit: `git push origin doc/archive-$(date +%Y-%m-%d)-upgrade-nextjs`
-- [ ] Open PR from `doc/archive-*` to `main` with title `docs: archive upgrade-nextjs-to-16.2.6 (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges (same loop as implementation PR)
-- [ ] Prune merged branches: `git fetch --prune && git branch -d chore/upgrade-nextjs-16.2.6 doc/archive-$(date +%Y-%m-%d)-upgrade-nextjs`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main` (check `git log --oneline -1` shows the upgrade commit)
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No documentation updates required (dependency bump, pure technical change)
+- [x] No spec deltas to sync (no capability changes)
+- [x] Archive the change: `git checkout -b doc/archive-$(date +%Y-%m-%d)-upgrade-nextjs && mkdir -p openspec/changes/archive/$(date +%Y-%m-%d)-upgrade-nextjs-to-16-2-6 && cp -ra openspec/changes/upgrade-nextjs-to-16-2-6/. openspec/changes/archive/$(date +%Y-%m-%d)-upgrade-nextjs-to-16-2-6/ && rm -rf openspec/changes/upgrade-nextjs-to-16-2-6 && git add openspec/changes/archive/ openspec/changes/ && git commit -m "docs: archive upgrade-nextjs-to-16.2.6 ($(date +%Y-%m-%d))"`
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-upgrade-nextjs-to-16-2-6/` exists and `openspec/changes/upgrade-nextjs-to-16-2-6/` is gone
+- [x] Push the archive commit: `git push origin doc/archive-$(date +%Y-%m-%d)-upgrade-nextjs`
+- [x] Open PR from `doc/archive-*` to `main` with title `docs: archive upgrade-nextjs-to-16.2.6 (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor the doc PR until it merges (same loop as implementation PR)
+- [x] Prune merged branches: `git fetch --prune && git branch -d chore/upgrade-nextjs-16.2.6 doc/archive-$(date +%Y-%m-%d)-upgrade-nextjs`

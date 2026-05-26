@@ -7,7 +7,7 @@ description: Tests for the Next.js 16.2.6 upgrade
 
 ## Overview
 
-This document outlines the validation tests for the `upgrade-nextjs-to-16-2-6` change. For a dependency upgrade, the "tests" are integration and verification tests run during the Execution and Validation phases in `tasks.md`. All validations are automated and run as part of the standard CI/CD pipeline.
+This document outlines the validation tests for the `upgrade-nextjs-to-16-2-6` change. For a dependency upgrade, the "tests" are integration and verification tests run during the Execution and Validation phases in `tasks.md`. Most validations run in CI; T4 (`npm audit`) and T5 (`npx tsc --noEmit`) are run locally only.
 
 ## Testing Strategy
 
@@ -101,12 +101,12 @@ Mapping to tasks in `tasks.md`:
 
 ## CI Pipeline Integration
 
-All tests above are automated in `.github/workflows/build-test.yml`:
+Most tests above are automated in `.github/workflows/build-test.yml`. T4 (`npm audit`) and T5 (`npx tsc --noEmit`) are run locally only — they are not part of CI:
 
-1. **Lint job** — runs T5 & T6 (TypeScript + ESLint)
+1. **Lint job** — runs T6 (ESLint only; no TypeScript typecheck step)
 2. **Unit tests job** — runs T7 (Jest unit suite)
 3. **Integration tests job** — runs T8 (Jest integration suite with testcontainers)
-4. **E2E tests job** — (implicit in CI; run manually with T9 command)
+4. **Regression tests job** — runs T9 (Playwright E2E via `npm run test:regression`)
 5. **Build job** — runs T10 (Next.js build)
 
 No new tests are added to the CI pipeline; all validations use existing test infrastructure. The upgrade is complete when all existing tests pass.

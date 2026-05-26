@@ -43,7 +43,7 @@ The system MUST build successfully without errors or warnings after the upgrade.
 
 - **Given** the codebase with Next.js 16.2.6 installed
 - **When** `npm run build` is executed
-- **Then** the process exits with code 0 and outputs "ready - started server" or similar success message (no ERR! or critical warnings)
+- **Then** the process exits with code 0 and the `.next/` directory is populated (no ERR! or critical warnings in output)
 
 #### Scenario: No unexpected build artifacts
 

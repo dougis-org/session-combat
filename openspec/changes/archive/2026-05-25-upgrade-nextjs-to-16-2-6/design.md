@@ -70,7 +70,7 @@
 - **Requirement:** Application behavior unchanged
   - **Design element:** Decision 3 (test suite validation)
   - **Acceptance criteria reference:** All 150 tests pass; E2E tests validate key user flows
-  - **Testability notes:** Run `npm test`, `npm run test:integration`, `npx playwright test`
+  - **Testability notes:** Run `npm run test:unit`, `npm run test:integration`, `npx playwright test tests/e2e/`
 
 ## Non-Functional Requirements Mapping
 
