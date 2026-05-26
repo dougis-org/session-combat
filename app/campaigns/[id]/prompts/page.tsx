@@ -279,6 +279,7 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
                   onChange={e => {
                     setIncludeNotes(e.target.checked);
                     setBuiltPrompt(null);
+                    setShowSavePanel(false);
                   }}
                   className="w-4 h-4"
                 />
