@@ -124,10 +124,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `feature/campaign-notes-and-status` to `main`. PR body must include: `Closes #189`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Ensure the `openspec-review-code` sub-agent was run before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `feature/campaign-notes-and-status` to `main`. PR body must include: `Closes #189`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
 - [ ] **Monitor PR comments** — poll for new comments autonomously; address them, commit fixes, follow all steps in [Remote push validation], push; wait 180 seconds then repeat until no unresolved comments remain
 - [ ] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, follow all steps in [Remote push validation], push; wait 180 seconds then repeat until all required checks pass
