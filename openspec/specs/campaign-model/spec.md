@@ -162,8 +162,22 @@ The system SHALL present a notes textarea in the campaign create/edit form.
 
 ### Requirement: Reliability — legacy document compatibility
 
-#### Scenario: Legacy document missing `status` field handled gracefully
+The system SHALL treat any Campaign document missing a `status` or `notes` field as if it were `status: 'active'` and `notes: ''` respectively. This normalisation MUST be applied at the storage layer (on read) so that all downstream consumers — dashboard filtering, list rendering, PATCH handler, and API responses — see a fully-populated Campaign object.
+
+#### Scenario: Legacy document missing `status` appears in Active dashboard
 
 - **Given** a MongoDB document with no `status` field (pre-migration)
+- **When** the DM views the `/campaigns` dashboard
+- **Then** the campaign appears in the Active Campaigns section
+
+#### Scenario: Legacy document missing `status` shows correct badge
+
+- **Given** a MongoDB document with no `status` field
+- **When** the DM views the campaign management list
+- **Then** the status badge renders as "Active" with `bg-green-700`
+
+#### Scenario: PATCH on legacy document handled gracefully
+
+- **Given** a MongoDB document with no `status` field
 - **When** the PATCH handler loads the campaign
 - **Then** the campaign is treated as `status: 'active'` and the PATCH proceeds without error

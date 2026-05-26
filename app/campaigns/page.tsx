@@ -201,7 +201,7 @@ export function CampaignsContent() {
     setEditingCampaign(null);
   };
 
-  const activeCampaigns = campaigns.filter(c => c.status === 'active');
+  const activeCampaigns = campaigns.filter(c => (c.status ?? 'active') === 'active');
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
