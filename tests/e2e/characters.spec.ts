@@ -251,6 +251,7 @@ test.describe("Character gender field", () => {
     await card.getByRole("button", { name: "Edit" }).click();
     await page.getByLabel("Character gender").clear();
     await page.getByRole("button", { name: /Save Character/i }).click();
+    await expect(page.getByLabel("Character gender")).not.toBeVisible({ timeout: 15000 });
     await expect(card.getByText(/\bHuman\b/)).toBeVisible({ timeout: 15000 });
     await expect(card.getByText("Non-binary Human")).toHaveCount(0);
   });

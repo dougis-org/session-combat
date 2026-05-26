@@ -12,23 +12,35 @@ async function globalTeardown(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 3000));
   }
 
-  const mongoUri = process.env.MONGODB_URI;
-  if (mongoUri) {
-    await dropTestDatabase(mongoUri);
-    console.log("Test database dropped (teardown)");
+  try {
+    const mongoUri = process.env.MONGODB_URI;
+    if (mongoUri) {
+      await dropTestDatabase(mongoUri);
+      console.log("Test database dropped (teardown)");
+    }
+  } catch (err) {
+    console.error("Failed to drop test database during teardown:", err);
   }
 
-  const dndBeyondServer = global.__DND_BEYOND_MOCK_SERVER__;
-  if (dndBeyondServer) {
-    await new Promise<void>((resolve) => dndBeyondServer.close(() => resolve()));
-    console.log("DnD Beyond mock server stopped");
+  try {
+    const dndBeyondServer = global.__DND_BEYOND_MOCK_SERVER__;
+    if (dndBeyondServer) {
+      await new Promise<void>((resolve) => dndBeyondServer.close(() => resolve()));
+      console.log("DnD Beyond mock server stopped");
+    }
+  } catch (err) {
+    console.error("Failed to stop DnD Beyond mock server during teardown:", err);
   }
 
-  const mongoContainer = global.__MONGO_CONTAINER__;
-  if (mongoContainer) {
-    console.log("Stopping MongoDB container...");
-    await mongoContainer.stop();
-    console.log("MongoDB container stopped");
+  try {
+    const mongoContainer = global.__MONGO_CONTAINER__;
+    if (mongoContainer) {
+      console.log("Stopping MongoDB container...");
+      await mongoContainer.stop();
+      console.log("MongoDB container stopped");
+    }
+  } catch (err) {
+    console.error("Failed to stop MongoDB container during teardown:", err);
   }
 }
 

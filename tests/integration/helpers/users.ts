@@ -1,10 +1,11 @@
 import fetch from "node-fetch";
 
 let counter = 0;
+const pid = process.pid;
 
 export function uniqueEmail(prefix = "user"): string {
   const workerId = process.env.JEST_WORKER_ID ?? "0";
-  return `${prefix}-w${workerId}-${++counter}@example.com`;
+  return `${prefix}-w${workerId}-p${pid}-${++counter}@example.com`;
 }
 
 export async function createTestUser(

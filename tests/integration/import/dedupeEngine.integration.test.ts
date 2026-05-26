@@ -21,10 +21,15 @@ describe("dedupeEngine integration", () => {
   let closeDatabase: () => Promise<void>;
   let db: Db;
 
+  let savedMongoUri: string | undefined;
+  let savedMongoDb: string | undefined;
+
   beforeAll(async () => {
     jest.resetModules();
     mongoContainer = await new MongoDBContainer("mongo:8").withExposedPorts(27017).start();
     mongoUri = `${mongoContainer.getConnectionString()}/?directConnection=true`;
+    savedMongoUri = process.env.MONGODB_URI;
+    savedMongoDb = process.env.MONGODB_DB;
     process.env.MONGODB_URI = mongoUri;
     process.env.MONGODB_DB = "session-combat-test";
     
@@ -44,6 +49,16 @@ describe("dedupeEngine integration", () => {
       await closeDatabase();
     }
     await mongoContainer?.stop();
+    if (savedMongoUri !== undefined) {
+      process.env.MONGODB_URI = savedMongoUri;
+    } else {
+      delete process.env.MONGODB_URI;
+    }
+    if (savedMongoDb !== undefined) {
+      process.env.MONGODB_DB = savedMongoDb;
+    } else {
+      delete process.env.MONGODB_DB;
+    }
   }, 30000);
 
   beforeEach(async () => {

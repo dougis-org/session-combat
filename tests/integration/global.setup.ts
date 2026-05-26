@@ -5,9 +5,17 @@ import { getDirectoryBasePort } from "../shared/port";
 import { dropTestDatabase } from "../shared/mongo";
 import { startDndBeyondMockServer } from "../mocks/dndBeyond/server";
 
-async function waitForServer(url: string, maxAttempts = 60, delay = 2000): Promise<void> {
+async function waitForServer(
+  url: string,
+  nextProcess?: import("child_process").ChildProcess,
+  maxAttempts = 60,
+  delay = 2000,
+): Promise<void> {
   let lastError: unknown;
   for (let i = 1; i <= maxAttempts; i++) {
+    if (nextProcess && nextProcess.exitCode !== null) {
+      throw new Error(`Next.js process exited prematurely with code ${nextProcess.exitCode}`);
+    }
     try {
       const response = await fetch(url);
       if (response.ok) return;
@@ -68,7 +76,7 @@ async function globalSetup(): Promise<void> {
   global.__NEXT_PROCESS__ = nextProcess;
 
   console.log(`Waiting for Next.js server on port ${port}...`);
-  await waitForServer(`http://localhost:${port}/api/health`);
+  await waitForServer(`http://localhost:${port}/api/health`, nextProcess);
   console.log("Next.js server is ready");
 
   process.env.TEST_BASE_URL = `http://localhost:${port}`;
