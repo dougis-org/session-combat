@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { makeAuthedHeaders } from "../helpers/server";
-import { createTestUser } from "../helpers/users";
+import { registerTestUser } from "../helpers/users";
 
 interface PartyResponse {
   id: string;
@@ -19,7 +19,7 @@ describe("Party Members Integration Tests", () => {
   beforeAll(async () => {
     baseUrl = process.env.TEST_BASE_URL!;
     if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
-    authCookie = (await createTestUser(baseUrl, "party-members")).cookie;
+    authCookie = (await registerTestUser(baseUrl, "party-members")).cookie;
   }, 30000);
 
   const authed = () => makeAuthedHeaders(authCookie);

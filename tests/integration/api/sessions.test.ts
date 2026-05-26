@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { makeAuthedHeaders } from "../helpers/server";
-import { createTestUser } from "../helpers/users";
+import { registerTestUser } from "../helpers/users";
 
 interface SessionLogResponse {
   id: string;
@@ -27,8 +27,8 @@ describe("Session Log API Integration Tests", () => {
     baseUrl = process.env.TEST_BASE_URL!;
     if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
 
-    authCookie = (await createTestUser(baseUrl, "sessions-user1")).cookie;
-    authCookie2 = (await createTestUser(baseUrl, "sessions-user2")).cookie;
+    authCookie = (await registerTestUser(baseUrl, "sessions-user1")).cookie;
+    authCookie2 = (await registerTestUser(baseUrl, "sessions-user2")).cookie;
 
     // Create a campaign for user1
     const campRes = await fetch(`${baseUrl}/api/campaigns`, {

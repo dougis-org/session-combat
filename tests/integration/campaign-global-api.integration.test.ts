@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { MongoClient, ObjectId } from "mongodb";
-import { createTestUser } from "./helpers/users";
+import { registerTestUser } from "./helpers/users";
 
 interface TemplateResponse {
   id: string;
@@ -37,9 +37,9 @@ describe("Campaign Global API Integration Tests", () => {
     mongoClient = new MongoClient(process.env.MONGODB_URI!);
     await mongoClient.connect();
 
-    userCookie = (await createTestUser(baseUrl, "campaign-global-user")).cookie;
+    userCookie = (await registerTestUser(baseUrl, "campaign-global-user")).cookie;
 
-    const adminUser = await createTestUser(baseUrl, "campaign-global-admin");
+    const adminUser = await registerTestUser(baseUrl, "campaign-global-admin");
     adminCookie = adminUser.cookie;
 
     const db = mongoClient.db(process.env.MONGODB_DB);

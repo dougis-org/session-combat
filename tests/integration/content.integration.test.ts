@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { createTestUser } from "./helpers/users";
+import { registerTestUser } from "./helpers/users";
 
 interface ContentResponse {
   id: string;
@@ -39,8 +39,8 @@ describe("Content API Integration Tests", () => {
   beforeAll(async () => {
     baseUrl = process.env.TEST_BASE_URL!;
     if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
-    authCookie = (await createTestUser(baseUrl, "content-test")).cookie;
-    authCookie2 = (await createTestUser(baseUrl, "content-user2")).cookie;
+    authCookie = (await registerTestUser(baseUrl, "content-test")).cookie;
+    authCookie2 = (await registerTestUser(baseUrl, "content-user2")).cookie;
   }, 30000);
 
   function authed(cookie = authCookie) {

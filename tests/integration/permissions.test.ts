@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId } from "mongodb";
-import { createTestUser } from "./helpers/users";
+import { registerTestUser } from "./helpers/users";
 
 describe("isUserAdmin Integration Tests", () => {
   let baseUrl: string;
@@ -23,7 +23,7 @@ describe("isUserAdmin Integration Tests", () => {
   }, 30000);
 
   async function registerUser(emailSuffix: string): Promise<{ userId: string }> {
-    const { userId } = await createTestUser(baseUrl, `permissions-${emailSuffix}`);
+    const { userId } = await registerTestUser(baseUrl, `permissions-${emailSuffix}`);
     return { userId };
   }
 

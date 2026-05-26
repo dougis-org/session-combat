@@ -91,9 +91,9 @@ describe("POST /api/auth/register - Integration Tests", () => {
 
   it("should handle special characters in email and set auth cookie", async () => {
     const specialEmails = [
-      `user+test-${Date.now()}@example.co.uk`,
-      `user-name-${Date.now()}@example.com`,
-      `user_name_${Date.now()}@example.com`,
+      `user+test-${Date.now()}-${Math.random().toString(36).slice(2, 9)}@example.co.uk`,
+      createTestEmail("user-name"),
+      createTestEmail("user_name"),
     ];
 
     for (const email of specialEmails) {

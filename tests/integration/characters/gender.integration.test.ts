@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { createTestUser } from "../helpers/users";
+import { registerTestUser } from "../helpers/users";
 
 describe("Character gender field — API integration", () => {
   let baseUrl: string;
@@ -8,7 +8,7 @@ describe("Character gender field — API integration", () => {
   beforeAll(async () => {
     baseUrl = process.env.TEST_BASE_URL!;
     if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
-    cookie = (await createTestUser(baseUrl, "gender-test")).cookie;
+    cookie = (await registerTestUser(baseUrl, "gender-test")).cookie;
   }, 30000);
 
   it("creates a character with gender and returns it", async () => {

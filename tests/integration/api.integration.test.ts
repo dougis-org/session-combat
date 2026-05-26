@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
-import { createTestUser } from "./helpers/users";
+import { registerTestUser } from "./helpers/users";
+import { createTestEmail } from "@/tests/integration/auth.test.helpers";
 
 describe("API Integration Tests", () => {
   let baseUrl: string;
@@ -22,7 +23,7 @@ describe("API Integration Tests", () => {
   });
 
   it("should allow registration of new users", async () => {
-    const email = `test-${Date.now()}@example.com`;
+    const email = createTestEmail("test");
     const response = await fetch(`${baseUrl}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -32,7 +33,7 @@ describe("API Integration Tests", () => {
   });
 
   it("should allow authenticated access to protected endpoints after registration", async () => {
-    const { cookie } = await createTestUser(baseUrl, "auth-test");
+    const { cookie } = await registerTestUser(baseUrl, "auth-test");
 
     const response = await fetch(`${baseUrl}/api/characters`, {
       headers: { Cookie: cookie },
@@ -41,7 +42,7 @@ describe("API Integration Tests", () => {
   });
 
   it("should return empty parties list for a new user", async () => {
-    const { cookie } = await createTestUser(baseUrl, "parties-test");
+    const { cookie } = await registerTestUser(baseUrl, "parties-test");
 
     const response = await fetch(`${baseUrl}/api/parties`, {
       headers: { Cookie: cookie },
@@ -53,7 +54,7 @@ describe("API Integration Tests", () => {
   });
 
   it("should allow creating a party with characterIds and return it in subsequent GET", async () => {
-    const { cookie } = await createTestUser(baseUrl, "parties-crud");
+    const { cookie } = await registerTestUser(baseUrl, "parties-crud");
 
     const createResponse = await fetch(`${baseUrl}/api/parties`, {
       method: "POST",

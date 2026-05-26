@@ -1,4 +1,4 @@
-import { createTestUser } from "@/tests/integration/helpers/users";
+import { registerTestUser } from "@/tests/integration/helpers/users";
 import {
   logoutUser,
   VALID_PASSWORD,
@@ -17,7 +17,7 @@ describe("POST /api/auth/logout - Integration Tests", () => {
   });
 
   it("should clear auth cookie and succeed with valid session", async () => {
-    const { cookie } = await createTestUser(baseUrl, "logout-user");
+    const { cookie } = await registerTestUser(baseUrl, "logout-user");
 
     const response = await logoutUser(baseUrl, cookie);
     expect(response.status).toBe(200);
@@ -41,7 +41,7 @@ describe("POST /api/auth/logout - Integration Tests", () => {
   });
 
   it("should allow repeated logout with same token (idempotent)", async () => {
-    const { cookie } = await createTestUser(baseUrl, "logout-repeat");
+    const { cookie } = await registerTestUser(baseUrl, "logout-repeat");
 
     const response1 = await logoutUser(baseUrl, cookie);
     expect(response1.status).toBe(200);

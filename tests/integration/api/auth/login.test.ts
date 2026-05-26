@@ -1,7 +1,6 @@
 import {
   apiCall,
   createTestEmail,
-  registerUser,
   loginUser,
   assertSuccessResponse,
   assertErrorResponse,
@@ -10,6 +9,7 @@ import {
   VALID_PASSWORD,
   INVALID_EMAILS,
 } from "@/tests/integration/auth.test.helpers";
+import { registerTestUser } from "@/tests/integration/helpers/users";
 
 /**
  * Integration tests for POST /api/auth/login
@@ -24,8 +24,7 @@ describe("POST /api/auth/login - Integration Tests", () => {
   });
 
   it("should login with valid email and password", async () => {
-    const email = createTestEmail("user");
-    await registerUser(baseUrl, email, VALID_PASSWORD);
+    const { email } = await registerTestUser(baseUrl, "user");
 
     const response = await loginUser(baseUrl, email, VALID_PASSWORD);
     const data = await assertSuccessResponse<{
@@ -57,8 +56,7 @@ describe("POST /api/auth/login - Integration Tests", () => {
 
   it("should return 401 for authentication failures", async () => {
     // Wrong password
-    const email1 = createTestEmail("wrong-password-test");
-    await registerUser(baseUrl, email1, VALID_PASSWORD);
+    const { email: email1 } = await registerTestUser(baseUrl, "wrong-password-test");
     let response = await loginUser(baseUrl, email1, "WrongPassword456!");
     expect(response.status).toBe(401);
 
@@ -81,7 +79,7 @@ describe("POST /api/auth/login - Integration Tests", () => {
     expect(response.status).toBe(400);
 
     // Missing password
-    const email = createTestEmail("missing-password");
+    const { email } = await registerTestUser(baseUrl, "missing-password");
     response = await loginUser(baseUrl, email, "");
     expect(response.status).toBe(400);
   });
