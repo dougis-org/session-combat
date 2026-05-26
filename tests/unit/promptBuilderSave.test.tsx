@@ -125,17 +125,11 @@ function makeContextWithNotes(notes: string) {
 }
 
 describe('Prompt Builder — DM notes checkbox', () => {
-  it('TC-C1: checkbox not rendered when campaign.notes is empty', async () => {
-    await act(async () => {
-      root = createRoot(container);
-      root.render(React.createElement(PromptBuilderPage));
-    });
-    const checkbox = container.querySelector('input[type="checkbox"]');
-    expect(checkbox).toBeNull();
-  });
-
-  it('TC-C2: checkbox not rendered when campaign.notes is whitespace only', async () => {
-    mockCampaignContextResult = { context: makeContextWithNotes('   '), loading: false, error: null };
+  it.each([
+    ['TC-C1: empty string', ''],
+    ['TC-C2: whitespace only', '   '],
+  ])('%s — checkbox not rendered', async (_label, notes) => {
+    mockCampaignContextResult = { context: makeContextWithNotes(notes), loading: false, error: null };
     await act(async () => {
       root = createRoot(container);
       root.render(React.createElement(PromptBuilderPage));
@@ -155,6 +149,24 @@ describe('Prompt Builder — DM notes checkbox', () => {
     expect(checkbox.checked).toBe(false);
     const label = checkbox.closest('label');
     expect(label?.textContent).toContain('Include DM notes in prompt');
+  });
+
+  it('TC-C4: toggling checkbox after generate clears built prompt and closes save panel', async () => {
+    mockCampaignContextResult = { context: makeContextWithNotes('Active quest: find the lost relic.'), loading: false, error: null };
+    await renderPage();
+    await fillFirstFieldAndGenerate();
+
+    // Save panel should be openable and Save to Library enabled after generate
+    expect(findSaveToLibraryButton().disabled).toBe(false);
+    await act(async () => { findSaveToLibraryButton().click(); });
+    expect(container.querySelector('#save-title')).toBeTruthy();
+
+    // Toggle the checkbox — should clear prompt and close save panel
+    const checkbox = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    await act(async () => { checkbox.click(); });
+
+    expect(container.querySelector('#save-title')).toBeNull();
+    expect(findSaveToLibraryButton().disabled).toBe(true);
   });
 });
 

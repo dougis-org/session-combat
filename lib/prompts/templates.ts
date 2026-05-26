@@ -41,7 +41,7 @@ export function buildSystemPrompt(context: CampaignContext, opts?: { includeNote
   const sessionSection = recentSessions?.length
     ? `Recent sessions:\n${recentSessions.map(formatSessionEntry).join('\n')}`
     : '';
-  const notesSection = opts?.includeNotes && campaign.notes.trim()
+  const notesSection = opts?.includeNotes && campaign.notes?.trim()
     ? `Current campaign context (DM notes):\n${campaign.notes}`
     : '';
 
