@@ -116,7 +116,7 @@
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm run test` — all tests must pass
+- **Unit tests** — `npm run test:unit` — all tests must pass
 - **Integration tests** — `npm run test:integration` — all tests must pass
 - **Type check** — `npx tsc --noEmit` — zero errors
 - **Build** — `npm run build` — must succeed with no errors

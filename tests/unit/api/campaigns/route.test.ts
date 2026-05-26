@@ -153,6 +153,18 @@ describe("POST /api/campaigns", () => {
     expect((await response.json()).notes).toBe("");
   });
 
+  it("POST returns 400 when notes exceed 10000 chars", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const response = await POST(makePostRequest({ name: "Test", notes: "x".repeat(10001) }));
+    expect(response.status).toBe(400);
+  });
+
+  it("POST returns 201 when notes are exactly 10000 chars", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const response = await POST(makePostRequest({ name: "Test", notes: "x".repeat(10000) }));
+    expect(response.status).toBe(201);
+  });
+
   it("ignores non-string moduleName", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(
@@ -335,6 +347,16 @@ describe("PATCH /api/campaigns/[id]", () => {
     );
     expect(response.status).toBe(200);
     expect((await response.json()).status).toBe("active");
+  });
+
+  it("strips legacy active field from stored document in PATCH response", async () => {
+    mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN, active: true } as any);
+    const response = await PATCH(
+      makeIdRequest("PATCH", { name: "Test" }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(200);
+    expect(await response.json()).not.toHaveProperty("active");
   });
 
   it("returns 400 when name is blank", async () => {

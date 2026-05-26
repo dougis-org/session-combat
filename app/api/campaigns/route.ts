@@ -23,6 +23,10 @@ export const POST = withAuth(async (request, auth) => {
       return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
     }
 
+    if (typeof notes === 'string' && notes.length > 10000) {
+      return NextResponse.json({ error: 'Notes must be a string of 10,000 characters or fewer' }, { status: 400 });
+    }
+
     const sanitizedChapters = sanitizeChapters(chapters);
     const sanitizedCurrentChapterId = sanitizeCurrentChapterId(currentChapterId, sanitizedChapters);
 

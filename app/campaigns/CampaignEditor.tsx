@@ -20,7 +20,7 @@ export function CampaignEditor({
 }) {
   const [name, setName] = useState(campaign.name);
   const [moduleName, setModuleName] = useState(campaign.moduleName);
-  const [status, setStatus] = useState(campaign.status);
+  const [status, setStatus] = useState(campaign.status ?? 'active');
   const [notes, setNotes] = useState(campaign.notes ?? '');
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);

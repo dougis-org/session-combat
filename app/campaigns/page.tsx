@@ -30,21 +30,23 @@ function ManagementChapterInfo({ campaign }: { campaign: Campaign }) {
   return null;
 }
 
-function statusBadgeClass(status: Campaign['status']): string {
+function statusBadgeClass(status: Campaign['status'] | undefined): string {
   switch (status) {
     case 'planning': return 'bg-slate-600';
     case 'active': return 'bg-green-700';
     case 'on-hold': return 'bg-yellow-600';
     case 'completed': return 'bg-gray-600';
+    default: return 'bg-green-700';
   }
 }
 
-function statusLabel(status: Campaign['status']): string {
+function statusLabel(status: Campaign['status'] | undefined): string {
   switch (status) {
     case 'planning': return 'Planning';
     case 'active': return 'Active';
     case 'on-hold': return 'On Hold';
     case 'completed': return 'Completed';
+    default: return 'Active';
   }
 }
 
@@ -101,7 +103,7 @@ export function CampaignsContent() {
   }, []);
 
   useEffect(() => {
-    const activeCampaigns = campaigns.filter(c => c.status === 'active');
+    const activeCampaigns = campaigns.filter(c => (c.status ?? 'active') === 'active');
     if (activeCampaigns.length === 0) return;
 
     const controller = new AbortController();

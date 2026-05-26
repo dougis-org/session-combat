@@ -76,6 +76,7 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
       currentChapterId: sanitizedCurrentChapterId,
       updatedAt: new Date(),
     };
+    delete (updated as Record<string, unknown>).active;
 
     await storage.saveCampaign(updated);
 
