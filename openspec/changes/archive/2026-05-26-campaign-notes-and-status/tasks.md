@@ -155,7 +155,7 @@ Blocking resolution flow:
 - [x] Archive the change: move `openspec/changes/campaign-notes-and-status/` to `openspec/changes/archive/2026-05-26-campaign-notes-and-status/` **in a single atomic commit** — do not commit the copy and delete separately
 - [x] Confirm `openspec/changes/archive/2026-05-26-campaign-notes-and-status/` exists and `openspec/changes/campaign-notes-and-status/` is gone
 - [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-05-26-campaign-notes-and-status` then `git push -u origin doc/archive-2026-05-26-campaign-notes-and-status`
-- [ ] Open a PR from `doc/archive-2026-05-26-campaign-notes-and-status` to `main` with title `docs: archive campaign-notes-and-status (2026-05-26)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Open a PR from `doc/archive-2026-05-26-campaign-notes-and-status` to `main` with title `docs: archive campaign-notes-and-status (2026-05-26)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
 - [ ] Monitor the doc PR until it merges; address comments and CI failures, push to the same doc branch, repeat
 - [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feature/campaign-notes-and-status doc/archive-2026-05-26-campaign-notes-and-status`
