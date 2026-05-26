@@ -106,11 +106,11 @@
 
 - [x] `npx tsc --noEmit` — zero type errors
 - [x] `npm run test:unit` — all unit tests pass
-- [ ] `npm run test:integration` — all integration tests pass
+- [x] `npm run test:integration` — all integration tests pass
 - [x] `npm run build` — build succeeds
 - [x] `npm run lint` — zero lint errors
 - [x] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation] pass
+- [x] All steps in [Remote push validation] pass
 
 ## Remote push validation
 
@@ -128,10 +128,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit all changes to the working branch and push to remote
 - [x] Open PR from `feature/campaign-notes-and-status` to `main`. PR body must include: `Closes #189`
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — poll for new comments autonomously; address them, commit fixes, follow all steps in [Remote push validation], push; wait 180 seconds then repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, follow all steps in [Remote push validation], push; wait 180 seconds then repeat until all required checks pass
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user — **never wait for a human to report the merge**; **never force-merge**
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Monitor PR comments** — poll for new comments autonomously; address them, commit fixes, follow all steps in [Remote push validation], push; wait 180 seconds then repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, follow all steps in [Remote push validation], push; wait 180 seconds then repeat until all required checks pass
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user — **never wait for a human to report the merge**; **never force-merge**
 
 Ownership metadata:
 
@@ -147,15 +147,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change
-- [ ] Sync approved spec deltas into `openspec/specs/`
-- [ ] Archive the change: move `openspec/changes/campaign-notes-and-status/` to `openspec/changes/archive/YYYY-MM-DD-campaign-notes-and-status/` **in a single atomic commit** — do not commit the copy and delete separately
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-notes-and-status/` exists and `openspec/changes/campaign-notes-and-status/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-campaign-notes-and-status` then `git push -u origin doc/archive-YYYY-MM-DD-campaign-notes-and-status`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-campaign-notes-and-status` to `main` with title `docs: archive campaign-notes-and-status (YYYY-MM-DD)`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change
+- [x] Sync approved spec deltas into `openspec/specs/`
+- [x] Archive the change: move `openspec/changes/campaign-notes-and-status/` to `openspec/changes/archive/2026-05-26-campaign-notes-and-status/` **in a single atomic commit** — do not commit the copy and delete separately
+- [x] Confirm `openspec/changes/archive/2026-05-26-campaign-notes-and-status/` exists and `openspec/changes/campaign-notes-and-status/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-05-26-campaign-notes-and-status` then `git push -u origin doc/archive-2026-05-26-campaign-notes-and-status`
+- [ ] Open a PR from `doc/archive-2026-05-26-campaign-notes-and-status` to `main` with title `docs: archive campaign-notes-and-status (2026-05-26)`
 - [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
 - [ ] Monitor the doc PR until it merges; address comments and CI failures, push to the same doc branch, repeat
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feature/campaign-notes-and-status doc/archive-YYYY-MM-DD-campaign-notes-and-status`
+- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feature/campaign-notes-and-status doc/archive-2026-05-26-campaign-notes-and-status`
