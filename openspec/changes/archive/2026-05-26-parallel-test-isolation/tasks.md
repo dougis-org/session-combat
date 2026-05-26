@@ -93,11 +93,11 @@ Files to migrate (excluding `dedupeEngine.integration.test.ts`):
 ## Validation
 
 - [x] `npm run typecheck` — no new type errors
-- [ ] `npm run test:integration` — all integration tests pass with shared server
-- [ ] Verify `[port-select]` line appears exactly once in integration test output
-- [ ] `npm run test:e2e` or `npx playwright test` — e2e suite passes with derived port
-- [ ] Run integration suite from two different shell sessions simultaneously (different directories if possible) — no EADDRINUSE errors
-- [ ] All completed tasks marked as complete
+- [x] `npm run test:integration` — all integration tests pass with shared server
+- [x] Verify `[port-select]` line appears exactly once in integration test output
+- [x] `npm run test:e2e` or `npx playwright test` — e2e suite passes with derived port
+- [x] Run integration suite from two different shell sessions simultaneously (different directories if possible) — no EADDRINUSE errors
+- [x] All completed tasks marked as complete
 
 ## Remote push validation
 
@@ -111,14 +111,14 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run before the final commit
-- [ ] Commit all changes to `feat/parallel-test-isolation` and push to remote
-- [ ] Open PR from `feat/parallel-test-isolation` to `main`. PR body must include `Closes #220`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll autonomously; address comments, commit fixes, validate locally, push, wait 180 seconds, repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, validate locally, push, wait 180 seconds, repeat
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify user
+- [x] Ensure the `openspec-review-code` sub-agent was run before the final commit
+- [x] Commit all changes to `feat/parallel-test-isolation` and push to remote
+- [x] Open PR from `feat/parallel-test-isolation` to `main`. PR body must include `Closes #220`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — poll autonomously; address comments, commit fixes, validate locally, push, wait 180 seconds, repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, validate locally, push, wait 180 seconds, repeat
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify user
 
 Ownership metadata:
 - Implementer: agent
@@ -132,9 +132,9 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
 - [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
 - [ ] Archive the change: move `openspec/changes/parallel-test-isolation/` to `openspec/changes/archive/YYYY-MM-DD-parallel-test-isolation/` **in a single commit** (stage both copy and deletion together)
 - [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-parallel-test-isolation/` exists and `openspec/changes/parallel-test-isolation/` is gone

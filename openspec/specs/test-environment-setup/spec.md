@@ -1,36 +1,66 @@
 ## Purpose
-Define reliable test environment setup expectations for E2E and integration test infrastructure.
+Define reliable test environment setup expectations for integration and E2E test infrastructure.
 
 ## Requirements
 
-### Requirement: Playwright E2E tests use the environment-provided MongoDB
-The Playwright test suite SHALL NOT start or manage its own MongoDB container. It SHALL rely on `MONGODB_URI` and `MONGODB_DB` environment variables being set before the test run (in CI: via job-level `env:` pointing to the Docker service; locally: via the developer's own MongoDB instance). The `global.setup.ts` file SHALL NOT start or manage MongoDB containers, but MAY perform environment validation and guard logic (for example, enforcing that `MONGODB_URI` is set and that `MONGODB_DB` uses a safe value). The `global.teardown.ts` file SHALL NOT manage MongoDB containers and MAY be removed if not otherwise needed. The `playwright.config.ts` SHALL remove the `globalSetup` and `globalTeardown` references if both files are removed.
+### Requirement: Integration tests use a shared globalSetup server
 
-#### Scenario: CI run uses Docker-service MongoDB
-- **WHEN** Playwright tests run in CI with `MONGODB_URI=mongodb://localhost:27017` set at the job level
-- **THEN** the Next.js dev server (started by `webServer`) connects to that MongoDB
-- **AND** the test helpers (e.g., `clearTestCollections`) connect to the same MongoDB
-- **AND** no additional MongoDB container is started by the test suite
+Integration tests SHALL use a single shared MongoDB container + Next.js process for the entire Jest run, started in `tests/integration/global.setup.ts` and torn down in `tests/integration/global.teardown.ts`. Individual test files SHALL NOT start their own MongoDB containers or Next.js processes.
 
-#### Scenario: Missing MONGODB_URI fails clearly
-- **WHEN** Playwright tests are run without `MONGODB_URI` set in the environment
-- **THEN** the test setup SHALL emit a clear error message explaining that `MONGODB_URI` must be set
-- **AND** the test run SHALL fail immediately rather than silently proceeding with an incorrect default
+#### Scenario: Single server for all integration tests
 
-#### Scenario: Local run uses developer's MongoDB
-- **WHEN** a developer runs `npm run test:regression` locally with `MONGODB_URI` pointing to their local MongoDB
-- **THEN** the test suite uses that connection without starting any additional container
+- **WHEN** `npm run test:integration` runs
+- **THEN** exactly one MongoDB container and one Next.js process are started (in `globalSetup`)
+- **AND** all test files share that server via `process.env.TEST_BASE_URL`
+- **AND** both are stopped in `globalTeardown`
 
-### Requirement: Integration tests share a server bootstrap utility
-Integration test files (`api.integration.test.ts`, `monsters.integration.test.ts`) SHALL import a shared `startTestServer` / `cleanup` helper from `tests/integration/helpers/server.ts` rather than each independently copying the MongoDB-container and Next.js spawn logic.
+#### Scenario: Shared database is clean at run start and end
 
-#### Scenario: Server helper starts a fresh stack per test file
-- **WHEN** a Jest integration test file calls `await startTestServer()` in `beforeAll`
-- **THEN** a MongoDB container is started and a Next.js process is spawned on an available port
-- **AND** the helper waits until the health endpoint responds before returning
-- **AND** the helper returns `{ baseUrl, cleanup }` so the test file can make requests and tear down cleanly
+- **WHEN** `globalSetup` starts
+- **THEN** the test database is dropped before any test file runs
+- **AND** `globalTeardown` drops the database again after all tests complete
 
-#### Scenario: Server helper cleans up on teardown
-- **WHEN** a Jest integration test file calls `await cleanup()` in `afterAll`
-- **THEN** the Next.js process is terminated and the MongoDB container is stopped
-- **AND** no orphaned processes or containers are left running after the test suite completes
+### Requirement: Port isolation via directory hash
+
+The integration test server SHALL derive its port from a djb2 hash of `process.cwd()` mapped to the range 20000–49999. If the derived port is occupied, the system SHALL probe up to 4 sequential offsets before failing.
+
+#### Scenario: Different directories use different ports
+
+- **GIVEN** two agents running in different working directories
+- **WHEN** each runs `getDirectoryPort()`
+- **THEN** the returned ports differ, eliminating cross-agent port collision
+
+#### Scenario: Port stays within range including offsets
+
+- **GIVEN** any working directory path
+- **WHEN** `getDirectoryPort()` is called
+- **THEN** the returned port is between 20000 and 49999 inclusive (base uses `hash % 29996` to leave room for up to 4 offsets)
+
+### Requirement: Parallel-safe user factory
+
+`tests/integration/helpers/users.ts` SHALL provide `createTestUser(baseUrl, prefix?)` that generates a unique email guaranteed collision-free across test files within the same run. The email format SHALL include worker ID and process PID to survive module-registry resets between files.
+
+#### Scenario: Emails are unique across test files
+
+- **GIVEN** two test files both call `createTestUser(baseUrl, 'user')`
+- **WHEN** Jest resets the module registry between files (counter resets to 0)
+- **THEN** the PID component ensures the two `user-w0-p<pid>-1@example.com` addresses differ across runs and use distinct DB records
+
+### Requirement: Playwright E2E tests inherit the derived port
+
+`playwright.config.ts` SHALL set `process.env.PORT` to the directory-derived port when `PORT` is not already set, ensuring both the `baseURL` and the `webServer` child process use the same port.
+
+#### Scenario: Local e2e run uses derived port
+
+- **WHEN** a developer runs `npx playwright test` without setting `PORT`
+- **THEN** `process.env.PORT` is set to `getDirectoryBasePort()` before the webServer spawns
+- **AND** `npm run dev` starts on that port and Playwright connects to it
+
+#### Scenario: CI e2e run respects explicit PORT
+
+- **WHEN** CI sets `PORT=3000` explicitly
+- **THEN** `playwright.config.ts` leaves `process.env.PORT` unchanged and uses 3000
+
+### Requirement: DnD Beyond mock server started in globalSetup
+
+The DnD Beyond character service mock SHALL be started in `globalSetup` so the Next.js process inherits `DND_BEYOND_CHARACTER_SERVICE_BASE_URL` at spawn time. Individual test files SHALL NOT start their own mock server instance for the character import tests.
