@@ -82,7 +82,7 @@ let root: Root;
 
 function makeContext(parties: typeof PARTY_ALICE_BOB[]) {
   return {
-    campaign: { id: 'camp-1', userId: 'u1', name: 'Test Campaign', moduleName: 'TCM', chapters: [], active: true, createdAt: new Date(), updatedAt: new Date() },
+    campaign: { id: 'camp-1', userId: 'u1', name: 'Test Campaign', moduleName: 'TCM', chapters: [], status: 'active', notes: '', createdAt: new Date(), updatedAt: new Date() },
     chapter: null,
     parties,
     allMembers: parties.flatMap(p => p.members),

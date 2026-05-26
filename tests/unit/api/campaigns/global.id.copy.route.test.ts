@@ -108,9 +108,11 @@ describe("POST /api/campaigns/global/[id]/copy — success", () => {
     expect((await res.json()).templateId).toBe(TEMPLATE_ID);
   });
 
-  it("creates campaign as inactive", async () => {
+  it("creates campaign with status planning", async () => {
     const res = await POST(makeRouteRequest(BASE_URL, "POST"), { params: PARAMS });
-    expect((await res.json()).active).toBe(false);
+    const data = await res.json();
+    expect(data.status).toBe("planning");
+    expect(data).not.toHaveProperty("active");
   });
 
   it("handles empty chapters — currentChapterId is absent", async () => {

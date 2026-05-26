@@ -7,7 +7,8 @@ interface CampaignResponse {
   name: string;
   moduleName: string;
   chapters: unknown[];
-  active: boolean;
+  status: string;
+  notes: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -108,7 +109,7 @@ describe("Campaign API Integration Tests", () => {
       body: JSON.stringify({
         name: "Curse of Strahd",
         moduleName: "Curse of Strahd",
-        active: true,
+        status: "planning",
       }),
     });
     expect(res.status).toBe(201);
@@ -117,14 +118,15 @@ describe("Campaign API Integration Tests", () => {
     expect(data.name).toBe("Curse of Strahd");
     expect(data.moduleName).toBe("Curse of Strahd");
     expect(data.chapters).toEqual([]);
-    expect(data.active).toBe(true);
+    expect(data.status).toBe("planning");
   });
 
   it("returns 201 with correct defaults when only name is provided", async () => {
     const data = await createCampaign("Minimal Campaign");
     expect(data.moduleName).toBe("");
     expect(data.chapters).toEqual([]);
-    expect(data.active).toBe(false);
+    expect(data.status).toBe("active");
+    expect(data.notes).toBe("");
   });
 
   // --- GET /api/campaigns/[id] ---
@@ -179,7 +181,7 @@ describe("Campaign API Integration Tests", () => {
     const data = await res.json() as CampaignResponse;
     expect(data.name).toBe("Updated Name");
     expect(data.moduleName).toBe(created.moduleName);
-    expect(data.active).toBe(created.active);
+    expect(data.status).toBe(created.status);
   });
 
   it("updates updatedAt on every PATCH", async () => {
@@ -189,27 +191,27 @@ describe("Campaign API Integration Tests", () => {
     const patchRes = await fetch(`${baseUrl}/api/campaigns/${created.id}`, {
       method: "PATCH",
       headers: authed(),
-      body: JSON.stringify({ active: true }),
+      body: JSON.stringify({ status: "active" }),
     });
     const patched = await patchRes.json() as CampaignResponse;
     expect(new Date(patched.updatedAt).getTime()).toBeGreaterThanOrEqual(new Date(created.updatedAt).getTime());
   });
 
-  it("allows two campaigns to both have active: true simultaneously", async () => {
+  it("allows two campaigns to both have status active simultaneously", async () => {
     const c1 = await (await fetch(`${baseUrl}/api/campaigns`, {
       method: "POST",
       headers: authed(),
-      body: JSON.stringify({ name: "Active Campaign 1", active: true }),
+      body: JSON.stringify({ name: "Active Campaign 1", status: "active" }),
     })).json() as CampaignResponse;
 
     const c2 = await (await fetch(`${baseUrl}/api/campaigns`, {
       method: "POST",
       headers: authed(),
-      body: JSON.stringify({ name: "Active Campaign 2", active: true }),
+      body: JSON.stringify({ name: "Active Campaign 2", status: "active" }),
     })).json() as CampaignResponse;
 
-    expect(c1.active).toBe(true);
-    expect(c2.active).toBe(true);
+    expect(c1.status).toBe("active");
+    expect(c2.status).toBe("active");
   });
 
   it("returns 404 when PATCHing a campaign that does not exist or belongs to another user", async () => {

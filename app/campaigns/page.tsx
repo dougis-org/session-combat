@@ -30,6 +30,26 @@ function ManagementChapterInfo({ campaign }: { campaign: Campaign }) {
   return null;
 }
 
+function statusBadgeClass(status: Campaign['status'] | undefined): string {
+  switch (status) {
+    case 'planning': return 'bg-slate-600';
+    case 'active': return 'bg-green-700';
+    case 'on-hold': return 'bg-yellow-600';
+    case 'completed': return 'bg-gray-600';
+    default: return 'bg-green-700';
+  }
+}
+
+function statusLabel(status: Campaign['status'] | undefined): string {
+  switch (status) {
+    case 'planning': return 'Planning';
+    case 'active': return 'Active';
+    case 'on-hold': return 'On Hold';
+    case 'completed': return 'Completed';
+    default: return 'Active';
+  }
+}
+
 export function CampaignsContent() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [parties, setParties] = useState<Party[]>([]);
@@ -80,11 +100,10 @@ export function CampaignsContent() {
 
   useEffect(() => {
     loadAll();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    const activeCampaigns = campaigns.filter(c => c.active);
+    const activeCampaigns = campaigns.filter(c => (c.status ?? 'active') === 'active');
     if (activeCampaigns.length === 0) return;
 
     const controller = new AbortController();
@@ -135,7 +154,8 @@ export function CampaignsContent() {
       name: '',
       moduleName: '',
       chapters: [],
-      active: false,
+      status: 'active',
+      notes: '',
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -181,7 +201,7 @@ export function CampaignsContent() {
     setEditingCampaign(null);
   };
 
-  const activeCampaigns = campaigns.filter(c => c.active);
+  const activeCampaigns = campaigns.filter(c => c.status === 'active');
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -198,7 +218,7 @@ export function CampaignsContent() {
           {activeCampaigns.length === 0 ? (
             <div className="bg-gray-800 rounded-lg p-6 text-center">
               <p className="text-gray-400 mb-2">
-                No active campaigns — mark one active or create a new one.
+                No active campaigns — set one to Active or create a new one.
               </p>
               <a href="#campaigns-list" className="text-blue-400 hover:text-blue-300 text-sm">
                 Go to campaign list ↓
@@ -214,7 +234,12 @@ export function CampaignsContent() {
                   <div key={campaign.id} className="bg-gray-800 rounded-lg p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="text-xl font-bold">{campaign.name}</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-xl font-bold">{campaign.name}</h3>
+                          <span className={`px-2 py-0.5 text-xs rounded text-white ${statusBadgeClass(campaign.status)}`}>
+                            {statusLabel(campaign.status)}
+                          </span>
+                        </div>
                         {campaign.moduleName && (
                           <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
                         )}
@@ -267,6 +292,21 @@ export function CampaignsContent() {
                         >
                           View all sessions →
                         </Link>
+                      </div>
+                    )}
+
+                    {campaign.notes?.trim() && (
+                      <div className="bg-gray-700 rounded p-3 mb-4" data-testid="dm-notes-snippet">
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">DM Notes</p>
+                        <p className="text-sm text-gray-200 whitespace-pre-line line-clamp-4">
+                          {campaign.notes.trim()}
+                        </p>
+                        <button
+                          onClick={() => { setEditingCampaign(campaign); setIsAdding(false); }}
+                          className="text-blue-400 text-xs hover:underline mt-1 inline-block"
+                        >
+                          Edit notes →
+                        </button>
                       </div>
                     )}
 
@@ -386,11 +426,9 @@ export function CampaignsContent() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h2 className="text-xl font-semibold">{campaign.name}</h2>
-                        {campaign.active && (
-                          <span className="bg-green-700 text-green-100 text-xs px-2 py-0.5 rounded">
-                            Active
-                          </span>
-                        )}
+                        <span className={`px-2 py-0.5 text-xs rounded text-white ${statusBadgeClass(campaign.status)}`}>
+                          {statusLabel(campaign.status)}
+                        </span>
                       </div>
                       {campaign.moduleName && (
                         <p className="text-gray-400 text-sm">{campaign.moduleName}</p>

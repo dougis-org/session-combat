@@ -24,7 +24,8 @@ const baseCampaign: Campaign = {
   name: "Test Campaign",
   moduleName: "Test Module",
   chapters: [],
-  active: true,
+  status: "active",
+  notes: "",
   createdAt: new Date("2024-01-01"),
   updatedAt: new Date("2024-01-01"),
 };
