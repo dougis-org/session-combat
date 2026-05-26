@@ -15,7 +15,7 @@
 
 ### 2. Update `playwright.config.ts`
 
-- [x] Replace `const testPort = process.env.PORT || "3000"` with `const testPort = process.env.PORT || String(getDirectoryBasePort())`
+- [x] Set `process.env.PORT` to `getDirectoryBasePort()` when not already set, so webServer child inherits the correct port
 - [x] Import `getDirectoryBasePort` from `tests/shared/port.ts`
 - [x] Verify: `npx ts-node -e "import('./playwright.config.ts')"` or just confirm TypeScript compiles
 
@@ -31,7 +31,7 @@
 - [x] Create `tests/integration/global.setup.ts`
 - [x] Start `MongoDBContainer("mongo:8").withExposedPorts(27017)` and store ref in `global.__MONGO_CONTAINER__`
 - [x] Connect to MongoDB and drop the test database entirely
-- [x] Call `getDirectoryBasePort()` for the port; emit `console.log(\`[port-select] cwd=${process.cwd()} port=${port}\`)`
+- [x] Call `getDirectoryPort()` (async, with port-free probing) for the port; emit `console.log(\`[port-select] cwd=${process.cwd()} port=${port}\`)`
 - [x] Spawn Next.js via `spawn("npx", ["next", "start"], { env: { ...process.env, PORT, HOSTNAME: "0.0.0.0", MONGODB_URI, MONGODB_DB: "session-combat-test" } })`; store PID in `global.__NEXT_PROCESS__`
 - [x] Wait for server ready on `/api/health`
 - [x] Set `process.env.TEST_BASE_URL = \`http://localhost:${port}\`` and `process.env.MONGODB_URI = mongoUri`

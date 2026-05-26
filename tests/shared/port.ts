@@ -5,7 +5,7 @@ function djb2Port(cwd: string): number {
   for (let i = 0; i < cwd.length; i++) {
     hash = ((hash << 5) + hash + cwd.charCodeAt(i)) >>> 0;
   }
-  return 20000 + (hash % 30000);
+  return 20000 + (hash % 29996);
 }
 
 function isPortFree(port: number): Promise<boolean> {

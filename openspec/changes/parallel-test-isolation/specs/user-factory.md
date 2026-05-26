@@ -14,19 +14,19 @@ The system SHALL provide a `createTestUser(baseUrl, prefix?)` function in `tests
 
 - **Given** worker 1 and worker 2 both call `createTestUser(baseUrl, 'user')`
 - **When** both registrations are sent to the shared server
-- **Then** the emails differ (`user-w1-1@example.com` vs `user-w2-1@example.com`) and both succeed
+- **Then** the emails differ (`user-w1-p<pid>-1@example.com` vs `user-w2-p<pid>-1@example.com`) and both succeed
 
 #### Scenario: Unique email format is deterministic and debuggable
 
-- **Given** `JEST_WORKER_ID=2` and the factory counter is at 3
+- **Given** `JEST_WORKER_ID=2`, `process.pid=12345`, and the factory counter is at 3
 - **When** `uniqueEmail('campaign')` is called
-- **Then** the returned email is `campaign-w2-3@example.com`
+- **Then** the returned email is `campaign-w2-p12345-3@example.com`
 
 #### Scenario: Factory works when JEST_WORKER_ID is absent
 
 - **Given** `process.env.JEST_WORKER_ID` is not set (e.g., running outside Jest)
 - **When** `uniqueEmail('user')` is called
-- **Then** the returned email uses worker id `'0'` (e.g., `user-w0-1@example.com`) and does not throw
+- **Then** the returned email uses worker id `'0'` (e.g., `user-w0-p<pid>-1@example.com`) and does not throw
 
 ### Requirement: ADDED Factory supports multiple users per test file
 
