@@ -4,7 +4,7 @@ This document details *changes* to requirements and is additive to the `design.m
 
 ### Requirement: MODIFIED `login.test.ts` uses `registerTestUser` for setup
 
-The system SHALL have `login.test.ts` import `registerTestUser` from `helpers/users.ts` for user setup, and SHALL NOT import `registerUser` or `createTestEmail` from `auth.test.helpers.ts` (it may still import `loginUser`, assertion helpers, and constants).
+The system SHALL have `login.test.ts` import `registerTestUser` from `helpers/users.ts` for user setup, and SHALL NOT import `registerUser` from `auth.test.helpers.ts`. It MAY still import `createTestEmail` for the non-existent-user test case (which generates an email without registering), as well as `loginUser`, assertion helpers, and constants.
 
 #### Scenario: Login test happy path still passes
 
@@ -12,11 +12,11 @@ The system SHALL have `login.test.ts` import `registerTestUser` from `helpers/us
 - **When** the integration suite runs
 - **Then** all login tests pass and the setup user is successfully registered before each test
 
-#### Scenario: `login.test.ts` has no `registerUser` or `createTestEmail` imports from auth helpers
+#### Scenario: `login.test.ts` has no `registerUser` import from auth helpers
 
 - **Given** the migrated `login.test.ts`
-- **When** `grep "registerUser\|createTestEmail" tests/integration/api/auth/login.test.ts` is run
-- **Then** zero matches
+- **When** `grep "registerUser" tests/integration/api/auth/login.test.ts` is run
+- **Then** zero matches (note: `createTestEmail` remains for the non-existent user test)
 
 ### Requirement: MODIFIED `register.test.ts` retains `registerUser` as test subject
 
