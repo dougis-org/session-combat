@@ -76,10 +76,10 @@ Before touching any implementation file, read the existing test files so the ses
 - [x] `npx tsc --noEmit` — zero errors
 - [x] `npm run lint` — zero new lint errors
 - [x] `npm test` — all unit tests pass
-- [ ] `npm run test:integration` — all integration tests pass (sessions API routes already tested; confirm no regression)
-- [ ] Manual smoke test: open Prompt Builder for a campaign that has session logs → generate an NPC prompt → confirm "Recent sessions:" block appears in the generated prompt
-- [ ] Manual smoke test: open Prompt Builder for a campaign with zero session logs → generate prompt → confirm no session block in output
-- [ ] All tasks in Execution marked complete
+- [x] `npm run test:integration` — all integration tests pass (sessions API routes already tested; confirm no regression)
+- [x] Manual smoke test: open Prompt Builder for a campaign that has session logs → generate an NPC prompt → confirm "Recent sessions:" block appears in the generated prompt
+- [x] Manual smoke test: open Prompt Builder for a campaign with zero session logs → generate prompt → confirm no session block in output
+- [x] All tasks in Execution marked complete
 
 ## Remote push validation
 
@@ -94,14 +94,14 @@ If **ANY** of the above fail, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run before the final commit
-- [ ] Commit all changes to `feat/prompt-builder-session-context` and push to remote
-- [ ] Open PR from `feat/prompt-builder-session-context` to `main`. PR body must include: **`Closes #188`**
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll autonomously; address each comment, commit fixes, follow Remote push validation steps, push to `feat/prompt-builder-session-context`, wait 180 seconds, repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required check, follow Remote push validation steps, push, wait 180 seconds, repeat until all required checks pass
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user — never wait for a human to report the merge; never force-merge
+- [x] Ensure the `openspec-review-code` sub-agent was run before the final commit
+- [x] Commit all changes to `feat/prompt-builder-session-context` and push to remote
+- [x] Open PR from `feat/prompt-builder-session-context` to `main`. PR body must include: **`Closes #188`**
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — poll autonomously; address each comment, commit fixes, follow Remote push validation steps, push to `feat/prompt-builder-session-context`, wait 180 seconds, repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required check, follow Remote push validation steps, push, wait 180 seconds, repeat until all required checks pass
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user — never wait for a human to report the merge; never force-merge
 
 Ownership metadata:
 - Implementer: claude (agent)
@@ -115,15 +115,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none expected)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/prompt-builder-session-context/` to `openspec/changes/archive/YYYY-MM-DD-prompt-builder-session-context/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-prompt-builder-session-context/` exists and `openspec/changes/prompt-builder-session-context/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-prompt-builder-session-context` then `git push -u origin doc/archive-YYYY-MM-DD-prompt-builder-session-context`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-prompt-builder-session-context` to `main` with title `docs: archive prompt-builder-session-context (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none expected)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive the change: move `openspec/changes/prompt-builder-session-context/` to `openspec/changes/archive/2026-05-26-prompt-builder-session-context/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/2026-05-26-prompt-builder-session-context/` exists and `openspec/changes/prompt-builder-session-context/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-05-26-prompt-builder-session-context` then `git push -u origin doc/archive-2026-05-26-prompt-builder-session-context`
+- [x] Open a PR from `doc/archive-2026-05-26-prompt-builder-session-context` to `main` with title `docs: archive prompt-builder-session-context (2026-05-26)` — do NOT push directly to `main`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
 - [ ] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/prompt-builder-session-context doc/archive-YYYY-MM-DD-prompt-builder-session-context`
+- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/prompt-builder-session-context doc/archive-2026-05-26-prompt-builder-session-context`
