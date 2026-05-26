@@ -1,5 +1,4 @@
 import {
-  afterAll,
   beforeAll,
   beforeEach,
   describe,
@@ -7,37 +6,23 @@ import {
   test,
 } from "@jest/globals";
 import fetch from "node-fetch";
-import {
-  startTestServer,
-  registerAndGetCookie,
-  TestServer,
-} from "../helpers/server";
+import { createTestUser } from "../helpers/users";
 import {
   DND_BEYOND_CHARACTER_NAME,
   DND_BEYOND_CHARACTER_URL,
 } from "@/tests/helpers/dndBeyondImport";
-import { createDndBeyondMockServer } from "@/tests/mocks/dndBeyond/server";
 
 describe("Character import API integration", () => {
-  let server: TestServer;
   let baseUrl: string;
   let cookie: string;
-  const mockServer = createDndBeyondMockServer();
 
   beforeAll(async () => {
-    await mockServer.setup();
-    server = await startTestServer();
-    baseUrl = server.baseUrl;
-  }, 120000);
-
-  afterAll(async () => {
-    await server.cleanup();
-    await mockServer.teardown();
+    baseUrl = process.env.TEST_BASE_URL!;
+    if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
   }, 30000);
 
   beforeEach(async () => {
-    const email = `import-${Date.now()}-${Math.random()}@example.com`;
-    cookie = await registerAndGetCookie(baseUrl, email, "testPassword123!");
+    cookie = (await createTestUser(baseUrl, "import")).cookie;
   });
 
   test("imports a public D&D Beyond character for an authenticated user", async () => {

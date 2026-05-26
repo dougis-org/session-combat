@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { startTestServer, registerAndGetCookie, TestServer } from "./helpers/server";
+import { createTestUser } from "./helpers/users";
 
 interface CampaignResponse {
   id: string;
@@ -22,24 +22,16 @@ const CHAPTER_PAIR = [
 ];
 
 describe("Campaign API Integration Tests", () => {
-  let server: TestServer;
   let baseUrl: string;
   let authCookie: string;
   let authCookie2: string;
 
   beforeAll(async () => {
-    server = await startTestServer();
-    baseUrl = server.baseUrl;
+    baseUrl = process.env.TEST_BASE_URL!;
+    if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
 
-    const email1 = `campaign-test-${Date.now()}@example.com`;
-    authCookie = await registerAndGetCookie(baseUrl, email1, "testPassword123!");
-
-    const email2 = `campaign-user2-${Date.now()}@example.com`;
-    authCookie2 = await registerAndGetCookie(baseUrl, email2, "testPassword123!");
-  }, 120000);
-
-  afterAll(async () => {
-    await server.cleanup();
+    authCookie = (await createTestUser(baseUrl, "campaign-test")).cookie;
+    authCookie2 = (await createTestUser(baseUrl, "campaign-user2")).cookie;
   }, 30000);
 
   function authed(cookie = authCookie) {

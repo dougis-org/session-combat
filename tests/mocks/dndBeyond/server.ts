@@ -1,5 +1,30 @@
 import { createServer, Server } from "http";
-import { sampleDndBeyondCharacterResponse } from "@/tests/fixtures/dndBeyondCharacter";
+import { sampleDndBeyondCharacterResponse } from "../../fixtures/dndBeyondCharacter";
+
+export function createDndBeyondHttpServer(): Server {
+  return createServer((request, response) => {
+    if (request.url?.startsWith("/character/v5/character/91913267")) {
+      response.writeHead(200, { "Content-Type": "application/json" });
+      response.end(JSON.stringify(sampleDndBeyondCharacterResponse));
+      return;
+    }
+
+    if (request.url?.startsWith("/character/v5/character/500")) {
+      response.writeHead(500, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "Upstream failed" }));
+      return;
+    }
+
+    response.writeHead(404, { "Content-Type": "application/json" });
+    response.end(JSON.stringify({ error: "Not found" }));
+  });
+}
+
+export async function startDndBeyondMockServer(): Promise<{ server: Server; baseUrl: string }> {
+  const server = createDndBeyondHttpServer();
+  const port = await listen(server);
+  return { server, baseUrl: `http://127.0.0.1:${port}/character/v5` };
+}
 
 function listen(server: Server): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -29,22 +54,7 @@ export function createDndBeyondMockServer(): {
       originalAllowInsecureCharacterServiceBaseUrl =
         process.env.ALLOW_INSECURE_DND_BEYOND_CHARACTER_SERVICE_BASE_URL;
 
-      server = createServer((request, response) => {
-        if (request.url?.startsWith("/character/v5/character/91913267")) {
-          response.writeHead(200, { "Content-Type": "application/json" });
-          response.end(JSON.stringify(sampleDndBeyondCharacterResponse));
-          return;
-        }
-
-        if (request.url?.startsWith("/character/v5/character/500")) {
-          response.writeHead(500, { "Content-Type": "application/json" });
-          response.end(JSON.stringify({ error: "Upstream failed" }));
-          return;
-        }
-
-        response.writeHead(404, { "Content-Type": "application/json" });
-        response.end(JSON.stringify({ error: "Not found" }));
-      });
+      server = createDndBeyondHttpServer();
 
       const port = await listen(server);
       process.env.DND_BEYOND_CHARACTER_SERVICE_BASE_URL = `http://127.0.0.1:${port}/character/v5`;

@@ -1,8 +1,4 @@
 import {
-  startTestServer,
-  TestServer,
-} from "@/tests/integration/helpers/server";
-import {
   createTestEmail,
   createTestUser,
   registerUser,
@@ -19,17 +15,12 @@ import {
  * Consolidated test patterns to minimize duplication
  */
 describe("POST /api/auth/register - Integration Tests", () => {
-  let server: TestServer;
   let baseUrl: string;
 
-  beforeAll(async () => {
-    server = await startTestServer();
-    baseUrl = server.baseUrl;
-  }, 120000);
-
-  afterAll(async () => {
-    await server.cleanup();
-  }, 30000);
+  beforeAll(() => {
+    baseUrl = process.env.TEST_BASE_URL!;
+    if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
+  });
 
   it("should register new user with valid email and password", async () => {
     const email = createTestEmail("newuser");

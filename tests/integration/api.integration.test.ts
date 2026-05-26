@@ -1,18 +1,13 @@
 import fetch from "node-fetch";
-import { startTestServer, registerAndGetCookie, TestServer } from "./helpers/server";
+import { createTestUser } from "./helpers/users";
 
 describe("API Integration Tests", () => {
-  let server: TestServer;
   let baseUrl: string;
 
-  beforeAll(async () => {
-    server = await startTestServer();
-    baseUrl = server.baseUrl;
-  }, 120000);
-
-  afterAll(async () => {
-    await server.cleanup();
-  }, 30000);
+  beforeAll(() => {
+    baseUrl = process.env.TEST_BASE_URL!;
+    if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
+  });
 
   it("should return healthy status from health endpoint", async () => {
     const response = await fetch(`${baseUrl}/api/health`);
@@ -37,8 +32,7 @@ describe("API Integration Tests", () => {
   });
 
   it("should allow authenticated access to protected endpoints after registration", async () => {
-    const email = `auth-test-${Date.now()}@example.com`;
-    const cookie = await registerAndGetCookie(baseUrl, email, "testPassword123!");
+    const { cookie } = await createTestUser(baseUrl, "auth-test");
 
     const response = await fetch(`${baseUrl}/api/characters`, {
       headers: { Cookie: cookie },
@@ -47,8 +41,7 @@ describe("API Integration Tests", () => {
   });
 
   it("should return empty parties list for a new user", async () => {
-    const email = `parties-test-${Date.now()}@example.com`;
-    const cookie = await registerAndGetCookie(baseUrl, email, "testPassword123!");
+    const { cookie } = await createTestUser(baseUrl, "parties-test");
 
     const response = await fetch(`${baseUrl}/api/parties`, {
       headers: { Cookie: cookie },
@@ -60,8 +53,7 @@ describe("API Integration Tests", () => {
   });
 
   it("should allow creating a party with characterIds and return it in subsequent GET", async () => {
-    const email = `parties-crud-${Date.now()}@example.com`;
-    const cookie = await registerAndGetCookie(baseUrl, email, "testPassword123!");
+    const { cookie } = await createTestUser(baseUrl, "parties-crud");
 
     const createResponse = await fetch(`${baseUrl}/api/parties`, {
       method: "POST",

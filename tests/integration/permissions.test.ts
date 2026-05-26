@@ -1,39 +1,30 @@
 import { MongoClient, ObjectId } from "mongodb";
-import { startTestServer, registerAndGetCookie, TestServer } from "./helpers/server";
+import { createTestUser } from "./helpers/users";
 
 describe("isUserAdmin Integration Tests", () => {
-  let server: TestServer;
   let baseUrl: string;
   let mongoClient: MongoClient;
   let isUserAdmin: (userId: string) => Promise<boolean | null>;
 
   beforeAll(async () => {
-    server = await startTestServer();
-    baseUrl = server.baseUrl;
+    baseUrl = process.env.TEST_BASE_URL!;
+    if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
 
-    // Must follow startTestServer() so MONGODB_URI is set before the module-level constant runs
     jest.resetModules();
     const mod = await import("@/lib/permissions");
     isUserAdmin = mod.isUserAdmin;
 
     mongoClient = new MongoClient(process.env.MONGODB_URI!);
     await mongoClient.connect();
-  }, 120000);
+  }, 30000);
 
   afterAll(async () => {
     await mongoClient.close();
-    await server.cleanup();
   }, 30000);
 
   async function registerUser(emailSuffix: string): Promise<{ userId: string }> {
-    const email = `permissions-test-${emailSuffix}-${Date.now()}@example.com`;
-    await registerAndGetCookie(baseUrl, email, "TestPassword123!");
-
-    const db = mongoClient.db(process.env.MONGODB_DB);
-    const user = await db.collection("users").findOne({ email });
-    if (!user) throw new Error(`User not found after registration: ${email}`);
-
-    return { userId: user._id.toString() };
+    const { userId } = await createTestUser(baseUrl, `permissions-${emailSuffix}`);
+    return { userId };
   }
 
   it("returns true for admin user", async () => {

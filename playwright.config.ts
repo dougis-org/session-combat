@@ -1,11 +1,12 @@
 import path from "path";
 import { defineConfig, devices } from "@playwright/test";
 import { defineCoverageReporterConfig } from "@bgotink/playwright-coverage";
+import { getDirectoryBasePort } from "./tests/shared/port";
 
 const e2eDbName = process.env.MONGODB_DB || "session-combat-e2e";
 process.env.MONGODB_DB = e2eDbName;
 
-const testPort = process.env.PORT || "3000";
+const testPort = process.env.PORT || String(getDirectoryBasePort());
 
 /**
  * See https://playwright.dev/docs/test-configuration.

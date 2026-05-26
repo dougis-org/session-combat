@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
-import { startTestServer, registerAndGetCookie, makeAuthedHeaders, TestServer } from "../helpers/server";
+import { makeAuthedHeaders } from "../helpers/server";
+import { createTestUser } from "../helpers/users";
 
 interface SessionLogResponse {
   id: string;
@@ -17,21 +18,17 @@ interface SessionLogResponse {
 }
 
 describe("Session Log API Integration Tests", () => {
-  let server: TestServer;
   let baseUrl: string;
   let authCookie: string;
   let authCookie2: string;
   let campaignId: string;
 
   beforeAll(async () => {
-    server = await startTestServer();
-    baseUrl = server.baseUrl;
+    baseUrl = process.env.TEST_BASE_URL!;
+    if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
 
-    const email1 = `sessions-user1-${Date.now()}@example.com`;
-    authCookie = await registerAndGetCookie(baseUrl, email1, "TestPassword123!");
-
-    const email2 = `sessions-user2-${Date.now()}@example.com`;
-    authCookie2 = await registerAndGetCookie(baseUrl, email2, "TestPassword123!");
+    authCookie = (await createTestUser(baseUrl, "sessions-user1")).cookie;
+    authCookie2 = (await createTestUser(baseUrl, "sessions-user2")).cookie;
 
     // Create a campaign for user1
     const campRes = await fetch(`${baseUrl}/api/campaigns`, {
@@ -41,10 +38,6 @@ describe("Session Log API Integration Tests", () => {
     });
     const camp = await campRes.json() as { id: string };
     campaignId = camp.id;
-  }, 120000);
-
-  afterAll(async () => {
-    await server.cleanup();
   }, 30000);
 
   const authed = (cookie = authCookie) => makeAuthedHeaders(cookie);

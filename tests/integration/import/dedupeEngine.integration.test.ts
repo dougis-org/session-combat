@@ -1,3 +1,11 @@
+/**
+ * EXCLUDED FROM SHARED SERVER MIGRATION (see issue #224).
+ *
+ * This file manages its own MongoDBContainer and imports library code directly
+ * without going through HTTP. It uses deleteMany({}) in beforeEach, which is
+ * incompatible with the shared database contract used by all other integration
+ * tests. Do not migrate this file to the global shared server setup.
+ */
 import { MongoDBContainer, StartedMongoDBContainer } from "@testcontainers/mongodb";
 import { createMockClient, createTestCreature, createTestSpell } from "@/tests/helpers/importTestHelpers";
 import type { IOpen5EClient } from "@/lib/import/open5eAdapter";
