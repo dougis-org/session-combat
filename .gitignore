@@ -76,3 +76,4 @@ regression-test-output.txt
 .github\instructions\codacy.instructions.md
 
 .wolf/
+.claude/scheduled_tasks.lock
