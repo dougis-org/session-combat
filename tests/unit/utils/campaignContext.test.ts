@@ -1,5 +1,6 @@
 import { describe, test, expect, jest, beforeEach } from '@jest/globals';
 import { CampaignContext } from '@/lib/types';
+import { makeSession } from '../fixtures/sessions';
 
 const makeCampaign = (overrides = {}) => ({
   id: 'camp-1',
@@ -45,19 +46,24 @@ const makeCharacter = (id: string, name: string, overrides = {}) => ({
 
 const makeMember = (characterId: string) => ({ characterId, addedAt: new Date() });
 
-function makeFetch(campaign: object, parties: object[], characters: object[]) {
+function routeFetch(url: RequestInfo | URL, campaign: object, parties: object[], characters: object[], sessions: object[]): Response {
+  const s = String(url);
+  if (s.includes('/sessions')) return { ok: true, json: async () => sessions } as unknown as Response;
+  if (s.includes('/api/campaigns/') && !s.includes('parties')) return { ok: true, json: async () => campaign } as unknown as Response;
+  if (s.includes('/api/parties')) return { ok: true, json: async () => parties } as unknown as Response;
+  if (s.includes('/api/characters')) return { ok: true, json: async () => characters } as unknown as Response;
+  return { ok: false, json: async () => ({}) } as unknown as Response;
+}
+
+function makeFetch(campaign: object, parties: object[], characters: object[], sessions: object[] = []) {
+  return jest.fn(async (url: RequestInfo | URL) => routeFetch(url, campaign, parties, characters, sessions));
+}
+
+function makeFetchWithSessionOverride(campaign: object, sessionHandler: (url: string) => Promise<Response>) {
   return jest.fn(async (url: RequestInfo | URL) => {
     const s = String(url);
-    if (s.includes('/api/campaigns/camp-1') && !s.includes('parties')) {
-      return { ok: true, json: async () => campaign } as unknown as Response;
-    }
-    if (s.includes('/api/parties')) {
-      return { ok: true, json: async () => parties } as unknown as Response;
-    }
-    if (s.includes('/api/characters')) {
-      return { ok: true, json: async () => characters } as unknown as Response;
-    }
-    return { ok: false, json: async () => ({}) } as unknown as Response;
+    if (s.includes('/sessions')) return sessionHandler(s);
+    return routeFetch(url, campaign, [], [], []);
   }) as typeof fetch;
 }
 
@@ -163,7 +169,7 @@ describe('fetchCampaignContext', () => {
     expect(ctx.characters[0].id).toBe('c-1');
   });
 
-  test('A2-8: all three fetches initiated in parallel via Promise.all', async () => {
+  test('A2-8: all four fetches initiated in parallel via Promise.all', async () => {
     const campaign = makeCampaign();
     const started: string[] = [];
     const resolvers: Record<string, (r: Response) => void> = {};
@@ -171,7 +177,10 @@ describe('fetchCampaignContext', () => {
     const parallelFetch = jest.fn((url: RequestInfo | URL) => {
       const s = String(url);
       return new Promise<Response>(resolve => {
-        if (s.includes('/api/campaigns/')) {
+        if (s.includes('/sessions')) {
+          started.push('sessions');
+          resolvers.sessions = resolve;
+        } else if (s.includes('/api/campaigns/')) {
           started.push('campaign');
           resolvers.campaign = resolve;
         } else if (s.includes('/api/parties')) {
@@ -186,23 +195,74 @@ describe('fetchCampaignContext', () => {
 
     const fetchPromise = fetchCampaignContext('camp-1', parallelFetch);
 
-    // Yield to the microtask queue so Promise.all registers all three fetches
+    // Yield to the microtask queue so Promise.all registers all four fetches
     await Promise.resolve();
     await Promise.resolve();
 
-    // All three must have been started before any resolved
+    // All four must have been started before any resolved
     expect(started).toContain('campaign');
     expect(started).toContain('parties');
     expect(started).toContain('characters');
+    expect(started).toContain('sessions');
 
-    // Now resolve all three
+    // Now resolve all four
     const ok = (data: unknown) => ({ ok: true, json: async () => data } as unknown as Response);
     resolvers.campaign(ok(campaign));
     resolvers.parties(ok([]));
     resolvers.characters(ok([]));
+    resolvers.sessions(ok([]));
 
     await fetchPromise;
-    expect(parallelFetch).toHaveBeenCalledTimes(3);
+    expect(parallelFetch).toHaveBeenCalledTimes(4);
+  });
+
+  test('TC-3-1: sessions URL includes ?limit=3', async () => {
+    const campaign = makeCampaign();
+    const fetchMock = makeFetch(campaign, [], []);
+    await fetchCampaignContext('camp-1', fetchMock as typeof fetch);
+    const urls = fetchMock.mock.calls.map(([u]) => String(u));
+    expect(urls).toContain('/api/campaigns/camp-1/sessions?limit=3');
+  });
+
+  test('TC-3-2: sessions fetch returns data — included in context', async () => {
+    const campaign = makeCampaign();
+    const sessions = [makeSession({ sessionNumber: 5 }), makeSession({ sessionNumber: 4 })];
+    const ctx = await fetchCampaignContext('camp-1', makeFetch(campaign, [], [], sessions));
+    expect(ctx.recentSessions).toHaveLength(2);
+    expect(ctx.recentSessions![0].sessionNumber).toBe(5);
+  });
+
+  test('TC-3-3: zero sessions returns empty array', async () => {
+    const campaign = makeCampaign();
+    const ctx = await fetchCampaignContext('camp-1', makeFetch(campaign, [], [], []));
+    expect(ctx.recentSessions).toEqual([]);
+  });
+
+  test('TC-3-4: sessions fetch 500 — resolves with empty recentSessions, does not throw', async () => {
+    const ctx = await fetchCampaignContext(
+      'camp-1',
+      makeFetchWithSessionOverride(makeCampaign(), async () => ({ ok: false, status: 500 } as unknown as Response)),
+    );
+    expect(ctx.recentSessions).toEqual([]);
+  });
+
+  test('TC-3-5: sessions fetch network error — resolves with empty recentSessions, does not throw', async () => {
+    const ctx = await fetchCampaignContext(
+      'camp-1',
+      makeFetchWithSessionOverride(makeCampaign(), async () => { throw new Error('Network error'); }),
+    );
+    expect(ctx.recentSessions).toEqual([]);
+  });
+
+  test('TC-3-6: sessions fetch returns malformed JSON — resolves with empty recentSessions, does not throw', async () => {
+    const ctx = await fetchCampaignContext(
+      'camp-1',
+      makeFetchWithSessionOverride(makeCampaign(), async () => ({
+        ok: true,
+        json: async () => { throw new SyntaxError('Unexpected token'); },
+      } as unknown as Response)),
+    );
+    expect(ctx.recentSessions).toEqual([]);
   });
 
   test('A2-9: non-OK response rejects with error', async () => {
