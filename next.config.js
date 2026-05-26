@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 /* global module, process */
 const nextConfig = {
+  turbopack: {
+    root: __dirname,
+  },
   productionBrowserSourceMaps: process.env.GENERATE_SOURCE_MAPS === "true",
   async redirects() {
     return [
