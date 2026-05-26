@@ -22,7 +22,7 @@ function formatCharacter(c: Character): string {
 }
 
 function formatSessionEntry(session: SessionLog): string {
-  const date = new Date(session.datePlayed).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const date = new Date(session.datePlayed).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
   const title = session.title || 'Untitled Session';
   let suffix = '';
   if (session.milestone) {

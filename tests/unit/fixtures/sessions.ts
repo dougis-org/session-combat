@@ -6,7 +6,7 @@ export const makeSession = (overrides: Partial<SessionLog> = {}): SessionLog => 
   campaignId: 'camp-1',
   sessionNumber: 11,
   title: 'The Betrayer Revealed',
-  datePlayed: new Date(2026, 4, 14),
+  datePlayed: new Date('2026-05-14T12:00:00Z'),
   summary: '',
   events: [],
   milestone: false,

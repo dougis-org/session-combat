@@ -111,6 +111,11 @@ describe('buildSystemPrompt', () => {
     expect(result).toContain('Untitled Session');
   });
 
+  test('TC-4-9: datePlayed as ISO string (runtime JSON shape) renders correct date', () => {
+    const result = buildSystemPrompt(makeContext({ recentSessions: [makeSession({ datePlayed: '2026-05-14' as unknown as Date })] }));
+    expect(result).toContain('May 14, 2026');
+  });
+
   test('TC-4-8: multiple sessions render in array order', () => {
     const sessions = [makeSession({ sessionNumber: 12, title: 'S12' }), makeSession({ sessionNumber: 11, title: 'S11' }), makeSession({ sessionNumber: 10, title: 'S10' })];
     const result = buildSystemPrompt(makeContext({ recentSessions: sessions }));

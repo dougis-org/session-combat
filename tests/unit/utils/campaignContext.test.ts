@@ -254,6 +254,17 @@ describe('fetchCampaignContext', () => {
     expect(ctx.recentSessions).toEqual([]);
   });
 
+  test('TC-3-6: sessions fetch returns malformed JSON — resolves with empty recentSessions, does not throw', async () => {
+    const ctx = await fetchCampaignContext(
+      'camp-1',
+      makeFetchWithSessionOverride(makeCampaign(), async () => ({
+        ok: true,
+        json: async () => { throw new SyntaxError('Unexpected token'); },
+      } as unknown as Response)),
+    );
+    expect(ctx.recentSessions).toEqual([]);
+  });
+
   test('A2-9: non-OK response rejects with error', async () => {
     const errorFetch = jest.fn(async (url: RequestInfo | URL) => {
       const s = String(url);

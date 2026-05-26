@@ -50,7 +50,8 @@ export async function fetchCampaignContext(
   let recentSessions: SessionLog[] = [];
   try {
     if (sessionsRes?.ok) {
-      recentSessions = await sessionsRes.json() as SessionLog[];
+      const data = await sessionsRes.json();
+      recentSessions = Array.isArray(data) ? data as SessionLog[] : [];
     } else if (sessionsRes) {
       console.error('Sessions fetch failed with status:', sessionsRes.status);
     }
