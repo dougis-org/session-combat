@@ -157,5 +157,5 @@ Blocking resolution flow:
 - [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-05-26-campaign-notes-and-status` then `git push -u origin doc/archive-2026-05-26-campaign-notes-and-status`
 - [x] Open a PR from `doc/archive-2026-05-26-campaign-notes-and-status` to `main` with title `docs: archive campaign-notes-and-status (2026-05-26)`
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges; address comments and CI failures, push to the same doc branch, repeat
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feature/campaign-notes-and-status doc/archive-2026-05-26-campaign-notes-and-status`
+- [x] Monitor the doc PR until it merges; address comments and CI failures, push to the same doc branch, repeat
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feature/campaign-notes-and-status doc/archive-2026-05-26-campaign-notes-and-status`
