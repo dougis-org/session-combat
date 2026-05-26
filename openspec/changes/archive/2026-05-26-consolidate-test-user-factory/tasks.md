@@ -121,5 +121,5 @@ Blocking resolution flow:
 - [x] **Create a doc branch**: `git checkout -b doc/archive-2026-05-26-consolidate-test-user-factory` then `git push -u origin doc/archive-2026-05-26-consolidate-test-user-factory`
 - [x] Open a PR from the doc branch to `main` with title `docs: archive consolidate-test-user-factory (2026-05-26)`
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d refactor/consolidate-test-user-factory doc/archive-2026-05-26-consolidate-test-user-factory`
+- [x] Monitor the doc PR until it merges
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d refactor/consolidate-test-user-factory doc/archive-2026-05-26-consolidate-test-user-factory`
