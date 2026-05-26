@@ -196,7 +196,7 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
   const [includeNotes, setIncludeNotes] = useState(false);
 
   const activeTemplate = TEMPLATES.find(t => t.id === activeTemplateId) ?? TEMPLATES[0];
-  const hasNotes = Boolean(context?.campaign.notes.trim());
+  const hasNotes = Boolean(context?.campaign?.notes?.trim());
 
   function selectTemplate(template: PromptTemplate) {
     setActiveTemplateId(template.id);
