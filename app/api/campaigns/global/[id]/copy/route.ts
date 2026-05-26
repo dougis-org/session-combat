@@ -25,7 +25,8 @@ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id
       chapters: copiedChapters,
       currentChapterId: copiedChapters.length > 0 ? copiedChapters[0].id : undefined,
       templateId: template.id,
-      active: false,
+      status: 'planning',
+      notes: '',
       createdAt: new Date(),
       updatedAt: new Date(),
     };

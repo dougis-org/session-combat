@@ -63,7 +63,7 @@ const makeContext = (): CampaignContext => ({
   campaign: {
     id: 'camp-1', userId: 'u1', name: 'Curse of Strahd', moduleName: 'CoS',
     chapters: [{ id: 'ch-2', title: 'Act II', order: 2 }],
-    currentChapterId: 'ch-2', active: true,
+    currentChapterId: 'ch-2', status: 'active', notes: '',
     createdAt: new Date(), updatedAt: new Date(),
   },
   chapter: { id: 'ch-2', title: 'Act II', order: 2 },

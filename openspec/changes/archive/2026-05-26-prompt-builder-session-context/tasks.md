@@ -125,5 +125,5 @@ Blocking resolution flow:
 - [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-05-26-prompt-builder-session-context` then `git push -u origin doc/archive-2026-05-26-prompt-builder-session-context`
 - [x] Open a PR from `doc/archive-2026-05-26-prompt-builder-session-context` to `main` with title `docs: archive prompt-builder-session-context (2026-05-26)` — do NOT push directly to `main`
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/prompt-builder-session-context doc/archive-2026-05-26-prompt-builder-session-context`
+- [x] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to the same doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/prompt-builder-session-context doc/archive-2026-05-26-prompt-builder-session-context`

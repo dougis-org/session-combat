@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Campaign } from '@/lib/types';
+import { Campaign, CAMPAIGN_STATUSES } from '@/lib/types';
 import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
 
 type Params = { id: string };
@@ -30,11 +30,21 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
     const campaign = result;
 
     const body = await request.json();
-    const { name, moduleName, active, chapters, currentChapterId } = body;
+    const { name, moduleName, status, notes, chapters, currentChapterId } = body;
 
     if (name !== undefined) {
       if (typeof name !== 'string' || name.trim() === '') {
         return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
+      }
+    }
+
+    if (status !== undefined && !CAMPAIGN_STATUSES.includes(status)) {
+      return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
+    }
+
+    if (notes !== undefined) {
+      if (typeof notes !== 'string' || notes.length > 10000) {
+        return NextResponse.json({ error: 'Notes must be a string of 10,000 characters or fewer' }, { status: 400 });
       }
     }
 
@@ -57,9 +67,11 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
 
     const updated = {
       ...campaign,
+      status: campaign.status ?? 'active',
       ...(name !== undefined && typeof name === 'string' && { name: name.trim() }),
       ...(moduleName !== undefined && typeof moduleName === 'string' && { moduleName: moduleName.trim() }),
-      ...(active !== undefined && typeof active === 'boolean' && { active }),
+      ...(status !== undefined && { status }),
+      ...(notes !== undefined && { notes }),
       ...(chapters !== undefined && { chapters: sanitizedChapters }),
       currentChapterId: sanitizedCurrentChapterId,
       updatedAt: new Date(),

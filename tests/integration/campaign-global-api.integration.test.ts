@@ -21,7 +21,8 @@ interface CampaignResponse {
   chapters: { id: string; title: string; order: number }[];
   currentChapterId?: string;
   templateId?: string;
-  active: boolean;
+  status: string;
+  notes: string;
 }
 
 describe("Campaign Global API Integration Tests", () => {
@@ -215,7 +216,7 @@ describe("Campaign Global API Integration Tests", () => {
     expect(campaign.currentChapterId).toBe(campaign.chapters[0].id);
     expect(campaign.chapters[0].id).not.toBe("orig-ch-1");
     expect(campaign.chapters[1].id).not.toBe("orig-ch-2");
-    expect(campaign.active).toBe(false);
+    expect(campaign.status).toBe("planning");
   });
 
   it("chapter ids are new UUIDs distinct from template chapter ids", async () => {

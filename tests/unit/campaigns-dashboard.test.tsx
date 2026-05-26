@@ -34,12 +34,13 @@ const BASE_CAMPAIGN = {
   moduleName: 'LMoP',
   chapters: [{ id: 'ch1', title: 'The Mines', order: 0 }],
   currentChapterId: 'ch1',
-  active: true,
+  status: 'active',
+  notes: '',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
 
-const INACTIVE_CAMPAIGN = { ...BASE_CAMPAIGN, id: 'camp-inactive', name: 'Inactive Campaign', active: false };
+const INACTIVE_CAMPAIGN = { ...BASE_CAMPAIGN, id: 'camp-inactive', name: 'Inactive Campaign', status: 'planning' };
 
 const PARTY = {
   id: 'party-1',
@@ -191,10 +192,11 @@ describe('T3 — Fetch logic', () => {
 });
 
 describe('T4 — Dashboard section UI', () => {
-  it('T4.1 — zero active campaigns renders CTA card; no campaign cards', async () => {
+  it('T4.1 — zero active campaigns renders CTA card with updated text; no campaign cards', async () => {
     setupFetch({ campaigns: [INACTIVE_CAMPAIGN], parties: [], characters: [] });
     await renderPage();
     expect(container.textContent).toContain('No active campaigns');
+    expect(container.textContent).toContain('set one to Active or create a new one');
     expect(container.textContent).not.toContain('Start Encounter');
   });
 
@@ -246,6 +248,82 @@ describe('T4 — Dashboard section UI', () => {
     expect(container.textContent).toContain('Mira');
     expect(container.textContent).not.toContain('Player Characters');
     expect(container.textContent).toContain('Travelling NPCs & Companions');
+  });
+
+  it('T4.N1 — campaign with status planning does not appear in Active Campaigns section', async () => {
+    const planningCampaign = { ...BASE_CAMPAIGN, id: 'camp-planning', name: 'Planning Campaign', status: 'planning' };
+    setupFetch({ campaigns: [planningCampaign], parties: [], characters: [] });
+    await renderPage();
+    expect(container.textContent).toContain('No active campaigns');
+    expect(container.textContent).not.toContain('Start Encounter');
+  });
+
+  it('T4.N2 — campaign with status on-hold does not appear in Active Campaigns section', async () => {
+    const onHoldCampaign = { ...BASE_CAMPAIGN, id: 'camp-onhold', name: 'On Hold Campaign', status: 'on-hold' };
+    setupFetch({ campaigns: [onHoldCampaign], parties: [], characters: [] });
+    await renderPage();
+    expect(container.textContent).toContain('No active campaigns');
+  });
+
+  it('T4.N3 — campaign with status completed does not appear in Active Campaigns section', async () => {
+    const completedCampaign = { ...BASE_CAMPAIGN, id: 'camp-done', name: 'Completed Campaign', status: 'completed' };
+    setupFetch({ campaigns: [completedCampaign], parties: [], characters: [] });
+    await renderPage();
+    expect(container.textContent).toContain('No active campaigns');
+  });
+
+  it('T4.N4 — active campaign with non-empty notes renders DM Notes snippet', async () => {
+    const campaignWithNotes = { ...BASE_CAMPAIGN, notes: 'Quest: find the orb' };
+    setupFetch({ campaigns: [campaignWithNotes], parties: [], characters: [] });
+    await renderPage();
+    const notesEl = container.querySelector('[data-testid="dm-notes-snippet"]');
+    expect(notesEl).toBeTruthy();
+    expect(notesEl?.textContent).toContain('Quest: find the orb');
+  });
+
+  it('T4.N5 — active campaign with empty notes renders no DM Notes section', async () => {
+    const campaignNoNotes = { ...BASE_CAMPAIGN, notes: '' };
+    setupFetch({ campaigns: [campaignNoNotes], parties: [], characters: [] });
+    await renderPage();
+    expect(container.querySelector('[data-testid="dm-notes-snippet"]')).toBeNull();
+  });
+
+  it('T4.N6 — active campaign with whitespace-only notes renders no DM Notes section', async () => {
+    const campaignWsNotes = { ...BASE_CAMPAIGN, notes: '   ' };
+    setupFetch({ campaigns: [campaignWsNotes], parties: [], characters: [] });
+    await renderPage();
+    expect(container.querySelector('[data-testid="dm-notes-snippet"]')).toBeNull();
+  });
+
+  it('T4.N7 — status badge for planning renders bg-slate-600', async () => {
+    const planningCamp = { ...BASE_CAMPAIGN, id: 'camp-p', status: 'planning' };
+    setupFetch({ campaigns: [planningCamp], parties: [], characters: [] });
+    await renderPage();
+    const badges = Array.from(container.querySelectorAll('span')).filter(s => s.className.includes('bg-slate-600'));
+    expect(badges.length).toBeGreaterThan(0);
+  });
+
+  it('T4.N8 — status badge for active renders bg-green-700', async () => {
+    setupFetch({ campaigns: [BASE_CAMPAIGN], parties: [], characters: [] });
+    await renderPage();
+    const badges = Array.from(container.querySelectorAll('span')).filter(s => s.className.includes('bg-green-700'));
+    expect(badges.length).toBeGreaterThan(0);
+  });
+
+  it('T4.N9 — status badge for on-hold renders bg-yellow-600', async () => {
+    const onHoldCamp = { ...BASE_CAMPAIGN, id: 'camp-oh', status: 'on-hold' };
+    setupFetch({ campaigns: [onHoldCamp], parties: [], characters: [] });
+    await renderPage();
+    const badges = Array.from(container.querySelectorAll('span')).filter(s => s.className.includes('bg-yellow-600'));
+    expect(badges.length).toBeGreaterThan(0);
+  });
+
+  it('T4.N10 — status badge for completed renders bg-gray-600', async () => {
+    const completedCamp = { ...BASE_CAMPAIGN, id: 'camp-c', status: 'completed' };
+    setupFetch({ campaigns: [completedCamp], parties: [], characters: [] });
+    await renderPage();
+    const badges = Array.from(container.querySelectorAll('span')).filter(s => s.className.includes('bg-gray-600'));
+    expect(badges.length).toBeGreaterThan(0);
   });
 
   it('T4.6 — existing campaign management list renders below the dashboard section', async () => {

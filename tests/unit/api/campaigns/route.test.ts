@@ -32,7 +32,8 @@ const MOCK_CAMPAIGN = {
   name: "Lost Mine of Phandelver",
   moduleName: "LMoP",
   chapters: [],
-  active: true,
+  status: "active",
+  notes: "",
   createdAt: new Date("2026-01-01"),
   updatedAt: new Date("2026-01-01"),
 };
@@ -117,23 +118,39 @@ describe("POST /api/campaigns", () => {
     expect(body.userId).toBe("user-123");
     expect(body.moduleName).toBe("");
     expect(body.chapters).toEqual([]);
-    expect(body.active).toBe(false);
+    expect(body.status).toBe("active");
+    expect(body.notes).toBe("");
+    expect(body).not.toHaveProperty("active");
     expect(body.id).toMatch(/^[0-9a-f-]{36}$/i);
   });
 
-  it("creates campaign with optional moduleName and active", async () => {
+  it("creates campaign with optional moduleName and explicit status", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(
       makePostRequest({
         name: "Dragon Heist",
         moduleName: " DH ",
-        active: true,
+        status: "planning",
       })
     );
     expect(response.status).toBe(201);
     const body = await response.json();
     expect(body.moduleName).toBe("DH");
-    expect(body.active).toBe(true);
+    expect(body.status).toBe("planning");
+    expect(body).not.toHaveProperty("active");
+  });
+
+  it("POST with no status defaults to active", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const response = await POST(makePostRequest({ name: "Test" }));
+    expect(response.status).toBe(201);
+    expect((await response.json()).status).toBe("active");
+  });
+
+  it("POST with no notes defaults to empty string", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const response = await POST(makePostRequest({ name: "Test" }));
+    expect((await response.json()).notes).toBe("");
   });
 
   it("ignores non-string moduleName", async () => {
@@ -244,18 +261,80 @@ describe("PATCH /api/campaigns/[id]", () => {
     expect((await response.json()).name).toBe("New Name");
   });
 
-  it("updates moduleName and active fields", async () => {
+  it("updates moduleName and status fields", async () => {
     const response = await PATCH(
       makeIdRequest("PATCH", {
         moduleName: " DH2 ",
-        active: false,
+        status: "completed",
       }),
       { params: PARAMS }
     );
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.moduleName).toBe("DH2");
-    expect(body.active).toBe(false);
+    expect(body.status).toBe("completed");
+    expect(body).not.toHaveProperty("active");
+  });
+
+  it("returns 400 when status is invalid", async () => {
+    const response = await PATCH(
+      makeIdRequest("PATCH", { status: "running" }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(400);
+  });
+
+  it("returns 400 when status is empty string", async () => {
+    const response = await PATCH(
+      makeIdRequest("PATCH", { status: "" }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(400);
+  });
+
+  it("returns 200 when status is on-hold", async () => {
+    const response = await PATCH(
+      makeIdRequest("PATCH", { status: "on-hold" }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(200);
+    expect((await response.json()).status).toBe("on-hold");
+  });
+
+  it("returns 400 when notes exceed 10000 chars", async () => {
+    const response = await PATCH(
+      makeIdRequest("PATCH", { notes: "x".repeat(10001) }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(400);
+  });
+
+  it("returns 200 when notes are exactly 10000 chars", async () => {
+    const response = await PATCH(
+      makeIdRequest("PATCH", { notes: "x".repeat(10000) }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(200);
+    expect((await response.json()).notes).toHaveLength(10000);
+  });
+
+  it("PATCH response does not include active field", async () => {
+    const response = await PATCH(
+      makeIdRequest("PATCH", { name: "Updated" }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(200);
+    expect(await response.json()).not.toHaveProperty("active");
+  });
+
+  it("treats missing status field on stored document as active (backwards compat)", async () => {
+    mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN, status: undefined } as any);
+    const response = await PATCH(
+      makeIdRequest("PATCH", { name: "Test" }),
+      { params: PARAMS }
+    );
+    expect(response.status).toBe(200);
+    expect((await response.json()).status).toBe("active");
   });
 
   it("returns 400 when name is blank", async () => {

@@ -27,7 +27,8 @@ const MOCK_CAMPAIGN = {
   name: 'My Campaign',
   moduleName: 'LMoP',
   chapters: [],
-  active: false,
+  status: 'planning',
+  notes: '',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };

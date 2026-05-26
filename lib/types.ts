@@ -538,6 +538,9 @@ export interface CampaignTemplate {
   updatedAt: Date;
 }
 
+export const CAMPAIGN_STATUSES = ['planning', 'active', 'on-hold', 'completed'] as const;
+export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
+
 export interface Campaign {
   _id?: string;
   id: string;
@@ -547,7 +550,8 @@ export interface Campaign {
   chapters: CampaignChapter[];
   currentChapterId?: string;
   templateId?: string;
-  active: boolean;
+  status: CampaignStatus;
+  notes: string;
   createdAt: Date;
   updatedAt: Date;
 }

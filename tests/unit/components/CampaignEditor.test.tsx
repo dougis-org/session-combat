@@ -21,7 +21,8 @@ const BASE_CAMPAIGN: Campaign = {
   name: 'Test Campaign',
   moduleName: 'LMoP',
   chapters: [],
-  active: false,
+  status: 'planning',
+  notes: '',
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
 };
@@ -90,14 +91,27 @@ describe('CampaignEditor', () => {
       expect(container.querySelectorAll<HTMLInputElement>('input[type="text"]')[1].value).toBe('LMoP');
     });
 
-    it('renders active checkbox unchecked when campaign.active is false', () => {
-      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
-      expect(getInput('checkbox').checked).toBe(false);
+    it('renders status dropdown with current value selected', () => {
+      render({ campaign: { ...BASE_CAMPAIGN, status: 'on-hold' }, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      const select = container.querySelector<HTMLSelectElement>('select[data-testid="status-select"]');
+      expect(select?.value).toBe('on-hold');
     });
 
-    it('renders active checkbox checked when campaign.active is true', () => {
-      render({ campaign: { ...BASE_CAMPAIGN, active: true }, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
-      expect(getInput('checkbox').checked).toBe(true);
+    it('renders notes textarea with current value', () => {
+      render({ campaign: { ...BASE_CAMPAIGN, notes: 'Party at level 5' }, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      const textarea = container.querySelector<HTMLTextAreaElement>('textarea[data-testid="notes-textarea"]');
+      expect(textarea?.value).toBe('Party at level 5');
+    });
+
+    it('notes textarea has maxLength of 10000', () => {
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      const textarea = container.querySelector<HTMLTextAreaElement>('textarea[data-testid="notes-textarea"]');
+      expect(textarea?.maxLength).toBe(10000);
+    });
+
+    it('renders character counter showing length/10000', () => {
+      render({ campaign: { ...BASE_CAMPAIGN, notes: 'Hello' }, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      expect(container.textContent).toContain('5/10000');
     });
   });
 
@@ -129,12 +143,28 @@ describe('CampaignEditor', () => {
       expect((onSave.mock.calls[0][0] as Campaign).moduleName).toBe('DH');
     });
 
-    it('calls onSave with toggled active value', async () => {
+    it('calls onSave with updated status when dropdown changes', async () => {
       const onSave = jest.fn() as any;
       render({ campaign: BASE_CAMPAIGN, onSave, onCancel: jest.fn(), isNew: false });
-      act(() => { getInput('checkbox').click(); });
+      const select = container.querySelector<HTMLSelectElement>('select[data-testid="status-select"]')!;
+      await act(async () => {
+        select.value = 'completed';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      });
       await act(async () => { findButton('Save Campaign').click(); });
-      expect((onSave.mock.calls[0][0] as Campaign).active).toBe(true);
+      expect((onSave.mock.calls[0][0] as Campaign).status).toBe('completed');
+    });
+
+    it('calls onSave with on-hold status when dropdown changes to on-hold', async () => {
+      const onSave = jest.fn() as any;
+      render({ campaign: BASE_CAMPAIGN, onSave, onCancel: jest.fn(), isNew: false });
+      const select = container.querySelector<HTMLSelectElement>('select[data-testid="status-select"]')!;
+      await act(async () => {
+        select.value = 'on-hold';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      await act(async () => { findButton('Save Campaign').click(); });
+      expect((onSave.mock.calls[0][0] as Campaign).status).toBe('on-hold');
     });
   });
 

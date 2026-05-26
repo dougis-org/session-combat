@@ -20,7 +20,8 @@ export function CampaignEditor({
 }) {
   const [name, setName] = useState(campaign.name);
   const [moduleName, setModuleName] = useState(campaign.moduleName);
-  const [active, setActive] = useState(campaign.active);
+  const [status, setStatus] = useState(campaign.status);
+  const [notes, setNotes] = useState(campaign.notes ?? '');
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -100,7 +101,8 @@ export function CampaignEditor({
         ...campaign,
         name: name.trim(),
         moduleName: moduleName.trim(),
-        active,
+        status,
+        notes,
         chapters,
         currentChapterId: finalCurrentChapterId,
       });
@@ -250,11 +252,38 @@ export function CampaignEditor({
       </div>
 
       <div className="mb-4">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)}
-            disabled={saving} className="cursor-pointer" />
-          <span className="text-sm font-semibold">Active</span>
+        <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">
+          Status
         </label>
+        <select
+          data-testid="status-select"
+          value={status}
+          onChange={(e) => setStatus(e.target.value as Campaign['status'])}
+          disabled={saving}
+          className="w-full text-sm bg-gray-950 border border-gray-700 hover:border-gray-600 rounded px-3 py-2 text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer"
+        >
+          <option value="planning">Planning</option>
+          <option value="active">Active</option>
+          <option value="on-hold">On Hold</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">
+          DM Notes
+        </label>
+        <textarea
+          data-testid="notes-textarea"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          disabled={saving}
+          maxLength={10000}
+          rows={6}
+          placeholder="Current quests, NPC states, world events..."
+          className="w-full text-sm bg-gray-950 border border-gray-700 hover:border-gray-600 focus:border-blue-500 rounded px-3 py-2 text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all resize-y"
+        />
+        <p className="text-xs text-gray-500 text-right mt-1">{notes.length}/10000</p>
       </div>
     </EditorShell>
   );
