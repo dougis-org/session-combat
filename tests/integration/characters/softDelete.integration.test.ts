@@ -1,29 +1,15 @@
-import { afterAll, beforeAll, describe, expect, test } from "@jest/globals";
+import { beforeAll, describe, expect, test } from "@jest/globals";
 import { MongoClient } from "mongodb";
-import {
-  startTestServer,
-  registerAndGetCookie,
-  TestServer,
-} from "../helpers/server";
+import { createTestUser } from "../helpers/users";
 
 describe("Character Soft Delete API Integration", () => {
-  let server: TestServer;
   let baseUrl: string;
   let authCookie: string;
 
   beforeAll(async () => {
-    server = await startTestServer();
-    baseUrl = server.baseUrl;
-    const uniqueEmail = `softdelete-${Date.now()}@test.com`;
-    authCookie = await registerAndGetCookie(
-      baseUrl,
-      uniqueEmail,
-      "TestPassword123!",
-    );
-  }, 120000);
-
-  afterAll(async () => {
-    await server.cleanup();
+    baseUrl = process.env.TEST_BASE_URL!;
+    if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
+    authCookie = (await createTestUser(baseUrl, "softdelete")).cookie;
   }, 30000);
 
   describe("DELETE /api/characters/{id}", () => {

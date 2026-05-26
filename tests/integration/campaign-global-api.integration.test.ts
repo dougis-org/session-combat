@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { MongoClient, ObjectId } from "mongodb";
-import { startTestServer, registerAndGetCookie, TestServer } from "./helpers/server";
+import { createTestUser } from "./helpers/users";
 
 interface TemplateResponse {
   id: string;
@@ -25,37 +25,32 @@ interface CampaignResponse {
 }
 
 describe("Campaign Global API Integration Tests", () => {
-  let server: TestServer;
   let baseUrl: string;
   let mongoClient: MongoClient;
   let userCookie: string;
   let adminCookie: string;
 
   beforeAll(async () => {
-    server = await startTestServer();
-    baseUrl = server.baseUrl;
+    baseUrl = process.env.TEST_BASE_URL!;
+    if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
 
     mongoClient = new MongoClient(process.env.MONGODB_URI!);
     await mongoClient.connect();
 
-    const email1 = `campaign-global-user-${Date.now()}@example.com`;
-    userCookie = await registerAndGetCookie(baseUrl, email1, "testPassword123!");
+    userCookie = (await createTestUser(baseUrl, "campaign-global-user")).cookie;
 
-    const email2 = `campaign-global-admin-${Date.now()}@example.com`;
-    adminCookie = await registerAndGetCookie(baseUrl, email2, "testPassword123!");
+    const adminUser = await createTestUser(baseUrl, "campaign-global-admin");
+    adminCookie = adminUser.cookie;
 
     const db = mongoClient.db(process.env.MONGODB_DB);
-    const adminUser = await db.collection("users").findOne({ email: email2 });
-    if (!adminUser) throw new Error("Admin user not found");
     await db.collection("users").updateOne(
-      { _id: adminUser._id },
+      { _id: new ObjectId(adminUser.userId) },
       { $set: { isAdmin: true } }
     );
-  }, 120000);
+  }, 30000);
 
   afterAll(async () => {
     await mongoClient.close();
-    await server.cleanup();
   }, 30000);
 
   function authedUser() { return { "Content-Type": "application/json", Cookie: userCookie }; }

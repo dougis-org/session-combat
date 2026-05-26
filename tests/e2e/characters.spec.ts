@@ -251,10 +251,8 @@ test.describe("Character gender field", () => {
     await card.getByRole("button", { name: "Edit" }).click();
     await page.getByLabel("Character gender").clear();
     await page.getByRole("button", { name: /Save Character/i }).click();
-    // Wait for editor to close before checking card — ancestor divs matched by the
-    // card locator would otherwise include the race <option> from the still-mounted editor
-    await expect(page.getByRole("button", { name: /Save Character/i })).not.toBeVisible({ timeout: 15000 });
-    await expect(card.getByText(/\bHuman\b/)).toBeVisible();
+    await expect(page.getByLabel("Character gender")).not.toBeVisible({ timeout: 15000 });
+    await expect(card.getByText(/\bHuman\b/)).toBeVisible({ timeout: 15000 });
     await expect(card.getByText("Non-binary Human")).toHaveCount(0);
   });
 });

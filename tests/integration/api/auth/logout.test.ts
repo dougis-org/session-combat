@@ -1,10 +1,5 @@
+import { createTestUser } from "@/tests/integration/helpers/users";
 import {
-  startTestServer,
-  registerAndGetCookie,
-  TestServer,
-} from "@/tests/integration/helpers/server";
-import {
-  createTestEmail,
   logoutUser,
   VALID_PASSWORD,
 } from "@/tests/integration/auth.test.helpers";
@@ -14,21 +9,15 @@ import {
  * Consolidated test patterns to minimize duplication
  */
 describe("POST /api/auth/logout - Integration Tests", () => {
-  let server: TestServer;
   let baseUrl: string;
 
-  beforeAll(async () => {
-    server = await startTestServer();
-    baseUrl = server.baseUrl;
-  }, 120000);
-
-  afterAll(async () => {
-    await server.cleanup();
-  }, 30000);
+  beforeAll(() => {
+    baseUrl = process.env.TEST_BASE_URL!;
+    if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
+  });
 
   it("should clear auth cookie and succeed with valid session", async () => {
-    const email = createTestEmail("user");
-    const cookie = await registerAndGetCookie(baseUrl, email, VALID_PASSWORD);
+    const { cookie } = await createTestUser(baseUrl, "logout-user");
 
     const response = await logoutUser(baseUrl, cookie);
     expect(response.status).toBe(200);
@@ -52,8 +41,7 @@ describe("POST /api/auth/logout - Integration Tests", () => {
   });
 
   it("should allow repeated logout with same token (idempotent)", async () => {
-    const email = createTestEmail("user");
-    const cookie = await registerAndGetCookie(baseUrl, email, VALID_PASSWORD);
+    const { cookie } = await createTestUser(baseUrl, "logout-repeat");
 
     const response1 = await logoutUser(baseUrl, cookie);
     expect(response1.status).toBe(200);

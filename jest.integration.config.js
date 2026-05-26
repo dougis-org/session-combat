@@ -5,6 +5,8 @@ module.exports = {
   testEnvironment: "node",
   testMatch: ["**/tests/integration/**/*.test.ts"],
   testTimeout: 120000,
+  globalSetup: "./tests/integration/global.setup.ts",
+  globalTeardown: "./tests/integration/global.teardown.ts",
   // forceExit is NOT set here — use `npm run test:ci` (which passes --forceExit) for
   // pre-commit hooks and CI. Direct `npm run test:integration` runs without force-exit so
   // leaked handles surface during development.
