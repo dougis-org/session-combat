@@ -1,19 +1,11 @@
 import fetch from "node-fetch";
+import { createTestUser } from "@/tests/integration/auth.test.helpers";
 
-let counter = 0;
-const pid = process.pid;
-
-export function uniqueEmail(prefix = "user"): string {
-  const workerId = process.env.JEST_WORKER_ID ?? "0";
-  return `${prefix}-w${workerId}-p${pid}-${++counter}@example.com`;
-}
-
-export async function createTestUser(
+export async function registerTestUser(
   baseUrl: string,
   prefix = "user",
 ): Promise<{ email: string; password: string; cookie: string; userId: string }> {
-  const email = uniqueEmail(prefix);
-  const password = process.env.TEST_USER_PASSWORD ?? "testPassword123!";
+  const { email, password } = createTestUser(prefix);
 
   const response = await fetch(`${baseUrl}/api/auth/register`, {
     method: "POST",

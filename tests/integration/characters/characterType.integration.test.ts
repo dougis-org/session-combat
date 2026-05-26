@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { createTestUser } from "../helpers/users";
+import { registerTestUser } from "../helpers/users";
 
 interface CharacterResponse {
   id: string;
@@ -14,7 +14,7 @@ describe("Character characterType field — API integration", () => {
   beforeAll(async () => {
     baseUrl = process.env.TEST_BASE_URL!;
     if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
-    cookie = (await createTestUser(baseUrl, "chartype-test")).cookie;
+    cookie = (await registerTestUser(baseUrl, "chartype-test")).cookie;
   }, 30000);
 
   function authed() {
@@ -104,7 +104,7 @@ describe("Character characterType field — API integration", () => {
   // GET filter tests
 
   async function setupFilterUser(emailPrefix: string) {
-    const filterCookie = (await createTestUser(baseUrl, emailPrefix)).cookie;
+    const filterCookie = (await registerTestUser(baseUrl, emailPrefix)).cookie;
     const filterAuthed = { "Content-Type": "application/json", Cookie: filterCookie };
 
     async function postChar(name: string, characterType: string) {

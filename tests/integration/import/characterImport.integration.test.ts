@@ -6,7 +6,7 @@ import {
   test,
 } from "@jest/globals";
 import fetch from "node-fetch";
-import { createTestUser } from "../helpers/users";
+import { registerTestUser } from "../helpers/users";
 import {
   DND_BEYOND_CHARACTER_NAME,
   DND_BEYOND_CHARACTER_URL,
@@ -22,7 +22,7 @@ describe("Character import API integration", () => {
   }, 30000);
 
   beforeEach(async () => {
-    cookie = (await createTestUser(baseUrl, "import")).cookie;
+    cookie = (await registerTestUser(baseUrl, "import")).cookie;
   });
 
   test("imports a public D&D Beyond character for an authenticated user", async () => {

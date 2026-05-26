@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { createTestUser } from "./helpers/users";
+import { registerTestUser } from "./helpers/users";
 
 interface MonsterResponse {
   id: string;
@@ -24,7 +24,7 @@ describe("Monster API Integration Tests", () => {
   beforeAll(async () => {
     baseUrl = process.env.TEST_BASE_URL!;
     if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
-    authCookie = (await createTestUser(baseUrl, "monster-test")).cookie;
+    authCookie = (await registerTestUser(baseUrl, "monster-test")).cookie;
   }, 30000);
 
   function authed() {
