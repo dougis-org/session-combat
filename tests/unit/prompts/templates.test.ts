@@ -1,5 +1,6 @@
 import { describe, test, expect } from '@jest/globals';
 import { CampaignContext } from '@/lib/types';
+import { makeSession } from '../fixtures/sessions';
 import {
   TEMPLATES,
   buildSystemPrompt,
@@ -73,6 +74,50 @@ describe('buildSystemPrompt', () => {
     expect(result).toContain('Curse of Strahd');
     expect(result).toContain('CoS');
     expect(typeof result).toBe('string');
+  });
+
+  test('TC-4-1: no session block when recentSessions is []', () => {
+    const result = buildSystemPrompt(makeContext({ recentSessions: [] }));
+    expect(result).not.toContain('Recent sessions:');
+  });
+
+  test('TC-4-2: no session block when recentSessions is undefined', () => {
+    const result = buildSystemPrompt(makeContext());
+    expect(result).not.toContain('Recent sessions:');
+  });
+
+  test('TC-4-3: session block present with correct heading when sessions exist', () => {
+    const result = buildSystemPrompt(makeContext({ recentSessions: [makeSession()] }));
+    expect(result).toContain('Recent sessions:');
+  });
+
+  test('TC-4-4: session line format — title and date', () => {
+    const result = buildSystemPrompt(makeContext({ recentSessions: [makeSession()] }));
+    expect(result).toContain('- Session 11 (May 14, 2026): The Betrayer Revealed');
+  });
+
+  test('TC-4-5: milestone with newLevel appends correct suffix', () => {
+    const result = buildSystemPrompt(makeContext({ recentSessions: [makeSession({ milestone: true, newLevel: 11 })] }));
+    expect(result).toContain('— party reached Level 11.');
+  });
+
+  test('TC-4-6: milestone without newLevel appends fallback suffix', () => {
+    const result = buildSystemPrompt(makeContext({ recentSessions: [makeSession({ milestone: true, newLevel: undefined })] }));
+    expect(result).toContain('— milestone reached.');
+  });
+
+  test('TC-4-7: session with no title uses "Untitled Session"', () => {
+    const result = buildSystemPrompt(makeContext({ recentSessions: [makeSession({ title: undefined })] }));
+    expect(result).toContain('Untitled Session');
+  });
+
+  test('TC-4-8: multiple sessions render in array order', () => {
+    const sessions = [makeSession({ sessionNumber: 12, title: 'S12' }), makeSession({ sessionNumber: 11, title: 'S11' }), makeSession({ sessionNumber: 10, title: 'S10' })];
+    const result = buildSystemPrompt(makeContext({ recentSessions: sessions }));
+    const s12pos = result.indexOf('Session 12');
+    const s10pos = result.indexOf('Session 10');
+    expect(result).toContain('Recent sessions:');
+    expect(s12pos).toBeLessThan(s10pos);
   });
 });
 

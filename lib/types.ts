@@ -576,6 +576,7 @@ export interface CampaignContext {
   parties: Party[];
   allMembers: PartyMember[];
   characters: Character[];
+  recentSessions?: SessionLog[];
 }
 
 export interface BuiltPrompt {

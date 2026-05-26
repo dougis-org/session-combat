@@ -1,4 +1,4 @@
-import { BuiltPrompt, CampaignContext, Character, SavedContent, calculateTotalLevel } from '@/lib/types';
+import { BuiltPrompt, CampaignContext, Character, SavedContent, SessionLog, calculateTotalLevel } from '@/lib/types';
 
 export interface PromptField {
   key: string;
@@ -21,19 +21,33 @@ function formatCharacter(c: Character): string {
   return `${c.name} (Level ${level} ${classNames})`;
 }
 
+function formatSessionEntry(session: SessionLog): string {
+  const date = new Date(session.datePlayed).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const title = session.title || 'Untitled Session';
+  let suffix = '';
+  if (session.milestone) {
+    suffix = session.newLevel != null ? ` — party reached Level ${session.newLevel}.` : ' — milestone reached.';
+  }
+  return `- Session ${session.sessionNumber} (${date}): ${title}${suffix}`;
+}
+
 export function buildSystemPrompt(context: CampaignContext): string {
-  const { campaign, chapter, characters } = context;
+  const { campaign, chapter, characters, recentSessions } = context;
 
   const chapterLine = chapter ? `Current Chapter: ${chapter.title}` : '';
   const partySection = characters.length > 0
     ? `Party Members:\n${characters.map(c => `- ${formatCharacter(c)}`).join('\n')}`
     : 'Party Members: None currently linked.';
+  const sessionSection = recentSessions?.length
+    ? `Recent sessions:\n${recentSessions.map(formatSessionEntry).join('\n')}`
+    : '';
 
   return [
     `You are a creative assistant helping a Dungeon Master run a D&D 5e campaign.`,
     `Campaign: ${campaign.name} (${campaign.moduleName})`,
     chapterLine,
     partySection,
+    sessionSection,
   ].filter(Boolean).join('\n');
 }
 
