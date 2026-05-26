@@ -70,7 +70,7 @@ For each file below, change `import { createTestUser }` → `import { registerTe
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Review its report and apply fixes for duplication, complexity, and completeness before committing.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Review its report and apply fixes for duplication, complexity, and completeness before committing.
 
 ## Validation
 
@@ -78,7 +78,7 @@ For each file below, change `import { createTestUser }` → `import { registerTe
 - [x] `npm run typecheck` (or `tsc --noEmit`) — zero type errors
 - [x] `npm run build` — build succeeds
 - [x] All verification greps from Execution step 6 pass
-- [ ] All completed tasks marked as complete
+- [x] All completed tasks marked as complete
 
 ## Remote push validation
 
@@ -94,10 +94,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit all changes to the working branch and push to remote
 - [x] Open PR from `refactor/consolidate-test-user-factory` to `main`. PR body must include `Closes #222`
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll for check status autonomously using `gh pr checks <PR-URL> --json isRequired,state`; when any required (blocking) CI check fails, diagnose and fix, commit, follow Remote push validation steps, push; wait 180 seconds then repeat
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll for check status autonomously using `gh pr checks <PR-URL> --json isRequired,state`; when any required (blocking) CI check fails, diagnose and fix, commit, follow Remote push validation steps, push; wait 180 seconds then repeat
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
 
 Ownership metadata:
 
@@ -112,14 +112,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/consolidate-test-user-factory/` to `openspec/changes/archive/YYYY-MM-DD-consolidate-test-user-factory/` — stage both copy and deletion in a single commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-consolidate-test-user-factory/` exists and `openspec/changes/consolidate-test-user-factory/` is gone
-- [ ] **Create a doc branch**: `git checkout -b doc/archive-YYYY-MM-DD-consolidate-test-user-factory` then `git push -u origin doc/archive-YYYY-MM-DD-consolidate-test-user-factory`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive consolidate-test-user-factory (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive the change: move `openspec/changes/consolidate-test-user-factory/` to `openspec/changes/archive/2026-05-26-consolidate-test-user-factory/` — stage both copy and deletion in a single commit
+- [x] Confirm `openspec/changes/archive/2026-05-26-consolidate-test-user-factory/` exists and `openspec/changes/consolidate-test-user-factory/` is gone
+- [x] **Create a doc branch**: `git checkout -b doc/archive-2026-05-26-consolidate-test-user-factory` then `git push -u origin doc/archive-2026-05-26-consolidate-test-user-factory`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive consolidate-test-user-factory (2026-05-26)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
 - [ ] Monitor the doc PR until it merges
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d refactor/consolidate-test-user-factory doc/archive-YYYY-MM-DD-consolidate-test-user-factory`
+- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d refactor/consolidate-test-user-factory doc/archive-2026-05-26-consolidate-test-user-factory`
