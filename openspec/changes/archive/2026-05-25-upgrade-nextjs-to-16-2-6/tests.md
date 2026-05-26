@@ -21,7 +21,7 @@ Mapping to tasks in `tasks.md`:
 
 | Task       | Validation Test                                     | Command                               | Expected Output          |
 |------------|-----------------------------------------------------|---------------------------------------|--------------------------|
-| T4         | npm audit clean (Next.js CVEs removed)             | `npm audit --production`              | 0 high/moderate Next.js  |
+| T4         | npm audit clean (Next.js CVEs removed)             | `npm audit --omit=dev`              | 0 high/moderate Next.js  |
 | T5         | TypeScript compilation succeeds                    | `npx tsc --noEmit`                   | Exit code 0              |
 | T6         | ESLint linting passes                              | `npm run lint`                        | Exit code 0              |
 | T7         | 116 unit tests pass                                | `npm run test:unit`                   | "116 passed"             |
@@ -35,7 +35,7 @@ Mapping to tasks in `tasks.md`:
 
 - [ ] **Case: npm audit clean (Next.js)**
   - **Setup:** Run `npm install` after version bump
-  - **Test:** Execute `npm audit --production` and parse output
+  - **Test:** Execute `npm audit --omit=dev` and parse output
   - **Assertion:** No entries for "next" in vulnerabilities section; all 13 pre-existing CVEs are gone
   - **Maps to:** Spec requirement "Security Vulnerabilities Resolved"
 
@@ -115,7 +115,7 @@ No new tests are added to the CI pipeline; all validations use existing test inf
 
 Before opening the PR, verify locally:
 
-- [ ] `npm audit --production` shows zero Next.js CVEs
+- [ ] `npm audit --omit=dev` shows zero Next.js CVEs
 - [ ] `npx tsc --noEmit` passes
 - [ ] `npm run lint` passes
 - [ ] `npm run test:unit` passes (116 tests)

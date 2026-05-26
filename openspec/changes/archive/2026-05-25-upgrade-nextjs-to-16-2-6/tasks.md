@@ -27,7 +27,7 @@
 
 ### T4 — Validate npm audit
 
-- [x] Run `npm audit --production` to check for remaining vulnerabilities
+- [x] Run `npm audit --omit=dev` to check for remaining vulnerabilities
 - [x] Verify the output shows zero high/moderate severity Next.js vulnerabilities
 - [x] Note: PostCSS 8.4.31 XSS vulnerability may persist (known limitation, out of scope)
 
@@ -79,7 +79,7 @@
 - [x] **Integration tests:** `npm run test:integration` passes (23 tests) ✓
 - [x] **E2E tests:** `npx playwright test tests/e2e/` passes (11 tests) ✓
 - [x] **Build:** `npm run build` succeeds ✓
-- [x] **Security audit:** `npm audit --production` shows zero Next.js CVEs ✓
+- [x] **Security audit:** `npm audit --omit=dev` shows zero Next.js CVEs ✓
 - [x] All execution tasks T1–T10 marked complete ✓
 - [x] All remote push validation steps pass ✓
 

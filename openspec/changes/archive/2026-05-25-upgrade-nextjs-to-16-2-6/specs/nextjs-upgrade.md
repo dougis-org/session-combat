@@ -7,7 +7,7 @@ The system SHALL have zero unpatched high/moderate severity Next.js vulnerabilit
 #### Scenario: npm audit clean after upgrade
 
 - **Given** the codebase with Next.js 16.2.6 installed and dependencies resolved
-- **When** `npm audit --production` is run
+- **When** `npm audit --omit=dev` is run
 - **Then** no high/moderate severity vulnerabilities appear in the report (zero Next.js CVEs flagged)
 
 #### Scenario: Specific CVEs fixed
@@ -30,11 +30,12 @@ The system SHALL have both next and eslint-config-next at version 16.2.6.
 
 - **Given** package.json with eslint-config-next@^16.2.2
 - **When** npm install is run
-- **Then** package-lock.json reflects eslint-config-next 16.2.6 (verified: `grep '"eslint-config-next": ' package-lock.json` shows 16.2.6)
+- **Then** package-lock.json reflects eslint-config-next 16.2.6 (verified: `npm ls eslint-config-next` shows 16.2.6)
 
 ## MODIFIED Requirements
 
 ### Requirement: MODIFIED Build Validation
+
 
 The system MUST build successfully without errors or warnings after the upgrade.
 
@@ -49,8 +50,6 @@ The system MUST build successfully without errors or warnings after the upgrade.
 - **Given** a successful build
 - **When** the .next directory is inspected
 - **Then** it contains expected app router output (no legacy Pages Router artifacts, no build errors logged)
-
-## MODIFIED Requirements
 
 ### Requirement: MODIFIED Unit Test Suite Validation
 
@@ -68,8 +67,6 @@ All 116 unit tests SHALL pass with no failures or flakes.
 - **When** the same tests run with 16.2.6
 - **Then** they continue to pass consistently across 3 runs (no intermittent failures)
 
-## MODIFIED Requirements
-
 ### Requirement: MODIFIED Integration Test Suite Validation
 
 All 23 integration tests SHALL pass with MongoDB and PostgreSQL containers.
@@ -79,8 +76,6 @@ All 23 integration tests SHALL pass with MongoDB and PostgreSQL containers.
 - **Given** the codebase with Next.js 16.2.6, testcontainers running MongoDB and PostgreSQL
 - **When** `npm run test:integration` is executed
 - **Then** all 23 tests pass (output shows test count matches expected, exit code 0, no container errors)
-
-## MODIFIED Requirements
 
 ### Requirement: MODIFIED E2E Test Suite Validation
 
@@ -110,7 +105,7 @@ All 11 E2E tests SHALL pass with Playwright.
 
 #### Scenario: npm audit shows no Next.js CVEs
 
-- **Given** `npm audit --production` run post-upgrade
+- **Given** `npm audit --omit=dev` run post-upgrade
 - **When** the report is parsed
 - **Then** zero entries for next/nextjs packages in the vulnerability list (all 13 CVEs resolved)
 

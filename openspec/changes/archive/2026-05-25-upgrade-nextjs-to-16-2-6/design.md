@@ -65,7 +65,7 @@
 - **Requirement:** Security vulnerabilities patched
   - **Design element:** Decision 1 (16.2.6 upgrade)
   - **Acceptance criteria reference:** `npm audit` shows zero Next.js vulnerabilities
-  - **Testability notes:** Run `npm audit --production` post-upgrade; verify no high/moderate severities
+  - **Testability notes:** Run `npm audit --omit=dev` post-upgrade; verify no high/moderate severities
 
 - **Requirement:** Application behavior unchanged
   - **Design element:** Decision 3 (test suite validation)
@@ -83,7 +83,7 @@
 - **Requirement category:** Security
   - **Requirement:** Vulnerabilities eliminated
   - **Design element:** Decision 1 (16.2.6)
-  - **Acceptance criteria reference:** `npm audit --production` shows clean audit after upgrade
+  - **Acceptance criteria reference:** `npm audit --omit=dev` shows clean audit after upgrade
   - **Testability notes:** Compare `npm audit` output before/after
 
 - **Requirement category:** Maintainability
