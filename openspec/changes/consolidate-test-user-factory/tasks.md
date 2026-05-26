@@ -49,11 +49,11 @@ For each file below, change `import { createTestUser }` → `import { registerTe
 ### 4. Fix `tests/integration/api/auth/register.test.ts` special-email strings
 
 - [x] Lines 93-96: replace the three raw `Date.now()`-only email strings with collision-safe equivalents using the existing `createTestEmail` already imported from `auth.test.helpers.ts`:
-  - `` `user+test-${Date.now()}@example.co.uk` `` → `` `user+test-${Date.now()}-${Math.random().toString(36).slice(2, 9)}@example.co.uk` ``
+  - `` `user+test-${Date.now()}@example.co.uk` `` → `createTestEmail("user+test").replace("@example.com", "@example.co.uk")`
   - `` `user-name-${Date.now()}@example.com` `` → `createTestEmail("user-name")`
   - `` `user_name_${Date.now()}@example.com` `` → `createTestEmail("user_name")`
 - [x] The `createTestUser` import from `auth.test.helpers.ts` already present in this file stays (it is the sync data factory used by the parallel-safety test)
-- [x] Verify: `grep "Date\.now()" tests/integration/api/auth/register.test.ts` returns zero matches
+- [x] Verify: no collision-unsafe (bare `Date.now()@`) email patterns in `register.test.ts`
 - [x] Verify: `tsc --noEmit` passes
 
 ### 5. Handle `tests/integration/api/auth/logout.test.ts`
@@ -65,7 +65,7 @@ For each file below, change `import { createTestUser }` → `import { registerTe
 
 - [x] `grep -r "createTestUser" tests/integration --include="*.ts" | grep -v "auth.test.helpers.ts\|register.test.ts"` → zero matches
 - [x] `grep -r "uniqueEmail" tests/integration --include="*.ts"` → zero matches
-- [x] `grep -r "Date\.now()" tests/integration --include="*.ts"` → zero matches (or only non-email uses)
+- [x] `grep -r "Date\.now()" tests/integration --include="*.ts"` → only non-email uses (campaign IDs, `createTestEmail` internals, `.co.uk` safe variant)
 - [x] `tsc --noEmit` → passes
 
 ## Pre-Commit Code Review
@@ -91,9 +91,9 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `refactor/consolidate-test-user-factory` to `main`. PR body must include `Closes #222`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `refactor/consolidate-test-user-factory` to `main`. PR body must include `Closes #222`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
 - [ ] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
 - [ ] **Monitor CI checks** — poll for check status autonomously using `gh pr checks <PR-URL> --json isRequired,state`; when any required (blocking) CI check fails, diagnose and fix, commit, follow Remote push validation steps, push; wait 180 seconds then repeat

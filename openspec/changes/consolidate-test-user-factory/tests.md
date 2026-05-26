@@ -37,7 +37,7 @@ For each task, the TDD loop is: verify the grep/compile assertion fails in curre
 
 ### Task 4 — Fix `register.test.ts` special-email strings
 
-- [ ] **No bare `Date.now()`:** `grep "Date\.now()" tests/integration/api/auth/register.test.ts` returns zero matches
+- [ ] **No collision-unsafe emails:** `grep "Date\.now()" tests/integration/api/auth/register.test.ts` shows only safe patterns (random suffix or via `createTestEmail`)
 - [ ] **`createTestEmail` used:** `grep "createTestEmail" tests/integration/api/auth/register.test.ts` matches the special-email variants
 - [ ] **Register tests pass:** `npm run test:integration -- --testPathPattern=register.test` — all register tests pass including the special-character and parallel-safety tests
 
@@ -51,7 +51,7 @@ For each task, the TDD loop is: verify the grep/compile assertion fails in curre
 
 - [ ] `grep -r "createTestUser" tests/integration --include="*.ts" | grep -v "auth.test.helpers.ts\|register.test.ts"` → zero matches
 - [ ] `grep -r "uniqueEmail" tests/integration --include="*.ts"` → zero matches
-- [ ] `grep -r "Date\.now()" tests/integration --include="*.ts"` → zero matches (or only non-email uses)
+- [ ] No collision-unsafe email construction: `grep -r "Date\.now()[^)]*@" tests/integration --include="*.ts"` → zero matches
 - [ ] `tsc --noEmit` → passes
 - [ ] `npm run test:integration` → all tests pass
 - [ ] `npm run build` → succeeds

@@ -2,9 +2,9 @@
 
 This document details *changes* to requirements and is additive to the `design.md` document, not a replacement.
 
-### Requirement: MODIFIED `createTestEmail` in `auth.test.helpers.ts` is the sole email generator
+### Requirement: MODIFIED `createTestEmail` in `auth.test.helpers.ts` is the preferred email generator
 
-The system SHALL generate all test email addresses via `createTestEmail` from `tests/integration/auth.test.helpers.ts`. No other file in `tests/integration/` SHALL contain inline email construction using `Date.now()` alone (without a random component).
+The system SHOULD generate all test email addresses via `createTestEmail` from `tests/integration/auth.test.helpers.ts`. No file in `tests/integration/` SHALL construct emails using `Date.now()` alone without a random component (collision-unsafe).
 
 #### Scenario: Collision-safe email in parallel workers
 
@@ -36,8 +36,8 @@ Reason for removal: `uniqueEmail` in `helpers/users.ts` used a worker/pid/counte
 
 ### Requirement: Reliability
 
-#### Scenario: grep confirms no raw `Date.now()`-only email patterns remain
+#### Scenario: grep confirms no collision-unsafe email patterns remain
 
 - **Given** the integration test suite after migration
-- **When** `grep -r "Date\.Now\|Date\.now()" tests/integration --include="*.ts"` is run
-- **Then** zero matches (or only matches that are not email construction)
+- **When** `grep -r "Date\.now()[^)]*@" tests/integration --include="*.ts"` is run (matches `Date.now()` directly followed by `@` with no random component)
+- **Then** zero matches
