@@ -32,6 +32,8 @@ const mockContext = {
     active: true,
     userId: 'u1',
     currentChapterId: undefined,
+    status: 'active',
+    notes: '',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
@@ -41,8 +43,11 @@ const mockContext = {
   characters: [],
 };
 
+type CampaignContextResult = { context: typeof mockContext | null; loading: boolean; error: string | null };
+let mockCampaignContextResult: CampaignContextResult;
+
 jest.mock('@/lib/hooks/useCampaignContext', () => ({
-  useCampaignContext: () => ({ context: mockContext, loading: false, error: null }),
+  useCampaignContext: (_id: string) => mockCampaignContextResult,
 }));
 
 import PromptBuilderPage from '@/app/campaigns/[id]/prompts/page';
@@ -55,6 +60,7 @@ beforeEach(() => {
   container = document.createElement('div');
   document.body.appendChild(container);
   originalFetch = global.fetch;
+  mockCampaignContextResult = { context: mockContext, loading: false, error: null };
 });
 
 afterEach(() => {
@@ -113,6 +119,56 @@ async function submitPanelSave() {
   await act(async () => { panelSaveBtn.click(); });
   await act(async () => { await new Promise(r => setTimeout(r, 50)); });
 }
+
+function makeContextWithNotes(notes: string) {
+  return { ...mockContext, campaign: { ...mockContext.campaign, notes } };
+}
+
+describe('Prompt Builder — DM notes checkbox', () => {
+  it.each([
+    ['TC-C1: empty string', ''],
+    ['TC-C2: whitespace only', '   '],
+  ])('%s — checkbox not rendered', async (_label, notes) => {
+    mockCampaignContextResult = { context: makeContextWithNotes(notes), loading: false, error: null };
+    await act(async () => {
+      root = createRoot(container);
+      root.render(React.createElement(PromptBuilderPage));
+    });
+    const checkbox = container.querySelector('input[type="checkbox"]');
+    expect(checkbox).toBeNull();
+  });
+
+  it('TC-C3: checkbox rendered when campaign.notes is non-empty, unchecked by default', async () => {
+    mockCampaignContextResult = { context: makeContextWithNotes('Active quest: find the lost relic.'), loading: false, error: null };
+    await act(async () => {
+      root = createRoot(container);
+      root.render(React.createElement(PromptBuilderPage));
+    });
+    const checkbox = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    expect(checkbox).toBeTruthy();
+    expect(checkbox.checked).toBe(false);
+    const label = checkbox.closest('label');
+    expect(label?.textContent).toContain('Include DM notes in prompt');
+  });
+
+  it('TC-C4: toggling checkbox after generate clears built prompt and closes save panel', async () => {
+    mockCampaignContextResult = { context: makeContextWithNotes('Active quest: find the lost relic.'), loading: false, error: null };
+    await renderPage();
+    await fillFirstFieldAndGenerate();
+
+    // Save panel should be openable and Save to Library enabled after generate
+    expect(findSaveToLibraryButton().disabled).toBe(false);
+    await act(async () => { findSaveToLibraryButton().click(); });
+    expect(container.querySelector('#save-title')).toBeTruthy();
+
+    // Toggle the checkbox — should clear prompt and close save panel
+    const checkbox = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    await act(async () => { checkbox.click(); });
+
+    expect(container.querySelector('#save-title')).toBeNull();
+    expect(findSaveToLibraryButton().disabled).toBe(true);
+  });
+});
 
 describe('Prompt Builder — Save to Library', () => {
   it('"Save to Library" button is disabled before generate', async () => {

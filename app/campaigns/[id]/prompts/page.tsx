@@ -193,8 +193,10 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
   const [builtPrompt, setBuiltPrompt] = useState<BuiltPrompt | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [showSavePanel, setShowSavePanel] = useState(false);
+  const [includeNotes, setIncludeNotes] = useState(false);
 
   const activeTemplate = TEMPLATES.find(t => t.id === activeTemplateId) ?? TEMPLATES[0];
+  const hasNotes = Boolean(context?.campaign?.notes?.trim());
 
   function selectTemplate(template: PromptTemplate) {
     setActiveTemplateId(template.id);
@@ -220,7 +222,7 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
       setBuiltPrompt(null);
       return;
     }
-    setBuiltPrompt(activeTemplate.build(fields, ctx));
+    setBuiltPrompt(activeTemplate.build(fields, ctx, { includeNotes }));
     setValidationError(null);
   }
 
@@ -268,6 +270,22 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
                 </button>
               ))}
             </div>
+
+            {hasNotes && (
+              <label className="flex items-center gap-2 text-sm text-gray-300 mb-4">
+                <input
+                  type="checkbox"
+                  checked={includeNotes}
+                  onChange={e => {
+                    setIncludeNotes(e.target.checked);
+                    setBuiltPrompt(null);
+                    setShowSavePanel(false);
+                  }}
+                  className="w-4 h-4"
+                />
+                Include DM notes in prompt
+              </label>
+            )}
 
             <TemplateForm
               template={activeTemplate}
