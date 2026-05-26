@@ -127,6 +127,37 @@ describe('buildSystemPrompt', () => {
   });
 });
 
+describe('buildSystemPrompt — DM notes toggle', () => {
+  const ctxWithNotes = makeContext({ campaign: { id: 'camp-1', userId: 'u1', name: 'Curse of Strahd', moduleName: 'CoS', chapters: [], currentChapterId: undefined, status: 'active', notes: 'Quest hook: the gate is sealed.', createdAt: new Date(), updatedAt: new Date() } });
+  const ctxWhitespaceNotes = makeContext({ campaign: { ...ctxWithNotes.campaign, notes: '   ' } });
+
+  test('TC-N1: notes block absent when opts omitted', () => {
+    const result = buildSystemPrompt(ctxWithNotes);
+    expect(result).not.toContain('Current campaign context (DM notes):');
+  });
+
+  test('TC-N2: notes block absent when opts.includeNotes is false', () => {
+    const result = buildSystemPrompt(ctxWithNotes, { includeNotes: false });
+    expect(result).not.toContain('Current campaign context (DM notes):');
+  });
+
+  test('TC-N3: notes block present when opts.includeNotes is true', () => {
+    const result = buildSystemPrompt(ctxWithNotes, { includeNotes: true });
+    expect(result).toContain('Current campaign context (DM notes):\nQuest hook: the gate is sealed.');
+  });
+
+  test('TC-N4: notes block absent when notes are whitespace only, even with includeNotes: true', () => {
+    const result = buildSystemPrompt(ctxWhitespaceNotes, { includeNotes: true });
+    expect(result).not.toContain('Current campaign context (DM notes):');
+  });
+
+  test('TC-N5: npcTemplate passes opts through — notes block appears in fullText', () => {
+    const result = npcTemplate.build({ role: 'innkeeper', location: 'Barovia', requirements: '' }, ctxWithNotes, { includeNotes: true });
+    expect(result.fullText).toContain('Current campaign context (DM notes):');
+    expect(result.fullText).toContain('Quest hook: the gate is sealed.');
+  });
+});
+
 describe('TEMPLATES array', () => {
   test('B1-12: exactly 5 entries with distinct ids', () => {
     expect(TEMPLATES).toHaveLength(5);
