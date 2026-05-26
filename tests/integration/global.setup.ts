@@ -1,7 +1,7 @@
 import { MongoDBContainer } from "@testcontainers/mongodb";
 import { spawn } from "child_process";
 import fetch from "node-fetch";
-import { getDirectoryBasePort } from "../shared/port";
+import { getDirectoryPort } from "../shared/port";
 import { dropTestDatabase } from "../shared/mongo";
 import { startDndBeyondMockServer } from "../mocks/dndBeyond/server";
 
@@ -49,7 +49,7 @@ async function globalSetup(): Promise<void> {
   global.__DND_BEYOND_MOCK_SERVER__ = dndBeyondServer;
   console.log(`DnD Beyond mock server started at ${dndBeyondBaseUrl}`);
 
-  const port = getDirectoryBasePort();
+  const port = await getDirectoryPort();
   console.log(`[port-select] cwd=${process.cwd()} port=${port}`);
 
   const nextProcess = spawn("npx", ["next", "start"], {

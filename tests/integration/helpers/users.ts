@@ -13,7 +13,7 @@ export async function createTestUser(
   prefix = "user",
 ): Promise<{ email: string; password: string; cookie: string; userId: string }> {
   const email = uniqueEmail(prefix);
-  const password = "testPassword123!";
+  const password = process.env.TEST_USER_PASSWORD ?? "testPassword123!";
 
   const response = await fetch(`${baseUrl}/api/auth/register`, {
     method: "POST",

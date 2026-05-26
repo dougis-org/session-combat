@@ -92,7 +92,7 @@ Files to migrate (excluding `dedupeEngine.integration.test.ts`):
 
 ## Validation
 
-- [x] `npm run type-check` (or `tsc --noEmit`) — no new type errors
+- [x] `npm run typecheck` — no new type errors
 - [ ] `npm run test:integration` — all integration tests pass with shared server
 - [ ] Verify `[port-select]` line appears exactly once in integration test output
 - [ ] `npm run test:e2e` or `npx playwright test` — e2e suite passes with derived port
@@ -103,7 +103,7 @@ Files to migrate (excluding `dedupeEngine.integration.test.ts`):
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test` (unit suite); all tests must pass
+- **Unit tests** — `npm run test:unit`; all tests must pass
 - **Integration tests** — `npm run test:integration`; all tests must pass
 - **Regression / E2E tests** — `npx playwright test`; all tests must pass
 - **Build** — `npm run build`; must succeed with no errors

@@ -2,7 +2,7 @@
 
 ### Requirement: ADDED Directory-derived port selection
 
-The system SHALL derive a stable, unique base port for each working directory by hashing `process.cwd()` into the range 20000–50000, and use that port for all test servers started from that directory.
+The system SHALL derive a stable, unique base port for each working directory by hashing `process.cwd()` into the range 20000–49999 inclusive, and use that port for all test servers started from that directory.
 
 #### Scenario: Different directories produce different ports
 
