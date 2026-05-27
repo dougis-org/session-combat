@@ -30,14 +30,15 @@ export async function migrateGlobalMonsters() {
   return result.modifiedCount;
 }
 
+export async function runCli(): Promise<void> {
+  const count = await migrateGlobalMonsters();
+  console.log(`Successfully updated ${count} global monsters`);
+  process.exit(0);
+}
+
 if (require.main === module) {
-  migrateGlobalMonsters()
-    .then((count) => {
-      console.log(`Successfully updated ${count} global monsters`);
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error("Migration failed:", error);
-      process.exit(1);
-    });
+  runCli().catch((error) => {
+    console.error("Migration failed:", error);
+    process.exit(1);
+  });
 }
