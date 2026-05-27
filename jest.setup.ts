@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import { webcrypto } from 'crypto';
 
 if (typeof globalThis.crypto?.randomUUID !== 'function') {

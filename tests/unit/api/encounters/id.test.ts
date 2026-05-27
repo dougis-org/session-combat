@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { GET, PUT, DELETE } from "@/app/api/encounters/[id]/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";

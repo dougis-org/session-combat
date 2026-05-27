@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { NextRequest } from "next/server";
 import { POST } from "@/app/api/auth/logout/route";
 import { clearAuthCookie } from "@/lib/middleware";

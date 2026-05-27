@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { DELETE } from "@/app/api/campaigns/global/[id]/route";
 import { requireAdmin } from "@/lib/api-helpers";
 import { storage } from "@/lib/storage";

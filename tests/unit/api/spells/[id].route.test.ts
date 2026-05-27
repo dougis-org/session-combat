@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { NextResponse } from "next/server";
 import { GET, PUT, DELETE } from "@/app/api/spells/[id]/route";
 import { storage } from "@/lib/storage";

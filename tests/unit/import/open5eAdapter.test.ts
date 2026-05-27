@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { Open5EClient, Open5ECreature, Open5ESpell } from "@/lib/import/open5eAdapter";
 import {
   createMockFetch,

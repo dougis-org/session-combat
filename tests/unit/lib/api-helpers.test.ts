@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { requireAdmin } from "@/lib/api-helpers";
 import { requireAuth } from "@/lib/middleware";
 import { getUserById, InvalidUserIdError } from "@/lib/permissions";

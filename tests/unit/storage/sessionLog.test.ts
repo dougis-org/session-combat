@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { describe, test, expect, jest, beforeEach } from "@jest/globals";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
