@@ -2,7 +2,7 @@ import { getDatabase } from "../db";
 import { MonsterTemplate } from "../types";
 import { GLOBAL_USER_ID } from "../constants";
 
-async function migrateGlobalMonsters() {
+export async function migrateGlobalMonsters() {
   const db = await getDatabase();
   const collection = db.collection<MonsterTemplate>("monsterTemplates");
 
@@ -30,12 +30,17 @@ async function migrateGlobalMonsters() {
   return result.modifiedCount;
 }
 
-migrateGlobalMonsters()
-  .then((count) => {
-    console.log(`Successfully updated ${count} global monsters`);
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error("Migration failed:", error);
-    process.exit(1);
-  });
+export async function runCli(): Promise<void> {
+  const count = await migrateGlobalMonsters();
+  console.log(`Successfully updated ${count} global monsters`);
+  process.exit(0);
+}
+
+export function handleCliError(error: unknown): never {
+  console.error("Migration failed:", error);
+  process.exit(1);
+}
+
+if (require.main === module) {
+  runCli().catch(handleCliError);
+}
