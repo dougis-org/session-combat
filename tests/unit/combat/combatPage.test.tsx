@@ -40,7 +40,7 @@ const MOCK_COMBAT_STATE: CombatState = {
 };
 
 let container: HTMLDivElement;
-let root: Root;
+let root: Root | undefined;
 
 beforeEach(() => {
   container = document.createElement('div');
@@ -48,7 +48,10 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  act(() => { root?.unmount(); });
+  if (root) {
+    act(() => { root!.unmount(); });
+    root = undefined;
+  }
   container.remove();
   jest.clearAllMocks();
 });
