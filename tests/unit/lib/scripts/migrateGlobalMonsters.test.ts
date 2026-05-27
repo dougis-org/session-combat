@@ -1,4 +1,4 @@
-import { runCli } from "../../../../lib/scripts/migrateGlobalMonsters";
+import { runCli, handleCliError } from "../../../../lib/scripts/migrateGlobalMonsters";
 
 jest.mock("../../../../lib/db", () => ({
   getDatabase: jest.fn(),
@@ -39,5 +39,27 @@ describe("runCli", () => {
 
     expect(logSpy).toHaveBeenCalledWith("Successfully updated 5 global monsters");
     expect(exitSpy).toHaveBeenCalledWith(0);
+  });
+});
+
+describe("handleCliError", () => {
+  let exitSpy: jest.SpyInstance;
+  let errorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    exitSpy = jest.spyOn(process, "exit").mockImplementation((() => {}) as never);
+    errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("logs error and exits 1", () => {
+    const err = new Error("DB failed");
+    handleCliError(err);
+
+    expect(errorSpy).toHaveBeenCalledWith("Migration failed:", err);
+    expect(exitSpy).toHaveBeenCalledWith(1);
   });
 });

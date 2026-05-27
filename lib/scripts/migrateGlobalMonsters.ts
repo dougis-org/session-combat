@@ -36,9 +36,11 @@ export async function runCli(): Promise<void> {
   process.exit(0);
 }
 
+export function handleCliError(error: unknown): never {
+  console.error("Migration failed:", error);
+  process.exit(1);
+}
+
 if (require.main === module) {
-  runCli().catch((error) => {
-    console.error("Migration failed:", error);
-    process.exit(1);
-  });
+  runCli().catch(handleCliError);
 }
