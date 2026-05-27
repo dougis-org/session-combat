@@ -45,7 +45,7 @@ The system SHALL have a passing RTL smoke test at `tests/unit/CombatStatsRow.rtl
 #### Scenario: Smoke test passes
 
 - **Given** RTL packages are installed and jest-dom is configured
-- **When** `npm test -- CombatStatsRow.rtl` is run
+- **When** `npm run test:unit -- --testPathPattern=CombatStatsRow.rtl` is run
 - **Then** all assertions pass and the test exits 0
 
 #### Scenario: Smoke test uses RTL APIs exclusively
@@ -63,7 +63,7 @@ The system SHALL use `jsdom` as the default `testEnvironment` in `jest.config.js
 #### Scenario: All existing tests still pass under jsdom
 
 - **Given** `jest.config.js` with `testEnvironment: "jsdom"`
-- **When** `npm test` is run (full unit suite, excluding integration)
+- **When** `npm run test:unit` is run (full unit suite, excluding integration)
 - **Then** all previously-passing tests still pass; no new failures introduced
 
 #### Scenario: Integration tests are unaffected
@@ -94,7 +94,7 @@ No requirements removed.
 #### Scenario: No regressions after env change
 
 - **Given** the full unit test suite (138 tests) was passing before this change
-- **When** `npm test` is run after all changes are applied
+- **When** `npm run test:unit` is run after all changes are applied
 - **Then** the same number of tests pass; zero new failures
 
 ### Requirement: Operability
