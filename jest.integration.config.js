@@ -10,7 +10,17 @@ module.exports = {
   // forceExit is NOT set here — use `npm run test:ci` (which passes --forceExit) for
   // pre-commit hooks and CI. Direct `npm run test:integration` runs without force-exit so
   // leaked handles surface during development.
-  maxWorkers: 1, // Run tests sequentially to avoid port conflicts
+  // Port conflicts resolved by #220; parallelism is now safe
+  maxWorkers: (() => {
+    const value = process.env.INTEGRATION_WORKERS;
+    if (!value) return '50%'; // Jest default: half CPUs
+    const parsed = Number.parseInt(value, 10);
+    if (!Number.isFinite(parsed) || parsed < 1) {
+      console.warn(`Invalid INTEGRATION_WORKERS="${value}"; falling back to default`);
+      return '50%';
+    }
+    return parsed;
+  })(),
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
