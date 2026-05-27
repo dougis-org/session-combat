@@ -61,13 +61,13 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run before the final commit
-- [ ] Commit all changes to `feat/install-rtl-infrastructure` and push to remote
-- [ ] Open PR from `feat/install-rtl-infrastructure` to `main`. PR body **MUST** include `Closes #254`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll autonomously; address, commit, validate locally, push, wait 180s, repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, validate locally, push, wait 180s, repeat
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify user
+- [x] Commit all changes to `feat/install-rtl-infrastructure` and push to remote
+- [x] Open PR from `feat/install-rtl-infrastructure` to `main`. PR body **MUST** include `Closes #254`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — poll autonomously; address, commit, validate locally, push, wait 180s, repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, validate locally, push, wait 180s, repeat
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify user
 
 Ownership metadata:
 
@@ -83,15 +83,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`: `git log --oneline -5`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No documentation updates required for this infrastructure change
-- [ ] Sync approved spec deltas: copy `openspec/changes/install-rtl-infrastructure/specs/rtl-setup.md` to `openspec/specs/rtl-setup.md`
-- [ ] Archive the change: move `openspec/changes/install-rtl-infrastructure/` to `openspec/changes/archive/YYYY-MM-DD-install-rtl-infrastructure/` — stage both the new location and deletion of the old location in **a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-install-rtl-infrastructure/` exists and `openspec/changes/install-rtl-infrastructure/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-install-rtl-infrastructure` then `git push -u origin doc/archive-YYYY-MM-DD-install-rtl-infrastructure`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-install-rtl-infrastructure` to `main` with title `docs: archive install-rtl-infrastructure (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/install-rtl-infrastructure doc/archive-YYYY-MM-DD-install-rtl-infrastructure`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`: `git log --oneline -5`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No documentation updates required for this infrastructure change
+- [x] Sync approved spec deltas: copy `openspec/changes/install-rtl-infrastructure/specs/rtl-setup.md` to `openspec/specs/rtl-setup.md`
+- [x] Archive the change: move `openspec/changes/install-rtl-infrastructure/` to `openspec/changes/archive/YYYY-MM-DD-install-rtl-infrastructure/` — stage both the new location and deletion of the old location in **a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-install-rtl-infrastructure/` exists and `openspec/changes/install-rtl-infrastructure/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-install-rtl-infrastructure` then `git push -u origin doc/archive-YYYY-MM-DD-install-rtl-infrastructure`
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-install-rtl-infrastructure` to `main` with title `docs: archive install-rtl-infrastructure (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/install-rtl-infrastructure doc/archive-YYYY-MM-DD-install-rtl-infrastructure`
