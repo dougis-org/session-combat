@@ -28,8 +28,10 @@ export default defineConfig({
   workers: (() => {
     const value = process.env.REGRESSION_WORKERS;
     if (!value) return undefined; // Playwright default: half CPUs, bounded by spec file count
-    const parsed = Number.parseInt(value, 10);
-    if (!Number.isFinite(parsed) || parsed < 1) {
+    const trimmed = value.trim();
+    if (/^\d+%$/.test(trimmed)) return trimmed; // percentage strings are valid Playwright syntax
+    const parsed = Number(trimmed); // strict: '4abc' → NaN, unlike parseInt
+    if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed < 1) {
       console.warn(
         `Invalid REGRESSION_WORKERS="${value}"; falling back to default`,
       );
