@@ -67,11 +67,11 @@ File: `.github/workflows/build-test.yml`
 
 - [x] `npm run test:unit` — all pass
 - [x] `INTEGRATION_WORKERS=4 npm run test:integration` — all pass with multiple workers
-- [ ] `npm run test:regression` — all pass (Playwright uses smart default locally)
+- [x] `npm run test:regression` — all pass (Playwright uses smart default locally)
 - [x] `npm run build` — succeeds
 - [x] `npm run typecheck` — no errors
 - [x] `npm run lint` — no errors
-- [ ] All completed tasks marked complete
+- [x] All completed tasks marked complete
 
 ## Remote push validation
 
@@ -85,16 +85,16 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run before the final commit
-- [ ] Commit all changes to `feat/parallel-test-runners` and push to remote
-- [ ] Open PR from `feat/parallel-test-runners` to `main`. PR body must include:
+- [x] Ensure the `openspec-review-code` sub-agent was run before the final commit
+- [x] Commit all changes to `feat/parallel-test-runners` and push to remote
+- [x] Open PR from `feat/parallel-test-runners` to `main`. PR body must include:
   - `Closes #233`
   - Summary of what changed and why (reference to issue #220 resolving the original blocker)
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll for new comments autonomously; address, commit, validate locally, push; wait 180 seconds; repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll with `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, validate, push; wait 180 seconds; repeat until all required checks pass
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — poll for new comments autonomously; address, commit, validate locally, push; wait 180 seconds; repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll with `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, validate, push; wait 180 seconds; repeat until all required checks pass
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
 
 Ownership metadata:
 
@@ -110,15 +110,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main` (`git log --oneline -5`)
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] No documentation updates required (config-only change)
-- [ ] Sync approved spec deltas into `openspec/specs/` if applicable
-- [ ] Archive the change: move `openspec/changes/parallel-test-runners/` to `openspec/changes/archive/YYYY-MM-DD-parallel-test-runners/` — stage both the new location and deletion of the old location in a **single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-parallel-test-runners/` exists and `openspec/changes/parallel-test-runners/` is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-parallel-test-runners` then `git push -u origin doc/archive-YYYY-MM-DD-parallel-test-runners`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive parallel-test-runners (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor doc PR until merged (same loop as implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/parallel-test-runners doc/archive-YYYY-MM-DD-parallel-test-runners`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main` (`git log --oneline -5`)
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] No documentation updates required (config-only change)
+- [x] Sync approved spec deltas into `openspec/specs/` if applicable
+- [x] Archive the change: move `openspec/changes/parallel-test-runners/` to `openspec/changes/archive/YYYY-MM-DD-parallel-test-runners/` — stage both the new location and deletion of the old location in a **single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-parallel-test-runners/` exists and `openspec/changes/parallel-test-runners/` is gone
+- [x] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-parallel-test-runners` then `git push -u origin doc/archive-YYYY-MM-DD-parallel-test-runners`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive parallel-test-runners (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor doc PR until merged (same loop as implementation PR)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/parallel-test-runners doc/archive-YYYY-MM-DD-parallel-test-runners`
