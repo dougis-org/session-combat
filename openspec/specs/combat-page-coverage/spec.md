@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the `design.md` document, not a replacement.
+This document details *changes* to requirements and is additive to the archived [design.md](../../changes/archive/2026-05-27-combat-page-test-coverage/design.md) document, not a replacement.
 
 ### Requirement: ADDED Central `useCombat` mock factory
 
@@ -99,5 +99,5 @@ None.
 #### Scenario: Test suite runs fast
 
 - **Given** all five module-level mocks are in place
-- **When** `npm test -- --testPathPattern=combatPage` is run
+- **When** `npx jest --testPathPattern=combatPage` is run
 - **Then** the three tests complete in under one second (no network, no DB, no real hook state)
