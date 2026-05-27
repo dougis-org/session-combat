@@ -25,7 +25,7 @@ For each task, verify behavior before and after the config change using the comm
 - [ ] **TC-1.2 — Invalid env var falls back gracefully:** Run `INTEGRATION_WORKERS=banana npm run test:integration`. Verify stderr contains `Invalid INTEGRATION_WORKERS="banana"; falling back to default` and tests still complete successfully.
   - Spec scenario: "Invalid INTEGRATION_WORKERS value"
 
-- [ ] **TC-1.3 — No env var uses Jest default:** Run `npm run test:integration` with no `INTEGRATION_WORKERS` set. Verify tests run (no crash), no warning is printed, and Jest selects its own worker count.
+- [ ] **TC-1.3 — No env var uses Jest default:** Run `npm run test:integration` with no `INTEGRATION_WORKERS` set. Verify tests run (no crash), no warning is printed, and Jest uses `'50%'` of logical CPUs (the explicit fallback default).
   - Spec scenario: "INTEGRATION_WORKERS not set (local default)"
 
 - [ ] **TC-1.4 — Escape hatch:** Run `INTEGRATION_WORKERS=1 npm run test:integration`. Verify sequential execution (equivalent to old behavior). All tests pass.

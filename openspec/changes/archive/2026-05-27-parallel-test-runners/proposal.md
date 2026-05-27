@@ -50,7 +50,7 @@
 
 ## What Changes
 
-- `jest.integration.config.js`: `maxWorkers` reads `INTEGRATION_WORKERS` env var; validates and warns on invalid values; defaults to Jest's own default (undefined = 50% CPUs) when unset
+- `jest.integration.config.js`: `maxWorkers` reads `INTEGRATION_WORKERS` env var; validates and warns on invalid values; defaults to `'50%'` (half logical CPUs) explicitly when unset
 - `playwright.config.ts`: workers IIFE returns `undefined` instead of `1` when `REGRESSION_WORKERS` is not set
 - `.github/workflows/build-test.yml`: two env var additions/updates
 
@@ -61,7 +61,7 @@
   - Mitigation: Verified all integration tests use unique-per-run user identities; `permissions.test.ts` `afterAll` only closes a connection. No collection-level mutations found.
 
 - Risk: Increased worker count in CI could exhaust GitHub Actions runner resources (memory, CPU)
-  - Impact: Low — Next.js server + MongoDB are already running; additional workers are lightweight Jest processes making HTTP requests
+  - Impact: Medium — Next.js server + MongoDB are already running; Jest workers are full Node.js processes that load ts-jest and compile TypeScript, making them resource-intensive on standard 2-core GitHub runners
   - Mitigation: Start with 4 workers in CI (conservative); can tune `INTEGRATION_WORKERS` / `REGRESSION_WORKERS` without code changes
 
 - Risk: A future test added without proper isolation could silently fail when parallelism is on

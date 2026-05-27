@@ -4,7 +4,7 @@ This document details *changes* to requirements and is additive to the `design.m
 
 ### Requirement: ADDED Integration test worker configuration via env var
 
-The system SHALL read `INTEGRATION_WORKERS` from the environment to set Jest `maxWorkers` for the integration test suite, warn on invalid values, and fall back to Jest's default when unset.
+The system SHALL read `INTEGRATION_WORKERS` from the environment to set Jest `maxWorkers` for the integration test suite, warn on invalid values, and fall back to `'50%'` (half logical CPUs) when unset.
 
 #### Scenario: Valid INTEGRATION_WORKERS value
 
@@ -22,7 +22,7 @@ The system SHALL read `INTEGRATION_WORKERS` from the environment to set Jest `ma
 
 - **Given** `INTEGRATION_WORKERS` is not set in the environment
 - **When** `npm run test:integration` is executed
-- **Then** Jest uses its own default worker count (approximately 50% of logical CPUs) and tests pass
+- **Then** Jest uses `'50%'` as the explicit `maxWorkers` value (approximately half of logical CPUs) and tests pass
 
 ### Requirement: ADDED Playwright smart local worker default
 

@@ -23,7 +23,7 @@
 
 ### Decision 1: INTEGRATION_WORKERS env var pattern
 
-- Chosen: Read `process.env.INTEGRATION_WORKERS` in `jest.integration.config.js`; parse as integer; warn and fall back to `undefined` (Jest default = 50% CPUs) if missing or invalid; pass directly to `maxWorkers`
+- Chosen: Read `process.env.INTEGRATION_WORKERS` in `jest.integration.config.js`; parse as integer or accept percentage strings (e.g. `'50%'`); warn and fall back to `'50%'` (half logical CPUs) if missing or invalid; pass directly to `maxWorkers`
 - Alternatives considered: (a) hardcode a specific number like 4; (b) use Jest's `--maxWorkers` CLI flag at the npm script level
 - Rationale: Mirrors the existing `REGRESSION_WORKERS` pattern in `playwright.config.ts` exactly — consistent, overridable per environment, no CLI flag pollution in `package.json`
 - Trade-offs: Slightly more config than hardcoding; worth it for per-environment control without code changes
@@ -39,7 +39,7 @@
 
 - Chosen: `INTEGRATION_WORKERS: '4'` for integration job; `REGRESSION_WORKERS: '4'` for regression job (up from 2)
 - Alternatives considered: `2`, `8`, `'50%'`
-- Rationale: GitHub Actions standard runners have 4 vCPUs. 4 workers saturates available CPUs without oversubscribing. `'50%'` is not supported by Jest's env-var path (requires parsing).
+- Rationale: GitHub Actions standard runners have 2 vCPUs. Configuring 4 workers may oversubscribe the CPU but can help maximize throughput when tests have significant I/O wait times. `'50%'` is valid Jest percentage syntax and is also accepted by the env-var path; a fixed `'4'` was chosen for predictable CI behaviour.
 - Trade-offs: If runner resources are constrained, 4 workers could slow things. Env var can be dropped to `2` or `1` without code changes.
 
 ## Proposal to Design Mapping
@@ -60,22 +60,22 @@
 
 - Requirement: Integration tests run in parallel when `INTEGRATION_WORKERS` > 1
   - Design element: `maxWorkers` reads env var (Decision 1)
-  - Acceptance criteria reference: specs/integration-parallelism.md
+  - Acceptance criteria reference: specs/parallel-runners.md
   - Testability notes: Run with `INTEGRATION_WORKERS=4`, observe Jest output showing `Test Suites: N` completing non-sequentially
 
 - Requirement: Invalid `INTEGRATION_WORKERS` value falls back gracefully
   - Design element: Parse + validate + warn pattern (mirrors existing Playwright pattern)
-  - Acceptance criteria reference: specs/integration-parallelism.md
+  - Acceptance criteria reference: specs/parallel-runners.md
   - Testability notes: Set `INTEGRATION_WORKERS=banana`, expect warning in stderr and tests proceed with default workers
 
 - Requirement: Playwright uses smart default locally
   - Design element: `return undefined` in workers IIFE (Decision 2)
-  - Acceptance criteria reference: specs/e2e-parallelism.md
+  - Acceptance criteria reference: specs/parallel-runners.md
   - Testability notes: On a 4-vCPU machine with `REGRESSION_WORKERS` unset, Playwright should report 2 workers (min of half CPUs and 4 spec files)
 
 - Requirement: CI uses 4 workers for both suites
   - Design element: Decision 3 env var additions to build-test.yml
-  - Acceptance criteria reference: specs/ci-configuration.md
+  - Acceptance criteria reference: specs/parallel-runners.md
   - Testability notes: CI job output lines "Regression workers: 4" (already instrumented) and Jest worker count visible in output
 
 ## Non-Functional Requirements Mapping
@@ -83,7 +83,7 @@
 - Requirement category: reliability
   - Requirement: Parallel tests must not produce flaky failures from data contention
   - Design element: No change to isolation patterns — existing uniqueness guarantees are sufficient
-  - Acceptance criteria reference: specs/integration-parallelism.md (no new test failures vs baseline)
+  - Acceptance criteria reference: specs/parallel-runners.md (no new test failures vs baseline)
   - Testability notes: Run integration suite 3x with `INTEGRATION_WORKERS=4`; all runs green
 
 - Requirement category: operability
