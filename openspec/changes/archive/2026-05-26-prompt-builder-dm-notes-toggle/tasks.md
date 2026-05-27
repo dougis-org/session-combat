@@ -106,11 +106,11 @@ Blocking resolution flow:
 - [x] `git checkout main` and `git pull --ff-only`
 - [x] Verify the merged changes appear on main
 - [x] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/` (copy `specs/dm-notes-toggle/spec.md` to `openspec/specs/prompt-builder-dm-notes-toggle/dm-notes-toggle/spec.md`)
-- [ ] Archive the change: move `openspec/changes/prompt-builder-dm-notes-toggle/` to `openspec/changes/archive/YYYY-MM-DD-prompt-builder-dm-notes-toggle/` **in a single commit** — stage both the new location and the deletion of the old location together
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-prompt-builder-dm-notes-toggle/` exists and `openspec/changes/prompt-builder-dm-notes-toggle/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-prompt-builder-dm-notes-toggle` then `git push -u origin doc/archive-YYYY-MM-DD-prompt-builder-dm-notes-toggle`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive prompt-builder-dm-notes-toggle (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Sync approved spec deltas into `openspec/specs/` (copy `specs/dm-notes-toggle/spec.md` to `openspec/specs/prompt-builder-dm-notes-toggle/dm-notes-toggle/spec.md`)
+- [x] Archive the change: move `openspec/changes/prompt-builder-dm-notes-toggle/` to `openspec/changes/archive/YYYY-MM-DD-prompt-builder-dm-notes-toggle/` **in a single commit** — stage both the new location and the deletion of the old location together
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-prompt-builder-dm-notes-toggle/` exists and `openspec/changes/prompt-builder-dm-notes-toggle/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-prompt-builder-dm-notes-toggle` then `git push -u origin doc/archive-YYYY-MM-DD-prompt-builder-dm-notes-toggle`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive prompt-builder-dm-notes-toggle (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
 - [ ] Monitor the doc PR until it merges
 - [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/prompt-builder-dm-notes-toggle doc/archive-YYYY-MM-DD-prompt-builder-dm-notes-toggle`
