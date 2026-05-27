@@ -73,6 +73,9 @@ describe("migrateGlobalMonsters", () => {
   });
 
   it("returns modifiedCount equal to number of untagged docs", async () => {
+    // Tag any pre-existing untagged global monsters so they don't skew the count
+    await migrateGlobalMonsters();
+
     await seed({ userId: GLOBAL_USER_ID, isGlobal: true });
     await seed({ userId: GLOBAL_USER_ID, isGlobal: true, source: "" });
     await seed({ userId: GLOBAL_USER_ID, isGlobal: true, source: "SRD" });
