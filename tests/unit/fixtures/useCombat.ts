@@ -45,7 +45,7 @@ export function makeUseCombat(overrides?: Partial<UseCombatReturn>): UseCombatRe
     setLairFormName: jest.fn(),
     setLairFormSeedMonster: jest.fn(),
 
-    saveCombatState: jest.fn<(state: CombatState | null) => Promise<void>>(),
+    saveCombatState: jest.fn<(state: CombatState | null) => Promise<void>>().mockResolvedValue(undefined),
     addCombatantToSetup: jest.fn(),
     removeCombatantFromSetup: jest.fn(),
     cancelLairForm: jest.fn(),
@@ -62,8 +62,8 @@ export function makeUseCombat(overrides?: Partial<UseCombatReturn>): UseCombatRe
     updateCombatantInitiativeSettings: jest.fn(),
     removeCombatant: jest.fn(),
     setInitiativeRoll: jest.fn(),
-    hasInitiativeBeenRolled: jest.fn<() => boolean>(),
-    getDisplayCombatants: jest.fn<() => CombatantState[]>(),
+    hasInitiativeBeenRolled: jest.fn<() => boolean>().mockReturnValue(false),
+    getDisplayCombatants: jest.fn<() => CombatantState[]>().mockReturnValue([]),
 
     ...overrides,
   };

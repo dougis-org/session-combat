@@ -24,13 +24,13 @@ Create `tests/unit/combat/combatPage.test.tsx` using the `createRoot` + `act` pa
 - A minimal `MOCK_COMBAT_STATE: CombatState` fixture defined inline
 - Three test cases: loading state, setup view, active view (see spec scenarios)
 
-**Verification:** `npm test -- --testPathPattern=combatPage` — all three tests pass
+**Verification:** `npx jest --testPathPattern=combatPage` — all three tests pass
 
 ### Task 3 — Verify coverage threshold
 
 Run coverage for the combat page file and confirm ≥80% statement coverage.
 
-**Verification:** `npm test -- --testPathPattern=combatPage --coverage --collectCoverageFrom='app/combat/page.tsx'` — statements ≥80%
+**Verification:** `npx jest --testPathPattern=combatPage --coverage --collectCoverageFrom='app/combat/page.tsx'` — statements ≥80%
 
 ## Pre-Commit Code Review
 
@@ -38,28 +38,28 @@ Run coverage for the combat page file and confirm ≥80% statement coverage.
 
 ## Validation
 
-- [ ] `npm test -- --testPathPattern=combatPage` — all three tests pass
-- [ ] `npx tsc --noEmit` — no TypeScript errors
-- [ ] `npm run build` — build succeeds
-- [ ] Coverage ≥80% on `app/combat/page.tsx`
-- [ ] All execution tasks marked complete
-- [ ] All steps in [Remote push validation]
+- [x] `npx jest --testPathPattern=combatPage` — all three tests pass
+- [x] `npx tsc --noEmit` — no TypeScript errors
+- [x] `npm run build` — build succeeds
+- [x] Coverage ≥80% on `app/combat/page.tsx`
+- [x] All execution tasks marked complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test` — all tests must pass
+- **Unit tests** — `npm run test:unit` — all tests must pass
 - **Integration tests** — `npm run test:integration` — all tests must pass
 - **Build** — `npm run build` — must succeed with no errors
 - if **ANY** of the above fail, you **MUST** iterate and address the failure
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run before the final commit
-- [ ] Commit all changes to `feat/combat-page-test-coverage` and push to remote
-- [ ] Open PR from `feat/combat-page-test-coverage` to `main`. PR body **must** include `Closes #243`.
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Ensure the `openspec-review-code` sub-agent was run before the final commit
+- [x] Commit all changes to `feat/combat-page-test-coverage` and push to remote
+- [x] Open PR from `feat/combat-page-test-coverage` to `main`. PR body **must** include `Closes #243`.
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
 - [ ] **Monitor PR comments** — poll for new comments autonomously; address, commit, validate locally, push; wait 180 seconds then repeat until no unresolved comments remain
 - [ ] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json isRequired,state`; fix any required failures, commit, validate locally, push; wait 180 seconds then repeat
