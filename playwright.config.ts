@@ -24,16 +24,18 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI: 2 retries for better flakiness tolerance */
   retries: process.env.CI ? 2 : 0,
-  /* Default to 1 worker to keep the test environment stable. Override with REGRESSION_WORKERS for local experimentation. */
+  /* Playwright default (half CPUs, bounded by spec file count) when REGRESSION_WORKERS is unset */
   workers: (() => {
     const value = process.env.REGRESSION_WORKERS;
-    if (!value) return 1;
-    const parsed = Number.parseInt(value, 10);
-    if (!Number.isFinite(parsed) || parsed < 1) {
+    if (!value) return undefined; // Playwright default: half CPUs, bounded by spec file count
+    const trimmed = value.trim();
+    if (/^\d+%$/.test(trimmed)) return trimmed; // percentage strings are valid Playwright syntax
+    const parsed = Number(trimmed); // strict: '4abc' → NaN, unlike parseInt
+    if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed < 1) {
       console.warn(
-        `Invalid REGRESSION_WORKERS="${value}"; falling back to 1`,
+        `Invalid REGRESSION_WORKERS="${value}"; falling back to default`,
       );
-      return 1;
+      return undefined;
     }
     return parsed;
   })(),

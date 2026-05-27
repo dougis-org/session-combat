@@ -100,6 +100,8 @@ jobs:
 
       - name: Run integration tests with coverage
         run: npm run test:integration -- --coverage --forceExit
+        env:
+          INTEGRATION_WORKERS: '4'
 
       - name: Upload integration coverage to Codacy
         if: always()
@@ -197,7 +199,7 @@ jobs:
 
           npm run test:regression
         env:
-          REGRESSION_WORKERS: '2'
+          REGRESSION_WORKERS: '4'
           MONGODB_URI: mongodb://localhost:27017
           MONGODB_DB: session-combat-e2e
           CHROMIUM_ONLY: 'true'

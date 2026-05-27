@@ -306,11 +306,11 @@ export default defineConfig({
 
 ### Environment Variables
 
-- `REGRESSION_WORKERS` - Number of parallel workers (defaults to Playwright auto-detection locally and 1 in CI)
+- `REGRESSION_WORKERS` - Number of parallel workers or percentage string (e.g. `'4'`, `'50%'`); defaults to Playwright's CPU-based auto-detection (half CPUs, bounded by spec file count) both locally and in CI
 - `MONGODB_URI` - MongoDB connection string (set to `mongodb://localhost:27017` in CI)
 - `MONGODB_DB` - Test database name (set to `session-combat-e2e` in CI)
 - `CHROMIUM_ONLY` - Set to `'true'` in CI to run the Chromium-specific regression path
-- `CI` - Set by GitHub Actions; triggers single worker + 2 retries
+- `CI` - Set by GitHub Actions; triggers 2 retries
 
 ## Running in CI
 
@@ -341,7 +341,7 @@ Regression tests run automatically in GitHub Actions:
     trap finish EXIT
     npm run test:regression
   env:
-    REGRESSION_WORKERS: '2'
+    REGRESSION_WORKERS: '4'
     MONGODB_URI: mongodb://localhost:27017
     MONGODB_DB: session-combat-e2e
     CHROMIUM_ONLY: 'true'
@@ -404,7 +404,7 @@ local runs, use a disposable test database name via `MONGODB_DB`.
 
 - **Chromium CI budget**: The primary runtime target applies to the Chromium-specific CI path
 - **Phase one goal**: Establish robust parallel execution first, then continue tuning toward the final runtime budget
-- **Tune for CI**: 2 workers for GitHub Actions runners unless runtime or stability data suggests a safer setting
+- **Tune for CI**: 4 workers for GitHub Actions runners (4 vCPUs); adjust `REGRESSION_WORKERS` in the CI workflow if runner resources are constrained
 - **Timing evidence**: CI logs emit browser scope, worker count, and elapsed regression duration for each run
 
 ## Troubleshooting
