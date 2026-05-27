@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { POST, PUT } from "@/app/api/monsters/global/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";

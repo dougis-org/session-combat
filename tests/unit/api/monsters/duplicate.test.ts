@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 const mockLoadAll = jest.fn();
 const mockSave = jest.fn();
 

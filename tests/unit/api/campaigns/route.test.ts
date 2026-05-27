@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { GET, POST } from "@/app/api/campaigns/route";
 import { GET as GET_ONE, PATCH, DELETE } from "@/app/api/campaigns/[id]/route";
 import { requireAuth } from "@/lib/middleware";

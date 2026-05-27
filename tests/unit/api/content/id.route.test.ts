@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { PUT, DELETE } from "@/app/api/content/[id]/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";

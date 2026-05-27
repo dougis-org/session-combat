@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { GET, POST, PUT } from "@/app/api/campaigns/global/route";
 import { requireAdmin } from "@/lib/api-helpers";
 import { storage } from "@/lib/storage";

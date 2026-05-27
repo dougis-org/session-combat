@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { storage } from "@/lib/storage";
 import { Character, CombatState, Encounter, SpellTemplate } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";

@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { NextRequest } from "next/server";
 import { GET } from "@/app/api/auth/me/route";
 import { verifyToken } from "@/lib/auth";

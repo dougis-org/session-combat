@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { PATCH, DELETE } from "@/app/api/campaigns/[id]/sessions/[sessionId]/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";

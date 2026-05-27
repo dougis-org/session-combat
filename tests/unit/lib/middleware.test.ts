@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { NextRequest, NextResponse } from "next/server";
 import {
   extractToken,

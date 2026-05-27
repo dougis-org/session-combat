@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { GET, POST } from "@/app/api/characters/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";

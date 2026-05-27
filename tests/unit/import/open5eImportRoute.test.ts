@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { POST } from "@/app/api/import/open5e/route";
 import { importMonstersFromOpen5E, importSpellsFromOpen5E } from "@/lib/import/dedupeEngine";

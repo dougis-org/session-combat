@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { GET, POST } from "@/app/api/spells/route";
 import { storage } from "@/lib/storage";
 import { requireAdmin } from "@/lib/api-helpers";

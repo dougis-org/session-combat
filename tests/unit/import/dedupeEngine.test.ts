@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { Open5ESpell } from "@/lib/import/open5eAdapter";
 import {
   shouldImport,
