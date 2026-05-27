@@ -10,8 +10,8 @@
 
 ## Problem Space
 
-- Current behavior: `buildSystemPrompt()` in `lib/prompts/templates.ts` emits campaign name, module, current chapter, party members, and recent sessions. `Campaign.notes` is fetched as part of the campaign context but never injected into any prompt.
-- Desired behavior: A checkbox in the Prompt Builder UI lets the DM opt in to appending their notes to the generated prompt. When checked and notes are non-empty, a `"Current campaign context (DM notes):\n{campaign.notes}"` block is appended by `buildSystemPrompt()`. The toggle is session-local — it resets to unchecked on each page load.
+- Current behaviour: `buildSystemPrompt()` in `lib/prompts/templates.ts` emits campaign name, module, current chapter, party members, and recent sessions. `Campaign.notes` is fetched as part of the campaign context but never injected into any prompt.
+- Desired behaviour: A checkbox in the Prompt Builder UI lets the DM opt in to appending their notes to the generated prompt. When checked and notes are non-empty, a `"Current campaign context (DM notes):\n{campaign.notes}"` block is appended by `buildSystemPrompt()`. The toggle is session-local — it resets to unchecked on each page load.
 - Constraints: Notes may contain spoilers or work-in-progress content the DM doesn't always want in the AI prompt, so the toggle must be opt-in (default off). No backend changes are needed — this is purely a UI + prompt assembly change.
 - Assumptions: `campaign.notes` is already available inside `CampaignContext` via `context.campaign.notes` (confirmed — `Campaign` interface has `notes: string`). The `useCampaignContext` hook already fetches the full campaign object.
 - Edge cases considered: Notes empty or whitespace-only → checkbox is hidden; no block is ever appended. Notes non-empty but checkbox unchecked → block is omitted. Toggle change after a prompt is already generated → clear `builtPrompt` so stale output is not shown with wrong content.
