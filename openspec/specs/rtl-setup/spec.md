@@ -93,7 +93,7 @@ No requirements removed.
 
 #### Scenario: No regressions after env change
 
-- **Given** the full unit test suite (138 tests) was passing before this change
+- **Given** the full unit test suite was passing before this change
 - **When** `npm run test:unit` is run after all changes are applied
 - **Then** the same number of tests pass; zero new failures
 
