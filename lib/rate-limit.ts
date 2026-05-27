@@ -6,10 +6,21 @@
 
 interface RateLimitEntry {
   count: number;
-  windowStart: number;
+  resetAt: number;
 }
 
 const store = new Map<string, RateLimitEntry>();
+
+// Periodically clean up expired entries to prevent memory leaks.
+// .unref() allows Node to exit even if this timer is still pending (not available in jsdom).
+(setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of store.entries()) {
+    if (now >= entry.resetAt) {
+      store.delete(key);
+    }
+  }
+}, 60_000) as unknown as { unref?: () => void }).unref?.();
 
 /**
  * Throws a 429-ready error when `key` has exceeded `limit` calls within
@@ -23,8 +34,8 @@ export function checkRateLimit(
   const now = Date.now();
   const entry = store.get(key);
 
-  if (!entry || now - entry.windowStart >= windowMs) {
-    store.set(key, { count: 1, windowStart: now });
+  if (!entry || now >= entry.resetAt) {
+    store.set(key, { count: 1, resetAt: now + windowMs });
     return;
   }
 

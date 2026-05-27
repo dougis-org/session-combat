@@ -18,15 +18,13 @@ jest.mocked(getDatabase).mockResolvedValue(mockedDb as any);
 
 function makeCollection(overrides: Partial<{
   findOne: jest.Mock;
-  insertOne: jest.Mock;
-  deleteMany: jest.Mock;
+  replaceOne: jest.Mock;
   updateOne: jest.Mock;
 }> = {}) {
   return {
     findOne: jest.fn(),
-    insertOne: jest.fn().mockResolvedValue({}),
-    deleteMany: jest.fn().mockResolvedValue({}),
-    updateOne: jest.fn().mockResolvedValue({}),
+    replaceOne: jest.fn().mockResolvedValue({ upsertedCount: 1 }),
+    updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
     ...overrides,
   };
 }
@@ -62,25 +60,32 @@ describe("lib/reset-tokens.ts", () => {
   });
 
   describe("storeResetToken", () => {
-    it("deletes prior tokens for the userId before inserting", async () => {
+    it("atomically upserts a token document keyed by userId", async () => {
       const col = makeCollection();
       mockedDb.collection.mockReturnValue(col);
 
       await storeResetToken("user-1", "hash-a");
-      expect(col.deleteMany).toHaveBeenCalledWith({ userId: "user-1" });
-      expect(col.insertOne).toHaveBeenCalledTimes(1);
+      expect(col.replaceOne).toHaveBeenCalledWith(
+        { userId: "user-1" },
+        expect.objectContaining({ userId: "user-1", tokenHash: "hash-a" }),
+        { upsert: true }
+      );
     });
 
-    it("calling twice for the same userId invalidates the first token", async () => {
+    it("calling twice for the same userId replaces the first token", async () => {
       const col = makeCollection();
       mockedDb.collection.mockReturnValue(col);
 
       await storeResetToken("user-1", "hash-a");
       await storeResetToken("user-1", "hash-b");
 
-      // deleteMany called twice (once per storeResetToken call)
-      expect(col.deleteMany).toHaveBeenCalledTimes(2);
-      expect(col.deleteMany).toHaveBeenNthCalledWith(2, { userId: "user-1" });
+      expect(col.replaceOne).toHaveBeenCalledTimes(2);
+      expect(col.replaceOne).toHaveBeenNthCalledWith(
+        2,
+        { userId: "user-1" },
+        expect.objectContaining({ userId: "user-1", tokenHash: "hash-b" }),
+        { upsert: true }
+      );
     });
   });
 
@@ -140,14 +145,29 @@ describe("lib/reset-tokens.ts", () => {
   });
 
   describe("consumeResetToken", () => {
-    it("sets consumedAt on the document", async () => {
+    it("sets consumedAt using a compare-and-set filter", async () => {
       const col = makeCollection();
       mockedDb.collection.mockReturnValue(col);
 
       await consumeResetToken("some-hash");
       expect(col.updateOne).toHaveBeenCalledWith(
-        { tokenHash: "some-hash" },
+        {
+          tokenHash: "some-hash",
+          consumedAt: { $exists: false },
+          expiresAt: { $gt: expect.any(Date) },
+        },
         { $set: { consumedAt: expect.any(Date) } }
+      );
+    });
+
+    it("throws when token was already consumed or expired", async () => {
+      const col = makeCollection({
+        updateOne: jest.fn().mockResolvedValue({ modifiedCount: 0 }),
+      });
+      mockedDb.collection.mockReturnValue(col);
+
+      await expect(consumeResetToken("some-hash")).rejects.toThrow(
+        /used|expired/i
       );
     });
   });

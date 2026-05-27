@@ -2,8 +2,8 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Create and publish working branch:** `git checkout -b feat/password-reset-infrastructure` then `git push -u origin feat/password-reset-infrastructure`
+- [x] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
+- [x] **Step 2 — Create and publish working branch:** `git checkout -b feat/password-reset-infrastructure` then `git push -u origin feat/password-reset-infrastructure`
 
 ## Prerequisites
 

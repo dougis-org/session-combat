@@ -1,13 +1,17 @@
 import { MailtrapClient } from "mailtrap";
 
+let client: MailtrapClient | null = null;
+
 function getClient(): MailtrapClient {
+  if (client) return client;
   const token = process.env.MAILTRAP_TOKEN;
   if (!token) {
     throw new Error(
       "MAILTRAP_TOKEN environment variable is not set. Email sending is unavailable."
     );
   }
-  return new MailtrapClient({ token });
+  client = new MailtrapClient({ token });
+  return client;
 }
 
 export async function sendPasswordResetEmail(

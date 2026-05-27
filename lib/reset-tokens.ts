@@ -27,18 +27,25 @@ export async function storeResetToken(
   const db = await getDatabase();
   const col = db.collection<ResetTokenDocument>(COLLECTION);
 
-  // Delete all prior active tokens for this user before inserting new one
-  await col.deleteMany({ userId });
-
-  await col.insertOne({
-    userId,
-    tokenHash,
-    expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
-    createdAt: new Date(),
-  });
+  // Atomically replace any existing token for this user (or insert if none exists),
+  // ensuring only one active reset token per user at any time.
+  await col.replaceOne(
+    { userId },
+    {
+      userId,
+      tokenHash,
+      expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
+      createdAt: new Date(),
+    },
+    { upsert: true }
+  );
 }
 
 export async function validateResetToken(token: string): Promise<string> {
+  if (!token || typeof token !== "string") {
+    throw new Error("Invalid or unknown reset token.");
+  }
+
   const db = await getDatabase();
   const col = db.collection<ResetTokenDocument>(COLLECTION);
 
@@ -62,5 +69,12 @@ export async function consumeResetToken(tokenHash: string): Promise<void> {
   const db = await getDatabase();
   const col = db.collection<ResetTokenDocument>(COLLECTION);
 
-  await col.updateOne({ tokenHash }, { $set: { consumedAt: new Date() } });
+  const result = await col.updateOne(
+    { tokenHash, consumedAt: { $exists: false }, expiresAt: { $gt: new Date() } },
+    { $set: { consumedAt: new Date() } }
+  );
+
+  if (result.modifiedCount === 0) {
+    throw new Error("Reset token has already been used or has expired.");
+  }
 }
