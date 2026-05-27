@@ -27,10 +27,10 @@ async function initializeDatabase(db: Db): Promise<void> {
     await db
       .collection("password_reset_tokens")
       .createIndex({ tokenHash: 1 }, { unique: true });
-    // Index on userId for efficient upsert in storeResetToken
+    // Unique index on userId ensures replaceOne+upsert is atomic — only one token per user
     await db
       .collection("password_reset_tokens")
-      .createIndex({ userId: 1 });
+      .createIndex({ userId: 1 }, { unique: true });
     console.log("Created indexes on password_reset_tokens.tokenHash and userId");
 
     // Check if characters_active already exists as a view; only drop views,

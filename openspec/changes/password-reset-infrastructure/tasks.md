@@ -42,7 +42,7 @@
 
 - [x] `npm run lint` passes
 - [x] `npm run typecheck` passes
-- [x] `npm test` (unit suite) passes
+- [x] `npm run test:unit` (unit suite) passes
 
 ## Pre-Commit Code Review
 

@@ -19,6 +19,11 @@ export async function sendPasswordResetEmail(
   resetUrl: string
 ): Promise<void> {
   const client = getClient();
+  if (!process.env.MAILTRAP_FROM_EMAIL) {
+    console.warn(
+      "MAILTRAP_FROM_EMAIL is not set — falling back to noreply@session-combat.app. Set this in production to avoid unverified-sender failures."
+    );
+  }
   const fromEmail = process.env.MAILTRAP_FROM_EMAIL || "noreply@session-combat.app";
 
   await client.send({
