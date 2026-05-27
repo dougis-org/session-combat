@@ -46,7 +46,7 @@
 
 ## Pre-Commit Code Review
 
-- [ ] Run `openspec-review-code` sub-agent before every commit
+- [x] Run `openspec-review-code` sub-agent before every commit
 
 ## Remote push validation
 
@@ -59,10 +59,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Commit all changes to `feat/password-reset-infrastructure` and push to remote
-- [ ] Open PR from `feat/password-reset-infrastructure` to `main`; reference `Closes #265`
+- [x] Commit all changes to `feat/password-reset-infrastructure` and push to remote
+- [x] Open PR from `feat/password-reset-infrastructure` to `main`; reference `Closes #265`
 - [ ] Wait 180 seconds for CI and agentic reviewers to post comments
-- [ ] Enable auto-merge: `gh pr merge <PR-URL> --auto --merge`
+- [x] Enable auto-merge: `gh pr merge <PR-URL> --auto --merge`
 - [ ] **Monitor PR comments** — address comments, commit fixes, follow Remote push validation, push, wait 180 s, repeat until no unresolved comments
 - [ ] **Monitor CI checks** — diagnose and fix failures, commit, follow Remote push validation, push, wait 180 s, repeat until all checks pass
 - [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; never force-merge
