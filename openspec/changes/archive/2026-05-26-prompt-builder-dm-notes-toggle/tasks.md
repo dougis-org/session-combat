@@ -48,13 +48,16 @@
 
 ### Step 6 — Write unit tests
 
-Add to `tests/unit/prompts/templates.test.ts`:
+**`tests/unit/prompts/templates.test.ts`** — prompt-content tests:
 
-- [x] Test: checkbox not rendered when `campaign.notes` is empty (render `PromptBuilderContent` with mock context where `notes = ''` — assert checkbox absent)
-- [x] Test: checkbox rendered when `campaign.notes` is non-empty
 - [x] Test: generated prompt does not contain notes block when `opts.includeNotes` is `false` (call `buildSystemPrompt(ctx)` directly, assert no `"Current campaign context"` string)
 - [x] Test: generated prompt contains notes block when `opts.includeNotes` is `true` (call `buildSystemPrompt(ctx, { includeNotes: true })`, assert notes block present with correct header)
 - [x] Test: notes block is formatted correctly — header is exactly `"Current campaign context (DM notes):"` on its own line
+
+**`tests/unit/promptBuilderSave.test.tsx`** — checkbox UI tests:
+
+- [x] Test: checkbox not rendered when `campaign.notes` is empty (render `PromptBuilderContent` with mock context where `notes = ''` — assert checkbox absent)
+- [x] Test: checkbox rendered when `campaign.notes` is non-empty
 
 ## Pre-Commit Code Review
 
@@ -62,7 +65,7 @@ Add to `tests/unit/prompts/templates.test.ts`:
 
 ## Validation
 
-- [x] `npm test` — all existing unit tests pass, five new tests pass
+- [x] `npm run test:unit` — all existing unit tests pass, five new tests pass
 - [x] `npm run test:integration` — no regressions
 - [x] `npx tsc --noEmit` — no type errors
 - [x] `npm run build` — build succeeds
@@ -73,7 +76,7 @@ Add to `tests/unit/prompts/templates.test.ts`:
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test` — all tests must pass
+- **Unit tests** — `npm run test:unit` — all tests must pass
 - **Integration tests** — `npm run test:integration` — all tests must pass
 - **Build** — `npm run build` — must succeed with no errors
 - if **ANY** of the above fail, you **MUST** iterate and address the failure
@@ -107,10 +110,10 @@ Blocking resolution flow:
 - [x] Verify the merged changes appear on main
 - [x] Mark all remaining tasks as complete (`- [x]`)
 - [x] Sync approved spec deltas into `openspec/specs/` (copy `specs/dm-notes-toggle/spec.md` to `openspec/specs/prompt-builder-dm-notes-toggle/dm-notes-toggle/spec.md`)
-- [x] Archive the change: move `openspec/changes/prompt-builder-dm-notes-toggle/` to `openspec/changes/archive/YYYY-MM-DD-prompt-builder-dm-notes-toggle/` **in a single commit** — stage both the new location and the deletion of the old location together
-- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-prompt-builder-dm-notes-toggle/` exists and `openspec/changes/prompt-builder-dm-notes-toggle/` is gone
-- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-prompt-builder-dm-notes-toggle` then `git push -u origin doc/archive-YYYY-MM-DD-prompt-builder-dm-notes-toggle`
-- [x] Open a PR from the doc branch to `main` with title `docs: archive prompt-builder-dm-notes-toggle (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] Archive the change: move `openspec/changes/prompt-builder-dm-notes-toggle/` to `openspec/changes/archive/2026-05-26-prompt-builder-dm-notes-toggle/` **in a single commit** — stage both the new location and the deletion of the old location together
+- [x] Confirm `openspec/changes/archive/2026-05-26-prompt-builder-dm-notes-toggle/` exists and `openspec/changes/prompt-builder-dm-notes-toggle/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-05-26-prompt-builder-dm-notes-toggle` then `git push -u origin doc/archive-2026-05-26-prompt-builder-dm-notes-toggle`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive prompt-builder-dm-notes-toggle (2026-05-26)` — **do NOT push directly to `main`**
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Monitor the doc PR until it merges
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/prompt-builder-dm-notes-toggle doc/archive-YYYY-MM-DD-prompt-builder-dm-notes-toggle`
+- [x] Monitor the doc PR until it merges
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/prompt-builder-dm-notes-toggle doc/archive-2026-05-26-prompt-builder-dm-notes-toggle`
