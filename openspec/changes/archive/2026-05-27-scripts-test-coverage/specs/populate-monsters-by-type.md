@@ -56,13 +56,13 @@ The system SHALL return the correct XP value for every CR in the standard D&D 5e
 - **When** `getCRExperience` is called
 - **Then** it returns `0`
 
-### Requirement: ADDED transformMonster maps Open5E API response to MonsterTemplate schema
+### Requirement: ADDED transformMonster maps D&D 5e API (dnd5eapi.co) response to MonsterTemplate schema
 
-The system SHALL produce a correctly structured object from a valid Open5E API monster response, with appropriate defaults when optional fields are absent.
+The system SHALL produce a correctly structured object from a valid D&D 5e API (dnd5eapi.co) monster response, with appropriate defaults when optional fields are absent.
 
 #### Scenario: Full monster response is transformed correctly
 
-- **Given** a mock Open5E API response with all fields populated (AC, proficiencies, senses, actions, traits, languages)
+- **Given** a mock D&D 5e API (dnd5eapi.co) response with all fields populated (AC, proficiencies, senses, actions, traits, languages)
 - **When** `transformMonster` is called
 - **Then** the result has `name`, `type`, `hp`, `ac`, `abilities`, `challengeRating`, `experiencePoints`, `source: "SRD"`, and correctly mapped `actions`, `traits`, `savingThrows`, `skills`
 
@@ -102,9 +102,9 @@ The system SHALL write a `.ts` file to the specified output directory containing
 
 #### Scenario: Already-plural type is not double-pluralized
 
-- **Given** monster type `"undead"` (does not end in "s")
+- **Given** monster type `"beasts"` (already ends in "s")
 - **When** `generateTypeFile` is called
-- **Then** the written file contains `export const UNDEADS:` (appends S)
+- **Then** the written file contains `export const BEASTS:` (does not become `BEASTSS`)
 
 #### Scenario: File is written to specified directory
 
