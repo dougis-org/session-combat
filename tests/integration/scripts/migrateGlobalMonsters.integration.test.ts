@@ -1,24 +1,21 @@
-import { MongoClient, Collection } from "mongodb";
+import { Collection, Db } from "mongodb";
 import { migrateGlobalMonsters } from "../../../lib/scripts/migrateGlobalMonsters";
 import { GLOBAL_USER_ID } from "../../../lib/constants";
+import { getDatabase, closeDatabase } from "../../../lib/db";
 
 const TEST_MARKER_FIELD = "__migrateTestRun";
-const TEST_MARKER_VALUE = `test-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+const TEST_MARKER_VALUE = `test-${Date.now()}-${require("crypto").randomBytes(3).toString("hex")}`;
 
-let client: MongoClient;
+let db: Db;
 let collection: Collection;
 
 beforeAll(async () => {
-  const uri = process.env.MONGODB_URI!;
-  const db = process.env.MONGODB_DB!;
-  if (!uri || !db) throw new Error("MONGODB_URI and MONGODB_DB must be set");
-  client = new MongoClient(uri);
-  await client.connect();
-  collection = client.db(db).collection("monsterTemplates");
+  db = await getDatabase();
+  collection = db.collection("monsterTemplates");
 });
 
 afterAll(async () => {
-  await client.close();
+  await closeDatabase();
 });
 
 afterEach(async () => {
@@ -33,23 +30,14 @@ function seed(overrides: Record<string, unknown> = {}) {
 }
 
 describe("migrateGlobalMonsters", () => {
-  it("tags a global monster with no source field", async () => {
+  it.each([
+    ["no source field", {}],
+    ["empty source string", { source: "" }],
+  ])("tags a global monster with %s", async (_label, overrides) => {
     const { insertedId } = await seed({
       userId: GLOBAL_USER_ID,
       isGlobal: true,
-    });
-
-    await migrateGlobalMonsters();
-
-    const doc = await collection.findOne({ _id: insertedId });
-    expect(doc?.source).toBe("SRD");
-  });
-
-  it("tags a global monster with empty source string", async () => {
-    const { insertedId } = await seed({
-      userId: GLOBAL_USER_ID,
-      isGlobal: true,
-      source: "",
+      ...overrides,
     });
 
     await migrateGlobalMonsters();
