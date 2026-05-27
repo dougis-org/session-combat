@@ -34,7 +34,7 @@
 ### D3: Token lifecycle and validity
 
 - Token TTL: 15 minutes.
-- New forgot request invalidates prior active tokens for same user.
+- New forgot request **deletes** all prior token documents for the same user before inserting the new one (no audit trail; keeps the collection lean).
 - Reset consumes token atomically (`consumedAt` set in same update path as password change).
 - Expired/consumed/unknown tokens return generic invalid-token error.
 
@@ -83,7 +83,18 @@
 - Feature-flag password reset routes/pages.
 - If incident occurs, disable reset endpoints and purge outstanding reset tokens.
 
+### D7: Forgot-endpoint timing safety (anti-enumeration)
+
+- The forgot endpoint performs `findOne({ email })` before deciding whether to send an email.
+- The 200 response is returned **immediately after the DB lookup** — before any email work begins.
+- If the user exists, `generateAndSendResetEmail()` is fired without `await` (fire-and-forget), with `.catch(err => console.error(...))` for silent failure logging.
+- Both branches (known / unknown email) return the response at the same code point, after the same single indexed `findOne`. No timing oracle.
+- Response message: `"If an account with that email exists, a password reset link has been sent."`
+- Works correctly on Fly.io: long-lived Node.js process means the background Promise continues in the event loop after response is returned; the machine will not auto-stop mid-request.
+
 ## Resolved Decisions
 
 - **Email provider:** Mailtrap.io (official Node.js SDK: `mailtrap`). Use the Email Sending API for production delivery.
-- **Rate limiter backing store:** In-memory (`Map` + TTL). Acceptable for current single-instance deployment. Document as a known limitation for horizontal scaling if Fly.io instance count grows.
+- **Rate limiter backing store:** In-memory (`Map` + TTL). Acceptable for current single-instance deployment. Document as a known limitation in `lib/rate-limit.ts`. Note: `auto_stop_machines = 'stop'` in `fly.toml` means rate-limit state is wiped on cold start — risk window is narrow at current scale.
+- **DB index for reset tokens:** Unique index on `tokenHash` only, added in `lib/db.ts` `initializeDatabase()`. No TTL index — expiry enforced in application logic via `expiresAt` checks.
+- **Forgot-endpoint timing:** Async fire-and-forget email send after immediate response (D7). Eliminates timing oracle between known and unknown email paths.

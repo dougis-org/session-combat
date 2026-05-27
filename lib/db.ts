@@ -23,6 +23,16 @@ async function initializeDatabase(db: Db): Promise<void> {
     await db.collection("characters").createIndex({ deletedAt: 1 });
     console.log("Created index on characters.deletedAt");
 
+    // Unique index on tokenHash for O(1) reset-token lookup
+    await db
+      .collection("password_reset_tokens")
+      .createIndex({ tokenHash: 1 }, { unique: true });
+    // Unique index on userId ensures replaceOne+upsert is atomic — only one token per user
+    await db
+      .collection("password_reset_tokens")
+      .createIndex({ userId: 1 }, { unique: true });
+    console.log("Created indexes on password_reset_tokens.tokenHash and userId");
+
     // Check if characters_active already exists as a view; only drop views,
     // never a real collection, to avoid accidental data loss during re-initialization.
     const existing = await db
