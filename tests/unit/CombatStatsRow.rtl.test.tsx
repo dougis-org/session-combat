@@ -20,6 +20,6 @@ describe('CombatStatsRow (RTL)', () => {
 
   test('does not render acNote when omitted', () => {
     render(<CombatStatsRow ac={10} hp={8} maxHp={8} />);
-    expect(screen.queryByText(/\(/)).toBeNull();
+    expect(screen.queryByText(/\(/)).not.toBeInTheDocument();
   });
 });
