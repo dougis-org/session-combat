@@ -2,47 +2,50 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Create and publish working branch:** `git checkout -b feat/password-reset-ui` then `git push -u origin feat/password-reset-ui`
+- [x] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
+- [x] **Step 2 — Create and publish working branch:** `git checkout -b feat/password-reset-ui` then `git push -u origin feat/password-reset-ui`
 
 ## Prerequisites
 
-- [ ] #266 (password-reset-api) merged — forgot and reset endpoints live
+- [x] #266 (password-reset-api) merged — forgot and reset endpoints live
 
 ## Implementation
 
-- [ ] Implement `app/forgot-password/page.tsx`:
+- [x] Implement `app/forgot-password/page.tsx`:
   - Email input form with validation
   - POST to `/api/auth/password/forgot` on submit
   - Handle: 200 (show confirmation), 400 (inline error), 429 (rate limit message), 5xx (error banner)
   - Disable form during in-flight request
-- [ ] Implement `app/reset-password/page.tsx`:
-  - Read `token` from `useSearchParams()`
-  - Redirect to `/forgot-password` if token missing
+- [x] Implement `app/reset-password/page.tsx` (server component — no `'use client'`):
+  - Receives `searchParams: Promise<{ token?: string }>` as a prop
+  - Awaits the token; calls `redirect('/forgot-password')` if missing
+  - Renders `<ResetPasswordForm token={token} />`
+- [x] Implement `app/reset-password/ResetPasswordForm.tsx` (client component — `'use client'`):
+  - Receives `token` as a string prop (guaranteed non-empty by page)
   - New password + confirm password fields with client-side match validation
   - POST `{ token, password }` to `/api/auth/password/reset`
   - Handle: 200 (success + login link), 400 invalid token (re-request link), 400 weak password (inline details), 429, 5xx
   - Disable form during in-flight request
-- [ ] Add "Forgot password?" link on login page pointing to `/forgot-password`
+- [x] Add "Forgot password?" link on login page pointing to `/forgot-password`
 
 ## Tests (Integration)
 
-- [ ] forgot-password page renders email form
-- [ ] Submitting valid email shows confirmation message (mock API returns 200)
-- [ ] Submitting invalid email format shows inline field error
-- [ ] 429 response shows rate-limit message
-- [ ] reset-password page with valid `?token=` renders new password form
-- [ ] Mismatched confirm password shows client-side error before submit
-- [ ] Successful reset (mock 200) shows success state with login link
-- [ ] Invalid/expired token (mock 400) shows re-request message with link to forgot-password
-- [ ] Weak password (mock 400 with details) shows inline error
-- [ ] Missing `?token=` in URL redirects to `/forgot-password`
+- [x] forgot-password page renders email form
+- [x] Submitting valid email shows confirmation message (mock API returns 200)
+- [x] Submitting invalid email format shows inline field error
+- [x] 429 response shows rate-limit message
+- [x] reset-password page with valid `?token=` renders new password form
+- [x] Mismatched confirm password shows client-side error before submit
+- [x] Successful reset (mock 200) shows success state with login link
+- [x] Invalid/expired token (mock 400) shows re-request message with link to forgot-password
+- [x] Weak password (mock 400 with details) shows inline error
+- [x] Missing `?token=` in URL redirects to `/forgot-password`
 
 ## Validation
 
-- [ ] `npm run lint` passes
-- [ ] `npm run typecheck` passes
-- [ ] Integration test suite passes
+- [x] `npm run lint` passes
+- [x] `npm run typecheck` passes
+- [x] Integration test suite passes
 
 ## Pre-Commit Code Review
 

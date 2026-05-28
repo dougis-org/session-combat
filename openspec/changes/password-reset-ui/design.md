@@ -27,12 +27,14 @@
 - **Rationale:** Simpler; one route, one component, all states handled inline.
 - **Trade-offs:** None material.
 
-### D-U2: reset-password page — token from URL query param; redirect on missing token
+### D-U2: reset-password page — server component extracts token; client component renders form
 
-- **Chosen:** Read `?token=` from `useSearchParams()`. If missing on mount, redirect to `/forgot-password`. Render new-password + confirm-password fields otherwise.
-- **Alternatives considered:** Hash-based token (not indexable but less conventional for Next.js).
-- **Rationale:** Standard pattern; query params are easy to parse in App Router.
-- **Trade-offs:** Token visible in browser history and server logs — acceptable given 15-minute TTL (noted in proposal).
+- **Chosen:** `app/reset-password/page.tsx` is a **server component** (no `'use client'`). It receives `searchParams` as a prop, awaits the token, and calls `redirect('/forgot-password')` server-side if the token is missing. It then renders `<ResetPasswordForm token={token} />`, a co-located client component at `app/reset-password/ResetPasswordForm.tsx` that receives the token as a prop.
+- **Alternatives considered:**
+  - `useSearchParams()` in a `'use client'` page wrapped in `<Suspense>` — works but redirect happens client-side after hydration, causing a flash before navigation.
+  - Hash-based token — less conventional for Next.js App Router.
+- **Rationale:** No `useSearchParams()` is used anywhere in UI pages in this codebase; there is no established Suspense pattern to follow. The server component approach avoids both the Suspense boilerplate and the client-side redirect flash. Server-side redirect on missing token is instant with no visible intermediate state.
+- **Trade-offs:** Two files instead of one. Component location follows the existing `app/campaigns/CampaignEditor.tsx` co-location precedent — page-local components live alongside their page, not in `lib/components/`.
 
 ### D-U3: Client-side confirm-password validation before submit
 
@@ -63,7 +65,7 @@
 ## Functional Requirements Mapping
 
 - Forgot page: renders email form; on 200 shows confirmation; on 400 shows field error; on 429 shows rate-limit message → D-U1.
-- Reset page: redirects to `/forgot-password` if no token in URL → D-U2.
+- Reset page: redirects to `/forgot-password` if no token in URL (server-side, via `redirect()` in server component) → D-U2.
 - Reset page: validates password match client-side before submit → D-U3.
 - Reset page: on 200 shows success + login link → D-U4.
 - Login page: has "Forgot password?" link → D-U5.
@@ -94,4 +96,4 @@
 
 ## Open Questions
 
-- Confirm whether `useSearchParams()` requires an explicit Suspense boundary in this project's Next.js version — check `app/login/page.tsx` for precedent.
+None.

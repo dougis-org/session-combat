@@ -22,7 +22,7 @@ to exercise all UX states without requiring a live backend.
 
 ### `app/reset-password/page.tsx`
 - [ ] Integration: page with valid `?token=abc` renders new password form.
-- [ ] Integration: page with no `?token=` redirects to `/forgot-password`.
+- [ ] Integration: page with no `?token=` redirects to `/forgot-password` (server-side redirect — response is a 307/308, not a rendered page).
 - [ ] Integration: confirm password mismatch shows client-side error before submit.
 - [ ] Integration: API returns 200 → success message and login link shown.
 - [ ] Integration: API returns 400 (invalid token) → "link is invalid or expired" message shown with link to forgot-password.
