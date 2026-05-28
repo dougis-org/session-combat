@@ -6,15 +6,13 @@
 import { jest, describe, it, expect } from '@jest/globals';
 import React from 'react';
 import { act } from 'react';
-import { createRoot } from 'react-dom/client';
-import { setupUiTest, mockFetch, jsonResponse } from '../helpers/uiTestSetup';
+import { setupUiTest, renderComponent, mockFetch, mockPendingFetch, jsonResponse } from '../helpers/uiTestSetup';
 import ForgotPasswordPage from '@/app/forgot-password/page';
 
 const ctx = setupUiTest();
 
 function render() {
-  ctx.root = createRoot(ctx.container);
-  act(() => { ctx.root!.render(React.createElement(ForgotPasswordPage)); });
+  renderComponent(ctx, React.createElement(ForgotPasswordPage));
 }
 
 async function submitForm() {
@@ -64,11 +62,7 @@ describe('ForgotPasswordPage', () => {
   });
 
   it('disables submit button while request is in-flight', async () => {
-    let resolveFetch!: (value: Response) => void;
-    global.fetch = jest.fn(
-      () => new Promise<Response>((resolve) => { resolveFetch = resolve; })
-    ) as jest.MockedFunction<typeof fetch>;
-
+    const resolveFetch = mockPendingFetch();
     render();
     act(() => {
       const form = ctx.container.querySelector('form') as HTMLFormElement;

@@ -1,4 +1,6 @@
+import React from 'react';
 import { act } from 'react';
+import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import { Response as FetchResponse } from 'node-fetch';
 
@@ -35,6 +37,20 @@ export function setupUiTest(): UiTestContext {
   });
 
   return ctx;
+}
+
+export function renderComponent(ctx: UiTestContext, element: React.ReactElement): void {
+  ctx.root = createRoot(ctx.container);
+  act(() => { ctx.root!.render(element); });
+}
+
+export function mockPendingFetch(): (value: Response) => void {
+  let resolve: ((value: Response) => void) | undefined;
+  global.fetch = jest.fn(
+    (_input: RequestInfo | URL, _init?: RequestInit) =>
+      new Promise<Response>((r) => { resolve = r; })
+  ) as jest.MockedFunction<typeof fetch>;
+  return (value: Response) => resolve!(value);
 }
 
 export function mockFetch(body: unknown, status = 200): void {
