@@ -30,7 +30,14 @@ const BASE: CombatantState = {
   hp: 30,
   maxHp: 30,
   ac: 15,
-  abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+  abilityScores: {
+    strength: 10,
+    dexterity: 10,
+    constitution: 10,
+    intelligence: 10,
+    wisdom: 10,
+    charisma: 10,
+  },
 };
 
 const ENEMY: CombatantState = { ...BASE, id: 'e1', name: 'Goblin', type: 'monster' };
@@ -108,7 +115,7 @@ describe('CombatantCard.hp — HP display', () => {
     expect(screen.getByTestId('temp-hp-bar')).toBeInTheDocument();
   });
 
-  test('temp-hp-bar is absent when tempHp is 0', () => {
+  test('temp-hp-bar is absent when tempHp is undefined', () => {
     renderCard();
     expect(screen.queryByTestId('temp-hp-bar')).not.toBeInTheDocument();
   });

@@ -18,23 +18,23 @@
 - [x] Write test: `hp: 1` → `<h3>` heading does not contain `☠️`
 - [x] Write test: `tempHp: 5` → `data-testid="temp-hp-bar"` is present
 - [x] Write test: no tempHp → `data-testid="temp-hp-bar"` is absent
-- [x] Run `npm test -- --testPathPattern=CombatantCard.hp` to confirm all pass
+- [x] Run `npm run test:unit -- --testPathPattern=CombatantCard.hp` to confirm all pass
 
 ### T2 — Damage application tests
 
 - [x] Write test: normal damage (no type) → `onUpdate` called with `{ hp: 20 }` (30 - 10)
 - [x] Write test: fire resistance → `onUpdate` called with `{ hp: 25 }` (10 / 2 = 5 damage)
-- [x] Write test: fire immunity → `onUpdate` not called (or called with unchanged HP)
+- [x] Write test: fire immunity → `onUpdate` called with unchanged HP (`{ hp: 30, tempHp: 0 }` — component always calls onUpdate even on no-op)
 - [x] Write test: fire vulnerability → `onUpdate` called with `{ hp: 20 }` (5 * 2 = 10 damage)
 - [x] Write test: vulnerability floors HP at 0 (no negative HP)
-- [x] Run `npm test -- --testPathPattern=CombatantCard.hp` to confirm all pass
+- [x] Run `npm run test:unit -- --testPathPattern=CombatantCard.hp` to confirm all pass
 
 ### T3 — Temp HP drain tests
 
 - [x] Write test: damage ≤ tempHp → `onUpdate` called with `{ hp: 30, tempHp: 2 }` (3 damage into 5 temp)
 - [x] Write test: damage > tempHp → `onUpdate` called with `{ hp: 27, tempHp: 0 }` (8 damage into 5 temp + 3 spill)
 - [x] Write test: tempHp: 0 → all damage hits real HP → `{ hp: 20, tempHp: 0 }`
-- [x] Run `npm test -- --testPathPattern=CombatantCard.hp` to confirm all pass
+- [x] Run `npm run test:unit -- --testPathPattern=CombatantCard.hp` to confirm all pass
 
 ### T4 — Conditions tests
 
@@ -43,11 +43,11 @@
 - [x] Write test: click "Conditions (1)" → "Poisoned" text appears in DOM
 - [x] Write test: expand panel → click "Remove" → `onUpdate` called with `{ conditions: [] }`
 - [x] Write test: two conditions → remove first → `onUpdate` called with array containing only second
-- [x] Run `npm test -- --testPathPattern=CombatantCard.hp` to confirm all pass
+- [x] Run `npm run test:unit -- --testPathPattern=CombatantCard.hp` to confirm all pass
 
 ### T5 — Coverage verification
 
-- [x] Run `npm test -- --coverage --collectCoverageFrom='lib/components/CombatantCard.tsx' --testPathPattern=CombatantCard` and confirm branch coverage ≥ 65%
+- [x] Run `npm run test:unit -- --coverage --collectCoverageFrom='lib/components/CombatantCard.tsx' --testPathPattern=CombatantCard` and confirm branch coverage ≥ 65%
 - [x] Confirm existing `CombatantCard.test.tsx` tests still pass (no regressions)
 
 ## Pre-Commit Code Review
@@ -56,7 +56,7 @@
 
 ## Validation
 
-- [x] Run `npm test` — all tests pass
+- [x] Run `npm run test:unit` — all tests pass
 - [x] Run `npx tsc --noEmit` — no type errors
 - [x] Run `npm run build` — build succeeds
 - [x] Branch coverage for `CombatantCard.tsx` ≥ 65% confirmed
@@ -73,10 +73,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run before the final commit
-- [ ] Commit all changes and push to `feat/combatant-card-hp-coverage`
-- [ ] Open PR from `feat/combatant-card-hp-coverage` to `main`. PR body must include `Closes #256`.
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Ensure the `openspec-review-code` sub-agent was run before the final commit
+- [x] Commit all changes and push to `feat/combatant-card-hp-coverage`
+- [x] Open PR from `feat/combatant-card-hp-coverage` to `main`. PR body must include `Closes #256`.
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
 - [ ] **Monitor PR comments** — poll autonomously; address, commit fixes, follow remote push validation, push, wait 180s, repeat until no unresolved comments
 - [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failures, commit, validate, push, wait 180s, repeat

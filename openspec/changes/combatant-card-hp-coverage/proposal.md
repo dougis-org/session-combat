@@ -27,11 +27,15 @@
 - Temp HP draining before real HP, with spillover
 - Condition display (count button) and individual condition removal calling `onUpdate`
 
+### In Scope (expanded for ≥65% branch coverage)
+
+- Additional RTL tests covering initiative roll display (rolled/manual/advantage), set temp HP, healing, active combatant (onNextTurn), notes, legendary action badge, and targeting UI — all added because the T1–T4 tests alone reached only 42.74% branch coverage, and these high-value branches were needed to cross the 65% threshold.
+
 ### Out of Scope
 
 - Migrating existing tests in `CombatantCard.test.tsx` to RTL
 - Testing `applyTypedDamage` or `calcApplyDamage` at the unit level (already covered elsewhere)
-- Targeting panel, lair slot, or initiative UI
+- Lair slot rendering
 - Raising coverage in any other component
 
 ## What Changes
