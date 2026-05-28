@@ -80,6 +80,8 @@ export async function POST(request: NextRequest) {
     try {
       userObjectId = new ObjectId(userId);
     } catch {
+      // Corrupt token data — restore consumedAt so the token isn't silently burned
+      await tokensCol.updateOne({ tokenHash: { $eq: tokenHash } }, { $unset: { consumedAt: '' } });
       return NextResponse.json({ error: 'Invalid or expired reset token.' }, { status: 400 });
     }
 
@@ -95,6 +97,8 @@ export async function POST(request: NextRequest) {
     );
 
     if (result.matchedCount === 0) {
+      // User deleted after token issued — restore token so it isn't silently burned without effect
+      await tokensCol.updateOne({ tokenHash: { $eq: tokenHash } }, { $unset: { consumedAt: '' } });
       console.error(`Password reset: user not found for userId=${userId}`);
       return NextResponse.json({ error: 'Invalid or expired reset token.' }, { status: 400 });
     }
