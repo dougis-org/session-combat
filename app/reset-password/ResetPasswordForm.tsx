@@ -3,14 +3,12 @@
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { AuthCard } from '@/lib/components/AuthCard';
+import { FormError } from '@/lib/components/ui';
+import { safeJson } from '@/lib/utils/http';
 
 type Phase =
   | { tag: 'idle' | 'loading' | 'success' | 'invalid-token' }
   | { tag: 'error'; message: string };
-
-async function safeJson(res: Response): Promise<Record<string, unknown>> {
-  return res.json().catch(() => ({}));
-}
 
 interface Props {
   token: string;
@@ -100,13 +98,16 @@ export default function ResetPasswordForm({ token }: Props) {
           </label>
           <input
             id="password"
+            name="password"
             type="password"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
             disabled={isLoading}
             required
+            aria-describedby={phase.tag === 'error' ? 'reset-error' : undefined}
           />
         </div>
 
@@ -116,21 +117,20 @@ export default function ResetPasswordForm({ token }: Props) {
           </label>
           <input
             id="confirm-password"
+            name="confirm-password"
             type="password"
+            autoComplete="new-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="••••••••"
             className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
             disabled={isLoading}
             required
-            aria-describedby={phase.tag === 'error' ? 'reset-error' : undefined}
           />
         </div>
 
         {phase.tag === 'error' && (
-          <div id="reset-error" role="alert" className="p-4 bg-red-900 border border-red-700 rounded text-red-200 text-sm">
-            {phase.message}
-          </div>
+          <FormError id="reset-error" message={phase.message} />
         )}
 
         <button

@@ -7,7 +7,7 @@ interface Props {
 
 export default async function ResetPasswordPage({ searchParams }: Props) {
   const { token } = await searchParams;
-  if (!token) {
+  if (!token || typeof token !== 'string') {
     redirect('/forgot-password');
   }
   return <ResetPasswordForm token={token} />;

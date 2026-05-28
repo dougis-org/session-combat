@@ -7,7 +7,7 @@ import { jest, describe, it, expect } from '@jest/globals';
 import React from 'react';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { setupUiTest, jsonResponse } from '../helpers/uiTestSetup';
+import { setupUiTest, mockFetch, jsonResponse } from '../helpers/uiTestSetup';
 import ResetPasswordForm from '@/app/reset-password/ResetPasswordForm';
 
 const TOKEN = 'test-token-abc123';
@@ -54,10 +54,7 @@ describe('ResetPasswordForm', () => {
   });
 
   it('shows success state with login link on 200 response', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve(jsonResponse({ message: 'ok' }, 200))
-    ) as jest.MockedFunction<typeof fetch>;
-
+    mockFetch({ message: 'ok' });
     render();
     await submitWithPasswords('StrongPass1!', 'StrongPass1!');
 
@@ -67,10 +64,7 @@ describe('ResetPasswordForm', () => {
   });
 
   it('shows invalid/expired token message with link to forgot-password on 400 without details', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve(jsonResponse({ error: 'Token invalid or expired' }, 400))
-    ) as jest.MockedFunction<typeof fetch>;
-
+    mockFetch({ error: 'Token invalid or expired' }, 400);
     render();
     await submitWithPasswords('StrongPass1!', 'StrongPass1!');
 
@@ -80,12 +74,7 @@ describe('ResetPasswordForm', () => {
   });
 
   it('shows inline validation details on 400 with details array (weak password)', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve(
-        jsonResponse({ error: 'Weak password', details: ['Too short', 'Needs uppercase'] }, 400)
-      )
-    ) as jest.MockedFunction<typeof fetch>;
-
+    mockFetch({ error: 'Weak password', details: ['Too short', 'Needs uppercase'] }, 400);
     render();
     await submitWithPasswords('weak', 'weak');
 
@@ -95,10 +84,7 @@ describe('ResetPasswordForm', () => {
   });
 
   it('shows rate-limit message when API returns 429', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve(jsonResponse({ error: 'rate limited' }, 429))
-    ) as jest.MockedFunction<typeof fetch>;
-
+    mockFetch({ error: 'rate limited' }, 429);
     render();
     await submitWithPasswords('StrongPass1!', 'StrongPass1!');
 

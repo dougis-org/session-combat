@@ -7,7 +7,7 @@ import { jest, describe, it, expect } from '@jest/globals';
 import React from 'react';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { setupUiTest, jsonResponse } from '../helpers/uiTestSetup';
+import { setupUiTest, mockFetch, jsonResponse } from '../helpers/uiTestSetup';
 import ForgotPasswordPage from '@/app/forgot-password/page';
 
 const ctx = setupUiTest();
@@ -32,49 +32,33 @@ describe('ForgotPasswordPage', () => {
   });
 
   it('shows confirmation message after successful submission', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve(jsonResponse({ message: 'ok' }, 200))
-    ) as jest.MockedFunction<typeof fetch>;
-
+    mockFetch({ message: 'ok' });
     render();
     await submitForm();
-
     expect(ctx.container.textContent).toContain('Check your email');
     expect(ctx.container.querySelector('form')).toBeNull();
   });
 
   it('shows inline error when API returns 400', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve(jsonResponse({ error: 'Invalid email format' }, 400))
-    ) as jest.MockedFunction<typeof fetch>;
-
+    mockFetch({ error: 'Invalid email format' }, 400);
     render();
     await submitForm();
-
     expect(ctx.container.textContent).toContain('Invalid email format');
     expect(ctx.container.querySelector('form')).toBeTruthy();
   });
 
   it('shows rate-limit message when API returns 429', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve(jsonResponse({ error: 'rate limited' }, 429))
-    ) as jest.MockedFunction<typeof fetch>;
-
+    mockFetch({ error: 'rate limited' }, 429);
     render();
     await submitForm();
-
     expect(ctx.container.textContent).toContain('Too many requests');
     expect(ctx.container.querySelector('form')).toBeTruthy();
   });
 
   it('shows generic error banner when API returns 500', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve(jsonResponse({}, 500))
-    ) as jest.MockedFunction<typeof fetch>;
-
+    mockFetch({}, 500);
     render();
     await submitForm();
-
     expect(ctx.container.textContent).toContain('Something went wrong');
     expect(ctx.container.querySelector('form')).toBeTruthy();
   });
@@ -86,7 +70,6 @@ describe('ForgotPasswordPage', () => {
     ) as jest.MockedFunction<typeof fetch>;
 
     render();
-
     act(() => {
       const form = ctx.container.querySelector('form') as HTMLFormElement;
       form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));

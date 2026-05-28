@@ -3,14 +3,12 @@
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { AuthCard } from '@/lib/components/AuthCard';
+import { FormError } from '@/lib/components/ui';
+import { safeJson } from '@/lib/utils/http';
 
 type Phase =
   | { tag: 'idle' | 'loading' | 'success' }
   | { tag: 'error'; message: string };
-
-async function safeJson(res: Response): Promise<Record<string, unknown>> {
-  return res.json().catch(() => ({}));
-}
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -78,7 +76,9 @@ export default function ForgotPasswordPage() {
           </label>
           <input
             id="email"
+            name="email"
             type="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
@@ -90,9 +90,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         {phase.tag === 'error' && (
-          <div id="forgot-error" role="alert" className="p-4 bg-red-900 border border-red-700 rounded text-red-200 text-sm">
-            {phase.message}
-          </div>
+          <FormError id="forgot-error" message={phase.message} />
         )}
 
         <button

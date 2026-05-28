@@ -37,6 +37,12 @@ export function setupUiTest(): UiTestContext {
   return ctx;
 }
 
+export function mockFetch(body: unknown, status = 200): void {
+  global.fetch = jest.fn((_input: RequestInfo | URL, _init?: RequestInit) =>
+    Promise.resolve(jsonResponse(body, status))
+  ) as jest.MockedFunction<typeof fetch>;
+}
+
 export async function clickButton(
   container: HTMLDivElement,
   predicate: (b: HTMLButtonElement) => boolean,

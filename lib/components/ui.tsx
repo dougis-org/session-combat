@@ -81,6 +81,14 @@ export function EditorShell({
   );
 }
 
+export function FormError({ id, message }: { id: string; message: string }) {
+  return (
+    <div id={id} role="alert" className="p-4 bg-red-900 border border-red-700 rounded text-red-200 text-sm">
+      {message}
+    </div>
+  );
+}
+
 export function textInputClass() {
   return 'w-full bg-gray-700 rounded px-3 py-2 text-white';
 }
