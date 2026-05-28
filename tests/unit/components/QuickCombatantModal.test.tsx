@@ -253,6 +253,7 @@ describe('monster selection', () => {
     const user = userEvent.setup();
     const { onAddMonster } = renderModal();
     await user.click(screen.getByRole('button', { name: 'Add Goblin to encounter' }));
+    expect(onAddMonster).toHaveBeenCalledTimes(1);
     expect(onAddMonster).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'test-uuid', templateId: 'g1', name: 'Goblin', hp: 7, ac: 15 })
     );
@@ -333,6 +334,7 @@ describe('character tab', () => {
     const { onAddCharacter } = renderModal();
     await user.click(screen.getByRole('tab', { name: 'Party Members' }));
     await user.click(screen.getByRole('button', { name: 'Add Aria to combat' }));
+    expect(onAddCharacter).toHaveBeenCalledTimes(1);
     expect(onAddCharacter).toHaveBeenCalledWith(ARIA);
   });
 

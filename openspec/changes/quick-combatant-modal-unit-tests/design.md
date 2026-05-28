@@ -144,7 +144,7 @@
 - Requirement category: reliability
   - Requirement: Tests must pass consistently in CI (no flakiness)
   - Design element: Real Fuse.js with distinct fixture names; no fake timers; deterministic uuid spy
-  - Acceptance criteria reference: All tests pass on `npm test -- QuickCombatantModal`
+  - Acceptance criteria reference: All tests pass on `npm run test:unit -- QuickCombatantModal`
   - Testability notes: Run 3× locally before merging to confirm no timer/async flakiness
 
 - Requirement category: operability
