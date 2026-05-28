@@ -74,6 +74,14 @@ const ARIA = makeCharacter({ id: 'c1', name: 'Aria' });
 const BRON = makeCharacter({ id: 'c2', name: 'Bron' });
 const CHARACTER_TEMPLATES = [ARIA, BRON];
 
+beforeEach(() => {
+  jest.spyOn(crypto, 'randomUUID').mockReturnValue('test-uuid' as `${string}-${string}-${string}-${string}-${string}`);
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
+
 function renderModal(overrides: Partial<React.ComponentProps<typeof QuickCombatantModal>> = {}) {
   const onAddMonster = jest.fn();
   const onAddCharacter = jest.fn();
@@ -94,14 +102,6 @@ function renderModal(overrides: Partial<React.ComponentProps<typeof QuickCombata
 }
 
 describe('render and navigation', () => {
-  beforeEach(() => {
-    jest.spyOn(crypto, 'randomUUID').mockReturnValue('test-uuid' as `${string}-${string}-${string}-${string}-${string}`);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   test('modal renders with monsters tab active by default', () => {
     renderModal();
     expect(screen.getByRole('heading', { name: 'Add Combatant' })).toBeInTheDocument();
@@ -176,14 +176,6 @@ describe('monster tab states', () => {
 });
 
 describe('monster search and filter', () => {
-  beforeEach(() => {
-    jest.spyOn(crypto, 'randomUUID').mockReturnValue('test-uuid' as `${string}-${string}-${string}-${string}-${string}`);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   test('all monsters visible initially', () => {
     renderModal();
     expect(screen.getByText('Goblin')).toBeInTheDocument();
@@ -257,14 +249,6 @@ describe('monster search and filter', () => {
 });
 
 describe('monster selection', () => {
-  beforeEach(() => {
-    jest.spyOn(crypto, 'randomUUID').mockReturnValue('test-uuid' as `${string}-${string}-${string}-${string}-${string}`);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   test('clicking Add calls onAddMonster with correct payload', async () => {
     const user = userEvent.setup();
     const { onAddMonster } = renderModal();
@@ -313,14 +297,6 @@ describe('monster selection', () => {
 });
 
 describe('character tab', () => {
-  beforeEach(() => {
-    jest.spyOn(crypto, 'randomUUID').mockReturnValue('test-uuid' as `${string}-${string}-${string}-${string}-${string}`);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   test('loadingTemplates=true on characters tab shows "Loading characters..."', async () => {
     const user = userEvent.setup();
     renderModal({ loadingTemplates: true });
@@ -370,14 +346,6 @@ describe('character tab', () => {
 });
 
 describe('custom form', () => {
-  beforeEach(() => {
-    jest.spyOn(crypto, 'randomUUID').mockReturnValue('test-uuid' as `${string}-${string}-${string}-${string}-${string}`);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   async function openCustomTab() {
     const user = userEvent.setup();
     const mocks = renderModal();
@@ -450,8 +418,8 @@ describe('custom form', () => {
   });
 
   test('dexterity=0 → dexterity range error, onAddMonster not called', async () => {
-    const { user, onAddMonster } = await openCustomTab();
-    await user.type(screen.getByLabelText(/Name/), 'Dragon');
+    const { onAddMonster } = await openCustomTab();
+    fireEvent.input(screen.getByLabelText(/Name/), { target: { value: 'Dragon' } });
     // fireEvent.input bypasses jsdom's number input constraint validation;
     // fireEvent.submit bypasses browser constraint validation that would block onSubmit
     fireEvent.input(screen.getByLabelText(/Dexterity/), { target: { value: '0' } });
@@ -461,8 +429,8 @@ describe('custom form', () => {
   });
 
   test('dexterity=31 → dexterity range error, onAddMonster not called', async () => {
-    const { user, onAddMonster } = await openCustomTab();
-    await user.type(screen.getByLabelText(/Name/), 'Dragon');
+    const { onAddMonster } = await openCustomTab();
+    fireEvent.input(screen.getByLabelText(/Name/), { target: { value: 'Dragon' } });
     fireEvent.input(screen.getByLabelText(/Dexterity/), { target: { value: '31' } });
     fireEvent.submit(screen.getByRole('button', { name: 'Add Combatant' }).closest('form')!);
     expect(screen.getByText(/Dexterity must be between 1 and 30/)).toBeInTheDocument();
@@ -470,8 +438,8 @@ describe('custom form', () => {
   });
 
   test('AC=0 → "AC must be at least 1", onAddMonster not called', async () => {
-    const { user, onAddMonster } = await openCustomTab();
-    await user.type(screen.getByLabelText(/Name/), 'Dragon');
+    const { onAddMonster } = await openCustomTab();
+    fireEvent.input(screen.getByLabelText(/Name/), { target: { value: 'Dragon' } });
     fireEvent.input(screen.getByLabelText(/^AC/), { target: { value: '0' } });
     fireEvent.submit(screen.getByRole('button', { name: 'Add Combatant' }).closest('form')!);
     expect(screen.getByText('AC must be at least 1')).toBeInTheDocument();
@@ -479,8 +447,8 @@ describe('custom form', () => {
   });
 
   test('maxHp=0 → "Max HP must be at least 1", onAddMonster not called', async () => {
-    const { user, onAddMonster } = await openCustomTab();
-    await user.type(screen.getByLabelText(/Name/), 'Dragon');
+    const { onAddMonster } = await openCustomTab();
+    fireEvent.input(screen.getByLabelText(/Name/), { target: { value: 'Dragon' } });
     fireEvent.input(screen.getByLabelText(/Max HP/), { target: { value: '0' } });
     fireEvent.submit(screen.getByRole('button', { name: 'Add Combatant' }).closest('form')!);
     expect(screen.getByText('Max HP must be at least 1')).toBeInTheDocument();
