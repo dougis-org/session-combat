@@ -125,10 +125,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit all changes to `test/quick-combatant-modal-unit-tests` and push to remote
 - [x] Open PR from `test/quick-combatant-modal-unit-tests` to `main`. PR body MUST include: `Closes #258`
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin` to force)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll autonomously; address comments, commit fixes, follow Remote push validation, push, wait 180 seconds, repeat until no unresolved threads remain
-- [ ] **Monitor CI checks** — poll via `gh pr checks <PR-URL> --json isRequired,state`; fix any blocking failure, commit, follow Remote push validation, push, wait 180 seconds, repeat
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — poll autonomously; address comments, commit fixes, follow Remote push validation, push, wait 180 seconds, repeat until no unresolved threads remain
+- [x] **Monitor CI checks** — poll via `gh pr checks <PR-URL> --json isRequired,state`; fix any blocking failure, commit, follow Remote push validation, push, wait 180 seconds, repeat
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify
 
 Ownership metadata:
 
@@ -144,15 +144,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all tasks complete (`- [x]`)
-- [ ] Update `.wolf/anatomy.md` if any files were renamed or moved during review
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/quick-combatant-modal-unit-tests/` to `openspec/changes/archive/YYYY-MM-DD-quick-combatant-modal-unit-tests/` **in a single atomic commit** (stage both the new location and the deletion of the old location together)
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-quick-combatant-modal-unit-tests/` exists and `openspec/changes/quick-combatant-modal-unit-tests/` is gone
-- [ ] **Create a doc branch** for the archive commit: `git checkout -b doc/archive-YYYY-MM-DD-quick-combatant-modal-unit-tests` then `git push -u origin doc/archive-YYYY-MM-DD-quick-combatant-modal-unit-tests`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive quick-combatant-modal-unit-tests (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor the doc PR until merged (same comment/CI loop as implementation PR)
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all tasks complete (`- [x]`)
+- [x] Update `.wolf/anatomy.md` if any files were renamed or moved during review
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive the change: move `openspec/changes/quick-combatant-modal-unit-tests/` to `openspec/changes/archive/2026-05-28-quick-combatant-modal-unit-tests/` **in a single atomic commit** (stage both the new location and the deletion of the old location together)
+- [x] Confirm `openspec/changes/archive/2026-05-28-quick-combatant-modal-unit-tests/` exists and `openspec/changes/quick-combatant-modal-unit-tests/` is gone
+- [x] **Create a doc branch** for the archive commit: `git checkout -b doc/archive-2026-05-28-quick-combatant-modal-unit-tests` then `git push -u origin doc/archive-2026-05-28-quick-combatant-modal-unit-tests`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive quick-combatant-modal-unit-tests (2026-05-28)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor the doc PR until merged (same comment/CI loop as implementation PR)
 - [ ] Prune merged local branches: `git fetch --prune` && `git branch -d test/quick-combatant-modal-unit-tests doc/archive-YYYY-MM-DD-quick-combatant-modal-unit-tests`
