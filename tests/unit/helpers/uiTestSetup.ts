@@ -1,5 +1,15 @@
+import React from 'react';
 import { act } from 'react';
+import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
+import { Response as FetchResponse } from 'node-fetch';
+
+export function jsonResponse(body: unknown, status = 200): Response {
+  return new FetchResponse(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  }) as unknown as Response;
+}
 
 export interface UiTestContext {
   container: HTMLDivElement;
@@ -27,6 +37,31 @@ export function setupUiTest(): UiTestContext {
   });
 
   return ctx;
+}
+
+export function renderComponent(ctx: UiTestContext, element: React.ReactElement): void {
+  ctx.root = createRoot(ctx.container);
+  act(() => { ctx.root!.render(element); });
+}
+
+export function mockPendingFetch(): (value: Response) => void {
+  let resolve: ((value: Response) => void) | undefined;
+  global.fetch = jest.fn(
+    (_input: RequestInfo | URL, _init?: RequestInit) =>
+      new Promise<Response>((r) => { resolve = r; })
+  ) as jest.MockedFunction<typeof fetch>;
+  return (value: Response) => resolve!(value);
+}
+
+export function mockFetch(body: unknown, status = 200): void {
+  global.fetch = jest.fn((_input: RequestInfo | URL, _init?: RequestInit) =>
+    Promise.resolve(jsonResponse(body, status))
+  ) as jest.MockedFunction<typeof fetch>;
+}
+
+export function dispatchFormSubmit(container: HTMLDivElement): void {
+  const form = container.querySelector('form') as HTMLFormElement;
+  form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
 }
 
 export async function clickButton(
