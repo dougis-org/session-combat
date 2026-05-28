@@ -68,7 +68,7 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Enable auto-merge: `gh pr merge <PR-URL> --auto --merge`
 - [x] **Monitor PR comments** — address comments, commit fixes, follow Remote push validation, push, wait 180 s, repeat until no unresolved comments
 - [x] **Monitor CI checks** — diagnose and fix failures, commit, follow Remote push validation, push, wait 180 s, repeat until all checks pass
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; never force-merge
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; never force-merge
 
 Ownership metadata:
 
@@ -83,11 +83,11 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive: move `openspec/changes/password-reset-api/` → `openspec/changes/archive/YYYY-MM-DD-password-reset-api/` in a single commit
-- [ ] Confirm archive location exists and original directory is gone
-- [ ] Commit and push the archive to `main`
-- [ ] Prune merged branch: `git fetch --prune` and `git branch -d feat/password-reset-api`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive: move `openspec/changes/password-reset-api/` → `openspec/changes/archive/YYYY-MM-DD-password-reset-api/` in a single commit
+- [x] Confirm archive location exists and original directory is gone
+- [x] Commit and push the archive to `main`
+- [x] Prune merged branch: `git fetch --prune` and `git branch -d feat/password-reset-api`
