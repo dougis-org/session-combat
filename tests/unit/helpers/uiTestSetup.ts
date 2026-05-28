@@ -1,5 +1,13 @@
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
+import { Response as FetchResponse } from 'node-fetch';
+
+export function jsonResponse(body: unknown, status = 200): Response {
+  return new FetchResponse(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  }) as unknown as Response;
+}
 
 export interface UiTestContext {
   container: HTMLDivElement;

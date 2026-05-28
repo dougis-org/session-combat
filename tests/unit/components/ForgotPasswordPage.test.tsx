@@ -3,59 +3,32 @@
  */
 (globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { jest, describe, it, expect } from '@jest/globals';
 import React from 'react';
 import { act } from 'react';
-import { Root, createRoot } from 'react-dom/client';
-import { Response as FetchResponse } from 'node-fetch';
+import { createRoot } from 'react-dom/client';
+import { setupUiTest, jsonResponse } from '../helpers/uiTestSetup';
 import ForgotPasswordPage from '@/app/forgot-password/page';
 
-function jsonResponse(body: unknown, status = 200): Response {
-  return new FetchResponse(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  }) as unknown as Response;
+const ctx = setupUiTest();
+
+function render() {
+  ctx.root = createRoot(ctx.container);
+  act(() => { ctx.root!.render(React.createElement(ForgotPasswordPage)); });
 }
 
-let container: HTMLDivElement;
-let root: Root;
-let originalFetch: typeof global.fetch;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-  originalFetch = global.fetch;
-});
-
-afterEach(() => {
-  act(() => {
-    root.unmount();
+async function submitForm() {
+  await act(async () => {
+    const form = ctx.container.querySelector('form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
   });
-  document.body.removeChild(container);
-  global.fetch = originalFetch;
-  jest.clearAllMocks();
-});
-
-function render(ui: React.ReactElement) {
-  act(() => {
-    root.render(ui);
-  });
-}
-
-function getInput(): HTMLInputElement {
-  return container.querySelector('input[type="email"]') as HTMLInputElement;
-}
-
-function getButton(): HTMLButtonElement {
-  return container.querySelector('button[type="submit"]') as HTMLButtonElement;
 }
 
 describe('ForgotPasswordPage', () => {
   it('renders email form with input and submit button', () => {
-    render(React.createElement(ForgotPasswordPage));
-    expect(container.querySelector('input[type="email"]')).toBeTruthy();
-    expect(container.querySelector('button[type="submit"]')).toBeTruthy();
+    render();
+    expect(ctx.container.querySelector('input[type="email"]')).toBeTruthy();
+    expect(ctx.container.querySelector('button[type="submit"]')).toBeTruthy();
   });
 
   it('shows confirmation message after successful submission', async () => {
@@ -63,37 +36,11 @@ describe('ForgotPasswordPage', () => {
       Promise.resolve(jsonResponse({ message: 'ok' }, 200))
     ) as jest.MockedFunction<typeof fetch>;
 
-    render(React.createElement(ForgotPasswordPage));
+    render();
+    await submitForm();
 
-    const input = getInput();
-    act(() => {
-      Object.defineProperty(input, 'value', { writable: true, value: 'user@example.com' });
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-
-    await act(async () => {
-      const form = container.querySelector('form') as HTMLFormElement;
-      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    });
-
-    expect(container.textContent).toContain('Check your email');
-    expect(container.querySelector('form')).toBeNull();
-  });
-
-  it('shows rate-limit message when API returns 429', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve(jsonResponse({ error: 'rate limited' }, 429))
-    ) as jest.MockedFunction<typeof fetch>;
-
-    render(React.createElement(ForgotPasswordPage));
-
-    await act(async () => {
-      const form = container.querySelector('form') as HTMLFormElement;
-      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    });
-
-    expect(container.textContent).toContain('Too many requests');
-    expect(container.querySelector('form')).toBeTruthy();
+    expect(ctx.container.textContent).toContain('Check your email');
+    expect(ctx.container.querySelector('form')).toBeNull();
   });
 
   it('shows inline error when API returns 400', async () => {
@@ -101,31 +48,35 @@ describe('ForgotPasswordPage', () => {
       Promise.resolve(jsonResponse({ error: 'Invalid email format' }, 400))
     ) as jest.MockedFunction<typeof fetch>;
 
-    render(React.createElement(ForgotPasswordPage));
+    render();
+    await submitForm();
 
-    await act(async () => {
-      const form = container.querySelector('form') as HTMLFormElement;
-      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    });
+    expect(ctx.container.textContent).toContain('Invalid email format');
+    expect(ctx.container.querySelector('form')).toBeTruthy();
+  });
 
-    expect(container.textContent).toContain('Invalid email format');
-    expect(container.querySelector('form')).toBeTruthy();
+  it('shows rate-limit message when API returns 429', async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve(jsonResponse({ error: 'rate limited' }, 429))
+    ) as jest.MockedFunction<typeof fetch>;
+
+    render();
+    await submitForm();
+
+    expect(ctx.container.textContent).toContain('Too many requests');
+    expect(ctx.container.querySelector('form')).toBeTruthy();
   });
 
   it('shows generic error banner when API returns 500', async () => {
     global.fetch = jest.fn(() =>
-      Promise.resolve(new FetchResponse('', { status: 500 }) as unknown as Response)
+      Promise.resolve(jsonResponse({}, 500))
     ) as jest.MockedFunction<typeof fetch>;
 
-    render(React.createElement(ForgotPasswordPage));
+    render();
+    await submitForm();
 
-    await act(async () => {
-      const form = container.querySelector('form') as HTMLFormElement;
-      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    });
-
-    expect(container.textContent).toContain('Something went wrong');
-    expect(container.querySelector('form')).toBeTruthy();
+    expect(ctx.container.textContent).toContain('Something went wrong');
+    expect(ctx.container.querySelector('form')).toBeTruthy();
   });
 
   it('disables submit button while request is in-flight', async () => {
@@ -134,17 +85,16 @@ describe('ForgotPasswordPage', () => {
       () => new Promise<Response>((resolve) => { resolveFetch = resolve; })
     ) as jest.MockedFunction<typeof fetch>;
 
-    render(React.createElement(ForgotPasswordPage));
+    render();
 
     act(() => {
-      const form = container.querySelector('form') as HTMLFormElement;
+      const form = ctx.container.querySelector('form') as HTMLFormElement;
       form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     });
 
-    expect(getButton().disabled).toBe(true);
+    const btn = ctx.container.querySelector('button[type="submit"]') as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
 
-    await act(async () => {
-      resolveFetch(jsonResponse({ message: 'ok' }));
-    });
+    await act(async () => { resolveFetch(jsonResponse({ message: 'ok' })); });
   });
 });

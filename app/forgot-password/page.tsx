@@ -2,18 +2,23 @@
 
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
+import { AuthCard } from '@/lib/components/AuthCard';
 
-type State = 'idle' | 'loading' | 'success' | 'error';
+type Phase =
+  | { tag: 'idle' | 'loading' | 'success' }
+  | { tag: 'error'; message: string };
+
+async function safeJson(res: Response): Promise<Record<string, unknown>> {
+  return res.json().catch(() => ({}));
+}
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const [state, setState] = useState<State>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [phase, setPhase] = useState<Phase>({ tag: 'idle' });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setState('loading');
-    setErrorMessage('');
+    setPhase({ tag: 'loading' });
 
     try {
       const res = await fetch('/api/auth/password/forgot', {
@@ -22,107 +27,90 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       });
 
-      if (res.ok) {
-        setState('success');
-        return;
-      }
+      if (res.ok) { setPhase({ tag: 'success' }); return; }
 
       if (res.status === 429) {
-        setErrorMessage('Too many requests. Please wait before trying again.');
-        setState('error');
+        setPhase({ tag: 'error', message: 'Too many requests. Please wait before trying again.' });
         return;
       }
 
-      const body = await res.json().catch(() => ({}));
-      setErrorMessage(body.error || 'Something went wrong. Please try again.');
-      setState('error');
+      const body = await safeJson(res);
+      setPhase({ tag: 'error', message: String(body.error || 'Something went wrong. Please try again.') });
     } catch {
-      setErrorMessage('Something went wrong. Please try again.');
-      setState('error');
+      setPhase({ tag: 'error', message: 'Something went wrong. Please try again.' });
     }
   };
 
-  if (state === 'success') {
+  if (phase.tag === 'success') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="w-full max-w-md p-8 bg-gray-800 rounded-lg shadow-lg text-center">
-          <h1 className="text-3xl font-bold text-white mb-4">Check your email</h1>
-          <p className="text-gray-300">
-            If an account exists for that address, a password reset link has been sent.
-          </p>
-          <p className="text-gray-400 text-sm mt-4">
-            Didn&apos;t receive it? Check your spam folder or{' '}
-            <button
-              onClick={() => {
-                setState('idle');
-                setEmail('');
-              }}
-              className="text-blue-400 hover:text-blue-300 font-semibold underline"
-            >
-              try again
-            </button>
-            .
-          </p>
-        </div>
-      </div>
+      <AuthCard center>
+        <h1 className="text-3xl font-bold text-white mb-4">Check your email</h1>
+        <p className="text-gray-300">
+          If an account exists for that address, a password reset link has been sent.
+        </p>
+        <p className="text-gray-400 text-sm mt-4">
+          Didn&apos;t receive it? Check your spam folder or{' '}
+          <button
+            onClick={() => { setPhase({ tag: 'idle' }); setEmail(''); }}
+            className="text-blue-400 hover:text-blue-300 font-semibold underline"
+          >
+            try again
+          </button>
+          .
+        </p>
+      </AuthCard>
     );
   }
 
-  const isLoading = state === 'loading';
+  const isLoading = phase.tag === 'loading';
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <div className="w-full max-w-md p-8 bg-gray-800 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-white mb-2 text-center">Forgot password?</h1>
-        <p className="text-gray-400 text-sm text-center mb-6">
-          Enter your email and we&apos;ll send you a reset link.
-        </p>
+    <AuthCard>
+      <h1 className="text-3xl font-bold text-white mb-2 text-center">Forgot password?</h1>
+      <p className="text-gray-400 text-sm text-center mb-6">
+        Enter your email and we&apos;ll send you a reset link.
+      </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
-              disabled={isLoading}
-              required
-              aria-describedby={errorMessage ? 'forgot-error' : undefined}
-            />
-          </div>
-
-          {errorMessage && (
-            <div
-              id="forgot-error"
-              role="alert"
-              className="p-4 bg-red-900 border border-red-700 rounded text-red-200 text-sm"
-            >
-              {errorMessage}
-            </div>
-          )}
-
-          <button
-            type="submit"
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+            Email Address
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
             disabled={isLoading}
-            aria-disabled={isLoading}
-            className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold rounded transition-colors"
-          >
-            {isLoading ? 'Sending…' : 'Send reset link'}
-          </button>
-        </form>
+            required
+            aria-describedby={phase.tag === 'error' ? 'forgot-error' : undefined}
+          />
+        </div>
 
-        <p className="text-center text-gray-400 text-sm mt-6">
-          Remembered it?{' '}
-          <Link href="/login" className="text-blue-400 hover:text-blue-300 font-semibold">
-            Back to login
-          </Link>
-        </p>
-      </div>
-    </div>
+        {phase.tag === 'error' && (
+          <div id="forgot-error" role="alert" className="p-4 bg-red-900 border border-red-700 rounded text-red-200 text-sm">
+            {phase.message}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          aria-disabled={isLoading}
+          className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold rounded transition-colors"
+        >
+          {isLoading ? 'Sending…' : 'Send reset link'}
+        </button>
+      </form>
+
+      <p className="text-center text-gray-400 text-sm mt-6">
+        Remembered it?{' '}
+        <Link href="/login" className="text-blue-400 hover:text-blue-300 font-semibold">
+          Back to login
+        </Link>
+      </p>
+    </AuthCard>
   );
 }
