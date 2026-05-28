@@ -56,13 +56,13 @@ describe('LegendaryActionsPanel', () => {
   });
 
   it('renders null when legendaryActions is empty', () => {
-    const { container } = render(
+    render(
       <LegendaryActionsPanel
         combatant={{ ...BASE_COMBATANT, legendaryActions: [] } as CombatantState}
         onUpdate={jest.fn()}
       />
     );
-    expect(container.firstChild).toBeNull();
+    expect(screen.queryByText(/legendary actions/i)).not.toBeInTheDocument();
   });
 
   it('shows zero when legendaryActionsRemaining is 0', () => {

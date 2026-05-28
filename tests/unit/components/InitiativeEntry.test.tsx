@@ -156,7 +156,7 @@ describe('InitiativeEntry', () => {
   });
 
   describe('dex modifier display', () => {
-    it('negative modifier (dexterity: 8) shown when rolling', async () => {
+    it('negative modifier (dexterity: 8) is applied to the rolled initiative callback', async () => {
       const user = userEvent.setup();
       const { onSet } = renderEntry({
         abilityScores: {
