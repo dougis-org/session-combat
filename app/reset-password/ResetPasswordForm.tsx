@@ -3,7 +3,7 @@
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { AuthCard } from '@/lib/components/AuthCard';
-import { FormError } from '@/lib/components/ui';
+import { FormError, SubmitButton } from '@/lib/components/ui';
 import { safeJson } from '@/lib/utils/http';
 
 type Phase =
@@ -133,14 +133,7 @@ export default function ResetPasswordForm({ token }: Props) {
           <FormError id="reset-error" message={phase.message} />
         )}
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          aria-disabled={isLoading}
-          className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold rounded transition-colors"
-        >
-          {isLoading ? 'Resetting…' : 'Reset password'}
-        </button>
+        <SubmitButton isLoading={isLoading} label="Reset password" loadingLabel="Resetting…" />
       </form>
     </AuthCard>
   );

@@ -6,7 +6,7 @@
 import { jest, describe, it, expect } from '@jest/globals';
 import React from 'react';
 import { act } from 'react';
-import { setupUiTest, renderComponent, mockFetch, mockPendingFetch, jsonResponse } from '../helpers/uiTestSetup';
+import { setupUiTest, renderComponent, mockFetch, mockPendingFetch, dispatchFormSubmit, jsonResponse } from '../helpers/uiTestSetup';
 import ResetPasswordForm from '@/app/reset-password/ResetPasswordForm';
 
 const TOKEN = 'test-token-abc123';
@@ -26,10 +26,7 @@ async function submitWithPasswords(password: string, confirm: string) {
     setInputValue(ctx.container.querySelector('#password') as HTMLInputElement, password);
     setInputValue(ctx.container.querySelector('#confirm-password') as HTMLInputElement, confirm);
   });
-  await act(async () => {
-    const form = ctx.container.querySelector('form') as HTMLFormElement;
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-  });
+  await act(async () => { dispatchFormSubmit(ctx.container); });
 }
 
 describe('ResetPasswordForm', () => {
@@ -98,10 +95,7 @@ describe('ResetPasswordForm', () => {
       setInputValue(ctx.container.querySelector('#password') as HTMLInputElement, 'StrongPass1!');
       setInputValue(ctx.container.querySelector('#confirm-password') as HTMLInputElement, 'StrongPass1!');
     });
-    act(() => {
-      const form = ctx.container.querySelector('form') as HTMLFormElement;
-      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    });
+    act(() => { dispatchFormSubmit(ctx.container); });
 
     const btn = ctx.container.querySelector('button[type="submit"]') as HTMLButtonElement;
     expect(btn.disabled).toBe(true);

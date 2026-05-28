@@ -3,7 +3,7 @@
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { AuthCard } from '@/lib/components/AuthCard';
-import { FormError } from '@/lib/components/ui';
+import { FormError, SubmitButton } from '@/lib/components/ui';
 import { safeJson } from '@/lib/utils/http';
 
 type Phase =
@@ -93,14 +93,7 @@ export default function ForgotPasswordPage() {
           <FormError id="forgot-error" message={phase.message} />
         )}
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          aria-disabled={isLoading}
-          className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold rounded transition-colors"
-        >
-          {isLoading ? 'Sending…' : 'Send reset link'}
-        </button>
+        <SubmitButton isLoading={isLoading} label="Send reset link" loadingLabel="Sending…" />
       </form>
 
       <p className="text-center text-gray-400 text-sm mt-6">

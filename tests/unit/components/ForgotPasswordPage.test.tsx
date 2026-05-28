@@ -6,7 +6,7 @@
 import { jest, describe, it, expect } from '@jest/globals';
 import React from 'react';
 import { act } from 'react';
-import { setupUiTest, renderComponent, mockFetch, mockPendingFetch, jsonResponse } from '../helpers/uiTestSetup';
+import { setupUiTest, renderComponent, mockFetch, mockPendingFetch, dispatchFormSubmit, jsonResponse } from '../helpers/uiTestSetup';
 import ForgotPasswordPage from '@/app/forgot-password/page';
 
 const ctx = setupUiTest();
@@ -16,10 +16,7 @@ function render() {
 }
 
 async function submitForm() {
-  await act(async () => {
-    const form = ctx.container.querySelector('form') as HTMLFormElement;
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-  });
+  await act(async () => { dispatchFormSubmit(ctx.container); });
 }
 
 describe('ForgotPasswordPage', () => {
@@ -64,10 +61,7 @@ describe('ForgotPasswordPage', () => {
   it('disables submit button while request is in-flight', async () => {
     const resolveFetch = mockPendingFetch();
     render();
-    act(() => {
-      const form = ctx.container.querySelector('form') as HTMLFormElement;
-      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    });
+    act(() => { dispatchFormSubmit(ctx.container); });
 
     const btn = ctx.container.querySelector('button[type="submit"]') as HTMLButtonElement;
     expect(btn.disabled).toBe(true);

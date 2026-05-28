@@ -59,6 +59,11 @@ export function mockFetch(body: unknown, status = 200): void {
   ) as jest.MockedFunction<typeof fetch>;
 }
 
+export function dispatchFormSubmit(container: HTMLDivElement): void {
+  const form = container.querySelector('form') as HTMLFormElement;
+  form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+}
+
 export async function clickButton(
   container: HTMLDivElement,
   predicate: (b: HTMLButtonElement) => boolean,

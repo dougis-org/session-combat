@@ -89,6 +89,19 @@ export function FormError({ id, message }: { id: string; message: string }) {
   );
 }
 
+export function SubmitButton({ isLoading, label, loadingLabel }: { isLoading: boolean; label: string; loadingLabel: string }) {
+  return (
+    <button
+      type="submit"
+      disabled={isLoading}
+      aria-disabled={isLoading}
+      className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold rounded transition-colors"
+    >
+      {isLoading ? loadingLabel : label}
+    </button>
+  );
+}
+
 export function textInputClass() {
   return 'w-full bg-gray-700 rounded px-3 py-2 text-white';
 }
