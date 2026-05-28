@@ -23,6 +23,17 @@ async function initializeDatabase(db: Db): Promise<void> {
     await db.collection("characters").createIndex({ deletedAt: 1 });
     console.log("Created index on characters.deletedAt");
 
+    // Index on users.email for O(1) lookup in auth and password-reset flows — isolated so a
+    // duplicate-email failure doesn't abort password_reset_tokens index creation below
+    try {
+      await db.collection("users").createIndex({ email: 1 }, { unique: true });
+      console.log("Created index on users.email");
+    } catch (indexError) {
+      if (indexError instanceof Error && !indexError.message.includes("already exists")) {
+        console.warn("Warning creating users.email index:", indexError.message);
+      }
+    }
+
     // Unique index on tokenHash for O(1) reset-token lookup
     await db
       .collection("password_reset_tokens")
