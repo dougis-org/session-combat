@@ -254,7 +254,7 @@ describe('monster selection', () => {
     const { onAddMonster } = renderModal();
     await user.click(screen.getByRole('button', { name: 'Add Goblin to encounter' }));
     expect(onAddMonster).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'test-uuid', templateId: 'g1', name: 'Goblin' })
+      expect.objectContaining({ id: 'test-uuid', templateId: 'g1', name: 'Goblin', hp: 7, ac: 15 })
     );
   });
 
@@ -380,7 +380,7 @@ describe('custom form', () => {
     // Leave Initiative blank
     await user.click(screen.getByRole('button', { name: 'Add Combatant' }));
     expect(onAddMonster).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Dragon', ac: 15, maxHp: 50, hp: 50 })
+      expect.objectContaining({ name: 'Dragon', ac: 15, maxHp: 50, hp: 50, abilityScores: expect.objectContaining({ dexterity: 14 }) })
     );
     expect(onClose).toHaveBeenCalledTimes(1);
   });
