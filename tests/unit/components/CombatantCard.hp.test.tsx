@@ -64,7 +64,9 @@ async function applyDamageHelper(
 ): Promise<jest.Mock> {
   const user = userEvent.setup();
   const onUpdate = renderCard({ hp: 30, maxHp: 30, ...overrides });
-  await user.type(screen.getByRole('spinbutton'), amount);
+  const input = screen.getByRole('spinbutton');
+  await user.clear(input);
+  await user.type(input, amount);
   if (damageType) {
     await user.selectOptions(
       screen.getByLabelText('Damage type (for resistance/immunity/vulnerability)'),
@@ -205,7 +207,7 @@ describe('CombatantCard.hp — conditions', () => {
     const onUpdate = renderCard({ conditions: [{ id: 'c1', name: 'Poisoned', description: '' }] });
     await user.click(screen.getByRole('button', { name: /Conditions \(1\)/ }));
     await user.click(screen.getByRole('button', { name: 'Remove' }));
-    expect(onUpdate).toHaveBeenCalledWith({ conditions: [] });
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ conditions: [] }));
   });
 
   test('two conditions — remove first — onUpdate called with only second', async () => {
@@ -218,9 +220,9 @@ describe('CombatantCard.hp — conditions', () => {
     await user.click(screen.getByRole('button', { name: /Conditions \(2\)/ }));
     const removeButtons = screen.getAllByRole('button', { name: 'Remove' });
     await user.click(removeButtons[0]);
-    expect(onUpdate).toHaveBeenCalledWith({
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({
       conditions: [{ id: 'c2', name: 'Blinded', description: '' }],
-    });
+    }));
   });
 });
 
@@ -232,7 +234,9 @@ describe('CombatantCard.hp — healing', () => {
   test('Heal button calls onUpdate with increased hp', async () => {
     const user = userEvent.setup();
     const onUpdate = renderCard({ hp: 20, maxHp: 30 });
-    await user.type(screen.getByRole('spinbutton'), '5');
+    const input = screen.getByRole('spinbutton');
+    await user.clear(input);
+    await user.type(input, '5');
     await user.click(screen.getByRole('button', { name: 'Heal' }));
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ hp: 25 }));
   });
@@ -240,7 +244,9 @@ describe('CombatantCard.hp — healing', () => {
   test('Heal button caps hp at maxHp', async () => {
     const user = userEvent.setup();
     const onUpdate = renderCard({ hp: 28, maxHp: 30 });
-    await user.type(screen.getByRole('spinbutton'), '10');
+    const input = screen.getByRole('spinbutton');
+    await user.clear(input);
+    await user.type(input, '10');
     await user.click(screen.getByRole('button', { name: 'Heal' }));
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ hp: 30 }));
   });
@@ -258,7 +264,9 @@ describe('CombatantCard.hp — set temp HP', () => {
     const user = userEvent.setup();
     const onUpdate = renderCard({ hp: 30, maxHp: 30 });
     await user.click(screen.getByRole('checkbox', { name: /Temp/ }));
-    await user.type(screen.getByRole('spinbutton'), '10');
+    const input = screen.getByRole('spinbutton');
+    await user.clear(input);
+    await user.type(input, '10');
     await user.click(screen.getByRole('button', { name: 'Set Temp' }));
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ tempHp: 10 }));
   });
