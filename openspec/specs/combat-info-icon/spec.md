@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the `design.md` document, not a replacement.
+This document details *changes* to requirements and is additive to the base design document ([design.md](../../changes/archive/2026-05-28-standalone-components-coverage/design.md)), not a replacement.
 
 ### Requirement: ADDED CombatInfoIcon renders an icon button
 
@@ -22,24 +22,24 @@ The system SHALL not show the info tooltip/panel on initial render.
 - **When** no interaction has occurred
 - **Then** the combatant detail panel (tooltip) is not visible in the DOM
 
-### Requirement: ADDED Clicking the icon shows the tooltip
+### Requirement: ADDED Hovering the icon shows the tooltip
 
-The system SHALL show the combatant info panel when the icon is clicked.
+The system SHALL show the combatant info panel when the mouse enters the icon area.
 
-#### Scenario: Click shows tooltip
+#### Scenario: Hover shows tooltip
 
 - **Given** `CombatInfoIcon` renders with a combatants array and the tooltip is hidden
-- **When** the user clicks the icon
+- **When** the user hovers over the icon
 - **Then** the combatant info panel becomes visible in the DOM
 
-### Requirement: ADDED Clicking again hides the tooltip
+### Requirement: ADDED Unhovering hides the tooltip
 
-The system SHALL hide the combatant info panel when the icon is clicked a second time.
+The system SHALL hide the combatant info panel when the mouse leaves the icon area.
 
-#### Scenario: Second click hides tooltip
+#### Scenario: Unhover hides tooltip
 
 - **Given** the tooltip is currently visible
-- **When** the user clicks the icon again
+- **When** the user moves the mouse away from the icon
 - **Then** the combatant info panel is no longer visible in the DOM
 
 ### Requirement: ADDED Combatant names appear in the expanded panel
@@ -49,19 +49,19 @@ The system SHALL render combatant names from the provided array in the info pane
 #### Scenario: Player combatant name shown in panel
 
 - **Given** `CombatInfoIcon` receives `combatants: [{ name: 'Elara', type: 'player', hp: 20, ... }]`
-- **When** the user clicks the icon to show the panel
+- **When** the user hovers over the icon to show the panel
 - **Then** "Elara" is visible in the DOM
 
 #### Scenario: Monster combatant name shown in panel
 
 - **Given** `CombatInfoIcon` receives a monster combatant with `name: 'Goblin'` and `hp: 5`
-- **When** the user clicks the icon to show the panel
+- **When** the user hovers over the icon to show the panel
 - **Then** "Goblin" is visible in the DOM
 
 #### Scenario: Dead combatant (hp <= 0) grouped separately
 
 - **Given** `CombatInfoIcon` receives a combatant with `hp: 0`
-- **When** the user clicks the icon to show the panel
+- **When** the user hovers over the icon to show the panel
 - **Then** the combatant appears in the dead/fallen section of the panel
 
 ## MODIFIED Requirements

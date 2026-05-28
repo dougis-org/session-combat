@@ -104,5 +104,5 @@ None.
 #### Scenario: Tests pass in jsdom CI environment with mocked alert
 
 - **Given** `window.alert` is spied on and `Math.random` returns values in the valid d20 range
-- **When** `npm test` runs
+- **When** `npm run test:unit` runs
 - **Then** all `InitiativeEntry` tests pass without throwing

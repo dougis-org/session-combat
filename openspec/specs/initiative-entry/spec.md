@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the `design.md` document, not a replacement.
+This document details *changes* to requirements and is additive to the base design document ([design.md](../../changes/archive/2026-05-28-standalone-components-coverage/design.md)), not a replacement.
 
 ### Requirement: ADDED Roll mode generates initiative and calls onSet
 
@@ -104,5 +104,5 @@ None.
 #### Scenario: Tests pass in jsdom CI environment with mocked alert
 
 - **Given** `window.alert` is spied on and `Math.random` returns values in the valid d20 range
-- **When** `npm test` runs
+- **When** `npm run test:unit` runs
 - **Then** all `InitiativeEntry` tests pass without throwing

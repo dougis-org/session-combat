@@ -10,7 +10,7 @@
 
 - Reach ≥80% statement coverage for each of the 5 components
 - Establish one clean RTL test file per component in `tests/unit/components/`
-- All tests pass in CI with `npm test`
+- All tests pass in CI with `npm run test:unit`
 
 ### Non-Goals
 
@@ -139,7 +139,7 @@
   - Requirement: All tests pass in jsdom CI environment
   - Design element: `@jest-environment jsdom` directive in every test file; `localStorage.clear()` in `beforeEach`
   - Acceptance criteria reference: All specs
-  - Testability notes: CI runs `npm test`; all five new files must pass
+  - Testability notes: CI runs `npm run test:unit`; all five new files must pass
 
 ## Risks / Trade-offs
 

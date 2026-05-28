@@ -34,11 +34,11 @@ The system SHALL call `onUpdate` with a decremented remaining count when the spe
 - **When** the user clicks the spend/decrement button (⚡ or equivalent)
 - **Then** `onUpdate` is called with a payload reflecting `legendaryActionsRemaining: 1`
 
-#### Scenario: Spend at zero does not go negative
+#### Scenario: Spend button is disabled at zero remaining
 
 - **Given** a combatant with `legendaryActionCount: 3`, `legendaryActionsRemaining: 0`
-- **When** the spend button is clicked (if visible/enabled)
-- **Then** `onUpdate` is called with `legendaryActionsRemaining` not less than 0
+- **When** `LegendaryActionsPanel` renders
+- **Then** the spend button is disabled and `onUpdate` is not called
 
 ### Requirement: ADDED Restore button resets to full count
 
@@ -71,5 +71,5 @@ None.
 #### Scenario: Tests pass in jsdom CI environment
 
 - **Given** the jsdom test environment
-- **When** `npm test` runs
+- **When** `npm run test:unit` runs
 - **Then** all `LegendaryActionsPanel` tests pass

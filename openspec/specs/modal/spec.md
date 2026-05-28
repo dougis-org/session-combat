@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the `design.md` document, not a replacement.
+This document details *changes* to requirements and is additive to the base design document ([design.md](../../changes/archive/2026-05-28-standalone-components-coverage/design.md)), not a replacement.
 
 ### Requirement: ADDED Modal renders children when open
 
@@ -70,5 +70,5 @@ None.
 #### Scenario: Tests pass in jsdom CI environment
 
 - **Given** the jsdom test environment
-- **When** `npm test` runs
+- **When** `npm run test:unit` runs
 - **Then** all `Modal` tests pass

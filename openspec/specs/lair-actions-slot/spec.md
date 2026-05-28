@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the `design.md` document, not a replacement.
+This document details *changes* to requirements and is additive to the base design document ([design.md](../../changes/archive/2026-05-28-standalone-components-coverage/design.md)), not a replacement.
 
 ### Requirement: ADDED LairActionsSlot renders inactive pill
 
@@ -48,6 +48,8 @@ The system SHALL call `onUpdate` with all lair action charges restored when "Res
 
 The system SHALL call `onNextTurn` when the appropriate next-turn control is activated in the active state.
 
+> **Note:** Test coverage for this scenario was deferred from this change (T2 covers render and restore only). A future change should add the corresponding test case.
+
 #### Scenario: Active panel exposes next turn trigger
 
 - **Given** a combatant with `isActive: true` and an `onNextTurn` callback
@@ -76,5 +78,5 @@ None.
 #### Scenario: Tests pass in jsdom CI environment
 
 - **Given** the jsdom test environment
-- **When** `npm test` runs
+- **When** `npm run test:unit` runs
 - **Then** all `LairActionsSlot` tests pass

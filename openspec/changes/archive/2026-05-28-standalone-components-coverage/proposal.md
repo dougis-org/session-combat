@@ -12,7 +12,7 @@
 
 - Current behavior: All five components have 0% statement coverage. No test files exist for them. All existing tests in `tests/unit/components/` use the legacy `createRoot`/`act`/`container.querySelector` pattern.
 - Desired behavior: Each component reaches ≥80% statement coverage. Tests use RTL (`render`, `screen`, `userEvent`) following the PR 272 pattern. One new test file per component.
-- Constraints: No production code changes. Tests must pass in CI (`npm test`). Must follow the RTL patterns from PR 272 exactly (see Design).
+- Constraints: No production code changes. Tests must pass in CI (`npm run test:unit`). Must follow the RTL patterns from PR 272 exactly (see Design).
 - Assumptions: RTL packages (`@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`) are installed. `jest.setup.ts` imports `@testing-library/jest-dom`. Both confirmed by #254 and PR 272.
 - Edge cases considered: `InitiativeEntry` has local `useState` (3 modes) and a `document.keydown` effect — integration-style testing is appropriate. `CombatInfoIcon` has baked-in combatant grouping logic inside the component body — tested via rendered output with known fixture; pure extraction tracked in #274. `LairActionsSlot` has two render paths (`isActive` true/false).
 
