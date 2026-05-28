@@ -155,4 +155,4 @@ Blocking resolution flow:
 - [x] Open a PR from the doc branch to `main` with title `docs: archive quick-combatant-modal-unit-tests (2026-05-28)`
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
 - [x] Monitor the doc PR until merged (same comment/CI loop as implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` && `git branch -d test/quick-combatant-modal-unit-tests doc/archive-YYYY-MM-DD-quick-combatant-modal-unit-tests`
+- [x] Prune merged local branches: `git fetch --prune` && `git branch -d test/quick-combatant-modal-unit-tests doc/archive-2026-05-28-quick-combatant-modal-unit-tests`
