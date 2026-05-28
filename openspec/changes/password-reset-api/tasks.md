@@ -66,8 +66,8 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Open PR from `feat/password-reset-api` to `main`; reference `Closes #266`
 - [x] Wait 180 seconds for CI and agentic reviewers to post comments
 - [x] Enable auto-merge: `gh pr merge <PR-URL> --auto --merge`
-- [ ] **Monitor PR comments** — address comments, commit fixes, follow Remote push validation, push, wait 180 s, repeat until no unresolved comments
-- [ ] **Monitor CI checks** — diagnose and fix failures, commit, follow Remote push validation, push, wait 180 s, repeat until all checks pass
+- [x] **Monitor PR comments** — address comments, commit fixes, follow Remote push validation, push, wait 180 s, repeat until no unresolved comments
+- [x] **Monitor CI checks** — diagnose and fix failures, commit, follow Remote push validation, push, wait 180 s, repeat until all checks pass
 - [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; never force-merge
 
 Ownership metadata:
