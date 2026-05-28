@@ -70,5 +70,5 @@ None.
 #### Scenario: Tests pass in jsdom CI environment
 
 - **Given** the jsdom test environment
-- **When** `npm test` runs
+- **When** `npm run test:unit` runs
 - **Then** all `Modal` tests pass

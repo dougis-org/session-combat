@@ -40,13 +40,15 @@ The system SHALL call `onUpdate` with all lair action charges restored when "Res
 
 #### Scenario: Restore all restores charges
 
-- **Given** a combatant with `isActive: true` and a lair action with depleted charges
+- **Given** a combatant with `isActive: true` and a lair action with `usesRemaining: 2`
 - **When** the user clicks the "Restore All" button
-- **Then** `onUpdate` is called with all lair action charges at their maximum values
+- **Then** `onUpdate` is called with each lair action's `usesRemaining` incremented by 1
 
 ### Requirement: ADDED onNextTurn is callable from active panel
 
 The system SHALL call `onNextTurn` when the appropriate next-turn control is activated in the active state.
+
+> **Note:** Test coverage for this scenario was deferred from this change (T2 covers render and restore only). A future change should add the corresponding test case.
 
 #### Scenario: Active panel exposes next turn trigger
 
@@ -76,5 +78,5 @@ None.
 #### Scenario: Tests pass in jsdom CI environment
 
 - **Given** the jsdom test environment
-- **When** `npm test` runs
+- **When** `npm run test:unit` runs
 - **Then** all `LairActionsSlot` tests pass
