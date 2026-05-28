@@ -23,6 +23,10 @@ async function initializeDatabase(db: Db): Promise<void> {
     await db.collection("characters").createIndex({ deletedAt: 1 });
     console.log("Created index on characters.deletedAt");
 
+    // Index on users.email for O(1) lookup in auth and password-reset flows
+    await db.collection("users").createIndex({ email: 1 }, { unique: true });
+    console.log("Created index on users.email");
+
     // Unique index on tokenHash for O(1) reset-token lookup
     await db
       .collection("password_reset_tokens")

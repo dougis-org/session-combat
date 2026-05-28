@@ -62,18 +62,22 @@ describe("Password Reset API Integration Tests", () => {
       const data = (await res.json()) as { message: string };
       expect(data.message).toBe(GENERIC_MSG);
 
-      // Give the fire-and-forget a moment to complete
-      await new Promise((r) => setTimeout(r, 500));
-
+      // Poll until fire-and-forget token write completes (avoids flaky fixed-delay)
       const client = new MongoClient(mongoUri);
       try {
         await client.connect();
         const db = client.db(process.env.MONGODB_DB ?? "session-combat-test");
         const user = await db.collection("users").findOne({ email });
         expect(user).not.toBeNull();
-        const tokenDoc = await db
-          .collection("password_reset_tokens")
-          .findOne({ userId: user!._id.toString() });
+
+        let tokenDoc = null;
+        for (let i = 0; i < 20; i++) {
+          tokenDoc = await db
+            .collection("password_reset_tokens")
+            .findOne({ userId: user!._id.toString() });
+          if (tokenDoc) break;
+          await new Promise((r) => setTimeout(r, 100));
+        }
         expect(tokenDoc).not.toBeNull();
       } finally {
         await client.close();
