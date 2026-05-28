@@ -40,9 +40,9 @@ The system SHALL call `onUpdate` with all lair action charges restored when "Res
 
 #### Scenario: Restore all restores charges
 
-- **Given** a combatant with `isActive: true` and a lair action with depleted charges
+- **Given** a combatant with `isActive: true` and a lair action with `usesRemaining: 2`
 - **When** the user clicks the "Restore All" button
-- **Then** `onUpdate` is called with all lair action charges at their maximum values
+- **Then** `onUpdate` is called with each lair action's `usesRemaining` incremented by 1
 
 ### Requirement: ADDED onNextTurn is callable from active panel
 
