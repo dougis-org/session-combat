@@ -1,14 +1,11 @@
 /**
  * @jest-environment jsdom
  */
-(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-
+import { jest, describe, it, expect } from '@jest/globals';
 import React from 'react';
-import { Root } from 'react-dom/client';
-import { act } from 'react';
-import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
+import { render as rtlRender, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   ErrorBanner,
   ValidationError,
@@ -19,68 +16,53 @@ import {
   TextInputField,
 } from '@/lib/components/ui';
 
-let container: HTMLDivElement;
-let root: Root;
-
-beforeEach(() => {
-  ({ container, root } = createReactRoot());
-});
-
-afterEach(() => {
-  unmountReactRoot(container, root);
-});
-
-function render(element: React.ReactElement) {
-  act(() => { root.render(element); });
-}
-
 // ---------------------------------------------------------------------------
 
 describe('ErrorBanner', () => {
   it('renders nothing when message is null', () => {
-    render(<ErrorBanner message={null} />);
+    const { container } = rtlRender(<ErrorBanner message={null} />);
     expect(container.firstChild).toBeNull();
   });
 
   it('renders message text when provided', () => {
-    render(<ErrorBanner message="Something went wrong" />);
-    expect(container.textContent).toContain('Something went wrong');
+    rtlRender(<ErrorBanner message="Something went wrong" />);
+    screen.getByText('Something went wrong');
   });
 });
 
 describe('ValidationError', () => {
   it('renders nothing when message is null', () => {
-    render(<ValidationError message={null} />);
+    const { container } = rtlRender(<ValidationError message={null} />);
     expect(container.firstChild).toBeNull();
   });
 
   it('renders message text when provided', () => {
-    render(<ValidationError message="Name is required" />);
-    expect(container.textContent).toContain('Name is required');
+    rtlRender(<ValidationError message="Name is required" />);
+    screen.getByText('Name is required');
   });
 });
 
 describe('LoadingState', () => {
   it('renders the label text', () => {
-    render(<LoadingState label="Loading data..." />);
-    expect(container.textContent).toContain('Loading data...');
+    rtlRender(<LoadingState label="Loading data..." />);
+    screen.getByText('Loading data...');
   });
 });
 
 describe('FormField', () => {
   it('renders label text', () => {
-    render(<FormField label="My Field"><input /></FormField>);
-    expect(container.querySelector('label')?.textContent).toBe('My Field');
+    rtlRender(<FormField label="My Field"><input /></FormField>);
+    screen.getByText('My Field');
   });
 
   it('sets htmlFor on label when provided', () => {
-    render(<FormField label="Email" htmlFor="email-input"><input id="email-input" /></FormField>);
-    expect(container.querySelector('label')?.htmlFor).toBe('email-input');
+    rtlRender(<FormField label="Email" htmlFor="email-input"><input id="email-input" /></FormField>);
+    screen.getByLabelText('Email');
   });
 
   it('renders children', () => {
-    render(<FormField label="Name"><input data-testid="child-input" /></FormField>);
-    expect(container.querySelector('[data-testid="child-input"]')).not.toBeNull();
+    rtlRender(<FormField label="Name"><input data-testid="child-input" /></FormField>);
+    screen.getByTestId('child-input');
   });
 });
 
@@ -96,57 +78,59 @@ describe('EditorShell', () => {
   };
 
   it('renders title', () => {
-    render(<EditorShell {...defaultProps}><div /></EditorShell>);
-    expect(container.querySelector('h2')?.textContent).toBe('Test Editor');
+    rtlRender(<EditorShell {...defaultProps}><div /></EditorShell>);
+    screen.getByRole('heading', { name: 'Test Editor' });
   });
 
   it('renders save button with saveLabel', () => {
-    render(<EditorShell {...defaultProps}><div /></EditorShell>);
-    expect(container.querySelectorAll('button')[0].textContent).toBe('Save');
+    rtlRender(<EditorShell {...defaultProps}><div /></EditorShell>);
+    screen.getByRole('button', { name: /save/i });
   });
 
   it('shows Saving... text when saving is true', () => {
-    render(<EditorShell {...defaultProps} saving={true}><div /></EditorShell>);
-    expect(container.querySelectorAll('button')[0].textContent).toBe('Saving...');
+    rtlRender(<EditorShell {...defaultProps} saving={true}><div /></EditorShell>);
+    screen.getByRole('button', { name: /saving/i });
   });
 
   it('disables save button when saving', () => {
-    render(<EditorShell {...defaultProps} saving={true}><div /></EditorShell>);
-    expect((container.querySelectorAll('button')[0] as HTMLButtonElement).disabled).toBe(true);
+    rtlRender(<EditorShell {...defaultProps} saving={true}><div /></EditorShell>);
+    expect(screen.getByRole('button', { name: /saving/i })).toBeDisabled();
   });
 
   it('disables save button when canSave is false', () => {
-    render(<EditorShell {...defaultProps} canSave={false}><div /></EditorShell>);
-    expect((container.querySelectorAll('button')[0] as HTMLButtonElement).disabled).toBe(true);
+    rtlRender(<EditorShell {...defaultProps} canSave={false}><div /></EditorShell>);
+    expect(screen.getByRole('button', { name: /save/i })).toBeDisabled();
   });
 
   it('disables cancel button when saving', () => {
-    render(<EditorShell {...defaultProps} saving={true}><div /></EditorShell>);
-    expect((container.querySelectorAll('button')[1] as HTMLButtonElement).disabled).toBe(true);
+    rtlRender(<EditorShell {...defaultProps} saving={true}><div /></EditorShell>);
+    expect(screen.getByRole('button', { name: /cancel/i })).toBeDisabled();
   });
 
   it('renders validation error when provided', () => {
-    render(<EditorShell {...defaultProps} validationError="Fix errors"><div /></EditorShell>);
-    expect(container.textContent).toContain('Fix errors');
+    rtlRender(<EditorShell {...defaultProps} validationError="Fix errors"><div /></EditorShell>);
+    screen.getByText('Fix errors');
   });
 
-  it('calls onSave when save button clicked', () => {
+  it('calls onSave when save button clicked', async () => {
     const onSave = jest.fn();
-    render(<EditorShell {...defaultProps} onSave={onSave}><div /></EditorShell>);
-    act(() => { (container.querySelectorAll('button')[0] as HTMLButtonElement).click(); });
+    const user = userEvent.setup();
+    rtlRender(<EditorShell {...defaultProps} onSave={onSave}><div /></EditorShell>);
+    await user.click(screen.getByRole('button', { name: /save/i }));
     expect(onSave).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onCancel when cancel button clicked', () => {
+  it('calls onCancel when cancel button clicked', async () => {
     const onCancel = jest.fn();
-    render(<EditorShell {...defaultProps} onCancel={onCancel}><div /></EditorShell>);
-    act(() => { (container.querySelectorAll('button')[1] as HTMLButtonElement).click(); });
+    const user = userEvent.setup();
+    rtlRender(<EditorShell {...defaultProps} onCancel={onCancel}><div /></EditorShell>);
+    await user.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   it('renders children', () => {
-    render(<EditorShell {...defaultProps}><span data-testid="child">content</span></EditorShell>);
-    expect(container.querySelector('[data-testid="child"]')).not.toBeNull();
+    rtlRender(<EditorShell {...defaultProps}><span data-testid="child">content</span></EditorShell>);
+    screen.getByTestId('child');
   });
 });
 
@@ -158,40 +142,35 @@ describe('textInputClass', () => {
 
 describe('TextInputField', () => {
   it('renders label text', () => {
-    render(<TextInputField label="Username" value="" onChange={jest.fn()} />);
-    expect(container.querySelector('label')?.textContent).toBe('Username');
+    rtlRender(<TextInputField label="Username" value="" onChange={jest.fn()} />);
+    screen.getByText('Username');
   });
 
   it('renders input with provided value', () => {
-    render(<TextInputField label="Username" value="alice" onChange={jest.fn()} />);
-    expect((container.querySelector('input') as HTMLInputElement)?.value).toBe('alice');
+    rtlRender(<TextInputField label="Username" value="alice" onChange={jest.fn()} />);
+    screen.getByDisplayValue('alice');
   });
 
-  it('calls onChange when input changes', () => {
+  it('calls onChange when input changes', async () => {
     const onChange = jest.fn();
-    render(<TextInputField label="Username" value="" onChange={onChange} />);
-    const input = container.querySelector('input') as HTMLInputElement;
-    act(() => {
-      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
-      nativeSetter.call(input, 'bob');
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    });
+    const user = userEvent.setup();
+    rtlRender(<TextInputField label="Username" value="" onChange={onChange} />);
+    await user.type(screen.getByRole('textbox'), 'bob');
     expect(onChange).toHaveBeenCalled();
   });
 
   it('disables input when disabled is true', () => {
-    render(<TextInputField label="Username" value="" onChange={jest.fn()} disabled={true} />);
-    expect((container.querySelector('input') as HTMLInputElement)?.disabled).toBe(true);
+    rtlRender(<TextInputField label="Username" value="" onChange={jest.fn()} disabled={true} />);
+    expect(screen.getByRole('textbox')).toBeDisabled();
   });
 
   it('renders placeholder text', () => {
-    render(<TextInputField label="Username" value="" onChange={jest.fn()} placeholder="Enter username" />);
-    expect((container.querySelector('input') as HTMLInputElement)?.placeholder).toBe('Enter username');
+    rtlRender(<TextInputField label="Username" value="" onChange={jest.fn()} placeholder="Enter username" />);
+    screen.getByPlaceholderText('Enter username');
   });
 
   it('wires id to input and label htmlFor when provided', () => {
-    render(<TextInputField id="my-field" label="My Field" value="" onChange={jest.fn()} />);
-    expect((container.querySelector('input') as HTMLInputElement)?.id).toBe('my-field');
-    expect(container.querySelector('label')?.htmlFor).toBe('my-field');
+    rtlRender(<TextInputField id="my-field" label="My Field" value="" onChange={jest.fn()} />);
+    screen.getByLabelText('My Field');
   });
 });

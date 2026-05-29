@@ -1,12 +1,11 @@
 /**
  * @jest-environment jsdom
  */
-(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
-import { jest, describe, test, expect, beforeEach, afterEach } from '@jest/globals';
+import { jest, describe, test, expect } from '@jest/globals';
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
-import { act } from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { TargetActionModal } from '@/lib/components/TargetActionModal';
 import type { CombatantState } from '@/lib/types';
 
@@ -22,136 +21,68 @@ const TARGET: CombatantState = {
   abilityScores: { strength: 8, dexterity: 14, constitution: 10, intelligence: 10, wisdom: 8, charisma: 8 },
 };
 
-let container: HTMLDivElement;
-let root: Root;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  jest.spyOn(window, 'alert').mockImplementation(() => {});
-});
-
-afterEach(() => {
-  act(() => { root?.unmount(); });
-  container.remove();
-  jest.restoreAllMocks();
-});
-
-function render(
-  target: CombatantState,
-  onClose: ReturnType<typeof jest.fn>,
-  onApplyDamage: ReturnType<typeof jest.fn>,
-  onAddCondition: ReturnType<typeof jest.fn>
-) {
-  act(() => {
-    root = createRoot(container);
-    root.render(
-      <TargetActionModal
-        target={target}
-        onClose={onClose as any}
-        onApplyDamage={onApplyDamage as any}
-        onAddCondition={onAddCondition as any}
-      />
-    );
-  });
-}
-
-function findButton(text: string): HTMLButtonElement {
-  const buttons = Array.from(container.querySelectorAll('button'));
-  const found = buttons.find(b => b.textContent?.trim() === text);
-  if (!found) throw new Error(`Could not find button with text: ${text}`);
-  return found;
-}
-
-function renderDefault() {
-  const onClose = jest.fn();
-  const onApplyDamage = jest.fn();
-  const onAddCondition = jest.fn();
-  render(TARGET, onClose, onApplyDamage, onAddCondition);
+function renderModal(overrides: Partial<{
+  onClose: jest.Mock;
+  onApplyDamage: jest.Mock;
+  onAddCondition: jest.Mock;
+}> = {}) {
+  const onClose = overrides.onClose ?? jest.fn();
+  const onApplyDamage = overrides.onApplyDamage ?? jest.fn();
+  const onAddCondition = overrides.onAddCondition ?? jest.fn();
+  render(
+    <TargetActionModal
+      target={TARGET}
+      onClose={onClose as any}
+      onApplyDamage={onApplyDamage as any}
+      onAddCondition={onAddCondition as any}
+    />
+  );
   return { onClose, onApplyDamage, onAddCondition };
-}
-
-function changeInputValue(element: HTMLInputElement | HTMLSelectElement, value: string) {
-  act(() => {
-    const proto = element instanceof HTMLInputElement ? HTMLInputElement.prototype : HTMLSelectElement.prototype;
-    const nativeSetter = Object.getOwnPropertyDescriptor(proto, 'value')!.set!;
-    nativeSetter.call(element, value);
-    const eventType = element instanceof HTMLInputElement ? 'input' : 'change';
-    element.dispatchEvent(new Event(eventType, { bubbles: true }));
-  });
 }
 
 describe('TargetActionModal', () => {
   test('renders target info and buttons', () => {
-    renderDefault();
-
-    expect(container.textContent).toContain('Goblin Target');
-    expect(container.textContent).toContain('HP: 7/7');
-    expect(container.textContent).toContain('AC: 13');
-    expect(findButton('Apply Damage')).not.toBeNull();
-    expect(findButton('Add Condition')).not.toBeNull();
-    expect(findButton('Cancel')).not.toBeNull();
+    renderModal();
+    screen.getByText('Goblin Target');
+    screen.getByText(/HP: 7\/7/);
+    screen.getByText(/AC: 13/);
+    screen.getByRole('button', { name: /apply damage/i });
+    screen.getByRole('button', { name: /add condition/i });
+    screen.getByRole('button', { name: /cancel/i });
   });
 
-  test('calls onClose when Cancel is clicked', () => {
-    const { onClose } = renderDefault();
-
-    act(() => {
-      findButton('Cancel').click();
-    });
-
+  test('calls onClose when Cancel is clicked', async () => {
+    const { onClose } = renderModal();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onClose).toHaveBeenCalled();
   });
 
-  test('transitions to damage screen and fires onApplyDamage', () => {
-    const { onApplyDamage } = renderDefault();
+  test('transitions to damage screen and fires onApplyDamage', async () => {
+    const { onApplyDamage } = renderModal();
+    const user = userEvent.setup();
 
-    act(() => {
-      findButton('Apply Damage').click();
-    });
+    await user.click(screen.getByRole('button', { name: /apply damage/i }));
+    expect(screen.queryByRole('button', { name: /apply damage/i })).not.toBeInTheDocument();
 
-    expect(container.textContent).not.toContain('Apply Damage');
-    const input = container.querySelector('input[type="number"]') as HTMLInputElement;
-    expect(input).not.toBeNull();
+    await user.type(screen.getByPlaceholderText('Damage amount'), '5');
+    await user.selectOptions(screen.getByRole('combobox', { name: /damage type/i }), 'fire');
 
-    // Fill damage input
-    changeInputValue(input, '5');
-
-    // Select damage type
-    const select = container.querySelector('select') as HTMLSelectElement;
-    expect(select).not.toBeNull();
-    changeInputValue(select, 'fire');
-
-    // Click Apply
-    act(() => {
-      findButton('Apply (fire)').click();
-    });
-
+    await user.click(screen.getByRole('button', { name: /apply \(fire\)/i }));
     expect(onApplyDamage).toHaveBeenCalledWith(5, 'fire');
   });
 
-  test('transitions to condition screen and fires onAddCondition', () => {
-    const { onAddCondition } = renderDefault();
+  test('transitions to condition screen and fires onAddCondition', async () => {
+    const { onAddCondition } = renderModal();
+    const user = userEvent.setup();
 
-    act(() => {
-      findButton('Add Condition').click();
-    });
+    await user.click(screen.getByRole('button', { name: /add condition/i }));
+    expect(screen.queryByRole('button', { name: /add condition/i })).not.toBeInTheDocument();
 
-    expect(container.textContent).not.toContain('Add Condition');
-    const nameInput = container.querySelector('input[placeholder="Condition name"]') as HTMLInputElement;
-    const durationInput = container.querySelector('input[placeholder="Duration in rounds (optional)"]') as HTMLInputElement;
-    expect(nameInput).not.toBeNull();
-    expect(durationInput).not.toBeNull();
+    await user.type(screen.getByPlaceholderText('Condition name'), 'Stunned');
+    await user.type(screen.getByPlaceholderText('Duration in rounds (optional)'), '3');
 
-    // Fill inputs
-    changeInputValue(nameInput, 'Stunned');
-    changeInputValue(durationInput, '3');
-
-    // Click Add
-    act(() => {
-      findButton('Add').click();
-    });
-
+    await user.click(screen.getByRole('button', { name: /^add$/i }));
     expect(onAddCondition).toHaveBeenCalledWith('Stunned', 3);
   });
 });
