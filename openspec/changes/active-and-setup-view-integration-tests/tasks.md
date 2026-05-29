@@ -10,37 +10,35 @@
 ### 1. Create ActiveCombatView test file
 
 - [x] Create `tests/unit/components/ActiveCombatView.test.tsx`
-- [x] Add module-level mocks: `jest.mock('@/lib/hooks/useCombat', ...)` and `jest.mock('next/link', ...)`
+- [x] Add module-level mock: `jest.mock('next/link', ...)` (component receives `UseCombatReturn` via props; no hook mock needed)
 - [x] Import `makeUseCombat` from `@/tests/unit/fixtures/useCombat`
-- [x] Add `beforeEach` to configure `(useCombat as jest.Mock).mockReturnValue(makeUseCombat())`
 - [x] Write scenario: renders combatant names from `getDisplayCombatants` (happy path)
 - [x] Write scenario: empty combatant list when `getDisplayCombatants` returns `[]`
-- [x] Write scenario: clicking "Next Turn" calls `nextTurn()` once
+- [x] Write scenario: clicking "Current Turn (done)" calls `nextTurn()` once
 - [x] Write scenario: active combatant has a distinguishing CSS class/attribute
 - [x] Write scenario: encounter description modal visible when `showEncounterDescription: true`
 - [x] Write scenario: encounter description modal hidden when `showEncounterDescription: false`
 - [x] Write scenario: confirming remove calls `removeCombatant` with correct ID
-- [x] Verify: `npm test -- --testPathPattern=ActiveCombatView` passes
+- [x] Verify: `npm run test:unit -- --testPathPattern=ActiveCombatView` passes
 
 ### 2. Create CombatSetupView test file
 
 - [x] Create `tests/unit/components/CombatSetupView.test.tsx`
-- [x] Add module-level mocks: `jest.mock('@/lib/hooks/useCombat', ...)` and `jest.mock('next/link', ...)`
+- [x] Add module-level mock: `jest.mock('next/link', ...)` (component receives `UseCombatReturn` via props; no hook mock needed)
 - [x] Import `makeUseCombat` from `@/tests/unit/fixtures/useCombat`
-- [x] Add `beforeEach` to configure `(useCombat as jest.Mock).mockReturnValue(makeUseCombat())`
 - [x] Write scenario: renders setup combatant names from `setupCombatants` (happy path)
 - [x] Write scenario: empty list when `setupCombatants: []`
 - [x] Write scenario: clicking "Start Combat" calls `startCombatWithSetupCombatants()` once
-- [x] Write scenario: clicking "Add Combatant" calls `setShowCombatantModal(true)`
+- [x] Write scenario: clicking "Add Party Member" calls `setShowCombatantModal(true)`
 - [x] Write scenario: `QuickCombatantModal` visible when `showCombatantModal: true`
 - [x] Write scenario: clicking remove button calls `removeCombatantFromSetup` with correct ID
-- [x] Verify: `npm test -- --testPathPattern=CombatSetupView` passes
+- [x] Verify: `npm run test:unit -- --testPathPattern=CombatSetupView` passes
 
 ### 3. Verify coverage targets
 
-- [x] Run `npm test -- --coverage --collectCoverageFrom="lib/components/ActiveCombatView.tsx" --testPathPattern=ActiveCombatView`
+- [x] Run `npm run test:unit -- --collectCoverageFrom="lib/components/ActiveCombatView.tsx" --testPathPattern=ActiveCombatView`
 - [x] Confirm `ActiveCombatView.tsx` statement coverage ≥ 60%
-- [x] Run `npm test -- --coverage --collectCoverageFrom="lib/components/CombatSetupView.tsx" --testPathPattern=CombatSetupView`
+- [x] Run `npm run test:unit -- --collectCoverageFrom="lib/components/CombatSetupView.tsx" --testPathPattern=CombatSetupView`
 - [x] Confirm `CombatSetupView.tsx` statement coverage ≥ 60%
 
 ## Pre-Commit Code Review
@@ -49,9 +47,9 @@
 
 ## Validation
 
-- [x] `npm test` — all unit tests pass
+- [x] `npm run test:unit` — all unit tests pass
 - [x] `npm run test:integration` — all integration tests pass (no regressions)
-- [x] `npm run type-check` (or equivalent) — no TypeScript errors
+- [x] `npm run typecheck` — no TypeScript errors
 - [x] `npm run build` — build succeeds
 - [x] `npm run lint` — no lint errors
 
@@ -59,7 +57,7 @@
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test`; all tests must pass
+- **Unit tests** — `npm run test:unit`; all tests must pass
 - **Integration tests** — `npm run test:integration`; all tests must pass
 - **Build** — `npm run build`; must succeed with no errors
 - if **ANY** of the above fail, you **MUST** iterate and address the failure
@@ -68,8 +66,8 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
 - [x] Commit all changes to `test/active-and-setup-view-integration-tests` and push to remote
-- [ ] Open PR from `test/active-and-setup-view-integration-tests` to `main`. PR body must include `Closes #259`.
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
+- [x] Open PR from `test/active-and-setup-view-integration-tests` to `main`. PR body must include `Closes #259`.
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
 - [ ] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
 - [ ] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json name,state`; when any required check fails, diagnose and fix, commit, follow all steps in [Remote push validation], push, wait 180 seconds then repeat until all required checks pass
