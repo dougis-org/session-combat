@@ -39,7 +39,7 @@ describe('CreatureStatBlock — CombatStatsRow integration', () => {
 
   test('renders acNote when provided', () => {
     renderBlock({ ac: 14, acNote: 'chain mail' });
-    expect(screen.getByText(/chain mail/)).toBeInTheDocument();
+    expect(screen.getByText('(chain mail)')).toBeInTheDocument();
   });
 
   test('renders without acNote when omitted', () => {
