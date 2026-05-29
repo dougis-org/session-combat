@@ -1,6 +1,5 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import type { TestInfo } from "@playwright/test";
-import { randomUUID } from "crypto";
 
 type IsolationInput = Pick<TestInfo, "workerIndex" | "retry" | "title">;
 

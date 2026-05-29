@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { expect, Page } from "@playwright/test";
 
 export const STRONG_PASSWORD = "TestPassword123!";

@@ -1,6 +1,6 @@
 import { SpellTemplate, DnDSpellSchool, isValidSpellSchool } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import {
   validateSpellName,
   validateSpellLevel,

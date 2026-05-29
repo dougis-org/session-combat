@@ -1,7 +1,7 @@
 import { SpellTemplate, DnDSpellSchool } from "@/lib/types";
 import { Open5ESpell } from "./open5eAdapter";
 import { GLOBAL_USER_ID } from "@/lib/constants";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 
 const SCHOOL_MAP: Record<string, DnDSpellSchool> = {
   abjuration: "Abjuration",

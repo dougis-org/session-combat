@@ -1,7 +1,7 @@
 import { MonsterTemplate, DnDAlignment } from "@/lib/types";
 import { Open5ECreature } from "./open5eAdapter";
 import { GLOBAL_USER_ID } from "@/lib/constants";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 
 function normalizeAlignment(
   alignment: string | undefined
