@@ -63,7 +63,7 @@ describe('TargetActionModal', () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /apply damage/i }));
-    expect(screen.queryByRole('button', { name: /apply damage/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /apply damage/i })).not.toBeInTheDocument();
 
     await user.type(screen.getByPlaceholderText('Damage amount'), '5');
     await user.selectOptions(screen.getByRole('combobox', { name: /damage type/i }), 'fire');
@@ -77,7 +77,7 @@ describe('TargetActionModal', () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /add condition/i }));
-    expect(screen.queryByRole('button', { name: /add condition/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /add condition/i })).not.toBeInTheDocument();
 
     await user.type(screen.getByPlaceholderText('Condition name'), 'Stunned');
     await user.type(screen.getByPlaceholderText('Duration in rounds (optional)'), '3');

@@ -98,7 +98,7 @@ describe('CreatureStatsForm – checkbox toggle calls onChange', () => {
 
     expect(onChange).toHaveBeenCalled();
     const callArg = (onChange as jest.Mock).mock.calls[0][0] as CreatureStats;
-    expect(callArg.damageResistances).toBeFalsy();
+    expect(callArg.damageResistances).toBeUndefined();
   });
 
   test('checking immunity type calls onChange with damageImmunities containing the type', async () => {

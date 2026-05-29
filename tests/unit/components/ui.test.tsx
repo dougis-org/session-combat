@@ -94,17 +94,17 @@ describe('EditorShell', () => {
 
   it('disables save button when saving', () => {
     rtlRender(<EditorShell {...defaultProps} saving={true}><div /></EditorShell>);
-    expect((screen.getByRole('button', { name: /saving/i }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole('button', { name: /saving/i })).toBeDisabled();
   });
 
   it('disables save button when canSave is false', () => {
     rtlRender(<EditorShell {...defaultProps} canSave={false}><div /></EditorShell>);
-    expect((screen.getByRole('button', { name: /save/i }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole('button', { name: /save/i })).toBeDisabled();
   });
 
   it('disables cancel button when saving', () => {
     rtlRender(<EditorShell {...defaultProps} saving={true}><div /></EditorShell>);
-    expect((screen.getByRole('button', { name: /cancel/i }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole('button', { name: /cancel/i })).toBeDisabled();
   });
 
   it('renders validation error when provided', () => {
@@ -153,14 +153,15 @@ describe('TextInputField', () => {
 
   it('calls onChange when input changes', async () => {
     const onChange = jest.fn();
+    const user = userEvent.setup();
     rtlRender(<TextInputField label="Username" value="" onChange={onChange} />);
-    await userEvent.type(screen.getByRole('textbox'), 'bob');
+    await user.type(screen.getByRole('textbox'), 'bob');
     expect(onChange).toHaveBeenCalled();
   });
 
   it('disables input when disabled is true', () => {
     rtlRender(<TextInputField label="Username" value="" onChange={jest.fn()} disabled={true} />);
-    expect((screen.getByRole('textbox') as HTMLInputElement).disabled).toBe(true);
+    expect(screen.getByRole('textbox')).toBeDisabled();
   });
 
   it('renders placeholder text', () => {
