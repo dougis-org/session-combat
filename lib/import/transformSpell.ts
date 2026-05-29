@@ -1,7 +1,7 @@
 import { SpellTemplate, DnDSpellSchool } from "@/lib/types";
 import { Open5ESpell } from "./open5eAdapter";
 import { GLOBAL_USER_ID } from "@/lib/constants";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 const SCHOOL_MAP: Record<string, DnDSpellSchool> = {
   abjuration: "Abjuration",
@@ -35,7 +35,7 @@ export function transformSpell(
 
   const spell: SpellTemplate = {
     _id: undefined,
-    id: uuidv4(),
+    id: randomUUID(),
     userId: GLOBAL_USER_ID,
     isGlobal: true,
     source: "open5e",
