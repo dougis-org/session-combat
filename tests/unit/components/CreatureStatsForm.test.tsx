@@ -1,12 +1,11 @@
 /**
  * @jest-environment jsdom
  */
-(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
-import { act } from 'react';
-import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, test, expect, jest } from '@jest/globals';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import type { CreatureStats } from '@/lib/types';
 
@@ -20,36 +19,18 @@ const BASE_STATS: CreatureStats = {
   },
 };
 
-let container: HTMLDivElement;
-let root: Root;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-});
-
-afterEach(() => {
-  act(() => { root?.unmount(); });
-  container.remove();
-});
-
-function render(stats: CreatureStats, onChange: (s: CreatureStats) => void) {
-  act(() => {
-    root = createRoot(container);
-    root.render(<CreatureStatsForm stats={stats} onChange={onChange} />);
-  });
+function renderForm(stats: CreatureStats, onChange: (s: CreatureStats) => void) {
+  render(<CreatureStatsForm stats={stats} onChange={onChange} />);
+  return { user: userEvent.setup() };
 }
 
-function clickResistancesHeader() {
-  const resistancesBtn = Array.from(container.querySelectorAll('button')).find(
-    b => b.textContent?.includes('Resistances'),
-  );
-  act(() => { (resistancesBtn as HTMLButtonElement).click(); });
+async function expandResistances(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: /resistances/i }));
 }
 
-function renderExpanded(stats: CreatureStats, onChange: (s: CreatureStats) => void) {
-  render(stats, onChange);
-  clickResistancesHeader();
+function getSection(labelText: string) {
+  // scoped by section label text — tied to CreatureStatsForm DOM structure
+  return screen.getByText(labelText).closest('div')!;
 }
 
 // ---------------------------------------------------------------------------
@@ -58,40 +39,32 @@ function renderExpanded(stats: CreatureStats, onChange: (s: CreatureStats) => vo
 
 describe('CreatureStatsForm – resistances section', () => {
   test('resistances section is collapsed by default', () => {
-    const onChange = jest.fn();
-    render(BASE_STATS, onChange as any);
-    // When collapsed, checkboxes for damage types should not be present
-    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-    expect(checkboxes.length).toBe(0);
+    renderForm(BASE_STATS, jest.fn() as any);
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
   });
 
-  test('expanding section renders checkboxes for all 13 damage types per field (39 total)', () => {
-    renderExpanded(BASE_STATS, jest.fn() as any);
-    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-    // 3 fields × 13 types = 39 checkboxes
-    expect(checkboxes.length).toBe(39);
+  test('expanding section renders checkboxes for all 13 damage types per field (39 total)', async () => {
+    const { user } = renderForm(BASE_STATS, jest.fn() as any);
+    await expandResistances(user);
+    expect(screen.getAllByRole('checkbox')).toHaveLength(39);
   });
 
-  test('checkboxes are unchecked when no resistances set', () => {
-    renderExpanded(BASE_STATS, jest.fn() as any);
-    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(cb => expect((cb as HTMLInputElement).checked).toBe(false));
-  });
-
-  test('pre-selected resistances render as checked', () => {
-    const stats = { ...BASE_STATS, damageResistances: ['fire' as const, 'cold' as const] };
-    renderExpanded(stats, jest.fn() as any);
-    // Find the fire resistance checkbox (first field group = vulnerabilities, second = resistances)
-    const labels = container.querySelectorAll('label');
-    const fireLabel = Array.from(labels).find(l => {
-      const span = l.querySelector('span');
-      return span?.textContent === 'fire' && l.closest('div[data-field]') === null;
+  test('checkboxes are unchecked when no resistances set', async () => {
+    const { user } = renderForm(BASE_STATS, jest.fn() as any);
+    await expandResistances(user);
+    screen.getAllByRole('checkbox').forEach(cb => {
+      expect((cb as HTMLInputElement).checked).toBe(false);
     });
-    // Simpler: check that exactly 2 checkboxes in the form are checked (one for fire, one for cold in the resistance section)
-    const checked = Array.from(container.querySelectorAll('input[type="checkbox"]')).filter(
-      cb => (cb as HTMLInputElement).checked
-    );
-    expect(checked.length).toBe(2);
+  });
+
+  test('pre-selected resistances render as checked', async () => {
+    const stats = { ...BASE_STATS, damageResistances: ['fire' as const, 'cold' as const] };
+    const { user } = renderForm(stats, jest.fn() as any);
+    await expandResistances(user);
+    const checked = screen.getAllByRole('checkbox').filter(cb => (cb as HTMLInputElement).checked);
+    expect(checked).toHaveLength(2);
+    const resistancesSection = getSection('Damage Resistances');
+    expect(within(resistancesSection).getAllByRole('checkbox', { checked: true })).toHaveLength(2);
   });
 });
 
@@ -100,88 +73,56 @@ describe('CreatureStatsForm – resistances section', () => {
 // ---------------------------------------------------------------------------
 
 describe('CreatureStatsForm – checkbox toggle calls onChange', () => {
-  test('checking an unchecked resistance calls onChange with the type added', () => {
+  test('checking an unchecked resistance calls onChange with the type added', async () => {
     const onChange = jest.fn();
-    renderExpanded(BASE_STATS, onChange as any);
+    const { user } = renderForm(BASE_STATS, onChange as any);
+    await expandResistances(user);
 
-    // Find the "Damage Resistances" section label, then the "fire" checkbox within it
-    const sectionLabel = Array.from(container.querySelectorAll('label')).find(
-      l => l.textContent?.includes('Damage Resistances'),
-    )!;
-    const sectionDiv = sectionLabel.parentElement!;
-    const fireLabel = Array.from(sectionDiv.querySelectorAll('label')).find(
-      l => l.querySelector('span')?.textContent?.trim() === 'fire',
-    )!;
-    const fireResistanceCheckbox = fireLabel.querySelector('input[type="checkbox"]') as HTMLInputElement;
-    expect(fireResistanceCheckbox).not.toBeNull();
-
-    act(() => {
-      fireResistanceCheckbox.click();
-    });
+    const fireCheckbox = within(getSection('Damage Resistances')).getByRole('checkbox', { name: /fire/i });
+    await user.click(fireCheckbox);
 
     expect(onChange).toHaveBeenCalled();
     const callArg = (onChange as jest.Mock).mock.calls[0][0] as CreatureStats;
     expect(callArg.damageResistances).toContain('fire');
   });
 
-  test('unchecking a checked resistance calls onChange with the type removed', () => {
+  test('unchecking a checked resistance calls onChange with the type removed', async () => {
     const stats = { ...BASE_STATS, damageResistances: ['fire' as const] };
     const onChange = jest.fn();
-    renderExpanded(stats, onChange as any);
+    const { user } = renderForm(stats, onChange as any);
+    await expandResistances(user);
 
-    // Find the checked fire checkbox in the resistance group
-    const checkedBoxes = Array.from(container.querySelectorAll('input[type="checkbox"]')).filter(
-      cb => (cb as HTMLInputElement).checked
-    );
-    expect(checkedBoxes.length).toBe(1);
-
-    act(() => {
-      (checkedBoxes[0] as HTMLInputElement).click();
-    });
+    const fireCheckbox = within(getSection('Damage Resistances')).getByRole('checkbox', { name: /fire/i });
+    expect((fireCheckbox as HTMLInputElement).checked).toBe(true);
+    await user.click(fireCheckbox);
 
     expect(onChange).toHaveBeenCalled();
     const callArg = (onChange as jest.Mock).mock.calls[0][0] as CreatureStats;
-    // When last type is removed, field should be undefined (falsy)
     expect(callArg.damageResistances).toBeFalsy();
   });
 
-  test('checking immunity type calls onChange with damageImmunities containing the type', () => {
+  test('checking immunity type calls onChange with damageImmunities containing the type', async () => {
     const onChange = jest.fn();
-    renderExpanded(BASE_STATS, onChange as any);
+    const { user } = renderForm(BASE_STATS, onChange as any);
+    await expandResistances(user);
 
-    // Find the "Damage Immunities" section label, then the "poison" checkbox within it
-    const sectionLabel = Array.from(container.querySelectorAll('label')).find(
-      l => l.textContent?.includes('Damage Immunities'),
-    )!;
-    const sectionDiv = sectionLabel.parentElement!;
-    const poisonLabel = Array.from(sectionDiv.querySelectorAll('label')).find(
-      l => l.querySelector('span')?.textContent?.trim() === 'poison',
-    )!;
-    const poisonImmunityCheckbox = poisonLabel.querySelector('input[type="checkbox"]') as HTMLInputElement;
-    expect(poisonImmunityCheckbox).not.toBeNull();
-
-    act(() => {
-      poisonImmunityCheckbox.click();
-    });
+    const poisonCheckbox = within(getSection('Damage Immunities')).getByRole('checkbox', { name: /poison/i });
+    await user.click(poisonCheckbox);
 
     expect(onChange).toHaveBeenCalled();
     const callArg = (onChange as jest.Mock).mock.calls[0][0] as CreatureStats;
     expect(callArg.damageImmunities).toContain('poison');
   });
 
-  test('removing last type from a field sets field to undefined', () => {
+  test('removing last type from a field sets field to undefined', async () => {
     const stats = { ...BASE_STATS, damageVulnerabilities: ['cold' as const] };
     const onChange = jest.fn();
-    renderExpanded(stats, onChange as any);
+    const { user } = renderForm(stats, onChange as any);
+    await expandResistances(user);
 
-    const checkedBoxes = Array.from(container.querySelectorAll('input[type="checkbox"]')).filter(
-      cb => (cb as HTMLInputElement).checked
-    );
-    expect(checkedBoxes.length).toBe(1);
-
-    act(() => {
-      (checkedBoxes[0] as HTMLInputElement).click();
-    });
+    const coldCheckbox = within(getSection('Damage Vulnerabilities')).getByRole('checkbox', { name: /cold/i });
+    expect((coldCheckbox as HTMLInputElement).checked).toBe(true);
+    await user.click(coldCheckbox);
 
     const callArg = (onChange as jest.Mock).mock.calls[0][0] as CreatureStats;
     expect(callArg.damageVulnerabilities).toBeUndefined();
