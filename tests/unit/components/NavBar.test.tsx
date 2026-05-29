@@ -1,9 +1,8 @@
 /**
  * @jest-environment jsdom
  */
-(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { jest, describe, it, expect } from '@jest/globals';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -16,24 +15,12 @@ jest.mock('@/lib/hooks/useAuth', () => ({
 }));
 
 import React from 'react';
-import { Root } from 'react-dom/client';
-import { act } from 'react';
-import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { NavBar } from '@/lib/components/NavBar';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 const mockedUseAuth = jest.mocked(useAuth);
-
-let container: HTMLDivElement;
-let root: Root;
-
-beforeEach(() => {
-  ({ container, root } = createReactRoot());
-});
-
-afterEach(() => {
-  unmountReactRoot(container, root);
-});
 
 function mockAuth(overrides: Partial<ReturnType<typeof useAuth>>) {
   mockedUseAuth.mockReturnValue({
@@ -44,39 +31,40 @@ function mockAuth(overrides: Partial<ReturnType<typeof useAuth>>) {
 }
 
 describe('NavBar', () => {
-  it('renders navigation links', () => {
+  it('renders all navigation links', () => {
     mockAuth({});
-    act(() => { root.render(<NavBar />); });
-    const hrefs = Array.from(container.querySelectorAll('a')).map(a => a.getAttribute('href'));
-    expect(hrefs).toContain('/campaigns');
-    expect(hrefs).toContain('/encounters');
-    expect(hrefs).toContain('/parties');
-    expect(hrefs).toContain('/characters');
+    render(<NavBar />);
+    expect(screen.getByRole('link', { name: 'Campaigns' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Encounters' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Parties' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Characters' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Monsters' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Combat' })).toBeInTheDocument();
   });
 
   it('does not show logout button when not authenticated', () => {
     mockAuth({});
-    act(() => { root.render(<NavBar />); });
-    expect(container.querySelector('[data-testid="logout-button"]')).toBeNull();
+    render(<NavBar />);
+    expect(screen.queryByTestId('logout-button')).not.toBeInTheDocument();
   });
 
   it('does not show logout button while loading', () => {
     mockAuth({ isAuthenticated: true, loading: true });
-    act(() => { root.render(<NavBar />); });
-    expect(container.querySelector('[data-testid="logout-button"]')).toBeNull();
+    render(<NavBar />);
+    expect(screen.queryByTestId('logout-button')).not.toBeInTheDocument();
   });
 
   it('shows logout button when authenticated and not loading', () => {
     mockAuth({ isAuthenticated: true, user: { userId: 'u1', email: 'u@test.com' } });
-    act(() => { root.render(<NavBar />); });
-    expect(container.querySelector('[data-testid="logout-button"]')).not.toBeNull();
+    render(<NavBar />);
+    expect(screen.getByTestId('logout-button')).toBeInTheDocument();
   });
 
-  it('calls logout when logout button clicked', () => {
+  it('calls logout when logout button clicked', async () => {
     const logout = jest.fn() as any;
     mockAuth({ isAuthenticated: true, user: { userId: 'u1', email: 'u@test.com' }, logout });
-    act(() => { root.render(<NavBar />); });
-    act(() => { (container.querySelector('[data-testid="logout-button"]') as HTMLButtonElement).click(); });
+    render(<NavBar />);
+    await userEvent.click(screen.getByTestId('logout-button'));
     expect(logout).toHaveBeenCalledTimes(1);
   });
 });
