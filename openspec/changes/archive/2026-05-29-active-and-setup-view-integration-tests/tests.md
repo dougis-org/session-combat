@@ -25,38 +25,38 @@ For each test case below:
 
 Spec reference: `openspec/changes/active-and-setup-view-integration-tests/specs/active-combat-view.md`
 
-- [ ] **ACT-1** Renders combatant names from `getDisplayCombatants`
+- [x] **ACT-1** Renders combatant names from `getDisplayCombatants`
   - Scenario: "Combatant names appear in the rendered output"
   - Mock: `getDisplayCombatants` returns `[{ name: 'Goblin', ... }, { name: 'Orc', ... }]`
   - Assert: `screen.getByText('Goblin')` and `screen.getByText('Orc')` present
 
-- [ ] **ACT-2** Empty combatant list renders no combatant elements
+- [x] **ACT-2** Empty combatant list renders no combatant elements
   - Scenario: "No combatants renders an empty list"
   - Mock: `getDisplayCombatants` returns `[]`, `combatState: null`
   - Assert: no combatant name elements in document
 
-- [ ] **ACT-3** Clicking "Next Turn" calls `nextTurn()` exactly once
+- [x] **ACT-3** Clicking "Next Turn" calls `nextTurn()` exactly once
   - Scenario: "Clicking next turn invokes the callback"
   - Mock: `nextTurn: jest.fn()`
   - Interact: `await userEvent.click(screen.getByRole('button', { name: /next turn/i }))`
   - Assert: `expect(nextTurn).toHaveBeenCalledTimes(1)`
 
-- [ ] **ACT-4** Active combatant has a visual indicator
+- [x] **ACT-4** Active combatant has a visual indicator
   - Scenario: "Active combatant has a distinguishing marker"
   - Mock: `combatState.currentTurnIndex = 0`, `getDisplayCombatants` returns one combatant
   - Assert: active combatant element has expected class or `aria-current` attribute
 
-- [ ] **ACT-5** Encounter description modal visible when `showEncounterDescription: true`
+- [x] **ACT-5** Encounter description modal visible when `showEncounterDescription: true`
   - Scenario: "Modal is visible when showEncounterDescription is true"
   - Mock: `makeUseCombat({ showEncounterDescription: true })`
   - Assert: modal content element is in the document
 
-- [ ] **ACT-6** Encounter description modal absent when `showEncounterDescription: false`
+- [x] **ACT-6** Encounter description modal absent when `showEncounterDescription: false`
   - Scenario: "Modal is not visible when showEncounterDescription is false"
   - Mock: `makeUseCombat({ showEncounterDescription: false })`
   - Assert: modal content element is not present or has `hidden` attribute
 
-- [ ] **ACT-7** Confirming remove calls `removeCombatant` with correct ID
+- [x] **ACT-7** Confirming remove calls `removeCombatant` with correct ID
   - Scenario: "Confirming removal calls the callback"
   - Mock: `removeConfirmId: 'c1'`, `removeCombatant: jest.fn()`
   - Interact: `await userEvent.click(screen.getByRole('button', { name: /confirm/i }))`
@@ -68,34 +68,34 @@ Spec reference: `openspec/changes/active-and-setup-view-integration-tests/specs/
 
 Spec reference: `openspec/changes/active-and-setup-view-integration-tests/specs/combat-setup-view.md`
 
-- [ ] **CSV-1** Renders setup combatant names from `setupCombatants`
+- [x] **CSV-1** Renders setup combatant names from `setupCombatants`
   - Scenario: "Setup combatant names appear in the rendered output"
   - Mock: `setupCombatants: [{ name: 'Fighter', ... }, { name: 'Rogue', ... }]`
   - Assert: `screen.getByText('Fighter')` and `screen.getByText('Rogue')` present
 
-- [ ] **CSV-2** Empty `setupCombatants` renders no combatant elements
+- [x] **CSV-2** Empty `setupCombatants` renders no combatant elements
   - Scenario: "Empty setupCombatants renders an empty list"
   - Mock: `setupCombatants: []`
   - Assert: no combatant name elements in setup list
 
-- [ ] **CSV-3** Clicking "Start Combat" calls `startCombatWithSetupCombatants()` exactly once
+- [x] **CSV-3** Clicking "Start Combat" calls `startCombatWithSetupCombatants()` exactly once
   - Scenario: "Clicking start combat invokes the callback"
   - Mock: `startCombatWithSetupCombatants: jest.fn()`
   - Interact: `await userEvent.click(screen.getByRole('button', { name: /start combat/i }))`
   - Assert: `expect(startCombatWithSetupCombatants).toHaveBeenCalledTimes(1)`
 
-- [ ] **CSV-4** Clicking "Add Combatant" calls `setShowCombatantModal(true)`
+- [x] **CSV-4** Clicking "Add Combatant" calls `setShowCombatantModal(true)`
   - Scenario: "Clicking add combatant calls setShowCombatantModal with true"
   - Mock: `setShowCombatantModal: jest.fn()`
   - Interact: click the add combatant button
   - Assert: `expect(setShowCombatantModal).toHaveBeenCalledWith(true)`
 
-- [ ] **CSV-5** `QuickCombatantModal` visible when `showCombatantModal: true`
+- [x] **CSV-5** `QuickCombatantModal` visible when `showCombatantModal: true`
   - Scenario: "QuickCombatantModal is visible when showCombatantModal is true"
   - Mock: `makeUseCombat({ showCombatantModal: true })`
   - Assert: modal element or its title is present in the document
 
-- [ ] **CSV-6** Remove button calls `removeCombatantFromSetup` with correct ID
+- [x] **CSV-6** Remove button calls `removeCombatantFromSetup` with correct ID
   - Scenario: "Remove button calls the callback with the combatant ID"
   - Mock: `setupCombatants: [{ id: 's1', name: 'Fighter', ... }]`, `removeCombatantFromSetup: jest.fn()`
   - Interact: click the remove button for 'Fighter'
@@ -105,5 +105,5 @@ Spec reference: `openspec/changes/active-and-setup-view-integration-tests/specs/
 
 ### Task 3 — Coverage verification (no new test code)
 
-- [ ] **COV-1** `ActiveCombatView.tsx` statement coverage ≥ 60% after ACT-1 through ACT-7 pass
-- [ ] **COV-2** `CombatSetupView.tsx` statement coverage ≥ 60% after CSV-1 through CSV-6 pass
+- [x] **COV-1** `ActiveCombatView.tsx` statement coverage ≥ 60% after ACT-1 through ACT-7 pass
+- [x] **COV-2** `CombatSetupView.tsx` statement coverage ≥ 60% after CSV-1 through CSV-6 pass
