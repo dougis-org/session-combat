@@ -1,6 +1,6 @@
 import { SpellTemplate, DnDSpellSchool, isValidSpellSchool } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import {
   validateSpellName,
   validateSpellLevel,
@@ -28,7 +28,7 @@ export interface SpellBody {
 
 export function buildSpellFromBody(body: SpellBody): SpellTemplate {
   return {
-    id: uuidv4(),
+    id: randomUUID(),
     userId: GLOBAL_USER_ID,
     isGlobal: true,
     source: "open5e",

@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import { expect, Page } from "@playwright/test";
 
 export const STRONG_PASSWORD = "TestPassword123!";
@@ -7,7 +7,7 @@ export const STRONG_PASSWORD = "TestPassword123!";
  * Generate a unique email address for test purposes using UUID
  */
 export function generateUniqueEmail(): string {
-  const uuid = uuidv4();
+  const uuid = randomUUID();
   return `${uuid}@example.com`;
 }
 

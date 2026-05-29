@@ -1,7 +1,7 @@
 import { MonsterTemplate, DnDAlignment } from "@/lib/types";
 import { Open5ECreature } from "./open5eAdapter";
 import { GLOBAL_USER_ID } from "@/lib/constants";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 
 function normalizeAlignment(
   alignment: string | undefined
@@ -71,7 +71,7 @@ export function transformMonster(
 
   const monster: MonsterTemplate = {
     _id: undefined,
-    id: uuidv4(),
+    id: randomUUID(),
     userId: GLOBAL_USER_ID,
     name: raw.name || "Unknown",
     size: mapSize(raw.size?.key || "medium"),

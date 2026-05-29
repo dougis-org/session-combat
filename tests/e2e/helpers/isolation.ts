@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { TestInfo } from "@playwright/test";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 
 type IsolationInput = Pick<TestInfo, "workerIndex" | "retry" | "title">;
 
@@ -30,7 +30,7 @@ export function scopedValue(base: string, namespace: string): string {
 
 export function createTestIdentity(input: IsolationInput) {
   const namespace = buildTestNamespace(input);
-  const token = uuidv4().replace(/-/g, "");
+  const token = randomUUID().replace(/-/g, "");
 
   return {
     namespace,
