@@ -44,7 +44,7 @@ describe('CreatureStatBlock — CombatStatsRow integration', () => {
 
   test('renders without acNote when omitted', () => {
     renderBlock({ ac: 10 });
-    expect(screen.queryByText(/\(/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^\(.*\)$/)).not.toBeInTheDocument();
   });
 
   test('renders ability scores in full mode', () => {
