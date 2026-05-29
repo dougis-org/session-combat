@@ -23,7 +23,7 @@ For each test case below:
 
 ### Task 1 — `tests/unit/components/ActiveCombatView.test.tsx`
 
-Spec reference: `openspec/changes/active-and-setup-view-integration-tests/specs/active-combat-view.md`
+Spec reference: `openspec/specs/active-and-setup-view-integration-tests/active-combat-view.md`
 
 - [x] **ACT-1** Renders combatant names from `getDisplayCombatants`
   - Scenario: "Combatant names appear in the rendered output"
@@ -66,7 +66,7 @@ Spec reference: `openspec/changes/active-and-setup-view-integration-tests/specs/
 
 ### Task 2 — `tests/unit/components/CombatSetupView.test.tsx`
 
-Spec reference: `openspec/changes/active-and-setup-view-integration-tests/specs/combat-setup-view.md`
+Spec reference: `openspec/specs/active-and-setup-view-integration-tests/combat-setup-view.md`
 
 - [x] **CSV-1** Renders setup combatant names from `setupCombatants`
   - Scenario: "Setup combatant names appear in the rendered output"
