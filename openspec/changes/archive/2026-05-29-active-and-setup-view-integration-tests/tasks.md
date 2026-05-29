@@ -68,10 +68,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit all changes to `test/active-and-setup-view-integration-tests` and push to remote
 - [x] Open PR from `test/active-and-setup-view-integration-tests` to `main`. PR body must include `Closes #259`.
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json name,state`; when any required check fails, diagnose and fix, commit, follow all steps in [Remote push validation], push, wait 180 seconds then repeat until all required checks pass
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json name,state`; when any required check fails, diagnose and fix, commit, follow all steps in [Remote push validation], push, wait 180 seconds then repeat until all required checks pass
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
 
 Ownership metadata:
 
@@ -87,14 +87,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify new test files appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec): copy `specs/active-combat-view.md` and `specs/combat-setup-view.md` to `openspec/specs/active-and-setup-view-integration-tests/`
-- [ ] Archive the change: move `openspec/changes/active-and-setup-view-integration-tests/` to `openspec/changes/archive/YYYY-MM-DD-active-and-setup-view-integration-tests/` **in a single atomic commit** — stage both the new location and the deletion of the original
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-active-and-setup-view-integration-tests/` exists and `openspec/changes/active-and-setup-view-integration-tests/` is gone
-- [ ] **Create a doc branch**: `git checkout -b doc/archive-YYYY-MM-DD-active-and-setup-view-integration-tests` then `git push -u origin doc/archive-YYYY-MM-DD-active-and-setup-view-integration-tests`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive active-and-setup-view-integration-tests (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d test/active-and-setup-view-integration-tests doc/archive-YYYY-MM-DD-active-and-setup-view-integration-tests`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify new test files appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec): copy `specs/active-combat-view.md` and `specs/combat-setup-view.md` to `openspec/specs/active-and-setup-view-integration-tests/`
+- [x] Archive the change: move `openspec/changes/active-and-setup-view-integration-tests/` to `openspec/changes/archive/2026-05-29-active-and-setup-view-integration-tests/` **in a single atomic commit** — stage both the new location and the deletion of the original
+- [x] Confirm `openspec/changes/archive/2026-05-29-active-and-setup-view-integration-tests/` exists and `openspec/changes/active-and-setup-view-integration-tests/` is gone
+- [x] **Create a doc branch**: `git checkout -b doc/archive-2026-05-29-active-and-setup-view-integration-tests` then `git push -u origin doc/archive-2026-05-29-active-and-setup-view-integration-tests`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive active-and-setup-view-integration-tests (2026-05-29)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d test/active-and-setup-view-integration-tests doc/archive-2026-05-29-active-and-setup-view-integration-tests`
