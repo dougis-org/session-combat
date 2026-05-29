@@ -20,8 +20,9 @@ const BASE_STATS: CreatureStats = {
 };
 
 function renderForm(stats: CreatureStats, onChange: (s: CreatureStats) => void) {
+  const user = userEvent.setup();
   render(<CreatureStatsForm stats={stats} onChange={onChange} />);
-  return { user: userEvent.setup() };
+  return { user };
 }
 
 async function expandResistances(user: ReturnType<typeof userEvent.setup>) {
@@ -61,7 +62,7 @@ describe('CreatureStatsForm – resistances section', () => {
     const stats = { ...BASE_STATS, damageResistances: ['fire' as const, 'cold' as const] };
     const { user } = renderForm(stats, jest.fn() as any);
     await expandResistances(user);
-    const checked = screen.getAllByRole('checkbox').filter(cb => (cb as HTMLInputElement).checked);
+    const checked = screen.getAllByRole('checkbox', { checked: true });
     expect(checked).toHaveLength(2);
     const resistancesSection = getSection('Damage Resistances');
     expect(within(resistancesSection).getAllByRole('checkbox', { checked: true })).toHaveLength(2);
