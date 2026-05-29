@@ -10,7 +10,7 @@ The system SHALL test `AlignmentSelect` using `render`, `screen`, and `userEvent
 
 - **Given** `tests/unit/components/AlignmentSelect.test.tsx` is migrated to RTL
 - **When** `npx jest tests/unit/components/AlignmentSelect.test.tsx --no-coverage` is run
-- **Then** all 9 test cases pass with 0 failures
+- **Then** all 10 test cases pass with 0 failures
 
 #### Scenario: AlignmentSelect select element is found via role query
 

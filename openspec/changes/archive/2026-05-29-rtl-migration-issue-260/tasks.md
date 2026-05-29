@@ -16,7 +16,7 @@
   - Replace `container.querySelectorAll('option')` → `screen.getAllByRole('option')`
   - Replace `dispatchEvent` → `await userEvent.selectOptions(...)`
   - Replace `.disabled` check → `expect(combobox).toBeDisabled()`
-- [x] Run `npx jest tests/unit/components/AlignmentSelect.test.tsx --no-coverage` — expect 9 tests pass
+- [x] Run `npx jest tests/unit/components/AlignmentSelect.test.tsx --no-coverage` — expect 10 tests pass
 
 ### Task 2: Migrate NavBar.test.tsx
 
@@ -85,10 +85,10 @@ Blocking resolution flow:
 - [x] Mark all remaining tasks as complete (`- [x]`)
 - [x] Update repository documentation if impacted
 - [x] Sync approved spec deltas into `openspec/specs/`
-- [ ] Archive the change: move `openspec/changes/rtl-migration-issue-260/` to `openspec/changes/archive/YYYY-MM-DD-rtl-migration-issue-260/` in a single atomic commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-rtl-migration-issue-260/` exists and `openspec/changes/rtl-migration-issue-260/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-rtl-migration-issue-260` then push
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive rtl-migration-issue-260 (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR (NEVER use `--admin`)
-- [ ] Monitor the doc PR until it merges; address any comments or CI failures
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d test/rtl-migration-issue-260 doc/archive-YYYY-MM-DD-rtl-migration-issue-260`
+- [x] Archive the change: move `openspec/changes/rtl-migration-issue-260/` to `openspec/changes/archive/2026-05-29-rtl-migration-issue-260/` in a single atomic commit
+- [x] Confirm `openspec/changes/archive/2026-05-29-rtl-migration-issue-260/` exists and `openspec/changes/rtl-migration-issue-260/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-2026-05-29-rtl-migration-issue-260` then push
+- [x] Open a PR from the doc branch to `main` with title `docs: archive rtl-migration-issue-260 (2026-05-29)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR (NEVER use `--admin`)
+- [x] Monitor the doc PR until it merges; address any comments or CI failures
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d test/rtl-migration-issue-260 doc/archive-2026-05-29-rtl-migration-issue-260`

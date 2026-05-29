@@ -149,7 +149,7 @@ describe('AlignmentSelect', () => {
 npx jest tests/unit/components/AlignmentSelect.test.tsx --no-coverage
 ```
 
-Expected: 9 tests pass, 0 failures.
+Expected: 10 tests pass, 0 failures.
 
 - [ ] **Step 3: Commit**
 
@@ -298,8 +298,8 @@ The existing RTL smoke test for `CombatStatsRow` (`tests/unit/CombatStatsRow.rtl
 | `container.textContent` contains `'AC'` | `screen.getByText('AC')` |
 | `container.textContent` contains `'16'` | `screen.getByText('16')` |
 | `container.textContent` contains `'30/30'` | `screen.getByText('30/30')` |
-| `container.textContent` contains `'(chain mail)'` | `screen.getByText(/chain mail/)` |
-| `container.textContent` not contains `'('` | `screen.queryByText(/\(/)` → `not.toBeInTheDocument()` |
+| `container.textContent` contains `'(chain mail)'` | `screen.getByText('(chain mail)')` |
+| `container.textContent` not contains `'('` | `screen.queryByText(/^\(.*\)$/)` → `not.toBeInTheDocument()` |
 | `container.textContent` contains `'STR'` | `screen.getByText('STR')` |
 | `container.textContent` not contains `'STR'` | `screen.queryByText('STR')` → `not.toBeInTheDocument()` |
 
