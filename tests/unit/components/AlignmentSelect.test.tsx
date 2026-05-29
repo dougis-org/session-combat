@@ -45,7 +45,8 @@ describe('AlignmentSelect', () => {
   test('each of the 9 standard alignment options has the correct value', () => {
     renderSelect();
     VALID_ALIGNMENTS.slice(0, 9).forEach((alignment) => {
-      expect(screen.getByRole('option', { name: alignment })).toBeInTheDocument();
+      const option = screen.getByRole('option', { name: alignment }) as HTMLOptionElement;
+      expect(option.value).toBe(alignment);
     });
   });
 

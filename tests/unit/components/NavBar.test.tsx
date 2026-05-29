@@ -31,15 +31,15 @@ function mockAuth(overrides: Partial<ReturnType<typeof useAuth>>) {
 }
 
 describe('NavBar', () => {
-  it('renders all navigation links', () => {
+  it('renders all navigation links with correct hrefs', () => {
     mockAuth({});
     render(<NavBar />);
-    expect(screen.getByRole('link', { name: 'Campaigns' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Encounters' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Parties' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Characters' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Monsters' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Combat' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Campaigns' })).toHaveAttribute('href', '/campaigns');
+    expect(screen.getByRole('link', { name: 'Encounters' })).toHaveAttribute('href', '/encounters');
+    expect(screen.getByRole('link', { name: 'Parties' })).toHaveAttribute('href', '/parties');
+    expect(screen.getByRole('link', { name: 'Characters' })).toHaveAttribute('href', '/characters');
+    expect(screen.getByRole('link', { name: 'Monsters' })).toHaveAttribute('href', '/monsters');
+    expect(screen.getByRole('link', { name: 'Combat' })).toHaveAttribute('href', '/combat');
   });
 
   it('does not show logout button when not authenticated', () => {
