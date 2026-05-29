@@ -13,44 +13,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ActiveCombatView } from '@/lib/components/ActiveCombatView';
 import { makeUseCombat } from '@/tests/unit/fixtures/useCombat';
+import { makeCombatant, makeCombatState } from '@/tests/unit/fixtures/combatHelpers';
 import type { UseCombatReturn } from '@/lib/hooks/useCombat';
-import type { CombatantState, CombatState } from '@/lib/types';
-
-function makeCombatant(overrides: Partial<CombatantState> = {}): CombatantState {
-  return {
-    id: 'c1',
-    name: 'Goblin',
-    type: 'monster',
-    initiative: 10,
-    hp: 10,
-    maxHp: 10,
-    ac: 12,
-    conditions: [],
-    abilityScores: {
-      strength: 8,
-      dexterity: 14,
-      constitution: 10,
-      intelligence: 6,
-      wisdom: 8,
-      charisma: 8,
-    },
-    ...overrides,
-  } as CombatantState;
-}
-
-function makeCombatState(overrides: Partial<CombatState> = {}): CombatState {
-  return {
-    id: 'combat-1',
-    userId: 'user-1',
-    combatants: [],
-    currentRound: 1,
-    currentTurnIndex: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides,
-  };
-}
+import type { CombatantState } from '@/lib/types';
 
 function makeCombat(
   overrides: Partial<UseCombatReturn> = {},
@@ -164,14 +129,14 @@ describe('ActiveCombatView', () => {
     expect(nextTurn).toHaveBeenCalledTimes(1);
   });
 
-  it('active combatant card has yellow border class', () => {
+  it('active combatant card has aria-current="step"', () => {
     const goblin = makeCombatant();
     const combat = makeCombat(
       { combatState: makeCombatState({ combatants: [goblin], currentTurnIndex: 0 }), hasInitiativeBeenRolled: jest.fn().mockReturnValue(true) },
       [goblin],
     );
-    const { container } = render(<ActiveCombatView combat={combat} user={null} />);
-    expect(container.querySelector('.border-yellow-500')).toBeInTheDocument();
+    render(<ActiveCombatView combat={combat} user={null} />);
+    expect(document.querySelector('[aria-current="step"]')).toBeInTheDocument();
   });
 
   it('renders lair slot in initiative order when lair combatant is active', () => {
