@@ -50,7 +50,7 @@ The system SHALL have automated tests verifying that `QuickCombatantModal` rende
 
 ## MODIFIED Requirements
 
-None. This is a new test file with no changes to existing requirements.
+None.
 
 ## REMOVED Requirements
 

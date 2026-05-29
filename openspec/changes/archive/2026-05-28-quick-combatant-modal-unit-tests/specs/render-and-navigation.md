@@ -50,7 +50,7 @@ The system SHALL have automated tests verifying that `QuickCombatantModal` rende
 
 ## MODIFIED Requirements
 
-None. This is a new test file with no changes to existing requirements.
+None.
 
 ## REMOVED Requirements
 
@@ -69,5 +69,5 @@ None.
 #### Scenario: Tests pass consistently
 
 - **Given** the test suite runs in jsdom via Jest
-- **When** `npx jest tests/unit/components/QuickCombatantModal.test.tsx` is executed three times in succession
+- **When** `npm run test:unit -- tests/unit/components/QuickCombatantModal.test.tsx` is executed three times in succession
 - **Then** all tests pass each time with no intermittent failures

@@ -28,7 +28,7 @@ The system SHALL have automated tests verifying that Fuse.js search and creator 
 
 - **Given** the monsters tab is active
 - **When** the user types "zzznomatch" in the search input
-- **Then** the text "No monsters match your search and filter criteria" is visible
+- **Then** the text "No monsters match your search and filter criteria." is visible
 
 #### Scenario: Creator filter "My" shows only user's monsters
 
@@ -64,7 +64,7 @@ The system SHALL have automated tests verifying that Fuse.js search and creator 
 
 - **Given** `monsterTemplates=[]`
 - **When** the monsters tab is active
-- **Then** "No monster templates available" is visible with a "Create one" link
+- **Then** "No monster templates available." is visible with a "Create one" link
 
 ### Requirement: ADDED Unit tests for character search and filter
 
@@ -92,7 +92,7 @@ The system SHALL have automated tests verifying that search and filter correctly
 
 - **Given** `characterTemplates=[]`
 - **When** the user switches to the Party Members tab
-- **Then** "No party members available" is visible with a "Create one" link
+- **Then** "No party members available." is visible with a "Create one" link
 
 ## MODIFIED Requirements
 

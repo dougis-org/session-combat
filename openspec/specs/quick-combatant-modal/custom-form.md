@@ -16,7 +16,7 @@ The system SHALL have automated tests verifying that the Create New tab form val
 
 - **Given** the Create New tab is active and the user fills: Name="Dragon", Dexterity=14, AC=15, Max HP=50, Current HP=50, Initiative (blank)
 - **When** the user clicks "Add Combatant"
-- **Then** `onAddMonster` is called with `{ name: 'Dragon', ac: 15, maxHp: 50, hp: 50, abilityScores: { dexterity: 14, ... } }` and `onClose` is called
+- **Then** `onAddMonster` is called with `{ id: <uuid>, name: 'Dragon', ac: 15, maxHp: 50, hp: 50, abilityScores: { strength: 10, dexterity: 14, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 }, size: 'medium', type: 'humanoid', speed: '30 ft.', challengeRating: 0 }` and `onClose` is called
 
 #### Scenario: Happy path — custom monster with initiative set
 
