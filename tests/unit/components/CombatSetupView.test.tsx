@@ -83,8 +83,7 @@ describe('CombatSetupView', () => {
     const setShowCombatantModal = jest.fn();
     const combat = makeUseCombat({ setShowCombatantModal });
     render(<CombatSetupView combat={combat} user={null} />);
-    const [addBtn] = screen.getAllByRole('button', { name: /add party member/i });
-    await user.click(addBtn);
+    await user.click(screen.getByRole('button', { name: /add party member/i }));
     expect(setShowCombatantModal).toHaveBeenCalledWith(true);
   });
 
@@ -101,7 +100,7 @@ describe('CombatSetupView', () => {
     const encounter = makeEncounter({ id: 'e1', name: 'Goblin Ambush' });
     const combat = makeUseCombat({ encounters: [encounter], setSelectedEncounterId });
     render(<CombatSetupView combat={combat} user={null} />);
-    const [encounterSelect] = screen.getAllByRole('combobox');
+    const encounterSelect = screen.getByDisplayValue('No encounter');
     await user.selectOptions(encounterSelect, 'e1');
     expect(setSelectedEncounterId).toHaveBeenCalledWith('e1');
   });
@@ -111,7 +110,7 @@ describe('CombatSetupView', () => {
     const selectParty = jest.fn();
     const combat = makeUseCombat({ selectParty });
     render(<CombatSetupView combat={combat} user={null} />);
-    const [, partySelect] = screen.getAllByRole('combobox');
+    const partySelect = screen.getByDisplayValue('No party (all characters)');
     await user.selectOptions(partySelect, '');
     expect(selectParty).toHaveBeenCalledWith(null);
   });

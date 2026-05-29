@@ -106,8 +106,7 @@ describe('ActiveCombatView', () => {
     const setShowCombatantModal = jest.fn();
     const combat = makeCombat({ combatState: makeCombatState(), setShowCombatantModal });
     render(<ActiveCombatView combat={combat} user={null} />);
-    const [addBtn] = screen.getAllByRole('button', { name: /add party member/i });
-    await user.click(addBtn);
+    await user.click(screen.getByRole('button', { name: /add party member/i }));
     expect(setShowCombatantModal).toHaveBeenCalledWith(true);
   });
 
