@@ -2,6 +2,8 @@
  * @jest-environment jsdom
  */
 
+(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
+
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({ children, href }: { children: React.ReactNode; href: string }) =>
@@ -110,7 +112,10 @@ describe('ActiveCombatView', () => {
   });
 
   it('renders no combatant elements when getDisplayCombatants returns []', () => {
-    const combat = makeCombat({ combatState: makeCombatState() });
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', type: 'monster' });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc', type: 'monster' });
+    // combatState has combatants, but getDisplayCombatants filters them all out
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin, orc] }) }, []);
     render(<ActiveCombatView combat={combat} user={null} />);
     expect(screen.queryByText('Goblin')).not.toBeInTheDocument();
     expect(screen.queryByText('Orc')).not.toBeInTheDocument();

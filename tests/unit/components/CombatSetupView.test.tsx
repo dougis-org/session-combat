@@ -2,6 +2,8 @@
  * @jest-environment jsdom
  */
 
+(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
+
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({ children, href }: { children: React.ReactNode; href: string }) =>
@@ -14,7 +16,7 @@ import userEvent from '@testing-library/user-event';
 import { CombatSetupView } from '@/lib/components/CombatSetupView';
 import { makeUseCombat } from '@/tests/unit/fixtures/useCombat';
 import { makeCombatant, makeEncounter } from '@/tests/unit/fixtures/combatHelpers';
-import type { CombatantState } from '@/lib/types';
+import type { CombatantState, Party } from '@/lib/types';
 
 function makeSetupCombatant(overrides: Partial<CombatantState> = {}): CombatantState {
   return makeCombatant({ id: 's1', name: 'Fighter', type: 'player', initiative: 0, hp: 20, maxHp: 20, ac: 16, abilityScores: { strength: 16, dexterity: 12, constitution: 14, intelligence: 10, wisdom: 10, charisma: 10 }, ...overrides });
@@ -78,9 +80,10 @@ describe('CombatSetupView', () => {
   it('changing party select calls selectParty with null when empty value selected', async () => {
     const user = userEvent.setup();
     const selectParty = jest.fn();
-    const combat = makeUseCombat({ selectParty });
+    const party: Party = { id: 'p1', userId: 'user-1', name: 'Alpha Squad', members: [], createdAt: new Date(), updatedAt: new Date() };
+    const combat = makeUseCombat({ parties: [party], selectedPartyId: 'p1', selectParty });
     render(<CombatSetupView combat={combat} user={null} />);
-    const partySelect = screen.getByDisplayValue('No party (all characters)');
+    const partySelect = screen.getByDisplayValue('Alpha Squad');
     await user.selectOptions(partySelect, '');
     expect(selectParty).toHaveBeenCalledWith(null);
   });
