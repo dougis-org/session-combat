@@ -406,8 +406,7 @@ describe('CombatantCard – Undo HP button', () => {
     await user.type(input, '10');
     await user.click(screen.getByRole('button', { name: 'Damage' }));
     await user.click(screen.getByTestId('undo-hp-change'));
-    const lastCall = (onUpdate as jest.Mock).mock.calls.at(-1)![0] as { hp: number; tempHp: number };
-    expect(lastCall).toMatchObject({ hp: 30, tempHp: 0 });
+    expect(onUpdate).toHaveBeenLastCalledWith(expect.objectContaining({ hp: 30, tempHp: 0 }));
   });
 
   test('Undo HP button becomes disabled again after undo exhausts history', async () => {

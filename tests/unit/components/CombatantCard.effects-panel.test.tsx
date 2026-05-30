@@ -81,11 +81,13 @@ describe('CombatantCard – preset application', () => {
   test('clicking Rage preset calls onUpdate with B/P/S resistances', async () => {
     const { user, onUpdate } = await openPanel();
     await user.click(screen.getByRole('button', { name: /^Rage$/i }));
-    const arg = (onUpdate as jest.Mock).mock.calls[0][0] as { activeDamageEffects: ActiveDamageEffect[] };
-    const types = arg.activeDamageEffects.map(e => e.type);
-    expect(types).toContain('bludgeoning');
-    expect(types).toContain('piercing');
-    expect(types).toContain('slashing');
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      activeDamageEffects: expect.arrayContaining([
+        expect.objectContaining({ type: 'bludgeoning' }),
+        expect.objectContaining({ type: 'piercing' }),
+        expect.objectContaining({ type: 'slashing' }),
+      ]),
+    }));
   });
 
   test('clicking Rage preset closes the effects panel', async () => {
@@ -112,8 +114,11 @@ describe('CombatantCard – preset application', () => {
     const { user, onUpdate } = await openPanel();
     await user.click(screen.getByRole('button', { name: /Protection from Energy/i }));
     await user.click(screen.getByRole('button', { name: /^cold$/i }));
-    const arg = (onUpdate as jest.Mock).mock.calls[0][0] as { activeDamageEffects: ActiveDamageEffect[] };
-    expect(arg.activeDamageEffects.some(e => e.type === 'cold' && e.kind === 'resistance')).toBe(true);
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      activeDamageEffects: expect.arrayContaining([
+        expect.objectContaining({ type: 'cold', kind: 'resistance' }),
+      ]),
+    }));
   });
 
   test('selecting a type closes both picker and panel', async () => {

@@ -81,9 +81,7 @@ describe('CombatantCard – damage type select', () => {
       'fire',
     );
     await user.click(screen.getByRole('button', { name: 'Damage' }));
-    expect(onUpdate).toHaveBeenCalled();
-    const arg = (onUpdate as jest.Mock).mock.calls[0][0] as { hp: number; tempHp: number };
-    expect(arg.hp).toBe(30);
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ hp: 30 }));
   });
 
   test('Damage button applies untyped damage when no type selected', async () => {
@@ -93,8 +91,6 @@ describe('CombatantCard – damage type select', () => {
     await user.clear(input);
     await user.type(input, '10');
     await user.click(screen.getByRole('button', { name: 'Damage' }));
-    expect(onUpdate).toHaveBeenCalled();
-    const arg = (onUpdate as jest.Mock).mock.calls[0][0] as { hp: number; tempHp: number };
-    expect(arg.hp).toBe(20);
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ hp: 20 }));
   });
 });

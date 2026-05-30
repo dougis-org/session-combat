@@ -17,7 +17,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActiveDamageEffect } from '@/lib/types';
-import { BASE, renderCard } from './CombatantCard.test-helpers';
+import { renderCard } from './CombatantCard.test-helpers';
 
 beforeEach(() => {
   localStorage.clear();
@@ -87,8 +87,6 @@ describe('CombatantCard – remove active effect', () => {
     ];
     const onUpdate = renderCard({ activeDamageEffects });
     await user.click(screen.getByRole('button', { name: 'Remove Fire Shield' }));
-    expect(onUpdate).toHaveBeenCalled();
-    const arg = (onUpdate as jest.Mock).mock.calls[0][0] as { activeDamageEffects: ActiveDamageEffect[] };
-    expect(arg.activeDamageEffects).toEqual([]);
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ activeDamageEffects: [] }));
   });
 });
