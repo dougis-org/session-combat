@@ -17,6 +17,17 @@ const config = [
       "docs/**",
     ],
   },
+  {
+    files: ["tests/**/*.ts", "tests/**/*.tsx"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        paths: [{
+          name: "@jest/globals",
+          message: "Do not import from @jest/globals. Jest injects globals at runtime. See docs/TESTING.md."
+        }]
+      }]
+    }
+  },
 ];
 
 export default config;

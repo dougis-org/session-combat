@@ -3,7 +3,6 @@
  */
 (globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 import React from 'react';
 import { Root } from 'react-dom/client';

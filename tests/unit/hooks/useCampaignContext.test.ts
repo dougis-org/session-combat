@@ -6,7 +6,6 @@
 import React from 'react';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { describe, test, expect, jest, beforeEach } from '@jest/globals';
 import { useCampaignContext } from '@/lib/hooks/useCampaignContext';
 import { CampaignContext } from '@/lib/types';
 

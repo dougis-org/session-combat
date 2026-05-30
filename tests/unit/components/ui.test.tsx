@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 
-import { jest, describe, it, expect } from '@jest/globals';
 import React from 'react';
 import { render as rtlRender, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

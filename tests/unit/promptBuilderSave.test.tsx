@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { act } from 'react';
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { createRoot, Root } from 'react-dom/client';
 
 jest.mock('next/link', () => ({

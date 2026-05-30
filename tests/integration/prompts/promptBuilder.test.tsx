@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { act } from 'react';
-import { describe, test, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { createRoot, Root } from 'react-dom/client';
 import { CampaignContext } from '@/lib/types';
 import PromptBuilderPage from '@/app/campaigns/[id]/prompts/page';

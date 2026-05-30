@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-import { describe, test, expect, jest, beforeEach } from "@jest/globals";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
 import type { Campaign, CampaignTemplate } from "@/lib/types";
@@ -13,11 +12,11 @@ jest.mock("@/lib/db", () => ({
 const mockedGetDatabase = jest.mocked(getDatabase);
 
 function makeMockCollection() {
-  const toArray = jest.fn<() => Promise<unknown[]>>();
+  const toArray = jest.fn<Promise<unknown[]>, []>();
   const find = jest.fn(() => ({ toArray }));
-  const findOne = jest.fn<() => Promise<unknown>>();
-  const updateOne = jest.fn<() => Promise<unknown>>();
-  const deleteOne = jest.fn<() => Promise<unknown>>();
+  const findOne = jest.fn<Promise<unknown>, []>();
+  const updateOne = jest.fn<Promise<unknown>, []>();
+  const deleteOne = jest.fn<Promise<unknown>, []>();
   return { find, toArray, findOne, updateOne, deleteOne };
 }
 

@@ -4,7 +4,6 @@
 (globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
 // Must be declared before any imports — ts-jest hoists these.
-import { jest, describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 
 jest.mock('next/link', () => ({
   __esModule: true,

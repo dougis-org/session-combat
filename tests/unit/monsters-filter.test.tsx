@@ -1,4 +1,3 @@
-import { describe, test, expect } from '@jest/globals';
 import { filterMonsters, getAvailableTypes } from '@/app/monsters/filterUtils';
 import type { MonsterTemplate } from '@/lib/types';
 

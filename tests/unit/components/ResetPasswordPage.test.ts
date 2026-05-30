@@ -1,4 +1,3 @@
-import { jest, describe, it, expect } from '@jest/globals';
 
 jest.mock('next/navigation', () => ({
   redirect: jest.fn(),

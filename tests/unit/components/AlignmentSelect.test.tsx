@@ -5,7 +5,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, test, expect, jest } from '@jest/globals';
 import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
 import { VALID_ALIGNMENTS } from '@/lib/types';
 

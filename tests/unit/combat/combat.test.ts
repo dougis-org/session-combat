@@ -1,4 +1,3 @@
-import { describe, test, expect } from '@jest/globals';
 import { applyDamage, applyHealing, setTempHp, useLegendaryAction, resetLegendaryActions, resetIncomingLegendaryPool, decrementLegendaryPool, incrementLegendaryPool, useCharge, restoreCharge, restoreAllCharges, buildLairCombatant } from '@/lib/utils/combat';
 import type { CreatureAbility, CombatantState } from '@/lib/types';
 
