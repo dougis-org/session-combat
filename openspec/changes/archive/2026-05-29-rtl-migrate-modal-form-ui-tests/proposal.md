@@ -6,7 +6,7 @@
 
 - **Problem statement:** Three component test files (`ui.test.tsx`, `TargetActionModal.test.tsx`, `CreatureStatsForm.test.tsx`) still use the legacy `createRoot` + `act` + `container.querySelector*` pattern. The project adopted React Testing Library (RTL) as the standard in #254, and all new tests are written in RTL. These files are the final wave of medium-complexity tests that must be migrated to eliminate the legacy pattern from the component test suite.
 - **Why now:** RTL infrastructure (#254) is complete and merged. The simpler files (issue #260) are being migrated in parallel on a separate thread. This is the natural next step to fully retire the legacy pattern.
-- **Business/user impact:** Unified test style lowers contributor friction and makes test failures easier to diagnose. RTL's `userEvent` is more faithful to real browser interaction than synthetic `dispatchEvent`, improving confidence in these tests. Retiring the legacy pattern also removes the `helpers/reactRoot.ts` file and the `IS_REACT_ACT_ENVIRONMENT` globals.
+- **Business/user impact:** Unified test style lowers contributor friction and makes test failures easier to diagnose. RTL's `userEvent` is more faithful to real browser interaction than synthetic `dispatchEvent`, improving confidence in these tests. Retiring the legacy pattern in these three files reduces reliance on `helpers/reactRoot.ts` and `IS_REACT_ACT_ENVIRONMENT`, enabling their eventual removal once remaining consumers are migrated.
 
 ## Problem Space
 
@@ -54,7 +54,7 @@
 
 - **Risk:** Test coverage regression on `CreatureStatsForm` (currently 32% statement coverage).
   - **Impact:** Medium — existing tests are already sparse; migration must at minimum preserve them.
-  - **Mitigation:** Run `npm test -- --coverage` before and after; fail the PR if coverage drops.
+  - **Mitigation:** Run `npm run test:unit -- --coverage` before and after; fail the PR if coverage drops.
 
 - **Risk:** RTL's `userEvent.type` behaves differently from the native setter hack for controlled inputs — React state may update differently.
   - **Impact:** Low — RTL's simulation is more realistic; the component's `onChange` handlers respond to native input events which `userEvent` fires correctly.

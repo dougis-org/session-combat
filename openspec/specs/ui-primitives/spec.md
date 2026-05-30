@@ -12,7 +12,7 @@ The system SHALL render and interact with UI primitives using `@testing-library/
 
 - **Given** `ui.test.tsx` is migrated to RTL
 - **When** `ErrorBanner` is rendered with `message={null}`
-- **Then** `screen.queryByRole('alert')` (or any container query) returns null / the component renders nothing
+- **Then** `screen.queryByRole('alert')` returns null / the component renders nothing
 
 #### Scenario: ErrorBanner renders message text when provided
 

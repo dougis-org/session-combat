@@ -88,7 +88,7 @@
 - **Requirement:** `TargetActionModal.test.tsx` serves as the canonical RTL reference
   - Design element: Decision 2 (`userEvent.setup()` per test), Decision 4
   - Acceptance criteria reference: `specs/target-action-modal/spec.md`
-  - Testability notes: Code review; file is fully commented-free except for the one `within()` note
+  - Testability notes: Code review; `TargetActionModal.test.tsx` is fully comment-free (the one `within()` scoping comment is in `CreatureStatsForm.test.tsx`)
 
 ## Non-Functional Requirements Mapping
 
