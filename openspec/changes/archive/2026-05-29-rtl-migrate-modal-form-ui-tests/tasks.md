@@ -18,7 +18,7 @@
 - [x] Migrate `EditorShell` button queries from index-based (`querySelectorAll('button')[0]`) to `screen.getByRole('button', { name: /save/i })` and `getByRole('button', { name: /cancel/i })`
 - [x] Migrate `EditorShell` click tests to `const user = userEvent.setup(); await user.click(...)`; make those tests `async`
 - [x] Migrate `TextInputField.onChange` test from native-setter hack to `await userEvent.type(input, 'value')`
-- [x] Verify: `npm test -- --testPathPattern="ui\.test"` passes green
+- [x] Verify: `npm run test:unit -- --testPathPattern="ui\.test"` passes green
 - [x] Verify: `grep -E "createRoot|IS_REACT_ACT_ENVIRONMENT|reactRoot" tests/unit/components/ui.test.tsx` returns no matches
 
 ### File 2: Migrate `tests/unit/components/TargetActionModal.test.tsx`
@@ -34,7 +34,7 @@
 - [x] Migrate damage flow: `await user.click(...)` to enter damage mode, `await userEvent.type(screen.getByPlaceholderText('Damage amount'), '5')`, `await userEvent.selectOptions(screen.getByRole('combobox', ...), 'fire')`, assert button label updates, click Apply
 - [x] Migrate condition flow: `await user.click(...)` to enter condition mode, type into both inputs, click Add
 - [x] Make all interaction tests `async`
-- [x] Verify: `npm test -- --testPathPattern="TargetActionModal\.test"` passes green
+- [x] Verify: `npm run test:unit -- --testPathPattern="TargetActionModal\.test"` passes green
 - [x] Verify: `grep -E "createRoot|IS_REACT_ACT_ENVIRONMENT|findButton|changeInputValue" tests/unit/components/TargetActionModal.test.tsx` returns no matches
 
 ### File 3: Migrate `tests/unit/components/CreatureStatsForm.test.tsx`
@@ -54,13 +54,13 @@
 - [x] Migrate checkbox toggle tests using `within(getSection('Damage Resistances')).getByRole('checkbox', { name: /fire/i })` and `await user.click(...)`
 - [x] Migrate immunity toggle test using `within(getSection('Damage Immunities')).getByRole('checkbox', { name: /poison/i })`
 - [x] Migrate "last type removed sets field undefined" test for Damage Vulnerabilities
-- [x] Verify: `npm test -- --testPathPattern="CreatureStatsForm\.test"` passes green
+- [x] Verify: `npm run test:unit -- --testPathPattern="CreatureStatsForm\.test"` passes green
 - [x] Verify: `grep -E "createRoot|IS_REACT_ACT_ENVIRONMENT|parentElement|querySelectorAll" tests/unit/components/CreatureStatsForm.test.tsx` returns no matches
 
 ### Cleanup: Delete `reactRoot.ts` helper if unused
 
 - [x] Run: `grep -r "reactRoot" tests/` — output was NOT empty (5 consumer files remain from #260); helper retained
-- [x] If deleted: verify `npm test` still passes — N/A (not deleted)
+- [x] If deleted: verify `npm run test:unit` still passes — N/A (not deleted)
 
 ## Pre-Commit Code Review
 
@@ -68,11 +68,11 @@
 
 ## Validation
 
-- [x] `npm test -- --testPathPattern="(ui|TargetActionModal|CreatureStatsForm)\.test"` — all pass green
-- [x] `npm test` — unit suite passes (1776 tests); integration failures are pre-existing MongoDB ESM issue unrelated to this change
+- [x] `npm run test:unit -- --testPathPattern="(ui|TargetActionModal|CreatureStatsForm)\.test"` — all pass green
+- [x] `npm run test:unit` — unit suite passes (1776 tests); integration failures are pre-existing MongoDB ESM issue unrelated to this change
 - [x] `npm run build` — skipped (no source code changed, only test files)
 - [x] `npx tsc --noEmit` — no new type errors (23 pre-existing errors unchanged)
-- [x] Verify coverage has not dropped: `npm test -- --coverage --testPathPattern="(ui|TargetActionModal|CreatureStatsForm)\.test"`
+- [x] Verify coverage has not dropped: `npm run test:unit -- --coverage --testPathPattern="(ui|TargetActionModal|CreatureStatsForm)\.test"`
 - [x] `grep -rE "createRoot|IS_REACT_ACT_ENVIRONMENT" tests/unit/components/ui.test.tsx tests/unit/components/TargetActionModal.test.tsx tests/unit/components/CreatureStatsForm.test.tsx` — empty
 - [x] All execution tasks marked complete
 
@@ -80,7 +80,7 @@
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test` — all tests pass
+- **Unit tests** — `npm run test:unit` — all tests pass
 - **Build** — `npm run build` — succeeds with no errors
 - If **ANY** of the above fail, **MUST** iterate and address the failure before pushing
 
@@ -90,10 +90,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit all changes to `refactor/rtl-migrate-modal-form-ui-tests` and push to remote
 - [x] Open PR from `refactor/rtl-migrate-modal-form-ui-tests` to `main`. PR body **must** include `Closes #261` — PR #285
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (never `--admin`, never `--merge`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to comment
-- [ ] **Monitor PR comments** — address each one, commit fixes, run remote push validation, push, wait 180 seconds, repeat until no unresolved threads
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing check, commit, validate, push, wait 180 seconds, repeat
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user
+- [x] Wait 180 seconds for CI to start and agentic reviewers to comment
+- [x] **Monitor PR comments** — address each one, commit fixes, run remote push validation, push, wait 180 seconds, repeat until no unresolved threads
+- [x] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing check, commit, validate, push, wait 180 seconds, repeat
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user
 
 Ownership metadata:
 - Implementer: (assigned)
@@ -101,7 +101,7 @@ Ownership metadata:
 - Required approvals: 1
 
 Blocking resolution flow:
-- CI failure → fix → commit → `npm test && npm run build` → push → re-check
+- CI failure → fix → commit → `npm run test:unit && npm run build` → push → re-check
 - Review comment → address → commit → validate → push → confirm thread resolved
 
 ## Post-Merge
@@ -112,8 +112,8 @@ Blocking resolution flow:
 - [x] Sync approved spec deltas to `openspec/specs/` (global spec directory)
 - [x] Archive the change: move `openspec/changes/rtl-migrate-modal-form-ui-tests/` → `openspec/changes/archive/2026-05-29-rtl-migrate-modal-form-ui-tests/` — stage both the copy and the deletion in **a single commit**
 - [x] Confirm `openspec/changes/archive/2026-05-29-rtl-migrate-modal-form-ui-tests/` exists and `openspec/changes/rtl-migrate-modal-form-ui-tests/` is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-2026-05-29-rtl-migrate-modal-form-ui-tests && git push -u origin doc/archive-...`
-- [ ] Open archive PR: title `docs: archive rtl-migrate-modal-form-ui-tests (2026-05-29)` — do NOT push directly to `main`
-- [ ] Enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor doc PR until merged (same loop — comments + CI + poll)
+- [x] Create doc branch: `git checkout -b doc/archive-2026-05-29-rtl-migrate-modal-form-ui-tests && git push -u origin doc/archive-...`
+- [x] Open archive PR: title `docs: archive rtl-migrate-modal-form-ui-tests (2026-05-29)` — PR #286
+- [x] Enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor doc PR until merged (same loop — comments + CI + poll)
 - [ ] Prune: `git fetch --prune && git branch -d refactor/rtl-migrate-modal-form-ui-tests doc/archive-2026-05-29-rtl-migrate-modal-form-ui-tests`

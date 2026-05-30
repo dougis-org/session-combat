@@ -1,6 +1,6 @@
 ## Context
 
-- **Relevant architecture:** Component tests live in `tests/unit/components/`. The project uses Jest with jsdom and RTL (`@testing-library/react` ^16, `@testing-library/user-event` ^14, `@testing-library/jest-dom` ^6). RTL is configured globally via `jest.setup.ts` (imports `@testing-library/jest-dom`). `jest.config.js` uses `setupFilesAfterFramework`.
+- **Relevant architecture:** Component tests live in `tests/unit/components/`. The project uses Jest with jsdom and RTL (`@testing-library/react` ^16, `@testing-library/user-event` ^14, `@testing-library/jest-dom` ^6). RTL is configured globally via `jest.setup.ts` (imports `@testing-library/jest-dom`). `jest.config.js` uses `setupFilesAfterEnv`.
 - **Dependencies:** `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom` already installed (issue #254). No new package additions required.
 - **Interfaces/contracts touched:** Test files only. No production source files are modified.
 
@@ -64,13 +64,13 @@
 
 - **Proposal: Migrate ui.test.tsx first**
   - Design decision: Decision 1 (migration order)
-  - Validation approach: File uses only RTL imports; `npm test` passes after each file
+  - Validation approach: File uses only RTL imports; `npm run test:unit` passes after each file
 - **Proposal: `TargetActionModal` has unlabelled inputs → use `getByPlaceholderText`**
   - Design decision: Decision 4 (query strategy)
   - Validation approach: Tests pass and accurately exercise component behavior
 - **Proposal: `CreatureStatsForm` has 39 duplicate-named checkboxes → use `within()`**
   - Design decision: Decision 3 (`within()` scoping)
-  - Validation approach: Checkbox tests correctly target the right section; `npm test` passes
+  - Validation approach: Checkbox tests correctly target the right section; `npm run test:unit` passes
 - **Proposal: Conditional `reactRoot.ts` deletion**
   - Design decision: Decision 5 (conditional deletion)
   - Validation approach: `grep -r "reactRoot" tests/` returns empty before deletion
@@ -84,7 +84,7 @@
 - **Requirement:** All existing test cases pass after migration
   - Design element: Decision 4 (query strategy per component)
   - Acceptance criteria reference: All three spec files
-  - Testability notes: `npm test -- --testPathPattern="(ui|TargetActionModal|CreatureStatsForm).test"` green
+  - Testability notes: `npm run test:unit -- --testPathPattern="(ui|TargetActionModal|CreatureStatsForm).test"` green
 - **Requirement:** `TargetActionModal.test.tsx` serves as the canonical RTL reference
   - Design element: Decision 2 (`userEvent.setup()` per test), Decision 4
   - Acceptance criteria reference: `specs/target-action-modal/spec.md`
@@ -112,7 +112,7 @@
 - **Rollback trigger:** CI fails on any of the three migrated test files and cannot be fixed within the PR iteration.
 - **Rollback steps:** Revert the affected test file to its pre-migration state from `main`. Open a follow-up issue for the specific file.
 - **Data migration considerations:** None — test files only.
-- **Verification after rollback:** `npm test` passes on `main`.
+- **Verification after rollback:** `npm run test:unit` passes on `main`.
 
 ## Operational Blocking Policy
 

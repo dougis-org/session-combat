@@ -9,13 +9,13 @@ description: Test cases for rtl-migrate-modal-form-ui-tests
 
 This change IS the test migration — the "tests" are the migrated test files themselves. The TDD workflow here means: rewrite each test file in RTL, run it (it should pass immediately since the component behavior hasn't changed), and fix any failures before proceeding to the next file.
 
-The verification command for each group of test cases is the same: `npm test -- --testPathPattern="<file>.test"`.
+The verification command for each group of test cases is the same: `npm run test:unit -- --testPathPattern="<file>.test"`.
 
 ## Testing Steps (per file)
 
 1. **Rewrite the file in RTL** — remove all legacy imports and patterns; write RTL equivalents.
 2. **Run the tests** — they should pass immediately (behavior unchanged). If any fail, treat the failure as a red state and fix before proceeding.
-3. **Run the full suite** — `npm test` — to verify no regressions.
+3. **Run the full suite** — `npm run test:unit` — to verify no regressions.
 
 ## Test Cases
 
@@ -92,4 +92,4 @@ Mapped to: tasks.md → "File 3: Migrate CreatureStatsForm.test.tsx" | spec: `sp
 Mapped to: tasks.md → "Cleanup: Delete reactRoot.ts helper if unused"
 
 - [x] `grep -r "reactRoot" tests/` returns no matches after migration (conditional — only if #260 is also complete)
-- [x] If deleted: `npm test` still passes with no import errors
+- [x] If deleted: `npm run test:unit` still passes with no import errors
