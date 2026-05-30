@@ -78,11 +78,11 @@ Blocking resolution flow:
 - [x] Verify the merged changes appear on `main`
 - [x] Mark all remaining tasks as complete (`- [x]`)
 - [x] No documentation updates required (pure dependency removal)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/remove-uuid-dependency/` to `openspec/changes/archive/YYYY-MM-DD-remove-uuid-dependency/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-remove-uuid-dependency/` exists and `openspec/changes/remove-uuid-dependency/` is gone
-- [ ] **Create a doc branch** for the archive: `git checkout -b doc/archive-YYYY-MM-DD-remove-uuid-dependency` then `git push -u origin doc/archive-YYYY-MM-DD-remove-uuid-dependency`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-remove-uuid-dependency` to `main` with title `docs: archive remove-uuid-dependency (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d chore/remove-uuid-dependency doc/archive-YYYY-MM-DD-remove-uuid-dependency`
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive the change: move `openspec/changes/remove-uuid-dependency/` to `openspec/changes/archive/2026-05-29-remove-uuid-dependency/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/2026-05-29-remove-uuid-dependency/` exists and `openspec/changes/remove-uuid-dependency/` is gone
+- [x] **Create a doc branch** for the archive: `git checkout -b doc/archive-2026-05-29-remove-uuid-dependency` then `git push -u origin doc/archive-2026-05-29-remove-uuid-dependency`
+- [x] Open a PR from `doc/archive-2026-05-29-remove-uuid-dependency` to `main` with title `docs: archive remove-uuid-dependency (2026-05-29)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor the doc PR until it merges
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d chore/remove-uuid-dependency doc/archive-2026-05-29-remove-uuid-dependency`
