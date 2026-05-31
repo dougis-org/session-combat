@@ -191,87 +191,106 @@ describe("Campaign Members Integration Tests", () => {
       expect(list).toEqual([]);
     });
 
-    test("listCampaignsForMember — returns correct { id, name } for each campaign", async () => {
-      const db = await getDatabase();
+    describe("listCampaignsForMember", () => {
+      const TEST_CAMPAIGN_IDS = ["camp-1", "camp-2", "camp-3"];
 
-      const campaign1: Campaign = {
-        id: "camp-1",
-        userId: "user-dm",
-        name: "Lost Mine",
-        moduleName: "LMoP",
-        chapters: [],
-        status: "active",
-        notes: "",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      afterEach(async () => {
+        const db = await getDatabase();
+        await db.collection("campaigns").deleteMany({ id: { $in: TEST_CAMPAIGN_IDS } });
+      });
 
-      const campaign2: Campaign = {
-        id: "camp-2",
-        userId: "user-dm",
-        name: "Dragon Heist",
-        moduleName: "DH",
-        chapters: [],
-        status: "active",
-        notes: "",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      test("returns correct { id, name } for each campaign", async () => {
+        const db = await getDatabase();
 
-      const campaign3: Campaign = {
-        id: "camp-3",
-        userId: "user-dm",
-        name: "Out of the Abyss",
-        moduleName: "OotA",
-        chapters: [],
-        status: "active",
-        notes: "",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+        const campaign1: Campaign = {
+          id: "camp-1",
+          userId: "user-dm",
+          name: "Lost Mine",
+          moduleName: "LMoP",
+          chapters: [],
+          status: "active",
+          notes: "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await db.collection("campaigns").insertMany([campaign1, campaign2, campaign3] as any[]);
+        const campaign2: Campaign = {
+          id: "camp-2",
+          userId: "user-dm",
+          name: "Dragon Heist",
+          moduleName: "DH",
+          chapters: [],
+          status: "active",
+          notes: "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
 
-      const member1: CampaignMember = {
-        id: "mem-1",
-        campaignId: "camp-1",
-        userId: "user-alice",
-        role: "player",
-        status: "active",
-        invitedBy: "user-dm",
-        invitedAt: new Date(),
-      };
+        const campaign3: Campaign = {
+          id: "camp-3",
+          userId: "user-dm",
+          name: "Out of the Abyss",
+          moduleName: "OotA",
+          chapters: [],
+          status: "active",
+          notes: "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
 
-      const member2: CampaignMember = {
-        id: "mem-2",
-        campaignId: "camp-3",
-        userId: "user-alice",
-        role: "player",
-        status: "pending",
-        invitedBy: "user-dm",
-        invitedAt: new Date(),
-      };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await db.collection("campaigns").insertMany([campaign1, campaign2, campaign3] as any[]);
 
-      await storage.addMember(member1);
-      await storage.addMember(member2);
+        const member1: CampaignMember = {
+          id: "mem-1",
+          campaignId: "camp-1",
+          userId: "user-alice",
+          role: "player",
+          status: "active",
+          invitedBy: "user-dm",
+          invitedAt: new Date(),
+        };
 
-      const list = await storage.listCampaignsForMember("user-alice");
-      expect(list).toHaveLength(2);
-      const sorted = list.sort((a, b) => a.id.localeCompare(b.id));
-      expect(sorted).toEqual([
-        { id: "camp-1", name: "Lost Mine" },
-        { id: "camp-3", name: "Out of the Abyss" },
-      ]);
-    });
+        const member2: CampaignMember = {
+          id: "mem-2",
+          campaignId: "camp-3",
+          userId: "user-alice",
+          role: "player",
+          status: "pending",
+          invitedBy: "user-dm",
+          invitedAt: new Date(),
+        };
 
-    test("listCampaignsForMember — returns empty for user with no memberships", async () => {
-      const list = await storage.listCampaignsForMember("user-none");
-      expect(list).toEqual([]);
+        await storage.addMember(member1);
+        await storage.addMember(member2);
+
+        const list = await storage.listCampaignsForMember("user-alice");
+        expect(list).toHaveLength(2);
+        const sorted = list.sort((a, b) => a.id.localeCompare(b.id));
+        expect(sorted).toEqual([
+          { id: "camp-1", name: "Lost Mine" },
+          { id: "camp-3", name: "Out of the Abyss" },
+        ]);
+      });
+
+      test("returns empty for user with no memberships", async () => {
+        const list = await storage.listCampaignsForMember("user-none");
+        expect(list).toEqual([]);
+      });
     });
   });
 
   describe("API POST Seeding Integration", () => {
+    let createdCampaignId: string | null = null;
+
+    afterEach(async () => {
+      if (createdCampaignId) {
+        const db = await getDatabase();
+        await db.collection("campaigns").deleteMany({ id: createdCampaignId });
+        createdCampaignId = null;
+      }
+    });
+
     test("POST /api/campaigns — response is 201 and campaign owner seeded as active DM", async () => {
       const res = await fetch(`${baseUrl}/api/campaigns`, {
         method: "POST",
@@ -286,6 +305,8 @@ describe("Campaign Members Integration Tests", () => {
       const body = (await res.json()) as any;
       expect(body.id).toBeDefined();
       expect(body.name).toBe("Seeded Campaign");
+
+      createdCampaignId = body.id;
 
       const db = await getDatabase();
       const members = await db

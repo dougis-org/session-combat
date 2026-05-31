@@ -924,6 +924,7 @@ export const storage = {
         db.collection<Party>("parties").deleteMany({ userId }),
         db.collection<CombatState>("combatStates").deleteMany({ userId }),
         db.collection<SavedContent>("savedContent").deleteMany({ userId }),
+        db.collection("campaignMembers").deleteMany({ userId }),
       ]);
     } catch (error) {
       console.error("Error clearing data:", error);

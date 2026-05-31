@@ -58,7 +58,11 @@ export const POST = withAuth(async (request, auth) => {
         invitedAt: new Date(),
       });
     } catch (memberError) {
-      await storage.deleteCampaign(campaign.id, auth.userId);
+      try {
+        await storage.deleteCampaign(campaign.id, auth.userId);
+      } catch (rollbackError) {
+        console.error('Failed to rollback campaign creation:', rollbackError);
+      }
       throw memberError;
     }
 

@@ -160,6 +160,11 @@ describe("Campaign members storage and types", () => {
       mockCollection.updateOne.mockResolvedValue({ matchedCount: 0 } as never);
       await expect(storage.updateMember("camp-1", "user-1", "player", "active")).resolves.not.toThrow();
     });
+
+    test("no-op — no updateOne called when both params are undefined", async () => {
+      await storage.updateMember("camp-1", "user-1", undefined, undefined);
+      expect(mockCollection.updateOne).not.toHaveBeenCalled();
+    });
   });
 
   describe("listMembersForCampaign (mocked DB)", () => {
