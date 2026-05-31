@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const db = await getDatabase();
     const usersCollection = db.collection<User>('users');
 
-    const existingUser = await usersCollection.findOne({ email });
+    const existingUser = await usersCollection.findOne({ email: { $eq: email } });
     if (existingUser) {
       return NextResponse.json(
         { error: 'User with this email already exists' },
