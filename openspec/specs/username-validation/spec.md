@@ -82,7 +82,7 @@ The system SHALL provide a `validateUsername(value: unknown): ValidationResult` 
 
 - **Given** a value of `null`, `undefined`, `42`, or `{}`
 - **When** `validateUsername` is called with it
-- **Then** it returns `{ valid: false, errors: [{ field: "username", message: "..." }] }` with a message indicating the field is required
+- **Then** it returns `{ valid: false, errors: [{ field: "username", message: "..." }] }` with a message indicating the username must be a string
 
 ## MODIFIED Requirements
 

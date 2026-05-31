@@ -42,8 +42,4 @@ _(none)_
 
 ### Requirement: Reliability
 
-#### Scenario: `username` is present when user document has it
-
-- **Given** a user document that has `username` set (all users post-1a backfill)
-- **When** `GET /api/auth/me` is called
-- **Then** `username` is non-null and matches the stored value
+_(covered by functional scenarios above)_
