@@ -89,14 +89,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/` (copy `specs/username-model.md` → `openspec/specs/username-model.md`)
-- [ ] Archive the change: move `openspec/changes/add-username-to-user-model/` to `openspec/changes/archive/2026-05-30-add-username-to-user-model/` **in a single atomic commit** (stage both the new location and deletion of the old)
-- [ ] Confirm `openspec/changes/archive/2026-05-30-add-username-to-user-model/` exists and `openspec/changes/add-username-to-user-model/` is gone
-- [ ] **Create a doc branch**: `git checkout -b doc/archive-2026-05-30-add-username-to-user-model` then push to remote
-- [ ] Open PR from doc branch to `main` with title `docs: archive add-username-to-user-model (2026-05-30)`
-- [ ] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor doc PR until merged (same loop — address comments and CI failures, push, repeat)
-- [ ] Prune merged branches: `git fetch --prune` and `git branch -d feat/add-username-to-user-model doc/archive-2026-05-30-add-username-to-user-model`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/` (copy `specs/username-model.md` → `openspec/specs/username-model.md`)
+- [x] Archive the change: move `openspec/changes/add-username-to-user-model/` to `openspec/changes/archive/2026-05-30-add-username-to-user-model/` **in a single atomic commit** (stage both the new location and deletion of the old)
+- [x] Confirm `openspec/changes/archive/2026-05-30-add-username-to-user-model/` exists and `openspec/changes/add-username-to-user-model/` is gone
+- [x] **Create a doc branch**: `git checkout -b doc/archive-2026-05-30-add-username-to-user-model` then push to remote
+- [x] Open PR from doc branch to `main` with title `docs: archive add-username-to-user-model (2026-05-30)`
+- [x] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor doc PR until merged (same loop — address comments and CI failures, push, repeat)
+- [x] Prune merged branches: `git fetch --prune` and `git branch -d feat/add-username-to-user-model doc/archive-2026-05-30-add-username-to-user-model`
