@@ -176,4 +176,39 @@ describe("POST /api/auth/password/forgot", () => {
       expect(url).toContain("http://localhost:3000/reset-password");
     });
   });
+
+  describe("email send error handling", () => {
+    it("logs structured error when sendPasswordResetEmail rejects", async () => {
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const apiError = Object.assign(new Error("Unauthorized"), {
+        response: { status: 401, data: { errors: ["Invalid token"] } },
+      });
+      mockedSendPasswordResetEmail.mockRejectedValueOnce(apiError);
+      mockDb({ _id: { toString: () => "uid-err" } });
+
+      await POST(makeRequest({ email: "user@example.com" }));
+      await new Promise((r) => setImmediate(r));
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("[reset-email] failed"),
+        expect.anything()
+      );
+      consoleSpy.mockRestore();
+    });
+
+    it("logs structured error when storeResetToken rejects", async () => {
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      mockedStoreResetToken.mockRejectedValueOnce(new Error("DB down"));
+      mockDb({ _id: { toString: () => "uid-store-err" } });
+
+      await POST(makeRequest({ email: "user@example.com" }));
+      await new Promise((r) => setImmediate(r));
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("[reset-email] failed"),
+        expect.anything()
+      );
+      consoleSpy.mockRestore();
+    });
+  });
 });

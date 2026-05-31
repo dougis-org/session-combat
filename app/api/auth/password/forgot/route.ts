@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
           .catch((err) => {
             const status = err?.response?.status ?? err?.status ?? 'unknown';
             const data = err?.response?.data ?? err?.message ?? String(err);
-            console.error(`[reset-email] failed userId=${userId} status=${status}`, data, err);
+            console.error(`[reset-email] failed userId=${userId} status=${status}`, data);
           });
       }
     }

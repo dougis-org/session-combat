@@ -49,27 +49,22 @@ describe("lib/email.ts", () => {
       expect(call.category).toBe("password-reset");
     });
 
-    it("uses MAILTRAP_FROM_EMAIL as sender when set", async () => {
-      process.env.MAILTRAP_TOKEN = "test-token";
-      process.env.MAILTRAP_FROM_EMAIL = "custom@example.com";
-      const { sendPasswordResetEmail } = await import("@/lib/email");
+    it.each([
+      ["custom@example.com", "custom@example.com"],
+      [undefined, "noreply@session-combat.app"],
+    ])(
+      "uses correct sender when MAILTRAP_FROM_EMAIL is %s",
+      async (envVal, expected) => {
+        process.env.MAILTRAP_TOKEN = "test-token";
+        if (envVal) process.env.MAILTRAP_FROM_EMAIL = envVal;
+        else delete process.env.MAILTRAP_FROM_EMAIL;
 
-      await sendPasswordResetEmail(RECIPIENT, RESET_URL);
+        const { sendPasswordResetEmail } = await import("@/lib/email");
+        await sendPasswordResetEmail(RECIPIENT, RESET_URL);
 
-      const call = mockSend.mock.calls[0][0];
-      expect(call.from.email).toBe("custom@example.com");
-      delete process.env.MAILTRAP_FROM_EMAIL;
-    });
-
-    it("falls back to default sender when MAILTRAP_FROM_EMAIL is not set", async () => {
-      process.env.MAILTRAP_TOKEN = "test-token";
-      delete process.env.MAILTRAP_FROM_EMAIL;
-      const { sendPasswordResetEmail } = await import("@/lib/email");
-
-      await sendPasswordResetEmail(RECIPIENT, RESET_URL);
-
-      const call = mockSend.mock.calls[0][0];
-      expect(call.from.email).toBe("noreply@session-combat.app");
-    });
+        const call = mockSend.mock.calls[0][0];
+        expect(call.from.email).toBe(expected);
+      }
+    );
   });
 });
