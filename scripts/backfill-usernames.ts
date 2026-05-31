@@ -21,25 +21,33 @@ export async function runBackfill(): Promise<number> {
     let updatedCount = 0;
     const assignedInRun = new Set<string>();
 
+    // Fetch all existing usernames once to avoid N+1 query pattern inside the loop
+    const existingUsers = await db
+      .collection("users")
+      .find({ username: { $exists: true } }, { projection: { username: 1 } })
+      .toArray();
+    
+    const takenUsernames = new Set<string>(
+      existingUsers
+        .map((u) => u.username)
+        .filter((username): username is string => typeof username === "string")
+    );
+
     for (const user of users) {
-      if (!user.email) {
-        console.warn(`User document ${user._id} is missing email field; skipping.`);
+      if (typeof user.email !== "string") {
+        console.warn(`User document ${user._id} has an invalid or missing email field; skipping.`);
         continue;
       }
 
       // Derive candidate from email local-part
-      const email: string = user.email;
+      const email = user.email;
       const candidateBase = email.split("@")[0];
       
       let finalUsername = candidateBase;
       let suffix = 2;
 
       // Find a unique username that is not in the database and not assigned during this run
-      while (true) {
-        const count = await db.collection("users").countDocuments({ username: finalUsername });
-        if (count === 0 && !assignedInRun.has(finalUsername)) {
-          break;
-        }
+      while (takenUsernames.has(finalUsername) || assignedInRun.has(finalUsername)) {
         finalUsername = `${candidateBase}-${suffix}`;
         suffix++;
       }
