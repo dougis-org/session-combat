@@ -14,7 +14,12 @@ import {
   SessionLog,
   SessionLogInput,
   SavedContent,
+  CampaignMember,
+  CampaignMemberSummary,
+  MemberRole,
+  MemberStatus,
 } from "./types";
+import { DuplicateMemberError } from "./errors";
 import { GLOBAL_USER_ID } from "./constants";
 import { ObjectId, Filter, Document } from "mongodb";
 
@@ -827,6 +832,88 @@ export const storage = {
     },
   },
 
+  async addMember(member: CampaignMember): Promise<void> {
+    try {
+      const db = await getDatabase();
+      const { _id, ...insertData } = member;
+      await db
+        .collection<CampaignMember>("campaignMembers")
+        .insertOne(insertData as CampaignMember);
+    } catch (error) {
+      if (error && typeof error === "object" && "code" in error && error.code === 11000) {
+        throw new DuplicateMemberError(member.campaignId, member.userId);
+      }
+      console.error("Error adding campaign member:", error);
+      throw error;
+    }
+  },
+
+  async updateMember(
+    campaignId: string,
+    userId: string,
+    role?: MemberRole,
+    status?: MemberStatus,
+  ): Promise<void> {
+    try {
+      const db = await getDatabase();
+      const patch: Record<string, unknown> = {};
+      if (role !== undefined) patch.role = role;
+      if (status !== undefined) patch.status = status;
+      if (Object.keys(patch).length === 0) {
+        return;
+      }
+      await db
+        .collection<CampaignMember>("campaignMembers")
+        .updateOne({ campaignId, userId }, { $set: patch });
+    } catch (error) {
+      console.error("Error updating campaign member:", error);
+      throw error;
+    }
+  },
+
+  async listMembersForCampaign(campaignId: string): Promise<CampaignMember[]> {
+    try {
+      const db = await getDatabase();
+      const members = await db
+        .collection<CampaignMember>("campaignMembers")
+        .find({ campaignId })
+        .toArray();
+      return members.map((m) => {
+        const normalized = normalizeStoredEntityId(m);
+        const { _id, ...rest } = normalized;
+        return rest as CampaignMember;
+      });
+    } catch (error) {
+      console.error("Error listing campaign members:", error);
+      return [];
+    }
+  },
+
+  async listCampaignsForMember(userId: string): Promise<CampaignMemberSummary[]> {
+    try {
+      const db = await getDatabase();
+      const memberships = await db
+        .collection<{ campaignId: string }>("campaignMembers")
+        .find({ userId })
+        .toArray();
+      if (memberships.length === 0) {
+        return [];
+      }
+      const campaignIds = memberships.map((m) => m.campaignId);
+      const campaigns = await db
+        .collection<Campaign>("campaigns")
+        .find({ id: { $in: campaignIds } }, { projection: { id: 1, name: 1 } })
+        .toArray();
+      return campaigns.map((c) => ({
+        id: c.id,
+        name: c.name,
+      }));
+    } catch (error) {
+      console.error("Error listing campaigns for member:", error);
+      return [];
+    }
+  },
+
   // Clear all data for a user
   async clear(userId: string): Promise<void> {
     try {
@@ -837,6 +924,7 @@ export const storage = {
         db.collection<Party>("parties").deleteMany({ userId }),
         db.collection<CombatState>("combatStates").deleteMany({ userId }),
         db.collection<SavedContent>("savedContent").deleteMany({ userId }),
+        db.collection("campaignMembers").deleteMany({ userId }),
       ]);
     } catch (error) {
       console.error("Error clearing data:", error);

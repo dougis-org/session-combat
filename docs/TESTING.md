@@ -76,6 +76,54 @@ import type { Mock } from '@jest/globals';
 
 This should be rare. The `jest.Mock` global type from `@types/jest` covers the common cases. Prefer that first.
 
+## Integration Test Data Isolation
+
+Integration tests share a single MongoDB instance. Each test file is responsible for cleaning up exactly the records it creates — no more, no less.
+
+**Rules:**
+
+1. **`beforeEach` cleans only the collection(s) your test file writes to.** Never delete all documents from a collection that other test files also write to (e.g. `campaigns`), since tests run in parallel.
+
+2. **Tests that insert into shared collections must clean up those exact records.** Use a nested `describe` with an `afterEach` that deletes by the specific IDs your test inserted:
+
+   ```ts
+   describe("my feature", () => {
+     const TEST_IDS = ["id-1", "id-2"];
+
+     afterEach(async () => {
+       const db = await getDatabase();
+       await db.collection("shared_collection").deleteMany({ id: { $in: TEST_IDS } });
+     });
+
+     test("...", async () => {
+       // insert with ids from TEST_IDS
+     });
+   });
+   ```
+
+3. **Tests that create records via the API must capture the created ID and delete it in `afterEach`:**
+
+   ```ts
+   let createdId: string | null = null;
+
+   afterEach(async () => {
+     if (createdId) {
+       const db = await getDatabase();
+       await db.collection("items").deleteMany({ id: createdId });
+       createdId = null;
+     }
+   });
+
+   test("POST creates item", async () => {
+     const res = await fetch(...);
+     const body = await res.json();
+     createdId = body.id; // capture for cleanup
+     // assertions
+   });
+   ```
+
+4. **Do not use `deleteMany({})` on shared collections** — it will race with parallel test files and cause intermittent failures.
+
 ## Running Tests
 
 ```sh

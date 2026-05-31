@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Campaign, CAMPAIGN_STATUSES } from '@/lib/types';
+import { Campaign, CAMPAIGN_STATUSES, CampaignMember } from '@/lib/types';
 import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
 
 export const GET = withAuth(async (_request, auth) => {
@@ -46,6 +46,25 @@ export const POST = withAuth(async (request, auth) => {
     };
 
     await storage.saveCampaign(campaign);
+
+    try {
+      await storage.addMember({
+        id: crypto.randomUUID(),
+        campaignId: campaign.id,
+        userId: auth.userId,
+        role: 'dm',
+        status: 'active',
+        invitedBy: auth.userId,
+        invitedAt: new Date(),
+      });
+    } catch (memberError) {
+      try {
+        await storage.deleteCampaign(campaign.id, auth.userId);
+      } catch (rollbackError) {
+        console.error('Failed to rollback campaign creation:', rollbackError);
+      }
+      throw memberError;
+    }
 
     return NextResponse.json(campaign, { status: 201 });
   } catch (error) {
