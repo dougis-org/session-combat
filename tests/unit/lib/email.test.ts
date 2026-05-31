@@ -38,5 +38,38 @@ describe("lib/email.ts", () => {
       );
       expect(mockSend).not.toHaveBeenCalled();
     });
+
+    it("sends with category password-reset", async () => {
+      process.env.MAILTRAP_TOKEN = "test-token";
+      const { sendPasswordResetEmail } = await import("@/lib/email");
+
+      await sendPasswordResetEmail(RECIPIENT, RESET_URL);
+
+      const call = mockSend.mock.calls[0][0];
+      expect(call.category).toBe("password-reset");
+    });
+
+    it("uses MAILTRAP_FROM_EMAIL as sender when set", async () => {
+      process.env.MAILTRAP_TOKEN = "test-token";
+      process.env.MAILTRAP_FROM_EMAIL = "custom@example.com";
+      const { sendPasswordResetEmail } = await import("@/lib/email");
+
+      await sendPasswordResetEmail(RECIPIENT, RESET_URL);
+
+      const call = mockSend.mock.calls[0][0];
+      expect(call.from.email).toBe("custom@example.com");
+      delete process.env.MAILTRAP_FROM_EMAIL;
+    });
+
+    it("falls back to default sender when MAILTRAP_FROM_EMAIL is not set", async () => {
+      process.env.MAILTRAP_TOKEN = "test-token";
+      delete process.env.MAILTRAP_FROM_EMAIL;
+      const { sendPasswordResetEmail } = await import("@/lib/email");
+
+      await sendPasswordResetEmail(RECIPIENT, RESET_URL);
+
+      const call = mockSend.mock.calls[0][0];
+      expect(call.from.email).toBe("noreply@session-combat.app");
+    });
   });
 });

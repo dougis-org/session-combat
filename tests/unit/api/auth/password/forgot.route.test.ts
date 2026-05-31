@@ -128,4 +128,52 @@ describe("POST /api/auth/password/forgot", () => {
     const res = await POST(makeRequest({ email: "user@example.com" }));
     expect(res.status).toBe(500);
   });
+
+  describe("reset URL construction", () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+      process.env = { ...originalEnv };
+      delete process.env.NEXTAUTH_URL;
+      delete process.env.NEXT_PUBLIC_APP_URL;
+      delete process.env.APP_URL;
+      mockDb({ _id: { toString: () => "uid-1" } });
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
+    async function captureResetUrl(): Promise<string> {
+      await POST(makeRequest({ email: "user@example.com" }));
+      await new Promise((r) => setImmediate(r));
+      const call = mockedSendPasswordResetEmail.mock.calls[0];
+      return call?.[1] ?? "";
+    }
+
+    it("uses APP_URL when NEXTAUTH_URL and NEXT_PUBLIC_APP_URL are absent", async () => {
+      process.env.APP_URL = "https://session-combat.fly.dev";
+      const url = await captureResetUrl();
+      expect(url).toContain("https://session-combat.fly.dev/reset-password");
+    });
+
+    it("strips trailing slash from APP_URL", async () => {
+      process.env.APP_URL = "https://session-combat.fly.dev/";
+      const url = await captureResetUrl();
+      expect(url).not.toContain("//reset-password");
+      expect(url).toContain("https://session-combat.fly.dev/reset-password");
+    });
+
+    it("prefers NEXTAUTH_URL over APP_URL", async () => {
+      process.env.NEXTAUTH_URL = "https://via-nextauth.example.com";
+      process.env.APP_URL = "https://session-combat.fly.dev";
+      const url = await captureResetUrl();
+      expect(url).toContain("https://via-nextauth.example.com/reset-password");
+    });
+
+    it("falls back to localhost:3000 when no URL env var is set", async () => {
+      const url = await captureResetUrl();
+      expect(url).toContain("http://localhost:3000/reset-password");
+    });
+  });
 });
