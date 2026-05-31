@@ -125,12 +125,12 @@ Blocking resolution flow:
 - [x] `git checkout main` and `git pull --ff-only`
 - [x] Verify the merged changes appear on the default branch
 - [x] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (update `.wolf/anatomy.md` for new/deleted test files)
-- [ ] Sync approved spec deltas into `openspec/specs/`
-- [ ] Archive the change: move `openspec/changes/migrate-combatant-card-tests-rtl/` to `openspec/changes/archive/YYYY-MM-DD-migrate-combatant-card-tests-rtl/` **in a single commit** — stage both the new location and deletion of the old location together
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-migrate-combatant-card-tests-rtl/` exists and `openspec/changes/migrate-combatant-card-tests-rtl/` is gone
-- [ ] **Create a doc branch**: `git checkout -b doc/archive-YYYY-MM-DD-migrate-combatant-card-tests-rtl` then `git push -u origin doc/archive-YYYY-MM-DD-migrate-combatant-card-tests-rtl`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive migrate-combatant-card-tests-rtl (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Update repository documentation impacted by the change (update `.wolf/anatomy.md` for new/deleted test files)
+- [x] Sync approved spec deltas into `openspec/specs/`
+- [x] Archive the change: move `openspec/changes/migrate-combatant-card-tests-rtl/` to `openspec/changes/archive/YYYY-MM-DD-migrate-combatant-card-tests-rtl/` **in a single commit** — stage both the new location and deletion of the old location together
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-migrate-combatant-card-tests-rtl/` exists and `openspec/changes/migrate-combatant-card-tests-rtl/` is gone
+- [x] **Create a doc branch**: `git checkout -b doc/archive-YYYY-MM-DD-migrate-combatant-card-tests-rtl` then `git push -u origin doc/archive-YYYY-MM-DD-migrate-combatant-card-tests-rtl`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive migrate-combatant-card-tests-rtl (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
 - [ ] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to doc branch, repeat)
 - [ ] Prune merged local branches: `git fetch --prune` and `git branch -d refactor/migrate-combatant-card-tests-rtl doc/archive-YYYY-MM-DD-migrate-combatant-card-tests-rtl`
