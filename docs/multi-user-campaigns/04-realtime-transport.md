@@ -7,6 +7,8 @@ plumbing everything else plugs into.
 
 **Depends on:** Phase 1 (1e access). Items 4a/4b/4c can largely proceed in parallel.
 
+> **Tracking:** epic [#296](https://github.com/dougis-org/session-combat/issues/296).
+
 ## Component layout
 
 ```mermaid
@@ -52,26 +54,35 @@ flowchart TD
 
 ## Deliverables (sub-issues)
 
-### 4a. SSE stream endpoint + transport abstraction
+### 4a. SSE stream endpoint + transport abstraction · [#311](https://github.com/dougis-org/session-combat/issues/311)
 - `GET /api/campaigns/[id]/stream` returning a `text/event-stream` `ReadableStream`;
   caller must pass `assertCampaignAccess`.
 - Transport abstraction in `lib/server/` (or `lib/api/`): a `subscribe(campaignId,
   onEvent)` that uses **MongoDB Change Streams** when available (Atlas) and a
   **`since`-timestamp DB poll** otherwise. Emits typed events scoped to the campaign.
+- **Multiplex one stream per campaign (not per connection):** keep an in-process
+  subscriber registry so each server instance opens **one** change stream per active
+  campaign (or a single collection-wide stream) and fans events out to all that
+  campaign's SSE connections. Opening a cursor per connection scales linearly with
+  connected users and exhausts Atlas connection / change-stream limits.
+  Reference-count subscribers and close the stream when a campaign's last connection
+  drops.
 - Heartbeat/keepalive comments; clean teardown on disconnect; respects Fly's
   request lifecycle.
 - **Depends on:** 1e.
 - **Acceptance:** an authorized member receives events for their campaign and
-  nothing for campaigns they're not in; works against Atlas (change streams) and a
-  standalone Mongo (polling); connections close cleanly.
+  nothing for campaigns they're not in; multiple connections to one campaign share a
+  single change stream; works against Atlas (change streams) and a standalone Mongo
+  (polling); connections close cleanly and the shared stream closes when the last
+  one drops.
 
-### 4b. Client `useCampaignStream` hook
+### 4b. Client `useCampaignStream` hook · [#312](https://github.com/dougis-org/session-combat/issues/312)
 - React hook in `lib/hooks/` wrapping `EventSource` with auto-reconnect/backoff,
   connection state, and typed event dispatch.
 - **Acceptance:** components can subscribe to a campaign and receive typed events;
   reconnects after transient drops; tears down on unmount.
 
-### 4c. Collapsible / pinnable chat dock shell
+### 4c. Collapsible / pinnable chat dock shell · [#313](https://github.com/dougis-org/session-combat/issues/313)
 - `CampaignChat` component in `lib/components/`: fixed dock that toggles
   collapsed pill ↔ expanded drawer, with a **pin-open** control persisted to
   `localStorage`. No data wiring yet — layout, states, and a11y only.

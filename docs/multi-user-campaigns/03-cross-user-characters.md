@@ -7,6 +7,8 @@ own them.
 **Depends on:** Phase 1 (1e access). Benefits from Phase 2 (active members exist),
 but the data layer can be built against memberships directly.
 
+> **Tracking:** epic [#295](https://github.com/dougis-org/session-combat/issues/295).
+
 ## How a player's character reaches a DM's party
 
 The character record stays owned by the player; the DM only references it once the
@@ -24,7 +26,7 @@ flowchart LR
 
 ## Deliverables (sub-issues)
 
-### 3a. Character sharing (opt-in) — data + player UI
+### 3a. Character sharing (opt-in) — data + player UI · [#309](https://github.com/dougis-org/session-combat/issues/309)
 - Add `CampaignCharacterShare` type; create `campaignCharacterShares` collection
   with unique `{campaignId, characterId}`.
 - API for a player to share/unshare one of **their** characters into a campaign
@@ -35,13 +37,20 @@ flowchart LR
 - **Acceptance:** a player can share/unshare only their own characters into
   campaigns they belong to; sharing a character they don't own is rejected.
 
-### 3b. Party builder uses shared characters
+### 3b. Party builder uses shared characters · [#310](https://github.com/dougis-org/session-combat/issues/310)
 - Update the party access rule: the DM may add a `characterId` to a party in a
   campaign if that character is shared into the campaign by an active member (in
   addition to characters the DM owns).
 - Party builder UI: surface shared members' characters as selectable, grouped by
   owner; respect soft-delete (`characters_active`).
+- **Cleanup on unshare / member removal (proactive + reactive):** prefer
+  **proactive** cleanup — when a character is unshared or a member is removed, set
+  `leftAt` on the affected `Party.members[]` entries (reusing the existing leave
+  semantics) so stale references aren't persisted. Keep a **reactive** guard in the
+  party / campaign-context loader that filters any character no longer shared, as
+  defense-in-depth.
 - **Depends on:** 3a.
 - **Acceptance:** DM can add a player's shared character to a campaign party;
-  unsharing/removing a member or character handles party membership gracefully;
-  DM cannot add an unshared character.
+  unsharing a character or removing a member proactively sets `leftAt` on its party
+  entries and it stops appearing in party/campaign context; DM cannot add an
+  unshared character.

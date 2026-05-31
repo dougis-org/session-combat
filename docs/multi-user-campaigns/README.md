@@ -92,6 +92,7 @@ existing `lib/db.ts` pattern):
 - `CampaignCharacterShare` — `{ campaignId, userId, characterId, sharedAt }`. Unique `{campaignId,characterId}`. Player opt-in of a character into a campaign.
 - `CampaignMessage` — `{ campaignId, senderId, kind: 'text'|'scene', visibility: {scope:'group'|'direct'|'dm-only', toUserId?}, body?, attachmentId? }`. Index `{campaignId,createdAt}`. Persistent.
 - `CampaignRoll` — `{ campaignId, sessionId, rollerId, label?, formula, rolls[], total, visibility: {scope:'group'|'dm-only'|'direct', toUserId?} }`. Index `{campaignId,sessionId,createdAt}`. Session-scoped.
+- `Campaign.activeSessionId?: string` — **NEW**: the session currently open for live play (set when the DM starts a session, cleared when it ends). Phase 6 rolls are scoped to it; with no active session, roll submission is rejected rather than silently dropped.
 
 The relationships between the existing entities (grey-ish: `User`, `Campaign`,
 `Character`, `Party`, `SessionLog`) and the new ones introduced by this initiative:
@@ -122,6 +123,7 @@ erDiagram
     Campaign {
         string id
         string userId "owner = DM"
+        string activeSessionId "NEW: open session, scopes rolls"
     }
     CampaignMember {
         string campaignId
@@ -160,7 +162,8 @@ Campaign reads are currently `{ userId, id }` (single owner). This becomes
 `assertCampaignAccess(campaignId, userId)` helper in `lib/utils/campaign.ts` that
 returns the member's role. Party building gains a rule: the DM may add a
 `characterId` to a party only if that character is shared into the campaign by an
-active member. Phase 1e delivers this refactor; most later phases depend on it.
+active member. Phase 1e ([#304](https://github.com/dougis-org/session-combat/issues/304))
+delivers this refactor; most later phases depend on it.
 
 ## Phase roadmap
 
@@ -169,13 +172,13 @@ on its own. `→` marks hard dependencies; everything else can run in parallel.
 
 | Phase | Theme | Epic | Sub-issues | Depends on |
 |-------|-------|------|------------|------------|
-| 1 | Identity & membership foundations | #293 | 1a #300 · 1b #301 · 1c #302 · 1d #303 · 1e #304 | — |
-| 2 | Invite & accept flow | #294 | 2a #305 · 2b #306 · 2c #307 · 2d #308 | Phase 1 |
-| 3 | Cross-user characters into parties | #295 | 3a #309 · 3b #310 | Phase 1 |
-| 4 | Real-time transport | #296 | 4a #311 · 4b #312 · 4c #313 | Phase 1 |
-| 5 | Messaging | #297 | 5a #314 · 5b #315 | Phase 4 |
-| 6 | Shared dice rolls (session-scoped) | #298 | 6a #316 · 6b #317 | Phase 5 |
-| 7 | Scene content (maps/images) | #299 | 7a #318 · 7b #319 | Phase 5 |
+| 1 | Identity & membership foundations | [#293](https://github.com/dougis-org/session-combat/issues/293) | [1a #300](https://github.com/dougis-org/session-combat/issues/300) · [1b #301](https://github.com/dougis-org/session-combat/issues/301) · [1c #302](https://github.com/dougis-org/session-combat/issues/302) · [1d #303](https://github.com/dougis-org/session-combat/issues/303) · [1e #304](https://github.com/dougis-org/session-combat/issues/304) | — |
+| 2 | Invite & accept flow | [#294](https://github.com/dougis-org/session-combat/issues/294) | [2a #305](https://github.com/dougis-org/session-combat/issues/305) · [2b #306](https://github.com/dougis-org/session-combat/issues/306) · [2c #307](https://github.com/dougis-org/session-combat/issues/307) · [2d #308](https://github.com/dougis-org/session-combat/issues/308) | Phase 1 |
+| 3 | Cross-user characters into parties | [#295](https://github.com/dougis-org/session-combat/issues/295) | [3a #309](https://github.com/dougis-org/session-combat/issues/309) · [3b #310](https://github.com/dougis-org/session-combat/issues/310) | Phase 1 |
+| 4 | Real-time transport | [#296](https://github.com/dougis-org/session-combat/issues/296) | [4a #311](https://github.com/dougis-org/session-combat/issues/311) · [4b #312](https://github.com/dougis-org/session-combat/issues/312) · [4c #313](https://github.com/dougis-org/session-combat/issues/313) | Phase 1 |
+| 5 | Messaging | [#297](https://github.com/dougis-org/session-combat/issues/297) | [5a #314](https://github.com/dougis-org/session-combat/issues/314) · [5b #315](https://github.com/dougis-org/session-combat/issues/315) | Phase 4 |
+| 6 | Shared dice rolls (session-scoped) | [#298](https://github.com/dougis-org/session-combat/issues/298) | [6a #316](https://github.com/dougis-org/session-combat/issues/316) · [6b #317](https://github.com/dougis-org/session-combat/issues/317) | Phase 5 |
+| 7 | Scene content (maps/images) | [#299](https://github.com/dougis-org/session-combat/issues/299) | [7a #318](https://github.com/dougis-org/session-combat/issues/318) · [7b #319](https://github.com/dougis-org/session-combat/issues/319) | Phase 5 |
 
 ### Dependency graph
 
@@ -245,6 +248,63 @@ flowchart LR
     n5b --> n7b
     n7a --> n7b
 ```
+
+### Build order & parallelism (waves)
+
+The dependency graph above shows *what blocks what*; this view shows *when each
+sub-issue can start* and *what runs concurrently*. A "wave" is the earliest point a
+sub-issue can begin assuming unlimited parallel hands (each bar ≈ one deliverable;
+bars in the same column run in parallel). Exact edges remain authoritative in the
+dependency graph — the waves are the schedule those edges imply.
+
+```mermaid
+gantt
+    title Earliest-start schedule (overlap = can be built in parallel)
+    dateFormat YYYY-MM-DD
+    axisFormat W%d
+
+    section Phase 1 · Identity & membership
+    1a username model          :done1a, 2026-01-01, 1d
+    1d campaignMembers         :done1d, 2026-01-01, 1d
+    1b username set/edit       :after done1a, 1d
+    1c user search             :done1c, after done1a, 1d
+    1e assertCampaignAccess    :done1e, after done1d, 1d
+
+    section Phase 2 · Invite & accept
+    2b accept/decline + inbox  :done2b, after done1d, 1d
+    2a invite API              :done2a, after done1c done1e, 1d
+    2c member mgmt UI          :after done2a, 1d
+    2d invitations inbox UI    :after done2b, 1d
+
+    section Phase 3 · Cross-user characters
+    3a character sharing       :done3a, after done1e, 1d
+    3b party builder           :after done3a, 1d
+
+    section Phase 4 · Real-time transport
+    4b useCampaignStream       :done4b, 2026-01-01, 1d
+    4c chat dock shell         :done4c, 2026-01-01, 1d
+    4a SSE + transport         :done4a, after done1e, 1d
+
+    section Phase 5 · Messaging
+    5a messages API            :done5a, after done1e, 1d
+    5b wire dock               :done5b, after done4b done4c done5a, 1d
+
+    section Phase 6 · Shared rolls
+    6a rolls API               :done6a, after done1e, 1d
+    6b roll UI                 :after done5b done6a, 1d
+
+    section Phase 7 · Scene content
+    7a GridFS upload/serve     :done7a, 2026-01-01, 1d
+    7b push scene              :after done5b done7a, 1d
+```
+
+| Wave | Can start | Notes |
+|------|-----------|-------|
+| 1 | **1a, 1d, 4b, 4c, 7a** | All dependency-free — the UI shell (4c), stream hook (4b), and GridFS (7a) need nothing upstream, so they parallelize the Phase 1 foundations |
+| 2 | **1b, 1c, 1e, 2b** | `1e` (access spine) unlocks most of the rest; `2b` only needs `1d` |
+| 3 | **2a, 2d, 3a, 4a, 5a, 6a** | Widest fan-out — six independent tracks once `1e` lands |
+| 4 | **2c, 3b, 5b** | `5b` is the integration point (needs `4b` + `4c` + `5a`) |
+| 5 | **6b, 7b** | Feature UIs that sit on top of messaging (`5b`) |
 
 See the per-phase docs for deliverables, acceptance criteria, and affected files:
 
