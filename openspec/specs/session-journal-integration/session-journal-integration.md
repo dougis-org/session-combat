@@ -76,9 +76,9 @@ The system SHALL produce `SessionEvent` objects with the following shape for com
 
 #### Scenario: Event description degrades gracefully when no encounter description
 
-- **Given** a completed combat with no `encounterDescription`
+- **Given** a completed combat with no `encounterDescription` and `currentRound: 3`
 - **When** the event is constructed
-- **Then** `description` is `"Combat: Unnamed encounter (N rounds)"`
+- **Then** `description` is `"Combat: Unnamed encounter (2 rounds)"`
 
 ## MODIFIED Requirements
 
