@@ -50,8 +50,8 @@ describe("Username Backfill Script Integration Tests", () => {
       }
     ]);
 
-    // Run backfill script via ts-node
-    const { stdout, stderr } = await execAsync(`npx ts-node --esm ${scriptPath}`, {
+    // Run backfill script via tsx
+    const { stdout, stderr } = await execAsync(`npx tsx ${scriptPath}`, {
       env: {
         ...process.env,
         MONGODB_URI: mongoUri,
@@ -103,7 +103,7 @@ describe("Username Backfill Script Integration Tests", () => {
     ]);
 
     // Run backfill script
-    const { stdout } = await execAsync(`npx ts-node --esm ${scriptPath}`, {
+    const { stdout } = await execAsync(`npx tsx ${scriptPath}`, {
       env: {
         ...process.env,
         MONGODB_URI: mongoUri,
@@ -140,7 +140,7 @@ describe("Username Backfill Script Integration Tests", () => {
       }
     ]);
 
-    const { stdout } = await execAsync(`npx ts-node --esm ${scriptPath}`, {
+    const { stdout } = await execAsync(`npx tsx ${scriptPath}`, {
       env: {
         ...process.env,
         MONGODB_URI: mongoUri,
@@ -171,7 +171,7 @@ describe("Username Backfill Script Integration Tests", () => {
     ]);
 
     // First run
-    await execAsync(`npx ts-node --esm ${scriptPath}`, {
+    await execAsync(`npx tsx ${scriptPath}`, {
       env: {
         ...process.env,
         MONGODB_URI: mongoUri,
@@ -180,7 +180,7 @@ describe("Username Backfill Script Integration Tests", () => {
     });
 
     // Second run
-    const { stdout } = await execAsync(`npx ts-node --esm ${scriptPath}`, {
+    const { stdout } = await execAsync(`npx tsx ${scriptPath}`, {
       env: {
         ...process.env,
         MONGODB_URI: mongoUri,
