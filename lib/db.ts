@@ -34,6 +34,15 @@ async function initializeDatabase(db: Db): Promise<void> {
       }
     }
 
+    try {
+      await db.collection("users").createIndex({ username: 1 }, { unique: true, sparse: true });
+      console.log("Created index on users.username");
+    } catch (indexError) {
+      if (indexError instanceof Error && !indexError.message.includes("already exists")) {
+        console.warn("Warning creating users.username index:", indexError.message);
+      }
+    }
+
     // Unique index on tokenHash for O(1) reset-token lookup
     await db
       .collection("password_reset_tokens")
