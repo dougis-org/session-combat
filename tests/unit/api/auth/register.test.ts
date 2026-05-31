@@ -53,19 +53,24 @@ describe("POST /api/auth/register", () => {
   });
 
   it("returns 400 when email is missing", async () => {
-    const response = await POST(makeRequest({ password: "ValidPass1!" }));
+    const response = await POST(makeRequest({ password: "ValidPass1!", username: "mockuser" }));
     expect(response.status).toBe(400);
   });
 
   it("returns 400 when password is missing", async () => {
-    const response = await POST(makeRequest({ email: "user@example.com" }));
+    const response = await POST(makeRequest({ email: "user@example.com", username: "mockuser" }));
+    expect(response.status).toBe(400);
+  });
+
+  it("returns 400 when username is missing", async () => {
+    const response = await POST(makeRequest({ email: "user@example.com", password: "ValidPass1!" }));
     expect(response.status).toBe(400);
   });
 
   it("returns 400 for invalid email format", async () => {
     mockedValidateEmail.mockReturnValue(false);
     const response = await POST(
-      makeRequest({ email: "notanemail", password: "ValidPass1!" })
+      makeRequest({ email: "notanemail", password: "ValidPass1!", username: "mockuser" })
     );
     expect(response.status).toBe(400);
   });
@@ -77,35 +82,74 @@ describe("POST /api/auth/register", () => {
       errors: ["Too short"],
     });
     const response = await POST(
-      makeRequest({ email: "user@example.com", password: "weak" })
+      makeRequest({ email: "user@example.com", password: "weak", username: "mockuser" })
     );
     expect(response.status).toBe(400);
   });
 
-  it("returns 409 when user already exists", async () => {
+  it("returns 400 for invalid username format", async () => {
     mockedValidateEmail.mockReturnValue(true);
     mockedValidatePassword.mockReturnValue({ valid: true, errors: [] });
-    mockDb({ email: "user@example.com" });
     const response = await POST(
-      makeRequest({ email: "user@example.com", password: "ValidPass1!" })
+      makeRequest({ email: "user@example.com", password: "ValidPass1!", username: "a" })
+    );
+    expect(response.status).toBe(400);
+  });
+
+  it("returns 409 when user with email already exists", async () => {
+    mockedValidateEmail.mockReturnValue(true);
+    mockedValidatePassword.mockReturnValue({ valid: true, errors: [] });
+    const findOne = jest.fn().mockResolvedValue({ email: "user@example.com" });
+    const insertOne = jest.fn();
+    mockedGetDatabase.mockResolvedValue({
+      collection: jest.fn().mockReturnValue({ findOne, insertOne }),
+    } as any);
+    const response = await POST(
+      makeRequest({ email: "user@example.com", password: "ValidPass1!", username: "mockuser" })
     );
     expect(response.status).toBe(409);
+    const body = await response.json();
+    expect(body.error).toBe("User with this email already exists");
+  });
+
+  it("returns 409 when username is already taken", async () => {
+    mockedValidateEmail.mockReturnValue(true);
+    mockedValidatePassword.mockReturnValue({ valid: true, errors: [] });
+    const findOne = jest.fn().mockResolvedValue(null);
+    const insertOne = jest.fn().mockRejectedValue({
+      code: 11000,
+      keyPattern: { username: 1 }
+    });
+    mockedGetDatabase.mockResolvedValue({
+      collection: jest.fn().mockReturnValue({ findOne, insertOne }),
+    } as any);
+    const response = await POST(
+      makeRequest({ email: "user@example.com", password: "ValidPass1!", username: "mockuser" })
+    );
+    expect(response.status).toBe(409);
+    const body = await response.json();
+    expect(body.error).toBe("Username already taken");
   });
 
   it("returns 201 and sets cookie on successful registration", async () => {
     mockedValidateEmail.mockReturnValue(true);
     mockedValidatePassword.mockReturnValue({ valid: true, errors: [] });
-    mockDb(null);
+    const findOne = jest.fn().mockResolvedValue(null);
+    const insertOne = jest.fn().mockResolvedValue({ insertedId: { toString: () => "new-user-id" } });
+    mockedGetDatabase.mockResolvedValue({
+      collection: jest.fn().mockReturnValue({ findOne, insertOne }),
+    } as any);
     mockedHashPassword.mockResolvedValue("hashed-password");
     mockedGenerateToken.mockReturnValue("jwt.token.here");
 
     const response = await POST(
-      makeRequest({ email: "new@example.com", password: "ValidPass1!" })
+      makeRequest({ email: "new@example.com", password: "ValidPass1!", username: "mockuser" })
     );
 
     expect(response.status).toBe(201);
     const body = await response.json();
     expect(body.email).toBe("new@example.com");
+    expect(body.username).toBe("mockuser");
     expect(mockedSetAuthCookie).toHaveBeenCalledTimes(1);
   });
 
@@ -114,7 +158,7 @@ describe("POST /api/auth/register", () => {
     mockedValidatePassword.mockReturnValue({ valid: true, errors: [] });
     mockedGetDatabase.mockRejectedValue(new Error("DB error"));
     const response = await POST(
-      makeRequest({ email: "user@example.com", password: "ValidPass1!" })
+      makeRequest({ email: "user@example.com", password: "ValidPass1!", username: "mockuser" })
     );
     expect(response.status).toBe(500);
   });

@@ -19,6 +19,14 @@ export async function fillRegistrationForm(
   email: string,
   password: string,
 ): Promise<void> {
+  const usernameField = page.locator("#username");
+  await expect(usernameField).toBeVisible({ timeout: 15000 });
+  await expect(usernameField).toBeEnabled({ timeout: 15000 });
+  const localPart = email.split("@")[0];
+  const sanitized = localPart.replace(/[^a-zA-Z0-9_-]/g, "");
+  const username = `u_${sanitized}`.slice(0, 20);
+  await usernameField.fill(username);
+
   const emailField = page.locator("#email");
   await expect(emailField).toBeVisible({ timeout: 15000 });
   await expect(emailField).toBeEnabled({ timeout: 15000 });

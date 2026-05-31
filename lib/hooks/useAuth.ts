@@ -9,6 +9,7 @@ export interface AuthUser {
   userId: string;
   email: string;
   isAdmin?: boolean;
+  username?: string;
 }
 
 export function useAuth() {
@@ -30,6 +31,7 @@ export function useAuth() {
           userId: data.userId,
           email: data.email,
           isAdmin: data.isAdmin,
+          username: data.username,
         });
         setError(null);
       } else {
@@ -51,14 +53,14 @@ export function useAuth() {
   }, [checkAuth, pathname]);
 
   // Register function
-  const register = useCallback(async (email: string, password: string) => {
+  const register = useCallback(async (email: string, password: string, username: string) => {
     try {
       setLoading(true);
       setError(null);
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, username }),
       });
 
       const data = await response.json();
@@ -67,7 +69,7 @@ export function useAuth() {
         throw new Error(data.error || "Registration failed");
       }
 
-      setUser({ userId: data.userId, email: data.email });
+      setUser({ userId: data.userId, email: data.email, username: data.username });
       return true;
     } catch (err) {
       const message =
@@ -97,7 +99,7 @@ export function useAuth() {
         throw new Error(data.error || "Login failed");
       }
 
-      setUser({ userId: data.userId, email: data.email });
+      setUser({ userId: data.userId, email: data.email, username: data.username });
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed";

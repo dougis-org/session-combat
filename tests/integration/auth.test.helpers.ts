@@ -4,6 +4,7 @@
  */
 
 import fetch, { RequestInit, Response } from "node-fetch";
+import { randomUUID } from "node:crypto";
 
 // ============================================================================
 // Test Data Constants
@@ -64,7 +65,7 @@ export const VALID_PASSWORDS = [
  */
 export function createTestEmail(prefix = "user"): string {
   const timestamp = Date.now();
-  const random = Math.random().toString(36).slice(2, 11);
+  const random = randomUUID().replace(/[^a-z0-9]/g, "").slice(0, 9);
   return `${prefix}-${timestamp}-${random}@example.com`;
 }
 
@@ -127,9 +128,10 @@ export async function registerUser(
   baseUrl: string,
   email: string = createTestEmail(),
   password: string = VALID_PASSWORD,
+  username: string = createTestUsername(),
 ) {
   return apiCall(baseUrl, "/api/auth/register", {
-    body: { email, password },
+    body: { email, password, username },
   });
 }
 
@@ -279,6 +281,14 @@ export function assertResponseStatus(
  * Create test user with email and password
  * Useful for test data generation
  */
+export function createTestUsername(prefix = "usr"): string {
+  const timestamp = Date.now() % 1000000;
+  const random = randomUUID().replace(/[^a-z0-9]/g, "").slice(0, 4);
+  const sanitizedPrefix = prefix.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 8);
+  const candidate = `${sanitizedPrefix}_${timestamp}_${random}`;
+  return candidate.slice(0, 20);
+}
+
 export function createTestUser(
   prefix: string = "user",
   password: string = VALID_PASSWORD,
@@ -286,6 +296,7 @@ export function createTestUser(
   return {
     email: createTestEmail(prefix),
     password,
+    username: createTestUsername(prefix),
   };
 }
 

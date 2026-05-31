@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const usersCollection = db.collection<User>('users');
 
     // Find user by email
-    const user = await usersCollection.findOne({ email });
+    const user = await usersCollection.findOne({ email: { $eq: email } });
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Create response with cookie
     const response = NextResponse.json(
-      { userId, email, message: 'Login successful' },
+      { userId, email, username: user.username, message: 'Login successful' },
       { status: 200 }
     );
     setAuthCookie(response, token);

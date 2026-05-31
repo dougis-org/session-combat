@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { validatePasswordForClient } from '@/lib/validation/password';
+import { validateUsername } from '@/lib/validation/username';
 
 export default function RegisterPage() {
   const { register, loading, error, isAuthenticated } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [formError, setFormError] = useState('');
@@ -61,6 +63,12 @@ export default function RegisterPage() {
       return;
     }
 
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.valid) {
+      setFormError(usernameValidation.errors[0]?.message || 'Username does not meet requirements');
+      return;
+    }
+
     if (!password) {
       setFormError('Password is required');
       return;
@@ -76,7 +84,7 @@ export default function RegisterPage() {
       return;
     }
 
-    const success = await register(email, password);
+    const success = await register(email, password, username);
     if (success) {
       router.replace('/campaigns');
       return;
@@ -93,6 +101,22 @@ export default function RegisterPage() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Username Input */}
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
+              Username
+            </label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username (4-20 chars)"
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
+              disabled={loading}
+            />
+          </div>
+
           {/* Email Input */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">

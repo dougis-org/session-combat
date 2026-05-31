@@ -163,7 +163,7 @@ describe("useAuth", () => {
 
     let regResult: boolean;
     await act(async () => {
-      regResult = await result.current.register("new@example.com", "ValidPass1!");
+      regResult = await result.current.register("new@example.com", "ValidPass1!", "mockuser");
     });
 
     expect(regResult!).toBe(true);

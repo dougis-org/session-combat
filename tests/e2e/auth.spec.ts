@@ -413,7 +413,7 @@ test.describe("Auth", () => {
     const email = generateUniqueEmail();
 
     const registerResponse = await context.request.post("/api/auth/register", {
-      data: { email, password: STRONG_PASSWORD },
+      data: { email, password: STRONG_PASSWORD, username: `logout_${Date.now()}` },
     });
     await expect(registerResponse).toBeOK();
 
