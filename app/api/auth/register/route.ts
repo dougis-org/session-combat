@@ -63,15 +63,16 @@ export async function POST(request: NextRequest) {
     let result;
     try {
       result = await usersCollection.insertOne(newUser);
-    } catch (err: any) {
-      if (err.code === 11000) {
-        if (err.keyPattern?.username) {
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: number }).code === 11000) {
+        const mongoErr = err as { code: number; keyPattern?: Record<string, unknown> };
+        if (mongoErr.keyPattern?.username) {
           return NextResponse.json(
             { error: 'Username already taken' },
             { status: 409 }
           );
         }
-        if (err.keyPattern?.email) {
+        if (mongoErr.keyPattern?.email) {
           return NextResponse.json(
             { error: 'User with this email already exists' },
             { status: 409 }
