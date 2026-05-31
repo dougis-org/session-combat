@@ -111,7 +111,11 @@ export function useCombat(options: UseCombatOptions = {}) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    if (!response.ok) throw new Error(method === 'POST' ? 'Failed to create combat state' : 'Failed to update combat state');
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => null);
+      const message = errBody?.error ?? (method === 'POST' ? 'Failed to create combat state' : 'Failed to update combat state');
+      throw new Error(message);
+    }
     return response.json();
   };
 
@@ -126,7 +130,8 @@ export function useCombat(options: UseCombatOptions = {}) {
           serverCombatIdRef.current = saved.id;
           setCombatState(saved);
         } else {
-          await combatFetch('PUT', `/api/combat/${serverCombatIdRef.current}`, state);
+          const updated = await combatFetch('PUT', `/api/combat/${serverCombatIdRef.current}`, state);
+          setCombatState(updated);
         }
       }
     } catch (err) {

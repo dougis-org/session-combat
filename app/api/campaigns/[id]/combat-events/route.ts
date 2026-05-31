@@ -7,7 +7,11 @@ export const GET = withAuthAndParams<{ id: string }>(async (request, auth, { id 
   try {
     const { searchParams } = new URL(request.url);
     const sinceParam = searchParams.get('since');
-    const sinceDate = sinceParam ? new Date(sinceParam) : new Date(0);
+    let sinceDate = new Date(0);
+    if (sinceParam) {
+      const parsed = new Date(sinceParam);
+      if (!isNaN(parsed.getTime())) sinceDate = parsed;
+    }
 
     const db = await getDatabase();
     const docs = await db

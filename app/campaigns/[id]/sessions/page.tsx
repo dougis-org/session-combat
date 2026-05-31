@@ -124,7 +124,7 @@ function SessionForm({
   useEffect(() => {
     if (existing) return;
     const npcEvents = hasParty ? buildNpcEventsFromMemberChanges(allMembers, lastSessionDate) : [];
-    if (!sinceCombatDate) {
+    if (!sinceCombatDate || isNaN(sinceCombatDate.getTime())) {
       setEvents(npcEvents);
       return;
     }

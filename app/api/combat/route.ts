@@ -3,12 +3,14 @@ import { withAuth } from '@/lib/middleware';
 import { getDatabase } from '@/lib/db';
 import { CombatState } from '@/lib/types';
 
-export const GET = withAuth(async (request, auth) => {
+export const GET = withAuth(async (request: NextRequest, auth) => {
   try {
+    const { searchParams } = new URL(request.url);
+    const campaignId = searchParams.get('campaignId') ?? undefined;
     const db = await getDatabase();
     const combatState = await db
       .collection<CombatState>('combatStates')
-      .findOne({ userId: auth.userId, isActive: true });
+      .findOne({ userId: auth.userId, isActive: true, ...(campaignId ? { campaignId } : {}) });
 
     if (!combatState) {
       return NextResponse.json(null);
