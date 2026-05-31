@@ -62,11 +62,17 @@ export async function POST(request: NextRequest) {
       if (userId) {
         const token = generateResetToken();
         const tokenHash = hashToken(token);
-        const resetUrl = `${process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/reset-password?token=${token}`;
+        const baseUrl = (process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+        const resetUrl = `${baseUrl}/reset-password?token=${token}`;
 
         storeResetToken(userId, tokenHash)
           .then(() => sendPasswordResetEmail(trimmedEmail, resetUrl))
-          .catch((err) => console.error('Password reset email failed:', err));
+          .then(() => console.log(`[reset-email] sent userId=${userId}`))
+          .catch((err) => {
+            const status = err?.response?.status ?? err?.status ?? 'unknown';
+            const data = err?.response?.data ?? err?.message ?? String(err);
+            console.error(`[reset-email] failed userId=${userId} status=${status}`, data);
+          });
       }
     }
 

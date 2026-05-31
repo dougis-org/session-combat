@@ -29,6 +29,7 @@ export async function sendPasswordResetEmail(
   await client.send({
     from: { email: fromEmail, name: "Session Combat" },
     to: [{ email: to }],
+    category: "password-reset",
     subject: "Reset your Session Combat password",
     html: `<p>You requested a password reset.</p>
 <p><a href="${resetUrl}">Click here to reset your password</a></p>

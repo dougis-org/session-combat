@@ -38,5 +38,33 @@ describe("lib/email.ts", () => {
       );
       expect(mockSend).not.toHaveBeenCalled();
     });
+
+    it("sends with category password-reset", async () => {
+      process.env.MAILTRAP_TOKEN = "test-token";
+      const { sendPasswordResetEmail } = await import("@/lib/email");
+
+      await sendPasswordResetEmail(RECIPIENT, RESET_URL);
+
+      const call = mockSend.mock.calls[0][0];
+      expect(call.category).toBe("password-reset");
+    });
+
+    it.each([
+      ["custom@example.com", "custom@example.com"],
+      [undefined, "noreply@session-combat.app"],
+    ])(
+      "uses correct sender when MAILTRAP_FROM_EMAIL is %s",
+      async (envVal, expected) => {
+        process.env.MAILTRAP_TOKEN = "test-token";
+        if (envVal) process.env.MAILTRAP_FROM_EMAIL = envVal;
+        else delete process.env.MAILTRAP_FROM_EMAIL;
+
+        const { sendPasswordResetEmail } = await import("@/lib/email");
+        await sendPasswordResetEmail(RECIPIENT, RESET_URL);
+
+        const call = mockSend.mock.calls[0][0];
+        expect(call.from.email).toBe(expected);
+      }
+    );
   });
 });
