@@ -48,6 +48,19 @@ describe("GET /api/combat", () => {
     expect(body.id).toBe("cs-1");
   });
 
+  it("filters by campaignId when provided as query param", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const findOne = jest.fn().mockResolvedValue(null);
+    mockDbCollection(mockedGetDatabase, { findOne });
+
+    const req = makeRouteRequest(`${BASE_URL}?campaignId=camp-1`, "GET");
+    await GET(req);
+
+    expect(findOne).toHaveBeenCalledWith(
+      expect.objectContaining({ campaignId: "camp-1" })
+    );
+  });
+
   itReturns500(
     GET,
     () => makeRequest(),
@@ -63,29 +76,44 @@ describe("POST /api/combat", () => {
 
   itReturns401(POST, () => makeRequest({ combatants: [] }), mockedRequireAuth);
 
-  it("creates new combat state and returns 201", async () => {
+  it("creates new combat state without campaignId and returns 201", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    const updateOne = jest.fn().mockResolvedValue({});
-    mockDbCollection(mockedGetDatabase, { updateOne });
+    const insertOne = jest.fn().mockResolvedValue({});
+    mockDbCollection(mockedGetDatabase, { insertOne });
+
+    const response = await POST(makeRequest({ combatants: [] }));
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.userId).toBe("user-123");
+    expect(body.currentRound).toBe(1);
+    expect(body.isActive).toBe(true);
+    expect(insertOne).toHaveBeenCalledTimes(1);
+  });
+
+  it("creates new combat state with campaignId and returns 201", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const insertOne = jest.fn().mockResolvedValue({});
+    mockDbCollection(mockedGetDatabase, { insertOne });
 
     const response = await POST(
-      makeRequest({ encounterId: "enc-1", combatants: [] })
+      makeRequest({ campaignId: "camp-1", encounterId: "enc-1", combatants: [] })
     );
 
     expect(response.status).toBe(201);
     const body = await response.json();
     expect(body.userId).toBe("user-123");
+    expect(body.campaignId).toBe("camp-1");
     expect(body.encounterId).toBe("enc-1");
     expect(body.currentRound).toBe(1);
     expect(body.isActive).toBe(true);
-    expect(updateOne).toHaveBeenCalledTimes(1);
+    expect(insertOne).toHaveBeenCalledTimes(1);
   });
 
   itReturns500(
     POST,
     () => makeRequest({ combatants: [] }),
     () => mockDbCollection(mockedGetDatabase, {
-      updateOne: jest.fn().mockRejectedValue(new Error("DB error")),
+      insertOne: jest.fn().mockRejectedValue(new Error("DB error")),
     }),
     mockedRequireAuth
   );

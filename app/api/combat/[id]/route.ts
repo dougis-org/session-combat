@@ -44,12 +44,15 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
       );
     }
 
+    const isDeactivating = isActive === false && existingCombatState.isActive === true;
+
     const updatedCombatState: CombatState = {
       ...existingCombatState,
       combatants: combatants !== undefined ? combatants : existingCombatState.combatants,
       currentRound: currentRound !== undefined ? currentRound : existingCombatState.currentRound,
       currentTurnIndex: currentTurnIndex !== undefined ? currentTurnIndex : existingCombatState.currentTurnIndex,
       isActive: isActive !== undefined ? isActive : existingCombatState.isActive,
+      ...(isDeactivating ? { completedAt: new Date() } : {}),
       updatedAt: new Date(),
     };
 

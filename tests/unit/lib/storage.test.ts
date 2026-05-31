@@ -110,6 +110,7 @@ describe("storage", () => {
     const base: CombatState = {
       id: "cs-123",
       userId: "user-456",
+      campaignId: "campaign-1",
       combatants: [],
       currentRound: 1,
       currentTurnIndex: 0,

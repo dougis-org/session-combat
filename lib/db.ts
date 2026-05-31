@@ -18,6 +18,13 @@ let cachedDb: Db | null = null;
  */
 async function initializeDatabase(db: Db): Promise<void> {
   try {
+    // Compound index to support active-combat queries and completed-combat event queries
+    await db.collection("combatStates").createIndex(
+      { userId: 1, campaignId: 1, completedAt: 1 },
+      { background: true }
+    );
+    console.log("Created index on combatStates.{userId,campaignId,completedAt}");
+
     // Create index on deletedAt field for optimal query performance
     // This index accelerates the $match pipeline in the characters_active view
     await db.collection("characters").createIndex({ deletedAt: 1 });

@@ -93,6 +93,7 @@ function SessionForm({
   allMembers,
   hasParty,
   lastSessionDate,
+  sinceCombatDate,
   nextSessionNumber,
   onSave,
   onCancel,
@@ -102,6 +103,7 @@ function SessionForm({
   allMembers: PartyMember[];
   hasParty: boolean;
   lastSessionDate: Date | null;
+  sinceCombatDate: Date | null;
   nextSessionNumber: number;
   onSave: () => void;
   onCancel: () => void;
@@ -120,9 +122,20 @@ function SessionForm({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (existing || !hasParty) return;
-    setEvents(buildNpcEventsFromMemberChanges(allMembers, lastSessionDate));
-  }, [allMembers, hasParty, lastSessionDate, existing]);
+    if (existing) return;
+    const npcEvents = hasParty ? buildNpcEventsFromMemberChanges(allMembers, lastSessionDate) : [];
+    if (!sinceCombatDate || isNaN(sinceCombatDate.getTime())) {
+      setEvents(npcEvents);
+      return;
+    }
+    const since = sinceCombatDate.toISOString();
+    fetch(`/api/campaigns/${campaignId}/combat-events?since=${encodeURIComponent(since)}`)
+      .then(res => res.ok ? res.json() : [])
+      .catch(() => [])
+      .then((combatEvents: SessionEvent[]) => {
+        setEvents([...npcEvents, ...combatEvents]);
+      });
+  }, [allMembers, hasParty, lastSessionDate, sinceCombatDate, campaignId, existing]);
 
   const removeEvent = (index: number) => {
     setEvents(ev => ev.filter((_, i) => i !== index));
@@ -367,6 +380,7 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
   const nextSessionNumber = logs.length > 0
     ? logs[0].sessionNumber + 1
     : 1;
+  const sinceCombatDate = lastSessionDate ?? (context?.campaign?.createdAt ? new Date(context.campaign.createdAt) : null);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -397,6 +411,7 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
             allMembers={context?.allMembers ?? []}
             hasParty={(context?.parties.length ?? 0) > 0}
             lastSessionDate={lastSessionDate}
+            sinceCombatDate={sinceCombatDate}
             nextSessionNumber={nextSessionNumber}
             onSave={handleSaved}
             onCancel={() => { setShowForm(false); setEditingLog(null); }}
