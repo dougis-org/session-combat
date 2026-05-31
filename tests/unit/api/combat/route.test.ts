@@ -48,6 +48,19 @@ describe("GET /api/combat", () => {
     expect(body.id).toBe("cs-1");
   });
 
+  it("filters by campaignId when provided as query param", async () => {
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const findOne = jest.fn().mockResolvedValue(null);
+    mockDbCollection(mockedGetDatabase, { findOne });
+
+    const req = makeRouteRequest(`${BASE_URL}?campaignId=camp-1`, "GET");
+    await GET(req);
+
+    expect(findOne).toHaveBeenCalledWith(
+      expect.objectContaining({ campaignId: "camp-1" })
+    );
+  });
+
   itReturns500(
     GET,
     () => makeRequest(),
@@ -63,16 +76,21 @@ describe("POST /api/combat", () => {
 
   itReturns401(POST, () => makeRequest({ combatants: [] }), mockedRequireAuth);
 
-  it("returns 400 when campaignId is missing", async () => {
+  it("creates new combat state without campaignId and returns 201", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+    const insertOne = jest.fn().mockResolvedValue({});
+    mockDbCollection(mockedGetDatabase, { insertOne });
 
     const response = await POST(makeRequest({ combatants: [] }));
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(201);
     const body = await response.json();
-    expect(body.error).toBe("campaignId is required");
+    expect(body.userId).toBe("user-123");
+    expect(body.currentRound).toBe(1);
+    expect(body.isActive).toBe(true);
+    expect(insertOne).toHaveBeenCalledTimes(1);
   });
 
-  it("creates new combat state and returns 201", async () => {
+  it("creates new combat state with campaignId and returns 201", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const insertOne = jest.fn().mockResolvedValue({});
     mockDbCollection(mockedGetDatabase, { insertOne });
@@ -93,7 +111,7 @@ describe("POST /api/combat", () => {
 
   itReturns500(
     POST,
-    () => makeRequest({ campaignId: "camp-1", combatants: [] }),
+    () => makeRequest({ combatants: [] }),
     () => mockDbCollection(mockedGetDatabase, {
       insertOne: jest.fn().mockRejectedValue(new Error("DB error")),
     }),

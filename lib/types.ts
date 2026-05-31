@@ -507,7 +507,7 @@ export interface CombatState {
   _id?: string;
   id: string;
   userId: string;
-  campaignId: string;
+  campaignId?: string;
   encounterId?: string;
   encounterDescription?: string;
   combatants: CombatantState[];

@@ -38,6 +38,7 @@ export function useCombat(options: UseCombatOptions = {}) {
   const [lairFormSeedMonster, setLairFormSeedMonster] = useState('');
   const setupCombatantsRef = useRef<CombatantState[]>([]);
   const serverCombatIdRef = useRef<string | null>(null);
+  const isCreatingRef = useRef(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -126,9 +127,15 @@ export function useCombat(options: UseCombatOptions = {}) {
       setCombatState(state);
       if (state) {
         if (!serverCombatIdRef.current) {
-          const saved = await combatFetch('POST', '/api/combat', state);
-          serverCombatIdRef.current = saved.id;
-          setCombatState(saved);
+          if (isCreatingRef.current) return;
+          isCreatingRef.current = true;
+          try {
+            const saved = await combatFetch('POST', '/api/combat', state);
+            serverCombatIdRef.current = saved.id;
+            setCombatState(saved);
+          } finally {
+            isCreatingRef.current = false;
+          }
         } else {
           const updated = await combatFetch('PUT', `/api/combat/${serverCombatIdRef.current}`, state);
           setCombatState(updated);
@@ -266,11 +273,6 @@ export function useCombat(options: UseCombatOptions = {}) {
     }
 
     const encounter = selectedEncounterId ? encounters.find(e => e.id === selectedEncounterId) : undefined;
-
-    if (!campaignId) {
-      setError('Campaign ID is required to start combat');
-      return;
-    }
 
     const newState: CombatState = {
       id: crypto.randomUUID(),

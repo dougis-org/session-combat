@@ -460,4 +460,79 @@ describe('useCombat', () => {
       expect(updatedLair.initiativeRoll).toBeUndefined();
     });
   });
+
+  test('saveCombatState surfaces server error message from response body', async () => {
+    const fetchMock = jest.fn(async (url: string, options?: RequestInit) => {
+      if (options?.method === 'POST') {
+        return { ok: false, json: async () => ({ error: 'Server says no' }) };
+      }
+      return { ok: true, json: async () => null };
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { result, unmount } = renderHook();
+    await act(async () => { await Promise.resolve(); });
+
+    await act(async () => {
+      await result.current.saveCombatState(makeCombatState([makeCombatant('c1', 'Rogue', 'player')]));
+    });
+
+    expect(result.current.error).toBe('Server says no');
+    unmount();
+  });
+
+  test('saveCombatState ignores concurrent POST when creation already in flight', async () => {
+    let resolveFirst!: (v: unknown) => void;
+    const firstPost = new Promise(res => { resolveFirst = res; });
+    let postCount = 0;
+
+    global.fetch = jest.fn(async (url: string, options?: RequestInit) => {
+      if (options?.method === 'POST') {
+        postCount++;
+        await firstPost;
+        return { ok: true, json: async () => makeCombatState([]) };
+      }
+      return { ok: true, json: async () => null };
+    }) as unknown as typeof fetch;
+
+    const { result, unmount } = renderHook();
+    await act(async () => { await Promise.resolve(); });
+
+    const state = makeCombatState([makeCombatant('c1', 'Wizard', 'player')]);
+
+    // Fire two concurrent saves before the first POST resolves
+    act(() => {
+      result.current.saveCombatState(state);
+      result.current.saveCombatState(state);
+    });
+
+    resolveFirst(undefined);
+    await act(async () => { await Promise.resolve(); });
+
+    expect(postCount).toBe(1);
+    unmount();
+  });
+
+  test('saveCombatState updates local state from PUT response', async () => {
+    const serverUpdated = { ...makeCombatState([makeCombatant('c1', 'Bard', 'player')]), currentRound: 99 };
+    global.fetch = jest.fn(async (url: string, options?: RequestInit) => {
+      if (options?.method === 'POST') return { ok: true, json: async () => makeCombatState([makeCombatant('c1', 'Bard', 'player')]) };
+      if (options?.method === 'PUT') return { ok: true, json: async () => serverUpdated };
+      return { ok: true, json: async () => null };
+    }) as unknown as typeof fetch;
+
+    const { result, unmount } = renderHook();
+    await act(async () => { await Promise.resolve(); });
+
+    await act(async () => {
+      await result.current.saveCombatState(makeCombatState([makeCombatant('c1', 'Bard', 'player')]));
+    });
+
+    await act(async () => {
+      await result.current.saveCombatState({ ...makeCombatState([makeCombatant('c1', 'Bard', 'player')]), currentRound: 2 });
+    });
+
+    expect(result.current.combatState?.currentRound).toBe(99);
+    unmount();
+  });
 });

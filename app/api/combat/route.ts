@@ -31,13 +31,6 @@ export const POST = withAuth(async (request, auth) => {
     const body = await request.json();
     const { campaignId, encounterId, encounterDescription, combatants, currentRound, currentTurnIndex } = body;
 
-    if (!campaignId) {
-      return NextResponse.json(
-        { error: 'campaignId is required' },
-        { status: 400 }
-      );
-    }
-
     const combatState: CombatState = {
       id: crypto.randomUUID(),
       userId: auth.userId,
