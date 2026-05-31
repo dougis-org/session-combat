@@ -94,6 +94,7 @@ function makeCombatState(combatants: CombatantState[]): CombatState {
   return {
     id: 'combat-1',
     userId: 'u1',
+    campaignId: 'campaign-1',
     encounterId: undefined,
     encounterDescription: undefined,
     combatants,
@@ -135,7 +136,13 @@ function createFetchMock({
 } = {}) {
   const mock = jest.fn(async (url: string, options?: RequestInit) => {
     if (url === '/api/combat' && options?.method === 'POST') {
-      return response({ ok: true });
+      const body = JSON.parse(options?.body as string);
+      return response(body);
+    }
+
+    if (url.match(/^\/api\/combat\/[^/]+$/) && options?.method === 'PUT') {
+      const body = JSON.parse(options?.body as string);
+      return response(body);
     }
 
     if (url === '/api/encounters') return response(encounters);
@@ -151,14 +158,14 @@ function createFetchMock({
   return mock;
 }
 
-function renderHook() {
+function renderHook(options?: Parameters<typeof useCombat>[0]) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
   const resultRef: { current: HookResult } = { current: undefined as unknown as HookResult };
 
   function Probe() {
-    const value = useCombat();
+    const value = useCombat(options);
     React.useEffect(() => {
       resultRef.current = value;
     }, [value]);
@@ -189,13 +196,23 @@ function getPostCallCount(fetchMock: jest.Mock) {
   return fetchMock.mock.calls.filter(([, opts]: [string, RequestInit?]) => opts?.method === 'POST').length;
 }
 
+function getLastPutBody(fetchMock: jest.Mock) {
+  const putCalls = fetchMock.mock.calls.filter(([, opts]: [string, RequestInit?]) => opts?.method === 'PUT');
+  return JSON.parse(String(putCalls[putCalls.length - 1][1]?.body));
+}
+
+function getPutCallCount(fetchMock: jest.Mock) {
+  return fetchMock.mock.calls.filter(([, opts]: [string, RequestInit?]) => opts?.method === 'PUT').length;
+}
+
 // Shared helper to drastically reduce duplication and complexity
 async function testHook(
   callback: (result: { current: HookResult }, fetchMock: jest.Mock) => void | Promise<void>,
-  initialFetchData?: Parameters<typeof createFetchMock>[0]
+  initialFetchData?: Parameters<typeof createFetchMock>[0],
+  hookOptions?: Parameters<typeof useCombat>[0]
 ) {
   const fetchMock = createFetchMock(initialFetchData);
-  const { result, unmount } = renderHook();
+  const { result, unmount } = renderHook(hookOptions);
 
   await act(async () => {
     await Promise.resolve();
@@ -296,7 +313,7 @@ describe('useCombat', () => {
     });
   });
 
-  test('confirmAddLair in active phase posts updated combat state', async () => {
+  test('confirmAddLair in active phase puts updated combat state', async () => {
     await testHook(async (result, fetchMock) => {
       await act(async () => {
         await result.current.saveCombatState(makeCombatState([makeCombatant('c1', 'Fighter', 'player')]));
@@ -307,11 +324,12 @@ describe('useCombat', () => {
         result.current.setLairFormName('Crypt Lair');
       });
 
-      act(() => {
+      await act(async () => {
         result.current.confirmAddLair();
+        await Promise.resolve();
       });
 
-      const lastBody = getLastPostBody(fetchMock);
+      const lastBody = getLastPutBody(fetchMock);
       expect(lastBody.combatants.some((c: CombatantState) => c.type === 'lair' && c.name === 'Crypt Lair')).toBe(true);
     });
   });
@@ -327,17 +345,19 @@ describe('useCombat', () => {
     });
   });
 
-  test('addCombatantFromLibrary routes to active combat and posts', async () => {
+  test('addCombatantFromLibrary routes to active combat and updates via PUT', async () => {
     await testHook(async (result, fetchMock) => {
       await act(async () => {
         await result.current.saveCombatState(makeCombatState([makeCombatant('c1', 'Cleric', 'player')]));
       });
 
-      act(() => {
+      await act(async () => {
         result.current.addCombatantFromLibrary({ name: 'Bandit', hp: 11, maxHp: 11, ac: 12 } as never, 'monster', 'monster');
+        await Promise.resolve();
       });
 
-      expect(getPostCallCount(fetchMock)).toBeGreaterThanOrEqual(2);
+      expect(getPostCallCount(fetchMock)).toBe(1);
+      expect(getPutCallCount(fetchMock)).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -353,7 +373,7 @@ describe('useCombat', () => {
       expect(getPostCallCount(fetchMock)).toBeGreaterThanOrEqual(1);
     }, {
       characters: [{ id: 'ch1', name: 'Aria', hp: 12, maxHp: 12, ac: 14 }],
-    });
+    }, { campaignId: 'campaign-1' });
   });
 
   test('endCombat clears active combat and resets setup state when confirmed', async () => {
@@ -364,7 +384,10 @@ describe('useCombat', () => {
 
       act(() => {
         result.current.addCombatantToSetup(makeCombatant('s1', 'Scout', 'monster'));
-        result.current.endCombat();
+      });
+
+      await act(async () => {
+        await result.current.endCombat();
       });
 
       expect(result.current.combatState).toBeNull();
@@ -382,12 +405,15 @@ describe('useCombat', () => {
         ]));
       });
 
-      const postCallsBefore = getPostCallCount(fetchMock);
+      const putCallsBefore = getPutCallCount(fetchMock);
 
-      act(() => { result.current.nextTurn(); });
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
 
-      const lastBody = getLastPostBody(fetchMock);
-      expect(getPostCallCount(fetchMock)).toBeGreaterThan(postCallsBefore);
+      const lastBody = getLastPutBody(fetchMock);
+      expect(getPutCallCount(fetchMock)).toBeGreaterThan(putCallsBefore);
       expect(lastBody.currentTurnIndex).toBe(1);
       expect(lastBody.currentRound).toBe(1);
     });
@@ -399,9 +425,12 @@ describe('useCombat', () => {
         await result.current.saveCombatState(makeCombatState([makeCombatant('c1', 'Fighter', 'player')]));
       });
 
-      act(() => { result.current.nextTurn(); });
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
 
-      const lastBody = getLastPostBody(fetchMock);
+      const lastBody = getLastPutBody(fetchMock);
       expect(lastBody.currentTurnIndex).toBe(0);
       expect(lastBody.currentRound).toBe(2);
     });
@@ -416,9 +445,12 @@ describe('useCombat', () => {
         await result.current.saveCombatState(makeCombatState([fighter, lair]));
       });
 
-      act(() => { result.current.rollInitiative(); });
+      await act(async () => {
+        result.current.rollInitiative();
+        await Promise.resolve();
+      });
 
-      const lastBody = getLastPostBody(fetchMock);
+      const lastBody = getLastPutBody(fetchMock);
 
       const updatedFighter = lastBody.combatants.find((c: CombatantState) => c.id === 'c1');
       expect(updatedFighter.initiativeRoll).toBeDefined();

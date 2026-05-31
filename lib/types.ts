@@ -507,12 +507,14 @@ export interface CombatState {
   _id?: string;
   id: string;
   userId: string;
+  campaignId: string;
   encounterId?: string;
   encounterDescription?: string;
   combatants: CombatantState[];
   currentRound: number;
   currentTurnIndex: number;
   isActive: boolean;
+  completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -596,6 +598,11 @@ export interface SessionEvent {
   characterId?: string;
   characterName?: string;
   timestamp?: Date;
+  encounterId?: string;
+  encounterDescription?: string;
+  rounds?: number;
+  completedAt?: Date;
+  campaignId?: string;
 }
 
 export interface SessionLog {

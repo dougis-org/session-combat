@@ -26,6 +26,7 @@ export function makeCombatState(overrides: Partial<CombatState> = {}): CombatSta
   return {
     id: 'combat-1',
     userId: 'user-1',
+    campaignId: 'campaign-1',
     combatants: [],
     currentRound: 1,
     currentTurnIndex: 0,

@@ -7,7 +7,12 @@ import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
 import { pushHpHistory, popHpHistory, getHpHistoryStack, clearCombatHistory } from '@/lib/utils/hpHistory';
 
-export function useCombat() {
+export interface UseCombatOptions {
+  campaignId?: string;
+}
+
+export function useCombat(options: UseCombatOptions = {}) {
+  const { campaignId } = options;
   const [combatState, setCombatState] = useState<CombatState | null>(null);
   const [encounters, setEncounters] = useState<Encounter[]>([]);
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -32,6 +37,7 @@ export function useCombat() {
   const [lairFormName, setLairFormName] = useState('');
   const [lairFormSeedMonster, setLairFormSeedMonster] = useState('');
   const setupCombatantsRef = useRef<CombatantState[]>([]);
+  const serverCombatIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -61,6 +67,7 @@ export function useCombat() {
         setCharacters(charactersData || []);
         setMonsterTemplates(monstersData || []);
         setCombatState(combatData || null);
+        serverCombatIdRef.current = combatData?.id ?? null;
         setParties(partiesData || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
@@ -98,18 +105,29 @@ export function useCombat() {
     setupCombatantsRef.current = setupCombatants;
   }, [setupCombatants]);
 
+  const combatFetch = async (method: 'POST' | 'PUT', url: string, body: unknown): Promise<CombatState> => {
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) throw new Error(method === 'POST' ? 'Failed to create combat state' : 'Failed to update combat state');
+    return response.json();
+  };
+
   const saveCombatState = async (state: CombatState | null) => {
     const prev = combatState;
     try {
       setError(null);
       setCombatState(state);
       if (state) {
-        const response = await fetch('/api/combat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(state),
-        });
-        if (!response.ok) throw new Error('Failed to save combat state');
+        if (!serverCombatIdRef.current) {
+          const saved = await combatFetch('POST', '/api/combat', state);
+          serverCombatIdRef.current = saved.id;
+          setCombatState(saved);
+        } else {
+          await combatFetch('PUT', `/api/combat/${serverCombatIdRef.current}`, state);
+        }
       }
     } catch (err) {
       setCombatState(prev);
@@ -244,9 +262,15 @@ export function useCombat() {
 
     const encounter = selectedEncounterId ? encounters.find(e => e.id === selectedEncounterId) : undefined;
 
+    if (!campaignId) {
+      setError('Campaign ID is required to start combat');
+      return;
+    }
+
     const newState: CombatState = {
       id: crypto.randomUUID(),
       userId: '',
+      campaignId,
       encounterId: selectedEncounterId || undefined,
       encounterDescription: encounter?.description,
       combatants,
@@ -266,12 +290,19 @@ export function useCombat() {
     startCombatWithSetupCombatants();
   };
 
-  const endCombat = () => {
-    if (confirm('Are you sure you want to end combat?')) {
-      if (combatState) clearCombatHistory(combatState.id);
-      saveCombatState(null);
+  const endCombat = async () => {
+    if (!confirm('Are you sure you want to end combat?')) return;
+    if (!combatState || !serverCombatIdRef.current) return;
+    try {
+      setError(null);
+      await combatFetch('PUT', `/api/combat/${serverCombatIdRef.current}`, { isActive: false });
+      serverCombatIdRef.current = null;
+      clearCombatHistory(combatState.id);
+      setCombatState(null);
       setSetupCombatants([]);
       setSelectedPartyId(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to end combat');
     }
   };
 
@@ -527,7 +558,7 @@ export interface UseCombatReturn {
   addCombatantFromLibrary: (item: Monster | Character, type: 'player' | 'monster', idPrefix: 'character' | 'monster') => void;
   startCombatWithSetupCombatants: () => void;
   startCombat: () => void;
-  endCombat: () => void;
+  endCombat: () => Promise<void>;
   restartRound: () => void;
   rollInitiative: () => void;
   nextTurn: () => void;

@@ -30,6 +30,7 @@ import { useCombat } from '@/lib/hooks/useCombat';
 const MOCK_COMBAT_STATE: CombatState = {
   id: 'combat-1',
   userId: 'user-1',
+  campaignId: 'campaign-1',
   combatants: [],
   currentRound: 1,
   currentTurnIndex: 0,
