@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { act } from 'react';
-import { describe, test, expect, jest } from '@jest/globals';
 import { createRoot } from 'react-dom/client';
 import { CharactersContent } from '@/app/characters/page';
 import { setupUiTest, clickButton } from '@/tests/unit/helpers/uiTestSetup';

@@ -2,8 +2,6 @@
  * @jest-environment jsdom
  */
 
-import { jest, describe, it, expect } from '@jest/globals';
-
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({ children, href, ...rest }: { children: React.ReactNode; href: string; [k: string]: unknown }) =>

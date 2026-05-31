@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { act } from 'react';
-import { describe, test, expect, afterEach } from '@jest/globals';
 import { CharacterMiniSummary } from '@/lib/components/CharacterMiniSummary';
 import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
 import type { Root } from 'react-dom/client';

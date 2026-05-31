@@ -1,13 +1,5 @@
 /** @jest-environment jsdom */
 
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  jest,
-  test,
-} from "@jest/globals";
 import React from "react";
 import { act } from "react";
 import { createRoot, Root } from "react-dom/client";

@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { act } from 'react';
-import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import type { CombatantState } from '@/lib/types';
 import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';

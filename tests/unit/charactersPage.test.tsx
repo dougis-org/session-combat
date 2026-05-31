@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { act } from 'react';
-import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import { CharactersContent } from '@/app/characters/page';

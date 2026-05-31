@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { act } from 'react';
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { Root, createRoot } from 'react-dom/client';
 import { CampaignChapterInfo } from '@/lib/components/CampaignChapterInfo';
 

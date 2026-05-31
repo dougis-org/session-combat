@@ -1,4 +1,3 @@
-import { describe, test, expect } from '@jest/globals';
 import { getExpiringConditions, tickConditions, processRoundEnd } from '@/lib/combat/conditionExpiry';
 import { CombatantState } from '@/lib/types';
 

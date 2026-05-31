@@ -1,4 +1,3 @@
-import { describe, test, expect } from '@jest/globals';
 import { applyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects } from '@/lib/utils/combat';
 import type { ActiveDamageEffect } from '@/lib/types';
 

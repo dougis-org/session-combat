@@ -1,6 +1,5 @@
 /** @jest-environment jsdom */
 
-import { beforeEach, describe, expect, jest, test } from "@jest/globals";
 
 import { SESSION_COMBAT_PREFIX } from "@/lib/offline/LocalStore";
 import { SyncQueue } from "@/lib/offline/SyncQueue";
@@ -136,7 +135,7 @@ describe("SyncQueue", () => {
 
     const syncFn: jest.MockedFunction<(operation: unknown) => Promise<void>> =
       jest
-        .fn<(_operation: unknown) => Promise<void>>()
+        .fn<Promise<void>, [unknown]>()
         .mockRejectedValueOnce(new Error("first failure"))
         .mockResolvedValueOnce(undefined);
 

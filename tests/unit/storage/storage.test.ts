@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-import { describe, test, expect, jest, beforeEach } from "@jest/globals";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
 import { GLOBAL_USER_ID } from "@/lib/constants";
@@ -15,10 +14,10 @@ const mockedGetDatabase = jest.mocked(getDatabase);
 
 // Per-collection mock factories
 function makeMockCollection() {
-  const toArray = jest.fn<() => Promise<unknown[]>>();
+  const toArray = jest.fn<Promise<unknown[]>, []>();
   const find = jest.fn(() => ({ toArray }));
-  const updateOne = jest.fn<() => Promise<unknown>>();
-  const updateMany = jest.fn<() => Promise<unknown>>();
+  const updateOne = jest.fn<Promise<unknown>, []>();
+  const updateMany = jest.fn<Promise<unknown>, []>();
   return { find, toArray, updateOne, updateMany };
 }
 
@@ -278,7 +277,7 @@ describe("storage.saveParty", () => {
   let mockCollection: jest.Mock;
 
   beforeEach(() => {
-    updateOne = jest.fn<() => Promise<unknown>>().mockResolvedValue({
+    updateOne = jest.fn<Promise<unknown>, []>().mockResolvedValue({
       matchedCount: 1,
       modifiedCount: 1,
       upsertedId: null,

@@ -3,7 +3,6 @@
  */
 (globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
-import { jest, describe, it, expect } from '@jest/globals';
 import React from 'react';
 import { act } from 'react';
 import { setupUiTest, renderComponent, mockFetch, mockPendingFetch, dispatchFormSubmit, jsonResponse } from '../helpers/uiTestSetup';

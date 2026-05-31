@@ -43,7 +43,11 @@ All work in this repository must follow this specific process:
 - Keep commits focused and atomic
 - Ensure all tests pass before submitting a pull request
 
-### Testing Guidance: Mocks vs Integration
+### Testing Guidance
+
+For jest setup conventions and the import pattern all test files must follow, see [docs/TESTING.md](docs/TESTING.md).
+
+#### Mocks vs Integration
 
 **We prefer integration tests using Testcontainers over complex mocks.**
 

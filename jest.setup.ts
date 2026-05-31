@@ -1,4 +1,7 @@
+// Augment global jest namespace (used by tests that rely on Jest's auto-injected globals)
+// Augment @jest/globals module (safety net; ESLint gate prevents its use, but types must resolve if present)
 import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/jest-globals';
 import { webcrypto } from 'crypto';
 
 (globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;

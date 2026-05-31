@@ -4,7 +4,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, test, expect } from '@jest/globals';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 
 const BASE_ABILITY_SCORES = {
