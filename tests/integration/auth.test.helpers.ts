@@ -4,6 +4,7 @@
  */
 
 import fetch, { RequestInit, Response } from "node-fetch";
+import { randomUUID } from "node:crypto";
 
 // ============================================================================
 // Test Data Constants
@@ -64,7 +65,7 @@ export const VALID_PASSWORDS = [
  */
 export function createTestEmail(prefix = "user"): string {
   const timestamp = Date.now();
-  const random = Math.random().toString(36).slice(2, 11);
+  const random = randomUUID().replace(/[^a-z0-9]/g, "").slice(0, 9);
   return `${prefix}-${timestamp}-${random}@example.com`;
 }
 
@@ -282,7 +283,7 @@ export function assertResponseStatus(
  */
 export function createTestUsername(prefix = "usr"): string {
   const timestamp = Date.now() % 1000000;
-  const random = Math.random().toString(36).slice(2, 6);
+  const random = randomUUID().replace(/[^a-z0-9]/g, "").slice(0, 4);
   const sanitizedPrefix = prefix.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 8);
   const candidate = `${sanitizedPrefix}_${timestamp}_${random}`;
   return candidate.slice(0, 20);
