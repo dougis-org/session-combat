@@ -71,9 +71,9 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Open PR from `feat/username-validation-and-registration` to `main`. PR body must include `Closes #301`.
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
 - [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll for check status autonomously using `gh pr checks <PR-URL> --json isRequired,state`; when any **required (blocking)** CI check fails, diagnose and fix the failure, commit fixes, follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until all required checks pass
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
+- [x] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll for check status autonomously using `gh pr checks <PR-URL> --json isRequired,state`; when any **required (blocking)** CI check fails, diagnose and fix the failure, commit fixes, follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until all required checks pass
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
 
 Ownership metadata:
 
@@ -89,17 +89,17 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/`:
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/`:
   - Add `openspec/specs/username-validation/spec.md`
   - Add `openspec/specs/username-registration/spec.md`
   - Update `openspec/specs/auth-me/spec.md` (or create if absent)
-- [ ] Archive the change: move `openspec/changes/username-validation-and-registration/` to `openspec/changes/archive/YYYY-MM-DD-username-validation-and-registration/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-username-validation-and-registration/` exists and `openspec/changes/username-validation-and-registration/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-username-validation-and-registration` then `git push -u origin doc/archive-YYYY-MM-DD-username-validation-and-registration`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive username-validation-and-registration (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor the doc PR until it merges
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/username-validation-and-registration doc/archive-YYYY-MM-DD-username-validation-and-registration`
+- [x] Archive the change: move `openspec/changes/username-validation-and-registration/` to `openspec/changes/archive/YYYY-MM-DD-username-validation-and-registration/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-username-validation-and-registration/` exists and `openspec/changes/username-validation-and-registration/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-username-validation-and-registration` then `git push -u origin doc/archive-YYYY-MM-DD-username-validation-and-registration`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive username-validation-and-registration (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor the doc PR until it merges
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/username-validation-and-registration doc/archive-YYYY-MM-DD-username-validation-and-registration`
