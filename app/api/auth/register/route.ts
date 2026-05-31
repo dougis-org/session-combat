@@ -8,16 +8,17 @@ import {
 } from '@/lib/auth';
 import { setAuthCookie } from '@/lib/middleware';
 import { User } from '@/lib/types';
+import { validateUsername } from '@/lib/validation/username';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const { email, password, username } = body;
 
     // Validate input
-    if (!email || !password) {
+    if (!email || !password || !username) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: 'Email, password and username are required' },
         { status: 400 }
       );
     }
@@ -37,29 +38,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const db = await getDatabase();
-    const usersCollection = db.collection<User>('users');
-
-    // Check if user already exists
-    const existingUser = await usersCollection.findOne({ email });
-    if (existingUser) {
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.valid) {
       return NextResponse.json(
-        { error: 'User with this email already exists' },
-        { status: 409 }
+        { error: 'Username does not meet requirements', details: usernameValidation.errors },
+        { status: 400 }
       );
     }
+
+    const db = await getDatabase();
+    const usersCollection = db.collection<User>('users');
 
     // Hash password and create user
     const passwordHash = await hashPassword(password);
     const newUser: User = {
       email,
+      username,
       passwordHash,
       tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const result = await usersCollection.insertOne(newUser);
+    let result;
+    try {
+      result = await usersCollection.insertOne(newUser);
+    } catch (err: any) {
+      if (err.code === 11000) {
+        if (err.keyPattern?.username) {
+          return NextResponse.json(
+            { error: 'Username already taken' },
+            { status: 409 }
+          );
+        }
+        if (err.keyPattern?.email) {
+          return NextResponse.json(
+            { error: 'User with this email already exists' },
+            { status: 409 }
+          );
+        }
+      }
+      throw err;
+    }
+    
     const userId = result.insertedId.toString();
 
     // Generate token
@@ -67,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     // Create response with cookie
     const response = NextResponse.json(
-      { userId, email, message: 'User registered successfully' },
+      { userId, email, username, message: 'User registered successfully' },
       { status: 201 }
     );
     setAuthCookie(response, token);

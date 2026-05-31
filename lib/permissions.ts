@@ -19,7 +19,7 @@ export async function getUserById(userId: string): Promise<Record<string, unknow
   const id = new ObjectId(userId);
   return db.collection('users').findOne(
     { _id: { $eq: id } },
-    { projection: { email: 1, tokenVersion: 1, isAdmin: 1 } }
+    { projection: { email: 1, tokenVersion: 1, isAdmin: 1, username: 1 } }
   );
 }
 

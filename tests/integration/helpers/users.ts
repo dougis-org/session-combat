@@ -4,13 +4,13 @@ import { createTestUser } from "@/tests/integration/auth.test.helpers";
 export async function registerTestUser(
   baseUrl: string,
   prefix = "user",
-): Promise<{ email: string; password: string; cookie: string; userId: string }> {
-  const { email, password } = createTestUser(prefix);
+): Promise<{ email: string; password: string; cookie: string; userId: string; username: string }> {
+  const { email, password, username } = createTestUser(prefix);
 
   const response = await fetch(`${baseUrl}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, username }),
   });
 
   if (response.status !== 201) {
@@ -19,7 +19,7 @@ export async function registerTestUser(
     );
   }
 
-  const data = (await response.json()) as { userId: string; email: string };
+  const data = (await response.json()) as { userId: string; email: string; username: string };
 
   const rawHeaders = (response.headers as unknown as {
     raw?: () => Record<string, string[]>;
@@ -35,5 +35,5 @@ export async function registerTestUser(
     cookieHeader = single.split(";")[0].trim();
   }
 
-  return { email, password, cookie: cookieHeader, userId: data.userId };
+  return { email, password, cookie: cookieHeader, userId: data.userId, username: data.username };
 }

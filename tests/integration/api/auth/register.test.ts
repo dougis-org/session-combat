@@ -1,4 +1,5 @@
 import {
+  apiCall,
   createTestEmail,
   createTestUser,
   registerUser,
@@ -119,6 +120,93 @@ describe("POST /api/auth/register - Integration Tests", () => {
 
     responses.forEach((response) => {
       expect(response.status).toBe(201);
+    });
+  });
+
+  describe("Username Validation", () => {
+    it("should accept valid registration with username", async () => {
+      const email = createTestEmail("withusername");
+      const username = "dougreg42";
+      const response = await registerUser(baseUrl, email, VALID_PASSWORD, username);
+      const data = await assertSuccessResponse<{ userId: string; email: string; username: string }>(
+        response,
+        201,
+      );
+
+      expect(data.userId).toBeDefined();
+      expect(data.email).toBe(email);
+      expect(data.username).toBe(username);
+
+      // Verify DB storage
+      const { getDatabase } = await import("@/lib/db");
+      const db = await getDatabase();
+      const user = await db.collection("users").findOne({ email });
+      expect(user).not.toBeNull();
+      expect(user?.username).toBe(username);
+    });
+
+    it("should return 400 when username is missing", async () => {
+      const email = createTestEmail("missingusername");
+      // Use apiCall directly to bypass the helper's default username generator
+      const response = await apiCall(baseUrl, "/api/auth/register", {
+        body: { email, password: VALID_PASSWORD }
+      });
+      const data = await assertErrorResponse(response, 400);
+      expect(data.error).toContain("required");
+    });
+
+    it("should return 400 when username is too short", async () => {
+      const email = createTestEmail("shortusername");
+      const response = await registerUser(baseUrl, email, VALID_PASSWORD, "ab");
+      const data = await assertErrorResponse(response, 400);
+      expect(data.error).toContain("Username does not meet requirements");
+    });
+
+    it("should return 400 when username is a reserved word", async () => {
+      const email = createTestEmail("reservedusername");
+      const response = await registerUser(baseUrl, email, VALID_PASSWORD, "Admin");
+      await assertErrorResponse(response, 400);
+    });
+
+    it("should return 409 when username is already taken", async () => {
+      const email1 = createTestEmail("user1");
+      const email2 = createTestEmail("user2");
+      const username = "taken42";
+
+      // Register first user
+      const resp1 = await registerUser(baseUrl, email1, VALID_PASSWORD, username);
+      expect(resp1.status).toBe(201);
+
+      // Try registering second user with same username
+      const resp2 = await registerUser(baseUrl, email2, VALID_PASSWORD, username);
+      const data = await assertErrorResponse(resp2, 409);
+      expect(data.error).toContain("already taken");
+    });
+
+    it("should accept the same username in different casing", async () => {
+      const email1 = createTestEmail("casing1");
+      const email2 = createTestEmail("casing2");
+
+      const resp1 = await registerUser(baseUrl, email1, VALID_PASSWORD, "DougCasing42");
+      expect(resp1.status).toBe(201);
+
+      const resp2 = await registerUser(baseUrl, email2, VALID_PASSWORD, "dougcasing42");
+      expect(resp2.status).toBe(201);
+    });
+
+    it("should return distinct conflict message for duplicate email vs duplicate username", async () => {
+      const email = createTestEmail("uniqueemail");
+      const username1 = "uniq1";
+      const username2 = "uniq2";
+
+      // Register first user
+      const resp1 = await registerUser(baseUrl, email, VALID_PASSWORD, username1);
+      expect(resp1.status).toBe(201);
+
+      // Register second user with same email but different username
+      const resp2 = await registerUser(baseUrl, email, VALID_PASSWORD, username2);
+      const data = await assertErrorResponse(resp2, 409);
+      expect(data.error).toContain("email already exists");
     });
   });
 });

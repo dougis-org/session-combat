@@ -27,7 +27,7 @@ describe("API Integration Tests", () => {
     const response = await fetch(`${baseUrl}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password: "testPassword123!" }),
+      body: JSON.stringify({ email, password: "testPassword123!", username: "regtestuser" }),
     });
     expect(response.status).toBe(201);
   });

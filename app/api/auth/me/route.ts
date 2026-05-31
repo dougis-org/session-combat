@@ -4,9 +4,11 @@ import { getUserById } from '@/lib/permissions';
 
 export const GET = withAuth(async (request, auth) => {
   let isAdmin = false;
+  let username: string | undefined = undefined;
   try {
     const user = await getUserById(auth.userId);
     isAdmin = user?.['isAdmin'] === true;
+    username = user?.['username'] as string | undefined;
   } catch (error) {
     console.error('Error fetching user admin status:', error);
   }
@@ -16,7 +18,8 @@ export const GET = withAuth(async (request, auth) => {
       authenticated: true,
       userId: auth.userId,
       email: auth.email,
-      isAdmin
+      isAdmin,
+      username
     },
     { status: 200 }
   );

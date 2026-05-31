@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const { register, loading, error, isAuthenticated } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [formError, setFormError] = useState('');
@@ -61,6 +62,32 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!username.trim()) {
+      setFormError('Username is required');
+      return;
+    }
+
+    if (username.length < 4) {
+      setFormError('Username must be at least 4 characters long');
+      return;
+    }
+
+    if (username.length > 20) {
+      setFormError('Username must be at most 20 characters long');
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      setFormError('Username can only contain alphanumeric characters, underscores, and hyphens');
+      return;
+    }
+
+    const reservedWords = ['admin', 'root', 'system', 'support', 'moderator', 'api', 'null', 'undefined'];
+    if (reservedWords.includes(username.toLowerCase())) {
+      setFormError('This username is reserved and cannot be used');
+      return;
+    }
+
     if (!password) {
       setFormError('Password is required');
       return;
@@ -76,7 +103,7 @@ export default function RegisterPage() {
       return;
     }
 
-    const success = await register(email, password);
+    const success = await register(email, password, username);
     if (success) {
       router.replace('/campaigns');
       return;
@@ -93,6 +120,22 @@ export default function RegisterPage() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Username Input */}
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
+              Username
+            </label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username (4-20 chars)"
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
+              disabled={loading}
+            />
+          </div>
+
           {/* Email Input */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">

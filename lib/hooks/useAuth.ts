@@ -51,14 +51,14 @@ export function useAuth() {
   }, [checkAuth, pathname]);
 
   // Register function
-  const register = useCallback(async (email: string, password: string) => {
+  const register = useCallback(async (email: string, password: string, username: string) => {
     try {
       setLoading(true);
       setError(null);
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, username }),
       });
 
       const data = await response.json();
