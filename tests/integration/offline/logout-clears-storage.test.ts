@@ -33,6 +33,7 @@ describe("logout clears storage integration", () => {
   let container: HTMLDivElement;
   let root: Root;
   let logoutFn: (() => Promise<void>) | null = null;
+  let originalFetch: typeof globalThis.fetch;
 
   beforeEach(() => {
     (
@@ -40,20 +41,15 @@ describe("logout clears storage integration", () => {
     ).IS_REACT_ACT_ENVIRONMENT = true;
     localStorage.clear();
     replaceMock.mockReset();
+    logoutFn = null;
 
-    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+    originalFetch = globalThis.fetch;
+    globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = input.toString();
       if (url.endsWith("/api/auth/logout")) {
-        return {
-          ok: true,
-          json: async () => ({}),
-        } as Response;
+        return { ok: true, json: async () => ({}) } as Response;
       }
-
-      return {
-        ok: false,
-        json: async () => ({}),
-      } as Response;
+      return { ok: false, json: async () => ({}) } as Response;
     }) as typeof fetch;
 
     container = document.createElement("div");
@@ -61,12 +57,16 @@ describe("logout clears storage integration", () => {
     root = createRoot(container);
   });
 
-  afterEach(() => {
-    act(() => {
-      root.unmount();
-    });
-    container.remove();
-    jest.restoreAllMocks();
+  afterEach(async () => {
+    try {
+      await act(async () => {
+        root.unmount();
+      });
+    } finally {
+      container.remove();
+      globalThis.fetch = originalFetch;
+      jest.restoreAllMocks();
+    }
   });
 
   test("logout removes sessionCombat:v1:* keys and sessionData but keeps unrelated keys", async () => {
@@ -123,7 +123,7 @@ describe("logout clears storage integration", () => {
       return null;
     }
 
-    global.fetch = jest.fn(async () => {
+    globalThis.fetch = jest.fn(async () => {
       throw new Error("network down");
     }) as typeof fetch;
 
