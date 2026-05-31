@@ -14,46 +14,12 @@ jest.mock('next/navigation', () => ({
 }));
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CombatantCard } from '@/lib/components/CombatantCard';
 import type { CombatantState } from '@/lib/types';
-
-const BASE: CombatantState = {
-  id: 'c1',
-  name: 'Test Fighter',
-  type: 'player',
-  initiative: 10,
-  conditions: [],
-  hp: 30,
-  maxHp: 30,
-  ac: 15,
-  abilityScores: {
-    strength: 10,
-    dexterity: 10,
-    constitution: 10,
-    intelligence: 10,
-    wisdom: 10,
-    charisma: 10,
-  },
-};
+import { BASE, renderCard } from './CombatantCard.test-helpers';
 
 const ENEMY: CombatantState = { ...BASE, id: 'e1', name: 'Goblin', type: 'monster' };
-
-function renderCard(overrides: Partial<CombatantState> = {}, onUpdate = jest.fn(), extra: Record<string, unknown> = {}) {
-  const combatant = { ...BASE, ...overrides };
-  render(
-    <CombatantCard
-      combatId="test-combat"
-      combatant={combatant}
-      isActive={false}
-      onUpdate={onUpdate as any}
-      onRemove={jest.fn() as any}
-      {...(extra as any)}
-    />
-  );
-  return onUpdate;
-}
 
 async function applyDamageHelper(
   amount: string,
@@ -393,5 +359,81 @@ describe('CombatantCard.hp — targeting UI', () => {
     renderWithAllCombatants({ targetIds: ['e1'] });
     expect(screen.getByText('Targets:')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Goblin' })).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Undo HP button
+// ---------------------------------------------------------------------------
+
+describe('CombatantCard – Undo HP button', () => {
+  test('Undo HP button is disabled when history is empty', () => {
+    renderCard();
+    expect(screen.getByTestId('undo-hp-change')).toBeDisabled();
+  });
+
+  test('Undo HP button is enabled after applying damage', async () => {
+    const user = userEvent.setup();
+    renderCard({ hp: 30 });
+    const input = screen.getByRole('spinbutton');
+    await user.clear(input);
+    await user.type(input, '5');
+    await user.click(screen.getByRole('button', { name: 'Damage' }));
+    expect(screen.getByTestId('undo-hp-change')).not.toBeDisabled();
+  });
+
+  test('Undo HP button stays disabled when immune combatant receives typed damage', async () => {
+    const user = userEvent.setup();
+    renderCard({ hp: 30, damageImmunities: ['fire'] });
+    const input = screen.getByRole('spinbutton');
+    await user.clear(input);
+    await user.type(input, '10');
+    await user.selectOptions(
+      screen.getByLabelText('Damage type (for resistance/immunity/vulnerability)'),
+      'fire',
+    );
+    await user.click(screen.getByRole('button', { name: 'Damage' }));
+    expect(screen.getByTestId('undo-hp-change')).toBeDisabled();
+  });
+
+  test('clicking Undo HP calls onUpdate with the previous hp/tempHp snapshot', async () => {
+    const user = userEvent.setup();
+    const onUpdate = renderCard({ hp: 30 });
+    const input = screen.getByRole('spinbutton');
+    await user.clear(input);
+    await user.type(input, '10');
+    await user.click(screen.getByRole('button', { name: 'Damage' }));
+    await user.click(screen.getByTestId('undo-hp-change'));
+    expect(onUpdate).toHaveBeenLastCalledWith(expect.objectContaining({ hp: 30, tempHp: 0 }));
+  });
+
+  test('Undo HP button becomes disabled again after undo exhausts history', async () => {
+    const user = userEvent.setup();
+    renderCard({ hp: 30 });
+    const input = screen.getByRole('spinbutton');
+    await user.clear(input);
+    await user.type(input, '5');
+    await user.click(screen.getByRole('button', { name: 'Damage' }));
+    await user.click(screen.getByTestId('undo-hp-change'));
+    expect(screen.getByTestId('undo-hp-change')).toBeDisabled();
+  });
+
+  test('Undo HP does not push a new history entry (undo is not itself undoable)', async () => {
+    const user = userEvent.setup();
+    renderCard({ hp: 30 });
+    const input = screen.getByRole('spinbutton');
+    // Apply damage twice — two history entries, button enabled
+    await user.clear(input);
+    await user.type(input, '5');
+    await user.click(screen.getByRole('button', { name: 'Damage' }));
+    await user.clear(input);
+    await user.type(input, '3');
+    await user.click(screen.getByRole('button', { name: 'Damage' }));
+    // Undo first time — one entry remains, button still enabled
+    await user.click(screen.getByTestId('undo-hp-change'));
+    expect(screen.getByTestId('undo-hp-change')).not.toBeDisabled();
+    // Undo second time — history empty, button disabled
+    await user.click(screen.getByTestId('undo-hp-change'));
+    expect(screen.getByTestId('undo-hp-change')).toBeDisabled();
   });
 });
