@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { validatePasswordForClient } from '@/lib/validation/password';
+import { validateUsername } from '@/lib/validation/username';
 
 export default function RegisterPage() {
   const { register, loading, error, isAuthenticated } = useAuth();
@@ -62,29 +63,9 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!username.trim()) {
-      setFormError('Username is required');
-      return;
-    }
-
-    if (username.length < 4) {
-      setFormError('Username must be at least 4 characters long');
-      return;
-    }
-
-    if (username.length > 20) {
-      setFormError('Username must be at most 20 characters long');
-      return;
-    }
-
-    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-      setFormError('Username can only contain alphanumeric characters, underscores, and hyphens');
-      return;
-    }
-
-    const reservedWords = ['admin', 'root', 'system', 'support', 'moderator', 'api', 'null', 'undefined'];
-    if (reservedWords.includes(username.toLowerCase())) {
-      setFormError('This username is reserved and cannot be used');
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.valid) {
+      setFormError(usernameValidation.errors[0]?.message || 'Username does not meet requirements');
       return;
     }
 
