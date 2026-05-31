@@ -19,20 +19,23 @@ flowchart TB
         ES["EventSource"]
         Dock --> Hook --> ES
     end
-    subgraph Server["Next.js (Fly.io)"]
+    subgraph Server["Next.js instance (Fly.io)"]
         SSE["GET /campaigns/:id/stream (4a)"]
         AUTH["assertCampaignAccess (1e)"]
+        REG["Subscriber registry<br/>(demux by campaignId)"]
         TA["Transport abstraction<br/>subscribe(campaignId, onEvent)"]
         SSE --> AUTH
         SSE --> TA
+        TA --> REG
     end
     subgraph Mongo["MongoDB"]
-        CS["Change Streams (Atlas)"]
+        CS["ONE shared change stream<br/>per instance (Atlas)"]
         POLL["since-timestamp poll (local dev)"]
     end
     ES -- "HTTP text/event-stream" --> SSE
-    TA -->|prod| CS
-    TA -->|fallback| POLL
+    REG -->|prod · single cursor| CS
+    REG -->|fallback| POLL
+    CS -. "events demux'd to all<br/>campaigns + connections" .-> REG
 ```
 
 ## Transport selection (4a)
@@ -42,7 +45,7 @@ The same `subscribe()` interface picks its source at runtime so clients never ch
 ```mermaid
 flowchart TD
     start(["subscribe(campaignId)"]) --> q{"Mongo is a<br/>replica set?"}
-    q -->|yes · Atlas| cs["watch() change stream<br/>filtered to campaignId"]
+    q -->|yes · Atlas| cs["one shared watch() per instance<br/>(unfiltered) → demux by campaignId"]
     q -->|no · standalone dev| poll["poll collections since<br/>last-seen timestamp"]
     cs --> emit["emit typed campaign events"]
     poll --> emit
@@ -60,21 +63,22 @@ flowchart TD
 - Transport abstraction in `lib/server/` (or `lib/api/`): a `subscribe(campaignId,
   onEvent)` that uses **MongoDB Change Streams** when available (Atlas) and a
   **`since`-timestamp DB poll** otherwise. Emits typed events scoped to the campaign.
-- **Multiplex one stream per campaign (not per connection):** keep an in-process
-  subscriber registry so each server instance opens **one** change stream per active
-  campaign (or a single collection-wide stream) and fans events out to all that
-  campaign's SSE connections. Opening a cursor per connection scales linearly with
-  connected users and exhausts Atlas connection / change-stream limits.
-  Reference-count subscribers and close the stream when a campaign's last connection
-  drops.
+- **One shared change stream per process (multiplex across campaigns *and*
+  connections):** each server instance opens a **single** change stream over the
+  relevant collections — **not** filtered by campaign — and demultiplexes events to
+  per-campaign subscriber sets in-process via a registry keyed by `campaignId`.
+  Never one cursor per connection *or* per campaign; both scale with load and
+  exhaust Atlas connection / change-stream limits. Keep the count of streams to
+  Mongo as low as possible (ideally one per instance). The shared stream opens lazily
+  on the first SSE connection and closes when the instance's last connection drops.
 - Heartbeat/keepalive comments; clean teardown on disconnect; respects Fly's
   request lifecycle.
 - **Depends on:** 1e.
 - **Acceptance:** an authorized member receives events for their campaign and
-  nothing for campaigns they're not in; multiple connections to one campaign share a
-  single change stream; works against Atlas (change streams) and a standalone Mongo
-  (polling); connections close cleanly and the shared stream closes when the last
-  one drops.
+  nothing for campaigns they're not in; connections across **multiple** campaigns on
+  one instance share a **single** change stream (verified by cursor count); works
+  against Atlas (change streams) and a standalone Mongo (polling); connections close
+  cleanly and the shared stream closes when the instance's last connection drops.
 
 ### 4b. Client `useCampaignStream` hook · [#312](https://github.com/dougis-org/session-combat/issues/312)
 - React hook in `lib/hooks/` wrapping `EventSource` with auto-reconnect/backoff,

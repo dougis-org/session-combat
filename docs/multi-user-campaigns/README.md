@@ -32,7 +32,7 @@ reshaping the foundations.
 | Area | Decision | Rationale |
 |------|----------|-----------|
 | Real-time transport | **Server-Sent Events (SSE)** from a per-campaign stream endpoint; client→server stays plain `POST` | Next.js App Router supports streaming responses with no custom server; broadcast-shaped feature set; works behind Fly's HTTPS proxy; zero new infra/cost |
-| Real-time backplane | **MongoDB Change Streams** with a **DB-polling fallback** behind a transport abstraction | We already run MongoDB; change streams cost nothing and work across machines. Polling fallback keeps standalone/dev Mongo and non-replica-set deploys working |
+| Real-time backplane | **MongoDB Change Streams** with a **DB-polling fallback** behind a transport abstraction. **One shared change stream per server instance**, multiplexed across all campaigns and connections (demuxed in-process by `campaignId`) | We already run MongoDB; change streams cost nothing and work across machines. A single cursor per instance keeps Mongo/Atlas connection & change-stream usage flat regardless of how many campaigns or members are live. Polling fallback keeps standalone/dev Mongo and non-replica-set deploys working |
 | Fly scale-to-zero | No special handling | Open SSE connections keep the machine warm during a session; idle = nobody connected = nothing to deliver |
 | Scene/image storage | **MongoDB GridFS** | No binary store exists today; GridFS needs no S3/bucket, survives Fly's ephemeral disk, stays zero-cost |
 | Membership | **Invite + accept**; players own their own characters and **opt them in** per campaign | Consent-based; players maintain their own sheets |
@@ -78,8 +78,10 @@ sequenceDiagram
     Note right of ST: dm-only / direct messages are<br/>only pushed to the allowed recipients
 ```
 
-> Local dev (standalone Mongo, no replica set) swaps the change-stream feed for a
-> `since`-timestamp DB poll behind the same transport interface — clients are
+> In prod the change-stream feed is a **single shared stream per server instance**,
+> demultiplexed in-process to the right campaign's connections (never one cursor per
+> campaign or per connection). Local dev (standalone Mongo, no replica set) swaps it
+> for a `since`-timestamp DB poll behind the same transport interface — clients are
 > unaffected. See [Phase 4](./04-realtime-transport.md).
 
 ## Data model (target shapes)
