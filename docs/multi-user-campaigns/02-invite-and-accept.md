@@ -5,6 +5,53 @@ or decline. Membership only becomes `active` on acceptance.
 
 **Depends on:** Phase 1 (1c search, 1d members, 1e access).
 
+## Membership lifecycle
+
+A `CampaignMember.status` moves through these states. The owner is seeded directly
+as `active` with role `dm` (Phase 1d) and never goes through the invite flow.
+
+```mermaid
+stateDiagram-v2
+    [*] --> invited: DM invites by username (2a)
+    invited --> active: invitee accepts (2b)
+    invited --> declined: invitee declines (2b)
+    active --> removed: DM removes member (2c)
+    declined --> invited: DM re-invites (2a)
+    removed --> invited: DM re-invites (2a)
+    active --> [*]
+    declined --> [*]
+    removed --> [*]
+
+    note right of active
+        owner is seeded here as
+        role = dm (Phase 1d)
+    end note
+```
+
+## Invite → accept sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant DM
+    participant Search as GET /users/search (1c)
+    participant Inv as POST /campaigns/:id/members (2a)
+    participant DB as MongoDB
+    participant P as Player
+    participant Inbox as GET /me/invitations (2b)
+
+    DM->>Search: q="ali"
+    Search-->>DM: [{ id, username }]
+    DM->>Inv: invite { userId }
+    Inv->>Inv: assert caller is DM; no dup / self
+    Inv->>DB: insert member { status: invited }
+    P->>Inbox: list my pending invites
+    Inbox-->>P: [{ campaign, invitedBy }]
+    P->>Inv: respond { accept } (2b)
+    Inv->>DB: status = active, respondedAt
+    Note over P: campaign now appears<br/>in the player's list
+```
+
 ## Deliverables (sub-issues)
 
 ### 2a. Invite API

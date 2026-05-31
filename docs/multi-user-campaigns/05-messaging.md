@@ -5,6 +5,25 @@ visibility, delivered live over the Phase 4 stream and rendered in the chat dock
 
 **Depends on:** Phase 1 (1e), Phase 4 (4a/4b transport + 4c dock).
 
+## Visibility model
+
+Server-side, every message carries a `visibility.scope`. The stream filter decides
+who a stored message is pushed to (and `GET` history applies the same predicate):
+
+```mermaid
+flowchart TD
+    msg["message { senderId, visibility }"] --> scope{"scope?"}
+    scope -->|group| grp["all active members"]
+    scope -->|dm-only| dmo["DM + sender"]
+    scope -->|direct| dir["sender + toUserId"]
+    grp --> push["push via SSE / return in history"]
+    dmo --> push
+    dir --> push
+```
+
+> The same `{ scope, toUserId? }` envelope is reused by shared rolls (Phase 6),
+> so a new scope added here is automatically available to rolls.
+
 ## Deliverables (sub-issues)
 
 ### 5a. `campaignMessages` collection + API

@@ -1,6 +1,6 @@
 # Multi-User Campaigns
 
-> Status: **Planning** · Owner: DM (campaign owner) · Last updated: 2026-05-30
+> Status: **Planning** · Owner: DM (campaign owner) · Last updated: 2026-05-31
 
 This initiative turns campaigns from a single-owner artifact into a shared space
 where a DM (the campaign owner) invites a group of players who participate during
@@ -48,6 +48,40 @@ reshaping the foundations.
   a replica set), kept behind the Phase 4 transport abstraction so it stays a config
   detail.
 
+## Real-time data flow
+
+How a live update reaches members, end to end. Client→server is a normal `POST`;
+server→clients is the SSE push driven by the MongoDB change stream (Atlas) or the
+polling fallback (local dev).
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant P as Player (browser)
+    participant DM as DM (browser)
+    participant API as Next.js route<br/>POST /messages
+    participant DB as MongoDB (Atlas)
+    participant ST as SSE stream<br/>GET /campaigns/:id/stream
+
+    Note over DM,ST: On campaign open, each member's<br/>EventSource connects (after assertCampaignAccess)
+    DM->>ST: open EventSource
+    P->>ST: open EventSource
+
+    P->>API: POST message { body, visibility }
+    API->>API: assertCampaignAccess(campaignId, userId)
+    API->>DB: insert campaignMessages doc
+    API-->>P: 201 Created
+    DB-->>ST: change stream event (insert)
+    ST->>ST: filter by campaignId + visibility
+    ST-->>DM: SSE: message event
+    ST-->>P: SSE: message event (echo)
+    Note right of ST: dm-only / direct messages are<br/>only pushed to the allowed recipients
+```
+
+> Local dev (standalone Mongo, no replica set) swaps the change-stream feed for a
+> `since`-timestamp DB poll behind the same transport interface — clients are
+> unaffected. See [Phase 4](./04-realtime-transport.md).
+
 ## Data model (target shapes)
 
 New/changed types in `lib/types.ts` and new MongoDB collections (indexes follow the
@@ -58,6 +92,66 @@ existing `lib/db.ts` pattern):
 - `CampaignCharacterShare` — `{ campaignId, userId, characterId, sharedAt }`. Unique `{campaignId,characterId}`. Player opt-in of a character into a campaign.
 - `CampaignMessage` — `{ campaignId, senderId, kind: 'text'|'scene', visibility: {scope:'group'|'direct'|'dm-only', toUserId?}, body?, attachmentId? }`. Index `{campaignId,createdAt}`. Persistent.
 - `CampaignRoll` — `{ campaignId, sessionId, rollerId, label?, formula, rolls[], total, visibility: {scope:'group'|'dm-only'|'direct', toUserId?} }`. Index `{campaignId,sessionId,createdAt}`. Session-scoped.
+
+The relationships between the existing entities (grey-ish: `User`, `Campaign`,
+`Character`, `Party`, `SessionLog`) and the new ones introduced by this initiative:
+
+```mermaid
+erDiagram
+    User ||--o{ Campaign : "owns (DM)"
+    User ||--o{ Character : owns
+    User ||--o{ CampaignMember : "is"
+    Campaign ||--o{ CampaignMember : has
+    Campaign ||--o{ Party : has
+    Campaign ||--o{ SessionLog : has
+    Campaign ||--o{ CampaignCharacterShare : has
+    Character ||--o{ CampaignCharacterShare : "shared via"
+    Party }o--o{ Character : includes
+    Campaign ||--o{ CampaignMessage : has
+    User ||--o{ CampaignMessage : sends
+    CampaignMessage |o--o| SceneAttachment : "may attach (GridFS)"
+    Campaign ||--o{ CampaignRoll : has
+    SessionLog ||--o{ CampaignRoll : scopes
+    User ||--o{ CampaignRoll : rolls
+
+    User {
+        string id
+        string email
+        string username "NEW: unique, searchable"
+    }
+    Campaign {
+        string id
+        string userId "owner = DM"
+    }
+    CampaignMember {
+        string campaignId
+        string userId
+        enum role "dm | player"
+        enum status "invited|active|declined|removed"
+    }
+    CampaignCharacterShare {
+        string campaignId
+        string characterId
+        string userId "owner who opted in"
+    }
+    CampaignMessage {
+        string campaignId
+        string senderId
+        enum kind "text | scene"
+        json visibility "group|direct|dm-only"
+        string attachmentId "GridFS id, scene only"
+    }
+    CampaignRoll {
+        string campaignId
+        string sessionId "session-scoped"
+        string rollerId
+        json visibility "group|dm-only|direct"
+    }
+    SceneAttachment {
+        string id "GridFS file id"
+        string contentType
+    }
+```
 
 ## Access-control change (the spine)
 
@@ -82,6 +176,75 @@ on its own. `→` marks hard dependencies; everything else can run in parallel.
 | 5 | Messaging | #297 | 5a #314 · 5b #315 | Phase 4 |
 | 6 | Shared dice rolls (session-scoped) | #298 | 6a #316 · 6b #317 | Phase 5 |
 | 7 | Scene content (maps/images) | #299 | 7a #318 · 7b #319 | Phase 5 |
+
+### Dependency graph
+
+Arrows are hard dependencies (a node can't start until its predecessors merge).
+Nodes with no inbound arrow at the same level can be built in parallel — e.g. the
+Phase 1 identity track (1a→1b, 1a→1c) runs alongside the membership track
+(1d→1e), and the Phase 4 dock shell (4c) and hook (4b) need nothing upstream.
+
+```mermaid
+flowchart LR
+    subgraph P1["Phase 1 · Identity & membership"]
+        direction TB
+        n1a["1a username model"]
+        n1b["1b username set/edit"]
+        n1c["1c user search"]
+        n1d["1d campaignMembers"]
+        n1e["1e assertCampaignAccess"]
+        n1a --> n1b
+        n1a --> n1c
+        n1d --> n1e
+    end
+    subgraph P2["Phase 2 · Invite & accept"]
+        n2a["2a invite API"]
+        n2b["2b accept/decline + inbox"]
+        n2c["2c member mgmt UI"]
+        n2d["2d invitations inbox UI"]
+        n2a --> n2c
+        n2b --> n2d
+    end
+    subgraph P3["Phase 3 · Cross-user characters"]
+        n3a["3a character sharing"]
+        n3b["3b party builder"]
+        n3a --> n3b
+    end
+    subgraph P4["Phase 4 · Real-time transport"]
+        n4a["4a SSE + transport"]
+        n4b["4b useCampaignStream"]
+        n4c["4c chat dock shell"]
+    end
+    subgraph P5["Phase 5 · Messaging"]
+        n5a["5a messages API"]
+        n5b["5b wire dock"]
+    end
+    subgraph P6["Phase 6 · Shared rolls"]
+        n6a["6a rolls API"]
+        n6b["6b roll UI"]
+    end
+    subgraph P7["Phase 7 · Scene content"]
+        n7a["7a GridFS"]
+        n7b["7b push scene"]
+    end
+
+    n1c --> n2a
+    n1d --> n2a
+    n1e --> n2a
+    n1d --> n2b
+    n1e --> n3a
+    n1e --> n4a
+    n3a --> n3b
+    n1e --> n5a
+    n4b --> n5b
+    n4c --> n5b
+    n5a --> n5b
+    n1e --> n6a
+    n5b --> n6b
+    n6a --> n6b
+    n5b --> n7b
+    n7a --> n7b
+```
 
 See the per-phase docs for deliverables, acceptance criteria, and affected files:
 

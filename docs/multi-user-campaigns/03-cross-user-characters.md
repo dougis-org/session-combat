@@ -7,6 +7,21 @@ own them.
 **Depends on:** Phase 1 (1e access). Benefits from Phase 2 (active members exist),
 but the data layer can be built against memberships directly.
 
+## How a player's character reaches a DM's party
+
+The character record stays owned by the player; the DM only references it once the
+player has shared it and the DM-side party rule confirms the share.
+
+```mermaid
+flowchart LR
+    C["Character<br/>(owned by Player)"] -->|player shares · 3a| S["CampaignCharacterShare<br/>{campaignId, characterId, userId}"]
+    M["CampaignMember<br/>(player, active)"] -. guards .-> S
+    S -->|DM picks in builder · 3b| PB{"Party add rule"}
+    DMC["DM-owned character"] --> PB
+    PB -->|"shared by active member<br/>OR owned by DM"| P["Party.members[]"]
+    PB -.->|otherwise| X["rejected"]
+```
+
 ## Deliverables (sub-issues)
 
 ### 3a. Character sharing (opt-in) — data + player UI

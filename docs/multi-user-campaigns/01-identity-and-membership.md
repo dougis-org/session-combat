@@ -52,3 +52,18 @@ This is the spine the rest of the initiative builds on.
 - **Depends on:** 1d.
 - **Acceptance:** a player member can GET a campaign; a non-member gets 404/403;
   mutations stay DM-gated; existing owner behavior unchanged.
+
+The access check every campaign-scoped route funnels through (today's
+`{ userId, id }` owner check is the leftmost path only):
+
+```mermaid
+flowchart TD
+    req["request { campaignId, userId, op }"] --> m{"active CampaignMember<br/>for (campaignId, userId)?"}
+    m -->|no| deny["404 / 403"]
+    m -->|"yes · role = dm"| any["allow read + write"]
+    m -->|"yes · role = player"| rw{"write op?"}
+    rw -->|no| readok["allow read"]
+    rw -->|yes| feat{"feature opts player in?<br/>(e.g. send message, share roll)"}
+    feat -->|yes| allow["allow scoped write"]
+    feat -->|no| deny
+```

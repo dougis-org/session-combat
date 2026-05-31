@@ -7,6 +7,49 @@ plumbing everything else plugs into.
 
 **Depends on:** Phase 1 (1e access). Items 4a/4b/4c can largely proceed in parallel.
 
+## Component layout
+
+```mermaid
+flowchart TB
+    subgraph Browser
+        Dock["CampaignChat dock (4c)"]
+        Hook["useCampaignStream (4b)"]
+        ES["EventSource"]
+        Dock --> Hook --> ES
+    end
+    subgraph Server["Next.js (Fly.io)"]
+        SSE["GET /campaigns/:id/stream (4a)"]
+        AUTH["assertCampaignAccess (1e)"]
+        TA["Transport abstraction<br/>subscribe(campaignId, onEvent)"]
+        SSE --> AUTH
+        SSE --> TA
+    end
+    subgraph Mongo["MongoDB"]
+        CS["Change Streams (Atlas)"]
+        POLL["since-timestamp poll (local dev)"]
+    end
+    ES -- "HTTP text/event-stream" --> SSE
+    TA -->|prod| CS
+    TA -->|fallback| POLL
+```
+
+## Transport selection (4a)
+
+The same `subscribe()` interface picks its source at runtime so clients never change:
+
+```mermaid
+flowchart TD
+    start(["subscribe(campaignId)"]) --> q{"Mongo is a<br/>replica set?"}
+    q -->|yes · Atlas| cs["watch() change stream<br/>filtered to campaignId"]
+    q -->|no · standalone dev| poll["poll collections since<br/>last-seen timestamp"]
+    cs --> emit["emit typed campaign events"]
+    poll --> emit
+    emit --> sse["write SSE frames + heartbeat"]
+    sse --> close{"client<br/>disconnected?"}
+    close -->|no| emit
+    close -->|yes| teardown["close cursor / stop poll"]
+```
+
 ## Deliverables (sub-issues)
 
 ### 4a. SSE stream endpoint + transport abstraction
