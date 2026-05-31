@@ -706,3 +706,25 @@ export interface SpellTemplate {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export const MEMBER_ROLES = ["dm", "player"] as const;
+export type MemberRole = (typeof MEMBER_ROLES)[number];
+export type MemberStatus = "active" | "pending" | "declined";
+
+export interface CampaignMember {
+  _id?: string;
+  id: string;
+  campaignId: string;
+  userId: string;
+  role: MemberRole;
+  status: MemberStatus;
+  invitedBy: string;
+  invitedAt: Date;
+  respondedAt?: Date;
+}
+
+export interface CampaignMemberSummary {
+  id: string;
+  name: string;
+}
+

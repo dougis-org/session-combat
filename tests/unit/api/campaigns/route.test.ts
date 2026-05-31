@@ -23,6 +23,7 @@ jest.mock("@/lib/storage", () => ({
     saveCampaign: jest.fn(),
     loadCampaignById: jest.fn(),
     deleteCampaign: jest.fn(),
+    addMember: jest.fn().mockResolvedValue(undefined),
   },
 }));
 
