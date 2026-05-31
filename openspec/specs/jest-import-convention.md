@@ -90,7 +90,7 @@ Reason for removal: Jest injects these as globals at runtime; explicit imports b
 - Design Decision 2 → Requirement: REMOVED per-file imports
 - Design Decision 3 → Requirement: ADDED ESLint gate
 - Design Decision 4 → Requirement: ADDED docs/TESTING.md
-- All requirements → Task: fix-jest-globals-type-augmentation/tasks.md
+- All requirements → Task: ../changes/archive/2026-05-30-fix-jest-globals-type-augmentation/tasks.md
 
 ## Non-Functional Acceptance Criteria
 
