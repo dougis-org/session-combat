@@ -106,10 +106,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit all changes to `fix/jest-globals-type-augmentation` and push to remote
 - [x] Open PR from `fix/jest-globals-type-augmentation` to `main`. PR body must state: "Closes #(none — internal quality fix)"
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in Remote push validation then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll for check status autonomously using `gh pr checks <PR-URL> --json isRequired,state`; when any required CI check fails, diagnose and fix, commit, follow Remote push validation, push, wait 180 seconds, repeat
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in Remote push validation then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll for check status autonomously using `gh pr checks <PR-URL> --json isRequired,state`; when any required CI check fails, diagnose and fix, commit, follow Remote push validation, push, wait 180 seconds, repeat
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
 
 Ownership metadata:
 
@@ -124,15 +124,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on main
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update `docs/TESTING.md` if any further doc corrections were made during review
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/fix-jest-globals-type-augmentation/` to `openspec/changes/archive/YYYY-MM-DD-fix-jest-globals-type-augmentation/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-jest-globals-type-augmentation/` exists and `openspec/changes/fix-jest-globals-type-augmentation/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-fix-jest-globals-type-augmentation` then push
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive fix-jest-globals-type-augmentation (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on main
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update `docs/TESTING.md` if any further doc corrections were made during review
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive the change: move `openspec/changes/fix-jest-globals-type-augmentation/` to `openspec/changes/archive/2026-05-30-fix-jest-globals-type-augmentation/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/2026-05-30-fix-jest-globals-type-augmentation/` exists and `openspec/changes/fix-jest-globals-type-augmentation/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-05-30-fix-jest-globals-type-augmentation` then push
+- [x] Open a PR from the doc branch to `main` with title `docs: archive fix-jest-globals-type-augmentation (2026-05-30)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR
 - [ ] Monitor the doc PR until it merges
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d fix/jest-globals-type-augmentation doc/archive-YYYY-MM-DD-fix-jest-globals-type-augmentation`
+- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d fix/jest-globals-type-augmentation doc/archive-2026-05-30-fix-jest-globals-type-augmentation`
