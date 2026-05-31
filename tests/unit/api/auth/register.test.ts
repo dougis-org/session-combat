@@ -99,12 +99,10 @@ describe("POST /api/auth/register", () => {
   it("returns 409 when user with email already exists", async () => {
     mockedValidateEmail.mockReturnValue(true);
     mockedValidatePassword.mockReturnValue({ valid: true, errors: [] });
-    const insertOne = jest.fn().mockRejectedValue({
-      code: 11000,
-      keyPattern: { email: 1 }
-    });
+    const findOne = jest.fn().mockResolvedValue({ email: "user@example.com" });
+    const insertOne = jest.fn();
     mockedGetDatabase.mockResolvedValue({
-      collection: jest.fn().mockReturnValue({ insertOne }),
+      collection: jest.fn().mockReturnValue({ findOne, insertOne }),
     } as any);
     const response = await POST(
       makeRequest({ email: "user@example.com", password: "ValidPass1!", username: "mockuser" })
@@ -117,12 +115,13 @@ describe("POST /api/auth/register", () => {
   it("returns 409 when username is already taken", async () => {
     mockedValidateEmail.mockReturnValue(true);
     mockedValidatePassword.mockReturnValue({ valid: true, errors: [] });
+    const findOne = jest.fn().mockResolvedValue(null);
     const insertOne = jest.fn().mockRejectedValue({
       code: 11000,
       keyPattern: { username: 1 }
     });
     mockedGetDatabase.mockResolvedValue({
-      collection: jest.fn().mockReturnValue({ insertOne }),
+      collection: jest.fn().mockReturnValue({ findOne, insertOne }),
     } as any);
     const response = await POST(
       makeRequest({ email: "user@example.com", password: "ValidPass1!", username: "mockuser" })
@@ -135,9 +134,10 @@ describe("POST /api/auth/register", () => {
   it("returns 201 and sets cookie on successful registration", async () => {
     mockedValidateEmail.mockReturnValue(true);
     mockedValidatePassword.mockReturnValue({ valid: true, errors: [] });
+    const findOne = jest.fn().mockResolvedValue(null);
     const insertOne = jest.fn().mockResolvedValue({ insertedId: { toString: () => "new-user-id" } });
     mockedGetDatabase.mockResolvedValue({
-      collection: jest.fn().mockReturnValue({ insertOne }),
+      collection: jest.fn().mockReturnValue({ findOne, insertOne }),
     } as any);
     mockedHashPassword.mockResolvedValue("hashed-password");
     mockedGenerateToken.mockReturnValue("jwt.token.here");
