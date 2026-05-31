@@ -58,12 +58,12 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
 - [x] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `feat/combat-info-icon-test-coverage` to `main`. PR body must state **"Closes #62"**
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll autonomously; address comments, commit fixes, validate locally, push; wait 180 seconds; repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing check, commit, validate locally, push; wait 180 seconds; repeat
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify user
+- [x] Open PR from `feat/combat-info-icon-test-coverage` to `main`. PR body must state **"Closes #62"**
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — poll autonomously; address comments, commit fixes, validate locally, push; wait 180 seconds; repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing check, commit, validate locally, push; wait 180 seconds; repeat
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify user
 
 Ownership metadata:
 
@@ -78,14 +78,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on main
-- [ ] Mark all remaining tasks as complete
-- [ ] Sync approved spec deltas into `openspec/specs/`
-- [ ] Archive the change: move `openspec/changes/combat-info-icon-test-coverage/` to `openspec/changes/archive/YYYY-MM-DD-combat-info-icon-test-coverage/` in a single commit (copy + delete staged together)
-- [ ] Confirm archive path exists and original path is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-combat-info-icon-test-coverage` then push
-- [ ] Open PR from doc branch to `main` titled `docs: archive combat-info-icon-test-coverage (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR
-- [ ] Monitor doc PR until merged (same loop as implementation PR)
-- [ ] Prune local branches: `git fetch --prune` and `git branch -d feat/combat-info-icon-test-coverage doc/archive-YYYY-MM-DD-combat-info-icon-test-coverage`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on main
+- [x] Mark all remaining tasks as complete
+- [x] Sync approved spec deltas into `openspec/specs/`
+- [x] Archive the change: move `openspec/changes/combat-info-icon-test-coverage/` to `openspec/changes/archive/YYYY-MM-DD-combat-info-icon-test-coverage/` in a single commit (copy + delete staged together)
+- [x] Confirm archive path exists and original path is gone
+- [x] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-combat-info-icon-test-coverage` then push
+- [x] Open PR from doc branch to `main` titled `docs: archive combat-info-icon-test-coverage (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR
+- [x] Monitor doc PR until merged (same loop as implementation PR)
+- [x] Prune local branches: `git fetch --prune` and `git branch -d feat/combat-info-icon-test-coverage doc/archive-YYYY-MM-DD-combat-info-icon-test-coverage`
