@@ -91,10 +91,10 @@ _(none)_
 - Proposal: `username?: string` on `User` -> Requirement: ADDED Username field on User type
 - Proposal: Sparse unique index -> Requirement: ADDED Sparse unique index on users.username
 - Proposal: Idempotent backfill script -> Requirement: ADDED Idempotent username backfill script
-- Design Decision 1 (sparse index) -> Requirement: ADDED Sparse unique index
+- Design Decision 1 (sparse index) -> Requirement: ADDED Sparse unique index on users.username
 - Design Decision 2 (case-sensitive) -> Scenario: Two users with different usernames can coexist
 - Design Decision 3 (isolated try/catch) -> Scenario: Index creation failure does not crash app startup
-- Design Decision 4 (email local-part + suffix) -> Scenario: Email local-part collision de-duplicated
+- Design Decision 4 (email local-part + suffix) -> Scenario: Email local-part collision de-duplicated with suffix
 - Design Decision 5 (standalone script) -> Requirement: ADDED Idempotent username backfill script
 - All requirements -> Tasks: task-1 (types), task-2 (index), task-3 (backfill script)
 
