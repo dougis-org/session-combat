@@ -242,7 +242,7 @@ describe('Strikethrough on dead combatants', () => {
     renderIcon([DEAD_MONSTER]);
     await hoverIcon(user);
     const nameEl = screen.getByText('Goblin');
-    expect(nameEl.closest('.line-through')).not.toBeNull();
+    expect(nameEl.closest('.line-through')).toBeInTheDocument();
   });
 });
 
@@ -269,7 +269,7 @@ describe('Independent column sections', () => {
     await hoverIcon(user);
     expect(screen.getByText(/DEFEATED/i)).toBeInTheDocument();
     expect(screen.getByText('Elara')).toBeInTheDocument();
-    expect(screen.getByText('Elara').closest('.line-through')).toBeNull();
+    expect(screen.getByText('Elara').closest('.line-through')).not.toBeInTheDocument();
   });
 });
 
