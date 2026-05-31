@@ -25,25 +25,27 @@ import { useAuth } from '@/lib/hooks/useAuth';
 
 const mockedUseAuth = jest.mocked(useAuth);
 
+const defaultAuth: ReturnType<typeof useAuth> = {
+  isAuthenticated: false,
+  loading: false,
+  register: jest.fn().mockResolvedValue(true),
+  login: jest.fn() as any,
+  logout: jest.fn() as any,
+  user: null,
+  error: null,
+};
+
 function mockAuth(overrides: Partial<ReturnType<typeof useAuth>> = {}) {
-  mockedUseAuth.mockReturnValue({
-    isAuthenticated: false,
-    loading: false,
-    register: jest.fn().mockResolvedValue(true),
-    login: jest.fn() as any,
-    logout: jest.fn() as any,
-    user: null,
-    error: null,
-    ...overrides,
-  });
+  mockedUseAuth.mockReturnValue({ ...defaultAuth, ...overrides });
 }
 
-async function fillAndSubmit(fields: {
+async function renderAndSubmit(fields: {
   username?: string;
   email?: string;
   password?: string;
   confirmPassword?: string;
 }) {
+  render(<RegisterPage />);
   if (fields.username !== undefined) {
     await userEvent.type(screen.getByLabelText(/username/i), fields.username);
   }
@@ -59,58 +61,48 @@ async function fillAndSubmit(fields: {
   fireEvent.submit(document.querySelector('form')!);
 }
 
+async function expectFormError(pattern: RegExp) {
+  await waitFor(() => expect(document.body.textContent).toMatch(pattern));
+}
+
 describe('RegisterPage — username validation', () => {
   beforeEach(() => { mockAuth(); });
 
-  it('shows error when username is too short (< 4 chars)', async () => {
-    render(<RegisterPage />);
-    await fillAndSubmit({ username: 'ab', email: 'user@example.com', password: 'ValidPass1!', confirmPassword: 'ValidPass1!' });
-    await waitFor(() => {
-      expect(document.body.textContent).toMatch(/username/i);
-    });
-    expect(mockedUseAuth().register).not.toHaveBeenCalled();
+  it('blocks submission when username is too short (< 4 chars)', async () => {
+    const register = jest.fn();
+    mockAuth({ register });
+    await renderAndSubmit({ username: 'ab', email: 'user@example.com', password: 'ValidPass1!', confirmPassword: 'ValidPass1!' });
+    await expectFormError(/username/i);
+    expect(register).not.toHaveBeenCalled();
   });
 
-  it('shows error when username is a reserved word (admin)', async () => {
-    render(<RegisterPage />);
-    await fillAndSubmit({ username: 'admin', email: 'user@example.com', password: 'ValidPass1!', confirmPassword: 'ValidPass1!' });
-    await waitFor(() => {
-      expect(document.body.textContent).toMatch(/username/i);
-    });
-    expect(mockedUseAuth().register).not.toHaveBeenCalled();
+  it('blocks submission when username is a reserved word', async () => {
+    const register = jest.fn();
+    mockAuth({ register });
+    await renderAndSubmit({ username: 'admin', email: 'user@example.com', password: 'ValidPass1!', confirmPassword: 'ValidPass1!' });
+    await expectFormError(/username/i);
+    expect(register).not.toHaveBeenCalled();
   });
 
-  it('calls register with valid username', async () => {
+  it('calls register with a valid username', async () => {
     const register = jest.fn().mockResolvedValue(true);
     mockAuth({ register });
-    render(<RegisterPage />);
-    await fillAndSubmit({ username: 'validuser', email: 'user@example.com', password: 'ValidPass1!', confirmPassword: 'ValidPass1!' });
-    await waitFor(() => {
-      expect(register).toHaveBeenCalledWith('user@example.com', 'ValidPass1!', 'validuser');
-    });
+    await renderAndSubmit({ username: 'validuser', email: 'user@example.com', password: 'ValidPass1!', confirmPassword: 'ValidPass1!' });
+    await waitFor(() => expect(register).toHaveBeenCalledWith('user@example.com', 'ValidPass1!', 'validuser'));
   });
 
-  it('shows error for missing email', async () => {
-    render(<RegisterPage />);
-    await fillAndSubmit({ username: 'validuser', password: 'ValidPass1!', confirmPassword: 'ValidPass1!' });
-    await waitFor(() => {
-      expect(document.body.textContent).toMatch(/email.*required/i);
-    });
+  it('blocks submission when email is missing', async () => {
+    await renderAndSubmit({ username: 'validuser', password: 'ValidPass1!', confirmPassword: 'ValidPass1!' });
+    await expectFormError(/email.*required/i);
   });
 
-  it('shows error for invalid email format', async () => {
-    render(<RegisterPage />);
-    await fillAndSubmit({ username: 'validuser', email: 'notanemail', password: 'ValidPass1!', confirmPassword: 'ValidPass1!' });
-    await waitFor(() => {
-      expect(document.body.textContent).toMatch(/valid email/i);
-    });
+  it('blocks submission when email format is invalid', async () => {
+    await renderAndSubmit({ username: 'validuser', email: 'notanemail', password: 'ValidPass1!', confirmPassword: 'ValidPass1!' });
+    await expectFormError(/valid email/i);
   });
 
-  it('shows error when passwords do not match', async () => {
-    render(<RegisterPage />);
-    await fillAndSubmit({ username: 'validuser', email: 'user@example.com', password: 'ValidPass1!', confirmPassword: 'Different1!' });
-    await waitFor(() => {
-      expect(document.body.textContent).toMatch(/passwords do not match/i);
-    });
+  it('blocks submission when passwords do not match', async () => {
+    await renderAndSubmit({ username: 'validuser', email: 'user@example.com', password: 'ValidPass1!', confirmPassword: 'Different1!' });
+    await expectFormError(/passwords do not match/i);
   });
 });
