@@ -58,12 +58,15 @@ describe("logout clears storage integration", () => {
   });
 
   afterEach(async () => {
-    await act(async () => {
-      root.unmount();
-    });
-    container.remove();
-    globalThis.fetch = originalFetch;
-    jest.restoreAllMocks();
+    try {
+      await act(async () => {
+        root.unmount();
+      });
+    } finally {
+      container.remove();
+      globalThis.fetch = originalFetch;
+      jest.restoreAllMocks();
+    }
   });
 
   test("logout removes sessionCombat:v1:* keys and sessionData but keeps unrelated keys", async () => {
