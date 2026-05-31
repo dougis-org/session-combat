@@ -18,7 +18,7 @@ const config = [
     ],
   },
   {
-    files: ["tests/**/*.ts", "tests/**/*.tsx"],
+    files: ["tests/**/*.{ts,tsx,js,jsx}"],
     rules: {
       "no-restricted-imports": ["error", {
         paths: [{

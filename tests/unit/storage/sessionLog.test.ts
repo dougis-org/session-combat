@@ -59,7 +59,7 @@ describe("getNextSessionNumber", () => {
 
 describe("storage.loadSessionLogs", () => {
   test("queries sessionLogs by userId and campaignId sorted descending", async () => {
-    const toArray = jest.fn<Promise<SessionLog[]>, []>().mockResolvedValue([baseLog] as never);
+    const toArray = jest.fn<Promise<SessionLog[]>, []>().mockResolvedValue([baseLog]);
     const sort = jest.fn(() => ({ toArray }));
     const find = jest.fn(() => ({ sort }));
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ find }) as never);
@@ -81,7 +81,7 @@ describe("storage.loadSessionLogs", () => {
 
 describe("storage.saveSessionLog", () => {
   test("inserts log without _id field", async () => {
-    const insertOne = jest.fn<Promise<unknown>, []>().mockResolvedValue({} as never);
+    const insertOne = jest.fn<Promise<unknown>, []>().mockResolvedValue({});
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ insertOne }) as never);
 
     const logWithId = { ...baseLog, _id: "mongo-id" };
@@ -94,7 +94,7 @@ describe("storage.saveSessionLog", () => {
   });
 
   test("throws on error", async () => {
-    const insertOne = jest.fn<Promise<unknown>, []>().mockRejectedValue(new Error("DB error") as never);
+    const insertOne = jest.fn<Promise<unknown>, []>().mockRejectedValue(new Error("DB error"));
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ insertOne }) as never);
 
     await expect(storage.saveSessionLog(baseLog)).rejects.toThrow("DB error");
@@ -103,7 +103,7 @@ describe("storage.saveSessionLog", () => {
 
 describe("storage.updateSessionLog", () => {
   test("updates whitelisted fields and converts datePlayed to Date", async () => {
-    const findOneAndUpdate = jest.fn<Promise<SessionLog>, []>().mockResolvedValue(baseLog as never);
+    const findOneAndUpdate = jest.fn<Promise<SessionLog>, []>().mockResolvedValue(baseLog);
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ findOneAndUpdate }) as never);
 
     await storage.updateSessionLog("log-1", "user-1", "campaign-1", {
@@ -118,7 +118,7 @@ describe("storage.updateSessionLog", () => {
   });
 
   test("omits datePlayed from $set when not provided", async () => {
-    const findOneAndUpdate = jest.fn<Promise<SessionLog>, []>().mockResolvedValue(baseLog as never);
+    const findOneAndUpdate = jest.fn<Promise<SessionLog>, []>().mockResolvedValue(baseLog);
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ findOneAndUpdate }) as never);
 
     await storage.updateSessionLog("log-1", "user-1", "campaign-1", { title: "Only Title" });
@@ -128,7 +128,7 @@ describe("storage.updateSessionLog", () => {
   });
 
   test("returns null when log not found", async () => {
-    const findOneAndUpdate = jest.fn<Promise<null>, []>().mockResolvedValue(null as never);
+    const findOneAndUpdate = jest.fn<Promise<null>, []>().mockResolvedValue(null);
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ findOneAndUpdate }) as never);
 
     const result = await storage.updateSessionLog("missing", "user-1", "campaign-1", {});
@@ -136,7 +136,7 @@ describe("storage.updateSessionLog", () => {
   });
 
   test("throws on error", async () => {
-    const findOneAndUpdate = jest.fn<Promise<never>, []>().mockRejectedValue(new Error("DB error") as never);
+    const findOneAndUpdate = jest.fn<Promise<never>, []>().mockRejectedValue(new Error("DB error"));
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ findOneAndUpdate }) as never);
 
     await expect(storage.updateSessionLog("log-1", "user-1", "campaign-1", {})).rejects.toThrow("DB error");

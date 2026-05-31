@@ -51,7 +51,7 @@ import { describe, it, expect } from '@jest/globals'; // ❌ do not do this
 
 ```js
 {
-  files: ["tests/**/*.ts", "tests/**/*.tsx"],
+  files: ["tests/**/*.{ts,tsx,js,jsx}"],
   rules: {
     "no-restricted-imports": ["error", {
       paths: [{
