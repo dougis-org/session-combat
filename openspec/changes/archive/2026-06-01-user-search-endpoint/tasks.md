@@ -29,7 +29,7 @@
 ### 4. Implement regex-escaped prefix DB query
 
 - [x] Escape `q` for regex metacharacters: `/[.*+?^${}()|[\]\\]/g` → `\\$&`
-- [x] Build MongoDB query: `{ username: { $regex: new RegExp('^' + escapedQ) }, _id: { $ne: new ObjectId(auth.userId) } }` with collation for case-insensitivity
+- [x] Build MongoDB query: `{ username: { $regex: new RegExp('^' + escapedQ, 'i') }, _id: { $ne: new ObjectId(auth.userId) } }` — `i` flag for case-insensitive match
 - [x] Use projection `{ username: 1 }`, limit 15
 - [x] Map results to `{ id: string; username: string }` (convert `_id` to string)
 - [x] Return `{ results }` with status 200
@@ -96,10 +96,10 @@ Blocking resolution flow:
 - [x] Verify `app/api/users/search/route.ts` appears on `main`
 - [x] Mark all remaining tasks as complete
 - [x] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/user-search-endpoint/` to `openspec/changes/archive/YYYY-MM-DD-user-search-endpoint/` — stage both the copy and the deletion in a single commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-user-search-endpoint/` exists and `openspec/changes/user-search-endpoint/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-user-search-endpoint` then `git push -u origin doc/archive-YYYY-MM-DD-user-search-endpoint`
-- [ ] Open PR from doc branch to `main` with title `docs: archive user-search-endpoint (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/user-search-endpoint doc/archive-YYYY-MM-DD-user-search-endpoint`
+- [x] Archive the change: move `openspec/changes/user-search-endpoint/` to `openspec/changes/archive/2026-06-01-user-search-endpoint/` — stage both the copy and the deletion in a single commit
+- [x] Confirm `openspec/changes/archive/2026-06-01-user-search-endpoint/` exists and `openspec/changes/user-search-endpoint/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-2026-06-01-user-search-endpoint` then `git push -u origin doc/archive-2026-06-01-user-search-endpoint`
+- [x] Open PR from doc branch to `main` with title `docs: archive user-search-endpoint (2026-06-01)` — do NOT push directly to `main`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/user-search-endpoint doc/archive-2026-06-01-user-search-endpoint`

@@ -135,7 +135,7 @@ None.
 
 - **Given** a user is authenticated
 - **When** `GET /api/users/search?q=.*` or `q=(test` is requested
-- **Then** the response is 200 with results matching only literal usernames containing those characters (not a wildcard match); no server error
+- **Then** the response is 200 with results matching only literal usernames starting with those characters as a literal prefix (not a wildcard match); no server error
 
 ### Requirement: Security — Access control
 

@@ -112,7 +112,7 @@
 
 - Requirement category: security
   - Requirement: Rate-limited to prevent enumeration
-  - Design element: `checkRateLimit(auth.userId, 20, 60_000)` at route entry
+  - Design element: `checkRateLimit(\`search:user:${auth.userId}\`, 20, 60_000)` at route entry
   - Acceptance criteria reference: specs/search.md — rate limit
   - Testability notes: Unit test driving rate limiter to limit; assert 429 response
 
