@@ -27,13 +27,11 @@ function makeRequest(q?: string): NextRequest {
 }
 
 function mockDb() {
-  const cursor = {
-    collation: jest.fn().mockReturnThis(),
-    toArray: jest.fn().mockResolvedValue([]),
-  };
   mockedGetDatabase.mockResolvedValue({
     collection: jest.fn().mockReturnValue({
-      find: jest.fn().mockReturnValue(cursor),
+      find: jest.fn().mockReturnValue({
+        toArray: jest.fn().mockResolvedValue([]),
+      }),
     }),
   } as any);
 }
@@ -81,6 +79,15 @@ describe("GET /api/users/search — rate limiting", () => {
     expect(res.status).toBe(429);
   });
 
+  it("uses a namespaced rate-limit key scoped to this endpoint", async () => {
+    await GET(makeRequest("doug"));
+    expect(mockedCheckRateLimit).toHaveBeenCalledWith(
+      "search:user:507f1f77bcf86cd799439011",
+      20,
+      60_000
+    );
+  });
+
   it("proceeds past rate-limit check when no error is thrown", async () => {
     mockedCheckRateLimit.mockReturnValue(undefined);
     const res = await GET(makeRequest("doug"));
@@ -93,15 +100,11 @@ describe("GET /api/users/search — regex escaping", () => {
 
   beforeEach(() => {
     capturedRegex = undefined;
-    const cursor = {
-      collation: jest.fn().mockReturnThis(),
-      toArray: jest.fn().mockResolvedValue([]),
-    };
     mockedGetDatabase.mockResolvedValue({
       collection: jest.fn().mockReturnValue({
         find: jest.fn().mockImplementation((query) => {
           capturedRegex = query.username?.$regex;
-          return cursor;
+          return { toArray: jest.fn().mockResolvedValue([]) };
         }),
       }),
     } as any);
@@ -110,15 +113,18 @@ describe("GET /api/users/search — regex escaping", () => {
   it("escapes .* metacharacters so they are treated as literals", async () => {
     await GET(makeRequest(".*"));
     expect(capturedRegex?.source).toBe("^\\.\\*");
+    expect(capturedRegex?.flags).toContain("i");
   });
 
   it("escapes ( metacharacter so it is treated as literal", async () => {
     await GET(makeRequest("(test"));
     expect(capturedRegex?.source).toBe("^\\(test");
+    expect(capturedRegex?.flags).toContain("i");
   });
 
-  it("leaves plain alphanumeric query unchanged", async () => {
+  it("leaves plain alphanumeric query unchanged and is case-insensitive", async () => {
     await GET(makeRequest("doug"));
     expect(capturedRegex?.source).toBe("^doug");
+    expect(capturedRegex?.flags).toContain("i");
   });
 });

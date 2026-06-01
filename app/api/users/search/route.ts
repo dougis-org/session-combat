@@ -8,8 +8,6 @@ const MAX_Q_LENGTH = 50;
 const RATE_LIMIT = 20;
 const RATE_WINDOW_MS = 60_000;
 const MAX_RESULTS = 15;
-// Case-insensitive collation for prefix search — allows the users.username index to be used.
-const CASE_INSENSITIVE_COLLATION = { locale: "en", strength: 2 } as const;
 
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -28,16 +26,12 @@ export const GET = withAuth(async (request: NextRequest, auth) => {
   }
 
   try {
-    checkRateLimit(auth.userId, RATE_LIMIT, RATE_WINDOW_MS);
+    checkRateLimit(`search:user:${auth.userId}`, RATE_LIMIT, RATE_WINDOW_MS);
   } catch (err) {
     if (err instanceof RateLimitError) {
       return NextResponse.json({ error: err.message }, { status: 429 });
     }
     throw err;
-  }
-
-  if (!ObjectId.isValid(auth.userId)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -46,12 +40,11 @@ export const GET = withAuth(async (request: NextRequest, auth) => {
       .collection("users")
       .find(
         {
-          username: { $regex: new RegExp("^" + escapeRegex(q)) },
+          username: { $regex: new RegExp("^" + escapeRegex(q), "i") },
           _id: { $ne: new ObjectId(auth.userId) },
         },
         { projection: { username: 1 }, limit: MAX_RESULTS }
       )
-      .collation(CASE_INSENSITIVE_COLLATION)
       .toArray();
 
     const results = docs.map((doc) => ({

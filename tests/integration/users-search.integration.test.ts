@@ -49,7 +49,8 @@ describe("GET /api/users/search integration", () => {
   });
 
   it("returns matching users for a valid prefix (case-insensitive)", async () => {
-    const res = await fetch(`${baseUrl}${SEARCH_PATH}?q=srch`, { headers: authed() });
+    // Use uppercase query to verify case-insensitive matching against lowercase usernames
+    const res = await fetch(`${baseUrl}${SEARCH_PATH}?q=SRCH`, { headers: authed() });
     expect(res.status).toBe(200);
     const body = await res.json() as { results: Array<{ id: string; username: string }> };
     expect(body.results.length).toBeGreaterThan(0);
