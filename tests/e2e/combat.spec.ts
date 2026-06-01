@@ -3,6 +3,7 @@ import {
   registerUser,
   createCharacter,
   createParty,
+  seedCharacter,
   importMonster,
   createEncounter,
   openCombat,
@@ -175,25 +176,52 @@ test.describe("Combat flows", () => {
 
   test("user can create a party", async ({ page }, testInfo) => {
     const identity = await registerTestUser(page, testInfo);
+    const aragorn = identity.name("Aragorn");
+    const legolas = identity.name("Legolas");
+    const gimli = identity.name("Gimli");
+    const gandalf = identity.name("Gandalf");
+    await Promise.all([
+      seedCharacter(page, { name: aragorn }),
+      seedCharacter(page, { name: legolas }),
+      seedCharacter(page, { name: gimli }),
+      seedCharacter(page, { name: gandalf }),
+    ]);
     await createParty(page, {
       name: identity.name("Fellowship"),
-      memberCount: 4,
+      memberNames: [aragorn, legolas, gimli, gandalf],
     });
+    await expect(page.getByText("Members: 4")).toBeVisible();
     await expect(page).not.toHaveURL(/\/parties\/create/);
   });
 
-  test("party with different member counts can be created", async ({
+  test("party with different member counts shows correct member count", async ({
     page,
   }, testInfo) => {
     const identity = await registerTestUser(page, testInfo);
+    const frodo = identity.name("Frodo");
+    const sam = identity.name("Sam");
+    const merry = identity.name("Merry");
+    const pippin = identity.name("Pippin");
+    const aragorn = identity.name("Aragorn");
+    const boromir = identity.name("Boromir");
+    await Promise.all([
+      seedCharacter(page, { name: frodo }),
+      seedCharacter(page, { name: sam }),
+      seedCharacter(page, { name: merry }),
+      seedCharacter(page, { name: pippin }),
+      seedCharacter(page, { name: aragorn }),
+      seedCharacter(page, { name: boromir }),
+    ]);
     await createParty(page, {
       name: identity.name("Small Group"),
-      memberCount: 2,
+      memberNames: [frodo, sam],
     });
+    await expect(page.getByText("Members: 2")).toBeVisible();
     await createParty(page, {
       name: identity.name("Large Group"),
-      memberCount: 6,
+      memberNames: [frodo, sam, merry, pippin, aragorn, boromir],
     });
+    await expect(page.getByText("Members: 6")).toBeVisible();
     await expect(page).not.toHaveURL(/\/create/);
   });
 
@@ -505,7 +533,7 @@ test.describe("Combat flows", () => {
 
     await createParty(page, {
       name: identity.name("Dwarven Company"),
-      memberCount: 13,
+      memberNames: [identity.name("Thorin")],
     });
     await expect(page).not.toHaveURL(/\/parties\/create/);
 
