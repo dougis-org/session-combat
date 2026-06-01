@@ -139,16 +139,8 @@ None.
 
 ### Requirement: Security — Access control
 
-#### Scenario: No session token
-
-- **Given** no valid authentication token is present
-- **When** `GET /api/users/search?q=test` is requested
-- **Then** the response is 401 and no user data is returned
+See "Unauthenticated access denied" above.
 
 ### Requirement: Reliability — Graceful empty state
 
-#### Scenario: No users match query
-
-- **Given** a user is authenticated
-- **When** `GET /api/users/search?q=zzz` is requested and no usernames start with "zzz"
-- **Then** the response is 200 with `{ results: [] }` (not 404, not 500)
+See "No matches" scenario under "User search endpoint" above.
