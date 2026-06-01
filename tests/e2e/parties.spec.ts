@@ -17,7 +17,7 @@ test.describe("Party creation — data-driven", () => {
     test(`create party: ${name}`, async ({ page }, testInfo) => {
       const identity = createTestIdentity(testInfo);
       await registerUser(page, identity.email, STRONG_PASSWORD);
-      await createParty(page, { name, description, memberCount: 0 });
+      await createParty(page, { name, description, memberNames: [] });
       await expect(page.getByText(name)).toBeVisible();
     });
   }
@@ -107,7 +107,7 @@ test.describe("Party — no members", () => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
     const partyName = identity.name("Empty Party");
-    await createParty(page, { name: partyName, memberCount: 0 });
+    await createParty(page, { name: partyName, memberNames: [] });
     await expect(page.getByText("Members: 0")).toBeVisible();
   });
 });
@@ -123,7 +123,7 @@ test.describe("Party editing", () => {
     const originalName = identity.name("Original Party");
     const newName = identity.name("Renamed Party");
 
-    await createParty(page, { name: originalName, memberCount: 0 });
+    await createParty(page, { name: originalName, memberNames: [] });
 
     await page
       .locator("div", { has: page.getByRole("heading", { name: originalName }) })
@@ -149,7 +149,7 @@ test.describe("Party deletion", () => {
     await registerUser(page, identity.email, STRONG_PASSWORD);
     const partyName = identity.name("Delete Me Party");
 
-    await createParty(page, { name: partyName, memberCount: 0 });
+    await createParty(page, { name: partyName, memberNames: [] });
 
     page.once("dialog", (dialog) => void dialog.accept());
     const deleteResponse = page.waitForResponse(
@@ -175,5 +175,63 @@ test.describe("Party deletion", () => {
     // Wait for the re-fetch to complete before asserting absence
     await partiesRefetch;
     await expect(page.getByText(partyName)).toHaveCount(0, { timeout: 5000 });
+  });
+});
+
+// ────────────────────────────────────────────────────────────
+// Party member management
+// ────────────────────────────────────────────────────────────
+
+test.describe("Party member management", () => {
+  let charA = "";
+  let charB = "";
+  let partyName = "";
+
+  test.beforeEach(async ({ page }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    charA = identity.name("Aragorn");
+    charB = identity.name("Legolas");
+    await seedCharacter(page, { name: charA });
+    await seedCharacter(page, { name: charB });
+    partyName = identity.name("Fellowship");
+  });
+
+  async function openEditParty(page: Parameters<typeof createParty>[0], name: string) {
+    await page
+      .locator("div", { has: page.getByRole("heading", { name }) })
+      .getByRole("button", { name: "Edit" })
+      .click();
+  }
+
+  async function savePartyEdit(page: Parameters<typeof createParty>[0], _name: string) {
+    await page.getByRole("button", { name: /Save Party/i }).click();
+    await page.getByRole("button", { name: "Cancel" }).waitFor({ state: "hidden", timeout: 15000 });
+  }
+
+  test("add a member to existing party increases member count", async ({ page }) => {
+    await createParty(page, { name: partyName, memberNames: [charA] });
+    await openEditParty(page, partyName);
+    await page.getByLabel(charB).check();
+    await savePartyEdit(page, partyName);
+    await expect(page.getByText("Members: 2")).toBeVisible();
+  });
+
+  test("remove a member from existing party decreases member count", async ({ page }) => {
+    await createParty(page, { name: partyName, memberNames: [charA, charB] });
+    await openEditParty(page, partyName);
+    await page.getByLabel(charA).uncheck();
+    await savePartyEdit(page, partyName);
+    await expect(page.getByText("Members: 1")).toBeVisible();
+    await expect(page.getByText(charA)).not.toBeVisible();
+  });
+
+  test("party card shows correct member names after member changes", async ({ page }) => {
+    await createParty(page, { name: partyName, memberNames: [charA, charB] });
+    await openEditParty(page, partyName);
+    await page.getByLabel(charA).uncheck();
+    await savePartyEdit(page, partyName);
+    await expect(page.getByText(charB)).toBeVisible();
+    await expect(page.getByText(charA)).not.toBeVisible();
   });
 });

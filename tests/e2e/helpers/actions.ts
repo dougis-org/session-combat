@@ -141,7 +141,7 @@ export async function createCharacter(
  */
 export async function createParty(
   page: Page,
-  party: { name: string; description?: string; memberCount: number },
+  party: { name: string; description?: string; memberNames: string[] },
 ): Promise<void> {
   await page.goto("/parties");
   await page.getByRole("button", { name: "Add New Party" }).click();
@@ -153,11 +153,8 @@ export async function createParty(
     );
   }
 
-  const memberCheckboxes = page.locator('input[type="checkbox"]');
-  const availableCount = await memberCheckboxes.count();
-  const toSelect = Math.min(party.memberCount, availableCount);
-  for (let i = 0; i < toSelect; i++) {
-    await memberCheckboxes.nth(i).check();
+  for (const name of party.memberNames) {
+    await page.getByLabel(name).check();
   }
 
   await page.getByRole("button", { name: /Save Party/i }).click();
