@@ -192,9 +192,11 @@ test.describe("Party member management", () => {
     await registerUser(page, identity.email, STRONG_PASSWORD);
     charA = identity.name("Aragorn");
     charB = identity.name("Legolas");
-    await seedCharacter(page, { name: charA });
-    await seedCharacter(page, { name: charB });
     partyName = identity.name("Fellowship");
+    await Promise.all([
+      seedCharacter(page, { name: charA }),
+      seedCharacter(page, { name: charB }),
+    ]);
   });
 
   async function openEditParty(page: Parameters<typeof createParty>[0], name: string) {
@@ -204,7 +206,7 @@ test.describe("Party member management", () => {
       .click();
   }
 
-  async function savePartyEdit(page: Parameters<typeof createParty>[0], _name: string) {
+  async function savePartyEdit(page: Parameters<typeof createParty>[0]) {
     await page.getByRole("button", { name: /Save Party/i }).click();
     await page.getByRole("button", { name: "Cancel" }).waitFor({ state: "hidden", timeout: 15000 });
   }
@@ -213,7 +215,7 @@ test.describe("Party member management", () => {
     await createParty(page, { name: partyName, memberNames: [charA] });
     await openEditParty(page, partyName);
     await page.getByLabel(charB).check();
-    await savePartyEdit(page, partyName);
+    await savePartyEdit(page);
     await expect(page.getByText("Members: 2")).toBeVisible();
   });
 
@@ -221,7 +223,7 @@ test.describe("Party member management", () => {
     await createParty(page, { name: partyName, memberNames: [charA, charB] });
     await openEditParty(page, partyName);
     await page.getByLabel(charA).uncheck();
-    await savePartyEdit(page, partyName);
+    await savePartyEdit(page);
     await expect(page.getByText("Members: 1")).toBeVisible();
     await expect(page.getByText(charA)).not.toBeVisible();
   });
@@ -230,7 +232,7 @@ test.describe("Party member management", () => {
     await createParty(page, { name: partyName, memberNames: [charA, charB] });
     await openEditParty(page, partyName);
     await page.getByLabel(charA).uncheck();
-    await savePartyEdit(page, partyName);
+    await savePartyEdit(page);
     await expect(page.getByText(charB)).toBeVisible();
     await expect(page.getByText(charA)).not.toBeVisible();
   });

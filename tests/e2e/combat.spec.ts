@@ -180,10 +180,12 @@ test.describe("Combat flows", () => {
     const legolas = identity.name("Legolas");
     const gimli = identity.name("Gimli");
     const gandalf = identity.name("Gandalf");
-    await seedCharacter(page, { name: aragorn });
-    await seedCharacter(page, { name: legolas });
-    await seedCharacter(page, { name: gimli });
-    await seedCharacter(page, { name: gandalf });
+    await Promise.all([
+      seedCharacter(page, { name: aragorn }),
+      seedCharacter(page, { name: legolas }),
+      seedCharacter(page, { name: gimli }),
+      seedCharacter(page, { name: gandalf }),
+    ]);
     await createParty(page, {
       name: identity.name("Fellowship"),
       memberNames: [aragorn, legolas, gimli, gandalf],
@@ -202,12 +204,14 @@ test.describe("Combat flows", () => {
     const pippin = identity.name("Pippin");
     const aragorn = identity.name("Aragorn");
     const boromir = identity.name("Boromir");
-    await seedCharacter(page, { name: frodo });
-    await seedCharacter(page, { name: sam });
-    await seedCharacter(page, { name: merry });
-    await seedCharacter(page, { name: pippin });
-    await seedCharacter(page, { name: aragorn });
-    await seedCharacter(page, { name: boromir });
+    await Promise.all([
+      seedCharacter(page, { name: frodo }),
+      seedCharacter(page, { name: sam }),
+      seedCharacter(page, { name: merry }),
+      seedCharacter(page, { name: pippin }),
+      seedCharacter(page, { name: aragorn }),
+      seedCharacter(page, { name: boromir }),
+    ]);
     await createParty(page, {
       name: identity.name("Small Group"),
       memberNames: [frodo, sam],
