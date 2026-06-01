@@ -39,9 +39,9 @@
 
 ### Decision 3: Rate-limit key
 
-- Chosen: `auth.userId` as the rate-limit key (20 req/min, 60 s window)
-- Alternatives considered: IP address
-- Rationale: IP is unreliable (NAT, proxies); userId ties the limit to the authenticated actor; consistent with how other rate-limited endpoints should work
+- Chosen: `search:user:<userId>` as the rate-limit key (20 req/min, 60 s window)
+- Alternatives considered: IP address; bare `auth.userId`
+- Rationale: IP is unreliable (NAT, proxies); userId ties the limit to the authenticated actor; namespaced key (`search:user:`) scopes the limit to this endpoint and prevents accidental coupling with other routes that may also rate-limit by userId
 - Trade-offs: Per-user limit resets on cold start (existing known limitation)
 
 ### Decision 4: Input validation

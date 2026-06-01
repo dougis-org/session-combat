@@ -91,7 +91,7 @@ describe("GET /api/users/search integration", () => {
     const res = await fetch(`${baseUrl}${SEARCH_PATH}?q=${prefix}`, { headers: authed() });
     expect(res.status).toBe(200);
     const body = await res.json() as { results: unknown[] };
-    expect(body.results.length).toBeLessThanOrEqual(15);
+    expect(body.results.length).toBe(15);
   }, 60000);
 
   it("handles a single character query", async () => {

@@ -10,8 +10,8 @@ description: Tests for the user-search-endpoint change
 This document outlines the tests for the `user-search-endpoint` change. All work follows strict TDD: write a failing test, make it pass with the simplest code, then refactor.
 
 Test files:
-- Unit: `app/api/users/search/__tests__/route.unit.test.ts`
-- Integration: `app/api/users/search/__tests__/route.integration.test.ts`
+- Unit: `tests/unit/api/users/search/route.unit.test.ts`
+- Integration: `tests/integration/users-search.integration.test.ts`
 
 ## Testing Steps
 

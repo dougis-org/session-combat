@@ -34,6 +34,11 @@ export const GET = withAuth(async (request: NextRequest, auth) => {
     throw err;
   }
 
+  if (!ObjectId.isValid(auth.userId)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const callerId = new ObjectId(auth.userId);
+
   try {
     const db = await getDatabase();
     const docs = await db
@@ -41,7 +46,7 @@ export const GET = withAuth(async (request: NextRequest, auth) => {
       .find(
         {
           username: { $regex: new RegExp("^" + escapeRegex(q), "i") },
-          _id: { $ne: new ObjectId(auth.userId) },
+          _id: { $ne: callerId },
         },
         { projection: { username: 1 }, limit: MAX_RESULTS }
       )

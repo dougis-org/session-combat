@@ -23,7 +23,7 @@
 
 ### 3. Add rate limiting
 
-- [x] Call `checkRateLimit(auth.userId, 20, 60_000)` at route entry; catch `RateLimitError` and return 429
+- [x] Call `checkRateLimit(\`search:user:${auth.userId}\`, 20, 60_000)` at route entry; catch `RateLimitError` and return 429
 - [x] Add unit test: mock `checkRateLimit` throwing `RateLimitError` → assert 429 response
 
 ### 4. Implement regex-escaped prefix DB query
@@ -69,10 +69,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `feat/user-search-endpoint` and push to remote
-- [ ] Open PR from `feat/user-search-endpoint` to `main`. PR body must include `Closes #302`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to `feat/user-search-endpoint` and push to remote
+- [x] Open PR from `feat/user-search-endpoint` to `main`. PR body must include `Closes #302`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
 - [ ] **Monitor PR comments** — poll autonomously; address comments, commit fixes, follow Remote push validation, push to `feat/user-search-endpoint`; wait 180 seconds; repeat until no unresolved threads remain
 - [ ] **Monitor CI checks** — poll `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, commit, follow Remote push validation, push; wait 180 seconds; repeat until all required checks pass
