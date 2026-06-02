@@ -114,10 +114,10 @@ Blocking resolution flow:
 - [x] Mark all remaining tasks complete
 - [x] No documentation updates required (test-only change)
 - [x] Sync approved spec deltas into `openspec/specs/` (no global spec impact — test helper only)
-- [ ] Archive the change: move `openspec/changes/fix-createparty-member-selection/` to `openspec/changes/archive/YYYY-MM-DD-fix-createparty-member-selection/` in a single atomic commit (copy + delete staged together)
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-createparty-member-selection/` exists and `openspec/changes/fix-createparty-member-selection/` is gone
-- [ ] **Create doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-fix-createparty-member-selection` then push
-- [ ] Open PR: `docs: archive fix-createparty-member-selection (YYYY-MM-DD)` — do NOT push directly to main
-- [ ] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor doc PR until merged (same loop — address comments, fix CI, push to doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d fix/createparty-member-selection doc/archive-YYYY-MM-DD-fix-createparty-member-selection`
+- [x] Archive the change: move `openspec/changes/fix-createparty-member-selection/` to `openspec/changes/archive/2026-06-01-fix-createparty-member-selection/` in a single atomic commit (copy + delete staged together)
+- [x] Confirm `openspec/changes/archive/2026-06-01-fix-createparty-member-selection/` exists and `openspec/changes/fix-createparty-member-selection/` is gone
+- [x] **Create doc branch:** `git checkout -b doc/archive-2026-06-01-fix-createparty-member-selection` then push
+- [x] Open PR: `docs: archive fix-createparty-member-selection (2026-06-01)` — do NOT push directly to main
+- [x] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor doc PR until merged (same loop — address comments, fix CI, push to doc branch, repeat)
+- [x] Prune merged local branches (after merge): `git fetch --prune` and `git branch -d fix/createparty-member-selection doc/archive-2026-06-01-fix-createparty-member-selection`
