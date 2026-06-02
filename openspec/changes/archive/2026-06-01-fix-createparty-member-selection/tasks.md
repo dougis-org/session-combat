@@ -90,13 +90,13 @@ Verification requirements (all must pass before PR or pushing updates):
 ## PR and Merge
 
 - [x] Ensure `openspec-review-code` sub-agent was run and all findings addressed before final commit
-- [ ] Commit all changes to `fix/createparty-member-selection` and push to remote
-- [ ] Open PR from `fix/createparty-member-selection` to `main`. PR body must include `Closes #117`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (never `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — address, commit, push to `fix/createparty-member-selection`, wait 180s, repeat until no unresolved threads
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix required failures, commit, push, wait 180s, repeat
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user
+- [x] Commit all changes to `fix/createparty-member-selection` and push to remote
+- [x] Open PR from `fix/createparty-member-selection` to `main`. PR body must include `Closes #117`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (never `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — address, commit, push to `fix/createparty-member-selection`, wait 180s, repeat until no unresolved threads
+- [x] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix required failures, commit, push, wait 180s, repeat
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user
 
 Ownership metadata:
 - Implementer: dougis
@@ -109,15 +109,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on main
-- [ ] Mark all remaining tasks complete
-- [ ] No documentation updates required (test-only change)
-- [ ] Sync approved spec deltas into `openspec/specs/` (no global spec impact — test helper only)
-- [ ] Archive the change: move `openspec/changes/fix-createparty-member-selection/` to `openspec/changes/archive/YYYY-MM-DD-fix-createparty-member-selection/` in a single atomic commit (copy + delete staged together)
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-createparty-member-selection/` exists and `openspec/changes/fix-createparty-member-selection/` is gone
-- [ ] **Create doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-fix-createparty-member-selection` then push
-- [ ] Open PR: `docs: archive fix-createparty-member-selection (YYYY-MM-DD)` — do NOT push directly to main
-- [ ] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor doc PR until merged (same loop — address comments, fix CI, push to doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d fix/createparty-member-selection doc/archive-YYYY-MM-DD-fix-createparty-member-selection`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on main
+- [x] Mark all remaining tasks complete
+- [x] No documentation updates required (test-only change)
+- [x] Sync approved spec deltas into `openspec/specs/` (no global spec impact — test helper only)
+- [x] Archive the change: move `openspec/changes/fix-createparty-member-selection/` to `openspec/changes/archive/2026-06-01-fix-createparty-member-selection/` in a single atomic commit (copy + delete staged together)
+- [x] Confirm `openspec/changes/archive/2026-06-01-fix-createparty-member-selection/` exists and `openspec/changes/fix-createparty-member-selection/` is gone
+- [x] **Create doc branch:** `git checkout -b doc/archive-2026-06-01-fix-createparty-member-selection` then push
+- [x] Open PR: `docs: archive fix-createparty-member-selection (2026-06-01)` — do NOT push directly to main
+- [x] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor doc PR until merged (same loop — address comments, fix CI, push to doc branch, repeat)
+- [x] Prune merged local branches (after merge): `git fetch --prune` and `git branch -d fix/createparty-member-selection doc/archive-2026-06-01-fix-createparty-member-selection`
