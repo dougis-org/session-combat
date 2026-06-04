@@ -115,6 +115,36 @@ describe("POST /api/items — rarity validation", () => {
   });
 });
 
+describe("POST /api/items — numeric field validation", () => {
+  it("returns 400 when quantity is zero", async () => {
+    const res = await POST(makePostRequest({ name: "Sword", type: "weapon", rarity: "common", quantity: 0 }));
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("Quantity must be a positive number");
+  });
+
+  it("returns 400 when quantity is negative", async () => {
+    const res = await POST(makePostRequest({ name: "Sword", type: "weapon", rarity: "common", quantity: -1 }));
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("Quantity must be a positive number");
+  });
+
+  it("returns 400 when value is negative", async () => {
+    const res = await POST(makePostRequest({ name: "Sword", type: "weapon", rarity: "common", value: -5 }));
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("Value must be a non-negative number");
+  });
+
+  it("returns 400 when weight is negative", async () => {
+    const res = await POST(makePostRequest({ name: "Sword", type: "weapon", rarity: "common", weight: -1 }));
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("Weight must be a non-negative number");
+  });
+});
+
 describe("POST /api/items — success cases", () => {
   it("returns 201 with full item shape on valid request", async () => {
     mockDb();
