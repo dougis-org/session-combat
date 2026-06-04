@@ -7,7 +7,7 @@
  * tests. Do not migrate this file to the global shared server setup.
  */
 import { MongoDBContainer, StartedMongoDBContainer } from "@testcontainers/mongodb";
-import { createMockClient, createTestCreature, createTestSpell } from "@/tests/helpers/importTestHelpers";
+import { createMockClient, createTestCreature, createTestSpell } from "@/tests/helpers/open5eTestHelpers";
 import type { IOpen5EClient } from "@/lib/import/open5eAdapter";
 import type { ImportResult } from "@/lib/import/dedupeEngine";
 import type { Db } from "mongodb";
