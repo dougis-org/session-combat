@@ -38,58 +38,58 @@ For each task in `tasks.md`:
 
 These tests drive the route changes. Write them first — they will fail until the interface and validation are implemented.
 
-- [ ] **GET-1** `GET /api/items` returns 200 with items array
+- [x] **GET-1** `GET /api/items` returns 200 with items array
   - Spec: Non-Functional / Reliability
   - Mock `getDatabase` to return a collection with `find().toArray()` resolving to `[mockItem]`
   - Assert status 200 and body equals `[mockItem]`
 
-- [ ] **GET-2** `GET /api/items` returns 500 when DB throws
+- [x] **GET-2** `GET /api/items` returns 500 when DB throws
   - Spec: Non-Functional / Reliability — "GET returns 500 on DB error"
   - Mock `getDatabase` to throw
   - Assert status 500 and `body.error === "Failed to fetch items"`
 
-- [ ] **POST-1** `POST /api/items` returns 400 when `name` is missing
+- [x] **POST-1** `POST /api/items` returns 400 when `name` is missing
   - Spec: MODIFIED — POST validates `name`
   - Body: `{ type: "weapon", rarity: "common" }`
   - Assert status 400 and `body.error === "Item name is required"`
 
-- [ ] **POST-2** `POST /api/items` returns 400 when `name` is whitespace-only
+- [x] **POST-2** `POST /api/items` returns 400 when `name` is whitespace-only
   - Spec: MODIFIED — POST validates `name`
   - Body: `{ name: "   ", type: "weapon", rarity: "common" }`
   - Assert status 400 and `body.error === "Item name is required"`
 
-- [ ] **POST-3** `POST /api/items` returns 400 when `type` is missing
+- [x] **POST-3** `POST /api/items` returns 400 when `type` is missing
   - Spec: ADDED — POST validates `type` / "POST with missing type returns 400"
   - Body: `{ name: "Sword", rarity: "common" }`
   - Assert status 400 and `body.error === "Item type is required"`
 
-- [ ] **POST-4** `POST /api/items` returns 400 when `type` is not a valid enum value
+- [x] **POST-4** `POST /api/items` returns 400 when `type` is not a valid enum value
   - Spec: ADDED — POST validates `type` / "POST with invalid type returns 400"
   - Body: `{ name: "Sword", type: "banana", rarity: "common" }`
   - Assert status 400 and `body.error === "Invalid item type"`
 
-- [ ] **POST-5** `POST /api/items` returns 400 when `rarity` is missing
+- [x] **POST-5** `POST /api/items` returns 400 when `rarity` is missing
   - Spec: ADDED — POST validates `rarity` / "POST with missing rarity returns 400"
   - Body: `{ name: "Sword", type: "weapon" }`
   - Assert status 400 and `body.error === "Item rarity is required"`
 
-- [ ] **POST-6** `POST /api/items` returns 400 when `rarity` is not a valid enum value
+- [x] **POST-6** `POST /api/items` returns 400 when `rarity` is not a valid enum value
   - Spec: ADDED — POST validates `rarity` / "POST with invalid rarity returns 400"
   - Body: `{ name: "Sword", type: "weapon", rarity: "epic" }`
   - Assert status 400 and `body.error === "Invalid item rarity"`
 
-- [ ] **POST-7** `POST /api/items` returns 201 with full item shape on valid request
+- [x] **POST-7** `POST /api/items` returns 201 with full item shape on valid request
   - Spec: ADDED — POST validates `type` / "POST with valid type succeeds"; POST validates `rarity` / "POST with valid rarity succeeds"
   - Body: `{ name: "Longsword", type: "weapon", rarity: "uncommon", description: "A sharp blade", quantity: 2, value: 15, weight: 3, attunement: false, equipped: true, properties: ["martial"], notes: "Found in the dungeon" }`
   - Mock `getDatabase` collection `insertOne` to resolve
   - Assert status 201; body contains all provided fields; `id` is a UUID string; `userId === "user-123"` (from mock auth)
 
-- [ ] **POST-8** `POST /api/items` returns 201 with defaults when only required fields provided
+- [x] **POST-8** `POST /api/items` returns 201 with defaults when only required fields provided
   - Spec: ADDED — POST applies safe defaults / "POST with only required fields returns item with defaults"
   - Body: `{ name: "Potion of Healing", type: "potion", rarity: "common" }`
   - Assert status 201; `body.quantity === 1`; `body.attunement === false`; `body.equipped === false`
 
-- [ ] **POST-9** `POST /api/items` returns 500 when DB throws on insert
+- [x] **POST-9** `POST /api/items` returns 500 when DB throws on insert
   - Spec: Non-Functional / Reliability — "POST returns 500 on DB error"
   - Mock `getDatabase` to throw
   - Assert status 500 and `body.error === "Failed to create item"`
@@ -100,27 +100,27 @@ These tests drive the route changes. Write them first — they will fail until t
 
 These tests require the full stack (real server + MongoDB). Follow `tests/integration/content.integration.test.ts` for setup.
 
-- [ ] **INT-1** `GET /api/items` without auth cookie returns 401
+- [x] **INT-1** `GET /api/items` without auth cookie returns 401
   - Spec: Non-Functional / Security — "GET requires authentication"
   - Call GET with no `Cookie` header
   - Assert status 401
 
-- [ ] **INT-2** `POST /api/items` without auth cookie returns 401
+- [x] **INT-2** `POST /api/items` without auth cookie returns 401
   - Spec: Non-Functional / Security — "POST requires authentication"
   - Call POST with no `Cookie` header
   - Assert status 401
 
-- [ ] **INT-3** `POST /api/items` with valid body returns 201 with correct shape and defaults
+- [x] **INT-3** `POST /api/items` with valid body returns 201 with correct shape and defaults
   - Spec: ADDED — POST validates `type` / "POST with valid type succeeds"
   - Call POST with `{ name: "Dagger", type: "weapon", rarity: "common" }`
   - Assert status 201; `body.quantity === 1`; `body.attunement === false`; `body.equipped === false`; `body.id` is a string
 
-- [ ] **INT-4** POST then GET round-trip: created item appears in GET response
+- [x] **INT-4** POST then GET round-trip: created item appears in GET response
   - Spec: Implied by all ADDED requirements — item must be persisted and retrievable
   - POST a valid item; capture `body.id`
   - Call GET; assert response contains an item with the same `id`
 
-- [ ] **INT-5** User isolation: user A's items not visible to user B
+- [x] **INT-5** User isolation: user A's items not visible to user B
   - Spec: Non-Functional / Security — "GET enforces user isolation"
   - Register two users (user A and user B) via `registerTestUser`
   - User A POSTs an item

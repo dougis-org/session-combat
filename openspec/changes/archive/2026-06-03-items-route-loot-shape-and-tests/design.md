@@ -124,7 +124,7 @@
 - Rollback trigger: CI failure, type errors, or integration test failures post-merge
 - Rollback steps: Revert `app/api/items/route.ts` to the previous interface; delete new test files. No DB migration needed — field additions to the interface don't affect existing documents.
 - Data migration considerations: None. Existing items in MongoDB (none in production yet) are unaffected; new fields are optional or have defaults.
-- Verification after rollback: Run `npm test` and `npm run test:integration`; confirm 0 failures.
+- Verification after rollback: Run `npm run test:unit` and `npm run test:integration`; confirm 0 failures.
 
 ## Operational Blocking Policy
 
