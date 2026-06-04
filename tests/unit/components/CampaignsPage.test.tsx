@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Response as FetchResponse } from 'node-fetch';
 import { CampaignsContent } from '@/app/campaigns/page';
@@ -148,7 +148,7 @@ describe('Campaign Catalog UI', () => {
 
     const copyButton = await screen.findByRole('button', { name: /copy/i });
 
-    fireEvent.click(copyButton);
+    await userEvent.click(copyButton);
 
     const loadingButton = await screen.findByRole('button', { name: /copying/i });
     expect(loadingButton).toBeInTheDocument();
@@ -156,6 +156,7 @@ describe('Campaign Catalog UI', () => {
 
     resolveCopy(undefined);
     await copyPromise;
+    await screen.findByRole('button', { name: /copy/i });
   });
 
   it('Copy failure shows inline error message', async () => {

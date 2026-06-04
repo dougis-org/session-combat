@@ -90,9 +90,7 @@ describe('SessionsPage — session log display', () => {
   test('renders milestone badge as "Level Up" when newLevel is 0', async () => {
     const log = { ...MILESTONE_LOG, newLevel: 0 };
     await renderWithData([log]);
-    // The session title 'Level Up!' is asserted here; the badge renders 'Level 0' due to
-    // JS falsy short-circuit (0 && ...) — component bug tracked separately, not in scope
-    expect(await screen.findByText('Level Up!')).toBeInTheDocument();
+    expect(await screen.findByText('Level Up')).toBeInTheDocument();
   });
 
   test('shows empty state when no logs', async () => {
