@@ -155,7 +155,7 @@ describe('Campaign Catalog UI', () => {
 
     resolveCopy(undefined);
     await copyPromise;
-    await screen.findByRole('button', { name: /copy/i });
+    await screen.findByRole('button', { name: /^copy$/i });
   });
 
   it('Copy failure shows inline error message', async () => {
