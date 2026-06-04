@@ -1,9 +1,8 @@
-import { MongoClient, ObjectId } from "mongodb";
-import { registerTestUser } from "./helpers/users";
+import { ObjectId } from "mongodb";
+import { registerTestUser, makeUserAdmin } from "./helpers/users";
 
 describe("isUserAdmin Integration Tests", () => {
   let baseUrl: string;
-  let mongoClient: MongoClient;
   let isUserAdmin: (userId: string) => Promise<boolean | null>;
 
   beforeAll(async () => {
@@ -13,13 +12,10 @@ describe("isUserAdmin Integration Tests", () => {
     jest.resetModules();
     const mod = await import("@/lib/permissions");
     isUserAdmin = mod.isUserAdmin;
-
-    mongoClient = new MongoClient(process.env.MONGODB_URI!);
-    await mongoClient.connect();
   }, 30000);
 
   afterAll(async () => {
-    await mongoClient.close();
+    // No MongoClient to close
   }, 30000);
 
   async function registerUser(emailSuffix: string): Promise<{ userId: string }> {
@@ -30,11 +26,7 @@ describe("isUserAdmin Integration Tests", () => {
   it("returns true for admin user", async () => {
     const { userId } = await registerUser("admin");
 
-    const db = mongoClient.db(process.env.MONGODB_DB);
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { isAdmin: true } }
-    );
+    await makeUserAdmin(userId);
 
     const result = await isUserAdmin(userId);
     expect(result).toBe(true);
@@ -55,5 +47,12 @@ describe("isUserAdmin Integration Tests", () => {
   it("returns null for malformed userId", async () => {
     const result = await isUserAdmin("not-a-valid-object-id");
     expect(result).toBeNull();
+  });
+
+  it("fails to promote non-existent user to admin", async () => {
+    const fakeId = new ObjectId().toString();
+    await expect(makeUserAdmin(fakeId)).rejects.toThrow(
+      `Failed to promote user to admin: user ${fakeId} not found`
+    );
   });
 });

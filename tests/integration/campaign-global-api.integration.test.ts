@@ -1,6 +1,5 @@
 import fetch from "node-fetch";
-import { MongoClient, ObjectId } from "mongodb";
-import { registerTestUser } from "./helpers/users";
+import { registerTestUser, makeUserAdmin } from "./helpers/users";
 
 interface TemplateResponse {
   id: string;
@@ -27,7 +26,6 @@ interface CampaignResponse {
 
 describe("Campaign Global API Integration Tests", () => {
   let baseUrl: string;
-  let mongoClient: MongoClient;
   let userCookie: string;
   let adminCookie: string;
 
@@ -35,23 +33,16 @@ describe("Campaign Global API Integration Tests", () => {
     baseUrl = process.env.TEST_BASE_URL!;
     if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
 
-    mongoClient = new MongoClient(process.env.MONGODB_URI!);
-    await mongoClient.connect();
-
     userCookie = (await registerTestUser(baseUrl, "campaign-global-user")).cookie;
 
     const adminUser = await registerTestUser(baseUrl, "campaign-global-admin");
     adminCookie = adminUser.cookie;
 
-    const db = mongoClient.db(process.env.MONGODB_DB);
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(adminUser.userId) },
-      { $set: { isAdmin: true } }
-    );
+    await makeUserAdmin(adminUser.userId);
   }, 30000);
 
   afterAll(async () => {
-    await mongoClient.close();
+    // No MongoClient to close
   }, 30000);
 
   function authedUser() { return { "Content-Type": "application/json", Cookie: userCookie }; }
