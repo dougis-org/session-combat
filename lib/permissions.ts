@@ -1,3 +1,4 @@
+// Reusable helper functions for checking user permissions and admin roles
 import { ObjectId } from 'mongodb';
 import { getDatabase } from '@/lib/db';
 
