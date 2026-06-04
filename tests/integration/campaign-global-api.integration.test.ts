@@ -41,10 +41,6 @@ describe("Campaign Global API Integration Tests", () => {
     await makeUserAdmin(adminUser.userId);
   }, 30000);
 
-  afterAll(async () => {
-    // No MongoClient to close
-  }, 30000);
-
   function authedUser() { return { "Content-Type": "application/json", Cookie: userCookie }; }
   function authedAdmin() { return { "Content-Type": "application/json", Cookie: adminCookie }; }
 

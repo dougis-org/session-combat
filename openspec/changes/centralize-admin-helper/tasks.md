@@ -8,12 +8,12 @@
 ## Execution
 
 ### BDD/TDD Phase: Test Drafts
-- [x] **Step 3 — Draft tests and imports**: Update [tests/integration/permissions.test.ts](file:///home/doug/dev3/session-combat/tests/integration/permissions.test.ts) and [tests/integration/campaign-global-api.integration.test.ts](file:///home/doug/dev3/session-combat/tests/integration/campaign-global-api.integration.test.ts) to import `makeUserAdmin` and remove their inline MongoClient connections.
+- [x] **Step 3 — Draft tests and imports**: Update [tests/integration/permissions.test.ts](../../../tests/integration/permissions.test.ts) and [tests/integration/campaign-global-api.integration.test.ts](../../../tests/integration/campaign-global-api.integration.test.ts) to import `makeUserAdmin` and remove their inline MongoClient connections.
 - [x] **Step 4 — Run tests to verify failure**: Run integration tests to verify they fail due to `makeUserAdmin` being undefined/missing:
   `npm run test:integration tests/integration/permissions.test.ts tests/integration/campaign-global-api.integration.test.ts`
 
 ### Implementation Phase
-- [x] **Step 5 — Create helper function**: Implement `makeUserAdmin(userId: string, mongoUri?: string, mongoDb?: string): Promise<void>` in [tests/integration/helpers/users.ts](file:///home/doug/dev3/session-combat/tests/integration/helpers/users.ts) to handle MongoDB connection, updating `isAdmin: true`, and client teardown.
+- [x] **Step 5 — Create helper function**: Implement `makeUserAdmin(userId: string, mongoUri?: string, mongoDb?: string): Promise<void>` in [tests/integration/helpers/users.ts](../../../tests/integration/helpers/users.ts) to handle MongoDB connection, updating `isAdmin: true`, and client teardown.
 - [x] **Step 6 — Verify integration tests pass**: Run the integration tests again to ensure they now pass successfully with the helper implemented.
 
 ## Pre-Commit Code Review

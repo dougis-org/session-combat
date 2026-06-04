@@ -14,10 +14,6 @@ describe("isUserAdmin Integration Tests", () => {
     isUserAdmin = mod.isUserAdmin;
   }, 30000);
 
-  afterAll(async () => {
-    // No MongoClient to close
-  }, 30000);
-
   async function registerUser(emailSuffix: string): Promise<{ userId: string }> {
     const { userId } = await registerTestUser(baseUrl, `permissions-${emailSuffix}`);
     return { userId };

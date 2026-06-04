@@ -29,7 +29,11 @@ export async function makeUserAdmin(
       throw new Error(`Failed to promote user to admin: user ${userId} not found`);
     }
   } finally {
-    await client.close();
+    try {
+      await client.close();
+    } catch (err) {
+      // Ignore close errors to avoid masking the primary error from the try block
+    }
   }
 }
 
