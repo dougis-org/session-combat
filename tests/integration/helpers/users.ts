@@ -1,5 +1,47 @@
 import fetch from "node-fetch";
+import { MongoClient, ObjectId } from "mongodb";
 import { createTestUser } from "@/tests/integration/auth.test.helpers";
+
+export async function makeUserAdmin(
+  userId: string,
+  mongoUri = process.env.MONGODB_URI,
+  mongoDb = process.env.MONGODB_DB,
+): Promise<void> {
+  if (!mongoUri) {
+    throw new Error("Failed to promote user to admin: MONGODB_URI is not set");
+  }
+  if (!mongoDb) {
+    throw new Error("Failed to promote user to admin: MONGODB_DB is not set");
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new Error(`Failed to promote user to admin: invalid userId format "${userId}"`);
+  }
+
+  const client = new MongoClient(mongoUri);
+  let primaryError: unknown;
+  try {
+    await client.connect();
+    const db = client.db(mongoDb);
+    const result = await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { isAdmin: true } }
+    );
+    if (result.matchedCount === 0) {
+      throw new Error(`Failed to promote user to admin: user ${userId} not found`);
+    }
+  } catch (err) {
+    primaryError = err;
+    throw err;
+  } finally {
+    try {
+      await client.close();
+    } catch (closeErr) {
+      if (!primaryError) {
+        throw closeErr;
+      }
+    }
+  }
+}
 
 export async function registerTestUser(
   baseUrl: string,
