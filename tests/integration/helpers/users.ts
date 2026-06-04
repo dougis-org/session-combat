@@ -31,7 +31,7 @@ export async function makeUserAdmin(
   } finally {
     try {
       await client.close();
-    } catch (err) {
+    } catch {
       // Ignore close errors to avoid masking the primary error from the try block
     }
   }
