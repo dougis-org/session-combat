@@ -28,7 +28,7 @@ For each task, follow: write failing test → implement → confirm passing → 
 
 - [ ] **TC-01b** — Existing Open5E factory exports still resolve
   - Spec: `dndbeyond-test-helpers.md` → "All existing Open5E exports remain available"
-  - Run: `npm test -- --testPathPattern=open5eAdapter` — must pass
+  - Run: `npm run test:unit -- --testPathPattern=open5eAdapter` — must pass
   - Linked task: task-01
 
 ---
@@ -86,10 +86,10 @@ For each task, follow: write failing test → implement → confirm passing → 
 
 - [ ] **TC-04a** — `createImportedCharacterDraft` still callable from `dndBeyondImport.ts` (backward compat)
   - Spec: `character-test-helpers.md` → "Backward-compatible re-export"
-  - Run: `npm test -- --testPathPattern=dndBeyondCharacterImport` — must pass
+  - Run: `npm run test:unit -- --testPathPattern=dndBeyondCharacterImport` — must pass
 
 - [ ] **TC-04b** — `createNormalizedImportResult` still works after the move
-  - Run: `npm test -- --testPathPattern=characterImportRoute` — must pass
+  - Run: `npm run test:unit -- --testPathPattern=characterImportRoute` — must pass
 
 ---
 
@@ -107,7 +107,7 @@ For each task, follow: write failing test → implement → confirm passing → 
   - Spec: `dndbeyond-test-helpers.md` → "No inline modifier arrays remain"
 
 - [ ] **TC-06b** — All armor class tests still pass
-  - Run: `npm test -- --testPathPattern=dndBeyond-armor-class` — must pass
+  - Run: `npm run test:unit -- --testPathPattern=dndBeyond-armor-class` — must pass
 
 ---
 
@@ -117,7 +117,7 @@ For each task, follow: write failing test → implement → confirm passing → 
   - Command: `grep -rn "baseAbilityScores\s*=" tests/unit/import/` returns zero results
 
 - [ ] **TC-07b** — All affected test files still pass
-  - Run: `npm test -- --testPathPattern=unit` — must pass
+  - Run: `npm run test:unit` — must pass
 
 ---
 
@@ -131,6 +131,6 @@ For each task, follow: write failing test → implement → confirm passing → 
 
 ### Regression gate (all tasks)
 
-- [ ] **TC-REG-01** — Full unit suite passes: `npm test -- --testPathPattern=unit`
+- [ ] **TC-REG-01** — Full unit suite passes: `npm run test:unit`
 - [ ] **TC-REG-02** — TypeScript compiles clean: `tsc --noEmit`
 - [ ] **TC-REG-03** — Build succeeds: `npm run build`

@@ -3,8 +3,8 @@
 // (DnD Beyond, Roll20, Pathbuilder, etc.).
 // Raw source-specific API shapes belong in the source's own helper file.
 
-import { AbilityScores, CharacterClass } from "@/lib/types";
-import { ImportedCharacterDraft } from "@/lib/dndBeyondCharacterImport";
+import type { AbilityScores, CharacterClass } from "@/lib/types";
+import type { ImportedCharacterDraft } from "@/lib/dndBeyondCharacterImport";
 
 // Default name for the sample imported character fixture used across importer tests.
 export const DND_BEYOND_CHARACTER_NAME = "Dolor Vagarpie";
@@ -21,8 +21,8 @@ export function createAbilityScores(partial: Partial<AbilityScores> = {}): Abili
   };
 }
 
-export function createClassEntry(className: string, level: number): CharacterClass {
-  return { class: className as CharacterClass["class"], level };
+export function createClassEntry(className: CharacterClass["class"], level: number): CharacterClass {
+  return { class: className, level };
 }
 
 export function createCharacterData(
@@ -33,17 +33,10 @@ export function createCharacterData(
     ac: 17,
     hp: 92,
     maxHp: 92,
-    abilityScores: {
-      strength: 10,
-      dexterity: 17,
-      constitution: 14,
-      intelligence: 16,
-      wisdom: 10,
-      charisma: 21,
-    },
+    abilityScores: createAbilityScores({ dexterity: 17, constitution: 14, intelligence: 16, charisma: 21 }),
     classes: [
-      { class: "Rogue", level: 5 },
-      { class: "Warlock", level: 7 },
+      createClassEntry("Rogue", 5),
+      createClassEntry("Warlock", 7),
     ],
     savingThrows: {},
     skills: {},

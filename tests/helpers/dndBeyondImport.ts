@@ -1,8 +1,8 @@
-import {
+import type {
   ImportedCharacterDraft,
   NormalizedDndBeyondCharacter,
 } from "@/lib/dndBeyondCharacterImport";
-import { Character } from "@/lib/types";
+import type { Character } from "@/lib/types";
 import { sampleDndBeyondCharacterResponse } from "@/tests/fixtures/dndBeyondCharacter";
 import { createCharacterData, DND_BEYOND_CHARACTER_NAME } from "@/tests/helpers/characterTestHelpers";
 

@@ -88,7 +88,7 @@
 - [x] `grep -rn "importTestHelpers" tests/` — zero results
 - [x] `grep -rn "MockDndBeyondModifier\[\]" tests/unit/import/dndBeyond-armor-class.test.ts` — zero results
 - [x] `grep -rn "baseAbilityScores\s*=" tests/unit/import/` — zero results
-- [x] `npm test -- --testPathPattern=unit` — zero failures
+- [x] `npm run test:unit` — zero failures
 - [x] Each helper file opens with a scope-defining header comment
 - [x] `openspec/specs/adr-test-helper-layers.md` exists
 
@@ -96,7 +96,7 @@
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test -- --testPathPattern=unit`; all tests must pass
+- **Unit tests** — `npm run test:unit`; all tests must pass
 - **Integration tests** — `npm run test:integration`; all tests must pass
 - **Build** — `npm run build`; build must succeed with no errors
 - if **ANY** of the above fail, you **MUST** iterate and address the failure
