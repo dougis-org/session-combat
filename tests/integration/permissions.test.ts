@@ -55,4 +55,11 @@ describe("isUserAdmin Integration Tests", () => {
       `Failed to promote user to admin: user ${fakeId} not found`
     );
   });
+
+  it("fails to promote malformed userId to admin", async () => {
+    const malformedId = "not-a-valid-object-id";
+    await expect(makeUserAdmin(malformedId)).rejects.toThrow(
+      `Failed to promote user to admin: invalid userId format "${malformedId}"`
+    );
+  });
 });

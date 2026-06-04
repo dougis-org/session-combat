@@ -13,6 +13,9 @@ export async function makeUserAdmin(
   if (!mongoDb) {
     throw new Error("Failed to promote user to admin: MONGODB_DB is not set");
   }
+  if (!ObjectId.isValid(userId)) {
+    throw new Error(`Failed to promote user to admin: invalid userId format "${userId}"`);
+  }
 
   const client = new MongoClient(mongoUri);
   try {
