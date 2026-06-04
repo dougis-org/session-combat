@@ -62,7 +62,7 @@ Reason for removal: Replaced by RTL `render()`.
 
 ### Requirement: REMOVED IS_REACT_ACT_ENVIRONMENT global mutation
 
-Reason for removal: RTL sets this flag internally.
+Reason for removal: Already set globally in `jest.setup.ts`; per-file mutation was redundant.
 
 ### Requirement: REMOVED @jest-environment jsdom docblock
 

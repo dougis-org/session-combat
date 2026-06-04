@@ -22,7 +22,7 @@ The test file SHALL use `render` from `@testing-library/react` and `screen` quer
 
 - **Given** the migrated file
 - **When** a test needs to find elements with `aria-label^="Member section:"`
-- **Then** it uses `screen.getAllByRole('region', { name: /member section/i })` or `screen.getAllByLabelText(/member section/i)` (whichever matches the rendered ARIA role), selecting the same element set as the old `querySelectorAll` call
+- **Then** it uses `screen.getAllByLabelText(/member section/i)` (the elements are `<p>` tags with `aria-label`, no explicit `role`), selecting the same element set as the old `querySelectorAll` call
 
 #### Scenario: Element count from aria-label query preserved
 
@@ -44,7 +44,7 @@ Reason for removal: RTL `render()` handles DOM setup and cleanup; `setupUiTest` 
 
 ### Requirement: REMOVED IS_REACT_ACT_ENVIRONMENT global mutation
 
-Reason for removal: RTL sets this flag internally when rendering.
+Reason for removal: Already set globally in `jest.setup.ts`; per-file mutation was redundant.
 
 ### Requirement: REMOVED @jest-environment jsdom docblock
 
