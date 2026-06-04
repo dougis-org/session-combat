@@ -1,12 +1,5 @@
-/**
- * @jest-environment jsdom
- */
-(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
-
 import React from 'react';
-import { act } from 'react';
-import { createRoot } from 'react-dom/client';
-import { setupUiTest } from '@/tests/unit/helpers/uiTestSetup';
+import { render, screen } from '@testing-library/react';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -85,8 +78,6 @@ const PC_NO_TYPE = {
   abilityScores: { strength: 10, dexterity: 16, constitution: 12, intelligence: 12, wisdom: 10, charisma: 10 },
 };
 
-const ctx = setupUiTest();
-
 async function renderWithData(characters: object[], parties: object[]) {
   global.fetch = jest.fn(async (url: RequestInfo | URL) => {
     const urlStr = String(url);
@@ -97,73 +88,62 @@ async function renderWithData(characters: object[], parties: object[]) {
   }) as typeof fetch;
 
   const { default: PartiesPage } = await import('@/app/parties/page');
-  await act(async () => {
-    ctx.root = createRoot(ctx.container);
-    ctx.root.render(React.createElement(PartiesPage));
-  });
-}
-
-function getMemberSections() {
-  return ctx.container.querySelectorAll('[aria-label^="Member section:"]');
-}
-
-function getMemberSectionLabels() {
-  return Array.from(getMemberSections()).map(s => s.getAttribute('aria-label'));
+  render(React.createElement(PartiesPage));
 }
 
 describe('PartiesPage — party card member display', () => {
   test('party with all three types renders three member sections', async () => {
     await renderWithData([PC, NPC, COMPANION], [PARTY_ALL]);
 
-    const labels = getMemberSectionLabels();
-    expect(labels).toContain('Member section: Player Characters');
-    expect(labels).toContain('Member section: Travelling NPCs');
-    expect(labels).toContain('Member section: Companions');
+    expect(await screen.findByLabelText('Member section: Player Characters')).toBeInTheDocument();
+    expect(screen.getByLabelText('Member section: Travelling NPCs')).toBeInTheDocument();
+    expect(screen.getByLabelText('Member section: Companions')).toBeInTheDocument();
   });
 
   test('PC-only party hides NPC and Companion sections', async () => {
     await renderWithData([PC], [PARTY_PC_ONLY]);
 
-    const labels = getMemberSectionLabels();
-    expect(labels).toContain('Member section: Player Characters');
-    expect(labels).not.toContain('Member section: Travelling NPCs');
-    expect(labels).not.toContain('Member section: Companions');
+    expect(await screen.findByLabelText('Member section: Player Characters')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Member section: Travelling NPCs')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Member section: Companions')).not.toBeInTheDocument();
   });
 
   test('zero-member party shows no member sections', async () => {
     await renderWithData([PC], [PARTY_EMPTY]);
 
-    expect(getMemberSections()).toHaveLength(0);
+    await screen.findByText('Empty Party');
+    expect(screen.queryAllByLabelText(/^Member section:/)).toHaveLength(0);
   });
 
   test('member with undefined characterType defaults to Player Characters section', async () => {
     const party = { ...PARTY_PC_ONLY, members: [{ characterId: 'c4', addedAt: new Date().toISOString() }] };
     await renderWithData([PC_NO_TYPE], [party]);
 
-    const labels = getMemberSectionLabels();
-    expect(labels).toContain('Member section: Player Characters');
-    expect(labels).not.toContain('Member section: Travelling NPCs');
-    expect(labels).not.toContain('Member section: Companions');
+    expect(await screen.findByLabelText('Member section: Player Characters')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Member section: Travelling NPCs')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Member section: Companions')).not.toBeInTheDocument();
   });
 
   test('comma-separated name list is no longer rendered', async () => {
     await renderWithData([PC, NPC], [PARTY_ALL]);
 
-    const text = ctx.container.textContent ?? '';
-    expect(text).not.toMatch(/Thorin,\s*Barliman/);
-    expect(text).not.toMatch(/Barliman,\s*Thorin/);
+    await screen.findByText('Fellowship');
+    const bodyText = document.body.textContent ?? '';
+    expect(bodyText).not.toMatch(/Thorin,\s*Barliman/);
+    expect(bodyText).not.toMatch(/Barliman,\s*Thorin/);
   });
 
   test('member names appear in the card', async () => {
     await renderWithData([PC, NPC, COMPANION], [PARTY_ALL]);
 
-    expect(ctx.container.textContent).toContain('Thorin');
-    expect(ctx.container.textContent).toContain('Barliman');
-    expect(ctx.container.textContent).toContain('Bill');
+    expect(await screen.findByText('Thorin')).toBeInTheDocument();
+    expect(screen.getByText('Barliman')).toBeInTheDocument();
+    expect(screen.getByText('Bill')).toBeInTheDocument();
   });
 
   test('no additional fetches on render', async () => {
     await renderWithData([PC, NPC], [PARTY_ALL]);
+    await screen.findByText('Fellowship');
     expect(global.fetch).toHaveBeenCalledTimes(3);
   });
 
@@ -174,22 +154,22 @@ describe('PartiesPage — party card member display', () => {
     };
     await renderWithData([NPC], [partyNpcOnly]);
 
-    const labels = getMemberSectionLabels();
-    expect(labels).toContain('Member section: Travelling NPCs');
-    expect(labels).not.toContain('Member section: Player Characters');
-    expect(labels).not.toContain('Member section: Companions');
+    expect(await screen.findByLabelText('Member section: Travelling NPCs')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Member section: Player Characters')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Member section: Companions')).not.toBeInTheDocument();
   });
 
   test('member summaries render all six fields (name, race, class, level, AC, HP)', async () => {
     await renderWithData([PC], [PARTY_PC_ONLY]);
 
-    const text = ctx.container.textContent ?? '';
-    expect(text).toContain('Thorin');
-    expect(text).toContain('Dwarf');
-    expect(text).toContain('Fighter');
-    expect(text).toContain('Lv 5');
-    expect(text).toContain('16');
-    expect(text).toContain('40/40');
+    expect(await screen.findByText('Thorin')).toBeInTheDocument();
+    expect(screen.getByText('16')).toBeInTheDocument();
+    expect(screen.getByText('40/40')).toBeInTheDocument();
+    // race/class/level render as a single compound text node — bodyText is most reliable here
+    const bodyText = document.body.textContent ?? '';
+    expect(bodyText).toContain('Dwarf');
+    expect(bodyText).toContain('Fighter');
+    expect(bodyText).toContain('Lv 5');
   });
 
   test('renders placeholder Unknown card for missing character ID', async () => {
@@ -199,8 +179,7 @@ describe('PartiesPage — party card member display', () => {
     };
     await renderWithData([], [partyWithMissing]);
 
-    expect(ctx.container.textContent).toContain('Unknown');
-    const labels = getMemberSectionLabels();
-    expect(labels).toContain('Member section: Player Characters');
+    expect(await screen.findByText('Unknown')).toBeInTheDocument();
+    expect(screen.getByLabelText('Member section: Player Characters')).toBeInTheDocument();
   });
 });
