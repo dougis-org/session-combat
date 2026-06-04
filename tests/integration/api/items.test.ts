@@ -29,6 +29,8 @@ describe("Items API Integration Tests", () => {
   let baseUrl: string;
   let authCookie: string;
   let authCookie2: string;
+  // Track created IDs for reference; actual cleanup handled by global test DB teardown
+  const createdItemIds: string[] = [];
 
   beforeAll(async () => {
     const url = process.env.TEST_BASE_URL;
@@ -51,7 +53,9 @@ describe("Items API Integration Tests", () => {
     if (res.status !== 201) {
       throw new Error(`createItem failed with status ${res.status}: ${await res.text()}`);
     }
-    return res.json() as Promise<ItemResponse>;
+    const item = await res.json() as ItemResponse;
+    createdItemIds.push(item.id);
+    return item;
   }
 
   describe("Auth enforcement", () => {
@@ -79,6 +83,7 @@ describe("Items API Integration Tests", () => {
       });
       expect(res.status).toBe(201);
       const body = await res.json() as ItemResponse;
+      createdItemIds.push(body.id);
       expect(body.quantity).toBe(1);
       expect(body.attunement).toBe(false);
       expect(body.equipped).toBe(false);

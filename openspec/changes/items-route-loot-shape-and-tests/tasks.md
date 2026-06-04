@@ -58,28 +58,28 @@
 
 ## Validation
 
-- [x] `npm test -- --testPathPattern="tests/unit/api/items"` — all unit tests pass
+- [x] `npm run test:unit -- --testPathPattern="tests/unit/api/items"` — all unit tests pass
 - [x] `npm run test:integration -- --testPathPattern="tests/integration/api/items"` — all integration tests pass
-- [x] `npm run type-check` (or `npx tsc --noEmit`) — no type errors
+- [x] `npx tsc --noEmit` — no type errors
 - [x] `npm run build` — build succeeds
-- [x] Full unit suite: `npm test` — no regressions
+- [x] Full unit suite: `npm run test:unit` — no regressions
 - [x] Full integration suite: `npm run test:integration` — no regressions
 
 ## Remote push validation
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test`; all tests must pass
+- **Unit tests** — `npm run test:unit`; all tests must pass
 - **Integration tests** — `npm run test:integration`; all tests must pass
 - **Build** — `npm run build`; must succeed with no errors
 - if **ANY** of the above fail, you **MUST** iterate and address the failure
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `feat/items-route-loot-shape-and-tests` and push to remote
-- [ ] Open PR from `feat/items-route-loot-shape-and-tests` to `main`. PR body **MUST** include `Closes #245`.
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to `feat/items-route-loot-shape-and-tests` and push to remote
+- [x] Open PR from `feat/items-route-loot-shape-and-tests` to `main`. PR body **MUST** include `Closes #245`.
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
 - [ ] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
 - [ ] **Monitor CI checks** — poll for check status autonomously using `gh pr checks <PR-URL> --json isRequired,state`; when any **required (blocking)** CI check fails, diagnose and fix the failure, commit fixes, follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until all required checks pass

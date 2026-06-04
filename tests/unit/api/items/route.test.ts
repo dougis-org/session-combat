@@ -136,8 +136,14 @@ describe("POST /api/items — success cases", () => {
     expect(body.name).toBe("Longsword");
     expect(body.type).toBe("weapon");
     expect(body.rarity).toBe("uncommon");
+    expect(body.description).toBe("A sharp blade");
     expect(body.quantity).toBe(2);
+    expect(body.value).toBe(15);
+    expect(body.weight).toBe(3);
+    expect(body.attunement).toBe(false);
     expect(body.equipped).toBe(true);
+    expect(body.properties).toEqual(["martial"]);
+    expect(body.notes).toBe("Found in the dungeon");
     expect(body.userId).toBe("user-123");
     expect(typeof body.id).toBe("string");
   });
@@ -152,7 +158,7 @@ describe("POST /api/items — success cases", () => {
     expect(body.equipped).toBe(false);
   });
 
-  it("returns 500 when DB throws on insert", async () => {
+  it("returns 500 when DB throws", async () => {
     mockDbThrow();
     const res = await POST(makePostRequest({ name: "Sword", type: "weapon", rarity: "common" }));
     expect(res.status).toBe(500);
