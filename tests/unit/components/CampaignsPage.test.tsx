@@ -118,7 +118,6 @@ describe('Campaign Catalog UI', () => {
     renderPage();
 
     const copyButton = await screen.findByRole('button', { name: /copy/i });
-    expect(copyButton).toBeTruthy();
 
     await userEvent.click(copyButton);
 

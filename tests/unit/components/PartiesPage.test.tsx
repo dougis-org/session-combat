@@ -165,11 +165,9 @@ describe('PartiesPage — party card member display', () => {
     expect(await screen.findByText('Thorin')).toBeInTheDocument();
     expect(screen.getByText('16')).toBeInTheDocument();
     expect(screen.getByText('40/40')).toBeInTheDocument();
-    // race/class/level render as a single compound text node — bodyText is most reliable here
-    const bodyText = document.body.textContent ?? '';
-    expect(bodyText).toContain('Dwarf');
-    expect(bodyText).toContain('Fighter');
-    expect(bodyText).toContain('Lv 5');
+    expect(screen.getByText(/Dwarf/)).toBeInTheDocument();
+    expect(screen.getByText(/Fighter/)).toBeInTheDocument();
+    expect(screen.getByText(/Lv 5/)).toBeInTheDocument();
   });
 
   test('renders placeholder Unknown card for missing character ID', async () => {
