@@ -1,11 +1,6 @@
-/**
- * @jest-environment jsdom
- */
-(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
-
 import React from 'react';
-import { act } from 'react';
-import { Root, createRoot } from 'react-dom/client';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Response as FetchResponse } from 'node-fetch';
 import { CampaignsContent } from '@/app/campaigns/page';
 
@@ -48,20 +43,13 @@ const MOCK_TEMPLATE = {
   updatedAt: new Date().toISOString(),
 };
 
-let container: HTMLDivElement;
-let root: Root;
 let originalFetch: typeof global.fetch;
 
 beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
   originalFetch = global.fetch;
 });
 
 afterEach(() => {
-  act(() => { root.unmount(); });
-  container.remove();
   global.fetch = originalFetch;
   jest.clearAllMocks();
 });
@@ -75,21 +63,22 @@ function setupFetch(campaigns: unknown[] = [], templates: unknown[] = []) {
   }) as typeof fetch;
 }
 
-async function renderPage() {
-  await act(async () => { root.render(React.createElement(CampaignsContent)); });
+function renderPage() {
+  render(<CampaignsContent />);
 }
 
 describe('Campaign Catalog UI', () => {
   it('renders Campaign Catalog section heading', async () => {
     setupFetch([], [MOCK_TEMPLATE]);
-    await renderPage();
-    expect(container.textContent).toContain('Campaign Catalog');
+    renderPage();
+    expect(await screen.findByText('Campaign Catalog')).toBeInTheDocument();
   });
 
   it('catalog section appears after user campaigns section in DOM', async () => {
     setupFetch([MOCK_CAMPAIGN], [MOCK_TEMPLATE]);
-    await renderPage();
-    const headings = Array.from(container.querySelectorAll('h1, h2'));
+    renderPage();
+    await screen.findByText('Campaign Catalog');
+    const headings = screen.getAllByRole('heading');
     const campaignsIndex = headings.findIndex(h => h.textContent?.includes('Campaigns'));
     const catalogIndex = headings.findIndex(h => h.textContent?.includes('Campaign Catalog'));
     expect(campaignsIndex).toBeGreaterThanOrEqual(0);
@@ -98,18 +87,17 @@ describe('Campaign Catalog UI', () => {
 
   it('shows template name, moduleName, chapter count, and Copy button', async () => {
     setupFetch([], [MOCK_TEMPLATE]);
-    await renderPage();
-    expect(container.textContent).toContain('Lost Mine of Phandelver');
-    expect(container.textContent).toContain('LMoP');
-    expect(container.textContent).toContain('4 chapters');
-    const buttons = Array.from(container.querySelectorAll('button'));
-    expect(buttons.some(b => b.textContent?.trim() === 'Copy')).toBe(true);
+    renderPage();
+    expect(await screen.findByText('Lost Mine of Phandelver')).toBeInTheDocument();
+    expect(screen.getByText('LMoP')).toBeInTheDocument();
+    expect(screen.getByText('4 chapters')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /copy/i })).toBeInTheDocument();
   });
 
   it('shows empty state when catalog is empty', async () => {
     setupFetch([], []);
-    await renderPage();
-    expect(container.textContent).toContain('No campaign templates available yet');
+    renderPage();
+    expect(await screen.findByText('No campaign templates available yet.')).toBeInTheDocument();
   });
 
   it('Copy button calls POST to correct URL and refreshes campaigns', async () => {
@@ -127,14 +115,11 @@ describe('Campaign Catalog UI', () => {
       return jsonResponse({ error: 'not found' }, 404);
     }) as typeof fetch;
 
-    await renderPage();
+    renderPage();
 
-    const copyButton = Array.from(container.querySelectorAll('button')).find(
-      b => b.textContent?.trim() === 'Copy'
-    );
-    expect(copyButton).toBeTruthy();
+    const copyButton = await screen.findByRole('button', { name: /copy/i });
 
-    await act(async () => { copyButton!.click(); });
+    await userEvent.click(copyButton);
 
     const fetchMock = global.fetch as jest.MockedFunction<typeof fetch>;
     const copyCall = fetchMock.mock.calls.find(
@@ -158,22 +143,19 @@ describe('Campaign Catalog UI', () => {
       return jsonResponse({ error: 'not found' }, 404);
     }) as typeof fetch;
 
-    await renderPage();
+    renderPage();
 
-    const copyButton = Array.from(container.querySelectorAll('button')).find(
-      b => b.textContent?.trim() === 'Copy'
-    );
+    const copyButton = await screen.findByRole('button', { name: /copy/i });
 
-    act(() => { copyButton!.click(); });
+    await userEvent.click(copyButton);
 
-    const loadingButton = Array.from(container.querySelectorAll('button')).find(
-      b => b.textContent?.includes('Copying')
-    );
-    expect(loadingButton).toBeTruthy();
-    expect((loadingButton as HTMLButtonElement).disabled).toBe(true);
+    const loadingButton = await screen.findByRole('button', { name: /copying/i });
+    expect(loadingButton).toBeInTheDocument();
+    expect(loadingButton).toBeDisabled();
 
     resolveCopy(undefined);
-    await act(async () => { await copyPromise; });
+    await copyPromise;
+    await screen.findByRole('button', { name: /^copy$/i });
   });
 
   it('Copy failure shows inline error message', async () => {
@@ -187,14 +169,12 @@ describe('Campaign Catalog UI', () => {
       return jsonResponse({ error: 'not found' }, 404);
     }) as typeof fetch;
 
-    await renderPage();
+    renderPage();
 
-    const copyButton = Array.from(container.querySelectorAll('button')).find(
-      b => b.textContent?.trim() === 'Copy'
-    );
-    await act(async () => { copyButton!.click(); });
+    const copyButton = await screen.findByRole('button', { name: /copy/i });
+    await userEvent.click(copyButton);
 
-    expect(container.textContent).toContain('Server error');
+    expect(await screen.findByText('Server error')).toBeInTheDocument();
   });
 
   it('catalog fetch failure does not crash page — user campaigns still render', async () => {
@@ -205,10 +185,10 @@ describe('Campaign Catalog UI', () => {
       return jsonResponse({ error: 'not found' }, 404);
     }) as typeof fetch;
 
-    await renderPage();
+    renderPage();
 
-    expect(container.textContent).toContain('My Campaign');
-    expect(container.textContent).toContain('Campaign Catalog');
+    expect(await screen.findByText('My Campaign')).toBeInTheDocument();
+    expect(screen.getByText('Campaign Catalog')).toBeInTheDocument();
   });
 
   describe('Campaign active chapter display', () => {
@@ -222,8 +202,8 @@ describe('Campaign Catalog UI', () => {
         ],
       };
       setupFetch([campaignWithActiveCh], []);
-      await renderPage();
-      expect(container.textContent).toContain('📖 Current Chapter: Ch. 2: The Inn');
+      renderPage();
+      expect(await screen.findByText(/📖 Current Chapter: Ch\. 2: The Inn/)).toBeInTheDocument();
     });
 
     it('displays standard chapter count when no active chapter is selected', async () => {
@@ -235,17 +215,18 @@ describe('Campaign Catalog UI', () => {
         ],
       };
       setupFetch([campaignNoActiveCh], []);
-      await renderPage();
-      expect(container.textContent).not.toContain('📖 Current Chapter:');
-      expect(container.textContent).toContain('2 chapters');
+      renderPage();
+      await screen.findByText('2 chapters');
+      expect(screen.queryByText(/📖 Current Chapter:/)).not.toBeInTheDocument();
     });
   });
 
   describe('Session Log link', () => {
     it('renders a Session Log link pointing to /campaigns/[id]/sessions', async () => {
       setupFetch([MOCK_CAMPAIGN], []);
-      await renderPage();
-      const links = Array.from(container.querySelectorAll('a'));
+      renderPage();
+      await screen.findByText('My Campaign');
+      const links = screen.getAllByRole('link');
       const sessionLink = links.find(a => a.textContent?.includes('Session Log'));
       expect(sessionLink).toBeTruthy();
       expect(sessionLink?.getAttribute('href')).toBe(`/campaigns/${MOCK_CAMPAIGN.id}/sessions`);
