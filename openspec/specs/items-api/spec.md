@@ -4,7 +4,7 @@ This document details *changes* to requirements and is additive to the `design.m
 
 ### Requirement: ADDED Item interface includes full loot vocabulary
 
-The system SHALL define `ItemType` and `ItemRarity` as TypeScript string union types and the `Item` interface SHALL include: `id`, `userId`, `name`, `type`, `rarity`, `description`, `quantity`, `value`, `weight`, `attunement`, `equipped`, `properties`, `notes`, `createdAt`, `updatedAt`.
+The system SHALL define `ItemType` and `ItemRarity` as TypeScript string union types and the `Item` interface SHALL include: `id`, `userId`, `name`, `type`, `rarity`, `createdAt`, `updatedAt` (required); and `description?`, `quantity`, `value?`, `weight?`, `attunement`, `equipped`, `properties?`, `notes?` (optional with safe defaults where applicable).
 
 #### Scenario: Interface is additive-safe
 
@@ -76,7 +76,7 @@ The system SHALL default `quantity` to `1`, `attunement` to `false`, and `equipp
 
 ### Requirement: ADDED POST validates numeric field constraints
 
-The system SHALL reject POST requests where `quantity` is not a positive number, or where `value` or `weight` are not non-negative numbers.
+When provided, the system SHALL reject POST requests where `quantity` is not a positive number, or where `value` or `weight` are not non-negative numbers. These fields are optional; omitting them bypasses validation.
 
 #### Scenario: POST with non-positive quantity returns 400
 
@@ -134,6 +134,7 @@ None.
 - Design Decision 3 (withAuth factory mock) → All unit test scenarios
 - Requirement: ADDED POST validates `type` → Tasks: update route, write unit tests, write integration tests
 - Requirement: ADDED POST validates `rarity` → Tasks: update route, write unit tests, write integration tests
+- Requirement: ADDED POST validates numeric field constraints → Tasks: update route POST handler, write unit tests (POST-10/11/12)
 
 ---
 
