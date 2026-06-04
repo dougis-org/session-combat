@@ -7,7 +7,7 @@ import {
   createPaginatedResponse,
   SAMPLE_CREATURE,
   SAMPLE_SPELL,
-} from "@/tests/helpers/importTestHelpers";
+} from "@/tests/helpers/open5eTestHelpers";
 
 describe("Open5EClient", () => {
   describe("fetchMonsters", () => {

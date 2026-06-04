@@ -1,3 +1,7 @@
+// Open5E-specific test helpers.
+// Contains mock fetch utilities, Open5ECreature/Open5ESpell factories, and mock clients.
+// Only put Open5E raw API shapes here. Generic 5e character shapes go in characterTestHelpers.ts.
+
 import { IOpen5EClient, Open5ECreature, Open5ESpell } from "@/lib/import/open5eAdapter";
 
 export function createMockFetch(response: unknown) {

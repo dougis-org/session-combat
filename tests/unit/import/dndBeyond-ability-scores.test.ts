@@ -4,6 +4,7 @@ import {
   normalizeMaxHp,
 } from "@/lib/import/dndBeyond-ability-scores";
 import { sampleDndBeyondCharacterResponse } from "@/tests/fixtures/dndBeyondCharacter";
+import { createAbilityScores } from "@/tests/helpers/characterTestHelpers";
 
 function requireDefined<T>(value: T | undefined | null, label: string): T {
   if (value == null) throw new Error(`${label} must be defined in fixture`);
@@ -14,14 +15,7 @@ const sampleStats = requireDefined(sampleDndBeyondCharacterResponse.data.stats, 
 const sampleBonusStats = requireDefined(sampleDndBeyondCharacterResponse.data.bonusStats, "bonusStats");
 const sampleOverrideStats = requireDefined(sampleDndBeyondCharacterResponse.data.overrideStats, "overrideStats");
 
-const baseAbilityScores = {
-  strength: 10,
-  dexterity: 17,
-  constitution: 14,
-  intelligence: 16,
-  wisdom: 10,
-  charisma: 21,
-};
+const baseAbilityScores = createAbilityScores({ dexterity: 17, constitution: 14, intelligence: 16, charisma: 21 });
 
 describe("dndBeyond-ability-scores", () => {
   describe("normalizeAbilityScores", () => {

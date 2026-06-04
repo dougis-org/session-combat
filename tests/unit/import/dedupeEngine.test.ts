@@ -13,7 +13,7 @@ import {
   createMockClient,
   createTestCreature,
   createTestSpell,
-} from "@/tests/helpers/importTestHelpers";
+} from "@/tests/helpers/open5eTestHelpers";
 
 jest.mock("@/lib/storage");
 jest.mock("@/lib/import/transformMonster");
