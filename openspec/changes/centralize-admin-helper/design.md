@@ -25,7 +25,7 @@
 
 ### Decision 1: Placement and Signature of the Helper
 
-- **Chosen**: Export `makeUserAdmin(userId: string, mongoUri?: string, mongoDb?: string): Promise<void>` from [tests/integration/helpers/users.ts](file:///home/doug/dev3/session-combat/tests/integration/helpers/users.ts).
+- **Chosen**: Export `makeUserAdmin(userId: string, mongoUri?: string, mongoDb?: string): Promise<void>` from [tests/integration/helpers/users.ts](../../../tests/integration/helpers/users.ts).
 - **Alternatives considered**:
   - Create a new helper file `tests/integration/helpers/db.ts`.
   - Keep the helper inline but in a shared setup file.
@@ -56,7 +56,7 @@
 
 - **Requirement**: A registered user must be promoted to admin by updating their `isAdmin` flag in the `users` collection.
   - **Design element**: MongoDB update query `{ $set: { isAdmin: true } }` matched by `_id: new ObjectId(userId)`.
-  - **Acceptance criteria reference**: `specs/permissions/spec.md`.
+  - **Acceptance criteria reference**: `specs/integration-test-patterns/spec.md`.
   - **Testability notes**: Verified by ensuring the `isUserAdmin(userId)` checks return `true` after calling `makeUserAdmin`.
 
 - **Requirement**: Throw clear, helpful error if user is not found.

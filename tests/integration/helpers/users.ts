@@ -18,6 +18,7 @@ export async function makeUserAdmin(
   }
 
   const client = new MongoClient(mongoUri);
+  let primaryError: unknown;
   try {
     await client.connect();
     const db = client.db(mongoDb);
@@ -28,11 +29,16 @@ export async function makeUserAdmin(
     if (result.matchedCount === 0) {
       throw new Error(`Failed to promote user to admin: user ${userId} not found`);
     }
+  } catch (err) {
+    primaryError = err;
+    throw err;
   } finally {
     try {
       await client.close();
-    } catch {
-      // Ignore close errors to avoid masking the primary error from the try block
+    } catch (closeErr) {
+      if (!primaryError) {
+        throw closeErr;
+      }
     }
   }
 }
