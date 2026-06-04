@@ -74,6 +74,30 @@ The system SHALL default `quantity` to `1`, `attunement` to `false`, and `equipp
 
 ---
 
+### Requirement: ADDED POST validates numeric field constraints
+
+The system SHALL reject POST requests where `quantity` is not a positive number, or where `value` or `weight` are not non-negative numbers.
+
+#### Scenario: POST with non-positive quantity returns 400
+
+- **Given** an authenticated user
+- **When** POST `/api/items` is called with `quantity: 0` or `quantity: -1`
+- **Then** the response status is `400` and the body contains `{ "error": "Quantity must be a positive number" }`
+
+#### Scenario: POST with negative value returns 400
+
+- **Given** an authenticated user
+- **When** POST `/api/items` is called with `value: -5`
+- **Then** the response status is `400` and the body contains `{ "error": "Value must be a non-negative number" }`
+
+#### Scenario: POST with negative weight returns 400
+
+- **Given** an authenticated user
+- **When** POST `/api/items` is called with `weight: -1`
+- **Then** the response status is `400` and the body contains `{ "error": "Weight must be a non-negative number" }`
+
+---
+
 ## MODIFIED Requirements
 
 ### Requirement: MODIFIED POST validates `name` (existing, unchanged behavior)

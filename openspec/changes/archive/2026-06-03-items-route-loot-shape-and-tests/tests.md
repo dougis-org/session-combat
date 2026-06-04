@@ -94,6 +94,21 @@ These tests drive the route changes. Write them first — they will fail until t
   - Mock `getDatabase` to throw
   - Assert status 500 and `body.error === "Failed to create item"`
 
+- [x] **POST-10** `POST /api/items` returns 400 when `quantity` is non-positive
+  - Spec: ADDED — POST validates numeric field constraints
+  - Body: `{ name: "Sword", type: "weapon", rarity: "common", quantity: 0 }`
+  - Assert status 400 and `body.error === "Quantity must be a positive number"`
+
+- [x] **POST-11** `POST /api/items` returns 400 when `value` is negative
+  - Spec: ADDED — POST validates numeric field constraints
+  - Body: `{ name: "Sword", type: "weapon", rarity: "common", value: -5 }`
+  - Assert status 400 and `body.error === "Value must be a non-negative number"`
+
+- [x] **POST-12** `POST /api/items` returns 400 when `weight` is negative
+  - Spec: ADDED — POST validates numeric field constraints
+  - Body: `{ name: "Sword", type: "weapon", rarity: "common", weight: -1 }`
+  - Assert status 400 and `body.error === "Weight must be a non-negative number"`
+
 ---
 
 ### Task: Write integration tests — `tests/integration/api/items.test.ts`

@@ -116,8 +116,8 @@
 ## Risks / Trade-offs
 
 - Risk/trade-off: Validation arrays (`VALID_TYPES`, `VALID_RARITIES`) can drift from the union types
-  - Impact: Low — TypeScript will catch impossible includes at compile time; if a type is removed from the union, the array reference breaks
-  - Mitigation: Keep arrays immediately adjacent to type definitions in the source file
+  - Impact: Low — TypeScript will catch a removed type (the array reference would break), but will NOT catch a type added to the union but forgotten in the array
+  - Mitigation: A future refactor should derive the union from the array (`type ItemType = typeof VALID_TYPES[number]`) so the type system and validator are always in sync. For this change, arrays are kept immediately adjacent to the type definitions.
 
 ## Rollback / Mitigation
 
