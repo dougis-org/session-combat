@@ -10,7 +10,7 @@
 
 - Remove `@jest-environment jsdom` docblock from all 52 files that carry it
 - Remove per-file `IS_REACT_ACT_ENVIRONMENT = true` from all 30 test files that carry it
-- Confirm zero test regressions via `npm test`
+- Confirm zero test regressions via `npm run test:unit && npm run test:integration`
 
 ### Non-Goals
 
@@ -52,11 +52,11 @@
 
 - Proposal element: Remove `@jest-environment jsdom` from 52 files
   - Design decision: Decision 1 (grep enumeration), Decision 2 (full block removal)
-  - Validation approach: `grep -rl "@jest-environment jsdom"` returns 0 results after cleanup; `npm test` passes
+  - Validation approach: `grep -rl "@jest-environment jsdom"` returns 0 results after cleanup; `npm run test:unit && npm run test:integration` passes
 
 - Proposal element: Remove per-file `IS_REACT_ACT_ENVIRONMENT` from 30 files
   - Design decision: Decision 1 (grep enumeration), Decision 3 (keep in setup)
-  - Validation approach: `grep -rl "IS_REACT_ACT_ENVIRONMENT" tests/` returns 0 results; `npm test` passes
+  - Validation approach: `grep -rl "IS_REACT_ACT_ENVIRONMENT" tests/` returns 0 results; `npm run test:unit && npm run test:integration` passes
 
 - Proposal element: `tests/unit/helpers/reactRoot.ts` docblock removal
   - Design decision: Decision 4
@@ -74,10 +74,10 @@
   - Acceptance criteria reference: specs/cleanup.md — no per-file IS_REACT_ACT_ENVIRONMENT in tests/
   - Testability notes: Verified by `grep -r "IS_REACT_ACT_ENVIRONMENT" tests/` returning no results
 
-- Requirement: `npm test` passes with zero regressions
+- Requirement: `npm run test:unit && npm run test:integration` passes with zero regressions
   - Design element: No behavioral change; pure dead-code removal
   - Acceptance criteria reference: specs/cleanup.md — full test suite passes
-  - Testability notes: Run `npm test` after all file edits are complete
+  - Testability notes: Run `npm run test:unit && npm run test:integration` after all file edits are complete
 
 ## Non-Functional Requirements Mapping
 
@@ -91,14 +91,14 @@
 
 - Risk/trade-off: A test file was inadvertently relying on the per-file docblock to override a different environment
   - Impact: Test failure post-cleanup
-  - Mitigation: `npm test` is the acceptance gate; any failure is immediately attributable to a specific file and trivially re-added
+  - Mitigation: `npm run test:unit && npm run test:integration` is the acceptance gate; any failure is immediately attributable to a specific file and trivially re-added
 
 ## Rollback / Mitigation
 
-- Rollback trigger: Any test failure in `npm test` after cleanup
-- Rollback steps: `git checkout -- <failing-test-file>` to restore the docblock/line for that file; rerun `npm test` to confirm
+- Rollback trigger: Any test failure in `npm run test:unit && npm run test:integration` after cleanup
+- Rollback steps: `git checkout -- <failing-test-file>` to restore the docblock/line for that file; rerun `npm run test:unit && npm run test:integration` to confirm
 - Data migration considerations: None
-- Verification after rollback: `npm test` passes
+- Verification after rollback: `npm run test:unit && npm run test:integration` passes
 
 ## Operational Blocking Policy
 

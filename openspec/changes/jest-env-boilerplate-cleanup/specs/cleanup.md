@@ -8,7 +8,7 @@ _No new capabilities are added by this change._
 
 ### Requirement: MODIFIED Test file boilerplate
 
-Test files SHALL NOT contain `@jest-environment jsdom` docblock comments or per-file `IS_REACT_ACT_ENVIRONMENT` assignments. These SHALL be configured exclusively in `jest.config.js` and `jest.setup.ts`.
+Unit test files (matched by `jest.config.js`, i.e. under `tests/unit/`) SHALL NOT contain `@jest-environment jsdom` docblock comments or per-file `IS_REACT_ACT_ENVIRONMENT` assignments — these are already set globally by `jest.config.js` and `jest.setup.ts`. Integration test files (matched by `jest.integration.config.js`, which uses `testEnvironment: "node"`) MAY retain `@jest-environment jsdom` overrides where required for browser-API access.
 
 #### Scenario: No per-file jest-environment docblocks remain
 
@@ -44,9 +44,9 @@ Test files SHALL NOT contain `@jest-environment jsdom` docblock comments or per-
 
 ### Requirement: REMOVED Per-file jest environment override
 
-The `@jest-environment jsdom` docblock is no longer required or permitted in individual test files.
+The `@jest-environment jsdom` docblock is no longer required in unit test files matched by `jest.config.js` (under `tests/unit/`).
 
-Reason for removal: `jest.config.js` sets `testEnvironment: "jsdom"` globally, making per-file overrides redundant.
+Reason for removal: `jest.config.js` sets `testEnvironment: "jsdom"` globally, making per-file overrides in unit test files redundant. Integration test files under `tests/integration/` that need jsdom for browser APIs retain their overrides, as `jest.integration.config.js` defaults to `node`.
 
 ### Requirement: REMOVED Per-file IS_REACT_ACT_ENVIRONMENT assignment
 
@@ -72,5 +72,5 @@ Reason for removal: `jest.setup.ts` sets this globally via `setupFilesAfterEnv`,
 #### Scenario: Full test suite passes after cleanup
 
 - **Given** all docblock and IS_REACT_ACT_ENVIRONMENT removals have been applied
-- **When** `npm test` is run
+- **When** `npm run test:unit && npm run test:integration` is run
 - **Then** all tests pass with zero failures and zero regressions from the pre-cleanup baseline

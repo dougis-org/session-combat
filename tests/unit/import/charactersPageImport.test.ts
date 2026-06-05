@@ -43,7 +43,6 @@ describe("Characters page import UI", () => {
   let confirmSpy: jest.SpiedFunction<typeof window.confirm>;
 
   beforeEach(() => {
-
     originalFetch = global.fetch;
     confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
     container = document.createElement("div");

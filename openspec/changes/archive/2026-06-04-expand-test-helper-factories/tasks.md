@@ -125,14 +125,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [x] `git checkout main` and `git pull --ff-only`
-- [x] Verify the merged changes appear on `main`
-- [x] Mark all remaining tasks as complete (`- [x]`)
-- [x] Sync approved spec deltas into `openspec/specs/` — copy `specs/character-test-helpers.md`, `specs/dndbeyond-test-helpers.md` to `openspec/specs/` under an appropriate capability folder
-- [x] Archive the change: move `openspec/changes/expand-test-helper-factories/` to `openspec/changes/archive/2026-06-04-expand-test-helper-factories/` **in a single commit** (stage copy + deletion together)
-- [x] Confirm `openspec/changes/archive/2026-06-04-expand-test-helper-factories/` exists and `openspec/changes/expand-test-helper-factories/` is gone
-- [x] **Create a doc branch:** `git checkout -b doc/archive-2026-06-04-expand-test-helper-factories` then `git push -u origin doc/archive-2026-06-04-expand-test-helper-factories`
-- [x] Open PR from doc branch to `main` with title `docs: archive expand-test-helper-factories (2026-06-04)`
-- [x] **IMMEDIATELY** enable auto-merge on the doc PR
-- [x] Monitor the doc PR until it merges (same loop as implementation PR)
-- [x] Prune merged local branches: `git fetch --prune` && `git branch -d test/expand-helper-factories doc/archive-2026-06-04-expand-test-helper-factories`
+- [ ] `git checkout main` and `git pull --ff-only`
+- [ ] Verify the merged changes appear on `main`
+- [ ] Mark all remaining tasks as complete (`- [x]`)
+- [ ] Sync approved spec deltas into `openspec/specs/` — copy `specs/character-test-helpers.md`, `specs/dndbeyond-test-helpers.md` to `openspec/specs/` under an appropriate capability folder
+- [ ] Archive the change: move `openspec/changes/expand-test-helper-factories/` to `openspec/changes/archive/2026-06-04-expand-test-helper-factories/` **in a single commit** (stage copy + deletion together)
+- [ ] Confirm `openspec/changes/archive/2026-06-04-expand-test-helper-factories/` exists and `openspec/changes/expand-test-helper-factories/` is gone
+- [ ] **Create a doc branch:** `git checkout -b doc/archive-2026-06-04-expand-test-helper-factories` then `git push -u origin doc/archive-2026-06-04-expand-test-helper-factories`
+- [ ] Open PR from doc branch to `main` with title `docs: archive expand-test-helper-factories (2026-06-04)`
+- [ ] **IMMEDIATELY** enable auto-merge on the doc PR
+- [ ] Monitor the doc PR until it merges (same loop as implementation PR)
+- [ ] Prune merged local branches: `git fetch --prune` && `git branch -d test/expand-helper-factories doc/archive-2026-06-04-expand-test-helper-factories`

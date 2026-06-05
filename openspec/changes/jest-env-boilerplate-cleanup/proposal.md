@@ -16,16 +16,16 @@
 - Assumptions: All 52 files with the docblock and all 30 files with the per-file assignment are safe to clean up — confirmed by the fact that `jest.config.js` already uses `testEnvironment: "jsdom"` and tests are currently passing.
 - Edge cases considered:
   - `tests/unit/helpers/reactRoot.ts` — not a test file; `@jest-environment` docblocks have no effect on imported helper modules. Safe to remove.
-  - `jest.integration.config.js` uses its own explicit `testEnvironment: "node"` — unaffected by this change.
+  - `jest.integration.config.js` uses its own explicit `testEnvironment: "node"`. Integration test files in `tests/integration/` that already carry `@jest-environment jsdom` docblocks MUST keep them — those overrides are load-bearing (they switch the integration runner from `node` to `jsdom` for browser-API tests). Only unit test files (under `tests/unit/`) have redundant docblocks.
   - Non-component unit tests (combat logic, validation, API routes) run under jsdom already and are unaffected.
 
 ## Scope
 
 ### In Scope
 
-- Remove `@jest-environment jsdom` docblock from all 52 affected files
-- Remove per-file `(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;` from all 30 affected test files
-- Verify `npm test` passes with zero regressions after cleanup
+- Remove `@jest-environment jsdom` docblock from all 49 affected unit test files (files under `tests/unit/` and `tests/unit/helpers/`); integration test files in `tests/integration/` that use jsdom APIs keep their overrides
+- Remove per-file `(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;` from all affected test files
+- Verify `npm run test:unit && npm run test:integration` passes with zero regressions after cleanup
 
 ### Out of Scope
 
@@ -45,7 +45,7 @@
 
 - Risk: A test file relied on the docblock being present for a reason not captured by the global config (e.g., a ts-jest transform quirk).
   - Impact: Test failure post-cleanup.
-  - Mitigation: `npm test` must pass as the acceptance gate. Any failure is immediately visible and trivially reverted per-file.
+  - Mitigation: `npm run test:unit && npm run test:integration` must pass as the acceptance gate. Any failure is immediately visible and trivially reverted per-file.
 
 - Risk: The count of affected files changes between analysis and implementation (new files added, files deleted).
   - Impact: Missed files or unnecessary edits.

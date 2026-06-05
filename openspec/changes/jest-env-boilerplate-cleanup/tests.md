@@ -18,7 +18,7 @@ Since this is mechanical cleanup with no new code, each verification step replac
 1. **Assert boilerplate exists (pre-condition):** Confirm grep finds the patterns before removal.
 2. **Apply removal (implementation):** Remove the docblocks and IS_REACT_ACT_ENVIRONMENT lines.
 3. **Assert boilerplate gone (post-condition):** Confirm grep finds no matches after removal.
-4. **Assert test suite still passes:** Run `npm test` to confirm no regressions.
+4. **Assert test suite still passes:** Run `npm run test:unit && npm run test:integration` to confirm no regressions.
 
 ## Test Cases
 
@@ -48,6 +48,6 @@ Since this is mechanical cleanup with no new code, each verification step replac
 
 ### Full test suite regression check
 
-- [ ] `npm test` exits with code 0 after all cleanup is applied
-  - Maps to: tasks.md Validation step "Run npm test"
+- [ ] `npm run test:unit && npm run test:integration` exits with code 0 after all cleanup is applied
+  - Maps to: tasks.md Validation step "Run npm run test:unit && npm run test:integration"
   - Maps to: specs/cleanup.md Scenario "Full test suite passes after cleanup"

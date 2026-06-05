@@ -22,7 +22,7 @@
 
 - [x] Run `grep -r "@jest-environment jsdom" tests/` — must return no matches
 - [x] Run `grep -r "IS_REACT_ACT_ENVIRONMENT" tests/` — must return no matches
-- [x] Run `npm test` — all tests must pass with zero regressions
+- [x] Run `npm run test:unit && npm run test:integration` — all tests must pass with zero regressions
 - [x] Run type checks: `npx tsc --noEmit`
 - [x] All completed tasks marked as complete
 
@@ -38,9 +38,9 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `chore/jest-env-boilerplate-cleanup` and push to remote
-- [ ] Open PR from `chore/jest-env-boilerplate-cleanup` to `main`. PR body must include `Closes #264`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Commit all changes to `chore/jest-env-boilerplate-cleanup` and push to remote
+- [x] Open PR from `chore/jest-env-boilerplate-cleanup` to `main`. PR body must include `Closes #264`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
 - [ ] **Monitor PR comments** — poll for new comments autonomously; address, commit fixes, follow remote push validation, push; wait 180 seconds then repeat until no unresolved comments remain
 - [ ] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, commit, follow remote push validation, push; wait 180 seconds then repeat until all required checks pass
