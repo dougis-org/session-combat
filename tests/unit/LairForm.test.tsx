@@ -101,12 +101,12 @@ describe('LairForm', () => {
   test('input onChange fires onNameChange with new value', () => {
     const { onNameChange } = renderLairForm();
     fireEvent.change(screen.getByTestId('lair-name-input'), { target: { value: 'New Lair' } });
-    expect(onNameChange).toHaveBeenCalled();
+    expect(onNameChange).toHaveBeenCalledWith('New Lair');
   });
 
   test('select onChange fires onSeedChange with selected value', () => {
     const { onSeedChange } = renderLairForm({ seedOptions: ['Dragon', 'Lich'] });
     fireEvent.change(screen.getByTestId('lair-seed-select'), { target: { value: 'Dragon' } });
-    expect(onSeedChange).toHaveBeenCalled();
+    expect(onSeedChange).toHaveBeenCalledWith('Dragon');
   });
 });
