@@ -7,7 +7,7 @@
 
 ## Execution
 
-- [x] **Enumerate docblock files:** Run `grep -rl "@jest-environment jsdom" tests/ jest.setup.ts` to get the current definitive list of files (includes `tests/unit/helpers/reactRoot.ts`)
+- [x] **Enumerate docblock files:** Run `grep -rl "@jest-environment jsdom" tests/unit/ jest.setup.ts` to get the current definitive list of files (includes `tests/unit/helpers/reactRoot.ts`); integration test files under `tests/integration/` that carry jsdom overrides are NOT in scope
 - [x] **Remove `@jest-environment jsdom` docblocks:** For each file in the list, remove the full `/** @jest-environment jsdom */` block (including `/**` and `*/` delimiters and any surrounding blank lines introduced by the block)
 - [x] **Enumerate IS_REACT_ACT_ENVIRONMENT files:** Run `grep -rl "IS_REACT_ACT_ENVIRONMENT" tests/` to get the current list (excludes `jest.setup.ts` which must keep its line)
 - [x] **Remove per-file IS_REACT_ACT_ENVIRONMENT assignments:** For each file in the list, remove the `(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;` line
@@ -20,7 +20,7 @@
 
 ## Validation
 
-- [x] Run `grep -r "@jest-environment jsdom" tests/` — must return no matches
+- [x] Run `grep -r "@jest-environment jsdom" tests/unit/` — must return no matches (integration test overrides are intentionally kept)
 - [x] Run `grep -r "IS_REACT_ACT_ENVIRONMENT" tests/` — must return no matches
 - [x] Run `npm run test:unit && npm run test:integration` — all tests must pass with zero regressions
 - [x] Run type checks: `npx tsc --noEmit`
@@ -30,7 +30,7 @@
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test`; all tests must pass
+- **Unit tests** — `npm run test:unit`; all tests must pass
 - **Integration tests** — `npm run test:integration` (if exists); all tests must pass
 - **Build** — `npm run build`; build must succeed with no errors
 - if **ANY** of the above fail, you **MUST** iterate and address the failure
@@ -41,8 +41,8 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit all changes to `chore/jest-env-boilerplate-cleanup` and push to remote
 - [x] Open PR from `chore/jest-env-boilerplate-cleanup` to `main`. PR body must include `Closes #264`
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — poll for new comments autonomously; address, commit fixes, follow remote push validation, push; wait 180 seconds then repeat until no unresolved comments remain
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Monitor PR comments** — poll for new comments autonomously; address, commit fixes, follow remote push validation, push; wait 180 seconds then repeat until no unresolved comments remain
 - [ ] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, commit, follow remote push validation, push; wait 180 seconds then repeat until all required checks pass
 - [ ] **Poll for merge** — run `gh pr view <PR-URL> --json state` after each iteration; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
 

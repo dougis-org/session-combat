@@ -10,11 +10,12 @@ _No new capabilities are added by this change._
 
 Unit test files (matched by `jest.config.js`, i.e. under `tests/unit/`) SHALL NOT contain `@jest-environment jsdom` docblock comments or per-file `IS_REACT_ACT_ENVIRONMENT` assignments — these are already set globally by `jest.config.js` and `jest.setup.ts`. Integration test files (matched by `jest.integration.config.js`, which uses `testEnvironment: "node"`) MAY retain `@jest-environment jsdom` overrides where required for browser-API access.
 
-#### Scenario: No per-file jest-environment docblocks remain
+#### Scenario: No per-file jest-environment docblocks remain in unit tests
 
-- **Given** the full test suite in `tests/`
-- **When** `grep -r "@jest-environment jsdom" tests/` is run after cleanup
+- **Given** the unit test suite in `tests/unit/`
+- **When** `grep -r "@jest-environment jsdom" tests/unit/` is run after cleanup
 - **Then** the command returns no matches (exit code 1 / empty output)
+- **Note:** Integration tests under `tests/integration/` MAY retain `@jest-environment jsdom` overrides; those are load-bearing (override `testEnvironment: "node"` from `jest.integration.config.js`)
 
 #### Scenario: No per-file IS_REACT_ACT_ENVIRONMENT assignments remain
 
@@ -52,7 +53,7 @@ Reason for removal: `jest.config.js` sets `testEnvironment: "jsdom"` globally, m
 
 The `(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;` line is no longer required in individual test files.
 
-Reason for removal: `jest.setup.ts` sets this globally via `setupFilesAfterEnv`, making per-file assignments redundant.
+Reason for removal: `jest.config.js` includes `jest.setup.ts` via `setupFilesAfterEnv`, which sets `IS_REACT_ACT_ENVIRONMENT = true` globally for all unit tests, making per-file assignments in `tests/unit/` redundant. Note: `jest.integration.config.js` does not include `setupFilesAfterEnv`; integration test files removed their per-file assignments because they use jsdom via `@jest-environment jsdom` override, and React Testing Library handles this flag internally in that environment.
 
 ## Traceability
 

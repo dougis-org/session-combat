@@ -18,16 +18,16 @@ Since this is mechanical cleanup with no new code, each verification step replac
 1. **Assert boilerplate exists (pre-condition):** Confirm grep finds the patterns before removal.
 2. **Apply removal (implementation):** Remove the docblocks and IS_REACT_ACT_ENVIRONMENT lines.
 3. **Assert boilerplate gone (post-condition):** Confirm grep finds no matches after removal.
-4. **Assert test suite still passes:** Run `npm run test:unit && npm run test:integration` to confirm no regressions.
+4. **Assert test suite still passes:** Run `npm run test:unit && npm run test:integration` to confirm no regressions. Note: `jest.integration.config.js` matches `**/*.test.ts` only — `.test.tsx` files under `tests/integration/` are a pre-existing gap not introduced by this change.
 
 ## Test Cases
 
 ### Removal of @jest-environment jsdom docblocks
 
-- [ ] **Pre-condition:** `grep -r "@jest-environment jsdom" tests/ tests/unit/helpers/reactRoot.ts` returns ≥ 1 match before cleanup
-- [ ] **Post-condition:** `grep -r "@jest-environment jsdom" tests/` returns 0 matches after cleanup
+- [ ] **Pre-condition:** `grep -r "@jest-environment jsdom" tests/unit/` returns ≥ 1 match before cleanup
+- [ ] **Post-condition:** `grep -r "@jest-environment jsdom" tests/unit/` returns 0 matches after cleanup (integration overrides intentionally kept)
   - Maps to: tasks.md "Remove @jest-environment jsdom docblocks"
-  - Maps to: specs/cleanup.md Scenario "No per-file jest-environment docblocks remain"
+  - Maps to: specs/cleanup.md Scenario "No per-file jest-environment docblocks remain in unit tests"
 
 ### Removal of per-file IS_REACT_ACT_ENVIRONMENT assignments
 
