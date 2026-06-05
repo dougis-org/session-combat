@@ -27,7 +27,7 @@ No automated test exists for the frontend page component. TDD here means:
 
 1. Confirm the bug exists: inspect the 207 handler and verify it reads `successCount`/`totalCount`/`failures` (all undefined from the route).
 2. Apply the fix (read `count`/`total`/`errors`).
-3. Verify manually: start the dev server, trigger a partial upload (one valid monster, one missing `name`), and confirm the message shows real numbers and error detail.
+3. Verify manually: the 207 partial-success path requires a storage-level failure after validation passes — submitting a monster with a missing required field returns 400 before any saves occur and does not exercise the 207 handler. This path is covered by the unit test `returns 207 when first save succeeds and second fails`.
 
 ---
 

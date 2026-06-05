@@ -16,7 +16,7 @@ Update the 207 handler (lines 45–58) to read the correct fields from the route
 
 Format `result.errors` into a human-readable string (e.g., join entries as `"[index N]: message"` separated by `"; "`).
 
-**Verify:** Start dev server and manually upload a JSON file with one valid and one invalid monster to confirm the partial-success message shows real numbers and error detail.
+**Verify:** The 207 path requires a storage-level failure after per-monster validation passes (e.g. a DB error mid-batch). This path is covered by the unit test `returns 207 when first save succeeds and second fails`. Manual reproduction requires mocking or forcing a storage error — it cannot be triggered by submitting an invalid monster field (that returns 400 before any saves occur).
 
 ---
 
@@ -119,7 +119,7 @@ Blocking resolution flow:
 - [x] Verify merged changes appear on `main`
 - [x] Mark all remaining tasks as complete
 - [x] No documentation updates required for this change
-- [x] Sync approved spec deltas into `openspec/specs/` if applicable
+- [x] Sync approved spec deltas into `openspec/specs/` if applicable — not applicable for this change (test coverage only; no new API contracts or spec files were introduced)
 - [x] Archive the change: move `openspec/changes/upload-route-test-coverage/` to `openspec/changes/archive/YYYY-MM-DD-upload-route-test-coverage/` in a **single atomic commit** (stage both the copy and the deletion together — never split into two commits)
 - [x] Confirm `openspec/changes/archive/YYYY-MM-DD-upload-route-test-coverage/` exists and `openspec/changes/upload-route-test-coverage/` is gone
 - [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-upload-route-test-coverage` then `git push -u origin doc/archive-YYYY-MM-DD-upload-route-test-coverage`
