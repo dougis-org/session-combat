@@ -51,7 +51,7 @@ The `waitForServer` helper used in integration test setup SHALL log each retry a
 - **THEN** `waitForServer` throws an error containing the URL, attempt count, and the last network error received
 - **AND** this error causes the `beforeAll` to fail, aborting the test file with a clear diagnostic message
 
-### Requirement: ADDED Central Admin Promotion Test Helper
+### Requirement: Central Admin Promotion Test Helper
 
 The system SHALL provide a centralized helper function `makeUserAdmin` in the integration test suite to promote users to administrators.
 
@@ -69,7 +69,7 @@ The system SHALL provide a centralized helper function `makeUserAdmin` in the in
 
 ---
 
-### Requirement: ADDED Permissions Integration Test
+### Requirement: Permissions Integration Test
 
 The integration tests for permissions SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
 
@@ -79,7 +79,7 @@ The integration tests for permissions SHALL utilize the centralized admin promot
 - **When** the admin user is registered using `registerTestUser` and promoted using `makeUserAdmin(userId)`.
 - **Then** `isUserAdmin(userId)` returns `true` and the test file runs without declaring, connecting, or closing a raw `MongoClient`.
 
-### Requirement: ADDED Campaign Global API Integration Test
+### Requirement: Campaign Global API Integration Test
 
 The integration tests for the campaign global API SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
 
