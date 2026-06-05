@@ -80,7 +80,7 @@ Required test cases:
 
 - [x] `npm run test:unit -- --testPathPattern upload.route` — all unit tests pass
 - [x] `npm run test:unit` — full unit suite still passes (no regressions)
-- [ ] Integration test suite passes with new upload describe block
+- [x] Integration test suite passes with new upload describe block
 - [x] `npm run build` — build succeeds with no type errors
 - [x] Coverage report for `app/api/monsters/upload/route.ts` shows ≥85% statements
 
@@ -99,9 +99,9 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit all changes to `feat/upload-route-test-coverage` and push to remote
 - [x] Open PR from `feat/upload-route-test-coverage` to `main`. PR body must include `Closes #244`.
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (use `--squash`; NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll autonomously; address comments, commit fixes, follow remote push validation, push to same branch; wait 180 seconds then repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing check, commit, follow remote push validation, push, wait 180 seconds, repeat
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — poll autonomously; address comments, commit fixes, follow remote push validation, push to same branch; wait 180 seconds then repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing check, commit, follow remote push validation, push, wait 180 seconds, repeat
 - [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user — never force-merge
 
 Ownership metadata:
@@ -120,10 +120,10 @@ Blocking resolution flow:
 - [x] Mark all remaining tasks as complete
 - [x] No documentation updates required for this change
 - [x] Sync approved spec deltas into `openspec/specs/` if applicable
-- [ ] Archive the change: move `openspec/changes/upload-route-test-coverage/` to `openspec/changes/archive/YYYY-MM-DD-upload-route-test-coverage/` in a **single atomic commit** (stage both the copy and the deletion together — never split into two commits)
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-upload-route-test-coverage/` exists and `openspec/changes/upload-route-test-coverage/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-upload-route-test-coverage` then `git push -u origin doc/archive-YYYY-MM-DD-upload-route-test-coverage`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive upload-route-test-coverage (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor the doc PR until merged (same loop — address comments and CI, push to doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/upload-route-test-coverage doc/archive-YYYY-MM-DD-upload-route-test-coverage`
+- [x] Archive the change: move `openspec/changes/upload-route-test-coverage/` to `openspec/changes/archive/YYYY-MM-DD-upload-route-test-coverage/` in a **single atomic commit** (stage both the copy and the deletion together — never split into two commits)
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-upload-route-test-coverage/` exists and `openspec/changes/upload-route-test-coverage/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-upload-route-test-coverage` then `git push -u origin doc/archive-YYYY-MM-DD-upload-route-test-coverage`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive upload-route-test-coverage (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor the doc PR until merged (same loop — address comments and CI, push to doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/upload-route-test-coverage doc/archive-YYYY-MM-DD-upload-route-test-coverage`

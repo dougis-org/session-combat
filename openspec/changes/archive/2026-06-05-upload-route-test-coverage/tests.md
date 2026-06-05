@@ -37,57 +37,57 @@ No automated test exists for the frontend page component. TDD here means:
 
 ### Auth
 
-- [ ] **Returns 401 when not authenticated**
+- [x] **Returns 401 when not authenticated**
   - Task: Task 2 | Spec: Scenario "Unauthenticated request rejected"
   - Test: `itReturns401(POST, makeReq, mockedRequireAuth)`
   - TDD: file doesn't exist yet → test fails → create file → passes
 
 ### Request parsing
 
-- [ ] **Returns 400 for malformed JSON body**
+- [x] **Returns 400 for malformed JSON body**
   - Task: Task 2 | Spec: Scenario "Malformed JSON body"
   - Test: Construct `NextRequest` with non-JSON body; assert status 400 and `body.error` contains "Invalid JSON"
   - TDD: write test → fails (no file) → create handler mock → passes
 
 ### Document validation
 
-- [ ] **Returns 400 when `monsters` key is missing**
+- [x] **Returns 400 when `monsters` key is missing**
   - Task: Task 2 | Spec: Scenario "Missing monsters key"
   - Test: POST `{}` → assert 400, `body.details` or `body.error` present
 
-- [ ] **Returns 400 when `monsters` is not an array**
+- [x] **Returns 400 when `monsters` is not an array**
   - Task: Task 2 | Spec: Scenario "monsters is not an array"
   - Test: POST `{ monsters: "nope" }` → assert 400
 
-- [ ] **Returns 400 for empty `monsters` array**
+- [x] **Returns 400 for empty `monsters` array**
   - Task: Task 2 | Spec: Scenario "Empty monsters array"
   - Test: POST `{ monsters: [] }` → assert 400
 
-- [ ] **Returns 400 when monster is missing `name`**
+- [x] **Returns 400 when monster is missing `name`**
   - Task: Task 2 | Spec: Scenario "Monster missing required name field"
   - Test: POST `{ monsters: [{ maxHp: 10 }] }` → assert 400
 
-- [ ] **Returns 400 when monster is missing `maxHp`**
+- [x] **Returns 400 when monster is missing `maxHp`**
   - Task: Task 2 | Spec: Scenario "Monster missing required maxHp field"
   - Test: POST `{ monsters: [{ name: "Beast" }] }` → assert 400
 
 ### Successful save
 
-- [ ] **Returns 201 with count 1 for single valid monster**
+- [x] **Returns 201 with count 1 for single valid monster**
   - Task: Task 2 | Spec: Scenario "Single valid monster, save succeeds"
   - Test: `saveMonsterTemplate` mocked to resolve; POST `{ monsters: [{ name: "G", maxHp: 7 }] }` → assert 201, `body.count === 1`, `body.imported.length === 1`, `body.imported[0].name === "G"`
 
-- [ ] **Returns 201 with count 2 for two valid monsters**
+- [x] **Returns 201 with count 2 for two valid monsters**
   - Task: Task 2 | Spec: Scenario "Multiple valid monsters, all save"
   - Test: Both `saveMonsterTemplate` calls resolve; assert 201, `body.count === 2`
 
 ### Partial and total failure
 
-- [ ] **Returns 207 when first save succeeds and second fails**
+- [x] **Returns 207 when first save succeeds and second fails**
   - Task: Task 2 | Spec: Scenario "Partial save failure (207)"
   - Test: `mockResolvedValueOnce(undefined)` + `mockRejectedValueOnce(new Error("fail"))`; POST two valid monsters → assert 207, `body.count === 1`, `Array.isArray(body.errors)`, `body.errors.length === 1`
 
-- [ ] **Returns 500 when all saves fail**
+- [x] **Returns 500 when all saves fail**
   - Task: Task 2 | Spec: Scenario "All saves fail"
   - Test: `saveMonsterTemplate` mocked to reject; POST one valid monster → assert 500
 
@@ -104,7 +104,7 @@ No automated test exists for the frontend page component. TDD here means:
 
 ### Test cases
 
-- [ ] **Valid upload returns 201 and monster is queryable**
+- [x] **Valid upload returns 201 and monster is queryable**
   - Task: Task 3 | Spec: Scenario "Valid upload, monsters queryable after"
   - Test:
     1. POST `{ monsters: [{ name: "Upload Beast", maxHp: 22 }] }` with `uploadAuthed()` headers
@@ -112,10 +112,10 @@ No automated test exists for the frontend page component. TDD here means:
     3. GET `/api/monsters` with same headers
     4. Assert response includes a monster with `name === "Upload Beast"`
 
-- [ ] **Upload without auth returns 401**
+- [x] **Upload without auth returns 401**
   - Task: Task 3 | Spec: Scenario "Upload without authentication"
   - Test: POST without Cookie header → assert 401
 
-- [ ] **Upload with missing `monsters` key returns 400**
+- [x] **Upload with missing `monsters` key returns 400**
   - Task: Task 3 | Spec: Scenario "Upload with missing monsters key"
   - Test: POST `{}` with `uploadAuthed()` → assert 400
