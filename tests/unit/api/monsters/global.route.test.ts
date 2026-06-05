@@ -1,18 +1,21 @@
 /**
  * @jest-environment node
  */
+import { NextRequest } from "next/server";
 import { POST, PUT } from "@/app/api/monsters/global/route";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
 import {
-  ADMIN_AUTH,
   makeRouteRequest,
   mockDbCollection,
   itValidatesAlignmentField,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () => ({
+  withAuth: (handler: Function) => (req: NextRequest) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
+  requireAuth: () => ({ userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
+}));
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadGlobalMonsterTemplates: jest.fn(),
@@ -36,7 +39,6 @@ jest.mock("mongodb", () => {
   return { ObjectId };
 });
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 const mockedGetDatabase = jest.mocked(getDatabase);
 
@@ -50,7 +52,6 @@ const makeReqWith = (alignment: string | undefined) =>
 describe("POST /api/monsters/global — alignment validation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
     mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
     mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockResolvedValue({ tokenVersion: 0, isAdmin: true }),
@@ -63,7 +64,6 @@ describe("POST /api/monsters/global — alignment validation", () => {
 describe("POST /api/monsters/global — DB error during admin check", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
     mockedGetDatabase.mockRejectedValue(new Error("connection refused"));
   });
 
@@ -79,7 +79,6 @@ describe("POST /api/monsters/global — DB error during admin check", () => {
 describe("PUT /api/monsters/global — DB error during admin check", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
     mockedGetDatabase.mockRejectedValue(new Error("connection refused"));
   });
 

@@ -1,21 +1,21 @@
 /**
  * @jest-environment node
  */
+import { NextRequest } from "next/server";
 import { GET } from "@/app/api/campaigns/[id]/combat-events/route";
-import { requireAuth } from "@/lib/middleware";
 import { getDatabase } from "@/lib/db";
 import {
-  MOCK_AUTH,
   mockDbCollection,
   makeRouteRequest,
-  itReturns401WithParams,
   itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () => ({
+  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
+}));
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedGetDatabase = jest.mocked(getDatabase);
 
 const CAMPAIGN_ID = "camp-abc";
@@ -40,12 +40,9 @@ const MOCK_DOC = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedRequireAuth.mockReturnValue(MOCK_AUTH);
 });
 
 describe("GET /api/campaigns/[id]/combat-events", () => {
-  itReturns401WithParams(GET, makeGetReq, params, mockedRequireAuth);
-
   it("returns empty array when no documents match", async () => {
     mockDbCollection(mockedGetDatabase, { find: makeFind([]) });
 
@@ -131,6 +128,5 @@ describe("GET /api/campaigns/[id]/combat-events", () => {
           toArray: jest.fn().mockRejectedValue(new Error("DB error")),
         }),
       }),
-    mockedRequireAuth
   );
 });

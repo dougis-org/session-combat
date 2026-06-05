@@ -1,19 +1,21 @@
 /**
  * @jest-environment node
  */
+import { NextRequest } from "next/server";
 import { PUT, DELETE } from "@/app/api/monsters/global/[id]/route";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
 import {
-  ADMIN_AUTH,
   makeRouteRequest,
   mockDbCollection,
   itValidatesAlignmentFieldWithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 import { EXISTING_GLOBAL_MONSTER } from "./fixtures";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () => ({
+  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
+}));
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadGlobalMonsterTemplates: jest.fn(),
@@ -27,7 +29,6 @@ jest.mock("mongodb", () => {
   return { ObjectId };
 });
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 const mockedGetDatabase = jest.mocked(getDatabase);
 
@@ -43,7 +44,6 @@ const makeReqWith = (alignment: string | undefined) =>
 describe("PUT /api/monsters/global/[id] — alignment validation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
     mockedStorage.loadGlobalMonsterTemplates.mockResolvedValue([EXISTING_GLOBAL_MONSTER] as any);
     mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
     mockDbCollection(mockedGetDatabase, {
@@ -57,7 +57,6 @@ describe("PUT /api/monsters/global/[id] — alignment validation", () => {
 describe("PUT /api/monsters/global/[id] — DB error during admin check", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
     mockedGetDatabase.mockRejectedValue(new Error("connection refused"));
   });
 
@@ -77,7 +76,6 @@ describe("PUT /api/monsters/global/[id] — DB error during admin check", () => 
 describe("DELETE /api/monsters/global/[id] — DB error during admin check", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(ADMIN_AUTH);
     mockedGetDatabase.mockRejectedValue(new Error("connection refused"));
   });
 

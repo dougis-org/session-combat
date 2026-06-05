@@ -1,18 +1,19 @@
 /**
  * @jest-environment node
  */
+import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/characters/route";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
-  MOCK_AUTH,
   makeRouteRequest,
-  itReturns401,
   itReturns500,
   itValidatesAlignmentField,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () => ({
+  withAuth: (handler: Function) => (req: NextRequest) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
+}));
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadCharacters: jest.fn(),
@@ -20,7 +21,6 @@ jest.mock("@/lib/storage", () => ({
   },
 }));
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 
 const MOCK_CHARACTERS = [{ id: "char-1", name: "Thorin", userId: "user-123" }];
@@ -32,10 +32,7 @@ const makeRequest = (body?: unknown) =>
 describe("GET /api/characters", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  itReturns401(GET, () => makeRequest(), mockedRequireAuth);
-
   it("returns list of characters", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARACTERS as any);
 
     const response = await GET(makeRequest());
@@ -49,18 +46,14 @@ describe("GET /api/characters", () => {
     GET,
     () => makeRequest(),
     () => mockedStorage.loadCharacters.mockRejectedValue(new Error("Storage error")),
-    mockedRequireAuth
   );
 });
 
 describe("POST /api/characters", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
   });
-
-  itReturns401(POST, () => makeRequest({ name: "Hero" }), mockedRequireAuth);
 
   it("returns 400 when name is missing", async () => {
     const response = await POST(makeRequest({ hp: 10 }));
@@ -128,7 +121,6 @@ describe("POST /api/characters", () => {
     POST,
     () => makeRequest({ name: "Doomed Hero" }),
     () => mockedStorage.saveCharacter.mockRejectedValue(new Error("Storage error")),
-    mockedRequireAuth
   );
 
   itValidatesAlignmentField(
@@ -192,7 +184,6 @@ describe("GET /api/characters — characterType filter", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARS as any);
   });
 

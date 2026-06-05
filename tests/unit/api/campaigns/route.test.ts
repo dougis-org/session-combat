@@ -1,21 +1,23 @@
 /**
  * @jest-environment node
  */
+import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/campaigns/route";
 import { GET as GET_ONE, PATCH, DELETE } from "@/app/api/campaigns/[id]/route";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
-  MOCK_AUTH,
   makeRouteRequest,
-  itReturns401,
   itReturns500,
-  itReturns401WithParams,
   itReturns404WithParams,
   itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () => ({
+  withAuth: (handler: Function) => (req: NextRequest) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
+  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
+}));
 
 jest.mock("@/lib/storage", () => ({
   storage: {
@@ -27,7 +29,6 @@ jest.mock("@/lib/storage", () => ({
   },
 }));
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 
 const MOCK_CAMPAIGN = {
@@ -55,10 +56,7 @@ const PATCH_SINGLE_CHAPTER = [{ id: "ch-5", title: "New Chapter 5", order: 0 }];
 describe("GET /api/campaigns", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  itReturns401(GET, makeGetRequest, mockedRequireAuth);
-
   it("returns list of campaigns", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadCampaigns.mockResolvedValue([MOCK_CAMPAIGN] as any);
 
     const response = await GET(makeGetRequest());
@@ -69,7 +67,6 @@ describe("GET /api/campaigns", () => {
   });
 
   it("returns empty array when no campaigns", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadCampaigns.mockResolvedValue([]);
 
     const response = await GET(makeGetRequest());
@@ -81,7 +78,6 @@ describe("GET /api/campaigns", () => {
     GET,
     makeGetRequest,
     () => mockedStorage.loadCampaigns.mockRejectedValue(new Error("DB error")),
-    mockedRequireAuth
   );
 });
 
@@ -93,28 +89,22 @@ describe("POST /api/campaigns", () => {
     mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
   });
 
-  itReturns401(POST, () => makePostRequest({ name: "Test" }), mockedRequireAuth);
-
   it("returns 400 when name is missing", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makePostRequest({ moduleName: "X" }));
     expect(response.status).toBe(400);
   });
 
   it("returns 400 when name is blank", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makePostRequest({ name: "   " }));
     expect(response.status).toBe(400);
   });
 
   it("returns 400 when name is a non-string type", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makePostRequest({ name: 123 }));
     expect(response.status).toBe(400);
   });
 
   it("creates campaign with required fields and returns 201", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makePostRequest({ name: "  Dragon Heist  " }));
     expect(response.status).toBe(201);
     const body = await response.json();
@@ -129,7 +119,6 @@ describe("POST /api/campaigns", () => {
   });
 
   it("creates campaign with optional moduleName and explicit status", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(
       makePostRequest({
         name: "Dragon Heist",
@@ -145,32 +134,27 @@ describe("POST /api/campaigns", () => {
   });
 
   it("POST with no status defaults to active", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makePostRequest({ name: "Test" }));
     expect(response.status).toBe(201);
     expect((await response.json()).status).toBe("active");
   });
 
   it("POST with no notes defaults to empty string", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makePostRequest({ name: "Test" }));
     expect((await response.json()).notes).toBe("");
   });
 
   it("POST returns 400 when notes exceed 10000 chars", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makePostRequest({ name: "Test", notes: "x".repeat(10001) }));
     expect(response.status).toBe(400);
   });
 
   it("POST returns 201 when notes are exactly 10000 chars", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makePostRequest({ name: "Test", notes: "x".repeat(10000) }));
     expect(response.status).toBe(201);
   });
 
   it("ignores non-string moduleName", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(
       makePostRequest({ name: "Test", moduleName: 42 })
     );
@@ -179,7 +163,6 @@ describe("POST /api/campaigns", () => {
   });
 
   it("creates campaign with chapters and valid currentChapterId", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(
       makePostRequest({
         name: "Lost Mine",
@@ -200,7 +183,6 @@ describe("POST /api/campaigns", () => {
   });
 
   it("clears currentChapterId if it does not exist in chapters", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(
       makePostRequest({
         name: "Lost Mine",
@@ -219,7 +201,6 @@ describe("POST /api/campaigns", () => {
     POST,
     () => makePostRequest({ name: "Doomed" }),
     () => mockedStorage.saveCampaign.mockRejectedValue(new Error("DB error")),
-    mockedRequireAuth
   );
 });
 
@@ -228,10 +209,7 @@ describe("POST /api/campaigns", () => {
 describe("GET /api/campaigns/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  itReturns401WithParams(GET_ONE, () => makeIdRequest("GET"), PARAMS, mockedRequireAuth);
-
   it("returns campaign when found", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadCampaignById.mockResolvedValue(MOCK_CAMPAIGN as any);
 
     const response = await GET_ONE(makeIdRequest("GET"), { params: PARAMS });
@@ -244,7 +222,6 @@ describe("GET /api/campaigns/[id]", () => {
     () => makeIdRequest("GET"),
     PARAMS,
     () => mockedStorage.loadCampaignById.mockResolvedValue(null),
-    mockedRequireAuth
   );
 
   itReturns500WithParams(
@@ -252,7 +229,6 @@ describe("GET /api/campaigns/[id]", () => {
     () => makeIdRequest("GET"),
     PARAMS,
     () => mockedStorage.loadCampaignById.mockRejectedValue(new Error("DB error")),
-    mockedRequireAuth
   );
 });
 
@@ -261,12 +237,9 @@ describe("GET /api/campaigns/[id]", () => {
 describe("PATCH /api/campaigns/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN } as any);
     mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
   });
-
-  itReturns401WithParams(PATCH, () => makeIdRequest("PATCH", {}), PARAMS, mockedRequireAuth);
 
   it("updates name and returns 200", async () => {
     const response = await PATCH(
@@ -424,7 +397,6 @@ describe("PATCH /api/campaigns/[id]", () => {
     () => makeIdRequest("PATCH", { name: "X" }),
     PARAMS,
     () => mockedStorage.loadCampaignById.mockResolvedValue(null),
-    mockedRequireAuth
   );
 
   itReturns500WithParams(
@@ -432,7 +404,6 @@ describe("PATCH /api/campaigns/[id]", () => {
     () => makeIdRequest("PATCH", { name: "X" }),
     PARAMS,
     () => mockedStorage.loadCampaignById.mockRejectedValue(new Error("DB error")),
-    mockedRequireAuth
   );
 });
 
@@ -441,12 +412,9 @@ describe("PATCH /api/campaigns/[id]", () => {
 describe("DELETE /api/campaigns/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN } as any);
     mockedStorage.deleteCampaign.mockResolvedValue(undefined as any);
   });
-
-  itReturns401WithParams(DELETE, () => makeIdRequest("DELETE"), PARAMS, mockedRequireAuth);
 
   it("deletes campaign and returns 200", async () => {
     const response = await DELETE(makeIdRequest("DELETE"), { params: PARAMS });
@@ -459,7 +427,6 @@ describe("DELETE /api/campaigns/[id]", () => {
     () => makeIdRequest("DELETE"),
     PARAMS,
     () => mockedStorage.loadCampaignById.mockResolvedValue(null),
-    mockedRequireAuth
   );
 
   itReturns500WithParams(
@@ -467,6 +434,5 @@ describe("DELETE /api/campaigns/[id]", () => {
     () => makeIdRequest("DELETE"),
     PARAMS,
     () => mockedStorage.loadCampaignById.mockRejectedValue(new Error("DB error")),
-    mockedRequireAuth
   );
 });

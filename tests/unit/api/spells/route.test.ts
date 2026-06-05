@@ -5,7 +5,7 @@ import { GET, POST } from "@/app/api/spells/route";
 import { storage } from "@/lib/storage";
 import { requireAdmin } from "@/lib/api-helpers";
 import { SpellTemplate } from "@/lib/types";
-import { makeRouteRequest, mockUnauthorized } from "@/tests/unit/helpers/route.test.helpers";
+import { makeRouteRequest, mockAdminDenied } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/storage", () => ({
   storage: {
@@ -172,7 +172,7 @@ describe("POST /api/spells", () => {
   });
 
   it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAdmin);
+    mockAdminDenied(mockedRequireAdmin, 401);
 
     const req = makeRouteRequest("http://localhost/api/spells", "POST", BASE_BODY);
     const res = await POST(req);

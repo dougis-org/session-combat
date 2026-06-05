@@ -1,18 +1,19 @@
 /**
  * @jest-environment node
  */
+import { NextRequest } from "next/server";
 import { PUT, DELETE } from "@/app/api/content/[id]/route";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
-  MOCK_AUTH,
   makeRouteRequest,
-  itReturns401WithParams,
   itReturns404WithParams,
   itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () => ({
+  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
+}));
 jest.mock("@/lib/storage", () => ({
   storage: {
     savedContent: {
@@ -22,7 +23,6 @@ jest.mock("@/lib/storage", () => ({
   },
 }));
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedUpdate = jest.mocked(storage.savedContent.update);
 const mockedRemove = jest.mocked(storage.savedContent.remove);
 
@@ -35,14 +35,11 @@ const makeDeleteReq = () => makeRouteRequest(BASE_URL, "DELETE");
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedRequireAuth.mockReturnValue(MOCK_AUTH);
 });
 
 // ─── PUT /api/content/[id] ────────────────────────────────────────────────────
 
 describe("PUT /api/content/[id]", () => {
-  itReturns401WithParams(PUT, () => makePutReq({ result: "text" }), PARAMS, mockedRequireAuth);
-
   it("returns 400 when result is not a string", async () => {
     const res = await PUT(makePutReq({ result: 42 }), { params: PARAMS });
     expect(res.status).toBe(400);
@@ -86,7 +83,6 @@ describe("PUT /api/content/[id]", () => {
     () => makePutReq({ result: "text" }),
     PARAMS,
     () => mockedUpdate.mockResolvedValue(false),
-    mockedRequireAuth,
     "returns 404 when item not found"
   );
 
@@ -95,15 +91,12 @@ describe("PUT /api/content/[id]", () => {
     () => makePutReq({ result: "text" }),
     PARAMS,
     () => mockedUpdate.mockRejectedValue(new Error("DB error")),
-    mockedRequireAuth
   );
 });
 
 // ─── DELETE /api/content/[id] ─────────────────────────────────────────────────
 
 describe("DELETE /api/content/[id]", () => {
-  itReturns401WithParams(DELETE, makeDeleteReq, PARAMS, mockedRequireAuth);
-
   it("returns 204 on successful delete", async () => {
     mockedRemove.mockResolvedValue(true);
     const res = await DELETE(makeDeleteReq(), { params: PARAMS });
@@ -116,7 +109,6 @@ describe("DELETE /api/content/[id]", () => {
     makeDeleteReq,
     PARAMS,
     () => mockedRemove.mockResolvedValue(false),
-    mockedRequireAuth,
     "returns 404 when item not found"
   );
 
@@ -125,6 +117,5 @@ describe("DELETE /api/content/[id]", () => {
     makeDeleteReq,
     PARAMS,
     () => mockedRemove.mockRejectedValue(new Error("DB error")),
-    mockedRequireAuth
   );
 });

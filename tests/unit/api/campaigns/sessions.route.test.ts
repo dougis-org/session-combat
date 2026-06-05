@@ -1,19 +1,20 @@
 /**
  * @jest-environment node
  */
+import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/campaigns/[id]/sessions/route";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
-  MOCK_AUTH,
   MOCK_SESSION_LOG,
   makeRouteRequest,
-  itReturns401WithParams,
   itReturns404WithParams,
   itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () => ({
+  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
+}));
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadCampaignById: jest.fn(),
@@ -24,7 +25,6 @@ jest.mock("@/lib/storage", () => ({
 }));
 jest.mock("crypto", () => ({ randomUUID: jest.fn(() => "test-uuid") }));
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 
 const CAMPAIGN_ID = "campaign-1";
@@ -37,15 +37,12 @@ const MOCK_CAMPAIGN = { id: CAMPAIGN_ID, userId: "user-123", name: "Test Campaig
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedRequireAuth.mockReturnValue(MOCK_AUTH);
   mockedStorage.loadCampaignById.mockResolvedValue(MOCK_CAMPAIGN as any);
 });
 
 // ─── GET /api/campaigns/[id]/sessions ─────────────────────────────────────────
 
 describe("GET /api/campaigns/[id]/sessions", () => {
-  itReturns401WithParams(GET, makeGetReq, PARAMS, mockedRequireAuth);
-
   it("returns 200 with session logs", async () => {
     mockedStorage.loadSessionLogs.mockResolvedValue([MOCK_SESSION_LOG] as any);
     const res = await GET(makeGetReq(), { params: PARAMS });
@@ -67,7 +64,6 @@ describe("GET /api/campaigns/[id]/sessions", () => {
     makeGetReq,
     PARAMS,
     () => mockedStorage.loadCampaignById.mockResolvedValue(null as any),
-    mockedRequireAuth,
     "returns 404 when campaign not found"
   );
 
@@ -76,7 +72,6 @@ describe("GET /api/campaigns/[id]/sessions", () => {
     makeGetReq,
     PARAMS,
     () => mockedStorage.loadSessionLogs.mockRejectedValue(new Error("DB error")),
-    mockedRequireAuth
   );
 });
 
@@ -87,8 +82,6 @@ describe("POST /api/campaigns/[id]/sessions", () => {
     mockedStorage.saveSessionLog.mockResolvedValue(undefined as any);
     mockedStorage.getNextSessionNumber.mockResolvedValue(2);
   });
-
-  itReturns401WithParams(POST, () => makePostReq({ datePlayed: "2026-05-01" }), PARAMS, mockedRequireAuth);
 
   it("returns 400 when datePlayed is missing", async () => {
     const res = await POST(makePostReq({ title: "Session 1" }), { params: PARAMS });
@@ -162,7 +155,6 @@ describe("POST /api/campaigns/[id]/sessions", () => {
     () => makePostReq({ datePlayed: "2026-05-01" }),
     PARAMS,
     () => mockedStorage.loadCampaignById.mockResolvedValue(null as any),
-    mockedRequireAuth,
     "returns 404 when campaign not found"
   );
 
@@ -171,6 +163,5 @@ describe("POST /api/campaigns/[id]/sessions", () => {
     () => makePostReq({ datePlayed: "2026-05-01" }),
     PARAMS,
     () => mockedStorage.saveSessionLog.mockRejectedValue(new Error("DB error")),
-    mockedRequireAuth
   );
 });
