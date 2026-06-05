@@ -81,18 +81,24 @@ The system SHALL re-export all factories from `tests/helpers/characterTestHelper
 - **When** the import is resolved
 - **Then** the factory from `characterTestHelpers.ts` is used without error
 
-## REMOVED Requirements
+## Backward-Compatible Export
 
-### Requirement: REMOVED `createImportedCharacterDraft` from `dndBeyondImport.ts`
+### Requirement: `createImportedCharacterDraft` retained as alias in `dndBeyondImport.ts`
 
-Reason for removal: The function creates the normalized 5e output shape, not a DnD Beyond-specific shape. It is moved verbatim to `characterTestHelpers.ts` as `createCharacterData`. Callers in `dndBeyondImport.ts`-dependent tests are updated to use the new path.
+`createImportedCharacterDraft` is re-exported from `dndBeyondImport.ts` as a backward-compatible alias for `createCharacterData`:
+
+```typescript
+export { createCharacterData as createImportedCharacterDraft };
+```
+
+This keeps existing callers working without modification. The canonical name going forward is `createCharacterData` from `characterTestHelpers.ts`.
 
 ## Traceability
 
 - Proposal element "Create characterTestHelpers.ts" -> Requirements: ADDED createAbilityScores, ADDED createClassEntry, ADDED createCharacterData, ADDED header comment
 - Design decision 1 (three-layer hierarchy) -> All ADDED requirements
-- Design decision 2 (move createImportedCharacterDraft verbatim) -> ADDED createCharacterData, REMOVED createImportedCharacterDraft
-- Requirements -> Tasks: task-03 (create characterTestHelpers.ts), task-05 (update imports)
+- Design decision 2 (move createImportedCharacterDraft verbatim) -> ADDED createCharacterData, backward-compat re-export in dndBeyondImport.ts
+- Requirements -> Tasks: task-03 (create characterTestHelpers.ts), task-04 (backward-compat re-export), task-05 (update imports)
 
 ## Non-Functional Acceptance Criteria
 
@@ -101,5 +107,5 @@ Reason for removal: The function creates the normalized 5e output shape, not a D
 #### Scenario: Existing tests unaffected
 
 - **Given** all test files that previously used `createImportedCharacterDraft` are updated to use `createCharacterData`
-- **When** the full unit test suite runs (`npm test -- --testPathPattern=unit`)
+- **When** the full unit test suite runs (`npm run test:unit`)
 - **Then** zero test failures introduced by this change
