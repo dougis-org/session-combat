@@ -44,16 +44,23 @@ function MonsterImportContent() {
 
       if (response.status === 207) {
         const count = result && typeof result.count === "number" ? result.count : 0;
-        const total = result && typeof result.total === "number" ? result.total : count;
+        const errorsArray = Array.isArray(result?.errors) ? result.errors : [];
+        const total =
+          result && typeof result.total === "number"
+            ? result.total
+            : count + errorsArray.length;
         const errorDetails =
-          result && Array.isArray(result.errors)
-            ? result.errors
-                .map(
-                  (e: { index?: number; message?: string }) =>
-                    `[index ${e?.index ?? "unknown"}]: ${e?.message ?? "Unknown error"}`
+          errorsArray.length > 0
+            ? errorsArray
+                .map((e: unknown) =>
+                  typeof e === "string"
+                    ? e
+                    : `[index ${(e as { index?: number })?.index ?? "unknown"}]: ${(e as { message?: string })?.message ?? "Unknown error"}`
                 )
                 .join("; ")
-            : result?.error;
+            : result?.error != null
+            ? String(result.error)
+            : undefined;
         let message = `Successfully imported ${count} of ${total} monsters.`;
         if (errorDetails)
           message += ` Some monsters could not be imported: ${errorDetails}`;

@@ -87,7 +87,23 @@ describe("MonsterImportPage — 207 partial-success handler", () => {
     expect(msg.textContent).toMatch(/\[index 1\]: Missing name/);
   });
 
-  it("shows 0 counts when result fields are absent (null-safe fallback)", async () => {
+  it("derives total from count + errors length when total is absent", async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      jsonResponse(
+        { count: 1, errors: [{ index: 1, message: "Bad" }] },
+        207
+      )
+    ) as typeof fetch;
+
+    await renderAndUpload(VALID_BODY);
+
+    // total absent → 1 (count) + 1 (errors.length) = 2
+    expect(
+      await screen.findByText(/Successfully imported 1 of 2 monsters/i)
+    ).toBeInTheDocument();
+  });
+
+  it("shows 0 of 0 when result fields are absent (null-safe fallback)", async () => {
     global.fetch = jest.fn().mockResolvedValue(
       jsonResponse({}, 207)
     ) as typeof fetch;
@@ -108,5 +124,19 @@ describe("MonsterImportPage — 207 partial-success handler", () => {
 
     const msg = await screen.findByText(/Successfully imported 0 of 1 monsters/i);
     expect(msg.textContent).toMatch(/Unexpected failure/);
+  });
+
+  it("handles string elements inside errors array", async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      jsonResponse(
+        { count: 0, total: 1, errors: ["plain string error"] },
+        207
+      )
+    ) as typeof fetch;
+
+    await renderAndUpload(VALID_BODY);
+
+    const msg = await screen.findByText(/Successfully imported 0 of 1 monsters/i);
+    expect(msg.textContent).toMatch(/plain string error/);
   });
 });
