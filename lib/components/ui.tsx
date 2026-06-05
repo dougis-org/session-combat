@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useId } from 'react';
 
 export function ErrorBanner({ message }: { message: string | null }) {
   if (!message) return null;
@@ -121,10 +121,12 @@ export function TextInputField({
   disabled?: boolean;
   placeholder?: string;
 }) {
+  const generatedId = useId();
+  const resolvedId = id ?? generatedId;
   return (
-    <FormField label={label} htmlFor={id}>
+    <FormField label={label} htmlFor={resolvedId}>
       <input
-        id={id}
+        id={resolvedId}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
