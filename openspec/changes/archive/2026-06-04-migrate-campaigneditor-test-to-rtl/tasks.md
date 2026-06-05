@@ -156,15 +156,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`.
-- [ ] Verify merged changes appear on `main`.
-- [ ] Mark all remaining tasks complete.
-- [ ] No doc updates required beyond this change (test-only + minor a11y attrs).
-- [ ] Sync approved spec delta: copy `openspec/changes/migrate-campaigneditor-test-to-rtl/specs/rtl-migration/spec.md` to `openspec/specs/rtl-migration/spec.md` (create directory if absent).
-- [ ] Archive the change: move `openspec/changes/migrate-campaigneditor-test-to-rtl/` to `openspec/changes/archive/2026-06-04-migrate-campaigneditor-test-to-rtl/` **as a single atomic commit** (stage both the new location and the deletion of the old in one commit — never split).
-- [ ] Confirm `openspec/changes/archive/2026-06-04-migrate-campaigneditor-test-to-rtl/` exists and `openspec/changes/migrate-campaigneditor-test-to-rtl/` is gone.
-- [ ] Create doc branch: `git checkout -b doc/archive-2026-06-04-migrate-campaigneditor-test-to-rtl` then `git push -u origin doc/archive-…`
-- [ ] Open PR from doc branch to `main` with title `docs: archive migrate-campaigneditor-test-to-rtl (2026-06-04)`.
-- [ ] Immediately enable auto-merge on doc PR.
-- [ ] Monitor doc PR until merged (same loop).
-- [ ] Prune merged local branches: `git fetch --prune && git branch -d feat/migrate-campaigneditor-test-to-rtl doc/archive-2026-06-04-migrate-campaigneditor-test-to-rtl`
+- [x] `git checkout main` and `git pull --ff-only`.
+- [x] Verify merged changes appear on `main`.
+- [x] Mark all remaining tasks complete.
+- [x] No doc updates required beyond this change (test-only + minor a11y attrs).
+- [x] Sync approved spec delta: copy `openspec/changes/migrate-campaigneditor-test-to-rtl/specs/rtl-migration/spec.md` to `openspec/specs/rtl-migration/spec.md` (create directory if absent).
+- [x] Archive the change: move `openspec/changes/migrate-campaigneditor-test-to-rtl/` to `openspec/changes/archive/2026-06-04-migrate-campaigneditor-test-to-rtl/` **as a single atomic commit** (stage both the new location and the deletion of the old in one commit — never split).
+- [x] Confirm `openspec/changes/archive/2026-06-04-migrate-campaigneditor-test-to-rtl/` exists and `openspec/changes/migrate-campaigneditor-test-to-rtl/` is gone.
+- [x] Create doc branch: `git checkout -b doc/archive-2026-06-04-migrate-campaigneditor-test-to-rtl` then `git push -u origin doc/archive-…`
+- [x] Open PR from doc branch to `main` with title `docs: archive migrate-campaigneditor-test-to-rtl (2026-06-04)`.
+- [x] Immediately enable auto-merge on doc PR.
+- [x] Monitor doc PR until merged (same loop).
+- [x] Prune merged local branches: `git fetch --prune && git branch -d feat/migrate-campaigneditor-test-to-rtl doc/archive-2026-06-04-migrate-campaigneditor-test-to-rtl`
