@@ -1,5 +1,3 @@
-/** @jest-environment jsdom */
-
 /**
  * Client-side integration test for logout storage cleanup.
  *
@@ -36,9 +34,6 @@ describe("logout clears storage integration", () => {
   let originalFetch: typeof globalThis.fetch;
 
   beforeEach(() => {
-    (
-      globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
-    ).IS_REACT_ACT_ENVIRONMENT = true;
     localStorage.clear();
     replaceMock.mockReset();
     logoutFn = null;

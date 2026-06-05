@@ -1,9 +1,3 @@
-/**
- * @jest-environment jsdom
- */
-(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
-
-
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({ children, href, ...rest }: { children: React.ReactNode; href: string; [k: string]: unknown }) =>

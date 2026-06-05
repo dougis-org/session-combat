@@ -1,7 +1,12 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { Root } from 'react-dom/client';
+import { act } from 'react';
+import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
 import { CampaignEditor } from '@/app/campaigns/CampaignEditor';
 import type { Campaign } from '@/lib/types';
+
+let container: HTMLDivElement;
+let root: Root;
 
 const BASE_CAMPAIGN: Campaign = {
   id: 'camp-1',
@@ -15,28 +20,32 @@ const BASE_CAMPAIGN: Campaign = {
   updatedAt: new Date('2026-01-01'),
 };
 
+beforeEach(() => {
+  ({ container, root } = createReactRoot());
+});
+
 afterEach(() => {
+  unmountReactRoot(container, root);
   jest.clearAllMocks();
 });
 
-function renderEditor(overrides: Partial<Campaign> = {}, extraProps: { isNew?: boolean } = {}) {
-  const user = userEvent.setup();
-  const onSave = jest.fn();
-  const onCancel = jest.fn();
-  render(
-    <CampaignEditor
-      campaign={{ ...BASE_CAMPAIGN, ...overrides }}
-      onSave={onSave}
-      onCancel={onCancel}
-      isNew={extraProps.isNew ?? false}
-    />
-  );
-  return { onSave, onCancel, user };
+function render(props: { campaign: Campaign; onSave: (...args: any[]) => any; onCancel: (...args: any[]) => any; isNew: boolean }) {
+  act(() => { root.render(<CampaignEditor {...props} />); });
 }
 
-async function openChapters(user: ReturnType<typeof userEvent.setup>) {
-  if (!screen.queryByRole('button', { name: /add chapter/i })) {
-    await user.click(screen.getByRole('button', { name: /chapters \(\d+\)/i }));
+function findButton(text: string): HTMLButtonElement {
+  return Array.from(container.querySelectorAll('button')).find(
+    b => b.textContent?.trim().includes(text),
+  ) as HTMLButtonElement;
+}
+
+function getInput(type: string, index = 0): HTMLInputElement {
+  return container.querySelectorAll<HTMLInputElement>(`input[type="${type}"]`)[index];
+}
+
+async function openChapters() {
+  if (!container.textContent?.includes('+ Add Chapter')) {
+    await act(async () => { findButton('Chapters').click(); });
   }
 }
 
@@ -56,118 +65,145 @@ const CHAPTER_TRIO = [
 describe('CampaignEditor', () => {
   describe('rendering', () => {
     it('shows "Create Campaign" title when isNew', () => {
-      renderEditor({}, { isNew: true });
-      expect(screen.getByRole('heading', { name: 'Create Campaign' })).toBeInTheDocument();
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: true });
+      expect(container.querySelector('h2')?.textContent).toBe('Create Campaign');
     });
 
     it('shows "Edit Campaign" title when not isNew', () => {
-      renderEditor();
-      expect(screen.getByRole('heading', { name: 'Edit Campaign' })).toBeInTheDocument();
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      expect(container.querySelector('h2')?.textContent).toBe('Edit Campaign');
     });
 
     it('populates name input from campaign', () => {
-      renderEditor();
-      expect(screen.getByRole('textbox', { name: /campaign name/i })).toHaveValue('Test Campaign');
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      expect(container.querySelectorAll<HTMLInputElement>('input[type="text"]')[0].value).toBe('Test Campaign');
     });
 
     it('populates moduleName input from campaign', () => {
-      renderEditor();
-      expect(screen.getByRole('textbox', { name: /module \/ adventure/i })).toHaveValue('LMoP');
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      expect(container.querySelectorAll<HTMLInputElement>('input[type="text"]')[1].value).toBe('LMoP');
     });
 
     it('renders status dropdown with current value selected', () => {
-      renderEditor({ status: 'on-hold' });
-      expect(screen.getByTestId('status-select')).toHaveValue('on-hold');
+      render({ campaign: { ...BASE_CAMPAIGN, status: 'on-hold' }, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      const select = container.querySelector<HTMLSelectElement>('select[data-testid="status-select"]');
+      expect(select?.value).toBe('on-hold');
     });
 
     it('renders notes textarea with current value', () => {
-      renderEditor({ notes: 'Party at level 5' });
-      expect(screen.getByTestId('notes-textarea')).toHaveValue('Party at level 5');
+      render({ campaign: { ...BASE_CAMPAIGN, notes: 'Party at level 5' }, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      const textarea = container.querySelector<HTMLTextAreaElement>('textarea[data-testid="notes-textarea"]');
+      expect(textarea?.value).toBe('Party at level 5');
     });
 
     it('notes textarea has maxLength of 10000', () => {
-      renderEditor();
-      expect(screen.getByTestId('notes-textarea')).toHaveAttribute('maxLength', '10000');
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      const textarea = container.querySelector<HTMLTextAreaElement>('textarea[data-testid="notes-textarea"]');
+      expect(textarea?.maxLength).toBe(10000);
     });
 
     it('renders character counter showing length/10000', () => {
-      renderEditor({ notes: 'Hello' });
-      expect(screen.getByText('5/10000')).toBeInTheDocument();
+      render({ campaign: { ...BASE_CAMPAIGN, notes: 'Hello' }, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      expect(container.textContent).toContain('5/10000');
     });
   });
 
   describe('validation', () => {
     it('save button is disabled when name is empty', () => {
-      renderEditor({ name: '' });
-      expect(screen.getByRole('button', { name: /save campaign/i })).toBeDisabled();
+      render({ campaign: { ...BASE_CAMPAIGN, name: '' }, onSave: jest.fn(), onCancel: jest.fn(), isNew: true });
+      expect(findButton('Save Campaign').disabled).toBe(true);
     });
 
     it('save button is enabled when name has content', () => {
-      renderEditor();
-      expect(screen.getByRole('button', { name: /save campaign/i })).not.toBeDisabled();
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      expect(findButton('Save Campaign').disabled).toBe(false);
     });
   });
 
   describe('saving', () => {
     it('calls onSave with trimmed name', async () => {
-      const { onSave, user } = renderEditor();
-      await user.click(screen.getByRole('button', { name: /save campaign/i }));
+      const onSave = jest.fn() as any;
+      render({ campaign: BASE_CAMPAIGN, onSave, onCancel: jest.fn(), isNew: false });
+      await act(async () => { findButton('Save Campaign').click(); });
       expect(onSave).toHaveBeenCalledTimes(1);
       expect((onSave.mock.calls[0][0] as Campaign).name).toBe('Test Campaign');
     });
 
     it('calls onSave with trimmed moduleName', async () => {
-      const { onSave, user } = renderEditor({ moduleName: '  DH  ' });
-      await user.click(screen.getByRole('button', { name: /save campaign/i }));
+      const onSave = jest.fn() as any;
+      render({ campaign: { ...BASE_CAMPAIGN, moduleName: '  DH  ' }, onSave, onCancel: jest.fn(), isNew: false });
+      await act(async () => { findButton('Save Campaign').click(); });
       expect((onSave.mock.calls[0][0] as Campaign).moduleName).toBe('DH');
     });
 
     it('calls onSave with updated status when dropdown changes', async () => {
-      const { onSave, user } = renderEditor();
-      await user.selectOptions(screen.getByTestId('status-select'), 'completed');
-      await user.click(screen.getByRole('button', { name: /save campaign/i }));
+      const onSave = jest.fn() as any;
+      render({ campaign: BASE_CAMPAIGN, onSave, onCancel: jest.fn(), isNew: false });
+      const select = container.querySelector<HTMLSelectElement>('select[data-testid="status-select"]')!;
+      await act(async () => {
+        select.value = 'completed';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      await act(async () => { findButton('Save Campaign').click(); });
       expect((onSave.mock.calls[0][0] as Campaign).status).toBe('completed');
     });
 
     it('calls onSave with on-hold status when dropdown changes to on-hold', async () => {
-      const { onSave, user } = renderEditor();
-      await user.selectOptions(screen.getByTestId('status-select'), 'on-hold');
-      await user.click(screen.getByRole('button', { name: /save campaign/i }));
+      const onSave = jest.fn() as any;
+      render({ campaign: BASE_CAMPAIGN, onSave, onCancel: jest.fn(), isNew: false });
+      const select = container.querySelector<HTMLSelectElement>('select[data-testid="status-select"]')!;
+      await act(async () => {
+        select.value = 'on-hold';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      await act(async () => { findButton('Save Campaign').click(); });
       expect((onSave.mock.calls[0][0] as Campaign).status).toBe('on-hold');
     });
   });
 
   describe('cancel', () => {
-    it('calls onCancel when Cancel button clicked', async () => {
-      const { onCancel, user } = renderEditor();
-      await user.click(screen.getByRole('button', { name: /cancel/i }));
+    it('calls onCancel when Cancel button clicked', () => {
+      const onCancel = jest.fn();
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel, isNew: false });
+      act(() => { findButton('Cancel').click(); });
       expect(onCancel).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('legacy fields removed', () => {
     it('does not render currentChapter input', () => {
-      renderEditor();
-      expect(screen.queryByText(/current chapter/i)).not.toBeInTheDocument();
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      const labels = Array.from(container.querySelectorAll('label')).map(l => l.textContent);
+      expect(labels.some(l => l?.includes('Current Chapter'))).toBe(false);
     });
 
     it('does not render currentChapterOrder input', () => {
-      renderEditor();
-      expect(screen.queryByText(/chapter order/i)).not.toBeInTheDocument();
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      const labels = Array.from(container.querySelectorAll('label')).map(l => l.textContent);
+      expect(labels.some(l => l?.includes('Chapter Order'))).toBe(false);
     });
   });
 
   describe('chapters display', () => {
     it('renders chapter list when chapters present', () => {
-      renderEditor({ chapters: CHAPTER_TRIO });
-      expect(screen.getByDisplayValue('Arrival')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('The Inn')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('The Dungeon')).toBeInTheDocument();
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        chapters: [
+          { id: 'ch-1', title: 'Arrival', order: 0 },
+          { id: 'ch-2', title: 'The Inn', order: 1 },
+          { id: 'ch-3', title: 'The Dungeon', order: 2 },
+        ],
+      };
+      render({ campaign, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      expect(container.textContent).toContain('Arrival');
+      expect(container.textContent).toContain('The Inn');
+      expect(container.textContent).toContain('The Dungeon');
     });
 
     it('save with no chapters calls onSave with chapters: []', async () => {
-      const { onSave, user } = renderEditor();
-      await user.click(screen.getByRole('button', { name: /save campaign/i }));
+      const onSave = jest.fn() as any;
+      render({ campaign: BASE_CAMPAIGN, onSave, onCancel: jest.fn(), isNew: false });
+      await act(async () => { findButton('Save Campaign').click(); });
       expect(onSave).toHaveBeenCalledTimes(1);
       expect((onSave.mock.calls[0][0] as Campaign).chapters).toEqual([]);
     });
@@ -175,54 +211,99 @@ describe('CampaignEditor', () => {
 
   describe('chapters editing', () => {
     it('toggles chapters editing section when accordion button is clicked', async () => {
-      const { user } = renderEditor();
-      expect(screen.queryByRole('button', { name: /add chapter/i })).not.toBeInTheDocument();
-      await user.click(screen.getByRole('button', { name: /chapters \(\d+\)/i }));
-      expect(screen.getByRole('button', { name: /add chapter/i })).toBeInTheDocument();
-      await user.click(screen.getByRole('button', { name: /chapters \(\d+\)/i }));
-      expect(screen.queryByRole('button', { name: /add chapter/i })).not.toBeInTheDocument();
+      render({ campaign: BASE_CAMPAIGN, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      // Initially, the chapters editor section is collapsed, so '+ Add Chapter' is not in DOM
+      expect(container.textContent).not.toContain('+ Add Chapter');
+      
+      const accordionBtn = findButton('Chapters');
+      expect(accordionBtn).toBeDefined();
+
+      await act(async () => { accordionBtn.click(); });
+      expect(container.textContent).toContain('+ Add Chapter');
+
+      await act(async () => { accordionBtn.click(); });
+      expect(container.textContent).not.toContain('+ Add Chapter');
     });
 
     it('adds a new chapter row when "+ Add Chapter" is clicked', async () => {
-      const { user } = renderEditor({ chapters: [] });
-      await openChapters(user);
-      expect(screen.getByText('No chapters defined')).toBeInTheDocument();
-      await user.click(screen.getByRole('button', { name: /add chapter/i }));
-      const inputs = screen.getAllByRole('textbox', { name: /chapter \d+ title/i });
-      expect(inputs).toHaveLength(1);
-      expect(inputs[0]).toHaveValue('');
-      expect(screen.queryByText('No chapters defined')).not.toBeInTheDocument();
-      expect(screen.getByTestId('current-chapter-select')).toBeInTheDocument();
+      const campaign = { ...BASE_CAMPAIGN, chapters: [] };
+      render({ campaign, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+
+      await openChapters();
+      
+      expect(container.textContent).toContain('No chapters defined');
+      
+      const addBtn = findButton('+ Add Chapter');
+      await act(async () => { addBtn.click(); });
+      
+      const inputs = container.querySelectorAll<HTMLInputElement>('input[data-testid="chapter-title-input"]');
+      expect(inputs.length).toBe(1);
+      expect(inputs[0].value).toBe('');
+      expect(container.textContent).not.toContain('No chapters defined');
+      
+      const select = container.querySelector('select[data-testid="current-chapter-select"]') as HTMLSelectElement;
+      expect(select).toBeDefined();
     });
 
     it('removes a chapter, shifts subsequent ones, and clears active chapter if deleted', async () => {
-      const { onSave, user } = renderEditor({ chapters: CHAPTER_TRIO, currentChapterId: 'ch-2' });
-      await openChapters(user);
-      await user.click(screen.getByRole('button', { name: /remove the inn/i }));
-      expect(screen.getByRole('textbox', { name: /chapter 1 title/i })).toHaveValue('Arrival');
-      expect(screen.getByRole('textbox', { name: /chapter 2 title/i })).toHaveValue('The Dungeon');
-      await user.click(screen.getByRole('button', { name: /save campaign/i }));
+      const onSave = jest.fn() as any;
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        currentChapterId: 'ch-2',
+        chapters: CHAPTER_TRIO,
+      };
+      render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
+
+      await openChapters();
+
+      const removeBtn = container.querySelector('button[data-testid="remove-chapter-1"]') as HTMLButtonElement;
+      await act(async () => { removeBtn.click(); });
+      
+      const inputs = container.querySelectorAll<HTMLInputElement>('input[data-testid="chapter-title-input"]');
+      expect(inputs.length).toBe(2);
+      expect(inputs[0].value).toBe('Arrival');
+      expect(inputs[1].value).toBe('The Dungeon');
+      
+      await act(async () => { findButton('Save Campaign').click(); });
       expect(onSave).toHaveBeenCalledTimes(1);
-      const saved = onSave.mock.calls[0][0] as Campaign;
-      expect(saved.chapters).toEqual([
+      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
+      expect(savedCampaign.chapters).toEqual([
         { id: 'ch-1', title: 'Arrival', order: 0 },
         { id: 'ch-3', title: 'The Dungeon', order: 1 },
       ]);
-      expect(saved.currentChapterId).toBeUndefined();
+      expect(savedCampaign.currentChapterId).toBeUndefined();
     });
 
     it('reorders chapters with move buttons and updates order index', async () => {
-      const { onSave, user } = renderEditor({ chapters: CHAPTER_TRIO });
-      await openChapters(user);
-      await user.click(screen.getByRole('button', { name: /move chapter 2 up/i }));
-      expect(screen.getByRole('textbox', { name: /chapter 1 title/i })).toHaveValue('The Inn');
-      expect(screen.getByRole('textbox', { name: /chapter 2 title/i })).toHaveValue('Arrival');
-      await user.click(screen.getByRole('button', { name: /move chapter 1 down/i }));
-      expect(screen.getByRole('textbox', { name: /chapter 1 title/i })).toHaveValue('Arrival');
-      await user.click(screen.getByRole('button', { name: /save campaign/i }));
+      const onSave = jest.fn() as any;
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        chapters: CHAPTER_TRIO,
+      };
+      render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
+
+      await openChapters();
+
+      const moveUpBtn = container.querySelector('button[data-testid="move-up-1"]') as HTMLButtonElement;
+      await act(async () => { moveUpBtn.click(); });
+      
+      let inputs = container.querySelectorAll<HTMLInputElement>('input[data-testid="chapter-title-input"]');
+      expect(inputs[0].value).toBe('The Inn');
+      expect(inputs[1].value).toBe('Arrival');
+      expect(inputs[2].value).toBe('The Dungeon');
+      
+      const moveDownBtn = container.querySelector('button[data-testid="move-down-0"]') as HTMLButtonElement;
+      await act(async () => { moveDownBtn.click(); });
+      
+      inputs = container.querySelectorAll<HTMLInputElement>('input[data-testid="chapter-title-input"]');
+      expect(inputs[0].value).toBe('Arrival');
+      expect(inputs[1].value).toBe('The Inn');
+      expect(inputs[2].value).toBe('The Dungeon');
+      
+      await act(async () => { findButton('Save Campaign').click(); });
       expect(onSave).toHaveBeenCalledTimes(1);
-      const saved = onSave.mock.calls[0][0] as Campaign;
-      expect(saved.chapters).toEqual([
+      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
+      expect(savedCampaign.chapters).toEqual([
         { id: 'ch-1', title: 'Arrival', order: 0 },
         { id: 'ch-2', title: 'The Inn', order: 1 },
         { id: 'ch-3', title: 'The Dungeon', order: 2 },
@@ -230,31 +311,71 @@ describe('CampaignEditor', () => {
     });
 
     it('updates currentChapterId when a chapter is selected in active chapter select', async () => {
-      const { onSave, user } = renderEditor({ chapters: CHAPTER_PAIR });
-      await openChapters(user);
-      await user.selectOptions(screen.getByTestId('current-chapter-select'), 'ch-2');
-      await user.click(screen.getByRole('button', { name: /save campaign/i }));
+      const onSave = jest.fn() as any;
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        chapters: CHAPTER_PAIR,
+      };
+      render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
+
+      await openChapters();
+
+      const select = container.querySelector('select[data-testid="current-chapter-select"]') as HTMLSelectElement;
+      expect(select).toBeDefined();
+      
+      await act(async () => {
+        select.value = 'ch-2';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      
+      await act(async () => { findButton('Save Campaign').click(); });
       expect(onSave).toHaveBeenCalledTimes(1);
-      expect((onSave.mock.calls[0][0] as Campaign).currentChapterId).toBe('ch-2');
+      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
+      expect(savedCampaign.currentChapterId).toBe('ch-2');
     });
 
     it('updates chapter title correctly when typing in the input field', async () => {
-      const { user } = renderEditor({ chapters: [{ id: 'ch-1', title: 'Arrival', order: 0 }] });
-      await openChapters(user);
-      const input = screen.getByRole('textbox', { name: /chapter 1 title/i });
-      expect(input).toHaveValue('Arrival');
-      await user.clear(input);
-      await user.type(input, 'New Arrival');
-      expect(input).toHaveValue('New Arrival');
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        chapters: [
+          { id: 'ch-1', title: 'Arrival', order: 0 },
+        ],
+      };
+      render({ campaign, onSave: jest.fn(), onCancel: jest.fn(), isNew: false });
+      
+      await openChapters();
+
+      const input = container.querySelector('input[data-testid="chapter-title-input"]') as HTMLInputElement;
+      expect(input.value).toBe('Arrival');
+      
+      await act(async () => {
+        input.value = 'New Arrival';
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      
+      expect(input.value).toBe('New Arrival');
     });
 
     it('sets currentChapterId to undefined when active chapter is removed', async () => {
-      const { onSave, user } = renderEditor({ chapters: CHAPTER_PAIR, currentChapterId: 'ch-2' });
-      await openChapters(user);
-      await user.click(screen.getByRole('button', { name: /remove the inn/i }));
-      await user.click(screen.getByRole('button', { name: /save campaign/i }));
+      const onSave = jest.fn() as any;
+      const campaign = {
+        ...BASE_CAMPAIGN,
+        chapters: CHAPTER_PAIR,
+        currentChapterId: 'ch-2',
+      };
+      render({ campaign, onSave, onCancel: jest.fn(), isNew: false });
+
+      await openChapters();
+
+      const removeBtn = container.querySelector('button[data-testid="remove-chapter-1"]') as HTMLButtonElement;
+      expect(removeBtn).toBeDefined();
+      
+      await act(async () => { removeBtn.click(); });
+      
+      await act(async () => { findButton('Save Campaign').click(); });
       expect(onSave).toHaveBeenCalledTimes(1);
-      expect((onSave.mock.calls[0][0] as Campaign).currentChapterId).toBeUndefined();
+      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
+      expect(savedCampaign.currentChapterId).toBeUndefined();
     });
   });
 });

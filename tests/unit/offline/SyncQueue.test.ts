@@ -1,6 +1,3 @@
-/** @jest-environment jsdom */
-
-
 import { SESSION_COMBAT_PREFIX } from "@/lib/offline/LocalStore";
 import { SyncQueue } from "@/lib/offline/SyncQueue";
 

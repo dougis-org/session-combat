@@ -1,5 +1,3 @@
-/** @jest-environment jsdom */
-
 import React from 'react';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -226,7 +224,6 @@ async function testHook(
 describe('useCombat', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
     global.confirm = jest.fn(() => true);
     global.alert = jest.fn();
     global.crypto = { randomUUID: () => 'uuid-1' } as Crypto;
