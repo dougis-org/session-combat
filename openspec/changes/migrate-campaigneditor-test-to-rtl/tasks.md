@@ -107,22 +107,22 @@ Work through the file top-to-bottom, replacing each legacy pattern. Complete eac
 
 ### 4. Run and verify
 
-- [x] `npx jest --testPathPattern CampaignEditor` — all 25 tests pass.
+- [x] `npx jest --testPathPattern CampaignEditor` — all 26 tests pass.
 - [x] `npx tsc --noEmit` — no TypeScript errors.
 - [x] Grep sanity checks:
   - `grep -n "createReactRoot\|IS_REACT_ACT_ENVIRONMENT\|@jest-environment jsdom\|\.click()\|\.value =" tests/unit/components/CampaignEditor.test.tsx` → zero results.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill on all modified files. The primary agent must automatically address all findings before committing.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill on all modified files. The primary agent must automatically address all findings before committing.
 
 ## Validation
 
-- [ ] `npx jest --testPathPattern CampaignEditor` — all 25 pass.
-- [ ] `npx jest` — full unit suite passes (no regressions).
-- [ ] `npx tsc --noEmit` — clean.
-- [ ] `npm run build` — production build succeeds.
-- [ ] All tasks in Execution marked complete.
+- [x] `npx jest --testPathPattern CampaignEditor` — all 26 pass.
+- [x] `npx jest` — full unit suite passes (no regressions).
+- [x] `npx tsc --noEmit` — clean.
+- [x] `npm run build` — production build succeeds.
+- [x] All tasks in Execution marked complete.
 
 ## Remote push validation
 
@@ -134,10 +134,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure `openspec-review-code` sub-agent was run and all findings addressed before the final commit.
-- [ ] Commit all changes to `feat/migrate-campaigneditor-test-to-rtl` and push to remote.
-- [ ] Open PR from `feat/migrate-campaigneditor-test-to-rtl` to `main`. PR body must include `Closes #343`.
-- [ ] **Immediately** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (never `--admin`).
+- [x] Ensure `openspec-review-code` sub-agent was run and all findings addressed before the final commit.
+- [x] Commit all changes to `feat/migrate-campaigneditor-test-to-rtl` and push to remote.
+- [x] Open PR from `feat/migrate-campaigneditor-test-to-rtl` to `main`. PR body must include `Closes #343`.
+- [x] **Immediately** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (never `--admin`).
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments.
 - [ ] **Monitor PR comments** — poll autonomously; when comments appear, address, commit fixes, follow remote push validation, push, wait 180 s, repeat.
 - [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing check, follow remote push validation, push, wait 180 s, repeat.

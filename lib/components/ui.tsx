@@ -106,10 +106,6 @@ export function textInputClass() {
   return 'w-full bg-gray-700 rounded px-3 py-2 text-white';
 }
 
-function slugify(label: string): string {
-  return label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
-
 export function TextInputField({
   id,
   label,
@@ -126,7 +122,7 @@ export function TextInputField({
   placeholder?: string;
 }) {
   const generatedId = useId();
-  const resolvedId = id ?? (slugify(label) || generatedId);
+  const resolvedId = id ?? generatedId;
   return (
     <FormField label={label} htmlFor={resolvedId}>
       <input
