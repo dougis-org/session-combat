@@ -10,8 +10,9 @@ export const GET = withAuthAndParams<Params>(async (request, auth, { id: campaig
   try {
     const result = await assertCampaignAccess(campaignId, auth.userId);
     if (result instanceof NextResponse) return result;
+    const { campaign } = result;
 
-    const logs = await storage.loadSessionLogs(auth.userId, campaignId);
+    const logs = await storage.loadSessionLogs(campaign.userId, campaignId);
     const limitParam = new URL(request.url).searchParams.get('limit');
     const limit = limitParam ? parseInt(limitParam, 10) : undefined;
     return NextResponse.json(limit && limit > 0 ? logs.slice(0, limit) : logs);

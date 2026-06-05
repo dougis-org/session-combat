@@ -59,6 +59,7 @@ describe("GET /api/campaigns/[id]/sessions", () => {
     const body = await res.json();
     expect(body).toHaveLength(1);
     expect(body[0].sessionNumber).toBe(1);
+    expect(mockedStorage.loadSessionLogs).toHaveBeenCalledWith(MOCK_CAMPAIGN.userId, CAMPAIGN_ID);
   });
 
   it("returns 200 with empty array when no logs", async () => {
