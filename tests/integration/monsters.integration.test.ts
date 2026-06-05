@@ -167,3 +167,55 @@ describe("Monster API Integration Tests", () => {
     expect(Array.isArray(data)).toBe(true);
   });
 });
+
+describe("POST /api/monsters/upload", () => {
+  let uploadBaseUrl: string;
+  let uploadAuthCookie: string;
+
+  beforeAll(async () => {
+    uploadBaseUrl = process.env.TEST_BASE_URL!;
+    if (!uploadBaseUrl)
+      throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
+    uploadAuthCookie = (await registerTestUser(uploadBaseUrl, "monster-upload-test")).cookie;
+  }, 30000);
+
+  function uploadAuthed() {
+    return { "Content-Type": "application/json", Cookie: uploadAuthCookie };
+  }
+
+  it("valid upload returns 201 and monster is queryable", async () => {
+    const uploadRes = await fetch(`${uploadBaseUrl}/api/monsters/upload`, {
+      method: "POST",
+      headers: uploadAuthed(),
+      body: JSON.stringify({ monsters: [{ name: "Upload Beast", maxHp: 22 }] }),
+    });
+    expect(uploadRes.status).toBe(201);
+    const uploadData = (await uploadRes.json()) as { count: number };
+    expect(uploadData.count).toBe(1);
+
+    const listRes = await fetch(`${uploadBaseUrl}/api/monsters`, {
+      headers: uploadAuthed(),
+    });
+    expect(listRes.status).toBe(200);
+    const monsters = (await listRes.json()) as Array<{ name: string }>;
+    expect(monsters.some((m) => m.name === "Upload Beast")).toBe(true);
+  });
+
+  it("returns 401 without auth cookie", async () => {
+    const res = await fetch(`${uploadBaseUrl}/api/monsters/upload`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ monsters: [{ name: "Beast", maxHp: 10 }] }),
+    });
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 400 with missing monsters key", async () => {
+    const res = await fetch(`${uploadBaseUrl}/api/monsters/upload`, {
+      method: "POST",
+      headers: uploadAuthed(),
+      body: JSON.stringify({}),
+    });
+    expect(res.status).toBe(400);
+  });
+});
