@@ -77,14 +77,14 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure `openspec-review-code` sub-agent was run and all findings addressed before the final commit
-- [ ] Commit all changes to `test/rtl-migration-issue-355` and push to remote
-- [ ] Open PR from `test/rtl-migration-issue-355` to `main` with body including `Closes #355`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (never `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll autonomously; address, commit, validate locally, push, wait 180 seconds, repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll via `gh pr checks <PR-URL> --json isRequired,state`; for any required failing check: diagnose, fix, validate locally, push, wait 180 seconds, repeat
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user
+- [x] Ensure `openspec-review-code` sub-agent was run and all findings addressed before the final commit
+- [x] Commit all changes to `test/rtl-migration-issue-355` and push to remote
+- [x] Open PR from `test/rtl-migration-issue-355` to `main` with body including `Closes #355`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (never `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — poll autonomously; address, commit, validate locally, push, wait 180 seconds, repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll via `gh pr checks <PR-URL> --json isRequired,state`; for any required failing check: diagnose, fix, validate locally, push, wait 180 seconds, repeat
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user
 
 Ownership metadata:
 
@@ -99,11 +99,11 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on main
-- [ ] Mark all remaining tasks complete
-- [ ] No documentation updates required (test-only change)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on main
+- [x] Mark all remaining tasks complete
+- [x] No documentation updates required (test-only change)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
 - [ ] Archive the change: move `openspec/changes/migrate-createreactroot-to-rtl/` to `openspec/changes/archive/YYYY-MM-DD-migrate-createreactroot-to-rtl/` in a single commit (copy + delete staged together)
 - [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-migrate-createreactroot-to-rtl/` exists and `openspec/changes/migrate-createreactroot-to-rtl/` is gone
 - [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-migrate-createreactroot-to-rtl` then `git push -u origin doc/archive-YYYY-MM-DD-migrate-createreactroot-to-rtl`
