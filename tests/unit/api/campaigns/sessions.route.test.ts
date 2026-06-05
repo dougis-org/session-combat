@@ -1,31 +1,36 @@
 /**
  * @jest-environment node
  */
+import { NextResponse } from "next/server";
 import { GET, POST } from "@/app/api/campaigns/[id]/sessions/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
+import { assertCampaignAccess } from "@/lib/utils/campaign";
 import {
   MOCK_AUTH,
   MOCK_SESSION_LOG,
   makeRouteRequest,
   itReturns401WithParams,
-  itReturns404WithParams,
   itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware");
 jest.mock("@/lib/storage", () => ({
   storage: {
-    loadCampaignById: jest.fn(),
     loadSessionLogs: jest.fn(),
     saveSessionLog: jest.fn(),
     getNextSessionNumber: jest.fn(),
   },
 }));
+jest.mock("@/lib/utils/campaign", () => ({
+  ...jest.requireActual("@/lib/utils/campaign"),
+  assertCampaignAccess: jest.fn(),
+}));
 jest.mock("crypto", () => ({ randomUUID: jest.fn(() => "test-uuid") }));
 
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
+const mockedAssertCampaignAccess = jest.mocked(assertCampaignAccess);
 
 const CAMPAIGN_ID = "campaign-1";
 const BASE_URL = `http://localhost/api/campaigns/${CAMPAIGN_ID}/sessions`;
@@ -33,12 +38,12 @@ const PARAMS = Promise.resolve({ id: CAMPAIGN_ID });
 const makeGetReq = () => makeRouteRequest(BASE_URL, "GET");
 const makePostReq = (body: unknown) => makeRouteRequest(BASE_URL, "POST", body);
 
-const MOCK_CAMPAIGN = { id: CAMPAIGN_ID, userId: "user-123", name: "Test Campaign" };
+const MOCK_CAMPAIGN = { id: CAMPAIGN_ID, userId: "user-123", name: "Test Campaign", chapters: [], status: "active" as const, notes: "" };
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-  mockedStorage.loadCampaignById.mockResolvedValue(MOCK_CAMPAIGN as any);
+  mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "dm" });
 });
 
 // ─── GET /api/campaigns/[id]/sessions ─────────────────────────────────────────
@@ -46,7 +51,8 @@ beforeEach(() => {
 describe("GET /api/campaigns/[id]/sessions", () => {
   itReturns401WithParams(GET, makeGetReq, PARAMS, mockedRequireAuth);
 
-  it("returns 200 with session logs", async () => {
+  it("returns 200 with session logs for active player", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
     mockedStorage.loadSessionLogs.mockResolvedValue([MOCK_SESSION_LOG] as any);
     const res = await GET(makeGetReq(), { params: PARAMS });
     expect(res.status).toBe(200);
@@ -62,14 +68,13 @@ describe("GET /api/campaigns/[id]/sessions", () => {
     expect(await res.json()).toEqual([]);
   });
 
-  itReturns404WithParams(
-    GET,
-    makeGetReq,
-    PARAMS,
-    () => mockedStorage.loadCampaignById.mockResolvedValue(null as any),
-    mockedRequireAuth,
-    "returns 404 when campaign not found"
-  );
+  it("returns 404 when assertCampaignAccess denies (non-member)", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+    const res = await GET(makeGetReq(), { params: PARAMS });
+    expect(res.status).toBe(404);
+  });
 
   itReturns500WithParams(
     GET,
@@ -157,14 +162,20 @@ describe("POST /api/campaigns/[id]/sessions", () => {
     expect(body.newLevel).toBe(5);
   });
 
-  itReturns404WithParams(
-    POST,
-    () => makePostReq({ datePlayed: "2026-05-01" }),
-    PARAMS,
-    () => mockedStorage.loadCampaignById.mockResolvedValue(null as any),
-    mockedRequireAuth,
-    "returns 404 when campaign not found"
-  );
+  it("returns 404 when active player attempts POST", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
+    const res = await POST(makePostReq({ datePlayed: "2026-05-01" }), { params: PARAMS });
+    expect(res.status).toBe(404);
+    expect((await res.json()).error).toBe("Campaign not found");
+  });
+
+  it("returns 404 when assertCampaignAccess denies (non-member)", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+    const res = await POST(makePostReq({ datePlayed: "2026-05-01" }), { params: PARAMS });
+    expect(res.status).toBe(404);
+  });
 
   itReturns500WithParams(
     POST,

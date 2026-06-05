@@ -889,6 +889,35 @@ export const storage = {
     }
   },
 
+  async getMember(campaignId: string, userId: string): Promise<CampaignMember | null> {
+    try {
+      const db = await getDatabase();
+      const doc = await db
+        .collection<CampaignMember>("campaignMembers")
+        .findOne({ campaignId, userId });
+      if (!doc) return null;
+      const normalized = normalizeStoredEntityId(doc);
+      const { _id, ...rest } = normalized;
+      return rest as CampaignMember;
+    } catch (error) {
+      console.error("Error getting campaign member:", error);
+      throw error;
+    }
+  },
+
+  async loadCampaignByIdAny(id: string): Promise<Campaign | null> {
+    try {
+      const db = await getDatabase();
+      const campaign = await db
+        .collection<Campaign>("campaigns")
+        .findOne({ id });
+      return campaign ? normalizeCampaign(normalizeStoredEntityId(campaign)) : null;
+    } catch (error) {
+      console.error("Error loading campaign by ID (any):", error);
+      throw error;
+    }
+  },
+
   async listCampaignsForMember(userId: string): Promise<CampaignMemberSummary[]> {
     try {
       const db = await getDatabase();
