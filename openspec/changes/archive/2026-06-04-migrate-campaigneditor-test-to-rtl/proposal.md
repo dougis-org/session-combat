@@ -14,7 +14,7 @@
 - Current behavior: Tests render via `createReactRoot`, interact via `element.click()` / `element.value = …; dispatchEvent(…)`, and assert via `container.textContent.includes(…)` and positional `querySelectorAll(…)[index]`.
 - Desired behavior: Tests render via RTL `render()`, interact via `userEvent`, and assert via `screen.getBy*` / `screen.queryBy*` — all tied to accessible names rather than DOM position.
 - Constraints:
-  - All 25 existing test cases must continue to pass (no behaviour changes, no test deletions).
+  - All 26 existing test cases must continue to pass (no behaviour changes, no test deletions).
   - `TextInputField` in `lib/components/ui.tsx` must auto-generate a stable `id` from its `label` prop when no explicit `id` is supplied, so that `<label htmlFor>` links correctly and RTL can resolve accessible names without requiring callers to pass `id`.
   - Chapter action buttons (move-up, move-down, remove) must have `aria-label` values that include chapter title when available, falling back to ordinal position (e.g. "Chapter 2") when title is empty. Existing positional `aria-label` patterns on move buttons are acceptable for RTL queries; only the remove button currently lacks an `aria-label` and must gain one.
   - Chapter title inputs must gain an `aria-label` (e.g. `Chapter 1 title`) so they can be queried by accessible name.
