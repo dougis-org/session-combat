@@ -3,6 +3,21 @@ import type { ActiveDamageEffect, CreatureAbility, CombatantState, InitiativeRol
 import type { DamageType } from '@/lib/constants';
 import { rollDie } from '@/lib/utils/dice';
 
+export interface GroupedCombatants {
+  alive: {
+    players: Map<string, CombatantState[]>;
+    monsters: Map<string, CombatantState[]>;
+  };
+  dead: {
+    players: Map<string, CombatantState[]>;
+    monsters: Map<string, CombatantState[]>;
+  };
+  totals: {
+    players: number;  // alive only
+    monsters: number; // alive only
+  };
+}
+
 /**
  * Apply damage to a combatant, draining temp HP first.
  * Overflow damage carries through to regular HP, which floors at 0.
@@ -336,6 +351,55 @@ export function buildCombatantFromSource(
     lairActions: 'lairActions' in source ? source.lairActions : undefined,
     legendaryActionCount: lacCount,
     legendaryActionsRemaining: lacCount,
+  };
+}
+
+/**
+ * Partition combatants into alive/dead subsets and group each subset by type then name.
+ * `totals` reflects alive counts only (matches the header display in CombatInfoIcon).
+ */
+export function groupCombatantsForDisplay(combatants: CombatantState[]): GroupedCombatants {
+  const alivePlayersByName = new Map<string, CombatantState[]>();
+  const aliveMonstersByName = new Map<string, CombatantState[]>();
+  const deadPlayersByName = new Map<string, CombatantState[]>();
+  const deadMonstersByName = new Map<string, CombatantState[]>();
+
+  let totalPlayers = 0;
+  let totalMonsters = 0;
+
+  for (const combatant of combatants) {
+    if (combatant.type === 'lair') continue;
+
+    const isAlive = combatant.hp > 0;
+    if (combatant.type === 'player') {
+      if (isAlive) {
+        const existing = alivePlayersByName.get(combatant.name) || [];
+        existing.push(combatant);
+        alivePlayersByName.set(combatant.name, existing);
+        totalPlayers++;
+      } else {
+        const existing = deadPlayersByName.get(combatant.name) || [];
+        existing.push(combatant);
+        deadPlayersByName.set(combatant.name, existing);
+      }
+    } else {
+      if (isAlive) {
+        const existing = aliveMonstersByName.get(combatant.name) || [];
+        existing.push(combatant);
+        aliveMonstersByName.set(combatant.name, existing);
+        totalMonsters++;
+      } else {
+        const existing = deadMonstersByName.get(combatant.name) || [];
+        existing.push(combatant);
+        deadMonstersByName.set(combatant.name, existing);
+      }
+    }
+  }
+
+  return {
+    alive: { players: alivePlayersByName, monsters: aliveMonstersByName },
+    dead: { players: deadPlayersByName, monsters: deadMonstersByName },
+    totals: { players: totalPlayers, monsters: totalMonsters },
   };
 }
 
