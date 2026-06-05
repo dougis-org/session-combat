@@ -41,7 +41,7 @@
 
 - Risk: Integration tests for upload create real monster documents in the shared test DB.
   - Impact: Leaked documents could cause noise in other integration tests that assert exact monster counts.
-  - Mitigation: Use a distinct test-user slug (e.g., `"upload-test"`) so monsters are user-scoped and don't pollute other users' assertions.
+  - Mitigation: Use a distinct test-user slug (e.g., `"monster-upload-test"`) so monsters are user-scoped and don't pollute other users' assertions.
 
 - Risk: The 207 page fix changes visible user-facing text.
   - Impact: Low — the current message is always wrong; any improvement is correct.

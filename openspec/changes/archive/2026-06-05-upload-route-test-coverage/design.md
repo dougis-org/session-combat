@@ -37,7 +37,7 @@
 
 ### Decision 3: Integration test placement and user isolation
 
-- Chosen: Append a new `describe("POST /api/monsters/upload", ...)` block to `tests/integration/monsters.integration.test.ts`. Register a separate test user (`"upload-test"` slug) in a nested `beforeAll` to keep uploaded monsters user-scoped.
+- Chosen: Append a new `describe("POST /api/monsters/upload", ...)` block to `tests/integration/monsters.integration.test.ts`. Register a separate test user (`"monster-upload-test"` slug) in a nested `beforeAll` to keep uploaded monsters user-scoped.
 - Alternatives considered: New integration test file — rejected to avoid duplication of the shared server/DB setup.
 - Rationale: User-scoping via distinct slug prevents uploaded documents from appearing in other users' GET responses.
 - Trade-offs: Slightly larger existing file; acceptable given the file already covers multiple describe blocks.
@@ -108,7 +108,7 @@
 
 - Requirement category: reliability
   - Requirement: Test DB isolation — uploaded monsters don't leak into other users' assertions
-  - Design element: Decision 3 — distinct `"upload-test"` user slug
+  - Design element: Decision 3 — distinct `"monster-upload-test"` user slug
   - Acceptance criteria reference: No cross-user data bleed in integration suite
   - Testability notes: Confirmed by user-scoped storage queries in GET /api/monsters
 

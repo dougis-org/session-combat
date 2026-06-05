@@ -136,7 +136,7 @@ No requirements removed.
 
 #### Scenario: Uploaded monsters are user-scoped
 
-- **Given** integration tests upload monsters as the `"upload-test"` user
+- **Given** integration tests upload monsters as the `"monster-upload-test"` user
 - **When** another test user calls `GET /api/monsters`
 - **Then** the uploaded monsters do not appear in that user's response
 
