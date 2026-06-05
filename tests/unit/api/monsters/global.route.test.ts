@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from "next/server";
 import { POST, PUT } from "@/app/api/monsters/global/route";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
@@ -12,8 +11,6 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => ({
-  withAuth: (handler: Function) => (req: NextRequest) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
   requireAuth: () => ({ userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
 }));
 jest.mock("@/lib/storage", () => ({
