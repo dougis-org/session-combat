@@ -9,7 +9,7 @@ description: Tests for the extract-combatant-grouping-util change
 
 This document outlines the tests for the `extract-combatant-grouping-util` change. All work follows strict TDD: write a failing test first, then implement the minimum code to pass it, then refactor.
 
-This is a pure refactor — the existing `CombatInfoIcon.test.tsx` suite is the primary regression guard. The TDD work here focuses on new unit tests for `groupCombatantsForDisplay` itself, which are written before the function is extracted.
+This is primarily a refactor with one intentional behavior fix (lair exclusion). The existing `CombatInfoIcon.test.tsx` suite is the primary regression guard. The TDD work here focuses on new unit tests for `groupCombatantsForDisplay` itself, which are written before the function is extracted.
 
 ## Testing Steps
 
@@ -25,22 +25,22 @@ For each task in `tasks.md`:
 
 Test file: `tests/unit/utils/groupCombatantsForDisplay.test.ts` (new)
 
-- [ ] **Alive/dead split — mixed input:** Given combatants with `hp > 0` and `hp <= 0`, alive combatants appear only in `alive.*` and dead appear only in `dead.*`
-- [ ] **Alive/dead split — boundary `hp === 0`:** A combatant with `hp === 0` appears in `dead.*`, not `alive.*`
-- [ ] **Type routing — players go to `alive.players`:** Given alive players, they appear in `alive.players` and not in `alive.monsters`
-- [ ] **Type routing — monsters go to `alive.monsters`:** Given alive monsters, they appear in `alive.monsters` and not in `alive.players`
-- [ ] **Grouping by name — same name → single Map key:** Two alive monsters named "Goblin" produce `alive.monsters.get("Goblin")` with length 2
-- [ ] **Grouping by name — different names → separate keys:** Two alive monsters with different names produce two separate Map entries
-- [ ] **Totals count alive combatants only:** 2 alive players + 1 dead player → `totals.players === 2`
-- [ ] **Totals count alive monsters only:** 1 alive monster + 2 dead monsters → `totals.monsters === 1`
-- [ ] **Empty input:** Empty array → all Maps empty, both totals 0
-- [ ] **All dead:** Array with all `hp <= 0` → `alive.*` Maps empty, `totals` both 0, `dead.*` Maps populated
+- [x] **Alive/dead split — mixed input:** Given combatants with `hp > 0` and `hp <= 0`, alive combatants appear only in `alive.*` and dead appear only in `dead.*`
+- [x] **Alive/dead split — boundary `hp === 0`:** A combatant with `hp === 0` appears in `dead.*`, not `alive.*`
+- [x] **Type routing — players go to `alive.players`:** Given alive players, they appear in `alive.players` and not in `alive.monsters`
+- [x] **Type routing — monsters go to `alive.monsters`:** Given alive monsters, they appear in `alive.monsters` and not in `alive.players`
+- [x] **Grouping by name — same name → single Map key:** Two alive monsters named "Goblin" produce `alive.monsters.get("Goblin")` with length 2
+- [x] **Grouping by name — different names → separate keys:** Two alive monsters with different names produce two separate Map entries
+- [x] **Totals count alive combatants only:** 2 alive players + 1 dead player → `totals.players === 2`
+- [x] **Totals count alive monsters only:** 1 alive monster + 2 dead monsters → `totals.monsters === 1`
+- [x] **Empty input:** Empty array → all Maps empty, both totals 0
+- [x] **All dead:** Array with all `hp <= 0` → `alive.*` Maps empty, `totals` both 0, `dead.*` Maps populated
 
 ### Task: Refactor `CombatInfoIcon` to call utility
 
 No new tests for this task — the existing `tests/unit/components/CombatInfoIcon.test.tsx` suite provides full regression coverage. All tests must pass after the refactor without modification.
 
-- [ ] **Regression: existing CombatInfoIcon tests pass unchanged** — run `npm test -- --testPathPattern CombatInfoIcon`; all 18 tests green
+- [x] **Regression: existing CombatInfoIcon tests pass unchanged** — run `npm run test:unit -- --testPathPattern CombatInfoIcon`; all 18 tests green
 
 ## Spec Traceability
 

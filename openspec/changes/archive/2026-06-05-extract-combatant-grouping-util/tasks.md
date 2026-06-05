@@ -95,10 +95,10 @@ Blocking resolution flow:
 - [x] Mark all remaining tasks as complete (`- [x]`)
 - [x] No documentation updates required (pure internal refactor)
 - [x] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/extract-combatant-grouping-util/` to `openspec/changes/archive/2026-06-05-extract-combatant-grouping-util/` **in a single commit** — stage both the new location and the deletion of the old in the same commit
-- [ ] Confirm `openspec/changes/archive/2026-06-05-extract-combatant-grouping-util/` exists and `openspec/changes/extract-combatant-grouping-util/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-2026-06-05-extract-combatant-grouping-util` then push
-- [ ] Open PR from doc branch to `main` with title `docs: archive extract-combatant-grouping-util (2026-06-05)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR
+- [x] Archive the change: move `openspec/changes/extract-combatant-grouping-util/` to `openspec/changes/archive/2026-06-05-extract-combatant-grouping-util/` **in a single commit** — stage both the new location and the deletion of the old in the same commit
+- [x] Confirm `openspec/changes/archive/2026-06-05-extract-combatant-grouping-util/` exists and `openspec/changes/extract-combatant-grouping-util/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-2026-06-05-extract-combatant-grouping-util` then push
+- [x] Open PR from doc branch to `main` with title `docs: archive extract-combatant-grouping-util (2026-06-05)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR
 - [ ] Monitor the doc PR until it merges
 - [ ] Prune merged local branches: `git fetch --prune` and `git branch -d refactor/extract-combatant-grouping-util doc/archive-2026-06-05-extract-combatant-grouping-util`

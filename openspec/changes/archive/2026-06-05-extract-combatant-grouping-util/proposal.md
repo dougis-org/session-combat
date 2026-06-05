@@ -6,7 +6,7 @@
 
 - Problem statement: `CombatInfoIcon` contains ~30 lines of pure data transformation (filtering alive/dead combatants, grouping by type and name) directly in the component body. This logic is unreachable by unit tests without rendering the full component.
 - Why now: Issue #257 surfaced a coverage gap caused by this complexity. The refactor is a prerequisite to adding targeted unit tests for the grouping logic.
-- Business/user impact: No user-visible change. Developer impact: the grouping logic becomes independently testable, and `CombatInfoIcon` becomes a thin render layer that is easier to reason about and test in isolation.
+- Business/user impact: One user-visible behavior fix — lair pseudo-combatants no longer appear as defeated monsters in the tooltip. Developer impact: the grouping logic becomes independently testable, and `CombatInfoIcon` becomes a thin render layer that is easier to reason about and test in isolation.
 
 ## Problem Space
 

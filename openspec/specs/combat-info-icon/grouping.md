@@ -42,21 +42,33 @@ The system SHALL provide an exported pure function `groupCombatantsForDisplay(co
 - **When** `groupCombatantsForDisplay` is called
 - **Then** `alive.players` and `alive.monsters` are empty Maps; `totals.players` and `totals.monsters` are 0; dead Maps are populated correctly
 
+#### Scenario: Lair pseudo-combatants are excluded
+
+- **Given** an array containing one or more combatants with `type: 'lair'`
+- **When** `groupCombatantsForDisplay` is called
+- **Then** no lair combatant appears in any alive or dead Map; lair combatants do not contribute to totals
+
 ## MODIFIED Requirements
 
 ### Requirement: MODIFIED CombatInfoIcon data transformation
 
 The system SHALL compute grouping data by calling `groupCombatantsForDisplay` rather than performing inline filtering and Map construction inside the component body.
 
-#### Scenario: Render output unchanged after refactor
+#### Scenario: Render output after refactor
 
-- **Given** `CombatInfoIcon` receives a combatants array
+- **Given** `CombatInfoIcon` receives a combatants array (without lair entries)
 - **When** the user hovers the info icon
 - **Then** the tooltip renders identically to the pre-refactor behavior — same combatant names, same ×N multipliers, same DEFEATED sections, same header counts
 
+#### Scenario: Lair entries excluded from tooltip
+
+- **Given** `CombatInfoIcon` receives a combatants array that includes lair pseudo-combatants
+- **When** the user hovers the info icon
+- **Then** lair combatants do not appear in any section of the tooltip
+
 ## REMOVED Requirements
 
-No requirements removed. The inline grouping logic is moved, not deleted — its behavior is fully preserved.
+No requirements removed. The inline grouping logic is moved, not deleted. One latent bug was fixed during extraction: lair pseudo-combatants (`type: 'lair'`) previously appeared in the dead-monster bucket; they are now correctly excluded.
 
 ## Traceability
 
@@ -75,7 +87,7 @@ No requirements removed. The inline grouping logic is moved, not deleted — its
 #### Scenario: Existing test suite remains green
 
 - **Given** the refactor is applied to `lib/utils/combat.ts` and `lib/components/CombatInfoIcon.tsx`
-- **When** `npm test -- --testPathPattern CombatInfoIcon` is run
+- **When** `npm run test:unit -- --testPathPattern CombatInfoIcon` is run
 - **Then** all tests pass with no failures or skips
 
 ### Requirement: Operability
