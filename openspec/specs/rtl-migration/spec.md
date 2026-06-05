@@ -80,11 +80,11 @@ The test file `tests/unit/components/CampaignEditor.test.tsx` SHALL use `@testin
 - **When** the file is grepped for `\.value\s*=|dispatchEvent|\.click()`
 - **Then** zero matches are found
 
-#### Scenario: All 25 existing tests pass
+#### Scenario: All 26 existing tests pass
 
 - **Given** the migrated test file and updated component files
 - **When** `jest --testPathPattern CampaignEditor` is run
-- **Then** all 25 test cases report `pass` and the suite exits 0
+- **Then** all 26 test cases report `pass` and the suite exits 0
 
 #### Scenario: Tests are isolated (no shared mutable state)
 
@@ -125,7 +125,7 @@ Reason for removal: Replaced by `screen.getBy*` / `screen.queryBy*` queries, whi
 
 - **Given** the migrated test suite
 - **When** tests run in random order
-- **Then** all 25 pass regardless of order (RTL automatic cleanup between tests)
+- **Then** all 26 pass regardless of order (RTL automatic cleanup between tests)
 
 ### Requirement: Operability — TypeScript
 

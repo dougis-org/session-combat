@@ -57,7 +57,7 @@ These tests are written in the migrated test file and fail until component chang
 
 ### Task 3 — Migrated test cases (tests/unit/components/CampaignEditor.test.tsx)
 
-Each migrated test is its own TDD cycle: convert to RTL syntax → run → confirm green before proceeding. The 25 tests are grouped by describe block.
+Each migrated test is its own TDD cycle: convert to RTL syntax → run → confirm green before proceeding. The 26 tests are grouped by describe block.
 
 #### rendering (7 tests)
 - [ ] **TC-3.01** "Create Campaign" heading present when `isNew=true`

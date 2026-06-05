@@ -13,7 +13,7 @@
 - Eliminate all legacy `createRoot`/`act`/`container.querySelector` patterns from `CampaignEditor.test.tsx`.
 - Make `TextInputField` self-labelling (auto `id` from `label`) so RTL name queries work without caller changes.
 - Ensure all chapter interactive elements have accessible names RTL can query.
-- Keep all 25 existing tests passing with identical assertions on component behaviour.
+- Keep all 26 existing tests passing with identical assertions on component behaviour.
 
 ### Non-Goals
 
@@ -78,9 +78,9 @@
 
 ## Functional Requirements Mapping
 
-- Requirement: All 25 existing test cases pass after migration
+- Requirement: All 26 existing test cases pass after migration
   - Design element: RTL render + screen + userEvent replacements (Decisions 3, 4)
-  - Acceptance criteria reference: specs/rtl-migration/spec.md — "All 25 test cases pass"
+  - Acceptance criteria reference: specs/rtl-migration/spec.md — "All 26 test cases pass"
   - Testability notes: `jest --testPathPattern CampaignEditor` — green run is the criterion.
 
 - Requirement: TextInputField accessible by label name

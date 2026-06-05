@@ -49,7 +49,7 @@
 
 - `lib/components/ui.tsx`: `TextInputField` generates a stable `id` from `label` when `id` prop is absent.
 - `app/campaigns/CampaignEditor.tsx`: chapter title inputs gain `aria-label`; remove button gains `aria-label`; move button `aria-label` values verified to be RTL-queryable.
-- `tests/unit/components/CampaignEditor.test.tsx`: full rewrite to RTL — render, screen, userEvent; all legacy imports and helpers removed; all 25 tests ported.
+- `tests/unit/components/CampaignEditor.test.tsx`: full rewrite to RTL — render, screen, userEvent; all legacy imports and helpers removed; all 26 tests ported.
 
 ## Risks
 
@@ -75,7 +75,7 @@ No unresolved ambiguity. Decisions confirmed during exploration:
 - Replacing `data-testid` on `<select>` and `<textarea>` elements (they already work and are not the source of fragility).
 - Converting the file to Vitest or any other test runner.
 - Adding snapshot tests.
-- Achieving 100% branch coverage beyond what the existing 25 tests exercise.
+- Achieving 100% branch coverage beyond what the existing 26 tests exercise.
 
 ## Change Control
 
