@@ -61,6 +61,26 @@ The integration test server SHALL derive its port from a djb2 hash of `process.c
 - **WHEN** CI sets `PORT=3000` explicitly
 - **THEN** `playwright.config.ts` leaves `process.env.PORT` unchanged and uses 3000
 
+### Requirement: No redundant @jest-environment docblocks in unit test files
+
+Files under `tests/unit/` (run via `npm run test:unit` which scopes to that path) SHALL NOT contain `@jest-environment jsdom` docblock comments. `jest.config.js` sets `testEnvironment: "jsdom"` globally, making per-file overrides in unit test files redundant. Integration test files under `tests/integration/` MAY retain `@jest-environment jsdom` overrides where required, as `jest.integration.config.js` uses `testEnvironment: "node"`.
+
+#### Scenario: No redundant docblocks in unit tests
+
+- **GIVEN** any file under `tests/unit/`
+- **WHEN** `grep -r "@jest-environment jsdom" tests/unit/` is run
+- **THEN** the command returns no matches
+
+### Requirement: No per-file IS_REACT_ACT_ENVIRONMENT assignments in test files
+
+No file under `tests/` SHALL contain a per-file `IS_REACT_ACT_ENVIRONMENT = true` assignment. The single canonical assignment lives in `jest.setup.ts`, loaded via `setupFilesAfterEnv` in `jest.config.js` for all unit tests.
+
+#### Scenario: No redundant IS_REACT_ACT_ENVIRONMENT assignments
+
+- **GIVEN** any file under `tests/`
+- **WHEN** `grep -r "IS_REACT_ACT_ENVIRONMENT" tests/` is run
+- **THEN** the command returns no matches (the single canonical assignment lives in `jest.setup.ts`)
+
 ### Requirement: DnD Beyond mock server started in globalSetup
 
 The DnD Beyond character service mock SHALL be started in `globalSetup` so the Next.js process inherits `DND_BEYOND_CHARACTER_SERVICE_BASE_URL` at spawn time. Individual test files SHALL NOT start their own mock server instance for the character import tests.
