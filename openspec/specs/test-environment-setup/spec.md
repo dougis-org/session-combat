@@ -61,9 +61,9 @@ The integration test server SHALL derive its port from a djb2 hash of `process.c
 - **WHEN** CI sets `PORT=3000` explicitly
 - **THEN** `playwright.config.ts` leaves `process.env.PORT` unchanged and uses 3000
 
-### Requirement: No boilerplate jest-environment or IS_REACT_ACT_ENVIRONMENT in unit test files
+### Requirement: No redundant @jest-environment docblocks in unit test files
 
-Unit test files (matched by `jest.config.js`, under `tests/unit/`) SHALL NOT contain `@jest-environment jsdom` docblock comments or per-file `IS_REACT_ACT_ENVIRONMENT = true` assignments. These are set globally by `jest.config.js` (`testEnvironment: "jsdom"`) and `jest.setup.ts` respectively. Integration test files under `tests/integration/` MAY retain `@jest-environment jsdom` overrides where required, as `jest.integration.config.js` uses `testEnvironment: "node"`.
+Files under `tests/unit/` (run via `npm run test:unit` which scopes to that path) SHALL NOT contain `@jest-environment jsdom` docblock comments. `jest.config.js` sets `testEnvironment: "jsdom"` globally, making per-file overrides in unit test files redundant. Integration test files under `tests/integration/` MAY retain `@jest-environment jsdom` overrides where required, as `jest.integration.config.js` uses `testEnvironment: "node"`.
 
 #### Scenario: No redundant docblocks in unit tests
 
@@ -71,11 +71,15 @@ Unit test files (matched by `jest.config.js`, under `tests/unit/`) SHALL NOT con
 - **WHEN** `grep -r "@jest-environment jsdom" tests/unit/` is run
 - **THEN** the command returns no matches
 
+### Requirement: No per-file IS_REACT_ACT_ENVIRONMENT assignments in test files
+
+No file under `tests/` SHALL contain a per-file `IS_REACT_ACT_ENVIRONMENT = true` assignment. The single canonical assignment lives in `jest.setup.ts`, loaded via `setupFilesAfterEnv` in `jest.config.js` for all unit tests.
+
 #### Scenario: No redundant IS_REACT_ACT_ENVIRONMENT assignments
 
 - **GIVEN** any file under `tests/`
 - **WHEN** `grep -r "IS_REACT_ACT_ENVIRONMENT" tests/` is run
-- **THEN** the command returns no matches (the single canonical assignment lives in `jest.setup.ts` line 7)
+- **THEN** the command returns no matches (the single canonical assignment lives in `jest.setup.ts`)
 
 ### Requirement: DnD Beyond mock server started in globalSetup
 

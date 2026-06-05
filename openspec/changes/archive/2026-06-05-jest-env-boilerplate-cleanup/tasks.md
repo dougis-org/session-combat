@@ -62,12 +62,12 @@ Blocking resolution flow:
 - [x] `git checkout main` and `git pull --ff-only`
 - [x] Verify the merged changes appear on the default branch
 - [x] Mark all remaining tasks as complete (`- [x]`)
-- [x] No documentation updates required (infrastructure-only change)
+- [x] Documentation updates completed (syncing spec deltas into `openspec/specs/test-environment-setup/spec.md`)
 - [x] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [x] Archive the change: move `openspec/changes/jest-env-boilerplate-cleanup/` to `openspec/changes/archive/YYYY-MM-DD-jest-env-boilerplate-cleanup/` **and stage both the new location and the deletion of the old location in a single commit**
-- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-jest-env-boilerplate-cleanup/` exists and `openspec/changes/jest-env-boilerplate-cleanup/` is gone
-- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup` then `git push -u origin doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup`
-- [x] Open a PR from `doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup` to `main` with title `docs: archive jest-env-boilerplate-cleanup (YYYY-MM-DD)`
+- [x] Archive the change: move `openspec/changes/jest-env-boilerplate-cleanup/` to `openspec/changes/archive/2026-06-05-jest-env-boilerplate-cleanup/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/2026-06-05-jest-env-boilerplate-cleanup/` exists and `openspec/changes/jest-env-boilerplate-cleanup/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-06-05-jest-env-boilerplate-cleanup` then `git push -u origin doc/archive-2026-06-05-jest-env-boilerplate-cleanup`
+- [x] Open a PR from `doc/archive-2026-06-05-jest-env-boilerplate-cleanup` to `main` with title `docs: archive jest-env-boilerplate-cleanup (2026-06-05)`
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
 - [x] Monitor the doc PR until it merges
-- [x] Prune merged local branches: `git fetch --prune` and `git branch -d chore/jest-env-boilerplate-cleanup doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup`
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d chore/jest-env-boilerplate-cleanup doc/archive-2026-06-05-jest-env-boilerplate-cleanup`
