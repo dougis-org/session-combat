@@ -1,24 +1,12 @@
 import React from 'react';
-import { act } from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { LairForm } from '@/lib/components/LairForm';
-import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
-import type { Root } from 'react-dom/client';
 
 describe('LairForm', () => {
-  let container: HTMLDivElement;
-  let root: Root;
-
-  beforeEach(() => {
-    ({ container, root } = createReactRoot());
-  });
-
-  afterEach(async () => {
-    await unmountReactRoot(container, root);
-  });
-
-  const render = async (props: Partial<Parameters<typeof LairForm>[0]> = {}) => {
+  const renderLairForm = (props: Partial<Parameters<typeof LairForm>[0]> = {}) => {
     const defaults = {
-      seedOptions: [],
+      seedOptions: [] as string[],
       lairName: '',
       seedMonster: '',
       onNameChange: jest.fn() as jest.MockedFunction<(v: string) => void>,
@@ -27,119 +15,98 @@ describe('LairForm', () => {
       onCancel: jest.fn() as jest.MockedFunction<() => void>,
     };
     const merged = { ...defaults, ...props };
-    await act(async () => {
-      root.render(<LairForm {...merged} />);
-    });
-    return merged;
+    const { container } = render(<LairForm {...merged} />);
+    return { container, ...merged };
   };
 
-  test('renders lair name input', async () => {
-    await render();
-    const input = container.querySelector('[data-testid="lair-name-input"]') as HTMLInputElement;
-    expect(input).not.toBeNull();
+  test('renders lair name input', () => {
+    renderLairForm();
+    expect(screen.getByTestId('lair-name-input')).toBeInTheDocument();
   });
 
-  test('Add Lair button disabled when name is empty', async () => {
-    await render({ lairName: '' });
-    const btn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Add Lair')) as HTMLButtonElement;
-    expect(btn?.disabled).toBe(true);
+  test('Add Lair button disabled when name is empty', () => {
+    renderLairForm({ lairName: '' });
+    expect(screen.getByRole('button', { name: /Add Lair/i })).toBeDisabled();
   });
 
-  test('Add Lair button enabled when name has content', async () => {
-    await render({ lairName: "Dragon's Lair" });
-    const btn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Add Lair')) as HTMLButtonElement;
-    expect(btn?.disabled).toBe(false);
+  test('Add Lair button enabled when name has content', () => {
+    renderLairForm({ lairName: "Dragon's Lair" });
+    expect(screen.getByRole('button', { name: /Add Lair/i })).not.toBeDisabled();
   });
 
   test('calls onConfirm when Add Lair clicked', async () => {
-    const { onConfirm } = await render({ lairName: 'Test Lair' });
-    const btn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Add Lair')) as HTMLButtonElement;
-    await act(async () => { btn.click(); });
+    const user = userEvent.setup();
+    const { onConfirm } = renderLairForm({ lairName: 'Test Lair' });
+    await user.click(screen.getByRole('button', { name: /Add Lair/i }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
   test('calls onCancel when Cancel clicked', async () => {
-    const { onCancel } = await render();
-    const btn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Cancel')) as HTMLButtonElement;
-    await act(async () => { btn.click(); });
+    const user = userEvent.setup();
+    const { onCancel } = renderLairForm();
+    await user.click(screen.getByRole('button', { name: /Cancel/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
-  test('seed select hidden when seedOptions is empty', async () => {
-    await render({ seedOptions: [] });
-    expect(container.querySelector('[data-testid="lair-seed-select"]')).toBeNull();
+  test('seed select hidden when seedOptions is empty', () => {
+    renderLairForm({ seedOptions: [] });
+    expect(screen.queryByTestId('lair-seed-select')).not.toBeInTheDocument();
   });
 
-  test('seed select shown when seedOptions has entries', async () => {
-    await render({ seedOptions: ['Dragon', 'Lich'] });
-    const select = container.querySelector('[data-testid="lair-seed-select"]') as HTMLSelectElement;
-    expect(select).not.toBeNull();
+  test('seed select shown when seedOptions has entries', () => {
+    renderLairForm({ seedOptions: ['Dragon', 'Lich'] });
+    const select = screen.getByTestId('lair-seed-select') as HTMLSelectElement;
     expect(select.options.length).toBe(3); // "None" + 2 monsters
   });
 
-  test('input reflects lairName prop', async () => {
-    await render({ lairName: 'Test Lair' });
-    const input = container.querySelector('[data-testid="lair-name-input"]') as HTMLInputElement;
-    expect(input.value).toBe('Test Lair');
+  test('input reflects lairName prop', () => {
+    renderLairForm({ lairName: 'Test Lair' });
+    expect(screen.getByTestId('lair-name-input')).toHaveValue('Test Lair');
   });
 
   test('Escape key calls onCancel', async () => {
-    const { onCancel } = await render();
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    });
+    const user = userEvent.setup();
+    const { onCancel } = renderLairForm();
+    await user.keyboard('{Escape}');
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
-  test('clicking the overlay calls onCancel', async () => {
-    const { onCancel } = await render();
-    const overlay = container.firstElementChild as HTMLDivElement;
-    await act(async () => {
-      overlay.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
+  test('clicking the overlay calls onCancel', () => {
+    const { container, onCancel } = renderLairForm();
+    // fireEvent is intentional: userEvent.click targets the visual center (the dialog),
+    // which stops propagation. We need to fire directly on the overlay element.
+    fireEvent.click(container.firstElementChild as HTMLDivElement);
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   test('clicking inside the dialog does not call onCancel', async () => {
-    const { onCancel } = await render();
-    const dialog = container.querySelector('[role="dialog"]') as HTMLDivElement;
-    await act(async () => {
-      dialog.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
+    const user = userEvent.setup();
+    const { onCancel } = renderLairForm();
+    await user.click(screen.getByRole('dialog'));
     expect(onCancel).not.toHaveBeenCalled();
   });
 
-  test('dialog has correct ARIA attributes', async () => {
-    await render();
-    const dialog = container.querySelector('[role="dialog"]');
-    expect(dialog?.getAttribute('aria-modal')).toBe('true');
-    expect(dialog?.getAttribute('aria-labelledby')).toBeTruthy();
+  test('dialog has correct ARIA attributes', () => {
+    renderLairForm();
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    expect(dialog).toHaveAttribute('aria-labelledby');
   });
 
-  test('body scroll is locked while mounted', async () => {
-    await render();
+  test('body scroll is locked while mounted', () => {
+    renderLairForm();
     expect(document.body.style.overflow).toBe('hidden');
   });
 
-  test('input onChange fires onNameChange with new value', async () => {
-    const { onNameChange } = await render();
-    const input = container.querySelector('[data-testid="lair-name-input"]') as HTMLInputElement;
-    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-    await act(async () => {
-      nativeSetter?.call(input, 'New Lair');
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-    expect(onNameChange).toHaveBeenCalled();
+  test('input onChange fires onNameChange with new value', () => {
+    const { onNameChange } = renderLairForm();
+    fireEvent.change(screen.getByTestId('lair-name-input'), { target: { value: 'New Lair' } });
+    expect(onNameChange).toHaveBeenCalledWith('New Lair');
   });
 
-  test('select onChange fires onSeedChange with selected value', async () => {
-    const { onSeedChange } = await render({ seedOptions: ['Dragon', 'Lich'] });
-    const select = container.querySelector('[data-testid="lair-seed-select"]') as HTMLSelectElement;
-    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')?.set;
-    await act(async () => {
-      nativeSetter?.call(select, 'Dragon');
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-    expect(onSeedChange).toHaveBeenCalled();
+  test('select onChange fires onSeedChange with selected value', () => {
+    const { onSeedChange } = renderLairForm({ seedOptions: ['Dragon', 'Lich'] });
+    fireEvent.change(screen.getByTestId('lair-seed-select'), { target: { value: 'Dragon' } });
+    expect(onSeedChange).toHaveBeenCalledWith('Dragon');
   });
 });
