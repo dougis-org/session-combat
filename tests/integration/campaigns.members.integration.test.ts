@@ -29,7 +29,10 @@ describe("Campaign Members Integration Tests", () => {
 
   beforeEach(async () => {
     const db = await getDatabase();
-    await db.collection("campaignMembers").deleteMany({});
+    // Only delete members with the fake "camp-*" IDs used in this test file.
+    // Real campaign IDs are UUIDs and must not be wiped — parallel test files
+    // depend on member records created during campaign creation.
+    await db.collection("campaignMembers").deleteMany({ campaignId: { $regex: "^camp-" } });
   });
 
   describe("Storage Methods Integration", () => {

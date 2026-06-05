@@ -1,22 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Campaign, CAMPAIGN_STATUSES } from '@/lib/types';
-import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
+import { CAMPAIGN_STATUSES } from '@/lib/types';
+import { sanitizeChapters, sanitizeCurrentChapterId, assertCampaignAccess } from '@/lib/utils/campaign';
 
 type Params = { id: string };
 
-async function findCampaign(id: string, userId: string): Promise<Campaign | NextResponse> {
-  const campaign = await storage.loadCampaignById(id, userId);
-  if (!campaign) return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
-  return campaign;
-}
-
 export const GET = withAuthAndParams<Params>(async (_request, auth, { id }) => {
   try {
-    const result = await findCampaign(id, auth.userId);
+    const result = await assertCampaignAccess(id, auth.userId);
     if (result instanceof NextResponse) return result;
-    return NextResponse.json(result);
+    return NextResponse.json(result.campaign);
   } catch (error) {
     console.error('Error fetching campaign:', error);
     return NextResponse.json({ error: 'Failed to fetch campaign' }, { status: 500 });
@@ -25,9 +19,11 @@ export const GET = withAuthAndParams<Params>(async (_request, auth, { id }) => {
 
 export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => {
   try {
-    const result = await findCampaign(id, auth.userId);
+    const result = await assertCampaignAccess(id, auth.userId);
     if (result instanceof NextResponse) return result;
-    const campaign = result;
+    const { campaign, role } = result;
+
+    if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
     const body = await request.json();
     const { name, moduleName, status, notes, chapters, currentChapterId } = body;
@@ -89,9 +85,13 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
 
 export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id }) => {
   try {
-    const result = await findCampaign(id, auth.userId);
+    const result = await assertCampaignAccess(id, auth.userId);
     if (result instanceof NextResponse) return result;
-    await storage.deleteCampaign(id, auth.userId);
+    const { campaign, role } = result;
+
+    if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+
+    await storage.deleteCampaign(id, campaign.userId);
     return NextResponse.json({ message: 'Campaign deleted successfully' });
   } catch (error) {
     console.error('Error deleting campaign:', error);

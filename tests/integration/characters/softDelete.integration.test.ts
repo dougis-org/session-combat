@@ -136,15 +136,18 @@ describe("Character Soft Delete API Integration", () => {
         }),
       });
 
+      expect(createRes.status).toBe(201);
       const character = await createRes.json();
-      const characterId = character.id;
+      const characterId: string = character.id;
+      expect(characterId).toBeDefined();
       const originalData = { ...character };
 
       // Delete the character
-      await fetch(`${baseUrl}/api/characters/${characterId}`, {
+      const deleteRes = await fetch(`${baseUrl}/api/characters/${characterId}`, {
         method: "DELETE",
         headers: { Cookie: authCookie },
       });
+      expect(deleteRes.status).toBe(200);
 
       // Verify character data is preserved in the raw collection with deletedAt set
       const mongoClient = new MongoClient(process.env.MONGODB_URI!);

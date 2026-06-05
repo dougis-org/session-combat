@@ -1,9 +1,11 @@
 /**
  * @jest-environment node
  */
+import { NextResponse } from "next/server";
 import { GET } from "@/app/api/campaigns/[id]/combat-events/route";
 import { requireAuth } from "@/lib/middleware";
 import { getDatabase } from "@/lib/db";
+import { assertCampaignAccess } from "@/lib/utils/campaign";
 import {
   MOCK_AUTH,
   mockDbCollection,
@@ -14,9 +16,16 @@ import {
 
 jest.mock("@/lib/middleware");
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
+jest.mock("@/lib/utils/campaign", () => ({
+  ...jest.requireActual("@/lib/utils/campaign"),
+  assertCampaignAccess: jest.fn(),
+}));
 
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedGetDatabase = jest.mocked(getDatabase);
+const mockedAssertCampaignAccess = jest.mocked(assertCampaignAccess);
+
+const MOCK_CAMPAIGN = { id: "camp-abc", userId: "user-123", name: "Test", chapters: [], status: "active" as const, notes: "" };
 
 const CAMPAIGN_ID = "camp-abc";
 const BASE_URL = `http://localhost/api/campaigns/${CAMPAIGN_ID}/combat-events`;
@@ -41,10 +50,29 @@ const MOCK_DOC = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+  mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
 });
 
 describe("GET /api/campaigns/[id]/combat-events", () => {
   itReturns401WithParams(GET, makeGetReq, params, mockedRequireAuth);
+
+  it("returns 404 when non-member accesses combat events", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+    const res = await GET(makeGetReq(), { params });
+    expect(res.status).toBe(404);
+    expect((await res.json()).error).toBe("Campaign not found");
+  });
+
+  it("returns 200 with events for active player member", async () => {
+    mockDbCollection(mockedGetDatabase, { find: makeFind([MOCK_DOC]) });
+    const res = await GET(makeGetReq(), { params });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toHaveLength(1);
+    expect(body[0].type).toBe("combat_completed");
+  });
 
   it("returns empty array when no documents match", async () => {
     mockDbCollection(mockedGetDatabase, { find: makeFind([]) });

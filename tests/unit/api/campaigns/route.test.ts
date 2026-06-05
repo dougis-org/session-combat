@@ -1,17 +1,18 @@
 /**
  * @jest-environment node
  */
+import { NextResponse } from "next/server";
 import { GET, POST } from "@/app/api/campaigns/route";
 import { GET as GET_ONE, PATCH, DELETE } from "@/app/api/campaigns/[id]/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
+import { assertCampaignAccess } from "@/lib/utils/campaign";
 import {
   MOCK_AUTH,
   makeRouteRequest,
   itReturns401,
   itReturns500,
   itReturns401WithParams,
-  itReturns404WithParams,
   itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
@@ -21,11 +22,17 @@ jest.mock("@/lib/storage", () => ({
   storage: {
     loadCampaigns: jest.fn(),
     saveCampaign: jest.fn(),
-    loadCampaignById: jest.fn(),
     deleteCampaign: jest.fn(),
     addMember: jest.fn().mockResolvedValue(undefined),
   },
 }));
+
+jest.mock("@/lib/utils/campaign", () => ({
+  ...jest.requireActual("@/lib/utils/campaign"),
+  assertCampaignAccess: jest.fn(),
+}));
+
+const mockedAssertCampaignAccess = jest.mocked(assertCampaignAccess);
 
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
@@ -226,32 +233,44 @@ describe("POST /api/campaigns", () => {
 // ─── GET /api/campaigns/[id] ─────────────────────────────────────────────────
 
 describe("GET /api/campaigns/[id]", () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+  });
 
   itReturns401WithParams(GET_ONE, () => makeIdRequest("GET"), PARAMS, mockedRequireAuth);
 
-  it("returns campaign when found", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadCampaignById.mockResolvedValue(MOCK_CAMPAIGN as any);
+  it("returns 200 with campaign for active DM member", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "dm" });
 
     const response = await GET_ONE(makeIdRequest("GET"), { params: PARAMS });
     expect(response.status).toBe(200);
     expect((await response.json()).name).toBe("Lost Mine of Phandelver");
   });
 
-  itReturns404WithParams(
-    GET_ONE,
-    () => makeIdRequest("GET"),
-    PARAMS,
-    () => mockedStorage.loadCampaignById.mockResolvedValue(null),
-    mockedRequireAuth
-  );
+  it("returns 200 with campaign for active player member", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
+
+    const response = await GET_ONE(makeIdRequest("GET"), { params: PARAMS });
+    expect(response.status).toBe(200);
+    expect((await response.json()).name).toBe("Lost Mine of Phandelver");
+  });
+
+  it("returns 404 when assertCampaignAccess denies (non-member)", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+
+    const response = await GET_ONE(makeIdRequest("GET"), { params: PARAMS });
+    expect(response.status).toBe(404);
+    expect((await response.json()).error).toBe("Campaign not found");
+  });
 
   itReturns500WithParams(
     GET_ONE,
     () => makeIdRequest("GET"),
     PARAMS,
-    () => mockedStorage.loadCampaignById.mockRejectedValue(new Error("DB error")),
+    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error")),
     mockedRequireAuth
   );
 });
@@ -262,7 +281,7 @@ describe("PATCH /api/campaigns/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN } as any);
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN } as any, role: "dm" });
     mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
   });
 
@@ -344,7 +363,7 @@ describe("PATCH /api/campaigns/[id]", () => {
   });
 
   it("treats missing status field on stored document as active (backwards compat)", async () => {
-    mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN, status: undefined } as any);
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN, status: undefined } as any, role: "dm" });
     const response = await PATCH(
       makeIdRequest("PATCH", { name: "Test" }),
       { params: PARAMS }
@@ -354,13 +373,20 @@ describe("PATCH /api/campaigns/[id]", () => {
   });
 
   it("strips legacy active field from stored document in PATCH response", async () => {
-    mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN, active: true } as any);
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN, active: true } as any, role: "dm" });
     const response = await PATCH(
       makeIdRequest("PATCH", { name: "Test" }),
       { params: PARAMS }
     );
     expect(response.status).toBe(200);
     expect(await response.json()).not.toHaveProperty("active");
+  });
+
+  it("returns 404 when active player attempts PATCH", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
+    const response = await PATCH(makeIdRequest("PATCH", { name: "X" }), { params: PARAMS });
+    expect(response.status).toBe(404);
+    expect((await response.json()).error).toBe("Campaign not found");
   });
 
   it("returns 400 when name is blank", async () => {
@@ -419,19 +445,19 @@ describe("PATCH /api/campaigns/[id]", () => {
     expect(body.currentChapterId).toBeUndefined();
   });
 
-  itReturns404WithParams(
-    PATCH,
-    () => makeIdRequest("PATCH", { name: "X" }),
-    PARAMS,
-    () => mockedStorage.loadCampaignById.mockResolvedValue(null),
-    mockedRequireAuth
-  );
+  it("returns 404 when assertCampaignAccess denies (non-member)", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+    const response = await PATCH(makeIdRequest("PATCH", { name: "X" }), { params: PARAMS });
+    expect(response.status).toBe(404);
+  });
 
   itReturns500WithParams(
     PATCH,
     () => makeIdRequest("PATCH", { name: "X" }),
     PARAMS,
-    () => mockedStorage.loadCampaignById.mockRejectedValue(new Error("DB error")),
+    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error")),
     mockedRequireAuth
   );
 });
@@ -442,31 +468,38 @@ describe("DELETE /api/campaigns/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
-    mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN } as any);
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN } as any, role: "dm" });
     mockedStorage.deleteCampaign.mockResolvedValue(undefined as any);
   });
 
   itReturns401WithParams(DELETE, () => makeIdRequest("DELETE"), PARAMS, mockedRequireAuth);
 
-  it("deletes campaign and returns 200", async () => {
+  it("deletes campaign and returns 200 for DM", async () => {
     const response = await DELETE(makeIdRequest("DELETE"), { params: PARAMS });
     expect(response.status).toBe(200);
     expect(mockedStorage.deleteCampaign).toHaveBeenCalledWith("campaign-1", "user-123");
   });
 
-  itReturns404WithParams(
-    DELETE,
-    () => makeIdRequest("DELETE"),
-    PARAMS,
-    () => mockedStorage.loadCampaignById.mockResolvedValue(null),
-    mockedRequireAuth
-  );
+  it("returns 404 when active player attempts DELETE", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
+    const response = await DELETE(makeIdRequest("DELETE"), { params: PARAMS });
+    expect(response.status).toBe(404);
+    expect((await response.json()).error).toBe("Campaign not found");
+  });
+
+  it("returns 404 when assertCampaignAccess denies (non-member)", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+    const response = await DELETE(makeIdRequest("DELETE"), { params: PARAMS });
+    expect(response.status).toBe(404);
+  });
 
   itReturns500WithParams(
     DELETE,
     () => makeIdRequest("DELETE"),
     PARAMS,
-    () => mockedStorage.loadCampaignById.mockRejectedValue(new Error("DB error")),
+    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error")),
     mockedRequireAuth
   );
 });

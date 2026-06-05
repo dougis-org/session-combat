@@ -2,9 +2,13 @@ import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { getDatabase } from '@/lib/db';
 import { CombatState, SessionEvent } from '@/lib/types';
+import { assertCampaignAccess } from '@/lib/utils/campaign';
 
 export const GET = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
+    const result = await assertCampaignAccess(id, auth.userId);
+    if (result instanceof NextResponse) return result;
+
     const { searchParams } = new URL(request.url);
     const sinceParam = searchParams.get('since');
     let sinceDate = new Date(0);

@@ -1,4 +1,19 @@
-import type { CampaignChapter } from '@/lib/types';
+import { NextResponse } from 'next/server';
+import type { Campaign, CampaignChapter, MemberRole } from '@/lib/types';
+import { storage } from '@/lib/storage';
+
+const notFound = () => NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+
+export async function assertCampaignAccess(
+  campaignId: string,
+  userId: string,
+): Promise<{ campaign: Campaign; role: MemberRole } | NextResponse> {
+  const member = await storage.getMember(campaignId, userId);
+  if (!member || member.status !== 'active') return notFound();
+  const campaign = await storage.loadCampaignByIdAny(campaignId);
+  if (!campaign) return notFound();
+  return { campaign, role: member.role };
+}
 
 /**
  * Sanitizes and normalizes an input array of chapters.
