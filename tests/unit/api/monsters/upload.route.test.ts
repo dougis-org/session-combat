@@ -112,7 +112,7 @@ describe("POST /api/monsters/upload — successful save", () => {
 describe("POST /api/monsters/upload — partial and total failure", () => {
   it("returns 207 when first save succeeds and second fails", async () => {
     mockedSave
-      .mockResolvedValueOnce(undefined as any)
+      .mockResolvedValueOnce(undefined)
       .mockRejectedValueOnce(new Error("fail"));
     const res = await POST(
       makeReq({ monsters: [{ name: "A", maxHp: 5 }, { name: "B", maxHp: 10 }] })
