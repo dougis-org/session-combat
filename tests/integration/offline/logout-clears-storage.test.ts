@@ -1,3 +1,5 @@
+/** @jest-environment jsdom */
+
 /**
  * Client-side integration test for logout storage cleanup.
  *
