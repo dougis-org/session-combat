@@ -43,7 +43,7 @@
     - `totalMonsters` → `totals.monsters`
 
 - [x] **Verify TypeScript compiles:** `npx tsc --noEmit`
-- [x] **Verify existing tests pass:** `npm test -- --testPathPattern CombatInfoIcon`
+- [x] **Verify existing tests pass:** `npm run test:unit -- --testPathPattern CombatInfoIcon`
 
 ## Pre-Commit Code Review
 
@@ -51,7 +51,7 @@
 
 ## Validation
 
-- [x] Run unit tests: `npm test`
+- [x] Run unit tests: `npm run test:unit`
 - [x] Run type checks: `npx tsc --noEmit`
 - [x] Run build: `npm run build`
 - [ ] All completed tasks marked as complete
@@ -61,18 +61,18 @@
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test`; all tests must pass
-- **Integration tests** — `npm run test:e2e` if applicable; all tests must pass
+- **Unit tests** — `npm run test:unit`; all tests must pass
+- **Integration tests** — `npm run test:integration` if applicable; all tests must pass
 - **Build** — `npm run build`; must succeed with no errors
 - If **ANY** of the above fail, you **MUST** iterate and address the failure
 
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `refactor/extract-combatant-grouping-util` to `main`. PR body must include **`Closes #274`**.
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `refactor/extract-combatant-grouping-util` to `main`. PR body must include **`Closes #274`**.
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
 - [ ] **Monitor PR comments** — poll for new comments autonomously; address, commit, follow remote push validation, push; wait 180 seconds; repeat until no unresolved comments remain
 - [ ] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json isRequired,state`; fix any required-check failures, commit, follow remote push validation, push; wait 180 seconds; repeat until all required checks pass
 - [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify user
