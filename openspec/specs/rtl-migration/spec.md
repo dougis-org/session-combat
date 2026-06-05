@@ -134,3 +134,65 @@ Reason for removal: Replaced by `screen.getBy*` / `screen.queryBy*` queries, whi
 - **Given** the updated source files (`ui.tsx`, `CampaignEditor.tsx`, `CampaignEditor.test.tsx`)
 - **When** `tsc --noEmit` is run
 - **Then** zero TypeScript errors are reported
+
+---
+
+## ADDED Requirements — 4-file RTL migration (migrate-createreactroot-to-rtl)
+
+### Requirement: Component test infrastructure — 4 files use RTL
+
+The system SHALL render all 4 migrated test components using RTL `render` from `@testing-library/react` with no manual container setup.
+
+#### Scenario: CombatStatsRow, CharacterMiniSummary, LairForm, LairActionsSlot render with RTL
+
+- **Given** any of `CombatStatsRow.test.tsx`, `CharacterMiniSummary.test.tsx`, `LairForm.test.tsx`, `LairActionsSlot.test.tsx`
+- **When** the test suite runs
+- **Then** RTL `render(...)` is called with no `createReactRoot`, no `act` wrapper, and no manual `container`/`root` lifecycle
+
+---
+
+### Requirement: Component test assertions use semantic RTL queries
+
+The system SHALL query rendered output using `screen.getByRole`, `screen.getByText`, `screen.getByTestId`, `toHaveTextContent`, or equivalent RTL screen queries — not raw `container.textContent`, `container.querySelector`, or `container.querySelectorAll`.
+
+#### Scenario: Button found by role
+
+- **Given** `LairForm.test.tsx` migrated
+- **When** the test queries for the "Add Lair" button
+- **Then** it uses `screen.getByRole('button', { name: /Add Lair/i })`
+
+#### Scenario: data-testid elements found via `getByTestId`
+
+- **Given** `LairActionsSlot.test.tsx` migrated
+- **When** a test queries an element by `data-testid`
+- **Then** it uses `screen.getByTestId('...')`
+
+---
+
+### Requirement: Click interactions use `userEvent.setup()` per test
+
+The system SHALL simulate user interactions using `userEvent.setup()` instantiated per test (before render), consistent with project convention.
+
+#### Scenario: Click interaction in LairForm and LairActionsSlot
+
+- **Given** any migrated test that simulates a click
+- **When** the test runs
+- **Then** `const user = userEvent.setup()` is called before `render`, and `await user.click(el)` performs the interaction
+
+---
+
+### Requirement: No `createReactRoot` imports in the 4 migrated files
+
+The system SHALL have zero imports from `@/tests/unit/helpers/reactRoot` in the 4 migrated test files.
+
+#### Scenario: Import removed post-migration
+
+- **Given** any of the 4 migrated test files
+- **When** `grep "reactRoot" tests/unit/LairForm.test.tsx tests/unit/CharacterMiniSummary.test.tsx tests/unit/LairActionsSlot.test.tsx tests/unit/CombatStatsRow.test.tsx` is run
+- **Then** the command returns no matches
+
+---
+
+### Requirement: REMOVED Manual DOM container lifecycle (4 files)
+
+Reason for removal: `createReactRoot` setup (`let container`, `let root`, `beforeEach`, `afterEach` with `unmountReactRoot`) is replaced by RTL's automatic render and cleanup in the 4 migrated files.
