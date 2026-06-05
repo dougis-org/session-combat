@@ -359,37 +359,42 @@ export function buildCombatantFromSource(
  * `totals` reflects alive counts only (matches the header display in CombatInfoIcon).
  */
 export function groupCombatantsForDisplay(combatants: CombatantState[]): GroupedCombatants {
-  const aliveCombatants = combatants.filter((c) => c.hp > 0);
-  const deadCombatants = combatants.filter((c) => c.hp <= 0);
-
   const alivePlayersByName = new Map<string, CombatantState[]>();
   const aliveMonstersByName = new Map<string, CombatantState[]>();
-
-  aliveCombatants.forEach((combatant) => {
-    if (combatant.type === 'player') {
-      const existing = alivePlayersByName.get(combatant.name) || [];
-      alivePlayersByName.set(combatant.name, [...existing, combatant]);
-    } else {
-      const existing = aliveMonstersByName.get(combatant.name) || [];
-      aliveMonstersByName.set(combatant.name, [...existing, combatant]);
-    }
-  });
-
   const deadPlayersByName = new Map<string, CombatantState[]>();
   const deadMonstersByName = new Map<string, CombatantState[]>();
 
-  deadCombatants.forEach((combatant) => {
-    if (combatant.type === 'player') {
-      const existing = deadPlayersByName.get(combatant.name) || [];
-      deadPlayersByName.set(combatant.name, [...existing, combatant]);
-    } else {
-      const existing = deadMonstersByName.get(combatant.name) || [];
-      deadMonstersByName.set(combatant.name, [...existing, combatant]);
-    }
-  });
+  let totalPlayers = 0;
+  let totalMonsters = 0;
 
-  const totalPlayers = Array.from(alivePlayersByName.values()).reduce((sum, group) => sum + group.length, 0);
-  const totalMonsters = Array.from(aliveMonstersByName.values()).reduce((sum, group) => sum + group.length, 0);
+  for (const combatant of combatants) {
+    if (combatant.type === 'lair') continue;
+
+    const isAlive = combatant.hp > 0;
+    if (combatant.type === 'player') {
+      if (isAlive) {
+        const existing = alivePlayersByName.get(combatant.name) || [];
+        existing.push(combatant);
+        alivePlayersByName.set(combatant.name, existing);
+        totalPlayers++;
+      } else {
+        const existing = deadPlayersByName.get(combatant.name) || [];
+        existing.push(combatant);
+        deadPlayersByName.set(combatant.name, existing);
+      }
+    } else {
+      if (isAlive) {
+        const existing = aliveMonstersByName.get(combatant.name) || [];
+        existing.push(combatant);
+        aliveMonstersByName.set(combatant.name, existing);
+        totalMonsters++;
+      } else {
+        const existing = deadMonstersByName.get(combatant.name) || [];
+        existing.push(combatant);
+        deadMonstersByName.set(combatant.name, existing);
+      }
+    }
+  }
 
   return {
     alive: { players: alivePlayersByName, monsters: aliveMonstersByName },
