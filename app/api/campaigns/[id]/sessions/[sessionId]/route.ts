@@ -29,6 +29,12 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id: campa
 
 export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: campaignId, sessionId }) => {
   try {
+    const result = await assertCampaignAccess(campaignId, auth.userId);
+    if (result instanceof NextResponse) return result;
+    const { role } = result;
+
+    if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+
     const deleted = await storage.deleteSessionLog(sessionId, auth.userId, campaignId);
     if (!deleted) {
       return NextResponse.json({ error: 'Session log not found' }, { status: 404 });

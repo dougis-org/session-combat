@@ -109,11 +109,28 @@ describe("PATCH /api/campaigns/[id]/sessions/[sessionId]", () => {
 describe("DELETE /api/campaigns/[id]/sessions/[sessionId]", () => {
   itReturns401WithParams(DELETE, makeDeleteReq, PARAMS, mockedRequireAuth);
 
-  it("returns 200 when deleted", async () => {
+  it("returns 200 when DM deletes a session log", async () => {
     mockedStorage.deleteSessionLog.mockResolvedValue(true as any);
     const res = await DELETE(makeDeleteReq(), { params: PARAMS });
     expect(res.status).toBe(200);
     expect(mockedStorage.deleteSessionLog).toHaveBeenCalledWith(SESSION_ID, "user-123", CAMPAIGN_ID);
+  });
+
+  it("returns 404 when active player attempts DELETE", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
+    const res = await DELETE(makeDeleteReq(), { params: PARAMS });
+    expect(res.status).toBe(404);
+    expect((await res.json()).error).toBe("Campaign not found");
+    expect(mockedStorage.deleteSessionLog).not.toHaveBeenCalled();
+  });
+
+  it("returns 404 when non-member attempts DELETE", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+    const res = await DELETE(makeDeleteReq(), { params: PARAMS });
+    expect(res.status).toBe(404);
+    expect(mockedStorage.deleteSessionLog).not.toHaveBeenCalled();
   });
 
   itReturns404WithParams(
