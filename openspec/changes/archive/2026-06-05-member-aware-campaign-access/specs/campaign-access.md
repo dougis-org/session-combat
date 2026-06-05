@@ -210,22 +210,8 @@ Reason for removal: `findCampaign(id, userId)` in `app/api/campaigns/[id]/route.
 
 ### Requirement: Security
 
-#### Scenario: No campaign existence leakage
-
-- **Given** a user with no membership record makes any request to `/api/campaigns/[id]/**`
-- **When** the request is processed
-- **Then** the response is always 404 with body `{ error: 'Campaign not found' }` — never 403 or any body that reveals the campaign exists
-
-#### Scenario: Player cannot escalate to DM write
-
-- **Given** a user is an active `player` member
-- **When** any write method (PATCH, DELETE, POST) is attempted on a campaign route
-- **Then** HTTP 404 is returned; the write is not executed
+All denial responses use HTTP 404 with body `{ error: 'Campaign not found' }` — never 403 and never a body that reveals campaign existence. This invariant is enforced by `assertCampaignAccess` and is covered by the denial scenarios in the functional requirements above (non-member denial, pending/declined member denial, player write denial).
 
 ### Requirement: Reliability
 
-#### Scenario: Orphaned membership record (campaign doc missing)
-
-- **Given** a `campaignMembers` record exists for a campaign that has been deleted
-- **When** `assertCampaignAccess` is called
-- **Then** HTTP 404 is returned; no unhandled error is thrown
+Orphaned membership records (member record exists but campaign document is missing) are handled gracefully. See the "Member record exists but campaign document is missing" scenario under the `assertCampaignAccess` functional requirement above.
