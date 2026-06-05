@@ -26,7 +26,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   try {
     const result = await assertCampaignAccess(campaignId, auth.userId);
     if (result instanceof NextResponse) return result;
-    const { role } = result;
+    const { campaign, role } = result;
 
     if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
@@ -40,12 +40,12 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     const resolvedSessionNumber =
       typeof sessionNumber === 'number' && Number.isInteger(sessionNumber) && sessionNumber >= 0
         ? sessionNumber
-        : await storage.getNextSessionNumber(auth.userId, campaignId);
+        : await storage.getNextSessionNumber(campaign.userId, campaignId);
 
     const now = new Date();
     const log: SessionLog = {
       id: crypto.randomUUID(),
-      userId: auth.userId,
+      userId: campaign.userId,
       campaignId,
       sessionNumber: resolvedSessionNumber,
       title: typeof title === 'string' ? title.trim() || undefined : undefined,

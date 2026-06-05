@@ -9,14 +9,14 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id: campa
   try {
     const result = await assertCampaignAccess(campaignId, auth.userId);
     if (result instanceof NextResponse) return result;
-    const { role } = result;
+    const { campaign, role } = result;
 
     if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
     const body = await request.json();
     const { title, datePlayed, summary, events, milestone, newLevel } = body;
     const patch = { title, datePlayed, summary, events, milestone, newLevel };
-    const updated = await storage.updateSessionLog(sessionId, auth.userId, campaignId, patch);
+    const updated = await storage.updateSessionLog(sessionId, campaign.userId, campaignId, patch);
     if (!updated) {
       return NextResponse.json({ error: 'Session log not found' }, { status: 404 });
     }
@@ -31,11 +31,11 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: cam
   try {
     const result = await assertCampaignAccess(campaignId, auth.userId);
     if (result instanceof NextResponse) return result;
-    const { role } = result;
+    const { campaign, role } = result;
 
     if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
-    const deleted = await storage.deleteSessionLog(sessionId, auth.userId, campaignId);
+    const deleted = await storage.deleteSessionLog(sessionId, campaign.userId, campaignId);
     if (!deleted) {
       return NextResponse.json({ error: 'Session log not found' }, { status: 404 });
     }

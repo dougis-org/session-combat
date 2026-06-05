@@ -58,6 +58,9 @@ describe("PATCH /api/campaigns/[id]/sessions/[sessionId]", () => {
     const res = await PATCH(makePatchReq({ title: "Updated Title" }), { params: PARAMS });
     expect(res.status).toBe(200);
     expect((await res.json()).title).toBe("Updated Title");
+    expect(mockedStorage.updateSessionLog).toHaveBeenCalledWith(
+      SESSION_ID, MOCK_CAMPAIGN.userId, CAMPAIGN_ID, expect.any(Object)
+    );
   });
 
   it("whitelists only allowed fields — does not pass campaignId to storage", async () => {
@@ -113,7 +116,7 @@ describe("DELETE /api/campaigns/[id]/sessions/[sessionId]", () => {
     mockedStorage.deleteSessionLog.mockResolvedValue(true as any);
     const res = await DELETE(makeDeleteReq(), { params: PARAMS });
     expect(res.status).toBe(200);
-    expect(mockedStorage.deleteSessionLog).toHaveBeenCalledWith(SESSION_ID, "user-123", CAMPAIGN_ID);
+    expect(mockedStorage.deleteSessionLog).toHaveBeenCalledWith(SESSION_ID, MOCK_CAMPAIGN.userId, CAMPAIGN_ID);
   });
 
   it("returns 404 when active player attempts DELETE", async () => {

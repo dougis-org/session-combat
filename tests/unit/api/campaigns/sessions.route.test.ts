@@ -111,7 +111,9 @@ describe("POST /api/campaigns/[id]/sessions", () => {
     expect(body.sessionNumber).toBe(2);
     expect(body.title).toBe("First Session");
     expect(body.milestone).toBe(false);
+    expect(body.userId).toBe(MOCK_CAMPAIGN.userId);
     expect(mockedStorage.saveSessionLog).toHaveBeenCalledTimes(1);
+    expect(mockedStorage.getNextSessionNumber).toHaveBeenCalledWith(MOCK_CAMPAIGN.userId, CAMPAIGN_ID);
   });
 
   it("uses provided sessionNumber when valid positive integer", async () => {

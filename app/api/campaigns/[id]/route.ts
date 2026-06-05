@@ -87,11 +87,11 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id }) =
   try {
     const result = await assertCampaignAccess(id, auth.userId);
     if (result instanceof NextResponse) return result;
-    const { role } = result;
+    const { campaign, role } = result;
 
     if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
-    await storage.deleteCampaign(id, auth.userId);
+    await storage.deleteCampaign(id, campaign.userId);
     return NextResponse.json({ message: 'Campaign deleted successfully' });
   } catch (error) {
     console.error('Error deleting campaign:', error);
