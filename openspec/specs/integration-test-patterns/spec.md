@@ -1,8 +1,6 @@
 ## Purpose
 Define deterministic integration testing patterns for authenticated routes, assertions, and shared setup.
-
 ## Requirements
-
 ### Requirement: Integration tests authenticate before calling protected endpoints
 Integration tests that test protected API routes SHALL first register a test user via `POST /api/auth/register`, capture the session cookie from the `Set-Cookie` response header, and include that cookie in subsequent requests. Tests SHALL NOT accept `401 Unauthorized` as a passing response for a scenario that is intended to test the authenticated happy path.
 
@@ -52,3 +50,44 @@ The `waitForServer` helper used in integration test setup SHALL log each retry a
 - **WHEN** the Next.js server does not become ready within the allowed attempts
 - **THEN** `waitForServer` throws an error containing the URL, attempt count, and the last network error received
 - **AND** this error causes the `beforeAll` to fail, aborting the test file with a clear diagnostic message
+
+### Requirement: ADDED Central Admin Promotion Test Helper
+
+The system SHALL provide a centralized helper function `makeUserAdmin` in the integration test suite to promote users to administrators.
+
+#### Scenario: User successfully promoted to admin
+
+- **Given** a registered user exists in the MongoDB database with a valid `userId` and `isAdmin` is not true.
+- **When** `makeUserAdmin(userId)` is called and resolves.
+- **Then** the user document in the database has `isAdmin: true`.
+
+#### Scenario: Helper fails with non-existent user
+
+- **Given** a valid ObjectId format string representing a non-existent user.
+- **When** `makeUserAdmin(userId)` is called.
+- **Then** the function rejects with an error message: `Failed to promote user to admin: user <userId> not found`.
+
+---
+
+### Requirement: ADDED Permissions Integration Test
+
+The integration tests for permissions SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
+
+#### Scenario: Permissions integration test verifies admin access using helper
+
+- **Given** permissions integration tests are executing in the integration environment.
+- **When** the admin user is registered using `registerTestUser` and promoted using `makeUserAdmin(userId)`.
+- **Then** `isUserAdmin(userId)` returns `true` and the test file runs without declaring, connecting, or closing a raw `MongoClient`.
+
+### Requirement: ADDED Campaign Global API Integration Test
+
+The integration tests for the campaign global API SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
+
+#### Scenario: Campaign Global API integration test verifies admin endpoints using helper
+
+- **Given** campaign global API tests are executing in the integration environment.
+- **When** the admin user cookie is registered and the user is promoted using `makeUserAdmin(userId)`.
+- **Then** POST, PUT, and DELETE administrative endpoints respond as expected and the test file runs without declaring, connecting, or closing a raw `MongoClient`.
+
+---
+

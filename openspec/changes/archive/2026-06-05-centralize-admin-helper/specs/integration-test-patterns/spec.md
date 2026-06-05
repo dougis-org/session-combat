@@ -19,10 +19,7 @@ The system SHALL provide a centralized helper function `makeUserAdmin` in the in
 - **Then** the function rejects with an error message: `Failed to promote user to admin: user <userId> not found`.
 
 ---
-
-## MODIFIED Requirements
-
-### Requirement: MODIFIED Permissions Integration Test
+### Requirement: ADDED Permissions Integration Test
 
 The integration tests for permissions SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
 
@@ -32,7 +29,7 @@ The integration tests for permissions SHALL utilize the centralized admin promot
 - **When** the admin user is registered using `registerTestUser` and promoted using `makeUserAdmin(userId)`.
 - **Then** `isUserAdmin(userId)` returns `true` and the test file runs without declaring, connecting, or closing a raw `MongoClient`.
 
-### Requirement: MODIFIED Campaign Global API Integration Test
+### Requirement: ADDED Campaign Global API Integration Test
 
 The integration tests for the campaign global API SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
 
@@ -41,15 +38,6 @@ The integration tests for the campaign global API SHALL utilize the centralized 
 - **Given** campaign global API tests are executing in the integration environment.
 - **When** the admin user cookie is registered and the user is promoted using `makeUserAdmin(userId)`.
 - **Then** POST, PUT, and DELETE administrative endpoints respond as expected and the test file runs without declaring, connecting, or closing a raw `MongoClient`.
-
----
-
-## REMOVED Requirements
-
-### Requirement: REMOVED Inline MongoClient connections in integration tests
-
-Reason for removal:
-Replaced by the centralized helper function to avoid connection leaks, duplicate boilerplate code, and reduce direct Mongo connection surface area.
 
 ---
 
