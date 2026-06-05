@@ -43,8 +43,8 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
 - [x] **Monitor PR comments** — poll for new comments autonomously; address, commit fixes, follow remote push validation, push; wait 180 seconds then repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, commit, follow remote push validation, push; wait 180 seconds then repeat until all required checks pass
-- [ ] **Poll for merge** — run `gh pr view <PR-URL> --json state` after each iteration; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
+- [x] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, commit, follow remote push validation, push; wait 180 seconds then repeat until all required checks pass
+- [x] **Poll for merge** — run `gh pr view <PR-URL> --json state` after each iteration; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
 
 Ownership metadata:
 
@@ -59,15 +59,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No documentation updates required (infrastructure-only change)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/jest-env-boilerplate-cleanup/` to `openspec/changes/archive/YYYY-MM-DD-jest-env-boilerplate-cleanup/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-jest-env-boilerplate-cleanup/` exists and `openspec/changes/jest-env-boilerplate-cleanup/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup` then `git push -u origin doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup` to `main` with title `docs: archive jest-env-boilerplate-cleanup (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d chore/jest-env-boilerplate-cleanup doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No documentation updates required (infrastructure-only change)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive the change: move `openspec/changes/jest-env-boilerplate-cleanup/` to `openspec/changes/archive/YYYY-MM-DD-jest-env-boilerplate-cleanup/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-jest-env-boilerplate-cleanup/` exists and `openspec/changes/jest-env-boilerplate-cleanup/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup` then `git push -u origin doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup`
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup` to `main` with title `docs: archive jest-env-boilerplate-cleanup (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor the doc PR until it merges
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d chore/jest-env-boilerplate-cleanup doc/archive-YYYY-MM-DD-jest-env-boilerplate-cleanup`
