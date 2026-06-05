@@ -20,9 +20,7 @@ The system SHALL provide a centralized helper function `makeUserAdmin` in the in
 
 ---
 
-## MODIFIED Requirements
-
-### Requirement: MODIFIED Permissions Integration Test
+### Requirement: ADDED Permissions Integration Test
 
 The integration tests for permissions SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
 
@@ -32,7 +30,7 @@ The integration tests for permissions SHALL utilize the centralized admin promot
 - **When** the admin user is registered using `registerTestUser` and promoted using `makeUserAdmin(userId)`.
 - **Then** `isUserAdmin(userId)` returns `true` and the test file runs without declaring, connecting, or closing a raw `MongoClient`.
 
-### Requirement: MODIFIED Campaign Global API Integration Test
+### Requirement: ADDED Campaign Global API Integration Test
 
 The integration tests for the campaign global API SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
 
@@ -44,28 +42,19 @@ The integration tests for the campaign global API SHALL utilize the centralized 
 
 ---
 
-## REMOVED Requirements
-
-### Requirement: REMOVED Inline MongoClient connections in integration tests
-
-Reason for removal:
-Replaced by the centralized helper function to avoid connection leaks, duplicate boilerplate code, and reduce direct Mongo connection surface area.
-
----
-
 ## Traceability
 
 - **Proposal element** -> **Requirement**:
   - In-scope: Create `makeUserAdmin` helper -> Requirement: `ADDED Central Admin Promotion Test Helper`
-  - In-scope: Refactor permissions tests -> Requirement: `MODIFIED Permissions Integration Test`
-  - In-scope: Refactor campaign global API tests -> Requirement: `MODIFIED Campaign Global API Integration Test`
+  - In-scope: Refactor permissions tests -> Requirement: `ADDED Permissions Integration Test`
+  - In-scope: Refactor campaign global API tests -> Requirement: `ADDED Campaign Global API Integration Test`
 - **Design decision** -> **Requirement**:
   - Decision 1 (Placement/Signature) -> Requirement: `ADDED Central Admin Promotion Test Helper`
   - Decision 2 (Lifecycle) -> Requirement: `ADDED Central Admin Promotion Test Helper`
 - **Requirement** -> **Task(s)**:
   - ADDED Central Admin Promotion Test Helper -> Implementation of `makeUserAdmin` in helper file.
-  - MODIFIED Permissions Integration Test -> Refactoring permissions test suite.
-  - MODIFIED Campaign Global API Integration Test -> Refactoring campaign global API test suite.
+  - ADDED Permissions Integration Test -> Refactoring permissions test suite.
+  - ADDED Campaign Global API Integration Test -> Refactoring campaign global API test suite.
 
 ---
 
