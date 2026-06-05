@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useId } from 'react';
 
 export function ErrorBanner({ message }: { message: string | null }) {
   if (!message) return null;
@@ -106,6 +106,10 @@ export function textInputClass() {
   return 'w-full bg-gray-700 rounded px-3 py-2 text-white';
 }
 
+function slugify(label: string): string {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
 export function TextInputField({
   id,
   label,
@@ -121,10 +125,12 @@ export function TextInputField({
   disabled?: boolean;
   placeholder?: string;
 }) {
+  const generatedId = useId();
+  const resolvedId = id ?? (slugify(label) || generatedId);
   return (
-    <FormField label={label} htmlFor={id}>
+    <FormField label={label} htmlFor={resolvedId}>
       <input
-        id={id}
+        id={resolvedId}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}

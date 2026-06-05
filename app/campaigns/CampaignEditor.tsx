@@ -188,6 +188,7 @@ export function CampaignEditor({
                     <input
                       type="text"
                       data-testid="chapter-title-input"
+                      aria-label={`Chapter ${index + 1} title`}
                       value={ch.title}
                       onChange={(e) => handleTitleChange(index, e.target.value)}
                       disabled={saving}
@@ -225,6 +226,7 @@ export function CampaignEditor({
                     <button
                       type="button"
                       data-testid={`remove-chapter-${index}`}
+                      aria-label={`Remove ${ch.title || `chapter ${index + 1}`}`}
                       onClick={() => handleRemoveChapter(index)}
                       disabled={saving}
                       className="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-900/40 hover:border-red-800/60 text-xs rounded transition-all font-semibold cursor-pointer"
