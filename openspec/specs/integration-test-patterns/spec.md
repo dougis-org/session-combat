@@ -75,12 +75,14 @@ The integration tests for permissions SHALL utilize the centralized admin promot
 - **THEN** `isUserAdmin(userId)` returns `true`
 - **AND** the test file runs without declaring, connecting, or closing a raw `MongoClient`
 
+---
+
 ### Requirement: Campaign Global API Integration Test
 
 The integration tests for the campaign global API SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
 
 #### Scenario: Campaign Global API integration test verifies admin endpoints using helper
-- **WHEN** the campaign global API integration tests execute and promote the registered user using `makeUserAdmin(userId)`
+- **WHEN** the admin user is registered using `registerTestUser` and promoted using `makeUserAdmin(userId)`
 - **THEN** POST, PUT, and DELETE administrative endpoints respond as expected
 - **AND** the test file runs without declaring, connecting, or closing a raw `MongoClient`
 
