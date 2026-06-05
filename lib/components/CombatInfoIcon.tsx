@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { CombatantState } from '@/lib/types';
+import { groupCombatantsForDisplay } from '@/lib/utils/combat';
 
 interface CombatInfoIconProps {
   combatants: CombatantState[];
@@ -10,47 +11,7 @@ interface CombatInfoIconProps {
 export function CombatInfoIcon({ combatants }: CombatInfoIconProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
-  // Separate alive and dead combatants
-  const aliveCombatants = combatants.filter((c) => c.hp > 0);
-  const deadCombatants = combatants.filter((c) => c.hp <= 0);
-
-  // Group alive combatants by type and name
-  const alivePlayersByName = new Map<string, CombatantState[]>();
-  const aliveMonstersByName = new Map<string, CombatantState[]>();
-
-  aliveCombatants.forEach((combatant) => {
-    if (combatant.type === 'player') {
-      const existing = alivePlayersByName.get(combatant.name) || [];
-      alivePlayersByName.set(combatant.name, [...existing, combatant]);
-    } else {
-      const existing = aliveMonstersByName.get(combatant.name) || [];
-      aliveMonstersByName.set(combatant.name, [...existing, combatant]);
-    }
-  });
-
-  // Group dead combatants by type and name
-  const deadPlayersByName = new Map<string, CombatantState[]>();
-  const deadMonstersByName = new Map<string, CombatantState[]>();
-
-  deadCombatants.forEach((combatant) => {
-    if (combatant.type === 'player') {
-      const existing = deadPlayersByName.get(combatant.name) || [];
-      deadPlayersByName.set(combatant.name, [...existing, combatant]);
-    } else {
-      const existing = deadMonstersByName.get(combatant.name) || [];
-      deadMonstersByName.set(combatant.name, [...existing, combatant]);
-    }
-  });
-
-  // Count totals
-  const totalPlayers = Array.from(alivePlayersByName.values()).reduce(
-    (sum, group) => sum + group.length,
-    0
-  );
-  const totalMonsters = Array.from(aliveMonstersByName.values()).reduce(
-    (sum, group) => sum + group.length,
-    0
-  );
+  const { alive, dead, totals } = groupCombatantsForDisplay(combatants);
 
   return (
     <div className="relative inline-block">
@@ -80,12 +41,12 @@ export function CombatInfoIcon({ combatants }: CombatInfoIconProps) {
           <div className="grid grid-cols-2 gap-4">
             {/* Players Column */}
             <div>
-              <p className="text-xs text-gray-400 font-semibold mb-2">PLAYERS ({totalPlayers})</p>
+              <p className="text-xs text-gray-400 font-semibold mb-2">PLAYERS ({totals.players})</p>
               
               {/* Alive Players */}
-              {alivePlayersByName.size > 0 ? (
+              {alive.players.size > 0 ? (
                 <div className="space-y-1">
-                  {Array.from(alivePlayersByName.entries()).map(([name, group]) => (
+                  {Array.from(alive.players.entries()).map(([name, group]) => (
                     <div key={name} className="text-xs text-gray-300">
                       <div className="flex items-baseline gap-1">
                         <span className="font-medium">{name}</span>
@@ -113,12 +74,12 @@ export function CombatInfoIcon({ combatants }: CombatInfoIconProps) {
               )}
 
               {/* Dead Players Separator */}
-              {deadPlayersByName.size > 0 && (
+              {dead.players.size > 0 && (
                 <>
                   <div className="border-t border-gray-600 my-2"></div>
                   <p className="text-xs text-red-400 font-semibold mb-1">DEFEATED</p>
                   <div className="space-y-1">
-                    {Array.from(deadPlayersByName.entries()).map(([name, group]) => (
+                    {Array.from(dead.players.entries()).map(([name, group]) => (
                       <div key={`dead-${name}`} className="text-xs text-gray-500 line-through">
                         <div className="flex items-baseline gap-1">
                           <span className="font-medium">{name}</span>
@@ -135,12 +96,12 @@ export function CombatInfoIcon({ combatants }: CombatInfoIconProps) {
 
             {/* Monsters Column */}
             <div>
-              <p className="text-xs text-gray-400 font-semibold mb-2">MONSTERS ({totalMonsters})</p>
+              <p className="text-xs text-gray-400 font-semibold mb-2">MONSTERS ({totals.monsters})</p>
               
               {/* Alive Monsters */}
-              {aliveMonstersByName.size > 0 ? (
+              {alive.monsters.size > 0 ? (
                 <div className="space-y-1">
-                  {Array.from(aliveMonstersByName.entries()).map(([name, group]) => (
+                  {Array.from(alive.monsters.entries()).map(([name, group]) => (
                     <div key={name} className="text-xs text-gray-300">
                       <div className="flex items-baseline gap-1">
                         <span className="font-medium">{name}</span>
@@ -168,12 +129,12 @@ export function CombatInfoIcon({ combatants }: CombatInfoIconProps) {
               )}
 
               {/* Dead Monsters Separator */}
-              {deadMonstersByName.size > 0 && (
+              {dead.monsters.size > 0 && (
                 <>
                   <div className="border-t border-gray-600 my-2"></div>
                   <p className="text-xs text-red-400 font-semibold mb-1">DEFEATED</p>
                   <div className="space-y-1">
-                    {Array.from(deadMonstersByName.entries()).map(([name, group]) => (
+                    {Array.from(dead.monsters.entries()).map(([name, group]) => (
                       <div key={`dead-${name}`} className="text-xs text-gray-500 line-through">
                         <div className="flex items-baseline gap-1">
                           <span className="font-medium">{name}</span>
@@ -190,7 +151,7 @@ export function CombatInfoIcon({ combatants }: CombatInfoIconProps) {
           </div>
 
           {/* Empty state */}
-          {totalPlayers === 0 && totalMonsters === 0 && deadPlayersByName.size === 0 && deadMonstersByName.size === 0 && (
+          {totals.players === 0 && totals.monsters === 0 && dead.players.size === 0 && dead.monsters.size === 0 && (
             <p className="text-xs text-gray-400 col-span-2">No combatants</p>
           )}
         </div>
