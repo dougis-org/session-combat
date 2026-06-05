@@ -1,7 +1,4 @@
-/**
- * @jest-environment jsdom
- */
-(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
+/** @jest-environment jsdom */
 
 import React from 'react';
 import { act } from 'react';

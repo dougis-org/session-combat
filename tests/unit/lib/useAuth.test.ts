@@ -1,5 +1,3 @@
-/** @jest-environment jsdom */
-
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
@@ -59,7 +57,6 @@ describe("useAuth", () => {
   beforeEach(() => {
     originalFetch = global.fetch;
     jest.clearAllMocks();
-    (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
   });
 
   afterEach(() => {

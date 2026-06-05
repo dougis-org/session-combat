@@ -1,6 +1,3 @@
-/** @jest-environment jsdom */
-
-
 import {
   LocalStore,
   SESSION_COMBAT_PREFIX,

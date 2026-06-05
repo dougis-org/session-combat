@@ -1,5 +1,3 @@
-/** @jest-environment jsdom */
-
 import React from "react";
 import { act } from "react";
 import { createRoot, Root } from "react-dom/client";
@@ -45,10 +43,6 @@ describe("Characters page import UI", () => {
   let confirmSpy: jest.SpiedFunction<typeof window.confirm>;
 
   beforeEach(() => {
-    (
-      globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
-    ).IS_REACT_ACT_ENVIRONMENT = true;
-
     originalFetch = global.fetch;
     confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
     container = document.createElement("div");

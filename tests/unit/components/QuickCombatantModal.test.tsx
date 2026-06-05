@@ -1,15 +1,9 @@
-/**
- * @jest-environment jsdom
- */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
 import { MonsterTemplate, Character } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
-
-// @ts-expect-error IS_REACT_ACT_ENVIRONMENT
-global.IS_REACT_ACT_ENVIRONMENT = true;
 
 jest.mock('next/link', () => ({
   __esModule: true,

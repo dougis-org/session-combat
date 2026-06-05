@@ -1,9 +1,3 @@
-/**
- * @jest-environment jsdom
- */
-// Tell React's act() that this is a test environment
-(globalThis as unknown as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
-
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { act } from 'react';

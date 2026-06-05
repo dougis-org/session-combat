@@ -1,5 +1,3 @@
-/** @jest-environment jsdom */
-
 import { NetworkDetector } from "@/lib/offline/NetworkDetector";
 
 describe("NetworkDetector", () => {

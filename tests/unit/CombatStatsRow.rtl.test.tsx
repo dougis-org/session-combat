@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import { render, screen } from '@testing-library/react';
 import { CombatStatsRow } from '@/lib/components/CombatStatsRow';
 
