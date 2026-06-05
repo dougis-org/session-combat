@@ -19,6 +19,7 @@ The system SHALL provide a centralized helper function `makeUserAdmin` in the in
 - **Then** the function rejects with an error message: `Failed to promote user to admin: user <userId> not found`.
 
 ---
+
 ### Requirement: ADDED Permissions Integration Test
 
 The integration tests for permissions SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
@@ -45,15 +46,15 @@ The integration tests for the campaign global API SHALL utilize the centralized 
 
 - **Proposal element** -> **Requirement**:
   - In-scope: Create `makeUserAdmin` helper -> Requirement: `ADDED Central Admin Promotion Test Helper`
-  - In-scope: Refactor permissions tests -> Requirement: `MODIFIED Permissions Integration Test`
-  - In-scope: Refactor campaign global API tests -> Requirement: `MODIFIED Campaign Global API Integration Test`
+  - In-scope: Refactor permissions tests -> Requirement: `ADDED Permissions Integration Test`
+  - In-scope: Refactor campaign global API tests -> Requirement: `ADDED Campaign Global API Integration Test`
 - **Design decision** -> **Requirement**:
   - Decision 1 (Placement/Signature) -> Requirement: `ADDED Central Admin Promotion Test Helper`
   - Decision 2 (Lifecycle) -> Requirement: `ADDED Central Admin Promotion Test Helper`
 - **Requirement** -> **Task(s)**:
   - ADDED Central Admin Promotion Test Helper -> Implementation of `makeUserAdmin` in helper file.
-  - MODIFIED Permissions Integration Test -> Refactoring permissions test suite.
-  - MODIFIED Campaign Global API Integration Test -> Refactoring campaign global API test suite.
+  - ADDED Permissions Integration Test -> Refactoring permissions test suite.
+  - ADDED Campaign Global API Integration Test -> Refactoring campaign global API test suite.
 
 ---
 

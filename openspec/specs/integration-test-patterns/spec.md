@@ -56,16 +56,13 @@ The `waitForServer` helper used in integration test setup SHALL log each retry a
 The system SHALL provide a centralized helper function `makeUserAdmin` in the integration test suite to promote users to administrators.
 
 #### Scenario: User successfully promoted to admin
-
-- **Given** a registered user exists in the MongoDB database with a valid `userId` and `isAdmin` is not true.
-- **When** `makeUserAdmin(userId)` is called and resolves.
-- **Then** the user document in the database has `isAdmin: true`.
+- **WHEN** `makeUserAdmin(userId)` is called with a valid `userId` for a registered user whose `isAdmin` is not true
+- **THEN** the helper resolves successfully
+- **AND** the user document in the database has `isAdmin: true`
 
 #### Scenario: Helper fails with non-existent user
-
-- **Given** a valid ObjectId format string representing a non-existent user.
-- **When** `makeUserAdmin(userId)` is called.
-- **Then** the function rejects with an error message: `Failed to promote user to admin: user <userId> not found`.
+- **WHEN** `makeUserAdmin(userId)` is called with a valid-format `userId` representing a non-existent user
+- **THEN** the helper rejects with an error message: `Failed to promote user to admin: user <userId> not found`
 
 ---
 
@@ -74,20 +71,18 @@ The system SHALL provide a centralized helper function `makeUserAdmin` in the in
 The integration tests for permissions SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
 
 #### Scenario: Permissions integration test verifies admin access using helper
-
-- **Given** permissions integration tests are executing in the integration environment.
-- **When** the admin user is registered using `registerTestUser` and promoted using `makeUserAdmin(userId)`.
-- **Then** `isUserAdmin(userId)` returns `true` and the test file runs without declaring, connecting, or closing a raw `MongoClient`.
+- **WHEN** the permissions integration tests execute and promote a registered user using `makeUserAdmin(userId)`
+- **THEN** `isUserAdmin(userId)` returns `true`
+- **AND** the test file runs without declaring, connecting, or closing a raw `MongoClient`
 
 ### Requirement: Campaign Global API Integration Test
 
 The integration tests for the campaign global API SHALL utilize the centralized admin promotion helper rather than managing a raw database connection.
 
 #### Scenario: Campaign Global API integration test verifies admin endpoints using helper
-
-- **Given** campaign global API tests are executing in the integration environment.
-- **When** the admin user cookie is registered and the user is promoted using `makeUserAdmin(userId)`.
-- **Then** POST, PUT, and DELETE administrative endpoints respond as expected and the test file runs without declaring, connecting, or closing a raw `MongoClient`.
+- **WHEN** the campaign global API integration tests execute and promote the registered user using `makeUserAdmin(userId)`
+- **THEN** POST, PUT, and DELETE administrative endpoints respond as expected
+- **AND** the test file runs without declaring, connecting, or closing a raw `MongoClient`
 
 ---
 
