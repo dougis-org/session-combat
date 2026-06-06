@@ -21,6 +21,7 @@ const MOCK_CAMPAIGN = {
   id: "camp-1",
   userId: "owner-user",
   name: "Test Campaign",
+  moduleName: "",
   chapters: [],
   status: "active" as const,
   notes: "",
@@ -28,14 +29,13 @@ const MOCK_CAMPAIGN = {
   updatedAt: new Date("2026-01-01"),
 };
 
-const makeMember = (role: "dm" | "player", status: "active" | "pending" | "declined") => ({
+const makeMember = (role: "dm" | "player", status: "active" | "invited" | "declined" | "removed") => ({
   id: "mem-1",
   campaignId: "camp-1",
   userId: "user-1",
   role,
   status,
-  invitedBy: "owner-user",
-  invitedAt: new Date("2026-06-01"),
+  history: [{ action: status as "active" | "invited" | "declined" | "removed", by: "owner-user", at: new Date("2026-06-01") }],
 });
 
 beforeEach(() => {
@@ -78,8 +78,8 @@ describe("assertCampaignAccess", () => {
     expect(body).toEqual({ error: "Campaign not found" });
   });
 
-  it("returns 404 NextResponse when member status is 'pending'", async () => {
-    mockedStorage.getMember.mockResolvedValue(makeMember("dm", "pending"));
+  it("returns 404 NextResponse when member status is 'invited'", async () => {
+    mockedStorage.getMember.mockResolvedValue(makeMember("dm", "invited"));
 
     const result = await assertCampaignAccess("camp-1", "user-1");
 
@@ -109,7 +109,7 @@ describe("assertCampaignAccess", () => {
   });
 
   it("does not call loadCampaignByIdAny when member is not active", async () => {
-    mockedStorage.getMember.mockResolvedValue(makeMember("dm", "pending"));
+    mockedStorage.getMember.mockResolvedValue(makeMember("dm", "invited"));
 
     await assertCampaignAccess("camp-1", "user-1");
 

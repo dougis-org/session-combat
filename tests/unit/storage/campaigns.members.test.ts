@@ -40,9 +40,8 @@ describe("Campaign members storage and types", () => {
         campaignId: "campaign-1",
         userId: "user-1",
         role: "player",
-        status: "pending",
-        invitedBy: "user-dm",
-        invitedAt: new Date("2026-05-30T12:00:00Z"),
+        status: "invited",
+        history: [{ action: "invited", by: "user-dm", at: new Date("2026-05-30T12:00:00Z") }],
       };
       expect(member.role).toBe("player");
     });
@@ -74,8 +73,7 @@ describe("Campaign members storage and types", () => {
         userId: "user-1",
         role: "dm",
         status: "active",
-        invitedBy: "user-1",
-        invitedAt: new Date(),
+        history: [{ action: "active", by: "user-1", at: new Date() }],
       };
       await expect(storage.addMember(member)).resolves.not.toThrow();
       expect(mockDb.collection).toHaveBeenCalledWith("campaignMembers");
@@ -98,8 +96,7 @@ describe("Campaign members storage and types", () => {
         userId: "user-1",
         role: "dm",
         status: "active",
-        invitedBy: "user-1",
-        invitedAt: new Date(),
+        history: [{ action: "active", by: "user-1", at: new Date() }],
       };
       await expect(storage.addMember(member)).rejects.toThrow(DuplicateMemberError);
     });
@@ -112,14 +109,13 @@ describe("Campaign members storage and types", () => {
         userId: "user-1",
         role: "dm",
         status: "active",
-        invitedBy: "user-1",
-        invitedAt: new Date(),
+        history: [{ action: "active", by: "user-1", at: new Date() }],
       };
       await expect(storage.addMember(member)).rejects.toThrow("DB failure");
     });
   });
 
-  describe("updateMember (mocked DB)", () => {
+  describe("updateMemberStatus (mocked DB)", () => {
     let mockCollection: ReturnType<typeof makeMockCollection>;
     let mockDb: { collection: ReturnType<typeof jest.fn> };
 
@@ -129,41 +125,33 @@ describe("Campaign members storage and types", () => {
       mockedGetDatabase.mockResolvedValue(mockDb as never);
     });
 
-    test("status only — set only status", async () => {
+    test("status field updated to new value", async () => {
       mockCollection.updateOne.mockResolvedValue({ matchedCount: 1 } as never);
-      await storage.updateMember("camp-1", "user-1", undefined, "active");
+      await storage.updateMemberStatus("camp-1", "user-1", "invited", "dm-user");
       expect(mockCollection.updateOne).toHaveBeenCalledWith(
         { campaignId: "camp-1", userId: "user-1" },
-        { $set: { status: "active" } }
+        expect.objectContaining({ $set: { status: "invited" } })
       );
     });
 
-    test("role only — set only role", async () => {
+    test("history entry appended with correct action, by, at", async () => {
       mockCollection.updateOne.mockResolvedValue({ matchedCount: 1 } as never);
-      await storage.updateMember("camp-1", "user-1", "dm", undefined);
+      await storage.updateMemberStatus("camp-1", "user-1", "invited", "dm-user");
       expect(mockCollection.updateOne).toHaveBeenCalledWith(
         { campaignId: "camp-1", userId: "user-1" },
-        { $set: { role: "dm" } }
+        expect.objectContaining({
+          $push: expect.objectContaining({
+            history: expect.objectContaining({ action: "invited", by: "dm-user", at: expect.any(Date) }),
+          }),
+        })
       );
     });
 
-    test("both fields — set both", async () => {
-      mockCollection.updateOne.mockResolvedValue({ matchedCount: 1 } as never);
-      await storage.updateMember("camp-1", "user-1", "player", "pending");
-      expect(mockCollection.updateOne).toHaveBeenCalledWith(
-        { campaignId: "camp-1", userId: "user-1" },
-        { $set: { role: "player", status: "pending" } }
-      );
-    });
-
-    test("no match — no error when matchedCount is 0", async () => {
+    test("member not found — no error thrown, no document modified", async () => {
       mockCollection.updateOne.mockResolvedValue({ matchedCount: 0 } as never);
-      await expect(storage.updateMember("camp-1", "user-1", "player", "active")).resolves.not.toThrow();
-    });
-
-    test("no-op — no updateOne called when both params are undefined", async () => {
-      await storage.updateMember("camp-1", "user-1", undefined, undefined);
-      expect(mockCollection.updateOne).not.toHaveBeenCalled();
+      await expect(
+        storage.updateMemberStatus("camp-1", "nobody", "invited", "dm-user")
+      ).resolves.not.toThrow();
     });
   });
 
@@ -180,7 +168,7 @@ describe("Campaign members storage and types", () => {
     test("returns normalized members for campaign", async () => {
       const rawDbMembers = [
         { _id: "obj-1", id: "mem-1", campaignId: "camp-1", userId: "user-1", role: "dm", status: "active" },
-        { _id: "obj-2", id: "mem-2", campaignId: "camp-1", userId: "user-2", role: "player", status: "pending" },
+        { _id: "obj-2", id: "mem-2", campaignId: "camp-1", userId: "user-2", role: "player", status: "invited" },
       ];
       mockCollection.toArray.mockResolvedValue(rawDbMembers);
 
@@ -272,7 +260,9 @@ describe("Route POST seeding (mocked storage)", () => {
         userId: "user-123",
         role: "dm",
         status: "active",
-        invitedBy: "user-123",
+        history: expect.arrayContaining([
+          expect.objectContaining({ action: "active", by: "user-123" }),
+        ]),
       })
     );
 

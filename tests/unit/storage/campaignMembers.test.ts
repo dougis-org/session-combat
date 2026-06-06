@@ -27,8 +27,7 @@ const MOCK_MEMBER: CampaignMember = {
   userId: "user-1",
   role: "dm",
   status: "active",
-  invitedBy: "user-1",
-  invitedAt: new Date("2026-06-01T00:00:00Z"),
+  history: [{ action: "active", by: "user-1", at: new Date("2026-06-01T00:00:00Z") }],
 };
 
 describe("getMember", () => {
