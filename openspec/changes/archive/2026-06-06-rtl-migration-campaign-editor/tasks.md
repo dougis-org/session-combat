@@ -155,11 +155,11 @@ Blocking resolution flow:
 - [x] Verify `CampaignEditor.test.tsx` on `main` has no `reactRoot` imports
 - [x] Mark all tasks `[x]`
 - [x] No documentation updates needed (test-only change)
-- [ ] Sync approved spec delta: copy `openspec/changes/rtl-migration-campaign-editor/specs/rtl-migration/spec.md` → `openspec/specs/rtl-migration/campaign-editor.md` (or merge into existing `openspec/specs/` RTL spec if present)
-- [ ] Archive: move `openspec/changes/rtl-migration-campaign-editor/` to `openspec/changes/archive/YYYY-MM-DD-rtl-migration-campaign-editor/` — stage both copy and deletion in **one commit**
-- [ ] Confirm archive exists and original path is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-rtl-migration-campaign-editor` → push
-- [ ] Open PR from doc branch to `main` with title `docs: archive rtl-migration-campaign-editor (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR
-- [ ] Monitor doc PR until merged (same loop as implementation PR)
-- [ ] Prune: `git fetch --prune && git branch -d test/rtl-migration-campaign-editor doc/archive-YYYY-MM-DD-rtl-migration-campaign-editor`
+- [x] Sync approved spec delta: copy `openspec/changes/rtl-migration-campaign-editor/specs/rtl-migration/spec.md` → `openspec/specs/rtl-migration/campaign-editor.md` (or merge into existing `openspec/specs/` RTL spec if present)
+- [x] Archive: move `openspec/changes/rtl-migration-campaign-editor/` to `openspec/changes/archive/YYYY-MM-DD-rtl-migration-campaign-editor/` — stage both copy and deletion in **one commit**
+- [x] Confirm archive exists and original path is gone
+- [x] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-rtl-migration-campaign-editor` → push
+- [x] Open PR from doc branch to `main` with title `docs: archive rtl-migration-campaign-editor (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR
+- [x] Monitor doc PR until merged (same loop as implementation PR)
+- [x] Prune: `git fetch --prune && git branch -d test/rtl-migration-campaign-editor doc/archive-YYYY-MM-DD-rtl-migration-campaign-editor`
