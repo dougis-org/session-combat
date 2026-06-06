@@ -126,7 +126,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
     expect(body.invitations[0].invitedBy).toBe("Unknown user");
   });
 
-  it("falls back to 'Unknown user' when history is empty", async () => {
+  it("falls back to 'Unknown user' and null invitedAt when history is empty", async () => {
     mockedStorage.listInvitationsForUser.mockResolvedValue([
       makeInvitation({ history: [] }),
     ]);
@@ -138,6 +138,19 @@ describe("GET /api/me/invitations — pending invitations", () => {
     const body = await response.json();
     expect(body.invitations[0].invitedBy).toBe("Unknown user");
     expect(body.invitations[0].invitedAt).toBeNull();
+  });
+
+  it("falls back to 'Unknown campaign' when campaign is not found", async () => {
+    mockedStorage.listInvitationsForUser.mockResolvedValue([
+      makeInvitation({ history: [{ action: "invited", by: DM_ID, at: new Date() }] }),
+    ]);
+    mockedStorage.getUsersByIds.mockResolvedValue({ [DM_ID]: "theDM" });
+    mockedStorage.getCampaignsByIds.mockResolvedValue([]);
+
+    const response = await GET(makeGetRequest());
+
+    const body = await response.json();
+    expect(body.invitations[0].campaignName).toBe("Unknown campaign");
   });
 
   it("makes exactly one getCampaignsByIds and getUsersByIds call regardless of invitation count", async () => {

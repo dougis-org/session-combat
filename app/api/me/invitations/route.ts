@@ -42,7 +42,7 @@ export const GET = withAuth(async (_request: NextRequest, auth) => {
       return {
         id: m.id,
         campaignId: m.campaignId,
-        campaignName: campaignNameMap[m.campaignId] ?? '',
+        campaignName: campaignNameMap[m.campaignId] ?? 'Unknown campaign',
         invitedBy,
         invitedAt: entry?.at ?? null,
       };
