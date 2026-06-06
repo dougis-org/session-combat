@@ -53,8 +53,9 @@ describe('AlignmentSelect', () => {
 
   test('calls onChange with the selected value when user changes the select', async () => {
     const onChange = jest.fn() as jest.MockedFunction<(v: string) => void>;
+    const user = userEvent.setup();
     renderSelect({ onChange });
-    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Alignment' }), 'Chaotic Evil');
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Alignment' }), 'Chaotic Evil');
     expect(onChange).toHaveBeenCalledWith('Chaotic Evil');
   });
 

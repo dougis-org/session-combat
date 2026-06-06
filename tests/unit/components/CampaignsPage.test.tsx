@@ -68,6 +68,9 @@ function renderPage() {
 }
 
 describe('Campaign Catalog UI', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+  beforeEach(() => { user = userEvent.setup(); });
+
   it('renders Campaign Catalog section heading', async () => {
     setupFetch([], [MOCK_TEMPLATE]);
     renderPage();
@@ -119,7 +122,7 @@ describe('Campaign Catalog UI', () => {
 
     const copyButton = await screen.findByRole('button', { name: /copy/i });
 
-    await userEvent.click(copyButton);
+    await user.click(copyButton);
 
     const fetchMock = global.fetch as jest.MockedFunction<typeof fetch>;
     const copyCall = fetchMock.mock.calls.find(
@@ -147,7 +150,7 @@ describe('Campaign Catalog UI', () => {
 
     const copyButton = await screen.findByRole('button', { name: /copy/i });
 
-    await userEvent.click(copyButton);
+    await user.click(copyButton);
 
     const loadingButton = await screen.findByRole('button', { name: /copying/i });
     expect(loadingButton).toBeInTheDocument();
@@ -172,7 +175,7 @@ describe('Campaign Catalog UI', () => {
     renderPage();
 
     const copyButton = await screen.findByRole('button', { name: /copy/i });
-    await userEvent.click(copyButton);
+    await user.click(copyButton);
 
     expect(await screen.findByText('Server error')).toBeInTheDocument();
   });

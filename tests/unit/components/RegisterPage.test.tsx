@@ -41,18 +41,19 @@ async function renderAndSubmit(fields: {
   password?: string;
   confirmPassword?: string;
 }) {
+  const user = userEvent.setup();
   render(<RegisterPage />);
   if (fields.username !== undefined) {
-    await userEvent.type(screen.getByLabelText(/username/i), fields.username);
+    await user.type(screen.getByLabelText(/username/i), fields.username);
   }
   if (fields.email !== undefined) {
-    await userEvent.type(screen.getByLabelText(/email address/i), fields.email);
+    await user.type(screen.getByLabelText(/email address/i), fields.email);
   }
   if (fields.password !== undefined) {
-    await userEvent.type(screen.getByLabelText(/^password$/i), fields.password);
+    await user.type(screen.getByLabelText(/^password$/i), fields.password);
   }
   if (fields.confirmPassword !== undefined) {
-    await userEvent.type(screen.getByLabelText(/confirm password/i), fields.confirmPassword);
+    await user.type(screen.getByLabelText(/confirm password/i), fields.confirmPassword);
   }
   fireEvent.submit(document.querySelector('form')!);
 }
