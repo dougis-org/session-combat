@@ -1,9 +1,8 @@
 import React from 'react';
-import { act } from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import type { CombatantState } from '@/lib/types';
-import { createReactRoot, unmountReactRoot } from '@/tests/unit/helpers/reactRoot';
-import type { Root } from 'react-dom/client';
 
 const DEFAULT_LAIR_ACTIONS = [
   { name: 'Earthquake', description: 'The ground shakes violently.', usesRemaining: 2 },
@@ -32,93 +31,78 @@ function getUpdatedLairActions(mock: jest.MockedFunction<(u: Partial<CombatantSt
 }
 
 describe('LairActionsSlot', () => {
-  let container: HTMLDivElement;
-  let root: Root;
-
-  const renderSlot = async (
+  const renderSlot = (
     overrides: Partial<CombatantState> = {},
     isActive = false,
     onUpdate: (u: Partial<CombatantState>) => void = () => {},
     onNextTurn: () => void = () => {},
   ) => {
+    const user = userEvent.setup();
     const combatant = makeLairCombatant(overrides);
-    await act(async () => {
-      root.render(
-        <LairActionsSlot
-          combatant={combatant}
-          isActive={isActive}
-          onUpdate={onUpdate}
-          onNextTurn={onNextTurn}
-        />
-      );
-    });
-    return { combatant };
+    const { container } = render(
+      <LairActionsSlot
+        combatant={combatant}
+        isActive={isActive}
+        onUpdate={onUpdate}
+        onNextTurn={onNextTurn}
+      />
+    );
+    return { combatant, user, container };
   };
 
-  const clickEl = async (testid: string) => {
-    const el = container.querySelector(`[data-testid="${testid}"]`) as HTMLElement;
-    expect(el).not.toBeNull();
-    await act(async () => { el.click(); });
+  const clickEl = async (testid: string, user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(screen.getByTestId(testid));
   };
 
-  beforeEach(() => {
-    ({ container, root } = createReactRoot());
+  test('renders compact badge with lair name when inactive', () => {
+    renderSlot({}, false);
+    expect(screen.getByText(/Dragon's Lair/)).toBeInTheDocument();
+    expect(screen.queryByText('Earthquake')).not.toBeInTheDocument();
   });
 
-  afterEach(async () => {
-    await unmountReactRoot(container, root);
-  });
-
-  test('renders compact badge with lair name when inactive', async () => {
-    await renderSlot({}, false);
-    expect(container.textContent).toContain("Dragon's Lair");
-    // Should NOT show action list
-    expect(container.textContent).not.toContain('Earthquake');
-  });
-
-  test('renders full action list when active', async () => {
-    await renderSlot({}, true);
-    expect(container.textContent).toContain('Earthquake');
-    expect(container.textContent).toContain('The ground shakes violently.');
-    expect(container.textContent).toContain('Rockfall');
-    expect(container.textContent).toContain('Volcanic Gas');
+  test('renders full action list when active', () => {
+    renderSlot({}, true);
+    expect(screen.getByText('Earthquake')).toBeInTheDocument();
+    expect(screen.getByText('The ground shakes violently.')).toBeInTheDocument();
+    expect(screen.getByText('Rockfall')).toBeInTheDocument();
+    expect(screen.getByText('Volcanic Gas')).toBeInTheDocument();
   });
 
   test('Skip button calls onNextTurn', async () => {
-    const onNextTurn = jest.fn() as jest.MockedFunction<() => void>;
-    await renderSlot({}, true, () => {}, onNextTurn);
-    await clickEl('lair-action-skip');
+    const onNextTurn = jest.fn();
+    const { user } = renderSlot({}, true, () => {}, onNextTurn);
+    await clickEl('lair-action-skip', user);
     expect(onNextTurn).toHaveBeenCalledTimes(1);
   });
 
   test('Use button decrements charge via onUpdate', async () => {
     const onUpdate = jest.fn() as jest.MockedFunction<(u: Partial<CombatantState>) => void>;
-    await renderSlot({}, true, onUpdate);
-    await clickEl('lair-action-use-0');
+    const { user } = renderSlot({}, true, onUpdate);
+    await clickEl('lair-action-use-0', user);
     expect(onUpdate).toHaveBeenCalled();
     expect(getUpdatedLairActions(onUpdate)[0].usesRemaining).toBe(1);
   });
 
   test('[−] button decrements usesRemaining via onUpdate', async () => {
     const onUpdate = jest.fn() as jest.MockedFunction<(u: Partial<CombatantState>) => void>;
-    await renderSlot({}, true, onUpdate);
-    await clickEl('lair-action-decrement-0');
+    const { user } = renderSlot({}, true, onUpdate);
+    await clickEl('lair-action-decrement-0', user);
     expect(onUpdate).toHaveBeenCalled();
     expect(getUpdatedLairActions(onUpdate)[0].usesRemaining).toBe(1);
   });
 
   test('[+] button increments usesRemaining via onUpdate', async () => {
     const onUpdate = jest.fn() as jest.MockedFunction<(u: Partial<CombatantState>) => void>;
-    await renderSlot({}, true, onUpdate);
-    await clickEl('lair-action-increment-0');
+    const { user } = renderSlot({}, true, onUpdate);
+    await clickEl('lair-action-increment-0', user);
     expect(onUpdate).toHaveBeenCalled();
     expect(getUpdatedLairActions(onUpdate)[0].usesRemaining).toBe(3);
   });
 
   test('Restore All calls onUpdate with all charges incremented', async () => {
     const onUpdate = jest.fn() as jest.MockedFunction<(u: Partial<CombatantState>) => void>;
-    await renderSlot({}, true, onUpdate);
-    await clickEl('lair-action-restore-all');
+    const { user } = renderSlot({}, true, onUpdate);
+    await clickEl('lair-action-restore-all', user);
     expect(onUpdate).toHaveBeenCalled();
     const updatedActions = getUpdatedLairActions(onUpdate);
     // limited: 2→3, 0→1; unlimited: unchanged
@@ -127,39 +111,32 @@ describe('LairActionsSlot', () => {
     expect(updatedActions[2].usesRemaining).toBeUndefined();
   });
 
-  test('Use button disabled when usesRemaining is 0', async () => {
-    await renderSlot({}, true);
-    const useBtn = container.querySelector('[data-testid="lair-action-use-1"]') as HTMLButtonElement;
-    expect(useBtn).not.toBeNull();
-    expect(useBtn.disabled).toBe(true);
+  test('Use button disabled when usesRemaining is 0', () => {
+    renderSlot({}, true);
+    expect(screen.getByTestId('lair-action-use-1')).toBeDisabled();
   });
 
-  test('Use button enabled when usesRemaining > 0', async () => {
-    await renderSlot({}, true);
-    const useBtn = container.querySelector('[data-testid="lair-action-use-0"]') as HTMLButtonElement;
-    expect(useBtn.disabled).toBe(false);
+  test('Use button enabled when usesRemaining > 0', () => {
+    renderSlot({}, true);
+    expect(screen.getByTestId('lair-action-use-0')).not.toBeDisabled();
   });
 
-  test('charge controls hidden for actions without usesRemaining', async () => {
-    await renderSlot({}, true);
-    // Action at index 2 has no usesRemaining — no charge controls
-    expect(container.querySelector('[data-testid="lair-action-decrement-2"]')).toBeNull();
-    expect(container.querySelector('[data-testid="lair-action-increment-2"]')).toBeNull();
+  test('charge controls hidden for actions without usesRemaining', () => {
+    renderSlot({}, true);
+    expect(screen.queryByTestId('lair-action-decrement-2')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lair-action-increment-2')).not.toBeInTheDocument();
   });
 
-  test('no HP, AC, or conditions rendered', async () => {
-    await renderSlot({}, true);
-    expect(container.textContent).not.toMatch(/\bHP\b/);
-    expect(container.textContent).not.toMatch(/\bAC\b/);
-    // conditions section
-    expect(container.querySelector('[data-testid="conditions"]')).toBeNull();
+  test('no HP, AC, or conditions rendered', () => {
+    const { container } = renderSlot({}, true);
+    expect(container).not.toHaveTextContent(/\bHP\b/);
+    expect(container).not.toHaveTextContent(/\bAC\b/);
+    expect(screen.queryByTestId('conditions')).not.toBeInTheDocument();
   });
 
-  test('exhausted visual indicator shown when usesRemaining is 0', async () => {
-    await renderSlot({}, true);
-    // Action at index 1 has usesRemaining: 0 — expect exhausted class or text indicator
-    const actionEl = container.querySelector('[data-testid="lair-action-1"]');
-    expect(actionEl).not.toBeNull();
-    expect(actionEl!.className).toMatch(/exhausted|opacity|line-through/);
+  test('exhausted visual indicator shown when usesRemaining is 0', () => {
+    renderSlot({}, true);
+    const actionEl = screen.getByTestId('lair-action-1');
+    expect(actionEl.className).toMatch(/exhausted|opacity|line-through/);
   });
 });

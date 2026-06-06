@@ -1,13 +1,13 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { GET, POST } from "@/app/api/campaigns/[id]/sessions/route";
 import { storage } from "@/lib/storage";
+import { assertCampaignAccess } from "@/lib/utils/campaign";
 import {
   MOCK_SESSION_LOG,
   makeRouteRequest,
-  itReturns404WithParams,
   itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
@@ -17,15 +17,19 @@ jest.mock("@/lib/middleware", () => ({
 }));
 jest.mock("@/lib/storage", () => ({
   storage: {
-    loadCampaignById: jest.fn(),
     loadSessionLogs: jest.fn(),
     saveSessionLog: jest.fn(),
     getNextSessionNumber: jest.fn(),
   },
 }));
+jest.mock("@/lib/utils/campaign", () => ({
+  ...jest.requireActual("@/lib/utils/campaign"),
+  assertCampaignAccess: jest.fn(),
+}));
 jest.mock("crypto", () => ({ randomUUID: jest.fn(() => "test-uuid") }));
 
 const mockedStorage = jest.mocked(storage);
+const mockedAssertCampaignAccess = jest.mocked(assertCampaignAccess);
 
 const CAMPAIGN_ID = "campaign-1";
 const BASE_URL = `http://localhost/api/campaigns/${CAMPAIGN_ID}/sessions`;
@@ -33,23 +37,25 @@ const PARAMS = Promise.resolve({ id: CAMPAIGN_ID });
 const makeGetReq = () => makeRouteRequest(BASE_URL, "GET");
 const makePostReq = (body: unknown) => makeRouteRequest(BASE_URL, "POST", body);
 
-const MOCK_CAMPAIGN = { id: CAMPAIGN_ID, userId: "user-123", name: "Test Campaign" };
+const MOCK_CAMPAIGN = { id: CAMPAIGN_ID, userId: "user-123", name: "Test Campaign", chapters: [], status: "active" as const, notes: "" };
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedStorage.loadCampaignById.mockResolvedValue(MOCK_CAMPAIGN as any);
+  mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "dm" });
 });
 
 // ─── GET /api/campaigns/[id]/sessions ─────────────────────────────────────────
 
 describe("GET /api/campaigns/[id]/sessions", () => {
-  it("returns 200 with session logs", async () => {
+  it("returns 200 with session logs for active player", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
     mockedStorage.loadSessionLogs.mockResolvedValue([MOCK_SESSION_LOG] as any);
     const res = await GET(makeGetReq(), { params: PARAMS });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toHaveLength(1);
     expect(body[0].sessionNumber).toBe(1);
+    expect(mockedStorage.loadSessionLogs).toHaveBeenCalledWith(MOCK_CAMPAIGN.userId, CAMPAIGN_ID);
   });
 
   it("returns 200 with empty array when no logs", async () => {
@@ -59,13 +65,13 @@ describe("GET /api/campaigns/[id]/sessions", () => {
     expect(await res.json()).toEqual([]);
   });
 
-  itReturns404WithParams(
-    GET,
-    makeGetReq,
-    PARAMS,
-    () => mockedStorage.loadCampaignById.mockResolvedValue(null as any),
-    "returns 404 when campaign not found"
-  );
+  it("returns 404 when assertCampaignAccess denies (non-member)", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+    const res = await GET(makeGetReq(), { params: PARAMS });
+    expect(res.status).toBe(404);
+  });
 
   itReturns500WithParams(
     GET,
@@ -98,7 +104,9 @@ describe("POST /api/campaigns/[id]/sessions", () => {
     expect(body.sessionNumber).toBe(2);
     expect(body.title).toBe("First Session");
     expect(body.milestone).toBe(false);
+    expect(body.userId).toBe(MOCK_CAMPAIGN.userId);
     expect(mockedStorage.saveSessionLog).toHaveBeenCalledTimes(1);
+    expect(mockedStorage.getNextSessionNumber).toHaveBeenCalledWith(MOCK_CAMPAIGN.userId, CAMPAIGN_ID);
   });
 
   it("uses provided sessionNumber when valid positive integer", async () => {
@@ -150,13 +158,20 @@ describe("POST /api/campaigns/[id]/sessions", () => {
     expect(body.newLevel).toBe(5);
   });
 
-  itReturns404WithParams(
-    POST,
-    () => makePostReq({ datePlayed: "2026-05-01" }),
-    PARAMS,
-    () => mockedStorage.loadCampaignById.mockResolvedValue(null as any),
-    "returns 404 when campaign not found"
-  );
+  it("returns 404 when active player attempts POST", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
+    const res = await POST(makePostReq({ datePlayed: "2026-05-01" }), { params: PARAMS });
+    expect(res.status).toBe(404);
+    expect((await res.json()).error).toBe("Campaign not found");
+  });
+
+  it("returns 404 when assertCampaignAccess denies (non-member)", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+    const res = await POST(makePostReq({ datePlayed: "2026-05-01" }), { params: PARAMS });
+    expect(res.status).toBe(404);
+  });
 
   itReturns500WithParams(
     POST,

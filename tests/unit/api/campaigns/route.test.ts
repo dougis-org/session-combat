@@ -1,14 +1,14 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { GET, POST } from "@/app/api/campaigns/route";
 import { GET as GET_ONE, PATCH, DELETE } from "@/app/api/campaigns/[id]/route";
 import { storage } from "@/lib/storage";
+import { assertCampaignAccess } from "@/lib/utils/campaign";
 import {
   makeRouteRequest,
   itReturns500,
-  itReturns404WithParams,
   itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
@@ -23,12 +23,17 @@ jest.mock("@/lib/storage", () => ({
   storage: {
     loadCampaigns: jest.fn(),
     saveCampaign: jest.fn(),
-    loadCampaignById: jest.fn(),
     deleteCampaign: jest.fn(),
     addMember: jest.fn().mockResolvedValue(undefined),
   },
 }));
 
+jest.mock("@/lib/utils/campaign", () => ({
+  ...jest.requireActual("@/lib/utils/campaign"),
+  assertCampaignAccess: jest.fn(),
+}));
+
+const mockedAssertCampaignAccess = jest.mocked(assertCampaignAccess);
 const mockedStorage = jest.mocked(storage);
 
 const MOCK_CAMPAIGN = {
@@ -207,28 +212,41 @@ describe("POST /api/campaigns", () => {
 // ─── GET /api/campaigns/[id] ─────────────────────────────────────────────────
 
 describe("GET /api/campaigns/[id]", () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-  it("returns campaign when found", async () => {
-    mockedStorage.loadCampaignById.mockResolvedValue(MOCK_CAMPAIGN as any);
+  it("returns 200 with campaign for active DM member", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "dm" });
 
     const response = await GET_ONE(makeIdRequest("GET"), { params: PARAMS });
     expect(response.status).toBe(200);
     expect((await response.json()).name).toBe("Lost Mine of Phandelver");
   });
 
-  itReturns404WithParams(
-    GET_ONE,
-    () => makeIdRequest("GET"),
-    PARAMS,
-    () => mockedStorage.loadCampaignById.mockResolvedValue(null),
-  );
+  it("returns 200 with campaign for active player member", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
+
+    const response = await GET_ONE(makeIdRequest("GET"), { params: PARAMS });
+    expect(response.status).toBe(200);
+    expect((await response.json()).name).toBe("Lost Mine of Phandelver");
+  });
+
+  it("returns 404 when assertCampaignAccess denies (non-member)", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+
+    const response = await GET_ONE(makeIdRequest("GET"), { params: PARAMS });
+    expect(response.status).toBe(404);
+    expect((await response.json()).error).toBe("Campaign not found");
+  });
 
   itReturns500WithParams(
     GET_ONE,
     () => makeIdRequest("GET"),
     PARAMS,
-    () => mockedStorage.loadCampaignById.mockRejectedValue(new Error("DB error")),
+    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error")),
   );
 });
 
@@ -237,7 +255,7 @@ describe("GET /api/campaigns/[id]", () => {
 describe("PATCH /api/campaigns/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN } as any);
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN } as any, role: "dm" });
     mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
   });
 
@@ -317,7 +335,7 @@ describe("PATCH /api/campaigns/[id]", () => {
   });
 
   it("treats missing status field on stored document as active (backwards compat)", async () => {
-    mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN, status: undefined } as any);
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN, status: undefined } as any, role: "dm" });
     const response = await PATCH(
       makeIdRequest("PATCH", { name: "Test" }),
       { params: PARAMS }
@@ -327,13 +345,20 @@ describe("PATCH /api/campaigns/[id]", () => {
   });
 
   it("strips legacy active field from stored document in PATCH response", async () => {
-    mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN, active: true } as any);
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN, active: true } as any, role: "dm" });
     const response = await PATCH(
       makeIdRequest("PATCH", { name: "Test" }),
       { params: PARAMS }
     );
     expect(response.status).toBe(200);
     expect(await response.json()).not.toHaveProperty("active");
+  });
+
+  it("returns 404 when active player attempts PATCH", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
+    const response = await PATCH(makeIdRequest("PATCH", { name: "X" }), { params: PARAMS });
+    expect(response.status).toBe(404);
+    expect((await response.json()).error).toBe("Campaign not found");
   });
 
   it("returns 400 when name is blank", async () => {
@@ -353,7 +378,6 @@ describe("PATCH /api/campaigns/[id]", () => {
     const body = await response.json();
     expect(body.moduleName).toBe(MOCK_CAMPAIGN.moduleName);
   });
-
 
   it("returns 400 when chapters is not an array on PATCH", async () => {
     const response = await PATCH(
@@ -392,18 +416,19 @@ describe("PATCH /api/campaigns/[id]", () => {
     expect(body.currentChapterId).toBeUndefined();
   });
 
-  itReturns404WithParams(
-    PATCH,
-    () => makeIdRequest("PATCH", { name: "X" }),
-    PARAMS,
-    () => mockedStorage.loadCampaignById.mockResolvedValue(null),
-  );
+  it("returns 404 when assertCampaignAccess denies (non-member)", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+    const response = await PATCH(makeIdRequest("PATCH", { name: "X" }), { params: PARAMS });
+    expect(response.status).toBe(404);
+  });
 
   itReturns500WithParams(
     PATCH,
     () => makeIdRequest("PATCH", { name: "X" }),
     PARAMS,
-    () => mockedStorage.loadCampaignById.mockRejectedValue(new Error("DB error")),
+    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error")),
   );
 });
 
@@ -412,27 +437,35 @@ describe("PATCH /api/campaigns/[id]", () => {
 describe("DELETE /api/campaigns/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedStorage.loadCampaignById.mockResolvedValue({ ...MOCK_CAMPAIGN } as any);
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN } as any, role: "dm" });
     mockedStorage.deleteCampaign.mockResolvedValue(undefined as any);
   });
 
-  it("deletes campaign and returns 200", async () => {
+  it("deletes campaign and returns 200 for DM", async () => {
     const response = await DELETE(makeIdRequest("DELETE"), { params: PARAMS });
     expect(response.status).toBe(200);
     expect(mockedStorage.deleteCampaign).toHaveBeenCalledWith("campaign-1", "user-123");
   });
 
-  itReturns404WithParams(
-    DELETE,
-    () => makeIdRequest("DELETE"),
-    PARAMS,
-    () => mockedStorage.loadCampaignById.mockResolvedValue(null),
-  );
+  it("returns 404 when active player attempts DELETE", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
+    const response = await DELETE(makeIdRequest("DELETE"), { params: PARAMS });
+    expect(response.status).toBe(404);
+    expect((await response.json()).error).toBe("Campaign not found");
+  });
+
+  it("returns 404 when assertCampaignAccess denies (non-member)", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue(
+      NextResponse.json({ error: "Campaign not found" }, { status: 404 })
+    );
+    const response = await DELETE(makeIdRequest("DELETE"), { params: PARAMS });
+    expect(response.status).toBe(404);
+  });
 
   itReturns500WithParams(
     DELETE,
     () => makeIdRequest("DELETE"),
     PARAMS,
-    () => mockedStorage.loadCampaignById.mockRejectedValue(new Error("DB error")),
+    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error")),
   );
 });
