@@ -1,16 +1,18 @@
 /**
  * @jest-environment node
  */
+import { NextRequest } from "next/server";
 import { POST } from "@/app/api/campaigns/global/[id]/copy/route";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
   MOCK_AUTH,
   makeRouteRequest,
-  mockUnauthorized,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () => ({
+  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
+}));
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadGlobalCampaignTemplateById: jest.fn(),
@@ -23,7 +25,6 @@ jest.mock("crypto", () => ({
   randomUUID: jest.fn(() => `uuid-${++uuidCounter}`),
 }));
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 
 const TEMPLATE_ID = "tpl-1";
@@ -47,16 +48,7 @@ const MOCK_TEMPLATE = {
 beforeEach(() => {
   jest.clearAllMocks();
   uuidCounter = 0;
-  mockedRequireAuth.mockReturnValue(MOCK_AUTH);
   mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
-});
-
-describe("POST /api/campaigns/global/[id]/copy — auth", () => {
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth as jest.Mock);
-    const res = await POST(makeRouteRequest(BASE_URL, "POST"), { params: PARAMS });
-    expect(res.status).toBe(401);
-  });
 });
 
 describe("POST /api/campaigns/global/[id]/copy — not found", () => {

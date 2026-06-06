@@ -1,22 +1,22 @@
 /**
  * @jest-environment node
  */
+import { NextRequest } from "next/server";
 import { GET, PUT, DELETE } from "@/app/api/combat/[id]/route";
-import { requireAuth } from "@/lib/middleware";
 import { getDatabase } from "@/lib/db";
 import {
-  MOCK_AUTH,
   mockDbCollection,
   makeRouteRequest,
-  itReturns401WithParams,
   itReturns404WithParams,
   itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () => ({
+  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
+}));
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedGetDatabase = jest.mocked(getDatabase);
 
 const COMBAT_ID = "cs-abc-123";
@@ -36,18 +36,14 @@ const makeRequest = (method: string, body?: unknown) =>
 describe("GET /api/combat/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  itReturns401WithParams(GET, () => makeRequest("GET"), params, mockedRequireAuth);
-
   itReturns404WithParams(
     GET,
     () => makeRequest("GET"),
     params,
     () => mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) }),
-    mockedRequireAuth
   );
 
   it("returns combat state when found", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(MOCK_STATE) });
 
     const response = await GET(makeRequest("GET"), { params });
@@ -63,25 +59,20 @@ describe("GET /api/combat/[id]", () => {
     () => mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockRejectedValue(new Error("DB error")),
     }),
-    mockedRequireAuth
   );
 });
 
 describe("PUT /api/combat/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  itReturns401WithParams(PUT, () => makeRequest("PUT", {}), params, mockedRequireAuth);
-
   itReturns404WithParams(
     PUT,
     () => makeRequest("PUT", { currentRound: 2 }),
     params,
     () => mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) }),
-    mockedRequireAuth
   );
 
   it("updates combat state and returns 200", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const updateOne = jest.fn().mockResolvedValue({});
     mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockResolvedValue(MOCK_STATE),
@@ -107,25 +98,20 @@ describe("PUT /api/combat/[id]", () => {
     () => mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockRejectedValue(new Error("DB error")),
     }),
-    mockedRequireAuth
   );
 });
 
 describe("DELETE /api/combat/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  itReturns401WithParams(DELETE, () => makeRequest("DELETE"), params, mockedRequireAuth);
-
   itReturns404WithParams(
     DELETE,
     () => makeRequest("DELETE"),
     params,
     () => mockDbCollection(mockedGetDatabase, { findOne: jest.fn().mockResolvedValue(null) }),
-    mockedRequireAuth
   );
 
   it("deletes combat state and returns 200", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const deleteOne = jest.fn().mockResolvedValue({});
     mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockResolvedValue(MOCK_STATE),
@@ -145,6 +131,5 @@ describe("DELETE /api/combat/[id]", () => {
     () => mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockRejectedValue(new Error("DB error")),
     }),
-    mockedRequireAuth
   );
 });

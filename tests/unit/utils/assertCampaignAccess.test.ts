@@ -21,6 +21,7 @@ const MOCK_CAMPAIGN = {
   id: "camp-1",
   userId: "owner-user",
   name: "Test Campaign",
+  moduleName: "",
   chapters: [],
   status: "active" as const,
   notes: "",

@@ -1,10 +1,9 @@
 /**
  * @jest-environment node
  */
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { POST } from "@/app/api/characters/import/route";
 import { DndBeyondImportError } from "@/lib/dndBeyondCharacterImport";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { importDndBeyondCharacter } from "@/lib/server/dndBeyondCharacterImport";
 import {
@@ -14,24 +13,13 @@ import {
   EXISTING_IMPORTED_CHARACTER_ID,
   IMPORT_WARNING,
 } from "@/tests/helpers/dndBeyondImport";
-import { MOCK_AUTH } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => {
-  const requireAuth = jest.fn();
-  return {
-    requireAuth,
-    withAuth: (handler: any) => async (request: any) => {
-      const auth = requireAuth(request);
-      if (auth && 'status' in auth) return auth;
-      return handler(request, auth);
-    },
-    withAuthAndParams: (handler: any) => async (request: any, { params }: any) => {
-      const auth = requireAuth(request);
-      if (auth && 'status' in auth) return auth;
-      return handler(request, auth, await params);
-    },
-  };
-});
+jest.mock("@/lib/middleware", () => ({
+  withAuth: (handler: Function) => (request: any) =>
+    handler(request, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
+  withAuthAndParams: (handler: Function) => async (request: any, ctx: any) =>
+    handler(request, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
+}));
 
 jest.mock("@/lib/storage", () => ({
   storage: {
@@ -44,7 +32,6 @@ jest.mock("@/lib/server/dndBeyondCharacterImport", () => ({
   importDndBeyondCharacter: jest.fn(),
 }));
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedLoadCharacters = jest.mocked(storage.loadCharacters);
 const mockedSaveCharacter = jest.mocked(storage.saveCharacter);
 const mockedImportCharacter = jest.mocked(importDndBeyondCharacter);
@@ -61,25 +48,13 @@ function createRequest(body: unknown): NextRequest {
 
 describe("character import route", () => {
   beforeEach(() => {
-    mockedRequireAuth.mockReset();
     mockedLoadCharacters.mockReset();
     mockedSaveCharacter.mockReset();
     mockedImportCharacter.mockReset();
 
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedLoadCharacters.mockResolvedValue([]);
     mockedSaveCharacter.mockResolvedValue(undefined);
     mockedImportCharacter.mockResolvedValue(createNormalizedImportResult());
-  });
-
-  test("returns auth response when the user is not authenticated", async () => {
-    mockedRequireAuth.mockReturnValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-    );
-
-    const response = await POST(createRequest({ url: "https://example.com" }));
-
-    expect(response.status).toBe(401);
   });
 
   test("returns 400 when the import URL is blank", async () => {

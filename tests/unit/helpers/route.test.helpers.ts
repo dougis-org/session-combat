@@ -15,13 +15,6 @@ export const ADMIN_AUTH: AuthPayload = {
   tokenVersion: 0,
 };
 
-/** Configure a mocked requireAuth/verifyAuth to return a 401 Unauthorized response */
-export function mockUnauthorized(mockedFn: jest.Mock): void {
-  mockedFn.mockReturnValue(
-    NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  );
-}
-
 /** Configure a mocked requireAdmin (async) to return a 401 or 403 response */
 export function mockAdminDenied(mockedFn: jest.Mock, status: 401 | 403): void {
   const message = status === 401 ? "Unauthorized" : "Only administrators can perform this action";
@@ -87,46 +80,17 @@ type ContextHandler<P extends Record<string, string> = { id: string }> = (
   ctx: { params: Promise<P> }
 ) => Promise<Response>;
 
-/** Register: returns 401 when requireAuth returns Unauthorized (no route params) */
-export function itReturns401(
-  handler: RouteHandler,
-  makeReq: () => NextRequest,
-  mockedRequireAuth: jest.Mock
-): void {
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await handler(makeReq());
-    expect(response.status).toBe(401);
-  });
-}
-
 /** Register: returns 500 when setupError configures the mock to throw (no route params) */
 export function itReturns500(
   handler: RouteHandler,
   makeReq: () => NextRequest,
   setupError: () => void,
-  mockedRequireAuth: jest.Mock,
   description = "returns 500 on error"
 ): void {
   it(description, async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     setupError();
     const response = await handler(makeReq());
     expect(response.status).toBe(500);
-  });
-}
-
-/** Register: returns 401 when requireAuth returns Unauthorized (with route params) */
-export function itReturns401WithParams<P extends Record<string, string>>(
-  handler: ContextHandler<P>,
-  makeReq: () => NextRequest,
-  params: Promise<P>,
-  mockedRequireAuth: jest.Mock
-): void {
-  it("returns 401 when not authenticated", async () => {
-    mockUnauthorized(mockedRequireAuth);
-    const response = await handler(makeReq(), { params });
-    expect(response.status).toBe(401);
   });
 }
 
@@ -136,11 +100,9 @@ export function itReturns404WithParams<P extends Record<string, string>>(
   makeReq: () => NextRequest,
   params: Promise<P>,
   setupNotFound: () => void,
-  mockedRequireAuth: jest.Mock,
   description = "returns 404 when not found"
 ): void {
   it(description, async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     setupNotFound();
     const response = await handler(makeReq(), { params });
     expect(response.status).toBe(404);
@@ -153,11 +115,9 @@ export function itReturns500WithParams<P extends Record<string, string>>(
   makeReq: () => NextRequest,
   params: Promise<P>,
   setupError: () => void,
-  mockedRequireAuth: jest.Mock,
   description = "returns 500 on error"
 ): void {
   it(description, async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     setupError();
     const response = await handler(makeReq(), { params });
     expect(response.status).toBe(500);

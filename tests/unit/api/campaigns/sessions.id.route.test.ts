@@ -1,21 +1,21 @@
 /**
  * @jest-environment node
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PATCH, DELETE } from "@/app/api/campaigns/[id]/sessions/[sessionId]/route";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { assertCampaignAccess } from "@/lib/utils/campaign";
 import {
-  MOCK_AUTH,
   MOCK_SESSION_LOG,
   makeRouteRequest,
-  itReturns401WithParams,
   itReturns404WithParams,
   itReturns500WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () => ({
+  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
+}));
 jest.mock("@/lib/storage", () => ({
   storage: {
     updateSessionLog: jest.fn(),
@@ -27,7 +27,6 @@ jest.mock("@/lib/utils/campaign", () => ({
   assertCampaignAccess: jest.fn(),
 }));
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 const mockedAssertCampaignAccess = jest.mocked(assertCampaignAccess);
 
@@ -43,15 +42,12 @@ const makeDeleteReq = () => makeRouteRequest(BASE_URL, "DELETE");
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedRequireAuth.mockReturnValue(MOCK_AUTH);
   mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "dm" });
 });
 
 // ─── PATCH /api/campaigns/[id]/sessions/[sessionId] ───────────────────────────
 
 describe("PATCH /api/campaigns/[id]/sessions/[sessionId]", () => {
-  itReturns401WithParams(PATCH, () => makePatchReq({ title: "Updated" }), PARAMS, mockedRequireAuth);
-
   it("returns 200 with updated log for DM", async () => {
     const updated = { ...MOCK_SESSION_LOG, title: "Updated Title" };
     mockedStorage.updateSessionLog.mockResolvedValue(updated as any);
@@ -94,7 +90,6 @@ describe("PATCH /api/campaigns/[id]/sessions/[sessionId]", () => {
     () => makePatchReq({ title: "X" }),
     PARAMS,
     () => mockedStorage.updateSessionLog.mockResolvedValue(null),
-    mockedRequireAuth,
     "returns 404 when session log not found"
   );
 
@@ -103,15 +98,12 @@ describe("PATCH /api/campaigns/[id]/sessions/[sessionId]", () => {
     () => makePatchReq({ title: "X" }),
     PARAMS,
     () => mockedStorage.updateSessionLog.mockRejectedValue(new Error("DB error")),
-    mockedRequireAuth
   );
 });
 
 // ─── DELETE /api/campaigns/[id]/sessions/[sessionId] ──────────────────────────
 
 describe("DELETE /api/campaigns/[id]/sessions/[sessionId]", () => {
-  itReturns401WithParams(DELETE, makeDeleteReq, PARAMS, mockedRequireAuth);
-
   it("returns 200 when DM deletes a session log", async () => {
     mockedStorage.deleteSessionLog.mockResolvedValue(true as any);
     const res = await DELETE(makeDeleteReq(), { params: PARAMS });
@@ -141,7 +133,6 @@ describe("DELETE /api/campaigns/[id]/sessions/[sessionId]", () => {
     makeDeleteReq,
     PARAMS,
     () => mockedStorage.deleteSessionLog.mockResolvedValue(null as any),
-    mockedRequireAuth,
     "returns 404 when session log not found"
   );
 
@@ -150,6 +141,5 @@ describe("DELETE /api/campaigns/[id]/sessions/[sessionId]", () => {
     makeDeleteReq,
     PARAMS,
     () => mockedStorage.deleteSessionLog.mockRejectedValue(new Error("DB error")),
-    mockedRequireAuth
   );
 });

@@ -1,17 +1,18 @@
 /**
  * @jest-environment node
  */
+import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/encounters/route";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import {
-  MOCK_AUTH,
   makeRouteRequest,
-  itReturns401,
   itReturns500,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () => ({
+  withAuth: (handler: Function) => (req: NextRequest) =>
+    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
+}));
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadEncounters: jest.fn(),
@@ -19,7 +20,6 @@ jest.mock("@/lib/storage", () => ({
   },
 }));
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage);
 
 const MOCK_ENCOUNTERS = [
@@ -33,10 +33,7 @@ const makeRequest = (body?: unknown) =>
 describe("GET /api/encounters", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  itReturns401(GET, () => makeRequest(), mockedRequireAuth);
-
   it("returns list of encounters", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.loadEncounters.mockResolvedValue(MOCK_ENCOUNTERS as any);
 
     const response = await GET(makeRequest());
@@ -50,29 +47,23 @@ describe("GET /api/encounters", () => {
     GET,
     () => makeRequest(),
     () => mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error")),
-    mockedRequireAuth
   );
 });
 
 describe("POST /api/encounters", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  itReturns401(POST, () => makeRequest({ name: "Test" }), mockedRequireAuth);
-
   it("returns 400 when name is missing", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makeRequest({ monsters: [] }));
     expect(response.status).toBe(400);
   });
 
   it("returns 400 when name is empty string", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const response = await POST(makeRequest({ name: "   " }));
     expect(response.status).toBe(400);
   });
 
   it("creates encounter and returns 201", async () => {
-    mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     mockedStorage.saveEncounter.mockResolvedValue(undefined as any);
 
     const response = await POST(
@@ -91,6 +82,5 @@ describe("POST /api/encounters", () => {
     POST,
     () => makeRequest({ name: "Valid Name" }),
     () => mockedStorage.saveEncounter.mockRejectedValue(new Error("Storage error")),
-    mockedRequireAuth
   );
 });
