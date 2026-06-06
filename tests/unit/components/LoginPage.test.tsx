@@ -76,10 +76,11 @@ describe('LoginPage — client-side validation', () => {
   });
 
   it('blocks submit and shows "Email is required" when email is empty', async () => {
+    const user = userEvent.setup();
     const login = jest.fn();
     mockAuth({ login });
     render(<LoginPage />);
-    fireEvent.submit(document.querySelector('form')!);
+    await user.click(screen.getByRole('button', { name: /login/i }));
     await waitFor(() => expect(screen.getByText('Email is required')).toBeInTheDocument());
     expect(login).not.toHaveBeenCalled();
   });
@@ -90,7 +91,7 @@ describe('LoginPage — client-side validation', () => {
     mockAuth({ login });
     render(<LoginPage />);
     await user.type(screen.getByRole('textbox', { name: /email/i }), 'test@example.com');
-    fireEvent.submit(document.querySelector('form')!);
+    await user.click(screen.getByRole('button', { name: /login/i }));
     await waitFor(() => expect(screen.getByText('Password is required')).toBeInTheDocument());
     expect(login).not.toHaveBeenCalled();
   });
@@ -102,7 +103,8 @@ describe('LoginPage — client-side validation', () => {
     render(<LoginPage />);
     await user.type(screen.getByRole('textbox', { name: /email/i }), 'notanemail');
     await user.type(screen.getByLabelText(/password/i), 'somepassword');
-    fireEvent.submit(document.querySelector('form')!);
+    // fireEvent.submit bypasses HTML5 native email validation to test React-level validation
+    fireEvent.submit(screen.getByRole('button', { name: /login/i }).closest('form')!);
     await waitFor(() =>
       expect(screen.getByText(/valid email/i)).toBeInTheDocument()
     );
@@ -119,7 +121,7 @@ describe('LoginPage — submit behavior', () => {
     render(<LoginPage />);
     await user.type(screen.getByRole('textbox', { name: /email/i }), 'test@example.com');
     await user.type(screen.getByLabelText(/password/i), 'password123');
-    fireEvent.submit(document.querySelector('form')!);
+    await user.click(screen.getByRole('button', { name: /login/i }));
     await waitFor(() => expect(login).toHaveBeenCalledWith('test@example.com', 'password123'));
     expect(login).toHaveBeenCalledTimes(1);
   });
@@ -132,7 +134,7 @@ describe('LoginPage — submit behavior', () => {
     render(<LoginPage />);
     await user.type(screen.getByRole('textbox', { name: /email/i }), 'test@example.com');
     await user.type(screen.getByLabelText(/password/i), 'password123');
-    fireEvent.submit(document.querySelector('form')!);
+    await user.click(screen.getByRole('button', { name: /login/i }));
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/campaigns'));
   });
 
@@ -144,7 +146,7 @@ describe('LoginPage — submit behavior', () => {
     render(<LoginPage />);
     await user.type(screen.getByRole('textbox', { name: /email/i }), 'test@example.com');
     await user.type(screen.getByLabelText(/password/i), 'wrongpassword');
-    fireEvent.submit(document.querySelector('form')!);
+    await user.click(screen.getByRole('button', { name: /login/i }));
     await waitFor(() => expect(screen.getByText('Invalid credentials')).toBeInTheDocument());
   });
 });

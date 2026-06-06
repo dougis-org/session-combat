@@ -117,6 +117,18 @@ describe('MonsterEditor — save callback', () => {
     expect(screen.getByLabelText(/^hp$/i)).toHaveValue(5);
   });
 
+  it('calls onSave with updated dexterity', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    renderEditor({ onSave });
+    const dexInput = screen.getByLabelText(/dexterity/i);
+    fireEvent.change(dexInput, { target: { value: '20' } });
+    await user.click(screen.getByRole('button', { name: /save monster/i }));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ abilityScores: expect.objectContaining({ dexterity: 20 }) })
+    );
+  });
+
   it('calls onSave preserving unchanged ability scores', async () => {
     const user = userEvent.setup();
     const onSave = jest.fn();

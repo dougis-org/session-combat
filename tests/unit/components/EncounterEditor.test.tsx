@@ -126,6 +126,22 @@ describe('EncounterEditor — save callback', () => {
       })
     );
   });
+
+  it('calls onSave with updated name and description after typing', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    renderEditor({ onSave });
+    const nameInput = screen.getByLabelText(/^name$/i);
+    await user.clear(nameInput);
+    await user.type(nameInput, 'Dragon Lair');
+    const descTextarea = screen.getByLabelText(/^description$/i);
+    await user.clear(descTextarea);
+    await user.type(descTextarea, 'A fearsome cave');
+    await user.click(screen.getByRole('button', { name: /save encounter/i }));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Dragon Lair', description: 'A fearsome cave' })
+    );
+  });
 });
 
 describe('EncounterEditor — cancel callback', () => {
