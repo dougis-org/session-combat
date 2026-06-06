@@ -42,9 +42,8 @@ describe("Campaign Members Integration Tests", () => {
         campaignId: "camp-123",
         userId: "user-456",
         role: "player",
-        status: "pending",
-        invitedBy: "user-dm",
-        invitedAt: new Date(),
+        status: "invited",
+        history: [{ action: "invited", by: "user-dm", at: new Date() }],
       };
 
       await storage.addMember(member);
@@ -54,7 +53,7 @@ describe("Campaign Members Integration Tests", () => {
       expect(list[0].id).toBe("mem-123");
       expect(list[0].userId).toBe("user-456");
       expect(list[0].role).toBe("player");
-      expect(list[0].status).toBe("pending");
+      expect(list[0].status).toBe("invited");
     });
 
     test("addMember — duplicate throws DuplicateMemberError", async () => {
@@ -64,8 +63,7 @@ describe("Campaign Members Integration Tests", () => {
         userId: "user-1",
         role: "dm",
         status: "active",
-        invitedBy: "user-1",
-        invitedAt: new Date(),
+        history: [{ action: "active", by: "user-1", at: new Date() }],
       };
 
       await storage.addMember(member);
@@ -81,8 +79,7 @@ describe("Campaign Members Integration Tests", () => {
         userId: "user-1",
         role: "dm",
         status: "active",
-        invitedBy: "user-1",
-        invitedAt: new Date(),
+        history: [{ action: "active", by: "user-1", at: new Date() }],
       };
 
       const member2: CampaignMember = {
@@ -90,9 +87,8 @@ describe("Campaign Members Integration Tests", () => {
         campaignId: "camp-2",
         userId: "user-1",
         role: "player",
-        status: "active",
-        invitedBy: "user-dm",
-        invitedAt: new Date(),
+        status: "invited",
+        history: [{ action: "invited", by: "user-dm", at: new Date() }],
       };
 
       await storage.addMember(member1);
@@ -104,46 +100,45 @@ describe("Campaign Members Integration Tests", () => {
       expect(list2).toHaveLength(1);
     });
 
-    test("updateMember — status update persisted", async () => {
+    test("updateMemberStatus — status update persisted", async () => {
       const member: CampaignMember = {
         id: "mem-1",
         campaignId: "camp-1",
         userId: "user-1",
         role: "player",
-        status: "pending",
-        invitedBy: "user-dm",
-        invitedAt: new Date(),
+        status: "invited",
+        history: [{ action: "invited", by: "user-dm", at: new Date() }],
       };
 
       await storage.addMember(member);
-      await storage.updateMember("camp-1", "user-1", undefined, "active");
+      await storage.updateMemberStatus("camp-1", "user-1", "active", "user-dm");
 
       const list = await storage.listMembersForCampaign("camp-1");
       expect(list[0].status).toBe("active");
       expect(list[0].role).toBe("player");
     });
 
-    test("updateMember — role update persisted", async () => {
+    test("updateMemberStatus — history entry appended", async () => {
       const member: CampaignMember = {
         id: "mem-1",
         campaignId: "camp-1",
         userId: "user-1",
         role: "player",
-        status: "active",
-        invitedBy: "user-dm",
-        invitedAt: new Date(),
+        status: "invited",
+        history: [{ action: "invited", by: "user-dm", at: new Date() }],
       };
 
       await storage.addMember(member);
-      await storage.updateMember("camp-1", "user-1", "dm", undefined);
+      await storage.updateMemberStatus("camp-1", "user-1", "active", "user-dm");
 
       const list = await storage.listMembersForCampaign("camp-1");
-      expect(list[0].role).toBe("dm");
-      expect(list[0].status).toBe("active");
+      expect(list[0].history).toHaveLength(2);
+      expect(list[0].history[1].action).toBe("active");
+      expect(list[0].history[1].by).toBe("user-dm");
     });
 
-    test("updateMember — non-existent member: no error, no record created", async () => {
-      await expect(storage.updateMember("camp-none", "user-none", "dm", "active")).resolves.not.toThrow();
+    test("updateMemberStatus — non-existent member: no error, no record created", async () => {
+      await expect(storage.updateMemberStatus("camp-none", "user-none", "invited", "user-dm")).resolves.not.toThrow();
       const list = await storage.listMembersForCampaign("camp-none");
       expect(list).toHaveLength(0);
     });
@@ -155,8 +150,7 @@ describe("Campaign Members Integration Tests", () => {
         userId: "user-1",
         role: "dm",
         status: "active",
-        invitedBy: "user-1",
-        invitedAt: new Date(),
+        history: [{ action: "active", by: "user-1", at: new Date() }],
       };
 
       const member2: CampaignMember = {
@@ -165,8 +159,7 @@ describe("Campaign Members Integration Tests", () => {
         userId: "user-2",
         role: "player",
         status: "active",
-        invitedBy: "user-1",
-        invitedAt: new Date(),
+        history: [{ action: "active", by: "user-1", at: new Date() }],
       };
 
       const member3: CampaignMember = {
@@ -175,8 +168,7 @@ describe("Campaign Members Integration Tests", () => {
         userId: "user-3",
         role: "player",
         status: "active",
-        invitedBy: "user-dm",
-        invitedAt: new Date(),
+        history: [{ action: "active", by: "user-dm", at: new Date() }],
       };
 
       await storage.addMember(member1);
@@ -250,8 +242,7 @@ describe("Campaign Members Integration Tests", () => {
           userId: "user-alice",
           role: "player",
           status: "active",
-          invitedBy: "user-dm",
-          invitedAt: new Date(),
+          history: [{ action: "active", by: "user-dm", at: new Date() }],
         };
 
         const member2: CampaignMember = {
@@ -259,9 +250,8 @@ describe("Campaign Members Integration Tests", () => {
           campaignId: "camp-3",
           userId: "user-alice",
           role: "player",
-          status: "pending",
-          invitedBy: "user-dm",
-          invitedAt: new Date(),
+          status: "invited",
+          history: [{ action: "invited", by: "user-dm", at: new Date() }],
         };
 
         await storage.addMember(member1);

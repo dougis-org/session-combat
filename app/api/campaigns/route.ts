@@ -54,8 +54,7 @@ export const POST = withAuth(async (request, auth) => {
         userId: auth.userId,
         role: 'dm',
         status: 'active',
-        invitedBy: auth.userId,
-        invitedAt: new Date(),
+        history: [{ action: 'active' as const, by: auth.userId, at: new Date() }],
       });
     } catch (memberError) {
       try {

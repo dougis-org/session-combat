@@ -716,7 +716,13 @@ export interface SpellTemplate {
 
 export const MEMBER_ROLES = ["dm", "player"] as const;
 export type MemberRole = (typeof MEMBER_ROLES)[number];
-export type MemberStatus = "active" | "pending" | "declined";
+export type MemberStatus = "active" | "invited" | "declined" | "removed";
+
+export interface MemberHistoryEntry {
+  action: MemberStatus;
+  by: string;
+  at: Date;
+}
 
 export interface CampaignMember {
   _id?: string;
@@ -725,9 +731,7 @@ export interface CampaignMember {
   userId: string;
   role: MemberRole;
   status: MemberStatus;
-  invitedBy: string;
-  invitedAt: Date;
-  respondedAt?: Date;
+  history: MemberHistoryEntry[];
 }
 
 export interface CampaignMemberSummary {

@@ -18,6 +18,7 @@ import {
   CampaignMemberSummary,
   MemberRole,
   MemberStatus,
+  MemberHistoryEntry,
 } from "./types";
 import { DuplicateMemberError } from "./errors";
 import { GLOBAL_USER_ID } from "./constants";
@@ -848,25 +849,25 @@ export const storage = {
     }
   },
 
-  async updateMember(
+  async updateMemberStatus(
     campaignId: string,
     userId: string,
+    status: MemberStatus,
+    actorId: string,
     role?: MemberRole,
-    status?: MemberStatus,
   ): Promise<void> {
     try {
       const db = await getDatabase();
-      const patch: Record<string, unknown> = {};
-      if (role !== undefined) patch.role = role;
-      if (status !== undefined) patch.status = status;
-      if (Object.keys(patch).length === 0) {
-        return;
-      }
+      const historyEntry: MemberHistoryEntry = { action: status, by: actorId, at: new Date() };
+      const setFields = role !== undefined ? { status, role } : { status };
       await db
         .collection<CampaignMember>("campaignMembers")
-        .updateOne({ campaignId, userId }, { $set: patch });
+        .updateOne(
+          { campaignId, userId },
+          { $set: setFields, $push: { history: historyEntry } as any },
+        );
     } catch (error) {
-      console.error("Error updating campaign member:", error);
+      console.error("Error updating campaign member status:", error);
       throw error;
     }
   },
