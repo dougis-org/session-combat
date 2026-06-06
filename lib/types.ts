@@ -243,9 +243,14 @@ export interface User {
   passwordHash: string;
   tokenVersion: number;
   isAdmin?: boolean; // Admin users can manage global monster templates
-  username?: string;
+  username: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface PublicUser {
+  id: string;
+  username: string;
 }
 
 export interface AuthPayload {
