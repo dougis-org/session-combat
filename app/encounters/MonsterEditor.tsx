@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Monster } from '@/lib/types';
+import type { Monster } from '@/lib/types';
 
 export function MonsterEditor({
   monster,
@@ -76,7 +76,11 @@ export function MonsterEditor({
             id="monster-maxhp"
             type="number"
             value={maxHp}
-            onChange={(e) => setMaxHp(parseInt(e.target.value) || 0)}
+            onChange={(e) => {
+              const newMaxHp = parseInt(e.target.value) || 0;
+              setMaxHp(newMaxHp);
+              setHp((prevHp) => Math.min(prevHp, newMaxHp));
+            }}
             className="w-full bg-gray-700 rounded px-3 py-2 text-white"
           />
         </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { QuickCombatantModal } from '@/lib/components/QuickCombatantModal';
 import { Modal } from '@/lib/components/Modal';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { Encounter, Monster, MonsterTemplate } from '@/lib/types';
+import type { Encounter, Monster, MonsterTemplate } from '@/lib/types';
 import { MonsterEditor } from './MonsterEditor';
 
 export function EncounterEditor({
@@ -14,7 +14,7 @@ export function EncounterEditor({
   isNew,
 }: {
   encounter: Encounter;
-  onSave: (encounter: Encounter) => void;
+  onSave: (encounter: Encounter) => void | Promise<void>;
   onCancel: () => void;
   isNew: boolean;
 }) {
@@ -38,10 +38,11 @@ export function EncounterEditor({
       setLoadingTemplates(true);
       try {
         const response = await fetch('/api/monsters');
-        if (response.ok) {
-          const data = await response.json();
-          setMonsterTemplates(data || []);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch monster templates: ${response.statusText}`);
         }
+        const data = await response.json();
+        setMonsterTemplates(data || []);
       } catch (error) {
         console.error('Error loading monster templates:', error);
       } finally {
@@ -53,22 +54,20 @@ export function EncounterEditor({
   }, [showCombatantModal, monsterTemplates.length]);
 
   const addMonster = (monster: Monster) => {
-    setMonsters([...monsters, monster]);
+    setMonsters(prev => [...prev, monster]);
   };
 
   const saveMonster = (monster: Monster) => {
-    const existingIndex = monsters.findIndex(m => m.id === monster.id);
-    if (existingIndex >= 0) {
-      setMonsters(monsters.map(m => m.id === monster.id ? monster : m));
-    } else {
-      setMonsters([...monsters, monster]);
-    }
+    setMonsters(prev => {
+      const exists = prev.some(m => m.id === monster.id);
+      return exists ? prev.map(m => m.id === monster.id ? monster : m) : [...prev, monster];
+    });
     setEditingMonster(null);
     setShowCustomMonsterModal(false);
   };
 
   const deleteMonster = (id: string) => {
-    setMonsters(monsters.filter(m => m.id !== id));
+    setMonsters(prev => prev.filter(m => m.id !== id));
   };
 
   const handleSave = async () => {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { Encounter } from '@/lib/types';
+import type { Encounter } from '@/lib/types';
 import { EncounterEditor } from './EncounterEditor';
 
 export function EncountersContent() {
@@ -118,6 +118,7 @@ export function EncountersContent() {
 
         {editingEncounter && (
           <EncounterEditor
+            key={editingEncounter.id}
             encounter={editingEncounter}
             onSave={saveEncounter}
             onCancel={cancelEdit}

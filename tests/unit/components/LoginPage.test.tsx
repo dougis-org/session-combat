@@ -60,7 +60,7 @@ describe('LoginPage — rendering', () => {
 
   it('renders a password input', () => {
     render(<LoginPage />);
-    expect(document.querySelector('input[type="password"]')).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
   });
 
   it('renders a submit button', () => {
@@ -101,7 +101,7 @@ describe('LoginPage — client-side validation', () => {
     mockAuth({ login });
     render(<LoginPage />);
     await user.type(screen.getByRole('textbox', { name: /email/i }), 'notanemail');
-    await user.type(document.querySelector('input[type="password"]')!, 'somepassword');
+    await user.type(screen.getByLabelText(/password/i), 'somepassword');
     fireEvent.submit(document.querySelector('form')!);
     await waitFor(() =>
       expect(screen.getByText(/valid email/i)).toBeInTheDocument()
@@ -118,7 +118,7 @@ describe('LoginPage — submit behavior', () => {
     mockRouter();
     render(<LoginPage />);
     await user.type(screen.getByRole('textbox', { name: /email/i }), 'test@example.com');
-    await user.type(document.querySelector('input[type="password"]')!, 'password123');
+    await user.type(screen.getByLabelText(/password/i), 'password123');
     fireEvent.submit(document.querySelector('form')!);
     await waitFor(() => expect(login).toHaveBeenCalledWith('test@example.com', 'password123'));
     expect(login).toHaveBeenCalledTimes(1);
@@ -131,7 +131,7 @@ describe('LoginPage — submit behavior', () => {
     mockAuth({ login });
     render(<LoginPage />);
     await user.type(screen.getByRole('textbox', { name: /email/i }), 'test@example.com');
-    await user.type(document.querySelector('input[type="password"]')!, 'password123');
+    await user.type(screen.getByLabelText(/password/i), 'password123');
     fireEvent.submit(document.querySelector('form')!);
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/campaigns'));
   });
@@ -143,7 +143,7 @@ describe('LoginPage — submit behavior', () => {
     mockRouter();
     render(<LoginPage />);
     await user.type(screen.getByRole('textbox', { name: /email/i }), 'test@example.com');
-    await user.type(document.querySelector('input[type="password"]')!, 'wrongpassword');
+    await user.type(screen.getByLabelText(/password/i), 'wrongpassword');
     fireEvent.submit(document.querySelector('form')!);
     await waitFor(() => expect(screen.getByText('Invalid credentials')).toBeInTheDocument());
   });
