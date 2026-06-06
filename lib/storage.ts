@@ -19,9 +19,11 @@ import {
   MemberRole,
   MemberStatus,
   MemberHistoryEntry,
+  PublicUser,
 } from "./types";
 import { DuplicateMemberError } from "./errors";
 import { GLOBAL_USER_ID } from "./constants";
+import { InvalidUserIdError } from "./permissions";
 import { ObjectId, Filter, Document } from "mongodb";
 
 interface QueryableEntity {
@@ -942,6 +944,59 @@ export const storage = {
       console.error("Error listing campaigns for member:", error);
       return [];
     }
+  },
+
+  async getUserById(userId: string): Promise<PublicUser | null> {
+    if (!ObjectId.isValid(userId)) throw new InvalidUserIdError(userId);
+    const db = await getDatabase();
+    const doc = await db
+      .collection("users")
+      .findOne({ _id: { $eq: new ObjectId(userId) } }, { projection: { username: 1 } });
+    if (!doc || !doc['username']) return null;
+    return { id: userId, username: doc['username'] as string };
+  },
+
+  async getUsersByIds(userIds: string[]): Promise<Record<string, string>> {
+    if (userIds.length === 0) return {};
+    const validObjectIds = userIds
+      .filter((id) => ObjectId.isValid(id))
+      .map((id) => new ObjectId(id));
+    if (validObjectIds.length === 0) return {};
+    const db = await getDatabase();
+    const docs = await db
+      .collection("users")
+      .find({ _id: { $in: validObjectIds } }, { projection: { username: 1 } })
+      .toArray();
+    const result: Record<string, string> = {};
+    for (const doc of docs) {
+      if (doc['username']) {
+        result[doc._id.toString()] = doc['username'] as string;
+      }
+    }
+    return result;
+  },
+
+  async listInvitationsForUser(userId: string): Promise<CampaignMember[]> {
+    const db = await getDatabase();
+    const members = await db
+      .collection<CampaignMember>("campaignMembers")
+      .find({ userId, status: "invited" })
+      .toArray();
+    return members.map((m) => {
+      const normalized = normalizeStoredEntityId(m);
+      const { _id, ...rest } = normalized;
+      return rest as CampaignMember;
+    });
+  },
+
+  async getCampaignsByIds(campaignIds: string[]): Promise<Pick<Campaign, "id" | "name">[]> {
+    if (campaignIds.length === 0) return [];
+    const db = await getDatabase();
+    const docs = await db
+      .collection<Campaign>("campaigns")
+      .find({ id: { $in: campaignIds } }, { projection: { id: 1, name: 1, _id: 0 } })
+      .toArray();
+    return docs as Pick<Campaign, "id" | "name">[];
   },
 
   // Clear all data for a user

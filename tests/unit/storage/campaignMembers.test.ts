@@ -71,6 +71,60 @@ describe("getMember", () => {
   });
 });
 
+describe("listInvitationsForUser", () => {
+  let mockCollection: ReturnType<typeof makeMockCollection>;
+  let mockDb: { collection: jest.Mock };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCollection = makeMockCollection();
+    mockDb = { collection: jest.fn(() => mockCollection) };
+    mockedGetDatabase.mockResolvedValue(mockDb as never);
+  });
+
+  const INVITED_1: CampaignMember = {
+    id: "mem-inv-1",
+    campaignId: "camp-1",
+    userId: "user-1",
+    role: "player",
+    status: "invited",
+    history: [{ action: "invited", by: "dm-1", at: new Date("2026-06-01") }],
+  };
+
+  const INVITED_2: CampaignMember = {
+    id: "mem-inv-2",
+    campaignId: "camp-2",
+    userId: "user-1",
+    role: "player",
+    status: "invited",
+    history: [{ action: "invited", by: "dm-2", at: new Date("2026-06-02") }],
+  };
+
+  it("returns only 'invited' memberships for the user", async () => {
+    mockCollection.toArray.mockResolvedValue([
+      { _id: "oid-1", ...INVITED_1 },
+      { _id: "oid-2", ...INVITED_2 },
+    ] as never);
+
+    const result = await storage.listInvitationsForUser("user-1");
+
+    expect(mockDb.collection).toHaveBeenCalledWith("campaignMembers");
+    expect(mockCollection.find).toHaveBeenCalledWith({ userId: "user-1", status: "invited" });
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe("mem-inv-1");
+    expect(result[1].id).toBe("mem-inv-2");
+    expect(result[0]).not.toHaveProperty("_id");
+  });
+
+  it("returns empty array when no pending invitations", async () => {
+    mockCollection.toArray.mockResolvedValue([] as never);
+
+    const result = await storage.listInvitationsForUser("user-1");
+
+    expect(result).toEqual([]);
+  });
+});
+
 describe("loadCampaignByIdAny", () => {
   let mockCollection: ReturnType<typeof makeMockCollection>;
   let mockDb: { collection: jest.Mock };
