@@ -69,7 +69,7 @@ describe("PATCH /api/campaigns/[id]/members/me — input validation", () => {
     expect(response.status).toBe(400);
   });
 
-  it("returns 400 for malformed JSON", async () => {
+  it("returns 400 with 'Invalid JSON payload' for malformed JSON", async () => {
     mockedRequireAuth.mockReturnValue(MOCK_AUTH);
     const req = new Request(
       `http://localhost/api/campaigns/${CAMPAIGN_ID}/members/me`,
@@ -77,6 +77,8 @@ describe("PATCH /api/campaigns/[id]/members/me — input validation", () => {
     );
     const response = await PATCH(req as never, { params: PARAMS });
     expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toBe("Invalid JSON payload");
   });
 });
 

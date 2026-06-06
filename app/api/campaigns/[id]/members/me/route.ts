@@ -9,7 +9,7 @@ export const PATCH = withAuthAndParams<Params>(async (request: NextRequest, auth
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: 'action must be "accept" or "decline"' }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
   }
 
   const { action } = (body ?? {}) as Record<string, unknown>;

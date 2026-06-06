@@ -989,6 +989,16 @@ export const storage = {
     });
   },
 
+  async getCampaignsByIds(campaignIds: string[]): Promise<Pick<Campaign, "id" | "name">[]> {
+    if (campaignIds.length === 0) return [];
+    const db = await getDatabase();
+    const docs = await db
+      .collection<Campaign>("campaigns")
+      .find({ id: { $in: campaignIds } }, { projection: { id: 1, name: 1, _id: 0 } })
+      .toArray();
+    return docs as Pick<Campaign, "id" | "name">[];
+  },
+
   // Clear all data for a user
   async clear(userId: string): Promise<void> {
     try {

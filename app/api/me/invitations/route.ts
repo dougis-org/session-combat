@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { getDatabase } from '@/lib/db';
-import { Campaign, MemberHistoryEntry } from '@/lib/types';
+import type { MemberHistoryEntry } from '@/lib/types';
 
 function lastInvitedEntry(history: MemberHistoryEntry[]): MemberHistoryEntry | undefined {
   for (let i = history.length - 1; i >= 0; i--) {
@@ -27,12 +26,8 @@ export const GET = withAuth(async (_request: NextRequest, auth) => {
       ),
     ];
 
-    const db = await getDatabase();
     const [campaignDocs, usernameMap] = await Promise.all([
-      db
-        .collection<Campaign>('campaigns')
-        .find({ id: { $in: uniqueCampaignIds } }, { projection: { id: 1, name: 1 } })
-        .toArray(),
+      storage.getCampaignsByIds(uniqueCampaignIds),
       storage.getUsersByIds(uniqueInviterIds),
     ]);
 

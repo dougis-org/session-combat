@@ -4,7 +4,6 @@
 import { GET } from "@/app/api/me/invitations/route";
 import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
-import { getDatabase } from "@/lib/db";
 import { MOCK_AUTH, makeRouteRequest } from "@/tests/unit/helpers/route.test.helpers";
 import { CampaignMember } from "@/lib/types";
 
@@ -14,19 +13,16 @@ jest.mock("@/lib/storage", () => ({
   storage: {
     listInvitationsForUser: jest.fn(),
     getUsersByIds: jest.fn(),
+    getCampaignsByIds: jest.fn(),
   },
-}));
-
-jest.mock("@/lib/db", () => ({
-  getDatabase: jest.fn(),
 }));
 
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage) as {
   listInvitationsForUser: jest.MockedFunction<typeof storage.listInvitationsForUser>;
   getUsersByIds: jest.MockedFunction<typeof storage.getUsersByIds>;
+  getCampaignsByIds: jest.MockedFunction<typeof storage.getCampaignsByIds>;
 };
-const mockedGetDatabase = jest.mocked(getDatabase);
 
 const makeGetRequest = () =>
   makeRouteRequest("http://localhost/api/me/invitations", "GET");
@@ -43,12 +39,6 @@ const makeInvitation = (overrides: Partial<CampaignMember> = {}): CampaignMember
   history: [{ action: "invited", by: DM_ID, at: new Date("2026-06-01T10:00:00Z") }],
   ...overrides,
 });
-
-function setupDb(campaignDocs: { id: string; name: string }[]) {
-  const toArray = jest.fn().mockResolvedValue(campaignDocs);
-  const find = jest.fn(() => ({ toArray }));
-  mockedGetDatabase.mockResolvedValue({ collection: jest.fn(() => ({ find })) } as never);
-}
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -72,7 +62,7 @@ describe("GET /api/me/invitations — empty list", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toEqual({ invitations: [] });
-    expect(mockedGetDatabase).not.toHaveBeenCalled();
+    expect(mockedStorage.getCampaignsByIds).not.toHaveBeenCalled();
   });
 });
 
@@ -85,7 +75,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
       makeInvitation({ history: [{ action: "invited", by: DM_ID, at: invAt }] }),
     ]);
     mockedStorage.getUsersByIds.mockResolvedValue({ [DM_ID]: "theDM" });
-    setupDb([{ id: "camp-1", name: "Dragon Campaign" }]);
+    mockedStorage.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
 
     const response = await GET(makeGetRequest());
 
@@ -113,7 +103,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
       }),
     ]);
     mockedStorage.getUsersByIds.mockResolvedValue({ [DM_ID_2]: "anotherDM" });
-    setupDb([{ id: "camp-1", name: "Dragon Campaign" }]);
+    mockedStorage.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
 
     const response = await GET(makeGetRequest());
 
@@ -128,7 +118,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
       makeInvitation({ history: [{ action: "invited", by: DM_ID, at: new Date() }] }),
     ]);
     mockedStorage.getUsersByIds.mockResolvedValue({});
-    setupDb([{ id: "camp-1", name: "Dragon Campaign" }]);
+    mockedStorage.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
 
     const response = await GET(makeGetRequest());
 
@@ -136,13 +126,27 @@ describe("GET /api/me/invitations — pending invitations", () => {
     expect(body.invitations[0].invitedBy).toBe("Unknown user");
   });
 
-  it("makes exactly one getUsersByIds call regardless of invitation count", async () => {
+  it("falls back to 'Unknown user' when history is empty", async () => {
+    mockedStorage.listInvitationsForUser.mockResolvedValue([
+      makeInvitation({ history: [] }),
+    ]);
+    mockedStorage.getUsersByIds.mockResolvedValue({});
+    mockedStorage.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
+
+    const response = await GET(makeGetRequest());
+
+    const body = await response.json();
+    expect(body.invitations[0].invitedBy).toBe("Unknown user");
+    expect(body.invitations[0].invitedAt).toBeNull();
+  });
+
+  it("makes exactly one getCampaignsByIds and getUsersByIds call regardless of invitation count", async () => {
     mockedStorage.listInvitationsForUser.mockResolvedValue([
       makeInvitation({ id: "mem-1", campaignId: "camp-1", history: [{ action: "invited", by: DM_ID, at: new Date() }] }),
       makeInvitation({ id: "mem-2", campaignId: "camp-2", history: [{ action: "invited", by: DM_ID_2, at: new Date() }] }),
     ]);
     mockedStorage.getUsersByIds.mockResolvedValue({ [DM_ID]: "dm1", [DM_ID_2]: "dm2" });
-    setupDb([
+    mockedStorage.getCampaignsByIds.mockResolvedValue([
       { id: "camp-1", name: "Campaign 1" },
       { id: "camp-2", name: "Campaign 2" },
     ]);
@@ -150,6 +154,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
     await GET(makeGetRequest());
 
     expect(mockedStorage.getUsersByIds).toHaveBeenCalledTimes(1);
+    expect(mockedStorage.getCampaignsByIds).toHaveBeenCalledTimes(1);
     expect(mockedStorage.getUsersByIds).toHaveBeenCalledWith(
       expect.arrayContaining([DM_ID, DM_ID_2])
     );
