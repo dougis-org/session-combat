@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 This document details *changes* to requirements and is additive to the `design.md` document, not a replacement.
 
@@ -15,6 +15,8 @@ The system SHALL define `User.username` as `string` (not `string | undefined`).
 - **Then** TypeScript compilation fails with a type error
 
 ---
+
+## ADDED Requirements
 
 ### Requirement: ADDED `PublicUser` interface
 
@@ -270,12 +272,6 @@ None.
 - **Given** no authentication token
 - **When** a GET is made to `/api/me/invitations`
 - **Then** the response is `401 Unauthorized`
-
-#### Scenario: Caller can only respond to their own invitation
-
-- **Given** an authenticated user who is not a member of campaign `[id]`
-- **When** they PATCH `{ "action": "accept" }`
-- **Then** the response is `404` (membership lookup uses `auth.userId`, not a URL param)
 
 ### Requirement: Reliability
 
