@@ -205,17 +205,8 @@ Reason for removal: Renamed to `"invited"` to match phase documentation. No exis
 
 ### Requirement: Security
 
-#### Scenario: Access control — unauthenticated
-
-- **Given** no auth token
-- **When** POST is made to `/api/campaigns/[id]/members`
-- **Then** response is `401`; no DB access occurs
-
-#### Scenario: Access control — non-DM
-
-- **Given** a valid auth token for a user who is not an active DM of the campaign
-- **When** POST is made with a valid `userId` body
-- **Then** response is `403`; no `addMember` or `updateMemberStatus` call is made
+Access control scenarios (unauthenticated → 401, non-DM → 403) are specified in the functional requirements:
+- See: *ADDED `POST /api/campaigns/[id]/members` — guard: non-DM rejected* (covers both unauthenticated and non-DM callers)
 
 ### Requirement: Reliability
 
