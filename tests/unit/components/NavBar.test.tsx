@@ -55,10 +55,11 @@ describe('NavBar', () => {
   });
 
   it('calls logout when logout button clicked', async () => {
+    const user = userEvent.setup();
     const logout = jest.fn() as any;
     mockAuth({ isAuthenticated: true, user: { userId: 'u1', email: 'u@test.com' }, logout });
     render(<NavBar />);
-    await userEvent.click(screen.getByTestId('logout-button'));
+    await user.click(screen.getByTestId('logout-button'));
     expect(logout).toHaveBeenCalledTimes(1);
   });
 });

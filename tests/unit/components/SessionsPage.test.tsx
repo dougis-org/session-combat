@@ -76,6 +76,9 @@ async function renderWithData(logs: object[], parties: object[] = []) {
 }
 
 describe('SessionsPage — session log display', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+  beforeEach(() => { user = userEvent.setup(); });
+
   test('renders session title and number', async () => {
     await renderWithData([MOCK_LOG]);
     expect(await screen.findByText('Into the Mines')).toBeInTheDocument();
@@ -106,7 +109,7 @@ describe('SessionsPage — session log display', () => {
   test('renders session form when button clicked', async () => {
     await renderWithData([]);
     const btn = await screen.findByRole('button', { name: /new session/i });
-    await userEvent.click(btn);
+    await user.click(btn);
     expect(await screen.findByText(/Session #/)).toBeInTheDocument();
     expect(screen.getByText('Date Played')).toBeInTheDocument();
   });
@@ -115,7 +118,7 @@ describe('SessionsPage — session log display', () => {
     // useCampaignContext mock returns no parties by default (context: null)
     await renderWithData([]);
     const btn = await screen.findByRole('button', { name: /new session/i });
-    await userEvent.click(btn);
+    await user.click(btn);
     expect(await screen.findByText(/No linked party found/)).toBeInTheDocument();
   });
 
