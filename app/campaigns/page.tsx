@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState } from '@/lib/components/ui';
-import { Campaign, CampaignTemplate, Party, Character, SessionLog, getCharacterType } from '@/lib/types';
+import { Campaign, CampaignTemplate, Party, Character, SessionLog, CampaignMember, getCharacterType } from '@/lib/types';
 import { CampaignEditor } from './CampaignEditor';
 import { CharacterRosterCard } from '@/lib/components/CharacterRosterCard';
 import { CampaignChapterInfo } from '@/lib/components/CampaignChapterInfo';
+import { SharedCharactersPanel } from '@/lib/components/SharedCharactersPanel';
 
 function ManagementChapterInfo({ campaign }: { campaign: Campaign }) {
   const currentCh = campaign.currentChapterId
@@ -64,6 +65,7 @@ export function CampaignsContent() {
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [copyingIds, setCopyingIds] = useState<Set<string>>(new Set());
   const [copyError, setCopyError] = useState<Record<string, string>>({});
+  const [membershipsByCampaign, setMembershipsByCampaign] = useState<Record<string, CampaignMember | null>>({});
 
   const loadAll = async () => {
     try {
@@ -127,6 +129,30 @@ export function CampaignsContent() {
     };
 
     fetchSessions();
+    return () => controller.abort();
+  }, [campaigns]);
+
+  useEffect(() => {
+    if (campaigns.length === 0) return;
+    const controller = new AbortController();
+    const fetchMemberships = async () => {
+      const results = await Promise.all(
+        campaigns.map(async (campaign) => {
+          try {
+            const res = await fetch(`/api/campaigns/${campaign.id}/members/me`, { signal: controller.signal });
+            if (!res.ok) return [campaign.id, null] as const;
+            const member: CampaignMember = await res.json();
+            return [campaign.id, member] as const;
+          } catch {
+            return [campaign.id, null] as const;
+          }
+        })
+      );
+      if (!controller.signal.aborted) {
+        setMembershipsByCampaign(Object.fromEntries(results));
+      }
+    };
+    fetchMemberships();
     return () => controller.abort();
   }, [campaigns]);
 
@@ -229,6 +255,7 @@ export function CampaignsContent() {
               {activeCampaigns.map(campaign => {
                 const linkedParties = parties.filter(p => p.campaignId === campaign.id);
                 const lastSession = sessionsByCampaign[campaign.id];
+                const currentUserMember = membershipsByCampaign[campaign.id] ?? null;
 
                 return (
                   <div key={campaign.id} className="bg-gray-800 rounded-lg p-6">
@@ -380,6 +407,10 @@ export function CampaignsContent() {
                         })}
                       </div>
                     )}
+                    <SharedCharactersPanel
+                      campaignId={campaign.id}
+                      currentUserMember={currentUserMember}
+                    />
                   </div>
                 );
               })}

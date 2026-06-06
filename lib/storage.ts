@@ -16,12 +16,13 @@ import {
   SavedContent,
   CampaignMember,
   CampaignMemberSummary,
+  CampaignCharacterShare,
   MemberRole,
   MemberStatus,
   MemberHistoryEntry,
   PublicUser,
 } from "./types";
-import { DuplicateMemberError } from "./errors";
+import { DuplicateMemberError, DuplicateShareError } from "./errors";
 import { GLOBAL_USER_ID } from "./constants";
 import { InvalidUserIdError } from "./permissions";
 import { ObjectId, Filter, Document } from "mongodb";
@@ -999,6 +1000,73 @@ export const storage = {
     return docs as Pick<Campaign, "id" | "name">[];
   },
 
+  async addShare(share: CampaignCharacterShare): Promise<void> {
+    try {
+      const db = await getDatabase();
+      const { _id, ...insertData } = share;
+      await db
+        .collection<CampaignCharacterShare>("campaignCharacterShares")
+        .insertOne(insertData as CampaignCharacterShare);
+    } catch (error) {
+      if (error && typeof error === "object" && "code" in error && error.code === 11000) {
+        throw new DuplicateShareError(share.campaignId, share.characterId);
+      }
+      console.error("Error adding campaign character share:", error);
+      throw error;
+    }
+  },
+
+  async removeShare(campaignId: string, characterId: string, userId: string): Promise<boolean> {
+    try {
+      const db = await getDatabase();
+      const result = await db
+        .collection<CampaignCharacterShare>("campaignCharacterShares")
+        .deleteOne({ campaignId, characterId, userId });
+      return result.deletedCount > 0;
+    } catch (error) {
+      console.error("Error removing campaign character share:", error);
+      throw error;
+    }
+  },
+
+  async listSharesForCampaign(campaignId: string, userId: string): Promise<CampaignCharacterShare[]> {
+    try {
+      const db = await getDatabase();
+      const shares = await db
+        .collection<CampaignCharacterShare>("campaignCharacterShares")
+        .find({ campaignId, userId })
+        .toArray();
+      return shares.map((s) => {
+        const normalized = normalizeStoredEntityId(s);
+        const { _id, ...rest } = normalized;
+        return rest as CampaignCharacterShare;
+      });
+    } catch (error) {
+      console.error("Error listing campaign character shares:", error);
+      return [];
+    }
+  },
+
+  async loadCharacterById(id: string): Promise<Character | null> {
+    try {
+      const db = await getDatabase();
+      try {
+        const character = await db
+          .collection<Character>("characters_active")
+          .findOne({ id });
+        return character ? normalizeStoredEntityId(character) : null;
+      } catch {
+        const character = await db
+          .collection<Character>("characters")
+          .findOne({ id, deletedAt: null as unknown as Date });
+        return character ? normalizeStoredEntityId(character) : null;
+      }
+    } catch (error) {
+      console.error("Error loading character by ID:", error);
+      throw error;
+    }
+  },
+
   // Clear all data for a user
   async clear(userId: string): Promise<void> {
     try {
@@ -1010,6 +1078,7 @@ export const storage = {
         db.collection<CombatState>("combatStates").deleteMany({ userId }),
         db.collection<SavedContent>("savedContent").deleteMany({ userId }),
         db.collection("campaignMembers").deleteMany({ userId }),
+        db.collection("campaignCharacterShares").deleteMany({ userId }),
       ]);
     } catch (error) {
       console.error("Error clearing data:", error);

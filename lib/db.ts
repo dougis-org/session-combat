@@ -80,6 +80,17 @@ async function initializeDatabase(db: Db): Promise<void> {
       }
     }
 
+    try {
+      await db
+        .collection("campaignCharacterShares")
+        .createIndex({ campaignId: 1, characterId: 1 }, { unique: true });
+      console.log("Created index on campaignCharacterShares.{campaignId, characterId}");
+    } catch (indexError) {
+      if (indexError instanceof Error && !indexError.message.includes("already exists")) {
+        console.warn("Warning creating campaignCharacterShares.{campaignId, characterId} index:", indexError.message);
+      }
+    }
+
     // Check if characters_active already exists as a view; only drop views,
     // never a real collection, to avoid accidental data loss during re-initialization.
     const existing = await db
