@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { POST } from "@/app/api/characters/import/route";
 import { DndBeyondImportError } from "@/lib/dndBeyondCharacterImport";
 import { storage } from "@/lib/storage";
@@ -15,7 +15,7 @@ import {
 } from "@/tests/helpers/dndBeyondImport";
 import { MOCK_AUTH, mockAuthState } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").mockMiddleware);
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 
 jest.mock("@/lib/storage", () => ({
   storage: {

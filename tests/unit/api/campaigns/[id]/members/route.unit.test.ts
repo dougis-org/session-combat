@@ -2,16 +2,19 @@
  * @jest-environment node
  */
 import { POST } from "@/app/api/campaigns/[id]/members/route";
-import { requireAuth } from "@/lib/middleware";
 import { storage } from "@/lib/storage";
 import { DuplicateMemberError } from "@/lib/errors";
 import {
   MOCK_AUTH,
   makeRouteRequest,
+  mockAuthState,
+  itReturns401WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 import { CampaignMember } from "@/lib/types";
 
-jest.mock("@/lib/middleware");
+jest.mock("@/lib/middleware", () =>
+  require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware()
+);
 
 jest.mock("@/lib/storage", () => ({
   storage: {
@@ -21,7 +24,6 @@ jest.mock("@/lib/storage", () => ({
   },
 }));
 
-const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
   addMember: jest.MockedFunction<typeof storage.addMember>;
@@ -46,24 +48,18 @@ const makePostRequest = (body: unknown) =>
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockAuthState.payload = MOCK_AUTH;
   mockedStorage.addMember.mockResolvedValue(undefined);
   mockedStorage.updateMemberStatus.mockResolvedValue(undefined);
 });
 
 describe("POST /api/campaigns/[id]/members", () => {
   describe("unauthenticated", () => {
-    it("returns 401 when not authenticated", async () => {
-      mockedRequireAuth.mockReturnValue(
-        { status: 401, json: async () => ({ error: "Unauthorized" }) } as never
-      );
-      const response = await POST(makePostRequest({ userId: TARGET_USER_ID }), { params: PARAMS });
-      expect(response.status).toBe(401);
-    });
+    itReturns401WithParams(POST, makePostRequest.bind(null, { userId: TARGET_USER_ID }), PARAMS);
   });
 
   describe("successful new invite", () => {
     beforeEach(() => {
-      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
       mockedStorage.getMember
         .mockResolvedValueOnce(ACTIVE_DM)   // caller check
         .mockResolvedValueOnce(null);        // target check
@@ -109,7 +105,6 @@ describe("POST /api/campaigns/[id]/members", () => {
     };
 
     beforeEach(() => {
-      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
       mockedStorage.getMember
         .mockResolvedValueOnce(ACTIVE_DM)
         .mockResolvedValueOnce(DECLINED_MEMBER);
@@ -147,7 +142,6 @@ describe("POST /api/campaigns/[id]/members", () => {
     };
 
     beforeEach(() => {
-      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
       mockedStorage.getMember
         .mockResolvedValueOnce(ACTIVE_DM)
         .mockResolvedValueOnce(REMOVED_MEMBER);
@@ -187,8 +181,6 @@ describe("POST /api/campaigns/[id]/members", () => {
       history: [{ action: "invited", by: MOCK_AUTH.userId, at: new Date() }],
     };
 
-    beforeEach(() => mockedRequireAuth.mockReturnValue(MOCK_AUTH));
-
     it("returns 409 when target is already active", async () => {
       mockedStorage.getMember
         .mockResolvedValueOnce(ACTIVE_DM)
@@ -214,7 +206,6 @@ describe("POST /api/campaigns/[id]/members", () => {
 
   describe("self-invite", () => {
     it("returns 400 when userId equals auth.userId", async () => {
-      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
       const response = await POST(
         makePostRequest({ userId: MOCK_AUTH.userId }),
         { params: PARAMS }
@@ -225,8 +216,6 @@ describe("POST /api/campaigns/[id]/members", () => {
   });
 
   describe("missing/invalid body", () => {
-    beforeEach(() => mockedRequireAuth.mockReturnValue(MOCK_AUTH));
-
     it("returns 400 when userId is missing", async () => {
       const response = await POST(makePostRequest({}), { params: PARAMS });
       expect(response.status).toBe(400);
@@ -238,7 +227,6 @@ describe("POST /api/campaigns/[id]/members", () => {
     });
 
     it("returns 400 when body is malformed JSON", async () => {
-      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
       const req = new Request(
         `http://localhost/api/campaigns/${CAMPAIGN_ID}/members`,
         { method: "POST", headers: { "Content-Type": "application/json" }, body: "not-json" }
@@ -251,8 +239,6 @@ describe("POST /api/campaigns/[id]/members", () => {
   });
 
   describe("non-DM caller", () => {
-    beforeEach(() => mockedRequireAuth.mockReturnValue(MOCK_AUTH));
-
     it("returns 403 when caller is not a member", async () => {
       mockedStorage.getMember.mockResolvedValueOnce(null);
       const response = await POST(makePostRequest({ userId: TARGET_USER_ID }), { params: PARAMS });
@@ -290,7 +276,6 @@ describe("POST /api/campaigns/[id]/members", () => {
 
   describe("race condition / DuplicateMemberError from addMember", () => {
     it("returns 409 when addMember throws DuplicateMemberError", async () => {
-      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
       mockedStorage.getMember
         .mockResolvedValueOnce(ACTIVE_DM)
         .mockResolvedValueOnce(null);
@@ -304,7 +289,6 @@ describe("POST /api/campaigns/[id]/members", () => {
 
   describe("storage error", () => {
     it("returns 500 when addMember throws unexpected error", async () => {
-      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
       mockedStorage.getMember
         .mockResolvedValueOnce(ACTIVE_DM)
         .mockResolvedValueOnce(null);
@@ -317,7 +301,6 @@ describe("POST /api/campaigns/[id]/members", () => {
     });
 
     it("returns 500 when updateMemberStatus throws unexpected error", async () => {
-      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
       const declinedMember: CampaignMember = {
         id: "mem-target",
         campaignId: CAMPAIGN_ID,

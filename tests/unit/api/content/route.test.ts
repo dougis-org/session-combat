@@ -12,7 +12,7 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 import type { SavedContent } from "@/lib/types";
 
-jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").mockMiddleware);
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 jest.mock("@/lib/storage", () => ({
   storage: {
     savedContent: {

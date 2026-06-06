@@ -28,7 +28,7 @@ The system SHALL assert route authentication behaviors by mutating `mockAuthStat
 
 - **Given** `itReturns401` or `itReturns401WithParams` is executed
 - **When** the route handler is invoked within the assertion block
-- **Then** `mockAuthState.payload` is set to `null` during the invocation, the status code is checked for `401`, and `mockAuthState.payload` is safely restored to `MOCK_AUTH` afterwards.
+- **Then** `mockAuthState.payload` is set to `null` during the invocation, the status code is checked for `401`, and `mockAuthState.payload` is safely restored to its previous value afterwards.
 
 ## REMOVED Requirements
 

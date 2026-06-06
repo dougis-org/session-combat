@@ -4,7 +4,7 @@
 const mockLoadAll = jest.fn();
 const mockSave = jest.fn();
 
-jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").mockMiddleware);
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadAllMonsterTemplates: (...args: any[]) => mockLoadAll(...args),

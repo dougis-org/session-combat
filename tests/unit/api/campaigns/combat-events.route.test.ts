@@ -14,7 +14,7 @@ import {
   mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").mockMiddleware);
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 jest.mock("@/lib/utils/campaign", () => ({
   ...jest.requireActual("@/lib/utils/campaign"),

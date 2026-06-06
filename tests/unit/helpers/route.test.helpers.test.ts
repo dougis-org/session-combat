@@ -10,37 +10,28 @@ describe("route.test.helpers", () => {
     expect(mockAuthState.payload).toEqual(MOCK_AUTH);
   });
 
-  it("itReturns401 mutates and restores mockAuthState.payload", async () => {
+  describe("itReturns401", () => {
+    // Track payload observed during handler invocation
     let observedPayloadDuringHandler: unknown = "not_called";
-    
-    // A mock handler that records the payload status when called
-    const mockHandler = jest.fn().mockImplementation(async (req: NextRequest) => {
+
+    const mockHandler = jest.fn().mockImplementation(async (_req: NextRequest) => {
       observedPayloadDuringHandler = mockAuthState.payload;
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     });
 
     const makeReq = () => new NextRequest("http://localhost/api/test");
 
-    // We call the helper. Note we don't pass mockedRequireAuth since it should be removed.
-    // However, since we are inside a describe/it block, itReturns401 registers an it() test.
-    // To run it inline, we can extract the test function registered by itReturns401.
-    const originalIt = global.it;
-    let testFn: (() => Promise<void>) | null = null;
-    
-    global.it = ((name: string, fn: any) => {
-      testFn = fn;
-    }) as any;
+    // Registers an it() that the itReturns401 helper wraps
+    itReturns401(mockHandler, makeReq);
 
-    try {
-      itReturns401(mockHandler, makeReq);
-    } finally {
-      global.it = originalIt;
-    }
+    it("restores mockAuthState.payload to previous value after the 401 test runs", () => {
+      // The registered test above has already run; payload should be restored
+      expect(mockAuthState.payload).toEqual(MOCK_AUTH);
+    });
 
-    expect(testFn).not.toBeNull();
-    await testFn!();
-
-    expect(observedPayloadDuringHandler).toBeNull();
-    expect(mockAuthState.payload).toEqual(MOCK_AUTH);
+    it("sets mockAuthState.payload to null during the handler invocation", () => {
+      // The registered test ran mockHandler, which captured the payload
+      expect(observedPayloadDuringHandler).toBeNull();
+    });
   });
 });

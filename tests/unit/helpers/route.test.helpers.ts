@@ -20,33 +20,27 @@ export const mockAuthState = {
   payload: MOCK_AUTH as AuthPayload | null,
 };
 
-/** Central mock implementation for Next.js middleware endpoints */
-export const mockMiddleware = {
-  requireAuth: jest.fn((req: any) => {
-    const { NextResponse } = require("next/server");
-    const { mockAuthState } = require("@/tests/unit/helpers/route.test.helpers");
+/** Central mock factory implementation for Next.js middleware endpoints to avoid state leakage */
+export const createMockMiddleware = () => ({
+  requireAuth: jest.fn(async (_req: any) => {
     if (!mockAuthState.payload) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     return mockAuthState.payload;
   }),
   withAuth: jest.fn((handler: any) => async (req: any) => {
-    const { NextResponse } = require("next/server");
-    const { mockAuthState } = require("@/tests/unit/helpers/route.test.helpers");
     if (!mockAuthState.payload) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     return handler(req, mockAuthState.payload);
   }),
   withAuthAndParams: jest.fn((handler: any) => async (req: any, { params }: any) => {
-    const { NextResponse } = require("next/server");
-    const { mockAuthState } = require("@/tests/unit/helpers/route.test.helpers");
     if (!mockAuthState.payload) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     return handler(req, mockAuthState.payload, await params);
   }),
-};
+});
 
 /** Configure a mocked requireAdmin (async) to return a 401 or 403 response */
 export function mockAdminDenied(mockedFn: jest.Mock, status: 401 | 403): void {

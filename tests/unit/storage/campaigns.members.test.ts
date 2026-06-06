@@ -13,7 +13,7 @@ jest.mock("@/lib/db", () => ({
   getDatabase: jest.fn(),
 }));
 
-jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").mockMiddleware);
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 
 const mockedGetDatabase = jest.mocked(getDatabase);
 

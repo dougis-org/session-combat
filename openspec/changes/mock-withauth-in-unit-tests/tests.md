@@ -20,7 +20,7 @@ For each task in `tasks.md`:
 ## Test Cases
 
 - [x] **Test case 1 for Sub-task 1 (Update route test helpers):**
-  - Verify that executing `itReturns401` and `itReturns401WithParams` temporarily mutates `mockAuthState.payload` to `null` to trigger 401 rejections, and that it is fully restored to `MOCK_AUTH` after execution.
+  - Verify that executing `itReturns401` and `itReturns401WithParams` temporarily mutates `mockAuthState.payload` to `null` to trigger 401 rejections, and that it is fully restored to its previous value after execution.
 - [ ] **Test case 1 for Sub-task 2 (Update route unit test files):**
   - Verify that running `npm run test:unit` on route tests (e.g., `tests/unit/api/campaigns/route.test.ts` and `tests/unit/api/monsters/route.test.ts`) passes successfully using the state-based middleware mock factory without importing `requireAuth`.
 - [ ] **Test case 1 for Sub-task 3 (Update storage & utility test files):**

@@ -13,7 +13,7 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 import { EXISTING_GLOBAL_MONSTER } from "./fixtures";
 
-jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").mockMiddleware);
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadGlobalMonsterTemplates: jest.fn(),
