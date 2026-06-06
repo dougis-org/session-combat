@@ -28,13 +28,15 @@ export const GET = withAuthAndParams<Params>(async (_request, auth, { id: campai
       .toArray();
 
     const usernameMap = new Map(
-      userDocs.map(u => [u._id.toString(), typeof u.username === 'string' ? u.username : u._id.toString()])
+      userDocs
+        .filter(u => typeof u.username === 'string')
+        .map(u => [u._id.toString(), u.username as string])
     );
 
     const enriched = members.map(m => ({
       id: m.id,
       userId: m.userId,
-      username: usernameMap.get(m.userId) ?? m.userId,
+      username: usernameMap.get(m.userId) ?? 'Unknown',
       role: m.role,
       status: m.status,
     }));

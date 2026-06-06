@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
@@ -21,24 +21,20 @@ interface SearchResult {
   username: string;
 }
 
-function RoleBadge({ role }: { role: MemberRole }) {
-  if (role === 'dm') {
-    return <span className="bg-blue-700 text-blue-100 text-xs px-2 py-0.5 rounded">DM</span>;
-  }
-  return <span className="bg-gray-600 text-gray-200 text-xs px-2 py-0.5 rounded">Player</span>;
-}
+const ROLE_STYLE: Record<MemberRole, { bg: string; label: string }> = {
+  dm: { bg: 'bg-blue-700 text-blue-100', label: 'DM' },
+  player: { bg: 'bg-gray-600 text-gray-200', label: 'Player' },
+};
 
-function StatusBadge({ status }: { status: MemberStatus }) {
-  switch (status) {
-    case 'active':
-      return <span className="bg-green-700 text-green-100 text-xs px-2 py-0.5 rounded">Active</span>;
-    case 'invited':
-      return <span className="bg-yellow-700 text-yellow-100 text-xs px-2 py-0.5 rounded">Invited</span>;
-    case 'removed':
-      return <span className="bg-gray-600 text-gray-300 text-xs px-2 py-0.5 rounded">Removed</span>;
-    case 'declined':
-      return <span className="bg-gray-600 text-gray-300 text-xs px-2 py-0.5 rounded">Declined</span>;
-  }
+const STATUS_STYLE: Record<MemberStatus, { bg: string; label: string }> = {
+  active: { bg: 'bg-green-700 text-green-100', label: 'Active' },
+  invited: { bg: 'bg-yellow-700 text-yellow-100', label: 'Invited' },
+  removed: { bg: 'bg-gray-600 text-gray-300', label: 'Removed' },
+  declined: { bg: 'bg-gray-600 text-gray-300', label: 'Declined' },
+};
+
+function Badge({ style }: { style: { bg: string; label: string } }) {
+  return <span className={`${style.bg} text-xs px-2 py-0.5 rounded`}>{style.label}</span>;
 }
 
 function MemberRow({
@@ -59,8 +55,8 @@ function MemberRow({
     <div className="bg-gray-800 rounded-lg p-3 flex items-center justify-between">
       <div className="flex items-center gap-3 flex-wrap">
         <span className="font-medium">{member.username}</span>
-        <RoleBadge role={member.role} />
-        <StatusBadge status={member.status} />
+        <Badge style={ROLE_STYLE[member.role]} />
+        <Badge style={STATUS_STYLE[member.status]} />
       </div>
       {canRemove && (
         <button
@@ -84,24 +80,26 @@ function InviteSection({
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [inviteError, setInviteError] = useState<string | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
-    debounceRef.current = setTimeout(async () => {
+    const timer = setTimeout(async () => {
+      if (!query.trim()) {
+        setResults([]);
+        return;
+      }
       try {
         const res = await fetch(`/api/users/search?q=${encodeURIComponent(query.trim())}`);
-        if (!res.ok) return;
+        if (!res.ok) {
+          setResults([]);
+          return;
+        }
         const data = await res.json();
         setResults(data.results ?? []);
       } catch {
-        // ignore
+        setResults([]);
       }
-    }, 300);
+    }, query.trim() ? 300 : 0);
+    return () => clearTimeout(timer);
   }, [query]);
 
   const handleInvite = async (userId: string) => {
@@ -201,6 +199,7 @@ function CampaignMembersContent({ campaignId }: { campaignId: string }) {
   const isDM = currentMember?.role === 'dm' && currentMember?.status === 'active';
 
   const handleRemove = async (targetUserId: string) => {
+    if (!confirm('Are you sure you want to remove this member?')) return;
     try {
       const res = await fetch(`/api/campaigns/${campaignId}/members/${targetUserId}`, {
         method: 'DELETE',

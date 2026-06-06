@@ -93,14 +93,18 @@ function setupFetch(members = [DM_MEMBER, PLAYER_MEMBER]) {
 }
 
 let originalFetch: typeof global.fetch;
+let originalConfirm: typeof global.confirm;
 
 beforeEach(() => {
   originalFetch = global.fetch;
+  originalConfirm = global.confirm;
+  global.confirm = jest.fn(() => true);
   jest.clearAllMocks();
 });
 
 afterEach(() => {
   global.fetch = originalFetch;
+  global.confirm = originalConfirm;
 });
 
 describe('CampaignMembersPage', () => {
