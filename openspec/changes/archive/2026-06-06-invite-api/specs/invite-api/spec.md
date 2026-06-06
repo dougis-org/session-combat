@@ -76,13 +76,13 @@ The system SHALL reset a `declined` or `removed` member back to `invited` status
 
 - **Given** an authenticated DM and an existing member with `status: "declined"`
 - **When** the DM POSTs `{ userId: "<targetId>" }`
-- **Then** the response is `201` with `{ id, status: "invited" }`, and the member document's `status` is `"invited"` with a new history entry appended
+- **Then** the response is `201` with body `{ id: "<memberId>", status: "invited" }`, and the member document's `status` is `"invited"` with a new history entry appended
 
 #### Scenario: Re-invite a removed member
 
 - **Given** an authenticated DM and an existing member with `status: "removed"`
 - **When** the DM POSTs `{ userId: "<targetId>" }`
-- **Then** the response is `201` with `{ id, status: "invited" }`, and the member document's `status` is `"invited"` with a new history entry appended
+- **Then** the response is `201` with body `{ id: "<memberId>", status: "invited" }`, and the member document's `status` is `"invited"` with a new history entry appended
 
 ---
 
