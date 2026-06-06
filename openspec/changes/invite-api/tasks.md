@@ -13,7 +13,7 @@
 - [x] Add `export interface MemberHistoryEntry { action: MemberStatus; by: string; at: Date; }`
 - [x] Remove `invitedBy: string`, `invitedAt: Date`, `respondedAt?: Date` from `CampaignMember`
 - [x] Add `history: MemberHistoryEntry[]` to `CampaignMember`
-- [x] Verify: `npm run type-check` passes
+- [x] Verify: `npm run typecheck` passes
 
 ### 2. Replace `updateMember` with `updateMemberStatus` — `lib/storage.ts`
 
@@ -21,13 +21,13 @@
 - [x] Add `updateMemberStatus(campaignId: string, userId: string, status: MemberStatus, actorId: string): Promise<void>`
   - Single `updateOne` with `{ $set: { status }, $push: { history: { action: status, by: actorId, at: new Date() } } }`
 - [x] Update import if needed (no new imports required)
-- [x] Verify: `npm run type-check` passes
+- [x] Verify: `npm run typecheck` passes
 
 ### 3. Update DM owner seed — `app/api/campaigns/route.ts`
 
 - [x] At the `addMember` call (line ~51), remove `invitedBy` and `invitedAt` fields
 - [x] Add `history: [{ action: 'active' as const, by: auth.userId, at: new Date() }]`
-- [x] Verify: `npm run type-check` passes
+- [x] Verify: `npm run typecheck` passes
 
 ### 4. Update existing `addMember` unit tests
 
@@ -56,7 +56,7 @@
   - Existing with `status: 'active'` or `'invited'` → `409`
 - [x] `DuplicateMemberError` from `addMember` → `409` (race condition safety net)
 - [x] Unexpected errors → `500` (log server-side, no internals leaked)
-- [x] Verify: `npm run type-check` passes
+- [x] Verify: `npm run typecheck` passes
 
 ### 7. Add route unit tests — `tests/unit/api/campaigns/[id]/members/route.unit.test.ts`
 
@@ -81,7 +81,7 @@
 
 ## Validation
 
-- [x] `npm run type-check` — no errors
+- [x] `npm run typecheck` — no errors
 - [x] `npm run test:unit` — all tests pass
 - [x] `npm run build` — build succeeds
 - [x] All execution tasks checked off
@@ -92,16 +92,16 @@
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
 - **Unit tests** — `npm run test:unit` — all tests must pass
-- **Type check** — `npm run type-check` — no errors
+- **Type check** — `npm run typecheck` — no errors
 - **Build** — `npm run build` — must succeed with no errors
 - If **ANY** of the above fail, iterate and fix before pushing
 
 ## PR and Merge
 
-- [ ] Ensure `openspec-review-code` sub-agent was run and all findings addressed before final commit
-- [ ] Commit all changes to `feat/invite-api` and push to remote
-- [ ] Open PR from `feat/invite-api` to `main`. PR body must include `Closes #305`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin`)
+- [x] Ensure `openspec-review-code` sub-agent was run and all findings addressed before final commit
+- [x] Commit all changes to `feat/invite-api` and push to remote
+- [x] Open PR from `feat/invite-api` to `main`. PR body must include `Closes #305`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin`)
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
 - [ ] **Monitor PR comments** — poll autonomously; address comments, commit fixes, follow Remote push validation, push; wait 180 seconds; repeat until no unresolved comments remain
 - [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, commit, follow Remote push validation, push; wait 180 seconds; repeat until all required checks pass

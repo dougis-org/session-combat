@@ -153,6 +153,22 @@ describe("Campaign members storage and types", () => {
         storage.updateMemberStatus("camp-1", "nobody", "invited", "dm-user")
       ).resolves.not.toThrow();
     });
+
+    test("DB error — rethrows", async () => {
+      mockCollection.updateOne.mockRejectedValue(new Error("DB failure") as never);
+      await expect(
+        storage.updateMemberStatus("camp-1", "user-1", "invited", "dm-user")
+      ).rejects.toThrow("DB failure");
+    });
+
+    test("role reset — includes role in $set when provided", async () => {
+      mockCollection.updateOne.mockResolvedValue({ matchedCount: 1 } as never);
+      await storage.updateMemberStatus("camp-1", "user-1", "invited", "dm-user", "player");
+      expect(mockCollection.updateOne).toHaveBeenCalledWith(
+        { campaignId: "camp-1", userId: "user-1" },
+        expect.objectContaining({ $set: { status: "invited", role: "player" } })
+      );
+    });
   });
 
   describe("listMembersForCampaign (mocked DB)", () => {

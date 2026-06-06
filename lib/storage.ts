@@ -854,15 +854,17 @@ export const storage = {
     userId: string,
     status: MemberStatus,
     actorId: string,
+    role?: MemberRole,
   ): Promise<void> {
     try {
       const db = await getDatabase();
       const historyEntry: MemberHistoryEntry = { action: status, by: actorId, at: new Date() };
+      const setFields = role !== undefined ? { status, role } : { status };
       await db
         .collection<CampaignMember>("campaignMembers")
         .updateOne(
           { campaignId, userId },
-          { $set: { status }, $push: { history: historyEntry } as never },
+          { $set: setFields, $push: { history: historyEntry } as any },
         );
     } catch (error) {
       console.error("Error updating campaign member status:", error);

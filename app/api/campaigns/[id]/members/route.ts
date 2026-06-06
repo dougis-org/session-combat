@@ -6,13 +6,21 @@ import { DuplicateMemberError } from '@/lib/errors';
 type Params = { id: string };
 
 export const POST = withAuthAndParams<Params>(async (request, auth, { id: campaignId }) => {
+  let body: unknown;
   try {
-    const body = await request.json();
-    const { userId } = body;
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
 
-    if (typeof userId !== 'string' || userId.trim() === '') {
+  try {
+    const { userId: rawUserId } = body as Record<string, unknown>;
+
+    if (typeof rawUserId !== 'string' || rawUserId.trim() === '') {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
+
+    const userId = rawUserId.trim();
 
     if (userId === auth.userId) {
       return NextResponse.json({ error: 'Cannot invite yourself' }, { status: 400 });
@@ -42,7 +50,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       return NextResponse.json({ error: 'Member already exists' }, { status: 409 });
     }
 
-    await storage.updateMemberStatus(campaignId, userId, 'invited', auth.userId);
+    await storage.updateMemberStatus(campaignId, userId, 'invited', auth.userId, 'player');
     return NextResponse.json({ id: target.id, status: 'invited' }, { status: 201 });
   } catch (error) {
     if (error instanceof DuplicateMemberError) {

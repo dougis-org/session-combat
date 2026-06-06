@@ -123,10 +123,10 @@ describe("POST /api/campaigns/[id]/members", () => {
       expect(body.status).toBe("invited");
     });
 
-    it("calls updateMemberStatus with 'invited'", async () => {
+    it("calls updateMemberStatus with 'invited' and role 'player'", async () => {
       await POST(makePostRequest({ userId: TARGET_USER_ID }), { params: PARAMS });
       expect(mockedStorage.updateMemberStatus).toHaveBeenCalledWith(
-        CAMPAIGN_ID, TARGET_USER_ID, "invited", MOCK_AUTH.userId
+        CAMPAIGN_ID, TARGET_USER_ID, "invited", MOCK_AUTH.userId, "player"
       );
     });
 
@@ -161,10 +161,10 @@ describe("POST /api/campaigns/[id]/members", () => {
       expect(body.status).toBe("invited");
     });
 
-    it("calls updateMemberStatus with 'invited'", async () => {
+    it("calls updateMemberStatus with 'invited' and role 'player'", async () => {
       await POST(makePostRequest({ userId: TARGET_USER_ID }), { params: PARAMS });
       expect(mockedStorage.updateMemberStatus).toHaveBeenCalledWith(
-        CAMPAIGN_ID, TARGET_USER_ID, "invited", MOCK_AUTH.userId
+        CAMPAIGN_ID, TARGET_USER_ID, "invited", MOCK_AUTH.userId, "player"
       );
     });
   });
@@ -235,6 +235,18 @@ describe("POST /api/campaigns/[id]/members", () => {
     it("returns 400 when userId is a number", async () => {
       const response = await POST(makePostRequest({ userId: 123 }), { params: PARAMS });
       expect(response.status).toBe(400);
+    });
+
+    it("returns 400 when body is malformed JSON", async () => {
+      mockedRequireAuth.mockReturnValue(MOCK_AUTH);
+      const req = new Request(
+        `http://localhost/api/campaigns/${CAMPAIGN_ID}/members`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: "not-json" }
+      );
+      const response = await POST(req as never, { params: PARAMS });
+      expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body.error).toBe("Invalid JSON");
     });
   });
 

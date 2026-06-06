@@ -23,7 +23,7 @@ For each task in `tasks.md`:
 
 ### Task 1 — Type changes (`lib/types.ts`)
 
-These are compile-time checks enforced by TypeScript. No runtime test file needed; verified by `npm run type-check` after edits.
+These are compile-time checks enforced by TypeScript. No runtime test file needed; verified by `npm run typecheck` after edits.
 
 - [ ] `MemberStatus` does not accept `"pending"` (type error if used)
 - [ ] `MemberStatus` accepts `"invited"` and `"removed"` without error
@@ -31,7 +31,7 @@ These are compile-time checks enforced by TypeScript. No runtime test file neede
 - [ ] `CampaignMember` rejects `invitedBy`, `invitedAt`, `respondedAt` (type error if passed)
 - [ ] `CampaignMember` requires `history: MemberHistoryEntry[]`
 
-**File:** `lib/types.ts` | **Verified by:** `npm run type-check`
+**File:** `lib/types.ts` | **Verified by:** `npm run typecheck`
 **Spec ref:** ADDED `MemberStatus` values; ADDED `MemberHistoryEntry`; MODIFIED `CampaignMember`
 
 ---
@@ -132,7 +132,7 @@ These are compile-time checks enforced by TypeScript. No runtime test file neede
 
 | Task | Test file |
 |------|-----------|
-| Types (compile-time) | `lib/types.ts` — verified by `npm run type-check` |
+| Types (compile-time) | `lib/types.ts` — verified by `npm run typecheck` |
 | `updateMemberStatus` storage | `tests/unit/storage/campaignMembers.test.ts` |
 | Campaign creation seed | `tests/unit/api/campaigns/route.unit.test.ts` |
 | POST route | `tests/unit/api/campaigns/[id]/members/route.unit.test.ts` |
@@ -140,7 +140,7 @@ These are compile-time checks enforced by TypeScript. No runtime test file neede
 ## Commands
 
 ```bash
-npm run type-check
+npm run typecheck
 npm run test:unit -- --testPathPattern=campaignMembers
 npm run test:unit -- --testPathPattern="campaigns/route"
 npm run test:unit -- --testPathPattern="members/route"
