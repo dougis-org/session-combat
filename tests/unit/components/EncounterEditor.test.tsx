@@ -23,7 +23,7 @@ jest.mock('@/app/encounters/MonsterEditor', () => ({
 }));
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EncounterEditor } from '@/app/encounters/EncounterEditor';
 import type { Encounter, Monster } from '@/lib/types';
@@ -154,5 +154,42 @@ describe('EncounterEditor — monster list', () => {
   it('renders "Add Combatant" button', () => {
     renderEditor();
     expect(screen.getByRole('button', { name: /add combatant/i })).toBeInTheDocument();
+  });
+});
+
+describe('EncounterEditor — monster interactions', () => {
+  it('removes monster from list when Delete is clicked', async () => {
+    const user = userEvent.setup();
+    renderEditor({ encounter: { ...BASE_ENCOUNTER, monsters: [BASE_MONSTER] } });
+    expect(screen.getByText('Goblin')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /^delete$/i }));
+    expect(screen.queryByText('Goblin')).not.toBeInTheDocument();
+    expect(screen.getByText('No monsters added yet.')).toBeInTheDocument();
+  });
+
+  it('does not crash when Edit is clicked on a monster', async () => {
+    const user = userEvent.setup();
+    renderEditor({ encounter: { ...BASE_ENCOUNTER, monsters: [BASE_MONSTER] } });
+    await user.click(screen.getByRole('button', { name: /^edit$/i }));
+    expect(screen.getByRole('button', { name: /add combatant/i })).toBeInTheDocument();
+  });
+
+  it('fetches monster templates when Add Combatant is clicked', async () => {
+    const user = userEvent.setup();
+    const originalFetch = global.fetch;
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [],
+    } as unknown as Response);
+
+    try {
+      renderEditor();
+      await user.click(screen.getByRole('button', { name: /add combatant/i }));
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith('/api/monsters');
+      });
+    } finally {
+      global.fetch = originalFetch;
+    }
   });
 });
