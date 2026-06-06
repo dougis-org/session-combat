@@ -125,10 +125,10 @@ Blocking resolution flow:
 - [x] Verify merged changes appear on `main`
 - [x] Mark all remaining tasks as complete (`- [x]`)
 - [x] Sync approved spec deltas into `openspec/specs/invite-api/spec.md`
-- [x] Archive the change: move `openspec/changes/invite-api/` to `openspec/changes/archive/YYYY-MM-DD-invite-api/` **staging both new location and deletion in a single commit**
-- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-invite-api/` exists and `openspec/changes/invite-api/` is gone
-- [x] **Create doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-invite-api` then `git push -u origin doc/archive-YYYY-MM-DD-invite-api`
-- [x] Open PR with title `docs: archive invite-api (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] Archive the change: move `openspec/changes/invite-api/` to `openspec/changes/archive/2026-06-06-invite-api/` **staging both new location and deletion in a single commit**
+- [x] Confirm `openspec/changes/archive/2026-06-06-invite-api/` exists and `openspec/changes/invite-api/` is gone
+- [x] **Create doc branch:** `git checkout -b doc/archive-2026-06-06-invite-api` then `git push -u origin doc/archive-2026-06-06-invite-api`
+- [x] Open PR with title `docs: archive invite-api (2026-06-06)` — do NOT push directly to `main`
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor doc PR until merged (same loop — address comments and CI failures, push to doc branch, repeat)
-- [ ] Prune: `git fetch --prune` and `git branch -d feat/invite-api doc/archive-YYYY-MM-DD-invite-api`
+- [x] Monitor doc PR until merged (same loop — address comments and CI failures, push to doc branch, repeat)
+- [ ] Prune: `git fetch --prune` and `git branch -d feat/invite-api doc/archive-2026-06-06-invite-api`
