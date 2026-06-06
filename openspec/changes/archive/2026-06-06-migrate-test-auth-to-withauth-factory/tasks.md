@@ -172,10 +172,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit all changes to the working branch and push to remote
 - [x] Open PR from `fix/test-auth-factory-mock` to `main`. PR body **MUST** include `Closes #340` — PR #364
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll for check status autonomously using `gh pr checks <PR-URL> --json isRequired,state`; when any **required (blocking)** CI check fails, diagnose and fix, commit, follow all steps in [Remote push validation] then push; wait 180 seconds then repeat until all required checks pass
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Monitor PR comments** — poll for new comments autonomously; when comments appear, address them, commit fixes, and explicitly ensure threads are resolved. Follow all steps in [Remote push validation] then push to the same working branch; wait 180 seconds then repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll for check status autonomously using `gh pr checks <PR-URL> --json isRequired,state`; when any **required (blocking)** CI check fails, diagnose and fix, commit, follow all steps in [Remote push validation] then push; wait 180 seconds then repeat until all required checks pass
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
 
 Ownership metadata:
 
@@ -190,15 +190,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on main: `grep -rn "requireAuth" tests/unit/ | grep -v middleware.test.ts` → zero output
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] No documentation updates required (test-only change)
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on main: `grep -rn "requireAuth" tests/unit/ | grep -v middleware.test.ts` → 2 legitimate exceptions (api-helpers.test.ts, global.route.test.ts — both mock requireAuth for requireAdmin)
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] No documentation updates required (test-only change)
 - [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/migrate-test-auth-to-withauth-factory/` to `openspec/changes/archive/YYYY-MM-DD-migrate-test-auth-to-withauth-factory/` **in a single atomic commit** — stage both the new location and the deletion of the old location together
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-migrate-test-auth-to-withauth-factory/` exists and `openspec/changes/migrate-test-auth-to-withauth-factory/` is gone
-- [ ] **Create a doc branch** for the archive: `git checkout -b doc/archive-YYYY-MM-DD-migrate-test-auth-to-withauth-factory` then `git push -u origin doc/archive-...`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive migrate-test-auth-to-withauth-factory (YYYY-MM-DD)`
+- [ ] Archive the change: move `openspec/changes/migrate-test-auth-to-withauth-factory/` to `openspec/changes/archive/2026-06-06-migrate-test-auth-to-withauth-factory/` **in a single atomic commit** — stage both the new location and the deletion of the old location together
+- [ ] Confirm `openspec/changes/archive/2026-06-06-migrate-test-auth-to-withauth-factory/` exists and `openspec/changes/migrate-test-auth-to-withauth-factory/` is gone
+- [ ] **Create a doc branch** for the archive: `git checkout -b doc/archive-2026-06-06-migrate-test-auth-to-withauth-factory` then `git push -u origin doc/archive-...`
+- [ ] Open a PR from the doc branch to `main` with title `docs: archive migrate-test-auth-to-withauth-factory (2026-06-06)`
 - [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
 - [ ] Monitor the doc PR until it merges
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d fix/test-auth-factory-mock doc/archive-YYYY-MM-DD-migrate-test-auth-to-withauth-factory`
+- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d fix/test-auth-factory-mock doc/archive-2026-06-06-migrate-test-auth-to-withauth-factory`
