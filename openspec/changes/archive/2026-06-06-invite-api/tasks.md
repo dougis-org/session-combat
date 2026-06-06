@@ -131,4 +131,4 @@ Blocking resolution flow:
 - [x] Open PR with title `docs: archive invite-api (2026-06-06)` — do NOT push directly to `main`
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
 - [x] Monitor doc PR until merged (same loop — address comments and CI failures, push to doc branch, repeat)
-- [ ] Prune: `git fetch --prune` and `git branch -d feat/invite-api doc/archive-2026-06-06-invite-api`
+- [x] Prune: `git fetch --prune` and `git branch -d feat/invite-api doc/archive-2026-06-06-invite-api`
