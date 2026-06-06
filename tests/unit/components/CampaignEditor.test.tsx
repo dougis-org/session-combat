@@ -108,8 +108,7 @@ describe('CampaignEditor', () => {
       const onSave = jest.fn();
       renderEditor({ onSave });
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
-      expect(onSave).toHaveBeenCalledTimes(1);
-      expect((onSave.mock.calls[0][0] as Campaign).name).toBe('Test Campaign');
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Campaign' }));
     });
 
     it('calls onSave with trimmed moduleName', async () => {
@@ -117,7 +116,7 @@ describe('CampaignEditor', () => {
       const onSave = jest.fn();
       renderEditor({ campaign: { ...BASE_CAMPAIGN, moduleName: '  DH  ' }, onSave });
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
-      expect((onSave.mock.calls[0][0] as Campaign).moduleName).toBe('DH');
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ moduleName: 'DH' }));
     });
 
     it.each(['completed', 'on-hold'] as const)(
@@ -128,7 +127,7 @@ describe('CampaignEditor', () => {
         renderEditor({ onSave });
         await user.selectOptions(screen.getByTestId('status-select'), status);
         await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
-        expect((onSave.mock.calls[0][0] as Campaign).status).toBe(status);
+        expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ status }));
       },
     );
   });
@@ -168,8 +167,7 @@ describe('CampaignEditor', () => {
       const onSave = jest.fn();
       renderEditor({ onSave });
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
-      expect(onSave).toHaveBeenCalledTimes(1);
-      expect((onSave.mock.calls[0][0] as Campaign).chapters).toEqual([]);
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ chapters: [] }));
     });
   });
 
@@ -221,13 +219,15 @@ describe('CampaignEditor', () => {
       expect(inputs[1]).toHaveValue('The Dungeon');
 
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
-      expect(onSave).toHaveBeenCalledTimes(1);
-      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
-      expect(savedCampaign.chapters).toEqual([
-        { id: 'ch-1', title: 'Arrival', order: 0 },
-        { id: 'ch-3', title: 'The Dungeon', order: 1 },
-      ]);
-      expect(savedCampaign.currentChapterId).toBeUndefined();
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chapters: [
+            { id: 'ch-1', title: 'Arrival', order: 0 },
+            { id: 'ch-3', title: 'The Dungeon', order: 1 },
+          ],
+          currentChapterId: undefined,
+        })
+      );
     });
 
     it('reorders chapters with move buttons and updates order index', async () => {
@@ -252,13 +252,15 @@ describe('CampaignEditor', () => {
       expect(inputs[2]).toHaveValue('The Dungeon');
 
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
-      expect(onSave).toHaveBeenCalledTimes(1);
-      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
-      expect(savedCampaign.chapters).toEqual([
-        { id: 'ch-1', title: 'Arrival', order: 0 },
-        { id: 'ch-2', title: 'The Inn', order: 1 },
-        { id: 'ch-3', title: 'The Dungeon', order: 2 },
-      ]);
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chapters: [
+            { id: 'ch-1', title: 'Arrival', order: 0 },
+            { id: 'ch-2', title: 'The Inn', order: 1 },
+            { id: 'ch-3', title: 'The Dungeon', order: 2 },
+          ],
+        })
+      );
     });
 
     it('updates currentChapterId when a chapter is selected in active chapter select', async () => {
@@ -273,9 +275,7 @@ describe('CampaignEditor', () => {
       await user.selectOptions(screen.getByTestId('current-chapter-select'), 'ch-2');
 
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
-      expect(onSave).toHaveBeenCalledTimes(1);
-      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
-      expect(savedCampaign.currentChapterId).toBe('ch-2');
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ currentChapterId: 'ch-2' }));
     });
 
     it('updates chapter title correctly when typing in the input field', async () => {
@@ -308,9 +308,7 @@ describe('CampaignEditor', () => {
       await user.click(removeBtn);
 
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
-      expect(onSave).toHaveBeenCalledTimes(1);
-      const savedCampaign = onSave.mock.calls[0][0] as Campaign;
-      expect(savedCampaign.currentChapterId).toBeUndefined();
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ currentChapterId: undefined }));
     });
   });
 });
