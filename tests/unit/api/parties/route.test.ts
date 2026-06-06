@@ -1,23 +1,21 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/parties/route";
 import { GET as GET_ONE, PUT, DELETE } from "@/app/api/parties/[id]/route";
 import { storage } from "@/lib/storage";
 import {
+  MOCK_AUTH,
   makeRouteRequest,
+  itReturns401,
   itReturns500,
+  itReturns401WithParams,
   itReturns404WithParams,
   itReturns500WithParams,
+  mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({
-  withAuth: (handler: Function) => (req: NextRequest) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
-  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
-}));
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").mockMiddleware);
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadParties: jest.fn(),
@@ -39,7 +37,10 @@ const makeRequest = (body?: unknown) =>
 describe("GET /api/parties", () => {
   beforeEach(() => jest.clearAllMocks());
 
+  itReturns401(GET, () => makeRequest());
+
   it("returns list of parties", async () => {
+    mockAuthState.payload = MOCK_AUTH;
     mockedStorage.loadParties.mockResolvedValue(MOCK_PARTIES as any);
 
     const response = await GET(makeRequest());
@@ -52,29 +53,35 @@ describe("GET /api/parties", () => {
   itReturns500(
     GET,
     () => makeRequest(),
-    () => mockedStorage.loadParties.mockRejectedValue(new Error("Storage error")),
+    () => mockedStorage.loadParties.mockRejectedValue(new Error("Storage error"))
   );
 });
 
 describe("POST /api/parties", () => {
   beforeEach(() => jest.clearAllMocks());
 
+  itReturns401(POST, () => makeRequest({ name: "Crew" }));
+
   it("returns 400 when name is missing", async () => {
+    mockAuthState.payload = MOCK_AUTH;
     const response = await POST(makeRequest({ characterIds: [] }));
     expect(response.status).toBe(400);
   });
 
   it("returns 400 when name is empty string", async () => {
+    mockAuthState.payload = MOCK_AUTH;
     const response = await POST(makeRequest({ name: "  " }));
     expect(response.status).toBe(400);
   });
 
   it("returns 400 when name is a non-string type", async () => {
+    mockAuthState.payload = MOCK_AUTH;
     const response = await POST(makeRequest({ name: 123 }));
     expect(response.status).toBe(400);
   });
 
   it("creates party and returns 201", async () => {
+    mockAuthState.payload = MOCK_AUTH;
     mockedStorage.saveParty.mockResolvedValue(undefined as any);
 
     const response = await POST(
@@ -100,7 +107,7 @@ describe("POST /api/parties", () => {
   itReturns500(
     POST,
     () => makeRequest({ name: "Doomed Party" }),
-    () => mockedStorage.saveParty.mockRejectedValue(new Error("Storage error")),
+    () => mockedStorage.saveParty.mockRejectedValue(new Error("Storage error"))
   );
 });
 
@@ -117,6 +124,7 @@ describe("PUT /api/parties/[id]", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthState.payload = MOCK_AUTH;
     mockedStorage.loadParties.mockResolvedValue([EXISTING_PARTY] as any);
     mockedStorage.saveParty.mockResolvedValue(undefined as any);
   });
@@ -210,10 +218,13 @@ describe("GET /api/parties/[id]", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthState.payload = MOCK_AUTH;
     mockedStorage.loadParties.mockResolvedValue([
       { id: "party-123", userId: "user-123", name: "Fellowship", members: [] },
     ] as any);
   });
+
+  itReturns401WithParams(GET_ONE, makeReq, PARAMS);
 
   it("returns party when found", async () => {
     const response = await GET_ONE(makeReq(), { params: PARAMS });
@@ -225,14 +236,14 @@ describe("GET /api/parties/[id]", () => {
     GET_ONE,
     makeReq,
     PARAMS,
-    () => mockedStorage.loadParties.mockResolvedValue([]),
+    () => mockedStorage.loadParties.mockResolvedValue([])
   );
 
   itReturns500WithParams(
     GET_ONE,
     makeReq,
     PARAMS,
-    () => mockedStorage.loadParties.mockRejectedValue(new Error("DB error")),
+    () => mockedStorage.loadParties.mockRejectedValue(new Error("DB error"))
   );
 });
 
@@ -242,11 +253,14 @@ describe("DELETE /api/parties/[id]", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthState.payload = MOCK_AUTH;
     mockedStorage.loadParties.mockResolvedValue([
       { id: "party-123", userId: "user-123", name: "Fellowship", members: [] },
     ] as any);
     mockedStorage.deleteParty.mockResolvedValue(undefined as any);
   });
+
+  itReturns401WithParams(DELETE, makeReq, PARAMS);
 
   it("deletes party and returns 200", async () => {
     const response = await DELETE(makeReq(), { params: PARAMS });
@@ -258,13 +272,13 @@ describe("DELETE /api/parties/[id]", () => {
     DELETE,
     makeReq,
     PARAMS,
-    () => mockedStorage.loadParties.mockResolvedValue([]),
+    () => mockedStorage.loadParties.mockResolvedValue([])
   );
 
   itReturns500WithParams(
     DELETE,
     makeReq,
     PARAMS,
-    () => mockedStorage.loadParties.mockRejectedValue(new Error("DB error")),
+    () => mockedStorage.loadParties.mockRejectedValue(new Error("DB error"))
   );
 });

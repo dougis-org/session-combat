@@ -1,20 +1,20 @@
 /**
  * @jest-environment node
  */
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { GET } from "@/app/api/campaigns/[id]/combat-events/route";
 import { getDatabase } from "@/lib/db";
 import { assertCampaignAccess } from "@/lib/utils/campaign";
 import {
+  MOCK_AUTH,
   mockDbCollection,
   makeRouteRequest,
+  itReturns401WithParams,
   itReturns500WithParams,
+  mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({
-  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
-}));
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").mockMiddleware);
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 jest.mock("@/lib/utils/campaign", () => ({
   ...jest.requireActual("@/lib/utils/campaign"),
@@ -48,10 +48,13 @@ const MOCK_DOC = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockAuthState.payload = MOCK_AUTH;
   mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "player" });
 });
 
 describe("GET /api/campaigns/[id]/combat-events", () => {
+  itReturns401WithParams(GET, makeGetReq, params);
+
   it("returns 404 when non-member accesses combat events", async () => {
     mockedAssertCampaignAccess.mockResolvedValue(
       NextResponse.json({ error: "Campaign not found" }, { status: 404 })
@@ -154,6 +157,6 @@ describe("GET /api/campaigns/[id]/combat-events", () => {
         find: jest.fn().mockReturnValue({
           toArray: jest.fn().mockRejectedValue(new Error("DB error")),
         }),
-      }),
+      })
   );
 });

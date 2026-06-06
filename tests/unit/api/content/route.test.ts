@@ -1,19 +1,18 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/content/route";
 import { storage } from "@/lib/storage";
 import {
+  MOCK_AUTH,
   makeRouteRequest,
+  itReturns401,
   itReturns500,
+  mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 import type { SavedContent } from "@/lib/types";
 
-jest.mock("@/lib/middleware", () => ({
-  withAuth: (handler: Function) => (req: NextRequest) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
-}));
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").mockMiddleware);
 jest.mock("@/lib/storage", () => ({
   storage: {
     savedContent: {
@@ -60,11 +59,14 @@ const MOCK_ITEM: SavedContent = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockAuthState.payload = MOCK_AUTH;
 });
 
 // ─── GET /api/content ─────────────────────────────────────────────────────────
 
 describe("GET /api/content", () => {
+  itReturns401(GET, () => makeGetReq(CAMPAIGN_ID));
+
   it("returns 400 when campaignId is missing", async () => {
     const res = await GET(makeGetReq());
     expect(res.status).toBe(400);
@@ -85,13 +87,15 @@ describe("GET /api/content", () => {
   itReturns500(
     GET,
     () => makeGetReq(CAMPAIGN_ID),
-    () => mockedList.mockRejectedValue(new Error("DB error")),
+    () => mockedList.mockRejectedValue(new Error("DB error"))
   );
 });
 
 // ─── POST /api/content ────────────────────────────────────────────────────────
 
 describe("POST /api/content", () => {
+  itReturns401(POST, () => makePostReq(VALID_BODY));
+
   it("returns 400 when required fields are missing", async () => {
     const res = await POST(makePostReq({ campaignId: CAMPAIGN_ID }));
     expect(res.status).toBe(400);
@@ -143,6 +147,6 @@ describe("POST /api/content", () => {
   itReturns500(
     POST,
     () => makePostReq(VALID_BODY),
-    () => mockedCreate.mockRejectedValue(new Error("DB error")),
+    () => mockedCreate.mockRejectedValue(new Error("DB error"))
   );
 });

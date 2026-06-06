@@ -1,23 +1,22 @@
 /**
  * @jest-environment node
  */
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { GET, POST } from "@/app/api/campaigns/route";
 import { GET as GET_ONE, PATCH, DELETE } from "@/app/api/campaigns/[id]/route";
 import { storage } from "@/lib/storage";
 import { assertCampaignAccess } from "@/lib/utils/campaign";
 import {
+  MOCK_AUTH,
   makeRouteRequest,
+  itReturns401,
   itReturns500,
+  itReturns401WithParams,
   itReturns500WithParams,
+  mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({
-  withAuth: (handler: Function) => (req: NextRequest) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
-  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
-}));
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").mockMiddleware);
 
 jest.mock("@/lib/storage", () => ({
   storage: {
@@ -61,6 +60,8 @@ const PATCH_SINGLE_CHAPTER = [{ id: "ch-5", title: "New Chapter 5", order: 0 }];
 describe("GET /api/campaigns", () => {
   beforeEach(() => jest.clearAllMocks());
 
+  itReturns401(GET, makeGetRequest);
+
   it("returns list of campaigns", async () => {
     mockedStorage.loadCampaigns.mockResolvedValue([MOCK_CAMPAIGN] as any);
 
@@ -82,7 +83,7 @@ describe("GET /api/campaigns", () => {
   itReturns500(
     GET,
     makeGetRequest,
-    () => mockedStorage.loadCampaigns.mockRejectedValue(new Error("DB error")),
+    () => mockedStorage.loadCampaigns.mockRejectedValue(new Error("DB error"))
   );
 });
 
@@ -93,6 +94,8 @@ describe("POST /api/campaigns", () => {
     jest.clearAllMocks();
     mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
   });
+
+  itReturns401(POST, () => makePostRequest({ name: "Test" }));
 
   it("returns 400 when name is missing", async () => {
     const response = await POST(makePostRequest({ moduleName: "X" }));
@@ -205,7 +208,7 @@ describe("POST /api/campaigns", () => {
   itReturns500(
     POST,
     () => makePostRequest({ name: "Doomed" }),
-    () => mockedStorage.saveCampaign.mockRejectedValue(new Error("DB error")),
+    () => mockedStorage.saveCampaign.mockRejectedValue(new Error("DB error"))
   );
 });
 
@@ -215,6 +218,8 @@ describe("GET /api/campaigns/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  itReturns401WithParams(GET_ONE, () => makeIdRequest("GET"), PARAMS);
 
   it("returns 200 with campaign for active DM member", async () => {
     mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "dm" });
@@ -246,7 +251,7 @@ describe("GET /api/campaigns/[id]", () => {
     GET_ONE,
     () => makeIdRequest("GET"),
     PARAMS,
-    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error")),
+    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error"))
   );
 });
 
@@ -258,6 +263,8 @@ describe("PATCH /api/campaigns/[id]", () => {
     mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN } as any, role: "dm" });
     mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
   });
+
+  itReturns401WithParams(PATCH, () => makeIdRequest("PATCH", {}), PARAMS);
 
   it("updates name and returns 200", async () => {
     const response = await PATCH(
@@ -379,6 +386,7 @@ describe("PATCH /api/campaigns/[id]", () => {
     expect(body.moduleName).toBe(MOCK_CAMPAIGN.moduleName);
   });
 
+
   it("returns 400 when chapters is not an array on PATCH", async () => {
     const response = await PATCH(
       makeIdRequest("PATCH", { chapters: "not-an-array" }),
@@ -428,7 +436,7 @@ describe("PATCH /api/campaigns/[id]", () => {
     PATCH,
     () => makeIdRequest("PATCH", { name: "X" }),
     PARAMS,
-    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error")),
+    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error"))
   );
 });
 
@@ -440,6 +448,8 @@ describe("DELETE /api/campaigns/[id]", () => {
     mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN } as any, role: "dm" });
     mockedStorage.deleteCampaign.mockResolvedValue(undefined as any);
   });
+
+  itReturns401WithParams(DELETE, () => makeIdRequest("DELETE"), PARAMS);
 
   it("deletes campaign and returns 200 for DM", async () => {
     const response = await DELETE(makeIdRequest("DELETE"), { params: PARAMS });
@@ -466,6 +476,6 @@ describe("DELETE /api/campaigns/[id]", () => {
     DELETE,
     () => makeIdRequest("DELETE"),
     PARAMS,
-    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error")),
+    () => mockedAssertCampaignAccess.mockRejectedValue(new Error("DB error"))
   );
 });

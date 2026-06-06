@@ -1,19 +1,18 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/characters/route";
 import { storage } from "@/lib/storage";
 import {
+  MOCK_AUTH,
   makeRouteRequest,
+  itReturns401,
   itReturns500,
   itValidatesAlignmentField,
+  mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({
-  withAuth: (handler: Function) => (req: NextRequest) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
-}));
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").mockMiddleware);
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadCharacters: jest.fn(),
@@ -32,7 +31,10 @@ const makeRequest = (body?: unknown) =>
 describe("GET /api/characters", () => {
   beforeEach(() => jest.clearAllMocks());
 
+  itReturns401(GET, () => makeRequest());
+
   it("returns list of characters", async () => {
+    mockAuthState.payload = MOCK_AUTH;
     mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARACTERS as any);
 
     const response = await GET(makeRequest());
@@ -45,15 +47,18 @@ describe("GET /api/characters", () => {
   itReturns500(
     GET,
     () => makeRequest(),
-    () => mockedStorage.loadCharacters.mockRejectedValue(new Error("Storage error")),
+    () => mockedStorage.loadCharacters.mockRejectedValue(new Error("Storage error"))
   );
 });
 
 describe("POST /api/characters", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthState.payload = MOCK_AUTH;
     mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
   });
+
+  itReturns401(POST, () => makeRequest({ name: "Hero" }));
 
   it("returns 400 when name is missing", async () => {
     const response = await POST(makeRequest({ hp: 10 }));
@@ -120,7 +125,7 @@ describe("POST /api/characters", () => {
   itReturns500(
     POST,
     () => makeRequest({ name: "Doomed Hero" }),
-    () => mockedStorage.saveCharacter.mockRejectedValue(new Error("Storage error")),
+    () => mockedStorage.saveCharacter.mockRejectedValue(new Error("Storage error"))
   );
 
   itValidatesAlignmentField(
@@ -184,6 +189,7 @@ describe("GET /api/characters — characterType filter", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthState.payload = MOCK_AUTH;
     mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARS as any);
   });
 
