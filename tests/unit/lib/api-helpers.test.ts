@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { requireAdmin } from "@/lib/api-helpers";
-import { getUserById, InvalidUserIdError } from "@/lib/permissions";
+import { getUserById } from "@/lib/permissions";
 import { NextResponse } from "next/server";
 import { makeRouteRequest, ADMIN_AUTH } from "@/tests/unit/helpers/route.test.helpers";
 
