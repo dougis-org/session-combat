@@ -102,10 +102,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit all changes to `feat/invite-api` and push to remote
 - [x] Open PR from `feat/invite-api` to `main`. PR body must include `Closes #305`
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll autonomously; address comments, commit fixes, follow Remote push validation, push; wait 180 seconds; repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, commit, follow Remote push validation, push; wait 180 seconds; repeat until all required checks pass
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user — never wait for a human to report the merge; never force-merge
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — poll autonomously; address comments, commit fixes, follow Remote push validation, push; wait 180 seconds; repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, commit, follow Remote push validation, push; wait 180 seconds; repeat until all required checks pass
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user — never wait for a human to report the merge; never force-merge
 
 Ownership metadata:
 
@@ -121,14 +121,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/invite-api/spec.md`
-- [ ] Archive the change: move `openspec/changes/invite-api/` to `openspec/changes/archive/YYYY-MM-DD-invite-api/` **staging both new location and deletion in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-invite-api/` exists and `openspec/changes/invite-api/` is gone
-- [ ] **Create doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-invite-api` then `git push -u origin doc/archive-YYYY-MM-DD-invite-api`
-- [ ] Open PR with title `docs: archive invite-api (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor doc PR until merged (same loop — address comments and CI failures, push to doc branch, repeat)
-- [ ] Prune: `git fetch --prune` and `git branch -d feat/invite-api doc/archive-YYYY-MM-DD-invite-api`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/invite-api/spec.md`
+- [x] Archive the change: move `openspec/changes/invite-api/` to `openspec/changes/archive/2026-06-06-invite-api/` **staging both new location and deletion in a single commit**
+- [x] Confirm `openspec/changes/archive/2026-06-06-invite-api/` exists and `openspec/changes/invite-api/` is gone
+- [x] **Create doc branch:** `git checkout -b doc/archive-2026-06-06-invite-api` then `git push -u origin doc/archive-2026-06-06-invite-api`
+- [x] Open PR with title `docs: archive invite-api (2026-06-06)` — do NOT push directly to `main`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor doc PR until merged (same loop — address comments and CI failures, push to doc branch, repeat)
+- [ ] Prune: `git fetch --prune` and `git branch -d feat/invite-api doc/archive-2026-06-06-invite-api`
