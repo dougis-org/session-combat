@@ -88,7 +88,7 @@
 - **Requirement:** No test file imports `requireAuth` except `middleware.test.ts`
   - **Design element:** Remove import in all 23 files
   - **Acceptance criteria reference:** specs/route-test-files.md
-  - **Testability notes:** `grep -rn "requireAuth" tests/unit/ | grep -v middleware.test.ts` → empty
+  - **Testability notes:** `grep -rn "requireAuth" tests/unit/ | grep -v middleware.test.ts` → 2 exceptions (api-helpers.test.ts, global.route.test.ts — both legitimately mock requireAuth for requireAdmin)
 
 - **Requirement:** Shared helpers compile without `mockedRequireAuth` param
   - **Design element:** Decision 3 signature update

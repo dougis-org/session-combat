@@ -21,53 +21,53 @@ For each task in `tasks.md`, the cycle is:
 
 ### Task 1 — Shared helpers (`route.test.helpers.ts`)
 
-- [ ] `npx tsc --noEmit` fails with downstream call-site errors (expected — confirms the signature change took effect)
-- [ ] After completing Tasks 2–9, `npx tsc --noEmit` is clean (all call sites updated)
+- [x] `npx tsc --noEmit` fails with downstream call-site errors (expected — confirms the signature change took effect)
+- [x] After completing Tasks 2–9, `npx tsc --noEmit` is clean (all call sites updated)
 
 ### Task 2 — Campaigns tests
 
-- [ ] `npx jest tests/unit/api/campaigns/ --no-coverage` passes after migration
-- [ ] No `requireAuth` reference in any campaigns test file (`grep "requireAuth" tests/unit/api/campaigns/` → empty)
-- [ ] No `itReturns401` call in any campaigns test file
+- [x] `npx jest tests/unit/api/campaigns/ --no-coverage` passes after migration
+- [x] No `requireAuth` reference in any campaigns test file (`grep "requireAuth" tests/unit/api/campaigns/` → empty)
+- [x] No `itReturns401` call in any campaigns test file
 
 ### Task 3 — Characters tests
 
-- [ ] `npx jest tests/unit/api/characters/ --no-coverage` passes after migration
-- [ ] No `requireAuth` reference in characters test files
+- [x] `npx jest tests/unit/api/characters/ --no-coverage` passes after migration
+- [x] No `requireAuth` reference in characters test files
 
 ### Task 4 — Combat tests
 
-- [ ] `npx jest tests/unit/api/combat/ --no-coverage` passes after migration
-- [ ] No `requireAuth` reference in combat test files
+- [x] `npx jest tests/unit/api/combat/ --no-coverage` passes after migration
+- [x] No `requireAuth` reference in combat test files
 
 ### Task 5 — Content tests
 
-- [ ] `npx jest tests/unit/api/content/ --no-coverage` passes after migration
-- [ ] No `requireAuth` reference in content test files
+- [x] `npx jest tests/unit/api/content/ --no-coverage` passes after migration
+- [x] No `requireAuth` reference in content test files
 
 ### Task 6 — Encounters tests
 
-- [ ] `npx jest tests/unit/api/encounters/ --no-coverage` passes after migration
-- [ ] No `requireAuth` reference in encounters test files
+- [x] `npx jest tests/unit/api/encounters/ --no-coverage` passes after migration
+- [x] No `requireAuth` reference in encounters test files
 
 ### Task 7 — Monsters tests
 
-- [ ] `npx jest tests/unit/api/monsters/ --no-coverage` passes after migration
-- [ ] No `requireAuth` reference in monsters test files
+- [x] `npx jest tests/unit/api/monsters/ --no-coverage` passes after migration
+- [x] No `requireAuth` reference in monsters route test files — **exception:** `global.route.test.ts` legitimately mocks `requireAuth` because `global/route.ts` calls `requireAdmin` which calls `requireAuth` directly (not via `withAuth`)
 
 ### Task 8 — Parties test
 
-- [ ] `npx jest tests/unit/api/parties/ --no-coverage` passes after migration
-- [ ] No `requireAuth` reference in parties test files
+- [x] `npx jest tests/unit/api/parties/ --no-coverage` passes after migration
+- [x] No `requireAuth` reference in parties test files
 
 ### Task 9 — Miscellaneous tests
 
-- [ ] `npx jest tests/unit/import/ tests/unit/storage/ tests/unit/lib/api-helpers.test.ts --no-coverage` passes
-- [ ] `characterImportRoute.test.ts` factory no longer references `requireAuth` internally
+- [x] `npx jest tests/unit/import/ tests/unit/storage/ tests/unit/lib/api-helpers.test.ts --no-coverage` passes
+- [x] `characterImportRoute.test.ts` factory no longer references `requireAuth` internally
 
 ### Task 10 — Final acceptance
 
-- [ ] `grep -rn "requireAuth" tests/unit/ | grep -v middleware.test.ts` → zero output
-- [ ] `grep -rn "itReturns401" tests/unit/` → zero output
-- [ ] `npx tsc --noEmit` → clean
-- [ ] `npx jest --config jest.config.js tests/unit --no-coverage` → all pass
+- [x] `grep -rn "requireAuth" tests/unit/ | grep -v middleware.test.ts` → 2 exceptions: `api-helpers.test.ts` and `global.route.test.ts` (both legitimately mock `requireAuth` for `requireAdmin`; see tasks.md note)
+- [x] `grep -rn "itReturns401" tests/unit/` → zero output
+- [x] `npx tsc --noEmit` → clean
+- [x] `npx jest --config jest.config.js tests/unit --no-coverage` → all pass (1891 tests, 0 failures)

@@ -14,9 +14,9 @@ Each affected test file SHALL mock `@/lib/middleware` using an explicit factory 
 
 #### Scenario: No `requireAuth` import in affected files
 
-- **Given** any of the 23 affected test files after migration
+- **Given** any of the 23 affected route handler test files after migration
 - **When** `grep -n "requireAuth" <file>` is run
-- **Then** zero matches (no import, no jest.mocked reference, no mock setup)
+- **Then** zero matches (no import, no jest.mocked reference, no mock setup) — **exceptions:** `api-helpers.test.ts` and `global.route.test.ts` legitimately mock `requireAuth` because their subjects call `requireAdmin` which calls `requireAuth` directly
 
 ### Requirement: MODIFIED `itReturns500` / `itReturns404WithParams` call sites
 
@@ -57,4 +57,4 @@ Reason for removal: Route tests no longer test auth rejection. Each call site is
 
 - **Given** the completed migration
 - **When** `grep -rn "requireAuth" tests/unit/ | grep -v middleware.test.ts` is run
-- **Then** zero lines output
+- **Then** 2 lines output (api-helpers.test.ts, global.route.test.ts) — both are documented exceptions where `requireAuth` is legitimately mocked for `requireAdmin`
