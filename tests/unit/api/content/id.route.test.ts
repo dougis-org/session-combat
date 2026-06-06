@@ -1,19 +1,18 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from "next/server";
 import { PUT, DELETE } from "@/app/api/content/[id]/route";
 import { storage } from "@/lib/storage";
 import {
+  MOCK_AUTH,
   makeRouteRequest,
+  itReturns401WithParams,
   itReturns404WithParams,
   itReturns500WithParams,
+  mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({
-  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
-}));
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 jest.mock("@/lib/storage", () => ({
   storage: {
     savedContent: {
@@ -35,11 +34,14 @@ const makeDeleteReq = () => makeRouteRequest(BASE_URL, "DELETE");
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockAuthState.payload = MOCK_AUTH;
 });
 
 // ─── PUT /api/content/[id] ────────────────────────────────────────────────────
 
 describe("PUT /api/content/[id]", () => {
+  itReturns401WithParams(PUT, () => makePutReq({ result: "text" }), PARAMS);
+
   it("returns 400 when result is not a string", async () => {
     const res = await PUT(makePutReq({ result: 42 }), { params: PARAMS });
     expect(res.status).toBe(400);
@@ -90,13 +92,15 @@ describe("PUT /api/content/[id]", () => {
     PUT,
     () => makePutReq({ result: "text" }),
     PARAMS,
-    () => mockedUpdate.mockRejectedValue(new Error("DB error")),
+    () => mockedUpdate.mockRejectedValue(new Error("DB error"))
   );
 });
 
 // ─── DELETE /api/content/[id] ─────────────────────────────────────────────────
 
 describe("DELETE /api/content/[id]", () => {
+  itReturns401WithParams(DELETE, makeDeleteReq, PARAMS);
+
   it("returns 204 on successful delete", async () => {
     mockedRemove.mockResolvedValue(true);
     const res = await DELETE(makeDeleteReq(), { params: PARAMS });
@@ -116,6 +120,6 @@ describe("DELETE /api/content/[id]", () => {
     DELETE,
     makeDeleteReq,
     PARAMS,
-    () => mockedRemove.mockRejectedValue(new Error("DB error")),
+    () => mockedRemove.mockRejectedValue(new Error("DB error"))
   );
 });

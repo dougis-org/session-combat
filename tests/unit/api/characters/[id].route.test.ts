@@ -1,18 +1,16 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from "next/server";
 import { PUT } from "@/app/api/characters/[id]/route";
 import { storage } from "@/lib/storage";
 import {
+  MOCK_AUTH,
   makeRouteRequest,
   itValidatesAlignmentFieldWithParams,
+  mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({
-  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
-}));
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadCharacters: jest.fn(),
@@ -56,6 +54,7 @@ const makeRequest = (body: unknown) =>
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockAuthState.payload = MOCK_AUTH;
   mockedStorage.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
   mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
 });

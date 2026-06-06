@@ -5,14 +5,14 @@ import { NextRequest } from "next/server";
 import { POST } from "@/app/api/monsters/upload/route";
 import { storage } from "@/lib/storage";
 import {
+  MOCK_AUTH,
   makeRouteRequest,
+  itReturns401,
   itReturns500,
+  mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({
-  withAuth: (handler: Function) => (req: NextRequest) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
-}));
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 jest.mock("@/lib/storage", () => ({
   storage: { saveMonsterTemplate: jest.fn() },
 }));
@@ -28,6 +28,13 @@ const makeValidReq = () => makeReq({ monsters: [{ name: "G", maxHp: 7 }] });
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockAuthState.payload = MOCK_AUTH;
+});
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+describe("POST /api/monsters/upload — auth", () => {
+  itReturns401(POST, makeValidReq);
 });
 
 // ─── Request parsing ──────────────────────────────────────────────────────────
@@ -119,6 +126,6 @@ describe("POST /api/monsters/upload — partial and total failure", () => {
   itReturns500(
     POST,
     makeValidReq,
-    () => mockedSave.mockRejectedValue(new Error("DB")),
+    () => mockedSave.mockRejectedValue(new Error("DB"))
   );
 });

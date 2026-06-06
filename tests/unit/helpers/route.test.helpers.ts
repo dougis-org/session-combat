@@ -15,6 +15,33 @@ export const ADMIN_AUTH: AuthPayload = {
   tokenVersion: 0,
 };
 
+/** Mock auth state holding authentication payload dynamically for wrappers mock */
+export const mockAuthState = {
+  payload: MOCK_AUTH as AuthPayload | null,
+};
+
+/** Central mock factory implementation for Next.js middleware endpoints to avoid state leakage */
+export const createMockMiddleware = () => ({
+  requireAuth: jest.fn(async (_req: any) => {
+    if (!mockAuthState.payload) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return mockAuthState.payload;
+  }),
+  withAuth: jest.fn((handler: any) => async (req: any) => {
+    if (!mockAuthState.payload) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return handler(req, mockAuthState.payload);
+  }),
+  withAuthAndParams: jest.fn((handler: any) => async (req: any, { params }: any) => {
+    if (!mockAuthState.payload) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return handler(req, mockAuthState.payload, await params);
+  }),
+});
+
 /** Configure a mocked requireAdmin (async) to return a 401 or 403 response */
 export function mockAdminDenied(mockedFn: jest.Mock, status: 401 | 403): void {
   const message = status === 401 ? "Unauthorized" : "Only administrators can perform this action";
@@ -80,6 +107,23 @@ type ContextHandler<P extends Record<string, string> = { id: string }> = (
   ctx: { params: Promise<P> }
 ) => Promise<Response>;
 
+/** Register: returns 401 when auth state is unauthenticated (no route params) */
+export function itReturns401(
+  handler: RouteHandler,
+  makeReq: () => NextRequest
+): void {
+  it("returns 401 when not authenticated", async () => {
+    const originalPayload = mockAuthState.payload;
+    mockAuthState.payload = null;
+    try {
+      const response = await handler(makeReq());
+      expect(response.status).toBe(401);
+    } finally {
+      mockAuthState.payload = originalPayload;
+    }
+  });
+}
+
 /** Register: returns 500 when setupError configures the mock to throw (no route params) */
 export function itReturns500(
   handler: RouteHandler,
@@ -88,9 +132,33 @@ export function itReturns500(
   description = "returns 500 on error"
 ): void {
   it(description, async () => {
-    setupError();
-    const response = await handler(makeReq());
-    expect(response.status).toBe(500);
+    const originalPayload = mockAuthState.payload;
+    mockAuthState.payload = MOCK_AUTH;
+    try {
+      setupError();
+      const response = await handler(makeReq());
+      expect(response.status).toBe(500);
+    } finally {
+      mockAuthState.payload = originalPayload;
+    }
+  });
+}
+
+/** Register: returns 401 when auth state is unauthenticated (with route params) */
+export function itReturns401WithParams<P extends Record<string, string>>(
+  handler: ContextHandler<P>,
+  makeReq: () => NextRequest,
+  params: Promise<P>
+): void {
+  it("returns 401 when not authenticated", async () => {
+    const originalPayload = mockAuthState.payload;
+    mockAuthState.payload = null;
+    try {
+      const response = await handler(makeReq(), { params });
+      expect(response.status).toBe(401);
+    } finally {
+      mockAuthState.payload = originalPayload;
+    }
   });
 }
 
@@ -103,9 +171,15 @@ export function itReturns404WithParams<P extends Record<string, string>>(
   description = "returns 404 when not found"
 ): void {
   it(description, async () => {
-    setupNotFound();
-    const response = await handler(makeReq(), { params });
-    expect(response.status).toBe(404);
+    const originalPayload = mockAuthState.payload;
+    mockAuthState.payload = MOCK_AUTH;
+    try {
+      setupNotFound();
+      const response = await handler(makeReq(), { params });
+      expect(response.status).toBe(404);
+    } finally {
+      mockAuthState.payload = originalPayload;
+    }
   });
 }
 
@@ -118,9 +192,15 @@ export function itReturns500WithParams<P extends Record<string, string>>(
   description = "returns 500 on error"
 ): void {
   it(description, async () => {
-    setupError();
-    const response = await handler(makeReq(), { params });
-    expect(response.status).toBe(500);
+    const originalPayload = mockAuthState.payload;
+    mockAuthState.payload = MOCK_AUTH;
+    try {
+      setupError();
+      const response = await handler(makeReq(), { params });
+      expect(response.status).toBe(500);
+    } finally {
+      mockAuthState.payload = originalPayload;
+    }
   });
 }
 

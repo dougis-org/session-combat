@@ -5,14 +5,14 @@ import { POST, PUT } from "@/app/api/monsters/global/route";
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
 import {
+  ADMIN_AUTH,
   makeRouteRequest,
   mockDbCollection,
   itValidatesAlignmentField,
+  mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({
-  requireAuth: () => ({ userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
-}));
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadGlobalMonsterTemplates: jest.fn(),
@@ -49,6 +49,7 @@ const makeReqWith = (alignment: string | undefined) =>
 describe("POST /api/monsters/global — alignment validation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthState.payload = ADMIN_AUTH;
     mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
     mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockResolvedValue({ tokenVersion: 0, isAdmin: true }),
@@ -61,6 +62,7 @@ describe("POST /api/monsters/global — alignment validation", () => {
 describe("POST /api/monsters/global — DB error during admin check", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthState.payload = ADMIN_AUTH;
     mockedGetDatabase.mockRejectedValue(new Error("connection refused"));
   });
 
@@ -76,6 +78,7 @@ describe("POST /api/monsters/global — DB error during admin check", () => {
 describe("PUT /api/monsters/global — DB error during admin check", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthState.payload = ADMIN_AUTH;
     mockedGetDatabase.mockRejectedValue(new Error("connection refused"));
   });
 

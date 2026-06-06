@@ -7,18 +7,13 @@ import { getDatabase } from "@/lib/db";
 import { DuplicateMemberError } from "@/lib/errors";
 import { MEMBER_ROLES, MemberRole, CampaignMember } from "@/lib/types";
 import { POST } from "@/app/api/campaigns/route";
-import { makeRouteRequest } from "@/tests/unit/helpers/route.test.helpers";
+import { makeRouteRequest, mockAuthState } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/db", () => ({
   getDatabase: jest.fn(),
 }));
 
-jest.mock("@/lib/middleware", () => ({
-  withAuth: (handler: Function) => (req: NextRequest) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
-  withAuthAndParams: (handler: Function) => async (req: NextRequest, ctx: any) =>
-    handler(req, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
-}));
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 
 const mockedGetDatabase = jest.mocked(getDatabase);
 
@@ -263,6 +258,7 @@ describe("Route POST seeding (mocked storage)", () => {
   });
 
   test("POST campaign — 201 returned and addMember called with correct DM payload", async () => {
+    mockAuthState.payload = { userId: "user-123", email: "user@test.com", tokenVersion: 1 };
     const saveCampaignSpy = jest.spyOn(storage, "saveCampaign").mockResolvedValue(undefined as any);
     const addMemberSpy = jest.spyOn(storage, "addMember").mockResolvedValue(undefined as any);
     const req = makeRouteRequest("http://localhost/api/campaigns", "POST", { name: "New Epic Campaign" });
@@ -290,6 +286,7 @@ describe("Route POST seeding (mocked storage)", () => {
   });
 
   test("POST campaign — deleteCampaign called and 500 returned when addMember throws", async () => {
+    mockAuthState.payload = { userId: "user-123", email: "user@test.com", tokenVersion: 1 };
     const saveCampaignSpy = jest.spyOn(storage, "saveCampaign").mockResolvedValue(undefined as any);
     const addMemberSpy = jest.spyOn(storage, "addMember").mockRejectedValue(new Error("DB failure") as never);
     const deleteCampaignSpy = jest.spyOn(storage, "deleteCampaign").mockResolvedValue(undefined as any);

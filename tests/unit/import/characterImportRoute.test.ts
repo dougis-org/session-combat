@@ -13,13 +13,9 @@ import {
   EXISTING_IMPORTED_CHARACTER_ID,
   IMPORT_WARNING,
 } from "@/tests/helpers/dndBeyondImport";
+import { MOCK_AUTH, mockAuthState } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/middleware", () => ({
-  withAuth: (handler: Function) => (request: any) =>
-    handler(request, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }),
-  withAuthAndParams: (handler: Function) => async (request: any, ctx: any) =>
-    handler(request, { userId: "user-123", email: "user@example.com", tokenVersion: 0 }, await ctx.params),
-}));
+jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 
 jest.mock("@/lib/storage", () => ({
   storage: {
@@ -52,9 +48,18 @@ describe("character import route", () => {
     mockedSaveCharacter.mockReset();
     mockedImportCharacter.mockReset();
 
+    mockAuthState.payload = MOCK_AUTH;
     mockedLoadCharacters.mockResolvedValue([]);
     mockedSaveCharacter.mockResolvedValue(undefined);
     mockedImportCharacter.mockResolvedValue(createNormalizedImportResult());
+  });
+
+  test("returns auth response when the user is not authenticated", async () => {
+    mockAuthState.payload = null;
+
+    const response = await POST(createRequest({ url: "https://example.com" }));
+
+    expect(response.status).toBe(401);
   });
 
   test("returns 400 when the import URL is blank", async () => {
