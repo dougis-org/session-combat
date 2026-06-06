@@ -1,10 +1,10 @@
 ## ADDED Requirements
 
-This document details changes to requirements and is additive to the `design.md` document, not a replacement.
+This document details *changes* to requirements and is additive to the [design document](../archive/2026-06-05-mock-withauth-in-unit-tests/design.md), not a replacement.
 
 ### Requirement: ADDED Mock Auth State Helper
 
-The system SHALL provide a central state object `mockAuthState` that allows changing the mock authentication state dynamically inside test blocks.
+The system SHALL provide a central state object `mockAuthState` that allows changing the mock authentication state dynamically inside test blocks. The state object is module-scoped and must be reset in `beforeEach` blocks or via `try/finally` guards to maintain test isolation and prevent concurrent mutation between tests.
 
 #### Scenario: Setting payload to a mock user allows authentication to pass
 
@@ -41,7 +41,7 @@ Reason for removal: The `requireAuth` helper is deprecated, and mocking it direc
 - Proposal element: Update 28 unit tests -> Requirement: ADDED Mock Auth State Helper, MODIFIED Shared Route Test Helper Assertions, REMOVED Direct Mocks of `requireAuth`
 - Design decision: Decision 1 (State-Based Middleware Mock Factory) -> Requirement: ADDED Mock Auth State Helper
 - Design decision: Decision 2 (Remove `requireAuth` Mocking and Imports) -> Requirement: REMOVED Direct Mocks of `requireAuth`
-- Requirement -> Task(s): (Defined in tasks.md)
+- Requirement -> Task(s): (Defined in [tasks.md](../archive/2026-06-05-mock-withauth-in-unit-tests/tasks.md))
 
 ## Non-Functional Acceptance Criteria
 
