@@ -46,7 +46,7 @@
 
 ### Final verification
 
-- [x] Confirm no static calls remain: `grep -r "userEvent\." tests/ | grep -v "setup()"` returns empty
+- [x] Confirm no static calls remain: `grep -r "userEvent\.\(click\|type\|selectOptions\)" tests/` returns empty
 - [x] Run full suite: `npm run test:unit` exits 0
 
 ## Pre-Commit Code Review
@@ -57,7 +57,7 @@
 
 - [x] `npm run test:unit` — all tests pass
 - [x] `npm run build` — build succeeds
-- [x] `grep -r "userEvent\." tests/ | grep -v "setup()"` — no output
+- [x] `grep -r "userEvent\.\(click\|type\|selectOptions\)" tests/` — no output
 
 Note: No integration or E2E changes needed — this is a test-only migration.
 

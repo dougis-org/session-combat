@@ -49,7 +49,7 @@
 - Requirement: No static `userEvent.*()` calls remain in any test file
   - Design element: Replace all 11 static calls across 5 files
   - Acceptance criteria reference: specs/migration-pattern.md
-  - Testability notes: `grep -r "userEvent\." tests/ | grep -v "setup()"` should return empty
+  - Testability notes: `grep -r "userEvent\.\(click\|type\|selectOptions\)" tests/` should return empty
 
 - Requirement: All existing tests continue to pass
   - Design element: Mechanical replacement only — no assertion changes

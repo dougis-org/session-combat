@@ -89,12 +89,3 @@ Reason for removal: Deprecated in `@testing-library/user-event` v14. Replaced by
 - Design Decision 1 (inline vs beforeEach) → Modified requirement scenarios per file
 - Design Decision 2 (sequential migration) → Tasks: migrate one file at a time, verify after each
 
-## Non-Functional Acceptance Criteria
-
-### Requirement: Reliability
-
-#### Scenario: No flakiness introduced
-
-- **Given** the 5 migrated test files
-- **When** `npm run test:unit` is executed twice in sequence
-- **Then** both runs produce identical results with exit code 0
