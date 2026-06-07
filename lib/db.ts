@@ -165,11 +165,16 @@ export async function connectToDatabase(): Promise<{
 
       const db = client.db(DB_NAME);
 
-      // Verify connection
-      await db.admin().ping();
+      try {
+        // Verify connection
+        await db.admin().ping();
 
-      // Initialize views and indexes
-      await initializeDatabase(db);
+        // Initialize views and indexes
+        await initializeDatabase(db);
+      } catch (initError) {
+        await client.close().catch(() => {});
+        throw initError;
+      }
 
       cachedClient = client;
       cachedDb = db;
@@ -192,6 +197,7 @@ export async function getDatabase(): Promise<Db> {
 }
 
 export async function closeDatabase(): Promise<void> {
+  connectionPromise = null;
   if (cachedClient) {
     await cachedClient.close();
     cachedClient = null;
