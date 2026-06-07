@@ -1,9 +1,52 @@
 import { NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import { getDatabase } from '@/lib/db';
 import { DuplicateMemberError } from '@/lib/errors';
 
 type Params = { id: string };
+
+export const GET = withAuthAndParams<Params>(async (_request, auth, { id: campaignId }) => {
+  try {
+    const caller = await storage.getMember(campaignId, auth.userId);
+    if (!caller || caller.status !== 'active') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const members = await storage.listMembersForCampaign(campaignId);
+
+    const validObjectIds = members
+      .map(m => m.userId)
+      .filter(id => ObjectId.isValid(id))
+      .map(id => new ObjectId(id));
+
+    const db = await getDatabase();
+    const userDocs = await db
+      .collection('users')
+      .find({ _id: { $in: validObjectIds } }, { projection: { username: 1 } })
+      .toArray();
+
+    const usernameMap = new Map(
+      userDocs
+        .filter(u => typeof u.username === 'string')
+        .map(u => [u._id.toString(), u.username as string])
+    );
+
+    const enriched = members.map(m => ({
+      id: m.id,
+      userId: m.userId,
+      username: usernameMap.get(m.userId) ?? 'Unknown',
+      role: m.role,
+      status: m.status,
+    }));
+
+    return NextResponse.json({ members: enriched });
+  } catch (error) {
+    console.error('Error listing members:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+});
 
 export const POST = withAuthAndParams<Params>(async (request, auth, { id: campaignId }) => {
   let body: unknown;

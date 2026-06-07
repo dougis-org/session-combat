@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { POST } from "@/app/api/campaigns/[id]/members/route";
+import { GET, POST } from "@/app/api/campaigns/[id]/members/route";
 import { storage } from "@/lib/storage";
 import { DuplicateMemberError } from "@/lib/errors";
 import {
@@ -11,6 +11,9 @@ import {
   itReturns401WithParams,
 } from "@/tests/unit/helpers/route.test.helpers";
 import { CampaignMember } from "@/lib/types";
+import { getDatabase } from "@/lib/db";
+
+jest.mock("@/lib/db");
 
 jest.mock("@/lib/middleware", () =>
   require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware()
@@ -21,6 +24,7 @@ jest.mock("@/lib/storage", () => ({
     getMember: jest.fn(),
     addMember: jest.fn(),
     updateMemberStatus: jest.fn(),
+    listMembersForCampaign: jest.fn(),
   },
 }));
 
@@ -28,7 +32,10 @@ const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
   addMember: jest.MockedFunction<typeof storage.addMember>;
   updateMemberStatus: jest.MockedFunction<typeof storage.updateMemberStatus>;
+  listMembersForCampaign: jest.MockedFunction<typeof storage.listMembersForCampaign>;
 };
+
+const mockedGetDatabase = jest.mocked(getDatabase);
 
 const CAMPAIGN_ID = "camp-1";
 const TARGET_USER_ID = "target-user";
@@ -45,6 +52,33 @@ const ACTIVE_DM: CampaignMember = {
 
 const makePostRequest = (body: unknown) =>
   makeRouteRequest(`http://localhost/api/campaigns/${CAMPAIGN_ID}/members`, "POST", body);
+
+const MEMBER_1: CampaignMember = {
+  id: "mem-1",
+  campaignId: CAMPAIGN_ID,
+  userId: "507f1f77bcf86cd799439011",
+  role: "player",
+  status: "active",
+  history: [],
+};
+const MEMBER_2: CampaignMember = {
+  id: "mem-2",
+  campaignId: CAMPAIGN_ID,
+  userId: "507f1f77bcf86cd799439012",
+  role: "dm",
+  status: "active",
+  history: [],
+};
+
+function mockUsersDb(userDocs: { _id: { toString: () => string }; username: string }[]) {
+  const findMock = jest.fn().mockReturnValue({
+    toArray: jest.fn().mockResolvedValue(userDocs),
+  });
+  mockedGetDatabase.mockResolvedValue({
+    collection: jest.fn().mockReturnValue({ find: findMock }),
+  } as any);
+  return findMock;
+}
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -317,6 +351,67 @@ describe("POST /api/campaigns/[id]/members", () => {
       expect(response.status).toBe(500);
       const body = await response.json();
       expect(body).not.toHaveProperty("stack");
+    });
+  });
+});
+
+const makeGetRequest = () =>
+  makeRouteRequest(`http://localhost/api/campaigns/${CAMPAIGN_ID}/members`, "GET");
+
+describe("GET /api/campaigns/[id]/members", () => {
+  describe("unauthenticated", () => {
+    itReturns401WithParams(GET, makeGetRequest, PARAMS);
+  });
+
+  describe("active member retrieves enriched list", () => {
+    beforeEach(() => {
+      mockedStorage.getMember.mockResolvedValueOnce(ACTIVE_DM);
+      mockedStorage.listMembersForCampaign.mockResolvedValueOnce([MEMBER_1, MEMBER_2]);
+      mockUsersDb([
+        { _id: { toString: () => MEMBER_1.userId }, username: "alice" },
+        { _id: { toString: () => MEMBER_2.userId }, username: "bob" },
+      ]);
+    });
+
+    it("returns 200 with enriched member list", async () => {
+      const response = await GET(makeGetRequest(), { params: PARAMS });
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.members).toHaveLength(2);
+      expect(body.members[0]).toMatchObject({ id: "mem-1", userId: MEMBER_1.userId, username: "alice", role: "player", status: "active" });
+      expect(body.members[1]).toMatchObject({ id: "mem-2", userId: MEMBER_2.userId, username: "bob", role: "dm", status: "active" });
+    });
+  });
+
+  describe("username enrichment uses $in (no N+1)", () => {
+    it("calls db.collection('users').find exactly once regardless of member count", async () => {
+      mockedStorage.getMember.mockResolvedValueOnce(ACTIVE_DM);
+      mockedStorage.listMembersForCampaign.mockResolvedValueOnce([MEMBER_1, MEMBER_2]);
+      const findMock = mockUsersDb([]);
+      await GET(makeGetRequest(), { params: PARAMS });
+      expect(findMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("access control", () => {
+    it("returns 403 when caller is not a member", async () => {
+      mockedStorage.getMember.mockResolvedValueOnce(null);
+      const response = await GET(makeGetRequest(), { params: PARAMS });
+      expect(response.status).toBe(403);
+    });
+
+    it("returns 403 when caller has status 'invited'", async () => {
+      const invitedMember: CampaignMember = {
+        id: "mem-caller",
+        campaignId: CAMPAIGN_ID,
+        userId: MOCK_AUTH.userId,
+        role: "player",
+        status: "invited",
+        history: [],
+      };
+      mockedStorage.getMember.mockResolvedValueOnce(invitedMember);
+      const response = await GET(makeGetRequest(), { params: PARAMS });
+      expect(response.status).toBe(403);
     });
   });
 });

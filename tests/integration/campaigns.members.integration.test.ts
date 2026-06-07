@@ -233,8 +233,7 @@ describe("Campaign Members Integration Tests", () => {
           updatedAt: new Date(),
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await db.collection("campaigns").insertMany([campaign1, campaign2, campaign3] as any[]);
+        await db.collection("campaigns").insertMany([campaign1, campaign2, campaign3] as unknown[]);
 
         const member1: CampaignMember = {
           id: "mem-1",

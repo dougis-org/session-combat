@@ -235,4 +235,16 @@ describe('Campaign Catalog UI', () => {
       expect(sessionLink?.getAttribute('href')).toBe(`/campaigns/${MOCK_CAMPAIGN.id}/sessions`);
     });
   });
+
+  describe('Members link', () => {
+    it('renders a Members link pointing to /campaigns/[id]', async () => {
+      setupFetch([MOCK_CAMPAIGN], []);
+      renderPage();
+      await screen.findByText('My Campaign');
+      const links = screen.getAllByRole('link');
+      const membersLink = links.find(a => a.textContent?.trim() === 'Members');
+      expect(membersLink).toBeTruthy();
+      expect(membersLink?.getAttribute('href')).toBe(`/campaigns/${MOCK_CAMPAIGN.id}`);
+    });
+  });
 });

@@ -250,6 +250,12 @@ export function CampaignsContent() {
                       </div>
                       <div className="flex gap-2 flex-shrink-0 ml-4">
                         <Link
+                          href={`/campaigns/${campaign.id}`}
+                          className="bg-teal-600 hover:bg-teal-700 px-3 py-1 rounded text-sm"
+                        >
+                          Members
+                        </Link>
+                        <Link
                           href={`/campaigns/${campaign.id}/prompts`}
                           className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
                         >
@@ -436,6 +442,12 @@ export function CampaignsContent() {
                       <ManagementChapterInfo campaign={campaign} />
                     </div>
                     <div className="flex gap-2">
+                      <Link
+                        href={`/campaigns/${campaign.id}`}
+                        className="bg-teal-600 hover:bg-teal-700 px-3 py-1 rounded text-sm"
+                      >
+                        Members
+                      </Link>
                       <Link
                         href={`/campaigns/${campaign.id}/sessions`}
                         className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
