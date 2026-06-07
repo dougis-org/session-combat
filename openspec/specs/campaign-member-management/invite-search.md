@@ -10,7 +10,7 @@ The system SHALL allow a DM to type a username prefix into a search box, see mat
 
 - **Given** the current user is the DM and at least one other user exists with a matching username prefix
 - **When** the DM types 1 or more characters into the search box
-- **Then** within 300ms + debounce, a dropdown appears with matching usernames
+- **Then** within ~300ms debounce, a dropdown appears with matching usernames
 
 #### Scenario: DM invites a user from search results
 

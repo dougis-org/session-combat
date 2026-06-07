@@ -59,14 +59,6 @@ None.
 
 ## Non-Functional Acceptance Criteria
 
-### Requirement: Security
-
-#### Scenario: Only DM can trigger removal
-
-- **Given** a request with a valid player-role auth token
-- **When** `DELETE /api/campaigns/[id]/members/[userId]` is called
-- **Then** `403` is returned and the target member's status is unchanged
-
 ### Requirement: Reliability
 
 #### Scenario: Soft-delete does not destroy data

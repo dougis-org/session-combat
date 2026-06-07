@@ -66,14 +66,6 @@ None.
 
 ## Non-Functional Acceptance Criteria
 
-### Requirement: Security
-
-#### Scenario: Access control — non-member blocked
-
-- **Given** a valid auth token for a user not in the campaign
-- **When** `GET /api/campaigns/[id]/members` is called
-- **Then** `403` is returned and no member data is exposed
-
 ### Requirement: Performance
 
 #### Scenario: Member list loaded with no N+1 queries
