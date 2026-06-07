@@ -121,10 +121,10 @@ Blocking resolution flow:
 - [x] Verify the merged changes appear on `main`
 - [x] Mark all remaining tasks as complete (`- [x]`)
 - [x] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [x] Archive the change: move `openspec/changes/campaign-member-management-ui/` to `openspec/changes/archive/YYYY-MM-DD-campaign-member-management-ui/` **in a single commit** (stage both copy and deletion together — never two separate commits)
-- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-member-management-ui/` exists and `openspec/changes/campaign-member-management-ui/` is gone
-- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-campaign-member-management-ui` then `git push -u origin doc/archive-YYYY-MM-DD-campaign-member-management-ui`
-- [x] Open PR from doc branch to `main` with title `docs: archive campaign-member-management-ui (YYYY-MM-DD)`
-- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Archive the change: move `openspec/changes/campaign-member-management-ui/` to `openspec/changes/archive/2026-06-07-campaign-member-management-ui/` **in a single commit** (stage both copy and deletion together — never two separate commits)
+- [x] Confirm `openspec/changes/archive/2026-06-07-campaign-member-management-ui/` exists and `openspec/changes/campaign-member-management-ui/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-2026-06-07-campaign-member-management-ui` then `git push -u origin doc/archive-2026-06-07-campaign-member-management-ui`
+- [x] Open PR from doc branch to `main` with title `docs: archive campaign-member-management-ui (2026-06-07)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge https://github.com/dougis-org/session-combat/pull/385 --auto --merge`
 - [x] Monitor the doc PR until merged (same loop — address comments and CI, push to doc branch, repeat)
-- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/campaign-member-management-ui doc/archive-YYYY-MM-DD-campaign-member-management-ui`
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/campaign-member-management-ui doc/archive-2026-06-07-campaign-member-management-ui`
