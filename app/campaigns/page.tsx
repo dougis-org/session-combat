@@ -133,7 +133,6 @@ export function CampaignsContent() {
   }, [campaigns]);
 
   useEffect(() => {
-    if (campaigns.length === 0) return;
     const controller = new AbortController();
     const fetchMemberships = async () => {
       const results = await Promise.all(
