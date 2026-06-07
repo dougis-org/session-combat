@@ -78,12 +78,12 @@
 
 ## Validation
 
-- [ ] `npm run test:unit` — all unit tests pass
-- [ ] `npm run test:integration` — all integration tests pass
-- [ ] `npm run test:e2e` (if applicable) — all E2E tests pass
-- [ ] `npx tsc --noEmit` — no type errors
-- [ ] `npm run build` — build succeeds
-- [ ] All tasks above marked complete
+- [x] `npm run test:unit` — all unit tests pass
+- [x] `npm run test:integration` — all integration tests pass
+- [x] `npm run test:e2e` (if applicable) — all E2E tests pass
+- [x] `npx tsc --noEmit` — no type errors
+- [x] `npm run build` — build succeeds
+- [x] All tasks above marked complete
 
 ## Remote push validation
 
@@ -96,14 +96,14 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `feat/campaign-member-management-ui` and push to remote
-- [ ] Open PR from `feat/campaign-member-management-ui` to `main`. PR body MUST include `Closes #307`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — poll for new comments autonomously; address, commit fixes, follow remote push validation, push; wait 180 seconds; repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, validate locally, push; wait 180 seconds; repeat
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user; never force-merge
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to `feat/campaign-member-management-ui` and push to remote
+- [x] Open PR from `feat/campaign-member-management-ui` to `main`. PR body MUST include `Closes #307`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Monitor PR comments** — poll for new comments autonomously; address, commit fixes, follow remote push validation, push; wait 180 seconds; repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, validate locally, push; wait 180 seconds; repeat
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user; never force-merge
 
 Ownership metadata:
 - Implementer: claude (agent)
@@ -117,14 +117,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/campaign-member-management-ui/` to `openspec/changes/archive/YYYY-MM-DD-campaign-member-management-ui/` **in a single commit** (stage both copy and deletion together — never two separate commits)
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-member-management-ui/` exists and `openspec/changes/campaign-member-management-ui/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-campaign-member-management-ui` then `git push -u origin doc/archive-YYYY-MM-DD-campaign-member-management-ui`
-- [ ] Open PR from doc branch to `main` with title `docs: archive campaign-member-management-ui (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until merged (same loop — address comments and CI, push to doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/campaign-member-management-ui doc/archive-YYYY-MM-DD-campaign-member-management-ui`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive the change: move `openspec/changes/campaign-member-management-ui/` to `openspec/changes/archive/YYYY-MM-DD-campaign-member-management-ui/` **in a single commit** (stage both copy and deletion together — never two separate commits)
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-member-management-ui/` exists and `openspec/changes/campaign-member-management-ui/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-campaign-member-management-ui` then `git push -u origin doc/archive-YYYY-MM-DD-campaign-member-management-ui`
+- [x] Open PR from doc branch to `main` with title `docs: archive campaign-member-management-ui (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor the doc PR until merged (same loop — address comments and CI, push to doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/campaign-member-management-ui doc/archive-YYYY-MM-DD-campaign-member-management-ui`
