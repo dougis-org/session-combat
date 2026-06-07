@@ -118,10 +118,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 - [x] Commit all changes to the working branch and push to remote
 - [x] Open PR from `test/login-and-encounters-pages` to `main`. PR body **MUST** include `Closes #377`
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — poll for new comments autonomously; address each one, commit fixes, follow all steps in Remote push validation, push, wait 180 seconds, repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, commit, validate locally, push, wait 180 seconds, repeat
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Monitor PR comments** — poll for new comments autonomously; address each one, commit fixes, follow all steps in Remote push validation, push, wait 180 seconds, repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll using `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, commit, validate locally, push, wait 180 seconds, repeat
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
 
 Ownership metadata:
 
@@ -136,9 +136,9 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
 - [ ] Update repository documentation impacted by the change (e.g. CONTRIBUTING.md if test conventions changed)
 - [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
 - [ ] Archive the change: move `openspec/changes/test-login-and-encounters-pages/` to `openspec/changes/archive/YYYY-MM-DD-test-login-and-encounters-pages/` **in a single atomic commit** — stage both the new location and the deletion of the old location together
