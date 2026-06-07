@@ -744,3 +744,12 @@ export interface CampaignMemberSummary {
   name: string;
 }
 
+export interface CampaignCharacterShare {
+  _id?: string;
+  id: string;
+  campaignId: string;
+  characterId: string;
+  userId: string;
+  sharedAt: Date;
+}
+

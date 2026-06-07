@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 
+export const GET = withAuthAndParams<{ id: string }>(async (_request, auth, { id: campaignId }) => {
+  try {
+    const member = await storage.getMember(campaignId, auth.userId);
+    if (!member) {
+      return NextResponse.json({ error: 'Not a member' }, { status: 404 });
+    }
+    return NextResponse.json(member);
+  } catch (error) {
+    console.error('Error fetching member:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+});
+
 type Params = { id: string };
 
 export const PATCH = withAuthAndParams<Params>(async (request: NextRequest, auth, { id: campaignId }) => {
