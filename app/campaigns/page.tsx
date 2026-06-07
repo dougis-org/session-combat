@@ -8,7 +8,6 @@ import { Campaign, CampaignTemplate, Party, Character, SessionLog, getCharacterT
 import { CampaignEditor } from './CampaignEditor';
 import { CharacterRosterCard } from '@/lib/components/CharacterRosterCard';
 import { CampaignChapterInfo } from '@/lib/components/CampaignChapterInfo';
-import { SharedCharactersPanel } from '@/lib/components/SharedCharactersPanel';
 
 function ManagementChapterInfo({ campaign }: { campaign: Campaign }) {
   const currentCh = campaign.currentChapterId
@@ -381,10 +380,6 @@ export function CampaignsContent() {
                         })}
                       </div>
                     )}
-                    <SharedCharactersPanel
-                      campaignId={campaign.id}
-                      characters={characters}
-                    />
                   </div>
                 );
               })}

@@ -237,36 +237,3 @@ describe('Campaign Catalog UI', () => {
   });
 });
 
-describe('Campaign membership panel', () => {
-  const ACTIVE_CAMPAIGN = { ...MOCK_CAMPAIGN, status: 'active' };
-  const ACTIVE_MEMBER = { id: 'mem-1', campaignId: MOCK_CAMPAIGN.id, userId: 'user-1', role: 'player', status: 'active', history: [] };
-
-  it('renders SharedCharactersPanel for active player member', async () => {
-    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
-      const url = input.toString();
-      if (url === '/api/campaigns') return jsonResponse([ACTIVE_CAMPAIGN]);
-      if (url === '/api/campaigns/global') return jsonResponse([]);
-      if (url === `/api/campaigns/${MOCK_CAMPAIGN.id}/members/me`) return jsonResponse(ACTIVE_MEMBER);
-      if (url === `/api/campaigns/${MOCK_CAMPAIGN.id}/characters`) return jsonResponse([]);
-      return jsonResponse({ error: 'not found' }, 404);
-    }) as typeof fetch;
-
-    renderPage();
-
-    expect(await screen.findByText(/Shared Characters/i)).toBeInTheDocument();
-  });
-
-  it('does not render SharedCharactersPanel when membership fetch returns 404', async () => {
-    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
-      const url = input.toString();
-      if (url === '/api/campaigns') return jsonResponse([ACTIVE_CAMPAIGN]);
-      if (url === '/api/campaigns/global') return jsonResponse([]);
-      return jsonResponse({ error: 'not found' }, 404);
-    }) as typeof fetch;
-
-    renderPage();
-    await screen.findByText('Active Campaigns');
-
-    expect(screen.queryByText(/Shared Characters/i)).not.toBeInTheDocument();
-  });
-});
