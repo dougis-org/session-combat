@@ -275,28 +275,6 @@ None.
 
 ## Non-Functional Acceptance Criteria
 
-### Requirement: Security
-
-#### Scenario: Player cannot see other players' shares
-
-- **Given** players P1 and P2 are both active members of campaign C; each has shared characters
-- **When** P1 calls `GET /api/campaigns/C/characters`
-- **Then** only P1's shares are returned; P2's shares are absent
-
-#### Scenario: Player cannot delete another player's share by guessing characterId
-
-- **Given** character X is owned by P2 and shared into campaign C
-- **When** P1 (different active player) calls `DELETE /api/campaigns/C/characters/X`
-- **Then** response is `403 Forbidden`; the share record is unchanged
-
-### Requirement: Reliability
-
-#### Scenario: No phantom share records
-
-- **Given** a POST request body contains a `characterId` that does not exist in `characters`
-- **When** the POST handler processes the request
-- **Then** a `404` is returned and no record is inserted into `campaignCharacterShares`
-
 ### Requirement: Performance
 
 #### Scenario: List query is bounded
