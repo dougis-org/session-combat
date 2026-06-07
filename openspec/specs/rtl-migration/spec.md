@@ -196,3 +196,127 @@ The system SHALL have zero imports from `@/tests/unit/helpers/reactRoot` in the 
 ### Requirement: REMOVED Manual DOM container lifecycle (4 files)
 
 Reason for removal: `createReactRoot` setup (`let container`, `let root`, `beforeEach`, `afterEach` with `unmountReactRoot`) is replaced by RTL's automatic render and cleanup in the 4 migrated files.
+
+---
+
+## ADDED Requirements — LoginPage, EncountersPage, EncounterEditor test coverage (test-login-and-encounters-pages)
+
+### Requirement: ADDED LoginPage unit test coverage
+
+The system SHALL have unit tests for `LoginPage` covering rendering, client-side validation, submission behavior, error display, and authenticated redirect.
+
+#### Scenario: Renders form fields and submit button
+
+- **Given** `LoginPage` is rendered with `isAuthenticated: false`
+- **When** the component mounts
+- **Then** an email input, a password input, and a submit button are present in the DOM
+
+#### Scenario: Blocks submission and shows error when email is empty
+
+- **Given** the form is submitted with no email entered
+- **When** the user submits the form
+- **Then** `login` is not called and an "Email is required" error message is displayed
+
+#### Scenario: Blocks submission and shows error when password is empty
+
+- **Given** an email has been typed but no password
+- **When** the form is submitted
+- **Then** `login` is not called and a "Password is required" error message is displayed
+
+#### Scenario: Blocks submission and shows error when email format is invalid
+
+- **Given** an email like "notanemail" is typed
+- **When** the form is submitted (using `fireEvent.submit` to bypass HTML5 native email validation)
+- **Then** `login` is not called and a "valid email address" error message is displayed
+
+#### Scenario: Calls login with credentials on valid submit
+
+- **Given** a valid email and password are entered
+- **When** the form is submitted
+- **Then** `login` is called exactly once with the entered email and password
+
+#### Scenario: Redirects to /campaigns on successful login
+
+- **Given** `login` returns `true`
+- **When** the form is submitted with valid credentials
+- **Then** `router.replace('/campaigns')` is called
+
+#### Scenario: Shows error message on failed login
+
+- **Given** `login` returns `false` and `error` is set on `useAuth`
+- **When** the form is submitted
+- **Then** the error string from `useAuth` is displayed in the DOM
+
+#### Scenario: Redirects immediately when already authenticated
+
+- **Given** `isAuthenticated` is `true` on `useAuth`
+- **When** the component mounts
+- **Then** `router.replace('/campaigns')` is called without user interaction
+
+---
+
+### Requirement: ADDED EncountersPage unit test coverage
+
+The system SHALL have unit tests for `EncountersContent` covering fetch-on-mount, list rendering, empty state, error handling, the Add button, and the delete flow.
+
+`EncountersContent` SHALL be a named export from `app/encounters/page.tsx`.
+
+#### Scenario: Renders encounter list after successful fetch
+
+- **Given** `fetch('/api/encounters')` returns an array of encounters
+- **When** `EncountersContent` mounts
+- **Then** each encounter's name is visible in the DOM
+
+#### Scenario: Shows empty state when no encounters exist
+
+- **Given** `fetch('/api/encounters')` returns an empty array
+- **When** `EncountersContent` mounts
+- **Then** a message indicating no encounters are present is displayed
+
+#### Scenario: Renders "Add New Encounter" button
+
+- **Given** `EncountersContent` has mounted and the fetch has resolved
+- **When** the user views the page
+- **Then** a button labeled "Add New Encounter" is present
+
+#### Scenario: Handles fetch error gracefully
+
+- **Given** `fetch('/api/encounters')` throws or returns a non-OK response
+- **When** `EncountersContent` mounts
+- **Then** an error message is displayed and the page does not crash
+
+#### Scenario: Delete calls confirm, sends DELETE request, and refreshes list
+
+- **Given** `window.confirm` returns `true` and a delete button is visible
+- **When** the user clicks the delete button
+- **Then** a DELETE request is sent and the list is re-fetched
+
+#### Scenario: Delete is cancelled when user dismisses confirm dialog
+
+- **Given** `window.confirm` returns `false`
+- **When** the user clicks the delete button
+- **Then** no DELETE request is made
+
+---
+
+### Requirement: ADDED EncounterEditor extraction and unit test coverage
+
+`EncounterEditor` SHALL be extracted from `app/encounters/page.tsx` into `app/encounters/EncounterEditor.tsx` as a named export. A shared dependency (`MonsterEditor`) is extracted into `app/encounters/MonsterEditor.tsx` to break a circular import between `page.tsx` and `EncounterEditor.tsx`. Unit tests SHALL cover rendering, field pre-population, save/cancel callbacks, monster list display, and monster interactions.
+
+#### Scenario: Named import resolves correctly
+
+- **Given** `import { EncounterEditor } from '@/app/encounters/EncounterEditor'`
+- **When** the module is resolved
+- **Then** `EncounterEditor` is a renderable React component
+
+#### Scenario: EncounterEditor does not import from page.tsx
+
+- **Given** `EncounterEditor.tsx` needs `MonsterEditor`
+- **When** `MonsterEditor` is in its own file `app/encounters/MonsterEditor.tsx`
+- **Then** `EncounterEditor.tsx` imports `MonsterEditor` from `./MonsterEditor`, not from `./page` — eliminating the circular dependency
+
+#### Scenario: Delete removes monster from list
+
+- **Given** `EncounterEditor` is rendered with one monster in the list
+- **When** the user clicks the Delete button for that monster
+- **Then** the monster is removed from the DOM and "No monsters added yet." is shown
