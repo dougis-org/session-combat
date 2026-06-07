@@ -47,7 +47,7 @@
 
 - **Chosen:**
   - `addShare(share: CampaignCharacterShare): Promise<void>` — throws `DuplicateShareError` on code 11000
-  - `removeShare(campaignId: string, characterId: string): Promise<boolean>` — returns false if no record found (mirrors `savedContent.remove`)
+  - `removeShare(campaignId: string, characterId: string, userId: string): Promise<boolean>` — deletes by `{campaignId, characterId, userId}` for defense-in-depth; returns false if no record found
   - `listSharesForCampaign(campaignId: string, userId: string): Promise<CampaignCharacterShare[]>` — filtered by both campaignId and userId (caller's shares only)
 - **Alternatives considered:** `listSharesForCampaign(campaignId)` without userId filter (would require route-layer filtering).
 - **Rationale:** Storage-layer filtering is more efficient and prevents accidental leakage. The `userId` param is explicit and auditable.
@@ -72,7 +72,7 @@
 
 ### Decision 7: `initializeDatabase` registers the new collection
 
-- **Chosen:** Add `campaignCharacterShares` unique index creation to `initializeDatabase()` in `lib/storage.ts`, following the `campaignMembers` pattern.
+- **Chosen:** Add `campaignCharacterShares` unique index creation to `initializeDatabase()` in `lib/db.ts`, following the `campaignMembers` pattern. Also adds a non-unique `{campaignId, userId}` index for efficient `listSharesForCampaign` queries.
 - **Rationale:** Consistent with how all collections are initialized in this project.
 - **Trade-offs:** None.
 

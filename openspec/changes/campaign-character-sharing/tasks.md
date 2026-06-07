@@ -39,12 +39,12 @@
 ### 3. Storage — `lib/storage.ts`
 
 - [x] Import `CampaignCharacterShare` and `DuplicateShareError` at the top of `lib/storage.ts`
-- [x] In `initializeDatabase()`, register the `campaignCharacterShares` unique index on `{ campaignId: 1, characterId: 1 }` (follow the `campaignMembers` index creation pattern)
+- [x] In `initializeDatabase()` in `lib/db.ts`, register the `campaignCharacterShares` unique index on `{ campaignId: 1, characterId: 1 }` and a non-unique index on `{ campaignId: 1, userId: 1 }` for list queries
 - [x] Add `addShare(share: CampaignCharacterShare): Promise<void>`:
   - Insert into `campaignCharacterShares` (strip `_id` before insert)
   - Catch code 11000 → throw `DuplicateShareError`
-- [x] Add `removeShare(campaignId: string, characterId: string): Promise<boolean>`:
-  - `deleteOne({ campaignId, characterId })`
+- [x] Add `removeShare(campaignId: string, characterId: string, userId: string): Promise<boolean>`:
+  - `deleteOne({ campaignId, characterId, userId })` — scoped by userId for defense-in-depth
   - Return `deletedCount > 0`
 - [x] Add `listSharesForCampaign(campaignId: string, userId: string): Promise<CampaignCharacterShare[]>`:
   - `find({ campaignId, userId }).toArray()`
@@ -77,7 +77,7 @@
   1. Load `getMember(campaignId, auth.userId)`; return 403 if null or not `active`
   2. Load character by `cid`; return 404 if not found
   3. Return 403 if `character.userId !== auth.userId`
-  4. Call `removeShare(campaignId, cid)`; return 404 if returns `false`
+  4. Call `removeShare(campaignId, cid, auth.userId)`; return 404 if returns `false`
   5. Return 204
 
 **TDD:** Write unit tests in `tests/unit/api/campaigns/[id]/characters/[cid]/route.test.ts` before implementing. Run `npm run test:unit`.

@@ -1,32 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CampaignMember, Character, CampaignCharacterShare } from '@/lib/types';
+import { Character, CampaignCharacterShare, CampaignMember } from '@/lib/types';
 
 interface Props {
   campaignId: string;
-  currentUserMember: CampaignMember | null | undefined;
+  characters: Character[];
 }
 
-export function SharedCharactersPanel({ campaignId, currentUserMember }: Props) {
-  const [characters, setCharacters] = useState<Character[]>([]);
+export function SharedCharactersPanel({ campaignId, characters }: Props) {
+  const [member, setMember] = useState<CampaignMember | null>(null);
   const [sharedIds, setSharedIds] = useState<Set<string>>(new Set());
   const [toggling, setToggling] = useState<Set<string>>(new Set());
   const [expanded, setExpanded] = useState(true);
 
-  const isActivePlayer =
-    currentUserMember?.role === 'player' && currentUserMember?.status === 'active';
-
   useEffect(() => {
-    if (!isActivePlayer) return;
+    const controller = new AbortController();
 
     const fetchData = async () => {
-      const [charRes, shareRes] = await Promise.all([
-        fetch('/api/characters'),
-        fetch(`/api/campaigns/${campaignId}/characters`),
+      const [memberRes, shareRes] = await Promise.all([
+        fetch(`/api/campaigns/${campaignId}/members/me`, { signal: controller.signal }),
+        fetch(`/api/campaigns/${campaignId}/characters`, { signal: controller.signal }),
       ]);
-      if (charRes.ok) {
-        setCharacters(await charRes.json());
+      if (memberRes.ok) {
+        setMember(await memberRes.json());
       }
       if (shareRes.ok) {
         const shares: CampaignCharacterShare[] = await shareRes.json();
@@ -34,9 +31,11 @@ export function SharedCharactersPanel({ campaignId, currentUserMember }: Props) 
       }
     };
 
-    fetchData();
-  }, [campaignId, isActivePlayer]);
+    fetchData().catch(() => {});
+    return () => controller.abort();
+  }, [campaignId]);
 
+  const isActivePlayer = member?.role === 'player' && member?.status === 'active';
   if (!isActivePlayer) return null;
 
   const handleToggle = async (character: Character) => {

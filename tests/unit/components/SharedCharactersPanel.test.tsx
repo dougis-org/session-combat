@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Response as FetchResponse } from 'node-fetch';
 import { SharedCharactersPanel } from '@/lib/components/SharedCharactersPanel';
-import { CampaignMember, Character, CampaignCharacterShare } from '@/lib/types';
+import { Character, CampaignCharacterShare, CampaignMember } from '@/lib/types';
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
@@ -24,6 +24,15 @@ const ACTIVE_PLAYER: CampaignMember = {
   campaignId: CAMPAIGN_ID,
   userId: 'user-1',
   role: 'player',
+  status: 'active',
+  history: [],
+};
+
+const ACTIVE_DM: CampaignMember = {
+  id: 'mem-2',
+  campaignId: CAMPAIGN_ID,
+  userId: 'user-2',
+  role: 'dm',
   status: 'active',
   history: [],
 };
@@ -69,42 +78,43 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-function setupFetch(characters: unknown[] = [], shares: unknown[] = []) {
+function setupFetch(member: CampaignMember | null, shares: CampaignCharacterShare[] = []) {
   global.fetch = jest.fn(async (input: RequestInfo | URL) => {
     const url = input.toString();
-    if (url === '/api/characters') return jsonResponse(characters);
+    if (url === `/api/campaigns/${CAMPAIGN_ID}/members/me`) {
+      return member ? jsonResponse(member) : jsonResponse({ error: 'Not a member' }, 404);
+    }
     if (url === `/api/campaigns/${CAMPAIGN_ID}/characters`) return jsonResponse(shares);
     return jsonResponse({ error: 'Not found' }, 404);
   });
 }
 
 describe('SharedCharactersPanel', () => {
-  it('T6-1: panel is NOT rendered when currentUserMember is null', () => {
-    setupFetch();
-    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} currentUserMember={null} />);
+  it('T6-1: panel is NOT rendered when member fetch returns 404 (non-member)', async () => {
+    setupFetch(null);
+    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} characters={[CHAR_X]} />);
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     expect(screen.queryByText(/Shared Characters/i)).not.toBeInTheDocument();
   });
 
-  it('T6-2: panel is NOT rendered when member is active dm', () => {
-    setupFetch();
-    render(
-      <SharedCharactersPanel
-        campaignId={CAMPAIGN_ID}
-        currentUserMember={{ ...ACTIVE_PLAYER, role: 'dm' }}
-      />
-    );
+  it('T6-2: panel is NOT rendered when member is active dm', async () => {
+    setupFetch(ACTIVE_DM);
+    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} characters={[CHAR_X]} />);
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     expect(screen.queryByText(/Shared Characters/i)).not.toBeInTheDocument();
   });
 
   it('T6-3: panel IS rendered when member is active player', async () => {
-    setupFetch([], []);
-    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} currentUserMember={ACTIVE_PLAYER} />);
-    expect(screen.getByText(/Shared Characters/i)).toBeInTheDocument();
+    setupFetch(ACTIVE_PLAYER);
+    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} characters={[]} />);
+    await waitFor(() => {
+      expect(screen.getByText(/Shared Characters/i)).toBeInTheDocument();
+    });
   });
 
   it('T6-4: panel lists characters with correct toggle states', async () => {
-    setupFetch([CHAR_X, CHAR_Y], [SHARE_X]);
-    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} currentUserMember={ACTIVE_PLAYER} />);
+    setupFetch(ACTIVE_PLAYER, [SHARE_X]);
+    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} characters={[CHAR_X, CHAR_Y]} />);
 
     await waitFor(() => {
       expect(screen.getByText('Aragorn')).toBeInTheDocument();
@@ -121,10 +131,8 @@ describe('SharedCharactersPanel', () => {
     const user = userEvent.setup();
     const mockFetch = jest.fn(async (input: RequestInfo | URL, options?: RequestInit) => {
       const url = input.toString();
-      if (url === '/api/characters') return jsonResponse([CHAR_X, CHAR_Y]);
-      if (url === `/api/campaigns/${CAMPAIGN_ID}/characters` && (!options || options.method !== 'POST')) {
-        return jsonResponse([SHARE_X]);
-      }
+      if (url === `/api/campaigns/${CAMPAIGN_ID}/members/me`) return jsonResponse(ACTIVE_PLAYER);
+      if (url === `/api/campaigns/${CAMPAIGN_ID}/characters` && !options?.method) return jsonResponse([SHARE_X]);
       if (url === `/api/campaigns/${CAMPAIGN_ID}/characters` && options?.method === 'POST') {
         return jsonResponse({ id: 'share-y', characterId: 'char-y' }, 201);
       }
@@ -132,14 +140,11 @@ describe('SharedCharactersPanel', () => {
     });
     global.fetch = mockFetch;
 
-    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} currentUserMember={ACTIVE_PLAYER} />);
+    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} characters={[CHAR_X, CHAR_Y]} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Legolas')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByText('Legolas')).toBeInTheDocument());
 
-    const legolasToggle = screen.getByRole('checkbox', { name: /Legolas/i });
-    await user.click(legolasToggle);
+    await user.click(screen.getByRole('checkbox', { name: /Legolas/i }));
 
     await waitFor(() => {
       const postCall = mockFetch.mock.calls.find(
@@ -148,8 +153,7 @@ describe('SharedCharactersPanel', () => {
           opts?.method === 'POST'
       );
       expect(postCall).toBeDefined();
-      const body = JSON.parse(postCall![1]!.body as string);
-      expect(body.characterId).toBe('char-y');
+      expect(JSON.parse(postCall![1]!.body as string).characterId).toBe('char-y');
     });
   });
 
@@ -157,10 +161,8 @@ describe('SharedCharactersPanel', () => {
     const user = userEvent.setup();
     const mockFetch = jest.fn(async (input: RequestInfo | URL, options?: RequestInit) => {
       const url = input.toString();
-      if (url === '/api/characters') return jsonResponse([CHAR_X, CHAR_Y]);
-      if (url === `/api/campaigns/${CAMPAIGN_ID}/characters` && !options?.method) {
-        return jsonResponse([SHARE_X]);
-      }
+      if (url === `/api/campaigns/${CAMPAIGN_ID}/members/me`) return jsonResponse(ACTIVE_PLAYER);
+      if (url === `/api/campaigns/${CAMPAIGN_ID}/characters` && !options?.method) return jsonResponse([SHARE_X]);
       if (url === `/api/campaigns/${CAMPAIGN_ID}/characters/char-x` && options?.method === 'DELETE') {
         return new FetchResponse(null, { status: 204 }) as unknown as Response;
       }
@@ -168,22 +170,36 @@ describe('SharedCharactersPanel', () => {
     });
     global.fetch = mockFetch;
 
-    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} currentUserMember={ACTIVE_PLAYER} />);
+    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} characters={[CHAR_X, CHAR_Y]} />);
+
+    await waitFor(() => expect(screen.getByText('Aragorn')).toBeInTheDocument());
+
+    await user.click(screen.getByRole('checkbox', { name: /Aragorn/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Aragorn')).toBeInTheDocument();
-    });
-
-    const aragornToggle = screen.getByRole('checkbox', { name: /Aragorn/i });
-    await user.click(aragornToggle);
-
-    await waitFor(() => {
-      const deleteCall = mockFetch.mock.calls.find(
+      expect(mockFetch.mock.calls.find(
         ([url, opts]) =>
           url.toString() === `/api/campaigns/${CAMPAIGN_ID}/characters/char-x` &&
           opts?.method === 'DELETE'
-      );
-      expect(deleteCall).toBeDefined();
+      )).toBeDefined();
     });
+  });
+
+  it('panel collapses and expands on button click', async () => {
+    const user = userEvent.setup();
+    setupFetch(ACTIVE_PLAYER);
+
+    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} characters={[CHAR_X]} />);
+
+    await waitFor(() => expect(screen.getByText(/Shared Characters/i)).toBeInTheDocument());
+
+    const toggleBtn = screen.getByRole('button', { name: /Shared Characters/i });
+    expect(screen.getByText('Aragorn')).toBeInTheDocument();
+
+    await user.click(toggleBtn);
+    expect(screen.queryByText('Aragorn')).not.toBeInTheDocument();
+
+    await user.click(toggleBtn);
+    expect(screen.getByText('Aragorn')).toBeInTheDocument();
   });
 });

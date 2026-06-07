@@ -70,18 +70,18 @@ The system SHALL provide `addShare(share: CampaignCharacterShare): Promise<void>
 
 ### Requirement: ADDED `storage.removeShare`
 
-The system SHALL provide `removeShare(campaignId: string, characterId: string): Promise<boolean>` that deletes the share record matching `{campaignId, characterId}`. Returns `true` if a record was deleted, `false` if no record was found.
+The system SHALL provide `removeShare(campaignId: string, characterId: string, userId: string): Promise<boolean>` that deletes the share record matching `{campaignId, characterId, userId}` (scoped by owner for defense-in-depth). Returns `true` if a record was deleted, `false` if no record was found.
 
 #### Scenario: Successful removal
 
-- **Given** character X is shared into campaign C
-- **When** `removeShare(C, X)` is called
-- **Then** the record is deleted and `listSharesForCampaign(C, userId)` no longer includes it; return value is `true`
+- **Given** character X is shared into campaign C by user U
+- **When** `removeShare(C, X, U)` is called
+- **Then** the record is deleted and `listSharesForCampaign(C, U)` no longer includes it; return value is `true`
 
 #### Scenario: Remove non-existent share returns false
 
 - **Given** character X is not shared into campaign C
-- **When** `removeShare(C, X)` is called
+- **When** `removeShare(C, X, U)` is called
 - **Then** no error is thrown and the return value is `false`
 
 ---

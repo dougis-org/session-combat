@@ -1,7 +1,7 @@
 export class DuplicateShareError extends Error {
   constructor(campaignId: string, characterId: string) {
     super(`Character "${characterId}" is already shared into campaign "${campaignId}".`);
-    this.name = 'DuplicateShareError';
+    this.name = "DuplicateShareError";
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, DuplicateShareError);
     }

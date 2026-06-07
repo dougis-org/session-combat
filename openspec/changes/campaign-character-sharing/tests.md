@@ -13,8 +13,9 @@ Test files:
 - `tests/unit/lib/storage-shares.test.ts` — storage methods (mocked DB)
 - `tests/unit/api/campaigns/[id]/characters/route.test.ts` — POST and GET handlers
 - `tests/unit/api/campaigns/[id]/characters/[cid]/route.test.ts` — DELETE handler
+- `tests/unit/api/campaigns/[id]/members/me.get.test.ts` — GET members/me handler
 - `tests/unit/components/SharedCharactersPanel.test.tsx` — player UI panel (RTL)
-- `tests/integration/campaigns/characterSharing.integration.test.ts` — real MongoDB
+- `tests/integration/campaigns.character-sharing.integration.test.ts` — real MongoDB
 
 Run unit tests: `npm run test:unit`
 Run integration tests: `npm run test:integration`
@@ -67,8 +68,8 @@ File: `tests/unit/lib/storage-shares.test.ts`
 - [ ] **T3-4** Returns `true` when a record is deleted
   - Spec: `storage.removeShare` — Successful removal
   - Given: `deleteOne` returns `{ deletedCount: 1 }`
-  - When: `removeShare('c1', 'ch1')`
-  - Then: returns `true`
+  - When: `removeShare('c1', 'ch1', 'u1')`
+  - Then: returns `true`; `deleteOne` called with `{ campaignId: 'c1', characterId: 'ch1', userId: 'u1' }`
 
 - [ ] **T3-5** Returns `false` when no record found
   - Spec: `storage.removeShare` — Remove non-existent share returns false

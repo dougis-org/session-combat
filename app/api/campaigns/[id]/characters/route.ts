@@ -13,7 +13,8 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { characterId: rawCharacterId } = body as Record<string, unknown>;
+  const bodyObj = body !== null && typeof body === 'object' ? body as Record<string, unknown> : {};
+  const { characterId: rawCharacterId } = bodyObj;
   if (typeof rawCharacterId !== 'string' || rawCharacterId.trim() === '') {
     return NextResponse.json({ error: 'characterId is required' }, { status: 400 });
   }

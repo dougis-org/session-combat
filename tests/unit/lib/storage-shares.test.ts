@@ -157,3 +157,43 @@ describe("storage.listSharesForCampaign", () => {
     expect(mockFind).toHaveBeenCalledWith({ campaignId: "camp-1", userId: "user-1" });
   });
 });
+
+describe("storage.loadCharacterById", () => {
+  const CHARACTER_DOC = {
+    id: "char-1",
+    _id: "mongo-1",
+    userId: "user-1",
+    name: "Hero",
+    deletedAt: null,
+  };
+
+  it("returns null when character not found", async () => {
+    const mockFindOne = jest.fn().mockResolvedValue(null);
+    mockedDb.collection.mockReturnValue({ findOne: mockFindOne });
+
+    const result = await storage.loadCharacterById("char-1");
+
+    expect(result).toBeNull();
+  });
+
+  it("returns normalized character with id when found", async () => {
+    const mockFindOne = jest.fn().mockResolvedValue(CHARACTER_DOC);
+    mockedDb.collection.mockReturnValue({ findOne: mockFindOne });
+
+    const result = await storage.loadCharacterById("char-1");
+
+    expect(result).not.toBeNull();
+    expect(result!.id).toBe("char-1");
+  });
+
+  it("queries by id and deletedAt null to exclude soft-deleted characters", async () => {
+    const mockFindOne = jest.fn().mockResolvedValue(null);
+    mockedDb.collection.mockReturnValue({ findOne: mockFindOne });
+
+    await storage.loadCharacterById("char-1");
+
+    expect(mockFindOne).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "char-1" })
+    );
+  });
+});
