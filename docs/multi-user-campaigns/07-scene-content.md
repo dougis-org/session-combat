@@ -4,14 +4,15 @@
 group during a session. Scene content is modeled as a message (campaign-persistent)
 with an optional image attachment stored in GridFS.
 
-**Depends on:** Phase 5 (5b dock + feed). Scene messages reuse the `CampaignMessage`
+**Depends on:** Phase 5 (5b dock + feed) — not yet started. Scene messages reuse the `CampaignMessage`
 model (`kind: 'scene'`).
 
-> **Tracking:** epic [#299](https://github.com/dougis-org/session-combat/issues/299).
+> **Tracking:** epic [#299](https://github.com/dougis-org/session-combat/issues/299) — OPEN
+> **Status:** Not started. Blocked on Phase 5 (messaging). 7a (GridFS) has no upstream dependency beyond Phase 1 and can start now in parallel.
 
 ## Deliverables (sub-issues)
 
-### 7a. GridFS attachment upload/serve · [#318](https://github.com/dougis-org/session-combat/issues/318)
+### 🟡 7a. GridFS attachment upload/serve · [#318](https://github.com/dougis-org/session-combat/issues/318) — OPEN
 - Endpoints to upload a scene image to **MongoDB GridFS** and stream it back by id,
   with access gated by `assertCampaignAccess`.
 - Constraints: allowed image types, max size, basic validation; returns an
@@ -26,7 +27,7 @@ model (`kind: 'scene'`).
   never leaves a permanently orphaned file; bytes survive a Fly machine restart
   (persisted in Mongo, not local disk).
 
-### 7b. DM "push scene" + render · [#319](https://github.com/dougis-org/session-combat/issues/319)
+### 🟡 7b. DM "push scene" + render · [#319](https://github.com/dougis-org/session-combat/issues/319) — OPEN
 - DM action in `CampaignChat` (or campaign view) to push a `scene` message
   (text and/or image) to the group; renders inline in the feed with an enlargeable
   image.

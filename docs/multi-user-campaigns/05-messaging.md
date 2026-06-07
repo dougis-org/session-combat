@@ -3,9 +3,10 @@
 **Goal:** Persistent, campaign-scoped messaging with group / direct / DM-only
 visibility, delivered live over the Phase 4 stream and rendered in the chat dock.
 
-**Depends on:** Phase 1 (1e), Phase 4 (4a/4b transport + 4c dock).
+**Depends on:** Phase 1 (1e). ✅ Phase 1 complete. Phase 4 (4a/4b transport + 4c dock) — not yet started.
 
-> **Tracking:** epic [#297](https://github.com/dougis-org/session-combat/issues/297).
+> **Tracking:** epic [#297](https://github.com/dougis-org/session-combat/issues/297) — OPEN
+> **Status:** Not started. Blocked on Phase 4 transport.
 
 ## Visibility model
 
@@ -28,7 +29,7 @@ flowchart TD
 
 ## Deliverables (sub-issues)
 
-### 5a. `campaignMessages` collection + API · [#314](https://github.com/dougis-org/session-combat/issues/314)
+### 🟡 5a. `campaignMessages` collection + API · [#314](https://github.com/dougis-org/session-combat/issues/314) — OPEN
 - Add `CampaignMessage` type; create collection with index `{campaignId, createdAt}`.
 - `POST /api/campaigns/[id]/messages` — send a `text` message with a `visibility`
   (`group` | `direct`+`toUserId` | `dm-only`); `GET` for paginated history filtered
@@ -39,7 +40,7 @@ flowchart TD
 - **Acceptance:** messages persist; history pagination works; a player cannot read
   a direct/dm-only message not addressed to them; writes emit a stream event.
 
-### 5b. Wire chat dock to stream + send · [#315](https://github.com/dougis-org/session-combat/issues/315)
+### 🟡 5b. Wire chat dock to stream + send · [#315](https://github.com/dougis-org/session-combat/issues/315) — OPEN
 - Connect `CampaignChat` to `useCampaignStream` for live message events and to the
   send API; composer includes a **visibility selector** (Group / DM / whisper to a
   member).

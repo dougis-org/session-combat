@@ -4,10 +4,11 @@
 those shared characters into the parties they build — even though the DM doesn't
 own them.
 
-**Depends on:** Phase 1 (1e access). Benefits from Phase 2 (active members exist),
+**Depends on:** Phase 1 (1e access). ✅ Phase 1 complete. Benefits from Phase 2 (active members exist),
 but the data layer can be built against memberships directly.
 
-> **Tracking:** epic [#295](https://github.com/dougis-org/session-combat/issues/295).
+> **Tracking:** epic [#295](https://github.com/dougis-org/session-combat/issues/295) — OPEN
+> **Status:** Not started. Blocked on Phase 1 (complete). Can begin once Phase 2 invite/accept is sufficiently live.
 
 ## How a player's character reaches a DM's party
 
@@ -26,7 +27,7 @@ flowchart LR
 
 ## Deliverables (sub-issues)
 
-### 3a. Character sharing (opt-in) — data + player UI · [#309](https://github.com/dougis-org/session-combat/issues/309)
+### 🟡 3a. Character sharing (opt-in) — data + player UI · [#309](https://github.com/dougis-org/session-combat/issues/309) — OPEN
 - Add `CampaignCharacterShare` type; create `campaignCharacterShares` collection
   with unique `{campaignId, characterId}`.
 - API for a player to share/unshare one of **their** characters into a campaign
@@ -37,7 +38,7 @@ flowchart LR
 - **Acceptance:** a player can share/unshare only their own characters into
   campaigns they belong to; sharing a character they don't own is rejected.
 
-### 3b. Party builder uses shared characters · [#310](https://github.com/dougis-org/session-combat/issues/310)
+### 🟡 3b. Party builder uses shared characters · [#310](https://github.com/dougis-org/session-combat/issues/310) — OPEN
 - Update the party access rule: the DM may add a `characterId` to a party in a
   campaign if that character is shared into the campaign by an active member (in
   addition to characters the DM owns).

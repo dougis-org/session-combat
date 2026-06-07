@@ -4,13 +4,14 @@
 roll (e.g. a saving throw) can be sent to the DM only or to the whole group. Rolls
 are tied to the active session log.
 
-**Depends on:** Phase 5 (5b dock + feed). Reuses the existing `sessionLogs` model.
+**Depends on:** Phase 5 (5b dock + feed) — not yet started. Reuses the existing `sessionLogs` model.
 
-> **Tracking:** epic [#298](https://github.com/dougis-org/session-combat/issues/298).
+> **Tracking:** epic [#298](https://github.com/dougis-org/session-combat/issues/298) — OPEN
+> **Status:** Not started. Blocked on Phase 5 (messaging) completion.
 
 ## Deliverables (sub-issues)
 
-### 6a. `campaignRolls` collection + roll API · [#316](https://github.com/dougis-org/session-combat/issues/316)
+### 🟡 6a. `campaignRolls` collection + roll API · [#316](https://github.com/dougis-org/session-combat/issues/316) — OPEN
 - Add `CampaignRoll` type; create collection with index
   `{campaignId, sessionId, createdAt}`.
 - **Active-session tracking:** the current `Campaign` model has no concept of an
@@ -30,7 +31,7 @@ are tied to the active session log.
   session is rejected (not silently dropped); a `dm-only` roll is invisible to other
   players; rolls list scoped to the session.
 
-### 6b. Roll-share UI in the chat dock · [#317](https://github.com/dougis-org/session-combat/issues/317)
+### 🟡 6b. Roll-share UI in the chat dock · [#317](https://github.com/dougis-org/session-combat/issues/317) — OPEN
 - Roll entry control in `CampaignChat` (formula or quick buttons) with a visibility
   selector (DM-only vs Group); render rolls as a distinct feed item (formula,
   breakdown, total, roller handle, visibility marker).

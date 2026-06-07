@@ -1,4 +1,4 @@
-# Phase 1 — Identity & membership foundations
+# Phase 1 — Identity & membership foundations ✅ COMPLETE
 
 **Goal:** Give users a unique, searchable handle and give campaigns a membership
 layer (owner = DM, plus invited players), then make campaign access member-aware.
@@ -6,11 +6,12 @@ This is the spine the rest of the initiative builds on.
 
 **Depends on:** nothing.
 
-> **Tracking:** epic [#293](https://github.com/dougis-org/session-combat/issues/293).
+> **Tracking:** epic [#293](https://github.com/dougis-org/session-combat/issues/293) — **CLOSED** ✅
+> All sub-issues delivered and merged.
 
 ## Deliverables (sub-issues)
 
-### 1a. Add `username` to the User model · [#300](https://github.com/dougis-org/session-combat/issues/300)
+### ✅ 1a. Add `username` to the User model · [#300](https://github.com/dougis-org/session-combat/issues/300) — CLOSED
 - Add `username?: string` to `User` in `lib/types.ts`.
 - Add a **sparse unique index** on `users.username` in `lib/db.ts` (mirror the
   existing unique `email` index).
@@ -19,7 +20,7 @@ This is the spine the rest of the initiative builds on.
 - **Acceptance:** existing users keep working; index rejects duplicates; backfill
   is safe to re-run.
 
-### 1b. Username validation + set/edit · [#301](https://github.com/dougis-org/session-combat/issues/301)
+### ✅ 1b. Username validation + set/edit · [#301](https://github.com/dougis-org/session-combat/issues/301) — CLOSED
 - Validation rules in `lib/validation/` (length, allowed charset, reserved words,
   case-insensitive uniqueness).
 - Allow setting a username at registration and editing it on a profile/account
@@ -27,7 +28,7 @@ This is the spine the rest of the initiative builds on.
 - **Acceptance:** invalid/duplicate usernames rejected with clear errors; a user
   can set and change their handle.
 
-### 1c. User search endpoint · [#302](https://github.com/dougis-org/session-combat/issues/302)
+### ✅ 1c. User search endpoint · [#302](https://github.com/dougis-org/session-combat/issues/302) — CLOSED
 - `GET /api/users/search?q=` returning minimal public profiles (`{ id, username }`)
   for member-add. Backed by `fuse.js` (already a dependency) or a prefix query.
 - Rate-limited (reuse `lib/rate-limit.ts`); never leaks email/password fields;
@@ -36,7 +37,7 @@ This is the spine the rest of the initiative builds on.
 - **Acceptance:** searching a partial username returns matching handles only;
   no PII leakage; rate limit enforced.
 
-### 1d. `campaignMembers` collection + storage · [#303](https://github.com/dougis-org/session-combat/issues/303)
+### ✅ 1d. `campaignMembers` collection + storage · [#303](https://github.com/dougis-org/session-combat/issues/303) — CLOSED
 - Add `CampaignMember` type; create `campaignMembers` collection with a unique
   `{campaignId, userId}` index.
 - `storage` methods: add member, update status/role, list members for a campaign,
@@ -45,7 +46,7 @@ This is the spine the rest of the initiative builds on.
 - **Acceptance:** the owner is always an active DM member; duplicate memberships
   rejected; storage methods covered by unit/integration tests.
 
-### 1e. Member-aware campaign access (refactor) · [#304](https://github.com/dougis-org/session-combat/issues/304)
+### ✅ 1e. Member-aware campaign access (refactor) · [#304](https://github.com/dougis-org/session-combat/issues/304) — CLOSED
 - Add `assertCampaignAccess(campaignId, userId)` to `lib/utils/campaign.ts`
   returning the caller's role (`dm` | `player`) or denying access.
 - Refactor campaign read routes (`app/api/campaigns/[id]/**`) from `{ userId, id }`

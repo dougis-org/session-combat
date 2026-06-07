@@ -5,9 +5,10 @@ Change Streams (prod/Atlas) with a polling fallback (local dev) — plus the cli
 hook and the collapsible chat dock shell. **No product features yet**, just the
 plumbing everything else plugs into.
 
-**Depends on:** Phase 1 (1e access). Items 4a/4b/4c can largely proceed in parallel.
+**Depends on:** Phase 1 (1e access). ✅ Phase 1 complete. Items 4a/4b/4c can largely proceed in parallel.
 
-> **Tracking:** epic [#296](https://github.com/dougis-org/session-combat/issues/296).
+> **Tracking:** epic [#296](https://github.com/dougis-org/session-combat/issues/296) — OPEN
+> **Status:** Not started. 4b and 4c have no upstream dependencies beyond Phase 1 and can begin immediately.
 
 ## Component layout
 
@@ -57,7 +58,7 @@ flowchart TD
 
 ## Deliverables (sub-issues)
 
-### 4a. SSE stream endpoint + transport abstraction · [#311](https://github.com/dougis-org/session-combat/issues/311)
+### 🟡 4a. SSE stream endpoint + transport abstraction · [#311](https://github.com/dougis-org/session-combat/issues/311) — OPEN
 - `GET /api/campaigns/[id]/stream` returning a `text/event-stream` `ReadableStream`;
   caller must pass `assertCampaignAccess`.
 - Transport abstraction in `lib/server/` (or `lib/api/`): a `subscribe(campaignId,
@@ -80,13 +81,13 @@ flowchart TD
   against Atlas (change streams) and a standalone Mongo (polling); connections close
   cleanly and the shared stream closes when the instance's last connection drops.
 
-### 4b. Client `useCampaignStream` hook · [#312](https://github.com/dougis-org/session-combat/issues/312)
+### 🟡 4b. Client `useCampaignStream` hook · [#312](https://github.com/dougis-org/session-combat/issues/312) — OPEN
 - React hook in `lib/hooks/` wrapping `EventSource` with auto-reconnect/backoff,
   connection state, and typed event dispatch.
 - **Acceptance:** components can subscribe to a campaign and receive typed events;
   reconnects after transient drops; tears down on unmount.
 
-### 4c. Collapsible / pinnable chat dock shell · [#313](https://github.com/dougis-org/session-combat/issues/313)
+### 🟡 4c. Collapsible / pinnable chat dock shell · [#313](https://github.com/dougis-org/session-combat/issues/313) — OPEN
 - `CampaignChat` component in `lib/components/`: fixed dock that toggles
   collapsed pill ↔ expanded drawer, with a **pin-open** control persisted to
   `localStorage`. No data wiring yet — layout, states, and a11y only.

@@ -1,6 +1,7 @@
 # Multi-User Campaigns
 
-> Status: **Planning** · Owner: DM (campaign owner) · Last updated: 2026-05-31
+> Status: **In Progress** · Owner: DM (campaign owner) · Last updated: 2026-06-07
+> Phase 1 ✅ complete · Phase 2 🔄 in progress (3/4 done) · Phases 3–7 🟡 not started
 
 This initiative turns campaigns from a single-owner artifact into a shared space
 where a DM (the campaign owner) invites a group of players who participate during
@@ -172,15 +173,15 @@ delivers this refactor; most later phases depend on it.
 Each phase is an epic (parent issue). Each deliverable is a sub-issue that can ship
 on its own. `→` marks hard dependencies; everything else can run in parallel.
 
-| Phase | Theme | Epic | Sub-issues | Depends on |
-|-------|-------|------|------------|------------|
-| 1 | Identity & membership foundations | [#293](https://github.com/dougis-org/session-combat/issues/293) | [1a #300](https://github.com/dougis-org/session-combat/issues/300) · [1b #301](https://github.com/dougis-org/session-combat/issues/301) · [1c #302](https://github.com/dougis-org/session-combat/issues/302) · [1d #303](https://github.com/dougis-org/session-combat/issues/303) · [1e #304](https://github.com/dougis-org/session-combat/issues/304) | — |
-| 2 | Invite & accept flow | [#294](https://github.com/dougis-org/session-combat/issues/294) | [2a #305](https://github.com/dougis-org/session-combat/issues/305) · [2b #306](https://github.com/dougis-org/session-combat/issues/306) · [2c #307](https://github.com/dougis-org/session-combat/issues/307) · [2d #308](https://github.com/dougis-org/session-combat/issues/308) | Phase 1 |
-| 3 | Cross-user characters into parties | [#295](https://github.com/dougis-org/session-combat/issues/295) | [3a #309](https://github.com/dougis-org/session-combat/issues/309) · [3b #310](https://github.com/dougis-org/session-combat/issues/310) | Phase 1 |
-| 4 | Real-time transport | [#296](https://github.com/dougis-org/session-combat/issues/296) | [4a #311](https://github.com/dougis-org/session-combat/issues/311) · [4b #312](https://github.com/dougis-org/session-combat/issues/312) · [4c #313](https://github.com/dougis-org/session-combat/issues/313) | Phase 1 |
-| 5 | Messaging | [#297](https://github.com/dougis-org/session-combat/issues/297) | [5a #314](https://github.com/dougis-org/session-combat/issues/314) · [5b #315](https://github.com/dougis-org/session-combat/issues/315) | Phase 4 |
-| 6 | Shared dice rolls (session-scoped) | [#298](https://github.com/dougis-org/session-combat/issues/298) | [6a #316](https://github.com/dougis-org/session-combat/issues/316) · [6b #317](https://github.com/dougis-org/session-combat/issues/317) | Phase 5 |
-| 7 | Scene content (maps/images) | [#299](https://github.com/dougis-org/session-combat/issues/299) | [7a #318](https://github.com/dougis-org/session-combat/issues/318) · [7b #319](https://github.com/dougis-org/session-combat/issues/319) | Phase 5 |
+| Phase | Theme | Epic | Sub-issues | Depends on | Status |
+|-------|-------|------|------------|------------|--------|
+| 1 | Identity & membership foundations | [#293](https://github.com/dougis-org/session-combat/issues/293) CLOSED | ✅ [1a #300](https://github.com/dougis-org/session-combat/issues/300) · ✅ [1b #301](https://github.com/dougis-org/session-combat/issues/301) · ✅ [1c #302](https://github.com/dougis-org/session-combat/issues/302) · ✅ [1d #303](https://github.com/dougis-org/session-combat/issues/303) · ✅ [1e #304](https://github.com/dougis-org/session-combat/issues/304) | — | ✅ **Complete** |
+| 2 | Invite & accept flow | [#294](https://github.com/dougis-org/session-combat/issues/294) OPEN | ✅ [2a #305](https://github.com/dougis-org/session-combat/issues/305) · ✅ [2b #306](https://github.com/dougis-org/session-combat/issues/306) · ✅ [2c #307](https://github.com/dougis-org/session-combat/issues/307) · 🟡 [2d #308](https://github.com/dougis-org/session-combat/issues/308) | Phase 1 | 🔄 **3/4 done** |
+| 3 | Cross-user characters into parties | [#295](https://github.com/dougis-org/session-combat/issues/295) OPEN | 🟡 [3a #309](https://github.com/dougis-org/session-combat/issues/309) · 🟡 [3b #310](https://github.com/dougis-org/session-combat/issues/310) | Phase 1 | 🟡 Not started |
+| 4 | Real-time transport | [#296](https://github.com/dougis-org/session-combat/issues/296) OPEN | 🟡 [4a #311](https://github.com/dougis-org/session-combat/issues/311) · 🟡 [4b #312](https://github.com/dougis-org/session-combat/issues/312) · 🟡 [4c #313](https://github.com/dougis-org/session-combat/issues/313) | Phase 1 | 🟡 Not started |
+| 5 | Messaging | [#297](https://github.com/dougis-org/session-combat/issues/297) OPEN | 🟡 [5a #314](https://github.com/dougis-org/session-combat/issues/314) · 🟡 [5b #315](https://github.com/dougis-org/session-combat/issues/315) | Phase 4 | 🟡 Not started |
+| 6 | Shared dice rolls (session-scoped) | [#298](https://github.com/dougis-org/session-combat/issues/298) OPEN | 🟡 [6a #316](https://github.com/dougis-org/session-combat/issues/316) · 🟡 [6b #317](https://github.com/dougis-org/session-combat/issues/317) | Phase 5 | 🟡 Not started |
+| 7 | Scene content (maps/images) | [#299](https://github.com/dougis-org/session-combat/issues/299) OPEN | 🟡 [7a #318](https://github.com/dougis-org/session-combat/issues/318) · 🟡 [7b #319](https://github.com/dougis-org/session-combat/issues/319) | Phase 5 | 🟡 Not started |
 
 ### Dependency graph
 
@@ -302,11 +303,11 @@ gantt
 
 | Wave | Can start | Notes |
 |------|-----------|-------|
-| 1 | **1a, 1d, 4b, 4c, 7a** | All dependency-free — the UI shell (4c), stream hook (4b), and GridFS (7a) need nothing upstream, so they parallelize the Phase 1 foundations |
-| 2 | **1b, 1c, 1e, 2b** | `1e` (access spine) unlocks most of the rest; `2b` only needs `1d` |
-| 3 | **2a, 2d, 3a, 4a, 5a, 6a** | Widest fan-out — six independent tracks once `1e` lands |
-| 4 | **2c, 3b, 5b** | `5b` is the integration point (needs `4b` + `4c` + `5a`) |
-| 5 | **6b, 7b** | Feature UIs that sit on top of messaging (`5b`) |
+| 1 | ~~**1a, 1d, 4b, 4c, 7a**~~ | ✅ Phase 1 fully delivered. 4b, 4c, 7a remain ready to start. |
+| 2 | ~~**1b, 1c, 1e, 2b**~~ | ✅ All delivered. |
+| 3 | **2d, 3a, 4a–4c, 5a, 6a** | **2d** (#308) is the immediate next item (2a/2b/2c closed). 4a/4b/4c, 3a, 5a, 6a unblock as soon as 2d completes. |
+| 4 | **2c → done, 3b, 5b** | `5b` is the integration point (needs `4b` + `4c` + `5a`). |
+| 5 | **6b, 7b** | Feature UIs that sit on top of messaging (`5b`). |
 
 See the per-phase docs for deliverables, acceptance criteria, and affected files:
 
