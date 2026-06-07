@@ -5,6 +5,7 @@ const DB_NAME = process.env.MONGODB_DB || "session-combat";
 
 let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;
+let connectionPromise: Promise<{ client: MongoClient; db: Db }> | null = null;
 
 /**
  * Initialize MongoDB views and indexes after database connection.
@@ -149,31 +150,45 @@ export async function connectToDatabase(): Promise<{
     return { client: cachedClient, db: cachedDb };
   }
 
-  try {
-    const options: MongoClientOptions = {
-      maxPoolSize: 10,
-    };
-
-    const client = new MongoClient(MONGODB_URI, options);
-    await client.connect();
-
-    const db = client.db(DB_NAME);
-
-    // Verify connection
-    await db.admin().ping();
-
-    // Initialize views and indexes
-    await initializeDatabase(db);
-
-    cachedClient = client;
-    cachedDb = db;
-
-    console.log("Connected to MongoDB");
-    return { client, db };
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-    throw error;
+  if (connectionPromise) {
+    return connectionPromise;
   }
+
+  connectionPromise = (async () => {
+    try {
+      const options: MongoClientOptions = {
+        maxPoolSize: 10,
+      };
+
+      const client = new MongoClient(MONGODB_URI, options);
+      await client.connect();
+
+      const db = client.db(DB_NAME);
+
+      try {
+        // Verify connection
+        await db.admin().ping();
+
+        // Initialize views and indexes
+        await initializeDatabase(db);
+      } catch (initError) {
+        await client.close().catch(() => {});
+        throw initError;
+      }
+
+      cachedClient = client;
+      cachedDb = db;
+
+      console.log("Connected to MongoDB");
+      return { client, db };
+    } catch (error) {
+      connectionPromise = null;
+      console.error("Error connecting to MongoDB:", error);
+      throw error;
+    }
+  })();
+
+  return connectionPromise;
 }
 
 export async function getDatabase(): Promise<Db> {
@@ -182,6 +197,7 @@ export async function getDatabase(): Promise<Db> {
 }
 
 export async function closeDatabase(): Promise<void> {
+  connectionPromise = null;
   if (cachedClient) {
     await cachedClient.close();
     cachedClient = null;
