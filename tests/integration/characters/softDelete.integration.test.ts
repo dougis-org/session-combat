@@ -89,14 +89,16 @@ describe("Character Soft Delete API Integration", () => {
         }),
       });
 
+      expect(createRes.status).toBe(201);
       const character = await createRes.json();
       const characterId = character.id;
 
       // Delete the character
-      await fetch(`${baseUrl}/api/characters/${characterId}`, {
+      const deleteRes = await fetch(`${baseUrl}/api/characters/${characterId}`, {
         method: "DELETE",
         headers: { Cookie: authCookie },
       });
+      expect(deleteRes.status).toBe(200);
 
       // Try to get deleted character detail
       const detailRes = await fetch(

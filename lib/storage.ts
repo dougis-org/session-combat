@@ -475,9 +475,12 @@ export const storage = {
     try {
       const db = await getDatabase();
       // Soft delete: mark with deletedAt timestamp
-      await db
+      const result = await db
         .collection<Character>("characters")
         .updateOne({ id, userId }, { $set: { deletedAt: new Date() } });
+      if (result.matchedCount === 0) {
+        throw new Error(`Character ${id} not found`);
+      }
       // Set leftAt on all active party memberships for the deleted character
       await db
         .collection<Party>("parties")
