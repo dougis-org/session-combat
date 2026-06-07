@@ -70,6 +70,12 @@ describe("DELETE /api/campaigns/[id]/characters/[cid]", () => {
     expect(response.status).toBe(403);
   });
 
+  it("T5-1b: returns 403 when caller is an active dm", async () => {
+    mockedStorage.getMember.mockResolvedValue({ ...ACTIVE_PLAYER, role: "dm" });
+    const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
+    expect(response.status).toBe(403);
+  });
+
   it("T5-2: returns 404 when character not found", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
     mockedStorage.loadCharacterById.mockResolvedValue(null);

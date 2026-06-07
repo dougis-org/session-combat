@@ -41,19 +41,27 @@ export function SharedCharactersPanel({ campaignId, characters }: Props) {
   const handleToggle = async (character: Character) => {
     const id = character.id;
     const wasShared = sharedIds.has(id);
+    const prevIds = sharedIds;
+
     setToggling((prev) => new Set(prev).add(id));
+    const nextIds = new Set(sharedIds);
+    if (wasShared) { nextIds.delete(id); } else { nextIds.add(id); }
+    setSharedIds(nextIds);
+
     try {
       if (wasShared) {
         const res = await fetch(`/api/campaigns/${campaignId}/characters/${id}`, { method: 'DELETE' });
-        if (res.ok) setSharedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+        if (!res.ok) throw new Error('delete failed');
       } else {
         const res = await fetch(`/api/campaigns/${campaignId}/characters`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ characterId: id }),
         });
-        if (res.ok) setSharedIds((prev) => { const next = new Set(prev); next.add(id); return next; });
+        if (!res.ok) throw new Error('share failed');
       }
+    } catch {
+      setSharedIds(prevIds);
     } finally {
       setToggling((prev) => { const next = new Set(prev); next.delete(id); return next; });
     }

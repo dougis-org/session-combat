@@ -1050,10 +1050,17 @@ export const storage = {
   async loadCharacterById(id: string): Promise<Character | null> {
     try {
       const db = await getDatabase();
-      const character = await db
-        .collection<Character>("characters")
-        .findOne({ id, deletedAt: null as unknown as Date });
-      return character ? normalizeStoredEntityId(character) : null;
+      try {
+        const character = await db
+          .collection<Character>("characters_active")
+          .findOne({ id });
+        return character ? normalizeStoredEntityId(character) : null;
+      } catch {
+        const character = await db
+          .collection<Character>("characters")
+          .findOne({ id, deletedAt: null as unknown as Date });
+        return character ? normalizeStoredEntityId(character) : null;
+      }
     } catch (error) {
       console.error("Error loading character by ID:", error);
       throw error;

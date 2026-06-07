@@ -7,7 +7,7 @@ type Params = { id: string; cid: string };
 export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: campaignId, cid: characterId }) => {
   try {
     const member = await storage.getMember(campaignId, auth.userId);
-    if (!member || member.status !== 'active') {
+    if (!member || member.status !== 'active' || member.role !== 'player') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

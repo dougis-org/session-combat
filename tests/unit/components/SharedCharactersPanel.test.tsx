@@ -185,6 +185,33 @@ describe('SharedCharactersPanel', () => {
     });
   });
 
+  it('reverts optimistic update when POST fails', async () => {
+    const user = userEvent.setup();
+    const mockFetch = jest.fn(async (input: RequestInfo | URL, options?: RequestInit) => {
+      const url = input.toString();
+      if (url === `/api/campaigns/${CAMPAIGN_ID}/members/me`) return jsonResponse(ACTIVE_PLAYER);
+      if (url === `/api/campaigns/${CAMPAIGN_ID}/characters` && !options?.method) return jsonResponse([]);
+      if (url === `/api/campaigns/${CAMPAIGN_ID}/characters` && options?.method === 'POST') {
+        return jsonResponse({ error: 'Conflict' }, 409);
+      }
+      return jsonResponse({ error: 'Not found' }, 404);
+    });
+    global.fetch = mockFetch;
+
+    render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} characters={[CHAR_Y]} />);
+
+    await waitFor(() => expect(screen.getByText('Legolas')).toBeInTheDocument());
+
+    const toggle = screen.getByRole('checkbox', { name: /Legolas/i });
+    expect(toggle).not.toBeChecked();
+
+    await user.click(toggle);
+
+    await waitFor(() => {
+      expect(screen.getByRole('checkbox', { name: /Legolas/i })).not.toBeChecked();
+    });
+  });
+
   it('panel collapses and expands on button click', async () => {
     const user = userEvent.setup();
     setupFetch(ACTIVE_PLAYER);
