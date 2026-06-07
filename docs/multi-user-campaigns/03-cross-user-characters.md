@@ -1,4 +1,4 @@
-# Phase 3 — Cross-user characters into parties
+# Phase 3 — Cross-user characters into parties (partially complete)
 
 **Goal:** Let players opt their own characters into a campaign, and let the DM pull
 those shared characters into the parties they build — even though the DM doesn't
@@ -8,7 +8,7 @@ own them.
 but the data layer can be built against memberships directly.
 
 > **Tracking:** epic [#295](https://github.com/dougis-org/session-combat/issues/295) — OPEN
-> **Status:** Not started. Blocked on Phase 1 (complete). Can begin once Phase 2 invite/accept is sufficiently live.
+> **Status:** 1 of 2 sub-issues closed (3a delivered). **3b (#310) open — next to work on.**
 
 ## How a player's character reaches a DM's party
 
@@ -27,7 +27,7 @@ flowchart LR
 
 ## Deliverables (sub-issues)
 
-### 🟡 3a. Character sharing (opt-in) — data + player UI · [#309](https://github.com/dougis-org/session-combat/issues/309) — OPEN
+### ✅ 3a. Character sharing (opt-in) — data + player UI · [#309](https://github.com/dougis-org/session-combat/issues/309) — CLOSED
 - Add `CampaignCharacterShare` type; create `campaignCharacterShares` collection
   with unique `{campaignId, characterId}`.
 - API for a player to share/unshare one of **their** characters into a campaign
