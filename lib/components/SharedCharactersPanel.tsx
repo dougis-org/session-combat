@@ -26,8 +26,7 @@ export function SharedCharactersPanel({ campaignId, currentUserMember }: Props) 
         fetch(`/api/campaigns/${campaignId}/characters`),
       ]);
       if (charRes.ok) {
-        const chars: Character[] = await charRes.json();
-        setCharacters(chars);
+        setCharacters(await charRes.json());
       }
       if (shareRes.ok) {
         const shares: CampaignCharacterShare[] = await shareRes.json();
@@ -42,15 +41,14 @@ export function SharedCharactersPanel({ campaignId, currentUserMember }: Props) 
 
   const handleToggle = async (character: Character) => {
     const id = character.id;
-    if (toggling.has(id)) return;
-
     const wasShared = sharedIds.has(id);
+    const prevIds = sharedIds;
+
     setToggling((prev) => new Set(prev).add(id));
-    setSharedIds((prev) => {
-      const next = new Set(prev);
-      if (wasShared) { next.delete(id); } else { next.add(id); }
-      return next;
-    });
+
+    const nextIds = new Set(sharedIds);
+    if (wasShared) { nextIds.delete(id); } else { nextIds.add(id); }
+    setSharedIds(nextIds);
 
     try {
       if (wasShared) {
@@ -65,11 +63,7 @@ export function SharedCharactersPanel({ campaignId, currentUserMember }: Props) 
         if (!res.ok) throw new Error('share failed');
       }
     } catch {
-      setSharedIds((prev) => {
-        const next = new Set(prev);
-        if (wasShared) { next.add(id); } else { next.delete(id); }
-        return next;
-      });
+      setSharedIds(prevIds);
     } finally {
       setToggling((prev) => {
         const next = new Set(prev);
@@ -95,25 +89,22 @@ export function SharedCharactersPanel({ campaignId, currentUserMember }: Props) 
           {characters.length === 0 ? (
             <p className="text-gray-400 text-sm">No characters to share.</p>
           ) : (
-            characters.map((character) => {
-              const isShared = sharedIds.has(character.id);
-              return (
-                <label
-                  key={character.id}
-                  className="flex items-center gap-3 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    aria-label={character.name}
-                    checked={isShared}
-                    disabled={toggling.has(character.id)}
-                    onChange={() => handleToggle(character)}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm text-gray-200">{character.name}</span>
-                </label>
-              );
-            })
+            characters.map((character) => (
+              <label
+                key={character.id}
+                className="flex items-center gap-3 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  aria-label={character.name}
+                  checked={sharedIds.has(character.id)}
+                  disabled={toggling.has(character.id)}
+                  onChange={() => handleToggle(character)}
+                  className="w-4 h-4"
+                />
+                <span className="text-sm text-gray-200">{character.name}</span>
+              </label>
+            ))
           )}
         </div>
       )}

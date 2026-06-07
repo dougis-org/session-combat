@@ -127,10 +127,10 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings addressed before final commit
-- [ ] Commit all changes and push to `feat/campaign-character-sharing`
-- [ ] Open PR to `main`. PR body must include `Closes #309`.
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (never `--admin`)
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings addressed before final commit
+- [x] Commit all changes and push to `feat/campaign-character-sharing`
+- [x] Open PR to `main`. PR body must include `Closes #309`.
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (never `--admin`)
 - [ ] Wait 180 seconds for CI and agentic reviewers
 - [ ] **Monitor PR comments** — address each, commit fixes, run remote push validation, push, wait 180s, repeat until no unresolved threads remain
 - [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required check, run remote push validation, push, wait 180s, repeat
