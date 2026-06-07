@@ -107,7 +107,7 @@ Blocking resolution flow:
 - [x] Archive the change: move `openspec/changes/fix-soft-delete-flaky-test/` → `openspec/changes/archive/YYYY-MM-DD-fix-soft-delete-flaky-test/` in a **single atomic commit** (stage both copy and deletion together)
 - [x] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-soft-delete-flaky-test/` exists and `openspec/changes/fix-soft-delete-flaky-test/` is gone
 - [x] **Create a doc branch:** `git checkout -b doc/archive-fix-soft-delete-flaky-test` then `git push -u origin doc/archive-fix-soft-delete-flaky-test`
-- [ ] Open a PR from `doc/archive-fix-soft-delete-flaky-test` to `main` with title `docs: archive fix-soft-delete-flaky-test`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Open a PR from `doc/archive-fix-soft-delete-flaky-test` to `main` with title `docs: archive fix-soft-delete-flaky-test`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
 - [ ] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to doc branch, repeat)
 - [ ] Prune merged local branches: `git fetch --prune` && `git branch -d fix/soft-delete-flaky-test doc/archive-fix-soft-delete-flaky-test`
