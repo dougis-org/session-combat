@@ -139,12 +139,12 @@ Blocking resolution flow:
 - [x] `git checkout main` and `git pull --ff-only`
 - [x] Verify the merged changes appear on the default branch
 - [x] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (e.g. CONTRIBUTING.md if test conventions changed)
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec)
-- [ ] Archive the change: move `openspec/changes/test-login-and-encounters-pages/` to `openspec/changes/archive/YYYY-MM-DD-test-login-and-encounters-pages/` **in a single atomic commit** — stage both the new location and the deletion of the old location together
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-test-login-and-encounters-pages/` exists and `openspec/changes/test-login-and-encounters-pages/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-test-login-and-encounters-pages` then `git push -u origin doc/archive-YYYY-MM-DD-test-login-and-encounters-pages`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive test-login-and-encounters-pages (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges (same loop as implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d test/login-and-encounters-pages doc/archive-YYYY-MM-DD-test-login-and-encounters-pages`
+- [x] Update repository documentation impacted by the change (e.g. CONTRIBUTING.md if test conventions changed)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec)
+- [x] Archive the change: move `openspec/changes/test-login-and-encounters-pages/` to `openspec/changes/archive/2026-06-06-test-login-and-encounters-pages/` **in a single atomic commit** — stage both the new location and the deletion of the old location together
+- [x] Confirm `openspec/changes/archive/2026-06-06-test-login-and-encounters-pages/` exists and `openspec/changes/test-login-and-encounters-pages/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-06-06-test-login-and-encounters-pages` then `git push -u origin doc/archive-2026-06-06-test-login-and-encounters-pages`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive test-login-and-encounters-pages (2026-06-06)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor the doc PR until it merges (same loop as implementation PR)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d test/login-and-encounters-pages doc/archive-2026-06-06-test-login-and-encounters-pages`
