@@ -1,10 +1,24 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 export function NavBar() {
   const { isAuthenticated, loading, logout } = useAuth();
+  const [invitationCount, setInvitationCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated || loading) return;
+    fetch('/api/me/invitations')
+      .then((res) => res.json())
+      .then((data: { invitations?: unknown[] }) => {
+        setInvitationCount(data.invitations?.length ?? 0);
+      })
+      .catch(() => {
+        setInvitationCount(0);
+      });
+  }, [isAuthenticated, loading]);
 
   return (
     <nav className="flex-shrink-0 bg-gray-950 border-b border-gray-800 px-4 py-2">
@@ -27,6 +41,11 @@ export function NavBar() {
         <Link href="/combat" className="text-gray-400 hover:text-white transition-colors text-sm">
           Combat
         </Link>
+        {isAuthenticated && !loading && invitationCount > 0 && (
+          <Link href="/invitations" className="text-yellow-400 hover:text-yellow-300 transition-colors text-sm">
+            Invitations ({invitationCount})
+          </Link>
+        )}
         {isAuthenticated && !loading && (
           <button
             data-testid="logout-button"
