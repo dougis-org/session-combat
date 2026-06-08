@@ -38,8 +38,4 @@ No requirements removed.
 
 ### Requirement: Reliability
 
-#### Scenario: Recovery behavior
-
-- **Given** CI re-triggers the integration test suite after a transient failure
-- **When** all three HTTP operations (POST, DELETE, GET) complete successfully
-- **Then** the test passes without flaking, and no assertion failure is produced by a silent intermediate step
+See functional scenario: [All steps pass — test verifies 404 on deleted character]

@@ -16,7 +16,7 @@ The system SHALL throw an `Error` when `deleteCharacter` is called with an `id`/
 
 - **Given** no document in the `characters` collection matches the given `id` and `userId`
 - **When** `deleteCharacter(id, userId)` is called
-- **Then** the function throws `Error('Character not found')` and the DELETE endpoint returns HTTP 500
+- **Then** the function throws `` Error(`Character ${id} not found`) `` and the DELETE endpoint returns HTTP 500
 
 #### Scenario: Delete is not re-entrant for an already-deleted character
 
@@ -38,8 +38,4 @@ No requirements removed.
 
 ### Requirement: Reliability
 
-#### Scenario: Silent failures are surfaced as errors
-
-- **Given** a storage operation fails to modify any document (e.g., stale ID, concurrent deletion)
-- **When** `deleteCharacter` is called and `updateOne` reports `matchedCount === 0`
-- **Then** an error is thrown (not swallowed), ensuring callers and monitoring systems are aware of the unexpected condition
+See functional scenario: [Delete throws when character is not found]

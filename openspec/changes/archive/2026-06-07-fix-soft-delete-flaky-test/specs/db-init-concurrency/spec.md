@@ -38,8 +38,4 @@ No requirements removed.
 
 ### Requirement: Reliability
 
-#### Scenario: Recovery behavior
-
-- **Given** MongoDB is temporarily unavailable at server startup
-- **When** the first `connectToDatabase` call rejects and MongoDB becomes available
-- **Then** the next `connectToDatabase` call succeeds and the server resumes normal operation (the stale rejected promise does not permanently block subsequent attempts)
+See functional scenario: [Failed connection allows retry]
