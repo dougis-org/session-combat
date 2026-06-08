@@ -1,3 +1,5 @@
+import { Response as FetchResponse } from 'node-fetch';
+
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({ children, href, ...rest }: { children: React.ReactNode; href: string; [k: string]: unknown }) =>
@@ -9,7 +11,7 @@ jest.mock('@/lib/hooks/useAuth', () => ({
 }));
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NavBar } from '@/lib/components/NavBar';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -25,6 +27,22 @@ function mockAuth(overrides: Partial<ReturnType<typeof useAuth>>) {
 }
 
 describe('NavBar', () => {
+  let originalFetch: typeof global.fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+    global.fetch = jest.fn(() =>
+      Promise.resolve(new FetchResponse(JSON.stringify({ invitations: [] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }) as unknown as Response)
+    ) as unknown as jest.MockedFunction<typeof fetch>;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
   it('renders all navigation links with correct hrefs', () => {
     mockAuth({});
     render(<NavBar />);
@@ -61,5 +79,61 @@ describe('NavBar', () => {
     render(<NavBar />);
     await user.click(screen.getByTestId('logout-button'));
     expect(logout).toHaveBeenCalledTimes(1);
+  });
+});
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return new FetchResponse(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  }) as unknown as Response;
+}
+
+describe('NavBar — invitations badge', () => {
+  let originalFetch: typeof global.fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it('renders "Invitations (2)" link when fetch returns 2 invitations', async () => {
+    mockAuth({ isAuthenticated: true, loading: false, user: { userId: 'u1', email: 'u@test.com' } });
+    global.fetch = jest.fn(() =>
+      Promise.resolve(jsonResponse({ invitations: [{ id: '1' }, { id: '2' }] }))
+    ) as unknown as jest.MockedFunction<typeof fetch>;
+    render(<NavBar />);
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: 'Invitations (2)' })).toHaveAttribute('href', '/invitations');
+    });
+  });
+
+  it('does not render invitations link when fetch returns empty list', async () => {
+    mockAuth({ isAuthenticated: true, loading: false, user: { userId: 'u1', email: 'u@test.com' } });
+    global.fetch = jest.fn(() =>
+      Promise.resolve(jsonResponse({ invitations: [] }))
+    ) as unknown as jest.MockedFunction<typeof fetch>;
+    render(<NavBar />);
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    expect(screen.queryByRole('link', { name: /invitations/i })).not.toBeInTheDocument();
+  });
+
+  it('does not render invitations link when unauthenticated', () => {
+    mockAuth({ isAuthenticated: false, loading: false });
+    global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
+    render(<NavBar />);
+    expect(screen.queryByRole('link', { name: /invitations/i })).not.toBeInTheDocument();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('does not render invitations link when fetch throws error', async () => {
+    mockAuth({ isAuthenticated: true, loading: false, user: { userId: 'u1', email: 'u@test.com' } });
+    global.fetch = jest.fn(() => Promise.reject(new Error('Network error'))) as unknown as jest.MockedFunction<typeof fetch>;
+    render(<NavBar />);
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    expect(screen.queryByRole('link', { name: /invitations/i })).not.toBeInTheDocument();
   });
 });
