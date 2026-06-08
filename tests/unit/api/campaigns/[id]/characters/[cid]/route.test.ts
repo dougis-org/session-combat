@@ -20,6 +20,7 @@ jest.mock("@/lib/storage", () => ({
     getMember: jest.fn(),
     removeShare: jest.fn(),
     loadCharacterById: jest.fn(),
+    setPartyMemberLeftAt: jest.fn(),
   },
 }));
 
@@ -27,6 +28,7 @@ const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
   removeShare: jest.MockedFunction<typeof storage.removeShare>;
   loadCharacterById: jest.MockedFunction<typeof storage.loadCharacterById>;
+  setPartyMemberLeftAt: jest.MockedFunction<typeof storage.setPartyMemberLeftAt>;
 };
 
 const CAMPAIGN_ID = "camp-1";
@@ -105,6 +107,29 @@ describe("DELETE /api/campaigns/[id]/characters/[cid]", () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
     mockedStorage.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
     mockedStorage.removeShare.mockResolvedValue(true);
+    mockedStorage.setPartyMemberLeftAt.mockResolvedValue();
+    const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
+    expect(response.status).toBe(204);
+  });
+
+  it("B4-1: calls setPartyMemberLeftAt after successful unshare", async () => {
+    mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
+    mockedStorage.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
+    mockedStorage.removeShare.mockResolvedValue(true);
+    mockedStorage.setPartyMemberLeftAt.mockResolvedValue();
+    await DELETE(makeDeleteRequest(), { params: PARAMS });
+    expect(mockedStorage.setPartyMemberLeftAt).toHaveBeenCalledWith(
+      CAMPAIGN_ID,
+      CHARACTER_ID,
+      expect.any(Date)
+    );
+  });
+
+  it("B4-2: cleanup error does not change 204 response", async () => {
+    mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
+    mockedStorage.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
+    mockedStorage.removeShare.mockResolvedValue(true);
+    mockedStorage.setPartyMemberLeftAt.mockRejectedValue(new Error("cleanup failed"));
     const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
     expect(response.status).toBe(204);
   });

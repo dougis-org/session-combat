@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState, FormField, EditorShell, textInputClass } from '@/lib/components/ui';
-import { Party, Character, Campaign, CHARACTER_TYPE_ORDER, CHARACTER_TYPE_LABELS, getCharacterType } from '@/lib/types';
+import { Party, Character, Campaign, CHARACTER_TYPE_ORDER, CHARACTER_TYPE_LABELS, getCharacterType, SharedCharacterEntry } from '@/lib/types';
 import { CharacterMiniSummary } from '@/lib/components/CharacterMiniSummary';
 
 function PartiesContent() {
@@ -15,6 +15,7 @@ function PartiesContent() {
   const [error, setError] = useState<string | null>(null);
   const [editingParty, setEditingParty] = useState<Party | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [sharedCharacters, setSharedCharacters] = useState<SharedCharacterEntry[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -43,6 +44,24 @@ function PartiesContent() {
     }
   };
 
+  const fetchSharedCharacters = async (campaignId: string) => {
+    if (!campaignId) {
+      setSharedCharacters([]);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/campaigns/${campaignId}/characters`);
+      if (res.ok) {
+        const data = await res.json();
+        setSharedCharacters(Array.isArray(data) ? data : []);
+      } else {
+        setSharedCharacters([]);
+      }
+    } catch {
+      setSharedCharacters([]);
+    }
+  };
+
   const addParty = () => {
     const newParty: Party = {
       id: '',
@@ -53,6 +72,7 @@ function PartiesContent() {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+    setSharedCharacters([]);
     setEditingParty(newParty);
     setIsAdding(true);
   };
@@ -134,8 +154,10 @@ function PartiesContent() {
             party={editingParty}
             characters={characters}
             campaigns={campaigns}
+            sharedCharacters={sharedCharacters}
             onSave={saveParty}
             onCancel={cancelEdit}
+            onCampaignChange={fetchSharedCharacters}
             isNew={isAdding}
           />
         )}
@@ -223,6 +245,7 @@ function PartiesContent() {
                           onClick={() => {
                             setEditingParty(party);
                             setIsAdding(false);
+                            fetchSharedCharacters(party.campaignId ?? '');
                           }}
                           className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
                         >
@@ -251,15 +274,19 @@ function PartyEditor({
   party,
   characters,
   campaigns,
+  sharedCharacters,
   onSave,
   onCancel,
+  onCampaignChange,
   isNew,
 }: {
   party: Party;
   characters: Character[];
   campaigns: Campaign[];
+  sharedCharacters: SharedCharacterEntry[];
   onSave: (party: Party, characterIds: string[]) => Promise<void>;
   onCancel: () => void;
+  onCampaignChange: (campaignId: string) => void;
   isNew: boolean;
 }) {
   const [name, setName] = useState(party.name);
@@ -322,7 +349,10 @@ function PartyEditor({
         </FormField>
 
         <FormField label="Campaign">
-          <select value={campaignId} onChange={(e) => setCampaignId(e.target.value)}
+          <select value={campaignId} onChange={(e) => {
+            setCampaignId(e.target.value);
+            onCampaignChange(e.target.value);
+          }}
             className={textInputClass()} disabled={saving}>
             <option value="">None</option>
             {campaigns.map(campaign => (
@@ -334,7 +364,7 @@ function PartyEditor({
 
       <div className="mb-4">
         <label className="block mb-2 text-sm font-semibold">Party Members</label>
-        {characters.length === 0 ? (
+        {characters.length === 0 && sharedCharacters.length === 0 ? (
           <p className="text-gray-400 text-sm">No characters available. Create characters first.</p>
         ) : (
           <div className="space-y-4">
@@ -357,6 +387,35 @@ function PartyEditor({
                 </div>
               );
             })}
+            {campaignId && sharedCharacters.length > 0 && (() => {
+              const activeShared = sharedCharacters.filter(e => !e.character.deletedAt);
+              if (activeShared.length === 0) return null;
+              const byOwner = new Map<string, SharedCharacterEntry[]>();
+              for (const entry of activeShared) {
+                const key = entry.share.userId;
+                if (!byOwner.has(key)) byOwner.set(key, []);
+                byOwner.get(key)!.push(entry);
+              }
+              return (
+                <div>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Shared by Campaign Members</p>
+                  {Array.from(byOwner.entries()).map(([ownerId, entries]) => (
+                    <div key={ownerId} className="mb-2">
+                      <p className="text-xs text-gray-500 mb-1" aria-label={`Shared by: ${ownerId}`}>{ownerId}</p>
+                      <div className="grid md:grid-cols-2 gap-2">
+                        {entries.map(entry => (
+                          <label key={entry.character.id} className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={characterIds.has(entry.character.id)}
+                              onChange={() => toggleCharacter(entry.character.id)} disabled={saving} className="cursor-pointer" />
+                            <span className="text-sm">{entry.character.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>

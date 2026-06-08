@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { DuplicateShareError } from '@/lib/errors';
+import type { SharedCharacterEntry } from '@/lib/types';
 
 type Params = { id: string };
 
@@ -59,6 +60,11 @@ export const GET = withAuthAndParams<Params>(async (_request, auth, { id: campai
     const member = await storage.getMember(campaignId, auth.userId);
     if (!member || member.status !== 'active') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    if (member.role === 'dm') {
+      const entries: SharedCharacterEntry[] = await storage.buildSharedCharacterEntries(campaignId);
+      return NextResponse.json(entries);
     }
 
     const shares = await storage.listSharesForCampaign(campaignId, auth.userId);

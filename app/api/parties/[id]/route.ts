@@ -42,6 +42,23 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
       const existingActiveIds = new Set<string>(
         existingParty.members.filter(m => !m.leftAt).map(m => m.characterId)
       );
+
+      const effectiveCampaignId = campaignId !== undefined
+        ? (typeof campaignId === 'string' ? campaignId.trim() : '')
+        : existingParty.campaignId;
+      const campaignChanged = effectiveCampaignId !== existingParty.campaignId;
+
+      if (effectiveCampaignId) {
+        for (const charId of newIdSet) {
+          if (campaignChanged || !existingActiveIds.has(charId)) {
+            const allowed = await storage.canAddToCampaignParty(effectiveCampaignId, charId, auth.userId);
+            if (!allowed) {
+              return NextResponse.json({ error: 'Character not shared into campaign' }, { status: 403 });
+            }
+          }
+        }
+      }
+
       updatedMembers = existingParty.members.map(m => {
         if (!m.leftAt && !newIdSet.has(m.characterId)) {
           return { ...m, leftAt: now };

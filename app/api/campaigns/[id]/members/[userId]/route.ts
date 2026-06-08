@@ -21,6 +21,18 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: cam
     }
 
     await storage.updateMemberStatus(campaignId, targetUserId, 'removed', auth.userId);
+
+    try {
+      const shares = await storage.listAllSharesForCampaign(campaignId);
+      const targetShares = shares.filter(s => s.userId === targetUserId);
+      const now = new Date();
+      for (const share of targetShares) {
+        await storage.setPartyMemberLeftAt(campaignId, share.characterId, now);
+      }
+    } catch (cleanupError) {
+      console.error('Error during party cleanup after member removal:', cleanupError);
+    }
+
     return NextResponse.json({ status: 'removed' });
   } catch (error) {
     console.error('Error removing member:', error);
