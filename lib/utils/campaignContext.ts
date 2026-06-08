@@ -46,7 +46,7 @@ export async function fetchCampaignContext(
 
   const sharedCharacters: Character[] = sharedEntries
     .filter(e => !e.character.deletedAt)
-    .map(e => e.character as unknown as Character);
+    .map(e => e.character);
 
   const allCharactersById = new Map<string, Character>();
   for (const c of dmCharacters) {

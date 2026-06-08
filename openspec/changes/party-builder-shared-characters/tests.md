@@ -13,7 +13,7 @@ Test files map to existing conventions:
 - Storage unit tests → `tests/unit/lib/storage-shares.test.ts` (extend) or `tests/unit/lib/storage.test.ts`
 - New storage helpers → new `describe` blocks in `tests/unit/lib/storage-shares.test.ts`
 - Route integration tests → `tests/integration/campaigns.character-sharing.integration.test.ts` (extend) and `tests/integration/api.integration.test.ts` (party routes)
-- `fetchCampaignContext` unit tests → `tests/unit/lib/campaignContext.test.ts` (new file)
+- `fetchCampaignContext` unit tests → `tests/unit/utils/campaignContext.test.ts` (existing file, extended)
 - `PartyEditor` component tests → `tests/unit/components/PartyEditor.test.tsx` (new file)
 
 ## Testing Steps

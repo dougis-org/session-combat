@@ -270,7 +270,7 @@ function PartiesContent() {
   );
 }
 
-function PartyEditor({
+export function PartyEditor({
   party,
   characters,
   campaigns,

@@ -755,6 +755,6 @@ export interface CampaignCharacterShare {
 
 export interface SharedCharacterEntry {
   share: CampaignCharacterShare;
-  character: Pick<Character, 'id' | 'name' | 'characterType' | 'userId' | 'deletedAt'>;
+  character: Character;
 }
 

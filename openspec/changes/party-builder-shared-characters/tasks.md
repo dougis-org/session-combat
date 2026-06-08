@@ -88,7 +88,7 @@
 
 ## Validation
 
-- [x] `npm run test` — all unit tests pass
+- [x] `npm run test:unit` — all unit tests pass
 - [x] `npm run test:integration` — all integration tests pass
 - [x] `npm run build` — TypeScript build succeeds
 - [x] `npm run lint` — no lint errors
@@ -108,9 +108,9 @@ If **ANY** of the above fail, iterate and fix before pushing.
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `feat/party-builder-shared-characters` and push to remote
-- [ ] Open PR from `feat/party-builder-shared-characters` to `main`. PR body must include `Closes #310`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge`
+- [x] Commit all changes to `feat/party-builder-shared-characters` and push to remote
+- [x] Open PR from `feat/party-builder-shared-characters` to `main`. PR body must include `Closes #310`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge`
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
 - [ ] **Monitor PR comments** — poll autonomously; address, commit fixes, validate locally, push, wait 180 seconds, repeat until no unresolved comments
 - [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, validate locally, push, wait 180 seconds, repeat

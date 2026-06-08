@@ -1,6 +1,7 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { SharedCharacterEntry, Party } from '@/lib/types';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { PartyEditor } from '@/app/parties/page';
+import { SharedCharacterEntry, Party, Character, Campaign } from '@/lib/types';
 
 jest.mock('@/lib/components/ui', () => ({
   ErrorBanner: () => null,
@@ -25,17 +26,6 @@ jest.mock('@/lib/components/ui', () => ({
   textInputClass: () => '',
 }));
 
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({ children, href }: { children: React.ReactNode; href: string }) =>
-    React.createElement('a', { href }, children),
-}));
-
-jest.mock('@/lib/components/ProtectedRoute', () => ({
-  ProtectedRoute: ({ children }: { children: React.ReactNode }) =>
-    React.createElement(React.Fragment, null, children),
-}));
-
 jest.mock('@/lib/components/CharacterMiniSummary', () => ({
   CharacterMiniSummary: () => null,
 }));
@@ -51,109 +41,112 @@ const makeParty = (overrides: Partial<Party> = {}): Party => ({
   ...overrides,
 });
 
-const makeSharedEntry = (characterId: string, userId: string, name: string, deletedAt?: Date): SharedCharacterEntry => ({
-  share: { id: `share-${characterId}`, campaignId: 'camp-1', characterId, userId, sharedAt: new Date() },
-  character: { id: characterId, name, characterType: 'character', userId, deletedAt },
+const makeCharacter = (id: string, name: string): Character => ({
+  id,
+  userId: 'dm-1',
+  name,
+  classes: [{ class: 'Fighter', level: 1 }],
+  abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+  ac: 10,
+  hp: 10,
+  maxHp: 10,
 });
 
-describe('PartyEditor shared characters UI', () => {
+const makeSharedEntry = (characterId: string, userId: string, name: string, deletedAt?: Date): SharedCharacterEntry => ({
+  share: { id: `share-${characterId}`, campaignId: 'camp-1', characterId, userId, sharedAt: new Date() },
+  character: makeCharacter(characterId, name),
+});
+
+const makeCampaign = (id: string, name: string): Campaign => ({
+  id,
+  userId: 'dm-1',
+  name,
+  moduleName: 'Test',
+  chapters: [],
+  status: 'active',
+  notes: '',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+});
+
+const defaultProps = {
+  party: makeParty({ campaignId: 'camp-1' }),
+  characters: [] as Character[],
+  campaigns: [makeCampaign('camp-1', 'Campaign Alpha')],
+  sharedCharacters: [] as SharedCharacterEntry[],
+  onSave: jest.fn().mockResolvedValue(undefined),
+  onCancel: jest.fn(),
+  onCampaignChange: jest.fn(),
+  isNew: false,
+};
+
+describe('PartyEditor — shared characters', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('D1-1: shared character section rendered when campaignId set', () => {
-    const sharedEntry = makeSharedEntry('sc-1', 'player-1', 'Arya Stark');
-    // Simulate the section rendering by checking what PartyEditor renders
-    // We use a minimal render of just the section logic inline
-    const Wrapper = () => {
-      const entries = [sharedEntry];
-      const campaignId = 'camp-1';
-      const byOwner = new Map<string, typeof entries>();
-      for (const e of entries) {
-        const k = e.share.userId;
-        if (!byOwner.has(k)) byOwner.set(k, []);
-        byOwner.get(k)!.push(e);
-      }
-      if (!campaignId || entries.length === 0) return null;
-      return React.createElement('div', null,
-        React.createElement('p', null, 'Shared by Campaign Members'),
-        ...Array.from(byOwner.entries()).map(([ownerId, es]) =>
-          React.createElement('div', { key: ownerId },
-            React.createElement('p', { 'aria-label': `Shared by: ${ownerId}` }, ownerId),
-            ...es.map(e =>
-              React.createElement('label', { key: e.character.id },
-                React.createElement('input', { type: 'checkbox', readOnly: true, checked: false }),
-                React.createElement('span', null, e.character.name)
-              )
-            )
-          )
-        )
-      );
-    };
-
-    render(React.createElement(Wrapper));
+  test('D1-1: shows "Shared by Campaign Members" section when campaignId set and sharedCharacters present', () => {
+    const shared = [makeSharedEntry('sc-1', 'player-1', 'Arya Stark')];
+    render(React.createElement(PartyEditor, { ...defaultProps, sharedCharacters: shared }));
     expect(screen.getByText('Shared by Campaign Members')).toBeTruthy();
     expect(screen.getByText('Arya Stark')).toBeTruthy();
   });
 
   test('D1-2: shared characters grouped by owner', () => {
-    const e1 = makeSharedEntry('sc-1', 'player-1', 'Arya');
-    const e2 = makeSharedEntry('sc-2', 'player-2', 'Sansa');
-    const e3 = makeSharedEntry('sc-3', 'player-2', 'Bran');
-    const entries = [e1, e2, e3];
-    const byOwner = new Map<string, typeof entries>();
-    for (const e of entries) {
-      const k = e.share.userId;
-      if (!byOwner.has(k)) byOwner.set(k, []);
-      byOwner.get(k)!.push(e);
-    }
-    const Wrapper = () => React.createElement('div', null,
-      ...Array.from(byOwner.entries()).map(([ownerId, es]) =>
-        React.createElement('div', { key: ownerId },
-          React.createElement('p', { 'aria-label': `Shared by: ${ownerId}` }, ownerId),
-          ...es.map(e =>
-            React.createElement('span', { key: e.character.id }, e.character.name)
-          )
-        )
-      )
-    );
-    render(React.createElement(Wrapper));
-    expect(screen.getByText('player-1')).toBeTruthy();
-    expect(screen.getByText('player-2')).toBeTruthy();
+    const shared = [
+      makeSharedEntry('sc-1', 'player-1', 'Arya'),
+      makeSharedEntry('sc-2', 'player-2', 'Sansa'),
+      makeSharedEntry('sc-3', 'player-2', 'Bran'),
+    ];
+    render(React.createElement(PartyEditor, { ...defaultProps, sharedCharacters: shared }));
+    const p1Label = screen.getByLabelText('Shared by: player-1');
+    const p2Label = screen.getByLabelText('Shared by: player-2');
+    expect(p1Label).toBeTruthy();
+    expect(p2Label).toBeTruthy();
     expect(screen.getByText('Arya')).toBeTruthy();
     expect(screen.getByText('Sansa')).toBeTruthy();
     expect(screen.getByText('Bran')).toBeTruthy();
   });
 
-  test('D1-3: soft-deleted shared character not shown', () => {
-    const deleted = makeSharedEntry('sc-del', 'player-1', 'Deleted Char', new Date());
-    const active = makeSharedEntry('sc-act', 'player-1', 'Active Char');
-    const entries = [deleted, active].filter(e => !e.character.deletedAt);
-    expect(entries).toHaveLength(1);
-    expect(entries[0].character.name).toBe('Active Char');
+  test('D1-3: soft-deleted shared character is not shown', () => {
+    const deletedEntry = makeSharedEntry('sc-del', 'player-1', 'Deleted Char');
+    deletedEntry.character.deletedAt = new Date();
+    const shared = [deletedEntry, makeSharedEntry('sc-act', 'player-1', 'Active Char')];
+    render(React.createElement(PartyEditor, { ...defaultProps, sharedCharacters: shared }));
+    expect(screen.queryByText('Deleted Char')).toBeNull();
+    expect(screen.getByText('Active Char')).toBeTruthy();
   });
 
   test('D1-4: no shared section when sharedCharacters is empty', () => {
-    const Wrapper = () => {
-      const entries: SharedCharacterEntry[] = [];
-      const campaignId = 'camp-1';
-      if (!campaignId || entries.length === 0) return React.createElement('div', null, 'No shared');
-      return React.createElement('p', null, 'Shared by Campaign Members');
-    };
-    render(React.createElement(Wrapper));
-    expect(screen.queryByText('Shared by Campaign Members')).toBeNull();
+    render(React.createElement(PartyEditor, { ...defaultProps, sharedCharacters: [] }));
+    expect(screen.queryByText('Shared by Campaign Members')).not.toBeInTheDocument();
   });
 
-  test('D1-5: shared character checkbox toggles and id is included in state', () => {
-    const sharedEntry = makeSharedEntry('sc-1', 'player-1', 'Arya');
-    const selected = new Set<string>();
-    const toggle = (id: string) => {
-      if (selected.has(id)) selected.delete(id);
-      else selected.add(id);
-    };
-    toggle(sharedEntry.character.id);
-    expect(selected.has('sc-1')).toBe(true);
-    toggle(sharedEntry.character.id);
-    expect(selected.has('sc-1')).toBe(false);
+  test('D1-5: no shared section when party has no campaignId', () => {
+    render(React.createElement(PartyEditor, {
+      ...defaultProps,
+      party: makeParty({ campaignId: undefined }),
+      sharedCharacters: [makeSharedEntry('sc-1', 'player-1', 'Arya')],
+    }));
+    expect(screen.queryByText('Shared by Campaign Members')).not.toBeInTheDocument();
+  });
+
+  test('D1-6: shared character checkbox toggles and is included in save payload', async () => {
+    const shared = [makeSharedEntry('sc-1', 'player-1', 'Arya Stark')];
+    render(React.createElement(PartyEditor, { ...defaultProps, sharedCharacters: shared }));
+    const checkbox = screen.getByRole('checkbox', { name: /Arya Stark/i });
+    fireEvent.click(checkbox);
+    fireEvent.click(screen.getByTestId('save-btn'));
+    await Promise.resolve();
+    expect(defaultProps.onSave).toHaveBeenCalledTimes(1);
+    const [, characterIds] = defaultProps.onSave.mock.calls[0];
+    expect(characterIds).toContain('sc-1');
+  });
+
+  test('D1-7: onCampaignChange is called when campaign select changes', () => {
+    render(React.createElement(PartyEditor, { ...defaultProps }));
+    const select = screen.getByRole('combobox');
+    fireEvent.change(select, { target: { value: 'camp-1' } });
+    expect(defaultProps.onCampaignChange).toHaveBeenCalledWith('camp-1');
   });
 });

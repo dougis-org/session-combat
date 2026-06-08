@@ -27,11 +27,9 @@ export const POST = withAuth(async (request, auth) => {
 
     if (typeof campaignId === 'string' && campaignId.trim()) {
       const cid = campaignId.trim();
-      for (const charId of ids) {
-        const allowed = await storage.canAddToCampaignParty(cid, charId, auth.userId);
-        if (!allowed) {
-          return NextResponse.json({ error: 'Character not shared into campaign' }, { status: 403 });
-        }
+      const checks = await Promise.all(ids.map(charId => storage.canAddToCampaignParty(cid, charId, auth.userId)));
+      if (checks.some(allowed => !allowed)) {
+        return NextResponse.json({ error: 'Character not shared into campaign' }, { status: 403 });
       }
     }
 

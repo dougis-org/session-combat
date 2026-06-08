@@ -1136,24 +1136,18 @@ export const storage = {
 
   async buildSharedCharacterEntries(campaignId: string): Promise<SharedCharacterEntry[]> {
     const shares = await this.listAllSharesForCampaign(campaignId);
-    const entries: SharedCharacterEntry[] = [];
-    for (const share of shares) {
-      const member = await this.getMember(campaignId, share.userId);
-      if (!member || member.status !== 'active') continue;
-      const character = await this.loadCharacterById(share.characterId);
-      if (!character || character.deletedAt) continue;
-      entries.push({
-        share,
-        character: {
-          id: character.id,
-          name: character.name,
-          characterType: character.characterType,
-          userId: character.userId,
-          deletedAt: character.deletedAt,
-        },
-      });
-    }
-    return entries;
+    const results = await Promise.all(
+      shares.map(async (share) => {
+        const [member, character] = await Promise.all([
+          this.getMember(campaignId, share.userId),
+          this.loadCharacterById(share.characterId),
+        ]);
+        if (!member || member.status !== 'active') return null;
+        if (!character || character.deletedAt) return null;
+        return { share, character };
+      })
+    );
+    return results.filter((e): e is SharedCharacterEntry => e !== null);
   },
 
   async loadCharacterById(id: string): Promise<Character | null> {

@@ -49,13 +49,12 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
       const campaignChanged = effectiveCampaignId !== existingParty.campaignId;
 
       if (effectiveCampaignId) {
-        for (const charId of newIdSet) {
-          if (campaignChanged || !existingActiveIds.has(charId)) {
-            const allowed = await storage.canAddToCampaignParty(effectiveCampaignId, charId, auth.userId);
-            if (!allowed) {
-              return NextResponse.json({ error: 'Character not shared into campaign' }, { status: 403 });
-            }
-          }
+        const charsToCheck = Array.from(newIdSet).filter(charId => campaignChanged || !existingActiveIds.has(charId));
+        const checks = await Promise.all(
+          charsToCheck.map(charId => storage.canAddToCampaignParty(effectiveCampaignId, charId, auth.userId))
+        );
+        if (checks.some(allowed => !allowed)) {
+          return NextResponse.json({ error: 'Character not shared into campaign' }, { status: 403 });
         }
       }
 

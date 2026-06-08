@@ -25,11 +25,9 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: cam
       return NextResponse.json({ error: 'Share not found' }, { status: 404 });
     }
 
-    try {
-      await storage.setPartyMemberLeftAt(campaignId, characterId, new Date());
-    } catch (cleanupError) {
-      console.error('Error during party cleanup after unshare:', cleanupError);
-    }
+    void storage.setPartyMemberLeftAt(campaignId, characterId, new Date()).catch(
+      (e: unknown) => console.error('Error during party cleanup after unshare:', e)
+    );
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
