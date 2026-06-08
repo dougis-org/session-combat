@@ -75,8 +75,8 @@ File: `tests/unit/components/NavBar.test.tsx` (create if not exists)
 
 ## Validation
 
-- [x] `npm test -- --testPathPattern="Toast|InvitationsPage|NavBar"` — all new and updated tests pass
-- [x] `npm test` — full test suite passes with no regressions
+- [x] `npm run test:unit -- --testPathPattern="Toast|InvitationsPage|NavBar"` — all new and updated tests pass
+- [x] `npm run test:unit` — full test suite passes with no regressions
 - [x] `npm run build` — build succeeds with no type errors
 - [x] `npm run lint` — no lint errors
 - [x] All tasks above marked complete
@@ -85,7 +85,7 @@ File: `tests/unit/components/NavBar.test.tsx` (create if not exists)
 
 Verification requirements (all must pass before PR or pushing updates to a PR):
 
-- **Unit tests** — `npm test` — all tests must pass
+- **Unit tests** — `npm run test:unit` — all tests must pass
 - **Build** — `npm run build` — must succeed with no errors
 - **Lint** — `npm run lint` — must pass
 

@@ -10,14 +10,16 @@ export function NavBar() {
 
   useEffect(() => {
     if (!isAuthenticated || loading) return;
+    let active = true;
     fetch('/api/me/invitations')
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data: { invitations?: unknown[] }) => {
-        setInvitationCount(data.invitations?.length ?? 0);
+        if (active) setInvitationCount(data.invitations?.length ?? 0);
       })
       .catch(() => {
-        setInvitationCount(0);
+        if (active) setInvitationCount(0);
       });
+    return () => { active = false; };
   }, [isAuthenticated, loading]);
 
   return (

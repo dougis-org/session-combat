@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Response as FetchResponse } from 'node-fetch';
 
@@ -95,8 +95,7 @@ describe('InvitationsPage', () => {
   it('Accept click calls PATCH with { action: "accept" }, removes invite from list, shows success toast', async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) });
     let fetchCalls = 0;
-    global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = input.toString();
+    global.fetch = jest.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       if (init?.method === 'PATCH') return jsonResponse({ status: 'accepted' });
       fetchCalls++;
       return jsonResponse({ invitations: fetchCalls === 1 ? MOCK_INVITATIONS : [] });
@@ -123,8 +122,7 @@ describe('InvitationsPage', () => {
   it('Decline click calls PATCH with { action: "decline" }, removes invite from list, shows success toast', async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) });
     let fetchCalls = 0;
-    global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = input.toString();
+    global.fetch = jest.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       if (init?.method === 'PATCH') return jsonResponse({ status: 'declined' });
       fetchCalls++;
       return jsonResponse({ invitations: fetchCalls === 1 ? MOCK_INVITATIONS : [] });

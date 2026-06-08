@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 type ToastType = 'success' | 'error';
 
@@ -11,11 +11,20 @@ interface ToastState {
 
 export function useToast() {
   const [toast, setToast] = useState<ToastState | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = useCallback((message: string, type: ToastType) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
     setToast({ message, type });
     const timer = setTimeout(() => setToast(null), 3000);
+    timerRef.current = timer;
     (timer as unknown as { unref?: () => void }).unref?.();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, []);
 
   return { toast, showToast };

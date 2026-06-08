@@ -10,12 +10,14 @@ interface Invitation {
   campaignId: string;
   campaignName: string;
   invitedBy: string;
-  invitedAt: string;
+  invitedAt: string | null;
 }
 
-function relativeTime(date: string): string {
+function relativeTime(date: string | null): string {
+  if (!date) return 'just now';
   const diff = Date.now() - new Date(date).getTime();
   const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return 'just now';
   if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
@@ -28,6 +30,7 @@ function InvitationsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [respondingId, setRespondingId] = useState<string | null>(null);
   const { toast, showToast } = useToast();
 
   const fetchInvitations = useCallback(async () => {
@@ -49,6 +52,7 @@ function InvitationsContent() {
 
   async function handleRespond(campaignId: string, campaignName: string, action: 'accept' | 'decline') {
     setActionError(null);
+    setRespondingId(campaignId);
     try {
       const res = await fetch(`/api/campaigns/${campaignId}/members/me`, {
         method: 'PATCH',
@@ -65,6 +69,8 @@ function InvitationsContent() {
       void fetchInvitations();
     } catch {
       setActionError(`Failed to ${action} invitation`);
+    } finally {
+      setRespondingId(null);
     }
   }
 
@@ -79,29 +85,34 @@ function InvitationsContent() {
         <p className="text-center text-gray-400">No pending invitations</p>
       ) : (
         <ul className="space-y-4">
-          {invitations.map((inv) => (
-            <li key={inv.id} className="bg-gray-800 rounded-lg p-4 flex items-center justify-between gap-4">
-              <div>
-                <p className="font-bold text-white">{inv.campaignName}</p>
-                <p className="text-sm text-gray-400">Invited by: {inv.invitedBy}</p>
-                <p className="text-sm text-gray-500">{relativeTime(inv.invitedAt)}</p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => void handleRespond(inv.campaignId, inv.campaignName, 'accept')}
-                  className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded"
-                >
-                  Accept
-                </button>
-                <button
-                  onClick={() => void handleRespond(inv.campaignId, inv.campaignName, 'decline')}
-                  className="border border-gray-500 hover:border-red-500 text-gray-300 hover:text-red-400 text-sm px-3 py-1 rounded"
-                >
-                  Decline
-                </button>
-              </div>
-            </li>
-          ))}
+          {invitations.map((inv) => {
+            const isResponding = respondingId !== null;
+            return (
+              <li key={inv.id} className="bg-gray-800 rounded-lg p-4 flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-bold text-white">{inv.campaignName}</p>
+                  <p className="text-sm text-gray-400">Invited by: {inv.invitedBy}</p>
+                  <p className="text-sm text-gray-500">{relativeTime(inv.invitedAt)}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    disabled={isResponding}
+                    onClick={() => void handleRespond(inv.campaignId, inv.campaignName, 'accept')}
+                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white text-sm px-3 py-1 rounded"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    disabled={isResponding}
+                    onClick={() => void handleRespond(inv.campaignId, inv.campaignName, 'decline')}
+                    className="border border-gray-500 hover:border-red-500 disabled:border-gray-700 text-gray-300 hover:text-red-400 disabled:text-gray-600 text-sm px-3 py-1 rounded"
+                  >
+                    Decline
+                  </button>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
       <Toast toast={toast} />
