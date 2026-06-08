@@ -24,6 +24,15 @@ export const POST = withAuth(async (request, auth) => {
 
     const now = new Date();
     const ids: string[] = Array.isArray(characterIds) ? characterIds : [];
+
+    if (typeof campaignId === 'string' && campaignId.trim()) {
+      const cid = campaignId.trim();
+      const checks = await Promise.all(ids.map(charId => storage.canAddToCampaignParty(cid, charId, auth.userId)));
+      if (checks.some(allowed => !allowed)) {
+        return NextResponse.json({ error: 'Character not shared into campaign' }, { status: 403 });
+      }
+    }
+
     const members: PartyMember[] = ids.map(characterId => ({ characterId, addedAt: now }));
 
     const party: Party = {

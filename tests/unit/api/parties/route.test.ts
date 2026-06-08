@@ -21,6 +21,7 @@ jest.mock("@/lib/storage", () => ({
     loadParties: jest.fn(),
     saveParty: jest.fn(),
     deleteParty: jest.fn(),
+    canAddToCampaignParty: jest.fn(),
   },
 }));
 
@@ -109,6 +110,42 @@ describe("POST /api/parties", () => {
     () => makeRequest({ name: "Doomed Party" }),
     () => mockedStorage.saveParty.mockRejectedValue(new Error("Storage error"))
   );
+
+  it("B2-1: returns 403 when campaignId set and character not shared", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    (mockedStorage as any).canAddToCampaignParty.mockResolvedValue(false);
+    mockedStorage.saveParty.mockResolvedValue(undefined as any);
+
+    const response = await POST(
+      makeRequest({ name: "Campaign Party", campaignId: "camp-1", characterIds: ["char-foreign"] })
+    );
+
+    expect(response.status).toBe(403);
+    const body = await response.json();
+    expect(body.error).toContain("not shared");
+  });
+
+  it("B2-2: returns 201 when campaignId set and shared character allowed", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    (mockedStorage as any).canAddToCampaignParty.mockResolvedValue(true);
+    mockedStorage.saveParty.mockResolvedValue(undefined as any);
+
+    const response = await POST(
+      makeRequest({ name: "Campaign Party", campaignId: "camp-1", characterIds: ["char-shared"] })
+    );
+
+    expect(response.status).toBe(201);
+  });
+
+  it("B2-3: no share check when campaignId absent", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    mockedStorage.saveParty.mockResolvedValue(undefined as any);
+
+    const response = await POST(makeRequest({ name: "No Campaign", characterIds: ["char-1"] }));
+
+    expect(response.status).toBe(201);
+    expect((mockedStorage as any).canAddToCampaignParty).not.toHaveBeenCalled();
+  });
 });
 
 describe("PUT /api/parties/[id]", () => {
@@ -209,6 +246,69 @@ describe("PUT /api/parties/[id]", () => {
       { params: Promise.resolve({ id: "missing" }) }
     );
     expect(response.status).toBe(404);
+  });
+
+  it("B3-1: returns 403 when adding unshared character to campaign party", async () => {
+    const partyWithCampaign = { ...EXISTING_PARTY, campaignId: "camp-1" };
+    mockedStorage.loadParties.mockResolvedValue([partyWithCampaign] as any);
+    (mockedStorage as any).canAddToCampaignParty.mockResolvedValue(false);
+
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        characterIds: ["char-new-unshared"],
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    expect(response.status).toBe(403);
+  });
+
+  it("B3-2: returns 200 when adding shared character to campaign party", async () => {
+    const partyWithCampaign = { ...EXISTING_PARTY, campaignId: "camp-1" };
+    mockedStorage.loadParties.mockResolvedValue([partyWithCampaign] as any);
+    (mockedStorage as any).canAddToCampaignParty.mockResolvedValue(true);
+
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        characterIds: ["char-new-shared"],
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    expect(response.status).toBe(200);
+  });
+
+  it("B3-3: re-adding existing active member does not trigger share check", async () => {
+    const partyWithCampaign = { ...EXISTING_PARTY, campaignId: "camp-1" };
+    mockedStorage.loadParties.mockResolvedValue([partyWithCampaign] as any);
+
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        characterIds: ["char-1"],
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    expect(response.status).toBe(200);
+    expect((mockedStorage as any).canAddToCampaignParty).not.toHaveBeenCalled();
+  });
+
+  it("B3-4: no share check when party has no campaignId", async () => {
+    mockedStorage.loadParties.mockResolvedValue([EXISTING_PARTY] as any);
+
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        characterIds: ["char-new"],
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    expect(response.status).toBe(200);
+    expect((mockedStorage as any).canAddToCampaignParty).not.toHaveBeenCalled();
   });
 });
 

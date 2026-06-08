@@ -21,6 +21,7 @@ import {
   MemberStatus,
   MemberHistoryEntry,
   PublicUser,
+  SharedCharacterEntry,
 } from "./types";
 import { DuplicateMemberError, DuplicateShareError } from "./errors";
 import { GLOBAL_USER_ID } from "./constants";
@@ -1048,6 +1049,105 @@ export const storage = {
       console.error("Error listing campaign character shares:", error);
       return [];
     }
+  },
+
+  async listAllSharesForCampaign(campaignId: string): Promise<CampaignCharacterShare[]> {
+    try {
+      const db = await getDatabase();
+      const shares = await db
+        .collection<CampaignCharacterShare>("campaignCharacterShares")
+        .find({ campaignId })
+        .toArray();
+      return shares.map((s) => {
+        const normalized = normalizeStoredEntityId(s);
+        const { _id, ...rest } = normalized;
+        return rest as CampaignCharacterShare;
+      });
+    } catch (error) {
+      console.error("Error listing all campaign character shares:", error);
+      return [];
+    }
+  },
+
+  async loadPartiesByCampaign(campaignId: string): Promise<Party[]> {
+    // TODO: add campaignId index on parties if >50ms becomes common
+    const start = Date.now();
+    try {
+      const db = await getDatabase();
+      const parties = await db
+        .collection<LegacyPartyDoc>("parties")
+        .find({ campaignId } as unknown as Filter<LegacyPartyDoc>)
+        .toArray();
+      const duration = Date.now() - start;
+      if (duration > 10) {
+        console.log(`[perf] loadPartiesByCampaign ${campaignId}: ${duration}ms`);
+      }
+      return parties.map(normalizeStoredEntityId).map(migrateParty);
+    } catch (error) {
+      console.error("Error loading parties by campaign:", error);
+      return [];
+    }
+  },
+
+  async setPartyMemberLeftAt(campaignId: string, characterId: string, timestamp: Date): Promise<void> {
+    try {
+      const parties = await this.loadPartiesByCampaign(campaignId);
+      for (const party of parties) {
+        let modified = false;
+        const updatedMembers = party.members.map((m) => {
+          if (m.characterId === characterId && !m.leftAt) {
+            modified = true;
+            return { ...m, leftAt: timestamp };
+          }
+          return m;
+        });
+        if (modified) {
+          try {
+            await this.saveParty({ ...party, members: updatedMembers });
+          } catch (saveError) {
+            console.error(`Error saving party ${party.id} during setPartyMemberLeftAt:`, saveError);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error in setPartyMemberLeftAt:", error);
+    }
+  },
+
+  async canAddToCampaignParty(campaignId: string, characterId: string, dmUserId: string): Promise<boolean> {
+    try {
+      const character = await this.loadCharacterById(characterId);
+      if (!character) return false;
+      if (character.userId === dmUserId) return true;
+
+      const db = await getDatabase();
+      const share = await db
+        .collection<CampaignCharacterShare>("campaignCharacterShares")
+        .findOne({ campaignId, characterId });
+      if (!share) return false;
+
+      const member = await this.getMember(campaignId, share.userId);
+      return member?.status === 'active';
+    } catch (error) {
+      console.error("Error in canAddToCampaignParty:", error);
+      return false;
+    }
+  },
+
+  async buildSharedCharacterEntries(campaignId: string): Promise<SharedCharacterEntry[]> {
+    const shares = await this.listAllSharesForCampaign(campaignId);
+    const results = await Promise.all(
+      shares.map(async (share) => {
+        const [member, character] = await Promise.all([
+          this.getMember(campaignId, share.userId),
+          this.loadCharacterById(share.characterId),
+        ]);
+        if (!member || member.status !== 'active') return null;
+        if (!character || character.deletedAt) return null;
+        return { share, character };
+      })
+    );
+    return results.filter((e): e is SharedCharacterEntry => e !== null);
   },
 
   async loadCharacterById(id: string): Promise<Character | null> {

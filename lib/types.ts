@@ -753,3 +753,8 @@ export interface CampaignCharacterShare {
   sharedAt: Date;
 }
 
+export interface SharedCharacterEntry {
+  share: CampaignCharacterShare;
+  character: Character;
+}
+

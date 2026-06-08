@@ -22,6 +22,7 @@ jest.mock("@/lib/storage", () => ({
     addShare: jest.fn(),
     listSharesForCampaign: jest.fn(),
     loadCharacterById: jest.fn(),
+    buildSharedCharacterEntries: jest.fn(),
   },
 }));
 
@@ -30,6 +31,7 @@ const mockedStorage = jest.mocked(storage) as {
   addShare: jest.MockedFunction<typeof storage.addShare>;
   listSharesForCampaign: jest.MockedFunction<typeof storage.listSharesForCampaign>;
   loadCharacterById: jest.MockedFunction<typeof storage.loadCharacterById>;
+  buildSharedCharacterEntries: jest.MockedFunction<typeof storage.buildSharedCharacterEntries>;
 };
 
 const CAMPAIGN_ID = "camp-1";
@@ -189,5 +191,45 @@ describe("GET /api/campaigns/[id]/characters", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toEqual([]);
+  });
+
+  it("B1-1: DM gets enriched SharedCharacterEntry[] response", async () => {
+    const dmMember = { ...ACTIVE_PLAYER, role: "dm" as const };
+    const entry = {
+      share: { id: "s1", campaignId: CAMPAIGN_ID, characterId: "char-2", userId: "player-1", sharedAt: new Date() },
+      character: { id: "char-2", name: "Arya", characterType: "character", userId: "player-1", deletedAt: undefined },
+    };
+    mockedStorage.getMember.mockResolvedValue(dmMember);
+    mockedStorage.buildSharedCharacterEntries.mockResolvedValue([entry] as any);
+    const response = await GET(makeGetRequest(), { params: PARAMS });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toHaveLength(1);
+    expect(body[0]).toHaveProperty("share");
+    expect(body[0]).toHaveProperty("character");
+    expect(body[0].character.name).toBe("Arya");
+  });
+
+  it("B1-2: DM gets empty array when no shares exist", async () => {
+    const dmMember = { ...ACTIVE_PLAYER, role: "dm" as const };
+    mockedStorage.getMember.mockResolvedValue(dmMember);
+    mockedStorage.buildSharedCharacterEntries.mockResolvedValue([]);
+    const response = await GET(makeGetRequest(), { params: PARAMS });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toEqual([]);
+  });
+
+  it("B1-3: player still gets own shares in bare format", async () => {
+    const shares = [
+      { id: "s1", campaignId: CAMPAIGN_ID, characterId: "ch1", userId: MOCK_AUTH.userId, sharedAt: new Date() },
+    ];
+    mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
+    mockedStorage.listSharesForCampaign.mockResolvedValue(shares);
+    const response = await GET(makeGetRequest(), { params: PARAMS });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toHaveLength(1);
+    expect(body[0]).not.toHaveProperty("character");
   });
 });
