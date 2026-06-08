@@ -44,7 +44,7 @@
 ## What Changes
 
 - `lib/db.ts`: `connectToDatabase` stores its work in a module-level `Promise` on first call; subsequent concurrent calls await the same promise instead of starting parallel initialization.
-- `lib/storage.ts`: `deleteCharacter` reads `result.matchedCount` after `updateOne` and throws `Error('Character not found')` when it is 0.
+- `lib/storage.ts`: `deleteCharacter` reads `result.matchedCount` after `updateOne` and throws `Error('Character ${id} not found')` when it is 0.
 - `tests/integration/characters/softDelete.integration.test.ts`: the "should return 404 when accessing deleted character detail" test adds `expect(createRes.status).toBe(201)` and `expect(deleteRes.status).toBe(200)` before the final assertion.
 
 ## Risks

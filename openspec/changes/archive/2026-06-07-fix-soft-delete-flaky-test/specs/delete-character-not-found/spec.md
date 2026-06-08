@@ -16,7 +16,7 @@ The system SHALL throw an `Error` when `deleteCharacter` is called with an `id`/
 
 - **Given** no document in the `characters` collection matches the given `id` and `userId`
 - **When** `deleteCharacter(id, userId)` is called
-- **Then** the function throws `` Error(`Character ${id} not found`) `` and the DELETE endpoint returns HTTP 500
+- **Then** the function throws an `Error` with message `Character <id> not found` and the DELETE endpoint returns HTTP 500
 
 #### Scenario: Delete is not re-entrant for an already-deleted character
 

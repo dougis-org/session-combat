@@ -63,7 +63,7 @@ For each task in `tasks.md`:
 
 - [x] **Given** a mock MongoDB collection where `updateOne` returns `{ matchedCount: 0, modifiedCount: 0 }`
 - [x] **When** `deleteCharacter(id, userId)` is called
-- [x] **Then** the function throws `Error(`Character ${id} not found`)`
+- [x] **Then** the function throws an `Error` with message `Character <id> not found`
 - [x] **TDD step:** Write the test first; it fails because current code has no guard. Add guard; test passes.
 
 ### T2-C — Integration: DELETE endpoint returns 500 when character not found mid-flight
