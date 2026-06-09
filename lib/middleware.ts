@@ -79,7 +79,7 @@ async function verifyTokenVersion(auth: AuthPayload): Promise<boolean> {
   }
 }
 
-async function checkAuth(auth: AuthPayload): Promise<NextResponse | null> {
+export async function checkAuth(auth: AuthPayload): Promise<NextResponse | null> {
   try {
     if (!await verifyTokenVersion(auth)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -112,6 +112,22 @@ export function withAuthAndParams<P extends Record<string, string>>(
     request: NextRequest,
     { params }: { params: Promise<P> }
   ): Promise<NextResponse> => {
+    const auth = requireAuth(request);
+    if (auth instanceof NextResponse) return auth;
+    const denied = await checkAuth(auth);
+    if (denied) return denied;
+    return handler(request, auth, await params);
+  };
+}
+
+/** Wrap a streaming route handler with auth — returns Response (not NextResponse) for SSE compatibility. */
+export function withStreamAndParams<P extends Record<string, string>>(
+  handler: (request: NextRequest, auth: AuthPayload, params: P) => Promise<Response>
+) {
+  return async (
+    request: NextRequest,
+    { params }: { params: Promise<P> }
+  ): Promise<Response> => {
     const auth = requireAuth(request);
     if (auth instanceof NextResponse) return auth;
     const denied = await checkAuth(auth);
