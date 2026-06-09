@@ -74,13 +74,13 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `fix/soft-delete-flaky-test` and push to remote
-- [ ] Open PR from `fix/soft-delete-flaky-test` to `main`. PR body must include `Closes #386`.
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin` to force the merge; use `--squash` per repo ruleset)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — poll for new comments autonomously; address them, commit fixes, resolve threads, follow Remote push validation steps, push to `fix/soft-delete-flaky-test`; wait 180 seconds then repeat
-- [ ] **Monitor CI checks** — poll with `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, follow Remote push validation steps, push, wait 180 seconds, repeat
-- [ ] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
+- [x] Commit all changes to `fix/soft-delete-flaky-test` and push to remote
+- [x] Open PR from `fix/soft-delete-flaky-test` to `main`. PR body must include `Closes #386`.
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin` to force the merge; use `--squash` per repo ruleset)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Monitor PR comments** — poll for new comments autonomously; address them, commit fixes, resolve threads, follow Remote push validation steps, push to `fix/soft-delete-flaky-test`; wait 180 seconds then repeat
+- [x] **Monitor CI checks** — poll with `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, follow Remote push validation steps, push, wait 180 seconds, repeat
+- [x] **Poll for merge** — after each iteration run `gh pr view <PR-URL> --json state`; when `state` is `MERGED` proceed to Post-Merge; if `CLOSED` exit and notify the user
 
 Ownership metadata:
 
@@ -96,18 +96,18 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/`:
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/`:
   - Copy `openspec/changes/fix-soft-delete-flaky-test/specs/db-init-concurrency/spec.md` → `openspec/specs/db-init-concurrency/spec.md`
   - Copy `openspec/changes/fix-soft-delete-flaky-test/specs/delete-character-not-found/spec.md` → `openspec/specs/delete-character-not-found/spec.md`
   - Copy `openspec/changes/fix-soft-delete-flaky-test/specs/soft-delete-test-assertions/spec.md` → `openspec/specs/soft-delete-test-assertions/spec.md`
   - Update relative links in each promoted spec to point to archived locations (`../../changes/archive/YYYY-MM-DD-fix-soft-delete-flaky-test/design.md`, etc.)
-- [ ] Archive the change: move `openspec/changes/fix-soft-delete-flaky-test/` → `openspec/changes/archive/YYYY-MM-DD-fix-soft-delete-flaky-test/` in a **single atomic commit** (stage both copy and deletion together)
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-soft-delete-flaky-test/` exists and `openspec/changes/fix-soft-delete-flaky-test/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-fix-soft-delete-flaky-test` then `git push -u origin doc/archive-fix-soft-delete-flaky-test`
-- [ ] Open a PR from `doc/archive-fix-soft-delete-flaky-test` to `main` with title `docs: archive fix-soft-delete-flaky-test`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Archive the change: move `openspec/changes/fix-soft-delete-flaky-test/` → `openspec/changes/archive/YYYY-MM-DD-fix-soft-delete-flaky-test/` in a **single atomic commit** (stage both copy and deletion together)
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-soft-delete-flaky-test/` exists and `openspec/changes/fix-soft-delete-flaky-test/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-fix-soft-delete-flaky-test` then `git push -u origin doc/archive-fix-soft-delete-flaky-test`
+- [x] Open a PR from `doc/archive-fix-soft-delete-flaky-test` to `main` with title `docs: archive fix-soft-delete-flaky-test`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
 - [ ] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to doc branch, repeat)
 - [ ] Prune merged local branches: `git fetch --prune` && `git branch -d fix/soft-delete-flaky-test doc/archive-fix-soft-delete-flaky-test`
