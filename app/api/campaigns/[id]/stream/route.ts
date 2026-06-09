@@ -4,10 +4,13 @@ import { assertCampaignAccess } from '@/lib/utils/campaign';
 import { subscribe } from '@/lib/server/transport';
 import type { CampaignStreamEvent } from '@/lib/types';
 
-const HEARTBEAT_INTERVAL_MS = parseInt(process.env.HEARTBEAT_INTERVAL_MS ?? '25000', 10);
+const _parsed = parseInt(process.env.HEARTBEAT_INTERVAL_MS ?? '25000', 10);
+const HEARTBEAT_INTERVAL_MS = Number.isFinite(_parsed) && _parsed > 0 ? _parsed : 25000;
 
-function formatSSE(event: CampaignStreamEvent): string {
-  return `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`;
+const encoder = new TextEncoder();
+
+function formatSSE(event: CampaignStreamEvent): Uint8Array {
+  return encoder.encode(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
 }
 
 export const GET = withStreamAndParams<{ id: string }>(
@@ -17,10 +20,10 @@ export const GET = withStreamAndParams<{ id: string }>(
     const access = await assertCampaignAccess(id, auth.userId);
     if (access instanceof Response) return access;
 
-    const stream = new ReadableStream({
+    const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         // Flush response headers immediately before async setup
-        controller.enqueue(': connected\n\n');
+        controller.enqueue(encoder.encode(': connected\n\n'));
 
         const td = await subscribe(id, (event) => {
           controller.enqueue(formatSSE(event));

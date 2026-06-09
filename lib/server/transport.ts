@@ -17,8 +17,19 @@ async function detectReplicaSet(): Promise<boolean> {
     const { db } = await connectToDatabase();
     await db.admin().command({ replSetGetStatus: 1 });
     isReplicaSet = true;
-  } catch {
-    isReplicaSet = false;
+  } catch (err) {
+    const isNotReplicaSetError =
+      err instanceof Error && (
+        err.message.includes('not running with --replSet') ||
+        (err as { code?: number }).code === 76
+      );
+    if (isNotReplicaSetError) {
+      isReplicaSet = false;
+    } else {
+      // Transient error (connection/auth issue) — fall back to polling this time
+      // but don't cache so next subscribe retries detection
+      return false;
+    }
   }
   return isReplicaSet;
 }
@@ -34,23 +45,32 @@ function demux(doc: { fullDocument?: { campaignId?: string } & Record<string, un
     data: { ts: Date.now() },
   };
   for (const handler of handlers) {
-    handler(event);
+    try { handler(event); } catch { /* handler errors don't break the stream */ }
   }
 }
 
 async function closeStream() {
-  if (sharedCursor) {
-    await sharedCursor.close();
-  }
-  sharedCursor = null;
+  const promise = openPromise;
+  const cursor = sharedCursor;
   openPromise = null;
+  sharedCursor = null;
+  if (promise) {
+    try {
+      const resolvedCursor = await promise;
+      await resolvedCursor.close();
+    } catch { /* ignore */ }
+  } else if (cursor) {
+    try {
+      await cursor.close();
+    } catch { /* ignore */ }
+  }
 }
 
 async function openStream(): Promise<ChangeStream> {
   if (openPromise) return openPromise;
   openPromise = (async () => {
     const { client } = await connectToDatabase();
-    const cursor = client.watch([]) as ChangeStream;
+    const cursor = client.watch([], { fullDocument: 'updateLookup' }) as ChangeStream;
     sharedCursor = cursor;
 
     // Start async iteration in background
@@ -65,14 +85,12 @@ async function openStream(): Promise<ChangeStream> {
           (err.name === 'ChangeStreamInvalidatedError' || err.message.includes('ChangeStreamInvalidated'));
 
         if (isInvalidated) {
-          // One reconnect attempt
           openPromise = null;
           sharedCursor = null;
           try {
             await openStream();
           } catch {
-            // Fall through — stream stays closed; polling not activated here since
-            // replica-set was already confirmed. Subscribers receive no further events.
+            // Fall through — stream stays closed; subscribers receive no further events.
           }
         }
       }
@@ -94,11 +112,17 @@ async function pollFn(
     const since = new Date(sinceRef.value);
     const docs = await db
       .collection('campaigns')
-      .find({ campaignId, createdAt: { $gt: since } })
+      .find({
+        $or: [
+          { id: campaignId, updatedAt: { $gt: since } },
+          { campaignId, createdAt: { $gt: since } },
+        ],
+      })
       .toArray() as Array<Record<string, unknown>>;
 
     for (const doc of docs) {
-      if (doc['campaignId'] !== campaignId) continue;
+      const docCampaignId = (doc['campaignId'] ?? doc['id']) as string | undefined;
+      if (docCampaignId !== campaignId) continue;
       const event: CampaignStreamEvent = {
         type: 'heartbeat',
         campaignId,
@@ -117,32 +141,34 @@ export async function subscribe(campaignId: string, onEvent: EventHandler): Prom
   const atlasMode = await detectReplicaSet();
 
   if (atlasMode) {
-    // Register handler
     if (!registry.has(campaignId)) {
       registry.set(campaignId, new Set());
     }
     registry.get(campaignId)!.add(onEvent);
     subscriberCount++;
 
-    // Lazy open — concurrent calls share the same promise
     const streamPromise = openStream();
 
+    let torn = false;
     return () => {
+      if (torn) return;
+      torn = true;
       registry.get(campaignId)?.delete(onEvent);
-      subscriberCount--;
-      if (subscriberCount <= 0) {
-        subscriberCount = 0;
-        // Close after the stream resolves (handles in-flight case)
+      if (registry.get(campaignId)?.size === 0) registry.delete(campaignId);
+      subscriberCount = Math.max(0, subscriberCount - 1);
+      if (subscriberCount === 0) {
         streamPromise.then(() => closeStream()).catch(() => closeStream());
       }
     };
   } else {
-    // Polling path
     const sinceRef = { value: Date.now() };
     const intervalId = setInterval(() => pollFn(campaignId, onEvent, sinceRef), 2000);
     (intervalId as unknown as { unref?: () => void }).unref?.();
 
+    let torn = false;
     return () => {
+      if (torn) return;
+      torn = true;
       clearInterval(intervalId);
     };
   }
