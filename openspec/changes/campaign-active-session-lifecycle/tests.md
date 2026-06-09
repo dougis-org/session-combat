@@ -23,11 +23,11 @@ For each task in `tasks.md`:
 
 ### Task 2 — `setActiveCampaignSession` storage method
 
-- [ ] **T2.1** — `setActiveCampaignSession(campaignId, sessionId)` calls `updateOne` with `{ $set: { activeSessionId: sessionId, updatedAt: <Date> } }` and does NOT call `replaceOne` or `findOneAndReplace`.
+- [ ] **T2.1** — `setActiveCampaignSession(campaignId, userId, sessionId)` calls `updateOne` with filter `{ id: campaignId, userId }` and `{ $set: { activeSessionId: sessionId, updatedAt: <Date> } }` and does NOT call `replaceOne` or `findOneAndReplace`.
   - Spec: Requirement: ADDED `Campaign.activeSessionId` field / Concurrent write safety
   - File: storage unit test
 
-- [ ] **T2.2** — `setActiveCampaignSession(campaignId, null)` calls `updateOne` with `{ $set: { activeSessionId: null, updatedAt: <Date> } }`.
+- [ ] **T2.2** — `setActiveCampaignSession(campaignId, userId, null)` calls `updateOne` with `{ $set: { activeSessionId: null, updatedAt: <Date> } }`.
   - Spec: Scenario: "Field is null after session closed"
   - File: storage unit test
 

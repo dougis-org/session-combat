@@ -14,8 +14,8 @@
 
 ### Task 2 — Add `setActiveCampaignSession` to storage
 
-- [x] In `lib/storage.ts`, add method `setActiveCampaignSession(campaignId: string, sessionId: string | null): Promise<void>`.
-- [x] Implementation: `db.collection("campaigns").updateOne({ id: campaignId }, { $set: { activeSessionId: sessionId ?? null, updatedAt: new Date() } })`.
+- [x] In `lib/storage.ts`, add method `setActiveCampaignSession(campaignId: string, userId: string, sessionId: string | null): Promise<void>`.
+- [x] Implementation: `db.collection("campaigns").updateOne({ id: campaignId, userId }, { $set: { activeSessionId: sessionId, updatedAt: new Date() } })`.
 - [x] Ensure the method signature is added to the storage interface/type if one exists.
 - [x] Verify TypeScript compiles: `npx tsc --noEmit`
 

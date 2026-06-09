@@ -32,7 +32,7 @@
 ### In Scope
 
 - Add `activeSessionId?: string` to `Campaign` interface (`lib/types.ts`).
-- Add `setActiveCampaignSession(campaignId, sessionId | null)` to `lib/storage.ts`.
+- Add `setActiveCampaignSession(campaignId, userId, sessionId | null)` and `claimActiveCampaignSession(campaignId, userId, sessionId)` to `lib/storage.ts`.
 - New route file `app/api/campaigns/[id]/sessions/active/route.ts` with `POST` (open) and `DELETE` (close) handlers.
 - `DELETE` with `?force=true` query parameter to bypass the 409 guard and force-clear a stale `activeSessionId` (reset path).
 - Verify `GET /api/campaigns/:id` automatically includes `activeSessionId` once the type and storage are updated.

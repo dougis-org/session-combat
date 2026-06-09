@@ -18,9 +18,15 @@ export const POST = withAuthAndParams<Params>(async (_request, _auth, { id: camp
       return NextResponse.json({ error: 'A session is already active' }, { status: 409 });
     }
 
+    const logId = crypto.randomUUID();
+    const claimed = await storage.claimActiveCampaignSession(campaignId, campaign.userId, logId);
+    if (!claimed) {
+      return NextResponse.json({ error: 'A session is already active' }, { status: 409 });
+    }
+
     const now = new Date();
     const log: SessionLog = {
-      id: crypto.randomUUID(),
+      id: logId,
       userId: campaign.userId,
       campaignId,
       sessionNumber: await storage.getNextSessionNumber(campaign.userId, campaignId),
@@ -34,10 +40,6 @@ export const POST = withAuthAndParams<Params>(async (_request, _auth, { id: camp
     };
 
     await storage.saveSessionLog(log);
-    const claimed = await storage.claimActiveCampaignSession(campaignId, campaign.userId, log.id);
-    if (!claimed) {
-      return NextResponse.json({ error: 'A session is already active' }, { status: 409 });
-    }
 
     return NextResponse.json(log, { status: 201 });
   } catch (error) {
@@ -61,7 +63,7 @@ export const DELETE = withAuthAndParams<Params>(async (request, _auth, { id: cam
     }
 
     const closedSessionId = campaign.activeSessionId ?? null;
-    if (campaign.activeSessionId) {
+    if (force || campaign.activeSessionId) {
       await storage.setActiveCampaignSession(campaignId, campaign.userId, null);
     }
 

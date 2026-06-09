@@ -100,14 +100,17 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
     expect(datePlayed).toBeLessThanOrEqual(Date.now());
   });
 
-  it("calls saveSessionLog and claimActiveCampaignSession atomically", async () => {
+  it("claims the session atomically before saving the log — avoids orphan on concurrent open", async () => {
     await POST(makePostReq(), { params: PARAMS });
-    expect(mockedStorage.saveSessionLog).toHaveBeenCalledTimes(1);
     expect(mockedStorage.claimActiveCampaignSession).toHaveBeenCalledWith(
       CAMPAIGN_ID,
       "user-123",
       "new-session-uuid"
     );
+    expect(mockedStorage.saveSessionLog).toHaveBeenCalledTimes(1);
+    const claimOrder = mockedStorage.claimActiveCampaignSession.mock.invocationCallOrder[0];
+    const saveOrder = mockedStorage.saveSessionLog.mock.invocationCallOrder[0];
+    expect(claimOrder).toBeLessThan(saveOrder);
   });
 
   it("returns 409 when activeSessionId is already set (fast-path check)", async () => {
@@ -183,11 +186,11 @@ describe("DELETE /api/campaigns/[id]/sessions/active", () => {
     expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
   });
 
-  it("returns 200 with null sessionId when force=true and no active session — skips DB write", async () => {
+  it("returns 200 with null sessionId when force=true and no active session — writes null to ensure field is explicit", async () => {
     const res = await DELETE(makeDeleteReq(true), { params: PARAMS });
     expect(res.status).toBe(200);
     expect((await res.json()).sessionId).toBeNull();
-    expect(mockedStorage.setActiveCampaignSession).not.toHaveBeenCalled();
+    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
   });
 
   it("does not call saveSessionLog when closing — only clears activeSessionId pointer", async () => {

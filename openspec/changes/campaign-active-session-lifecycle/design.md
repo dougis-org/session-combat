@@ -30,14 +30,14 @@
 
 ### Decision 2: `setActiveCampaignSession` atomic `updateOne`
 
-- Chosen: `db.collection("campaigns").updateOne({ id: campaignId }, { $set: { activeSessionId: sessionId ?? null, updatedAt: new Date() } })`.
+- Chosen: `db.collection("campaigns").updateOne({ id: campaignId, userId }, { $set: { activeSessionId: sessionId, updatedAt: new Date() } })`.
 - Alternatives considered: Reuse `saveCampaign` full-upsert.
-- Rationale: Full upsert risks clobbering concurrent field changes (e.g., a DM editing campaign notes mid-session). Targeted `updateOne` on a single field is safe under concurrent writes.
+- Rationale: Full upsert risks clobbering concurrent field changes (e.g., a DM editing campaign notes mid-session). Targeted `updateOne` on a single field is safe under concurrent writes. Including `userId` in the filter is consistent with other multi-tenant storage methods (e.g., `saveCampaign`) and ensures ownership enforcement.
 - Trade-offs: Adds one new storage method; minimal overhead.
 
 ### Decision 3: Force-reset via `DELETE ?force=true`
 
-- Chosen: `DELETE /api/campaigns/:id/sessions/active?force=true` skips the "nothing to close" 404 check and unconditionally calls `setActiveCampaignSession(campaignId, null)`.
+- Chosen: `DELETE /api/campaigns/:id/sessions/active?force=true` skips the "nothing to close" 404 check and unconditionally calls `setActiveCampaignSession(campaignId, campaign.userId, null)`.
 - Alternatives considered: Separate `POST .../active/reset` endpoint; `PATCH` endpoint.
 - Rationale: DELETE is semantically correct (you are deleting the active session pointer). `?force=true` is a minimal, discoverable escape hatch without adding a new route. Keeps the surface small.
 - Trade-offs: Callers must know to use `?force=true`; no UI currently surfaces this. Acceptable because this is an operator/DM escape hatch, not a normal flow.
