@@ -337,6 +337,22 @@ export const storage = {
     }
   },
 
+  async claimActiveCampaignSession(campaignId: string, sessionId: string): Promise<boolean> {
+    try {
+      const db = await getDatabase();
+      const result = await db
+        .collection<Campaign>("campaigns")
+        .updateOne(
+          { id: campaignId, $or: [{ activeSessionId: null }, { activeSessionId: { $exists: false } }] },
+          { $set: { activeSessionId: sessionId, updatedAt: new Date() } }
+        );
+      return result.modifiedCount === 1;
+    } catch (error) {
+      console.error("Error claiming active campaign session:", error);
+      throw error;
+    }
+  },
+
   // Load all session data for a user
   async load(userId: string): Promise<SessionData> {
     try {

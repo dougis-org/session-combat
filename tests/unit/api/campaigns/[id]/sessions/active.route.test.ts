@@ -19,16 +19,29 @@ jest.mock("@/lib/storage", () => ({
     getNextSessionNumber: jest.fn(),
     saveSessionLog: jest.fn(),
     setActiveCampaignSession: jest.fn(),
+    claimActiveCampaignSession: jest.fn(),
   },
 }));
 jest.mock("@/lib/utils/campaign", () => ({
   ...jest.requireActual("@/lib/utils/campaign"),
   assertCampaignAccess: jest.fn(),
 }));
+
+const originalCrypto = globalThis.crypto;
 const mockRandomUUID = jest.fn(() => "new-session-uuid");
-Object.defineProperty(globalThis, "crypto", {
-  value: { randomUUID: mockRandomUUID },
-  writable: true,
+beforeAll(() => {
+  Object.defineProperty(globalThis, "crypto", {
+    value: { randomUUID: mockRandomUUID },
+    writable: true,
+    configurable: true,
+  });
+});
+afterAll(() => {
+  Object.defineProperty(globalThis, "crypto", {
+    value: originalCrypto,
+    writable: true,
+    configurable: true,
+  });
 });
 
 const mockedStorage = jest.mocked(storage);
@@ -61,6 +74,7 @@ beforeEach(() => {
   mockedStorage.getNextSessionNumber.mockResolvedValue(1);
   mockedStorage.saveSessionLog.mockResolvedValue(undefined as any);
   mockedStorage.setActiveCampaignSession.mockResolvedValue(undefined as any);
+  mockedStorage.claimActiveCampaignSession.mockResolvedValue(true as any);
 });
 
 // ─── POST /api/campaigns/[id]/sessions/active ────────────────────────────────
@@ -69,6 +83,7 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
   itReturns401WithParams(POST, makePostReq, PARAMS);
 
   it("returns 201 and the new SessionLog when no active session", async () => {
+    const before = Date.now();
     const res = await POST(makePostReq(), { params: PARAMS });
     expect(res.status).toBe(201);
     const body = await res.json();
@@ -80,18 +95,21 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
     expect(body.events).toEqual([]);
     expect(body.title).toBeUndefined();
     expect(body.summary).toBeUndefined();
+    const datePlayed = new Date(body.datePlayed).getTime();
+    expect(datePlayed).toBeGreaterThanOrEqual(before);
+    expect(datePlayed).toBeLessThanOrEqual(Date.now());
   });
 
-  it("calls saveSessionLog and setActiveCampaignSession", async () => {
+  it("calls saveSessionLog and claimActiveCampaignSession atomically", async () => {
     await POST(makePostReq(), { params: PARAMS });
     expect(mockedStorage.saveSessionLog).toHaveBeenCalledTimes(1);
-    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(
+    expect(mockedStorage.claimActiveCampaignSession).toHaveBeenCalledWith(
       CAMPAIGN_ID,
       "new-session-uuid"
     );
   });
 
-  it("returns 409 when activeSessionId is already set", async () => {
+  it("returns 409 when activeSessionId is already set (fast-path check)", async () => {
     mockedAssertCampaignAccess.mockResolvedValue({
       campaign: { ...MOCK_CAMPAIGN, activeSessionId: "existing-session-id" } as any,
       role: "dm",
@@ -100,6 +118,13 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
     expect(res.status).toBe(409);
     expect((await res.json()).error).toBe("A session is already active");
     expect(mockedStorage.saveSessionLog).not.toHaveBeenCalled();
+  });
+
+  it("returns 409 when atomic claim fails (concurrent session opened)", async () => {
+    mockedStorage.claimActiveCampaignSession.mockResolvedValue(false as any);
+    const res = await POST(makePostReq(), { params: PARAMS });
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("A session is already active");
   });
 
   it("returns 404 when role is not dm", async () => {
@@ -146,7 +171,7 @@ describe("DELETE /api/campaigns/[id]/sessions/active", () => {
     expect(mockedStorage.setActiveCampaignSession).not.toHaveBeenCalled();
   });
 
-  it("returns 200 with null sessionId when force=true and stale session exists", async () => {
+  it("returns 200 with the stale sessionId when force=true and stale session exists", async () => {
     mockedAssertCampaignAccess.mockResolvedValue({
       campaign: { ...MOCK_CAMPAIGN, activeSessionId: "stale-session-id" } as any,
       role: "dm",
@@ -157,21 +182,21 @@ describe("DELETE /api/campaigns/[id]/sessions/active", () => {
     expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, null);
   });
 
-  it("returns 200 with null sessionId when force=true and no active session", async () => {
+  it("returns 200 with null sessionId when force=true and no active session — skips DB write", async () => {
     const res = await DELETE(makeDeleteReq(true), { params: PARAMS });
     expect(res.status).toBe(200);
     expect((await res.json()).sessionId).toBeNull();
-    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, null);
+    expect(mockedStorage.setActiveCampaignSession).not.toHaveBeenCalled();
   });
 
-  it("does not delete SessionLog when closing — only clears activeSessionId", async () => {
+  it("does not call saveSessionLog when closing — only clears activeSessionId pointer", async () => {
     mockedAssertCampaignAccess.mockResolvedValue({
       campaign: { ...MOCK_CAMPAIGN, activeSessionId: "active-session-id" } as any,
       role: "dm",
     });
     await DELETE(makeDeleteReq(), { params: PARAMS });
+    expect(mockedStorage.saveSessionLog).not.toHaveBeenCalled();
     expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, null);
-    expect(Object.keys(mockedStorage)).not.toContain("deleteSessionLog");
   });
 
   it("returns 404 when role is not dm", async () => {
