@@ -1,4 +1,4 @@
-# Phase 3 — Cross-user characters into parties
+# Phase 3 — Cross-user characters into parties ✅ COMPLETE
 
 **Goal:** Let players opt their own characters into a campaign, and let the DM pull
 those shared characters into the parties they build — even though the DM doesn't

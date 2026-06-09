@@ -303,10 +303,10 @@ gantt
 
 | Wave | Can start | Notes |
 |------|-----------|-------|
-| 1 | ~~**1a, 1d, 4b, 4c, 7a**~~ | ✅ Phase 1 fully delivered. 4b, 4c, 7a remain ready to start. |
+| 1 | ~~**1a, 1d**~~, **4b, 4c, 7a** | ✅ 1a, 1d delivered. **4b, 4c, 7a** have no upstream deps and remain available to start at any time. |
 | 2 | ~~**1b, 1c, 1e, 2b**~~ | ✅ All delivered. |
-| 3 | ~~**2d, 3a, 4a–4c, 5a, 6a**~~ | ✅ All delivered. 4a/4b/4c, 5a, 6a remain ready to start. |
-| 4 | **3b → done, 5b** | `5b` is the integration point (needs `4b` + `4c` + `5a`). **Phase 4 is the natural next target.** |
+| 3 | ~~**2d, 3a**~~, **4a, 5a, 6a** | ✅ 2d (#308) and 3a (#309) delivered. **4a, 5a, 6a are now unblocked** (1e complete). 4b, 4c, 7a also remain available (see Wave 1). |
+| 4 | ~~**2c → done, 3b**~~ · **5b** | 2c and 3b delivered. `5b` is the integration point (needs `4b` + `4c` + `5a`). |
 | 5 | **6b, 7b** | Feature UIs that sit on top of messaging (`5b`). |
 
 See the per-phase docs for deliverables, acceptance criteria, and affected files:

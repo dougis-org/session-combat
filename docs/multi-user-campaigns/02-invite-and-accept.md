@@ -1,4 +1,4 @@
-# Phase 2 — Invite & accept flow (partially complete)
+# Phase 2 — Invite & accept flow ✅ COMPLETE
 
 **Goal:** Let a DM find users by username and invite them; let invited users accept
 or decline. Membership only becomes `active` on acceptance.
@@ -6,7 +6,7 @@ or decline. Membership only becomes `active` on acceptance.
 **Depends on:** Phase 1 (1c search, 1d members, 1e access). ✅ Phase 1 complete.
 
 > **Tracking:** epic [#294](https://github.com/dougis-org/session-combat/issues/294) — OPEN
-> **Status:** 3 of 4 sub-issues closed (2a, 2b, 2c delivered). **2d (#308) open — next to work on.**
+> **Status:** All 4 sub-issues CLOSED ✅ — Phase 2 complete. Epic #294 pending close.
 
 ## Membership lifecycle
 
@@ -89,7 +89,7 @@ sequenceDiagram
 - **Acceptance:** DM can search, invite, see pending/active members, and remove a
   member; follows existing `lib/components` + Tailwind semantic-token conventions.
 
-### 🟡 2d. Player invitations inbox UI · [#308](https://github.com/dougis-org/session-combat/issues/308) — OPEN (next up)
+### ✅ 2d. Player invitations inbox UI · [#308](https://github.com/dougis-org/session-combat/issues/308) — CLOSED
 - A surface (nav badge + page/panel) where a player sees pending campaign invites
   and accepts/declines.
 - **Depends on:** 2b.
