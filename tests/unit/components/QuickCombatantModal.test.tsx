@@ -267,6 +267,16 @@ describe('monster selection', () => {
     expect(screen.queryByText('Goblin added successfully')).not.toBeInTheDocument();
   });
 
+  test('error toast fires even when enableToast=false', async () => {
+    const user = userEvent.setup();
+    renderModal({
+      enableToast: false,
+      onAddMonster: jest.fn().mockImplementation(() => { throw new Error('add failed'); }),
+    });
+    await user.click(screen.getByRole('button', { name: 'Add Goblin to encounter' }));
+    expect(screen.getByText('Failed to add monster')).toBeInTheDocument();
+  });
+
   test('modal stays open after adding', async () => {
     const user = userEvent.setup();
     const { onClose } = renderModal();

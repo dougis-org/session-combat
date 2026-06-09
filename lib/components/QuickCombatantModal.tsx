@@ -15,7 +15,7 @@ interface QuickCombatantModalProps {
   characterTemplates?: Character[];
   loadingTemplates?: boolean;
   userId?: string;
-  enableToast?: boolean; // Whether to show toast notifications (default: true)
+  enableToast?: boolean; // Whether to show success toast notifications (default: true); error toasts always fire
 }
 
 type TabType = 'monsters' | 'characters' | 'custom';
