@@ -111,10 +111,10 @@ If **ANY** of the above fail, iterate and fix before pushing.
 - [x] Commit all changes to `feat/party-builder-shared-characters` and push to remote
 - [x] Open PR from `feat/party-builder-shared-characters` to `main`. PR body must include `Closes #310`
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge`
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll autonomously; address, commit fixes, validate locally, push, wait 180 seconds, repeat until no unresolved comments
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, validate locally, push, wait 180 seconds, repeat
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — poll autonomously; address, commit fixes, validate locally, push, wait 180 seconds, repeat until no unresolved comments
+- [x] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, validate locally, push, wait 180 seconds, repeat
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user
 
 Ownership metadata:
 
@@ -130,10 +130,10 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks complete
-- [ ] Sync approved spec deltas to `openspec/specs/`:
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks complete
+- [x] Sync approved spec deltas to `openspec/specs/`:
   - Copy `openspec/changes/party-builder-shared-characters/specs/campaign-character-shares-dm-get/spec.md` → `openspec/specs/campaign-character-shares/spec.md` (update existing)
   - Copy `openspec/changes/party-builder-shared-characters/specs/party-access-rule/spec.md` → `openspec/specs/party-access-rule/spec.md` (new)
   - Copy `openspec/changes/party-builder-shared-characters/specs/party-cleanup/spec.md` → `openspec/specs/party-cleanup/spec.md` (new)
