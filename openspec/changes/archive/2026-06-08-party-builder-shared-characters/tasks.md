@@ -134,17 +134,16 @@ Blocking resolution flow:
 - [x] Verify merged changes appear on `main`
 - [x] Mark all remaining tasks complete
 - [x] Sync approved spec deltas to `openspec/specs/`:
-  - Copy `openspec/changes/party-builder-shared-characters/specs/campaign-character-shares-dm-get/spec.md` → `openspec/specs/campaign-character-shares/spec.md` (update existing)
-  - Copy `openspec/changes/party-builder-shared-characters/specs/party-access-rule/spec.md` → `openspec/specs/party-access-rule/spec.md` (new)
-  - Copy `openspec/changes/party-builder-shared-characters/specs/party-cleanup/spec.md` → `openspec/specs/party-cleanup/spec.md` (new)
-  - Copy `openspec/changes/party-builder-shared-characters/specs/party-builder-ui/spec.md` → `openspec/specs/party-builder-ui/spec.md` (update existing)
-  - Copy `openspec/changes/party-builder-shared-characters/specs/campaign-context-shared-chars/spec.md` → `openspec/specs/campaign-context-shared-chars/spec.md` (new)
-  - Update relative references in each copied spec: `design.md` → `../../changes/archive/YYYY-MM-DD-party-builder-shared-characters/design.md`; `tasks.md` → `../../changes/archive/YYYY-MM-DD-party-builder-shared-characters/tasks.md`
-- [ ] Archive: move `openspec/changes/party-builder-shared-characters/` to `openspec/changes/archive/YYYY-MM-DD-party-builder-shared-characters/` — stage both copy and deletion in a **single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-party-builder-shared-characters/` exists and `openspec/changes/party-builder-shared-characters/` is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-party-builder-shared-characters` → `git push -u origin doc/archive-YYYY-MM-DD-party-builder-shared-characters`
-- [ ] Open PR: `docs: archive party-builder-shared-characters (YYYY-MM-DD)` from doc branch to `main`
-- [ ] **IMMEDIATELY** enable auto-merge on doc PR
-- [ ] Monitor doc PR until merged (same loop as implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/party-builder-shared-characters doc/archive-YYYY-MM-DD-party-builder-shared-characters`
-- [ ] Update `docs/multi-user-campaigns/03-cross-user-characters.md`: mark issue #310 as CLOSED, set Phase 3 status to complete
+  - Copy `openspec/changes/archive/2026-06-08-party-builder-shared-characters/specs/campaign-character-shares-dm-get/spec.md` → `openspec/specs/campaign-character-shares/spec.md` (merged into existing; MODIFIED section appended)
+  - Copy `openspec/changes/archive/2026-06-08-party-builder-shared-characters/specs/party-access-rule/spec.md` → `openspec/specs/party-access-rule/spec.md` (new)
+  - Copy `openspec/changes/archive/2026-06-08-party-builder-shared-characters/specs/party-cleanup/spec.md` → `openspec/specs/party-cleanup/spec.md` (new)
+  - Copy `openspec/changes/archive/2026-06-08-party-builder-shared-characters/specs/party-builder-ui/spec.md` → `openspec/specs/party-builder-ui/spec.md` (new)
+  - Copy `openspec/changes/archive/2026-06-08-party-builder-shared-characters/specs/campaign-context-shared-chars/spec.md` → `openspec/specs/campaign-context-shared-chars/spec.md` (new)
+- [x] Archive: move `openspec/changes/party-builder-shared-characters/` to `openspec/changes/archive/2026-06-08-party-builder-shared-characters/` — staged both copy and deletion in a **single commit**
+- [x] Confirm `openspec/changes/archive/2026-06-08-party-builder-shared-characters/` exists and `openspec/changes/party-builder-shared-characters/` is gone
+- [x] Create doc branch: `git checkout -b doc/archive-2026-06-08-party-builder-shared-characters` → `git push -u origin doc/archive-2026-06-08-party-builder-shared-characters`
+- [x] Open PR: `docs: archive party-builder-shared-characters (2026-06-08)` from doc branch to `main` — PR #395
+- [x] **IMMEDIATELY** enable auto-merge on doc PR
+- [x] Monitor doc PR until merged (same loop as implementation PR)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/party-builder-shared-characters doc/archive-2026-06-08-party-builder-shared-characters`
+- [x] Update `docs/multi-user-campaigns/03-cross-user-characters.md`: mark issue #310 as CLOSED, set Phase 3 status to complete
