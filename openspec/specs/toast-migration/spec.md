@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the `design.md` document, not a replacement.
+This document details *changes* to requirements and is additive to the archived design document at `openspec/changes/archive/2026-06-09-migrate-toast-to-shared-component/design.md`, not a replacement.
 
 ### Requirement: ADDED `ActiveCombatView` renders shared Toast component
 
@@ -80,13 +80,15 @@ Reason for removal: Replaced by `useToast()` from `lib/components/Toast.tsx`.
 
 ## Traceability
 
-- Proposal element "Replace useCombat inline state/timer" -> Requirement: MODIFIED `UseCombatReturn` exposes `showToast`
-- Proposal element "Replace ActiveCombatView inline div" -> Requirement: ADDED `ActiveCombatView` renders shared Toast component
-- Proposal element "Replace QuickCombatantModal inline state/timer" -> Requirement: ADDED `QuickCombatantModal` renders shared Toast component
-- Proposal element "Rename showToast prop" -> Requirement: MODIFIED `QuickCombatantModal` prop renamed to `enableToast`
-- Design Decision 1 -> All ADDED requirements
-- Design Decision 2 -> MODIFIED `QuickCombatantModal` prop renamed
-- Design Decision 3 -> No explicit scenario (timer duration is internal; not user-observable in tests)
+Proposal elements and Design Decisions referenced below are defined in the archived change at `openspec/changes/archive/2026-06-09-migrate-toast-to-shared-component/`.
+
+- Proposal element "Replace useCombat inline state/timer" → Requirement: MODIFIED `UseCombatReturn` exposes `showToast`
+- Proposal element "Replace ActiveCombatView inline div" → Requirement: ADDED `ActiveCombatView` renders shared Toast component
+- Proposal element "Replace QuickCombatantModal inline state/timer" → Requirement: ADDED `QuickCombatantModal` renders shared Toast component
+- Proposal element "Rename showToast prop" → Requirement: MODIFIED `QuickCombatantModal` prop renamed to `enableToast`
+- Design Decision 1 (per-component `useToast()`) → All ADDED requirements
+- Design Decision 2 (prop rename to `enableToast`) → MODIFIED `QuickCombatantModal` prop renamed
+- Design Decision 3 (unify duration to 3s) → No explicit scenario (timer duration is internal; not user-observable in tests)
 - ADDED `ActiveCombatView` renders Toast -> Task: Update ActiveCombatView
 - ADDED `QuickCombatantModal` renders Toast -> Task: Update QuickCombatantModal
 - MODIFIED `UseCombatReturn` -> Task: Update useCombat hook + fixture
@@ -101,7 +103,7 @@ Reason for removal: Replaced by `useToast()` from `lib/components/Toast.tsx`.
 - **When** the user clicks "Add" twice in quick succession
 - **Then** only one toast is visible at a time and the previous dismiss timer is cancelled before the new one starts
 
-> Implementation note: This is guaranteed by `useToast()`'s `useRef`-based timer cancellation. No separate test is required unless regression is observed.
+> Implementation note: This is guaranteed by `useToast()`'s `useRef`-based timer cancellation (see `lib/components/Toast.tsx`). The `useToast` hook itself is the appropriate unit under test for this behaviour — integration-level tests for `QuickCombatantModal` need not duplicate it. A regression test should be added to `Toast.tsx`'s own test suite if one does not already exist.
 
 ### Requirement: Performance
 
