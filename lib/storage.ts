@@ -322,14 +322,14 @@ export const storage = {
     }
   },
 
-  async setActiveCampaignSession(campaignId: string, sessionId: string | null): Promise<void> {
+  async setActiveCampaignSession(campaignId: string, userId: string, sessionId: string | null): Promise<void> {
     try {
       const db = await getDatabase();
       await db
         .collection<Campaign>("campaigns")
         .updateOne(
-          { id: campaignId },
-          { $set: { activeSessionId: sessionId ?? null, updatedAt: new Date() } }
+          { id: campaignId, userId },
+          { $set: { activeSessionId: sessionId, updatedAt: new Date() } }
         );
     } catch (error) {
       console.error("Error setting active campaign session:", error);
@@ -337,13 +337,13 @@ export const storage = {
     }
   },
 
-  async claimActiveCampaignSession(campaignId: string, sessionId: string): Promise<boolean> {
+  async claimActiveCampaignSession(campaignId: string, userId: string, sessionId: string): Promise<boolean> {
     try {
       const db = await getDatabase();
       const result = await db
         .collection<Campaign>("campaigns")
         .updateOne(
-          { id: campaignId, $or: [{ activeSessionId: null }, { activeSessionId: { $exists: false } }] },
+          { id: campaignId, userId, $or: [{ activeSessionId: null }, { activeSessionId: { $exists: false } }] },
           { $set: { activeSessionId: sessionId, updatedAt: new Date() } }
         );
       return result.modifiedCount === 1;

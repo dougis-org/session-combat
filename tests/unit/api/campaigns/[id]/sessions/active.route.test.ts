@@ -105,6 +105,7 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
     expect(mockedStorage.saveSessionLog).toHaveBeenCalledTimes(1);
     expect(mockedStorage.claimActiveCampaignSession).toHaveBeenCalledWith(
       CAMPAIGN_ID,
+      "user-123",
       "new-session-uuid"
     );
   });
@@ -162,7 +163,7 @@ describe("DELETE /api/campaigns/[id]/sessions/active", () => {
     const res = await DELETE(makeDeleteReq(), { params: PARAMS });
     expect(res.status).toBe(200);
     expect((await res.json()).sessionId).toBe("active-session-id");
-    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, null);
+    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
   });
 
   it("returns 404 when no active session and force is not set", async () => {
@@ -179,7 +180,7 @@ describe("DELETE /api/campaigns/[id]/sessions/active", () => {
     const res = await DELETE(makeDeleteReq(true), { params: PARAMS });
     expect(res.status).toBe(200);
     expect((await res.json()).sessionId).toBe("stale-session-id");
-    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, null);
+    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
   });
 
   it("returns 200 with null sessionId when force=true and no active session — skips DB write", async () => {
@@ -196,7 +197,7 @@ describe("DELETE /api/campaigns/[id]/sessions/active", () => {
     });
     await DELETE(makeDeleteReq(), { params: PARAMS });
     expect(mockedStorage.saveSessionLog).not.toHaveBeenCalled();
-    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, null);
+    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
   });
 
   it("returns 404 when role is not dm", async () => {

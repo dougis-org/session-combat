@@ -51,7 +51,7 @@
 - `lib/storage.ts`: Add `setActiveCampaignSession` method using `$set` with atomic `updateOne`.
 - `app/api/campaigns/[id]/sessions/active/route.ts`: New file with `POST` and `DELETE` handlers.
   - `POST`: DM-only, 409 if already active, creates `SessionLog`, sets `activeSessionId`, returns 201.
-  - `DELETE`: DM-only, 404 if none active, clears `activeSessionId`, returns 200 `{ sessionId }`. Accepts `?force=true` to skip 409 guard (for stale reset only — DELETE has nothing to 409, but POST guard is bypassed on force-reset path via a separate `POST ?force=true`).
+  - `DELETE`: DM-only, 404 if none active, clears `activeSessionId`, returns 200 `{ sessionId }`. Accepts `?force=true` to unconditionally clear `activeSessionId` (escape hatch for stale state).
 
 ## Risks
 

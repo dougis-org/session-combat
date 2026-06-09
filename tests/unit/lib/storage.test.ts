@@ -435,25 +435,26 @@ describe("storage", () => {
 
   describe("setActiveCampaignSession", () => {
     const CAMPAIGN_ID = "campaign-abc";
+    const USER_ID = "user-123";
     const SESSION_ID = "session-xyz";
 
     it("updates activeSessionId with the given string", async () => {
       mockedCollection.updateOne.mockResolvedValue({} as any);
 
-      await storage.setActiveCampaignSession(CAMPAIGN_ID, SESSION_ID);
+      await storage.setActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID);
 
       const [filter, update] = mockedCollection.updateOne.mock.calls[0];
-      expect(filter).toEqual({ id: CAMPAIGN_ID });
+      expect(filter).toEqual({ id: CAMPAIGN_ID, userId: USER_ID });
       expect(update.$set.activeSessionId).toBe(SESSION_ID);
     });
 
     it("sets activeSessionId to null when null is passed", async () => {
       mockedCollection.updateOne.mockResolvedValue({} as any);
 
-      await storage.setActiveCampaignSession(CAMPAIGN_ID, null);
+      await storage.setActiveCampaignSession(CAMPAIGN_ID, USER_ID, null);
 
       const [filter, update] = mockedCollection.updateOne.mock.calls[0];
-      expect(filter).toEqual({ id: CAMPAIGN_ID });
+      expect(filter).toEqual({ id: CAMPAIGN_ID, userId: USER_ID });
       expect(update.$set.activeSessionId).toBeNull();
     });
 
@@ -461,7 +462,7 @@ describe("storage", () => {
       mockedCollection.updateOne.mockResolvedValue({} as any);
       const before = new Date();
 
-      await storage.setActiveCampaignSession(CAMPAIGN_ID, SESSION_ID);
+      await storage.setActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID);
 
       const update = mockedCollection.updateOne.mock.calls[0][1];
       expect(update.$set.updatedAt).toBeInstanceOf(Date);
@@ -471,7 +472,7 @@ describe("storage", () => {
     it("uses updateOne (not upsert)", async () => {
       mockedCollection.updateOne.mockResolvedValue({} as any);
 
-      await storage.setActiveCampaignSession(CAMPAIGN_ID, SESSION_ID);
+      await storage.setActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID);
 
       expect(mockedCollection.updateOne).toHaveBeenCalledTimes(1);
       const callArgs = mockedCollection.updateOne.mock.calls[0];
@@ -481,18 +482,19 @@ describe("storage", () => {
     it("throws on database error", async () => {
       mockedCollection.updateOne.mockRejectedValue(new Error("DB error"));
 
-      await expect(storage.setActiveCampaignSession(CAMPAIGN_ID, SESSION_ID)).rejects.toThrow("DB error");
+      await expect(storage.setActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID)).rejects.toThrow("DB error");
     });
   });
 
   describe("claimActiveCampaignSession", () => {
     const CAMPAIGN_ID = "campaign-abc";
+    const USER_ID = "user-123";
     const SESSION_ID = "session-xyz";
 
     it("returns true when updateOne modifies the document (no existing active session)", async () => {
       mockedCollection.updateOne.mockResolvedValue({ modifiedCount: 1 } as any);
 
-      const result = await storage.claimActiveCampaignSession(CAMPAIGN_ID, SESSION_ID);
+      const result = await storage.claimActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID);
 
       expect(result).toBe(true);
     });
@@ -500,18 +502,19 @@ describe("storage", () => {
     it("returns false when updateOne modifies nothing (active session already set)", async () => {
       mockedCollection.updateOne.mockResolvedValue({ modifiedCount: 0 } as any);
 
-      const result = await storage.claimActiveCampaignSession(CAMPAIGN_ID, SESSION_ID);
+      const result = await storage.claimActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID);
 
       expect(result).toBe(false);
     });
 
-    it("filters on id and null/absent activeSessionId", async () => {
+    it("filters on id, userId, and null/absent activeSessionId", async () => {
       mockedCollection.updateOne.mockResolvedValue({ modifiedCount: 1 } as any);
 
-      await storage.claimActiveCampaignSession(CAMPAIGN_ID, SESSION_ID);
+      await storage.claimActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID);
 
       const [filter] = mockedCollection.updateOne.mock.calls[0];
       expect(filter.id).toBe(CAMPAIGN_ID);
+      expect(filter.userId).toBe(USER_ID);
       expect(filter.$or).toEqual([
         { activeSessionId: null },
         { activeSessionId: { $exists: false } },
@@ -522,7 +525,7 @@ describe("storage", () => {
       mockedCollection.updateOne.mockResolvedValue({ modifiedCount: 1 } as any);
       const before = new Date();
 
-      await storage.claimActiveCampaignSession(CAMPAIGN_ID, SESSION_ID);
+      await storage.claimActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID);
 
       const update = mockedCollection.updateOne.mock.calls[0][1];
       expect(update.$set.activeSessionId).toBe(SESSION_ID);
@@ -533,7 +536,7 @@ describe("storage", () => {
     it("throws on database error", async () => {
       mockedCollection.updateOne.mockRejectedValue(new Error("DB error"));
 
-      await expect(storage.claimActiveCampaignSession(CAMPAIGN_ID, SESSION_ID)).rejects.toThrow("DB error");
+      await expect(storage.claimActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID)).rejects.toThrow("DB error");
     });
   });
 });
