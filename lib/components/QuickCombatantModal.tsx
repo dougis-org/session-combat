@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Fuse from 'fuse.js';
 import { Monster, MonsterTemplate, Character } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
+import { useToast, Toast } from '@/lib/components/Toast';
 
 interface QuickCombatantModalProps {
   onAddMonster: (monster: Monster) => void;
@@ -14,7 +15,7 @@ interface QuickCombatantModalProps {
   characterTemplates?: Character[];
   loadingTemplates?: boolean;
   userId?: string;
-  showToast?: boolean; // Whether to show toast notifications (default: true)
+  enableToast?: boolean; // Whether to show toast notifications (default: true)
 }
 
 type TabType = 'monsters' | 'characters' | 'custom';
@@ -27,20 +28,12 @@ export function QuickCombatantModal({
   characterTemplates = [],
   loadingTemplates = false,
   userId,
-  showToast = true,
+  enableToast = true,
 }: QuickCombatantModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('monsters');
   const [searchQuery, setSearchQuery] = useState('');
   const [creatorFilter, setCreatorFilter] = useState<'all' | 'mine' | 'global' | 'other'>('all');
-  const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
-
-  // Auto-dismiss toast after 2 seconds
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
+  const { toast, showToast } = useToast();
 
 
 
@@ -142,19 +135,13 @@ export function QuickCombatantModal({
       };
       onAddMonster(newMonster);
       
-      if (showToast) {
-        setToast({
-          message: `${newMonster.name} added successfully`,
-          type: 'success',
-        });
+      if (enableToast) {
+        showToast(`${newMonster.name} added successfully`, 'success');
       }
       // Keep modal open to allow adding multiple monsters from library
     } catch (error) {
       console.error('Error in handleAddFromLibrary:', error);
-      setToast({
-        message: 'Failed to add monster',
-        type: 'error',
-      });
+      showToast('Failed to add monster', 'error');
     }
   };
 
@@ -163,11 +150,8 @@ export function QuickCombatantModal({
       if (onAddCharacter) {
         onAddCharacter(character);
         
-        if (showToast) {
-          setToast({
-            message: `${character.name} added successfully`,
-            type: 'success',
-          });
+        if (enableToast) {
+          showToast(`${character.name} added successfully`, 'success');
         }
         // Keep modal open to allow adding multiple characters from library
       } else {
@@ -175,10 +159,7 @@ export function QuickCombatantModal({
       }
     } catch (error) {
       console.error('Error in handleAddCharacterFromLibrary:', error);
-      setToast({
-        message: 'Failed to add character',
-        type: 'error',
-      });
+      showToast('Failed to add character', 'error');
     }
   };
 
@@ -679,14 +660,7 @@ export function QuickCombatantModal({
         </div>
       </div>
 
-      {/* Toast Notification */}
-      {toast && (
-        <div className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg text-white z-50 ${
-          toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
-        }`}>
-          {toast.message}
-        </div>
-      )}
+      <Toast toast={toast} />
     </div>
   );
 }
