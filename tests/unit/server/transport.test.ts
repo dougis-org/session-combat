@@ -103,11 +103,23 @@ it('T3-3: concurrent subscribes during lazy open result in one cursor', async ()
 
 it('T3-4: teardown removes handler from registry', async () => {
   const handler = jest.fn();
+
+  // Make the cursor yield one event then hang
+  async function* yieldThenHang() {
+    yield { fullDocument: { campaignId: 'c1' } };
+    await new Promise(() => {});
+  }
+  const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldThenHang };
+  mockWatch = jest.fn()
+    .mockImplementationOnce(() => makeProbeCursor())
+    .mockImplementationOnce(() => realCursor);
+
   const teardown = await transport.subscribe('c1', handler);
+  // Tear down before the event is processed
   teardown();
 
-  // After teardown, subscribing a different handler and routing an event
-  // should not call the removed handler
+  // Allow iteration to run — event should NOT reach the removed handler
+  await new Promise(r => setTimeout(r, 30));
   expect(handler).not.toHaveBeenCalled();
 });
 
@@ -215,7 +227,7 @@ it('T3-10: polling emits new events since last timestamp', async () => {
   teardown();
 
   expect(handler).toHaveBeenCalledWith(
-    expect.objectContaining({ type: 'heartbeat', campaignId: 'c1' })
+    expect.objectContaining({ type: 'change', campaignId: 'c1' })
   );
 });
 

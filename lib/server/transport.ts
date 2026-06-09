@@ -96,7 +96,10 @@ async function openStream(): Promise<ChangeStream> {
           err instanceof Error &&
           (err.name === 'ChangeStreamInvalidatedError' || err.message.includes('ChangeStreamInvalidated'));
 
-        // Always clear state so the next subscribe() can retry opening the stream.
+        // Close the cursor before clearing references to release server-side resources.
+        try { await cursor.close(); } catch { /* ignore */ }
+
+        // Clear state so the next subscribe() can retry opening the stream.
         openPromise = null;
         sharedCursor = null;
 
@@ -123,6 +126,8 @@ async function pollFn(
   handler: EventHandler,
   sinceRef: { value: number }
 ) {
+  // Capture start time before querying so documents created during the query window are not skipped.
+  const pollStart = Date.now();
   try {
     const db = await getDatabase();
     const since = new Date(sinceRef.value);
@@ -139,15 +144,16 @@ async function pollFn(
     for (const doc of docs) {
       const docCampaignId = (doc['campaignId'] ?? doc['id']) as string | undefined;
       if (docCampaignId !== campaignId) continue;
+      const { campaignId: _cid, id: _id, ...rest } = doc;
       const event: CampaignStreamEvent = {
-        type: 'heartbeat',
+        type: 'change',
         campaignId,
-        data: { ts: Date.now() },
+        data: rest,
       };
       handler(event);
     }
 
-    sinceRef.value = Date.now();
+    sinceRef.value = pollStart;
   } catch (err) {
     console.error('transport poll error:', err);
   }

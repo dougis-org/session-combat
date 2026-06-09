@@ -31,6 +31,7 @@ export const GET = withStreamAndParams<{ id: string }>(
 
         if (request.signal.aborted) {
           td();
+          try { controller.close(); } catch { /* already closed */ }
           return;
         }
 
