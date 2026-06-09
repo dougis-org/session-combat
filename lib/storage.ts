@@ -322,6 +322,21 @@ export const storage = {
     }
   },
 
+  async setActiveCampaignSession(campaignId: string, sessionId: string | null): Promise<void> {
+    try {
+      const db = await getDatabase();
+      await db
+        .collection<Campaign>("campaigns")
+        .updateOne(
+          { id: campaignId },
+          { $set: { activeSessionId: sessionId ?? null, updatedAt: new Date() } }
+        );
+    } catch (error) {
+      console.error("Error setting active campaign session:", error);
+      throw error;
+    }
+  },
+
   // Load all session data for a user
   async load(userId: string): Promise<SessionData> {
     try {
