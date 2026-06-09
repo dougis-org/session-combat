@@ -566,6 +566,7 @@ export interface Campaign {
   notes: string;
   createdAt: Date;
   updatedAt: Date;
+  activeSessionId?: string | null;
 }
 
 export interface PartyMember {
