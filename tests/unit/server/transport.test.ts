@@ -1,6 +1,5 @@
 // --- Mock infrastructure ---
 
-let mockAdminCommand: jest.Mock;
 let mockWatch: jest.Mock;
 let mockCursorClose: jest.Mock;
 let mockToArray: jest.Mock;
@@ -11,17 +10,31 @@ async function* makeCursorIterator(this: { pendingEvents?: Array<unknown>; shoul
   await new Promise(() => {});
 }
 
+// Returns a cursor stub used for the detection probe (closed immediately).
+function makeProbeCursor() {
+  return { close: jest.fn().mockResolvedValue(undefined) };
+}
+
+// Returns a full cursor stub used for the real change stream.
+function makeStreamCursor() {
+  return { close: mockCursorClose, [Symbol.asyncIterator]: makeCursorIterator };
+}
+
 jest.mock('@/lib/db', () => ({
   connectToDatabase: jest.fn(async () => ({
-    client: { watch: (...args: unknown[]) => mockWatch(...args) },
-    db: { admin: () => ({ command: (...args: unknown[]) => mockAdminCommand(...args) }) },
+    client: {
+      db: () => ({
+        collection: () => ({
+          watch: (...args: unknown[]) => mockWatch(...args),
+        }),
+      }),
+    },
   })),
   getDatabase: jest.fn((...args: unknown[]) => mockGetDatabase(...args)),
 }));
 
 function resetMocks() {
   mockCursorClose = jest.fn().mockResolvedValue(undefined);
-  mockAdminCommand = jest.fn().mockResolvedValue({ ok: 1 }); // Atlas by default
   mockToArray = jest.fn().mockResolvedValue([]);
   mockGetDatabase = jest.fn(async () => ({
     collection: () => ({
@@ -30,10 +43,10 @@ function resetMocks() {
       }),
     }),
   }));
-  mockWatch = jest.fn(() => ({
-    close: mockCursorClose,
-    [Symbol.asyncIterator]: makeCursorIterator,
-  }));
+  // First call is the detection probe (closed immediately), subsequent calls are real cursors.
+  mockWatch = jest.fn()
+    .mockImplementationOnce(() => makeProbeCursor())
+    .mockImplementation(() => makeStreamCursor());
 }
 
 // Reload transport module before each test to reset module-level singletons.
@@ -54,17 +67,19 @@ afterEach(() => {
 it('T3-1: first subscribe opens exactly one cursor', async () => {
   const teardown = await transport.subscribe('c1', jest.fn());
   await new Promise(r => setTimeout(r, 10));
-  expect(mockWatch).toHaveBeenCalledTimes(1);
+  // watch called twice: once for probe (detection), once for real stream
+  expect(mockWatch).toHaveBeenCalledTimes(2);
   teardown();
 });
 
 // --- T3-2: Second subscribe reuses existing cursor ---
 
-it('T3-2: second subscribe reuses cursor (watch call count stays 1)', async () => {
+it('T3-2: second subscribe reuses cursor (watch call count stays 2)', async () => {
   const td1 = await transport.subscribe('c1', jest.fn());
   const td2 = await transport.subscribe('c2', jest.fn());
   await new Promise(r => setTimeout(r, 10));
-  expect(mockWatch).toHaveBeenCalledTimes(1);
+  // probe (1) + real stream (1) = 2; second subscribe reuses openPromise
+  expect(mockWatch).toHaveBeenCalledTimes(2);
   td1();
   td2();
 });
@@ -72,14 +87,14 @@ it('T3-2: second subscribe reuses cursor (watch call count stays 1)', async () =
 // --- T3-3: Concurrent subscribes during lazy open result in one cursor ---
 
 it('T3-3: concurrent subscribes during lazy open result in one cursor', async () => {
-  // Both subscribes fire before watch has been called by checking they share the same openPromise
   const p1 = transport.subscribe('c1', jest.fn());
   const p2 = transport.subscribe('c2', jest.fn());
 
   const [td1, td2] = await Promise.all([p1, p2]);
   await new Promise(r => setTimeout(r, 10));
 
-  expect(mockWatch).toHaveBeenCalledTimes(1);
+  // detectReplicaSet is deduped — one probe call; openStream is deduped — one real cursor call
+  expect(mockWatch).toHaveBeenCalledTimes(2);
   td1();
   td2();
 });
@@ -109,9 +124,6 @@ it('T3-5: last subscriber teardown closes cursor', async () => {
 // --- T3-6: Last subscriber drops while open is in flight ---
 
 it('T3-6: last subscriber drops while open is in flight', async () => {
-  // After subscribe resolves, openStream's internal connectToDatabase
-  // is in-flight as a pending microtask. Calling teardown immediately
-  // before any more awaits puts us in the "in-flight" scenario.
   const teardown = await transport.subscribe('c1', jest.fn());
   teardown(); // fires while openStream may still be in-flight
   await new Promise(r => setTimeout(r, 20));
@@ -125,12 +137,15 @@ it('T3-7: event with campaignId A routes only to A handlers', async () => {
   const handlerA = jest.fn();
   const handlerB = jest.fn();
 
-  // Make the cursor yield one event for campaign A then hang
+  // Make the real cursor yield one event for campaign A then hang
   async function* yieldOnce() {
     yield { fullDocument: { campaignId: 'A', type: 'heartbeat' } };
     await new Promise(() => {}); // hang
   }
-  mockWatch = jest.fn(() => ({ close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce }));
+  const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce };
+  mockWatch = jest.fn()
+    .mockImplementationOnce(() => makeProbeCursor())
+    .mockImplementationOnce(() => realCursor);
 
   const tdA = await transport.subscribe('A', handlerA);
   const tdB = await transport.subscribe('B', handlerB);
@@ -148,11 +163,15 @@ it('T3-7: event with campaignId A routes only to A handlers', async () => {
 
 it('T3-8: non-replica-set detection selects polling path', async () => {
   jest.useFakeTimers();
-  mockAdminCommand = jest.fn().mockRejectedValue(new Error('not running with --replSet'));
+  // Make the probe throw with a non-replica-set error
+  mockWatch = jest.fn().mockImplementationOnce(() => {
+    throw new Error('not running with --replSet');
+  });
 
   const teardown = await transport.subscribe('c1', jest.fn());
 
-  expect(mockWatch).not.toHaveBeenCalled();
+  // Only the probe was called, not the real stream watch
+  expect(mockWatch).toHaveBeenCalledTimes(1);
   teardown();
 });
 
@@ -163,7 +182,8 @@ it('T3-9: replica-set detection is called only once across two subscribes', asyn
   const td2 = await transport.subscribe('c2', jest.fn());
   await new Promise(r => setTimeout(r, 10));
 
-  expect(mockAdminCommand).toHaveBeenCalledTimes(1);
+  // probe called once (detection is cached after first subscribe), stream cursor called once
+  expect(mockWatch).toHaveBeenCalledTimes(2);
   td1();
   td2();
 });
@@ -172,7 +192,9 @@ it('T3-9: replica-set detection is called only once across two subscribes', asyn
 
 it('T3-10: polling emits new events since last timestamp', async () => {
   jest.useFakeTimers();
-  mockAdminCommand = jest.fn().mockRejectedValue(new Error('not running with --replSet'));
+  mockWatch = jest.fn().mockImplementationOnce(() => {
+    throw new Error('not running with --replSet');
+  });
 
   const now = Date.now();
   jest.setSystemTime(now);
@@ -201,7 +223,9 @@ it('T3-10: polling emits new events since last timestamp', async () => {
 
 it('T3-11: polling skips documents for other campaigns', async () => {
   jest.useFakeTimers();
-  mockAdminCommand = jest.fn().mockRejectedValue(new Error('not running with --replSet'));
+  mockWatch = jest.fn().mockImplementationOnce(() => {
+    throw new Error('not running with --replSet');
+  });
 
   const doc = { campaignId: 'B', type: 'heartbeat', createdAt: new Date() };
   mockToArray = jest.fn().mockResolvedValue([doc]);
@@ -223,7 +247,9 @@ it('T3-11: polling skips documents for other campaigns', async () => {
 
 it('T3-12: polling teardown clears interval', async () => {
   jest.useFakeTimers();
-  mockAdminCommand = jest.fn().mockRejectedValue(new Error('not running with --replSet'));
+  mockWatch = jest.fn().mockImplementationOnce(() => {
+    throw new Error('not running with --replSet');
+  });
   const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
 
   const teardown = await transport.subscribe('c1', jest.fn());
@@ -237,10 +263,15 @@ it('T3-12: polling teardown clears interval', async () => {
 
 it('T3-13: cursor invalidation triggers one reconnect attempt', async () => {
   const closeFn = jest.fn().mockResolvedValue(undefined);
-  let watchCallCount = 0;
+  let streamCallCount = 0;
 
-  mockWatch = jest.fn(() => {
-    const currentCall = ++watchCallCount;
+  mockWatch = jest.fn().mockImplementation((_, opts: Record<string, unknown> | undefined) => {
+    // Probe call (detection): options include maxAwaitTimeMS
+    if (opts && 'maxAwaitTimeMS' in opts) {
+      return { close: jest.fn().mockResolvedValue(undefined) };
+    }
+    // Real stream call
+    const currentCall = ++streamCallCount;
     async function* cursorIter() {
       if (currentCall === 1) {
         throw Object.assign(new Error('ChangeStreamInvalidated'), {
@@ -256,7 +287,8 @@ it('T3-13: cursor invalidation triggers one reconnect attempt', async () => {
   // Allow iteration to run (throws on first cursor) and reconnect
   await new Promise(r => setTimeout(r, 50));
 
-  expect(mockWatch).toHaveBeenCalledTimes(2);
+  // probe (1) + first real stream that invalidates (1) + reconnect stream (1) = 3
+  expect(mockWatch).toHaveBeenCalledTimes(3);
   td();
 });
 
@@ -264,7 +296,9 @@ it('T3-13: cursor invalidation triggers one reconnect attempt', async () => {
 
 it('T3-14: poll DB error is caught and logged; interval continues', async () => {
   jest.useFakeTimers();
-  mockAdminCommand = jest.fn().mockRejectedValue(new Error('not running with --replSet'));
+  mockWatch = jest.fn().mockImplementationOnce(() => {
+    throw new Error('not running with --replSet');
+  });
 
   const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 

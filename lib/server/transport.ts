@@ -10,39 +10,51 @@ let sharedCursor: ChangeStream | null = null;
 let subscriberCount = 0;
 const registry = new Map<string, Set<EventHandler>>();
 let isReplicaSet: boolean | null = null;
+let detectPromise: Promise<boolean> | null = null;
 
 async function detectReplicaSet(): Promise<boolean> {
   if (isReplicaSet !== null) return isReplicaSet;
-  try {
-    const { db } = await connectToDatabase();
-    await db.admin().command({ replSetGetStatus: 1 });
-    isReplicaSet = true;
-  } catch (err) {
-    const isNotReplicaSetError =
-      err instanceof Error && (
-        err.message.includes('not running with --replSet') ||
-        (err as { code?: number }).code === 76
-      );
-    if (isNotReplicaSetError) {
-      isReplicaSet = false;
-    } else {
-      // Transient error (connection/auth issue) — fall back to polling this time
-      // but don't cache so next subscribe retries detection
-      return false;
-    }
+  if (!detectPromise) {
+    detectPromise = (async () => {
+      try {
+        // Probe by opening a change stream — avoids needing admin privileges for replSetGetStatus.
+        const { client } = await connectToDatabase();
+        const probe = client.db().collection('campaigns').watch([], { maxAwaitTimeMS: 100 });
+        await probe.close();
+        isReplicaSet = true;
+      } catch (err) {
+        const isNotReplicaSetError =
+          err instanceof Error && (
+            err.message.includes('not running with --replSet') ||
+            err.message.includes('$changeStream') ||
+            (err as { code?: number }).code === 76 ||
+            (err as { code?: number }).code === 40573
+          );
+        if (isNotReplicaSetError) {
+          isReplicaSet = false;
+        } else {
+          // Transient error — don't cache, retry next time
+          detectPromise = null;
+          return false;
+        }
+      }
+      detectPromise = null;
+      return isReplicaSet ?? false;
+    })();
   }
-  return isReplicaSet;
+  return detectPromise;
 }
 
-function demux(doc: { fullDocument?: { campaignId?: string } & Record<string, unknown> }) {
-  const campaignId = doc.fullDocument?.campaignId;
+function demux(doc: { fullDocument?: { campaignId?: string; id?: string } & Record<string, unknown> }) {
+  const campaignId = doc.fullDocument?.campaignId ?? doc.fullDocument?.id;
   if (!campaignId) return;
   const handlers = registry.get(campaignId);
   if (!handlers) return;
+  const { campaignId: _cid, id: _id, ...rest } = doc.fullDocument ?? {};
   const event: CampaignStreamEvent = {
-    type: 'heartbeat',
+    type: 'change',
     campaignId,
-    data: { ts: Date.now() },
+    data: rest,
   };
   for (const handler of handlers) {
     try { handler(event); } catch { /* handler errors don't break the stream */ }
@@ -70,7 +82,7 @@ async function openStream(): Promise<ChangeStream> {
   if (openPromise) return openPromise;
   openPromise = (async () => {
     const { client } = await connectToDatabase();
-    const cursor = client.watch([], { fullDocument: 'updateLookup' }) as ChangeStream;
+    const cursor = client.db().collection('campaigns').watch([], { fullDocument: 'updateLookup' }) as ChangeStream;
     sharedCursor = cursor;
 
     // Start async iteration in background
@@ -84,15 +96,19 @@ async function openStream(): Promise<ChangeStream> {
           err instanceof Error &&
           (err.name === 'ChangeStreamInvalidatedError' || err.message.includes('ChangeStreamInvalidated'));
 
+        // Always clear state so the next subscribe() can retry opening the stream.
+        openPromise = null;
+        sharedCursor = null;
+
         if (isInvalidated) {
-          openPromise = null;
-          sharedCursor = null;
           try {
             await openStream();
           } catch {
             // Fall through — stream stays closed; subscribers receive no further events.
           }
         }
+        // Non-invalidation errors (network, transient): state is cleared above so the
+        // next subscribe() call will reattempt openStream() automatically.
       }
     })();
 

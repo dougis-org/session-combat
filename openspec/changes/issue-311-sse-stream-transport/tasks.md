@@ -143,12 +143,12 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 ## PR and Merge
 
 - [ ] Ensure the `openspec-review-code` sub-agent was run and all findings automatically addressed before final commit
-- [ ] Commit all changes to `feat/issue-311-sse-stream-transport` and push to remote
-- [ ] Open PR from `feat/issue-311-sse-stream-transport` to `main`. PR body **MUST** include `Closes #311`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] Commit all changes to `feat/issue-311-sse-stream-transport` and push to remote
+- [x] Open PR from `feat/issue-311-sse-stream-transport` to `main`. PR body **MUST** include `Closes #311`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
 - [ ] **Monitor PR comments** — poll autonomously; address all comments, commit fixes, follow remote push validation, push, wait 180s, repeat until no unresolved threads remain
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix all required failures, commit, push, wait 180s, repeat
+- [x] **Monitor CI checks** — all checks passed (Codacy, lint, unit, integration, regression)
 - [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user; never force-merge
 
 Ownership metadata:

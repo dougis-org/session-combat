@@ -1,7 +1,8 @@
 // Data types for the combat tracker
 
 export type CampaignStreamEvent =
-  | { type: 'heartbeat'; campaignId: string; data: { ts: number } };
+  | { type: 'heartbeat'; campaignId: string; data: { ts: number } }
+  | { type: 'change'; campaignId: string; data: Record<string, unknown> };
 
 // D&D 5e Classes - includes official classes and common additions (e.g., Blood Hunter)
 export type DnDClass =
