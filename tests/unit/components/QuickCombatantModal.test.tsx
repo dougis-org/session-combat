@@ -88,7 +88,7 @@ function renderModal(overrides: Partial<React.ComponentProps<typeof QuickCombata
       monsterTemplates={MONSTER_TEMPLATES}
       characterTemplates={CHARACTER_TEMPLATES}
       userId={USER_ID}
-      showToast={true}
+      enableToast={true}
       {...overrides}
     />
   );
@@ -260,11 +260,21 @@ describe('monster selection', () => {
     expect(screen.getByText('Goblin added successfully')).toBeInTheDocument();
   });
 
-  test('adding monster with showToast=false shows no toast', async () => {
+  test('adding monster with enableToast=false shows no toast', async () => {
     const user = userEvent.setup();
-    renderModal({ showToast: false });
+    renderModal({ enableToast: false });
     await user.click(screen.getByRole('button', { name: 'Add Goblin to encounter' }));
     expect(screen.queryByText('Goblin added successfully')).not.toBeInTheDocument();
+  });
+
+  test('error toast fires even when enableToast=false', async () => {
+    const user = userEvent.setup();
+    renderModal({
+      enableToast: false,
+      onAddMonster: jest.fn().mockImplementation(() => { throw new Error('add failed'); }),
+    });
+    await user.click(screen.getByRole('button', { name: 'Add Goblin to encounter' }));
+    expect(screen.getByText('Failed to add monster')).toBeInTheDocument();
   });
 
   test('modal stays open after adding', async () => {

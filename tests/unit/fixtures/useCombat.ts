@@ -39,7 +39,7 @@ export function makeUseCombat(overrides?: Partial<UseCombatReturn>): UseCombatRe
     setRemoveConfirmId: jest.fn(),
     setRemoveConfirmPosition: jest.fn(),
     setShowEncounterDescription: jest.fn(),
-    setToast: jest.fn(),
+    showToast: jest.fn(),
     setShowLairForm: jest.fn(),
     setLairFormName: jest.fn(),
     setLairFormSeedMonster: jest.fn(),

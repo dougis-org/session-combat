@@ -109,5 +109,5 @@ Blocking resolution flow:
 - [x] **Create a doc branch:** `git checkout -b doc/archive-fix-soft-delete-flaky-test` then `git push -u origin doc/archive-fix-soft-delete-flaky-test`
 - [x] Open a PR from `doc/archive-fix-soft-delete-flaky-test` to `main` with title `docs: archive fix-soft-delete-flaky-test`
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to doc branch, repeat)
+- [x] Monitor the doc PR until it merges (same loop — address comments and CI failures, push to doc branch, repeat)
 - [ ] Prune merged local branches: `git fetch --prune` && `git branch -d fix/soft-delete-flaky-test doc/archive-fix-soft-delete-flaky-test`

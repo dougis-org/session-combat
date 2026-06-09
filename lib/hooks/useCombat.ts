@@ -6,6 +6,7 @@ import { resetIncomingLegendaryPool, sortCombatants, buildLairCombatant, buildCo
 import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
 import { pushHpHistory, popHpHistory, getHpHistoryStack, clearCombatHistory } from '@/lib/utils/hpHistory';
+import { useToast } from '@/lib/components/Toast';
 
 export interface UseCombatOptions {
   campaignId?: string;
@@ -32,13 +33,13 @@ export function useCombat(options: UseCombatOptions = {}) {
   const [removeConfirmId, setRemoveConfirmId] = useState<string | null>(null);
   const [removeConfirmPosition, setRemoveConfirmPosition] = useState<{top: number, left: number} | null>(null);
   const [showEncounterDescription, setShowEncounterDescription] = useState(false);
-  const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   const [showLairForm, setShowLairForm] = useState(false);
   const [lairFormName, setLairFormName] = useState('');
   const [lairFormSeedMonster, setLairFormSeedMonster] = useState('');
   const setupCombatantsRef = useRef<CombatantState[]>([]);
   const serverCombatIdRef = useRef<string | null>(null);
   const isCreatingRef = useRef(false);
+  const { toast, showToast } = useToast();
 
   useEffect(() => {
     const loadData = async () => {
@@ -92,14 +93,6 @@ export function useCombat(options: UseCombatOptions = {}) {
       return () => document.removeEventListener('keydown', handleEscape);
     }
   }, [selectedDetailCombatantId]);
-
-  // Auto-dismiss toast after 3 seconds
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
 
   // Keep ref in sync with setupCombatants state for duplicate detection
   useEffect(() => {
@@ -486,7 +479,7 @@ export function useCombat(options: UseCombatOptions = {}) {
     setRemoveConfirmId,
     setRemoveConfirmPosition,
     setShowEncounterDescription,
-    setToast,
+    showToast,
     setShowLairForm,
     setLairFormName,
     setLairFormSeedMonster,
@@ -551,7 +544,7 @@ export interface UseCombatReturn {
   setRemoveConfirmId: (id: string | null) => void;
   setRemoveConfirmPosition: (pos: {top: number, left: number} | null) => void;
   setShowEncounterDescription: (show: boolean) => void;
-  setToast: (toast: {message: string, type: 'success' | 'error'} | null) => void;
+  showToast: (message: string, type: 'success' | 'error') => void;
   setShowLairForm: (show: boolean) => void;
   setLairFormName: (name: string) => void;
   setLairFormSeedMonster: (name: string) => void;

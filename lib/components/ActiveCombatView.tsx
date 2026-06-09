@@ -11,6 +11,7 @@ import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import { CombatSetupAndActiveModals } from '@/lib/components/CombatSetupAndActiveModals';
 import { CombatantState } from '@/lib/types';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
+import { Toast } from '@/lib/components/Toast';
 
 function EncounterDescriptionModal({ description, onClose }: { description: string; onClose: () => void }) {
   return (
@@ -407,13 +408,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
         })()}
       </div>
 
-      {toast && (
-        <div
-          className={`fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transition-opacity duration-300 z-50 ${toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}
-        >
-          {toast.message}
-        </div>
-      )}
+      <Toast toast={toast} />
     </div>
   );
 }
