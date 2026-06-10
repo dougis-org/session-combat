@@ -1,26 +1,67 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useReducer, useEffect, useRef } from 'react'
 import { LocalStore } from '@/lib/offline/LocalStore'
 
 const PIN_KEY = 'campaign-chat-pin'
 
+type DockState = { isExpanded: boolean; isPinned: boolean }
+type DockAction =
+  | { type: 'INIT'; pinned: boolean }
+  | { type: 'EXPAND' }
+  | { type: 'COLLAPSE' }
+  | { type: 'PIN' }
+  | { type: 'UNPIN' }
+
+function dockReducer(state: DockState, action: DockAction): DockState {
+  switch (action.type) {
+    case 'INIT':
+      return { isExpanded: action.pinned, isPinned: action.pinned }
+    case 'EXPAND':
+      return { ...state, isExpanded: true }
+    case 'COLLAPSE':
+      return { ...state, isExpanded: false }
+    case 'PIN':
+      return { ...state, isPinned: true }
+    case 'UNPIN':
+      return { ...state, isPinned: false }
+  }
+}
+
 export function CampaignChat() {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [isPinned, setIsPinned] = useState(false)
+  const [{ isExpanded, isPinned }, dispatch] = useReducer(dockReducer, {
+    isExpanded: false,
+    isPinned: false,
+  })
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const isMounted = useRef(false)
 
   useEffect(() => {
-    const pinned = LocalStore.get<boolean>(PIN_KEY)
-    if (pinned) {
-      setIsExpanded(true)
-      setIsPinned(true)
+    let pinned = false
+    try {
+      pinned = !!LocalStore.get<boolean>(PIN_KEY)
+    } catch {
+      // storage unavailable: start collapsed
     }
+    dispatch({ type: 'INIT', pinned })
   }, [])
+
+  // Restore focus to the pill after the drawer closes. Skip on initial mount
+  // so we don't steal focus when the page first loads or auto-expands from pin.
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true
+      return
+    }
+    if (!isExpanded) {
+      triggerRef.current?.focus()
+    }
+  }, [isExpanded])
 
   useEffect(() => {
     if (!isExpanded) return
     const handler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsExpanded(false)
+      if (event.key === 'Escape') dispatch({ type: 'COLLAPSE' })
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
@@ -28,12 +69,16 @@ export function CampaignChat() {
 
   function handlePinToggle() {
     if (isPinned) {
-      LocalStore.remove(PIN_KEY)
-      setIsPinned(false)
+      try {
+        LocalStore.remove(PIN_KEY)
+      } catch {
+        // storage unavailable: pin cleared in memory only
+      }
+      dispatch({ type: 'UNPIN' })
     } else {
       try {
         LocalStore.set(PIN_KEY, true)
-        setIsPinned(true)
+        dispatch({ type: 'PIN' })
       } catch {
         // StorageQuotaError: pin preference not persisted; drawer stays open
       }
@@ -43,8 +88,9 @@ export function CampaignChat() {
   if (!isExpanded) {
     return (
       <button
+        ref={triggerRef}
         className="fixed bottom-4 right-4 z-40 bg-gray-800 border border-gray-700 rounded-full px-4 py-2 text-sm text-white hover:bg-gray-700"
-        onClick={() => setIsExpanded(true)}
+        onClick={() => dispatch({ type: 'EXPAND' })}
       >
         Chat ›
       </button>
@@ -74,12 +120,12 @@ export function CampaignChat() {
               fill="currentColor"
               aria-hidden="true"
             >
-              <path d="M10 2a1 1 0 011 1v1.07A6.002 6.002 0 0115.93 9H17a1 1 0 010 2h-1.07A6.002 6.002 0 0111 15.93V17a1 1 0 01-2 0v-1.07A6.002 6.002 0 014.07 11H3a1 1 0 010-2h1.07A6.002 6.002 0 019 4.07V3a1 1 0 011-1z" />
+              <path d="M11.5 3a1.5 1.5 0 00-3 0v3.586L6.293 8.793A1 1 0 006 9.5v1a1 1 0 001 1h2.5v4.5a.5.5 0 001 0v-4.5H13a1 1 0 001-1v-1a1 1 0 00-.293-.707L11.5 6.586V3z" />
             </svg>
           </button>
           <button
             aria-label="Collapse chat"
-            onClick={() => setIsExpanded(false)}
+            onClick={() => dispatch({ type: 'COLLAPSE' })}
             className="text-gray-400 hover:text-white text-lg leading-none"
           >
             ×
