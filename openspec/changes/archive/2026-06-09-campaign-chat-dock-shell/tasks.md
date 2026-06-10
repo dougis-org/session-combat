@@ -59,7 +59,7 @@ Write tests covering all spec scenarios. Mock `LocalStore` at the module level.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
@@ -79,14 +79,14 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `feat/campaign-chat-dock-shell` and push to remote
-- [ ] Open PR from `feat/campaign-chat-dock-shell` to `main`. PR body MUST include: `Closes #313`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll autonomously; address comments, commit fixes, validate locally, push; wait 180 seconds then repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — `gh pr checks <PR-URL> --json isRequired,state`; fix any required failing checks, validate locally, push; wait 180 seconds then repeat
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to `feat/campaign-chat-dock-shell` and push to remote
+- [x] Open PR from `feat/campaign-chat-dock-shell` to `main`. PR body MUST include: `Closes #313`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Monitor PR comments** — addressed Gemini (useRef, focus restore, pin SVG) and Copilot (LocalStore try/catch ×2) feedback; refactored to useReducer to fix lint; resolved all 9 threads
+- [x] **Monitor CI checks** — all checks passed (lint, unit-tests, integration-tests, regression-tests, Codacy)
+- [x] **Poll for merge** — PR #403 merged via auto-merge (squash)
 
 Ownership metadata:
 
@@ -102,14 +102,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update `openspec/specs/campaign-chat-dock/spec.md` — sync from `openspec/changes/campaign-chat-dock-shell/specs/campaign-chat-dock/spec.md` (update relative paths to `../../changes/archive/YYYY-MM-DD-campaign-chat-dock-shell/design.md` and `tasks.md`)
-- [ ] Archive the change: move `openspec/changes/campaign-chat-dock-shell/` to `openspec/changes/archive/YYYY-MM-DD-campaign-chat-dock-shell/` — stage both the new location and deletion of the old in a **single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-chat-dock-shell/` exists and `openspec/changes/campaign-chat-dock-shell/` is gone
-- [ ] **Create doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-campaign-chat-dock-shell` then `git push -u origin doc/archive-YYYY-MM-DD-campaign-chat-dock-shell`
-- [ ] Open PR from `doc/archive-YYYY-MM-DD-campaign-chat-dock-shell` to `main` with title `docs: archive campaign-chat-dock-shell (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges (same loop as implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/campaign-chat-dock-shell doc/archive-YYYY-MM-DD-campaign-chat-dock-shell`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update `openspec/specs/campaign-chat-dock/spec.md` — created canonical spec (no relative paths to update)
+- [x] Archive the change: move `openspec/changes/campaign-chat-dock-shell/` to `openspec/changes/archive/2026-06-09-campaign-chat-dock-shell/`
+- [x] Confirm archive exists and original is gone
+- [x] **Create doc branch:** `doc/archive-2026-06-09-campaign-chat-dock-shell`
+- [x] Open PR for doc branch
+- [x] Enable auto-merge on doc PR
+- [x] Monitor doc PR until merged
+- [x] Prune merged local branches
