@@ -12,7 +12,7 @@
 ## Problem Space
 
 - **Current behavior:** No chat surface exists anywhere in the app.
-- **Desired behavior:** A fixed corner pill (bottom-right) is always present in the browser. Clicking it expands a drawer (`w-80`, `h-[33vh]`). A pin button persists the expanded state across page loads via `LocalStore`. Dismissing collapses it back to the pill. No data or messages — layout and interaction states only.
+- **Desired behavior:** A fixed corner pill (bottom-right) is always present in the browser. Clicking it expands a drawer (`w-80`, `height 33vh (inline style)`). A pin button persists the expanded state across page loads via `LocalStore`. Dismissing collapses it back to the pill. No data or messages — layout and interaction states only.
 - **Constraints:**
   - Must sit at `z-40` so `Modal` components (`z-50`) always render above it.
   - `LocalStore` (versioned localStorage abstraction) must be used for pin persistence — no raw `localStorage` calls.
@@ -34,7 +34,7 @@
 - `lib/components/CampaignChat.tsx` — new `'use client'` component
 - Mount point in `app/layout.tsx` (add `<CampaignChat />` before `</body>`)
 - Collapsed pill state: `fixed bottom-4 right-4 z-40`, rounded-full button
-- Expanded drawer state: `fixed bottom-0 right-0 w-80 h-[33vh] z-40`, flex-col layout
+- Expanded drawer state: `fixed bottom-0 right-0 w-80 height 33vh (inline style) z-40`, flex-col layout
 - Pin toggle with `LocalStore` persistence (key: `campaign-chat-pin`)
 - Keyboard accessibility: focusable buttons, Escape to collapse, `role="complementary"`, `aria-label`, `aria-pressed` on pin
 - Unit tests for collapse/expand, pin persistence, Escape key, and aria attributes
@@ -70,7 +70,7 @@ No unresolved ambiguity remains. All design decisions were confirmed during expl
 - Always renders (no session gating for now) ✓
 - `z-40` for dock ✓
 - Unpin = don't reopen next time (not collapse immediately) ✓
-- Expanded height: `h-[33vh]`, width: `w-80` ✓
+- Expanded height: `height 33vh (inline style)`, width: `w-80` ✓
 
 ## Non-Goals
 

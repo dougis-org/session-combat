@@ -73,7 +73,7 @@
   - Design decision: D4 (z-40), D1 (component location)
   - Validation approach: RTL — assert pill button is in the document; CSS class snapshot or computed style check
 
-- Proposal element: Expanded drawer `w-80 h-[33vh]`, anchored `bottom-0 right-0`
+- Proposal element: Expanded drawer `w-80`, height `33vh` via inline style, anchored `bottom-0 right-0`
   - Design decision: D1, D4
   - Validation approach: RTL — after clicking pill, assert drawer is present with correct role/aria-label
 

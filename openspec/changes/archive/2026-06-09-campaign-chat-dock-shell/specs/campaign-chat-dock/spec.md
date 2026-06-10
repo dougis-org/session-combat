@@ -125,7 +125,7 @@ No existing requirements are removed by this change.
 ## Traceability
 
 - Proposal element "Corner pill, `fixed bottom-4 right-4 z-40`" → Requirement: ADDED CampaignChat dock shell renders globally
-- Proposal element "Expanded drawer `w-80 h-[33vh]`" → Requirement: ADDED Collapse/expand toggle
+- Proposal element "Expanded drawer `w-80`, height `33vh` via inline style" → Requirement: ADDED Collapse/expand toggle
 - Proposal element "Pin persisted via LocalStore" → Requirement: ADDED Pin-open control persisted to LocalStore
 - Proposal element "Keyboard accessible" → Requirement: ADDED Keyboard accessibility
 - Design decision D2 (always render) → Requirement: ADDED CampaignChat dock shell renders globally → Task: mount in `app/layout.tsx`

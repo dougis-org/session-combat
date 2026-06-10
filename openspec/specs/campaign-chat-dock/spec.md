@@ -139,7 +139,7 @@ No authentication, authorization, or sensitive data is involved in this componen
 ## Traceability
 
 - Corner pill (`fixed bottom-4 right-4 z-40`) → Requirement: CampaignChat dock shell renders globally
-- Expanded drawer (`w-80 h-[33vh]`) → Requirement: Collapse/expand toggle
+- Expanded drawer (`w-80`, height `33vh` via inline style) → Requirement: Collapse/expand toggle
 - Pin persisted via LocalStore → Requirement: Pin-open control persisted to LocalStore
 - Keyboard accessible → Requirement: Keyboard accessibility
 - Design D2 (always render) → Requirement: dock renders globally → `app/layout.tsx`
