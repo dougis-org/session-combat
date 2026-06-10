@@ -15,7 +15,7 @@ jobs:
       docs_only: ${{ steps.docs-only.outputs.docs_only }}
     steps:
       - uses: actions/checkout@v6
-      - uses: dorny/paths-filter@de90cc6415e9a3e19aafc651579a8f7a4cec8c49
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
         id: filter
         with:
           filters: |
@@ -380,7 +380,7 @@ jobs:
 
   ci-gate:
     runs-on: ubuntu-latest
-    needs: [lint, build, unit-tests, integration-tests, regression-tests, upload-and-finalize-coverage, check-codacy-coverage]
+    needs: [check-changes, lint, build, unit-tests, integration-tests, regression-tests, upload-and-finalize-coverage, check-codacy-coverage]
     if: always()
 
     steps:
