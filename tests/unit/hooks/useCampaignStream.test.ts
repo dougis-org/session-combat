@@ -85,6 +85,8 @@ function renderHook(props: HookProps): { result: HookResult; rerender: (p: HookP
 // Setup
 // ---------------------------------------------------------------------------
 
+const originalEventSource = (globalThis as unknown as Record<string, unknown>).EventSource;
+
 beforeEach(() => {
   MockEventSource.instances = [];
   (globalThis as unknown as Record<string, unknown>).EventSource = MockEventSource;
@@ -93,6 +95,7 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.useRealTimers();
+  (globalThis as unknown as Record<string, unknown>).EventSource = originalEventSource;
 });
 
 // ---------------------------------------------------------------------------
@@ -123,6 +126,13 @@ describe('T1 — Connection lifecycle', () => {
     unmount();
   });
 
+  test('T1-3b: campaignId is URL-encoded in the EventSource URL', () => {
+    const onEvent = jest.fn();
+    const { unmount } = renderHook({ campaignId: 'campaign/with spaces', onEvent });
+    expect(MockEventSource.instances[0].url).toBe('/api/campaigns/campaign%2Fwith%20spaces/stream');
+    unmount();
+  });
+
   test('T1-4: campaignId change closes previous EventSource and opens new one', () => {
     const onEvent = jest.fn();
     const { result, rerender, unmount } = renderHook({ campaignId: 'a', onEvent });
@@ -134,7 +144,7 @@ describe('T1 — Connection lifecycle', () => {
 
     expect(first.close).toHaveBeenCalled();
     expect(MockEventSource.instances).toHaveLength(2);
-    expect(MockEventSource.instances[1].url).toBe('/api/campaigns/b/stream');
+    expect(MockEventSource.instances[1].url).toBe(`/api/campaigns/${encodeURIComponent('b')}/stream`);
     expect(result.current.status).toBe('connecting');
     unmount();
   });

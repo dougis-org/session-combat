@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CampaignStreamEvent } from '@/lib/types';
 
-type Status = 'connecting' | 'open' | 'closed' | 'error';
+type Status = 'connecting' | 'open' | 'error';
 
 // Use a local constant so tests don't need a real EventSource global for static values
 const CLOSED = 2;
@@ -26,7 +26,7 @@ export function useCampaignStream(
     function connect() {
       if (torn) return;
 
-      const es = new globalThis.EventSource(`/api/campaigns/${campaignId}/stream`);
+      const es = new globalThis.EventSource(`/api/campaigns/${encodeURIComponent(campaignId)}/stream`);
       currentEs = es;
 
       if (!torn) setStatus('connecting');
@@ -39,11 +39,13 @@ export function useCampaignStream(
 
       const handler = (e: MessageEvent) => {
         if (torn) return;
+        let parsed: CampaignStreamEvent;
         try {
-          onEventRef.current(JSON.parse(e.data) as CampaignStreamEvent);
+          parsed = JSON.parse(e.data) as CampaignStreamEvent;
         } catch {
-          // ignore malformed payload
+          return; // ignore malformed payload
         }
+        onEventRef.current(parsed);
       };
 
       es.addEventListener('heartbeat', handler);
