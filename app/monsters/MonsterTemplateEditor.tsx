@@ -12,7 +12,7 @@ function formatSpeedValue(speedValue: unknown): string {
   if (typeof speedValue === 'string') {
     return speedValue;
   }
-  if (typeof speedValue === 'object' && speedValue !== null) {
+  if (typeof speedValue === 'object' && speedValue !== null && !Array.isArray(speedValue)) {
     return Object.entries(speedValue as Record<string, string>)
       .map(([key, value]) => `${key} ${value}`)
       .join(', ');

@@ -121,22 +121,14 @@ describe('MonsterTemplateEditor — save callback', () => {
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Hobgoblin' }));
   });
 
-  it('does not call onSave when name is empty', async () => {
+  it('disables Save and does not call onSave when name is empty', async () => {
     const user = userEvent.setup();
     const onSave = jest.fn();
     renderEditor({ onSave });
     const nameInput = screen.getByLabelText(/^name$/i);
     await user.clear(nameInput);
-    await user.click(screen.getByRole('button', { name: /save personal monster/i }));
-    expect(onSave).not.toHaveBeenCalled();
-  });
-
-  it('the Save button is disabled when name is empty', async () => {
-    const user = userEvent.setup();
-    renderEditor();
-    const nameInput = screen.getByLabelText(/^name$/i);
-    await user.clear(nameInput);
     expect(screen.getByRole('button', { name: /save personal monster/i })).toBeDisabled();
+    expect(onSave).not.toHaveBeenCalled();
   });
 });
 

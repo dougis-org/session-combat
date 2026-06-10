@@ -1,3 +1,5 @@
+'use client';
+
 import type { MonsterTemplate } from '@/lib/types';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 
