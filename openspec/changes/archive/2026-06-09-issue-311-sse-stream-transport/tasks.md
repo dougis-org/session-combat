@@ -172,10 +172,10 @@ Blocking resolution flow:
   - Copy `openspec/changes/issue-311-sse-stream-transport/specs/transport/spec.md` → `openspec/specs/transport/spec.md`
   - Copy `openspec/changes/issue-311-sse-stream-transport/specs/sse-stream/spec.md` → `openspec/specs/sse-stream/spec.md`
   - Update relative references in both files to point to archived locations
-- [ ] Archive the change in a **single atomic commit**: move `openspec/changes/issue-311-sse-stream-transport/` to `openspec/changes/archive/2026-06-09-issue-311-sse-stream-transport/` — stage both the new path and deletion of old path together
-- [ ] Confirm `openspec/changes/archive/2026-06-09-issue-311-sse-stream-transport/` exists and `openspec/changes/issue-311-sse-stream-transport/` is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-2026-06-09-issue-311-sse-stream-transport` then push
-- [ ] Open PR from doc branch to `main` with title `docs: archive issue-311-sse-stream-transport (2026-06-09)`
-- [ ] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Archive the change in a **single atomic commit**: move `openspec/changes/issue-311-sse-stream-transport/` to `openspec/changes/archive/2026-06-09-issue-311-sse-stream-transport/` — stage both the new path and deletion of old path together
+- [x] Confirm `openspec/changes/archive/2026-06-09-issue-311-sse-stream-transport/` exists and `openspec/changes/issue-311-sse-stream-transport/` is gone
+- [x] Create doc branch: `git checkout -b doc/archive-2026-06-09-issue-311-sse-stream-transport` then push
+- [x] Open PR from doc branch to `main` with title `docs: archive issue-311-sse-stream-transport (2026-06-09)`
+- [x] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
 - [ ] Monitor doc PR until merged (same loop — address comments/CI, push, repeat)
 - [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/issue-311-sse-stream-transport doc/archive-2026-06-09-issue-311-sse-stream-transport`
