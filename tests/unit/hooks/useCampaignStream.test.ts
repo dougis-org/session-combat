@@ -2,7 +2,7 @@ import React from 'react';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useCampaignStream } from '@/lib/hooks/useCampaignStream';
-import { CampaignStreamEvent } from '@/lib/types';
+import type { CampaignStreamEvent } from '@/lib/types';
 
 // ---------------------------------------------------------------------------
 // MockEventSource
@@ -316,13 +316,14 @@ describe('T3 — Reconnect behaviour', () => {
     unmount();
   });
 
-  test('T3-6: onerror with CONNECTING state does not schedule reconnect', () => {
+  test('T3-6: onerror with CONNECTING state sets status connecting and does not schedule explicit reconnect', () => {
     const onEvent = jest.fn();
-    const { unmount } = renderHook({ campaignId: 'c1', onEvent });
+    const { result, unmount } = renderHook({ campaignId: 'c1', onEvent });
     act(() => { MockEventSource.instances[0].triggerOpen(); });
     act(() => { MockEventSource.instances[0].triggerError(MockEventSource.CONNECTING); });
+    expect(result.current.status).toBe('connecting');
     act(() => { jest.runAllTimers(); });
-    expect(MockEventSource.instances).toHaveLength(1);
+    expect(MockEventSource.instances).toHaveLength(1); // no explicit reconnect scheduled
     unmount();
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { CampaignStreamEvent } from '@/lib/types';
+import type { CampaignStreamEvent } from '@/lib/types';
 
 type Status = 'connecting' | 'open' | 'error';
 
@@ -53,8 +53,8 @@ export function useCampaignStream(
 
       es.onerror = () => {
         if (torn) { es.close(); return; }
-        // Only handle HTTP-level failures (CLOSED); browser manages CONNECTING retries (Decision 4)
         if (es.readyState === CLOSED) {
+          // HTTP-level failure — close and schedule explicit reconnect with backoff (Decision 4)
           setStatus('error');
           es.close();
           const nextDelay = delay;
@@ -63,6 +63,9 @@ export function useCampaignStream(
             timerId = null;
             connect();
           }, nextDelay);
+        } else {
+          // Browser is managing a reconnect (transient network drop) — reflect connecting state
+          setStatus('connecting');
         }
       };
     }
