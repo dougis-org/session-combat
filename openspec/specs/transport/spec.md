@@ -169,7 +169,7 @@ None.
 
 ### Requirement: Security
 
-See functional scenarios in `openspec/changes/archive/2026-06-09-issue-311-sse-stream-transport/specs/sse-stream/spec.md`: "Unauthorized request rejected before stream opens", "Forbidden request rejected for non-member".
+See functional scenarios in `openspec/specs/sse-stream/spec.md`: "Unauthorized request rejected before stream opens", "Forbidden request rejected for non-member".
 
 ### Requirement: Reliability
 
