@@ -69,7 +69,7 @@ export function MonsterTemplateEditor({
         type,
         alignment: normalizeAlignment(alignment),
         speed,
-        challengeRating,
+        challengeRating: isNaN(challengeRating) ? 0 : challengeRating,
         source: source || undefined,
         description: description || undefined,
         updatedAt: new Date(),
@@ -83,7 +83,10 @@ export function MonsterTemplateEditor({
   const title = isGlobal ? 'Global Monster' : 'Personal Monster';
 
   return (
-    <div className={`rounded-lg p-6 mb-6 border-2 ${isGlobal ? 'border-purple-500 bg-gray-800' : 'border-blue-500 bg-gray-800'}`}>
+    <form
+      onSubmit={e => { e.preventDefault(); handleSave(); }}
+      className={`rounded-lg p-6 mb-6 border-2 ${isGlobal ? 'border-purple-500 bg-gray-800' : 'border-blue-500 bg-gray-800'}`}
+    >
       <h3 className="text-2xl font-bold mb-4">{isNew ? `Create ${title}` : `Edit ${title}`}</h3>
 
       {validationError && (
@@ -113,7 +116,7 @@ export function MonsterTemplateEditor({
             <select
               id="mte-size"
               value={size}
-              onChange={e => setSize(e.target.value as any)}
+              onChange={e => setSize(e.target.value as MonsterTemplate['size'])}
               className="w-full bg-gray-700 rounded px-3 py-2 text-white"
               disabled={saving}
             >
@@ -162,7 +165,7 @@ export function MonsterTemplateEditor({
               id="mte-cr"
               type="number"
               value={challengeRating}
-              onChange={e => setChallengeRating(parseFloat(e.target.value) || 0)}
+              onChange={e => setChallengeRating(parseFloat(e.target.value))}
               className="w-full bg-gray-700 rounded px-3 py-2 text-white"
               disabled={saving}
               step="0.125"
@@ -202,13 +205,14 @@ export function MonsterTemplateEditor({
 
       <div className="flex gap-2 mt-6">
         <button
-          onClick={handleSave}
+          type="submit"
           disabled={saving || !name.trim()}
           className={`hover:opacity-80 disabled:opacity-50 px-4 py-2 rounded ${isGlobal ? 'bg-purple-600' : 'bg-green-600'}`}
         >
           {saving ? 'Saving...' : `Save ${title}`}
         </button>
         <button
+          type="button"
           onClick={onCancel}
           disabled={saving}
           className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 px-4 py-2 rounded"
@@ -216,6 +220,6 @@ export function MonsterTemplateEditor({
           Cancel
         </button>
       </div>
-    </div>
+    </form>
   );
 }
