@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CampaignStreamEvent } from '@/lib/types';
 
 type Status = 'connecting' | 'open' | 'closed' | 'error';
@@ -15,7 +15,7 @@ export function useCampaignStream(
   const [status, setStatus] = useState<Status>('connecting');
   // Store onEvent in a ref to avoid stale closures without triggering reconnect (Decision 3)
   const onEventRef = useRef(onEvent);
-  onEventRef.current = onEvent;
+  useLayoutEffect(() => { onEventRef.current = onEvent; });
 
   useEffect(() => {
     let torn = false;
