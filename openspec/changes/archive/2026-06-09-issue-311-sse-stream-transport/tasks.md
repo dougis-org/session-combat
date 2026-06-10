@@ -142,14 +142,14 @@ Verification requirements (all must pass before PR or pushing updates to a PR):
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings automatically addressed before final commit
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings automatically addressed before final commit
 - [x] Commit all changes to `feat/issue-311-sse-stream-transport` and push to remote
 - [x] Open PR from `feat/issue-311-sse-stream-transport` to `main`. PR body **MUST** include `Closes #311`
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
 - [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Monitor PR comments** — poll autonomously; address all comments, commit fixes, follow remote push validation, push, wait 180s, repeat until no unresolved threads remain
+- [x] **Monitor PR comments** — poll autonomously; address all comments, commit fixes, follow remote push validation, push, wait 180s, repeat until no unresolved threads remain
 - [x] **Monitor CI checks** — all checks passed (Codacy, lint, unit, integration, regression)
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user; never force-merge
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user; never force-merge
 
 Ownership metadata:
 
@@ -165,17 +165,17 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks complete
-- [ ] Sync approved spec deltas to global specs:
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks complete
+- [x] Sync approved spec deltas to global specs:
   - Copy `openspec/changes/issue-311-sse-stream-transport/specs/transport/spec.md` → `openspec/specs/transport/spec.md`
   - Copy `openspec/changes/issue-311-sse-stream-transport/specs/sse-stream/spec.md` → `openspec/specs/sse-stream/spec.md`
   - Update relative references in both files to point to archived locations
-- [ ] Archive the change in a **single atomic commit**: move `openspec/changes/issue-311-sse-stream-transport/` to `openspec/changes/archive/YYYY-MM-DD-issue-311-sse-stream-transport/` — stage both the new path and deletion of old path together
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-issue-311-sse-stream-transport/` exists and `openspec/changes/issue-311-sse-stream-transport/` is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-issue-311-sse-stream-transport` then push
-- [ ] Open PR from doc branch to `main` with title `docs: archive issue-311-sse-stream-transport (YYYY-MM-DD)`
+- [ ] Archive the change in a **single atomic commit**: move `openspec/changes/issue-311-sse-stream-transport/` to `openspec/changes/archive/2026-06-09-issue-311-sse-stream-transport/` — stage both the new path and deletion of old path together
+- [ ] Confirm `openspec/changes/archive/2026-06-09-issue-311-sse-stream-transport/` exists and `openspec/changes/issue-311-sse-stream-transport/` is gone
+- [ ] Create doc branch: `git checkout -b doc/archive-2026-06-09-issue-311-sse-stream-transport` then push
+- [ ] Open PR from doc branch to `main` with title `docs: archive issue-311-sse-stream-transport (2026-06-09)`
 - [ ] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
 - [ ] Monitor doc PR until merged (same loop — address comments/CI, push, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/issue-311-sse-stream-transport doc/archive-YYYY-MM-DD-issue-311-sse-stream-transport`
+- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/issue-311-sse-stream-transport doc/archive-2026-06-09-issue-311-sse-stream-transport`
