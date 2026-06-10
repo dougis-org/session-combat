@@ -177,5 +177,5 @@ Blocking resolution flow:
 - [x] Create doc branch: `git checkout -b doc/archive-2026-06-09-issue-311-sse-stream-transport` then push
 - [x] Open PR from doc branch to `main` with title `docs: archive issue-311-sse-stream-transport (2026-06-09)`
 - [x] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor doc PR until merged (same loop — address comments/CI, push, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/issue-311-sse-stream-transport doc/archive-2026-06-09-issue-311-sse-stream-transport`
+- [x] Monitor doc PR until merged (same loop — address comments/CI, push, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/issue-311-sse-stream-transport doc/archive-2026-06-09-issue-311-sse-stream-transport`
