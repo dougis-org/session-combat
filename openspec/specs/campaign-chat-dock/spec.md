@@ -1,8 +1,10 @@
-## ADDED Requirements
+# Campaign Chat Dock — Specification
 
-This document details *changes* to requirements and is additive to the `design.md` document, not a replacement.
+This document is the canonical specification for the `CampaignChat` dock shell feature (Phase 4c). Implementation: `lib/components/CampaignChat.tsx`, mounted globally in `app/layout.tsx`. Design rationale: `openspec/changes/archive/2026-06-09-campaign-chat-dock-shell/design.md`.
 
-### Requirement: ADDED CampaignChat dock shell renders globally
+---
+
+## Requirement: CampaignChat dock shell renders globally
 
 The system SHALL render a `CampaignChat` component on every page of the application via `app/layout.tsx`.
 
@@ -20,7 +22,7 @@ The system SHALL render a `CampaignChat` component on every page of the applicat
 
 ---
 
-### Requirement: ADDED Collapse/expand toggle
+## Requirement: Collapse/expand toggle
 
 The system SHALL toggle between collapsed (pill) and expanded (drawer) states on user interaction.
 
@@ -50,7 +52,7 @@ The system SHALL toggle between collapsed (pill) and expanded (drawer) states on
 
 ---
 
-### Requirement: ADDED Pin-open control persisted to LocalStore
+## Requirement: Pin-open control persisted to LocalStore
 
 The system SHALL persist the pin preference using `LocalStore` under the key `campaign-chat-pin`, and restore it on mount.
 
@@ -86,7 +88,7 @@ The system SHALL persist the pin preference using `LocalStore` under the key `ca
 
 ---
 
-### Requirement: ADDED Keyboard accessibility
+## Requirement: Keyboard accessibility
 
 The system SHALL be fully operable via keyboard with appropriate ARIA attributes.
 
@@ -110,36 +112,9 @@ The system SHALL be fully operable via keyboard with appropriate ARIA attributes
 
 ---
 
-## MODIFIED Requirements
+## Non-Functional Requirements
 
-No existing requirements are modified by this change.
-
----
-
-## REMOVED Requirements
-
-No existing requirements are removed by this change.
-
----
-
-## Traceability
-
-- Proposal element "Corner pill, `fixed bottom-4 right-4 z-40`" → Requirement: ADDED CampaignChat dock shell renders globally
-- Proposal element "Expanded drawer `w-80 h-[33vh]`" → Requirement: ADDED Collapse/expand toggle
-- Proposal element "Pin persisted via LocalStore" → Requirement: ADDED Pin-open control persisted to LocalStore
-- Proposal element "Keyboard accessible" → Requirement: ADDED Keyboard accessibility
-- Design decision D2 (always render) → Requirement: ADDED CampaignChat dock shell renders globally → Task: mount in `app/layout.tsx`
-- Design decision D3 (LocalStore) → Requirement: ADDED Pin-open control persisted to LocalStore → Task: implement pin toggle in `CampaignChat`
-- Design decision D5 (unpin = don't collapse) → Scenario: Unpinning while expanded does not collapse the drawer
-- Design decision D6 (Escape always collapses) → Scenario: Collapse dock via Escape key
-- Requirement: ADDED CampaignChat dock shell renders globally → Task: create `lib/components/CampaignChat.tsx`, modify `app/layout.tsx`
-- Requirement: ADDED Keyboard accessibility → Task: add ARIA attributes and Escape handler to `CampaignChat`
-
----
-
-## Non-Functional Acceptance Criteria
-
-### Requirement: Reliability — SSR safety
+### Reliability — SSR safety
 
 #### Scenario: No localStorage access during server render
 
@@ -147,7 +122,7 @@ No existing requirements are removed by this change.
 - **When** the module is imported and the component tree is server-rendered
 - **Then** no `localStorage` access is attempted (verified by `LocalStore`'s `isBrowser()` guard and `useEffect`-gated mount logic)
 
-### Requirement: Reliability — no layout regression
+### Reliability — no layout regression
 
 #### Scenario: Existing tests pass after layout change
 
@@ -155,6 +130,21 @@ No existing requirements are removed by this change.
 - **When** the full unit and integration test suite is run
 - **Then** no previously passing test fails (the dock is `fixed`-positioned and out of document flow)
 
-### Requirement: Security
+### Security
 
-See functional scenarios above — no authentication, authorization, or sensitive data is involved in this component. The dock renders static UI with no user-supplied input beyond button clicks.
+No authentication, authorization, or sensitive data is involved in this component. The dock renders static UI with no user-supplied input beyond button clicks.
+
+---
+
+## Traceability
+
+- Corner pill (`fixed bottom-4 right-4 z-40`) → Requirement: CampaignChat dock shell renders globally
+- Expanded drawer (`w-80 h-[33vh]`) → Requirement: Collapse/expand toggle
+- Pin persisted via LocalStore → Requirement: Pin-open control persisted to LocalStore
+- Keyboard accessible → Requirement: Keyboard accessibility
+- Design D2 (always render) → Requirement: dock renders globally → `app/layout.tsx`
+- Design D3 (LocalStore key `campaign-chat-pin`) → Requirement: pin persisted → `CampaignChat` pin toggle
+- Design D5 (unpin = don't collapse) → Scenario: Unpinning while expanded does not collapse
+- Design D6 (Escape always collapses) → Scenario: Collapse dock via Escape key
+- Implementation: `lib/components/CampaignChat.tsx`, `app/layout.tsx`
+- Tests: `tests/unit/components/CampaignChat.test.tsx`
