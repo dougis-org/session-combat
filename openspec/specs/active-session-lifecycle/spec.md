@@ -4,7 +4,7 @@ This document details *changes* to requirements and is additive to the `design.m
 
 ### Requirement: ADDED `Campaign.activeSessionId` field
 
-The system SHALL include `activeSessionId?: string` on the `Campaign` type and persist it atomically in MongoDB.
+The system SHALL include `activeSessionId?: string | null` on the `Campaign` type and persist it atomically in MongoDB.
 
 #### Scenario: Field present after session opened
 
