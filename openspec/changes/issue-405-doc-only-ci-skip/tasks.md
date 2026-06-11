@@ -131,4 +131,4 @@ Blocking resolution flow:
 - [ ] Open PR from doc branch to `main` with title `docs: archive issue-405-doc-only-ci-skip (YYYY-MM-DD)`
 - [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
 - [ ] Monitor doc PR until merged (same loop — address comments and CI failures, push to doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` && `git branch -d feat/issue-405-doc-only-ci-skip doc/archive-YYYY-MM-DD-issue-405-doc-only-ci-skip`
+- [ ] Prune merged local branches: `git fetch --prune` && `git branch -D feat/issue-405-doc-only-ci-skip doc/archive-YYYY-MM-DD-issue-405-doc-only-ci-skip`
