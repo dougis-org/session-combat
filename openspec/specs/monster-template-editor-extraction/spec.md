@@ -57,7 +57,7 @@ The system SHALL export `MonsterTemplateCard` from `app/monsters/MonsterTemplate
 The system SHALL have a `formatSpeedValue` helper inside `MonsterTemplateEditor.tsx` that:
 - Returns a string as-is if the speed value is already a string
 - Converts a key/value object into a comma-separated string (e.g., `{ walk: "30 ft.", fly: "60 ft." }` → `"walk 30 ft., fly 60 ft."`)
-- Returns `"30 ft."` for null/undefined/unrecognised input
+- Returns `"30 ft."` for null/undefined/unrecognized input
 
 #### Scenario: formatSpeedValue with string input
 
@@ -70,6 +70,12 @@ The system SHALL have a `formatSpeedValue` helper inside `MonsterTemplateEditor.
 - **Given** `speed` is stored as `{ walk: "30 ft.", fly: "60 ft." }`
 - **When** `formatSpeedValue` is called with that object
 - **Then** it returns `"walk 30 ft., fly 60 ft."`
+
+#### Scenario: formatSpeedValue with unrecognized input
+
+- **Given** `speed` is a number, null, or other unrecognized type
+- **When** `formatSpeedValue` is called with that value
+- **Then** it returns `"30 ft."`
 
 ## MODIFIED Requirements
 
@@ -119,8 +125,4 @@ No new network calls, auth paths, or data exposure introduced. See functional sc
 
 ### Requirement: Reliability
 
-#### Scenario: No test regressions after extraction
-
-- **Given** the full Jest test suite is run after extraction
-- **When** comparing test pass counts for `monsters`-related tests before and after
-- **Then** the count is identical and no tests are skipped or removed
+No test regressions after extraction. See functional scenario: "MonstersPage renders without regressions".

@@ -97,10 +97,10 @@ Blocking resolution flow:
 - [x] Verify the merged changes appear on the default branch
 - [x] Mark all remaining tasks as complete (`- [x]`)
 - [x] Sync approved spec delta: copy `openspec/changes/extract-monster-template-components/specs/monster-template-editor-extraction/spec.md` → `openspec/specs/monster-template-editor-extraction/spec.md`
-- [x] Archive the change: move `openspec/changes/extract-monster-template-components/` to `openspec/changes/archive/YYYY-MM-DD-extract-monster-template-components/` **and stage both the new location and the deletion of the old location in a single commit**
-- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-extract-monster-template-components/` exists and `openspec/changes/extract-monster-template-components/` is gone
-- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-extract-monster-template-components` then `git push -u origin doc/archive-YYYY-MM-DD-extract-monster-template-components`
-- [x] Open a PR from the doc branch to `main` with title `docs: archive extract-monster-template-components (YYYY-MM-DD)`
+- [x] Archive the change: move `openspec/changes/extract-monster-template-components/` to `openspec/changes/archive/2026-06-10-extract-monster-template-components/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/2026-06-10-extract-monster-template-components/` exists and `openspec/changes/extract-monster-template-components/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-2026-06-10-extract-monster-template-components` then `git push -u origin doc/archive-2026-06-10-extract-monster-template-components`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive extract-monster-template-components (2026-06-10)`
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
 - [x] Monitor the doc PR until it merges
-- [x] Prune merged local branches: `git fetch --prune` and `git branch -d refactor/extract-monster-template-components doc/archive-YYYY-MM-DD-extract-monster-template-components`
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d refactor/extract-monster-template-components doc/archive-2026-06-10-extract-monster-template-components`
