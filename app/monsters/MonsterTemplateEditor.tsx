@@ -69,7 +69,7 @@ export function MonsterTemplateEditor({
         type,
         alignment: normalizeAlignment(alignment),
         speed,
-        challengeRating: isNaN(challengeRating) ? 0 : challengeRating,
+        challengeRating,
         source: source || undefined,
         description: description || undefined,
         updatedAt: new Date(),
@@ -165,7 +165,7 @@ export function MonsterTemplateEditor({
               id="mte-cr"
               type="number"
               value={challengeRating}
-              onChange={e => setChallengeRating(parseFloat(e.target.value))}
+              onChange={e => setChallengeRating(parseFloat(e.target.value) || 0)}
               className="w-full bg-gray-700 rounded px-3 py-2 text-white"
               disabled={saving}
               step="0.125"

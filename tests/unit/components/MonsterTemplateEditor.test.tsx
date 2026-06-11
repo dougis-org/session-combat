@@ -130,6 +130,24 @@ describe('MonsterTemplateEditor — save callback', () => {
     expect(screen.getByRole('button', { name: /save personal monster/i })).toBeDisabled();
     expect(onSave).not.toHaveBeenCalled();
   });
+
+  it('shows validation error and does not call onSave when HP exceeds Max HP', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    renderEditor({ template: { ...BASE_TEMPLATE, hp: 20, maxHp: 10 }, onSave });
+    await user.click(screen.getByRole('button', { name: /save personal monster/i }));
+    expect(screen.getByText(/current hp cannot be greater than max hp/i)).toBeInTheDocument();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+});
+
+describe('MonsterTemplateEditor — formatSpeedValue', () => {
+  it('returns "30 ft." fallback for unrecognized speed input', () => {
+    renderEditor({
+      template: { ...BASE_TEMPLATE, speed: 42 as unknown as string },
+    });
+    expect(screen.getByLabelText(/^speed$/i)).toHaveValue('30 ft.');
+  });
 });
 
 describe('MonsterTemplateEditor — cancel callback', () => {
