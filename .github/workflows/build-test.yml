@@ -16,6 +16,8 @@ jobs:
       docs_only: ${{ steps.set-docs-only.outputs.docs_only }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
       - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
         id: filter
         with:
@@ -79,7 +81,7 @@ jobs:
         env:
           MONGODB_URI: mongodb://localhost:27017
           MONGODB_DB: session-combat-test
-          GENERATE_SOURCE_MAPS: 'true'
+          GENERATE_SOURCE_MAPS: ${{ needs.check-changes.outputs.docs_only != 'true' }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
