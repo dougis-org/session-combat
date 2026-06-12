@@ -7,6 +7,33 @@ on:
     branches: ['main']
 
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      docs_only: ${{ steps.set-docs-only.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
+        id: filter
+        with:
+          filters: |
+            non_docs:
+              - '**'
+              - '!**/*.md'
+      - name: Set docs_only output
+        id: set-docs-only
+        run: |
+          if [ "${{ steps.filter.outputs.non_docs }}" == "true" ]; then
+            echo "docs_only=false" >> $GITHUB_OUTPUT
+          else
+            echo "docs_only=true" >> $GITHUB_OUTPUT
+          fi
+
   lint:
     runs-on: ubuntu-latest
 
@@ -29,52 +56,9 @@ jobs:
       - name: Run lint
         run: npm run lint
 
-  unit-tests:
+  build:
     runs-on: ubuntu-latest
-    needs: [lint]
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run unit tests with coverage
-        run: npm run test:unit
-
-      - name: Upload unit coverage to Codacy
-        if: always()
-        env:
-          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
-          CODACY_ORGANIZATION_PROVIDER: gh
-          CODACY_USERNAME: dougis-org
-          CODACY_PROJECT_NAME: session-combat
-        run: |
-          if [ -z "$CODACY_API_TOKEN" ]; then
-            echo "CODACY_API_TOKEN not set (fork PR or missing secret), skipping coverage upload"
-            exit 0
-          fi
-          curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
-          chmod +x codacy-coverage-reporter.sh
-          if [ -f coverage/lcov.info ]; then
-            ./codacy-coverage-reporter.sh report --partial -r coverage/lcov.info
-          else
-            echo "No coverage report found at coverage/lcov.info"
-          fi
-
-  integration-tests:
-    runs-on: ubuntu-latest
-    needs: [lint]
+    needs: [lint, check-changes]
 
     permissions:
       contents: read
@@ -97,31 +81,87 @@ jobs:
         env:
           MONGODB_URI: mongodb://localhost:27017
           MONGODB_DB: session-combat-test
+          GENERATE_SOURCE_MAPS: ${{ needs.check-changes.outputs.docs_only != 'true' }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: .next/
+          retention-days: 1
+          include-hidden-files: true
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    needs: [lint, check-changes]
+    if: needs.check-changes.outputs.docs_only != 'true'
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests with coverage
+        run: npm run test:unit
+
+      - name: Upload unit coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-lcov
+          path: coverage/lcov.info
+          if-no-files-found: ignore
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: [check-changes, build]
+    if: needs.check-changes.outputs.docs_only != 'true'
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .next/
 
       - name: Run integration tests with coverage
         run: npm run test:integration -- --coverage --forceExit
         env:
           INTEGRATION_WORKERS: '4'
 
-      - name: Upload integration coverage to Codacy
+      - name: Upload integration coverage
         if: always()
-        env:
-          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
-          CODACY_ORGANIZATION_PROVIDER: gh
-          CODACY_USERNAME: dougis-org
-          CODACY_PROJECT_NAME: session-combat
-        run: |
-          if [ -z "$CODACY_API_TOKEN" ]; then
-            echo "CODACY_API_TOKEN not set (fork PR or missing secret), skipping coverage upload"
-            exit 0
-          fi
-          curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
-          chmod +x codacy-coverage-reporter.sh
-          if [ -f coverage/lcov.info ]; then
-            ./codacy-coverage-reporter.sh report --partial -r coverage/lcov.info
-          else
-            echo "No coverage report found at coverage/lcov.info"
-          fi
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-lcov
+          path: coverage/lcov.info
+          if-no-files-found: ignore
 
       - name: Upload integration test artifacts on failure
         if: failure()
@@ -135,7 +175,8 @@ jobs:
 
   regression-tests:
     runs-on: ubuntu-latest
-    needs: [lint]
+    needs: [check-changes, build]
+    if: needs.check-changes.outputs.docs_only != 'true'
 
     permissions:
       contents: read
@@ -175,12 +216,11 @@ jobs:
           done
           echo 'Mongo did not become ready' && exit 1
 
-      - name: Build application
-        run: npm run build
-        env:
-          MONGODB_URI: mongodb://localhost:27017
-          MONGODB_DB: session-combat-e2e
-          GENERATE_SOURCE_MAPS: 'true'
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .next/
 
       - name: Run Playwright regression tests
         run: |
@@ -204,25 +244,13 @@ jobs:
           MONGODB_DB: session-combat-e2e
           CHROMIUM_ONLY: 'true'
 
-      - name: Upload E2E coverage to Codacy
+      - name: Upload E2E coverage
         if: always()
-        env:
-          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
-          CODACY_ORGANIZATION_PROVIDER: gh
-          CODACY_USERNAME: dougis-org
-          CODACY_PROJECT_NAME: session-combat
-        run: |
-          if [ -z "$CODACY_API_TOKEN" ]; then
-            echo "CODACY_API_TOKEN not set (fork PR or missing secret), skipping coverage upload"
-            exit 0
-          fi
-          curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
-          chmod +x codacy-coverage-reporter.sh
-          if [ -f coverage-e2e/lcov.info ]; then
-            ./codacy-coverage-reporter.sh report --partial -r coverage-e2e/lcov.info
-          else
-            echo "No coverage report found at coverage-e2e/lcov.info (check GENERATE_SOURCE_MAPS=true on build step and @bgotink/playwright-coverage reporter config)"
-          fi
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-lcov
+          path: coverage-e2e/lcov.info
+          if-no-files-found: ignore
 
       - name: Upload E2E coverage artifact on failure
         if: failure()
@@ -240,16 +268,37 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-  finalize-coverage:
+  upload-and-finalize-coverage:
     runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests, regression-tests]
-    if: always()
+    needs: [check-changes, unit-tests, integration-tests, regression-tests]
+    if: always() && needs.check-changes.outputs.docs_only != 'true'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Finalize Codacy coverage
+      - name: Download unit coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-lcov
+          path: artifacts/unit/
+        continue-on-error: true
+
+      - name: Download integration coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: integration-lcov
+          path: artifacts/integration/
+        continue-on-error: true
+
+      - name: Download E2E coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-lcov
+          path: artifacts/e2e/
+        continue-on-error: true
+
+      - name: Upload partial coverage to Codacy and finalize
         env:
           CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
           CODACY_ORGANIZATION_PROVIDER: gh
@@ -257,9 +306,102 @@ jobs:
           CODACY_PROJECT_NAME: session-combat
         run: |
           if [ -z "$CODACY_API_TOKEN" ]; then
-            echo "CODACY_API_TOKEN not set (fork PR or missing secret), skipping coverage finalization"
+            echo "CODACY_API_TOKEN not set (fork PR or missing secret), skipping coverage upload"
             exit 0
           fi
           curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
           chmod +x codacy-coverage-reporter.sh
+          if [ -f artifacts/unit/lcov.info ]; then
+            ./codacy-coverage-reporter.sh report --partial -r artifacts/unit/lcov.info
+          else
+            echo "No unit coverage report found"
+          fi
+          if [ -f artifacts/integration/lcov.info ]; then
+            ./codacy-coverage-reporter.sh report --partial -r artifacts/integration/lcov.info
+          else
+            echo "No integration coverage report found"
+          fi
+          if [ -f artifacts/e2e/lcov.info ]; then
+            ./codacy-coverage-reporter.sh report --partial -r artifacts/e2e/lcov.info
+          else
+            echo "No e2e coverage report found"
+          fi
           ./codacy-coverage-reporter.sh final
+
+  check-codacy-coverage:
+    runs-on: ubuntu-latest
+    needs: [check-changes, upload-and-finalize-coverage]
+    if: needs.check-changes.outputs.docs_only != 'true' && github.event_name == 'pull_request'
+
+    permissions:
+      checks: read
+
+    steps:
+      - name: Wait for Codacy coverage checks
+        uses: actions/github-script@v8
+        env:
+          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+        with:
+          script: |
+            if (!process.env.CODACY_API_TOKEN) {
+              core.info('CODACY_API_TOKEN not set (fork PR or missing secret), skipping Codacy coverage check.')
+              return
+            }
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const ref = context.payload.pull_request.head.sha
+            const checkNames = ['Codacy Diff Coverage', 'Codacy Coverage Variation']
+            const pollIntervalMs = 30_000
+            const maxWaitMs = 10 * 60_000
+            const startTime = Date.now()
+
+            const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+            while (true) {
+              const { data } = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref,
+                per_page: 100,
+              })
+              const checkRuns = data.check_runs ?? []
+
+              for (const checkName of checkNames) {
+                const check = checkRuns.find((c) => c.name === checkName)
+                if (check && check.status === 'completed' && check.conclusion !== 'success') {
+                  core.setFailed(`${checkName} concluded with: ${check.conclusion}`)
+                  return
+                }
+              }
+
+              const allComplete = checkNames.every((name) => {
+                const check = checkRuns.find((c) => c.name === name)
+                return check && check.status === 'completed'
+              })
+
+              if (allComplete) {
+                core.info('All Codacy coverage checks passed.')
+                return
+              }
+
+              const elapsedMs = Date.now() - startTime
+              if (elapsedMs >= maxWaitMs) {
+                core.setFailed('Timeout: Codacy coverage checks did not complete within 10 minutes.')
+                return
+              }
+
+              core.info(`Codacy checks not yet complete. Sleeping for ${pollIntervalMs / 1000} seconds...`)
+              await wait(pollIntervalMs)
+            }
+
+  ci-gate:
+    runs-on: ubuntu-latest
+    needs: [check-changes, lint, build, unit-tests, integration-tests, regression-tests, upload-and-finalize-coverage, check-codacy-coverage]
+    if: always()
+
+    steps:
+      - name: Check all upstream jobs passed
+        run: |
+          if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
+            exit 1
+          fi
