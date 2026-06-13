@@ -62,7 +62,7 @@
 
 ### 7. Update branch protection rules
 
-- [ ] In GitHub repository settings → Branches → Branch protection rules for `main`:
+- [x] In GitHub repository settings → Branches → Branch protection rules for `main`:
   - Add `ci-gate` as a required status check
   - Remove `lint`, `unit-tests`, `integration-tests`, `regression-tests`, `finalize-coverage` as required checks
   - Remove `Codacy Diff Coverage` and `Codacy Coverage Variation` as required checks
@@ -97,11 +97,11 @@ Note: Unit, integration, and regression tests are not re-run locally for this ch
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
 - [x] Commit all changes to `feat/issue-405-doc-only-ci-skip` and push to remote
 - [x] Open PR from `feat/issue-405-doc-only-ci-skip` to `main`. PR body must include **`Closes #405`**
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Monitor PR comments** — poll autonomously; address comments, commit fixes, follow remote push validation steps, push to `feat/issue-405-doc-only-ci-skip`; wait 180 seconds; repeat until no unresolved comments remain
-- [ ] **Monitor CI checks** — poll with `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, follow remote push validation steps, push; wait 180 seconds; repeat
-- [ ] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Monitor PR comments** — poll autonomously; address comments, commit fixes, follow remote push validation steps, push to `feat/issue-405-doc-only-ci-skip`; wait 180 seconds; repeat until no unresolved comments remain
+- [x] **Monitor CI checks** — poll with `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, follow remote push validation steps, push; wait 180 seconds; repeat
+- [x] **Poll for merge** — `gh pr view <PR-URL> --json state`; when `MERGED` proceed to Post-Merge; if `CLOSED` notify user
 
 Ownership metadata:
 
@@ -117,10 +117,10 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify `.github/workflows/build-test.yml` on `main` contains the `ci-gate` job
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/`:
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify `.github/workflows/build-test.yml` on `main` contains the `ci-gate` job
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/`:
   - Copy `openspec/changes/issue-405-doc-only-ci-skip/specs/doc-only-ci-skip/spec.md` → `openspec/specs/doc-only-ci-skip/spec.md`
   - Copy `openspec/changes/issue-405-doc-only-ci-skip/specs/codacy-coverage-gate/spec.md` → `openspec/specs/codacy-coverage-gate/spec.md`
   - Copy `openspec/changes/issue-405-doc-only-ci-skip/specs/ci-gate/spec.md` → `openspec/specs/ci-gate/spec.md`
