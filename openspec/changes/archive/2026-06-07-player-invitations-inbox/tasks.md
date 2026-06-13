@@ -116,14 +116,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec delta to `openspec/specs/invitations-inbox/spec.md` (create directory if needed; update relative references in spec to point to `../../changes/archive/YYYY-MM-DD-player-invitations-inbox/design.md` and `../../changes/archive/YYYY-MM-DD-player-invitations-inbox/tasks.md`)
-- [ ] Archive the change: move `openspec/changes/player-invitations-inbox/` to `openspec/changes/archive/YYYY-MM-DD-player-invitations-inbox/` — stage both the new location and the deletion of the old in **a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-player-invitations-inbox/` exists and `openspec/changes/player-invitations-inbox/` is gone
-- [ ] **Create doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-player-invitations-inbox` then `git push -u origin doc/archive-YYYY-MM-DD-player-invitations-inbox`
-- [ ] Open PR from doc branch to `main` with title `docs: archive player-invitations-inbox (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor doc PR until merged (same loop as implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` && `git branch -d feat/308-player-invitations-inbox doc/archive-YYYY-MM-DD-player-invitations-inbox`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec delta to `openspec/specs/invitations-inbox/spec.md` (create directory if needed; update relative references in spec to point to `../../changes/archive/YYYY-MM-DD-player-invitations-inbox/design.md` and `../../changes/archive/YYYY-MM-DD-player-invitations-inbox/tasks.md`)
+- [x] Archive the change: move `openspec/changes/player-invitations-inbox/` to `openspec/changes/archive/YYYY-MM-DD-player-invitations-inbox/` — stage both the new location and the deletion of the old in **a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-player-invitations-inbox/` exists and `openspec/changes/player-invitations-inbox/` is gone
+- [x] **Create doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-player-invitations-inbox` then `git push -u origin doc/archive-YYYY-MM-DD-player-invitations-inbox`
+- [x] Open PR from doc branch to `main` with title `docs: archive player-invitations-inbox (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor doc PR until merged (same loop as implementation PR)
+- [x] Prune merged local branches: `git fetch --prune` && `git branch -d feat/308-player-invitations-inbox doc/archive-YYYY-MM-DD-player-invitations-inbox`
