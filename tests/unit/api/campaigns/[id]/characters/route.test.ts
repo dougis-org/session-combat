@@ -193,14 +193,49 @@ describe("GET /api/campaigns/[id]/characters", () => {
     expect(body).toEqual([]);
   });
 
+  const makeCharacter = (id: string, name: string): Character => ({
+    id,
+    name,
+    characterType: "character",
+    userId: "player-1",
+    hp: { max: 10, current: 10, temp: 0 },
+    stats: {
+      armorClass: 10,
+      speed: 30,
+      initiativeBonus: 0,
+      passivePerception: 10,
+      passiveInvestigation: 10,
+      passiveInsight: 10
+    },
+    abilities: {
+      str: { score: 10, modifier: 0, save: 0 },
+      dex: { score: 10, modifier: 0, save: 0 },
+      con: { score: 10, modifier: 0, save: 0 },
+      int: { score: 10, modifier: 0, save: 0 },
+      wis: { score: 10, modifier: 0, save: 0 },
+      cha: { score: 10, modifier: 0, save: 0 }
+    },
+    defenses: {
+      immunities: [],
+      resistances: [],
+      vulnerabilities: [],
+      conditionImmunities: []
+    },
+    senses: [],
+    spellcasting: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: undefined
+  });
+
   it("B1-1: DM gets enriched SharedCharacterEntry[] response", async () => {
     const dmMember = { ...ACTIVE_PLAYER, role: "dm" as const };
     const entry = {
       share: { id: "s1", campaignId: CAMPAIGN_ID, characterId: "char-2", userId: "player-1", sharedAt: new Date() },
-      character: { id: "char-2", name: "Arya", characterType: "character", userId: "player-1", deletedAt: undefined },
+      character: makeCharacter("char-2", "Arya"),
     };
     mockedStorage.getMember.mockResolvedValue(dmMember);
-    mockedStorage.buildSharedCharacterEntries.mockResolvedValue([entry] as any);
+    mockedStorage.buildSharedCharacterEntries.mockResolvedValue([entry]);
     const response = await GET(makeGetRequest(), { params: PARAMS });
     expect(response.status).toBe(200);
     const body = await response.json();

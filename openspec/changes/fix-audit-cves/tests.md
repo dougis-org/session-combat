@@ -21,4 +21,4 @@ For each task in `tasks.md`:
 
 - [x] **Test Case 1 for Task "Test Definition (TDD step)"**: Run `npm audit --audit-level=high`. Verify that it exits with a non-zero exit code due to existing vulnerabilities in the dependency tree. This represents the failing test.
 - [x] **Test Case 2 for Tasks "Modify package.json" and "Regenerate lockfile"**: Run `npm audit --audit-level=high` after upgrading packages. Verify that it exits with code 0.
-- [x] **Test Case 3 for Task "Confirm acceptance criteria"**: Run the project's integration test suite (`npm run test` or similar) to ensure the `MongoDBContainer` starts successfully with testcontainers v12 and there are no runtime regressions.
+- [x] **Test Case 3 for Task "Confirm acceptance criteria"**: Run the project's integration test suite (`npm run test:ci` or similar) to ensure the `MongoDBContainer` starts successfully with testcontainers v12 and there are no runtime regressions.

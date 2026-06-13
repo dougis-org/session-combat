@@ -34,7 +34,7 @@ module.exports = {
     "!lib/**/*.d.ts",
   ],
   transformIgnorePatterns: [
-    "node_modules/(?!(archiver|compress-commons|zip-stream|tar-stream|crc-32|crc32-stream|lazystream|bblaze|is-stream|is-core-module)/)"
+    "node_modules/(?!(archiver|compress-commons|zip-stream|tar-stream|crc-32|crc32-stream|lazystream|b4a|bare-.*|is-stream|is-core-module)/)"
   ],
   transform: {
     "^.+\\.[tj]sx?$": [

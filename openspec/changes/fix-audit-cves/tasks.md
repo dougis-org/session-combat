@@ -8,7 +8,7 @@
 ## Execution
 
 - [x] **Test Definition (TDD step):** Run `npm audit --audit-level=high` and verify that it currently exits with a non-zero code due to vulnerabilities in the `testcontainers` and `ts-jest` trees. This serves as the failing test before implementation.
-- [x] Modify `package.json`: Upgrade `@testcontainers/mongodb` to `^12.0.1` and `ts-jest` to `^29.4.11` in `devDependencies`.
+- [x] Modify `package.json`: Upgrade `@testcontainers/mongodb` and `@testcontainers/postgresql` to `^12.0.1`, and `ts-jest` to `^29.4.11` in `devDependencies`.
 - [x] Regenerate lockfile: Run `npm install` to apply the updates and hoist the patched sub-dependencies.
 - [x] **Test Verification:** Run `npm audit --audit-level=high` and verify that it exits with code 0 (success).
 - [x] Confirm acceptance criteria are covered by running existing test suites to ensure `MongoDBContainer` works without regression.

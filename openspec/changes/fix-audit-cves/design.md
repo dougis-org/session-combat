@@ -61,14 +61,14 @@
 
 - Risk/trade-off: Testcontainer API regressions or runtime behavior changes in v12.
   - Impact: Moderate (integration tests failing locally or in CI).
-  - Mitigation: Run `npm run test` immediately after install. Review `tests/integration/global.setup.ts` and `tests/e2e/global.setup.ts` if needed.
+  - Mitigation: Run `npm run test:ci` immediately after install. Review `tests/integration/global.setup.ts` and `tests/e2e/global.setup.ts` if needed.
 
 ## Rollback / Mitigation
 
 - Rollback trigger: Unresolvable test failures related to `MongoDBContainer` that require out-of-scope refactoring.
 - Rollback steps: Revert `package.json` and `package-lock.json` changes using git.
 - Data migration considerations: N/A.
-- Verification after rollback: `npm ci && npm run test` passes.
+- Verification after rollback: `npm ci && npm run test:ci` passes.
 
 ## Operational Blocking Policy
 

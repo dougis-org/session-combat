@@ -20,7 +20,7 @@
 
 ### In Scope
 
-- Upgrading `@testcontainers/mongodb` to `^12.0.1` in `devDependencies`.
+- Upgrading `@testcontainers/mongodb` and `@testcontainers/postgresql` to `^12.0.1` in `devDependencies`.
 - Upgrading `ts-jest` to `^29.4.11` in `devDependencies`.
 - Re-running `npm install` and verifying audit results.
 
