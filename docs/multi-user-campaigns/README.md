@@ -1,6 +1,6 @@
 # Multi-User Campaigns
 
-> Status: **In Progress** · Owner: DM (campaign owner) · Last updated: 2026-06-09
+> Status: **In Progress** · Owner: DM (campaign owner) · Last updated: 2026-06-13
 > Phase 1 ✅ complete · Phase 2 ✅ complete · Phase 3 ✅ complete · Phases 4–7 🟡 not started
 
 This initiative turns campaigns from a single-owner artifact into a shared space

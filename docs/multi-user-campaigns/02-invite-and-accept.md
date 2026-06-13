@@ -5,8 +5,8 @@ or decline. Membership only becomes `active` on acceptance.
 
 **Depends on:** Phase 1 (1c search, 1d members, 1e access). ✅ Phase 1 complete.
 
-> **Tracking:** epic [#294](https://github.com/dougis-org/session-combat/issues/294) — OPEN
-> **Status:** All 4 sub-issues CLOSED ✅ — Phase 2 complete. Epic #294 pending close.
+> **Tracking:** epic [#294](https://github.com/dougis-org/session-combat/issues/294) — CLOSED ✅
+> **Status:** All 4 sub-issues CLOSED ✅ — Phase 2 complete.
 
 ## Membership lifecycle
 

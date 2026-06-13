@@ -7,7 +7,7 @@ own them.
 **Depends on:** Phase 1 (1e access). ✅ Phase 1 complete. Benefits from Phase 2 (active members exist),
 but the data layer can be built against memberships directly.
 
-> **Tracking:** epic [#295](https://github.com/dougis-org/session-combat/issues/295) — OPEN
+> **Tracking:** epic [#295](https://github.com/dougis-org/session-combat/issues/295) — CLOSED ✅
 > **Status:** 2 of 2 sub-issues closed. **Phase 3 complete.**
 
 ## How a player's character reaches a DM's party
