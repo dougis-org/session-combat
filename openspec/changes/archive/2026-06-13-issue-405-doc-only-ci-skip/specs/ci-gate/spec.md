@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the `../../design.md` document, not a replacement.
+This document details *changes* to requirements and is additive to the `../../changes/archive/2026-06-13-issue-405-doc-only-ci-skip/design.md` document, not a replacement.
 
 ### Requirement: ADDED ci-gate umbrella job
 
@@ -20,8 +20,8 @@ The system SHALL expose a single `ci-gate` job that succeeds when all upstream j
 
 #### Scenario: Any upstream job fails — gate fails
 
-- **Given** any pull request where at least one upstream job concludes with `failure`
-- **When** the `ci-gate` job evaluates upstream results using `contains(needs.*.result, 'failure')`
+- **Given** any pull request where at least one upstream job concludes with `failure` or `cancelled`
+- **When** the `ci-gate` job evaluates upstream results using `contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')`
 - **Then** `ci-gate` fails, blocking merge
 
 #### Scenario: ci-gate is the only required branch-protection check for this workflow
@@ -72,7 +72,7 @@ Reason for removal: The `ci-gate` job aggregates all of these; requiring individ
 
 - **Given** any workflow run
 - **When** the `ci-gate` job executes
-- **Then** the job body consists solely of a single conditional shell check (`contains(needs.*.result, 'failure')`) with no external dependencies, ensuring it cannot fail for infrastructure reasons
+- **Then** the job body consists solely of a single conditional shell check (`contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')`) with no external dependencies, ensuring it cannot fail for infrastructure reasons
 
 ### Requirement: Performance
 

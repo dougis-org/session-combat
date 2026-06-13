@@ -119,15 +119,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on main
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (no doc changes expected for this issue)
-- [ ] Sync approved spec deltas into `openspec/specs/active-session-lifecycle/spec.md` (create if absent)
-- [ ] Archive the change: move `openspec/changes/campaign-active-session-lifecycle/` to `openspec/changes/archive/YYYY-MM-DD-campaign-active-session-lifecycle/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-active-session-lifecycle/` exists and `openspec/changes/campaign-active-session-lifecycle/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-campaign-active-session-lifecycle` then `git push -u origin doc/archive-YYYY-MM-DD-campaign-active-session-lifecycle`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive campaign-active-session-lifecycle (YYYY-MM-DD)`. PR body: `Closes #400` (if not already closed by implementation PR).
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor the doc PR until it merges (same loop as implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -d feat/campaign-active-session-lifecycle doc/archive-YYYY-MM-DD-campaign-active-session-lifecycle`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on main
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (no doc changes expected for this issue)
+- [x] Sync approved spec deltas into `openspec/specs/active-session-lifecycle/spec.md` (create if absent)
+- [x] Archive the change: move `openspec/changes/campaign-active-session-lifecycle/` to `openspec/changes/archive/YYYY-MM-DD-campaign-active-session-lifecycle/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-active-session-lifecycle/` exists and `openspec/changes/campaign-active-session-lifecycle/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-campaign-active-session-lifecycle` then `git push -u origin doc/archive-YYYY-MM-DD-campaign-active-session-lifecycle`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive campaign-active-session-lifecycle (YYYY-MM-DD)`. PR body: `Closes #400` (if not already closed by implementation PR).
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor the doc PR until it merges (same loop as implementation PR)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -d feat/campaign-active-session-lifecycle doc/archive-YYYY-MM-DD-campaign-active-session-lifecycle`

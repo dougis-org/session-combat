@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the `../../design.md` document, not a replacement.
+This document details *changes* to requirements and is additive to the `../../changes/archive/2026-06-13-issue-405-doc-only-ci-skip/design.md` document, not a replacement.
 
 ### Requirement: ADDED Docs-only change detection
 
@@ -88,7 +88,7 @@ The system SHALL run `npm run build` as a dedicated `build` job (currently embed
 
 - **Given** any push or pull request triggering the workflow
 - **When** the workflow executes
-- **Then** `npm run build` is executed exactly once in the standalone `build` job, not duplicated inside test jobs
+- **Then** `npm run build` is executed exactly once in the standalone `build` job, not duplicated inside test jobs; the `build` job uploads the `.next/` output as a `next-build` artifact (via `actions/upload-artifact`), and `integration-tests` and `regression-tests` download it (via `actions/download-artifact`) before running
 
 ## REMOVED Requirements
 
