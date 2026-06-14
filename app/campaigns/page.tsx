@@ -232,48 +232,44 @@ export function CampaignsContent() {
 
                 return (
                   <div key={campaign.id} className="bg-gray-800 rounded-lg p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-xl font-bold">{campaign.name}</h3>
-                          <span className={`px-2 py-0.5 text-xs rounded text-white ${statusBadgeClass(campaign.status)}`}>
-                            {statusLabel(campaign.status)}
-                          </span>
-                        </div>
-                        {campaign.moduleName && (
-                          <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
-                        )}
-                        <CampaignChapterInfo
-                          chapters={campaign.chapters || []}
-                          currentChapterId={campaign.currentChapterId}
-                        />
-                      </div>
-                      <div className="flex gap-2 flex-shrink-0 ml-4">
-                        <Link
-                          href={`/campaigns/${campaign.id}`}
-                          className="bg-teal-600 hover:bg-teal-700 px-3 py-1 rounded text-sm"
-                        >
-                          Members
-                        </Link>
-                        <Link
-                          href={`/campaigns/${campaign.id}/prompts`}
-                          className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
-                        >
-                          Prompt Builder
-                        </Link>
-                        <Link
-                          href={`/campaigns/${campaign.id}/library`}
-                          className="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded text-sm"
-                        >
-                          Library
-                        </Link>
-                        <Link
-                          href="/encounters"
-                          className="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm"
-                        >
-                          Start Encounter
-                        </Link>
-                      </div>
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <h3 className="text-xl font-bold min-w-0 truncate">{campaign.name}</h3>
+                      <span className={`px-2 py-0.5 text-xs rounded text-white flex-shrink-0 ${statusBadgeClass(campaign.status)}`}>
+                        {statusLabel(campaign.status)}
+                      </span>
+                    </div>
+                    {campaign.moduleName && (
+                      <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
+                    )}
+                    <CampaignChapterInfo
+                      chapters={campaign.chapters || []}
+                      currentChapterId={campaign.currentChapterId}
+                    />
+                    <div className="flex flex-wrap gap-2 mt-3 mb-4">
+                      <Link
+                        href={`/campaigns/${campaign.id}`}
+                        className="bg-teal-600 hover:bg-teal-700 px-3 py-1 rounded text-sm"
+                      >
+                        Members
+                      </Link>
+                      <Link
+                        href={`/campaigns/${campaign.id}/prompts`}
+                        className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
+                      >
+                        Prompt Builder
+                      </Link>
+                      <Link
+                        href={`/campaigns/${campaign.id}/library`}
+                        className="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded text-sm"
+                      >
+                        Library
+                      </Link>
+                      <Link
+                        href="/encounters"
+                        className="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm"
+                      >
+                        Start Encounter
+                      </Link>
                     </div>
 
                     {lastSession && (
@@ -428,45 +424,41 @@ export function CampaignsContent() {
             <div className="grid md:grid-cols-2 gap-4">
               {campaigns.map(campaign => (
                 <div key={campaign.id} className="bg-gray-800 rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h2 className="text-xl font-semibold">{campaign.name}</h2>
-                        <span className={`px-2 py-0.5 text-xs rounded text-white ${statusBadgeClass(campaign.status)}`}>
-                          {statusLabel(campaign.status)}
-                        </span>
-                      </div>
-                      {campaign.moduleName && (
-                        <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
-                      )}
-                      <ManagementChapterInfo campaign={campaign} />
-                    </div>
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/campaigns/${campaign.id}`}
-                        className="bg-teal-600 hover:bg-teal-700 px-3 py-1 rounded text-sm"
-                      >
-                        Members
-                      </Link>
-                      <Link
-                        href={`/campaigns/${campaign.id}/sessions`}
-                        className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
-                      >
-                        Session Log
-                      </Link>
-                      <button
-                        onClick={() => { setEditingCampaign(campaign); setIsAdding(false); }}
-                        className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteCampaign(campaign.id)}
-                        className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h2 className="text-xl font-semibold min-w-0 truncate">{campaign.name}</h2>
+                    <span className={`px-2 py-0.5 text-xs rounded text-white flex-shrink-0 ${statusBadgeClass(campaign.status)}`}>
+                      {statusLabel(campaign.status)}
+                    </span>
+                  </div>
+                  {campaign.moduleName && (
+                    <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
+                  )}
+                  <ManagementChapterInfo campaign={campaign} />
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <Link
+                      href={`/campaigns/${campaign.id}`}
+                      className="bg-teal-600 hover:bg-teal-700 px-3 py-1 rounded text-sm"
+                    >
+                      Members
+                    </Link>
+                    <Link
+                      href={`/campaigns/${campaign.id}/sessions`}
+                      className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
+                    >
+                      Session Log
+                    </Link>
+                    <button
+                      onClick={() => { setEditingCampaign(campaign); setIsAdding(false); }}
+                      className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteCampaign(campaign.id)}
+                      className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}
