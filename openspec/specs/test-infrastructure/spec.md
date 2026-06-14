@@ -6,7 +6,7 @@ This document details *changes* to requirements and is additive to the [`design.
 
 ### Requirement: MODIFIED Test Dependency Baseline
 
-The system SHALL use `@testcontainers/mongodb` ^12.0.1 and `ts-jest` ^29.4.11 to resolve known HIGH/CRITICAL CVEs in outdated test infrastructure dependencies.
+The system SHALL use `@testcontainers/mongodb` ^12.0.1, `@testcontainers/postgresql` ^12.0.1, and `ts-jest` ^29.4.11 to resolve known HIGH/CRITICAL CVEs in outdated test infrastructure dependencies.
 
 #### Scenario: Install upgraded dependencies without conflicts
 
