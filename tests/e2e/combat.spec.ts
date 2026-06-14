@@ -298,7 +298,10 @@ test.describe("Combat flows", () => {
     // Enable Temp mode, enter 14, click "Set Temp"
     await page.getByLabel("Temp").first().check();
     await hpInput.fill("14");
-    await page.getByRole("button", { name: "Set Temp" }).first().click();
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/combat') && resp.request().method() === 'PUT'),
+      page.getByRole("button", { name: "Set Temp" }).first().click()
+    ]);
 
     // Assert "+14 tmp" visible in HP display and temp HP bar visible
     await expect(page.getByText("14 tmp", { exact: false })).toBeVisible();
@@ -307,14 +310,20 @@ test.describe("Combat flows", () => {
     // Enter 10 damage → 10 absorbed by temp HP (4 remaining), regular HP unchanged at 30
     await page.getByLabel("Temp").first().uncheck();
     await hpInput.fill("10");
-    await page.getByRole("button", { name: "Damage" }).first().click();
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/combat') && resp.request().method() === 'PUT'),
+      page.getByRole("button", { name: "Damage" }).first().click()
+    ]);
     await expect(page.getByText("4 tmp", { exact: false })).toBeVisible();
     // The HP span text content contains the current hp value
     await expect(page.getByText(/Current:.*30/).first()).toBeVisible();
 
     // Enter 10 damage → 4 absorbed, 6 overflow to regular HP (30 - 6 = 24)
     await hpInput.fill("10");
-    await page.getByRole("button", { name: "Damage" }).first().click();
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/combat') && resp.request().method() === 'PUT'),
+      page.getByRole("button", { name: "Damage" }).first().click()
+    ]);
     await expect(page.locator('[data-testid="temp-hp-bar"]')).toHaveCount(0);
     await expect(page.getByText(/Current:.*24/).first()).toBeVisible();
 
@@ -509,10 +518,20 @@ test.describe("Combat flows", () => {
 
     // Close detail panel and advance turns until we come back to Aboleth
     await page.keyboard.press("Escape");
-    // Click "Current Turn (done)" to advance — do this twice to cycle through both combatants
+    
+    await expect(page.locator('[aria-current="step"]')).toBeVisible();
+    const currentActive = await page.locator('[aria-current="step"]').innerText();
     const currentTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)/i });
-    await currentTurnBtn.click(); // advance to next combatant
-    await currentTurnBtn.click(); // advance back to Aboleth (or first combatant)
+    
+    if (currentActive.includes("Aboleth")) {
+      await currentTurnBtn.click();
+      await expect(page.locator('[aria-current="step"]')).not.toContainText("Aboleth");
+      await currentTurnBtn.click();
+      await expect(page.locator('[aria-current="step"]')).toContainText("Aboleth");
+    } else {
+      await currentTurnBtn.click();
+      await expect(page.locator('[aria-current="step"]')).toContainText("Aboleth");
+    }
 
     // After cycling back to Aboleth, remaining should be reset to 3
     await expect(badge).toContainText("⚡ 3/3");
@@ -606,12 +625,17 @@ test.describe("Combat flows", () => {
   }
 
   async function advanceToActiveLair(page: Page) {
-    const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
     for (let i = 0; i < 5; i++) {
       const activeLair = page.locator('[data-testid="lair-active"]');
-      const isVisible = await activeLair.isVisible().catch(() => false);
-      if (isVisible) break;
-      if (await nextTurnBtn.isVisible()) await nextTurnBtn.click();
+      if (await activeLair.isVisible().catch(() => false)) break;
+      
+      const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
+      if (await nextTurnBtn.isVisible()) {
+        await Promise.all([
+          page.waitForResponse(resp => resp.url().includes('/api/combat') && resp.request().method() === 'PUT'),
+          nextTurnBtn.click()
+        ]);
+      }
     }
   }
 
