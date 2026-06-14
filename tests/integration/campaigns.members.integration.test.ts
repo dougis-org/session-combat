@@ -233,7 +233,7 @@ describe("Campaign Members Integration Tests", () => {
           updatedAt: new Date(),
         };
 
-        await db.collection("campaigns").insertMany([campaign1, campaign2, campaign3] as unknown[]);
+        await db.collection<Campaign>("campaigns").insertMany([campaign1, campaign2, campaign3]);
 
         const member1: CampaignMember = {
           id: "mem-1",

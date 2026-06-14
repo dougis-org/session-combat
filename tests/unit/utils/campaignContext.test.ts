@@ -285,7 +285,7 @@ describe('fetchCampaignContext', () => {
 
   const makeSharedEntry = (characterId: string, userId: string, deletedAt?: Date): SharedCharacterEntry => ({
     share: { id: `share-${characterId}`, campaignId: 'camp-1', characterId, userId, sharedAt: new Date() },
-    character: { id: characterId, name: `Char ${characterId}`, characterType: 'character', userId, deletedAt },
+    character: makeCharacter(characterId, `Char ${characterId}`, { deletedAt }) as unknown as Character,
   });
 
   test('C1-1: shared character in active party appears in context.characters', async () => {

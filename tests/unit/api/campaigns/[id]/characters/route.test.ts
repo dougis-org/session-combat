@@ -193,14 +193,27 @@ describe("GET /api/campaigns/[id]/characters", () => {
     expect(body).toEqual([]);
   });
 
+  const makeCharacter = (id: string, name: string): Character => ({
+    id,
+    userId: "player-1",
+    name,
+    classes: [{ class: "Fighter", level: 3 }],
+    abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+    ac: 10,
+    hp: 10,
+    maxHp: 10,
+    speed: "30 ft.",
+    characterType: "character",
+  } as Character);
+
   it("B1-1: DM gets enriched SharedCharacterEntry[] response", async () => {
     const dmMember = { ...ACTIVE_PLAYER, role: "dm" as const };
     const entry = {
       share: { id: "s1", campaignId: CAMPAIGN_ID, characterId: "char-2", userId: "player-1", sharedAt: new Date() },
-      character: { id: "char-2", name: "Arya", characterType: "character", userId: "player-1", deletedAt: undefined },
+      character: makeCharacter("char-2", "Arya"),
     };
     mockedStorage.getMember.mockResolvedValue(dmMember);
-    mockedStorage.buildSharedCharacterEntries.mockResolvedValue([entry] as any);
+    mockedStorage.buildSharedCharacterEntries.mockResolvedValue([entry]);
     const response = await GET(makeGetRequest(), { params: PARAMS });
     expect(response.status).toBe(200);
     const body = await response.json();

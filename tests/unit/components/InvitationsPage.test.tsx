@@ -56,13 +56,13 @@ afterEach(() => {
 
 describe('InvitationsPage', () => {
   it('renders loading state while fetch is pending', () => {
-    global.fetch = jest.fn(() => new Promise(() => {})) as jest.MockedFunction<typeof fetch>;
+    global.fetch = jest.fn(() => new Promise(() => {})) as unknown as jest.MockedFunction<typeof fetch>;
     render(<InvitationsPage />);
     expect(screen.getByTestId('loading')).toBeInTheDocument();
   });
 
   it('renders error banner when fetch fails', async () => {
-    global.fetch = jest.fn(() => Promise.reject(new Error('Network error'))) as jest.MockedFunction<typeof fetch>;
+    global.fetch = jest.fn(() => Promise.reject(new Error('Network error'))) as unknown as jest.MockedFunction<typeof fetch>;
     render(<InvitationsPage />);
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe('InvitationsPage', () => {
   it('renders empty state when invitations list is empty', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve(jsonResponse({ invitations: [] }))
-    ) as jest.MockedFunction<typeof fetch>;
+    ) as unknown as jest.MockedFunction<typeof fetch>;
     render(<InvitationsPage />);
     await waitFor(() => {
       expect(screen.getByText('No pending invitations')).toBeInTheDocument();
@@ -82,7 +82,7 @@ describe('InvitationsPage', () => {
   it('renders invite rows with campaign name, invitedBy, relative time', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve(jsonResponse({ invitations: MOCK_INVITATIONS }))
-    ) as jest.MockedFunction<typeof fetch>;
+    ) as unknown as jest.MockedFunction<typeof fetch>;
     render(<InvitationsPage />);
     await waitFor(() => {
       expect(screen.getByText('Dragon Heist')).toBeInTheDocument();

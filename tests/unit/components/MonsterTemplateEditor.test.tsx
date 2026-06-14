@@ -26,7 +26,7 @@ const BASE_TEMPLATE: MonsterTemplate = {
   name: 'Goblin',
   size: 'small',
   type: 'humanoid',
-  alignment: 'neutral evil',
+  alignment: 'Neutral Evil',
   speed: '30 ft.',
   ac: 15,
   hp: 7,
