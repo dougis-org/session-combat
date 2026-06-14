@@ -141,11 +141,7 @@ None.
 
 ### Requirement: Reliability
 
-#### Scenario: Reconnect storm prevention
-
-- **Given** the connection has failed six consecutive times (delays: 1s, 2s, 4s, 8s, 16s, then capped)
-- **When** the sixth failure occurs
-- **Then** the next reconnect fires at exactly 30 000 ms (cap enforced)
+*See functional scenario: "Scenario: backoff is capped at 30 s" — reconnect storm prevention is fully specified there.*
 
 ### Requirement: Testability
 

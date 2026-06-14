@@ -13,7 +13,13 @@ export function useCampaignStream(
   onEvent: (e: CampaignStreamEvent) => void,
 ): { status: Status } {
   const [status, setStatus] = useState<Status>('connecting');
-  // Store onEvent in a ref to avoid stale closures without triggering reconnect (Decision 3)
+  // Reset status synchronously during render when campaignId changes (avoids stale 'open' flash)
+  const [prevCampaignId, setPrevCampaignId] = useState(campaignId);
+  if (campaignId !== prevCampaignId) {
+    setPrevCampaignId(campaignId);
+    setStatus('connecting');
+  }
+  // Store onEvent in a ref to avoid stale closures without triggering reconnect (Decision 1)
   const onEventRef = useRef(onEvent);
   useLayoutEffect(() => { onEventRef.current = onEvent; });
 
