@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createReactRoot, unmountReactRoot } from '../helpers/reactRoot';
 import { useCampaignStream } from '@/lib/hooks/useCampaignStream';
 import type { CampaignStreamEvent } from '@/lib/types';
 
@@ -21,7 +21,7 @@ class MockEventSource {
   onmessage: ((e: MessageEvent) => void) | null = null;
   close = jest.fn(() => { this.readyState = MockEventSource.CLOSED; });
 
-  private listeners: Record<string, Array<(e: MessageEvent) => void>> = {};
+  listeners: Record<string, Array<(e: MessageEvent) => void>> = {};
 
   constructor(url: string) {
     this.url = url;
@@ -57,9 +57,7 @@ type HookProps = { campaignId: string; onEvent: (e: CampaignStreamEvent) => void
 type HookResult = { current: { status: string } };
 
 function renderHook(props: HookProps): { result: HookResult; rerender: (p: HookProps) => void; unmount: () => void } {
-  const container = document.createElement('div');
-  document.body.appendChild(container);
-  const root = createRoot(container);
+  const { container, root } = createReactRoot();
   const resultRef: HookResult = { current: { status: 'connecting' } };
   let latestProps = props;
 
@@ -77,7 +75,7 @@ function renderHook(props: HookProps): { result: HookResult; rerender: (p: HookP
       latestProps = newProps;
       act(() => { root.render(React.createElement(Probe)); });
     },
-    unmount: () => { act(() => { root.unmount(); }); container.remove(); },
+    unmount: () => { unmountReactRoot(container, root); },
   };
 }
 
@@ -155,23 +153,14 @@ describe('T1 — Connection lifecycle', () => {
 // ---------------------------------------------------------------------------
 
 describe('T2 — Event dispatch', () => {
-  test('T2-1: addEventListener(heartbeat) called, onmessage not assigned', () => {
+  test('T2-1/T2-2: heartbeat and change listeners registered, onmessage not assigned', () => {
     const onEvent = jest.fn();
     const { unmount } = renderHook({ campaignId: 'c1', onEvent });
     const mockEs = MockEventSource.instances[0];
-    // Verify heartbeat listener was registered (spy on addEventListener calls)
-    const listeners = (mockEs as unknown as Record<string, unknown>)['listeners'] as Record<string, unknown[]>;
+    const listeners = mockEs.listeners;
     expect(listeners['heartbeat']).toHaveLength(1);
-    expect(mockEs.onmessage).toBeNull();
-    unmount();
-  });
-
-  test('T2-2: addEventListener(change) called', () => {
-    const onEvent = jest.fn();
-    const { unmount } = renderHook({ campaignId: 'c1', onEvent });
-    const mockEs = MockEventSource.instances[0];
-    const listeners = (mockEs as unknown as Record<string, unknown>)['listeners'] as Record<string, unknown[]>;
     expect(listeners['change']).toHaveLength(1);
+    expect(mockEs.onmessage).toBeNull();
     unmount();
   });
 

@@ -5,7 +5,7 @@ import type { CampaignStreamEvent } from '@/lib/types';
 
 type Status = 'connecting' | 'open' | 'error';
 
-// Use a local constant so tests don't need a real EventSource global for static values
+// Local constant avoids reading EventSource.CLOSED, which requires a real EventSource global
 const CLOSED = 2;
 
 export function useCampaignStream(
@@ -29,7 +29,7 @@ export function useCampaignStream(
       const es = new globalThis.EventSource(`/api/campaigns/${encodeURIComponent(campaignId)}/stream`);
       currentEs = es;
 
-      if (!torn) setStatus('connecting');
+      setStatus('connecting');
 
       es.onopen = () => {
         if (torn) { es.close(); return; }
