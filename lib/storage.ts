@@ -210,6 +210,7 @@ export const storage = {
       const templates = await db
         .collection<CampaignTemplate>("campaignTemplates")
         .find({ userId: GLOBAL_USER_ID })
+        .sort({ name: 1 })
         .toArray();
       return templates.map(normalizeStoredEntityId);
     } catch (error) {

@@ -13,11 +13,12 @@ const mockedGetDatabase = jest.mocked(getDatabase);
 
 function makeMockCollection() {
   const toArray = jest.fn<Promise<unknown[]>, []>();
-  const find = jest.fn(() => ({ toArray }));
+  const sort = jest.fn(() => ({ toArray }));
+  const find = jest.fn(() => ({ sort, toArray }));
   const findOne = jest.fn<Promise<unknown>, []>();
   const updateOne = jest.fn<Promise<unknown>, []>();
   const deleteOne = jest.fn<Promise<unknown>, []>();
-  return { find, toArray, findOne, updateOne, deleteOne };
+  return { find, sort, toArray, findOne, updateOne, deleteOne };
 }
 
 const baseCampaign: Campaign = {

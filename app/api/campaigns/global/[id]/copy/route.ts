@@ -33,6 +33,24 @@ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id
 
     await storage.saveCampaign(campaign);
 
+    try {
+      await storage.addMember({
+        id: randomUUID(),
+        campaignId: campaign.id,
+        userId: auth.userId,
+        role: 'dm',
+        status: 'active',
+        history: [{ action: 'active' as const, by: auth.userId, at: new Date() }],
+      });
+    } catch (memberError) {
+      try {
+        await storage.deleteCampaign(campaign.id, auth.userId);
+      } catch (rollbackError) {
+        console.error('Failed to rollback campaign creation after member insert error:', rollbackError);
+      }
+      throw memberError;
+    }
+
     return NextResponse.json(campaign, { status: 201 });
   } catch (error) {
     console.error('Error copying campaign template:', error);

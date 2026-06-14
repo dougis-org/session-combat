@@ -14,6 +14,8 @@ jest.mock("@/lib/storage", () => ({
   storage: {
     loadGlobalCampaignTemplateById: jest.fn(),
     saveCampaign: jest.fn(),
+    addMember: jest.fn(),
+    deleteCampaign: jest.fn(),
   },
 }));
 
@@ -47,6 +49,8 @@ beforeEach(() => {
   uuidCounter = 0;
   mockAuthState.payload = MOCK_AUTH;
   mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
+  mockedStorage.addMember.mockResolvedValue(undefined as any);
+  mockedStorage.deleteCampaign.mockResolvedValue(undefined as any);
 });
 
 describe("POST /api/campaigns/global/[id]/copy — auth", () => {
@@ -141,5 +145,21 @@ describe("POST /api/campaigns/global/[id]/copy — error handling", () => {
     mockedStorage.saveCampaign.mockRejectedValue(new Error("write failed"));
     const res = await POST(makeRouteRequest(BASE_URL, "POST"), { params: PARAMS });
     expect(res.status).toBe(500);
+  });
+
+  it("returns 500 and calls deleteCampaign when addMember throws", async () => {
+    mockedStorage.loadGlobalCampaignTemplateById.mockResolvedValue(MOCK_TEMPLATE as any);
+    mockedStorage.addMember.mockRejectedValue(new Error("member insert failed"));
+    const res = await POST(makeRouteRequest(BASE_URL, "POST"), { params: PARAMS });
+    expect(res.status).toBe(500);
+    expect(mockedStorage.deleteCampaign).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not call deleteCampaign when saveCampaign fails", async () => {
+    mockedStorage.loadGlobalCampaignTemplateById.mockResolvedValue(MOCK_TEMPLATE as any);
+    mockedStorage.saveCampaign.mockRejectedValue(new Error("write failed"));
+    const res = await POST(makeRouteRequest(BASE_URL, "POST"), { params: PARAMS });
+    expect(res.status).toBe(500);
+    expect(mockedStorage.deleteCampaign).not.toHaveBeenCalled();
   });
 });
