@@ -164,7 +164,7 @@ describe('SharedCharactersPanel', () => {
       if (url === `/api/campaigns/${CAMPAIGN_ID}/members/me`) return jsonResponse(ACTIVE_PLAYER);
       if (url === `/api/campaigns/${CAMPAIGN_ID}/characters` && !options?.method) return jsonResponse([SHARE_X]);
       if (url === `/api/campaigns/${CAMPAIGN_ID}/characters/char-x` && options?.method === 'DELETE') {
-        return new FetchResponse(undefined, { status: 204 }) as unknown as Response;
+        return new FetchResponse(null, { status: 204 });
       }
       return jsonResponse({ error: 'Not found' }, 404);
     });
