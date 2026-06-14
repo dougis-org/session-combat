@@ -195,38 +195,16 @@ describe("GET /api/campaigns/[id]/characters", () => {
 
   const makeCharacter = (id: string, name: string): Character => ({
     id,
-    name,
-    characterType: "character",
     userId: "player-1",
-    hp: { max: 10, current: 10, temp: 0 },
-    stats: {
-      armorClass: 10,
-      speed: 30,
-      initiativeBonus: 0,
-      passivePerception: 10,
-      passiveInvestigation: 10,
-      passiveInsight: 10
-    },
-    abilities: {
-      str: { score: 10, modifier: 0, save: 0 },
-      dex: { score: 10, modifier: 0, save: 0 },
-      con: { score: 10, modifier: 0, save: 0 },
-      int: { score: 10, modifier: 0, save: 0 },
-      wis: { score: 10, modifier: 0, save: 0 },
-      cha: { score: 10, modifier: 0, save: 0 }
-    },
-    defenses: {
-      immunities: [],
-      resistances: [],
-      vulnerabilities: [],
-      conditionImmunities: []
-    },
-    senses: [],
-    spellcasting: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    deletedAt: undefined
-  });
+    name,
+    classes: [{ class: "Fighter", level: 3 }],
+    abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+    ac: 10,
+    hp: 10,
+    maxHp: 10,
+    speed: "30 ft.",
+    characterType: "character",
+  } as Character);
 
   it("B1-1: DM gets enriched SharedCharacterEntry[] response", async () => {
     const dmMember = { ...ACTIVE_PLAYER, role: "dm" as const };
