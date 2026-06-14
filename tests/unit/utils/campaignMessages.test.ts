@@ -1,4 +1,4 @@
-import { canSeeMessage } from '../campaignMessages';
+import { canSeeMessage } from '@/lib/utils/campaignMessages';
 import type { CampaignMessage } from '@/lib/types';
 
 const makeMsg = (overrides: Partial<CampaignMessage> = {}): CampaignMessage => ({
