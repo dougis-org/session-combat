@@ -22,7 +22,7 @@ export async function fillRegistrationForm(
   const usernameField = page.locator("#username");
   await expect(usernameField).toBeVisible({ timeout: 15000 });
   await expect(usernameField).toBeEnabled({ timeout: 15000 });
-  const username = `u_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+  const username = `u_${Date.now()}_${randomUUID().split('-')[0]}`;
   await usernameField.fill(username);
 
   const emailField = page.locator("#email");
