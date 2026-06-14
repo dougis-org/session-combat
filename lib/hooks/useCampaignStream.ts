@@ -5,7 +5,7 @@ import type { CampaignStreamEvent } from '@/lib/types';
 
 type Status = 'connecting' | 'open' | 'error';
 
-// Use a local constant so tests don't need a real EventSource global for static values
+// Local constant avoids reading EventSource.CLOSED, which requires a real EventSource global
 const CLOSED = 2;
 
 export function useCampaignStream(
@@ -13,7 +13,13 @@ export function useCampaignStream(
   onEvent: (e: CampaignStreamEvent) => void,
 ): { status: Status } {
   const [status, setStatus] = useState<Status>('connecting');
-  // Store onEvent in a ref to avoid stale closures without triggering reconnect (Decision 3)
+  // Reset status synchronously during render when campaignId changes (avoids stale 'open' flash)
+  const [prevCampaignId, setPrevCampaignId] = useState(campaignId);
+  if (campaignId !== prevCampaignId) {
+    setPrevCampaignId(campaignId);
+    setStatus('connecting');
+  }
+  // Store onEvent in a ref to avoid stale closures without triggering reconnect (Decision 1)
   const onEventRef = useRef(onEvent);
   useLayoutEffect(() => { onEventRef.current = onEvent; });
 
@@ -29,7 +35,7 @@ export function useCampaignStream(
       const es = new globalThis.EventSource(`/api/campaigns/${encodeURIComponent(campaignId)}/stream`);
       currentEs = es;
 
-      if (!torn) setStatus('connecting');
+      setStatus('connecting');
 
       es.onopen = () => {
         if (torn) { es.close(); return; }
