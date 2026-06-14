@@ -25,7 +25,7 @@ export const GET = withStreamAndParams<{ id: string }>(
         // Flush response headers immediately before async setup
         controller.enqueue(encoder.encode(': connected\n\n'));
 
-        const td = await subscribe(id, (event) => {
+        const td = await subscribe(id, auth.userId, (event) => {
           controller.enqueue(formatSSE(event));
         });
 
