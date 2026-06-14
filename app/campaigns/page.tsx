@@ -64,6 +64,7 @@ export function CampaignsContent() {
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [copyingIds, setCopyingIds] = useState<Set<string>>(new Set());
   const [copyError, setCopyError] = useState<Record<string, string>>({});
+  const [catalogSearch, setCatalogSearch] = useState('');
 
   const loadAll = async () => {
     try {
@@ -202,6 +203,7 @@ export function CampaignsContent() {
   };
 
   const activeCampaigns = campaigns.filter(c => c.status === 'active');
+  const filteredTemplates = templates.filter(t => t.name.toLowerCase().includes(catalogSearch.trim().toLowerCase()));
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -483,33 +485,47 @@ export function CampaignsContent() {
           ) : templates.length === 0 ? (
             <p className="text-gray-400">No campaign templates available yet.</p>
           ) : (
-            <div className="grid md:grid-cols-2 gap-4">
-              {templates.map((template) => (
-                <div key={template.id} className="bg-gray-800 rounded-lg p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold">{template.name}</h3>
-                      {template.moduleName && (
-                        <p className="text-gray-400 text-sm">{template.moduleName}</p>
-                      )}
-                      <p className="text-gray-500 text-xs mt-1">
-                        {template.chapters.length} chapter{template.chapters.length !== 1 ? 's' : ''}
-                      </p>
-                      {copyError[template.id] && (
-                        <p className="text-red-400 text-xs mt-1">{copyError[template.id]}</p>
-                      )}
+            <>
+              <input
+                type="text"
+                aria-label="Search templates"
+                placeholder="Search templates..."
+                value={catalogSearch}
+                onChange={(e) => setCatalogSearch(e.target.value)}
+                className="w-full md:w-80 bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm mb-4 focus:outline-none focus:border-blue-500"
+              />
+              {filteredTemplates.length === 0 && catalogSearch ? (
+                <p className="text-gray-400">No templates match your search.</p>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {filteredTemplates.map((template) => (
+                    <div key={template.id} className="bg-gray-800 rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold">{template.name}</h3>
+                          {template.moduleName && (
+                            <p className="text-gray-400 text-sm">{template.moduleName}</p>
+                          )}
+                          <p className="text-gray-500 text-xs mt-1">
+                            {template.chapters.length} chapter{template.chapters.length !== 1 ? 's' : ''}
+                          </p>
+                          {copyError[template.id] && (
+                            <p className="text-red-400 text-xs mt-1">{copyError[template.id]}</p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => copyTemplate(template.id)}
+                          disabled={copyingIds.has(template.id)}
+                          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-3 py-1 rounded text-sm ml-4"
+                        >
+                          {copyingIds.has(template.id) ? 'Copying...' : 'Copy'}
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => copyTemplate(template.id)}
-                      disabled={copyingIds.has(template.id)}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-3 py-1 rounded text-sm ml-4"
-                    >
-                      {copyingIds.has(template.id) ? 'Copying...' : 'Copy'}
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>
