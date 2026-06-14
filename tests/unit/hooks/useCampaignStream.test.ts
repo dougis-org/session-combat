@@ -208,7 +208,20 @@ describe('T2 — Event dispatch', () => {
     expect(MockEventSource.instances).toHaveLength(1); // no reconnect
     unmount();
   });
+
+  test('T2-6: malformed (non-JSON) SSE payload is ignored; onEvent not called and no error thrown', () => {
+    const onEvent = jest.fn();
+    const { unmount } = renderHook({ campaignId: 'c1', onEvent });
+    const mockEs = MockEventSource.instances[0];
+    act(() => { mockEs.triggerOpen(); });
+    expect(() => {
+      act(() => { mockEs.triggerEvent('change', 'not valid json {{'); });
+    }).not.toThrow();
+    expect(onEvent).not.toHaveBeenCalled();
+    unmount();
+  });
 });
+
 
 // ---------------------------------------------------------------------------
 // T3 — Reconnect behaviour

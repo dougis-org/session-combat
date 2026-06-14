@@ -35,7 +35,7 @@
 
 - `lib/hooks/useCampaignStream.ts` added: wraps `EventSource` with auto-reconnect/backoff, connection state (`connecting | open | error`), and typed event dispatch via `onEventRef`.
 - `lib/types.ts` extended: `CampaignStreamEvent` union type added.
-- `tests/unit/hooks/useCampaignStream.test.ts` added: 19 tests across T1 (connection lifecycle), T2 (event dispatch), T3 (reconnect behaviour), T4 (teardown).
+- `tests/unit/hooks/useCampaignStream.test.ts` added: 19 tests across T1 (connection lifecycle), T2 (event dispatch incl. malformed payload), T3 (reconnect behaviour), T4 (teardown).
 
 ## Risks
 
