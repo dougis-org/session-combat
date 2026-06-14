@@ -84,9 +84,9 @@ Blocking resolution flow:
 - [x] Sync approved spec deltas into `openspec/specs/` (global spec). After copying each `spec.md` to `openspec/specs/<cap>/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-<name>/design.md`, and similarly for `../../tasks.md` and any other relative paths into the change directory.
 - [x] Archive the change: move `openspec/changes/fix-audit-cves/` to `openspec/changes/archive/YYYY-MM-DD-fix-audit-cves/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
 - [x] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-audit-cves/` exists and `openspec/changes/fix-audit-cves/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-fix-audit-cves` then `git push -u origin doc/archive-YYYY-MM-DD-fix-audit-cves`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-fix-audit-cves` to `main` with title `docs: archive fix-audit-cves (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-fix-audit-cves` then `git push -u origin doc/archive-YYYY-MM-DD-fix-audit-cves`
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-fix-audit-cves` to `main` with title `docs: archive fix-audit-cves (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
 - [ ] Prune merged local branches: `git fetch --prune` and `git branch -D fix-audit-cves doc/archive-YYYY-MM-DD-fix-audit-cves`
 
