@@ -105,12 +105,12 @@ async function initializeDatabase(db: Db): Promise<void> {
 
     try {
       await db
-        .collection('campaignMessages')
+        .collection("campaignMessages")
         .createIndex({ campaignId: 1, createdAt: 1 });
-      console.log('Created index on campaignMessages.{campaignId, createdAt}');
+      console.log("Created index on campaignMessages.{campaignId, createdAt}");
     } catch (indexError) {
-      if (indexError instanceof Error && !indexError.message.includes('already exists')) {
-        console.warn('Warning creating campaignMessages.{campaignId, createdAt} index:', indexError.message);
+      if (indexError instanceof Error && !indexError.message.includes("already exists")) {
+        console.warn("Warning creating campaignMessages.{campaignId, createdAt} index:", indexError.message);
       }
     }
 

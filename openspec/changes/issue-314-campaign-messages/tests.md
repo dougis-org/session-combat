@@ -69,7 +69,7 @@ These are compile-time checks; no runtime test file is needed. TypeScript must p
 
 ## T5 — `canSeeMessage` predicate (`lib/utils/campaignMessages.ts`)
 
-**File:** `lib/utils/__tests__/campaignMessages.test.ts`
+**File:** `tests/unit/utils/campaignMessages.test.ts`
 
 - [ ] **T5.1** — `group` message: active player returns `true`.
 - [ ] **T5.2** — `group` message: active DM returns `true`.
@@ -89,7 +89,7 @@ These are compile-time checks; no runtime test file is needed. TypeScript must p
 
 ## T6 — POST handler (`app/api/campaigns/[id]/messages/route.ts`)
 
-**File:** `__tests__/integration/campaignMessages.test.ts`
+**File:** `tests/integration/campaignMessages.test.ts`
 
 - [ ] **T6.1** — Active player POSTs group message → `201` with `CampaignMessage` document (id, campaignId, senderId, text, visibility, createdAt present).
 - [ ] **T6.2** — Active player POSTs direct message with valid `toUserId` → `201`.
@@ -108,7 +108,7 @@ These are compile-time checks; no runtime test file is needed. TypeScript must p
 
 ## T7 — GET handler (`app/api/campaigns/[id]/messages/route.ts`)
 
-**File:** `__tests__/integration/campaignMessages.test.ts` (continued)
+**File:** `tests/integration/campaignMessages.test.ts` (continued)
 
 - [ ] **T7.1** — Active member GETs campaign with 3 group messages → `200` with all 3, sorted descending by `createdAt`.
 - [ ] **T7.2** — Player C GETs campaign where player A sent a direct to player B → player C's response does not include the direct message.
@@ -125,7 +125,7 @@ These are compile-time checks; no runtime test file is needed. TypeScript must p
 
 ---
 
-## T8 — SSE emission (`__tests__/integration/campaignMessages.test.ts`)
+## T8 — SSE emission (`tests/integration/campaignMessages.test.ts`)
 
 - [ ] **T8.1** — Group message POST: all three active SSE subscribers receive a `message` event with `type: "message"`.
 - [ ] **T8.2** — Direct message POST (A → B): subscriber A and B each receive the event; subscriber C (unrelated player) does NOT.

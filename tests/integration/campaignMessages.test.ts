@@ -36,8 +36,7 @@ async function createCampaign(cookie: string): Promise<string> {
 async function addActiveMember(
   campaignId: string,
   dmCookie: string,
-  userId: string,
-  dmUserId: string
+  userId: string
 ): Promise<void> {
   // DM invites the player
   const inviteRes = await fetch(
@@ -57,7 +56,6 @@ async function addActiveMember(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     { $set: { status: "active" } } as any
   );
-  void dmUserId;
 }
 
 async function openSSEConnection(
@@ -124,12 +122,12 @@ describe("Campaign Messages Integration Tests", () => {
     campaignId = await createCampaign(dm.cookie);
 
     // Add players A, B, C as active members
-    await addActiveMember(campaignId, dm.cookie, playerA.userId, dm.userId);
-    await addActiveMember(campaignId, dm.cookie, playerB.userId, dm.userId);
-    await addActiveMember(campaignId, dm.cookie, playerC.userId, dm.userId);
+    await addActiveMember(campaignId, dm.cookie, playerA.userId);
+    await addActiveMember(campaignId, dm.cookie, playerB.userId);
+    await addActiveMember(campaignId, dm.cookie, playerC.userId);
 
     // Add dm2 as a co-DM
-    await addActiveMember(campaignId, dm.cookie, dm2.userId, dm.userId);
+    await addActiveMember(campaignId, dm.cookie, dm2.userId);
     const db = await getDatabase();
     await db.collection("campaignMembers").updateOne(
       { campaignId, userId: dm2.userId },
@@ -216,7 +214,7 @@ describe("Campaign Messages Integration Tests", () => {
   it("T6.6 — removed member cannot POST → 403", async () => {
     const db = await getDatabase();
     const removedUser = await registerTestUser(baseUrl, "msg-removed");
-    await addActiveMember(campaignId, dm.cookie, removedUser.userId, dm.userId);
+    await addActiveMember(campaignId, dm.cookie, removedUser.userId);
     await db.collection("campaignMembers").updateOne(
       { campaignId, userId: removedUser.userId },
       { $set: { status: "removed" } }
@@ -375,12 +373,22 @@ describe("Campaign Messages Integration Tests", () => {
     const now = Date.now();
     await db.collection("campaignMessages").insertMany([
       {
-        id: crypto.randomUUID(), campaignId, senderId: playerA.userId, senderName: "A",
-        text: "Group msg", visibility: { scope: "group" }, createdAt: new Date(now),
+        id: crypto.randomUUID(),
+        campaignId,
+        senderId: playerA.userId,
+        senderName: "A",
+        text: "Group msg",
+        visibility: { scope: "group" },
+        createdAt: new Date(now),
       },
       {
-        id: crypto.randomUUID(), campaignId, senderId: playerA.userId, senderName: "A",
-        text: "DM only msg", visibility: { scope: "dm-only" }, createdAt: new Date(now + 1000),
+        id: crypto.randomUUID(),
+        campaignId,
+        senderId: playerA.userId,
+        senderName: "A",
+        text: "DM only msg",
+        visibility: { scope: "dm-only" },
+        createdAt: new Date(now + 1000),
       },
     ]);
     const res = await fetch(MESSAGES_PATH(campaignId), {

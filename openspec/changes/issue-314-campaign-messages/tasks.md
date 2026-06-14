@@ -35,7 +35,7 @@
   ```ts
   | { type: 'message'; campaignId: string; data: CampaignMessage }
   ```
-- [x] **Verify:** `npm run type-check` passes with no new errors
+- [x] **Verify:** `npm run typecheck` passes with no new errors
 
 ---
 
@@ -64,7 +64,7 @@
     }
   }
   ```
-- [x] **Verify:** `npm run type-check` passes; existing stream integration tests still pass
+- [x] **Verify:** `npm run typecheck` passes; existing stream integration tests still pass
 
 ---
 
@@ -73,7 +73,7 @@
 **File:** `app/api/campaigns/[id]/stream/route.ts`
 
 - [x] Change `subscribe(id, handler)` → `subscribe(id, auth.userId, handler)`
-- [x] **Verify:** `npm run type-check` passes; run existing SSE stream tests
+- [x] **Verify:** `npm run typecheck` passes; run existing SSE stream tests
 
 ---
 
@@ -94,7 +94,7 @@
     }
   }
   ```
-- [x] **Verify:** `npm run type-check` passes
+- [x] **Verify:** `npm run typecheck` passes
 
 ---
 
@@ -131,12 +131,12 @@
     return false;
   }
   ```
-- [x] Write unit tests in `lib/utils/__tests__/campaignMessages.test.ts`:
+- [x] Write unit tests in `tests/unit/utils/campaignMessages.test.ts`:
   - group message visible to all active members
   - direct message visible only to sender and toUserId
   - dm-only visible only to sender and DM role members
   - inactive member sees nothing regardless of scope
-- [x] **Verify:** `npm test lib/utils/__tests__/campaignMessages.test.ts` passes
+- [x] **Verify:** `npm run test:unit -- --testPathPattern=campaignMessages` passes
 
 ---
 
@@ -148,12 +148,12 @@
   1. Auth via `withAuthAndParams`
   2. Assert caller is active member of campaign (403 if not)
   3. Validate body: `text` (non-empty string), `visibility.scope` (`group` | `direct` | `dm-only`); if `scope === 'direct'` require `toUserId` (400 if missing)
-  4. Build `CampaignMessage` document with `id: new ObjectId().toHexString()`, `senderId: auth.userId`, `senderName` (fetch from user record or member record), `createdAt: new Date()`
+  4. Build `CampaignMessage` document with `id: crypto.randomUUID()`, `senderId: auth.userId`, `senderName` (fetch from user record or member record), `createdAt: new Date()`
   5. Insert into `campaignMessages`
   6. Fetch all active members for the campaign (for `canReceive` predicate)
   7. Call `emitFiltered(campaignId, { type: 'message', campaignId, data: message }, (uid) => canSeeMessage(message, uid, activeMembers))`
   8. Return `201` with persisted document
-- [x] **Verify:** `npm run type-check`
+- [x] **Verify:** `npm run typecheck`
 
 ---
 
@@ -183,13 +183,13 @@
   6. Sort `{ createdAt: -1 }`, limit to `limit + 1` to detect next page
   7. If result length > limit, pop last item and set `nextCursor` to the last included item's `createdAt.toISOString()`
   8. Return `200` with `{ messages, nextCursor?: string }`
-- [x] **Verify:** `npm run type-check`
+- [x] **Verify:** `npm run typecheck`
 
 ---
 
 ### T8 — Write integration tests
 
-**File:** `__tests__/integration/campaignMessages.test.ts` (new)
+**File:** `tests/integration/campaignMessages.test.ts` (new)
 
 Cover the following integration scenarios (see `specs/campaign-messages/spec.md`):
 
@@ -215,8 +215,8 @@ Cover the following integration scenarios (see `specs/campaign-messages/spec.md`
 
 ## Validation
 
-- [x] `npm run type-check` — zero errors
-- [x] `npm test` — all unit tests pass (including new `canSeeMessage` tests)
+- [x] `npm run typecheck` — zero errors
+- [x] `npm run test:unit` — all unit tests pass (including new `canSeeMessage` tests)
 - [x] `npm run test:integration` — all integration tests pass
 - [x] `npm run build` — build succeeds
 - [x] All tasks T1–T8 checked off
@@ -225,7 +225,7 @@ Cover the following integration scenarios (see `specs/campaign-messages/spec.md`
 
 **Full path** (non-`.md` files changed — applicable here):
 
-- **Unit tests:** `npm test` — all pass
+- **Unit tests:** `npm run test:unit` — all pass
 - **Integration tests:** `npm run test:integration` — all pass
 - **Build:** `npm run build` — succeeds with no errors
 

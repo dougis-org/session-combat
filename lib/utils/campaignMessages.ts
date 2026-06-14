@@ -8,17 +8,14 @@ export function canSeeMessage(
   const member = members.find((m) => m.userId === userId && m.status === 'active');
   if (!member) return false;
 
-  const { scope } = msg.visibility;
+  if (msg.visibility.scope === 'group') return true;
 
-  if (scope === 'group') return true;
-
-  if (scope === 'direct') {
-    const toUserId = (msg.visibility as { scope: 'direct'; toUserId: string }).toUserId;
-    return userId === msg.senderId || userId === toUserId;
+  if (msg.visibility.scope === 'direct') {
+    return userId === msg.senderId || userId === msg.visibility.toUserId;
   }
 
   // dm-only: DM(s) + sender
-  if (scope === 'dm-only') {
+  if (msg.visibility.scope === 'dm-only') {
     return userId === msg.senderId || member.role === 'dm';
   }
 

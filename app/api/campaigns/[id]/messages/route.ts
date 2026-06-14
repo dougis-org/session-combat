@@ -23,7 +23,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   }
 
   const MAX_TEXT_LENGTH = 5000;
-  if (text.length > MAX_TEXT_LENGTH) {
+  if (text.trim().length > MAX_TEXT_LENGTH) {
     return NextResponse.json({ error: `text exceeds maximum length of ${MAX_TEXT_LENGTH} characters` }, { status: 400 });
   }
 
