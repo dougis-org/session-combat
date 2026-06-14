@@ -203,7 +203,7 @@ export function CampaignsContent() {
   };
 
   const activeCampaigns = campaigns.filter(c => c.status === 'active');
-  const filteredTemplates = templates.filter(t => t.name.toLowerCase().includes(catalogSearch.toLowerCase()));
+  const filteredTemplates = templates.filter(t => t.name.toLowerCase().includes(catalogSearch.trim().toLowerCase()));
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -488,6 +488,7 @@ export function CampaignsContent() {
             <>
               <input
                 type="text"
+                aria-label="Search templates"
                 placeholder="Search templates..."
                 value={catalogSearch}
                 onChange={(e) => setCatalogSearch(e.target.value)}

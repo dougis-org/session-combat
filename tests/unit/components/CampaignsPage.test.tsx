@@ -194,6 +194,78 @@ describe('Campaign Catalog UI', () => {
     expect(screen.getByText('Campaign Catalog')).toBeInTheDocument();
   });
 
+  describe('Catalog search', () => {
+    const TEMPLATE_A = { ...MOCK_TEMPLATE, id: 'tpl-a', name: 'Curse of Strahd' };
+    const TEMPLATE_B = { ...MOCK_TEMPLATE, id: 'tpl-b', name: 'Rime of the Frostmaiden' };
+    const TEMPLATE_C = { ...MOCK_TEMPLATE, id: 'tpl-c', name: 'Candlekeep Mysteries' };
+
+    it('shows search input when templates are present', async () => {
+      setupFetch([], [TEMPLATE_A]);
+      renderPage();
+      expect(await screen.findByRole('textbox', { name: /search templates/i })).toBeInTheDocument();
+    });
+
+    it('filters templates by name (case-insensitive)', async () => {
+      setupFetch([], [TEMPLATE_A, TEMPLATE_B, TEMPLATE_C]);
+      renderPage();
+      await screen.findByText('Curse of Strahd');
+
+      const searchInput = screen.getByRole('textbox', { name: /search templates/i });
+      await user.type(searchInput, 'rim');
+
+      expect(screen.getByText('Rime of the Frostmaiden')).toBeInTheDocument();
+      expect(screen.queryByText('Curse of Strahd')).not.toBeInTheDocument();
+      expect(screen.queryByText('Candlekeep Mysteries')).not.toBeInTheDocument();
+    });
+
+    it('shows all templates when search is empty', async () => {
+      setupFetch([], [TEMPLATE_A, TEMPLATE_B]);
+      renderPage();
+      await screen.findByText('Curse of Strahd');
+
+      expect(screen.getByText('Curse of Strahd')).toBeInTheDocument();
+      expect(screen.getByText('Rime of the Frostmaiden')).toBeInTheDocument();
+    });
+
+    it('shows empty-state message when no templates match search', async () => {
+      setupFetch([], [TEMPLATE_A, TEMPLATE_B]);
+      renderPage();
+      await screen.findByText('Curse of Strahd');
+
+      const searchInput = screen.getByRole('textbox', { name: /search templates/i });
+      await user.type(searchInput, 'zzznomatch');
+
+      expect(screen.queryByText('Curse of Strahd')).not.toBeInTheDocument();
+      expect(screen.getByText('No templates match your search.')).toBeInTheDocument();
+    });
+
+    it('search does not trigger additional network requests', async () => {
+      setupFetch([], [TEMPLATE_A, TEMPLATE_B]);
+      renderPage();
+      await screen.findByText('Curse of Strahd');
+
+      const callsBefore = (global.fetch as jest.MockedFunction<typeof fetch>).mock.calls.length;
+
+      const searchInput = screen.getByRole('textbox', { name: /search templates/i });
+      await user.type(searchInput, 'strahd');
+
+      const callsAfter = (global.fetch as jest.MockedFunction<typeof fetch>).mock.calls.length;
+      expect(callsAfter).toBe(callsBefore);
+    });
+
+    it('search trims leading and trailing whitespace', async () => {
+      setupFetch([], [TEMPLATE_A, TEMPLATE_B]);
+      renderPage();
+      await screen.findByText('Curse of Strahd');
+
+      const searchInput = screen.getByRole('textbox', { name: /search templates/i });
+      await user.type(searchInput, '  strahd  ');
+
+      expect(screen.getByText('Curse of Strahd')).toBeInTheDocument();
+      expect(screen.queryByText('Rime of the Frostmaiden')).not.toBeInTheDocument();
+    });
+  });
+
   describe('Campaign active chapter display', () => {
     it('displays active chapter when campaign has currentChapterId', async () => {
       const campaignWithActiveCh = {

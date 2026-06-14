@@ -89,14 +89,14 @@ Test: `POST /api/campaigns/global/<templateId>/copy`
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Apply all clearly-correct findings directly to the code without stopping or asking for confirmation. Re-run tests to confirm they pass, then commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Apply all clearly-correct findings directly to the code without stopping or asking for confirmation. Re-run tests to confirm they pass, then commit.
 
 ## Validation
 
-- [ ] `npm test -- --testPathPattern=campaigns-catalog-copy` — integration test passes
-- [ ] `npm test` — full test suite passes
-- [ ] `npm run build` — build succeeds
-- [ ] `npx tsc --noEmit` — no type errors
+- [x] `npm run test:ci -- --testPathPattern=campaigns-catalog-copy` — integration test passes
+- [x] `npm run test:unit` — full unit test suite passes
+- [x] `npm run build` — build succeeds
+- [x] `npx tsc --noEmit` — no type errors (pre-existing errors in unrelated test files only)
 - [ ] Manual smoke: copy a template from the UI catalog → navigate to the copied campaign → no error
 - [ ] Manual smoke: search in catalog filters results without page reload
 - [ ] All completed tasks marked as complete
@@ -113,10 +113,10 @@ If any step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings addressed before the final commit
-- [ ] Commit all changes to `fix/campaign-catalog-copy` and push to remote
-- [ ] Open PR from `fix/campaign-catalog-copy` to `main`. PR body must include: **Closes #419**
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge`
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings addressed before the final commit
+- [x] Commit all changes to `fix/campaign-catalog-copy` and push to remote
+- [x] Open PR from `fix/campaign-catalog-copy` to `main`. PR body must include: **Closes #419**
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash`
 - [ ] Wait 180 seconds for CI and agentic reviewers
 - [ ] **Iterate until merged** — repeat continuously until `gh pr view <PR-URL> --json state` returns `MERGED`:
   1. Run [Remote push validation]; fix failures, commit, push

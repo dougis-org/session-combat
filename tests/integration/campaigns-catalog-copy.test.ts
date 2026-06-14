@@ -58,11 +58,19 @@ describe("Campaign Catalog Copy Integration Tests", () => {
   }, 30000);
 
   afterAll(async () => {
-    const db = mongoClient.db(process.env.MONGODB_DB!);
-    await db.collection("campaigns").deleteMany({ templateId });
-    await db.collection("campaignMembers").deleteMany({ userId });
-    await db.collection("campaignTemplates").deleteMany({ id: templateId });
-    await mongoClient.close();
+    if (mongoClient) {
+      if (templateId || userId) {
+        const db = mongoClient.db(process.env.MONGODB_DB!);
+        if (templateId) {
+          await db.collection("campaigns").deleteMany({ templateId });
+          await db.collection("campaignTemplates").deleteMany({ id: templateId });
+        }
+        if (userId) {
+          await db.collection("campaignMembers").deleteMany({ userId });
+        }
+      }
+      await mongoClient.close();
+    }
   });
 
   it("returns 201 and campaign accessible via GET after copy", async () => {
@@ -93,7 +101,7 @@ describe("Campaign Catalog Copy Integration Tests", () => {
 
     const db = mongoClient.db(process.env.MONGODB_DB!);
     const member = await db.collection("campaignMembers").findOne({
-      campaignId: campaign.id,
+      campaignId: { $eq: campaign.id },
     });
 
     expect(member).not.toBeNull();

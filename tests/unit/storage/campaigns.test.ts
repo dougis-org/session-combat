@@ -13,12 +13,13 @@ const mockedGetDatabase = jest.mocked(getDatabase);
 
 function makeMockCollection() {
   const toArray = jest.fn<Promise<unknown[]>, []>();
-  const sort = jest.fn(() => ({ toArray }));
+  const collation = jest.fn(() => ({ toArray }));
+  const sort = jest.fn(() => ({ collation, toArray }));
   const find = jest.fn(() => ({ sort, toArray }));
   const findOne = jest.fn<Promise<unknown>, []>();
   const updateOne = jest.fn<Promise<unknown>, []>();
   const deleteOne = jest.fn<Promise<unknown>, []>();
-  return { find, sort, toArray, findOne, updateOne, deleteOne };
+  return { find, sort, collation, toArray, findOne, updateOne, deleteOne };
 }
 
 const baseCampaign: Campaign = {
@@ -198,6 +199,15 @@ describe("Campaign template storage functions", () => {
       expect(templatesMock.find).toHaveBeenCalledWith({ userId: "GLOBAL" });
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe("Test Template");
+    });
+
+    test("queries with sort({ name: 1 }) and case-insensitive collation", async () => {
+      templatesMock.toArray.mockResolvedValue([] as never);
+
+      await storage.loadGlobalCampaignTemplates();
+
+      expect(templatesMock.sort).toHaveBeenCalledWith({ name: 1 });
+      expect(templatesMock.collation).toHaveBeenCalledWith({ locale: 'en', strength: 2 });
     });
 
     test("returns empty array when no templates exist", async () => {

@@ -15,7 +15,7 @@ All integration tests live under `tests/integration/`. Unit tests for the copy r
 
 ### Task 1 — Copy route: member record creation with rollback
 
-**Integration test** — `tests/integration/api/campaigns-catalog-copy.test.ts` (new file)
+**Integration test** — `tests/integration/campaigns-catalog-copy.test.ts` (new file)
 
 Follow pattern established in `tests/integration/api/sessions.test.ts`: use `registerTestUser` for auth, `node-fetch` for HTTP, and `MongoClient` directly for DB assertions.
 
@@ -36,7 +36,7 @@ Setup: create a global campaign template via `POST /api/campaigns/global` (requi
   - Test: `POST /api/campaigns/global/nonexistent-id/copy` → assert status 404 → query `campaigns` collection → assert no document with that id
   - Spec: `specs/campaign-catalog-copy/spec.md` — Scenario: Template not found
 
-**Unit test** — `tests/unit/api/campaigns/global/copy.test.ts` (new file)
+**Unit test** — `tests/unit/api/campaigns/global.id.copy.route.test.ts` (extended)
 
 Mock `storage.saveCampaign`, `storage.addMember`, `storage.deleteCampaign`, `storage.loadGlobalCampaignTemplateById`.
 
@@ -51,7 +51,7 @@ Mock `storage.saveCampaign`, `storage.addMember`, `storage.deleteCampaign`, `sto
 
 ### Task 2 — Alphabetical sort of global templates
 
-**Unit test** — `tests/unit/lib/storage.test.ts` (extend existing file) or a dedicated `campaignTemplates` test
+**Unit test** — `tests/unit/storage/campaigns.test.ts` (extended)
 
 - [ ] **Scenario: Templates returned in alphabetical order**
   - TDD: Write test first (will fail: current query has no sort)
@@ -65,7 +65,7 @@ Mock `storage.saveCampaign`, `storage.addMember`, `storage.deleteCampaign`, `sto
 
 ### Task 3 — Search input filters catalog UI
 
-**Component test** — `tests/unit/components/CampaignCatalogSearch.test.tsx` (new file) or extend existing campaign page tests
+**Component test** — `tests/unit/components/CampaignsPage.test.tsx` (extended)
 
 Use React Testing Library. Mock `fetch` to return a fixed list of templates.
 
