@@ -58,12 +58,12 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `feat/campaign-layout-two-row-cards` and push to remote
-- [ ] Open PR from `feat/campaign-layout-two-row-cards` to `main`. PR body MUST include: `Closes #420`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (use `--squash` per repo ruleset; NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user:
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to `feat/campaign-layout-two-row-cards` and push to remote
+- [x] Open PR from `feat/campaign-layout-two-row-cards` to `main`. PR body MUST include: `Closes #420`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (use `--squash` per repo ruleset; NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -82,14 +82,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas: copy `openspec/changes/campaign-layout-two-row-cards/specs/campaign-card-layout/spec.md` to `openspec/specs/campaign-card-layout/spec.md`; update relative links from `../../design.md` to `../../changes/archive/YYYY-MM-DD-campaign-layout-two-row-cards/design.md` (and similarly for `tasks.md`)
-- [ ] Archive the change: move `openspec/changes/campaign-layout-two-row-cards/` to `openspec/changes/archive/YYYY-MM-DD-campaign-layout-two-row-cards/` **as a single atomic commit** that includes both the copy and the deletion
-- [ ] Confirm archive location exists and original directory is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-campaign-layout-two-row-cards` then `git push -u origin doc/archive-YYYY-MM-DD-campaign-layout-two-row-cards`
-- [ ] Open a PR from the doc branch to `main` with title `docs: archive campaign-layout-two-row-cards (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor the doc PR until it merges; address any comments or CI failures, push to the same doc branch, repeat
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feat/campaign-layout-two-row-cards doc/archive-YYYY-MM-DD-campaign-layout-two-row-cards`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas: copy `openspec/changes/campaign-layout-two-row-cards/specs/campaign-card-layout/spec.md` to `openspec/specs/campaign-card-layout/spec.md`; update relative links from `../../design.md` to `../../changes/archive/2026-06-14-campaign-layout-two-row-cards/design.md` (and similarly for `tasks.md`)
+- [x] Archive the change: move `openspec/changes/campaign-layout-two-row-cards/` to `openspec/changes/archive/2026-06-14-campaign-layout-two-row-cards/` **as a single atomic commit** that includes both the copy and the deletion
+- [x] Confirm archive location exists and original directory is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-2026-06-14-campaign-layout-two-row-cards` then `git push -u origin doc/archive-2026-06-14-campaign-layout-two-row-cards`
+- [x] Open a PR from the doc branch to `main` with title `docs: archive campaign-layout-two-row-cards (2026-06-14)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor the doc PR until it merges; address any comments or CI failures, push to the same doc branch, repeat
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/campaign-layout-two-row-cards doc/archive-2026-06-14-campaign-layout-two-row-cards`
