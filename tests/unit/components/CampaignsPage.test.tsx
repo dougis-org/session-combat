@@ -319,5 +319,129 @@ describe('Campaign Catalog UI', () => {
       expect(membersLink?.getAttribute('href')).toBe(`/campaigns/${MOCK_CAMPAIGN.id}`);
     });
   });
+
+  describe('FR1 — Status chip visible alongside campaign name', () => {
+    it('campaign list: status chip present in document', async () => {
+      setupFetch([MOCK_CAMPAIGN], []);
+      renderPage();
+      await screen.findByText('My Campaign');
+      expect(screen.getByText('Planning')).toBeInTheDocument();
+    });
+
+    it('campaign list: status chip is in a different container than action buttons', async () => {
+      setupFetch([MOCK_CAMPAIGN], []);
+      renderPage();
+      await screen.findByText('My Campaign');
+      const heading = screen.getByRole('heading', { name: 'My Campaign' });
+      const headerRow = heading.parentElement!;
+      expect(headerRow.querySelector('button')).not.toBeInTheDocument();
+      expect(headerRow.querySelector('a')).not.toBeInTheDocument();
+    });
+
+    it('active campaigns: status chip present for active campaign', async () => {
+      const activeCampaign = { ...MOCK_CAMPAIGN, status: 'active' as const };
+      setupFetch([activeCampaign], []);
+      renderPage();
+      await screen.findAllByText('My Campaign');
+      expect(screen.getAllByText('Active').length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('FR2 — Action buttons below header, never overlapping', () => {
+    it('campaign list: all action buttons present', async () => {
+      setupFetch([MOCK_CAMPAIGN], []);
+      renderPage();
+      await screen.findByText('My Campaign');
+      expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+      const links = screen.getAllByRole('link');
+      expect(links.find(a => a.textContent?.trim() === 'Members')).toBeTruthy();
+      expect(links.find(a => a.textContent?.includes('Session Log'))).toBeTruthy();
+    });
+
+    it('campaign list: heading precedes Edit button in DOM order', async () => {
+      setupFetch([MOCK_CAMPAIGN], []);
+      renderPage();
+      await screen.findByText('My Campaign');
+      const heading = screen.getByRole('heading', { name: 'My Campaign' });
+      const editButton = screen.getByRole('button', { name: 'Edit' });
+      expect(
+        heading.compareDocumentPosition(editButton) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+
+    it('active campaigns: action links present', async () => {
+      const activeCampaign = { ...MOCK_CAMPAIGN, status: 'active' as const };
+      setupFetch([activeCampaign], []);
+      renderPage();
+      await screen.findAllByText('My Campaign');
+      const links = screen.getAllByRole('link');
+      expect(links.find(a => a.textContent?.trim() === 'Members')).toBeTruthy();
+      expect(links.find(a => a.textContent?.includes('Prompt Builder'))).toBeTruthy();
+      expect(links.find(a => a.textContent?.includes('Library'))).toBeTruthy();
+      expect(links.find(a => a.textContent?.includes('Start Encounter'))).toBeTruthy();
+    });
+
+    it('active campaigns: heading precedes Members link in DOM order', async () => {
+      const activeCampaign = { ...MOCK_CAMPAIGN, status: 'active' as const };
+      setupFetch([activeCampaign], []);
+      renderPage();
+      await screen.findAllByText('My Campaign');
+      const headings = screen.getAllByRole('heading', { name: 'My Campaign' });
+      const links = screen.getAllByRole('link');
+      const membersLink = links.find(a => a.textContent?.trim() === 'Members');
+      expect(membersLink).toBeDefined();
+      expect(
+        headings[0].compareDocumentPosition(membersLink!) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+  });
+
+  describe('FR3 — Long titles truncate gracefully', () => {
+    it('campaign list: title heading has truncate class', async () => {
+      setupFetch([MOCK_CAMPAIGN], []);
+      renderPage();
+      const heading = await screen.findByRole('heading', { name: 'My Campaign' });
+      expect(heading.classList.contains('truncate')).toBe(true);
+    });
+
+    it('campaign list: title heading has min-w-0 class', async () => {
+      setupFetch([MOCK_CAMPAIGN], []);
+      renderPage();
+      const heading = await screen.findByRole('heading', { name: 'My Campaign' });
+      expect(heading.classList.contains('min-w-0')).toBe(true);
+    });
+  });
+
+  describe('FR4 — All existing action links remain functional', () => {
+    it('campaign list: Edit button opens editor', async () => {
+      setupFetch([MOCK_CAMPAIGN], []);
+      renderPage();
+      await screen.findByText('My Campaign');
+      await user.click(screen.getByRole('button', { name: 'Edit' }));
+      expect(await screen.findByRole('button', { name: /save/i })).toBeInTheDocument();
+    });
+
+    it('campaign list: Delete button calls confirm', async () => {
+      const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(false);
+      setupFetch([MOCK_CAMPAIGN], []);
+      renderPage();
+      await screen.findByText('My Campaign');
+      await user.click(screen.getByRole('button', { name: 'Delete' }));
+      expect(confirmSpy).toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+
+    it('active campaigns: Members link has correct href', async () => {
+      const activeCampaign = { ...MOCK_CAMPAIGN, id: 'active-1', status: 'active' as const };
+      setupFetch([activeCampaign], []);
+      renderPage();
+      await screen.findAllByText('My Campaign');
+      const links = screen.getAllByRole('link');
+      const membersLinks = links.filter(a => a.textContent?.trim() === 'Members');
+      const activeLink = membersLinks.find(a => a.getAttribute('href') === `/campaigns/${activeCampaign.id}`);
+      expect(activeLink).toBeTruthy();
+    });
+  });
 });
 
