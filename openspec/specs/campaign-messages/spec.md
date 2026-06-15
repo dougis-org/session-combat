@@ -102,6 +102,12 @@ The system SHALL return a paginated list of messages the authenticated caller is
 - **When** player B (another player, not DM) GETs `/api/campaigns/C/messages`
 - **Then** the dm-only message is NOT included in the response
 
+#### Scenario: Player can retrieve their own sent dm-only messages
+
+- **Given** player A sends a dm-only message in campaign `C`
+- **When** player A GETs `/api/campaigns/C/messages`
+- **Then** the response includes their own sent dm-only message
+
 #### Scenario: DM retrieves all messages including dm-only
 
 - **Given** a DM of campaign `C`, and messages of all three scopes exist
@@ -166,7 +172,7 @@ The `CampaignStreamEvent` union type SHALL include a `message` variant carrying 
 
 - **Given** a message is emitted via `emitFiltered`
 - **When** a subscriber receives the SSE event
-- **Then** the event has `type: "message"`, `campaignId`, and `data` containing the `CampaignMessage` fields the recipient is authorised to see
+- **Then** the event has `type: "message"`, `campaignId`, and `data` containing the `CampaignMessage` fields the recipient is authorized to see
 
 ---
 
@@ -238,18 +244,3 @@ _None._
 - **When** a recipient later GETs `/api/campaigns/C/messages`
 - **Then** the message appears in the history response (it was persisted before emit was attempted)
 
----
-
-## Added Requirements: DM-Only Message Retrieval by Sender
-
-#### Scenario: Player cannot retrieve dm-only messages
-
-- **Given** player A sends a dm-only message in campaign `C`
-- **When** player B (another player, not DM) GETs `/api/campaigns/C/messages`
-- **Then** the dm-only message is NOT included in the response
-
-#### Scenario: Player can retrieve their own sent dm-only messages
-
-- **Given** player A sends a dm-only message in campaign `C`
-- **When** player A GETs `/api/campaigns/C/messages`
-- **Then** the response includes their own sent dm-only message
