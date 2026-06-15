@@ -237,3 +237,19 @@ _None._
 - **Given** the SSE emit call fails or no subscribers are connected at send time
 - **When** a recipient later GETs `/api/campaigns/C/messages`
 - **Then** the message appears in the history response (it was persisted before emit was attempted)
+
+---
+
+## Added Requirements: DM-Only Message Retrieval by Sender
+
+#### Scenario: Player cannot retrieve dm-only messages
+
+- **Given** player A sends a dm-only message in campaign `C`
+- **When** player B (another player, not DM) GETs `/api/campaigns/C/messages`
+- **Then** the dm-only message is NOT included in the response
+
+#### Scenario: Player can retrieve their own sent dm-only messages
+
+- **Given** player A sends a dm-only message in campaign `C`
+- **When** player A GETs `/api/campaigns/C/messages`
+- **Then** the response includes their own sent dm-only message
