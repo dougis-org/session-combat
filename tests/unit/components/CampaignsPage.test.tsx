@@ -260,10 +260,10 @@ describe('Campaign Catalog UI', () => {
       setupFetch([MOCK_CAMPAIGN], []);
       renderPage();
       await screen.findByText('My Campaign');
-      const chip = screen.getByText('Planning');
-      const editButton = screen.getByRole('button', { name: 'Edit' });
-      expect(chip.parentElement).not.toBe(editButton.parentElement);
-      expect(chip.parentElement?.querySelector('button')).toBeNull();
+      const heading = screen.getByRole('heading', { name: 'My Campaign' });
+      const headerRow = heading.parentElement!;
+      expect(headerRow.querySelector('button')).not.toBeInTheDocument();
+      expect(headerRow.querySelector('a')).not.toBeInTheDocument();
     });
 
     it('active campaigns: status chip present for active campaign', async () => {

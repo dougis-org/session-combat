@@ -425,7 +425,7 @@ export function CampaignsContent() {
               {campaigns.map(campaign => (
                 <div key={campaign.id} className="bg-gray-800 rounded-lg p-4">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h2 className="text-xl font-semibold min-w-0 truncate">{campaign.name}</h2>
+                    <h3 className="text-xl font-bold min-w-0 truncate">{campaign.name}</h3>
                     <span className={`px-2 py-0.5 text-xs rounded text-white flex-shrink-0 ${statusBadgeClass(campaign.status)}`}>
                       {statusLabel(campaign.status)}
                     </span>
@@ -448,12 +448,14 @@ export function CampaignsContent() {
                       Session Log
                     </Link>
                     <button
+                      type="button"
                       onClick={() => { setEditingCampaign(campaign); setIsAdding(false); }}
                       className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
                     >
                       Edit
                     </button>
                     <button
+                      type="button"
                       onClick={() => deleteCampaign(campaign.id)}
                       className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
                     >
