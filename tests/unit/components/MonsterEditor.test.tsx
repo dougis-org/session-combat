@@ -19,8 +19,15 @@ jest.mock('@/lib/components/MonsterStatEditor', () => ({
       >
         Change Name
       </button>
+      <button
+        data-testid="mse-exceed-hp"
+        onClick={() => onChange({ ...value, hp: 999 })}
+      >
+        Exceed HP
+      </button>
     </div>
   )),
+  formatSpeedValue: (v: unknown) => (typeof v === 'string' ? v : '30 ft.'),
 }));
 
 import React from 'react';
@@ -28,7 +35,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MonsterEditor } from '@/app/encounters/MonsterEditor';
 import { MonsterStatEditor } from '@/lib/components/MonsterStatEditor';
-import type { Monster, MonsterEditableFields } from '@/lib/types';
+import type { Monster } from '@/lib/types';
 
 const MockMonsterStatEditor = MonsterStatEditor as jest.MockedFunction<typeof MonsterStatEditor>;
 
@@ -110,6 +117,17 @@ describe('MonsterEditor — save callback', () => {
     await user.click(screen.getByRole('button', { name: /save monster/i }));
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'mon-1', templateId: 'tmpl-42' }),
+    );
+  });
+
+  it('clamps HP to maxHp when onChange fires with hp > maxHp', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    renderEditor({ onSave });
+    await user.click(screen.getByTestId('mse-exceed-hp'));
+    await user.click(screen.getByRole('button', { name: /save monster/i }));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ hp: BASE_MONSTER.maxHp }),
     );
   });
 });

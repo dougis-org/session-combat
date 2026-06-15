@@ -3,21 +3,7 @@
 import { useState } from 'react';
 import type { MonsterTemplate, MonsterEditableFields } from '@/lib/types';
 import { normalizeAlignment } from '@/lib/types';
-import { MonsterStatEditor } from '@/lib/components/MonsterStatEditor';
-
-// handles already-stored speed values (string or legacy object);
-// differs from lib/import/transformMonster.ts:normalizeSpeed which processes raw API input
-function formatSpeedValue(speedValue: unknown): string {
-  if (typeof speedValue === 'string') {
-    return speedValue;
-  }
-  if (typeof speedValue === 'object' && speedValue !== null && !Array.isArray(speedValue)) {
-    return Object.entries(speedValue as Record<string, string>)
-      .map(([key, value]) => `${key} ${value}`)
-      .join(', ');
-  }
-  return '30 ft.';
-}
+import { MonsterStatEditor, formatSpeedValue } from '@/lib/components/MonsterStatEditor';
 
 export function MonsterTemplateEditor({
   template,
@@ -92,7 +78,7 @@ export function MonsterTemplateEditor({
       <div className="flex gap-2 mt-6">
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || !editableFields.name.trim()}
           className={`hover:opacity-80 disabled:opacity-50 px-4 py-2 rounded ${isGlobal ? 'bg-purple-600' : 'bg-green-600'}`}
         >
           {saving ? 'Saving...' : (isNew ? 'Create' : `Save ${title}`)}

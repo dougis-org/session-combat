@@ -1,8 +1,24 @@
 'use client';
 
-import { MonsterEditableFields, normalizeAlignment } from '@/lib/types';
+import { useId } from 'react';
+import type { MonsterEditableFields } from '@/lib/types';
+import { normalizeAlignment } from '@/lib/types';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
 import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
+
+// handles already-stored speed values (string or legacy object);
+// differs from lib/import/transformMonster.ts:normalizeSpeed which processes raw API input
+export function formatSpeedValue(speedValue: unknown): string {
+  if (typeof speedValue === 'string') {
+    return speedValue;
+  }
+  if (typeof speedValue === 'object' && speedValue !== null && !Array.isArray(speedValue)) {
+    return Object.entries(speedValue as Record<string, string>)
+      .map(([key, value]) => `${key} ${value}`)
+      .join(', ');
+  }
+  return '30 ft.';
+}
 
 export function MonsterStatEditor({
   value,
@@ -13,6 +29,9 @@ export function MonsterStatEditor({
   onChange: (value: MonsterEditableFields) => void;
   disabled?: boolean;
 }) {
+  const uid = useId();
+  const fid = (suffix: string) => `${uid}-${suffix}`;
+
   const update = (patch: Partial<MonsterEditableFields>) =>
     onChange({ ...value, ...patch });
 
@@ -22,9 +41,9 @@ export function MonsterStatEditor({
         <h4 className="font-bold text-gray-300 mb-4">Basic Info</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="mse-name" className="block mb-1 text-sm font-bold">Name</label>
+            <label htmlFor={fid('name')} className="block mb-1 text-sm font-bold">Name</label>
             <input
-              id="mse-name"
+              id={fid('name')}
               type="text"
               value={value.name}
               onChange={e => update({ name: e.target.value })}
@@ -34,9 +53,9 @@ export function MonsterStatEditor({
           </div>
 
           <div>
-            <label htmlFor="mse-size" className="block mb-1 text-sm font-bold">Size</label>
+            <label htmlFor={fid('size')} className="block mb-1 text-sm font-bold">Size</label>
             <select
-              id="mse-size"
+              id={fid('size')}
               value={value.size}
               onChange={e => update({ size: e.target.value as MonsterEditableFields['size'] })}
               className="w-full bg-gray-700 rounded px-3 py-2 text-white"
@@ -52,9 +71,9 @@ export function MonsterStatEditor({
           </div>
 
           <div>
-            <label htmlFor="mse-type" className="block mb-1 text-sm font-bold">Type</label>
+            <label htmlFor={fid('type')} className="block mb-1 text-sm font-bold">Type</label>
             <input
-              id="mse-type"
+              id={fid('type')}
               type="text"
               value={value.type}
               onChange={e => update({ type: e.target.value })}
@@ -74,9 +93,9 @@ export function MonsterStatEditor({
           </div>
 
           <div>
-            <label htmlFor="mse-speed" className="block mb-1 text-sm font-bold">Speed</label>
+            <label htmlFor={fid('speed')} className="block mb-1 text-sm font-bold">Speed</label>
             <input
-              id="mse-speed"
+              id={fid('speed')}
               type="text"
               value={value.speed}
               onChange={e => update({ speed: e.target.value })}
@@ -87,9 +106,9 @@ export function MonsterStatEditor({
           </div>
 
           <div>
-            <label htmlFor="mse-cr" className="block mb-1 text-sm font-bold">Challenge Rating</label>
+            <label htmlFor={fid('cr')} className="block mb-1 text-sm font-bold">Challenge Rating</label>
             <input
-              id="mse-cr"
+              id={fid('cr')}
               type="number"
               value={value.challengeRating}
               onChange={e => update({ challengeRating: parseFloat(e.target.value) || 0 })}
@@ -101,9 +120,9 @@ export function MonsterStatEditor({
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="mse-source" className="block mb-1 text-sm font-bold">Source</label>
+            <label htmlFor={fid('source')} className="block mb-1 text-sm font-bold">Source</label>
             <input
-              id="mse-source"
+              id={fid('source')}
               type="text"
               value={value.source ?? ''}
               onChange={e => update({ source: e.target.value || undefined })}
@@ -114,9 +133,9 @@ export function MonsterStatEditor({
           </div>
 
           <div className="md:col-span-3">
-            <label htmlFor="mse-description" className="block mb-1 text-sm font-bold">Description / Notes</label>
+            <label htmlFor={fid('description')} className="block mb-1 text-sm font-bold">Description / Notes</label>
             <textarea
-              id="mse-description"
+              id={fid('description')}
               value={value.description ?? ''}
               onChange={e => update({ description: e.target.value || undefined })}
               className="w-full bg-gray-700 rounded px-3 py-2 text-white"

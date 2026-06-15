@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import type { Monster, MonsterEditableFields } from '@/lib/types';
-import { MonsterStatEditor } from '@/lib/components/MonsterStatEditor';
+import { normalizeAlignment } from '@/lib/types';
+import { MonsterStatEditor, formatSpeedValue } from '@/lib/components/MonsterStatEditor';
 
 export function MonsterEditor({
   monster,
@@ -15,7 +16,11 @@ export function MonsterEditor({
   onCancel: () => void;
   hideCancel?: boolean;
 }) {
-  const [editableFields, setEditableFields] = useState<MonsterEditableFields>(monster);
+  const [editableFields, setEditableFields] = useState<MonsterEditableFields>({
+    ...monster,
+    alignment: normalizeAlignment(monster.alignment),
+    speed: formatSpeedValue(monster.speed),
+  });
 
   const handleChange = (fields: MonsterEditableFields) => {
     setEditableFields({ ...fields, hp: Math.min(fields.hp, fields.maxHp) });

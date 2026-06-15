@@ -23,7 +23,7 @@ jest.mock('@/lib/components/CreatureStatsForm', () => ({
 }));
 
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MonsterStatEditor } from '@/lib/components/MonsterStatEditor';
 import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
@@ -123,10 +123,63 @@ describe('MonsterStatEditor — header field onChange', () => {
   it('calls onChange with updated name when name field changes', () => {
     const onChange = jest.fn();
     renderEditor(BASE_VALUE, onChange);
-    const nameInput = screen.getByLabelText(/^name$/i);
-    fireEvent.change(nameInput, { target: { value: 'Hobgoblin' } });
+    fireEvent.change(screen.getByLabelText(/^name$/i), { target: { value: 'Hobgoblin' } });
     expect(onChange).toHaveBeenLastCalledWith(
       expect.objectContaining({ name: 'Hobgoblin' }),
+    );
+  });
+
+  it('calls onChange with updated size when size select changes', () => {
+    const onChange = jest.fn();
+    renderEditor(BASE_VALUE, onChange);
+    fireEvent.change(screen.getByLabelText(/^size$/i), { target: { value: 'large' } });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ size: 'large' }),
+    );
+  });
+
+  it('calls onChange with updated type when type field changes', () => {
+    const onChange = jest.fn();
+    renderEditor(BASE_VALUE, onChange);
+    fireEvent.change(screen.getByLabelText(/^type$/i), { target: { value: 'beast' } });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ type: 'beast' }),
+    );
+  });
+
+  it('calls onChange with updated speed when speed field changes', () => {
+    const onChange = jest.fn();
+    renderEditor(BASE_VALUE, onChange);
+    fireEvent.change(screen.getByLabelText(/^speed$/i), { target: { value: '40 ft.' } });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ speed: '40 ft.' }),
+    );
+  });
+
+  it('calls onChange with updated challengeRating when CR field changes', () => {
+    const onChange = jest.fn();
+    renderEditor(BASE_VALUE, onChange);
+    fireEvent.change(screen.getByLabelText(/challenge rating/i), { target: { value: '1' } });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ challengeRating: 1 }),
+    );
+  });
+
+  it('calls onChange with updated source when source field changes', () => {
+    const onChange = jest.fn();
+    renderEditor(BASE_VALUE, onChange);
+    fireEvent.change(screen.getByLabelText(/^source$/i), { target: { value: 'Volo\'s Guide' } });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ source: "Volo's Guide" }),
+    );
+  });
+
+  it('calls onChange with undefined source when source is cleared', () => {
+    const onChange = jest.fn();
+    renderEditor(BASE_VALUE, onChange);
+    fireEvent.change(screen.getByLabelText(/^source$/i), { target: { value: '' } });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ source: undefined }),
     );
   });
 });

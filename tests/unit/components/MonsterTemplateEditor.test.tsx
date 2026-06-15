@@ -12,10 +12,14 @@ jest.mock('@/lib/hooks/useAuth', () => ({
 
 jest.mock('@/lib/components/MonsterStatEditor', () => ({
   MonsterStatEditor: jest.fn(() => <div data-testid="monster-stat-editor" />),
+  formatSpeedValue: (v: unknown) => (typeof v === 'string' ? v :
+    typeof v === 'object' && v !== null && !Array.isArray(v)
+      ? Object.entries(v as Record<string, string>).map(([k, val]) => `${k} ${val}`).join(', ')
+      : '30 ft.'),
 }));
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MonsterTemplateEditor } from '@/app/monsters/MonsterTemplateEditor';
 import { MonsterStatEditor } from '@/lib/components/MonsterStatEditor';
@@ -63,6 +67,13 @@ function renderEditor(props: Partial<Parameters<typeof MonsterTemplateEditor>[0]
   );
 }
 
+function simulateMseChange(fields: Partial<MonsterEditableFields>) {
+  const lastCall = MockMonsterStatEditor.mock.calls[MockMonsterStatEditor.mock.calls.length - 1][0] as any;
+  act(() => {
+    lastCall.onChange({ ...lastCall.value, ...fields });
+  });
+}
+
 afterEach(() => {
   jest.clearAllMocks();
 });
@@ -101,11 +112,10 @@ describe('MonsterTemplateEditor — MonsterStatEditor delegation', () => {
 });
 
 describe('MonsterTemplateEditor — save callback', () => {
-  it('calls onSave with updated name on Save click', async () => {
+  it('calls onSave with current editable fields on Save click', async () => {
     const user = userEvent.setup();
     const onSave = jest.fn();
     renderEditor({ onSave });
-    expect(screen.getByRole('button', { name: /save personal monster/i })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /save personal monster/i }));
     expect(onSave).toHaveBeenCalledTimes(1);
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Goblin' }));
@@ -122,30 +132,19 @@ describe('MonsterTemplateEditor — save callback', () => {
   });
 });
 
-function simulateMseChange(fields: Partial<MonsterEditableFields>) {
-  const lastCall = MockMonsterStatEditor.mock.calls[MockMonsterStatEditor.mock.calls.length - 1][0] as any;
-  act(() => {
-    lastCall.onChange({ ...lastCall.value, ...fields });
-  });
-}
-
 describe('MonsterTemplateEditor — validation', () => {
-  it('shows validation error and does not call onSave when name is cleared via MonsterStatEditor', async () => {
-    const user = userEvent.setup();
-    const onSave = jest.fn();
-    renderEditor({ onSave });
+  it('disables save button when name is cleared via MonsterStatEditor', () => {
+    renderEditor();
     simulateMseChange({ name: '' });
-    await user.click(screen.getByRole('button', { name: /save personal monster/i }));
-    expect(screen.getByText(/monster name is required/i)).toBeInTheDocument();
-    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: /save personal monster/i })).toBeDisabled();
   });
 
-  it('does not call onSave when name is empty', async () => {
-    const user = userEvent.setup();
+  it('shows validation error when form is submitted with empty name', () => {
     const onSave = jest.fn();
-    renderEditor({ onSave });
+    const { container } = renderEditor({ onSave });
     simulateMseChange({ name: '' });
-    await user.click(screen.getByRole('button', { name: /save personal monster/i }));
+    fireEvent.submit(container.querySelector('form')!);
+    expect(screen.getByText(/monster name is required/i)).toBeInTheDocument();
     expect(onSave).not.toHaveBeenCalled();
   });
 
