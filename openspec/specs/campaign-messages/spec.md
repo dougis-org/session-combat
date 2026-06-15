@@ -199,9 +199,9 @@ _None._
 - Design Decision 1 (userId registry) → Requirement: MODIFIED transport subscribe()
 - Design Decision 2 (explicit emit) → Requirement: SSE stream emits message events
 - Design Decision 3 (canSeeMessage) → All visibility filtering scenarios
-- Requirement: POST send → Tasks: T1 (types), T3 (index), T5 (POST handler)
-- Requirement: GET history → Tasks: T1 (types), T4 (canSeeMessage), T6 (GET handler)
-- Requirement: SSE emit → Tasks: T2 (transport upgrade), T5 (emitFiltered call)
+- Requirement: POST send → Tasks: T1 (types), T4 (index), T6 (POST handler)
+- Requirement: GET history → Tasks: T1 (types), T5 (canSeeMessage), T7 (GET handler)
+- Requirement: SSE emit → Tasks: T2 (transport upgrade), T6 (emitFiltered call)
 
 ## Non-Functional Acceptance Criteria
 
