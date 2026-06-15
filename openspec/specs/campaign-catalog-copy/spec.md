@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the [`design.md`](../../design.md) document, not a replacement.
+This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-06-14-fix-campaign-catalog-copy/design.md) document, not a replacement.
 
 ### Requirement: ADDED Campaign copy creates accessible campaign with member record
 
@@ -50,15 +50,8 @@ _(none)_
 
 ### Requirement: Reliability
 
-#### Scenario: No orphaned campaign on partial failure
-
-- **Given** the member insert fails after campaign save
-- **When** rollback is triggered
-- **Then** the campaigns collection has no document with the attempted campaign id
-- **And** the campaignMembers collection has no document with the attempted campaignId
-
-> Note: The rollback-on-failure functional scenario above (Scenario: Member insert failure — campaign rolled back) fully specifies the access-control and error-handling behavior. The scenario above extends it with the measurable DB-state assertion that constitutes the non-functional reliability criterion.
+The system SHALL ensure no orphaned campaign or member records remain in the database if a partial failure occurs during the copy process, as specified in the functional "Scenario: Member insert failure — campaign rolled back".
 
 ### Requirement: Security
 
-> See functional scenario: "Template not found" — unauthenticated access is handled by `withAuthAndParams` middleware (returns 401) before the copy logic is reached; no distinct NFAC scenario is needed.
+> Unauthenticated requests to the copy endpoint are rejected with HTTP 401 by the `withAuthAndParams` middleware before any copy logic executes; no distinct NFAC scenario is needed beyond the auth middleware guarantee.

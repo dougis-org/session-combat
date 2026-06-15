@@ -1,10 +1,10 @@
 ## MODIFIED Requirements
 
-This document details *changes* to requirements and is additive to the [`design.md`](../../design.md) document, not a replacement.
+This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-06-14-fix-campaign-catalog-copy/design.md) document, not a replacement.
 
 ### Requirement: MODIFIED Campaign catalog list is alphabetically sorted
 
-The system SHALL return global campaign templates sorted ascending by name (case-insensitive collation at DB level via `sort({ name: 1 })`).
+The system SHALL return global campaign templates sorted ascending by name using `.sort({ name: 1 }).collation({ locale: 'en', strength: 2 })` for true case-insensitive alphabetical ordering at the DB level.
 
 #### Scenario: List returned in alphabetical order
 

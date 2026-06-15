@@ -97,9 +97,9 @@ Test: `POST /api/campaigns/global/<templateId>/copy`
 - [x] `npm run test:unit` — full unit test suite passes
 - [x] `npm run build` — build succeeds
 - [x] `npx tsc --noEmit` — no type errors (pre-existing errors in unrelated test files only)
-- [ ] Manual smoke: copy a template from the UI catalog → navigate to the copied campaign → no error
-- [ ] Manual smoke: search in catalog filters results without page reload
-- [ ] All completed tasks marked as complete
+- [x] Manual smoke: copy a template from the UI catalog → navigate to the copied campaign → no error
+- [x] Manual smoke: search in catalog filters results without page reload
+- [x] All completed tasks marked as complete
 
 ## Remote push validation
 
@@ -117,8 +117,8 @@ If any step fails, iterate and fix before pushing.
 - [x] Commit all changes to `fix/campaign-catalog-copy` and push to remote
 - [x] Open PR from `fix/campaign-catalog-copy` to `main`. PR body must include: **Closes #419**
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash`
-- [ ] Wait 180 seconds for CI and agentic reviewers
-- [ ] **Iterate until merged** — repeat continuously until `gh pr view <PR-URL> --json state` returns `MERGED`:
+- [x] Wait 180 seconds for CI and agentic reviewers
+- [x] **Iterate until merged** — repeat continuously until `gh pr view <PR-URL> --json state` returns `MERGED`:
   1. Run [Remote push validation]; fix failures, commit, push
   2. Poll `gh pr view <PR-URL> --json reviewThreads`; address all unresolved threads, commit, push, wait 180s
   3. Poll `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks, commit, push, wait 180s
@@ -137,16 +137,16 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete
-- [ ] Sync approved spec deltas to `openspec/specs/`:
-  - Copy `openspec/changes/fix-campaign-catalog-copy/specs/campaign-catalog-copy/spec.md` → `openspec/specs/campaign-catalog-copy/spec.md`
-  - Copy `openspec/changes/fix-campaign-catalog-copy/specs/campaign-catalog/spec.md` → `openspec/specs/campaign-catalog/spec.md`
-  - Update relative links in both files: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-fix-campaign-catalog-copy/design.md`
-- [ ] Archive: move `openspec/changes/fix-campaign-catalog-copy/` to `openspec/changes/archive/YYYY-MM-DD-fix-campaign-catalog-copy/` — stage both the new location and deletion of the old in a **single commit**
-- [ ] Confirm archive exists and original location is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-fix-campaign-catalog-copy` → `git push -u origin doc/archive-YYYY-MM-DD-fix-campaign-catalog-copy`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks as complete
+- [x] Sync approved spec deltas to `openspec/specs/`:
+  - Copy `openspec/changes/archive/2026-06-14-fix-campaign-catalog-copy/specs/campaign-catalog-copy/spec.md` → `openspec/specs/campaign-catalog-copy/spec.md`
+  - Copy `openspec/changes/archive/2026-06-14-fix-campaign-catalog-copy/specs/campaign-catalog/spec.md` → `openspec/specs/campaign-catalog/spec.md`
+  - Update relative links in both files: replace `../../design.md` with `../../changes/archive/2026-06-14-fix-campaign-catalog-copy/design.md`
+- [x] Archive: move `openspec/changes/fix-campaign-catalog-copy/` to `openspec/changes/archive/2026-06-14-fix-campaign-catalog-copy/` — stage both the new location and deletion of the old in a **single commit**
+- [x] Confirm archive exists and original location is gone
+- [x] Create doc branch: `git checkout -b doc/archive-2026-06-14-fix-campaign-catalog-copy` → `git push -u origin doc/archive-2026-06-14-fix-campaign-catalog-copy`
 - [ ] Open PR from doc branch to `main` with title `docs: archive fix-campaign-catalog-copy (YYYY-MM-DD)` — **do NOT push directly to main**
 - [ ] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
 - [ ] Monitor doc PR until merged; address any comments or CI failures
