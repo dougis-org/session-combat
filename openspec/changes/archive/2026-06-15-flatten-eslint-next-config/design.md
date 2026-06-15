@@ -60,7 +60,7 @@ Note: `globals` has two installed copies — v14.0.0 at the top level and v16.4.
 
 - Proposal element: Replace `eslint-config-next/core-web-vitals` import
   - Design decision: Decision 1 (inline flat config)
-  - Validation approach: Run `npx eslint --print-config src/app/page.tsx` before and after; diff must show no rule changes
+  - Validation approach: Run `npx eslint --print-config app/page.tsx` before and after; diff must show no rule changes
 
 - Proposal element: Promote seven plugins to direct devDependencies
   - Design decision: Decision 2 (pin to exact installed versions)

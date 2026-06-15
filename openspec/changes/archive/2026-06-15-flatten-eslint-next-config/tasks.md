@@ -9,7 +9,7 @@
 
 ### Task 1 — Capture pre-change ESLint baseline
 
-- [x] Run `npx eslint --print-config src/app/page.tsx > /tmp/eslint-before.json` to capture the resolved config for a representative TypeScript file
+- [x] Run `npx eslint --print-config app/page.tsx > /tmp/eslint-before.json` to capture the resolved config for a representative TypeScript file
 - [x] Run `npx eslint . 2>&1 | tee /tmp/eslint-findings-before.txt` to capture current lint findings
 
 ### Task 2 — Add direct devDependencies to `package.json`
@@ -36,7 +36,7 @@
 
 ### Task 4 — Validate against baseline
 
-- [x] Run `npx eslint --print-config src/app/page.tsx > /tmp/eslint-after.json`
+- [x] Run `npx eslint --print-config app/page.tsx > /tmp/eslint-after.json`
 - [x] Diff: `diff /tmp/eslint-before.json /tmp/eslint-after.json` — must produce no output (identical resolved config)
 - [x] Run `npx eslint . 2>&1 | tee /tmp/eslint-findings-after.txt`
 - [x] Diff: `diff /tmp/eslint-findings-before.txt /tmp/eslint-findings-after.txt` — no new errors or warnings introduced by the config change
@@ -49,18 +49,18 @@
 ## Validation
 
 - [x] `npx eslint .` exits without `Cannot find package` or `MODULE_NOT_FOUND` errors
-- [x] `npx eslint --print-config src/app/page.tsx` diff vs baseline is empty
+- [x] `npx eslint --print-config app/page.tsx` diff vs baseline is empty
 - [x] `npm install` exits 0 with no peer-dependency warnings for the changed packages
 - [x] Run type checks: `npm run typecheck` (or equivalent) — must pass
 - [x] Run build: `npm run build` — must succeed
 - [x] All completed tasks marked as complete
-- [ ] All steps in Remote push validation passed
+- [x] All steps in Remote push validation passed
 
 ## Remote push validation
 
 This change modifies `eslint.config.mjs` and `package.json` — non-docs files are changed, so apply the **full path**.
 
-- **Unit tests** — `npm test` (or equivalent); all tests must pass
+- **Unit tests** — `npm run test:unit`; all tests must pass
 - **Integration tests** — run the project's integration test suite; all tests must pass
 - **Build** — `npm run build`; must succeed with no errors
 

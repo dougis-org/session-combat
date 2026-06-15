@@ -29,7 +29,7 @@ The system SHALL resolve the same set of rules, severity levels, plugins, global
 #### Scenario: Resolved config matches pre-change baseline for a TS file
 
 - **Given** `eslint.config.mjs` has been rewritten with direct imports
-- **When** `npx eslint --print-config src/app/page.tsx` is run before and after the change
+- **When** `npx eslint --print-config app/page.tsx` is run before and after the change
 - **Then** the printed config diff shows no changes to `rules`, `plugins`, `languageOptions`, or `settings`
 
 #### Scenario: Previously ignored paths remain ignored
