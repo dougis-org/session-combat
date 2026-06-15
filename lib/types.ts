@@ -363,6 +363,11 @@ export interface MonsterTemplate extends CreatureStats {
   updatedAt: Date;
 }
 
+// Shared editable fields for both Monster and MonsterTemplate — used by MonsterStatEditor.
+// Derived from MonsterTemplate so that type changes propagate automatically.
+export type MonsterEditableFields = CreatureStats &
+  Pick<MonsterTemplate, 'name' | 'size' | 'type' | 'alignment' | 'speed' | 'challengeRating' | 'source' | 'description'>;
+
 // Monster instance in an encounter (unique copy with instance-specific state)
 export interface Monster extends CreatureStats {
   _id?: string;

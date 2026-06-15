@@ -10,11 +10,34 @@ jest.mock('@/lib/hooks/useAuth', () => ({
   })),
 }));
 
+jest.mock('@/lib/components/MonsterStatEditor', () => ({
+  MonsterStatEditor: jest.fn(({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
+    <div data-testid="monster-stat-editor" data-name={value.name}>
+      <button
+        data-testid="mse-trigger-change"
+        onClick={() => onChange({ ...value, name: 'Hobgoblin' })}
+      >
+        Change Name
+      </button>
+      <button
+        data-testid="mse-exceed-hp"
+        onClick={() => onChange({ ...value, hp: 999 })}
+      >
+        Exceed HP
+      </button>
+    </div>
+  )),
+  formatSpeedValue: (v: unknown) => (typeof v === 'string' ? v : '30 ft.'),
+}));
+
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MonsterEditor } from '@/app/encounters/MonsterEditor';
+import { MonsterStatEditor } from '@/lib/components/MonsterStatEditor';
 import type { Monster } from '@/lib/types';
+
+const MockMonsterStatEditor = MonsterStatEditor as jest.MockedFunction<typeof MonsterStatEditor>;
 
 const BASE_MONSTER: Monster = {
   id: 'mon-1',
@@ -52,92 +75,59 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-describe('MonsterEditor — field rendering', () => {
-  it('renders name input pre-populated from monster prop', () => {
+describe('MonsterEditor — full stat block rendering', () => {
+  it('renders MonsterStatEditor', () => {
     renderEditor();
-    expect(screen.getByLabelText(/^name$/i)).toHaveValue('Goblin');
+    expect(screen.getByTestId('monster-stat-editor')).toBeInTheDocument();
   });
 
-  it('renders AC input pre-populated from monster prop', () => {
+  it('passes the monster editable fields to MonsterStatEditor as value', () => {
     renderEditor();
-    expect(screen.getByLabelText(/^ac$/i)).toHaveValue(15);
-  });
-
-  it('renders HP input pre-populated from monster prop', () => {
-    renderEditor();
-    expect(screen.getByLabelText(/^hp$/i)).toHaveValue(7);
-  });
-
-  it('renders Max HP input pre-populated from monster prop', () => {
-    renderEditor();
-    expect(screen.getByLabelText(/^max hp$/i)).toHaveValue(10);
-  });
-
-  it('renders Dexterity input pre-populated from monster prop', () => {
-    renderEditor();
-    expect(screen.getByLabelText(/dexterity/i)).toHaveValue(14);
+    const lastProps = MockMonsterStatEditor.mock.calls[0][0];
+    expect(lastProps.value).toMatchObject({
+      name: 'Goblin',
+      ac: 15,
+      hp: 7,
+      maxHp: 10,
+      abilityScores: expect.objectContaining({ dexterity: 14 }),
+    });
   });
 });
 
 describe('MonsterEditor — save callback', () => {
-  it('calls onSave with updated name on Save Monster click', async () => {
+  it('calls onSave with merged Monster after field change', async () => {
     const user = userEvent.setup();
     const onSave = jest.fn();
     renderEditor({ onSave });
-    const nameInput = screen.getByLabelText(/^name$/i);
-    await user.clear(nameInput);
-    await user.type(nameInput, 'Hobgoblin');
+    await user.click(screen.getByTestId('mse-trigger-change'));
     await user.click(screen.getByRole('button', { name: /save monster/i }));
     expect(onSave).toHaveBeenCalledTimes(1);
-    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Hobgoblin' }));
-  });
-
-  it('calls onSave with updated AC', async () => {
-    const user = userEvent.setup();
-    const onSave = jest.fn();
-    renderEditor({ onSave });
-    const acInput = screen.getByLabelText(/^ac$/i);
-    fireEvent.change(acInput, { target: { value: '18' } });
-    await user.click(screen.getByRole('button', { name: /save monster/i }));
-    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ ac: 18 }));
-  });
-
-  it('clamps HP to maxHp when HP input exceeds maxHp', () => {
-    renderEditor();
-    const hpInput = screen.getByLabelText(/^hp$/i);
-    fireEvent.change(hpInput, { target: { value: '999' } });
-    expect(hpInput).toHaveValue(10);
-  });
-
-  it('clamps HP to new maxHp when maxHp is reduced below current HP', () => {
-    const monster = { ...BASE_MONSTER, hp: 8, maxHp: 10 };
-    renderEditor({ monster });
-    const maxHpInput = screen.getByLabelText(/^max hp$/i);
-    fireEvent.change(maxHpInput, { target: { value: '5' } });
-    expect(screen.getByLabelText(/^hp$/i)).toHaveValue(5);
-  });
-
-  it('calls onSave with updated dexterity', async () => {
-    const user = userEvent.setup();
-    const onSave = jest.fn();
-    renderEditor({ onSave });
-    const dexInput = screen.getByLabelText(/dexterity/i);
-    fireEvent.change(dexInput, { target: { value: '20' } });
-    await user.click(screen.getByRole('button', { name: /save monster/i }));
     expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ abilityScores: expect.objectContaining({ dexterity: 20 }) })
+      expect.objectContaining({ id: 'mon-1', name: 'Hobgoblin' }),
     );
   });
 
-  it('calls onSave preserving unchanged ability scores', async () => {
+  it('calls onSave preserving original monster metadata (id, templateId)', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const monster = { ...BASE_MONSTER, templateId: 'tmpl-42' };
+    render(
+      <MonsterEditor monster={monster} onSave={onSave} onCancel={jest.fn()} />,
+    );
+    await user.click(screen.getByRole('button', { name: /save monster/i }));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'mon-1', templateId: 'tmpl-42' }),
+    );
+  });
+
+  it('clamps HP to maxHp when onChange fires with hp > maxHp', async () => {
     const user = userEvent.setup();
     const onSave = jest.fn();
     renderEditor({ onSave });
+    await user.click(screen.getByTestId('mse-exceed-hp'));
     await user.click(screen.getByRole('button', { name: /save monster/i }));
     expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({
-        abilityScores: expect.objectContaining({ strength: 8 }),
-      })
+      expect.objectContaining({ hp: BASE_MONSTER.maxHp }),
     );
   });
 });
