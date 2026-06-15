@@ -16,6 +16,22 @@ interface EnrichedMember {
   status: string
 }
 
+// ── LocalStore helpers ────────────────────────────────────────────
+
+function safeGet<T>(key: string): T | null {
+  try { return LocalStore.get<T>(key) } catch { return null }
+}
+
+function safeSet(key: string, val: unknown): boolean {
+  try { LocalStore.set(key, val); return true } catch { return false }
+}
+
+function safeRemove(key: string) {
+  try { LocalStore.remove(key) } catch { /* storage unavailable */ }
+}
+
+// ── Dock reducer ──────────────────────────────────────────────────
+
 type DockState = { isExpanded: boolean; isPinned: boolean }
 type DockAction =
   | { type: 'INIT'; pinned: boolean }
@@ -26,20 +42,19 @@ type DockAction =
 
 function dockReducer(state: DockState, action: DockAction): DockState {
   switch (action.type) {
-    case 'INIT':
-      return { isExpanded: action.pinned, isPinned: action.pinned }
-    case 'EXPAND':
-      return { ...state, isExpanded: true }
-    case 'COLLAPSE':
-      return { ...state, isExpanded: false }
-    case 'PIN':
-      return { ...state, isPinned: true }
-    case 'UNPIN':
-      return { ...state, isPinned: false }
+    case 'INIT':    return { isExpanded: action.pinned, isPinned: action.pinned }
+    case 'EXPAND':  return { ...state, isExpanded: true }
+    case 'COLLAPSE':return { ...state, isExpanded: false }
+    case 'PIN':     return { ...state, isPinned: true }
+    case 'UNPIN':   return { ...state, isPinned: false }
   }
 }
 
 // ── Sub-components ────────────────────────────────────────────────
+
+function resolveUsername(members: EnrichedMember[], toUserId: string): string {
+  return members.find(m => m.userId === toUserId)?.username ?? toUserId
+}
 
 interface ChatFeedProps {
   messages: CampaignMessage[]
@@ -49,13 +64,9 @@ interface ChatFeedProps {
 }
 
 function ChatFeed({ messages, isLoadingHistory, members, feedRef }: ChatFeedProps) {
-  function resolveUsername(toUserId: string): string {
-    return members.find(m => m.userId === toUserId)?.username ?? toUserId
-  }
-
   function visibilityMarker(visibility: MessageVisibility): string | null {
     if (visibility.scope === 'dm-only') return '[DM]'
-    if (visibility.scope === 'direct') return `[→ @${resolveUsername(visibility.toUserId)}]`
+    if (visibility.scope === 'direct') return `[→ @${resolveUsername(members, visibility.toUserId)}]`
     return null
   }
 
@@ -75,9 +86,7 @@ function ChatFeed({ messages, isLoadingHistory, members, feedRef }: ChatFeedProp
             <span className="font-semibold text-white">{msg.senderName}</span>
             {' '}
             <span className="text-gray-500 text-xs">{ts}</span>
-            {marker && (
-              <span className="ml-1 text-xs text-yellow-400">{marker}</span>
-            )}
+            {marker && <span className="ml-1 text-xs text-yellow-400">{marker}</span>}
             <div className="mt-0.5 text-gray-300">{msg.text}</div>
           </div>
         )
@@ -100,10 +109,7 @@ function MentionDropdown({ results, onSelect }: MentionDropdownProps) {
           <button
             type="button"
             className="w-full text-left px-3 py-1.5 text-sm text-white hover:bg-gray-600"
-            onMouseDown={e => {
-              e.preventDefault() // prevent textarea blur before selection
-              onSelect(member)
-            }}
+            onMouseDown={e => { e.preventDefault(); onSelect(member) }}
           >
             @{member.username}
           </button>
@@ -130,25 +136,11 @@ interface ChatComposerProps {
 }
 
 function ChatComposer({
-  composerText,
-  onTextChange,
-  onKeyDown,
-  visibility,
-  onVisibilityChange,
-  isSending,
-  streamStatus,
-  members,
-  onSend,
-  onBlur,
-  mentionResults,
-  onMentionSelect,
-  textareaRef,
+  composerText, onTextChange, onKeyDown, visibility, onVisibilityChange,
+  isSending, streamStatus, members, onSend, onBlur,
+  mentionResults, onMentionSelect, textareaRef,
 }: ChatComposerProps) {
   const isDisabled = streamStatus !== 'open' || isSending
-
-  function resolveUsername(toUserId: string): string {
-    return members.find(m => m.userId === toUserId)?.username ?? toUserId
-  }
 
   return (
     <div className="border-t border-gray-700 p-3 flex-shrink-0 flex flex-col gap-2">
@@ -166,8 +158,10 @@ function ChatComposer({
           <option value="dm-only">DM-only</option>
           <option value="direct">Whisper</option>
         </select>
-        {visibility.scope === 'direct' && 'toUserId' in visibility && visibility.toUserId && (
-          <span className="text-xs text-yellow-400">→ @{resolveUsername(visibility.toUserId)}</span>
+        {visibility.scope === 'direct' && visibility.toUserId && (
+          <span className="text-xs text-yellow-400">
+            → @{resolveUsername(members, visibility.toUserId)}
+          </span>
         )}
       </div>
       <div className="relative">
@@ -207,46 +201,31 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
   const triggerRef = useRef<HTMLButtonElement>(null)
   const isMounted = useRef(false)
 
-  // Message feed state
   const [messages, setMessages] = useState<CampaignMessage[]>([])
   const seenIds = useRef<Set<string>>(new Set())
 
-  // Members state
   const [members, setMembers] = useState<EnrichedMember[]>([])
 
-  // History pagination state
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
+  // page and hasMore are only needed in the scroll handler — plain refs, no render needed
+  const pageRef = useRef(1)
+  const hasMoreRef = useRef(true)
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
-  const hasMoreRef = useRef(hasMore)
-  hasMoreRef.current = hasMore
-  const isLoadingHistoryRef = useRef(isLoadingHistory)
-  isLoadingHistoryRef.current = isLoadingHistory
-  const pageRef = useRef(page)
-  pageRef.current = page
+  const isLoadingHistoryRef = useRef(false)
   const feedRef = useRef<HTMLDivElement>(null)
 
-  // Unread badge state
   const [unreadCount, setUnreadCount] = useState(0)
   const lastOpenKey = `campaign-chat-last-open-${campaignId}`
   const lastOpenRef = useRef<Date>(new Date(0))
 
-  // Composer state
   const [composerText, setComposerText] = useState('')
   const [visibility, setVisibility] = useState<MessageVisibility>({ scope: 'group' })
   const [isSending, setIsSending] = useState(false)
   const [mentionQuery, setMentionQuery] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Derive mention results
-  const mentionResults =
-    mentionQuery !== null
-      ? members.filter(
-          m =>
-            m.status === 'active' &&
-            m.username.toLowerCase().startsWith(mentionQuery.toLowerCase()),
-        )
-      : []
+  const mentionResults = mentionQuery !== null
+    ? members.filter(m => m.status === 'active' && m.username.toLowerCase().startsWith(mentionQuery.toLowerCase()))
+    : []
 
   // ── SSE stream ──
   function onStreamEvent(e: CampaignStreamEvent) {
@@ -255,55 +234,31 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
     if (seenIds.current.has(msg.id)) return
     seenIds.current.add(msg.id)
     setMessages(prev => [...prev, msg])
-
-    if (!isExpanded) {
-      const msgDate = new Date(msg.createdAt)
-      if (msgDate > lastOpenRef.current) {
-        setUnreadCount(c => c + 1)
-      }
+    if (!isExpanded && new Date(msg.createdAt) > lastOpenRef.current) {
+      setUnreadCount(c => c + 1)
     }
   }
 
   const { status: streamStatus } = useCampaignStream(campaignId, onStreamEvent)
 
-  // ── LocalStore init: read last-open timestamp ──
+  // ── Init: pin state + last-open timestamp ──
   useEffect(() => {
-    let pinned = false
-    try {
-      pinned = !!LocalStore.get<boolean>(PIN_KEY)
-    } catch {
-      // storage unavailable
-    }
-    dispatch({ type: 'INIT', pinned })
-
-    try {
-      const stored = LocalStore.get<string>(lastOpenKey)
-      if (stored) {
-        lastOpenRef.current = new Date(stored)
-      }
-    } catch {
-      // storage unavailable: lastOpenRef stays at epoch
-    }
+    dispatch({ type: 'INIT', pinned: !!safeGet<boolean>(PIN_KEY) })
+    const stored = safeGet<string>(lastOpenKey)
+    if (stored) lastOpenRef.current = new Date(stored)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ── Restore focus after drawer closes ──
   useEffect(() => {
-    if (!isMounted.current) {
-      isMounted.current = true
-      return
-    }
-    if (!isExpanded) {
-      triggerRef.current?.focus()
-    }
+    if (!isMounted.current) { isMounted.current = true; return }
+    if (!isExpanded) triggerRef.current?.focus()
   }, [isExpanded])
 
   // ── Keyboard: Escape to collapse ──
   useEffect(() => {
     if (!isExpanded) return
-    const handler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') dispatch({ type: 'COLLAPSE' })
-    }
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') dispatch({ type: 'COLLAPSE' }) }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [isExpanded])
@@ -315,23 +270,18 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
       .then(r => (r.ok ? r.json() : null))
       .then(data => {
         if (!cancelled && data?.members) {
-          setMembers(
-            (data.members as EnrichedMember[]).filter(m => m.status === 'active'),
-          )
+          setMembers((data.members as EnrichedMember[]).filter(m => m.status === 'active'))
         }
       })
-      .catch(() => {
-        // leave members empty on failure
-      })
+      .catch(() => { /* leave members empty */ })
     return () => { cancelled = true }
   }, [campaignId])
 
   // ── History load on expand ──
   useEffect(() => {
-    if (!isExpanded) return
-    if (messages.length > 0) return
-
+    if (!isExpanded || messages.length > 0) return
     setIsLoadingHistory(true)
+    isLoadingHistoryRef.current = true
     fetch(`/api/campaigns/${campaignId}/messages?page=1&perPage=30`)
       .then(r => (r.ok ? r.json() : null))
       .then(data => {
@@ -339,15 +289,11 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
         const results: CampaignMessage[] = data.messages
         results.forEach(m => seenIds.current.add(m.id))
         setMessages(results)
-        setHasMore(results.length === 30)
-        setPage(1)
+        hasMoreRef.current = results.length === 30
+        pageRef.current = 1
       })
-      .catch(() => {
-        // leave feed empty on failure
-      })
-      .finally(() => {
-        setIsLoadingHistory(false)
-      })
+      .catch(() => { /* leave feed empty */ })
+      .finally(() => { setIsLoadingHistory(false); isLoadingHistoryRef.current = false })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isExpanded])
 
@@ -358,12 +304,12 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
     if (!container) return
 
     function handleScroll() {
-      if (!container) return
-      if (container.scrollTop !== 0) return
+      if (!container || container.scrollTop !== 0) return
       if (!hasMoreRef.current || isLoadingHistoryRef.current) return
 
       const nextPage = pageRef.current + 1
       setIsLoadingHistory(true)
+      isLoadingHistoryRef.current = true
       const prevScrollHeight = container.scrollHeight
 
       fetch(`/api/campaigns/${campaignId}/messages?page=${nextPage}&perPage=30`)
@@ -374,135 +320,86 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
           const newMsgs = results.filter(m => !seenIds.current.has(m.id))
           newMsgs.forEach(m => seenIds.current.add(m.id))
           setMessages(prev => [...newMsgs, ...prev])
-          setHasMore(results.length === 30)
-          setPage(nextPage)
-
+          hasMoreRef.current = results.length === 30
+          pageRef.current = nextPage
           requestAnimationFrame(() => {
             if (!container) return
-            const newScrollHeight = container.scrollHeight
-            container.scrollTop = newScrollHeight - prevScrollHeight
+            container.scrollTop = container.scrollHeight - prevScrollHeight
           })
         })
-        .catch(() => {
-          // leave page as-is on failure
-        })
-        .finally(() => {
-          setIsLoadingHistory(false)
-        })
+        .catch(() => { /* leave page as-is */ })
+        .finally(() => { setIsLoadingHistory(false); isLoadingHistoryRef.current = false })
     }
 
     container.addEventListener('scroll', handleScroll)
     return () => container.removeEventListener('scroll', handleScroll)
   }, [isExpanded, campaignId])
 
-  // ── Pin toggle ──
+  // ── Handlers ──
+
   function handlePinToggle() {
     if (isPinned) {
-      try {
-        LocalStore.remove(PIN_KEY)
-      } catch {
-        // storage unavailable
-      }
+      safeRemove(PIN_KEY)
       dispatch({ type: 'UNPIN' })
-    } else {
-      try {
-        LocalStore.set(PIN_KEY, true)
-        dispatch({ type: 'PIN' })
-      } catch {
-        // StorageQuotaError: pin not persisted
-      }
+    } else if (safeSet(PIN_KEY, true)) {
+      dispatch({ type: 'PIN' })
     }
   }
 
-  // ── Expand with unread reset ──
   function handleExpand() {
     const now = new Date()
-    try {
-      LocalStore.set(lastOpenKey, now.toISOString())
-      lastOpenRef.current = now
-    } catch {
-      // storage unavailable
-    }
+    if (safeSet(lastOpenKey, now.toISOString())) lastOpenRef.current = now
     setUnreadCount(0)
     dispatch({ type: 'EXPAND' })
   }
 
-  // ── Composer handlers ──
   function handleTextChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     const text = e.target.value
     setComposerText(text)
-
     const cursorPos = e.target.selectionStart ?? text.length
     const match = /@(\w*)$/.exec(text.slice(0, cursorPos))
     if (match) {
       setMentionQuery(match[1])
     } else {
       setMentionQuery(null)
-      // If @mention was removed, reset direct visibility to group
-      if (visibility.scope === 'direct') {
-        setVisibility({ scope: 'group' })
-      }
+      if (visibility.scope === 'direct') setVisibility({ scope: 'group' })
     }
   }
 
   function handleVisibilityChange(scope: string) {
-    if (scope === 'group') {
-      setMentionQuery(null)
-      setVisibility({ scope: 'group' })
-    } else if (scope === 'dm-only') {
-      setMentionQuery(null)
-      setVisibility({ scope: 'dm-only' })
-    } else if (scope === 'direct') {
-      // toUserId comes from a subsequent @mention selection
+    if (scope === 'direct') {
       setVisibility({ scope: 'direct', toUserId: '' })
+    } else {
+      setMentionQuery(null)
+      setVisibility(scope === 'dm-only' ? { scope: 'dm-only' } : { scope: 'group' })
     }
   }
 
   function handleMentionSelect(member: EnrichedMember) {
     const query = mentionQuery ?? ''
-    // Replace @{query} in text with @{username}
-    const mention = `@${query}`
-    const replacement = `@${member.username}`
-    const idx = composerText.lastIndexOf(mention)
-    if (idx !== -1) {
-      setComposerText(
-        composerText.slice(0, idx) + replacement + composerText.slice(idx + mention.length),
-      )
-    } else {
-      setComposerText(composerText + replacement)
-    }
+    const idx = composerText.lastIndexOf(`@${query}`)
+    const replaced = idx !== -1
+      ? composerText.slice(0, idx) + `@${member.username}` + composerText.slice(idx + query.length + 1)
+      : composerText + `@${member.username}`
+    setComposerText(replaced)
     setMentionQuery(null)
     setVisibility({ scope: 'direct', toUserId: member.userId })
   }
 
   function handleMentionBlur() {
-    // Delay to allow onMouseDown on list items to fire first
     setTimeout(() => setMentionQuery(null), 100)
   }
 
   function handleComposerKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Escape') {
-      setMentionQuery(null)
-      return
-    }
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
+    if (e.key === 'Escape') { setMentionQuery(null); return }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
 
-  // ── Send message ──
   async function handleSend() {
-    if (!composerText.trim()) return
-    if (streamStatus !== 'open') return
-    if (isSending) return
-
+    if (!composerText.trim() || streamStatus !== 'open' || isSending) return
     setIsSending(true)
-
-    // Optimistic append
-    const optimisticId = `pending-${Date.now()}`
     const optimisticMsg: CampaignMessage = {
-      id: optimisticId,
+      id: `pending-${Date.now()}`,
       campaignId,
       senderId: user?.userId ?? '',
       senderName: user?.username ?? user?.email ?? '',
@@ -511,15 +408,13 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
       createdAt: new Date(),
     }
     setMessages(prev => [...prev, optimisticMsg])
-    seenIds.current.add(optimisticId)
-
-    const body = { text: composerText.trim(), visibility }
+    seenIds.current.add(optimisticMsg.id)
 
     try {
       const response = await fetch(`/api/campaigns/${campaignId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ text: composerText.trim(), visibility }),
       })
       if (response.ok) {
         setComposerText('')
@@ -571,13 +466,7 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
             onClick={handlePinToggle}
             className="text-gray-400 hover:text-white"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path d="M11.5 3a1.5 1.5 0 00-3 0v3.586L6.293 8.793A1 1 0 006 9.5v1a1 1 0 001 1h2.5v4.5a.5.5 0 001 0v-4.5H13a1 1 0 001-1v-1a1 1 0 00-.293-.707L11.5 6.586V3z" />
             </svg>
           </button>

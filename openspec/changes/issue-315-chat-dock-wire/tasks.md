@@ -123,10 +123,10 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `feat/issue-315-chat-dock-wire` and push to remote
-- [ ] Open PR from `feat/issue-315-chat-dock-wire` to `main`. PR body MUST include `Closes #315`.
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to `feat/issue-315-chat-dock-wire` and push to remote
+- [x] Open PR from `feat/issue-315-chat-dock-wire` to `main`. PR body MUST include `Closes #315`.
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
 - [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, push before anything else this iteration
