@@ -5,7 +5,6 @@
 import type { Metadata } from 'next'
 import { IBM_Plex_Sans, IBM_Plex_Mono, IBM_Plex_Serif } from 'next/font/google'
 import { NavBar } from '@/lib/components/NavBar'
-import { CampaignChat } from '@/lib/components/CampaignChat'
 import './globals.css'
 
 const plexSans = IBM_Plex_Sans({
@@ -88,7 +87,6 @@ export default async function RootLayout({
             <span>{formatDate(versionData.buildDate)}</span>
           </div>
         </footer>
-        <CampaignChat />
       </body>
     </html>
   )
