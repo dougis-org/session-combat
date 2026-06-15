@@ -4,11 +4,19 @@ import type { CampaignStreamEvent } from '@/lib/types';
 
 type EventHandler = (event: CampaignStreamEvent) => void;
 
+interface Subscription {
+  userId: string;
+  handler: EventHandler;
+}
+
 // Module-level singletons — process-scoped state (safe on Fly.io single-process)
 let openPromise: Promise<ChangeStream> | null = null;
 let sharedCursor: ChangeStream | null = null;
 let subscriberCount = 0;
-const registry = new Map<string, Set<EventHandler>>();
+// Keyed by a per-subscription token so the same user can hold multiple concurrent
+// subscriptions (e.g. multiple browser tabs) without overwriting each other.
+const registry = new Map<string, Map<string, Subscription>>();
+let nextSubId = 0;
 let isReplicaSet: boolean | null = null;
 let detectPromise: Promise<boolean> | null = null;
 
@@ -56,8 +64,8 @@ function demux(doc: { fullDocument?: { campaignId?: string; id?: string } & Reco
     campaignId,
     data: rest,
   };
-  for (const handler of handlers) {
-    try { handler(event); } catch { /* handler errors don't break the stream */ }
+  for (const sub of handlers.values()) {
+    try { sub.handler(event); } catch { /* handler errors don't break the stream */ }
   }
 }
 
@@ -159,14 +167,29 @@ async function pollFn(
   }
 }
 
-export async function subscribe(campaignId: string, onEvent: EventHandler): Promise<() => void> {
+export function emitFiltered(
+  campaignId: string,
+  event: CampaignStreamEvent,
+  canReceive: (userId: string) => boolean
+): void {
+  const handlers = registry.get(campaignId);
+  if (!handlers) return;
+  for (const sub of handlers.values()) {
+    if (canReceive(sub.userId)) {
+      try { sub.handler(event); } catch { /* handler errors don't break dispatch */ }
+    }
+  }
+}
+
+export async function subscribe(campaignId: string, userId: string, onEvent: EventHandler): Promise<() => void> {
   const atlasMode = await detectReplicaSet();
 
   if (atlasMode) {
     if (!registry.has(campaignId)) {
-      registry.set(campaignId, new Set());
+      registry.set(campaignId, new Map());
     }
-    registry.get(campaignId)!.add(onEvent);
+    const subId = `${userId}:${++nextSubId}`;
+    registry.get(campaignId)!.set(subId, { userId, handler: onEvent });
     subscriberCount++;
 
     const streamPromise = openStream();
@@ -175,7 +198,7 @@ export async function subscribe(campaignId: string, onEvent: EventHandler): Prom
     return () => {
       if (torn) return;
       torn = true;
-      registry.get(campaignId)?.delete(onEvent);
+      registry.get(campaignId)?.delete(subId);
       if (registry.get(campaignId)?.size === 0) registry.delete(campaignId);
       subscriberCount = Math.max(0, subscriberCount - 1);
       if (subscriberCount === 0) {

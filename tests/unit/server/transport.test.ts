@@ -65,7 +65,7 @@ afterEach(() => {
 // --- T3-1: First subscribe (Atlas) opens exactly one cursor ---
 
 it('T3-1: first subscribe opens exactly one cursor', async () => {
-  const teardown = await transport.subscribe('c1', jest.fn());
+  const teardown = await transport.subscribe('c1', 'user-c1', jest.fn());
   await new Promise(r => setTimeout(r, 10));
   // watch called twice: once for probe (detection), once for real stream
   expect(mockWatch).toHaveBeenCalledTimes(2);
@@ -75,8 +75,8 @@ it('T3-1: first subscribe opens exactly one cursor', async () => {
 // --- T3-2: Second subscribe reuses existing cursor ---
 
 it('T3-2: second subscribe reuses cursor (watch call count stays 2)', async () => {
-  const td1 = await transport.subscribe('c1', jest.fn());
-  const td2 = await transport.subscribe('c2', jest.fn());
+  const td1 = await transport.subscribe('c1', 'user-c1', jest.fn());
+  const td2 = await transport.subscribe('c2', 'user-c2', jest.fn());
   await new Promise(r => setTimeout(r, 10));
   // probe (1) + real stream (1) = 2; second subscribe reuses openPromise
   expect(mockWatch).toHaveBeenCalledTimes(2);
@@ -87,8 +87,8 @@ it('T3-2: second subscribe reuses cursor (watch call count stays 2)', async () =
 // --- T3-3: Concurrent subscribes during lazy open result in one cursor ---
 
 it('T3-3: concurrent subscribes during lazy open result in one cursor', async () => {
-  const p1 = transport.subscribe('c1', jest.fn());
-  const p2 = transport.subscribe('c2', jest.fn());
+  const p1 = transport.subscribe('c1', 'user-c1', jest.fn());
+  const p2 = transport.subscribe('c2', 'user-c2', jest.fn());
 
   const [td1, td2] = await Promise.all([p1, p2]);
   await new Promise(r => setTimeout(r, 10));
@@ -114,7 +114,7 @@ it('T3-4: teardown removes handler from registry', async () => {
     .mockImplementationOnce(() => makeProbeCursor())
     .mockImplementationOnce(() => realCursor);
 
-  const teardown = await transport.subscribe('c1', handler);
+  const teardown = await transport.subscribe('c1', 'user-c1', handler);
   // Tear down before the event is processed
   teardown();
 
@@ -126,7 +126,7 @@ it('T3-4: teardown removes handler from registry', async () => {
 // --- T3-5: Last subscriber teardown closes cursor ---
 
 it('T3-5: last subscriber teardown closes cursor', async () => {
-  const td = await transport.subscribe('c1', jest.fn());
+  const td = await transport.subscribe('c1', 'user-c1', jest.fn());
   await new Promise(r => setTimeout(r, 10)); // let openStream settle
   td();
   await new Promise(r => setTimeout(r, 10));
@@ -136,7 +136,7 @@ it('T3-5: last subscriber teardown closes cursor', async () => {
 // --- T3-6: Last subscriber drops while open is in flight ---
 
 it('T3-6: last subscriber drops while open is in flight', async () => {
-  const teardown = await transport.subscribe('c1', jest.fn());
+  const teardown = await transport.subscribe('c1', 'user-c1', jest.fn());
   teardown(); // fires while openStream may still be in-flight
   await new Promise(r => setTimeout(r, 20));
   // Cursor should be closed via the streamPromise.then(() => closeStream()) chain
@@ -159,8 +159,8 @@ it('T3-7: event with campaignId A routes only to A handlers', async () => {
     .mockImplementationOnce(() => makeProbeCursor())
     .mockImplementationOnce(() => realCursor);
 
-  const tdA = await transport.subscribe('A', handlerA);
-  const tdB = await transport.subscribe('B', handlerB);
+  const tdA = await transport.subscribe('A', 'user-A', handlerA);
+  const tdB = await transport.subscribe('B', 'user-B', handlerB);
 
   // Allow async iteration loop to process the event
   await new Promise(r => setTimeout(r, 30));
@@ -180,7 +180,7 @@ it('T3-8: non-replica-set detection selects polling path', async () => {
     throw new Error('not running with --replSet');
   });
 
-  const teardown = await transport.subscribe('c1', jest.fn());
+  const teardown = await transport.subscribe('c1', 'user-c1', jest.fn());
 
   // Only the probe was called, not the real stream watch
   expect(mockWatch).toHaveBeenCalledTimes(1);
@@ -190,8 +190,8 @@ it('T3-8: non-replica-set detection selects polling path', async () => {
 // --- T3-9: Detection result is cached across subscribes ---
 
 it('T3-9: replica-set detection is called only once across two subscribes', async () => {
-  const td1 = await transport.subscribe('c1', jest.fn());
-  const td2 = await transport.subscribe('c2', jest.fn());
+  const td1 = await transport.subscribe('c1', 'user-c1', jest.fn());
+  const td2 = await transport.subscribe('c2', 'user-c2', jest.fn());
   await new Promise(r => setTimeout(r, 10));
 
   // probe called once (detection is cached after first subscribe), stream cursor called once
@@ -215,7 +215,7 @@ it('T3-10: polling emits new events since last timestamp', async () => {
   mockToArray = jest.fn().mockResolvedValue([doc]);
 
   const handler = jest.fn();
-  const teardown = await transport.subscribe('c1', handler);
+  const teardown = await transport.subscribe('c1', 'user-c1', handler);
 
   // Trigger poll
   jest.advanceTimersByTime(2001);
@@ -243,7 +243,7 @@ it('T3-11: polling skips documents for other campaigns', async () => {
   mockToArray = jest.fn().mockResolvedValue([doc]);
 
   const handler = jest.fn();
-  const teardown = await transport.subscribe('A', handler);
+  const teardown = await transport.subscribe('A', 'user-A', handler);
 
   jest.advanceTimersByTime(2001);
   await Promise.resolve();
@@ -264,7 +264,7 @@ it('T3-12: polling teardown clears interval', async () => {
   });
   const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
 
-  const teardown = await transport.subscribe('c1', jest.fn());
+  const teardown = await transport.subscribe('c1', 'user-c1', jest.fn());
   teardown();
 
   expect(clearIntervalSpy).toHaveBeenCalled();
@@ -295,7 +295,7 @@ it('T3-13: cursor invalidation triggers one reconnect attempt', async () => {
     return { close: closeFn, [Symbol.asyncIterator]: cursorIter };
   });
 
-  const td = await transport.subscribe('c1', jest.fn());
+  const td = await transport.subscribe('c1', 'user-c1', jest.fn());
   // Allow iteration to run (throws on first cursor) and reconnect
   await new Promise(r => setTimeout(r, 50));
 
@@ -324,7 +324,7 @@ it('T3-14: poll DB error is caught and logged; interval continues', async () => 
     });
 
   const handler = jest.fn();
-  const teardown = await transport.subscribe('c1', handler);
+  const teardown = await transport.subscribe('c1', 'user-c1', handler);
 
   // First poll fires: should log error
   jest.advanceTimersByTime(2001);

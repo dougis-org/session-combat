@@ -1,8 +1,25 @@
 // Data types for the combat tracker
 
+export type MessageVisibility =
+  | { scope: "group" }
+  | { scope: "dm-only" }
+  | { scope: "direct"; toUserId: string };
+
+export interface CampaignMessage {
+  _id?: string;
+  id: string;
+  campaignId: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  visibility: MessageVisibility;
+  createdAt: Date;
+}
+
 export type CampaignStreamEvent =
-  | { type: 'heartbeat'; campaignId: string; data: { ts: number } }
-  | { type: 'change'; campaignId: string; data: Record<string, unknown> };
+  | { type: "heartbeat"; campaignId: string; data: { ts: number } }
+  | { type: "change"; campaignId: string; data: Record<string, unknown> }
+  | { type: "message"; campaignId: string; data: CampaignMessage };
 
 // D&D 5e Classes - includes official classes and common additions (e.g., Blood Hunter)
 export type DnDClass =
