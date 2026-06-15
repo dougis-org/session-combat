@@ -140,13 +140,13 @@ Blocking resolution flow:
 - [x] `git checkout main` and `git pull --ff-only`
 - [x] Verify merged changes appear on `main`
 - [x] Mark all remaining tasks as complete
-- [ ] Sync approved spec deltas to `openspec/specs/`:
-  - Copy `openspec/changes/fix-campaign-catalog-copy/specs/campaign-catalog-copy/spec.md` → `openspec/specs/campaign-catalog-copy/spec.md`
-  - Copy `openspec/changes/fix-campaign-catalog-copy/specs/campaign-catalog/spec.md` → `openspec/specs/campaign-catalog/spec.md`
-  - Update relative links in both files: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-fix-campaign-catalog-copy/design.md`
-- [ ] Archive: move `openspec/changes/fix-campaign-catalog-copy/` to `openspec/changes/archive/YYYY-MM-DD-fix-campaign-catalog-copy/` — stage both the new location and deletion of the old in a **single commit**
-- [ ] Confirm archive exists and original location is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-fix-campaign-catalog-copy` → `git push -u origin doc/archive-YYYY-MM-DD-fix-campaign-catalog-copy`
+- [x] Sync approved spec deltas to `openspec/specs/`:
+  - Copy `openspec/changes/archive/2026-06-14-fix-campaign-catalog-copy/specs/campaign-catalog-copy/spec.md` → `openspec/specs/campaign-catalog-copy/spec.md`
+  - Copy `openspec/changes/archive/2026-06-14-fix-campaign-catalog-copy/specs/campaign-catalog/spec.md` → `openspec/specs/campaign-catalog/spec.md`
+  - Update relative links in both files: replace `../../design.md` with `../../changes/archive/2026-06-14-fix-campaign-catalog-copy/design.md`
+- [x] Archive: move `openspec/changes/fix-campaign-catalog-copy/` to `openspec/changes/archive/2026-06-14-fix-campaign-catalog-copy/` — stage both the new location and deletion of the old in a **single commit**
+- [x] Confirm archive exists and original location is gone
+- [x] Create doc branch: `git checkout -b doc/archive-2026-06-14-fix-campaign-catalog-copy` → `git push -u origin doc/archive-2026-06-14-fix-campaign-catalog-copy`
 - [ ] Open PR from doc branch to `main` with title `docs: archive fix-campaign-catalog-copy (YYYY-MM-DD)` — **do NOT push directly to main**
 - [ ] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
 - [ ] Monitor doc PR until merged; address any comments or CI failures
