@@ -151,11 +151,11 @@ Blocking resolution flow:
 - [x] Verify the merged changes appear on the default branch
 - [x] Mark all remaining tasks as complete (`- [x]`)
 - [x] Update `openspec/specs/campaign-chat-dock/spec.md` with final merged behavior (prop change, layout mount point)
-- [x] Sync `openspec/changes/issue-315-chat-dock-wire/specs/campaign-chat-wire/spec.md` → `openspec/specs/campaign-chat-wire/spec.md`. After copying, update relative links: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/design.md` and `../../tasks.md` with `../../changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/tasks.md`.
-- [x] Archive the change: move `openspec/changes/issue-315-chat-dock-wire/` to `openspec/changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/` **in a single atomic commit** (stage both new location and deletion of old location together — never split into two commits).
-- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/` exists and `openspec/changes/issue-315-chat-dock-wire/` is gone.
-- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-issue-315-chat-dock-wire` then `git push -u origin doc/archive-YYYY-MM-DD-issue-315-chat-dock-wire`
-- [x] Open a PR from `doc/archive-…` to `main` with title `docs: archive issue-315-chat-dock-wire (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] Sync `openspec/changes/issue-315-chat-dock-wire/specs/campaign-chat-wire/spec.md` → `openspec/specs/campaign-chat-wire/spec.md`. After copying, update relative links: replace `../../design.md` with `../../changes/archive/2026-06-18-issue-315-chat-dock-wire/design.md` and `../../tasks.md` with `../../changes/archive/2026-06-18-issue-315-chat-dock-wire/tasks.md`.
+- [x] Archive the change: move `openspec/changes/issue-315-chat-dock-wire/` to `openspec/changes/archive/2026-06-18-issue-315-chat-dock-wire/` **in a single atomic commit** (stage both new location and deletion of old location together — never split into two commits).
+- [x] Confirm `openspec/changes/archive/2026-06-18-issue-315-chat-dock-wire/` exists and `openspec/changes/issue-315-chat-dock-wire/` is gone.
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-06-18-issue-315-chat-dock-wire` then `git push -u origin doc/archive-2026-06-18-issue-315-chat-dock-wire`
+- [x] Open a PR from `doc/archive-…` to `main` with title `docs: archive issue-315-chat-dock-wire (2026-06-18)` — **do NOT push directly to `main`**
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
 - [x] Monitor the doc PR until it merges (same loop as implementation PR)
-- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/issue-315-chat-dock-wire doc/archive-YYYY-MM-DD-issue-315-chat-dock-wire`
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/issue-315-chat-dock-wire doc/archive-2026-06-18-issue-315-chat-dock-wire`
