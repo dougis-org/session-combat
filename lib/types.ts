@@ -16,10 +16,28 @@ export interface CampaignMessage {
   createdAt: Date;
 }
 
+export type RollVisibility = { scope: "group" } | { scope: "dm-only" };
+
+export interface CampaignRoll {
+  _id?: string;
+  id: string;
+  campaignId: string;
+  sessionId: string;
+  rollerId: string;
+  rollerName: string;
+  formula: string;
+  rolls: number[];
+  total: number;
+  label?: string;
+  visibility: RollVisibility;
+  createdAt: Date;
+}
+
 export type CampaignStreamEvent =
   | { type: "heartbeat"; campaignId: string; data: { ts: number } }
   | { type: "change"; campaignId: string; data: Record<string, unknown> }
-  | { type: "message"; campaignId: string; data: CampaignMessage };
+  | { type: "message"; campaignId: string; data: CampaignMessage }
+  | { type: "roll"; campaignId: string; data: CampaignRoll };
 
 // D&D 5e Classes - includes official classes and common additions (e.g., Blood Hunter)
 export type DnDClass =

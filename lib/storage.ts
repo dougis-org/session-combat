@@ -17,6 +17,7 @@ import {
   CampaignMember,
   CampaignMemberSummary,
   CampaignCharacterShare,
+  CampaignRoll,
   MemberRole,
   MemberStatus,
   MemberHistoryEntry,
@@ -1201,6 +1202,54 @@ export const storage = {
       console.error("Error loading character by ID:", error);
       throw error;
     }
+  },
+
+  async saveCampaignRoll(roll: CampaignRoll): Promise<void> {
+    const db = await getDatabase();
+    const { _id: _ignored, ...doc } = roll;
+    void _ignored;
+    await db.collection('campaignRolls').insertOne(doc);
+  },
+
+  async listCampaignRolls(
+    campaignId: string,
+    sessionId: string,
+    userId: string,
+    role: MemberRole,
+    opts: { limit: number; before?: Date }
+  ): Promise<{ rolls: CampaignRoll[]; nextCursor?: string }> {
+    const db = await getDatabase();
+    const query: Record<string, unknown> = {
+      campaignId,
+      sessionId,
+      ...(opts.before ? { createdAt: { $lt: opts.before } } : {}),
+      $or: [
+        { 'visibility.scope': 'group' },
+        { rollerId: userId },
+        ...(role === 'dm' ? [{ 'visibility.scope': 'dm-only' }] : []),
+      ],
+    };
+
+    const docs = await db
+      .collection('campaignRolls')
+      .find(query)
+      .sort({ createdAt: -1 })
+      .limit(opts.limit + 1)
+      .toArray();
+
+    let nextCursor: string | undefined;
+    if (docs.length > opts.limit) {
+      docs.pop();
+      nextCursor = (docs[docs.length - 1]['createdAt'] as Date).toISOString();
+    }
+
+    const rolls = docs.map((doc) => {
+      const { _id, ...rest } = doc;
+      void _id;
+      return rest as unknown as CampaignRoll;
+    });
+
+    return { rolls, ...(nextCursor ? { nextCursor } : {}) };
   },
 
   // Clear all data for a user
