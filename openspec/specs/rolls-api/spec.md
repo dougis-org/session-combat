@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-06-19-campaign-rolls-api/design.md) document, not a replacement.
+This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-06-19-campaign-rolls-api/design.md) document, not a replacement. See also [`tasks.md`](../../changes/archive/2026-06-19-campaign-rolls-api/tasks.md).
 
 ### Requirement: ADDED `CampaignRoll` type and `RollVisibility` union
 
@@ -168,7 +168,7 @@ The system SHALL extend `CampaignStreamEvent` with a `roll` variant without brea
 
 ## REMOVED Requirements
 
-None.
+_None._
 
 ## Traceability
 
