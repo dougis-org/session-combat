@@ -207,6 +207,30 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     expect(body.visibility).toEqual({ scope: "dm-only" });
   });
 
+  it("returns 400 when body is null", async () => {
+    const res = await POST(makePost(null), { params: PARAMS });
+    expect(res.status).toBe(400);
+  });
+
+  it("emitFiltered predicate uses canSeeRoll — DM sees dm-only roll", async () => {
+    const DM_MEMBER = { ...ACTIVE_PLAYER, role: "dm" as const };
+    mockedStorage.listMembersForCampaign.mockResolvedValue([DM_MEMBER]);
+    let capturedPredicate: ((uid: string) => boolean) | null = null;
+    mockedEmitFiltered.mockImplementation((_cid, _event, predicate) => {
+      capturedPredicate = predicate as (uid: string) => boolean;
+    });
+
+    await POST(
+      makePost({ ...VALID_ROLL_BODY, visibility: { scope: "dm-only" } }),
+      { params: PARAMS }
+    );
+    expect(capturedPredicate).not.toBeNull();
+    // DM (same user, role=dm) should see the dm-only roll
+    expect(capturedPredicate!(MOCK_AUTH.userId)).toBe(true);
+    // unknown user not in members cannot see it
+    expect(capturedPredicate!("outsider-id")).toBe(false);
+  });
+
   it("saves roll with correct sessionId via storage.saveCampaignRoll", async () => {
     await POST(makePost(VALID_ROLL_BODY), { params: PARAMS });
     expect(mockedStorage.saveCampaignRoll).toHaveBeenCalledWith(

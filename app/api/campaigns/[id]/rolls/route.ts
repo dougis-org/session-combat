@@ -17,6 +17,10 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
+    if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Request body must be an object' }, { status: 400 });
+    }
+
     const b = body as Record<string, unknown>;
     const { formula, rolls, total, label, visibility } = b;
 

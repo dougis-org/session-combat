@@ -48,17 +48,17 @@
 
 ### Decision 4: `canSeeRoll()` pure function pattern
 
-- Chosen: Mirror `canSeeMessage()` from `lib/utils/campaignMessages.ts` — a pure function `canSeeRoll(roll: CampaignRoll, userId: string, members: CampaignMember[]): boolean` used by both the GET query builder and `emitFiltered()`.
+- Chosen: Mirror `canSeeMessage()` from `lib/utils/campaignMessages.ts` — a pure function `canSeeRoll(roll: CampaignRoll, userId: string, members: CampaignMember[]): boolean` used by `emitFiltered()` for SSE fan-out. The GET path uses `storage.listCampaignRolls()` which applies an equivalent MongoDB query that mirrors the same rules — the query cannot call TypeScript functions directly, so the logic is mirrored (not shared) but tested in isolation.
 - Alternatives considered: Inline visibility logic in the route handler.
-- Rationale: Keeps GET and SSE paths in sync. Testable in isolation. Matches the established pattern.
-- Trade-offs: Small extra file, but well worth the consistency.
+- Rationale: `canSeeRoll()` is the authoritative rule definition. SSE uses it directly. GET uses a MongoDB query that mirrors it and is independently tested to guarantee they remain in sync.
+- Trade-offs: The MongoDB query in storage mirrors rather than calls `canSeeRoll()`. This is unavoidable for DB-layer filtering; tests for both paths prevent divergence.
 
-### Decision 5: Direct DB access for collection ops (no storage abstraction for insert)
+### Decision 5: Storage abstraction for all collection ops
 
-- Chosen: Use `getDatabase()` directly in the route handler for `insertOne`, same as the messages handler. Add `saveCampaignRoll()` and `listCampaignRolls()` to `lib/storage.ts` for the GET path (to keep filtering logic out of the route).
-- Alternatives considered: Add both insert and list to storage; keep everything direct in the route.
-- Rationale: The messages pattern uses direct `insertOne` in the route and that's the established convention. Consistency > purity.
-- Trade-offs: Minor inconsistency between insert (direct) and list (storage method), but mirrors the existing messages pattern exactly.
+- Chosen: Use `storage.saveCampaignRoll()` and `storage.listCampaignRolls()` for all `campaignRolls` operations. Both insert and list go through the storage layer.
+- Alternatives considered: Use `getDatabase()` directly in the route handler for `insertOne` (messages pattern).
+- Rationale: Having both insert and list in storage eliminates the inconsistency in the messages pattern and avoids dead code. Pre-commit code review flagged the direct insert as dead code since `storage.saveCampaignRoll()` was already defined; the route now uses it for consistency.
+- Trade-offs: Slight deviation from the messages pattern (which uses direct insert), but yields a cleaner, fully-abstracted storage layer for rolls.
 
 ### Decision 6: Cursor pagination on GET matching messages
 
