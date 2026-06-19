@@ -1,12 +1,14 @@
 # Campaign Chat Dock — Specification
 
-This document is the canonical specification for the `CampaignChat` dock shell feature (Phase 4c). Implementation: `lib/components/CampaignChat.tsx`, mounted globally in `app/layout.tsx`. Design rationale: `openspec/changes/archive/2026-06-09-campaign-chat-dock-shell/design.md`.
+This document is the canonical specification for the `CampaignChat` dock shell feature (Phase 4c / Phase 5). Implementation: `lib/components/CampaignChat.tsx`, mounted in `app/campaigns/[id]/layout.tsx` (scoped to campaign routes). Design rationale: `openspec/changes/archive/2026-06-09-campaign-chat-dock-shell/design.md`. Live-data wiring: `openspec/specs/campaign-chat-wire/spec.md`.
+
+**Note (Phase 5, issue #315):** `CampaignChat` now requires a `campaignId: string` prop and is mounted in `app/campaigns/[id]/layout.tsx`, not `app/layout.tsx`. The dock shell behavior below is unchanged; live-data requirements are specified in `openspec/specs/campaign-chat-wire/spec.md`.
 
 ---
 
-## Requirement: CampaignChat dock shell renders globally
+## Requirement: CampaignChat dock shell renders on campaign pages
 
-The system SHALL render a `CampaignChat` component on every page of the application via `app/layout.tsx`.
+The system SHALL render a `CampaignChat` component on all campaign routes (`/campaigns/[id]/…`) via `app/campaigns/[id]/layout.tsx`. The component requires a `campaignId: string` prop.
 
 #### Scenario: Pill present on initial render
 

@@ -56,6 +56,7 @@ export function useCampaignStream(
 
       es.addEventListener('heartbeat', handler);
       es.addEventListener('change', handler);
+      es.addEventListener('message', handler);
 
       es.onerror = () => {
         if (torn) { es.close(); return; }
