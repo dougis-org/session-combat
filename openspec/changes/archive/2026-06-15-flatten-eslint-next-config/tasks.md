@@ -72,8 +72,8 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 - [x] Commit all changes to `fix/flatten-eslint-next-config` and push to remote
 - [x] Open PR from `fix/flatten-eslint-next-config` to `main`. PR body **MUST** include `Closes #423`.
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user:
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user:
   1. **Build and tests** — run all steps in Remote push validation; fix any failures, commit, and push before anything else
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address each unresolved thread, commit fixes, run validation, push, wait 180 seconds
   3. **CI check failures** — only after all comments resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks, commit, run validation, push, wait 180 seconds
@@ -92,14 +92,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete
-- [ ] Sync approved spec delta: copy `openspec/changes/flatten-eslint-next-config/specs/eslint-config/spec.md` to `openspec/specs/eslint-config/spec.md`; update relative links from `../../design.md` → `../../changes/archive/YYYY-MM-DD-flatten-eslint-next-config/design.md` and `../../tasks.md` → `../../changes/archive/YYYY-MM-DD-flatten-eslint-next-config/tasks.md`
-- [ ] Archive the change: move `openspec/changes/flatten-eslint-next-config/` to `openspec/changes/archive/YYYY-MM-DD-flatten-eslint-next-config/` — stage copy and deletion **in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-flatten-eslint-next-config/` exists and `openspec/changes/flatten-eslint-next-config/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-flatten-eslint-next-config` then `git push -u origin doc/archive-YYYY-MM-DD-flatten-eslint-next-config`
-- [ ] Open PR from `doc/archive-YYYY-MM-DD-flatten-eslint-next-config` to `main` with title `docs: archive flatten-eslint-next-config (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges; address any comments or CI failures, commit to the doc branch, push, repeat
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D fix/flatten-eslint-next-config doc/archive-YYYY-MM-DD-flatten-eslint-next-config`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks as complete
+- [x] Sync approved spec delta: copy `openspec/changes/flatten-eslint-next-config/specs/eslint-config/spec.md` to `openspec/specs/eslint-config/spec.md`; update relative links from `../../design.md` → `../../changes/archive/YYYY-MM-DD-flatten-eslint-next-config/design.md` and `../../tasks.md` → `../../changes/archive/YYYY-MM-DD-flatten-eslint-next-config/tasks.md`
+- [x] Archive the change: move `openspec/changes/flatten-eslint-next-config/` to `openspec/changes/archive/YYYY-MM-DD-flatten-eslint-next-config/` — stage copy and deletion **in a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-flatten-eslint-next-config/` exists and `openspec/changes/flatten-eslint-next-config/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-flatten-eslint-next-config` then `git push -u origin doc/archive-YYYY-MM-DD-flatten-eslint-next-config`
+- [x] Open PR from `doc/archive-YYYY-MM-DD-flatten-eslint-next-config` to `main` with title `docs: archive flatten-eslint-next-config (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor the doc PR until it merges; address any comments or CI failures, commit to the doc branch, push, repeat
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D fix/flatten-eslint-next-config doc/archive-YYYY-MM-DD-flatten-eslint-next-config`
