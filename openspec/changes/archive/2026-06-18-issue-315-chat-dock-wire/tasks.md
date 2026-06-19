@@ -100,9 +100,9 @@
 - [x] `npx tsc --noEmit` — no TypeScript errors (3 pre-existing errors in unrelated test files)
 - [x] `npm run build` — build succeeds with no errors
 - [x] `npm run lint` — no lint errors (1 pre-existing warning in unrelated file)
-- [ ] Manually open `/campaigns/[id]` in browser: confirm dock pill appears; open dock; confirm "No messages yet" replaced by live feed or history
-- [ ] Manually verify dock pill absent on `/` and `/parties`
-- [ ] All tasks above marked complete
+- [x] Manually open `/campaigns/[id]` in browser: confirm dock pill appears; open dock; confirm "No messages yet" replaced by live feed or history
+- [x] Manually verify dock pill absent on `/` and `/parties`
+- [x] All tasks above marked complete
 
 ## Remote push validation
 
@@ -128,7 +128,7 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 - [x] Open PR from `feat/issue-315-chat-dock-wire` to `main`. PR body MUST include `Closes #315`.
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user:
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, push before anything else this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address each unresolved thread, commit fixes, run validation, push, wait 180 seconds; repeat until all threads resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks, commit, validate, push, wait 180 seconds; restart loop from step 1
@@ -147,15 +147,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update `openspec/specs/campaign-chat-dock/spec.md` with final merged behavior (prop change, layout mount point)
-- [ ] Sync `openspec/changes/issue-315-chat-dock-wire/specs/campaign-chat-wire/spec.md` → `openspec/specs/campaign-chat-wire/spec.md`. After copying, update relative links: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/design.md` and `../../tasks.md` with `../../changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/tasks.md`.
-- [ ] Archive the change: move `openspec/changes/issue-315-chat-dock-wire/` to `openspec/changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/` **in a single atomic commit** (stage both new location and deletion of old location together — never split into two commits).
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/` exists and `openspec/changes/issue-315-chat-dock-wire/` is gone.
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-issue-315-chat-dock-wire` then `git push -u origin doc/archive-YYYY-MM-DD-issue-315-chat-dock-wire`
-- [ ] Open a PR from `doc/archive-…` to `main` with title `docs: archive issue-315-chat-dock-wire (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges (same loop as implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feat/issue-315-chat-dock-wire doc/archive-YYYY-MM-DD-issue-315-chat-dock-wire`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update `openspec/specs/campaign-chat-dock/spec.md` with final merged behavior (prop change, layout mount point)
+- [x] Sync `openspec/changes/issue-315-chat-dock-wire/specs/campaign-chat-wire/spec.md` → `openspec/specs/campaign-chat-wire/spec.md`. After copying, update relative links: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/design.md` and `../../tasks.md` with `../../changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/tasks.md`.
+- [x] Archive the change: move `openspec/changes/issue-315-chat-dock-wire/` to `openspec/changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/` **in a single atomic commit** (stage both new location and deletion of old location together — never split into two commits).
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-issue-315-chat-dock-wire/` exists and `openspec/changes/issue-315-chat-dock-wire/` is gone.
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-issue-315-chat-dock-wire` then `git push -u origin doc/archive-YYYY-MM-DD-issue-315-chat-dock-wire`
+- [x] Open a PR from `doc/archive-…` to `main` with title `docs: archive issue-315-chat-dock-wire (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor the doc PR until it merges (same loop as implementation PR)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/issue-315-chat-dock-wire doc/archive-YYYY-MM-DD-issue-315-chat-dock-wire`
