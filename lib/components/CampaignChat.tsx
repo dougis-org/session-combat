@@ -206,9 +206,10 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
 
   const [members, setMembers] = useState<EnrichedMember[]>([])
 
-  // page and hasMore are only needed in the scroll handler — plain refs, no render needed
-  const pageRef = useRef(1)
+  // Pagination state lives in refs — never rendered, only read by the scroll handler
+  const cursorRef = useRef<string | null>(null)   // nextCursor from last fetch
   const hasMoreRef = useRef(true)
+  const historyLoadedRef = useRef(false)          // guards against re-fetching after stream msgs arrive
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const isLoadingHistoryRef = useRef(false)
   const feedRef = useRef<HTMLDivElement>(null)
@@ -279,18 +280,22 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
 
   // ── History load on expand ──
   useEffect(() => {
-    if (!isExpanded || messages.length > 0) return
+    if (!isExpanded || historyLoadedRef.current) return
+    historyLoadedRef.current = true
     setIsLoadingHistory(true)
     isLoadingHistoryRef.current = true
-    fetch(`/api/campaigns/${campaignId}/messages?page=1&perPage=30`)
+    fetch(`/api/campaigns/${campaignId}/messages?limit=30`)
       .then(r => (r.ok ? r.json() : null))
       .then(data => {
         if (!data?.messages) return
-        const results: CampaignMessage[] = data.messages
-        results.forEach(m => seenIds.current.add(m.id))
-        setMessages(results)
-        hasMoreRef.current = results.length === 30
-        pageRef.current = 1
+        // API returns newest-first; reverse so feed shows oldest at top, newest at bottom
+        const results: CampaignMessage[] = [...data.messages].reverse()
+        // Deduplicate against stream messages that may have arrived while loading
+        const newMsgs = results.filter(m => !seenIds.current.has(m.id))
+        newMsgs.forEach(m => seenIds.current.add(m.id))
+        setMessages(prev => [...newMsgs, ...prev])
+        cursorRef.current = data.nextCursor ?? null
+        hasMoreRef.current = !!data.nextCursor
       })
       .catch(() => { /* leave feed empty */ })
       .finally(() => { setIsLoadingHistory(false); isLoadingHistoryRef.current = false })
@@ -307,21 +312,22 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
       if (!container || container.scrollTop !== 0) return
       if (!hasMoreRef.current || isLoadingHistoryRef.current) return
 
-      const nextPage = pageRef.current + 1
       setIsLoadingHistory(true)
       isLoadingHistoryRef.current = true
       const prevScrollHeight = container.scrollHeight
 
-      fetch(`/api/campaigns/${campaignId}/messages?page=${nextPage}&perPage=30`)
+      const cursor = cursorRef.current
+      fetch(`/api/campaigns/${campaignId}/messages?limit=30${cursor ? `&before=${encodeURIComponent(cursor)}` : ''}`)
         .then(r => (r.ok ? r.json() : null))
         .then(data => {
           if (!data?.messages) return
-          const results: CampaignMessage[] = data.messages
+          // API returns newest-first; reverse so older messages prepend correctly
+          const results: CampaignMessage[] = [...data.messages].reverse()
           const newMsgs = results.filter(m => !seenIds.current.has(m.id))
           newMsgs.forEach(m => seenIds.current.add(m.id))
           setMessages(prev => [...newMsgs, ...prev])
-          hasMoreRef.current = results.length === 30
-          pageRef.current = nextPage
+          cursorRef.current = data.nextCursor ?? null
+          hasMoreRef.current = !!data.nextCursor
           requestAnimationFrame(() => {
             if (!container) return
             container.scrollTop = container.scrollHeight - prevScrollHeight
@@ -362,7 +368,8 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
       setMentionQuery(match[1])
     } else {
       setMentionQuery(null)
-      if (visibility.scope === 'direct') setVisibility({ scope: 'group' })
+      // Only revert direct→group when a mention target was previously selected and has been cleared
+      if (visibility.scope === 'direct' && visibility.toUserId) setVisibility({ scope: 'group' })
     }
   }
 
@@ -397,6 +404,7 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
 
   async function handleSend() {
     if (!composerText.trim() || streamStatus !== 'open' || isSending) return
+    if (visibility.scope === 'direct' && !visibility.toUserId) return
     setIsSending(true)
     const optimisticMsg: CampaignMessage = {
       id: `pending-${Date.now()}`,

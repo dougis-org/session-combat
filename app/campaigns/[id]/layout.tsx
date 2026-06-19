@@ -8,7 +8,7 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
   return (
     <>
       {children}
-      <CampaignChat campaignId={id} />
+      <CampaignChat key={id} campaignId={id} />
     </>
   )
 }

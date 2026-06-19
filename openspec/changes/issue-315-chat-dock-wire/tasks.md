@@ -110,7 +110,7 @@ Before running, determine whether the current change is **docs-only**: run `git 
 
 **Full path** (any non-`.md` file changed):
 
-- **Unit tests** — `npm test` — all tests must pass
+- **Unit tests** — `npm run test:unit` — all tests must pass
 - **Integration tests** — `npm run test:integration` — all tests must pass
 - **Build** — `npm run build` — build must succeed with no errors
 

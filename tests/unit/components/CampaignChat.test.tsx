@@ -276,17 +276,18 @@ it('history is not fetched on mount when dock is collapsed', async () => {
 it('history is fetched when dock is expanded', async () => {
   await openDock()
   await waitFor(() => {
-    expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/messages?page=1&perPage=30'))
+    expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/messages?limit=30'))
   })
 })
 
-// T4d-3: hasMore = false when result count < 30
-it('hasMore is false when history returns fewer than 30 messages', async () => {
+// T4d-3: hasMore = false when API returns no nextCursor
+it('hasMore is false when history response has no nextCursor', async () => {
   const messages = Array.from({ length: 5 }, (_, i) => ({
     id: `msg-${i}`, campaignId: 'test-campaign', senderId: 'user-1',
     senderName: 'Alice', text: `Message ${i}`,
     visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
   }))
+  // No nextCursor in response → no more pages
   setupFetchMock({ messages: { messages } })
   await openDock()
   await waitFor(() => expect(screen.getByText('Message 0')).toBeInTheDocument())
@@ -445,6 +446,18 @@ it('composer text is cleared after successful send', async () => {
 // T8e-3: empty composer does not POST
 it('send does nothing when composer text is empty', async () => {
   const user = await openDock()
+  await user.click(screen.getByRole('button', { name: /send/i }))
+  expect(fetchSpy).not.toHaveBeenCalledWith(
+    expect.stringContaining('/messages'),
+    expect.objectContaining({ method: 'POST' }),
+  )
+})
+
+// T8e-4: direct visibility with no toUserId does not POST
+it('send does nothing when direct visibility has no mention target', async () => {
+  const user = await openDock()
+  await user.selectOptions(screen.getByRole('combobox'), 'direct')
+  await user.type(screen.getByRole('textbox'), 'whisper without target')
   await user.click(screen.getByRole('button', { name: /send/i }))
   expect(fetchSpy).not.toHaveBeenCalledWith(
     expect.stringContaining('/messages'),
