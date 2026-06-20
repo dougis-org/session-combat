@@ -80,11 +80,11 @@ If **ANY** required step fails, iterate and fix before pushing.
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `feat/gridfs-attachment-upload-serve` and push to remote
-- [ ] Open PR from `feat/gridfs-attachment-upload-serve` to `main`. PR body MUST include `Closes #318`.
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin` to force the merge; use `--squash` per repo ruleset)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user:
+- [x] Commit all changes to `feat/gridfs-attachment-upload-serve` and push to remote
+- [x] Open PR from `feat/gridfs-attachment-upload-serve` to `main`. PR body MUST include `Closes #318`.
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin` to force the merge; use `--squash` per repo ruleset)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -105,19 +105,19 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on main
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/`:
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on main
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/`:
   - Copy `openspec/changes/gridfs-attachment-upload-serve/specs/gridfs-upload/spec.md` → `openspec/specs/gridfs-upload/spec.md`
   - Copy `openspec/changes/gridfs-attachment-upload-serve/specs/gridfs-serve/spec.md` → `openspec/specs/gridfs-serve/spec.md`
   - Copy `openspec/changes/gridfs-attachment-upload-serve/specs/gridfs-orphan/spec.md` → `openspec/specs/gridfs-orphan/spec.md`
   - Copy `openspec/changes/gridfs-attachment-upload-serve/specs/campaign-message-type/spec.md` → `openspec/specs/campaign-message-type/spec.md`
   - Update relative links in each copied spec: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-gridfs-attachment-upload-serve/design.md` and `../../tasks.md` with `../../changes/archive/YYYY-MM-DD-gridfs-attachment-upload-serve/tasks.md`
-- [ ] Archive the change: move `openspec/changes/gridfs-attachment-upload-serve/` to `openspec/changes/archive/YYYY-MM-DD-gridfs-attachment-upload-serve/` **in a single atomic commit** (stage both the new location and the deletion of the old location together)
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-gridfs-attachment-upload-serve/` exists and `openspec/changes/gridfs-attachment-upload-serve/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-gridfs-attachment-upload-serve` then `git push -u origin doc/archive-gridfs-attachment-upload-serve`
-- [ ] Open a PR from `doc/archive-gridfs-attachment-upload-serve` to `main` with title `docs: archive gridfs-attachment-upload-serve (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Archive the change: move `openspec/changes/gridfs-attachment-upload-serve/` to `openspec/changes/archive/YYYY-MM-DD-gridfs-attachment-upload-serve/` **in a single atomic commit** (stage both the new location and the deletion of the old location together)
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-gridfs-attachment-upload-serve/` exists and `openspec/changes/gridfs-attachment-upload-serve/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-gridfs-attachment-upload-serve` then `git push -u origin doc/archive-gridfs-attachment-upload-serve`
+- [x] Open a PR from `doc/archive-gridfs-attachment-upload-serve` to `main` with title `docs: archive gridfs-attachment-upload-serve (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
 - [ ] Monitor the doc PR until it merges; address any comments or CI failures
 - [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feat/gridfs-attachment-upload-serve doc/archive-gridfs-attachment-upload-serve`
