@@ -4,9 +4,14 @@ import { useReducer, useEffect, useRef, useState } from 'react'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import { useCampaignStream } from '@/lib/hooks/useCampaignStream'
 import { useAuth } from '@/lib/hooks/useAuth'
-import type { CampaignMessage, CampaignStreamEvent, MessageVisibility } from '@/lib/types'
+import { rollDie } from '@/lib/utils/dice'
+import type { CampaignMessage, CampaignRoll, CampaignStreamEvent, MessageVisibility, RollVisibility } from '@/lib/types'
 
 const PIN_KEY = 'campaign-chat-pin'
+
+type FeedItem =
+  | { kind: 'message'; data: CampaignMessage }
+  | { kind: 'roll'; data: CampaignRoll }
 
 interface EnrichedMember {
   id: string
@@ -56,14 +61,34 @@ function resolveUsername(members: EnrichedMember[], toUserId: string): string {
   return members.find(m => m.userId === toUserId)?.username ?? toUserId
 }
 
+function RollFeedItem({ roll }: { roll: CampaignRoll }) {
+  const ts = new Date(roll.createdAt).toLocaleTimeString()
+  const breakdown = `[${roll.rolls.join(', ')}]`
+  const dmMarker = roll.visibility.scope === 'dm-only' ? '[DM]' : null
+
+  return (
+    <div className="text-sm text-gray-200 bg-gray-700/50 rounded px-2 py-1.5">
+      <div className="flex items-center gap-1 flex-wrap">
+        <span aria-hidden="true">🎲</span>
+        <span className="font-semibold text-white">{roll.rollerName}</span>
+        <span className="text-gray-500 text-xs">{ts}</span>
+        {dmMarker && <span className="ml-1 text-xs text-yellow-400">{dmMarker}</span>}
+      </div>
+      <div className="mt-0.5 text-gray-300">
+        {roll.formula} → {breakdown} = <span className="font-bold text-white">{roll.total}</span>
+      </div>
+    </div>
+  )
+}
+
 interface ChatFeedProps {
-  messages: CampaignMessage[]
+  feed: FeedItem[]
   isLoadingHistory: boolean
   members: EnrichedMember[]
   feedRef: React.RefObject<HTMLDivElement | null>
 }
 
-function ChatFeed({ messages, isLoadingHistory, members, feedRef }: ChatFeedProps) {
+function ChatFeed({ feed, isLoadingHistory, members, feedRef }: ChatFeedProps) {
   function visibilityMarker(visibility: MessageVisibility): string | null {
     if (visibility.scope === 'dm-only') return '[DM]'
     if (visibility.scope === 'direct') return `[→ @${resolveUsername(members, visibility.toUserId)}]`
@@ -75,10 +100,14 @@ function ChatFeed({ messages, isLoadingHistory, members, feedRef }: ChatFeedProp
       {isLoadingHistory && (
         <div className="text-center text-xs text-gray-500 py-1">Loading…</div>
       )}
-      {messages.length === 0 && !isLoadingHistory && (
+      {feed.length === 0 && !isLoadingHistory && (
         <p className="text-gray-500 text-sm">No messages yet.</p>
       )}
-      {messages.map(msg => {
+      {feed.map(item => {
+        if (item.kind === 'roll') {
+          return <RollFeedItem key={item.data.id} roll={item.data} />
+        }
+        const msg = item.data
         const marker = visibilityMarker(msg.visibility)
         const ts = new Date(msg.createdAt).toLocaleTimeString()
         return (
@@ -149,6 +178,7 @@ function ChatComposer({
       )}
       <div className="flex gap-2 items-center">
         <select
+          aria-label="Message visibility"
           value={visibility.scope}
           onChange={e => onVisibilityChange(e.target.value)}
           disabled={isDisabled}
@@ -168,6 +198,7 @@ function ChatComposer({
         <MentionDropdown results={mentionResults} onSelect={onMentionSelect} />
         <textarea
           ref={textareaRef}
+          aria-label="Message"
           value={composerText}
           onChange={onTextChange}
           onKeyDown={onKeyDown}
@@ -190,9 +221,103 @@ function ChatComposer({
   )
 }
 
+const DIE_SIDES = [4, 6, 8, 10, 12, 20] as const
+
+interface RollEntryStripProps {
+  campaignId: string
+  activeSessionId: string | null
+  streamStatus: 'connecting' | 'open' | 'error'
+  onRollPosted: (roll: CampaignRoll) => void
+}
+
+function RollEntryStrip({ campaignId, activeSessionId, streamStatus, onRollPosted }: RollEntryStripProps) {
+  const [modifierText, setModifierText] = useState('0')
+  const modifier = modifierText === '' || modifierText === '-' ? 0 : (parseInt(modifierText, 10) || 0)
+  const [visibility, setVisibility] = useState<RollVisibility>({ scope: 'group' })
+  const [isRolling, setIsRolling] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const isDisabled = activeSessionId !== null ? streamStatus !== 'open' || isRolling : true
+
+  async function handleDieClick(sides: number) {
+    if (isDisabled) return
+    const [result] = rollDie(sides, 1)
+    const total = result + modifier
+    const formula = modifier !== 0
+      ? `1d${sides}${modifier > 0 ? '+' : ''}${modifier}`
+      : `1d${sides}`
+    setIsRolling(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/campaigns/${campaignId}/rolls`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ formula, rolls: [result], total, visibility }),
+      })
+      if (res.status === 201) {
+        const roll: CampaignRoll = await res.json()
+        onRollPosted(roll)
+      } else if (res.status === 409) {
+        setError('No active session')
+      } else {
+        setError('Roll failed, try again')
+      }
+    } catch {
+      setError('Roll failed, try again')
+    } finally {
+      setIsRolling(false)
+    }
+  }
+
+  return (
+    <div className="border-t border-gray-700 p-2 flex-shrink-0">
+      {activeSessionId === null && (
+        <p className="text-xs text-gray-500 mb-1">No active session</p>
+      )}
+      <div className="flex flex-wrap gap-1 items-center">
+        {DIE_SIDES.map(sides => (
+          <button
+            key={sides}
+            type="button"
+            onClick={() => handleDieClick(sides)}
+            disabled={isDisabled}
+            aria-label={`d${sides}`}
+            className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded"
+          >
+            d{sides}
+          </button>
+        ))}
+        <input
+          type="text"
+          inputMode="numeric"
+          value={modifierText}
+          onChange={e => {
+            const v = e.target.value
+            if (v === '' || v === '-' || /^-?\d+$/.test(v)) setModifierText(v)
+          }}
+          disabled={isDisabled}
+          aria-label="Modifier"
+          className="w-14 text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"
+        />
+        <select
+          value={visibility.scope}
+          onChange={e => setVisibility({ scope: e.target.value as RollVisibility['scope'] })}
+          disabled={isDisabled}
+          aria-label="Roll visibility"
+          className="text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"
+        >
+          <option value="group">Group</option>
+          <option value="dm-only">DM-only</option>
+        </select>
+      </div>
+      {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+    </div>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────
 
-export function CampaignChat({ campaignId }: { campaignId: string }) {
+export function CampaignChat({ campaignId, activeSessionId = null }: { campaignId: string; activeSessionId?: string | null }) {
   const { user } = useAuth()
   const [{ isExpanded, isPinned }, dispatch] = useReducer(dockReducer, {
     isExpanded: false,
@@ -201,7 +326,7 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
   const triggerRef = useRef<HTMLButtonElement>(null)
   const isMounted = useRef(false)
 
-  const [messages, setMessages] = useState<CampaignMessage[]>([])
+  const [feed, setFeed] = useState<FeedItem[]>([])
   const seenIds = useRef<Set<string>>(new Set())
 
   const [members, setMembers] = useState<EnrichedMember[]>([])
@@ -230,13 +355,19 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
 
   // ── SSE stream ──
   function onStreamEvent(e: CampaignStreamEvent) {
-    if (e.type !== 'message') return
-    const msg = e.data
-    if (seenIds.current.has(msg.id)) return
-    seenIds.current.add(msg.id)
-    setMessages(prev => [...prev, msg])
-    if (!isExpanded && new Date(msg.createdAt) > lastOpenRef.current) {
-      setUnreadCount(c => c + 1)
+    if (e.type === 'message') {
+      const msg = e.data
+      if (seenIds.current.has(msg.id)) return
+      seenIds.current.add(msg.id)
+      setFeed(prev => [...prev, { kind: 'message', data: msg }])
+      if (!isExpanded && new Date(msg.createdAt) > lastOpenRef.current) {
+        setUnreadCount(c => c + 1)
+      }
+    } else if (e.type === 'roll') {
+      const roll = e.data
+      if (seenIds.current.has(roll.id)) return
+      seenIds.current.add(roll.id)
+      setFeed(prev => [...prev, { kind: 'roll', data: roll }])
     }
   }
 
@@ -284,18 +415,39 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
     historyLoadedRef.current = true
     setIsLoadingHistory(true)
     isLoadingHistoryRef.current = true
-    fetch(`/api/campaigns/${campaignId}/messages?limit=30`)
+
+    const fetchMessages = fetch(`/api/campaigns/${campaignId}/messages?limit=30`)
       .then(r => (r.ok ? r.json() : null))
-      .then(data => {
-        if (!data?.messages) return
-        // API returns newest-first; reverse so feed shows oldest at top, newest at bottom
-        const results: CampaignMessage[] = [...data.messages].reverse()
-        // Deduplicate against stream messages that may have arrived while loading
-        const newMsgs = results.filter(m => !seenIds.current.has(m.id))
-        newMsgs.forEach(m => seenIds.current.add(m.id))
-        setMessages(prev => [...newMsgs, ...prev])
-        cursorRef.current = data.nextCursor ?? null
-        hasMoreRef.current = !!data.nextCursor
+      .catch(() => null)
+
+    const fetchRolls = activeSessionId !== null
+      ? fetch(`/api/campaigns/${campaignId}/rolls?sessionId=${activeSessionId}&limit=30`)
+          .then(r => (r.ok ? r.json() : null))
+          .catch(() => null)
+      : Promise.resolve(null)
+
+    Promise.all([fetchMessages, fetchRolls])
+      .then(([msgData, rollData]) => {
+        if (!msgData?.messages) return
+
+        const rawMsgs: CampaignMessage[] = [...msgData.messages].reverse()
+        const rawRolls: CampaignRoll[] = rollData?.rolls ? [...rollData.rolls].reverse() : []
+
+        const msgItems: FeedItem[] = rawMsgs
+          .filter(m => !seenIds.current.has(m.id))
+          .map(m => { seenIds.current.add(m.id); return { kind: 'message' as const, data: m } })
+
+        const rollItems: FeedItem[] = rawRolls
+          .filter(r => !seenIds.current.has(r.id))
+          .map(r => { seenIds.current.add(r.id); return { kind: 'roll' as const, data: r } })
+
+        const merged = [...msgItems, ...rollItems].sort(
+          (a, b) => new Date(a.data.createdAt).getTime() - new Date(b.data.createdAt).getTime()
+        )
+
+        setFeed(prev => [...merged, ...prev])
+        cursorRef.current = msgData.nextCursor ?? null
+        hasMoreRef.current = !!msgData.nextCursor
       })
       .catch(() => { /* leave feed empty */ })
       .finally(() => { setIsLoadingHistory(false); isLoadingHistoryRef.current = false })
@@ -325,7 +477,8 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
           const results: CampaignMessage[] = [...data.messages].reverse()
           const newMsgs = results.filter(m => !seenIds.current.has(m.id))
           newMsgs.forEach(m => seenIds.current.add(m.id))
-          setMessages(prev => [...newMsgs, ...prev])
+          const newItems: FeedItem[] = newMsgs.map(m => ({ kind: 'message' as const, data: m }))
+          setFeed(prev => [...newItems, ...prev])
           cursorRef.current = data.nextCursor ?? null
           hasMoreRef.current = !!data.nextCursor
           requestAnimationFrame(() => {
@@ -415,7 +568,7 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
       visibility,
       createdAt: new Date(),
     }
-    setMessages(prev => [...prev, optimisticMsg])
+    setFeed(prev => [...prev, { kind: 'message', data: optimisticMsg }])
     seenIds.current.add(optimisticMsg.id)
 
     try {
@@ -434,6 +587,12 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
     } finally {
       setIsSending(false)
     }
+  }
+
+  function handleRollPosted(roll: CampaignRoll) {
+    if (seenIds.current.has(roll.id)) return
+    seenIds.current.add(roll.id)
+    setFeed(prev => [...prev, { kind: 'roll', data: roll }])
   }
 
   // ── Collapsed pill ──
@@ -488,7 +647,7 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
         </div>
       </div>
       <ChatFeed
-        messages={messages}
+        feed={feed}
         isLoadingHistory={isLoadingHistory}
         members={members}
         feedRef={feedRef}
@@ -507,6 +666,12 @@ export function CampaignChat({ campaignId }: { campaignId: string }) {
         mentionResults={mentionResults}
         onMentionSelect={handleMentionSelect}
         textareaRef={textareaRef}
+      />
+      <RollEntryStrip
+        campaignId={campaignId}
+        activeSessionId={activeSessionId}
+        streamStatus={streamStatus}
+        onRollPosted={handleRollPosted}
       />
     </div>
   )

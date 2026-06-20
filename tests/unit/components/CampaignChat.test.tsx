@@ -339,15 +339,18 @@ it('LocalStore.get throwing does not crash the component', () => {
 // T6e-1: three visibility options present when dock is open
 it('composer shows three visibility options when dock is expanded', async () => {
   await openDock()
-  expect(screen.getByRole('option', { name: 'Group' })).toBeInTheDocument()
-  expect(screen.getByRole('option', { name: 'DM-only' })).toBeInTheDocument()
-  expect(screen.getByRole('option', { name: 'Whisper' })).toBeInTheDocument()
+  const msgSelect = screen.getByRole('combobox', { name: 'Message visibility' })
+  expect(msgSelect).toBeInTheDocument()
+  const options = Array.from(msgSelect.querySelectorAll('option')).map(o => o.textContent)
+  expect(options).toContain('Group')
+  expect(options).toContain('DM-only')
+  expect(options).toContain('Whisper')
 })
 
 // T6e-2: selecting DM-only changes visibility
 it('selecting DM-only visibility updates the select value', async () => {
   const user = await openDock()
-  const select = screen.getByRole('combobox')
+  const select = screen.getByRole('combobox', { name: 'Message visibility' })
   await user.selectOptions(select, 'dm-only')
   expect((select as HTMLSelectElement).value).toBe('dm-only')
 })
@@ -360,7 +363,7 @@ it('composer is disabled when stream status is not open', async () => {
     return { status: 'error' }
   })
   await openDock()
-  expect(screen.getByRole('textbox')).toBeDisabled()
+  expect(screen.getByRole('textbox', { name: 'Message' })).toBeDisabled()
   expect(screen.getByRole('button', { name: /send/i })).toBeDisabled()
   ;(useCampaignStream as jest.Mock).mockImplementation((_, onEvent) => {
     capturedOnEvent = onEvent
@@ -375,7 +378,7 @@ it('typing @prefix shows matching member in dropdown', async () => {
   withMembers([{ id: 'm2', userId: 'u2', username: 'bob' }])
   const user = await openDock()
   await waitFor(() => expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members')))
-  await user.type(screen.getByRole('textbox'), '@al')
+  await user.type(screen.getByRole('textbox', { name: 'Message' }), '@al')
   await waitFor(() => expect(screen.getByText('@alice')).toBeInTheDocument())
   expect(screen.queryByText('@bob')).not.toBeInTheDocument()
 })
@@ -385,7 +388,7 @@ it('no matching members hides the mention dropdown', async () => {
   withMembers()
   const user = await openDock()
   await waitFor(() => expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members')))
-  await user.type(screen.getByRole('textbox'), '@xyz')
+  await user.type(screen.getByRole('textbox', { name: 'Message' }), '@xyz')
   await waitFor(() => expect(screen.queryByText('@alice')).not.toBeInTheDocument())
 })
 
@@ -394,12 +397,12 @@ it('selecting mention sets visibility to direct and updates textarea', async () 
   withMembers()
   const user = await openDock()
   await waitFor(() => expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members')))
-  await user.type(screen.getByRole('textbox'), '@al')
+  await user.type(screen.getByRole('textbox', { name: 'Message' }), '@al')
   await waitFor(() => screen.getByText('@alice'))
   fireEvent.mouseDown(screen.getByText('@alice'))
   await waitFor(() => {
-    expect((screen.getByRole('textbox') as HTMLTextAreaElement).value).toContain('@alice')
-    expect(screen.getByRole('combobox')).toHaveValue('direct')
+    expect((screen.getByRole('textbox', { name: 'Message' }) as HTMLTextAreaElement).value).toContain('@alice')
+    expect(screen.getByRole('combobox', { name: 'Message visibility' })).toHaveValue('direct')
   })
 })
 
@@ -408,12 +411,12 @@ it('deleting @mention text resets visibility to group', async () => {
   withMembers()
   const user = await openDock()
   await waitFor(() => expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members')))
-  await user.type(screen.getByRole('textbox'), '@al')
+  await user.type(screen.getByRole('textbox', { name: 'Message' }), '@al')
   await waitFor(() => screen.getByText('@alice'))
   fireEvent.mouseDown(screen.getByText('@alice'))
-  await waitFor(() => expect(screen.getByRole('combobox')).toHaveValue('direct'))
-  fireEvent.change(screen.getByRole('textbox'), { target: { value: '', selectionStart: 0 } })
-  expect(screen.getByRole('combobox')).toHaveValue('group')
+  await waitFor(() => expect(screen.getByRole('combobox', { name: 'Message visibility' })).toHaveValue('direct'))
+  fireEvent.change(screen.getByRole('textbox', { name: 'Message' }), { target: { value: '', selectionStart: 0 } })
+  expect(screen.getByRole('combobox', { name: 'Message visibility' })).toHaveValue('group')
 })
 
 // ── T8 — Send tests ──────────────────────────────────────────────────
@@ -421,7 +424,7 @@ it('deleting @mention text resets visibility to group', async () => {
 // T8e-1: POST called with correct body on send
 it('send button calls POST with text and visibility', async () => {
   const user = await openDock()
-  await user.type(screen.getByRole('textbox'), 'Hello everyone')
+  await user.type(screen.getByRole('textbox', { name: 'Message' }), 'Hello everyone')
   await user.click(screen.getByRole('button', { name: /send/i }))
   await waitFor(() => {
     expect(fetchSpy).toHaveBeenCalledWith(
@@ -437,7 +440,7 @@ it('send button calls POST with text and visibility', async () => {
 // T8e-2: composer cleared on successful send
 it('composer text is cleared after successful send', async () => {
   const user = await openDock()
-  const textarea = screen.getByRole('textbox')
+  const textarea = screen.getByRole('textbox', { name: 'Message' })
   await user.type(textarea, 'Clear me')
   await user.click(screen.getByRole('button', { name: /send/i }))
   await waitFor(() => expect((textarea as HTMLTextAreaElement).value).toBe(''))
@@ -456,8 +459,8 @@ it('send does nothing when composer text is empty', async () => {
 // T8e-4: direct visibility with no toUserId does not POST
 it('send does nothing when direct visibility has no mention target', async () => {
   const user = await openDock()
-  await user.selectOptions(screen.getByRole('combobox'), 'direct')
-  await user.type(screen.getByRole('textbox'), 'whisper without target')
+  await user.selectOptions(screen.getByRole('combobox', { name: 'Message visibility' }), 'direct')
+  await user.type(screen.getByRole('textbox', { name: 'Message' }), 'whisper without target')
   await user.click(screen.getByRole('button', { name: /send/i }))
   expect(fetchSpy).not.toHaveBeenCalledWith(
     expect.stringContaining('/messages'),
