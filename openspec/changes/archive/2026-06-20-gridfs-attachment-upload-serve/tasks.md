@@ -117,7 +117,7 @@ Blocking resolution flow:
 - [x] Archive the change: move `openspec/changes/gridfs-attachment-upload-serve/` to `openspec/changes/archive/YYYY-MM-DD-gridfs-attachment-upload-serve/` **in a single atomic commit** (stage both the new location and the deletion of the old location together)
 - [x] Confirm `openspec/changes/archive/YYYY-MM-DD-gridfs-attachment-upload-serve/` exists and `openspec/changes/gridfs-attachment-upload-serve/` is gone
 - [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-gridfs-attachment-upload-serve` then `git push -u origin doc/archive-gridfs-attachment-upload-serve`
-- [ ] Open a PR from `doc/archive-gridfs-attachment-upload-serve` to `main` with title `docs: archive gridfs-attachment-upload-serve (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Open a PR from `doc/archive-gridfs-attachment-upload-serve` to `main` with title `docs: archive gridfs-attachment-upload-serve (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
 - [ ] Monitor the doc PR until it merges; address any comments or CI failures
 - [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feat/gridfs-attachment-upload-serve doc/archive-gridfs-attachment-upload-serve`
