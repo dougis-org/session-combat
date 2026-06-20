@@ -350,6 +350,30 @@ it('selecting DM-only sends correct scope', async () => {
   })
 })
 
+// T4.8 — buttons disabled while roll is in flight
+it('all die buttons are disabled while a roll POST is in flight', async () => {
+  let resolvePost: (value: unknown) => void
+  fetchSpy.mockImplementation((url: string, init?: RequestInit) => {
+    if (url.includes('/rolls') && init?.method === 'POST') {
+      return new Promise(resolve => { resolvePost = resolve })
+    }
+    if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
+    if (url.includes('/messages')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
+    if (url.includes('/rolls')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ rolls: [] }) })
+    return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+  })
+  await openDock('session-1')
+  // Click a die button — POST hangs
+  userEvent.click(screen.getByRole('button', { name: 'd6' }))
+  // While in flight, all die buttons should be disabled
+  await waitFor(() => {
+    expect(screen.getByRole('button', { name: 'd6' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'd20' })).toBeDisabled()
+  })
+  // Resolve the POST to clean up
+  resolvePost!({ ok: true, status: 201, json: () => Promise.resolve(makeRoll()) })
+})
+
 // T4.9
 it('409 response shows inline "No active session" error', async () => {
   setupFetchMock({ rollPostStatus: 409 })

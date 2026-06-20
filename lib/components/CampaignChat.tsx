@@ -198,6 +198,7 @@ function ChatComposer({
         <MentionDropdown results={mentionResults} onSelect={onMentionSelect} />
         <textarea
           ref={textareaRef}
+          aria-label="Message"
           value={composerText}
           onChange={onTextChange}
           onKeyDown={onKeyDown}
@@ -230,12 +231,13 @@ interface RollEntryStripProps {
 }
 
 function RollEntryStrip({ campaignId, activeSessionId, streamStatus, onRollPosted }: RollEntryStripProps) {
-  const [modifier, setModifier] = useState(0)
+  const [modifierText, setModifierText] = useState('0')
+  const modifier = modifierText === '' || modifierText === '-' ? 0 : (parseInt(modifierText, 10) || 0)
   const [visibility, setVisibility] = useState<RollVisibility>({ scope: 'group' })
   const [isRolling, setIsRolling] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const isDisabled = activeSessionId === null || streamStatus !== 'open' || isRolling
+  const isDisabled = activeSessionId !== null ? streamStatus !== 'open' || isRolling : true
 
   async function handleDieClick(sides: number) {
     if (isDisabled) return
@@ -286,9 +288,13 @@ function RollEntryStrip({ campaignId, activeSessionId, streamStatus, onRollPoste
           </button>
         ))}
         <input
-          type="number"
-          value={modifier}
-          onChange={e => setModifier(parseInt(e.target.value, 10) || 0)}
+          type="text"
+          inputMode="numeric"
+          value={modifierText}
+          onChange={e => {
+            const v = e.target.value
+            if (v === '' || v === '-' || /^-?\d+$/.test(v)) setModifierText(v)
+          }}
           disabled={isDisabled}
           aria-label="Modifier"
           className="w-14 text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"
@@ -412,10 +418,12 @@ export function CampaignChat({ campaignId, activeSessionId = null }: { campaignI
 
     const fetchMessages = fetch(`/api/campaigns/${campaignId}/messages?limit=30`)
       .then(r => (r.ok ? r.json() : null))
+      .catch(() => null)
 
-    const fetchRolls = activeSessionId
+    const fetchRolls = activeSessionId !== null
       ? fetch(`/api/campaigns/${campaignId}/rolls?sessionId=${activeSessionId}&limit=30`)
           .then(r => (r.ok ? r.json() : null))
+          .catch(() => null)
       : Promise.resolve(null)
 
     Promise.all([fetchMessages, fetchRolls])
