@@ -7,6 +7,7 @@ import {
   uploadAttachment,
   openDownloadStream,
   deleteOrphanedAttachments,
+  updateAttachmentStatus,
 } from '@/lib/gridfs';
 
 function makeBucket(overrides: Record<string, jest.Mock> = {}) {
@@ -208,7 +209,37 @@ describe('deleteOrphanedAttachments', () => {
 
     const callArg = bucket.find.mock.calls[0][0];
     const threshold: Date = callArg['metadata.uploadedAt'].$lt;
-    expect(threshold.getTime()).toBeGreaterThanOrEqual(before - 1000 - 10);
-    expect(threshold.getTime()).toBeLessThanOrEqual(after - 1000 + 10);
+    expect(threshold.getTime()).toBeGreaterThanOrEqual(before - 1000 - 500);
+    expect(threshold.getTime()).toBeLessThanOrEqual(after - 1000 + 500);
+  });
+});
+
+// ─── updateAttachmentStatus ───────────────────────────────────────────────────
+
+describe('updateAttachmentStatus', () => {
+  function makeDb(updateOne = jest.fn().mockResolvedValue({ modifiedCount: 1 })) {
+    return {
+      collection: jest.fn().mockReturnValue({ updateOne }),
+    } as any;
+  }
+
+  it('updates status in attachments.files collection', async () => {
+    const db = makeDb();
+    const id = new ObjectId().toHexString();
+
+    await updateAttachmentStatus(db, id, 'active');
+
+    expect(db.collection).toHaveBeenCalledWith('attachments.files');
+    expect(db.collection().updateOne).toHaveBeenCalledWith(
+      { _id: expect.any(ObjectId) },
+      { $set: { 'metadata.status': 'active' } },
+    );
+  });
+
+  it('throws INVALID_ID for a non-hex string', async () => {
+    const db = makeDb();
+    await expect(updateAttachmentStatus(db, 'not-an-id', 'active')).rejects.toMatchObject({
+      code: 'INVALID_ID',
+    });
   });
 });

@@ -5,7 +5,7 @@ export type MessageVisibility =
   | { scope: "dm-only" }
   | { scope: "direct"; toUserId: string };
 
-export type MessageKind = 'chat' | 'scene';
+export type MessageKind = "chat" | "scene";
 
 export interface CampaignMessage {
   _id?: string;

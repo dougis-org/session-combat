@@ -41,6 +41,9 @@ export const GET = withAuthAndParams<Params>(
         stream.on('end', () => controller.close());
         stream.on('error', (err) => controller.error(err));
       },
+      cancel() {
+        stream.destroy();
+      },
     });
 
     return new NextResponse(readableStream, {

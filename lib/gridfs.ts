@@ -29,6 +29,19 @@ export async function uploadAttachment(
   return id.toHexString();
 }
 
+export async function updateAttachmentStatus(
+  db: Db,
+  attachmentId: string,
+  status: string,
+): Promise<void> {
+  if (!ObjectId.isValid(attachmentId)) {
+    throw Object.assign(new Error('Invalid attachmentId'), { code: 'INVALID_ID' });
+  }
+  await db
+    .collection('attachments.files')
+    .updateOne({ _id: new ObjectId(attachmentId) }, { $set: { 'metadata.status': status } });
+}
+
 export async function openDownloadStream(
   bucket: GridFSBucket,
   attachmentId: string,
