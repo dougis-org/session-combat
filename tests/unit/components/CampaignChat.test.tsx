@@ -339,15 +339,19 @@ it('LocalStore.get throwing does not crash the component', () => {
 // T6e-1: three visibility options present when dock is open
 it('composer shows three visibility options when dock is expanded', async () => {
   await openDock()
-  expect(screen.getByRole('option', { name: 'Group' })).toBeInTheDocument()
-  expect(screen.getByRole('option', { name: 'DM-only' })).toBeInTheDocument()
+  const msgSelect = screen.getByRole('combobox', { name: 'Message visibility' })
+  expect(msgSelect).toBeInTheDocument()
   expect(screen.getByRole('option', { name: 'Whisper' })).toBeInTheDocument()
+  // Verify message visibility has all three options
+  expect(msgSelect).toContainHTML('Group')
+  expect(msgSelect).toContainHTML('DM-only')
+  expect(msgSelect).toContainHTML('Whisper')
 })
 
 // T6e-2: selecting DM-only changes visibility
 it('selecting DM-only visibility updates the select value', async () => {
   const user = await openDock()
-  const select = screen.getByRole('combobox')
+  const select = screen.getByRole('combobox', { name: 'Message visibility' })
   await user.selectOptions(select, 'dm-only')
   expect((select as HTMLSelectElement).value).toBe('dm-only')
 })
@@ -399,7 +403,7 @@ it('selecting mention sets visibility to direct and updates textarea', async () 
   fireEvent.mouseDown(screen.getByText('@alice'))
   await waitFor(() => {
     expect((screen.getByRole('textbox') as HTMLTextAreaElement).value).toContain('@alice')
-    expect(screen.getByRole('combobox')).toHaveValue('direct')
+    expect(screen.getByRole('combobox', { name: 'Message visibility' })).toHaveValue('direct')
   })
 })
 
@@ -411,9 +415,9 @@ it('deleting @mention text resets visibility to group', async () => {
   await user.type(screen.getByRole('textbox'), '@al')
   await waitFor(() => screen.getByText('@alice'))
   fireEvent.mouseDown(screen.getByText('@alice'))
-  await waitFor(() => expect(screen.getByRole('combobox')).toHaveValue('direct'))
+  await waitFor(() => expect(screen.getByRole('combobox', { name: 'Message visibility' })).toHaveValue('direct'))
   fireEvent.change(screen.getByRole('textbox'), { target: { value: '', selectionStart: 0 } })
-  expect(screen.getByRole('combobox')).toHaveValue('group')
+  expect(screen.getByRole('combobox', { name: 'Message visibility' })).toHaveValue('group')
 })
 
 // ── T8 — Send tests ──────────────────────────────────────────────────
@@ -456,7 +460,7 @@ it('send does nothing when composer text is empty', async () => {
 // T8e-4: direct visibility with no toUserId does not POST
 it('send does nothing when direct visibility has no mention target', async () => {
   const user = await openDock()
-  await user.selectOptions(screen.getByRole('combobox'), 'direct')
+  await user.selectOptions(screen.getByRole('combobox', { name: 'Message visibility' }), 'direct')
   await user.type(screen.getByRole('textbox'), 'whisper without target')
   await user.click(screen.getByRole('button', { name: /send/i }))
   expect(fetchSpy).not.toHaveBeenCalledWith(
