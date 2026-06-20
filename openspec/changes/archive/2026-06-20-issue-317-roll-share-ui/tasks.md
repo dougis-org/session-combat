@@ -154,8 +154,8 @@ Blocking resolution flow:
 - [x] Sync approved spec deltas: copy `openspec/changes/issue-317-roll-share-ui/specs/roll-share-ui/spec.md` to `openspec/specs/roll-share-ui/spec.md`; update relative links in the copied file: replace `../../design.md` → `../../changes/archive/YYYY-MM-DD-issue-317-roll-share-ui/design.md` and `../../tasks.md` → `../../changes/archive/YYYY-MM-DD-issue-317-roll-share-ui/tasks.md`
 - [x] Archive the change: move `openspec/changes/issue-317-roll-share-ui/` to `openspec/changes/archive/YYYY-MM-DD-issue-317-roll-share-ui/` — **stage both the copy and the deletion in a single commit**
 - [x] Confirm `openspec/changes/archive/YYYY-MM-DD-issue-317-roll-share-ui/` exists and `openspec/changes/issue-317-roll-share-ui/` is gone
-- [ ] **Create doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-issue-317-roll-share-ui` then `git push -u origin doc/archive-YYYY-MM-DD-issue-317-roll-share-ui`
-- [ ] Open PR from `doc/archive-YYYY-MM-DD-issue-317-roll-share-ui` to `main` with title `docs: archive issue-317-roll-share-ui (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until merged (same loop — address comments/CI, push to doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feature/issue-317-roll-share-ui doc/archive-YYYY-MM-DD-issue-317-roll-share-ui`
+- [x] **Create doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-issue-317-roll-share-ui` then `git push -u origin doc/archive-YYYY-MM-DD-issue-317-roll-share-ui`
+- [x] Open PR from `doc/archive-YYYY-MM-DD-issue-317-roll-share-ui` to `main` with title `docs: archive issue-317-roll-share-ui (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor the doc PR until merged (same loop — address comments/CI, push to doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feature/issue-317-roll-share-ui doc/archive-YYYY-MM-DD-issue-317-roll-share-ui`
