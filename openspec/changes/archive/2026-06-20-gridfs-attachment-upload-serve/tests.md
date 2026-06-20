@@ -18,7 +18,7 @@ Test files:
 
 ## T0 — `CampaignMessage` type extension (`lib/types.ts`)
 
-Spec: `openspec/changes/gridfs-attachment-upload-serve/specs/campaign-message-type/spec.md`
+Spec: `openspec/changes/archive/2026-06-20-gridfs-attachment-upload-serve/specs/campaign-message-type/spec.md`
 
 - [x] **T0-1** TypeScript compiles with `kind` and `attachmentId` absent — existing `CampaignMessage` objects remain valid (`npx tsc --noEmit`)
 - [x] **T0-2** TypeScript accepts `{ kind: 'scene', attachmentId: 'abc123' }` on a `CampaignMessage` without error
@@ -28,7 +28,7 @@ Spec: `openspec/changes/gridfs-attachment-upload-serve/specs/campaign-message-ty
 
 ## T1 — `lib/gridfs.ts` helper module
 
-Spec: `openspec/changes/gridfs-attachment-upload-serve/specs/gridfs-upload/spec.md`, `specs/gridfs-orphan/spec.md`
+Spec: `openspec/changes/archive/2026-06-20-gridfs-attachment-upload-serve/specs/gridfs-upload/spec.md`, `specs/gridfs-orphan/spec.md`
 
 File: `tests/unit/lib/gridfs.test.ts`
 
@@ -58,7 +58,7 @@ File: `tests/unit/lib/gridfs.test.ts`
 
 ## T2 — `POST /api/campaigns/[id]/attachments`
 
-Spec: `openspec/changes/gridfs-attachment-upload-serve/specs/gridfs-upload/spec.md`
+Spec: `openspec/changes/archive/2026-06-20-gridfs-attachment-upload-serve/specs/gridfs-upload/spec.md`
 
 File: `tests/integration/api/campaigns/[id]/attachments/route.test.ts`
 
@@ -82,7 +82,7 @@ File: `tests/integration/api/campaigns/[id]/attachments/route.test.ts`
 
 ## T3 — `GET /api/campaigns/[id]/attachments/[attachmentId]`
 
-Spec: `openspec/changes/gridfs-attachment-upload-serve/specs/gridfs-serve/spec.md`
+Spec: `openspec/changes/archive/2026-06-20-gridfs-attachment-upload-serve/specs/gridfs-serve/spec.md`
 
 File: `tests/integration/api/campaigns/[id]/attachments/[attachmentId]/route.test.ts`
 
