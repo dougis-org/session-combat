@@ -144,6 +144,13 @@ describe('openDownloadStream', () => {
       code: 'INVALID_ID',
     });
   });
+
+  it('throws INVALID_ID for a 12-char string (non-hex ObjectId)', async () => {
+    const bucket = makeBucket();
+    await expect(openDownloadStream(bucket, 'abcdef123456')).rejects.toMatchObject({
+      code: 'INVALID_ID',
+    });
+  });
 });
 
 // ─── deleteOrphanedAttachments ────────────────────────────────────────────────

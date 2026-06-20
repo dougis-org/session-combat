@@ -1,5 +1,9 @@
 import { Db, ObjectId, GridFSBucket, GridFSBucketReadStream } from 'mongodb';
 
+function isHexObjectId(id: string): boolean {
+  return /^[0-9a-f]{24}$/i.test(id);
+}
+
 export function getAttachmentsBucket(db: Db): GridFSBucket {
   return new GridFSBucket(db, { bucketName: 'attachments' });
 }
@@ -34,7 +38,7 @@ export async function updateAttachmentStatus(
   attachmentId: string,
   status: string,
 ): Promise<void> {
-  if (!ObjectId.isValid(attachmentId)) {
+  if (!isHexObjectId(attachmentId)) {
     throw Object.assign(new Error('Invalid attachmentId'), { code: 'INVALID_ID' });
   }
   await db
@@ -46,7 +50,7 @@ export async function openDownloadStream(
   bucket: GridFSBucket,
   attachmentId: string,
 ): Promise<{ stream: GridFSBucketReadStream; contentType: string; campaignId: string }> {
-  if (!ObjectId.isValid(attachmentId)) {
+  if (!isHexObjectId(attachmentId)) {
     throw Object.assign(new Error('Invalid attachmentId'), { code: 'INVALID_ID' });
   }
 
@@ -80,7 +84,9 @@ export async function deleteOrphanedAttachments(
       })
       .toArray();
 
-    await Promise.all(orphans.map((f) => bucket.delete(f._id)));
+    for (const orphan of orphans) {
+      await bucket.delete(orphan._id);
+    }
   } catch (err) {
     console.error('deleteOrphanedAttachments error:', err);
   }

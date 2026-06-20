@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
@@ -35,18 +36,7 @@ export const GET = withAuthAndParams<Params>(
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    const readableStream = new ReadableStream({
-      start(controller) {
-        stream.on('data', (chunk: Buffer) => controller.enqueue(chunk));
-        stream.on('end', () => controller.close());
-        stream.on('error', (err) => controller.error(err));
-      },
-      cancel() {
-        stream.destroy();
-      },
-    });
-
-    return new NextResponse(readableStream, {
+    return new NextResponse(Readable.toWeb(stream) as ReadableStream, {
       status: 200,
       headers: { 'Content-Type': contentType },
     });

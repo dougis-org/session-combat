@@ -36,11 +36,16 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     return NextResponse.json({ error: 'File exceeds 5 MB limit' }, { status: 413 });
   }
 
-  const db = await getDatabase();
-  const bucket = getAttachmentsBucket(db);
+  let attachmentId: string;
+  try {
+    const db = await getDatabase();
+    const bucket = getAttachmentsBucket(db);
+    await deleteOrphanedAttachments(bucket, campaignId);
+    attachmentId = await uploadAttachment(bucket, file, campaignId);
+  } catch (err) {
+    console.error('uploadAttachment error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 
-  await deleteOrphanedAttachments(bucket, campaignId);
-
-  const attachmentId = await uploadAttachment(bucket, file, campaignId);
   return NextResponse.json({ attachmentId }, { status: 201 });
 });

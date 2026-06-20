@@ -8,7 +8,6 @@ import { getDatabase } from "@/lib/db";
 import * as gridfs from "@/lib/gridfs";
 import {
   MOCK_AUTH,
-  makeRouteRequest,
   mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 
