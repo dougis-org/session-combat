@@ -163,6 +163,16 @@ describe("POST /messages — scene kind", () => {
     expect(body.kind).toBeUndefined();
   });
 
+  it("T1-8b: DM POSTs scene with caption > 5000 chars → 400", async () => {
+    mockedStorage.getMember.mockResolvedValue(DM_MEMBER);
+
+    const res = await POST(
+      makePost({ kind: "scene", text: "x".repeat(5001), visibility: { scope: "group" } }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(400);
+  });
+
   it("T1-8: Scene POST calls emitFiltered with kind:'scene' in data", async () => {
     mockedStorage.getMember.mockResolvedValue(DM_MEMBER);
     mockDbCollection(mockedGetDatabase, { insertOne: makeMockInsertOne() });

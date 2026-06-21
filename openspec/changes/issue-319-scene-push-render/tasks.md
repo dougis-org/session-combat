@@ -127,7 +127,7 @@ File: `tests/unit/components/CampaignChat.test.tsx` (extend existing or new)
 ## Validation
 
 - [x] `npx tsc --noEmit` — no type errors
-- [x] `npm run test` — all unit tests pass
+- [x] `npm run test:unit` — all unit tests pass
 - [x] `npm run test:integration` — all integration tests pass
 - [x] `npm run build` — build succeeds
 - [x] All tasks T1–T9 marked complete
@@ -138,7 +138,7 @@ Before running, determine whether the current change is **docs-only**: run `git 
 
 **Full path** (any non-`.md` file changed):
 
-- **Unit tests** — `npm test` — all tests must pass
+- **Unit tests** — `npm run test:unit` — all tests must pass
 - **Integration tests** — `npm run test:integration` — all tests must pass
 - **Build** — `npm run build` — must succeed with no errors
 

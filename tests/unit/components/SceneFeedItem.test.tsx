@@ -37,10 +37,10 @@ it('scene with text renders caption', () => {
 
 // T4-3
 it('scene with image only: <img> present; no caption paragraph', () => {
-  renderItem(makeMsg({ attachmentId: 'att-abc', text: '' }))
+  const { container } = renderItem(makeMsg({ attachmentId: 'att-abc', text: '' }))
   expect(screen.getByRole('img', { name: /scene image/i })).toBeInTheDocument()
-  // Empty text means no <p> caption element
-  expect(screen.queryByRole('paragraph')).not.toBeInTheDocument()
+  // Empty text → no <p> caption rendered
+  expect(container.querySelector('p')).not.toBeInTheDocument()
 })
 
 // T4-4
@@ -51,10 +51,10 @@ it('scene with caption only: caption present; no <img>', () => {
 })
 
 // T4-5
-it('clicking image calls showModal() on the dialog', () => {
+it('clicking the enlarge button calls showModal() on the dialog', () => {
   const showModalSpy = jest.spyOn(HTMLDialogElement.prototype, 'showModal')
   renderItem(makeMsg({ attachmentId: 'att-abc' }))
-  fireEvent.click(screen.getByRole('img', { name: /scene image/i }))
+  fireEvent.click(screen.getByRole('button', { name: /enlarge scene image/i }))
   expect(showModalSpy).toHaveBeenCalledTimes(1)
   showModalSpy.mockRestore()
 })

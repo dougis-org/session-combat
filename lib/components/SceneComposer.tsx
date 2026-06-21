@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { CampaignMessage } from '@/lib/types'
 
 interface SceneComposerProps {
@@ -13,16 +13,19 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 
 export function SceneComposer({ campaignId, onSuccess, onCancel }: SceneComposerProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
   const [caption, setCaption] = useState('')
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploadedAttachmentId, setUploadedAttachmentId] = useState<string | null>(null)
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0] ?? null
     setFileError(null)
     setSubmitError(null)
+    setUploadedAttachmentId(null)
     if (!selected) {
       setFile(null)
       return
@@ -30,43 +33,55 @@ export function SceneComposer({ campaignId, onSuccess, onCancel }: SceneComposer
     if (!ALLOWED_TYPES.includes(selected.type)) {
       setFileError('Invalid file type. Please select a JPEG, PNG, WebP, or GIF image.')
       setFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
     if (selected.size > MAX_FILE_SIZE) {
       setFileError('File exceeds 5 MB limit.')
       setFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
     setFile(selected)
   }
 
-  const canSend = !!(file && !fileError && !isSubmitting)
+  const canSend = !isSubmitting && !fileError && (!!file || caption.trim().length > 0)
 
   async function handleSend() {
-    if (!canSend || !file) return
+    if (!canSend) return
     setIsSubmitting(true)
     setSubmitError(null)
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      const uploadRes = await fetch(`/api/campaigns/${campaignId}/attachments`, {
-        method: 'POST',
-        body: formData,
-      })
-      if (!uploadRes.ok) {
-        const uploadData = await uploadRes.json().catch(() => ({})) as { error?: string }
-        setSubmitError(uploadData.error ?? 'Upload failed. Please try again.')
-        return
+      let attachmentId: string | null = null
+
+      if (file) {
+        let currentAttachmentId = uploadedAttachmentId
+        if (!currentAttachmentId) {
+          const formData = new FormData()
+          formData.append('file', file)
+          const uploadRes = await fetch(`/api/campaigns/${campaignId}/attachments`, {
+            method: 'POST',
+            body: formData,
+          })
+          if (!uploadRes.ok) {
+            const uploadData = await uploadRes.json().catch(() => ({})) as { error?: string }
+            setSubmitError(uploadData.error ?? 'Upload failed. Please try again.')
+            return
+          }
+          const { attachmentId: id } = await uploadRes.json() as { attachmentId: string }
+          currentAttachmentId = id
+          setUploadedAttachmentId(id)
+        }
+        attachmentId = currentAttachmentId
       }
-      const { attachmentId } = await uploadRes.json() as { attachmentId: string }
 
       const msgRes = await fetch(`/api/campaigns/${campaignId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           kind: 'scene',
-          attachmentId,
+          ...(attachmentId ? { attachmentId } : {}),
           text: caption.trim(),
           visibility: { scope: 'group' },
         }),
@@ -89,6 +104,7 @@ export function SceneComposer({ campaignId, onSuccess, onCancel }: SceneComposer
     <div className="border border-gray-600 bg-gray-800/80 rounded p-3 flex flex-col gap-2 flex-shrink-0">
       <span className="text-xs font-semibold text-yellow-400 uppercase tracking-wide">Scene</span>
       <input
+        ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp,image/gif"
         onChange={handleFileChange}

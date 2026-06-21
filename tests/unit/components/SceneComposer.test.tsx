@@ -66,7 +66,7 @@ function renderComposer() {
 }
 
 // T3-1
-it('Send button is disabled when no file is selected', () => {
+it('Send button is disabled when no file and no caption', () => {
   renderComposer()
   expect(screen.getByRole('button', { name: /send/i })).toBeDisabled()
 })
@@ -163,6 +163,26 @@ it('Cancel button calls onCancel without making any fetch calls', async () => {
   await user.click(screen.getByRole('button', { name: /cancel/i }))
   expect(onCancel).toHaveBeenCalledTimes(1)
   expect(fetchSpy).not.toHaveBeenCalled()
+})
+
+// T3-10: caption-only (no file) enables Send and skips /attachments
+it('caption-only scene enables Send and posts directly to /messages without upload', async () => {
+  const user = userEvent.setup()
+  renderComposer()
+  await user.type(screen.getByLabelText('Scene caption'), 'Just text, no image')
+  expect(screen.getByRole('button', { name: /send/i })).not.toBeDisabled()
+
+  await user.click(screen.getByRole('button', { name: /send/i }))
+  await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1))
+
+  const calls = fetchSpy.mock.calls.map(c => c[0] as string)
+  expect(calls.some(u => u.includes('/attachments'))).toBe(false)
+  expect(calls.some(u => u.includes('/messages'))).toBe(true)
+  const msgCall = fetchSpy.mock.calls.find(c => (c[0] as string).includes('/messages'))!
+  const body = JSON.parse(msgCall[1].body as string)
+  expect(body.kind).toBe('scene')
+  expect(body.attachmentId).toBeUndefined()
+  expect(body.text).toBe('Just text, no image')
 })
 
 // onSuccess receives the message
