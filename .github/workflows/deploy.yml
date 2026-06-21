@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  version-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '18'
+          node-version: '24'
 
       - name: Install Fly CLI
         run: |
