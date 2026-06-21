@@ -126,6 +126,14 @@ export function incrementLegendaryPool(
   };
 }
 
+/**
+ * Compute the CON save DC for a concentration check per D&D 5e rules.
+ * DC = max(10, floor(effectiveDamage / 2)).
+ */
+export function calcConSaveDC(effectiveDamage: number): number {
+  return Math.max(10, Math.floor(effectiveDamage / 2));
+}
+
 /** Clamp a potentially non-finite number to a non-negative finite value. */
 function safeNonNeg(n: number): number {
   return Number.isFinite(n) ? Math.max(0, n) : 0;

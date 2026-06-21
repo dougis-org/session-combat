@@ -11,7 +11,13 @@ import { ActiveCombatView } from '@/lib/components/ActiveCombatView';
 import { makeUseCombat } from '@/tests/unit/fixtures/useCombat';
 import { makeCombatant, makeCombatState } from '@/tests/unit/fixtures/combatHelpers';
 import type { UseCombatReturn } from '@/lib/hooks/useCombat';
-import type { CombatantState } from '@/lib/types';
+import type { CombatantState, Character } from '@/lib/types';
+
+const mockFetch = jest.fn().mockResolvedValue({ ok: true } as Response);
+beforeEach(() => {
+  global.fetch = mockFetch;
+  mockFetch.mockClear();
+});
 
 function makeCombat(
   overrides: Partial<UseCombatReturn> = {},
@@ -191,5 +197,87 @@ describe('ActiveCombatView', () => {
     await user.click(screen.getByRole('button', { name: /cancel/i }));
     expect(removeCombatant).not.toHaveBeenCalled();
     expect(setRemoveConfirmId).toHaveBeenCalledWith(null);
+  });
+});
+
+describe('ActiveCombatView — CON save notification', () => {
+  const CHARACTER_ID = 'char-abc';
+  const CHARACTER_USER_ID = 'user-xyz';
+  const CAMPAIGN_ID = 'campaign-1';
+
+  const playerCharacter: Character = {
+    id: CHARACTER_ID,
+    userId: CHARACTER_USER_ID,
+    name: 'Aria',
+    hp: 30,
+    maxHp: 30,
+    ac: 15,
+    conditions: [],
+    classes: [],
+    abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
+  } as unknown as Character;
+
+  function makeConcentratingPlayer(overrides: Partial<CombatantState> = {}): CombatantState {
+    return makeCombatant({
+      id: `character-${CHARACTER_ID}-some-uuid`,
+      name: 'Aria',
+      type: 'player',
+      hp: 30,
+      maxHp: 30,
+      concentratingOn: 'Bless',
+      ...overrides,
+    });
+  }
+
+  it('player-type concentrating combatant: posts direct message with toUserId on damage', async () => {
+    const user = userEvent.setup();
+    const combatant = makeConcentratingPlayer();
+    const combat = makeCombat(
+      {
+        combatState: makeCombatState({ combatants: [combatant], campaignId: CAMPAIGN_ID }),
+        characters: [playerCharacter],
+        getDisplayCombatants: jest.fn().mockReturnValue([combatant]),
+      },
+    );
+    render(<ActiveCombatView combat={combat} user={null} />);
+    const input = screen.getByRole('spinbutton');
+    await user.clear(input);
+    await user.type(input, '10');
+    await user.click(screen.getByRole('button', { name: 'Damage' }));
+    expect(mockFetch).toHaveBeenCalledWith(
+      `/api/campaigns/${CAMPAIGN_ID}/messages`,
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining(`"toUserId":"${CHARACTER_USER_ID}"`),
+      }),
+    );
+  });
+
+  it('monster-type concentrating combatant: does NOT post direct message on damage', async () => {
+    const user = userEvent.setup();
+    const combatant = makeCombatant({
+      id: 'monster-goblin-uuid',
+      name: 'Goblin',
+      type: 'monster',
+      hp: 30,
+      maxHp: 30,
+      concentratingOn: 'Hold Person',
+    });
+    const combat = makeCombat(
+      {
+        combatState: makeCombatState({ combatants: [combatant], campaignId: CAMPAIGN_ID }),
+        characters: [playerCharacter],
+        getDisplayCombatants: jest.fn().mockReturnValue([combatant]),
+      },
+    );
+    render(<ActiveCombatView combat={combat} user={null} />);
+    const input = screen.getByRole('spinbutton');
+    await user.clear(input);
+    await user.type(input, '10');
+    await user.click(screen.getByRole('button', { name: 'Damage' }));
+    const directMessageCall = mockFetch.mock.calls.find(
+      ([, opts]) => typeof opts?.body === 'string' && opts.body.includes('toUserId'),
+    );
+    expect(directMessageCall).toBeUndefined();
   });
 });

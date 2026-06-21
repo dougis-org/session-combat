@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { CombatantState } from '@/lib/types';
 import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
 
@@ -32,6 +33,17 @@ export function CombatantDetailPanel({
   onClose,
   onUpdate
 }: CombatantDetailPanelProps) {
+  const [spellInput, setSpellInput] = useState(combatant.concentratingOn ?? '');
+
+  useEffect(() => {
+    setSpellInput(combatant.concentratingOn ?? '');
+  }, [combatant.concentratingOn]);
+
+  const saveConcentration = () => {
+    const value = spellInput.trim();
+    onUpdate(combatant.id, { concentratingOn: value || undefined });
+  };
+
   return (
     <>
       <div
@@ -100,6 +112,33 @@ export function CombatantDetailPanel({
           {combatant.lairActions && combatant.lairActions.length > 0 && (
             <ActionList label="Lair Actions" actions={combatant.lairActions} />
           )}
+
+          <div>
+            <p className="text-gray-400 text-sm mb-1 font-semibold">Concentration</p>
+            <div className="flex items-center gap-2">
+              <label htmlFor="concentration-spell-input" className="text-xs text-gray-300 whitespace-nowrap">
+                Concentrating on spell
+              </label>
+              <input
+                id="concentration-spell-input"
+                type="text"
+                value={spellInput}
+                onChange={(e) => setSpellInput(e.target.value)}
+                onBlur={saveConcentration}
+                onKeyDown={(e) => { if (e.key === 'Enter') saveConcentration(); }}
+                className="flex-1 bg-gray-700 rounded px-2 py-1 text-xs text-white border border-gray-600"
+                placeholder="Spell name"
+              />
+            </div>
+            {combatant.concentratingOn && (
+              <button
+                onClick={() => onUpdate(combatant.id, { concentratingOn: undefined, pendingConSaveDC: undefined })}
+                className="mt-1 text-xs bg-red-700 hover:bg-red-600 text-red-100 px-2 py-1 rounded"
+              >
+                End Concentration
+              </button>
+            )}
+          </div>
 
           {combatant.abilityScores && (
             <div>

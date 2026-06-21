@@ -139,6 +139,22 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
   const activeCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
 
+  const handleConSaveRequired = (combatant: CombatantState, dc: number) => {
+    const campaignId = combatState.campaignId;
+    if (!campaignId) return;
+    if (!combatant.id.startsWith('character-')) return;
+    const character = characters.find(c => combatant.id.startsWith(`character-${c.id}-`));
+    if (!character) return;
+    fetch(`/api/campaigns/${campaignId}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: `${combatant.name} must make a CON saving throw (DC ${dc}) to maintain concentration on ${combatant.concentratingOn ?? 'their spell'}.`,
+        visibility: { scope: 'direct', toUserId: character.userId },
+      }),
+    });
+  };
+
   const renderCard = (combatant: CombatantState) => (
     <CombatantCard
       key={combatant.id}
@@ -159,6 +175,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
       }}
       allCombatants={combatState.combatants}
       onUpdateCombatant={(id, updates) => updateCombatant(id, updates)}
+      onConSaveRequired={(dc) => handleConSaveRequired(combatant, dc)}
     />
   );
 
