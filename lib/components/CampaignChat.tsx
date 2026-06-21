@@ -5,6 +5,8 @@ import { LocalStore } from '@/lib/offline/LocalStore'
 import { useCampaignStream } from '@/lib/hooks/useCampaignStream'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { rollDie } from '@/lib/utils/dice'
+import { SceneComposer } from '@/lib/components/SceneComposer'
+import { SceneFeedItem } from '@/lib/components/SceneFeedItem'
 import type { CampaignMessage, CampaignRoll, CampaignStreamEvent, MessageVisibility, RollVisibility } from '@/lib/types'
 
 const PIN_KEY = 'campaign-chat-pin'
@@ -86,9 +88,10 @@ interface ChatFeedProps {
   isLoadingHistory: boolean
   members: EnrichedMember[]
   feedRef: React.RefObject<HTMLDivElement | null>
+  campaignId: string
 }
 
-function ChatFeed({ feed, isLoadingHistory, members, feedRef }: ChatFeedProps) {
+function ChatFeed({ feed, isLoadingHistory, members, feedRef, campaignId }: ChatFeedProps) {
   function visibilityMarker(visibility: MessageVisibility): string | null {
     if (visibility.scope === 'dm-only') return '[DM]'
     if (visibility.scope === 'direct') return `[→ @${resolveUsername(members, visibility.toUserId)}]`
@@ -108,6 +111,9 @@ function ChatFeed({ feed, isLoadingHistory, members, feedRef }: ChatFeedProps) {
           return <RollFeedItem key={item.data.id} roll={item.data} />
         }
         const msg = item.data
+        if (msg.kind === 'scene') {
+          return <SceneFeedItem key={msg.id} message={msg} campaignId={campaignId} />
+        }
         const marker = visibilityMarker(msg.visibility)
         const ts = new Date(msg.createdAt).toLocaleTimeString()
         return (
@@ -347,7 +353,10 @@ export function CampaignChat({ campaignId, activeSessionId = null }: { campaignI
   const [visibility, setVisibility] = useState<MessageVisibility>({ scope: 'group' })
   const [isSending, setIsSending] = useState(false)
   const [mentionQuery, setMentionQuery] = useState<string | null>(null)
+  const [showSceneComposer, setShowSceneComposer] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const isDM = members.some(m => m.userId === user?.userId && m.role === 'dm')
 
   const mentionResults = mentionQuery !== null
     ? members.filter(m => m.status === 'active' && m.username.toLowerCase().startsWith(mentionQuery.toLowerCase()))
@@ -595,6 +604,14 @@ export function CampaignChat({ campaignId, activeSessionId = null }: { campaignI
     setFeed(prev => [...prev, { kind: 'roll', data: roll }])
   }
 
+  function handleSceneSuccess(msg: CampaignMessage) {
+    if (!seenIds.current.has(msg.id)) {
+      seenIds.current.add(msg.id)
+      setFeed(prev => [...prev, { kind: 'message', data: msg }])
+    }
+    setShowSceneComposer(false)
+  }
+
   // ── Collapsed pill ──
   if (!isExpanded) {
     return (
@@ -651,7 +668,26 @@ export function CampaignChat({ campaignId, activeSessionId = null }: { campaignI
         isLoadingHistory={isLoadingHistory}
         members={members}
         feedRef={feedRef}
+        campaignId={campaignId}
       />
+      {isDM && !showSceneComposer && (
+        <div className="border-t border-gray-700 px-3 py-2 flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowSceneComposer(true)}
+            className="text-xs bg-yellow-700 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+          >
+            Push Scene
+          </button>
+        </div>
+      )}
+      {isDM && showSceneComposer && (
+        <SceneComposer
+          campaignId={campaignId}
+          onSuccess={handleSceneSuccess}
+          onCancel={() => setShowSceneComposer(false)}
+        />
+      )}
       <ChatComposer
         composerText={composerText}
         onTextChange={handleTextChange}

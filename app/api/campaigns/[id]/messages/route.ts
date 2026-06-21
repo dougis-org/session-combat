@@ -16,15 +16,30 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { text, visibility } = body as Record<string, unknown>;
+  const { text, visibility, kind, attachmentId } = body as Record<string, unknown>;
 
-  if (typeof text !== 'string' || text.trim() === '') {
-    return NextResponse.json({ error: 'text is required' }, { status: 400 });
-  }
+  const isScene = kind === 'scene';
 
-  const MAX_TEXT_LENGTH = 5000;
-  if (text.trim().length > MAX_TEXT_LENGTH) {
-    return NextResponse.json({ error: `text exceeds maximum length of ${MAX_TEXT_LENGTH} characters` }, { status: 400 });
+  if (isScene) {
+    const hasText = typeof text === 'string' && text.trim().length > 0;
+    const hasAttachment = typeof attachmentId === 'string' && attachmentId.length > 0;
+    if (!hasText && !hasAttachment) {
+      return NextResponse.json(
+        { error: 'Scene messages require at least one of text or attachmentId' },
+        { status: 400 }
+      );
+    }
+    if (hasText && (text as string).trim().length > 5000) {
+      return NextResponse.json({ error: 'text exceeds maximum length of 5000 characters' }, { status: 400 });
+    }
+  } else {
+    if (typeof text !== 'string' || text.trim() === '') {
+      return NextResponse.json({ error: 'text is required' }, { status: 400 });
+    }
+    const MAX_TEXT_LENGTH = 5000;
+    if (text.trim().length > MAX_TEXT_LENGTH) {
+      return NextResponse.json({ error: `text exceeds maximum length of ${MAX_TEXT_LENGTH} characters` }, { status: 400 });
+    }
   }
 
   if (!visibility || typeof visibility !== 'object') {
@@ -47,6 +62,10 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
+  if (isScene && caller.role !== 'dm') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const user = await storage.getUserById(auth.userId);
   const senderName = user?.username ?? 'Unknown';
 
@@ -62,10 +81,17 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     campaignId,
     senderId: auth.userId,
     senderName,
-    text: text.trim(),
+    text: typeof text === 'string' ? text.trim() : '',
     visibility: msgVisibility,
     createdAt: new Date(),
   };
+
+  if (isScene) {
+    message.kind = 'scene';
+  }
+  if (typeof attachmentId === 'string' && attachmentId.length > 0) {
+    message.attachmentId = attachmentId;
+  }
 
   const db = await getDatabase();
   const { _id: _ignored, ...messageDoc } = message;
