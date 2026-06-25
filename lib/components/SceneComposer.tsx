@@ -110,8 +110,9 @@ export function SceneComposer({ campaignId, onSuccess, onCancel }: SceneComposer
         onChange={handleFileChange}
         className="text-xs text-gray-300 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-gray-700 file:text-white hover:file:bg-gray-600"
         aria-label="Scene image"
+        aria-describedby={fileError ? 'scene-file-error' : undefined}
       />
-      {fileError && <p className="text-xs text-red-400" role="alert">{fileError}</p>}
+      {fileError && <p id="scene-file-error" className="text-xs text-red-400" role="alert">{fileError}</p>}
       <textarea
         value={caption}
         onChange={e => setCaption(e.target.value)}
@@ -121,7 +122,7 @@ export function SceneComposer({ campaignId, onSuccess, onCancel }: SceneComposer
         className="w-full bg-gray-700 border border-gray-600 text-white text-sm rounded px-2 py-1.5 resize-none placeholder-gray-500"
         aria-label="Scene caption"
       />
-      {submitError && <p className="text-xs text-red-400" role="alert">{submitError}</p>}
+      {submitError && <p className="text-xs text-red-400" role="alert" aria-live="assertive">{submitError}</p>}
       <div className="flex gap-2 justify-end">
         <button
           type="button"
