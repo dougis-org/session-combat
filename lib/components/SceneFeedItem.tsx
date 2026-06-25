@@ -13,6 +13,7 @@ export function SceneFeedItem({ message, campaignId }: SceneFeedItemProps) {
   const [imgError, setImgError] = useState(false)
 
   const imgSrc = `/api/campaigns/${campaignId}/attachments/${message.attachmentId}`
+  const imgAlt = message.text ? message.text.slice(0, 100) : 'Scene image'
 
   function handleBackdropClick(e: React.MouseEvent<HTMLDialogElement>) {
     if (e.target === dialogRef.current) {
@@ -35,7 +36,7 @@ export function SceneFeedItem({ message, campaignId }: SceneFeedItemProps) {
           >
             <img
               src={imgSrc}
-              alt={message.text || 'Scene image'}
+              alt={imgAlt}
               className="max-h-48 w-auto rounded"
               onError={() => setImgError(true)}
             />
@@ -53,7 +54,7 @@ export function SceneFeedItem({ message, campaignId }: SceneFeedItemProps) {
         >
           <img
             src={imgSrc}
-            alt={message.text || 'Scene image'}
+            alt={imgAlt}
             className="max-h-[90vh] max-w-[90vw] object-contain"
           />
         </dialog>

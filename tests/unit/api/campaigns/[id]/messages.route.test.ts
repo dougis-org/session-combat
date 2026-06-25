@@ -163,6 +163,29 @@ describe("POST /messages — scene kind", () => {
     expect(body.kind).toBeUndefined();
   });
 
+  it("T1-8c: DM POSTs scene with whitespace-only attachmentId and no text → 400", async () => {
+    mockedStorage.getMember.mockResolvedValue(DM_MEMBER);
+
+    const res = await POST(
+      makePost({ kind: "scene", attachmentId: "   ", visibility: { scope: "group" } }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("T1-8d: DM POSTs scene with valid attachmentId → trimmed before storage", async () => {
+    mockedStorage.getMember.mockResolvedValue(DM_MEMBER);
+    mockDbCollection(mockedGetDatabase, { insertOne: makeMockInsertOne() });
+
+    const res = await POST(
+      makePost({ kind: "scene", attachmentId: " abc ", text: "Caption", visibility: { scope: "group" } }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.attachmentId).toBe("abc");
+  });
+
   it("T1-8b: DM POSTs scene with caption > 5000 chars → 400", async () => {
     mockedStorage.getMember.mockResolvedValue(DM_MEMBER);
 

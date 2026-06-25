@@ -73,7 +73,7 @@ it('clicking the dialog backdrop calls close()', () => {
 // T4-7
 it('image onError: shows placeholder; caption still visible if present', () => {
   renderItem(makeMsg({ attachmentId: 'att-abc', text: 'Caption here' }))
-  // alt is 'Caption here' since text is non-empty
+  // alt is first 100 chars of text
   const img = screen.getByRole('img', { name: 'Caption here' })
   fireEvent.error(img)
   expect(screen.queryByRole('img')).not.toBeInTheDocument()

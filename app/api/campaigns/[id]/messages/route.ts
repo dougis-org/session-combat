@@ -22,7 +22,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
 
   if (isScene) {
     const hasText = typeof text === 'string' && text.trim().length > 0;
-    const hasAttachment = typeof attachmentId === 'string' && attachmentId.length > 0;
+    const hasAttachment = typeof attachmentId === 'string' && attachmentId.trim().length > 0;
     if (!hasText && !hasAttachment) {
       return NextResponse.json(
         { error: 'Scene messages require at least one of text or attachmentId' },
@@ -89,8 +89,8 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   if (isScene) {
     message.kind = 'scene';
   }
-  if (typeof attachmentId === 'string' && attachmentId.length > 0) {
-    message.attachmentId = attachmentId;
+  if (typeof attachmentId === 'string' && attachmentId.trim().length > 0) {
+    message.attachmentId = attachmentId.trim();
   }
 
   const db = await getDatabase();
