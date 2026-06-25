@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { CombatantState, ActiveDamageEffect, StatusCondition } from '@/lib/types';
+import type { CombatantState, ActiveDamageEffect, StatusCondition } from '@/lib/types';
 import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects, calcConSaveDC } from '@/lib/utils/combat';
 import { pushHpHistory, popHpHistory, getHpHistoryStack } from '@/lib/utils/hpHistory';
 import { DAMAGE_TYPE_GROUPS, DAMAGE_EFFECT_PRESETS, DamageType } from '@/lib/constants';

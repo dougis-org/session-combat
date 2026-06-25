@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AuthUser } from '@/lib/hooks/useAuth';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { CombatantCard } from '@/lib/components/CombatantCard';
@@ -139,11 +139,17 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
   const activeCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
 
+  const characterMap = useMemo(
+    () => new Map((characters ?? []).map(c => [c.id, c])),
+    [characters],
+  );
+
   const handleConSaveRequired = (combatant: CombatantState, dc: number) => {
     const campaignId = combatState.campaignId;
     if (!campaignId) return;
     if (!combatant.id.startsWith('character-')) return;
-    const character = characters.find(c => combatant.id.startsWith(`character-${c.id}-`));
+    const characterId = combatant.id.slice('character-'.length);
+    const character = characterMap.get(characterId);
     if (!character) return;
     fetch(`/api/campaigns/${campaignId}/messages`, {
       method: 'POST',

@@ -212,14 +212,13 @@ describe('ActiveCombatView — CON save notification', () => {
     hp: 30,
     maxHp: 30,
     ac: 15,
-    conditions: [],
     classes: [],
     abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
   } as unknown as Character;
 
   function makeConcentratingPlayer(overrides: Partial<CombatantState> = {}): CombatantState {
     return makeCombatant({
-      id: `character-${CHARACTER_ID}-some-uuid`,
+      id: `character-${CHARACTER_ID}`,
       name: 'Aria',
       type: 'player',
       hp: 30,
