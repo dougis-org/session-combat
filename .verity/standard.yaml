@@ -1,0 +1,193 @@
+version: "1.0.0"
+created_by: "verity-setup"
+
+knowledge_spec:
+  project_name: "session-combat"
+  languages: [typescript, javascript]
+  frameworks: [nextjs, react, postgresql, mongodb, tailwindcss, jest, playwright]
+  architecture: monolith
+  build_system: npm
+  test_framework: jest
+
+quality_dimensions:
+  - id: comprehensibility
+    description: "Code readable in one context load"
+    signals:
+      - metric: file_length
+        threshold: 300
+        unit: lines
+        rationale: "AI context windows degrade on large files"
+      - metric: cyclomatic_complexity
+        threshold: 15
+        unit: per_function
+        rationale: "Complexity-aware feedback improves AI performance by 35.71%"
+      - metric: function_length
+        threshold: 50
+        unit: lines
+        rationale: "Short functions are easier for agents to modify safely"
+      - metric: naming_quality
+        tool: ai
+        rationale: "Descriptive names improve AI comprehension by 2x"
+
+  - id: modularity
+    description: "Modify one concern without touching 3+ files"
+    signals:
+      - metric: single_responsibility
+        tool: ai
+        rationale: "AI performance drops sharply at 3+ files per change"
+      - metric: shallow_abstractions
+        tool: ai
+        rationale: "LLMs struggle with deep inheritance hierarchies"
+
+  - id: type_safety
+    description: "Type system catches errors before runtime"
+    signals:
+      - metric: strict_types
+        languages: [typescript]
+        rationale: ">50% reduction in compilation errors with type constraints"
+        source: "ETH Zurich type annotation study"
+        rules_by_language:
+          typescript:
+            tool: eslint
+            rules:
+              - "@typescript-eslint/no-explicit-any"
+              - "@typescript-eslint/explicit-function-return-type"
+
+  - id: test_adequacy
+    description: "Tests define expected behavior for agents"
+    signals:
+      - metric: test_coverage
+        threshold: 80
+        unit: percent
+        ai_threshold: 90
+        rationale: "90% recommended for AI-generated code"
+      - metric: test_quality
+        tool: ai
+        rationale: "Tests are the primary safety net for AI agents"
+
+security_patterns:
+  - id: no-hardcoded-secrets
+    description: "No secrets, API keys, passwords, or tokens in source code"
+    severity: critical
+    cwe: [CWE-798]
+    enforced_by:
+      - tool: Trivy
+        config:
+          scanners: [secret]
+      - tool: Semgrep
+        rules: [generic.secrets]
+
+  - id: input-sanitization
+    description: "All user input validated and sanitized before use"
+    severity: critical
+    cwe: [CWE-20, CWE-80, CWE-89, CWE-117]
+    enforced_by:
+      - tool: Semgrep
+        rules:
+          - typescript.express.security
+          - javascript.lang.security.audit
+
+  - id: parameterized-queries
+    description: "Database queries use parameters, never string concatenation"
+    severity: critical
+    cwe: [CWE-89]
+    enforced_by:
+      - tool: Semgrep
+        rules:
+          - javascript.lang.security.audit.sqli
+          - typescript.lang.security.audit.sqli
+
+  - id: dependency-verification
+    description: "No known-vulnerable dependencies"
+    severity: high
+    cwe: [CWE-1395]
+    enforced_by:
+      - tool: Trivy
+        config:
+          scanners: [vuln]
+          severity: [HIGH, CRITICAL]
+
+  - id: no-unsafe-deserialization
+    description: "No unsafe deserialization of untrusted data"
+    severity: high
+    cwe: [CWE-502]
+    enforced_by:
+      - tool: Semgrep
+        rules:
+          - javascript.lang.security.deserialization
+
+  - id: access-control-checks
+    description: "Authorization verified on all sensitive operations"
+    severity: high
+    cwe: [CWE-639]
+    enforced_by: []
+
+  - id: config-file-integrity
+    description: "Configuration files not manipulable by untrusted input"
+    severity: high
+    cwe: [CWE-15]
+    enforced_by: []
+
+custom_patterns:
+  - id: api-auth-required
+    description: "All API routes in app/api/ (except auth endpoints) must verify JWT before processing"
+    severity: high
+    enforced_by: []
+    rationale: "Project uses jsonwebtoken for auth; unprotected routes leak character/campaign data"
+
+  - id: validation-before-db
+    description: "Input must pass lib/validation/ checks before any PostgreSQL or MongoDB operation"
+    severity: high
+    enforced_by: []
+    rationale: "Project has a dedicated lib/validation/ layer; bypassing it creates injection and data integrity risk"
+
+  - id: no-direct-db-in-routes
+    description: "Route handlers must delegate DB operations to lib/ service functions, not inline them"
+    severity: medium
+    enforced_by: []
+    rationale: "Keeps testability and separation of concerns; direct DB calls in handlers are harder to mock and test"
+
+  - id: password-hash-required
+    description: "User passwords must always be hashed with bcryptjs before storage"
+    severity: critical
+    enforced_by: []
+    rationale: "Project depends on bcryptjs; storing plaintext passwords is a critical auth failure"
+
+process_constraints:
+  self_healing_limit: 2
+  analysis_mode: thorough
+
+  compound_enabled: true
+  memory_graph_enabled: true
+  memory_graph_budget_tokens: 2000
+  knowledge_injection_budget_tokens: 2000
+  finding_autosuppress_threshold: 2
+
+  intent_fail_threshold: 4
+  intent_warn_threshold: 7
+
+  exclude_paths:
+    - node_modules
+    - dist
+    - build
+    - .git
+    - vendor
+    - __pycache__
+    - .next
+    - coverage
+    - coverage-e2e
+    - playwright-report
+    - test-results
+
+tool_configuration:
+  eslint:
+    enabled: true
+    config_file: "eslint.config.mjs"
+  semgrep:
+    enabled: true
+    rulesets: ["p/security-audit", "p/typescript", "p/javascript"]
+  trivy:
+    enabled: true
+    scanners: [vuln, secret, config]
+  lizard:
+    enabled: true
