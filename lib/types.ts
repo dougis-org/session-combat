@@ -544,6 +544,8 @@ export interface CombatantState extends CreatureStats {
   legendaryActionCount?: number; // DM-adjustable pool size (copied from template)
   legendaryActionsRemaining?: number; // Runtime counter; resets on turn start
   activeDamageEffects?: ActiveDamageEffect[];
+  concentratingOn?: string;
+  pendingConSaveDC?: number;
   initiativeAdvantage?: boolean;
   initiativeFlatBonus?: number;
 }

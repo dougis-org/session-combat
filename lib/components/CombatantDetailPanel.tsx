@@ -101,6 +101,41 @@ export function CombatantDetailPanel({
             <ActionList label="Lair Actions" actions={combatant.lairActions} />
           )}
 
+          <div>
+            <p className="text-gray-400 text-sm mb-1 font-semibold">Concentration</p>
+            <div className="flex items-center gap-2">
+              <label htmlFor="concentration-spell-input" className="text-xs text-gray-300 whitespace-nowrap">
+                Concentrating on spell
+              </label>
+              <input
+                key={combatant.concentratingOn ?? ''}
+                id="concentration-spell-input"
+                type="text"
+                defaultValue={combatant.concentratingOn ?? ''}
+                onBlur={(e) => {
+                  const v = e.target.value.trim();
+                  if (v === (combatant.concentratingOn ?? '')) return;
+                  onUpdate(combatant.id, { concentratingOn: v || undefined, pendingConSaveDC: undefined });
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.currentTarget.blur();
+                  }
+                }}
+                className="flex-1 bg-gray-700 rounded px-2 py-1 text-xs text-white border border-gray-600"
+                placeholder="Spell name"
+              />
+            </div>
+            {combatant.concentratingOn && (
+              <button
+                onClick={() => onUpdate(combatant.id, { concentratingOn: undefined, pendingConSaveDC: undefined })}
+                className="mt-1 text-xs bg-red-700 hover:bg-red-600 text-red-100 px-2 py-1 rounded"
+              >
+                End Concentration
+              </button>
+            )}
+          </div>
+
           {combatant.abilityScores && (
             <div>
               <p className="text-gray-400 text-sm mb-2">Ability Scores</p>

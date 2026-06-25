@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { CombatantState, ActiveDamageEffect, StatusCondition } from '@/lib/types';
-import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects } from '@/lib/utils/combat';
+import type { CombatantState, ActiveDamageEffect, StatusCondition } from '@/lib/types';
+import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects, calcConSaveDC } from '@/lib/utils/combat';
 import { pushHpHistory, popHpHistory, getHpHistoryStack } from '@/lib/utils/hpHistory';
 import { DAMAGE_TYPE_GROUPS, DAMAGE_EFFECT_PRESETS, DamageType } from '@/lib/constants';
 import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
@@ -21,6 +21,7 @@ export interface CombatantCardProps {
   onShowRemoveConfirm?: (combatantId: string, position: { top: number; left: number }) => void;
   allCombatants?: CombatantState[];
   onUpdateCombatant?: (combatantId: string, updates: Partial<CombatantState>) => void;
+  onConSaveRequired?: (dc: number) => void;
 }
 
 function applyTypedDamage(
@@ -29,7 +30,7 @@ function applyTypedDamage(
   damage: number,
   damageType: DamageType | '',
   combatant: Pick<CombatantState, 'damageResistances' | 'damageImmunities' | 'damageVulnerabilities' | 'activeDamageEffects'>
-): { hp: number; tempHp: number } {
+): { hp: number; tempHp: number; effectiveDamage: number } {
   if (damageType) {
     return calcApplyDamageWithType(hp, tempHp, damage, damageType, {
       damageResistances: combatant.damageResistances,
@@ -38,7 +39,9 @@ function applyTypedDamage(
       activeDamageEffects: combatant.activeDamageEffects,
     });
   }
-  return calcApplyDamage(hp, tempHp, damage);
+  const result = calcApplyDamage(hp, tempHp, damage);
+  const effectiveDamage = (hp + tempHp) - (result.hp + result.tempHp);
+  return { ...result, effectiveDamage };
 }
 
 function DamageEffectsPanel({
@@ -232,6 +235,7 @@ export function CombatantCard(props: CombatantCardProps) {
     onShowRemoveConfirm,
     allCombatants,
     onUpdateCombatant,
+    onConSaveRequired,
   } = props;
   const combatantMap = useMemo(() => new Map(allCombatants?.map(c => [c.id, c])), [allCombatants]);
 
@@ -250,12 +254,21 @@ export function CombatantCard(props: CombatantCardProps) {
     const prevTempHp = combatant.tempHp ?? 0;
     if (amount < 0) {
       const rawDamage = -amount;
-      const { hp: resultHp, tempHp: resultTempHp } = applyTypedDamage(prevHp, prevTempHp, rawDamage, selectedDamageType, combatant);
+      const { hp: resultHp, tempHp: resultTempHp, effectiveDamage } = applyTypedDamage(prevHp, prevTempHp, rawDamage, selectedDamageType, combatant);
       if (resultHp !== prevHp || resultTempHp !== prevTempHp) {
         pushHpHistory(combatId, combatant.id, { hp: prevHp, tempHp: prevTempHp, type: 'damage', amount: rawDamage, timestamp: Date.now() });
         setHistoryLength(getHpHistoryStack(combatId, combatant.id).length);
       }
-      onUpdate({ hp: resultHp, tempHp: resultTempHp });
+      const concentrationUpdates: Partial<CombatantState> = {};
+      if (resultHp === 0) {
+        concentrationUpdates.concentratingOn = undefined;
+        concentrationUpdates.pendingConSaveDC = undefined;
+      } else if (combatant.concentratingOn && effectiveDamage > 0) {
+        const dc = calcConSaveDC(effectiveDamage);
+        concentrationUpdates.pendingConSaveDC = dc;
+        onConSaveRequired?.(dc);
+      }
+      onUpdate({ hp: resultHp, tempHp: resultTempHp, ...concentrationUpdates });
     } else {
       const result = calcApplyHealing(prevHp, combatant.maxHp, amount);
       if (result.hp !== prevHp) {
@@ -580,6 +593,29 @@ export function CombatantCard(props: CombatantCardProps) {
             selectedDamageType={selectedDamageType}
             onUpdate={onUpdate}
           />
+
+          {combatant.concentratingOn && (
+            <span
+              className="inline-block text-xs bg-indigo-800 text-indigo-200 px-2 py-0.5 rounded-full font-semibold mt-1 mr-1"
+              data-testid="concentration-badge"
+            >
+              🎯 {combatant.concentratingOn}
+            </span>
+          )}
+
+          {combatant.pendingConSaveDC !== undefined && (
+            <div className="flex items-center gap-2 mt-1 bg-amber-900 border border-amber-600 rounded px-2 py-1 text-xs text-amber-200">
+              <span>CON Save DC {combatant.pendingConSaveDC}</span>
+              <button
+                onClick={() => onUpdate({ pendingConSaveDC: undefined })}
+                className="text-amber-400 hover:text-amber-200 leading-none"
+                aria-label="Dismiss CON save"
+                title="Dismiss CON save prompt"
+              >
+                ×
+              </button>
+            </div>
+          )}
 
           {combatant.conditions.length > 0 && (
             <div className="mb-2">

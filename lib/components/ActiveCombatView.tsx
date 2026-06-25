@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AuthUser } from '@/lib/hooks/useAuth';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { CombatantCard } from '@/lib/components/CombatantCard';
@@ -135,9 +135,31 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     }
   }, [initiativeEditId]);
 
+  const characterMap = useMemo(
+    () => new Map((characters ?? []).map(c => [c.id, c])),
+    [characters],
+  );
+
   if (!combatState) return null;
 
   const activeCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
+
+  const handleConSaveRequired = (combatant: CombatantState, dc: number) => {
+    const campaignId = combatState.campaignId;
+    if (!campaignId) return;
+    if (!combatant.id.startsWith('character-')) return;
+    const characterId = combatant.id.slice('character-'.length);
+    const character = characterMap.get(characterId);
+    if (!character) return;
+    fetch(`/api/campaigns/${campaignId}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: `${combatant.name} must make a CON saving throw (DC ${dc}) to maintain concentration on ${combatant.concentratingOn ?? 'their spell'}.`,
+        visibility: { scope: 'direct', toUserId: character.userId },
+      }),
+    }).catch(() => {});
+  };
 
   const renderCard = (combatant: CombatantState) => (
     <CombatantCard
@@ -159,6 +181,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
       }}
       allCombatants={combatState.combatants}
       onUpdateCombatant={(id, updates) => updateCombatant(id, updates)}
+      onConSaveRequired={(dc) => handleConSaveRequired(combatant, dc)}
     />
   );
 
