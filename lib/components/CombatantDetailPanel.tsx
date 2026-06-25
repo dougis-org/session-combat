@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { CombatantState } from '@/lib/types';
 import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
 
@@ -33,17 +32,6 @@ export function CombatantDetailPanel({
   onClose,
   onUpdate
 }: CombatantDetailPanelProps) {
-  const [spellInput, setSpellInput] = useState(combatant.concentratingOn ?? '');
-
-  useEffect(() => {
-    setSpellInput(combatant.concentratingOn ?? '');
-  }, [combatant.concentratingOn]);
-
-  const saveConcentration = () => {
-    const value = spellInput.trim();
-    onUpdate(combatant.id, { concentratingOn: value || undefined });
-  };
-
   return (
     <>
       <div
@@ -120,12 +108,20 @@ export function CombatantDetailPanel({
                 Concentrating on spell
               </label>
               <input
+                key={combatant.concentratingOn ?? ''}
                 id="concentration-spell-input"
                 type="text"
-                value={spellInput}
-                onChange={(e) => setSpellInput(e.target.value)}
-                onBlur={saveConcentration}
-                onKeyDown={(e) => { if (e.key === 'Enter') saveConcentration(); }}
+                defaultValue={combatant.concentratingOn ?? ''}
+                onBlur={(e) => {
+                  const v = e.target.value.trim();
+                  onUpdate(combatant.id, { concentratingOn: v || undefined });
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const v = e.currentTarget.value.trim();
+                    onUpdate(combatant.id, { concentratingOn: v || undefined });
+                  }
+                }}
                 className="flex-1 bg-gray-700 rounded px-2 py-1 text-xs text-white border border-gray-600"
                 placeholder="Spell name"
               />
