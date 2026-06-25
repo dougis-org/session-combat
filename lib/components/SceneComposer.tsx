@@ -12,6 +12,56 @@ interface SceneComposerProps {
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 
+function getFileValidationError(file: File): string | null {
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return 'Invalid file type. Please select a JPEG, PNG, WebP, or GIF image.'
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    return 'File exceeds 5 MB limit.'
+  }
+  return null
+}
+
+async function uploadAttachment(
+  campaignId: string,
+  file: File,
+  cached: string | null
+): Promise<{ attachmentId: string } | { error: string }> {
+  if (cached) return { attachmentId: cached }
+  const formData = new FormData()
+  formData.append('file', file)
+  const res = await fetch(`/api/campaigns/${campaignId}/attachments`, { method: 'POST', body: formData })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({})) as { error?: string }
+    return { error: data.error ?? 'Upload failed. Please try again.' }
+  }
+  const { attachmentId } = await res.json() as { attachmentId: string }
+  return { attachmentId }
+}
+
+async function postSceneMessage(
+  campaignId: string,
+  attachmentId: string | null,
+  caption: string
+): Promise<{ message: CampaignMessage } | { error: string }> {
+  const res = await fetch(`/api/campaigns/${campaignId}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'scene',
+      ...(attachmentId ? { attachmentId } : {}),
+      text: caption,
+      visibility: { scope: 'group' },
+    }),
+  })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({})) as { error?: string }
+    return { error: data.error ?? 'Failed to post scene. Please try again.' }
+  }
+  const message = await res.json() as CampaignMessage
+  return { message }
+}
+
 export function SceneComposer({ campaignId, onSuccess, onCancel }: SceneComposerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
@@ -30,14 +80,9 @@ export function SceneComposer({ campaignId, onSuccess, onCancel }: SceneComposer
       setFile(null)
       return
     }
-    if (!ALLOWED_TYPES.includes(selected.type)) {
-      setFileError('Invalid file type. Please select a JPEG, PNG, WebP, or GIF image.')
-      setFile(null)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-      return
-    }
-    if (selected.size > MAX_FILE_SIZE) {
-      setFileError('File exceeds 5 MB limit.')
+    const error = getFileValidationError(selected)
+    if (error) {
+      setFileError(error)
       setFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
       return
@@ -51,48 +96,23 @@ export function SceneComposer({ campaignId, onSuccess, onCancel }: SceneComposer
     if (!canSend) return
     setIsSubmitting(true)
     setSubmitError(null)
-
     try {
       let attachmentId: string | null = null
-
       if (file) {
-        let currentAttachmentId = uploadedAttachmentId
-        if (!currentAttachmentId) {
-          const formData = new FormData()
-          formData.append('file', file)
-          const uploadRes = await fetch(`/api/campaigns/${campaignId}/attachments`, {
-            method: 'POST',
-            body: formData,
-          })
-          if (!uploadRes.ok) {
-            const uploadData = await uploadRes.json().catch(() => ({})) as { error?: string }
-            setSubmitError(uploadData.error ?? 'Upload failed. Please try again.')
-            return
-          }
-          const { attachmentId: id } = await uploadRes.json() as { attachmentId: string }
-          currentAttachmentId = id
-          setUploadedAttachmentId(id)
+        const uploadResult = await uploadAttachment(campaignId, file, uploadedAttachmentId)
+        if ('error' in uploadResult) {
+          setSubmitError(uploadResult.error)
+          return
         }
-        attachmentId = currentAttachmentId
+        attachmentId = uploadResult.attachmentId
+        setUploadedAttachmentId(uploadResult.attachmentId)
       }
-
-      const msgRes = await fetch(`/api/campaigns/${campaignId}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          kind: 'scene',
-          ...(attachmentId ? { attachmentId } : {}),
-          text: caption.trim(),
-          visibility: { scope: 'group' },
-        }),
-      })
-      if (!msgRes.ok) {
-        const msgData = await msgRes.json().catch(() => ({})) as { error?: string }
-        setSubmitError(msgData.error ?? 'Failed to post scene. Please try again.')
+      const msgResult = await postSceneMessage(campaignId, attachmentId, caption.trim())
+      if ('error' in msgResult) {
+        setSubmitError(msgResult.error)
         return
       }
-      const message = await msgRes.json() as CampaignMessage
-      onSuccess(message)
+      onSuccess(msgResult.message)
     } catch {
       setSubmitError('An unexpected error occurred. Please try again.')
     } finally {
