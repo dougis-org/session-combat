@@ -14,9 +14,13 @@ import type { UseCombatReturn } from '@/lib/hooks/useCombat';
 import type { CombatantState, Character } from '@/lib/types';
 
 const mockFetch = jest.fn().mockResolvedValue({ ok: true } as Response);
+const originalFetch = global.fetch;
 beforeEach(() => {
   global.fetch = mockFetch;
   mockFetch.mockClear();
+});
+afterAll(() => {
+  global.fetch = originalFetch;
 });
 
 function makeCombat(

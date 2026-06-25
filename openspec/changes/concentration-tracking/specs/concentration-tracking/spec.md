@@ -88,7 +88,7 @@ The system SHALL compute CON save DC as `max(10, floor(effectiveDamage / 2))`.
 
 - **Given** `effectiveDamage = 19`
 - **When** `calcConSaveDC(19)` is called
-- **Then** the result is `9`... wait — floor(19/2) = 9, max(10,9) = 10. Result is `10`.
+- **Then** the result is `10` (floor(19/2) = 9 → max(10, 9) = 10)
 
 ---
 

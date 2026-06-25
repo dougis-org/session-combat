@@ -114,12 +114,12 @@ export function CombatantDetailPanel({
                 defaultValue={combatant.concentratingOn ?? ''}
                 onBlur={(e) => {
                   const v = e.target.value.trim();
+                  if (v === (combatant.concentratingOn ?? '')) return;
                   onUpdate(combatant.id, { concentratingOn: v || undefined });
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    const v = e.currentTarget.value.trim();
-                    onUpdate(combatant.id, { concentratingOn: v || undefined });
+                    e.currentTarget.blur();
                   }
                 }}
                 className="flex-1 bg-gray-700 rounded px-2 py-1 text-xs text-white border border-gray-600"
