@@ -8,6 +8,78 @@ import type { CampaignMessage, MessageVisibility } from '@/lib/types';
 
 type Params = { id: string };
 
+function validateScenePayload(text: unknown, attachmentId: unknown): NextResponse | null {
+  const hasText = typeof text === 'string' && text.trim().length > 0;
+  const hasAttachment = typeof attachmentId === 'string' && attachmentId.trim().length > 0;
+  if (!hasText && !hasAttachment) {
+    return NextResponse.json(
+      { error: 'Scene messages require at least one of text or attachmentId' },
+      { status: 400 }
+    );
+  }
+  if (hasText && (text as string).trim().length > 5000) {
+    return NextResponse.json({ error: 'text exceeds maximum length of 5000 characters' }, { status: 400 });
+  }
+  return null;
+}
+
+function validateChatPayload(text: unknown): NextResponse | null {
+  if (typeof text !== 'string' || text.trim() === '') {
+    return NextResponse.json({ error: 'text is required' }, { status: 400 });
+  }
+  if (text.trim().length > 5000) {
+    return NextResponse.json({ error: 'text exceeds maximum length of 5000 characters' }, { status: 400 });
+  }
+  return null;
+}
+
+function isValidScope(scope: unknown): scope is 'group' | 'direct' | 'dm-only' {
+  return scope === 'group' || scope === 'direct' || scope === 'dm-only';
+}
+
+function getToUserId(vis: Record<string, unknown>): string {
+  const raw = vis['toUserId'];
+  return typeof raw === 'string' ? raw.trim() : '';
+}
+
+function parseVisibility(visibility: unknown): { error: NextResponse } | { msgVisibility: MessageVisibility } {
+  if (!visibility || typeof visibility !== 'object') {
+    return { error: NextResponse.json({ error: 'visibility is required' }, { status: 400 }) };
+  }
+  const vis = visibility as Record<string, unknown>;
+  const scope = vis['scope'];
+  if (!isValidScope(scope)) {
+    return { error: NextResponse.json({ error: 'visibility.scope must be group, direct, or dm-only' }, { status: 400 }) };
+  }
+  const toUserId = getToUserId(vis);
+  if (scope === 'direct' && !toUserId) {
+    return { error: NextResponse.json({ error: 'visibility.toUserId is required for direct messages' }, { status: 400 }) };
+  }
+  const msgVisibility: MessageVisibility = scope === 'direct'
+    ? { scope: 'direct', toUserId }
+    : { scope };
+  return { msgVisibility };
+}
+
+type CallerRecord = Awaited<ReturnType<typeof storage.getMember>>;
+
+function checkCallerAccess(caller: CallerRecord, isScene: boolean): NextResponse | null {
+  if (!caller || caller.status !== 'active') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  if (isScene && caller.role !== 'dm') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  return null;
+}
+
+function applySceneFields(message: CampaignMessage, attachmentId: unknown): void {
+  message.kind = 'scene';
+  if (typeof attachmentId === 'string' && attachmentId.trim().length > 0) {
+    message.attachmentId = attachmentId.trim();
+  }
+}
+
 export const POST = withAuthAndParams<Params>(async (request, auth, { id: campaignId }) => {
   let body: unknown;
   try {
@@ -17,64 +89,20 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   }
 
   const { text, visibility, kind, attachmentId } = body as Record<string, unknown>;
-
   const isScene = kind === 'scene';
 
-  if (isScene) {
-    const hasText = typeof text === 'string' && text.trim().length > 0;
-    const hasAttachment = typeof attachmentId === 'string' && attachmentId.trim().length > 0;
-    if (!hasText && !hasAttachment) {
-      return NextResponse.json(
-        { error: 'Scene messages require at least one of text or attachmentId' },
-        { status: 400 }
-      );
-    }
-    if (hasText && (text as string).trim().length > 5000) {
-      return NextResponse.json({ error: 'text exceeds maximum length of 5000 characters' }, { status: 400 });
-    }
-  } else {
-    if (typeof text !== 'string' || text.trim() === '') {
-      return NextResponse.json({ error: 'text is required' }, { status: 400 });
-    }
-    const MAX_TEXT_LENGTH = 5000;
-    if (text.trim().length > MAX_TEXT_LENGTH) {
-      return NextResponse.json({ error: `text exceeds maximum length of ${MAX_TEXT_LENGTH} characters` }, { status: 400 });
-    }
-  }
+  const bodyError = isScene ? validateScenePayload(text, attachmentId) : validateChatPayload(text);
+  if (bodyError) return bodyError;
 
-  if (!visibility || typeof visibility !== 'object') {
-    return NextResponse.json({ error: 'visibility is required' }, { status: 400 });
-  }
-
-  const vis = visibility as Record<string, unknown>;
-  const scope = vis['scope'];
-
-  if (scope !== 'group' && scope !== 'direct' && scope !== 'dm-only') {
-    return NextResponse.json({ error: 'visibility.scope must be group, direct, or dm-only' }, { status: 400 });
-  }
-
-  if (scope === 'direct' && (typeof vis['toUserId'] !== 'string' || vis['toUserId'].trim() === '')) {
-    return NextResponse.json({ error: 'visibility.toUserId is required for direct messages' }, { status: 400 });
-  }
+  const visResult = parseVisibility(visibility);
+  if ('error' in visResult) return visResult.error;
 
   const caller = await storage.getMember(campaignId, auth.userId);
-  if (!caller || caller.status !== 'active') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  if (isScene && caller.role !== 'dm') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const accessError = checkCallerAccess(caller, isScene);
+  if (accessError) return accessError;
 
   const user = await storage.getUserById(auth.userId);
   const senderName = user?.username ?? 'Unknown';
-
-  let msgVisibility: MessageVisibility;
-  if (scope === 'direct') {
-    msgVisibility = { scope: 'direct', toUserId: (vis['toUserId'] as string).trim() };
-  } else {
-    msgVisibility = { scope };
-  }
 
   const message: CampaignMessage = {
     id: crypto.randomUUID(),
@@ -82,16 +110,11 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     senderId: auth.userId,
     senderName,
     text: typeof text === 'string' ? text.trim() : '',
-    visibility: msgVisibility,
+    visibility: visResult.msgVisibility,
     createdAt: new Date(),
   };
 
-  if (isScene) {
-    message.kind = 'scene';
-  }
-  if (typeof attachmentId === 'string' && attachmentId.trim().length > 0) {
-    message.attachmentId = attachmentId.trim();
-  }
+  if (isScene) applySceneFields(message, attachmentId);
 
   const db = await getDatabase();
   const { _id: _ignored, ...messageDoc } = message;
