@@ -94,13 +94,13 @@ The system SHALL compute CON save DC as `max(10, floor(effectiveDamage / 2))`.
 
 ### Requirement: ADDED CON save notification fires to DM and affected player
 
-The system SHALL invoke the `onConSaveRequired(dc)` callback on `CombatantCard` when `effectiveDamage > 0` and `concentratingOn` is set. `ActiveCombatView` SHALL implement this callback: for player-type combatants, resolve the player `userId` by extracting the character ID from the combatant ID (pattern `character-${character.id}`) and looking up the `Character` in `characters[]`, then POST a `CampaignMessage` with `visibility: { scope: "direct"; toUserId: character.userId }` to the campaign message API. For monster-type combatants, no player message is sent.
+The system SHALL invoke the `onConSaveRequired(dc)` callback on `CombatantCard` when `effectiveDamage > 0` and `concentratingOn` is set. `ActiveCombatView` SHALL implement this callback: for player-type combatants, resolve the player `userId` by extracting the character ID from the combatant ID (pattern `character-${character.id}`) and looking up the `Character` in `characters[]`, then POST a `CampaignMessage` with `visibility: { scope: "direct", toUserId: character.userId }` to the campaign message API. For monster-type combatants, no player message is sent.
 
 #### Scenario: Notification fires for player combatant
 
 - **Given** a concentrating combatant with `type: "player"` and `id: "character-abc123"`, with a matching `Character` in `characters[]` with `userId: "user-xyz"`, and `effectiveDamage > 0`
 - **When** damage is applied and `onConSaveRequired(dc)` is invoked
-- **Then** `ActiveCombatView` POSTs a `CampaignMessage` with `visibility: { scope: "direct"; toUserId: "user-xyz" }` containing the CON save DC
+- **Then** `ActiveCombatView` POSTs a `CampaignMessage` with `visibility: { scope: "direct", toUserId: "user-xyz" }` containing the CON save DC
 
 #### Scenario: No player message for monster combatant
 
@@ -217,4 +217,4 @@ None.
 
 ### Requirement: Security
 
-- DC value is rendered only in the DM-facing combatant card view. See functional scenario: "DC prompt appears after damage". No separate access-control scenario is required because the DC prompt renders within the existing DM-only card UI.
+- The CON save DC is visible to the DM via the card UI prompt, and is also sent directly to the affected player via a `CampaignMessage` with `visibility: { scope: "direct", toUserId }`. Monster combatants receive no player notification. No separate access-control scenario is required beyond the existing campaign message visibility model.
