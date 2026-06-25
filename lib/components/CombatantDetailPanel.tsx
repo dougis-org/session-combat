@@ -115,7 +115,7 @@ export function CombatantDetailPanel({
                 onBlur={(e) => {
                   const v = e.target.value.trim();
                   if (v === (combatant.concentratingOn ?? '')) return;
-                  onUpdate(combatant.id, { concentratingOn: v || undefined });
+                  onUpdate(combatant.id, { concentratingOn: v || undefined, pendingConSaveDC: undefined });
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {

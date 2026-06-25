@@ -158,7 +158,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
         text: `${combatant.name} must make a CON saving throw (DC ${dc}) to maintain concentration on ${combatant.concentratingOn ?? 'their spell'}.`,
         visibility: { scope: 'direct', toUserId: character.userId },
       }),
-    });
+    }).catch(() => {});
   };
 
   const renderCard = (combatant: CombatantState) => (
