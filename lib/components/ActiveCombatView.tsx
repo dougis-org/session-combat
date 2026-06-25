@@ -135,14 +135,14 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     }
   }, [initiativeEditId]);
 
-  if (!combatState) return null;
-
-  const activeCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
-
   const characterMap = useMemo(
     () => new Map((characters ?? []).map(c => [c.id, c])),
     [characters],
   );
+
+  if (!combatState) return null;
+
+  const activeCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
 
   const handleConSaveRequired = (combatant: CombatantState, dc: number) => {
     const campaignId = combatState.campaignId;
