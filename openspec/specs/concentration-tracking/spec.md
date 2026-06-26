@@ -74,9 +74,9 @@ The system SHALL compute CON save DC as `max(10, floor(effectiveDamage / 2))`.
 
 #### Scenario: Damage above threshold
 
-- **Given** `effectiveDamage = 21`
-- **When** `calcConSaveDC(21)` is called
-- **Then** the result is `10` (floor(21/2) = 10, max(10,10) = 10)
+- **Given** `effectiveDamage = 22`
+- **When** `calcConSaveDC(22)` is called
+- **Then** the result is `11` (floor(22/2) = 11, max(10,11) = 11)
 
 #### Scenario: High damage
 
