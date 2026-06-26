@@ -135,8 +135,8 @@ If **ANY** required step fails, iterate and fix before pushing.
 - [x] Commit all changes to `feat/concentration-tracking` and push to remote
 - [x] Open PR from `feat/concentration-tracking` to `main`. PR body MUST include `Closes #93`
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin`; NEVER use `--merge` — repo ruleset requires squash)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post their comments
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user:
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post their comments
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, push before doing anything else
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL>`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart from step 1
@@ -157,14 +157,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on main
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec delta: copy `openspec/changes/concentration-tracking/specs/concentration-tracking/spec.md` → `openspec/specs/concentration-tracking/spec.md`; update relative links from `../../design.md` → `../../changes/archive/YYYY-MM-DD-concentration-tracking/design.md` and `../../tasks.md` → `../../changes/archive/YYYY-MM-DD-concentration-tracking/tasks.md`
-- [ ] Archive the change: move `openspec/changes/concentration-tracking/` to `openspec/changes/archive/YYYY-MM-DD-concentration-tracking/` — **stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-concentration-tracking/` exists and `openspec/changes/concentration-tracking/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-concentration-tracking` then `git push -u origin doc/archive-YYYY-MM-DD-concentration-tracking`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-concentration-tracking` to `main` with title `docs: archive concentration-tracking (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor the doc PR until merged (same loop as implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feat/concentration-tracking doc/archive-YYYY-MM-DD-concentration-tracking`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on main
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec delta: copy `openspec/changes/concentration-tracking/specs/concentration-tracking/spec.md` → `openspec/specs/concentration-tracking/spec.md`; update relative links from `../../design.md` → `../../changes/archive/YYYY-MM-DD-concentration-tracking/design.md` and `../../tasks.md` → `../../changes/archive/YYYY-MM-DD-concentration-tracking/tasks.md`
+- [x] Archive the change: move `openspec/changes/concentration-tracking/` to `openspec/changes/archive/YYYY-MM-DD-concentration-tracking/` — **stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-concentration-tracking/` exists and `openspec/changes/concentration-tracking/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-concentration-tracking` then `git push -u origin doc/archive-YYYY-MM-DD-concentration-tracking`
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-concentration-tracking` to `main` with title `docs: archive concentration-tracking (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor the doc PR until merged (same loop as implementation PR)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/concentration-tracking doc/archive-YYYY-MM-DD-concentration-tracking`
