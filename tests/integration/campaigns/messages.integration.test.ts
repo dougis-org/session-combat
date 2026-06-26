@@ -15,6 +15,8 @@ interface UserCtx {
   username: string;
 }
 
+const OBJECT_ID_RE = /^[a-f0-9]{24}$/i;
+
 async function createCampaign(cookie: string): Promise<string> {
   const res = await fetch(`${process.env.TEST_BASE_URL}/api/campaigns`, {
     method: "POST",
@@ -22,6 +24,7 @@ async function createCampaign(cookie: string): Promise<string> {
     body: JSON.stringify({ name: "Scene Messages Integration Test" }),
   });
   const data = (await res.json()) as { id: string };
+  if (!OBJECT_ID_RE.test(data.id)) throw new Error(`Unexpected campaign id: ${data.id}`);
   return data.id;
 }
 
@@ -31,7 +34,7 @@ async function addActiveMember(
   userId: string
 ): Promise<void> {
   const inviteRes = await fetch(
-    `${process.env.TEST_BASE_URL}/api/campaigns/${encodeURIComponent(campaignId)}/members`, // nosemgrep
+    `${process.env.TEST_BASE_URL}/api/campaigns/${encodeURIComponent(campaignId)}/members`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: dmCookie },

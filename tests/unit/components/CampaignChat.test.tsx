@@ -4,6 +4,8 @@ import { CampaignChat } from '@/lib/components/CampaignChat'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import type { CampaignStreamEvent } from '@/lib/types'
 
+const CAMPAIGN_ID = 'bbbbbbbbbbbbbbbbbbbbbbbb'
+
 jest.mock('@/lib/offline/LocalStore', () => ({
   LocalStore: {
     get: jest.fn().mockReturnValue(null),
@@ -68,7 +70,7 @@ function setupFetchMock(overrides?: Record<string, unknown>) {
 /** Render the component and expand the dock. Returns userEvent instance. */
 async function openDock() {
   const user = userEvent.setup()
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await user.click(screen.getByRole('button', { name: /chat/i }))
   return user
 }
@@ -123,20 +125,20 @@ afterEach(() => {
 
 // TC-01
 it('pill button is present on initial render', () => {
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   expect(screen.getByRole('button', { name: /chat/i })).toBeInTheDocument()
 })
 
 // TC-02
 it('drawer is absent on initial render when no pin stored', () => {
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   expect(screen.queryByRole('complementary')).not.toBeInTheDocument()
 })
 
 // TC-03
 it('drawer is present on mount when pin is stored', async () => {
   mockedLocalStore.get.mockReturnValue(true)
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   expect(screen.getByRole('complementary', { name: /campaign chat/i })).toBeInTheDocument()
 })
 
@@ -162,7 +164,7 @@ it('pressing Escape collapses the drawer', async () => {
 
 // TC-07
 it('pressing Escape when collapsed has no effect', () => {
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   fireEvent.keyDown(document, { key: 'Escape' })
   expect(screen.queryByRole('complementary')).not.toBeInTheDocument()
   expect(screen.getByRole('button', { name: /chat/i })).toBeInTheDocument()
@@ -211,7 +213,7 @@ it('drawer has role="complementary" and aria-label="Campaign Chat"', async () =>
 // TC-13
 it('pill button is keyboard-activatable with Enter', async () => {
   const user = userEvent.setup()
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   const pill = screen.getByRole('button', { name: /chat/i })
   pill.focus()
   await user.keyboard('{Enter}')
@@ -259,9 +261,9 @@ it('heartbeat event does not affect message feed', async () => {
 
 // T3c-1: members fetched on mount
 it('fetches members on mount', async () => {
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await waitFor(() => {
-    expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/api/campaigns/test-campaign/members'))
+    expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining(`/api/campaigns/${CAMPAIGN_ID}/members`))
   })
 })
 
@@ -271,7 +273,7 @@ it('members fetch failure does not crash the component', async () => {
     if (url.includes('/members')) return Promise.reject(new Error('network error'))
     return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
   })
-  expect(() => render(<CampaignChat campaignId="test-campaign" />)).not.toThrow()
+  expect(() => render(<CampaignChat campaignId={CAMPAIGN_ID} />)).not.toThrow()
   await waitFor(() => expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members')))
 })
 
@@ -279,7 +281,7 @@ it('members fetch failure does not crash the component', async () => {
 
 // T4d-1: history NOT fetched on mount (dock collapsed)
 it('history is not fetched on mount when dock is collapsed', async () => {
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await waitFor(() => expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members')))
   expect(fetchSpy).not.toHaveBeenCalledWith(expect.stringContaining('/messages'))
 })
@@ -313,7 +315,7 @@ it('stream message while dock is collapsed shows unread badge', async () => {
   mockedLocalStore.get.mockImplementation((key: string) =>
     key === 'campaign-chat-last-open-test-campaign' ? pastDate : null
   )
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   fireMsg({ id: 'new-msg', senderName: 'Bob', text: 'Hi' })
   expect(screen.getByLabelText('unread messages')).toBeInTheDocument()
 })
@@ -324,13 +326,13 @@ it('opening dock clears unread badge and updates LocalStore', async () => {
   mockedLocalStore.get.mockImplementation((key: string) =>
     key === 'campaign-chat-last-open-test-campaign' ? pastDate : null
   )
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   fireMsg({ id: 'unread-1', senderName: 'Bob', text: 'Badge test' })
 
   const user = userEvent.setup()
   await user.click(screen.getByRole('button', { name: /chat/i }))
   expect(screen.queryByLabelText('unread messages')).not.toBeInTheDocument()
-  expect(mockedLocalStore.set).toHaveBeenCalledWith('campaign-chat-last-open-test-campaign', expect.any(String))
+  expect(mockedLocalStore.set).toHaveBeenCalledWith(`campaign-chat-last-open-${CAMPAIGN_ID}`, expect.any(String))
 })
 
 // T5f-3: stream message while dock is open does not increment badge
@@ -343,7 +345,7 @@ it('stream message while dock is open does not increment unread count', async ()
 // T5f-4: LocalStore throws — no crash
 it('LocalStore.get throwing does not crash the component', () => {
   mockedLocalStore.get.mockImplementation(() => { throw new Error('storage unavailable') })
-  expect(() => render(<CampaignChat campaignId="test-campaign" />)).not.toThrow()
+  expect(() => render(<CampaignChat campaignId={CAMPAIGN_ID} />)).not.toThrow()
 })
 
 // ── T6 — Composer tests ──────────────────────────────────────────────
@@ -440,7 +442,7 @@ it('send button calls POST with text and visibility', async () => {
   await user.click(screen.getByRole('button', { name: /send/i }))
   await waitFor(() => {
     expect(fetchSpy).toHaveBeenCalledWith(
-      '/api/campaigns/test-campaign/messages',
+      `/api/campaigns/${CAMPAIGN_ID}/messages`,
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ text: 'Hello everyone', visibility: { scope: 'group' } }),
@@ -563,7 +565,7 @@ const PLAYER_MEMBERS_RESPONSE = {
 it('DM user sees Push Scene button in expanded dock', async () => {
   setupFetchMock({ members: DM_MEMBERS_RESPONSE })
   const user = userEvent.setup()
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await user.click(screen.getByRole('button', { name: /chat/i }))
   await waitFor(() =>
     expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members'))
@@ -577,7 +579,7 @@ it('DM user sees Push Scene button in expanded dock', async () => {
 it('Non-DM member does not see Push Scene button', async () => {
   setupFetchMock({ members: PLAYER_MEMBERS_RESPONSE })
   const user = userEvent.setup()
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await user.click(screen.getByRole('button', { name: /chat/i }))
   await waitFor(() =>
     expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members'))
@@ -591,7 +593,7 @@ it('Non-DM member does not see Push Scene button', async () => {
 it('Clicking Push Scene renders SceneComposer', async () => {
   setupFetchMock({ members: DM_MEMBERS_RESPONSE })
   const user = userEvent.setup()
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await user.click(screen.getByRole('button', { name: /chat/i }))
   await waitFor(() =>
     expect(screen.getByRole('button', { name: /push scene/i })).toBeInTheDocument()
@@ -604,7 +606,7 @@ it('Clicking Push Scene renders SceneComposer', async () => {
 it('SceneComposer Cancel hides composer and shows Push Scene button again', async () => {
   setupFetchMock({ members: DM_MEMBERS_RESPONSE })
   const user = userEvent.setup()
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await user.click(screen.getByRole('button', { name: /chat/i }))
   await waitFor(() =>
     expect(screen.getByRole('button', { name: /push scene/i })).toBeInTheDocument()
@@ -619,7 +621,7 @@ it('SceneComposer Cancel hides composer and shows Push Scene button again', asyn
 // T10-5: SSE scene event renders SceneFeedItem in feed
 it('SSE scene message event renders SceneFeedItem in feed', async () => {
   setupFetchMock({ members: DM_MEMBERS_RESPONSE })
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   const user = userEvent.setup()
   await user.click(screen.getByRole('button', { name: /chat/i }))
   await waitFor(() =>
@@ -663,7 +665,7 @@ it('SceneComposer onSuccess appends scene message to feed and closes composer', 
   }
   setupFetchMock({ members: DM_MEMBERS_RESPONSE, sceneMessage: sceneMsg })
   const user = userEvent.setup()
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await user.click(screen.getByRole('button', { name: /chat/i }))
   await waitFor(() =>
     expect(screen.getByRole('button', { name: /push scene/i })).toBeInTheDocument()
