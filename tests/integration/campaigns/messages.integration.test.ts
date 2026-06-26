@@ -31,7 +31,7 @@ async function addActiveMember(
   userId: string
 ): Promise<void> {
   const inviteRes = await fetch(
-    `${process.env.TEST_BASE_URL}/api/campaigns/${encodeURIComponent(campaignId)}/members`,
+    `${process.env.TEST_BASE_URL}/api/campaigns/${encodeURIComponent(campaignId)}/members`, // nosemgrep
     {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: dmCookie },

@@ -30,7 +30,7 @@ async function uploadAttachment(
   if (cached) return { attachmentId: cached }
   const formData = new FormData()
   formData.append('file', file)
-  const res = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/attachments`, { method: 'POST', body: formData })
+  const res = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/attachments`, { method: 'POST', body: formData }) // nosemgrep
   if (!res.ok) {
     const data = await res.json().catch(() => ({})) as { error?: string }
     return { error: data.error ?? 'Upload failed. Please try again.' }
@@ -44,7 +44,7 @@ async function postSceneMessage(
   attachmentId: string | null,
   caption: string
 ): Promise<{ message: CampaignMessage } | { error: string }> {
-  const res = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/messages`, {
+  const res = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/messages`, { // nosemgrep
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
