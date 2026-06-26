@@ -25,7 +25,7 @@ Files: `app/api/campaigns/[id]/messages/route.ts`
 
 Files: `lib/components/CampaignChat.tsx`
 
-- [x] Determine DM status: use the `members` state already fetched by `CampaignChat` — find the entry matching `user?.id` and check `role === 'dm'`
+- [x] Determine DM status: use the `members` state already fetched by `CampaignChat` — find the entry matching `user?.userId` and check `role === 'dm'`
 - [x] Render a "Push Scene" button below (or above) the chat composer, visible only when `isDM === true`
 - [x] Button click opens `SceneComposer` (inline, replaces/overlays the composer area — not a modal)
 - [x] When `SceneComposer` calls its `onSuccess(message)` callback, append the new message to the local `messages` state (prevent duplicate via `seenIds`) and close the composer
@@ -40,8 +40,8 @@ Props: `{ campaignId: string; onSuccess: (msg: CampaignMessage) => void; onCance
 - [x] File input (`accept="image/jpeg,image/png,image/webp,image/gif"`)
 - [x] Client-side validation on file select: type must be JPEG/PNG/WebP/GIF; size ≤ 5 MB; show inline error and disable Send if invalid
 - [x] Optional caption `<textarea>` (max 5000 chars to match server limit)
-- [x] Send button disabled when: no file selected, or file is invalid, or a submit is in progress
-- [x] Send disabled when no file AND no caption (both empty = nothing to send)
+- [x] Send button disabled when: file validation error exists, or a submit is in progress, or both file and caption are empty
+- [x] Send enabled when either a valid file is selected OR caption is non-empty (caption-only scenes are valid)
 - [x] On Send:
   1. POST `FormData` with `file` to `/api/campaigns/${campaignId}/attachments` → extract `attachmentId`
   2. On upload failure: display error, do NOT proceed to step 2; remain open

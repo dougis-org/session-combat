@@ -7,7 +7,7 @@ import { registerTestUser } from "../helpers/users";
 import type { CampaignMessage } from "@/lib/types";
 
 const MESSAGES_PATH = (campaignId: string) =>
-  `${process.env.TEST_BASE_URL}/api/campaigns/${campaignId}/messages`;
+  `${process.env.TEST_BASE_URL}/api/campaigns/${encodeURIComponent(campaignId)}/messages`;
 
 interface UserCtx {
   cookie: string;
@@ -31,7 +31,7 @@ async function addActiveMember(
   userId: string
 ): Promise<void> {
   const inviteRes = await fetch(
-    `${process.env.TEST_BASE_URL}/api/campaigns/${campaignId}/members`,
+    `${process.env.TEST_BASE_URL}/api/campaigns/${encodeURIComponent(campaignId)}/members`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: dmCookie },

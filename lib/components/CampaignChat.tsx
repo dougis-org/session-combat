@@ -91,13 +91,27 @@ interface ChatFeedProps {
   campaignId: string
 }
 
-function ChatFeed({ feed, isLoadingHistory, members, feedRef, campaignId }: ChatFeedProps) {
-  function visibilityMarker(visibility: MessageVisibility): string | null {
-    if (visibility.scope === 'dm-only') return '[DM]'
-    if (visibility.scope === 'direct') return `[→ @${resolveUsername(members, visibility.toUserId)}]`
-    return null
-  }
+function getVisibilityMarker(members: EnrichedMember[], visibility: MessageVisibility): string | null {
+  if (visibility.scope === 'dm-only') return '[DM]'
+  if (visibility.scope === 'direct') return `[→ @${resolveUsername(members, visibility.toUserId)}]`
+  return null
+}
 
+function ChatMessageItem({ msg, members }: { msg: CampaignMessage; members: EnrichedMember[] }) {
+  const marker = getVisibilityMarker(members, msg.visibility)
+  const ts = new Date(msg.createdAt).toLocaleTimeString()
+  return (
+    <div className="text-sm text-gray-200">
+      <span className="font-semibold text-white">{msg.senderName}</span>
+      {' '}
+      <span className="text-gray-500 text-xs">{ts}</span>
+      {marker && <span className="ml-1 text-xs text-yellow-400">{marker}</span>}
+      <div className="mt-0.5 text-gray-300">{msg.text}</div>
+    </div>
+  )
+}
+
+function ChatFeed({ feed, isLoadingHistory, members, feedRef, campaignId }: ChatFeedProps) {
   return (
     <div ref={feedRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
       {isLoadingHistory && (
@@ -107,24 +121,10 @@ function ChatFeed({ feed, isLoadingHistory, members, feedRef, campaignId }: Chat
         <p className="text-gray-500 text-sm">No messages yet.</p>
       )}
       {feed.map(item => {
-        if (item.kind === 'roll') {
-          return <RollFeedItem key={item.data.id} roll={item.data} />
-        }
+        if (item.kind === 'roll') return <RollFeedItem key={item.data.id} roll={item.data} />
         const msg = item.data
-        if (msg.kind === 'scene') {
-          return <SceneFeedItem key={msg.id} message={msg} campaignId={campaignId} />
-        }
-        const marker = visibilityMarker(msg.visibility)
-        const ts = new Date(msg.createdAt).toLocaleTimeString()
-        return (
-          <div key={msg.id} className="text-sm text-gray-200">
-            <span className="font-semibold text-white">{msg.senderName}</span>
-            {' '}
-            <span className="text-gray-500 text-xs">{ts}</span>
-            {marker && <span className="ml-1 text-xs text-yellow-400">{marker}</span>}
-            <div className="mt-0.5 text-gray-300">{msg.text}</div>
-          </div>
-        )
+        if (msg.kind === 'scene') return <SceneFeedItem key={msg.id} message={msg} campaignId={campaignId} />
+        return <ChatMessageItem key={msg.id} msg={msg} members={members} />
       })}
     </div>
   )

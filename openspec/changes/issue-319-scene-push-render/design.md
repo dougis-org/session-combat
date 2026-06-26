@@ -21,7 +21,7 @@
 
 ### Non-Goals
 
-- Text-only scene messages (image required via UI; text-only path not exposed)
+- Empty scene messages (both image and caption absent; rejected client-side and server-side)
 - Image resizing, cropping, or thumbnail generation server-side
 - Per-scene player visibility control
 - Rate limiting the messages endpoint

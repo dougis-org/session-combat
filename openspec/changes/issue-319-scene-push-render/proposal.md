@@ -51,7 +51,7 @@
 
 ### Out of Scope
 
-- Text-only scene messages without an image (supported technically but not a primary use case; UI requires at least one of image or caption — revisit later)
+- Text-only scene messages without an image are supported (caption-only is valid); only fully empty scenes (no image and no caption) are disallowed
 - Per-scene visibility (show to subset of players)
 - Additional attachment types beyond images (audio, video, PDF)
 - Image editing, cropping, or annotation
