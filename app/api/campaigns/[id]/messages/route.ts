@@ -89,6 +89,10 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return NextResponse.json({ error: 'Request body must be a JSON object' }, { status: 400 });
+  }
+
   const { text, visibility, kind, attachmentId } = body as Record<string, unknown>;
   const isScene = kind === 'scene';
 
