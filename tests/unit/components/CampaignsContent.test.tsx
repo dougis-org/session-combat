@@ -9,6 +9,13 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
 }));
 
+// Mock next/link to be a plain <a> tag
+jest.mock('next/link', () => {
+  const MockLink = ({ children, href, ...rest }: any) => <a href={href} {...rest}>{children}</a>;
+  MockLink.displayName = 'MockLink';
+  return MockLink;
+});
+
 // Mock global fetch
 global.fetch = jest.fn();
 

@@ -15,6 +15,13 @@ jest.mock('@/lib/components/CampaignChat', () => ({
   CampaignChat: () => <div data-testid="campaign-chat" />
 }));
 
+// Mock next/link to be a plain <a> tag
+jest.mock('next/link', () => {
+  const MockLink = ({ children, href, ...rest }: any) => <a href={href} {...rest}>{children}</a>;
+  MockLink.displayName = 'MockLink';
+  return MockLink;
+});
+
 describe('CampaignLayout', () => {
   beforeEach(() => {
     mockPathname = '/campaigns/test-id';
@@ -143,6 +150,7 @@ describe('CampaignLayout', () => {
 
     await waitFor(() => screen.getByRole('heading'));
     expect(screen.getByTestId('child-content')).toBeInTheDocument();
+    expect(screen.getByTestId('campaign-chat')).toBeInTheDocument();
   });
 
   test('TC-3.10: Single fetch call (no extra network requests)', async () => {
