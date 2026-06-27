@@ -19,7 +19,10 @@ jest.mock('@/lib/components/CampaignChat', () => ({
 jest.mock('next/link', () => {
   const MockLink = ({ children, href, ...rest }: any) => <a href={href} {...rest}>{children}</a>;
   MockLink.displayName = 'MockLink';
-  return MockLink;
+  return {
+    __esModule: true,
+    default: MockLink,
+  };
 });
 
 describe('CampaignLayout', () => {
@@ -135,8 +138,9 @@ describe('CampaignLayout', () => {
       </CampaignLayout>
     );
 
-    // Wait a bit to ensure it finished trying to fetch
-    await waitFor(() => expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument());
+    // Wait for the async fetch to finish executing
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Members' })).toBeInTheDocument();
     expect(screen.getByText('Children content')).toBeInTheDocument();
   });

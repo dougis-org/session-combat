@@ -43,7 +43,7 @@
 
 ### Decision 3: Campaign name + sub-nav tab bar in layout
 
-- Chosen: Extend `app/campaigns/[id]/layout.tsx` to read `data?.name` from the existing `/api/campaigns/${id}` fetch (same request already in flight for `activeSessionId`). Render the name as an `<h1>` or section header above a tab bar. Tab bar uses `usePathname()` to detect active tab: exact match on `/campaigns/${id}` for Members, `.includes('/sessions')` for Sessions, `.includes('/prompts')` for Prompts, `.includes('/library')` for Library.
+- Chosen: Extend `app/campaigns/[id]/layout.tsx` to read `data?.name` from the existing `/api/campaigns/${id}` fetch (same request already in flight for `activeSessionId`). Render the name as an `<h1>` or section header above a tab bar. Tab bar uses `usePathname()` to detect active tab: exact match on `/campaigns/${id}` for Members, `.startsWith('/campaigns/${id}/sessions')` for Sessions, `.startsWith('/campaigns/${id}/prompts')` for Prompts, `.startsWith('/campaigns/${id}/library')` for Library.
 - Alternatives considered: Move nav into each individual page. Rejected — layout is the right abstraction; avoids duplication across 4 pages.
 - Rationale: Zero extra network cost (name comes from existing fetch). `usePathname()` is the Next.js idiomatic approach for active link detection in client layouts.
 - Trade-offs: Layout is already `'use client'` so `usePathname()` is available without RSC concerns. If campaign name fetch fails, header gracefully omits name (empty string fallback).

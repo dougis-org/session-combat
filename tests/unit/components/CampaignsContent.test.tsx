@@ -13,7 +13,10 @@ jest.mock('next/navigation', () => ({
 jest.mock('next/link', () => {
   const MockLink = ({ children, href, ...rest }: any) => <a href={href} {...rest}>{children}</a>;
   MockLink.displayName = 'MockLink';
-  return MockLink;
+  return {
+    __esModule: true,
+    default: MockLink,
+  };
 });
 
 // Mock global fetch
@@ -64,7 +67,7 @@ describe('CampaignsContent - Session section rendering', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => [mockSession] });
 
     render(<CampaignsContent />);
-    expect(await screen.findByText(/Session 5/)).toBeInTheDocument();
+    expect(await screen.findByText(/Session #5/)).toBeInTheDocument();
     expect(screen.getByText(/The Amber Temple/)).toBeInTheDocument();
     const link = screen.getByRole('link', { name: 'View all sessions →' });
     expect(link).toHaveAttribute('href', `/campaigns/${mockCampaign.id}/sessions`);

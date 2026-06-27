@@ -342,7 +342,7 @@ describe('T5 — Last Session card', () => {
       sessionsByCampaignId: { 'camp-1': [MOCK_SESSION] },
     });
     await renderPage();
-    expect(container.textContent).toContain('Session 11');
+    expect(container.textContent).toContain('Session #11');
     expect(container.textContent).toContain('The Betrayer Revealed');
   });
 
@@ -432,7 +432,7 @@ describe('T6 — Integration smoke test', () => {
     expect(container.textContent).toContain('Player Characters');
     expect(container.textContent).toContain('Mira');
     expect(container.textContent).toContain('Travelling NPCs & Companions');
-    expect(container.textContent).toContain('Session 11');
+    expect(container.textContent).toContain('Session #11');
     expect(container.textContent).not.toContain('Old Bob');
   });
 });

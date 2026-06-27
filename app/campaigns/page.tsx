@@ -284,13 +284,13 @@ export function CampaignsContent() {
                       <div className="bg-gray-700 rounded p-3 mb-4">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-medium">
-                            Session {lastSession.sessionNumber}{lastSession.title ? ` — ${lastSession.title}` : ''}
+                            Session #{lastSession.sessionNumber}{lastSession.title ? ` — ${lastSession.title}` : ''}
                           </p>
                           {lastSession.milestone && (
                             <span className="bg-yellow-600 text-yellow-100 text-xs px-2 py-0.5 rounded">Milestone</span>
                           )}
                         </div>
-                        <p className="text-gray-400 text-xs mt-1" suppressHydrationWarning>{new Date(lastSession.datePlayed).toLocaleDateString()}</p>
+                        <p className="text-gray-400 text-xs mt-1">{new Date(lastSession.datePlayed).toLocaleDateString('en-US', { timeZone: 'UTC' })}</p>
                         <Link href={`/campaigns/${campaign.id}/sessions`} className="text-blue-400 text-xs hover:underline mt-1 inline-block">View all sessions →</Link>
                       </div>
                     ) : (
