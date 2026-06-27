@@ -631,10 +631,10 @@ it('SSE scene message event renders SceneFeedItem in feed', async () => {
   act(() => {
     capturedOnEvent?.({
       type: 'message',
-      campaignId: 'test-campaign',
+      campaignId: CAMPAIGN_ID,
       data: {
         id: 'scene-msg-1',
-        campaignId: 'test-campaign',
+        campaignId: CAMPAIGN_ID,
         senderId: 'user-1',
         senderName: 'DM',
         text: '',
@@ -654,7 +654,7 @@ it('SSE scene message event renders SceneFeedItem in feed', async () => {
 it('SceneComposer onSuccess appends scene message to feed and closes composer', async () => {
   const sceneMsg = {
     id: 'scene-posted-1',
-    campaignId: 'test-campaign',
+    campaignId: CAMPAIGN_ID,
     senderId: 'user-1',
     senderName: 'DM',
     text: '',
@@ -690,7 +690,7 @@ it('SceneComposer onSuccess appends scene message to feed and closes composer', 
 
   // Duplicate id ignored: SSE fires same message id — still only one SceneFeedItem
   act(() => {
-    capturedOnEvent?.({ type: 'message', campaignId: 'test-campaign', data: sceneMsg as any })
+    capturedOnEvent?.({ type: 'message', campaignId: CAMPAIGN_ID, data: sceneMsg as any })
   })
   await waitFor(() => {
     expect(screen.queryAllByText('Scene').length).toBe(1)

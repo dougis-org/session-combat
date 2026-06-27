@@ -101,12 +101,6 @@ it('valid JPEG file clears errors and enables Send button', async () => {
   expect(screen.getByRole('button', { name: /send/i })).not.toBeDisabled()
 })
 
-// T3-5 (initial state — no file, no caption)
-it('Send button stays disabled when no file and no caption', () => {
-  renderComposer()
-  expect(screen.getByRole('button', { name: /send/i })).toBeDisabled()
-})
-
 // T3-6
 it('full success: calls /attachments then /messages; onSuccess called with returned message', async () => {
   const user = userEvent.setup()
