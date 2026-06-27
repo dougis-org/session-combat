@@ -4,7 +4,7 @@ import { CampaignChat } from '@/lib/components/CampaignChat'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import type { CampaignStreamEvent } from '@/lib/types'
 
-const CAMPAIGN_ID = 'bbbbbbbbbbbbbbbbbbbbbbbb'
+const CAMPAIGN_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
 
 jest.mock('@/lib/offline/LocalStore', () => ({
   LocalStore: {

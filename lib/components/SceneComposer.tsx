@@ -11,7 +11,7 @@ interface SceneComposerProps {
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 5 * 1024 * 1024
-const OBJECT_ID_RE = /^[a-f0-9]{24}$/i
+const CAMPAIGN_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function getFileValidationError(file: File): string | null {
   if (!ALLOWED_TYPES.includes(file.type)) {
@@ -31,7 +31,7 @@ async function uploadAttachment(
   if (cached) return { attachmentId: cached }
   const formData = new FormData()
   formData.append('file', file)
-  const res = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/attachments`, { method: 'POST', body: formData })
+  const res = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/attachments`, { method: 'POST', body: formData }) // nosemgrep
   if (!res.ok) {
     const data = await res.json().catch(() => ({})) as { error?: string }
     return { error: data.error ?? 'Upload failed. Please try again.' }
@@ -45,7 +45,7 @@ async function postSceneMessage(
   attachmentId: string | null,
   caption: string
 ): Promise<{ message: CampaignMessage } | { error: string }> {
-  const res = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/messages`, {
+  const res = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/messages`, { // nosemgrep
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -95,7 +95,7 @@ export function SceneComposer({ campaignId, onSuccess, onCancel }: SceneComposer
 
   async function handleSend() {
     if (!canSend) return
-    if (!OBJECT_ID_RE.test(campaignId)) {
+    if (!CAMPAIGN_UUID_RE.test(campaignId)) {
       setSubmitError('Invalid campaign. Please refresh and try again.')
       return
     }

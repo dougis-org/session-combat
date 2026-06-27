@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { SceneComposer } from '@/lib/components/SceneComposer'
 import type { CampaignMessage } from '@/lib/types'
 
-const CAMPAIGN_ID = 'aaaaaaaaaaaaaaaaaaaaaaaa'
+const CAMPAIGN_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
 const onSuccess = jest.fn()
 const onCancel = jest.fn()
 
