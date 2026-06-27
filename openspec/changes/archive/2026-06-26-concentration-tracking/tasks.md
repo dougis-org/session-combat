@@ -160,11 +160,11 @@ Blocking resolution flow:
 - [x] `git checkout main` and `git pull --ff-only`
 - [x] Verify the merged changes appear on main
 - [x] Mark all remaining tasks as complete (`- [x]`)
-- [x] Sync approved spec delta: copy `openspec/changes/concentration-tracking/specs/concentration-tracking/spec.md` → `openspec/specs/concentration-tracking/spec.md`; update relative links from `../../design.md` → `../../changes/archive/YYYY-MM-DD-concentration-tracking/design.md` and `../../tasks.md` → `../../changes/archive/YYYY-MM-DD-concentration-tracking/tasks.md`
-- [x] Archive the change: move `openspec/changes/concentration-tracking/` to `openspec/changes/archive/YYYY-MM-DD-concentration-tracking/` — **stage both the new location and the deletion of the old location in a single commit**
-- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-concentration-tracking/` exists and `openspec/changes/concentration-tracking/` is gone
-- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-concentration-tracking` then `git push -u origin doc/archive-YYYY-MM-DD-concentration-tracking`
-- [x] Open a PR from `doc/archive-YYYY-MM-DD-concentration-tracking` to `main` with title `docs: archive concentration-tracking (YYYY-MM-DD)`
-- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Sync approved spec delta: copy `openspec/changes/concentration-tracking/specs/concentration-tracking/spec.md` → `openspec/specs/concentration-tracking/spec.md`; update relative links from `../../design.md` → `../../changes/archive/2026-06-26-concentration-tracking/design.md` and `../../tasks.md` → `../../changes/archive/2026-06-26-concentration-tracking/tasks.md`
+- [x] Archive the change: move `openspec/changes/concentration-tracking/` to `openspec/changes/archive/2026-06-26-concentration-tracking/` — **stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/2026-06-26-concentration-tracking/` exists and `openspec/changes/concentration-tracking/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-2026-06-26-concentration-tracking` then `git push -u origin doc/archive-2026-06-26-concentration-tracking`
+- [x] Open a PR from `doc/archive-2026-06-26-concentration-tracking` to `main` with title `docs: archive concentration-tracking (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge https://github.com/dougis-org/session-combat/pull/449 --auto --squash`
 - [x] Monitor the doc PR until merged (same loop as implementation PR)
-- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/concentration-tracking doc/archive-YYYY-MM-DD-concentration-tracking`
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/concentration-tracking doc/archive-2026-06-26-concentration-tracking`
