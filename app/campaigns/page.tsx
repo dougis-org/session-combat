@@ -290,7 +290,7 @@ export function CampaignsContent() {
                             <span className="bg-yellow-600 text-yellow-100 text-xs px-2 py-0.5 rounded">Milestone</span>
                           )}
                         </div>
-                        <p className="text-gray-400 text-xs mt-1">{new Date(lastSession.datePlayed).toLocaleDateString()}</p>
+                        <p className="text-gray-400 text-xs mt-1" suppressHydrationWarning>{new Date(lastSession.datePlayed).toLocaleDateString()}</p>
                         <Link href={`/campaigns/${campaign.id}/sessions`} className="text-blue-400 text-xs hover:underline mt-1 inline-block">View all sessions →</Link>
                       </div>
                     ) : (

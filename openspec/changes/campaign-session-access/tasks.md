@@ -51,7 +51,7 @@
 
 ## Validation
 
-- [x] `npm run test` — all unit tests pass
+- [x] `npm run test:unit` — all unit tests pass
 - [x] `npm run test:integration` (if applicable) — all integration tests pass
 - [x] `npm run build` — TypeScript build succeeds with no errors
 - [x] `npm run lint` (if configured) — no lint errors
@@ -64,7 +64,7 @@ Before running, determine whether the current change is **docs-only**: run `git 
 
 **Full path** (any non-`.md` file changed):
 
-- **Unit tests** — `npm run test`; all tests must pass
+- **Unit tests** — `npm run test:unit`; all tests must pass
 - **Build** — `npm run build`; must succeed with no errors
 
 **Docs-only path** (every changed file is `.md`):
