@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { getDatabase } from '@/lib/db';
+import { verifyAttachmentCampaign } from '@/lib/gridfs';
 import { emitFiltered } from '@/lib/server/transport';
 import { canSeeMessage } from '@/lib/utils/campaignMessages';
 import type { CampaignMessage, MessageVisibility } from '@/lib/types';
@@ -117,6 +118,14 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   if (isScene) applySceneFields(message, attachmentId);
 
   const db = await getDatabase();
+
+  if (message.attachmentId) {
+    const owned = await verifyAttachmentCampaign(db, message.attachmentId, campaignId);
+    if (!owned) {
+      return NextResponse.json({ error: 'Attachment not found or does not belong to this campaign' }, { status: 400 });
+    }
+  }
+
   const { _id: _ignored, ...messageDoc } = message;
   void _ignored;
   await db.collection('campaignMessages').insertOne(messageDoc);

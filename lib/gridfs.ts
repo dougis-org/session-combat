@@ -69,6 +69,18 @@ export async function openDownloadStream(
   return { stream, contentType, campaignId };
 }
 
+export async function verifyAttachmentCampaign(
+  db: Db,
+  attachmentId: string,
+  campaignId: string,
+): Promise<boolean> {
+  if (!isHexObjectId(attachmentId)) return false;
+  const doc = await db
+    .collection('attachments.files')
+    .findOne({ _id: new ObjectId(attachmentId), 'metadata.campaignId': campaignId }, { projection: { _id: 1 } });
+  return doc !== null;
+}
+
 export async function deleteOrphanedAttachments(
   bucket: GridFSBucket,
   campaignId: string,

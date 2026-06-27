@@ -32,8 +32,15 @@ jest.mock("@/lib/server/transport", () => ({
   emitFiltered: jest.fn(),
 }));
 
+jest.mock("@/lib/gridfs", () => ({
+  verifyAttachmentCampaign: jest.fn(),
+}));
+
+import { verifyAttachmentCampaign } from "@/lib/gridfs";
+
 const mockedStorage = jest.mocked(storage);
 const mockedEmitFiltered = jest.mocked(emitFiltered);
+const mockedVerifyAttachment = jest.mocked(verifyAttachmentCampaign);
 
 const CAMPAIGN_ID = "campaign-xyz";
 const BASE_URL = `http://localhost/api/campaigns/${CAMPAIGN_ID}/messages`;
@@ -58,6 +65,8 @@ function makeMockInsertOne() {
   return jest.fn().mockResolvedValue({ insertedId: "mock-id" });
 }
 
+const VALID_ATTACHMENT_ID = "aaaaaaaaaaaaaaaaaaaaaaaa";
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockedGetDatabase = jest.fn();
@@ -71,6 +80,7 @@ beforeEach(() => {
   });
   mockedStorage.listMembersForCampaign.mockResolvedValue([DM_MEMBER]);
   mockedEmitFiltered.mockReturnValue(undefined);
+  mockedVerifyAttachment.mockResolvedValue(true);
   mockAuthState.payload = MOCK_AUTH;
 });
 
@@ -80,13 +90,13 @@ describe("POST /messages — scene kind", () => {
     mockDbCollection(mockedGetDatabase, { insertOne: makeMockInsertOne() });
 
     const res = await POST(
-      makePost({ kind: "scene", attachmentId: "abc", text: "Caption", visibility: { scope: "group" } }),
+      makePost({ kind: "scene", attachmentId: VALID_ATTACHMENT_ID, text: "Caption", visibility: { scope: "group" } }),
       { params: PARAMS }
     );
     expect(res.status).toBe(201);
     const body = await res.json();
     expect(body.kind).toBe("scene");
-    expect(body.attachmentId).toBe("abc");
+    expect(body.attachmentId).toBe(VALID_ATTACHMENT_ID);
     expect(body.text).toBe("Caption");
   });
 
@@ -95,13 +105,13 @@ describe("POST /messages — scene kind", () => {
     mockDbCollection(mockedGetDatabase, { insertOne: makeMockInsertOne() });
 
     const res = await POST(
-      makePost({ kind: "scene", attachmentId: "abc", visibility: { scope: "group" } }),
+      makePost({ kind: "scene", attachmentId: VALID_ATTACHMENT_ID, visibility: { scope: "group" } }),
       { params: PARAMS }
     );
     expect(res.status).toBe(201);
     const body = await res.json();
     expect(body.kind).toBe("scene");
-    expect(body.attachmentId).toBe("abc");
+    expect(body.attachmentId).toBe(VALID_ATTACHMENT_ID);
   });
 
   it("T1-3: DM POSTs scene with caption only (no attachmentId) → 201", async () => {
@@ -177,13 +187,27 @@ describe("POST /messages — scene kind", () => {
     mockedStorage.getMember.mockResolvedValue(DM_MEMBER);
     mockDbCollection(mockedGetDatabase, { insertOne: makeMockInsertOne() });
 
+    const paddedId = ` ${VALID_ATTACHMENT_ID} `;
     const res = await POST(
-      makePost({ kind: "scene", attachmentId: " abc ", text: "Caption", visibility: { scope: "group" } }),
+      makePost({ kind: "scene", attachmentId: paddedId, text: "Caption", visibility: { scope: "group" } }),
       { params: PARAMS }
     );
     expect(res.status).toBe(201);
     const body = await res.json();
-    expect(body.attachmentId).toBe("abc");
+    expect(body.attachmentId).toBe(VALID_ATTACHMENT_ID);
+  });
+
+  it("T1-9: DM POSTs scene with attachmentId not belonging to campaign → 400", async () => {
+    mockedStorage.getMember.mockResolvedValue(DM_MEMBER);
+    mockedVerifyAttachment.mockResolvedValue(false);
+
+    const res = await POST(
+      makePost({ kind: "scene", attachmentId: VALID_ATTACHMENT_ID, visibility: { scope: "group" } }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toMatch(/attachment/i);
   });
 
   it("T1-8b: DM POSTs scene with caption > 5000 chars → 400", async () => {
@@ -201,7 +225,7 @@ describe("POST /messages — scene kind", () => {
     mockDbCollection(mockedGetDatabase, { insertOne: makeMockInsertOne() });
 
     await POST(
-      makePost({ kind: "scene", attachmentId: "abc", text: "Test", visibility: { scope: "group" } }),
+      makePost({ kind: "scene", attachmentId: VALID_ATTACHMENT_ID, text: "Test", visibility: { scope: "group" } }),
       { params: PARAMS }
     );
 
