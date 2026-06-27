@@ -91,15 +91,15 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   const { text, visibility, kind, attachmentId } = body as Record<string, unknown>;
   const isScene = kind === 'scene';
 
+  const caller = await storage.getMember(campaignId, auth.userId);
+  const accessError = checkCallerAccess(caller, isScene);
+  if (accessError) return accessError;
+
   const bodyError = isScene ? validateScenePayload(text, attachmentId) : validateChatPayload(text);
   if (bodyError) return bodyError;
 
   const visResult = parseVisibility(visibility);
   if ('error' in visResult) return visResult.error;
-
-  const caller = await storage.getMember(campaignId, auth.userId);
-  const accessError = checkCallerAccess(caller, isScene);
-  if (accessError) return accessError;
 
   const user = await storage.getUserById(auth.userId);
   const senderName = user?.username ?? 'Unknown';

@@ -107,10 +107,10 @@
   - Acceptance criteria reference: specs/scene-push-render/spec.md — enlarge scenarios
   - Testability notes: jsdom dialog mock; user-event click on thumbnail, Escape keypress
 
-- Requirement: Caption is optional; text-only scene rejected (no image)
-  - Design element: SceneComposer validation; server accepts empty text when kind='scene'
+- Requirement: Caption-only scenes are valid; only fully empty scenes (no image and no caption) are rejected
+  - Design element: SceneComposer validation (Send enabled when either file or caption present); server rejects when both absent
   - Acceptance criteria reference: specs/scene-push-render/spec.md — validation scenarios
-  - Testability notes: Component test Submit disabled when no file selected; server unit test with empty text + kind='scene' → 201
+  - Testability notes: Component test T3-10 (caption-only enables Send, skips /attachments); route unit test T1-3 (caption-only → 201), T1-4 (both absent → 400)
 
 ## Non-Functional Requirements Mapping
 

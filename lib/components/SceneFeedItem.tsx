@@ -50,6 +50,7 @@ export function SceneFeedItem({ message, campaignId }: SceneFeedItemProps) {
         <dialog
           ref={dialogRef}
           onClick={handleBackdropClick}
+          aria-label="Fullscreen scene image"
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 border-none p-0 outline-none"
         >
           <img

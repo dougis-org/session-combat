@@ -37,6 +37,7 @@
 ### In Scope
 
 - Extend `POST /api/campaigns/[id]/messages` to accept `kind: 'scene'`, optional `attachmentId`, and optional `text` when kind is scene
+- Caption-only scenes (text without image) — both image-only and caption-only are valid; only fully empty scenes (no image and no caption) are rejected (400)
 - DM-only server-side gate for scene messages (403 for non-DMs)
 - "Push Scene" button in `CampaignChat` — DM-only, separate from chat composer
 - Inline scene composer component (file picker + caption textarea + Send/Cancel)
@@ -51,7 +52,6 @@
 
 ### Out of Scope
 
-- Text-only scene messages without an image are supported (caption-only is valid); only fully empty scenes (no image and no caption) are disallowed
 - Per-scene visibility (show to subset of players)
 - Additional attachment types beyond images (audio, video, PDF)
 - Image editing, cropping, or annotation

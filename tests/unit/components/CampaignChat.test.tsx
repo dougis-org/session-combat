@@ -313,7 +313,7 @@ it('hasMore is false when history response has no nextCursor', async () => {
 it('stream message while dock is collapsed shows unread badge', async () => {
   const pastDate = new Date(Date.now() - 5000).toISOString()
   mockedLocalStore.get.mockImplementation((key: string) =>
-    key === 'campaign-chat-last-open-test-campaign' ? pastDate : null
+    key === `campaign-chat-last-open-${CAMPAIGN_ID}` ? pastDate : null
   )
   render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   fireMsg({ id: 'new-msg', senderName: 'Bob', text: 'Hi' })
@@ -324,7 +324,7 @@ it('stream message while dock is collapsed shows unread badge', async () => {
 it('opening dock clears unread badge and updates LocalStore', async () => {
   const pastDate = new Date(Date.now() - 5000).toISOString()
   mockedLocalStore.get.mockImplementation((key: string) =>
-    key === 'campaign-chat-last-open-test-campaign' ? pastDate : null
+    key === `campaign-chat-last-open-${CAMPAIGN_ID}` ? pastDate : null
   )
   render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   fireMsg({ id: 'unread-1', senderName: 'Bob', text: 'Badge test' })
