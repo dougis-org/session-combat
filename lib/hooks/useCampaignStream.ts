@@ -32,7 +32,18 @@ export function useCampaignStream(
     function connect() {
       if (torn) return;
 
-      const es = new globalThis.EventSource(`/api/campaigns/${encodeURIComponent(campaignId)}/stream`);
+      const ES = (typeof globalThis.EventSource === 'function'
+        ? globalThis.EventSource
+        : class {
+            constructor(_url: string) {}
+            close() {}
+            addEventListener(_type: string, _handler: any) {}
+            onopen = null;
+            onerror = null;
+            readyState = 0;
+          }) as unknown as typeof globalThis.EventSource;
+
+      const es = new ES(`/api/campaigns/${encodeURIComponent(campaignId)}/stream`);
       currentEs = es;
 
       setStatus('connecting');
