@@ -25,6 +25,18 @@ The system SHALL always render a "Session Log" link in the Active Campaigns Dash
 
 ---
 
+### Requirement: ADDED Active Campaign card action row
+
+The system SHALL include "Session Log" as a permanent entry in the action row (Members | Session Log | Prompt Builder | Library | Start Encounter), consistently with the "Session Log" button already present in the all-campaigns grid below.
+
+#### Scenario: Action row contains Session Log
+
+- **Given** the user is on the `/campaigns` page
+- **When** the Active Campaigns Dashboard renders with one or more active campaigns
+- **Then** each campaign card's action row contains a "Session Log" link
+
+---
+
 ### Requirement: ADDED Session section always renders on Active Campaign card
 
 The system SHALL render a session section on every Active Campaigns Dashboard card: showing the last session details when sessions exist, or a "Log First Session" CTA when none exist.

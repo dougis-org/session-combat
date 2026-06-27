@@ -91,11 +91,11 @@ No requirements removed.
 
 ## Traceability
 
-- Proposal element "Campaign name header in sub-nav" → Requirement: ADDED Campaign name header
+- Proposal element "Campaign name header in sub-nav" → Requirement: ADDED Campaign name header in sub-nav
 - Proposal element "Tab bar Members | Sessions | Prompts | Library" → Requirement: ADDED Tab bar on campaign sub-pages
-- Proposal element "Active tab via usePathname()" → Requirement: ADDED Tab bar (active tab scenarios)
-- Design decision 3 (layout extension) → ADDED Campaign name header + ADDED Tab bar
-- Design decision 4 (pathname matching) → ADDED Tab bar active tab scenarios
+- Proposal element "Active tab via usePathname()" → Requirement: ADDED Tab bar on campaign sub-pages
+- Design decision 3 (layout extension) → ADDED Campaign name header in sub-nav + ADDED Tab bar on campaign sub-pages
+- Design decision 4 (pathname matching) → ADDED Tab bar on campaign sub-pages
 - Requirements → Tasks: task-3 (update layout.tsx with name + tab bar)
 
 ## Non-Functional Acceptance Criteria
