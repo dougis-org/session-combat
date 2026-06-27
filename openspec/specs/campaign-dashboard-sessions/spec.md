@@ -2,7 +2,11 @@
 
 ## Purpose
 To ensure that campaign session entry points are always discoverable from the Active Campaigns Dashboard by rendering a 'Session Log' button in the campaign card action row and a session section (showing the last session or a 'Log First Session' CTA) on the active campaign card.
+
 ## Requirements
+
+This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-06-27-campaign-session-access/design.md) document, not a replacement.
+
 ### Requirement: ADDED Session Log button in Active Campaigns action row
 
 The system SHALL always render a "Session Log" link in the Active Campaigns Dashboard action button row for each active campaign, regardless of whether any sessions exist.
@@ -43,3 +47,38 @@ The system SHALL render a session section on every Active Campaigns Dashboard ca
 - **When** an active campaign's last session has `milestone: true`
 - **Then** the session section displays a "Milestone" badge alongside the session info
 
+## REMOVED Requirements
+
+No requirements removed.
+
+## Traceability
+
+- Proposal element "Session section always renders" → Requirement: ADDED Session section always renders on Active Campaign card
+- Proposal element "Session Log button in action row" → Requirement: ADDED Session Log button in Active Campaigns action row
+- Design decision 1 (session section always renders) → ADDED Session section always renders on Active Campaign card
+- Design decision 2 (Session Log button in action row) → Requirement: ADDED Session Log button in Active Campaigns action row
+- Requirements → Tasks: task-1 (update app/campaigns/page.tsx session section), task-2 (add Session Log button to action row)
+
+## Non-Functional Acceptance Criteria
+
+### Requirement: Performance
+
+No additional network requests introduced by this change.
+
+#### Scenario: No extra fetch for session section empty state
+
+- **Given** an active campaign with no sessions
+- **When** the Active Campaigns Dashboard renders
+- **Then** no additional fetch calls are made beyond the existing `?limit=1` session fetch (which returns an empty array, already handled)
+
+### Requirement: Security
+
+See functional scenarios above — no new access-controlled endpoints are introduced. All links point to existing protected routes.
+
+### Requirement: Reliability
+
+#### Scenario: Session fetch failure degrades gracefully
+
+- **Given** the `/api/campaigns/${id}/sessions?limit=1` fetch fails or returns an error
+- **When** the Active Campaigns Dashboard renders
+- **Then** `lastSession` is `null` and the empty state CTA renders (same as no-sessions case); no unhandled error is thrown

@@ -2,7 +2,11 @@
 
 ## Purpose
 To provide a consistent navigation header and tab bar (Members, Sessions, Prompts, Library) on all campaign sub-pages (`/campaigns/[id]/*`), with active tab highlighting based on the current route pathname.
+
 ## Requirements
+
+This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-06-27-campaign-session-access/design.md) document, not a replacement.
+
 ### Requirement: ADDED Campaign name header in sub-nav
 
 The system SHALL display the campaign name as a header above the tab bar on all campaign sub-pages (`/campaigns/[id]/*`), fetched from the existing `/api/campaigns/${id}` response.
@@ -86,3 +90,37 @@ The system SHALL wrap all campaign sub-page content with the campaign name heade
 - **When** the layout renders with the new tab bar
 - **Then** the page's existing content (`{children}`) renders below the tab bar, and `CampaignChat` still renders
 
+## REMOVED Requirements
+
+No requirements removed.
+
+## Traceability
+
+- Proposal element "Campaign name header in sub-nav" → Requirement: ADDED Campaign name header in sub-nav
+- Proposal element "Tab bar Members | Sessions | Prompts | Library" → Requirement: ADDED Tab bar on campaign sub-pages
+- Proposal element "Active tab via usePathname()" → Requirement: ADDED Tab bar on campaign sub-pages
+- Design decision 3 (layout extension) → ADDED Campaign name header in sub-nav + ADDED Tab bar on campaign sub-pages
+- Design decision 4 (pathname matching) → ADDED Tab bar on campaign sub-pages
+- Requirements → Tasks: task-3 (update layout.tsx with name + tab bar)
+
+## Non-Functional Acceptance Criteria
+
+### Requirement: Performance
+
+No additional network requests. The campaign name is read from the existing `/api/campaigns/${id}` fetch already present in the layout.
+
+#### Scenario: Single fetch for both name and activeSessionId
+
+- **Given** a user navigates to any campaign sub-page
+- **When** the layout mounts
+- **Then** exactly one fetch to `/api/campaigns/${id}` is made (same as before), and both `name` and `activeSessionId` are read from the single response
+
+### Requirement: Security
+
+All tab bar links point to existing ProtectedRoute-wrapped pages. No new access-controlled surfaces are introduced.
+
+See functional scenarios above for navigation behavior.
+
+### Requirement: Reliability
+
+See functional scenario "Header degrades gracefully on fetch failure" — tab bar renders even when campaign name is unavailable.
