@@ -42,18 +42,6 @@ The system SHALL render a session section on every Active Campaigns Dashboard ca
 - **When** an active campaign's last session has `milestone: true`
 - **Then** the session section displays a "Milestone" badge alongside the session info
 
-## MODIFIED Requirements
-
-### Requirement: MODIFIED Active Campaign card action row
-
-The system SHALL include "Session Log" as a permanent entry in the action row (Members | Session Log | Prompt Builder | Library | Start Encounter), consistently with the "Session Log" button already present in the all-campaigns grid below.
-
-#### Scenario: Action row contains Session Log
-
-- **Given** the user is on the `/campaigns` page
-- **When** the Active Campaigns Dashboard renders with one or more active campaigns
-- **Then** each campaign card's action row contains a "Session Log" link
-
 ## REMOVED Requirements
 
 No requirements removed.
@@ -61,9 +49,9 @@ No requirements removed.
 ## Traceability
 
 - Proposal element "Session section always renders" → Requirement: ADDED Session section always renders
-- Proposal element "Session Log button in action row" → Requirement: MODIFIED Active Campaign card action row
+- Proposal element "Session Log button in action row" → Requirement: ADDED Session Log button in Active Campaigns action row
 - Design decision 1 (session section always renders) → ADDED Session section always renders
-- Design decision 2 (Session Log button in action row) → MODIFIED Active Campaign card action row
+- Design decision 2 (Session Log button in action row) → Requirement: ADDED Session Log button in Active Campaigns action row
 - Requirements → Tasks: task-1 (update app/campaigns/page.tsx session section), task-2 (add Session Log button to action row)
 
 ## Non-Functional Acceptance Criteria

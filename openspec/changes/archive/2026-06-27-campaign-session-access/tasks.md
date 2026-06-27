@@ -76,12 +76,12 @@ If **ANY** required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `feat/campaign-session-access` and push to remote
-- [ ] Open PR from `feat/campaign-session-access` to `main`. PR body **MUST** include `Closes #442`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Iterate until merged** — repeat the following priority loop until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify user:
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to `feat/campaign-session-access` and push to remote
+- [x] Open PR from `feat/campaign-session-access` to `main`. PR body **MUST** include `Closes #442`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Iterate until merged** — repeat the following priority loop until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify user:
   1. **Build and tests** — run all steps in [Remote push validation]; fix failures, commit, push before anything else
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address each unresolved thread, commit, run validation, push, wait 180s; repeat until all resolved
   3. **CI check failures** — after all comments resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks, commit, run validation, push, wait 180s; restart from step 1
@@ -100,17 +100,17 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/`:
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/`:
   - Copy `openspec/changes/campaign-session-access/specs/campaign-dashboard-sessions/spec.md` → `openspec/specs/campaign-dashboard-sessions/spec.md`
   - Copy `openspec/changes/campaign-session-access/specs/campaign-subnav/spec.md` → `openspec/specs/campaign-subnav/spec.md`
-  - Update relative links in both copied files: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-campaign-session-access/design.md` and `../../tasks.md` with `../../changes/archive/YYYY-MM-DD-campaign-session-access/tasks.md`
-- [ ] Archive the change: move `openspec/changes/campaign-session-access/` to `openspec/changes/archive/YYYY-MM-DD-campaign-session-access/` in a **single commit** (stage both copy and deletion together)
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-session-access/` exists and `openspec/changes/campaign-session-access/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-campaign-session-access` then `git push -u origin doc/archive-YYYY-MM-DD-campaign-session-access`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-campaign-session-access` to `main` with title `docs: archive campaign-session-access (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Monitor the doc PR until merged; address comments and CI failures iteratively
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feat/campaign-session-access doc/archive-YYYY-MM-DD-campaign-session-access`
+  - Update relative links in both copied files: replace `../../design.md` with `../../changes/archive/2026-06-27-campaign-session-access/design.md` and `../../tasks.md` with `../../changes/archive/2026-06-27-campaign-session-access/tasks.md`
+- [x] Archive the change: move `openspec/changes/campaign-session-access/` to `openspec/changes/archive/2026-06-27-campaign-session-access/` in a **single commit** (stage both copy and deletion together)
+- [x] Confirm `openspec/changes/archive/2026-06-27-campaign-session-access/` exists and `openspec/changes/campaign-session-access/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-2026-06-27-campaign-session-access` then `git push -u origin doc/archive-2026-06-27-campaign-session-access`
+- [x] Open a PR from `doc/archive-2026-06-27-campaign-session-access` to `main` with title `docs: archive campaign-session-access (2026-06-27)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Monitor the doc PR until merged; address comments and CI failures iteratively
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/campaign-session-access doc/archive-2026-06-27-campaign-session-access`

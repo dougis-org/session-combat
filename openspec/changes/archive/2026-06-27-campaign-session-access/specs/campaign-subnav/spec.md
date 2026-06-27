@@ -75,9 +75,7 @@ The system SHALL render a tab bar with four tabs — Members, Sessions, Prompts,
 - **When** they click the Members tab
 - **Then** they navigate to `/campaigns/${id}`
 
-## MODIFIED Requirements
-
-### Requirement: MODIFIED Campaign sub-page layout
+### Requirement: ADDED Campaign sub-page layout wrapping
 
 The system SHALL wrap all campaign sub-page content with the campaign name header and tab bar, in addition to the existing `CampaignChat` component already rendered by the layout.
 
