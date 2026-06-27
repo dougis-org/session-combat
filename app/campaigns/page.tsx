@@ -267,6 +267,12 @@ export function CampaignsContent() {
                         Library
                       </Link>
                       <Link
+                        href={`/campaigns/${campaign.id}/sessions`}
+                        className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm"
+                      >
+                        Session Log
+                      </Link>
+                      <Link
                         href="/encounters"
                         className="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm"
                       >
@@ -274,28 +280,23 @@ export function CampaignsContent() {
                       </Link>
                     </div>
 
-                    {lastSession && (
+                    {lastSession ? (
                       <div className="bg-gray-700 rounded p-3 mb-4">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-medium">
-                            Session {lastSession.sessionNumber}
-                            {lastSession.title ? ` — ${lastSession.title}` : ''}
+                            Session #{lastSession.sessionNumber}{lastSession.title ? ` — ${lastSession.title}` : ''}
                           </p>
                           {lastSession.milestone && (
-                            <span className="bg-yellow-600 text-yellow-100 text-xs px-2 py-0.5 rounded">
-                              Milestone
-                            </span>
+                            <span className="bg-yellow-600 text-yellow-100 text-xs px-2 py-0.5 rounded">Milestone</span>
                           )}
                         </div>
-                        <p className="text-gray-400 text-xs mt-1">
-                          {new Date(lastSession.datePlayed).toLocaleDateString()}
-                        </p>
-                        <Link
-                          href={`/campaigns/${campaign.id}/sessions`}
-                          className="text-blue-400 text-xs hover:underline mt-1 inline-block"
-                        >
-                          View all sessions →
-                        </Link>
+                        <p className="text-gray-400 text-xs mt-1">{new Date(lastSession.datePlayed).toLocaleDateString('en-US', { timeZone: 'UTC' })}</p>
+                        <Link href={`/campaigns/${campaign.id}/sessions`} className="text-blue-400 text-xs hover:underline mt-1 inline-block">View all sessions →</Link>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-700 rounded p-3 mb-4">
+                        <p className="text-sm text-gray-400">No sessions logged yet.</p>
+                        <Link href={`/campaigns/${campaign.id}/sessions`} className="text-blue-400 text-xs hover:underline mt-1 inline-block">Log First Session →</Link>
                       </div>
                     )}
 
