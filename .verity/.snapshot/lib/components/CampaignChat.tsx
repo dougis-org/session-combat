@@ -10,11 +10,6 @@ import { SceneFeedItem } from '@/lib/components/SceneFeedItem'
 import type { CampaignMessage, CampaignRoll, CampaignStreamEvent, MessageVisibility, RollVisibility } from '@/lib/types'
 
 const PIN_KEY = 'campaign-chat-pin'
-const CHAT_SIZE_KEY = 'campaign-chat-size'
-// Navbar height baked into full-height calculation; update if navbar changes
-const NAVBAR_HEIGHT = 60
-
-type PersistedSize = { height: number; screenWidth: number; screenHeight: number }
 
 type FeedItem =
   | { kind: 'message'; data: CampaignMessage }
@@ -44,32 +39,22 @@ function safeRemove(key: string) {
 
 // ── Dock reducer ──────────────────────────────────────────────────
 
-type DockState = { isExpanded: boolean; isPinned: boolean; isLarge: boolean; customHeight: number | null }
+type DockState = { isExpanded: boolean; isPinned: boolean }
 type DockAction =
   | { type: 'INIT'; pinned: boolean }
   | { type: 'EXPAND' }
   | { type: 'COLLAPSE' }
   | { type: 'PIN' }
   | { type: 'UNPIN' }
-  | { type: 'TOGGLE_SIZE' }
-  | { type: 'SET_HEIGHT'; payload: number }
 
 function dockReducer(state: DockState, action: DockAction): DockState {
   switch (action.type) {
-    case 'INIT':        return { isExpanded: action.pinned, isPinned: action.pinned, isLarge: false, customHeight: null }
-    case 'EXPAND':      return { ...state, isExpanded: true }
-    case 'COLLAPSE':    return { ...state, isExpanded: false }
-    case 'PIN':         return { ...state, isPinned: true }
-    case 'UNPIN':       return { ...state, isPinned: false }
-    case 'TOGGLE_SIZE': return { ...state, isLarge: !state.isLarge }
-    case 'SET_HEIGHT':  return { ...state, customHeight: Math.max(150, action.payload), isLarge: false }
+    case 'INIT':    return { isExpanded: action.pinned, isPinned: action.pinned }
+    case 'EXPAND':  return { ...state, isExpanded: true }
+    case 'COLLAPSE':return { ...state, isExpanded: false }
+    case 'PIN':     return { ...state, isPinned: true }
+    case 'UNPIN':   return { ...state, isPinned: false }
   }
-}
-
-function resolveHeight(state: DockState): string {
-  if (state.isLarge) return `calc(100vh - ${NAVBAR_HEIGHT}px)`
-  if (state.customHeight !== null) return `${state.customHeight}px`
-  return '33vh'
 }
 
 // ── Sub-components ────────────────────────────────────────────────
@@ -336,47 +321,16 @@ function RollEntryStrip({ campaignId, activeSessionId, streamStatus, onRollPoste
   )
 }
 
-// ── DragHandle sub-component ──────────────────────────────────────
-
-interface DragHandleProps {
-  onDragStart: (startY: number, startHeight: number) => void
-  currentHeightPx: number
-}
-
-function DragHandle({ onDragStart, currentHeightPx }: DragHandleProps) {
-  return (
-    <div
-      role="separator"
-      aria-label="Resize chat panel"
-      style={{ height: 8, cursor: 'ns-resize', flexShrink: 0 }}
-      className="w-full flex items-center justify-center bg-gray-800 hover:bg-gray-700"
-      onMouseDown={e => {
-        e.preventDefault()
-        onDragStart(e.clientY, currentHeightPx)
-      }}
-    >
-      <div className="flex gap-0.5">
-        <div className="w-1 h-1 rounded-full bg-gray-500" />
-        <div className="w-1 h-1 rounded-full bg-gray-500" />
-        <div className="w-1 h-1 rounded-full bg-gray-500" />
-      </div>
-    </div>
-  )
-}
-
 // ── Main component ────────────────────────────────────────────────
 
-export function CampaignChat({ campaignId, activeSessionId = null, onSessionChange, onSizeChange }: { campaignId: string; activeSessionId?: string | null; onSessionChange?: (activeSessionId: string | null) => void; onSizeChange?: (isLarge: boolean) => void }) {
+export function CampaignChat({ campaignId, activeSessionId = null, onSessionChange }: { campaignId: string; activeSessionId?: string | null; onSessionChange?: (activeSessionId: string | null) => void }) {
   const { user } = useAuth()
-  const [{ isExpanded, isPinned, isLarge, customHeight }, dispatch] = useReducer(dockReducer, {
+  const [{ isExpanded, isPinned }, dispatch] = useReducer(dockReducer, {
     isExpanded: false,
     isPinned: false,
-    isLarge: false,
-    customHeight: null,
   })
   const triggerRef = useRef<HTMLButtonElement>(null)
   const isMounted = useRef(false)
-  const dragListenersRef = useRef<{ move: (e: MouseEvent) => void; up: (e: MouseEvent) => void } | null>(null)
 
   const [feed, setFeed] = useState<FeedItem[]>([])
   const seenIds = useRef<Set<string>>(new Set())
@@ -430,36 +384,12 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
 
   const { status: streamStatus } = useCampaignStream(campaignId, onStreamEvent)
 
-  // ── Init: pin state + last-open timestamp + persisted size ──
+  // ── Init: pin state + last-open timestamp ──
   useEffect(() => {
     dispatch({ type: 'INIT', pinned: !!safeGet<boolean>(PIN_KEY) })
     const stored = safeGet<string>(lastOpenKey)
     if (stored) lastOpenRef.current = new Date(stored)
-
-    const savedSize = safeGet<PersistedSize>(CHAT_SIZE_KEY)
-    if (
-      savedSize &&
-      typeof savedSize.height === 'number' && Number.isFinite(savedSize.height) &&
-      typeof savedSize.screenWidth === 'number' && Number.isFinite(savedSize.screenWidth) &&
-      typeof savedSize.screenHeight === 'number' && Number.isFinite(savedSize.screenHeight)
-    ) {
-      const screenMatch =
-        Math.abs(savedSize.screenWidth - window.innerWidth) <= 100 &&
-        Math.abs(savedSize.screenHeight - window.innerHeight) <= 100
-      if (screenMatch) dispatch({ type: 'SET_HEIGHT', payload: savedSize.height })
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // ── Cleanup lingering drag listeners on unmount ──
-  useEffect(() => {
-    return () => {
-      if (dragListenersRef.current) {
-        document.removeEventListener('mousemove', dragListenersRef.current.move)
-        document.removeEventListener('mouseup', dragListenersRef.current.up)
-        dragListenersRef.current = null
-      }
-    }
   }, [])
 
   // ── Restore focus after drawer closes ──
@@ -471,11 +401,10 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   // ── Keyboard: Escape to collapse ──
   useEffect(() => {
     if (!isExpanded) return
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') handleCollapse() }
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') dispatch({ type: 'COLLAPSE' }) }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isExpanded, isLarge])
+  }, [isExpanded])
 
   // ── Fetch members on mount ──
   useEffect(() => {
@@ -577,34 +506,6 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   }, [isExpanded, campaignId])
 
   // ── Handlers ──
-
-  function handleDragStart(startY: number, startHeight: number) {
-    let latestHeight = startHeight
-    function onMove(e: MouseEvent) {
-      latestHeight = Math.max(150, startHeight - (e.clientY - startY))
-      dispatch({ type: 'SET_HEIGHT', payload: latestHeight })
-    }
-    function onUp() {
-      document.removeEventListener('mousemove', onMove)
-      document.removeEventListener('mouseup', onUp)
-      dragListenersRef.current = null
-      safeSet(CHAT_SIZE_KEY, { height: latestHeight, screenWidth: window.innerWidth, screenHeight: window.innerHeight })
-    }
-    dragListenersRef.current = { move: onMove, up: onUp }
-    document.addEventListener('mousemove', onMove)
-    document.addEventListener('mouseup', onUp)
-  }
-
-  function handleToggleSize() {
-    const nextIsLarge = !isLarge
-    dispatch({ type: 'TOGGLE_SIZE' })
-    onSizeChange?.(nextIsLarge)
-  }
-
-  function handleCollapse() {
-    if (isLarge) onSizeChange?.(false)
-    dispatch({ type: 'COLLAPSE' })
-  }
 
   function handlePinToggle() {
     if (isPinned) {
@@ -735,25 +636,13 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   }
 
   // ── Expanded drawer ──
-  const resolvedHeight = resolveHeight({ isExpanded, isPinned, isLarge, customHeight })
-  const drawerStyle = { height: resolvedHeight }
-  const drawerClass = isLarge
-    ? 'h-full w-80 flex flex-col bg-gray-800 border-l border-gray-700'
-    : 'fixed bottom-0 right-0 z-40 w-80 flex flex-col bg-gray-800 border-l border-t border-gray-700 rounded-tl-lg'
-
   return (
     <div
       role="complementary"
       aria-label="Campaign Chat"
-      className={drawerClass}
-      style={drawerStyle}
+      className="fixed bottom-0 right-0 z-40 w-80 flex flex-col bg-gray-800 border-l border-t border-gray-700 rounded-tl-lg"
+      style={{ height: '33vh' }}
     >
-      {!isLarge && (
-        <DragHandle
-          onDragStart={handleDragStart}
-          currentHeightPx={customHeight ?? Math.round(window.innerHeight * 0.33)}
-        />
-      )}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700 flex-shrink-0">
         <span className="text-sm font-semibold text-white">Campaign Chat</span>
         <div className="flex items-center gap-2">
@@ -768,27 +657,8 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
             </svg>
           </button>
           <button
-            aria-label={isLarge ? 'Collapse to compact view' : 'Expand to full height'}
-            onClick={handleToggleSize}
-            className="text-gray-400 hover:text-white"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              {isLarge ? (
-                <>
-                  <path d="M5.5 1a.5.5 0 010 1H2.707l3.147 3.146a.5.5 0 01-.708.708L2 2.707V5.5a.5.5 0 01-1 0V1.5A.5.5 0 011.5 1H5.5z" />
-                  <path d="M10.5 15a.5.5 0 010-1h2.793l-3.147-3.146a.5.5 0 01.708-.708L14 13.293V10.5a.5.5 0 011 0v4a.5.5 0 01-.5.5H10.5z" />
-                </>
-              ) : (
-                <>
-                  <path d="M1.5 1H5.5a.5.5 0 010 1H2.707l3.147 3.146a.5.5 0 01-.708.708L2 2.707V5.5a.5.5 0 01-1 0V1.5A.5.5 0 011.5 1z" />
-                  <path d="M14.5 15H10.5a.5.5 0 010-1h2.793l-3.147-3.146a.5.5 0 01.708-.708L14 13.293V10.5a.5.5 0 011 0v4a.5.5 0 01-.5.5z" />
-                </>
-              )}
-            </svg>
-          </button>
-          <button
             aria-label="Collapse chat"
-            onClick={handleCollapse}
+            onClick={() => dispatch({ type: 'COLLAPSE' })}
             className="text-gray-400 hover:text-white text-lg leading-none"
           >
             ×
