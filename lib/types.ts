@@ -41,7 +41,8 @@ export type CampaignStreamEvent =
   | { type: "heartbeat"; campaignId: string; data: { ts: number } }
   | { type: "change"; campaignId: string; data: Record<string, unknown> }
   | { type: "message"; campaignId: string; data: CampaignMessage }
-  | { type: "roll"; campaignId: string; data: CampaignRoll };
+  | { type: "roll"; campaignId: string; data: CampaignRoll }
+  | { type: "session"; campaignId: string; data: { activeSessionId: string | null } };
 
 // D&D 5e Classes - includes official classes and common additions (e.g., Blood Hunter)
 export type DnDClass =

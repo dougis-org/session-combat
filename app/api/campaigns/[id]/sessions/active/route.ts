@@ -3,6 +3,7 @@ import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { SessionLog } from '@/lib/types';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
+import { emitFiltered } from '@/lib/server/transport';
 
 type Params = { id: string };
 
@@ -41,6 +42,8 @@ export const POST = withAuthAndParams<Params>(async (_request, _auth, { id: camp
 
     await storage.saveSessionLog(log);
 
+    emitFiltered(campaignId, { type: 'session', campaignId, data: { activeSessionId: logId } }, () => true);
+
     return NextResponse.json(log, { status: 201 });
   } catch (error) {
     console.error('Error opening active session:', error);
@@ -66,6 +69,8 @@ export const DELETE = withAuthAndParams<Params>(async (request, _auth, { id: cam
     if (force || campaign.activeSessionId) {
       await storage.setActiveCampaignSession(campaignId, campaign.userId, null);
     }
+
+    emitFiltered(campaignId, { type: 'session', campaignId, data: { activeSessionId: null } }, () => true);
 
     return NextResponse.json({ sessionId: closedSessionId });
   } catch (error) {

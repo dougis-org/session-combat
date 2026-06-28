@@ -153,14 +153,30 @@ describe('T1 — Connection lifecycle', () => {
 // ---------------------------------------------------------------------------
 
 describe('T2 — Event dispatch', () => {
-  test('T2-1/T2-2: heartbeat and change listeners registered, onmessage not assigned', () => {
+  test('T2-1/T2-2: heartbeat, change, message, roll, and session listeners registered; onmessage not assigned', () => {
     const onEvent = jest.fn();
     const { unmount } = renderHook({ campaignId: 'c1', onEvent });
     const mockEs = MockEventSource.instances[0];
     const listeners = mockEs.listeners;
     expect(listeners['heartbeat']).toHaveLength(1);
     expect(listeners['change']).toHaveLength(1);
+    expect(listeners['message']).toHaveLength(1);
+    expect(listeners['roll']).toHaveLength(1);
+    expect(listeners['session']).toHaveLength(1);
     expect(mockEs.onmessage).toBeNull();
+    unmount();
+  });
+
+  test('T2-6: session event dispatched to onEvent', () => {
+    const onEvent = jest.fn();
+    const { unmount } = renderHook({ campaignId: 'c1', onEvent });
+    const mockEs = MockEventSource.instances[0];
+    act(() => { mockEs.triggerOpen(); });
+    act(() => {
+      mockEs.triggerEvent('session', '{"type":"session","campaignId":"c1","data":{"activeSessionId":"ses-1"}}');
+    });
+    expect(onEvent).toHaveBeenCalledTimes(1);
+    expect(onEvent).toHaveBeenCalledWith({ type: 'session', campaignId: 'c1', data: { activeSessionId: 'ses-1' } });
     unmount();
   });
 
