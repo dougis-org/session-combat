@@ -152,11 +152,11 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `feat/issue-319-scene-push-render` and push to remote
-- [ ] Open PR from `feat/issue-319-scene-push-render` to `main`. PR body must include: `Closes #319`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify the user:
+- [x] Commit all changes to `feat/issue-319-scene-push-render` and push to remote
+- [x] Open PR from `feat/issue-319-scene-push-render` to `main`. PR body must include: `Closes #319`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify the user:
   1. **Build and tests** — run all steps in Remote push validation; fix failures, commit, push before anything else
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address each unresolved thread, commit, validate, push, wait 180 seconds
   3. **CI check failures** — after all comments resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix failures, commit, validate, push, wait 180 seconds; restart loop from step 1
@@ -175,14 +175,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main` (`git log --oneline -5`)
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync spec delta to global spec: copy `openspec/changes/issue-319-scene-push-render/specs/scene-push-render/spec.md` to `openspec/specs/scene-push-render/spec.md`; update relative links from `../../design.md` → `../../changes/archive/YYYY-MM-DD-issue-319-scene-push-render/design.md` and `../../tasks.md` → `../../changes/archive/YYYY-MM-DD-issue-319-scene-push-render/tasks.md`
-- [ ] Archive the change: move `openspec/changes/issue-319-scene-push-render/` to `openspec/changes/archive/YYYY-MM-DD-issue-319-scene-push-render/` — stage both copy and deletion in a **single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-issue-319-scene-push-render/` exists and `openspec/changes/issue-319-scene-push-render/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-issue-319-scene-push-render` then `git push -u origin doc/archive-YYYY-MM-DD-issue-319-scene-push-render`
-- [ ] Open a PR with title `docs: archive issue-319-scene-push-render (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until it merges; address any comments or CI failures
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feat/issue-319-scene-push-render doc/archive-YYYY-MM-DD-issue-319-scene-push-render`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main` (`git log --oneline -5`)
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync spec delta to global spec: copy `openspec/changes/issue-319-scene-push-render/specs/scene-push-render/spec.md` to `openspec/specs/scene-push-render/spec.md`; update relative links from `../../design.md` → `../../changes/archive/YYYY-MM-DD-issue-319-scene-push-render/design.md` and `../../tasks.md` → `../../changes/archive/YYYY-MM-DD-issue-319-scene-push-render/tasks.md`
+- [x] Archive the change: move `openspec/changes/issue-319-scene-push-render/` to `openspec/changes/archive/YYYY-MM-DD-issue-319-scene-push-render/` — stage both copy and deletion in a **single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-issue-319-scene-push-render/` exists and `openspec/changes/issue-319-scene-push-render/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-issue-319-scene-push-render` then `git push -u origin doc/archive-YYYY-MM-DD-issue-319-scene-push-render`
+- [x] Open a PR with title `docs: archive issue-319-scene-push-render (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] Monitor the doc PR until it merges; address any comments or CI failures
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/issue-319-scene-push-render doc/archive-YYYY-MM-DD-issue-319-scene-push-render`
