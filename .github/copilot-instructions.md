@@ -20,5 +20,5 @@ Once the lock comment is posted, conduct a thorough and meticulous review of the
 ## 3. Release the Lock
 **After you have fully completed your review** (including submitting all inline comments and your overall approval/request for changes):
 * You MUST remove the initial "Review in Progress" comment you posted in Step 1.
-* You can do this by either **deleting** the comment or **resolving** the comment thread. 
+* Since Step 1 is a standalone PR comment, remove it by **deleting** the comment.
 * This signals to the repository that your review is complete and auto-merge is safe to proceed.
