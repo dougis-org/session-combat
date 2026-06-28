@@ -26,6 +26,10 @@ jest.mock("@/lib/utils/campaign", () => ({
   ...jest.requireActual("@/lib/utils/campaign"),
   assertCampaignAccess: jest.fn(),
 }));
+jest.mock("@/lib/server/transport", () => ({
+  emitFiltered: jest.fn(),
+}));
+import { emitFiltered } from "@/lib/server/transport";
 
 const originalCrypto = globalThis.crypto;
 const mockRandomUUID = jest.fn(() => "new-session-uuid");
@@ -145,6 +149,17 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
     expect(res.status).toBe(404);
   });
 
+  it("emits session event with new activeSessionId after POST succeeds", async () => {
+    await POST(makePostReq(), { params: PARAMS });
+    expect(emitFiltered).toHaveBeenCalledWith(
+      CAMPAIGN_ID,
+      { type: "session", campaignId: CAMPAIGN_ID, data: { activeSessionId: "new-session-uuid" } },
+      expect.any(Function)
+    );
+    const predicate = (jest.mocked(emitFiltered).mock.calls[0] as any[])[2];
+    expect(predicate()).toBe(true);
+  });
+
   itReturns500WithParams(
     POST,
     makePostReq,
@@ -201,6 +216,21 @@ describe("DELETE /api/campaigns/[id]/sessions/active", () => {
     await DELETE(makeDeleteReq(), { params: PARAMS });
     expect(mockedStorage.saveSessionLog).not.toHaveBeenCalled();
     expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
+  });
+
+  it("emits session event with activeSessionId: null after DELETE succeeds", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({
+      campaign: { ...MOCK_CAMPAIGN, activeSessionId: "active-session-id" } as any,
+      role: "dm",
+    });
+    await DELETE(makeDeleteReq(), { params: PARAMS });
+    expect(emitFiltered).toHaveBeenCalledWith(
+      CAMPAIGN_ID,
+      { type: "session", campaignId: CAMPAIGN_ID, data: { activeSessionId: null } },
+      expect.any(Function)
+    );
+    const predicate = (jest.mocked(emitFiltered).mock.calls[0] as any[])[2];
+    expect(predicate()).toBe(true);
   });
 
   it("returns 404 when role is not dm", async () => {
