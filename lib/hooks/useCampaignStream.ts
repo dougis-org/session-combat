@@ -63,6 +63,7 @@ export function useCampaignStream(
       es.addEventListener('change', handler);
       es.addEventListener('message', handler);
       es.addEventListener('roll', handler);
+      es.addEventListener('session', handler);
 
       es.onerror = () => {
         if (torn) { es.close(); return; }

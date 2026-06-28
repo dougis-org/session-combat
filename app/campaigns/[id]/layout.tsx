@@ -55,7 +55,7 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
         })}
       </nav>
       {children}
-      <CampaignChat key={id} campaignId={id} activeSessionId={activeSessionId} />
+      <CampaignChat key={id} campaignId={id} activeSessionId={activeSessionId} onSessionChange={setActiveSessionId} />
     </>
   )
 }

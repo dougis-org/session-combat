@@ -323,7 +323,7 @@ function RollEntryStrip({ campaignId, activeSessionId, streamStatus, onRollPoste
 
 // ── Main component ────────────────────────────────────────────────
 
-export function CampaignChat({ campaignId, activeSessionId = null }: { campaignId: string; activeSessionId?: string | null }) {
+export function CampaignChat({ campaignId, activeSessionId = null, onSessionChange }: { campaignId: string; activeSessionId?: string | null; onSessionChange?: (activeSessionId: string | null) => void }) {
   const { user } = useAuth()
   const [{ isExpanded, isPinned }, dispatch] = useReducer(dockReducer, {
     isExpanded: false,
@@ -377,6 +377,8 @@ export function CampaignChat({ campaignId, activeSessionId = null }: { campaignI
       if (seenIds.current.has(roll.id)) return
       seenIds.current.add(roll.id)
       setFeed(prev => [...prev, { kind: 'roll', data: roll }])
+    } else if (e.type === 'session') {
+      onSessionChange?.(e.data.activeSessionId)
     }
   }
 

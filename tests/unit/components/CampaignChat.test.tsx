@@ -696,3 +696,36 @@ it('SceneComposer onSuccess appends scene message to feed and closes composer', 
     expect(screen.queryAllByText('Scene').length).toBe(1)
   })
 })
+
+// T11-1: session event calls onSessionChange with the new activeSessionId
+it('session stream event calls onSessionChange with activeSessionId', async () => {
+  setupFetchMock({ members: [] })
+  const onSessionChange = jest.fn()
+  render(<CampaignChat campaignId={CAMPAIGN_ID} onSessionChange={onSessionChange} />)
+  act(() => {
+    capturedOnEvent?.({ type: 'session', campaignId: CAMPAIGN_ID, data: { activeSessionId: 'ses-abc' } })
+  })
+  expect(onSessionChange).toHaveBeenCalledWith('ses-abc')
+})
+
+// T11-2: session event with null calls onSessionChange with null
+it('session stream event calls onSessionChange with null on session end', async () => {
+  setupFetchMock({ members: [] })
+  const onSessionChange = jest.fn()
+  render(<CampaignChat campaignId={CAMPAIGN_ID} onSessionChange={onSessionChange} />)
+  act(() => {
+    capturedOnEvent?.({ type: 'session', campaignId: CAMPAIGN_ID, data: { activeSessionId: null } })
+  })
+  expect(onSessionChange).toHaveBeenCalledWith(null)
+})
+
+// T11-3: session event without onSessionChange prop does not throw
+it('session stream event with no onSessionChange prop does not throw', () => {
+  setupFetchMock({ members: [] })
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+  expect(() => {
+    act(() => {
+      capturedOnEvent?.({ type: 'session', campaignId: CAMPAIGN_ID, data: { activeSessionId: 'ses-xyz' } })
+    })
+  }).not.toThrow()
+})
