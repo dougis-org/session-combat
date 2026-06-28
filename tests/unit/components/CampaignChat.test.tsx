@@ -1,8 +1,10 @@
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, act, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import type { CampaignStreamEvent } from '@/lib/types'
+
+const CAMPAIGN_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
 
 jest.mock('@/lib/offline/LocalStore', () => ({
   LocalStore: {
@@ -35,7 +37,13 @@ const originalFetch = global.fetch
 // ── Test helpers ──────────────────────────────────────────────────
 
 function setupFetchMock(overrides?: Record<string, unknown>) {
-  fetchSpy = jest.fn().mockImplementation((url: string) => {
+  fetchSpy = jest.fn().mockImplementation((url: string, options?: RequestInit) => {
+    if (url.includes('/attachments')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(overrides?.attachments ?? { attachmentId: 'att-test' }),
+      })
+    }
     if (url.includes('/members')) {
       return Promise.resolve({
         ok: true,
@@ -43,6 +51,12 @@ function setupFetchMock(overrides?: Record<string, unknown>) {
       })
     }
     if (url.includes('/messages')) {
+      if (options?.method === 'POST') {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(overrides?.sceneMessage ?? { id: 'scene-1', kind: 'scene', text: '', attachmentId: 'att-test', visibility: { scope: 'group' }, campaignId: CAMPAIGN_ID, senderId: 'user-1', senderName: 'DM', createdAt: new Date().toISOString() }),
+        })
+      }
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve(overrides?.messages ?? { messages: [] }),
@@ -56,7 +70,7 @@ function setupFetchMock(overrides?: Record<string, unknown>) {
 /** Render the component and expand the dock. Returns userEvent instance. */
 async function openDock() {
   const user = userEvent.setup()
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await user.click(screen.getByRole('button', { name: /chat/i }))
   return user
 }
@@ -111,20 +125,20 @@ afterEach(() => {
 
 // TC-01
 it('pill button is present on initial render', () => {
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   expect(screen.getByRole('button', { name: /chat/i })).toBeInTheDocument()
 })
 
 // TC-02
 it('drawer is absent on initial render when no pin stored', () => {
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   expect(screen.queryByRole('complementary')).not.toBeInTheDocument()
 })
 
 // TC-03
 it('drawer is present on mount when pin is stored', async () => {
   mockedLocalStore.get.mockReturnValue(true)
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   expect(screen.getByRole('complementary', { name: /campaign chat/i })).toBeInTheDocument()
 })
 
@@ -150,7 +164,7 @@ it('pressing Escape collapses the drawer', async () => {
 
 // TC-07
 it('pressing Escape when collapsed has no effect', () => {
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   fireEvent.keyDown(document, { key: 'Escape' })
   expect(screen.queryByRole('complementary')).not.toBeInTheDocument()
   expect(screen.getByRole('button', { name: /chat/i })).toBeInTheDocument()
@@ -199,7 +213,7 @@ it('drawer has role="complementary" and aria-label="Campaign Chat"', async () =>
 // TC-13
 it('pill button is keyboard-activatable with Enter', async () => {
   const user = userEvent.setup()
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   const pill = screen.getByRole('button', { name: /chat/i })
   pill.focus()
   await user.keyboard('{Enter}')
@@ -247,9 +261,9 @@ it('heartbeat event does not affect message feed', async () => {
 
 // T3c-1: members fetched on mount
 it('fetches members on mount', async () => {
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await waitFor(() => {
-    expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/api/campaigns/test-campaign/members'))
+    expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining(`/api/campaigns/${CAMPAIGN_ID}/members`))
   })
 })
 
@@ -259,7 +273,7 @@ it('members fetch failure does not crash the component', async () => {
     if (url.includes('/members')) return Promise.reject(new Error('network error'))
     return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
   })
-  expect(() => render(<CampaignChat campaignId="test-campaign" />)).not.toThrow()
+  expect(() => render(<CampaignChat campaignId={CAMPAIGN_ID} />)).not.toThrow()
   await waitFor(() => expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members')))
 })
 
@@ -267,7 +281,7 @@ it('members fetch failure does not crash the component', async () => {
 
 // T4d-1: history NOT fetched on mount (dock collapsed)
 it('history is not fetched on mount when dock is collapsed', async () => {
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await waitFor(() => expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members')))
   expect(fetchSpy).not.toHaveBeenCalledWith(expect.stringContaining('/messages'))
 })
@@ -299,9 +313,9 @@ it('hasMore is false when history response has no nextCursor', async () => {
 it('stream message while dock is collapsed shows unread badge', async () => {
   const pastDate = new Date(Date.now() - 5000).toISOString()
   mockedLocalStore.get.mockImplementation((key: string) =>
-    key === 'campaign-chat-last-open-test-campaign' ? pastDate : null
+    key === `campaign-chat-last-open-${CAMPAIGN_ID}` ? pastDate : null
   )
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   fireMsg({ id: 'new-msg', senderName: 'Bob', text: 'Hi' })
   expect(screen.getByLabelText('unread messages')).toBeInTheDocument()
 })
@@ -310,15 +324,15 @@ it('stream message while dock is collapsed shows unread badge', async () => {
 it('opening dock clears unread badge and updates LocalStore', async () => {
   const pastDate = new Date(Date.now() - 5000).toISOString()
   mockedLocalStore.get.mockImplementation((key: string) =>
-    key === 'campaign-chat-last-open-test-campaign' ? pastDate : null
+    key === `campaign-chat-last-open-${CAMPAIGN_ID}` ? pastDate : null
   )
-  render(<CampaignChat campaignId="test-campaign" />)
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   fireMsg({ id: 'unread-1', senderName: 'Bob', text: 'Badge test' })
 
   const user = userEvent.setup()
   await user.click(screen.getByRole('button', { name: /chat/i }))
   expect(screen.queryByLabelText('unread messages')).not.toBeInTheDocument()
-  expect(mockedLocalStore.set).toHaveBeenCalledWith('campaign-chat-last-open-test-campaign', expect.any(String))
+  expect(mockedLocalStore.set).toHaveBeenCalledWith(`campaign-chat-last-open-${CAMPAIGN_ID}`, expect.any(String))
 })
 
 // T5f-3: stream message while dock is open does not increment badge
@@ -331,7 +345,7 @@ it('stream message while dock is open does not increment unread count', async ()
 // T5f-4: LocalStore throws — no crash
 it('LocalStore.get throwing does not crash the component', () => {
   mockedLocalStore.get.mockImplementation(() => { throw new Error('storage unavailable') })
-  expect(() => render(<CampaignChat campaignId="test-campaign" />)).not.toThrow()
+  expect(() => render(<CampaignChat campaignId={CAMPAIGN_ID} />)).not.toThrow()
 })
 
 // ── T6 — Composer tests ──────────────────────────────────────────────
@@ -428,7 +442,7 @@ it('send button calls POST with text and visibility', async () => {
   await user.click(screen.getByRole('button', { name: /send/i }))
   await waitFor(() => {
     expect(fetchSpy).toHaveBeenCalledWith(
-      '/api/campaigns/test-campaign/messages',
+      `/api/campaigns/${CAMPAIGN_ID}/messages`,
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ text: 'Hello everyone', visibility: { scope: 'group' } }),
@@ -535,4 +549,150 @@ it('loading indicator is shown when history is loading', async () => {
   })
   await openDock()
   await waitFor(() => expect(screen.getByText('Loading…')).toBeInTheDocument())
+})
+
+// ── T10 — Push Scene button tests ────────────────────────────────────
+
+const DM_MEMBERS_RESPONSE = {
+  members: [{ id: 'm1', userId: 'user-1', username: 'tester', role: 'dm', status: 'active' }],
+}
+
+const PLAYER_MEMBERS_RESPONSE = {
+  members: [{ id: 'm1', userId: 'user-1', username: 'tester', role: 'player', status: 'active' }],
+}
+
+// T10-1: DM sees "Push Scene" button
+it('DM user sees Push Scene button in expanded dock', async () => {
+  setupFetchMock({ members: DM_MEMBERS_RESPONSE })
+  const user = userEvent.setup()
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+  await user.click(screen.getByRole('button', { name: /chat/i }))
+  await waitFor(() =>
+    expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members'))
+  )
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: /push scene/i })).toBeInTheDocument()
+  )
+})
+
+// T10-2: Non-DM does NOT see "Push Scene" button
+it('Non-DM member does not see Push Scene button', async () => {
+  setupFetchMock({ members: PLAYER_MEMBERS_RESPONSE })
+  const user = userEvent.setup()
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+  await user.click(screen.getByRole('button', { name: /chat/i }))
+  await waitFor(() =>
+    expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members'))
+  )
+  await waitFor(() =>
+    expect(screen.queryByRole('button', { name: /push scene/i })).not.toBeInTheDocument()
+  )
+})
+
+// T10-3: Clicking "Push Scene" renders SceneComposer
+it('Clicking Push Scene renders SceneComposer', async () => {
+  setupFetchMock({ members: DM_MEMBERS_RESPONSE })
+  const user = userEvent.setup()
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+  await user.click(screen.getByRole('button', { name: /chat/i }))
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: /push scene/i })).toBeInTheDocument()
+  )
+  await user.click(screen.getByRole('button', { name: /push scene/i }))
+  expect(screen.getByLabelText('Scene image')).toBeInTheDocument()
+})
+
+// T10-4: SceneComposer onCancel hides composer
+it('SceneComposer Cancel hides composer and shows Push Scene button again', async () => {
+  setupFetchMock({ members: DM_MEMBERS_RESPONSE })
+  const user = userEvent.setup()
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+  await user.click(screen.getByRole('button', { name: /chat/i }))
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: /push scene/i })).toBeInTheDocument()
+  )
+  await user.click(screen.getByRole('button', { name: /push scene/i }))
+  expect(screen.getByLabelText('Scene image')).toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: /cancel/i }))
+  expect(screen.queryByLabelText('Scene image')).not.toBeInTheDocument()
+  expect(screen.getByRole('button', { name: /push scene/i })).toBeInTheDocument()
+})
+
+// T10-5: SSE scene event renders SceneFeedItem in feed
+it('SSE scene message event renders SceneFeedItem in feed', async () => {
+  setupFetchMock({ members: DM_MEMBERS_RESPONSE })
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+  const user = userEvent.setup()
+  await user.click(screen.getByRole('button', { name: /chat/i }))
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: /push scene/i })).toBeInTheDocument()
+  )
+
+  act(() => {
+    capturedOnEvent?.({
+      type: 'message',
+      campaignId: CAMPAIGN_ID,
+      data: {
+        id: 'scene-msg-1',
+        campaignId: CAMPAIGN_ID,
+        senderId: 'user-1',
+        senderName: 'DM',
+        text: '',
+        visibility: { scope: 'group' },
+        createdAt: new Date().toISOString(),
+        kind: 'scene',
+        attachmentId: 'att-abc',
+      } as any,
+    })
+  })
+  await waitFor(() =>
+    expect(screen.queryAllByText('Scene').length).toBeGreaterThanOrEqual(1)
+  )
+})
+
+// T10-6: SceneComposer onSuccess appends message to feed and closes composer
+it('SceneComposer onSuccess appends scene message to feed and closes composer', async () => {
+  const sceneMsg = {
+    id: 'scene-posted-1',
+    campaignId: CAMPAIGN_ID,
+    senderId: 'user-1',
+    senderName: 'DM',
+    text: '',
+    visibility: { scope: 'group' },
+    createdAt: new Date().toISOString(),
+    kind: 'scene',
+    attachmentId: 'att-posted',
+  }
+  setupFetchMock({ members: DM_MEMBERS_RESPONSE, sceneMessage: sceneMsg })
+  const user = userEvent.setup()
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+  await user.click(screen.getByRole('button', { name: /chat/i }))
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: /push scene/i })).toBeInTheDocument()
+  )
+
+  // Open SceneComposer and upload a valid JPEG
+  await user.click(screen.getByRole('button', { name: /push scene/i }))
+  expect(screen.getByLabelText('Scene image')).toBeInTheDocument()
+  const file = new File([new Uint8Array(1024)], 'test.jpg', { type: 'image/jpeg' })
+  await user.upload(screen.getByLabelText('Scene image'), file)
+
+  // Submit — triggers upload + post → onSuccess (scope to SceneComposer container)
+  const fileInput = screen.getByLabelText('Scene image')
+  await user.click(within(fileInput.parentElement!).getByRole('button', { name: /send/i }))
+
+  // Composer closes and Push Scene button returns
+  await waitFor(() => expect(screen.queryByLabelText('Scene image')).not.toBeInTheDocument())
+  expect(screen.getByRole('button', { name: /push scene/i })).toBeInTheDocument()
+
+  // SceneFeedItem renders in feed
+  expect(screen.queryAllByText('Scene').length).toBeGreaterThanOrEqual(1)
+
+  // Duplicate id ignored: SSE fires same message id — still only one SceneFeedItem
+  act(() => {
+    capturedOnEvent?.({ type: 'message', campaignId: CAMPAIGN_ID, data: sceneMsg as any })
+  })
+  await waitFor(() => {
+    expect(screen.queryAllByText('Scene').length).toBe(1)
+  })
 })
