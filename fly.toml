@@ -13,6 +13,8 @@ primary_region = 'sjc'
 
 [env]
   NODE_ENV = 'production'
+  # Secrets (set via `fly secrets set`):
+  #   GITHUB_FEEDBACK_TOKEN — GitHub PAT with issues:write scope on dougis-org/session-combat
 
 [http_service]
   internal_port = 3000

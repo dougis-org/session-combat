@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { FeedbackModal } from './FeedbackModal';
 
 export function NavBar() {
   const { isAuthenticated, loading, logout } = useAuth();
   const [invitationCount, setInvitationCount] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated || loading) return;
@@ -49,15 +51,26 @@ export function NavBar() {
           </Link>
         )}
         {isAuthenticated && !loading && (
-          <button
-            data-testid="logout-button"
-            onClick={() => void logout()}
-            className="ml-auto text-gray-400 hover:text-white transition-colors text-sm"
-          >
-            Logout
-          </button>
+          <>
+            <button
+              data-testid="feedback-button"
+              onClick={() => setIsModalOpen(true)}
+              className="ml-auto text-gray-400 hover:text-white transition-colors text-sm"
+              aria-label="Send feedback"
+            >
+              ?
+            </button>
+            <button
+              data-testid="logout-button"
+              onClick={() => void logout()}
+              className="text-gray-400 hover:text-white transition-colors text-sm"
+            >
+              Logout
+            </button>
+          </>
         )}
       </div>
+      <FeedbackModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </nav>
   );
 }
