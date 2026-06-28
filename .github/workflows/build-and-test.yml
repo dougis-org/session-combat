@@ -56,13 +56,15 @@ jobs:
         run: npm run lint
 
       - name: Build application
+        if: needs.check-changes.outputs.docs_only != 'true'
         run: npm run build
         env:
           MONGODB_URI: mongodb://localhost:27017
           MONGODB_DB: session-combat-test
-          GENERATE_SOURCE_MAPS: ${{ needs.check-changes.outputs.docs_only != 'true' }}
+          GENERATE_SOURCE_MAPS: 'true'
 
       - name: Upload build artifact
+        if: needs.check-changes.outputs.docs_only != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: next-build
@@ -83,7 +85,7 @@ jobs:
           if-no-files-found: ignore
 
   ci-integration:
-    runs-on: ubicloud-standard-2
+    runs-on: ${{ vars.INTEGRATION_RUNNER || 'ubuntu-latest' }}
     needs: [check-changes, ci-fast]
     if: needs.check-changes.outputs.docs_only != 'true'
 
@@ -133,7 +135,7 @@ jobs:
           retention-days: 7
 
   ci-e2e:
-    runs-on: ubicloud-standard-2
+    runs-on: ${{ vars.INTEGRATION_RUNNER || 'ubuntu-latest' }}
     needs: [check-changes, ci-fast]
     if: needs.check-changes.outputs.docs_only != 'true'
 
