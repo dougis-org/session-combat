@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export interface FeedbackFormData {
   type: 'bug' | 'feature';
@@ -20,11 +20,7 @@ export function FeedbackForm({ defaultType = 'bug', onSubmit, onCancel, isSubmit
   const [type, setType] = useState<'bug' | 'feature'>(defaultType);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [pageUrl, setPageUrl] = useState('');
-
-  useEffect(() => {
-    setPageUrl(window.location.href);
-  }, []);
+  const [pageUrl] = useState(() => (typeof window !== 'undefined' ? window.location.href : ''));
 
   const canSubmit = title.trim().length > 0 && !isSubmitting;
 
