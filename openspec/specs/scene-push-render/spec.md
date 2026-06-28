@@ -185,11 +185,11 @@ None. No existing requirements are removed by this change.
 - Design Decision 3 → ADDED SceneComposer; ADDED Scene message rendering
 - Design Decision 4 → ADDED Enlargeable image overlay
 - Design Decision 5 → ADDED Scene message creation (non-DM 403 scenario); ADDED Push Scene button (DM-only render)
-- ADDED Scene message creation → tasks: T1 (extend route), T4 (unit tests), T5 (integration tests)
-- ADDED Push Scene button → tasks: T2 (ScenePushButton in CampaignChat), T6 (component tests)
-- ADDED SceneComposer → tasks: T3 (SceneComposer component), T6 (component tests)
-- ADDED Scene message rendering → tasks: T3 (SceneFeedItem), T6 (component tests)
-- ADDED Enlargeable image overlay → tasks: T3 (SceneFeedItem dialog), T6 (component tests)
+- ADDED Scene message creation → tasks: T1 (extend route), T5 (unit tests), T6 (integration tests)
+- ADDED Push Scene button → tasks: T2 (ScenePushButton in CampaignChat), T9 (component tests)
+- ADDED SceneComposer → tasks: T3 (SceneComposer component), T7 (component tests)
+- ADDED Scene message rendering → tasks: T4 (SceneFeedItem), T8 (component tests)
+- ADDED Enlargeable image overlay → tasks: T4 (SceneFeedItem dialog), T8 (component tests)
 
 ## Non-Functional Acceptance Criteria
 
