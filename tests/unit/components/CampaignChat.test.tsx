@@ -54,7 +54,7 @@ function setupFetchMock(overrides?: Record<string, unknown>) {
       if (options?.method === 'POST') {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve(overrides?.sceneMessage ?? { id: 'scene-1', kind: 'scene', text: '', attachmentId: 'att-test', visibility: { scope: 'group' }, campaignId: 'test-campaign', senderId: 'user-1', senderName: 'DM', createdAt: new Date().toISOString() }),
+          json: () => Promise.resolve(overrides?.sceneMessage ?? { id: 'scene-1', kind: 'scene', text: '', attachmentId: 'att-test', visibility: { scope: 'group' }, campaignId: CAMPAIGN_ID, senderId: 'user-1', senderName: 'DM', createdAt: new Date().toISOString() }),
         })
       }
       return Promise.resolve({

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { type MouseEvent, useRef, useState } from 'react'
 import type { CampaignMessage } from '@/lib/types'
 
 interface SceneFeedItemProps {
@@ -15,7 +15,7 @@ export function SceneFeedItem({ message, campaignId }: SceneFeedItemProps) {
   const imgSrc = `/api/campaigns/${campaignId}/attachments/${message.attachmentId}`
   const imgAlt = message.text ? message.text.slice(0, 100) : 'Scene image'
 
-  function handleBackdropClick(e: React.MouseEvent<HTMLDialogElement>) {
+  function handleBackdropClick(e: MouseEvent<HTMLDialogElement>) {
     if (e.target === dialogRef.current) {
       dialogRef.current?.close()
     }
