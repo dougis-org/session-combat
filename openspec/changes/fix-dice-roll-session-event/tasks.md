@@ -2,65 +2,65 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Create and publish working branch:** `git checkout -b fix/issue-443-session-event-dice-roll` then immediately `git push -u origin fix/issue-443-session-event-dice-roll`
+- [x] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
+- [x] **Step 2 — Create and publish working branch:** `git checkout -b fix/issue-443-session-event-dice-roll` then immediately `git push -u origin fix/issue-443-session-event-dice-roll`
 
 ## Execution
 
 ### Task 1 — Add `session` to `CampaignStreamEvent` (`lib/types.ts`)
 
-- [ ] Add `| { type: "session"; campaignId: string; data: { activeSessionId: string | null } }` to the `CampaignStreamEvent` union in `lib/types.ts:40-44`
-- [ ] Search for any exhaustive switch/if-chains on `CampaignStreamEvent` type and add a `session` case to each (check `lib/components/CampaignChat.tsx`, `lib/hooks/useCampaignStream.ts`)
-- [ ] Run `npm run type-check` — no TypeScript errors
+- [x] Add `| { type: "session"; campaignId: string; data: { activeSessionId: string | null } }` to the `CampaignStreamEvent` union in `lib/types.ts:40-44`
+- [x] Search for any exhaustive switch/if-chains on `CampaignStreamEvent` type and add a `session` case to each (check `lib/components/CampaignChat.tsx`, `lib/hooks/useCampaignStream.ts`)
+- [x] Run `npm run type-check` — no TypeScript errors
 
 ### Task 2 — Emit `session` event from sessions/active route (`app/api/campaigns/[id]/sessions/active/route.ts`)
 
-- [ ] Import `emitFiltered` from `lib/server/transport` in the sessions/active route
-- [ ] After `await storage.saveSessionLog(log)` in the POST handler, add:
+- [x] Import `emitFiltered` from `lib/server/transport` in the sessions/active route
+- [x] After `await storage.saveSessionLog(log)` in the POST handler, add:
   ```ts
   emitFiltered(campaignId, { type: 'session', campaignId, data: { activeSessionId: logId } }, () => true)
   ```
-- [ ] After `await storage.setActiveCampaignSession(...)` in the DELETE handler, add:
+- [x] After `await storage.setActiveCampaignSession(...)` in the DELETE handler, add:
   ```ts
   emitFiltered(campaignId, { type: 'session', campaignId, data: { activeSessionId: null } }, () => true)
   ```
-- [ ] Verify: POST to sessions/active triggers the event; DELETE also triggers it
-- [ ] Run `npm run type-check` — no errors
+- [x] Verify: POST to sessions/active triggers the event; DELETE also triggers it
+- [x] Run `npm run type-check` — no errors
 
 ### Task 3 — Add `onSessionChange` prop to `CampaignChat` (`lib/components/CampaignChat.tsx`)
 
-- [ ] Add `onSessionChange?: (activeSessionId: string | null) => void` to the `CampaignChat` props interface
-- [ ] In `onStreamEvent`, add a branch for `e.type === 'session'`: call `onSessionChange?.(e.data.activeSessionId)`
-- [ ] Run `npm run type-check` — no errors
+- [x] Add `onSessionChange?: (activeSessionId: string | null) => void` to the `CampaignChat` props interface
+- [x] In `onStreamEvent`, add a branch for `e.type === 'session'`: call `onSessionChange?.(e.data.activeSessionId)`
+- [x] Run `npm run type-check` — no errors
 
 ### Task 4 — Wire `onSessionChange` in layout (`app/campaigns/[id]/layout.tsx`)
 
-- [ ] Pass `onSessionChange={setActiveSessionId}` to the `<CampaignChat>` render in the layout
-- [ ] Run `npm run type-check` — no errors
+- [x] Pass `onSessionChange={setActiveSessionId}` to the `<CampaignChat>` render in the layout
+- [x] Run `npm run type-check` — no errors
 
 ### Task 5 — Write/update tests
 
-- [ ] **Unit — `CampaignStreamEvent` type:** Confirm TypeScript accepts the `session` variant shape (type-level test via `lib/types.ts` — covered by type-check)
-- [ ] **Unit — `CampaignChat` `onSessionChange`:** Render `CampaignChat` with a spy `onSessionChange`; simulate a `session` stream event; assert spy called with correct value for start (`"abc"`) and end (`null`)
-- [ ] **Unit — layout reactive update:** Render the layout; simulate SSE `session` event via mock stream; assert `activeSessionId` state updates and roll strip enables/disables accordingly
-- [ ] **Integration — POST sessions/active emits event:** Mock `emitFiltered`; call POST handler; assert `emitFiltered` called with `{ type: 'session', data: { activeSessionId: <id> } }`
-- [ ] **Integration — DELETE sessions/active emits event:** Mock `emitFiltered`; call DELETE handler; assert `emitFiltered` called with `{ type: 'session', data: { activeSessionId: null } }`
-- [ ] All new and existing tests pass: `npm test`
+- [x] **Unit — `CampaignStreamEvent` type:** Confirm TypeScript accepts the `session` variant shape (type-level test via `lib/types.ts` — covered by type-check)
+- [x] **Unit — `CampaignChat` `onSessionChange`:** Render `CampaignChat` with a spy `onSessionChange`; simulate a `session` stream event; assert spy called with correct value for start (`"abc"`) and end (`null`)
+- [x] **Unit — layout reactive update:** Render the layout; simulate SSE `session` event via mock stream; assert `activeSessionId` state updates and roll strip enables/disables accordingly
+- [x] **Integration — POST sessions/active emits event:** Mock `emitFiltered`; call POST handler; assert `emitFiltered` called with `{ type: 'session', data: { activeSessionId: <id> } }`
+- [x] **Integration — DELETE sessions/active emits event:** Mock `emitFiltered`; call DELETE handler; assert `emitFiltered` called with `{ type: 'session', data: { activeSessionId: null } }`
+- [x] All new and existing tests pass: `npm test`
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] `npm run type-check` — zero TypeScript errors
-- [ ] `npm test` — all tests pass (new + existing)
-- [ ] `npm run build` — build succeeds with no errors
+- [x] `npm run type-check` — zero TypeScript errors
+- [x] `npm test` — all tests pass (new + existing)
+- [x] `npm run build` — build succeeds with no errors
 - [ ] `npm run lint` — no lint errors
-- [ ] All spec scenarios in `openspec/changes/fix-dice-roll-session-event/specs/session-event/spec.md` are covered by tests
-- [ ] Roll strip correctly enables when a `session` event with a non-null `activeSessionId` arrives after page load
-- [ ] Roll strip correctly disables when a `session` event with `activeSessionId: null` arrives
-- [ ] Static case (session already active on page load) still works correctly
+- [x] All spec scenarios in `openspec/changes/fix-dice-roll-session-event/specs/session-event/spec.md` are covered by tests
+- [x] Roll strip correctly enables when a `session` event with a non-null `activeSessionId` arrives after page load
+- [x] Roll strip correctly disables when a `session` event with `activeSessionId: null` arrives
+- [x] Static case (session already active on page load) still works correctly
 
 ## Remote push validation
 
@@ -74,7 +74,7 @@ If **ANY** required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
 - [ ] Commit all changes to `fix/issue-443-session-event-dice-roll` and push to remote
 - [ ] Open PR from `fix/issue-443-session-event-dice-roll` to `main`. PR body must include `Closes #443`.
 - [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
