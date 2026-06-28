@@ -5,14 +5,13 @@ import { getUserById } from '@/lib/permissions';
 import { extractIp } from '@/lib/utils/http';
 
 function buildIssueBody(
-  username: string,
-  email: string,
+  submittedBy: string,
   pageUrl: string,
   userAgent: string,
   description: string
 ): string {
   const context = [
-    `**Submitted by:** @${username} (${email})`,
+    `**Submitted by:** ${submittedBy}`,
     `**Page:** ${pageUrl}`,
     `**User-Agent:** ${userAgent}`,
   ].join('\n');
@@ -61,14 +60,15 @@ export const POST = withAuth(async (request: NextRequest, auth) => {
   }
 
   const user = await getUserById(auth.userId);
-  const username = (user?.['username'] as string | undefined) ?? auth.email;
+  const githubHandle = user?.['username'] as string | undefined;
   const email = auth.email;
+  const submittedBy = githubHandle ? `@${githubHandle} (${email})` : email;
   const userAgent = request.headers.get('user-agent') ?? '';
-  const rawPageUrl = typeof pageUrl === 'string' ? pageUrl : '';
-  const pageUrlStr = (rawPageUrl.startsWith('https://') || rawPageUrl.startsWith('/')) ? rawPageUrl : '';
+  const rawPageUrl = typeof pageUrl === 'string' ? pageUrl.replace(/[\r\n]/g, '') : '';
+  const pageUrlStr = (rawPageUrl.startsWith('https://') || (rawPageUrl.startsWith('/') && !rawPageUrl.startsWith('//'))) ? rawPageUrl : '';
   const descriptionStr = typeof description === 'string' ? description : '';
 
-  const issueBody = buildIssueBody(username, email, pageUrlStr, userAgent, descriptionStr);
+  const issueBody = buildIssueBody(submittedBy, pageUrlStr, userAgent, descriptionStr);
   const labels = type === 'bug' ? ['bug'] : ['enhancement'];
 
   const githubResponse = await fetch(

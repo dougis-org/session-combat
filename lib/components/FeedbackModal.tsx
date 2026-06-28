@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Modal } from './Modal';
 import { FeedbackForm, FeedbackFormData } from './FeedbackForm';
 
@@ -15,6 +15,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<ResultState>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const submitSeqRef = useRef(0);
 
   useEffect(() => {
     if (isOpen) {
@@ -24,6 +25,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   }, [isOpen]);
 
   function handleClose() {
+    submitSeqRef.current++;
     if (result !== 'success') {
       setResult('idle');
       setErrorMessage('');
@@ -32,6 +34,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   }
 
   async function handleSubmit(data: FeedbackFormData) {
+    const seq = ++submitSeqRef.current;
     setSubmitting(true);
     try {
       const response = await fetch('/api/feedback', {
@@ -39,6 +42,8 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+
+      if (submitSeqRef.current !== seq) return;
 
       if (response.status === 201) {
         setResult('success');
@@ -48,10 +53,11 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         setResult('error');
       }
     } catch {
+      if (submitSeqRef.current !== seq) return;
       setErrorMessage('Network error. Please check your connection and try again.');
       setResult('error');
     } finally {
-      setSubmitting(false);
+      if (submitSeqRef.current === seq) setSubmitting(false);
     }
   }
 

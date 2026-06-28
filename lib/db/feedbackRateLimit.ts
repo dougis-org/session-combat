@@ -8,10 +8,9 @@ let indexEnsured = false;
 async function ensureIndex(): Promise<void> {
   if (indexEnsured) return;
   const db = await getDatabase();
-  await db.collection('feedbackRateLimits').createIndex(
-    { windowResetAt: 1 },
-    { expireAfterSeconds: 0, background: true }
-  );
+  const col = db.collection('feedbackRateLimits');
+  await col.createIndex({ windowResetAt: 1 }, { expireAfterSeconds: 0, background: true });
+  await col.createIndex({ ip: 1 }, { unique: true, background: true });
   indexEnsured = true;
 }
 

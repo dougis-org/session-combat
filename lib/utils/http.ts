@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export async function safeJson(res: Response): Promise<Record<string, unknown>> {
   return res.json().catch(() => ({}));
