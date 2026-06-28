@@ -16,6 +16,16 @@ const NAVBAR_HEIGHT = 60
 
 type PersistedSize = { height: number; screenWidth: number; screenHeight: number }
 
+function isValidPersistedSize(val: unknown): val is PersistedSize {
+  if (!val || typeof val !== 'object') return false
+  const v = val as Record<string, unknown>
+  return (
+    typeof v.height === 'number' && Number.isFinite(v.height) &&
+    typeof v.screenWidth === 'number' && Number.isFinite(v.screenWidth) &&
+    typeof v.screenHeight === 'number' && Number.isFinite(v.screenHeight)
+  )
+}
+
 type FeedItem =
   | { kind: 'message'; data: CampaignMessage }
   | { kind: 'roll'; data: CampaignRoll }
@@ -436,13 +446,9 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
     const stored = safeGet<string>(lastOpenKey)
     if (stored) lastOpenRef.current = new Date(stored)
 
-    const savedSize = safeGet<PersistedSize>(CHAT_SIZE_KEY)
-    if (
-      savedSize &&
-      typeof savedSize.height === 'number' && Number.isFinite(savedSize.height) &&
-      typeof savedSize.screenWidth === 'number' && Number.isFinite(savedSize.screenWidth) &&
-      typeof savedSize.screenHeight === 'number' && Number.isFinite(savedSize.screenHeight)
-    ) {
+    const rawSize = safeGet<unknown>(CHAT_SIZE_KEY)
+    const savedSize = isValidPersistedSize(rawSize) ? rawSize : null
+    if (savedSize) {
       const screenMatch =
         Math.abs(savedSize.screenWidth - window.innerWidth) <= 100 &&
         Math.abs(savedSize.screenHeight - window.innerHeight) <= 100

@@ -216,4 +216,18 @@ describe('persistence load logic', () => {
       render(<CampaignChat campaignId={CAMPAIGN_ID} />)
     }).not.toThrow()
   })
+
+  it('ignores malformed persisted payload and uses default height', async () => {
+    mockedLocalStore.get.mockImplementation((key: string) => {
+      if (key === 'campaign-chat-size') return { height: 'not-a-number', screenWidth: 1920 }
+      return null
+    })
+
+    const user = userEvent.setup()
+    render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+    await user.click(screen.getByRole('button', { name: /chat/i }))
+
+    const panel = screen.getByRole('complementary', { name: /campaign chat/i })
+    expect(panel).toHaveStyle({ height: '33vh' })
+  })
 })
