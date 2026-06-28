@@ -80,6 +80,32 @@ describe('NavBar', () => {
     await user.click(screen.getByTestId('logout-button'));
     expect(logout).toHaveBeenCalledTimes(1);
   });
+
+  it('shows feedback button when authenticated and not loading', () => {
+    mockAuth({ isAuthenticated: true, user: { userId: 'u1', email: 'u@test.com' } });
+    render(<NavBar />);
+    expect(screen.getByTestId('feedback-button')).toBeInTheDocument();
+  });
+
+  it('does not show feedback button when not authenticated', () => {
+    mockAuth({ isAuthenticated: false, loading: false });
+    render(<NavBar />);
+    expect(screen.queryByTestId('feedback-button')).not.toBeInTheDocument();
+  });
+
+  it('does not show feedback button while loading', () => {
+    mockAuth({ isAuthenticated: true, loading: true });
+    render(<NavBar />);
+    expect(screen.queryByTestId('feedback-button')).not.toBeInTheDocument();
+  });
+
+  it('clicking feedback button opens FeedbackModal', async () => {
+    const user = userEvent.setup();
+    mockAuth({ isAuthenticated: true, user: { userId: 'u1', email: 'u@test.com' } });
+    render(<NavBar />);
+    await user.click(screen.getByTestId('feedback-button'));
+    expect(screen.getByText('Send Feedback')).toBeInTheDocument();
+  });
 });
 
 function jsonResponse(body: unknown, status = 200): Response {
