@@ -9,6 +9,10 @@ module.exports = {
     "**/lib/**/*.test.(ts|tsx|js|jsx)",
     "!**/tests/e2e/**",
   ],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/.verity/",
+  ],
   testTimeout: 120000,
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   moduleNameMapper: {
