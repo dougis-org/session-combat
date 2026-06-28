@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 11
     steps:
-      - name: Wait until Copilot and Gemini reviews are complete
+      - name: Wait until Copilot reviews are complete
         uses: actions/github-script@v8
         with:
           script: |
@@ -40,11 +40,6 @@ jobs:
                 label: 'Copilot',
                 checkPatterns: [/copilot/i],
                 reviewAuthors: ['copilot-pull-request-reviewer[bot]'],
-              },
-              {
-                label: 'Gemini',
-                checkPatterns: [/gemini/i],
-                reviewAuthors: ['gemini-code-assist[bot]'],
               },
             ]
             const initialSleepMs = 3 * 60_000
@@ -140,7 +135,7 @@ jobs:
               }
 
               if (allComplete) {
-                core.info('Copilot and Gemini reviews are complete.')
+                core.info('Copilot reviews are complete.')
                 return
               }
 
