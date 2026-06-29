@@ -129,10 +129,10 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `feat/chat-window-resize` to `main`. PR body must include: `Closes #444`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `feat/chat-window-resize` to `main`. PR body must include: `Closes #444`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
 - [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify user — **never wait for a human; never force-merge**:
   1. **Build and tests** — run all steps in Remote push validation; fix failures, commit, push before proceeding
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address each unresolved thread, commit, validate, push, wait 180s
@@ -160,6 +160,6 @@ Blocking resolution flow:
 - [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-chat-window-resize/` exists and `openspec/changes/chat-window-resize/` is gone
 - [ ] **Create a doc branch**: `git checkout -b doc/archive-YYYY-MM-DD-chat-window-resize` then `git push -u origin doc/archive-YYYY-MM-DD-chat-window-resize`
 - [ ] Open a PR from `doc/archive-YYYY-MM-DD-chat-window-resize` to `main` with title `docs: archive chat-window-resize (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
 - [ ] Monitor the doc PR until merged (same loop — address comments and CI failures, push to doc branch, repeat)
 - [ ] Prune merged local branches: `git fetch --prune` && `git branch -D feat/chat-window-resize doc/archive-YYYY-MM-DD-chat-window-resize`

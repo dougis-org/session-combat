@@ -68,7 +68,7 @@ function dockReducer(state: DockState, action: DockAction): DockState {
   switch (action.type) {
     case 'INIT':        return { isExpanded: action.pinned, isPinned: action.pinned, isLarge: false, customHeight: null }
     case 'EXPAND':      return { ...state, isExpanded: true }
-    case 'COLLAPSE':    return { ...state, isExpanded: false }
+    case 'COLLAPSE':    return { ...state, isExpanded: false, isLarge: false }
     case 'PIN':         return { ...state, isPinned: true }
     case 'UNPIN':       return { ...state, isPinned: false }
     case 'TOGGLE_SIZE': return { ...state, isLarge: !state.isLarge }
@@ -387,6 +387,7 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   const triggerRef = useRef<HTMLButtonElement>(null)
   const isMounted = useRef(false)
   const dragListenersRef = useRef<{ move: (e: MouseEvent) => void; up: (e: MouseEvent) => void } | null>(null)
+  const drawerRef = useRef<HTMLDivElement>(null)
 
   const [feed, setFeed] = useState<FeedItem[]>([])
   const seenIds = useRef<Set<string>>(new Set())
@@ -585,15 +586,22 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   // ── Handlers ──
 
   function handleDragStart(startY: number, startHeight: number) {
+    // Remove any lingering listeners from a previous drag that didn't complete cleanly
+    if (dragListenersRef.current) {
+      document.removeEventListener('mousemove', dragListenersRef.current.move)
+      document.removeEventListener('mouseup', dragListenersRef.current.up)
+    }
     let latestHeight = startHeight
     function onMove(e: MouseEvent) {
       latestHeight = Math.max(150, startHeight - (e.clientY - startY))
-      dispatch({ type: 'SET_HEIGHT', payload: latestHeight })
+      // Update DOM directly — no React re-render per pixel, dispatch only on mouseup
+      if (drawerRef.current) drawerRef.current.style.height = `${latestHeight}px`
     }
     function onUp() {
       document.removeEventListener('mousemove', onMove)
       document.removeEventListener('mouseup', onUp)
       dragListenersRef.current = null
+      dispatch({ type: 'SET_HEIGHT', payload: latestHeight })
       safeSet(CHAT_SIZE_KEY, { height: latestHeight, screenWidth: window.innerWidth, screenHeight: window.innerHeight })
     }
     dragListenersRef.current = { move: onMove, up: onUp }
@@ -749,6 +757,7 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
 
   return (
     <div
+      ref={drawerRef}
       role="complementary"
       aria-label="Campaign Chat"
       className={drawerClass}

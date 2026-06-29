@@ -28,6 +28,7 @@ jest.mock('@/lib/hooks/useAuth', () => ({
 }))
 
 const mockedLocalStore = LocalStore as jest.Mocked<typeof LocalStore>
+const originalFetch = global.fetch
 
 beforeEach(() => {
   jest.clearAllMocks()
@@ -44,6 +45,10 @@ beforeEach(() => {
 
   Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 1920 })
   Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 1080 })
+})
+
+afterEach(() => {
+  global.fetch = originalFetch
 })
 
 async function openDock() {
