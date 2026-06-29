@@ -4,6 +4,15 @@ import { checkAndIncrementRateLimit } from '@/lib/db/feedbackRateLimit';
 import { getUserById } from '@/lib/permissions';
 import { extractIp } from '@/lib/utils/http';
 
+function sanitizeIssueText(value: string, maxLen = 200): string {
+  return value
+    .replace(/[\r\n]/g, ' ')
+    .replace(/[\x00-\x1f\x7f]/g, '')
+    .replace(/[[\]*_`>]/g, '')
+    .trim()
+    .slice(0, maxLen);
+}
+
 function buildIssueBody(
   submittedBy: string,
   pageUrl: string,
@@ -22,15 +31,6 @@ function buildIssueBody(
 }
 
 export const POST = withAuth(async (request: NextRequest, auth) => {
-  const ip = extractIp(request);
-  const { allowed } = await checkAndIncrementRateLimit(ip);
-  if (!allowed) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded. Please wait before submitting again.' },
-      { status: 429 }
-    );
-  }
-
   let body: unknown;
   try {
     body = await request.json();
@@ -53,6 +53,15 @@ export const POST = withAuth(async (request: NextRequest, auth) => {
     return NextResponse.json({ error: 'description must be 2000 characters or fewer' }, { status: 400 });
   }
 
+  const ip = extractIp(request);
+  const { allowed } = await checkAndIncrementRateLimit(ip);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded. Please wait before submitting again.' },
+      { status: 429 }
+    );
+  }
+
   const githubToken = process.env.GITHUB_FEEDBACK_TOKEN;
   if (!githubToken) {
     console.error('GITHUB_FEEDBACK_TOKEN is not configured');
@@ -63,9 +72,13 @@ export const POST = withAuth(async (request: NextRequest, auth) => {
   const githubHandle = user?.['username'] as string | undefined;
   const email = auth.email;
   const submittedBy = githubHandle ? `@${githubHandle} (${email})` : email;
-  const userAgent = request.headers.get('user-agent') ?? '';
+  const userAgent = sanitizeIssueText(request.headers.get('user-agent') ?? '');
   const rawPageUrl = typeof pageUrl === 'string' ? pageUrl.replace(/[\r\n]/g, '') : '';
-  const pageUrlStr = (rawPageUrl.startsWith('https://') || (rawPageUrl.startsWith('/') && !rawPageUrl.startsWith('//'))) ? rawPageUrl : '';
+  const pageUrlStr =
+    rawPageUrl.startsWith('https://') ||
+    (rawPageUrl.startsWith('/') && !rawPageUrl.startsWith('//'))
+      ? rawPageUrl
+      : '';
   const descriptionStr = typeof description === 'string' ? description : '';
 
   const issueBody = buildIssueBody(submittedBy, pageUrlStr, userAgent, descriptionStr);

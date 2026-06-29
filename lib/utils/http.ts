@@ -4,11 +4,12 @@ export async function safeJson(res: Response): Promise<Record<string, unknown>> 
   return res.json().catch(() => ({}));
 }
 
-const IPV4_RE = /^(\d{1,3}\.){3}\d{1,3}$/;
-const IPV6_RE = /^[0-9a-f:]+$/i;
-
 function isValidIp(value: string): boolean {
-  return IPV4_RE.test(value) || IPV6_RE.test(value);
+  const ipv4Parts = value.split('.');
+  if (ipv4Parts.length === 4) {
+    return ipv4Parts.every(p => /^\d{1,3}$/.test(p) && Number(p) <= 255);
+  }
+  return /^[0-9a-f:]+$/i.test(value) && value.includes(':');
 }
 
 export function extractIp(request: NextRequest): string {
