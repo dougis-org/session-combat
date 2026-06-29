@@ -298,35 +298,44 @@ jobs:
           path: artifacts/e2e/
         continue-on-error: true
 
-      - name: Upload partial coverage to Codacy and finalize
-        env:
-          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
-          CODACY_ORGANIZATION_PROVIDER: gh
-          CODACY_USERNAME: dougis-org
-          CODACY_PROJECT_NAME: session-combat
-        run: |
-          if [ -z "$CODACY_API_TOKEN" ]; then
-            echo "CODACY_API_TOKEN not set (fork PR or missing secret), skipping coverage upload"
-            exit 0
-          fi
-          curl -Ls https://coverage.codacy.com/get.sh -o codacy-coverage-reporter.sh
-          chmod +x codacy-coverage-reporter.sh
-          if [ -f artifacts/unit/lcov.info ]; then
-            ./codacy-coverage-reporter.sh report --partial -r artifacts/unit/lcov.info
-          else
-            echo "No unit coverage report found"
-          fi
-          if [ -f artifacts/integration/lcov.info ]; then
-            ./codacy-coverage-reporter.sh report --partial -r artifacts/integration/lcov.info
-          else
-            echo "No integration coverage report found"
-          fi
-          if [ -f artifacts/e2e/lcov.info ]; then
-            ./codacy-coverage-reporter.sh report --partial -r artifacts/e2e/lcov.info
-          else
-            echo "No e2e coverage report found"
-          fi
-          ./codacy-coverage-reporter.sh final
+      - name: Upload unit coverage to Codacy
+        if: always()
+        continue-on-error: true
+        uses: dougis-org/cicd-tooling/.github/actions/codacy-reporter@main
+        with:
+          codacy-api-token: ${{ secrets.CODACY_API_TOKEN }}
+          codacy-username: dougis-org
+          codacy-project-name: session-combat
+          coverage-file: artifacts/unit/lcov.info
+
+      - name: Upload integration coverage to Codacy
+        if: always()
+        continue-on-error: true
+        uses: dougis-org/cicd-tooling/.github/actions/codacy-reporter@main
+        with:
+          codacy-api-token: ${{ secrets.CODACY_API_TOKEN }}
+          codacy-username: dougis-org
+          codacy-project-name: session-combat
+          coverage-file: artifacts/integration/lcov.info
+
+      - name: Upload E2E coverage to Codacy
+        if: always()
+        continue-on-error: true
+        uses: dougis-org/cicd-tooling/.github/actions/codacy-reporter@main
+        with:
+          codacy-api-token: ${{ secrets.CODACY_API_TOKEN }}
+          codacy-username: dougis-org
+          codacy-project-name: session-combat
+          coverage-file: artifacts/e2e/lcov.info
+
+      - name: Finalize coverage on Codacy
+        continue-on-error: true
+        uses: dougis-org/cicd-tooling/.github/actions/codacy-reporter@main
+        with:
+          codacy-api-token: ${{ secrets.CODACY_API_TOKEN }}
+          codacy-username: dougis-org
+          codacy-project-name: session-combat
+          final: 'true'
 
   check-codacy-coverage:
     runs-on: ubuntu-latest

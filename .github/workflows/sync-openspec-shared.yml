@@ -1,0 +1,10 @@
+name: Sync openspec-shared submodule
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  sync:
+    uses: dougis-org/cicd-tooling/.github/workflows/sync-openspec-shared.yml@main
+    secrets: inherit
