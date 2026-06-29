@@ -88,3 +88,7 @@ regression-test-output.txt
 .verity/.last-intent
 .verity/.memory-sync-state.json
 .verity/memory/log.md
+.verity/.task-context/
+.verity/.conversation-buffer
+.verity/.guard-iteration
+.verity/.last-reviewed-sha
