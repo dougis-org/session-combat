@@ -100,6 +100,13 @@ describe('POST /api/feedback', () => {
     expect(body.error).toMatch(/rate limit/i);
   });
 
+  it('returns 400 when body is not an object', async () => {
+    const req = makeRouteRequest('http://localhost/api/feedback', 'POST', null);
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    expect(mockedRateLimit).not.toHaveBeenCalled();
+  });
+
   it('returns 400 when title is empty', async () => {
     const res = await POST(makeRequest({ ...VALID_BODY, title: '' }));
     expect(res.status).toBe(400);
