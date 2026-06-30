@@ -17,3 +17,5 @@ exclude:
   - /openspec/**
   - /playwright.config.js
   - test-results.json
+  - .verity/**
+  - .vscode/**
