@@ -31,6 +31,7 @@ jest.mock('next/link', () => {
 
 describe('CampaignLayout', () => {
   beforeEach(() => {
+    capturedOnSessionChange = undefined;
     mockPathname = '/campaigns/test-id';
     global.fetch = jest.fn(() =>
       Promise.resolve({

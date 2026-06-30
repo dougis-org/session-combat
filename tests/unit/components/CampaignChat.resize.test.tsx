@@ -178,6 +178,32 @@ describe('height resolution helper', () => {
   })
 })
 
+describe('persistence save logic', () => {
+  it('persists new height via LocalStore.set on mouseup', async () => {
+    await openDock()
+    const handle = screen.getByRole('separator', { name: /resize chat panel/i })
+
+    act(() => {
+      fireEvent.mouseDown(handle, { clientY: 600 })
+    })
+    act(() => {
+      fireEvent.mouseMove(document, { clientY: 400 })
+    })
+    act(() => {
+      fireEvent.mouseUp(document)
+    })
+
+    expect(mockedLocalStore.set).toHaveBeenCalledWith(
+      'campaign-chat-size',
+      expect.objectContaining({
+        height: expect.any(Number),
+        screenWidth: 1920,
+        screenHeight: 1080,
+      })
+    )
+  })
+})
+
 describe('persistence load logic', () => {
   it('restores saved height when screen dimensions match', async () => {
     mockedLocalStore.get.mockImplementation((key: string) => {
