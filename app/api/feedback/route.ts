@@ -31,14 +31,12 @@ function buildIssueBody(
 }
 
 export const POST = withAuth(async (request: NextRequest, auth) => {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
+  const parsed = await request.json().catch(() => null);
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
 
-  const { type, title, description, pageUrl } = body as Record<string, unknown>;
+  const { type, title, description, pageUrl } = parsed as Record<string, unknown>;
 
   if (type !== 'bug' && type !== 'feature') {
     return NextResponse.json({ error: 'type must be "bug" or "feature"' }, { status: 400 });
@@ -79,7 +77,7 @@ export const POST = withAuth(async (request: NextRequest, auth) => {
     (rawPageUrl.startsWith('/') && !rawPageUrl.startsWith('//'))
       ? rawPageUrl
       : '';
-  const descriptionStr = typeof description === 'string' ? description : '';
+  const descriptionStr = typeof description === 'string' ? sanitizeIssueText(description, 2000) : '';
 
   const issueBody = buildIssueBody(submittedBy, pageUrlStr, userAgent, descriptionStr);
   const labels = type === 'bug' ? ['bug'] : ['enhancement'];
