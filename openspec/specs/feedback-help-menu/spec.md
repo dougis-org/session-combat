@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the [`design.md`](../../design.md) document, not a replacement.
+This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-06-28-add-feedback-help-menu/design.md) document, not a replacement.
 
 ### Requirement: ADDED NavBar help button — auth-gated
 
