@@ -10,8 +10,9 @@ function isValidIp(value: string): boolean {
     return ipv4Parts.every(p => /^\d{1,3}$/.test(p) && Number(p) <= 255);
   }
   if (!value.includes(':') || value.includes(':::')) return false;
+  if ((value.match(/::/g) ?? []).length > 1) return false;
   const segments = value.split(':');
-  if (segments.length < 3 || segments.length > 9) return false;
+  if (segments.length < 3 || segments.length > 8) return false;
   return segments.every(seg => /^[0-9a-f]{0,4}$/i.test(seg));
 }
 

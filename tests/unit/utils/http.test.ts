@@ -59,4 +59,14 @@ describe('extractIp', () => {
     const req = makeRequest({ 'x-forwarded-for': ':' });
     expect(extractIp(req)).toBe('unknown');
   });
+
+  it('rejects multiple double-colon compressions', () => {
+    const req = makeRequest({ 'x-forwarded-for': '2001::db8::1' });
+    expect(extractIp(req)).toBe('unknown');
+  });
+
+  it('rejects IPv6 with more than 8 segments', () => {
+    const req = makeRequest({ 'x-forwarded-for': '1:2:3:4:5:6:7:8:9' });
+    expect(extractIp(req)).toBe('unknown');
+  });
 });
