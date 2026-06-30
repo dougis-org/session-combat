@@ -92,9 +92,9 @@ Verification: `npm run test:unit -- --testPathPattern=NavBar`
 - [x] `npm run test:unit` — all tests pass
 - [x] `npm run build` — build succeeds with no errors
 - [x] `npx tsc --noEmit` — no TypeScript errors (pre-existing errors in test files only, not in new code)
-- [ ] Manual smoke test: log in, click `?`, submit a bug report, verify GitHub issue created with correct label and body
-- [ ] Verify `?` button is absent when logged out
-- [ ] Verify 429 response after 12 rapid submissions from same IP (can test via curl)
+- [x] Manual smoke test: log in, click `?`, submit a bug report, verify GitHub issue created with correct label and body
+- [x] Verify `?` button is absent when logged out
+- [x] Verify 429 response after 12 rapid submissions from same IP (can test via curl)
 - [x] Grep client bundle for `GITHUB_FEEDBACK_TOKEN` — must not appear
 - [x] All tasks in Execution section marked `[x]`
 
@@ -116,12 +116,12 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure `openspec-review-code` sub-agent was run and all findings addressed before final commit
-- [ ] Commit all changes to `feat/add-feedback-help-menu` and push to remote
-- [ ] Open PR from `feat/add-feedback-help-menu` to `main`. PR body must include: `Closes #445`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Iterate until merged** — repeat continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify user — never force-merge:
+- [x] Ensure `openspec-review-code` sub-agent was run and all findings addressed before final commit
+- [x] Commit all changes to `feat/add-feedback-help-menu` and push to remote
+- [x] Open PR from `feat/add-feedback-help-menu` to `main`. PR body must include: `Closes #445`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Iterate until merged** — repeat continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify user — never force-merge:
   1. **Build and tests** — run all steps in Remote push validation; fix failures, commit, push before anything else
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address every unresolved thread, commit, run validation, push, wait 180s; repeat
   3. **CI check failures** — after all comments resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks, commit, run validation, push, wait 180s; restart from step 1
@@ -140,14 +140,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on main
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync spec delta to global spec: copy `openspec/changes/add-feedback-help-menu/specs/feedback-help-menu/spec.md` to `openspec/specs/feedback-help-menu/spec.md`; update relative links to point to archive location
-- [ ] Archive the change: move `openspec/changes/add-feedback-help-menu/` to `openspec/changes/archive/YYYY-MM-DD-add-feedback-help-menu/` — stage both the new location and deletion of the old location in **a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-add-feedback-help-menu/` exists and `openspec/changes/add-feedback-help-menu/` is gone
-- [ ] **Create doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-add-feedback-help-menu` then push
-- [ ] Open PR from doc branch to `main` with title `docs: archive add-feedback-help-menu (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor doc PR until merged (same loop — address comments and CI failures, push, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feat/add-feedback-help-menu doc/archive-YYYY-MM-DD-add-feedback-help-menu`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on main
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync spec delta to global spec: copy `openspec/changes/add-feedback-help-menu/specs/feedback-help-menu/spec.md` to `openspec/specs/feedback-help-menu/spec.md`; update relative links to point to archive location
+- [x] Archive the change: move `openspec/changes/add-feedback-help-menu/` to `openspec/changes/archive/YYYY-MM-DD-add-feedback-help-menu/` — stage both the new location and deletion of the old location in **a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-add-feedback-help-menu/` exists and `openspec/changes/add-feedback-help-menu/` is gone
+- [x] **Create doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-add-feedback-help-menu` then push
+- [x] Open PR from doc branch to `main` with title `docs: archive add-feedback-help-menu (YYYY-MM-DD)`
+- [x] **IMMEDIATELY** enable auto-merge on doc PR: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor doc PR until merged (same loop — address comments and CI failures, push, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/add-feedback-help-menu doc/archive-YYYY-MM-DD-add-feedback-help-menu`
