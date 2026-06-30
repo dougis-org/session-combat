@@ -9,7 +9,10 @@ function isValidIp(value: string): boolean {
   if (ipv4Parts.length === 4) {
     return ipv4Parts.every(p => /^\d{1,3}$/.test(p) && Number(p) <= 255);
   }
-  return /^[0-9a-f:]+$/i.test(value) && value.includes(':');
+  if (!value.includes(':') || value.includes(':::')) return false;
+  const segments = value.split(':');
+  if (segments.length < 3 || segments.length > 9) return false;
+  return segments.every(seg => /^[0-9a-f]{0,4}$/i.test(seg));
 }
 
 export function extractIp(request: NextRequest): string {

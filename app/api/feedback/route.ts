@@ -8,7 +8,7 @@ function sanitizeIssueText(value: string, maxLen = 200): string {
   return value
     .replace(/[\r\n]/g, ' ')
     .replace(/[\x00-\x1f\x7f]/g, '')
-    .replace(/[[\]*_`>]/g, '')
+    .replace(/[[\]*_`>@#]/g, '')
     .trim()
     .slice(0, maxLen);
 }

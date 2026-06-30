@@ -49,4 +49,14 @@ describe('extractIp', () => {
     const req = makeRequest({ 'x-forwarded-for': '//evil.example' });
     expect(extractIp(req)).toBe('unknown');
   });
+
+  it('rejects malformed IPv6 with triple colon', () => {
+    const req = makeRequest({ 'x-forwarded-for': '2001:::1' });
+    expect(extractIp(req)).toBe('unknown');
+  });
+
+  it('rejects single colon as IPv6', () => {
+    const req = makeRequest({ 'x-forwarded-for': ':' });
+    expect(extractIp(req)).toBe('unknown');
+  });
 });
