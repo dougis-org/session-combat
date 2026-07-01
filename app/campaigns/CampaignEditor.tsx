@@ -196,12 +196,17 @@ export function CampaignEditor({
                     />
 
                     {ch.id === currentChapterId ? (
-                      <span
+                      <button
+                        type="button"
                         data-testid={`active-chapter-indicator-${ch.id}`}
-                        className="bg-green-900/40 text-green-400 border border-green-800/40 text-xs rounded px-2 py-0.5 font-semibold select-none"
+                        title="Clear active chapter"
+                        aria-label="Clear active chapter"
+                        onClick={() => setCurrentChapterId(undefined)}
+                        disabled={saving}
+                        className="bg-green-900/40 text-green-400 border border-green-800/40 hover:bg-red-900/40 hover:text-red-400 hover:border-red-800/40 disabled:opacity-30 disabled:pointer-events-none text-xs rounded px-2 py-0.5 font-semibold transition-all cursor-pointer"
                       >
                         ACTIVE
-                      </span>
+                      </button>
                     ) : (
                       <button
                         type="button"
