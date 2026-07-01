@@ -65,6 +65,7 @@ describe('POST /api/feedback', () => {
   const originalToken = process.env.GITHUB_FEEDBACK_TOKEN;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     originalFetch = global.fetch;
     mockAuthState.payload = MOCK_AUTH;
     mockedRateLimit.mockResolvedValue({ allowed: true });
@@ -99,14 +100,23 @@ describe('POST /api/feedback', () => {
     expect(body.error).toMatch(/rate limit/i);
   });
 
+  it('returns 400 when body is not an object', async () => {
+    const req = makeRouteRequest('http://localhost/api/feedback', 'POST', null);
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    expect(mockedRateLimit).not.toHaveBeenCalled();
+  });
+
   it('returns 400 when title is empty', async () => {
     const res = await POST(makeRequest({ ...VALID_BODY, title: '' }));
     expect(res.status).toBe(400);
+    expect(mockedRateLimit).not.toHaveBeenCalled();
   });
 
   it('returns 400 when type is invalid', async () => {
     const res = await POST(makeRequest({ ...VALID_BODY, type: 'other' }));
     expect(res.status).toBe(400);
+    expect(mockedRateLimit).not.toHaveBeenCalled();
   });
 
   it('creates GitHub issue for bug report and returns 201', async () => {
