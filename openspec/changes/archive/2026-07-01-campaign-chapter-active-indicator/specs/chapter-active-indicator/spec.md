@@ -10,7 +10,7 @@ The system SHALL display the active chapter's name as non-interactive text above
 
 - **Given** a campaign with chapters and `currentChapterId` set to an existing chapter
 - **When** the Campaign edit screen renders the Chapters section
-- **Then** a display element with `data-testid="current-chapter-display"` shows "Ch. N: <title>" matching the active chapter, with no `<select>` in the DOM
+- **Then** a display element with `data-testid="current-chapter-display"` shows `"Ch. N: <chapter title>"` matching the active chapter, with no `<select>` in the DOM
 
 #### Scenario: Placeholder shown when no active chapter is set
 
@@ -26,7 +26,7 @@ The system SHALL display the active chapter's name as non-interactive text above
 
 ### Requirement: ADDED Active chapter row indicator
 
-The system SHALL render a visible "ACTIVE" pill on the chapter row that is currently the active chapter.
+The system SHALL render a clickable "ACTIVE" button on the chapter row that is currently the active chapter. Clicking it clears `currentChapterId`, restoring parity with the empty-option behavior of the removed `<select>`.
 
 #### Scenario: ACTIVE pill appears on the active chapter row
 
@@ -35,7 +35,15 @@ The system SHALL render a visible "ACTIVE" pill on the chapter row that is curre
 - **Then** `data-testid="active-chapter-indicator-{X.id}"` is present on chapter X's row
 - **And** no other chapter row has an `active-chapter-indicator` test ID
 
-#### Scenario: No ACTIVE pill when no chapter is active
+#### Scenario: Clicking ACTIVE indicator clears the active chapter
+
+- **Given** chapter X is the active chapter
+- **When** the user clicks the `active-chapter-indicator-{X.id}` button
+- **Then** `currentChapterId` is cleared
+- **And** `current-chapter-display` shows "-- No active chapter --"
+- **And** no `active-chapter-indicator-*` element remains
+
+#### Scenario: No ACTIVE indicator when no chapter is active
 
 - **Given** a campaign with chapters and `currentChapterId` undefined
 - **When** the chapter list renders
@@ -104,7 +112,7 @@ Reason for removal: Replaced by the display-only block (Decision 1) and per-row 
 - Design Decision 2 → Requirement: ADDED Active chapter row indicator
 - Design Decision 3 → Requirement: ADDED Per-row activate button for inactive chapters
 - Design Decision 4 → Requirement: MODIFIED Chapter row layout
-- Requirements → Tasks: all requirements map to Task 1 (JSX changes) and Task 2 (test updates) in `tasks.md`
+- Requirements → Tasks: all requirements map to Task 1 (JSX changes) and Task 2 (test updates) in [`tasks.md`](../../tasks.md)
 
 ## Non-Functional Acceptance Criteria
 
