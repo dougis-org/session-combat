@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the [`design.md`](../../design.md) document, not a replacement.
+This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-06-30-chat-window-resize/design.md) document, not a replacement.
 
 ### Requirement: ADDED Expand toggle — compact to large mode
 
