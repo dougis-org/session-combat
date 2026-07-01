@@ -329,6 +329,7 @@ jobs:
           coverage-file: artifacts/e2e/lcov.info
 
       - name: Finalize coverage on Codacy
+        if: always()
         continue-on-error: true
         uses: dougis-org/cicd-tooling/.github/actions/codacy-reporter@main
         with:
