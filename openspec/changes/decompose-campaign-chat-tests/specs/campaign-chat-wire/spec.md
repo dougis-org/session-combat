@@ -9,13 +9,13 @@ The unit tests verifying the `CampaignChat` live-data wiring (SSE stream, messag
 - **Given** the `CampaignChat.test.tsx` file is decomposed
 - **When** `npm run test:unit` is executed
 - **Then** all tests pass successfully across the following files:
-  - [`tests/unit/components/CampaignChat/CampaignChat.sse.test.tsx`](file:///home/doug/dev3/session-combat/tests/unit/components/CampaignChat/CampaignChat.sse.test.tsx) (6 tests)
-  - [`tests/unit/components/CampaignChat/CampaignChat.history.test.tsx`](file:///home/doug/dev3/session-combat/tests/unit/components/CampaignChat/CampaignChat.history.test.tsx) (3 tests)
-  - [`tests/unit/components/CampaignChat/CampaignChat.unread.test.tsx`](file:///home/doug/dev3/session-combat/tests/unit/components/CampaignChat/CampaignChat.unread.test.tsx) (4 tests)
-  - [`tests/unit/components/CampaignChat/CampaignChat.members.test.tsx`](file:///home/doug/dev3/session-combat/tests/unit/components/CampaignChat/CampaignChat.members.test.tsx) (2 tests)
-  - [`tests/unit/components/CampaignChat/CampaignChat.composer.test.tsx`](file:///home/doug/dev3/session-combat/tests/unit/components/CampaignChat/CampaignChat.composer.test.tsx) (11 tests)
-  - [`tests/unit/components/CampaignChat/CampaignChat.visibility.test.tsx`](file:///home/doug/dev3/session-combat/tests/unit/components/CampaignChat/CampaignChat.visibility.test.tsx) (4 tests)
-  - [`tests/unit/components/CampaignChat/CampaignChat.scene.test.tsx`](file:///home/doug/dev3/session-combat/tests/unit/components/CampaignChat/CampaignChat.scene.test.tsx) (6 tests)
+  - [`tests/unit/components/CampaignChat/CampaignChat.sse.test.tsx`](../../../../tests/unit/components/CampaignChat/CampaignChat.sse.test.tsx) (6 tests)
+  - [`tests/unit/components/CampaignChat/CampaignChat.history.test.tsx`](../../../../tests/unit/components/CampaignChat/CampaignChat.history.test.tsx) (3 tests)
+  - [`tests/unit/components/CampaignChat/CampaignChat.unread.test.tsx`](../../../../tests/unit/components/CampaignChat/CampaignChat.unread.test.tsx) (4 tests)
+  - [`tests/unit/components/CampaignChat/CampaignChat.members.test.tsx`](../../../../tests/unit/components/CampaignChat/CampaignChat.members.test.tsx) (2 tests)
+  - [`tests/unit/components/CampaignChat/CampaignChat.composer.test.tsx`](../../../../tests/unit/components/CampaignChat/CampaignChat.composer.test.tsx) (11 tests)
+  - [`tests/unit/components/CampaignChat/CampaignChat.visibility.test.tsx`](../../../../tests/unit/components/CampaignChat/CampaignChat.visibility.test.tsx) (4 tests)
+  - [`tests/unit/components/CampaignChat/CampaignChat.scene.test.tsx`](../../../../tests/unit/components/CampaignChat/CampaignChat.scene.test.tsx) (6 tests)
 
 ## Traceability
 

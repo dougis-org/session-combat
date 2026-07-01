@@ -28,33 +28,35 @@ jest.mock('@/lib/hooks/useAuth', () => ({
 
 const mockedLocalStore = LocalStore as jest.Mocked<typeof LocalStore>
 
-beforeEach(() => {
-  jest.clearAllMocks()
-  mockedLocalStore.get.mockReturnValue(null)
-  sharedTestState.capturedOnEvent = null
-  setupFetchMock()
-})
-
-afterEach(() => {
-  restoreFetch()
-})
-
-// ── T3 — Members tests ───────────────────────────────────────────────
-
-// T3c-1: members fetched on mount
-it('fetches members on mount', async () => {
-  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
-  await waitFor(() => {
-    expect(sharedTestState.fetchSpy).toHaveBeenCalledWith(expect.stringContaining(`/api/campaigns/${CAMPAIGN_ID}/members`))
+describe('CampaignChat — members', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockedLocalStore.get.mockReturnValue(null)
+    sharedTestState.capturedOnEvent = null
+    setupFetchMock()
   })
-})
 
-// T3c-2: fetch failure leaves members empty (no crash)
-it('members fetch failure does not crash the component', async () => {
-  sharedTestState.fetchSpy.mockImplementation((url: string) => {
-    if (url.includes('/members')) return Promise.reject(new Error('network error'))
-    return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
+  afterEach(() => {
+    restoreFetch()
   })
-  expect(() => render(<CampaignChat campaignId={CAMPAIGN_ID} />)).not.toThrow()
-  await waitFor(() => expect(sharedTestState.fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members')))
+
+  // ── T3 — Members tests ───────────────────────────────────────────────
+
+  // T3c-1: members fetched on mount
+  it('fetches members on mount', async () => {
+    render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+    await waitFor(() => {
+      expect(sharedTestState.fetchSpy).toHaveBeenCalledWith(expect.stringContaining(`/api/campaigns/${CAMPAIGN_ID}/members`))
+    })
+  })
+
+  // T3c-2: fetch failure leaves members empty (no crash)
+  it('members fetch failure does not crash the component', async () => {
+    sharedTestState.fetchSpy.mockImplementation((url: string) => {
+      if (url.includes('/members')) return Promise.reject(new Error('network error'))
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
+    })
+    expect(() => render(<CampaignChat campaignId={CAMPAIGN_ID} />)).not.toThrow()
+    await waitFor(() => expect(sharedTestState.fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members')))
+  })
 })
