@@ -147,26 +147,26 @@ export function CampaignEditor({
 
         {chaptersExpanded && (
           <div className="p-4 border-t border-gray-800/50 space-y-4">
-            {/* Active Chapter dropdown picker (if chapters exist) */}
+            {/* Active Chapter display (if chapters exist) */}
             {chapters.length > 0 ? (
-              <div className="mb-4 bg-gray-800/20 p-3 rounded-lg border border-gray-800/40">
+              <div
+                data-testid="current-chapter-display"
+                className="mb-4 bg-gray-800/20 p-3 rounded-lg border border-gray-800/40"
+              >
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">
                   Current Chapter
                 </label>
-                <select
-                  data-testid="current-chapter-select"
-                  value={currentChapterId || ''}
-                  onChange={(e) => setCurrentChapterId(e.target.value)}
-                  disabled={saving}
-                  className="w-full text-sm bg-gray-950 border border-gray-700 hover:border-gray-600 rounded px-3 py-2 text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer"
-                >
-                  <option value="">-- No Active Chapter --</option>
-                  {chapters.map((ch) => (
-                    <option key={ch.id} value={ch.id}>
-                      Ch. {ch.order + 1}: {ch.title || 'Untitled Chapter'}
-                    </option>
-                  ))}
-                </select>
+                {(() => {
+                  const activeIndex = chapters.findIndex((ch) => ch.id === currentChapterId);
+                  const activeCh = activeIndex >= 0 ? chapters[activeIndex] : undefined;
+                  return activeCh ? (
+                    <p className="text-sm text-gray-200">
+                      Ch. {activeIndex + 1}: {activeCh.title || 'Untitled Chapter'}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">-- No active chapter --</p>
+                  );
+                })()}
               </div>
             ) : (
               <p className="text-sm text-gray-400 italic py-2 text-center">
@@ -195,6 +195,26 @@ export function CampaignEditor({
                       placeholder="e.g. Arrival at the Village"
                       className="flex-1 bg-gray-950 border border-gray-700 hover:border-gray-600 focus:border-blue-500 rounded px-3 py-1.5 text-sm text-gray-200 focus:outline-none transition-all duration-200"
                     />
+
+                    {ch.id === currentChapterId ? (
+                      <span
+                        data-testid={`active-chapter-indicator-${ch.id}`}
+                        className="bg-green-900/40 text-green-400 border border-green-800/40 text-xs rounded px-2 py-0.5 font-semibold select-none"
+                      >
+                        ACTIVE
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        data-testid={`activate-chapter-${ch.id}`}
+                        title="Mark as current chapter"
+                        onClick={() => setCurrentChapterId(ch.id)}
+                        disabled={saving}
+                        className="px-2 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 disabled:pointer-events-none text-xs rounded text-gray-300 transition-all cursor-pointer"
+                      >
+                        🚩
+                      </button>
+                    )}
 
                     {/* Move buttons */}
                     <div className="flex gap-1">
