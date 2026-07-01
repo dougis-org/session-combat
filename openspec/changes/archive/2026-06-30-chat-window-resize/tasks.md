@@ -133,7 +133,7 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 - [x] Open PR from `feat/chat-window-resize` to `main`. PR body must include: `Closes #444`
 - [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify user — **never wait for a human; never force-merge**:
+- [x] **Iterate until merged** — repeat the following priority loop until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify user — **never wait for a human; never force-merge**:
   1. **Build and tests** — run all steps in Remote push validation; fix failures, commit, push before proceeding
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address each unresolved thread, commit, validate, push, wait 180s
   3. **CI failures** — after comments resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix failures, commit, validate, push, wait 180s; restart loop from step 1
@@ -152,14 +152,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync spec delta to global specs: copy `openspec/changes/chat-window-resize/specs/chat-window-resize/spec.md` → `openspec/specs/chat-window-resize/spec.md`; update relative links to point to archive location
-- [ ] Archive the change: move `openspec/changes/chat-window-resize/` to `openspec/changes/archive/YYYY-MM-DD-chat-window-resize/` **in a single atomic commit** (stage both copy and deletion together)
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-chat-window-resize/` exists and `openspec/changes/chat-window-resize/` is gone
-- [ ] **Create a doc branch**: `git checkout -b doc/archive-YYYY-MM-DD-chat-window-resize` then `git push -u origin doc/archive-YYYY-MM-DD-chat-window-resize`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-chat-window-resize` to `main` with title `docs: archive chat-window-resize (YYYY-MM-DD)`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync spec delta to global specs: copy `openspec/changes/chat-window-resize/specs/chat-window-resize/spec.md` → `openspec/specs/chat-window-resize/spec.md`; update relative links to point to archive location
+- [x] Archive the change: move `openspec/changes/chat-window-resize/` to `openspec/changes/archive/YYYY-MM-DD-chat-window-resize/` **in a single atomic commit** (stage both copy and deletion together)
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-chat-window-resize/` exists and `openspec/changes/chat-window-resize/` is gone
+- [x] **Create a doc branch**: `git checkout -b doc/archive-YYYY-MM-DD-chat-window-resize` then `git push -u origin doc/archive-YYYY-MM-DD-chat-window-resize`
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-chat-window-resize` to `main` with title `docs: archive chat-window-resize (YYYY-MM-DD)`
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`
-- [ ] Monitor the doc PR until merged (same loop — address comments and CI failures, push to doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` && `git branch -D feat/chat-window-resize doc/archive-YYYY-MM-DD-chat-window-resize`
+- [x] Monitor the doc PR until merged (same loop — address comments and CI failures, push to doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` && `git branch -D feat/chat-window-resize doc/archive-YYYY-MM-DD-chat-window-resize`
