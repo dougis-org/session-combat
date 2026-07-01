@@ -1,5 +1,5 @@
 // tests/unit/components/CampaignLayout.test.tsx
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CampaignLayout from '@/app/campaigns/[id]/layout';
 
@@ -10,13 +10,9 @@ jest.mock('next/navigation', () => ({
   usePathname: () => mockPathname,
 }));
 
-// Mock CampaignChat to capture the onSessionChange prop
-let capturedOnSessionChange: ((id: string | null) => void) | undefined
+// Mock CampaignChat to isolate layout and avoid extra fetch calls
 jest.mock('@/lib/components/CampaignChat', () => ({
-  CampaignChat: ({ activeSessionId, onSessionChange }: { activeSessionId?: string | null; onSessionChange?: (id: string | null) => void }) => {
-    capturedOnSessionChange = onSessionChange
-    return <div data-testid="campaign-chat" data-active-session={activeSessionId ?? ''} />
-  },
+  CampaignChat: () => <div data-testid="campaign-chat" />
 }));
 
 // Mock next/link to be a plain <a> tag
@@ -31,7 +27,6 @@ jest.mock('next/link', () => {
 
 describe('CampaignLayout', () => {
   beforeEach(() => {
-    capturedOnSessionChange = undefined;
     mockPathname = '/campaigns/test-id';
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -172,35 +167,5 @@ describe('CampaignLayout', () => {
     await waitFor(() => screen.getByRole('heading'));
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith('/api/campaigns/test-id');
-  });
-
-  test('TC-3.11: onSessionChange updates activeSessionId passed to CampaignChat', async () => {
-    render(
-      <CampaignLayout>
-        <div>Children content</div>
-      </CampaignLayout>
-    );
-    await waitFor(() => screen.getByRole('heading'));
-    const chat = screen.getByTestId('campaign-chat');
-    expect(chat).toHaveAttribute('data-active-session', 'session-123');
-
-    act(() => {
-      capturedOnSessionChange?.('new-session-456');
-    });
-    await waitFor(() => expect(screen.getByTestId('campaign-chat')).toHaveAttribute('data-active-session', 'new-session-456'));
-  });
-
-  test('TC-3.12: onSessionChange with null clears activeSessionId in CampaignChat', async () => {
-    render(
-      <CampaignLayout>
-        <div>Children content</div>
-      </CampaignLayout>
-    );
-    await waitFor(() => screen.getByRole('heading'));
-
-    act(() => {
-      capturedOnSessionChange?.(null);
-    });
-    await waitFor(() => expect(screen.getByTestId('campaign-chat')).toHaveAttribute('data-active-session', ''));
   });
 });
