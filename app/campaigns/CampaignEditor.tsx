@@ -111,6 +111,9 @@ export function CampaignEditor({
     }
   };
 
+  const activeChapterIndex = chapters.findIndex((ch) => ch.id === currentChapterId);
+  const activeChapter = activeChapterIndex >= 0 ? chapters[activeChapterIndex] : undefined;
+
   return (
     <EditorShell
       title={isNew ? 'Create Campaign' : 'Edit Campaign'}
@@ -156,17 +159,13 @@ export function CampaignEditor({
                 <p className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">
                   Current Chapter
                 </p>
-                {(() => {
-                  const activeIndex = chapters.findIndex((ch) => ch.id === currentChapterId);
-                  const activeCh = activeIndex >= 0 ? chapters[activeIndex] : undefined;
-                  return activeCh ? (
-                    <p className="text-sm text-gray-200">
-                      Ch. {activeIndex + 1}: {activeCh.title || 'Untitled Chapter'}
-                    </p>
-                  ) : (
-                    <p className="text-sm text-gray-500 italic">-- No active chapter --</p>
-                  );
-                })()}
+                {activeChapter ? (
+                  <p className="text-sm text-gray-200">
+                    Ch. {activeChapterIndex + 1}: {activeChapter.title || 'Untitled Chapter'}
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-500 italic">-- No active chapter --</p>
+                )}
               </div>
             ) : (
               <p className="text-sm text-gray-400 italic py-2 text-center">
