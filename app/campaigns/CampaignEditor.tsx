@@ -153,9 +153,9 @@ export function CampaignEditor({
                 data-testid="current-chapter-display"
                 className="mb-4 bg-gray-800/20 p-3 rounded-lg border border-gray-800/40"
               >
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">
+                <p className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">
                   Current Chapter
-                </label>
+                </p>
                 {(() => {
                   const activeIndex = chapters.findIndex((ch) => ch.id === currentChapterId);
                   const activeCh = activeIndex >= 0 ? chapters[activeIndex] : undefined;
@@ -208,11 +208,12 @@ export function CampaignEditor({
                         type="button"
                         data-testid={`activate-chapter-${ch.id}`}
                         title="Mark as current chapter"
+                        aria-label="Mark as current chapter"
                         onClick={() => setCurrentChapterId(ch.id)}
                         disabled={saving}
                         className="px-2 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 disabled:pointer-events-none text-xs rounded text-gray-300 transition-all cursor-pointer"
                       >
-                        🚩
+                        <span aria-hidden="true">🚩</span>
                       </button>
                     )}
 
