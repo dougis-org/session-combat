@@ -309,8 +309,8 @@ describe('CampaignEditor', () => {
       const { user } = renderEditor();
       // Open accordion first to test the zero-chapters branch, not the collapsed state.
       await user.click(screen.getByRole('button', { name: /chapters/i }));
-      expect(screen.getByText('No chapters defined')).toBeInTheDocument();
       expect(screen.queryByTestId('current-chapter-display')).not.toBeInTheDocument();
+      expect(screen.getByText('No chapters defined')).toBeInTheDocument();
     });
 
     it('does not render the old select element', () => {
