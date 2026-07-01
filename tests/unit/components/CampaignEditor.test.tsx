@@ -17,7 +17,8 @@ const BASE_CAMPAIGN: Campaign = {
 };
 
 function renderEditor(props: Partial<Parameters<typeof CampaignEditor>[0]> = {}) {
-  return render(
+  const user = userEvent.setup();
+  render(
     <CampaignEditor
       campaign={BASE_CAMPAIGN}
       onSave={jest.fn()}
@@ -26,6 +27,7 @@ function renderEditor(props: Partial<Parameters<typeof CampaignEditor>[0]> = {})
       {...props}
     />
   );
+  return { user };
 }
 
 async function openChapters(user: UserEvent) {
@@ -104,17 +106,15 @@ describe('CampaignEditor', () => {
 
   describe('saving', () => {
     it('calls onSave with trimmed name', async () => {
-      const user = userEvent.setup();
       const onSave = jest.fn();
-      renderEditor({ onSave });
+      const { user } = renderEditor({ onSave });
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
       expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Campaign' }));
     });
 
     it('calls onSave with trimmed moduleName', async () => {
-      const user = userEvent.setup();
       const onSave = jest.fn();
-      renderEditor({ campaign: { ...BASE_CAMPAIGN, moduleName: '  DH  ' }, onSave });
+      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, moduleName: '  DH  ' }, onSave });
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
       expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ moduleName: 'DH' }));
     });
@@ -122,9 +122,8 @@ describe('CampaignEditor', () => {
     it.each(['completed', 'on-hold'] as const)(
       'calls onSave with status %s when dropdown changes',
       async (status) => {
-        const user = userEvent.setup();
         const onSave = jest.fn();
-        renderEditor({ onSave });
+        const { user } = renderEditor({ onSave });
         await user.selectOptions(screen.getByTestId('status-select'), status);
         await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
         expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ status }));
@@ -134,9 +133,8 @@ describe('CampaignEditor', () => {
 
   describe('cancel', () => {
     it('calls onCancel when Cancel button clicked', async () => {
-      const user = userEvent.setup();
       const onCancel = jest.fn();
-      renderEditor({ onCancel });
+      const { user } = renderEditor({ onCancel });
       await user.click(screen.getByRole('button', { name: 'Cancel' }));
       expect(onCancel).toHaveBeenCalledTimes(1);
     });
@@ -163,9 +161,8 @@ describe('CampaignEditor', () => {
     });
 
     it('save with no chapters calls onSave with chapters: []', async () => {
-      const user = userEvent.setup();
       const onSave = jest.fn();
-      renderEditor({ onSave });
+      const { user } = renderEditor({ onSave });
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
       expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ chapters: [] }));
     });
@@ -173,8 +170,7 @@ describe('CampaignEditor', () => {
 
   describe('chapters editing', () => {
     it('toggles chapters editing section when accordion button is clicked', async () => {
-      const user = userEvent.setup();
-      renderEditor();
+      const { user } = renderEditor();
       expect(screen.queryByText('+ Add Chapter')).not.toBeInTheDocument();
 
       await user.click(screen.getByRole('button', { name: /chapters/i }));
@@ -185,8 +181,7 @@ describe('CampaignEditor', () => {
     });
 
     it('adds a new chapter row when "+ Add Chapter" is clicked', async () => {
-      const user = userEvent.setup();
-      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: [] } });
+      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: [] } });
 
       await openChapters(user);
 
@@ -198,13 +193,12 @@ describe('CampaignEditor', () => {
       expect(inputs.length).toBe(1);
       expect(inputs[0]).toHaveValue('');
       expect(screen.queryByText('No chapters defined')).not.toBeInTheDocument();
-      expect(screen.getByTestId('current-chapter-select')).toBeInTheDocument();
+      expect(screen.getByTestId('current-chapter-display')).toBeInTheDocument();
     });
 
     it('removes a chapter, shifts subsequent ones, and clears active chapter if deleted', async () => {
-      const user = userEvent.setup();
       const onSave = jest.fn();
-      renderEditor({
+      const { user } = renderEditor({
         campaign: { ...BASE_CAMPAIGN, currentChapterId: 'ch-2', chapters: CHAPTER_TRIO },
         onSave,
       });
@@ -231,9 +225,8 @@ describe('CampaignEditor', () => {
     });
 
     it('reorders chapters with move buttons and updates order index', async () => {
-      const user = userEvent.setup();
       const onSave = jest.fn();
-      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_TRIO }, onSave });
+      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_TRIO }, onSave });
 
       await openChapters(user);
 
@@ -263,24 +256,8 @@ describe('CampaignEditor', () => {
       );
     });
 
-    it('updates currentChapterId when a chapter is selected in active chapter select', async () => {
-      const user = userEvent.setup();
-      const onSave = jest.fn();
-      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR }, onSave });
-
-      await openChapters(user);
-
-      expect(screen.getByTestId('current-chapter-select')).toBeInTheDocument();
-
-      await user.selectOptions(screen.getByTestId('current-chapter-select'), 'ch-2');
-
-      await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
-      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ currentChapterId: 'ch-2' }));
-    });
-
     it('updates chapter title correctly when typing in the input field', async () => {
-      const user = userEvent.setup();
-      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: [{ id: 'ch-1', title: 'Arrival', order: 0 }] } });
+      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: [{ id: 'ch-1', title: 'Arrival', order: 0 }] } });
 
       await openChapters(user);
 
@@ -293,9 +270,8 @@ describe('CampaignEditor', () => {
     });
 
     it('sets currentChapterId to undefined when active chapter is removed', async () => {
-      const user = userEvent.setup();
       const onSave = jest.fn();
-      renderEditor({
+      const { user } = renderEditor({
         campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-2' },
         onSave,
       });
@@ -308,6 +284,127 @@ describe('CampaignEditor', () => {
       await user.click(removeBtn);
 
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ currentChapterId: undefined }));
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Chapter active indicator tests (campaign-chapter-active-indicator)
+  // ---------------------------------------------------------------------------
+
+  describe('current chapter display block', () => {
+    it('shows active chapter name in display block', () => {
+      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' } });
+      const display = screen.getByTestId('current-chapter-display');
+      expect(display).toHaveTextContent('Ch. 1:');
+      expect(display).toHaveTextContent('Arrival');
+    });
+
+    it('shows placeholder when no active chapter is set', () => {
+      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: undefined } });
+      expect(screen.getByTestId('current-chapter-display')).toHaveTextContent('-- No active chapter --');
+    });
+
+    it('display block is absent when no chapters exist (accordion open)', async () => {
+      const { user } = renderEditor();
+      // Open accordion first to test the zero-chapters branch, not the collapsed state.
+      await user.click(screen.getByRole('button', { name: /chapters/i }));
+      expect(screen.queryByTestId('current-chapter-display')).not.toBeInTheDocument();
+      expect(screen.getByText('No chapters defined')).toBeInTheDocument();
+    });
+
+    it('does not render the old select element', () => {
+      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR } });
+      expect(screen.queryByTestId('current-chapter-select')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('ACTIVE pill', () => {
+    it('shows ACTIVE pill on the active chapter row', () => {
+      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' } });
+      expect(screen.getByTestId('active-chapter-indicator-ch-1')).toBeInTheDocument();
+    });
+
+    it('does not show ACTIVE pill on inactive chapter rows', () => {
+      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' } });
+      expect(screen.queryByTestId('active-chapter-indicator-ch-2')).not.toBeInTheDocument();
+    });
+
+    it('shows no ACTIVE pill when currentChapterId is unset', () => {
+      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: undefined } });
+      expect(screen.queryByTestId('active-chapter-indicator-ch-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('active-chapter-indicator-ch-2')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('activate button', () => {
+    it('shows activate button on inactive rows', () => {
+      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' } });
+      expect(screen.getByTestId('activate-chapter-ch-2')).toBeInTheDocument();
+    });
+
+    it('does not show activate button on the active row', () => {
+      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' } });
+      expect(screen.queryByTestId('activate-chapter-ch-1')).not.toBeInTheDocument();
+    });
+
+    it('activate button has correct tooltip and aria-label', () => {
+      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' } });
+      const btn = screen.getByTestId('activate-chapter-ch-2');
+      expect(btn).toHaveAttribute('title', 'Mark as current chapter');
+      expect(btn).toHaveAttribute('aria-label', 'Mark as current chapter');
+    });
+
+    it('clicking activate button transfers active state to that chapter', async () => {
+      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' } });
+
+      await user.click(screen.getByTestId('activate-chapter-ch-2'));
+
+      expect(screen.getByTestId('current-chapter-display')).toHaveTextContent('The Inn');
+      expect(screen.getByTestId('active-chapter-indicator-ch-2')).toBeInTheDocument();
+      expect(screen.queryByTestId('active-chapter-indicator-ch-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('activate-chapter-ch-1')).toBeInTheDocument();
+    });
+
+    it('clicking activate button and saving sends updated currentChapterId', async () => {
+      const onSave = jest.fn();
+      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' }, onSave });
+
+      await user.click(screen.getByTestId('activate-chapter-ch-2'));
+      await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
+
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ currentChapterId: 'ch-2' }));
+    });
+
+    it('activate button is not disabled in default (non-saving) state', () => {
+      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' } });
+      expect(screen.getByTestId('activate-chapter-ch-2')).not.toBeDisabled();
+    });
+
+    it('ACTIVE indicator is a button with clear-active-chapter aria-label', () => {
+      renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' } });
+      const btn = screen.getByTestId('active-chapter-indicator-ch-1');
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn).toHaveAttribute('aria-label', 'Clear active chapter');
+    });
+
+    it('clicking ACTIVE indicator clears the active chapter', async () => {
+      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' } });
+
+      await user.click(screen.getByTestId('active-chapter-indicator-ch-1'));
+
+      expect(screen.getByTestId('current-chapter-display')).toHaveTextContent('-- No active chapter --');
+      expect(screen.queryByTestId('active-chapter-indicator-ch-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('activate-chapter-ch-1')).toBeInTheDocument();
+    });
+
+    it('clicking ACTIVE indicator and saving sends currentChapterId: undefined', async () => {
+      const onSave = jest.fn();
+      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_PAIR, currentChapterId: 'ch-1' }, onSave });
+
+      await user.click(screen.getByTestId('active-chapter-indicator-ch-1'));
+      await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
+
       expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ currentChapterId: undefined }));
     });
   });
