@@ -16,7 +16,7 @@ The system SHALL render a visible drag handle (⠿ grip icon) as the leftmost el
 
 - **Given** the campaign editor is saving
 - **When** the save operation is in progress
-- **Then** all drag handles are non-interactive (pointer-events-none or aria-disabled) so dragging cannot be initiated
+- **Then** all drag handles are non-interactive (pointer-events-none, non-focusable via `tabindex="-1"`, or `aria-disabled`) so dragging cannot be initiated by pointer or keyboard input
 
 ## REMOVED Requirements
 

@@ -52,7 +52,7 @@ For each task in `tasks.md`:
 
 ### Task 3 — Delete move-button unit test
 
-- [ ] **No move-button test remains** (unit): `npm test -- --testPathPattern=CampaignEditor` passes and output does not mention `move-up-*` / `move-down-*`
+- [ ] **No move-button test remains** (unit): `npm run test:unit -- --testPathPattern=CampaignEditor` passes and output does not mention `move-up-*` / `move-down-*`
 
 ### Task 4 — Playwright E2E campaigns.spec.ts
 

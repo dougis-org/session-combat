@@ -34,7 +34,7 @@
 ### Task 3 — Delete the move-button unit test
 
 - [x] In `tests/unit/components/CampaignEditor.test.tsx`, delete the test `'reorders chapters with move buttons and updates order index'` (lines ~227–257)
-- [x] Run `npm test -- --testPathPattern=CampaignEditor` — must pass with no references to `move-up-*` / `move-down-*`
+- [x] Run `npm run test:unit -- --testPathPattern=CampaignEditor` — must pass with no references to `move-up-*` / `move-down-*`
 
 ### Task 4 — Write Playwright E2E spec for drag-reorder
 
