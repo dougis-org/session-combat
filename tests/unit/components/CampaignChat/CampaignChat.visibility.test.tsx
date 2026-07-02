@@ -1,5 +1,4 @@
-import { screen, act, waitFor } from '@testing-library/react'
-import { CampaignChat } from '@/lib/components/CampaignChat'
+import { screen, waitFor } from '@testing-library/react'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDock, withMembers, fireMsg } from './helpers'
 

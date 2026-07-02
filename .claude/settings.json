@@ -14,17 +14,6 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "verity guard --on commit,push",
-            "timeout": 300,
-            "statusMessage": "Running Verity git-moment review"
-          }
-        ]
-      },
-      {
         "matcher": "Read",
         "hooks": [
           {
@@ -41,6 +30,17 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.wolf/hooks/pre-write.js\"",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "verity guard --on commit,push",
+            "timeout": 300,
+            "statusMessage": "Running Verity git-moment review"
           }
         ]
       }
@@ -69,22 +69,22 @@
     ],
     "Stop": [
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "verity analyze",
-            "timeout": 120,
-            "statusMessage": "Running Verity analysis"
-          }
-        ]
-      },
-      {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.wolf/hooks/stop.js\"",
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "verity analyze",
+            "timeout": 120,
+            "statusMessage": "Running Verity analysis"
           }
         ]
       }

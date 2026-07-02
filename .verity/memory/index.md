@@ -4,7 +4,7 @@
 
 > If you are an AI coding agent reading this via CLAUDE.md: scan the catalog below for any node whose title, kind, or file scope is relevant to the task the user just asked you to do. Open the matching files via the Read tool before writing code. Most projects accumulate dozens to hundreds of nodes — do not read them all; pick the few that fit the current change.
 
-## decisions/ (12)
+## decisions/ (16)
 
 - [[n015-model-session-lifecycle-as-its-own-campaign-stream]] — **Model session lifecycle as its own campaign stream event variant**
   *decision* · 84%
@@ -30,6 +30,14 @@
   *decision* · 84% · scope: `.github/workflows/*.yml`
 - [[n026-use-relative-links-for-spec-references]] — **Use relative links for spec references**
   *decision* · 82% · scope: `docs/**/*.md`
+- [[n027-keep-repo-workflows-thin-and-centralize-shared-ci]] — **Keep repo workflows thin and centralize shared CI logic in cicd-tooling**
+  *decision* · 82% · scope: `.github/workflows/*.yml`
+- [[n028-use-paragraph-text-not-label-for-non-input-chapter]] — **Use paragraph text, not <label>, for non-input chapter headings**
+  *decision* · 91%
+- [[n029-open-the-chapters-accordion-before-asserting-chapt]] — **Open the chapters accordion before asserting chapter-empty states**
+  *decision* · 84%
+- [[n030-clear-invalid-currentchapterid-before-persisting-c]] — **Clear invalid currentChapterId before persisting campaign edits**
+  *decision* · 90%
 
 ## domain/ (4)
 
