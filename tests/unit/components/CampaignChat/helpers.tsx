@@ -1,7 +1,7 @@
 import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CampaignChat } from '@/lib/components/CampaignChat'
-import type { CampaignStreamEvent } from '@/lib/types'
+import type { CampaignStreamEvent, CampaignMessage, MessageVisibility } from '@/lib/types'
 
 export const CAMPAIGN_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
 
@@ -16,44 +16,33 @@ export const sharedTestState: {
 const originalFetch = global.fetch
 
 export function setupFetchMock(overrides?: Record<string, unknown>) {
+  type Handler = (options?: RequestInit) => unknown
+  const routes: Array<[string, Handler]> = [
+    ['/attachments', () => overrides?.attachments ?? { attachmentId: 'att-test' }],
+    ['/members', () => overrides?.members ?? { members: [] }],
+    ['/messages', (options) =>
+      options?.method === 'POST'
+        ? (overrides?.sceneMessage ?? {
+            id: 'scene-1',
+            kind: 'scene',
+            text: '',
+            attachmentId: 'att-test',
+            visibility: { scope: 'group' },
+            campaignId: CAMPAIGN_ID,
+            senderId: 'user-1',
+            senderName: 'DM',
+            createdAt: new Date().toISOString(),
+          })
+        : (overrides?.messages ?? { messages: [] })
+    ],
+  ]
+
   const spy = jest.fn().mockImplementation((url: string, options?: RequestInit) => {
-    if (url.includes('/attachments')) {
-      return Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(overrides?.attachments ?? { attachmentId: 'att-test' }),
-      })
-    }
-    if (url.includes('/members')) {
-      return Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(overrides?.members ?? { members: [] }),
-      })
-    }
-    if (url.includes('/messages')) {
-      if (options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(
-            overrides?.sceneMessage ?? {
-              id: 'scene-1',
-              kind: 'scene',
-              text: '',
-              attachmentId: 'att-test',
-              visibility: { scope: 'group' },
-              campaignId: CAMPAIGN_ID,
-              senderId: 'user-1',
-              senderName: 'DM',
-              createdAt: new Date().toISOString(),
-            }
-          ),
-        })
-      }
-      return Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(overrides?.messages ?? { messages: [] }),
-      })
-    }
-    return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+    const entry = routes.find(([pattern]) => url.includes(pattern))
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(entry ? entry[1](options) : {}),
+    })
   })
   sharedTestState.fetchSpy = spy
   global.fetch = spy as unknown as typeof global.fetch
@@ -76,11 +65,10 @@ export function fireMsg(
     senderId: string
     senderName: string
     text: string
-    visibility: { scope: string; toUserId?: string }
-    createdAt: string
+    visibility: MessageVisibility
+    createdAt: Date
   }> = {}
 ) {
-  const visibility = overrides.visibility ?? { scope: 'group' }
   act(() => {
     sharedTestState.capturedOnEvent?.({
       type: 'message',
@@ -91,9 +79,9 @@ export function fireMsg(
         senderId: overrides.senderId ?? 'user-1',
         senderName: overrides.senderName ?? 'Alice',
         text: overrides.text ?? 'Hello',
-        visibility: visibility as any,
-        createdAt: overrides.createdAt ?? new Date().toISOString(),
-      } as any,
+        visibility: overrides.visibility ?? { scope: 'group' },
+        createdAt: overrides.createdAt ?? new Date(),
+      } as CampaignMessage,
     })
   })
 }

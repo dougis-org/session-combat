@@ -2,6 +2,7 @@ import { render, screen, act, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import { LocalStore } from '@/lib/offline/LocalStore'
+import type { CampaignMessage } from '@/lib/types'
 import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch } from './helpers'
 
 jest.mock('@/lib/offline/LocalStore', () => ({
@@ -129,10 +130,10 @@ describe('CampaignChat — scene', () => {
           senderName: 'DM',
           text: '',
           visibility: { scope: 'group' },
-          createdAt: new Date().toISOString(),
+          createdAt: new Date(),
           kind: 'scene',
           attachmentId: 'att-abc',
-        } as any,
+        } as CampaignMessage,
       })
     })
     await waitFor(() =>
@@ -167,9 +168,9 @@ describe('CampaignChat — scene', () => {
     const file = new File([new Uint8Array(1024)], 'test.jpg', { type: 'image/jpeg' })
     await user.upload(screen.getByLabelText('Scene image'), file)
 
-    // Submit — triggers upload + post → onSuccess (scope to SceneComposer container)
-    const fileInput = screen.getByLabelText('Scene image')
-    await user.click(within(fileInput.parentElement!).getByRole('button', { name: /send/i }))
+    // Submit — triggers upload + post → onSuccess
+    const composer = screen.getByTestId('scene-composer')
+    await user.click(within(composer).getByRole('button', { name: /send/i }))
 
     // Composer closes and Push Scene button returns
     await waitFor(() => expect(screen.queryByLabelText('Scene image')).not.toBeInTheDocument())
@@ -180,7 +181,11 @@ describe('CampaignChat — scene', () => {
 
     // Duplicate id ignored: SSE fires same message id — still only one SceneFeedItem
     act(() => {
-      sharedTestState.capturedOnEvent?.({ type: 'message', campaignId: CAMPAIGN_ID, data: sceneMsg as any })
+      sharedTestState.capturedOnEvent?.({
+        type: 'message',
+        campaignId: CAMPAIGN_ID,
+        data: { ...sceneMsg, createdAt: new Date(sceneMsg.createdAt), visibility: { scope: 'group' } } as CampaignMessage,
+      })
     })
     await waitFor(() => {
       expect(screen.queryAllByText('Scene').length).toBe(1)
