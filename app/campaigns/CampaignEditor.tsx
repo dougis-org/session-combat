@@ -11,7 +11,7 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
+  type DragEndEvent,
 } from '@dnd-kit/core';
 import {
   SortableContext,

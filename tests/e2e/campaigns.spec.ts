@@ -66,7 +66,6 @@ test.describe("Campaign Chapters Drag and Drop", () => {
     }
 
     // Assert chapter title inputs are in the new order: ["The Inn", "The Dungeon", "Arrival"]
-    await page.waitForTimeout(500);
     await expect(titleInputs.nth(0)).toHaveValue("The Inn");
     await expect(titleInputs.nth(1)).toHaveValue("The Dungeon");
     await expect(titleInputs.nth(2)).toHaveValue("Arrival");

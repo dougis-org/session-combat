@@ -277,7 +277,9 @@ describe('CampaignEditor', () => {
           currentChapterId: undefined,
         })
       );
-    });    it('handles drag end to reorder chapters', async () => {
+    });
+
+    it('handles drag end to reorder chapters', async () => {
       mockIsDragging = true;
       try {
         const onSave = jest.fn();
