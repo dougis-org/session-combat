@@ -1,7 +1,7 @@
 import { render, screen, act } from '@testing-library/react'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import { LocalStore } from '@/lib/offline/LocalStore'
-import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDock } from './helpers'
+import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDock, fireMsg } from './helpers'
 
 jest.mock('@/lib/offline/LocalStore', () => ({
   LocalStore: {
@@ -45,17 +45,7 @@ describe('CampaignChat — SSE stream', () => {
   // T2e-1: stream message event appends to feed
   it('stream message event adds message to feed when dock is open', async () => {
     await openDock()
-    act(() => {
-      sharedTestState.capturedOnEvent?.({
-        type: 'message',
-        campaignId: 'test-campaign',
-        data: {
-          id: 'msg-1', campaignId: 'test-campaign', senderId: 'user-1',
-          senderName: 'Alice', text: 'Hello world',
-          visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-        },
-      })
-    })
+    fireMsg({ id: 'msg-1', text: 'Hello world' })
     expect(screen.getByText('Hello world')).toBeInTheDocument()
     expect(screen.getByText('Alice')).toBeInTheDocument()
   })
@@ -63,8 +53,8 @@ describe('CampaignChat — SSE stream', () => {
   // T2e-2: duplicate stream event does not duplicate message
   it('duplicate stream event is ignored', async () => {
     await openDock()
-    act(() => { sharedTestState.capturedOnEvent?.({ type: 'message', campaignId: 'test-campaign', data: { id: 'msg-dup', campaignId: 'test-campaign', senderId: 'user-1', senderName: 'Bob', text: 'Duplicate', visibility: { scope: 'group' }, createdAt: new Date().toISOString() } }) })
-    act(() => { sharedTestState.capturedOnEvent?.({ type: 'message', campaignId: 'test-campaign', data: { id: 'msg-dup', campaignId: 'test-campaign', senderId: 'user-1', senderName: 'Bob', text: 'Duplicate', visibility: { scope: 'group' }, createdAt: new Date().toISOString() } }) })
+    fireMsg({ id: 'msg-dup', senderName: 'Bob', text: 'Duplicate' })
+    fireMsg({ id: 'msg-dup', senderName: 'Bob', text: 'Duplicate' })
     expect(screen.getAllByText('Duplicate')).toHaveLength(1)
   })
 
@@ -72,7 +62,7 @@ describe('CampaignChat — SSE stream', () => {
   it('heartbeat event does not affect message feed', async () => {
     await openDock()
     act(() => {
-      sharedTestState.capturedOnEvent?.({ type: 'heartbeat', campaignId: 'test-campaign', data: { ts: Date.now() } })
+      sharedTestState.capturedOnEvent?.({ type: 'heartbeat', campaignId: CAMPAIGN_ID, data: { ts: Date.now() } })
     })
     expect(screen.getByText('No messages yet.')).toBeInTheDocument()
   })
@@ -81,7 +71,7 @@ describe('CampaignChat — SSE stream', () => {
 
   // T11-1: session event calls onSessionChange with the new activeSessionId
   it('session stream event calls onSessionChange with activeSessionId', async () => {
-    setupFetchMock({ members: [] })
+    setupFetchMock()
     const onSessionChange = jest.fn()
     render(<CampaignChat campaignId={CAMPAIGN_ID} onSessionChange={onSessionChange} />)
     act(() => {
@@ -92,7 +82,7 @@ describe('CampaignChat — SSE stream', () => {
 
   // T11-2: session event with null calls onSessionChange with null
   it('session stream event calls onSessionChange with null on session end', async () => {
-    setupFetchMock({ members: [] })
+    setupFetchMock()
     const onSessionChange = jest.fn()
     render(<CampaignChat campaignId={CAMPAIGN_ID} onSessionChange={onSessionChange} />)
     act(() => {
@@ -103,7 +93,7 @@ describe('CampaignChat — SSE stream', () => {
 
   // T11-3: session event without onSessionChange prop does not throw
   it('session stream event with no onSessionChange prop does not throw', () => {
-    setupFetchMock({ members: [] })
+    setupFetchMock()
     render(<CampaignChat campaignId={CAMPAIGN_ID} />)
     expect(() => {
       act(() => {

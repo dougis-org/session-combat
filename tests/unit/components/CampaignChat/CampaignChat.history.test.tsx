@@ -60,7 +60,7 @@ describe('CampaignChat — history', () => {
   // T4d-3: hasMore = false when API returns no nextCursor
   it('hasMore is false when history response has no nextCursor', async () => {
     const messages = Array.from({ length: 5 }, (_, i) => ({
-      id: `msg-${i}`, campaignId: 'test-campaign', senderId: 'user-1',
+      id: `msg-${i}`, campaignId: CAMPAIGN_ID, senderId: 'user-1',
       senderName: 'Alice', text: `Message ${i}`,
       visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
     }))

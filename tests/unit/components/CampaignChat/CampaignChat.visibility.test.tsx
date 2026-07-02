@@ -1,7 +1,7 @@
 import { screen, act, waitFor } from '@testing-library/react'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import { LocalStore } from '@/lib/offline/LocalStore'
-import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDock } from './helpers'
+import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDock, withMembers, fireMsg } from './helpers'
 
 jest.mock('@/lib/offline/LocalStore', () => ({
   LocalStore: {
@@ -45,17 +45,7 @@ describe('CampaignChat — visibility rendering', () => {
   // T9d-1: group message renders no visibility marker
   it('group message renders without visibility marker', async () => {
     await openDock()
-    act(() => {
-      sharedTestState.capturedOnEvent?.({
-        type: 'message',
-        campaignId: 'test-campaign',
-        data: {
-          id: 'group-msg', campaignId: 'test-campaign', senderId: 'u1',
-          senderName: 'Alice', text: 'Group message',
-          visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-        },
-      })
-    })
+    fireMsg({ id: 'group-msg', senderId: 'u1', text: 'Group message', visibility: { scope: 'group' } })
     expect(screen.getByText('Group message')).toBeInTheDocument()
     expect(screen.queryByText('[DM]')).not.toBeInTheDocument()
   })
@@ -63,38 +53,16 @@ describe('CampaignChat — visibility rendering', () => {
   // T9d-2: dm-only message renders [DM]
   it('dm-only message renders [DM] marker', async () => {
     await openDock()
-    act(() => {
-      sharedTestState.capturedOnEvent?.({
-        type: 'message',
-        campaignId: 'test-campaign',
-        data: {
-          id: 'dm-msg', campaignId: 'test-campaign', senderId: 'u1',
-          senderName: 'Alice', text: 'DM message',
-          visibility: { scope: 'dm-only' }, createdAt: new Date().toISOString(),
-        },
-      })
-    })
+    fireMsg({ id: 'dm-msg', senderId: 'u1', text: 'DM message', visibility: { scope: 'dm-only' } })
     expect(screen.getByText('[DM]')).toBeInTheDocument()
   })
 
   // T9d-3: direct (whisper) message renders [→ @username]
   it('direct message renders whisper marker with recipient username', async () => {
-    setupFetchMock({
-      members: { members: [{ id: 'm1', userId: 'u2', username: 'bob', role: 'player', status: 'active' }] },
-    })
+    withMembers([{ id: 'm2', userId: 'u2', username: 'bob' }])
     await openDock()
     await waitFor(() => expect(sharedTestState.fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/members')))
-    act(() => {
-      sharedTestState.capturedOnEvent?.({
-        type: 'message',
-        campaignId: 'test-campaign',
-        data: {
-          id: 'whisper-msg', campaignId: 'test-campaign', senderId: 'u1',
-          senderName: 'Alice', text: 'Whisper message',
-          visibility: { scope: 'direct', toUserId: 'u2' }, createdAt: new Date().toISOString(),
-        },
-      })
-    })
+    fireMsg({ id: 'whisper-msg', senderId: 'u1', text: 'Whisper message', visibility: { scope: 'direct', toUserId: 'u2' } })
     await waitFor(() => expect(screen.getByText('[→ @bob]')).toBeInTheDocument())
   })
 

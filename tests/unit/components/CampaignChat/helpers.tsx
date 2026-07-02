@@ -84,10 +84,10 @@ export function fireMsg(
   act(() => {
     sharedTestState.capturedOnEvent?.({
       type: 'message',
-      campaignId: 'test-campaign',
+      campaignId: CAMPAIGN_ID,
       data: {
         id: overrides.id ?? 'msg-default',
-        campaignId: 'test-campaign',
+        campaignId: CAMPAIGN_ID,
         senderId: overrides.senderId ?? 'user-1',
         senderName: overrides.senderName ?? 'Alice',
         text: overrides.text ?? 'Hello',
@@ -99,13 +99,17 @@ export function fireMsg(
 }
 
 export function withMembers(
-  extra: Array<{ id: string; userId: string; username: string }> = []
+  extra: Array<{ id: string; userId: string; username: string; role?: string; status?: string }> = []
 ) {
   setupFetchMock({
     members: {
       members: [
         { id: 'm1', userId: 'u1', username: 'alice', role: 'player', status: 'active' },
-        ...extra,
+        ...extra.map(m => ({
+          role: 'player',
+          status: 'active',
+          ...m,
+        })),
       ],
     },
   })
