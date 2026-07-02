@@ -75,13 +75,13 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to `feat/chapter-drag-reorder` and push to remote
-- [ ] Open PR from `feat/chapter-drag-reorder` to `main`. PR body must include `Closes #462`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Wait 180 seconds for CI to start and agentic reviewers to post comments
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify user:
+- [x] Commit all changes to `feat/chapter-drag-reorder` and push to remote
+- [x] Open PR from `feat/chapter-drag-reorder` to `main`. PR body must include `Closes #462`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify user:
   1. **Build and tests** — run all steps in Remote push validation; fix failures, commit, push before anything else
-  2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address each unresolved thread, commit, run validation, push, wait 180s; continue until all threads resolved
+  2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads; address each unresolved thread, commit, run validation, push, wait 180s; continue until all threads resolved
   3. **CI check failures** — only after comments resolved, poll `gh pr checks <PR-URL>`; fix failures, commit, run validation, push, wait 180s; restart loop from step 1
 
 Ownership metadata:
@@ -98,19 +98,19 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Sync approved spec deltas into `openspec/specs/`:
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Sync approved spec deltas into `openspec/specs/`:
   - Copy `openspec/changes/chapter-drag-reorder/specs/drag-handle/spec.md` → `openspec/specs/drag-handle/spec.md`
   - Copy `openspec/changes/chapter-drag-reorder/specs/drag-reorder/spec.md` → `openspec/specs/drag-reorder/spec.md`
   - Copy `openspec/changes/chapter-drag-reorder/specs/keyboard-a11y/spec.md` → `openspec/specs/keyboard-a11y/spec.md`
   - Copy `openspec/changes/chapter-drag-reorder/specs/save-persistence/spec.md` → `openspec/specs/save-persistence/spec.md`
-  - Update relative links in each copied spec: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-chapter-drag-reorder/design.md` and `../../tasks.md` with `../../changes/archive/YYYY-MM-DD-chapter-drag-reorder/tasks.md`
-- [ ] Archive the change: move `openspec/changes/chapter-drag-reorder/` to `openspec/changes/archive/YYYY-MM-DD-chapter-drag-reorder/` — stage both the copy and deletion in a **single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-chapter-drag-reorder/` exists and `openspec/changes/chapter-drag-reorder/` is gone
-- [ ] **Create a doc branch**: `git checkout -b doc/archive-YYYY-MM-DD-chapter-drag-reorder` then `git push -u origin doc/archive-YYYY-MM-DD-chapter-drag-reorder`
-- [ ] Open PR from `doc/archive-YYYY-MM-DD-chapter-drag-reorder` to `main` with title `docs: archive chapter-drag-reorder (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Monitor doc PR until merged; address any comments or CI failures by pushing to the same doc branch
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feat/chapter-drag-reorder doc/archive-YYYY-MM-DD-chapter-drag-reorder`
+  - Update relative links in each copied spec: replace `../../design.md` with `../../changes/archive/2026-07-01-chapter-drag-reorder/design.md` and `../../tasks.md` with `../../changes/archive/2026-07-01-chapter-drag-reorder/tasks.md`
+- [x] Archive the change: move `openspec/changes/chapter-drag-reorder/` to `openspec/changes/archive/2026-07-01-chapter-drag-reorder/` — stage both the copy and deletion in a **single commit**
+- [x] Confirm `openspec/changes/archive/2026-07-01-chapter-drag-reorder/` exists and `openspec/changes/chapter-drag-reorder/` is gone
+- [x] **Create a doc branch**: `git checkout -b doc/archive-2026-07-01-chapter-drag-reorder` then `git push -u origin doc/archive-2026-07-01-chapter-drag-reorder`
+- [x] Open PR from `doc/archive-2026-07-01-chapter-drag-reorder` to `main` with title `docs: archive chapter-drag-reorder (2026-07-01)`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Monitor doc PR until merged; address any comments or CI failures by pushing to the same doc branch
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/chapter-drag-reorder doc/archive-2026-07-01-chapter-drag-reorder`
