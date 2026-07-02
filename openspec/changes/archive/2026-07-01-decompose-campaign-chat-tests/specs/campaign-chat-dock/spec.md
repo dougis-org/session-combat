@@ -8,7 +8,7 @@ The unit tests verifying the `CampaignChat` dock shell behavior (drawer visibili
 
 - **Given** the `CampaignChat.test.tsx` file is decomposed
 - **When** `npm run test:unit` is executed
-- **Then** all 13 dock shell tests in [`tests/unit/components/CampaignChat/CampaignChat.drawer.test.tsx`](../../../../tests/unit/components/CampaignChat/CampaignChat.drawer.test.tsx) pass without modification to their original assertions.
+- **Then** all 13 dock shell tests in [`tests/unit/components/CampaignChat/CampaignChat.drawer.test.tsx`](../../../../../../tests/unit/components/CampaignChat/CampaignChat.drawer.test.tsx) pass without modification to their original assertions.
 
 ## Traceability
 
