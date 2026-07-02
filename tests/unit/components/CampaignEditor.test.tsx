@@ -160,6 +160,24 @@ describe('CampaignEditor', () => {
       expect(screen.getByDisplayValue('The Dungeon')).toBeInTheDocument();
     });
 
+    it('renders drag handles and does not render move up/down buttons', async () => {
+      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_TRIO } });
+      await openChapters(user);
+
+      // Verify drag handles are present
+      expect(screen.getByTestId('drag-handle-0')).toBeInTheDocument();
+      expect(screen.getByTestId('drag-handle-1')).toBeInTheDocument();
+      expect(screen.getByTestId('drag-handle-2')).toBeInTheDocument();
+
+      // Verify move buttons are absent
+      expect(screen.queryByTestId('move-up-0')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('move-up-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('move-up-2')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('move-down-0')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('move-down-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('move-down-2')).not.toBeInTheDocument();
+    });
+
     it('save with no chapters calls onSave with chapters: []', async () => {
       const onSave = jest.fn();
       const { user } = renderEditor({ onSave });
@@ -224,37 +242,7 @@ describe('CampaignEditor', () => {
       );
     });
 
-    it('reorders chapters with move buttons and updates order index', async () => {
-      const onSave = jest.fn();
-      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_TRIO }, onSave });
 
-      await openChapters(user);
-
-      await user.click(screen.getByTestId('move-up-1'));
-
-      let inputs = screen.getAllByTestId('chapter-title-input');
-      expect(inputs[0]).toHaveValue('The Inn');
-      expect(inputs[1]).toHaveValue('Arrival');
-      expect(inputs[2]).toHaveValue('The Dungeon');
-
-      await user.click(screen.getByTestId('move-down-0'));
-
-      inputs = screen.getAllByTestId('chapter-title-input');
-      expect(inputs[0]).toHaveValue('Arrival');
-      expect(inputs[1]).toHaveValue('The Inn');
-      expect(inputs[2]).toHaveValue('The Dungeon');
-
-      await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
-      expect(onSave).toHaveBeenCalledWith(
-        expect.objectContaining({
-          chapters: [
-            { id: 'ch-1', title: 'Arrival', order: 0 },
-            { id: 'ch-2', title: 'The Inn', order: 1 },
-            { id: 'ch-3', title: 'The Dungeon', order: 2 },
-          ],
-        })
-      );
-    });
 
     it('updates chapter title correctly when typing in the input field', async () => {
       const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: [{ id: 'ch-1', title: 'Arrival', order: 0 }] } });
