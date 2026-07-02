@@ -42,7 +42,7 @@ The system SHALL reorder chapters when a user drag-and-drops a chapter row's han
 
 ## Traceability
 
-- Proposal element "Drag handle reorders chapters" -> Requirements: ADDED Mouse/pointer drag, ADDED Touch drag
+- Proposal element "Drag handle reorders chapters" -> Requirements: ADDED Mouse/pointer drag reorders chapters, ADDED Touch drag reorders chapters (tablet)
 - Design decision 1 (@dnd-kit) -> Requirements: both drag requirements
 - Design decision 2 (PointerSensor + TouchSensor) -> Requirements: both drag requirements
 - Design decision 4 (arrayMove + renormalization) -> Requirements: both drag requirements

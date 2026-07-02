@@ -26,8 +26,8 @@ Reason for removal: Replaced by drag handle. The ▲ (move up) and ▼ (move dow
 
 ## Traceability
 
-- Proposal element "Replace ▲/▼ with drag handle" -> Requirement: ADDED Drag handle
-- Design decision 3 (inline SortableChapterRow) -> Requirement: ADDED Drag handle
+- Proposal element "Replace ▲/▼ with drag handle" -> Requirement: ADDED Drag handle on each chapter row
+- Design decision 3 (inline SortableChapterRow) -> Requirement: ADDED Drag handle on each chapter row
 - Requirement -> Task: "Add drag handle and remove ▲/▼ buttons from CampaignEditor"
 
 ## Non-Functional Acceptance Criteria

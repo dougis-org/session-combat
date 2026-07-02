@@ -32,8 +32,8 @@ Reason for removal: The KeyboardSensor on the drag handle replaces the previous 
 
 ## Traceability
 
-- Proposal element "Keyboard accessibility" -> Requirement: ADDED Keyboard sorting
-- Design decision 2 (KeyboardSensor + sortableKeyboardCoordinates) -> Requirement: ADDED Keyboard sorting
+- Proposal element "Keyboard accessibility" -> Requirement: ADDED Keyboard sorting via drag handle
+- Design decision 2 (KeyboardSensor + sortableKeyboardCoordinates) -> Requirement: ADDED Keyboard sorting via drag handle
 - Requirement -> Task: "Register KeyboardSensor in DndContext"
 
 ## Non-Functional Acceptance Criteria

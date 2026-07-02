@@ -26,8 +26,8 @@ The system SHALL save chapters in the order produced by drag-and-drop reordering
 
 ## Traceability
 
-- Proposal element "Saving persists new order" -> Requirement: MODIFIED Chapter order persists
-- Design decision 4 (arrayMove + renormalization) -> Requirement: MODIFIED Chapter order persists
+- Proposal element "Saving persists new order" -> Requirement: MODIFIED Chapter order persists after save
+- Design decision 4 (arrayMove + renormalization) -> Requirement: MODIFIED Chapter order persists after save
 - Requirement -> Task: "Add Playwright E2E test for drag-reorder save persistence"
 
 ## Non-Functional Acceptance Criteria
