@@ -81,7 +81,7 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 - [x] Wait 180 seconds for CI to start and agentic reviewers to post comments
 - [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify user:
   1. **Build and tests** — run all steps in Remote push validation; fix failures, commit, push before anything else
-  2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads; address each unresolved thread, commit, run validation, push, wait 180s; continue until all threads resolved
+  2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address each unresolved thread, commit, run validation, push, wait 180s; continue until all threads resolved
   3. **CI check failures** — only after comments resolved, poll `gh pr checks <PR-URL>`; fix failures, commit, run validation, push, wait 180s; restart loop from step 1
 
 Ownership metadata:
