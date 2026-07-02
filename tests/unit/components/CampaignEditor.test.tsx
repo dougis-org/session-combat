@@ -4,6 +4,43 @@ import userEvent, { UserEvent } from '@testing-library/user-event';
 import { CampaignEditor } from '@/app/campaigns/CampaignEditor';
 import type { Campaign } from '@/lib/types';
 
+let mockIsDragging = false;
+
+jest.mock('@dnd-kit/core', () => {
+  const original = jest.requireActual('@dnd-kit/core');
+  return {
+    ...original,
+    DndContext: ({ children, onDragEnd }: any) => (
+      <div
+        data-testid="mock-dnd-context"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onDragEnd?.({ active: { id: 'ch-1' }, over: { id: 'ch-3' } });
+          }
+        }}
+      >
+        {children}
+      </div>
+    ),
+  };
+});
+
+jest.mock('@dnd-kit/sortable', () => {
+  const original = jest.requireActual('@dnd-kit/sortable');
+  return {
+    ...original,
+    SortableContext: ({ children }: any) => <>{children}</>,
+    useSortable: ({ id }: any) => ({
+      attributes: {},
+      listeners: {},
+      setNodeRef: () => {},
+      transform: null,
+      transition: null,
+      isDragging: mockIsDragging && id === 'ch-1',
+    }),
+  };
+});
+
 const BASE_CAMPAIGN: Campaign = {
   id: 'camp-1',
   userId: 'user-1',
@@ -160,6 +197,24 @@ describe('CampaignEditor', () => {
       expect(screen.getByDisplayValue('The Dungeon')).toBeInTheDocument();
     });
 
+    it('renders drag handles and does not render move up/down buttons', async () => {
+      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_TRIO } });
+      await openChapters(user);
+
+      // Verify drag handles are present
+      expect(screen.getByTestId('drag-handle-0')).toBeInTheDocument();
+      expect(screen.getByTestId('drag-handle-1')).toBeInTheDocument();
+      expect(screen.getByTestId('drag-handle-2')).toBeInTheDocument();
+
+      // Verify move buttons are absent
+      expect(screen.queryByTestId('move-up-0')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('move-up-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('move-up-2')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('move-down-0')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('move-down-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('move-down-2')).not.toBeInTheDocument();
+    });
+
     it('save with no chapters calls onSave with chapters: []', async () => {
       const onSave = jest.fn();
       const { user } = renderEditor({ onSave });
@@ -224,36 +279,32 @@ describe('CampaignEditor', () => {
       );
     });
 
-    it('reorders chapters with move buttons and updates order index', async () => {
-      const onSave = jest.fn();
-      const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_TRIO }, onSave });
+    it('handles drag end to reorder chapters', async () => {
+      mockIsDragging = true;
+      try {
+        const onSave = jest.fn();
+        const { user } = renderEditor({ campaign: { ...BASE_CAMPAIGN, chapters: CHAPTER_TRIO }, onSave });
+        await openChapters(user);
 
-      await openChapters(user);
+        // Trigger the mock DndContext's onClick which calls onDragEnd
+        await user.click(screen.getByTestId('mock-dnd-context'));
 
-      await user.click(screen.getByTestId('move-up-1'));
-
-      let inputs = screen.getAllByTestId('chapter-title-input');
-      expect(inputs[0]).toHaveValue('The Inn');
-      expect(inputs[1]).toHaveValue('Arrival');
-      expect(inputs[2]).toHaveValue('The Dungeon');
-
-      await user.click(screen.getByTestId('move-down-0'));
-
-      inputs = screen.getAllByTestId('chapter-title-input');
-      expect(inputs[0]).toHaveValue('Arrival');
-      expect(inputs[1]).toHaveValue('The Inn');
-      expect(inputs[2]).toHaveValue('The Dungeon');
-
-      await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
-      expect(onSave).toHaveBeenCalledWith(
-        expect.objectContaining({
-          chapters: [
-            { id: 'ch-1', title: 'Arrival', order: 0 },
-            { id: 'ch-2', title: 'The Inn', order: 1 },
-            { id: 'ch-3', title: 'The Dungeon', order: 2 },
-          ],
-        })
-      );
+        // Save to verify order is updated: 'ch-1' (Arrival) is moved after 'ch-3' (The Dungeon)
+        // Original order: 'ch-1' (0), 'ch-2' (1), 'ch-3' (2)
+        // After moving 'ch-1' over 'ch-3': 'ch-2' (0), 'ch-3' (1), 'ch-1' (2)
+        await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
+        expect(onSave).toHaveBeenCalledWith(
+          expect.objectContaining({
+            chapters: [
+              { id: 'ch-2', title: 'The Inn', order: 0 },
+              { id: 'ch-3', title: 'The Dungeon', order: 1 },
+              { id: 'ch-1', title: 'Arrival', order: 2 },
+            ],
+          })
+        );
+      } finally {
+        mockIsDragging = false;
+      }
     });
 
     it('updates chapter title correctly when typing in the input field', async () => {
