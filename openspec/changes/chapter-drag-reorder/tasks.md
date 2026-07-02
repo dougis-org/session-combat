@@ -53,7 +53,7 @@ Create `tests/e2e/campaigns.spec.ts` covering:
 
 ## Validation
 
-- [x] `npm test` — all unit tests pass
+- [x] `npm run test:unit` — all unit tests pass
 - [x] `npx playwright test` — all E2E tests pass (including new campaigns.spec.ts)
 - [x] `npm run build` — build succeeds with no type errors
 - [x] `npm run lint` (if configured) — no lint errors
@@ -65,7 +65,7 @@ Create `tests/e2e/campaigns.spec.ts` covering:
 
 **Full path** (non-.md files changed):
 
-- **Unit tests** — `npm test` — all tests must pass
+- **Unit tests** — `npm run test:unit` — all tests must pass
 - **Integration tests** — `npm run test:integration` — all tests must pass
 - **E2E tests** — `npx playwright test` — all tests must pass
 - **Build** — `npm run build` — must succeed with no errors

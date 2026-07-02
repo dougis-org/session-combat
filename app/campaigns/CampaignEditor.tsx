@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { TextInputField, EditorShell } from '@/lib/components/ui';
-import { Campaign } from '@/lib/types';
+import type { Campaign } from '@/lib/types';
 import {
   DndContext,
   closestCenter,
@@ -54,7 +54,7 @@ function SortableChapterRow({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition: isDragging ? undefined : transition,
+    transition: isDragging ? 'none' : transition,
   };
 
   return (
@@ -62,7 +62,7 @@ function SortableChapterRow({
       ref={setNodeRef}
       style={style}
       className={`flex items-center gap-2 bg-gray-800/30 p-2 rounded-lg border border-gray-700/30 hover:border-gray-700/50 transition-all duration-200 ${
-        isDragging ? 'opacity-50 shadow-lg border-blue-500/50 bg-gray-800/60 z-50' : ''
+        isDragging ? 'relative opacity-50 shadow-lg border-blue-500/50 bg-gray-800/60 z-50' : ''
       }`}
     >
       <span
@@ -199,6 +199,9 @@ export function CampaignEditor({
       setChapters((prev) => {
         const oldIndex = prev.findIndex((ch) => ch.id === active.id);
         const newIndex = prev.findIndex((ch) => ch.id === over.id);
+        if (oldIndex === -1 || newIndex === -1) {
+          return prev;
+        }
         const reordered = arrayMove(prev, oldIndex, newIndex);
         return reordered.map((ch, i) => ({ ...ch, order: i }));
       });
