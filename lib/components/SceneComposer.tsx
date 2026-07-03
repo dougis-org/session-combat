@@ -126,7 +126,7 @@ export function SceneComposer({ campaignId, onSuccess, onCancel }: SceneComposer
   }
 
   return (
-    <div className="border border-gray-600 bg-gray-800/80 rounded p-3 flex flex-col gap-2 flex-shrink-0">
+    <div data-testid="scene-composer" className="border border-gray-600 bg-gray-800/80 rounded p-3 flex flex-col gap-2 flex-shrink-0">
       <span className="text-xs font-semibold text-yellow-400 uppercase tracking-wide">Scene</span>
       <input
         ref={fileInputRef}
