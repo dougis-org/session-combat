@@ -78,7 +78,7 @@ test.describe("Monster import — partial success (207)", () => {
     await page.locator('input[type="file"]').setInputFiles(FIXTURE_PATH);
     await page.click('button[type="submit"]');
 
-    await expect(page.getByRole("alert")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId("import-error")).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/successfully imported 1 of 2/i)).toBeVisible();
   });
 
@@ -126,7 +126,7 @@ test.describe("Monster import — invalid JSON rejection", () => {
     });
     await page.click('button[type="submit"]');
 
-    await expect(page.getByRole("alert")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId("import-error")).toBeVisible({ timeout: 10000 });
   });
 
   test("stays on import page when invalid JSON is submitted", async ({
@@ -157,7 +157,7 @@ test.describe("Monster import — no file selected", () => {
     await page.goto("/monsters/import");
     await page.click('button[type="submit"]');
 
-    await expect(page.getByRole("alert")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId("import-error")).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/please select a file/i)).toBeVisible();
   });
 
@@ -196,7 +196,7 @@ test.describe("Monster import — file size rejection", () => {
     });
     await page.click('button[type="submit"]');
 
-    await expect(page.getByRole("alert")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId("import-error")).toBeVisible({ timeout: 10000 });
     expect(uploadRequested).toBe(false);
   });
 
