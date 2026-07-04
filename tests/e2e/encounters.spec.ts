@@ -65,7 +65,7 @@ test.describe("Encounter creation — with imported monster", () => {
     const uploadRes = await page.request.post("/api/monsters/upload", {
       data: { monsters: [IMPORTED_MONSTER] },
     });
-    expect(uploadRes.ok()).toBeTruthy();
+    await expect(uploadRes).toBeOK();
 
     await page.goto("/encounters");
     await page.getByRole("button", { name: "Add New Encounter" }).click();

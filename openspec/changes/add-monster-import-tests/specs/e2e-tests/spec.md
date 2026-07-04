@@ -18,10 +18,10 @@ The system SHALL verify the monster import functionality through automated Playw
 - **When** the user uploads a malformed or invalid JSON file
 - **Then** the UI displays an appropriate error message and prevents the import
 
-#### Scenario: 100MB File Size Rejection
+#### Scenario: 5MB File Size Rejection
 
 - **Given** the user is on the monster import page
-- **When** the user attempts to upload a file whose simulated size exceeds 100MB
+- **When** the user attempts to upload a file whose simulated size exceeds 5MB (the application's `MAX_FILE_SIZE` limit)
 - **Then** the UI immediately rejects the file and displays an error without attempting the upload
 
 ### Requirement: ADDED Encounter Creation Regression Tests
@@ -46,7 +46,7 @@ None.
 
 - Proposal element -> Requirement: Two new E2E test files -> ADDED Monster Import Regression Tests, ADDED Encounter Creation Regression Tests
 - Design decision -> Requirement: Decision 1 (Domain-driven split) -> Maps to both ADDED requirements
-- Design decision -> Requirement: Decision 2 (Mock file size) -> Maps to 100MB File Size Rejection scenario
+- Design decision -> Requirement: Decision 2 (Mock file size) -> Maps to 5MB File Size Rejection scenario
 - Requirement -> Task(s): To be defined in `tasks.md`
 
 ## Non-Functional Acceptance Criteria
@@ -58,8 +58,8 @@ None.
 #### Scenario: Test Execution Latency
 
 - **Given** the Playwright test runner executing the regression suite
-- **When** it encounters the 100MB file size limit test
-- **Then** it completes the test execution near-instantaneously by utilizing a mocked/sparse payload rather than generating a real 100MB file
+- **When** it encounters the 5MB file size limit test
+- **Then** it completes the test execution near-instantaneously by utilizing a dynamically-allocated sparse buffer rather than generating a real large file
 
 ### Requirement: Security
 

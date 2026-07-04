@@ -12,16 +12,16 @@
 ## Problem Space
 
 - Current behavior: No dedicated Playwright regression tests exist for the monster import and encounter domains.
-- Desired behavior: `monsters.spec.ts` and `encounters.spec.ts` thoroughly test valid/invalid imports, size limits (100MB), and encounter creation flows using existing helper actions.
-- Constraints: The max file upload size constraint to test against is 100MB.
+- Desired behavior: `monsters.spec.ts` and `encounters.spec.ts` thoroughly test valid/invalid imports, size limits (5MB), and encounter creation flows using existing helper actions.
+- Constraints: The max file upload size constraint to test against is 5MB (the application's `MAX_FILE_SIZE` limit in `MonsterImportContent`).
 - Assumptions: `importMonster()` and `createEncounter()` helpers in `actions.ts` are fully functional and ready to be used.
-- Edge cases considered: Uploading malformed JSON, uploading files exceeding the 100MB limit, missing required fields.
+- Edge cases considered: Uploading malformed JSON, uploading files exceeding the 5MB limit, missing required fields.
 
 ## Scope
 
 ### In Scope
 
-- Creating `tests/e2e/monsters.spec.ts` with at least 5 tests covering valid imports, invalid JSON, oversized files (>100MB mock), format validation, and persistence.
+- Creating `tests/e2e/monsters.spec.ts` with at least 5 tests covering valid imports, invalid JSON, oversized files (>5MB mock), format validation, and persistence.
 - Creating `tests/e2e/encounters.spec.ts` with at least 3 tests covering encounter creation with imported monsters, form field interactions, and persistence.
 - Creating `tests/e2e/fixtures/import-monster-variants.json` with necessary test data payloads.
 
@@ -38,7 +38,7 @@
 
 ## Risks
 
-- Risk: Properly simulating a >100MB file upload without slowing down the test runner or eating up memory.
+- Risk: Properly simulating a >5MB file upload without slowing down the test runner or eating up memory.
   - Impact: Slow or flaky test suite.
   - Mitigation: Mock the file upload input or generate a sparse payload representing an oversized file to trigger the UI rejection efficiently.
 

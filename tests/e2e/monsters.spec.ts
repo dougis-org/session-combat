@@ -25,7 +25,7 @@ test.describe("Monster import — valid JSON", () => {
 
     await importMonster(page, FIXTURE_PATH);
 
-    await expect(page).toHaveURL(/\/monsters/);
+    await expect(page).toHaveURL(/\/monsters$/);
   });
 
   test("imported monster appears in monster list", async ({

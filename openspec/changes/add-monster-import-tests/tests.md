@@ -23,7 +23,7 @@ For each task in `tasks.md`:
 - [x] Implement and pass valid JSON import test
 - [x] Write failing test shell for `tests/e2e/monsters.spec.ts` invalid JSON import
 - [x] Implement and pass invalid JSON import test
-- [x] Write failing test shell for `tests/e2e/monsters.spec.ts` 100MB file limit rejection
-- [x] Implement and pass 100MB file limit rejection test
+- [x] Write failing test shell for `tests/e2e/monsters.spec.ts` 5MB file limit rejection
+- [x] Implement and pass 5MB file limit rejection test
 - [x] Write failing test shell for `tests/e2e/encounters.spec.ts` create encounter with imported monster
 - [x] Implement and pass create encounter with imported monster test

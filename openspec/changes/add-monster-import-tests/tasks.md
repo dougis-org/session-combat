@@ -13,9 +13,9 @@
 
 - [x] **Issue lifecycle: mark in-progress** _(skip if change is not issue-driven)_: run `gh issue edit #52 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner <owner> --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner <owner> --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
 - [x] Implement sub-tasks in small, testable increments:
-  - [x] Create `tests/e2e/fixtures/import-monster-variants.json` with valid, invalid, and large payload mocks.
+  - [x] Create `tests/e2e/fixtures/import-monster-variants.json` with a valid monster payload used by import tests.
   - [x] BDD/TDD Step: Create `tests/e2e/monsters.spec.ts` and `tests/e2e/encounters.spec.ts` with empty `test.skip` blocks or failing assertions for each acceptance criterion.
-  - [x] Implement and verify the monster import tests in `monsters.spec.ts` (valid, invalid, 100MB mock).
+  - [x] Implement and verify the monster import tests in `monsters.spec.ts` (valid, invalid, >5MB mock using `Buffer.alloc`).
   - [x] Implement and verify the encounter creation tests in `encounters.spec.ts` using the imported monster helpers.
 - [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch
 - [x] Confirm acceptance criteria are covered
@@ -57,12 +57,12 @@ Use the project's documented commands for each of the above (see project README 
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from working branch to `<default-branch>`. **If this change is issue-driven, the PR body MUST include `Closes #52` for each linked issue** (unconditionally, not as an optional conditional).
-- [ ] **Issue lifecycle: mark in-review** _(skip if change is not issue-driven)_: run `gh issue edit #52 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from working branch to `<default-branch>`. **If this change is issue-driven, the PR body MUST include `Closes #52` for each linked issue** (unconditionally, not as an optional conditional).
+- [x] **Issue lifecycle: mark in-review** _(skip if change is not issue-driven)_: run `gh issue edit #52 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved

@@ -26,11 +26,11 @@
 - Rationale: Aligns with the project's existing test structure (e.g., `characters.spec.ts`, `parties.spec.ts`), improving maintainability and isolation.
 - Trade-offs: Slightly more boilerplate across two files instead of one.
 
-### Decision 2: Handling 100MB File Size Limit Test
+### Decision 2: Handling 5MB File Size Limit Test
 
-- Chosen: Mock the file upload event payload or generate a sparse payload dynamically in Playwright to simulate a >100MB file upload.
-- Alternatives considered: Committing a >100MB JSON fixture file to the repository.
-- Rationale: Checking in massive files to Git severely impacts clone times and repository size. Dynamic mocking tests the UI rejection logic safely.
+- Chosen: Generate a sparse payload dynamically in Playwright to simulate a >5MB file upload (the application's `MAX_FILE_SIZE = 5 * 1024 * 1024` limit in `MonsterImportContent`).
+- Alternatives considered: Committing a >5MB JSON fixture file to the repository.
+- Rationale: Checking in large files to Git impacts clone times and repository size. Dynamic buffer generation tests the UI rejection logic safely without file system artifacts.
 - Trade-offs: May not test backend upload limits if the UI handles the rejection entirely, but this is acceptable for UI-focused E2E tests.
 
 ## Proposal to Design Mapping
@@ -38,15 +38,15 @@
 - Proposal element: Two new E2E test files (`monsters.spec.ts`, `encounters.spec.ts`)
   - Design decision: Decision 1
   - Validation approach: Both test files pass successfully in the Playwright runner.
-- Proposal element: Testing oversized files (>100MB mock)
+- Proposal element: Testing oversized files (>5MB mock)
   - Design decision: Decision 2
-  - Validation approach: Test verifies the UI error state when a mocked 100MB+ file is attached.
+  - Validation approach: Test verifies the UI error state when a mocked >5MB file is attached.
 
 ## Functional Requirements Mapping
 
 - Requirement: Monster Import Flow (valid, invalid, format limits)
-  - Design element: `monsters.spec.ts` tests using parameterized fixtures.
-  - Acceptance criteria reference: Monster specifications (valid JSON, invalid JSON, 100MB limit, persistence).
+  - Design element: `monsters.spec.ts` tests using a shared fixture and inline payloads.
+  - Acceptance criteria reference: Monster specifications (valid JSON, invalid JSON, 5MB limit, persistence).
   - Testability notes: Verified by Playwright runner.
 
 - Requirement: Encounter Creation Flow (create with imports, persistence)
@@ -58,13 +58,13 @@
 
 - Requirement category: performance
   - Requirement: Ensure tests execute efficiently and do not bloat the repository.
-  - Design element: Decision 2 (Handling 100MB File Size Limit Test).
+  - Design element: Decision 2 (Handling 5MB File Size Limit Test).
   - Acceptance criteria reference: Tests pass without hanging.
   - Testability notes: Validate execution time locally and in CI.
 
 ## Risks / Trade-offs
 
-- Risk/trade-off: Mocking file size limits instead of actually uploading real 100MB files.
+- Risk/trade-off: Mocking file size limits instead of actually uploading real >5MB files.
   - Impact: Could potentially hide backend misconfiguration if backend is supposed to handle the limit rejection and UI fails to catch it.
   - Mitigation: Ensure UI logic is robust enough to catch it before submitting.
 
