@@ -184,8 +184,9 @@ test.describe("Monster import — file size rejection", () => {
     await page.goto("/monsters/import");
 
     let uploadRequested = false;
-    await page.route("**/api/monsters/upload", () => {
+    await page.route("**/api/monsters/upload", async (route) => {
       uploadRequested = true;
+      await route.abort();
     });
 
     await page.locator('input[type="file"]').setInputFiles({
