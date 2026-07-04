@@ -59,7 +59,7 @@ None.
 
 - **Given** the Playwright test runner executing the regression suite
 - **When** it encounters the 5MB file size limit test
-- **Then** it completes the test execution near-instantaneously by utilizing a dynamically-allocated sparse buffer rather than generating a real large file
+- **Then** it completes the test execution near-instantaneously by using an in-memory `Buffer.alloc` rather than committing or reading a large file from disk
 
 ### Requirement: Security
 
