@@ -126,7 +126,7 @@ function MonsterImportContent() {
         </div>
 
         {error && (
-          <div className="p-4 bg-red-900 border border-red-700 rounded text-red-200 mb-6">
+          <div role="alert" className="p-4 bg-red-900 border border-red-700 rounded text-red-200 mb-6">
             {error}
           </div>
         )}
