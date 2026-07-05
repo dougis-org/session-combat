@@ -1,0 +1,36 @@
+{
+  "monsters": [
+    {
+      "name": "Test Goblin",
+      "type": "humanoid",
+      "alignment": "neutral evil",
+      "size": "small",
+      "ac": 15,
+      "maxHp": 7,
+      "speed": "30 ft.",
+      "abilityScores": {
+        "strength": 8,
+        "dexterity": 14,
+        "constitution": 10,
+        "intelligence": 10,
+        "wisdom": 8,
+        "charisma": 8
+      },
+      "senses": {
+        "darkvision": "60 ft.",
+        "passivePerception": "9"
+      },
+      "languages": ["Common", "Goblin"],
+      "challengeRating": 0.25,
+      "experiencePoints": 50,
+      "traits": [],
+      "actions": [
+        {
+          "name": "Scimitar",
+          "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage.",
+          "attackBonus": 4
+        }
+      ]
+    }
+  ]
+}
