@@ -33,6 +33,10 @@ function MonsterImportContent() {
       setLoading(true);
       const text = await file.text();
       const data = JSON.parse(text);
+      if (!data || !Array.isArray(data.monsters)) {
+        setError('Invalid file format. The JSON must have a "monsters" array.');
+        return;
+      }
 
       const response = await fetch("/api/monsters/upload", {
         method: "POST",
@@ -99,7 +103,15 @@ function MonsterImportContent() {
         throw new Error(result.error || "Failed to sync monsters");
       }
 
-      const { monsters } = result;
+      const monsters = result?.monsters;
+      if (
+        !monsters ||
+        typeof monsters.inserted !== "number" ||
+        typeof monsters.skipped !== "number" ||
+        typeof monsters.errors !== "number"
+      ) {
+        throw new Error("Unexpected sync response");
+      }
       setSyncMessage(
         `Sync complete: ${monsters.inserted} inserted, ${monsters.skipped} skipped, ${monsters.errors} errors`
       );
