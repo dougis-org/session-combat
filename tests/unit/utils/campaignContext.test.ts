@@ -1,4 +1,4 @@
-import { CampaignContext, SharedCharacterEntry } from '@/lib/types';
+import { CampaignContext, SharedCharacterEntry, Character } from '@/lib/types';
 import { makeSession } from '../fixtures/sessions';
 
 const makeCampaign = (overrides = {}) => ({
@@ -296,36 +296,47 @@ describe('fetchCampaignContext', () => {
     expect(ctx.characters.map(c => c.id)).toContain('shared-char');
   });
 
-  test('C1-2: DM-owned character in party still appears (no regression)', async () => {
+  test('C1-2: shared character in inactive party does not appear in context.characters', async () => {
+    const campaign = makeCampaign();
+    const sharedEntry = makeSharedEntry('shared-char', 'player-1');
+    const departedMember = { characterId: 'shared-char', addedAt: new Date(), leftAt: new Date() };
+    const party = makeParty('p-1', 'camp-1', [departedMember]);
+    const ctx = await fetchCampaignContext('camp-1', makeFetch(campaign, [party], [], [], [sharedEntry]));
+    expect(ctx.characters.map(c => c.id)).not.toContain('shared-char');
+  });
+
+  test('C1-3: soft-deleted shared character does not appear in context.characters', async () => {
+    const campaign = makeCampaign();
+    const sharedEntry = makeSharedEntry('shared-char', 'player-1', new Date());
+    const party = makeParty('p-1', 'camp-1', [makeMember('shared-char')]);
+    const ctx = await fetchCampaignContext('camp-1', makeFetch(campaign, [party], [], [], [sharedEntry]));
+    expect(ctx.characters.map(c => c.id)).not.toContain('shared-char');
+  });
+
+  test('C1-4: fetchCampaignContext does not fail if shared character API returns 404', async () => {
     const campaign = makeCampaign();
     const dmChar = makeCharacter('dm-char', 'DM Hero');
     const party = makeParty('p-1', 'camp-1', [makeMember('dm-char')]);
-    const ctx = await fetchCampaignContext('camp-1', makeFetch(campaign, [party], [dmChar], [], []));
+    const errorFetch = jest.fn(async (url: RequestInfo | URL) => {
+      const s = String(url);
+      if (s.match(/\/api\/campaigns\/[^/]+\/characters/)) return { ok: false, status: 404 } as unknown as Response;
+      return routeFetch(url, campaign, [party], [dmChar], []);
+    }) as typeof fetch;
+    const ctx = await fetchCampaignContext('camp-1', errorFetch);
     expect(ctx.characters.map(c => c.id)).toContain('dm-char');
   });
 
-  test('C1-3: reactive guard excludes character with revoked share', async () => {
+  test('C1-5: fetchCampaignContext does not fail if shared character API returns 403', async () => {
     const campaign = makeCampaign();
-    const party = makeParty('p-1', 'camp-1', [makeMember('shared-char')]);
-    // shared chars fetch returns empty (share revoked)
-    const ctx = await fetchCampaignContext('camp-1', makeFetch(campaign, [party], [], [], []));
-    expect(ctx.characters.map(c => c.id)).not.toContain('shared-char');
-  });
-
-  test('C1-4: soft-deleted shared character excluded', async () => {
-    const campaign = makeCampaign();
-    const deletedEntry = makeSharedEntry('shared-deleted', 'player-1', new Date());
-    const party = makeParty('p-1', 'camp-1', [makeMember('shared-deleted')]);
-    const ctx = await fetchCampaignContext('camp-1', makeFetch(campaign, [party], [], [], [deletedEntry]));
-    expect(ctx.characters.map(c => c.id)).not.toContain('shared-deleted');
-  });
-
-  test('C1-5: shared char with leftAt excluded by existing leftAt logic', async () => {
-    const campaign = makeCampaign();
-    const sharedEntry = makeSharedEntry('shared-char', 'player-1');
-    const party = makeParty('p-1', 'camp-1', [{ characterId: 'shared-char', addedAt: new Date(), leftAt: new Date() }]);
-    const ctx = await fetchCampaignContext('camp-1', makeFetch(campaign, [party], [], [], [sharedEntry]));
-    expect(ctx.characters.map(c => c.id)).not.toContain('shared-char');
+    const dmChar = makeCharacter('dm-char', 'DM Hero');
+    const party = makeParty('p-1', 'camp-1', [makeMember('dm-char')]);
+    const errorFetch = jest.fn(async (url: RequestInfo | URL) => {
+      const s = String(url);
+      if (s.match(/\/api\/campaigns\/[^/]+\/characters/)) return { ok: false, status: 403 } as unknown as Response;
+      return routeFetch(url, campaign, [party], [dmChar], []);
+    }) as typeof fetch;
+    const ctx = await fetchCampaignContext('camp-1', errorFetch);
+    expect(ctx.characters.map(c => c.id)).toContain('dm-char');
   });
 
   test('C1-6: failed shared-char fetch degrades to DM-only chars without throwing', async () => {

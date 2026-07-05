@@ -33,7 +33,7 @@ describe("PUT /api/campaigns/[id]/members/[userId]/parties/[partyId]", () => {
     jest.clearAllMocks();
     mockedStorage.getMember.mockResolvedValue({ status: "active", role: "player" } as any);
     mockedStorage.loadPartiesByCampaign.mockResolvedValue([
-      { id: "party-1", members: [{ characterId: "char-1" }] }
+      { id: "party-1", userId: "user-1", members: [{ characterId: "char-1" }] }
     ] as any);
     mockedStorage.loadCharacters.mockResolvedValue([{ id: "char-2" }] as any);
     mockedStorage.saveParty.mockResolvedValue(undefined as any);
@@ -98,6 +98,12 @@ describe("PUT /api/campaigns/[id]/members/[userId]/parties/[partyId]", () => {
     PUT,
     () => makePutRequest({ characterIds: [] }),
     PARAMS,
-    () => mockedStorage.getMember.mockRejectedValue(new Error("DB error"))
+    () => {
+      // Mock getMember for authorization checks to pass
+      mockedStorage.getMember.mockResolvedValueOnce({ status: "active", role: "dm" } as any); // caller
+      mockedStorage.getMember.mockResolvedValueOnce({ status: "active", role: "player" } as any); // member
+      mockedStorage.saveParty.mockRejectedValueOnce(new Error("DB error"));
+    },
+    "returns 500 when saveParty throws"
   );
 });

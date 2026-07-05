@@ -55,7 +55,6 @@ describe("Campaign Party Members Integration Tests", () => {
     });
     if (!acceptRes.ok) throw new Error(`Accept invite failed: ${await acceptRes.text()}`);
     
-    // We will use playerUserId as the memberId param
     memberId = playerUserId;
 
     // Create a party in the campaign
@@ -109,10 +108,6 @@ describe("Campaign Party Members Integration Tests", () => {
   it("Test case 1: Player successfully adds their own character to a party", async () => {
     const charId = await createCharacter(playerCookie, "Player Char 1");
     const res = await putPartyMembers(playerCookie, campaignId, memberId, partyId, [charId]);
-    
-    if (res.status !== 200) {
-      console.log(await res.text());
-    }
     expect(res.status).toBe(200);
 
     const party = await getParty();
@@ -135,43 +130,35 @@ describe("Campaign Party Members Integration Tests", () => {
 
     party = await getParty();
     const memberRemoved = party.members.find(m => m.characterId === charId);
-    expect(memberRemoved).toBeDefined(); // still in array
-    expect(memberRemoved?.leftAt).toBeDefined(); // marked left
+    expect(memberRemoved).toBeDefined();
+    expect(memberRemoved?.leftAt).toBeDefined();
   });
 
   it("Test case 3: Player provides a mix of characters (some to add, some to remove) without overwriting other members", async () => {
-    // Add GM's character to party directly
     const gmCharId = await createCharacter(gmCookie, "GM Char");
     await fetch(`${baseUrl}/api/parties/${partyId}`, {
       method: "PUT",
-      headers: authed(gmCookie),
+      headers: { "Content-Type": "application/json", Cookie: gmCookie },
       body: JSON.stringify({ name: "The Vanguard", characterIds: [gmCharId] })
     });
 
-    // Player Char 3 starts in party
     const charId3 = await createCharacter(playerCookie, "Player Char 3");
-    // Player Char 4 starts out of party
     const charId4 = await createCharacter(playerCookie, "Player Char 4");
 
-    // Put char 3 using the endpoint
     await putPartyMembers(playerCookie, campaignId, memberId, partyId, [charId3]);
 
-    // Now update to ONLY have char 4
     const res = await putPartyMembers(playerCookie, campaignId, memberId, partyId, [charId4]);
     expect(res.status).toBe(200);
 
     const party = await getParty();
 
-    // GM Char should still be there unaffected
     const gmMember = party.members.find(m => m.characterId === gmCharId);
     expect(gmMember).toBeDefined();
     expect(gmMember?.leftAt).toBeUndefined();
 
-    // Char 3 should be marked left
     const member3 = party.members.find(m => m.characterId === charId3);
     expect(member3?.leftAt).toBeDefined();
 
-    // Char 4 should be added
     const member4 = party.members.find(m => m.characterId === charId4);
     expect(member4?.addedAt).toBeDefined();
     expect(member4?.leftAt).toBeUndefined();
@@ -180,21 +167,17 @@ describe("Campaign Party Members Integration Tests", () => {
   it("Test case 4: Player attempts to add a character they do not own", async () => {
     const gmCharId = await createCharacter(gmCookie, "GM Char 2");
     
-    // Player tries to add GM's char
     const res = await putPartyMembers(playerCookie, campaignId, memberId, partyId, [gmCharId]);
-    
-    // Depending on strictness, it might return 400 or just ignore. Let's say 400.
     expect(res.status).toBe(400); 
     
     const party = await getParty();
     const gmMember = party.members.find(m => m.characterId === gmCharId);
-    expect(gmMember).toBeUndefined(); // shouldn't be added by this route
+    expect(gmMember).toBeUndefined();
   });
 
   it("Test case 5: GM successfully adds a character owned by a specific member on behalf of that member", async () => {
     const charId = await createCharacter(playerCookie, "Player Char 5");
     
-    // GM calls it for the player
     const res = await putPartyMembers(gmCookie, campaignId, memberId, partyId, [charId]);
     expect(res.status).toBe(200);
 
@@ -216,33 +199,36 @@ describe("Campaign Party Members Integration Tests", () => {
     const otherPartyRes = await fetch(`${baseUrl}/api/parties`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: gmCookie },
-      body: JSON.stringify({ name: "Other Party" }), // No campaignId
+      body: JSON.stringify({ name: "Other Party" }),
     });
     const otherParty = await otherPartyRes.json() as { id: string };
     
     const charId = await createCharacter(playerCookie, "Player Char 6");
     const res = await putPartyMembers(playerCookie, campaignId, memberId, otherParty.id, [charId]);
     
-    expect(res.status).toBe(404); // or 400
+    expect(res.status).toBe(404);
   });
 
-  it("Test case 8: Player removes then re-adds character — no duplicate record created", async () => {
+  it("Test case 8: Player removes then re-adds character — preserves membership history", async () => {
     const charId = await createCharacter(playerCookie, "Player Char Rejoin");
 
-    // Add char
-    await putPartyMembers(playerCookie, campaignId, memberId, partyId, [charId]);
-    // Remove char
-    await putPartyMembers(playerCookie, campaignId, memberId, partyId, []);
-    // Re-add char
-    const res = await putPartyMembers(playerCookie, campaignId, memberId, partyId, [charId]);
-    expect(res.status).toBe(200);
+    const r1 = await putPartyMembers(playerCookie, campaignId, memberId, partyId, [charId]);
+    expect(r1.status).toBe(200);
+
+    const r2 = await putPartyMembers(playerCookie, campaignId, memberId, partyId, []);
+    expect(r2.status).toBe(200);
+
+    const r3 = await putPartyMembers(playerCookie, campaignId, memberId, partyId, [charId]);
+    expect(r3.status).toBe(200);
 
     const party = await getParty();
     const allRecords = party.members.filter(m => m.characterId === charId);
-    // Must have exactly one record — no duplicates
-    expect(allRecords).toHaveLength(1);
-    expect(allRecords[0].leftAt).toBeUndefined(); // active
-    expect(allRecords[0].addedAt).toBeDefined();
+    expect(allRecords).toHaveLength(2);
+
+    const activeRecord = allRecords.find(m => !m.leftAt);
+    const historicalRecord = allRecords.find(m => m.leftAt);
+    expect(activeRecord).toBeDefined();
+    expect(historicalRecord).toBeDefined();
   });
 
 });

@@ -359,6 +359,7 @@ describe("Campaign Members Integration Tests", () => {
       
       await storage.saveParty({
         id: "party-1",
+        userId: otherUserId,
         campaignId: testCampaignId,
         name: "Test Party",
         members: [],
