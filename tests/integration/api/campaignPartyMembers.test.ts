@@ -226,4 +226,23 @@ describe("Campaign Party Members Integration Tests", () => {
     expect(res.status).toBe(404); // or 400
   });
 
+  it("Test case 8: Player removes then re-adds character — no duplicate record created", async () => {
+    const charId = await createCharacter(playerCookie, "Player Char Rejoin");
+
+    // Add char
+    await putPartyMembers(playerCookie, campaignId, memberId, partyId, [charId]);
+    // Remove char
+    await putPartyMembers(playerCookie, campaignId, memberId, partyId, []);
+    // Re-add char
+    const res = await putPartyMembers(playerCookie, campaignId, memberId, partyId, [charId]);
+    expect(res.status).toBe(200);
+
+    const party = await getParty();
+    const allRecords = party.members.filter(m => m.characterId === charId);
+    // Must have exactly one record — no duplicates
+    expect(allRecords).toHaveLength(1);
+    expect(allRecords[0].leftAt).toBeUndefined(); // active
+    expect(allRecords[0].addedAt).toBeDefined();
+  });
+
 });

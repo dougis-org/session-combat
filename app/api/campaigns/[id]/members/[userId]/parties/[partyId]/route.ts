@@ -16,20 +16,15 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
 
     if (auth.userId !== memberId) {
       const caller = await storage.getMember(campaignId, auth.userId);
-      if (!caller || caller.role !== 'dm') {
+      if (!caller || caller.role !== 'dm' || caller.status !== 'active') {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
       }
     }
+    // When caller is the member themselves, their active status is validated below via the 'member' fetch
 
     const member = await storage.getMember(campaignId, memberId);
-    if (!member || (member.status !== 'active' && member.status !== 'invited')) {
-      // Actually member.status can be 'active'.
-      // If GM adds a character to an invited member, that's fine.
+    if (!member || member.status !== 'active') {
       return NextResponse.json({ error: 'Member not found or not active' }, { status: 404 });
-    }
-    
-    if (auth.userId === memberId && member.status !== 'active') {
-       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const parties = await storage.loadPartiesByCampaign(campaignId);
@@ -51,13 +46,23 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
     }
 
     const now = new Date();
+    // Track which characters owned by this member have already been handled
+    // to avoid duplicates when a character rejoins (was previously leftAt).
+    const handledIds = new Set<string>();
     const updatedMembers: PartyMember[] = [];
 
     for (const m of existingParty.members) {
       if (memberCharacterIds.has(m.characterId)) {
-        if (!m.leftAt && !newIdSet.has(m.characterId)) {
+        handledIds.add(m.characterId);
+        if (newIdSet.has(m.characterId)) {
+          // rejoin: strip leftAt so the character becomes active again without creating a duplicate record
+          const { leftAt: _, ...rest } = m;
+          updatedMembers.push(rest.addedAt ? rest : { ...rest, addedAt: now });
+        } else if (!m.leftAt) {
+          // Character should be removed — mark leftAt
           updatedMembers.push({ ...m, leftAt: now });
         } else {
+          // Already marked as left — keep as-is
           updatedMembers.push(m);
         }
       } else {
@@ -65,12 +70,9 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
       }
     }
 
-    const existingActiveIds = new Set(
-      existingParty.members.filter(m => !m.leftAt).map(m => m.characterId)
-    );
-
+    // Add new characters not previously in the party at all
     for (const charId of newIdSet) {
-      if (!existingActiveIds.has(charId)) {
+      if (!handledIds.has(charId)) {
         updatedMembers.push({ characterId: charId, addedAt: now });
       }
     }
