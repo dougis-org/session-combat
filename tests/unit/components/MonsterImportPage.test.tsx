@@ -63,6 +63,68 @@ async function renderAndUpload(fileContent: unknown) {
 
 const VALID_BODY = { monsters: [{ name: "A", maxHp: 5 }, { maxHp: 10 }] };
 
+// ─── Client-side JSON schema validation ──────────────────────────────────────
+
+describe("MonsterImportPage — client-side JSON schema validation", () => {
+  it("shows error when uploaded JSON lacks a monsters array", async () => {
+    global.fetch = jest.fn() as typeof fetch;
+
+    await renderAndUpload({ notMonsters: [] });
+
+    expect(
+      await screen.findByText(/invalid file format/i)
+    ).toBeInTheDocument();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("shows error when uploaded JSON is a primitive (no monsters key)", async () => {
+    const user = userEvent.setup();
+    render(<MonsterImportPage />);
+    const file = new File([JSON.stringify(42)], "monsters.json", {
+      type: "application/json",
+    });
+    const input = screen.getByLabelText(/select json file/i);
+    await user.upload(input, file);
+    await user.click(screen.getByRole("button", { name: /^import monsters/i }));
+
+    expect(
+      await screen.findByText(/invalid file format/i)
+    ).toBeInTheDocument();
+  });
+});
+
+// ─── Sync response shape validation ──────────────────────────────────────────
+
+describe("MonsterImportPage — sync response validation", () => {
+  it("shows error when sync response lacks the monsters field", async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      jsonResponse({ unexpected: true }, 200)
+    ) as typeof fetch;
+
+    const user = userEvent.setup();
+    render(<MonsterImportPage />);
+    await user.click(screen.getByRole("button", { name: /sync from open5e/i }));
+
+    expect(
+      await screen.findByText(/unexpected sync response/i)
+    ).toBeInTheDocument();
+  });
+
+  it("shows sync success message when response is valid", async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      jsonResponse({ monsters: { inserted: 5, skipped: 2, errors: 0 } }, 200)
+    ) as typeof fetch;
+
+    const user = userEvent.setup();
+    render(<MonsterImportPage />);
+    await user.click(screen.getByRole("button", { name: /sync from open5e/i }));
+
+    expect(
+      await screen.findByText(/sync complete: 5 inserted, 2 skipped, 0 errors/i)
+    ).toBeInTheDocument();
+  });
+});
+
 // ─── 207 partial-success handler ─────────────────────────────────────────────
 
 describe("MonsterImportPage — 207 partial-success handler", () => {
