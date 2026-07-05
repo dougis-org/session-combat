@@ -1,11 +1,9 @@
 /**
  * @jest-environment node
  */
-import { NextResponse } from "next/server";
 import { PUT } from "@/app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route";
 import { storage } from "@/lib/storage";
 import {
-  MOCK_AUTH,
   makeRouteRequest,
   itReturns401WithParams,
   itReturns500WithParams,

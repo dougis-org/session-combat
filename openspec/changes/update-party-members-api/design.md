@@ -59,7 +59,7 @@
   - Testability notes: Test adding new ID, removing existing ID, and passing empty array.
 
 - Requirement: GM can manage any player's characters in the party.
-  - Design element: Auth check allows if `auth.userId === campaign.gmUserId`.
+  - Design element: Auth check allows if the caller's campaign membership has `role === 'dm'` and `status === 'active'`.
   - Acceptance criteria reference: Specs -> GM party management.
   - Testability notes: Test with GM's token using another member's ID.
 

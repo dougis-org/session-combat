@@ -8,7 +8,6 @@ describe("Campaign Party Members Integration Tests", () => {
   let gmCookie: string;
   let playerCookie: string;
   let outCookie: string;
-  let gmUserId: string;
   let playerUserId: string;
   let campaignId: string;
   let partyId: string;
@@ -20,7 +19,6 @@ describe("Campaign Party Members Integration Tests", () => {
 
     const gmAuth = await registerTestUser(baseUrl, "party-members-gm");
     gmCookie = gmAuth.cookie;
-    gmUserId = gmAuth.userId;
 
     const playerAuth = await registerTestUser(baseUrl, "party-members-player");
     playerCookie = playerAuth.cookie;

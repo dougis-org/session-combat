@@ -5,6 +5,59 @@ import { PartyMember } from '@/lib/types';
 
 type Params = { id: string; userId: string; partyId: string };
 
+async function isAuthorized(campaignId: string, callerId: string, memberId: string): Promise<boolean> {
+  if (callerId === memberId) return true;
+  const caller = await storage.getMember(campaignId, callerId);
+  return !!caller && caller.role === 'dm' && caller.status === 'active';
+}
+
+function resolveCharacterIds(characterIds: unknown[], memberCharacterIds: Set<string>): Set<string> | { error: string } {
+  const newIdSet = new Set<string>();
+  for (const charId of characterIds) {
+    if (typeof charId !== 'string') {
+      return { error: 'characterIds must contain only strings' };
+    }
+    if (!memberCharacterIds.has(charId)) {
+      return { error: 'Character not owned by member' };
+    }
+    newIdSet.add(charId);
+  }
+  return newIdSet;
+}
+
+// Preserves membership history: a character that previously left (has `leftAt`)
+// keeps that record, and rejoining creates a new active record with a fresh `addedAt`.
+function mergePartyMembers(
+  existingMembers: PartyMember[],
+  memberCharacterIds: Set<string>,
+  newIdSet: Set<string>,
+  now: Date
+): PartyMember[] {
+  const updatedMembers: PartyMember[] = [];
+  const activeMemberIds = new Set<string>();
+
+  for (const m of existingMembers) {
+    if (!memberCharacterIds.has(m.characterId) || m.leftAt) {
+      updatedMembers.push(m);
+      continue;
+    }
+    if (newIdSet.has(m.characterId)) {
+      updatedMembers.push(m);
+      activeMemberIds.add(m.characterId);
+    } else {
+      updatedMembers.push({ ...m, leftAt: now });
+    }
+  }
+
+  for (const charId of newIdSet) {
+    if (!activeMemberIds.has(charId)) {
+      updatedMembers.push({ characterId: charId, addedAt: now });
+    }
+  }
+
+  return updatedMembers;
+}
+
 export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaignId, userId: memberId, partyId }) => {
   let body: unknown;
   try {
@@ -19,11 +72,8 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
       return NextResponse.json({ error: 'characterIds must be an array' }, { status: 400 });
     }
 
-    if (auth.userId !== memberId) {
-      const caller = await storage.getMember(campaignId, auth.userId);
-      if (!caller || caller.role !== 'dm' || caller.status !== 'active') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-      }
+    if (!(await isAuthorized(campaignId, auth.userId, memberId))) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const member = await storage.getMember(campaignId, memberId);
@@ -40,48 +90,15 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
     const memberCharacters = await storage.loadCharacters(memberId);
     const memberCharacterIds = new Set(memberCharacters.map(c => c.id));
 
-    const newIdSet = new Set<string>();
-    for (const charId of characterIds) {
-      if (typeof charId !== 'string') {
-        return NextResponse.json({ error: 'characterIds must contain only strings' }, { status: 400 });
-      }
-      if (!memberCharacterIds.has(charId)) {
-        return NextResponse.json({ error: 'Character not owned by member' }, { status: 400 });
-      }
-      newIdSet.add(charId);
+    const newIdSet = resolveCharacterIds(characterIds, memberCharacterIds);
+    if (!(newIdSet instanceof Set)) {
+      return NextResponse.json({ error: newIdSet.error }, { status: 400 });
     }
 
     const now = new Date();
-    const updatedMembers: PartyMember[] = [];
-    const activeMemberIds = new Set<string>();
-
-    for (const m of existingParty.members) {
-      if (memberCharacterIds.has(m.characterId)) {
-        if (m.leftAt) {
-          updatedMembers.push(m);
-        } else {
-          if (newIdSet.has(m.characterId)) {
-            updatedMembers.push(m);
-            activeMemberIds.add(m.characterId);
-          } else {
-            updatedMembers.push({ ...m, leftAt: now });
-          }
-        }
-      } else {
-        updatedMembers.push(m);
-      }
-    }
-
-    for (const charId of newIdSet) {
-      if (!activeMemberIds.has(charId)) {
-        updatedMembers.push({ characterId: charId, addedAt: now });
-      }
-    }
-
-
     const updatedParty = {
       ...existingParty,
-      members: updatedMembers,
+      members: mergePartyMembers(existingParty.members, memberCharacterIds, newIdSet, now),
       updatedAt: now,
     };
 
