@@ -6,10 +6,15 @@ import { PartyMember } from '@/lib/types';
 type Params = { id: string; userId: string; partyId: string };
 
 export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaignId, userId: memberId, partyId }) => {
+  let body: unknown;
   try {
-    const body = await request.json();
-    const { characterIds } = body;
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+  const { characterIds } = body as Record<string, unknown>;
 
+  try {
     if (!Array.isArray(characterIds)) {
       return NextResponse.json({ error: 'characterIds must be an array' }, { status: 400 });
     }
@@ -38,7 +43,9 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
 
     const newIdSet = new Set<string>();
     for (const charId of characterIds) {
-      if (typeof charId !== 'string') continue;
+      if (typeof charId !== 'string') {
+        return NextResponse.json({ error: 'characterIds must contain only strings' }, { status: 400 });
+      }
       if (!memberCharacterIds.has(charId)) {
         return NextResponse.json({ error: 'Character not owned by member' }, { status: 400 });
       }
