@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { PartyMember } from '@/lib/types';
+import { validateStringArray } from '@/lib/validation/core';
 
 type Params = { id: string; userId: string; partyId: string };
 
@@ -11,12 +12,9 @@ async function isAuthorized(campaignId: string, callerId: string, memberId: stri
   return !!caller && caller.role === 'dm' && caller.status === 'active';
 }
 
-function resolveCharacterIds(characterIds: unknown[], memberCharacterIds: Set<string>): Set<string> | { error: string } {
+function resolveCharacterIds(characterIds: string[], memberCharacterIds: Set<string>): Set<string> | { error: string } {
   const newIdSet = new Set<string>();
   for (const charId of characterIds) {
-    if (typeof charId !== 'string') {
-      return { error: 'characterIds must contain only strings' };
-    }
     if (!memberCharacterIds.has(charId)) {
       return { error: 'Character not owned by member' };
     }
@@ -68,8 +66,12 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
   const { characterIds } = body as Record<string, unknown>;
 
   try {
-    if (!Array.isArray(characterIds)) {
+    if (characterIds === undefined || characterIds === null) {
       return NextResponse.json({ error: 'characterIds must be an array' }, { status: 400 });
+    }
+    const characterIdsResult = validateStringArray(characterIds, 'characterIds');
+    if (!characterIdsResult.valid) {
+      return NextResponse.json({ error: characterIdsResult.error.message }, { status: 400 });
     }
 
     if (!(await isAuthorized(campaignId, auth.userId, memberId))) {
@@ -90,7 +92,7 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
     const memberCharacters = await storage.loadCharacters(memberId);
     const memberCharacterIds = new Set(memberCharacters.map(c => c.id));
 
-    const newIdSet = resolveCharacterIds(characterIds, memberCharacterIds);
+    const newIdSet = resolveCharacterIds(characterIdsResult.value, memberCharacterIds);
     if (!(newIdSet instanceof Set)) {
       return NextResponse.json({ error: newIdSet.error }, { status: 400 });
     }

@@ -43,7 +43,7 @@ describe("PUT /api/campaigns/[id]/members/[userId]/parties/[partyId]", () => {
     const response = await PUT(makePutRequest({ characterIds: "not-an-array" }), { params: PARAMS });
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toBe("characterIds must be an array");
+    expect(body.error).toBe("characterIds must be an array of strings");
   });
 
   it("returns 403 if caller is not DM and not the member themselves", async () => {
