@@ -27,7 +27,7 @@
 ## Validation
 
 - [x] Run unit/integration tests
-- [ ] Run E2E tests (if applicable)
+- [x] Run E2E tests (if applicable)
 - [x] Run type checks
 - [x] Run build
 - [x] Run security/code quality checks required by project standards
