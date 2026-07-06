@@ -20,5 +20,5 @@
 
 ## Review and Merge
 
-- [ ] Address review feedback.
+- [x] Address review feedback.
 - [ ] Merge PR to the default branch.
