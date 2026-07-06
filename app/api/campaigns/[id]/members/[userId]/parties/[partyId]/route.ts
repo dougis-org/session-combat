@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { PartyMember } from '@/lib/types';
+import type { PartyMember } from '@/lib/types';
 import { validateStringArray } from '@/lib/validation/core';
 
 type Params = { id: string; userId: string; partyId: string };
@@ -66,9 +66,6 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
   const { characterIds } = body as Record<string, unknown>;
 
   try {
-    if (characterIds === undefined || characterIds === null) {
-      return NextResponse.json({ error: 'characterIds must be an array' }, { status: 400 });
-    }
     const characterIdsResult = validateStringArray(characterIds, 'characterIds');
     if (!characterIdsResult.valid) {
       return NextResponse.json({ error: characterIdsResult.error.message }, { status: 400 });

@@ -26,3 +26,4 @@ For each task in `tasks.md`:
 - [ ] Test case 5 for Task 2: GM successfully adds a character owned by a specific member on behalf of that member. (Verify the caller's active `role: 'dm'` membership is sufficient).
 - [ ] Test case 6 for Task 2: User who is not in the campaign attempts to call the endpoint. Verify 403 or 404 response.
 - [ ] Test case 7 for Task 2: Endpoint verifies that the party actually belongs to the specified campaign.
+- [ ] Test case 8 for Task 2: Character that previously left the party (has `leftAt`) rejoins. Verify the old record is preserved and a new active record with a fresh `addedAt` is created, rather than overwriting history.
