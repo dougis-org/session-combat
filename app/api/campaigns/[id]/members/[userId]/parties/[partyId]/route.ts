@@ -66,6 +66,9 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
   const { characterIds } = body as Record<string, unknown>;
 
   try {
+    if (characterIds === undefined) {
+      return NextResponse.json({ error: 'characterIds is required' }, { status: 400 });
+    }
     const characterIdsResult = validateStringArray(characterIds, 'characterIds');
     if (!characterIdsResult.valid) {
       return NextResponse.json({ error: characterIdsResult.error.message }, { status: 400 });
