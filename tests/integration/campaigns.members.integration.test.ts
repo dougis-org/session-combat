@@ -312,4 +312,92 @@ describe("Campaign Members Integration Tests", () => {
       expect(members[0].status).toBe("active");
     });
   });
+
+  describe("PUT /api/campaigns/[id]/members/[userId]/parties/[partyId]", () => {
+    let testCampaignId: string;
+    let otherUserId: string;
+
+    afterEach(async () => {
+      const db = await getDatabase();
+      await db.collection("campaigns").deleteMany({ id: testCampaignId });
+      await db.collection("campaignMembers").deleteMany({ campaignId: testCampaignId });
+      await db.collection("parties").deleteMany({ campaignId: testCampaignId });
+      await db.collection("characters").deleteMany({ userId: otherUserId });
+    });
+
+    beforeEach(async () => {
+      testCampaignId = "camp-party-" + Date.now();
+      otherUserId = "user-party-" + Date.now();
+      
+      const db = await getDatabase();
+      await db.collection("campaigns").insertOne({
+        id: testCampaignId,
+        name: "Test Campaign",
+        userId: apiUserId,
+        status: "active",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      await storage.addMember({
+        id: "mem-dm-" + Date.now(),
+        campaignId: testCampaignId,
+        userId: apiUserId,
+        role: "dm",
+        status: "active",
+        history: []
+      });
+
+      await storage.addMember({
+        id: "mem-player-" + Date.now(),
+        campaignId: testCampaignId,
+        userId: otherUserId,
+        role: "player",
+        status: "active",
+        history: []
+      });
+      
+      await storage.saveParty({
+        id: "party-1",
+        userId: otherUserId,
+        campaignId: testCampaignId,
+        name: "Test Party",
+        members: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      await storage.saveCharacter({
+        id: "char-1",
+        userId: otherUserId,
+        name: "Test Char",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        level: 1,
+        stats: { hp: 10, maxHp: 10, tempHp: 0, ac: 10, speed: 30, passivePerception: 10 },
+        isPublic: true
+      } as any);
+    });
+
+    test("returns 400 if characterIds is not an array", async () => {
+      const res = await fetch(`${baseUrl}/api/campaigns/${testCampaignId}/members/${otherUserId}/parties/party-1`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Cookie: authCookie },
+        body: JSON.stringify({ characterIds: "not-an-array" }),
+      });
+      expect(res.status).toBe(400);
+    });
+
+    test("updates party successfully for active member", async () => {
+      const res = await fetch(`${baseUrl}/api/campaigns/${testCampaignId}/members/${otherUserId}/parties/party-1`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Cookie: authCookie },
+        body: JSON.stringify({ characterIds: ["char-1"] }),
+      });
+      expect(res.status).toBe(200);
+      const data = await res.json() as any;
+      expect(data.members).toHaveLength(1);
+      expect(data.members[0].characterId).toBe("char-1");
+    });
+  });
 });

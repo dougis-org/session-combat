@@ -86,7 +86,7 @@ function setupFetch(member: CampaignMember | null, shares: CampaignCharacterShar
     }
     if (url === `/api/campaigns/${CAMPAIGN_ID}/characters`) return jsonResponse(shares);
     return jsonResponse({ error: 'Not found' }, 404);
-  });
+  }) as unknown as typeof global.fetch;
 }
 
 describe('SharedCharactersPanel', () => {
@@ -137,7 +137,7 @@ describe('SharedCharactersPanel', () => {
         return jsonResponse({ id: 'share-y', characterId: 'char-y' }, 201);
       }
       return jsonResponse({ error: 'Not found' }, 404);
-    });
+    }) as unknown as typeof global.fetch;
     global.fetch = mockFetch;
 
     render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} characters={[CHAR_X, CHAR_Y]} />);
@@ -147,7 +147,7 @@ describe('SharedCharactersPanel', () => {
     await user.click(screen.getByRole('checkbox', { name: /Legolas/i }));
 
     await waitFor(() => {
-      const postCall = mockFetch.mock.calls.find(
+      const postCall = (mockFetch as jest.Mock).mock.calls.find(
         ([url, opts]) =>
           url.toString() === `/api/campaigns/${CAMPAIGN_ID}/characters` &&
           opts?.method === 'POST'
@@ -164,10 +164,10 @@ describe('SharedCharactersPanel', () => {
       if (url === `/api/campaigns/${CAMPAIGN_ID}/members/me`) return jsonResponse(ACTIVE_PLAYER);
       if (url === `/api/campaigns/${CAMPAIGN_ID}/characters` && !options?.method) return jsonResponse([SHARE_X]);
       if (url === `/api/campaigns/${CAMPAIGN_ID}/characters/char-x` && options?.method === 'DELETE') {
-        return new FetchResponse(null, { status: 204 });
+        return new FetchResponse('', { status: 204 }) as unknown as Response;
       }
       return jsonResponse({ error: 'Not found' }, 404);
-    });
+    }) as unknown as typeof global.fetch;
     global.fetch = mockFetch;
 
     render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} characters={[CHAR_X, CHAR_Y]} />);
@@ -177,7 +177,7 @@ describe('SharedCharactersPanel', () => {
     await user.click(screen.getByRole('checkbox', { name: /Aragorn/i }));
 
     await waitFor(() => {
-      expect(mockFetch.mock.calls.find(
+      expect((mockFetch as jest.Mock).mock.calls.find(
         ([url, opts]) =>
           url.toString() === `/api/campaigns/${CAMPAIGN_ID}/characters/char-x` &&
           opts?.method === 'DELETE'
@@ -195,7 +195,7 @@ describe('SharedCharactersPanel', () => {
         return jsonResponse({ error: 'Conflict' }, 409);
       }
       return jsonResponse({ error: 'Not found' }, 404);
-    });
+    }) as unknown as typeof global.fetch;
     global.fetch = mockFetch;
 
     render(<SharedCharactersPanel campaignId={CAMPAIGN_ID} characters={[CHAR_Y]} />);

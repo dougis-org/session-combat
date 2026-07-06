@@ -46,7 +46,7 @@ describe('getAttachmentsBucket', () => {
 describe('uploadAttachment', () => {
   it('streams file to GridFS and returns hex ObjectId', async () => {
     const finishListeners: Array<() => void> = [];
-    const mockStream = {
+    const mockStream: any = {
       on: jest.fn((event: string, cb: () => void) => {
         if (event === 'finish') finishListeners.push(cb);
         return mockStream;
@@ -81,7 +81,7 @@ describe('uploadAttachment', () => {
 
   it('rejects if the upload stream emits an error', async () => {
     const errorListeners: Array<(err: Error) => void> = [];
-    const mockStream = {
+    const mockStream: any = {
       on: jest.fn((event: string, cb: (err: Error) => void) => {
         if (event === 'error') errorListeners.push(cb);
         return mockStream;
