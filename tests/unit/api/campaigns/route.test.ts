@@ -112,6 +112,21 @@ describe("POST /api/campaigns", () => {
     expect(response.status).toBe(400);
   });
 
+  it("returns 400 when JSON body is not an object (array)", async () => {
+    const response = await POST(makePostRequest(["not", "an", "object"]));
+    expect(response.status).toBe(400);
+  });
+
+  it("returns 400 when JSON body is not an object (null)", async () => {
+    const response = await POST(makePostRequest(null));
+    expect(response.status).toBe(400);
+  });
+
+  it("returns 400 when JSON body is not an object (string)", async () => {
+    const response = await POST(makePostRequest("just a string"));
+    expect(response.status).toBe(400);
+  });
+
   it("returns 400 when name is missing", async () => {
     const response = await POST(makePostRequest({ moduleName: "X" }));
     expect(response.status).toBe(400);
@@ -267,6 +282,17 @@ describe("POST /api/campaigns", () => {
       expect.any(String),
       "user-123"
     );
+    expect(mockedStorage.addMember).not.toHaveBeenCalled();
+  });
+
+  it("still returns 500 for the original error when deleteCampaign rollback itself fails after saveParty fails", async () => {
+    mockedStorage.saveParty.mockRejectedValue(new Error("party save failed"));
+    mockedStorage.deleteCampaign.mockRejectedValue(new Error("delete campaign failed"));
+
+    const response = await POST(makePostRequest({ name: "Doomed" }));
+
+    expect(response.status).toBe(500);
+    expect(mockedStorage.deleteCampaign).toHaveBeenCalled();
     expect(mockedStorage.addMember).not.toHaveBeenCalled();
   });
 

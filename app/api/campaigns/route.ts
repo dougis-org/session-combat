@@ -24,7 +24,11 @@ export const POST = withAuth(async (request, auth) => {
   }
 
   try {
-    const { name, moduleName, status, notes, chapters, currentChapterId } = body as Record<string, any>;
+    if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Request body must be a JSON object' }, { status: 400 });
+    }
+
+    const { name, moduleName, status, notes, chapters, currentChapterId } = body as Record<string, unknown>;
 
     if (typeof name !== 'string' || name.trim() === '') {
       return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
@@ -37,7 +41,10 @@ export const POST = withAuth(async (request, auth) => {
     const sanitizedChapters = sanitizeChapters(chapters);
     const sanitizedCurrentChapterId = sanitizeCurrentChapterId(currentChapterId, sanitizedChapters);
 
-    const resolvedStatus = CAMPAIGN_STATUSES.includes(status) ? status : 'active';
+    const resolvedStatus: (typeof CAMPAIGN_STATUSES)[number] =
+      typeof status === 'string' && CAMPAIGN_STATUSES.includes(status as (typeof CAMPAIGN_STATUSES)[number])
+        ? (status as (typeof CAMPAIGN_STATUSES)[number])
+        : 'active';
 
     const campaign: Campaign = {
       id: crypto.randomUUID(),
