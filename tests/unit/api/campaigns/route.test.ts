@@ -24,6 +24,8 @@ jest.mock("@/lib/storage", () => ({
     saveCampaign: jest.fn(),
     deleteCampaign: jest.fn(),
     addMember: jest.fn().mockResolvedValue(undefined),
+    saveParty: jest.fn().mockResolvedValue(undefined),
+    deleteParty: jest.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -93,6 +95,9 @@ describe("POST /api/campaigns", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
+    mockedStorage.saveParty.mockResolvedValue(undefined as any);
+    mockedStorage.deleteParty.mockResolvedValue(undefined as any);
+    mockedStorage.addMember.mockResolvedValue(undefined as any);
   });
 
   itReturns401(POST, () => makePostRequest({ name: "Test" }));
@@ -203,6 +208,86 @@ describe("POST /api/campaigns", () => {
     expect(response.status).toBe(201);
     const body = await response.json();
     expect(body.currentChapterId).toBeUndefined();
+  });
+
+  it("creates a default 'Main Party' linked to the new campaign", async () => {
+    const response = await POST(makePostRequest({ name: "Dragon Heist" }));
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(mockedStorage.saveParty).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "Main Party",
+        campaignId: body.id,
+        userId: "user-123",
+        members: [],
+      })
+    );
+  });
+
+  it("saves the party after the campaign and before the member", async () => {
+    const calls: string[] = [];
+    mockedStorage.saveCampaign.mockImplementation(async () => {
+      calls.push("saveCampaign");
+    });
+    mockedStorage.saveParty.mockImplementation(async () => {
+      calls.push("saveParty");
+    });
+    mockedStorage.addMember.mockImplementation(async () => {
+      calls.push("addMember");
+    });
+
+    await POST(makePostRequest({ name: "Dragon Heist" }));
+
+    expect(calls).toEqual(["saveCampaign", "saveParty", "addMember"]);
+  });
+
+  it("does not include a party key in the response body", async () => {
+    const response = await POST(makePostRequest({ name: "Dragon Heist" }));
+    const body = await response.json();
+    expect(body).not.toHaveProperty("party");
+  });
+
+  it("rolls back the campaign when saveParty fails", async () => {
+    mockedStorage.saveParty.mockRejectedValue(new Error("party save failed"));
+
+    const response = await POST(makePostRequest({ name: "Doomed" }));
+
+    expect(response.status).toBe(500);
+    expect(mockedStorage.deleteCampaign).toHaveBeenCalledWith(
+      expect.any(String),
+      "user-123"
+    );
+    expect(mockedStorage.addMember).not.toHaveBeenCalled();
+  });
+
+  it("rolls back the party then the campaign when addMember fails", async () => {
+    mockedStorage.addMember.mockRejectedValue(new Error("member save failed"));
+
+    const response = await POST(makePostRequest({ name: "Doomed" }));
+
+    expect(response.status).toBe(500);
+    expect(mockedStorage.deleteParty).toHaveBeenCalledWith(
+      expect.any(String),
+      "user-123"
+    );
+    expect(mockedStorage.deleteCampaign).toHaveBeenCalledWith(
+      expect.any(String),
+      "user-123"
+    );
+  });
+
+  it("still rolls back the campaign and rethrows when deleteParty itself fails during member-failure rollback", async () => {
+    mockedStorage.addMember.mockRejectedValue(new Error("member save failed"));
+    mockedStorage.deleteParty.mockRejectedValue(new Error("delete party failed"));
+
+    const response = await POST(makePostRequest({ name: "Doomed" }));
+
+    expect(response.status).toBe(500);
+    expect(mockedStorage.deleteParty).toHaveBeenCalled();
+    expect(mockedStorage.deleteCampaign).toHaveBeenCalledWith(
+      expect.any(String),
+      "user-123"
+    );
   });
 
   itReturns500(

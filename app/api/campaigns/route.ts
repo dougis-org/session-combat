@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Campaign, CAMPAIGN_STATUSES, CampaignMember } from '@/lib/types';
+import { Campaign, CAMPAIGN_STATUSES, CampaignMember, Party } from '@/lib/types';
 import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
 
 export const GET = withAuth(async (_request, auth) => {
@@ -47,6 +47,28 @@ export const POST = withAuth(async (request, auth) => {
 
     await storage.saveCampaign(campaign);
 
+    const party: Party = {
+      id: crypto.randomUUID(),
+      userId: auth.userId,
+      name: 'Main Party',
+      description: '',
+      members: [],
+      campaignId: campaign.id,
+      createdAt: campaign.createdAt,
+      updatedAt: campaign.updatedAt,
+    };
+
+    try {
+      await storage.saveParty(party);
+    } catch (partyError) {
+      try {
+        await storage.deleteCampaign(campaign.id, auth.userId);
+      } catch (rollbackError) {
+        console.error('Failed to rollback campaign creation:', rollbackError);
+      }
+      throw partyError;
+    }
+
     try {
       await storage.addMember({
         id: crypto.randomUUID(),
@@ -57,6 +79,11 @@ export const POST = withAuth(async (request, auth) => {
         history: [{ action: 'active' as const, by: auth.userId, at: new Date() }],
       });
     } catch (memberError) {
+      try {
+        await storage.deleteParty(party.id, auth.userId);
+      } catch (rollbackError) {
+        console.error('Failed to rollback party creation:', rollbackError);
+      }
       try {
         await storage.deleteCampaign(campaign.id, auth.userId);
       } catch (rollbackError) {

@@ -290,6 +290,17 @@ describe("Campaign API Integration Tests", () => {
     expect(party.campaignId).toBeUndefined();
   });
 
+  it("creating a campaign creates a linked default 'Main Party'", async () => {
+    const campaign = await createCampaign("Default Party Campaign");
+
+    const partiesRes = await fetch(`${baseUrl}/api/parties`, { headers: authed() });
+    expect(partiesRes.status).toBe(200);
+    const parties = await partiesRes.json() as { id: string; name: string; campaignId?: string }[];
+    const defaultParty = parties.find(p => p.campaignId === campaign.id);
+    expect(defaultParty).toBeDefined();
+    expect(defaultParty?.name).toBe("Main Party");
+  });
+
   it("deleting a campaign does not delete associated parties", async () => {
     const campaign = await createCampaign("Campaign To Delete");
 
