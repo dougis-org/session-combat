@@ -16,7 +16,7 @@ The system SHALL provide authenticated REST API endpoints to create, read, updat
 
 - **Given** an authenticated user
 - **When** they POST `/api/campaigns` with only `{ name }`
-- **Then** the campaign is created with `moduleName` defaulting to `""`, `currentChapter` to `""`, `currentChapterOrder` to `0`, and `active` to `false`; response is 201
+- **Then** the campaign is created with `moduleName` defaulting to `""`, `status` to `"active"`, `notes` to `""`, `chapters` to `[]`, and `currentChapterId` to `undefined`; response is 201
 
 #### Scenario: Creating a campaign without a name
 
@@ -90,19 +90,19 @@ The system SHALL create a default `Party` named "Main Party", linked to the new 
 
 ### Requirement: ADDED Campaign creation rolls back the default party on later failure
 
-The system SHALL delete the newly created `Party` (and the newly created `Campaign`) if a later step in campaign creation fails, so no partial state persists.
+The system SHALL attempt to delete the newly created `Party` (and the newly created `Campaign`) if a later step in campaign creation fails. Each rollback delete is attempted independently; if a rollback delete itself fails, the failure is logged and the original error is still raised, so cleanup is best-effort rather than guaranteed.
 
 #### Scenario: Member creation fails after party creation succeeds
 
 - **Given** an authenticated user
 - **When** they POST `/api/campaigns` and `storage.addMember` throws after the campaign and default party were both saved
-- **Then** the response is 500; the newly created `Party` no longer exists; the newly created `Campaign` no longer exists
+- **Then** the response is 500; deletion of the newly created `Party` and the newly created `Campaign` is attempted (each independently, with failures logged rather than swallowed)
 
 #### Scenario: Party creation fails after campaign creation succeeds
 
 - **Given** an authenticated user
 - **When** they POST `/api/campaigns` and `storage.saveParty` throws after the campaign was saved
-- **Then** the response is 500; the newly created `Campaign` no longer exists; no `CampaignMember` record was created for it
+- **Then** the response is 500; deletion of the newly created `Campaign` is attempted; no `CampaignMember` record was created for it
 
 ## MODIFIED Requirements
 
@@ -110,7 +110,7 @@ The system SHALL delete the newly created `Party` (and the newly created `Campai
 
 The system SHALL provide authenticated REST API endpoints to create, read, update, and delete campaigns scoped to the authenticated user, and creating a campaign SHALL additionally result in a default `Party` linked to it.
 
-See "Creating a campaign with all fields" scenario above (ADDED Requirements section) for the updated behavior.
+See the "Creating a campaign with all fields" scenario above in the scenarios section for the updated behavior.
 
 ## REMOVED Requirements
 
@@ -148,8 +148,8 @@ _None._
 - **When** they request a campaign ID that does not exist
 - **Then** the API returns 404 without throwing an unhandled error
 
-#### Scenario: No orphaned records after partial failure
+#### Scenario: Rollback is attempted after partial failure
 
 - **Given** a `POST /api/campaigns` request where a downstream step (party save or member save) throws
 - **When** the request completes with a 500 response
-- **Then** no `Campaign`, `Party`, or `CampaignMember` row exists in storage for the attempted creation
+- **Then** deletion of the `Campaign` and any `Party` already saved for the attempted creation is attempted; if a rollback delete itself fails, the failure is logged (not swallowed) and the original error still surfaces as the 500 response
