@@ -202,7 +202,7 @@ function CampaignMembersContent({ campaignId }: { campaignId: string }) {
       } else {
         console.error('Failed to load characters:', charactersRes.status);
         setMyCharacters([]);
-        setError('Failed to load party information');
+        setError('Failed to load your characters');
       }
     } catch {
       setError('Failed to load campaign data');
@@ -273,6 +273,7 @@ function CampaignMembersContent({ campaignId }: { campaignId: string }) {
                 campaignId={campaignId}
                 party={party}
                 characters={myCharacters}
+                userId={currentUserId}
               />
             ))}
           </>

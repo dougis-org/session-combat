@@ -1,27 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Character, Party } from '@/lib/types';
 
 interface Props {
   campaignId: string;
   party: Party;
   characters: Character[];
+  userId: string;
 }
 
-export function PartyMembershipPanel({ campaignId, party, characters }: Props) {
+function computeActiveIds(party: Party, characters: Character[]): Set<string> {
   const ownCharacterIds = new Set(characters.map((c) => c.id));
-  const initialActiveIds = new Set(
+  return new Set(
     party.members
       .filter((m) => !m.leftAt && ownCharacterIds.has(m.characterId))
       .map((m) => m.characterId)
   );
+}
 
-  const [activeIds, setActiveIds] = useState<Set<string>>(initialActiveIds);
+export function PartyMembershipPanel({ campaignId, party, characters, userId }: Props) {
+  const [activeIds, setActiveIds] = useState<Set<string>>(() => computeActiveIds(party, characters));
   const [toggling, setToggling] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
-  const myUserId = characters[0]?.userId;
+  useEffect(() => {
+    setActiveIds(computeActiveIds(party, characters));
+  }, [party, characters]);
 
   const handleToggle = async (character: Character) => {
     const id = character.id;
@@ -35,7 +40,7 @@ export function PartyMembershipPanel({ campaignId, party, characters }: Props) {
 
     try {
       const res = await fetch(
-        `/api/campaigns/${campaignId}/members/${myUserId}/parties/${party.id}`,
+        `/api/campaigns/${campaignId}/members/${userId}/parties/${party.id}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },

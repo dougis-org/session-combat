@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Response as FetchResponse } from 'node-fetch';
 import { PartyMembershipPanel } from '@/lib/components/PartyMembershipPanel';
-import { Character, Party } from '@/lib/types';
+import type { Character, Party } from '@/lib/types';
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new FetchResponse(JSON.stringify(body), {
@@ -63,7 +63,7 @@ afterEach(() => {
 describe('PartyMembershipPanel', () => {
   it('renders a checkbox for each of the player\'s own characters', () => {
     const party = makeParty('party-1');
-    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
 
     expect(screen.getByRole('checkbox', { name: /Aragorn/i })).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: /Legolas/i })).toBeInTheDocument();
@@ -73,7 +73,7 @@ describe('PartyMembershipPanel', () => {
     const party = makeParty('party-1', [
       { characterId: 'char-x', addedAt: new Date('2026-01-01'), leftAt: new Date('2026-01-02') },
     ]);
-    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X]} />);
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={party} characters={[CHAR_X]} />);
 
     expect(screen.getByRole('checkbox', { name: /Aragorn/i })).not.toBeChecked();
   });
@@ -82,7 +82,7 @@ describe('PartyMembershipPanel', () => {
     const party = makeParty('party-1', [
       { characterId: 'char-x', addedAt: new Date() },
     ]);
-    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
 
     expect(screen.getByRole('checkbox', { name: /Aragorn/i })).toBeChecked();
     expect(screen.getByRole('checkbox', { name: /Legolas/i })).not.toBeChecked();
@@ -96,7 +96,7 @@ describe('PartyMembershipPanel', () => {
     const mockFetch = jest.fn(async (_input: RequestInfo | URL, _options?: RequestInit) => jsonResponse({}, 200)) as unknown as typeof global.fetch;
     global.fetch = mockFetch;
 
-    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
 
     await user.click(screen.getByRole('checkbox', { name: /Legolas/i }));
 
@@ -118,7 +118,7 @@ describe('PartyMembershipPanel', () => {
     const mockFetch = jest.fn(async () => jsonResponse({}, 200)) as unknown as typeof global.fetch;
     global.fetch = mockFetch;
 
-    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
 
     await user.click(screen.getByRole('checkbox', { name: /Legolas/i }));
 
@@ -137,7 +137,7 @@ describe('PartyMembershipPanel', () => {
     const mockFetch = jest.fn(() => pending) as unknown as typeof global.fetch;
     global.fetch = mockFetch;
 
-    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
 
     await user.click(screen.getByRole('checkbox', { name: /Aragorn/i }));
 
@@ -154,7 +154,7 @@ describe('PartyMembershipPanel', () => {
     const mockFetch = jest.fn(async () => jsonResponse({ error: 'fail' }, 500)) as unknown as typeof global.fetch;
     global.fetch = mockFetch;
 
-    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X]} />);
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={party} characters={[CHAR_X]} />);
 
     const toggle = screen.getByRole('checkbox', { name: /Aragorn/i });
     expect(toggle).not.toBeChecked();
@@ -172,7 +172,7 @@ describe('PartyMembershipPanel', () => {
     const mockFetch = jest.fn(async () => jsonResponse({ error: 'fail' }, 500)) as unknown as typeof global.fetch;
     global.fetch = mockFetch;
 
-    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X]} />);
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={party} characters={[CHAR_X]} />);
 
     await user.click(screen.getByRole('checkbox', { name: /Aragorn/i }));
 
@@ -196,7 +196,7 @@ describe('PartyMembershipPanel', () => {
     }) as unknown as typeof global.fetch;
     global.fetch = mockFetch;
 
-    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
 
     // Start toggling Aragorn (char-x); its PUT stays pending.
     await user.click(screen.getByRole('checkbox', { name: /Aragorn/i }));
@@ -226,8 +226,8 @@ describe('PartyMembershipPanel', () => {
 
     render(
       <>
-        <PartyMembershipPanel campaignId={CAMPAIGN_ID} party={partyA} characters={[CHAR_X]} />
-        <PartyMembershipPanel campaignId={CAMPAIGN_ID} party={partyB} characters={[CHAR_X]} />
+        <PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={partyA} characters={[CHAR_X]} />
+        <PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={partyB} characters={[CHAR_X]} />
       </>
     );
 
@@ -248,9 +248,24 @@ describe('PartyMembershipPanel', () => {
 
   it('renders a message and no checkboxes when the player has zero characters', () => {
     const party = makeParty('party-1');
-    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[]} />);
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={party} characters={[]} />);
 
     expect(screen.getByText(/no characters/i)).toBeInTheDocument();
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+  });
+
+  it('resyncs checkbox state when the party prop updates after a refetch', () => {
+    const party = makeParty('party-1');
+    const { rerender } = render(
+      <PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={party} characters={[CHAR_X]} />
+    );
+    expect(screen.getByRole('checkbox', { name: /Aragorn/i })).not.toBeChecked();
+
+    const updatedParty = makeParty('party-1', [{ characterId: 'char-x', addedAt: new Date() }]);
+    rerender(
+      <PartyMembershipPanel campaignId={CAMPAIGN_ID} userId={USER_ID} party={updatedParty} characters={[CHAR_X]} />
+    );
+
+    expect(screen.getByRole('checkbox', { name: /Aragorn/i })).toBeChecked();
   });
 });
