@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Campaign, CAMPAIGN_STATUSES, CampaignMember } from '@/lib/types';
+import { CAMPAIGN_STATUSES } from '@/lib/types';
+import type { Campaign, Party } from '@/lib/types';
 import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
 
 export const GET = withAuth(async (_request, auth) => {
@@ -15,9 +16,19 @@ export const GET = withAuth(async (_request, auth) => {
 });
 
 export const POST = withAuth(async (request, auth) => {
+  let body: unknown;
   try {
-    const body = await request.json();
-    const { name, moduleName, status, notes, chapters, currentChapterId } = body;
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  try {
+    if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Request body must be a JSON object' }, { status: 400 });
+    }
+
+    const { name, moduleName, status, notes, chapters, currentChapterId } = body as Record<string, unknown>;
 
     if (typeof name !== 'string' || name.trim() === '') {
       return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });
@@ -30,7 +41,10 @@ export const POST = withAuth(async (request, auth) => {
     const sanitizedChapters = sanitizeChapters(chapters);
     const sanitizedCurrentChapterId = sanitizeCurrentChapterId(currentChapterId, sanitizedChapters);
 
-    const resolvedStatus = CAMPAIGN_STATUSES.includes(status) ? status : 'active';
+    const resolvedStatus: (typeof CAMPAIGN_STATUSES)[number] =
+      typeof status === 'string' && CAMPAIGN_STATUSES.includes(status as (typeof CAMPAIGN_STATUSES)[number])
+        ? (status as (typeof CAMPAIGN_STATUSES)[number])
+        : 'active';
 
     const campaign: Campaign = {
       id: crypto.randomUUID(),
@@ -47,6 +61,28 @@ export const POST = withAuth(async (request, auth) => {
 
     await storage.saveCampaign(campaign);
 
+    const party: Party = {
+      id: crypto.randomUUID(),
+      userId: auth.userId,
+      name: 'Main Party',
+      description: '',
+      members: [],
+      campaignId: campaign.id,
+      createdAt: campaign.createdAt,
+      updatedAt: campaign.updatedAt,
+    };
+
+    try {
+      await storage.saveParty(party);
+    } catch (partyError) {
+      try {
+        await storage.deleteCampaign(campaign.id, auth.userId);
+      } catch (rollbackError) {
+        console.error('Failed to rollback campaign creation:', rollbackError);
+      }
+      throw partyError;
+    }
+
     try {
       await storage.addMember({
         id: crypto.randomUUID(),
@@ -57,6 +93,11 @@ export const POST = withAuth(async (request, auth) => {
         history: [{ action: 'active' as const, by: auth.userId, at: new Date() }],
       });
     } catch (memberError) {
+      try {
+        await storage.deleteParty(party.id, auth.userId);
+      } catch (rollbackError) {
+        console.error('Failed to rollback party creation:', rollbackError);
+      }
       try {
         await storage.deleteCampaign(campaign.id, auth.userId);
       } catch (rollbackError) {
