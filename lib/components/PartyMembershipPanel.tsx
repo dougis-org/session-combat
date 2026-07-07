@@ -19,15 +19,17 @@ export function PartyMembershipPanel({ campaignId, party, characters }: Props) {
 
   const [activeIds, setActiveIds] = useState<Set<string>>(initialActiveIds);
   const [toggling, setToggling] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
 
   const myUserId = characters[0]?.userId;
 
   const handleToggle = async (character: Character) => {
     const id = character.id;
-    const prevIds = activeIds;
+    const wasActive = activeIds.has(id);
     const nextIds = new Set(activeIds);
-    if (nextIds.has(id)) { nextIds.delete(id); } else { nextIds.add(id); }
+    if (wasActive) { nextIds.delete(id); } else { nextIds.add(id); }
 
+    setError(null);
     setToggling((prev) => new Set(prev).add(id));
     setActiveIds(nextIds);
 
@@ -40,9 +42,18 @@ export function PartyMembershipPanel({ campaignId, party, characters }: Props) {
           body: JSON.stringify({ characterIds: Array.from(nextIds) }),
         }
       );
-      if (!res.ok) throw new Error('toggle failed');
-    } catch {
-      setActiveIds(prevIds);
+      if (!res.ok) throw new Error(`toggle failed: ${res.status}`);
+    } catch (err) {
+      console.error('Failed to update party membership:', err);
+      // Revert only this character's membership, not the whole set — another
+      // character's toggle may have committed to `activeIds` while this
+      // request was in flight, and that change must not be clobbered.
+      setActiveIds((prev) => {
+        const reverted = new Set(prev);
+        if (wasActive) { reverted.add(id); } else { reverted.delete(id); }
+        return reverted;
+      });
+      setError('Could not update party membership. Please try again.');
     } finally {
       setToggling((prev) => { const next = new Set(prev); next.delete(id); return next; });
     }
@@ -51,6 +62,7 @@ export function PartyMembershipPanel({ campaignId, party, characters }: Props) {
   return (
     <div className="mt-4 bg-gray-700 rounded-lg p-4">
       <p className="font-semibold text-sm text-gray-200">{party.name}</p>
+      {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
 
       <div className="mt-3 space-y-2">
         {characters.length === 0 ? (

@@ -188,8 +188,22 @@ function CampaignMembersContent({ campaignId }: { campaignId: string }) {
       ]);
       setCampaignName(campaignData.name ?? '');
       setMembers(membersData.members ?? []);
-      setParties(partiesRes.ok ? await partiesRes.json() : []);
-      setMyCharacters(charactersRes.ok ? await charactersRes.json() : []);
+
+      if (partiesRes.ok) {
+        setParties(await partiesRes.json());
+      } else {
+        console.error('Failed to load campaign parties:', partiesRes.status);
+        setParties([]);
+        setError('Failed to load party information');
+      }
+
+      if (charactersRes.ok) {
+        setMyCharacters(await charactersRes.json());
+      } else {
+        console.error('Failed to load characters:', charactersRes.status);
+        setMyCharacters([]);
+        setError('Failed to load party information');
+      }
     } catch {
       setError('Failed to load campaign data');
     } finally {

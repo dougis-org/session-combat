@@ -69,6 +69,15 @@ describe('PartyMembershipPanel', () => {
     expect(screen.getByRole('checkbox', { name: /Legolas/i })).toBeInTheDocument();
   });
 
+  it('renders a character who previously left the party as unchecked', () => {
+    const party = makeParty('party-1', [
+      { characterId: 'char-x', addedAt: new Date('2026-01-01'), leftAt: new Date('2026-01-02') },
+    ]);
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X]} />);
+
+    expect(screen.getByRole('checkbox', { name: /Aragorn/i })).not.toBeChecked();
+  });
+
   it('reflects active membership as checked and inactive as unchecked', () => {
     const party = makeParty('party-1', [
       { characterId: 'char-x', addedAt: new Date() },
@@ -155,6 +164,57 @@ describe('PartyMembershipPanel', () => {
     await waitFor(() => {
       expect(screen.getByRole('checkbox', { name: /Aragorn/i })).not.toBeChecked();
     });
+  });
+
+  it('shows an inline error message when a toggle fails', async () => {
+    const user = userEvent.setup();
+    const party = makeParty('party-1');
+    const mockFetch = jest.fn(async () => jsonResponse({ error: 'fail' }, 500)) as unknown as typeof global.fetch;
+    global.fetch = mockFetch;
+
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X]} />);
+
+    await user.click(screen.getByRole('checkbox', { name: /Aragorn/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/could not update party membership/i)).toBeInTheDocument();
+    });
+  });
+
+  it('a failed toggle for one character does not clobber a concurrent successful toggle for another', async () => {
+    const user = userEvent.setup();
+    const party = makeParty('party-1');
+    let resolveA: (value: Response) => void;
+    const pendingA = new Promise<Response>((resolve) => { resolveA = resolve; });
+    const mockFetch = jest.fn((url: RequestInfo | URL, options?: RequestInit) => {
+      const body = JSON.parse(options!.body as string);
+      // The request adding char-x (Aragorn only) is the one that will fail.
+      if (body.characterIds.length === 1 && body.characterIds[0] === 'char-x') {
+        return pendingA;
+      }
+      return Promise.resolve(jsonResponse({}, 200));
+    }) as unknown as typeof global.fetch;
+    global.fetch = mockFetch;
+
+    render(<PartyMembershipPanel campaignId={CAMPAIGN_ID} party={party} characters={[CHAR_X, CHAR_Y]} />);
+
+    // Start toggling Aragorn (char-x); its PUT stays pending.
+    await user.click(screen.getByRole('checkbox', { name: /Aragorn/i }));
+    // While that's in flight, toggle Legolas (char-y); its PUT resolves immediately.
+    await user.click(screen.getByRole('checkbox', { name: /Legolas/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('checkbox', { name: /Legolas/i })).toBeChecked();
+    });
+
+    // Now fail Aragorn's request.
+    resolveA!(jsonResponse({ error: 'fail' }, 500));
+
+    await waitFor(() => {
+      expect(screen.getByRole('checkbox', { name: /Aragorn/i })).not.toBeChecked();
+    });
+    // Legolas's committed toggle must survive Aragorn's revert.
+    expect(screen.getByRole('checkbox', { name: /Legolas/i })).toBeChecked();
   });
 
   it('two independent panel instances do not affect each other\'s state', async () => {

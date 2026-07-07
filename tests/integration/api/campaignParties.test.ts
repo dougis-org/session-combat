@@ -87,4 +87,29 @@ describe("GET /api/campaigns/[id]/parties Integration Tests", () => {
     });
     expect([403, 404]).toContain(res.status);
   });
+
+  it("does not include parties belonging to a different campaign", async () => {
+    const otherCampRes = await fetch(`${baseUrl}/api/campaigns`, {
+      method: "POST",
+      headers: authed(gmCookie),
+      body: JSON.stringify({ name: "Other Campaign", status: "active" }),
+    });
+    expect(otherCampRes.status).toBe(201);
+    const otherCampaign = (await otherCampRes.json()) as { id: string };
+
+    const otherPartyRes = await fetch(`${baseUrl}/api/parties`, {
+      method: "POST",
+      headers: authed(gmCookie),
+      body: JSON.stringify({ name: "Other Campaign Party", campaignId: otherCampaign.id }),
+    });
+    expect(otherPartyRes.status).toBe(201);
+    const otherParty = (await otherPartyRes.json()) as { id: string };
+
+    const res = await fetch(`${baseUrl}/api/campaigns/${campaignId}/parties`, {
+      headers: authed(playerCookie),
+    });
+    expect(res.status).toBe(200);
+    const parties = (await res.json()) as Array<{ id: string }>;
+    expect(parties.some((p) => p.id === otherParty.id)).toBe(false);
+  });
 });

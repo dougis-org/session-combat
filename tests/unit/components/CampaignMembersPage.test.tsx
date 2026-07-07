@@ -331,5 +331,22 @@ describe('CampaignMembersPage', () => {
       });
       expect(screen.queryByTestId(/party-panel-/)).not.toBeInTheDocument();
     });
+
+    it('shows an error banner when the parties endpoint fails to load', async () => {
+      mockPlayerAuth();
+      global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+        const url = input.toString();
+        if (url.includes('/api/campaigns/camp-1/parties')) return jsonResponse({ error: 'boom' }, 500);
+        if (url.includes('/api/characters')) return jsonResponse([]);
+        if (url.includes('/api/campaigns/camp-1/members')) return jsonResponse({ members: [DM_MEMBER, PLAYER_MEMBER] });
+        if (url.includes('/api/campaigns/camp-1')) return jsonResponse(MOCK_CAMPAIGN);
+        return jsonResponse({}, 404);
+      }) as jest.MockedFunction<typeof fetch>;
+
+      render(React.createElement(CampaignMembersPage));
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toHaveTextContent(/failed to load party information/i);
+      });
+    });
   });
 });
