@@ -1119,7 +1119,7 @@ export const storage = {
       return parties.map(normalizeStoredEntityId).map(migrateParty);
     } catch (error) {
       console.error("Error loading parties by campaign:", error);
-      return [];
+      throw error;
     }
   },
 

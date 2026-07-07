@@ -30,6 +30,11 @@ jest.mock('@/lib/hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 
+jest.mock('@/lib/components/PartyMembershipPanel', () => ({
+  PartyMembershipPanel: ({ party }: { party: { id: string; name: string } }) =>
+    React.createElement('div', { 'data-testid': `party-panel-${party.id}` }, party.name),
+}));
+
 import { useAuth } from '@/lib/hooks/useAuth';
 import CampaignMembersPage from '@/app/campaigns/[id]/page';
 
@@ -71,11 +76,17 @@ function mockPlayerAuth() {
   } as any);
 }
 
-function setupFetch(members = [DM_MEMBER, PLAYER_MEMBER]) {
+function setupFetch(members = [DM_MEMBER, PLAYER_MEMBER], parties: unknown[] = [], characters: unknown[] = []) {
   let callCount = 0;
   global.fetch = jest.fn(async (input: RequestInfo | URL) => {
     const url = input.toString();
     callCount++;
+    if (url.includes('/api/campaigns/camp-1/parties')) {
+      return jsonResponse(parties);
+    }
+    if (url.includes('/api/characters')) {
+      return jsonResponse(characters);
+    }
     if (url.includes('/api/campaigns/camp-1/members')) {
       if (url.includes('/api/campaigns/camp-1/members/')) {
         return jsonResponse({ status: 'removed' });
@@ -195,6 +206,8 @@ describe('CampaignMembersPage', () => {
       mockDmAuth();
       const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
         const url = input.toString();
+        if (url.includes('/api/campaigns/camp-1/parties')) return jsonResponse([]);
+        if (url.includes('/api/characters')) return jsonResponse([]);
         if (url.includes('/api/campaigns/camp-1/members')) return jsonResponse({ members: [DM_MEMBER] });
         if (url.includes('/api/campaigns/camp-1')) return jsonResponse(MOCK_CAMPAIGN);
         return jsonResponse({}, 404);
@@ -215,6 +228,8 @@ describe('CampaignMembersPage', () => {
       global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = input.toString();
         if (url.includes('/api/users/search')) return jsonResponse({ results: [{ id: 'new-id', username: 'charlie' }] });
+        if (url.includes('/api/campaigns/camp-1/parties')) return jsonResponse([]);
+        if (url.includes('/api/characters')) return jsonResponse([]);
         if (url.includes('/api/campaigns/camp-1/members') && init?.method === 'POST') return jsonResponse({ id: 'new-mem', status: 'invited' }, 201);
         if (url.includes('/api/campaigns/camp-1/members')) { memberListCallCount++; return jsonResponse({ members: [DM_MEMBER] }); }
         if (url.includes('/api/campaigns/camp-1')) return jsonResponse(MOCK_CAMPAIGN);
@@ -241,6 +256,8 @@ describe('CampaignMembersPage', () => {
       global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = input.toString();
         if (url.includes('/api/users/search')) return jsonResponse({ results: [{ id: 'existing-id', username: 'alice' }] });
+        if (url.includes('/api/campaigns/camp-1/parties')) return jsonResponse([]);
+        if (url.includes('/api/characters')) return jsonResponse([]);
         if (url.includes('/api/campaigns/camp-1/members') && init?.method === 'POST') return jsonResponse({ error: 'Member already exists' }, 409);
         if (url.includes('/api/campaigns/camp-1/members')) return jsonResponse({ members: [DM_MEMBER] });
         if (url.includes('/api/campaigns/camp-1')) return jsonResponse(MOCK_CAMPAIGN);
@@ -270,6 +287,8 @@ describe('CampaignMembersPage', () => {
       global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = input.toString();
         if (init?.method === 'DELETE') return jsonResponse({ status: 'removed' });
+        if (url.includes('/api/campaigns/camp-1/parties')) return jsonResponse([]);
+        if (url.includes('/api/characters')) return jsonResponse([]);
         if (url.includes('/api/campaigns/camp-1/members')) { memberListCallCount++; return jsonResponse({ members: [DM_MEMBER, PLAYER_MEMBER] }); }
         if (url.includes('/api/campaigns/camp-1')) return jsonResponse(MOCK_CAMPAIGN);
         return jsonResponse({}, 404);
@@ -284,6 +303,49 @@ describe('CampaignMembersPage', () => {
       await user.click(screen.getAllByRole('button', { name: /remove/i })[0]);
       await waitFor(() => {
         expect(memberListCallCount).toBeGreaterThan(callsBefore);
+      });
+    });
+  });
+
+  describe('party membership panel', () => {
+    it('renders one panel per party returned from the parties endpoint', async () => {
+      mockPlayerAuth();
+      setupFetch(
+        [DM_MEMBER, PLAYER_MEMBER],
+        [{ id: 'party-1', name: 'The Vanguard' }, { id: 'party-2', name: 'The Rearguard' }],
+        []
+      );
+      render(React.createElement(CampaignMembersPage));
+      await waitFor(() => {
+        expect(screen.getByTestId('party-panel-party-1')).toBeInTheDocument();
+        expect(screen.getByTestId('party-panel-party-2')).toBeInTheDocument();
+      });
+    });
+
+    it('renders no panel sections when the campaign has zero parties', async () => {
+      mockPlayerAuth();
+      setupFetch([DM_MEMBER, PLAYER_MEMBER], [], []);
+      render(React.createElement(CampaignMembersPage));
+      await waitFor(() => {
+        expect(screen.getByText('alice')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId(/party-panel-/)).not.toBeInTheDocument();
+    });
+
+    it('shows an error banner when the parties endpoint fails to load', async () => {
+      mockPlayerAuth();
+      global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+        const url = input.toString();
+        if (url.includes('/api/campaigns/camp-1/parties')) return jsonResponse({ error: 'boom' }, 500);
+        if (url.includes('/api/characters')) return jsonResponse([]);
+        if (url.includes('/api/campaigns/camp-1/members')) return jsonResponse({ members: [DM_MEMBER, PLAYER_MEMBER] });
+        if (url.includes('/api/campaigns/camp-1')) return jsonResponse(MOCK_CAMPAIGN);
+        return jsonResponse({}, 404);
+      }) as jest.MockedFunction<typeof fetch>;
+
+      render(React.createElement(CampaignMembersPage));
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toHaveTextContent(/failed to load party information/i);
       });
     });
   });

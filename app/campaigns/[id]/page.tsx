@@ -4,9 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
+import { PartyMembershipPanel } from '@/lib/components/PartyMembershipPanel';
 import { ErrorBanner, LoadingState, textInputClass } from '@/lib/components/ui';
 import { useAuth } from '@/lib/hooks/useAuth';
-import type { MemberRole, MemberStatus } from '@/lib/types';
+import type { Character, MemberRole, MemberStatus, Party } from '@/lib/types';
 
 interface EnrichedMember {
   id: string;
@@ -163,15 +164,20 @@ function CampaignMembersContent({ campaignId }: { campaignId: string }) {
   const { user } = useAuth();
   const [campaignName, setCampaignName] = useState<string>('');
   const [members, setMembers] = useState<EnrichedMember[]>([]);
+  const [parties, setParties] = useState<Party[]>([]);
+  const [myCharacters, setMyCharacters] = useState<Character[]>([]);
+  const [charactersUnavailable, setCharactersUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setError(null);
     try {
-      const [campaignRes, membersRes] = await Promise.all([
+      const [campaignRes, membersRes, partiesRes, charactersRes] = await Promise.all([
         fetch(`/api/campaigns/${campaignId}`),
         fetch(`/api/campaigns/${campaignId}/members`),
+        fetch(`/api/campaigns/${campaignId}/parties`),
+        fetch('/api/characters'),
       ]);
       if (!campaignRes.ok || !membersRes.ok) {
         setError('Failed to load campaign data');
@@ -183,6 +189,24 @@ function CampaignMembersContent({ campaignId }: { campaignId: string }) {
       ]);
       setCampaignName(campaignData.name ?? '');
       setMembers(membersData.members ?? []);
+
+      if (partiesRes.ok) {
+        setParties(await partiesRes.json());
+      } else {
+        console.error('Failed to load campaign parties:', partiesRes.status);
+        setParties([]);
+        setError('Failed to load party information');
+      }
+
+      if (charactersRes.ok) {
+        setMyCharacters(await charactersRes.json());
+        setCharactersUnavailable(false);
+      } else {
+        console.error('Failed to load characters:', charactersRes.status);
+        setMyCharacters([]);
+        setCharactersUnavailable(true);
+        setError('Failed to load your characters');
+      }
     } catch {
       setError('Failed to load campaign data');
     } finally {
@@ -245,6 +269,17 @@ function CampaignMembersContent({ campaignId }: { campaignId: string }) {
             {isDM && (
               <InviteSection campaignId={campaignId} onInvited={fetchData} />
             )}
+
+            {parties.map(party => (
+              <PartyMembershipPanel
+                key={party.id}
+                campaignId={campaignId}
+                party={party}
+                characters={myCharacters}
+                userId={currentUserId}
+                charactersUnavailable={charactersUnavailable}
+              />
+            ))}
           </>
         )}
       </div>
