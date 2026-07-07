@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
-import { Campaign, CAMPAIGN_STATUSES, CampaignMember, Party } from '@/lib/types';
+import { CAMPAIGN_STATUSES } from '@/lib/types';
+import type { Campaign, Party } from '@/lib/types';
 import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
 
 export const GET = withAuth(async (_request, auth) => {
