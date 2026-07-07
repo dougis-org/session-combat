@@ -15,9 +15,15 @@ export const GET = withAuth(async (_request, auth) => {
 });
 
 export const POST = withAuth(async (request, auth) => {
+  let body: unknown;
   try {
-    const body = await request.json();
-    const { name, moduleName, status, notes, chapters, currentChapterId } = body;
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  try {
+    const { name, moduleName, status, notes, chapters, currentChapterId } = body as Record<string, any>;
 
     if (typeof name !== 'string' || name.trim() === '') {
       return NextResponse.json({ error: 'Campaign name is required' }, { status: 400 });

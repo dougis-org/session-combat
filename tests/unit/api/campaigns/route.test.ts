@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { GET, POST } from "@/app/api/campaigns/route";
 import { GET as GET_ONE, PATCH, DELETE } from "@/app/api/campaigns/[id]/route";
 import { storage } from "@/lib/storage";
@@ -101,6 +101,16 @@ describe("POST /api/campaigns", () => {
   });
 
   itReturns401(POST, () => makePostRequest({ name: "Test" }));
+
+  it("returns 400 for malformed JSON body", async () => {
+    const request = new NextRequest(BASE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie: "auth-token=t" },
+      body: "not-json",
+    });
+    const response = await POST(request);
+    expect(response.status).toBe(400);
+  });
 
   it("returns 400 when name is missing", async () => {
     const response = await POST(makePostRequest({ moduleName: "X" }));
