@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-import { MongoClient } from "mongodb";
 import { makeAuthedHeaders } from "../helpers/server";
 import { registerTestUser } from "../helpers/users";
 
@@ -50,27 +49,16 @@ describe("GET /api/campaigns/[id]/parties Integration Tests", () => {
 
   const authed = (cookie: string) => makeAuthedHeaders(cookie);
 
-  it("returns 200 with an empty array when the campaign has no parties", async () => {
+  it("returns 200 with only the auto-created default party for a freshly created campaign", async () => {
     const res = await fetch(`${baseUrl}/api/campaigns/${campaignId}/parties`, {
       headers: authed(playerCookie),
     });
     expect(res.status).toBe(200);
-    const body = await res.json();
-    if (Array.isArray(body) && body.length > 0) {
-      const client = new MongoClient(process.env.MONGODB_URI!);
-      try {
-        await client.connect();
-        const db = client.db(process.env.MONGODB_DB);
-        const allParties = await db.collection("parties").find({}).toArray();
-        const allCampaigns = await db.collection("campaigns").find({}).toArray();
-        console.log("DEBUG campaignId (this test):", campaignId);
-        console.log("DEBUG ALL parties in DB:", JSON.stringify(allParties, null, 2));
-        console.log("DEBUG ALL campaigns in DB:", JSON.stringify(allCampaigns, null, 2));
-      } finally {
-        await client.close();
-      }
-    }
-    expect(body).toEqual([]);
+    const parties = (await res.json()) as Array<{ name: string }>;
+    // Campaign creation auto-creates a default "Main Party" (see #482); no
+    // other parties exist yet for a freshly created campaign.
+    expect(parties).toHaveLength(1);
+    expect(parties[0].name).toBe("Main Party");
   });
 
   it("active player member sees all parties in the campaign, including ones they don't own", async () => {
