@@ -64,13 +64,13 @@ Use the project's documented commands for each of the above (see project README 
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `feat/auto-create-default-party` to `main`. The PR body MUST include `Closes #474`.
-- [ ] **Issue lifecycle: mark in-review**: run `gh issue edit 474 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge; use `--squash` per repo ruleset)
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `feat/auto-create-default-party` to `main`. The PR body MUST include `Closes #474`. (PR #482)
+- [x] **Issue lifecycle: mark in-review**: run `gh issue edit 474 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found). (project-item step skipped — no `project` scope on `gh` token)
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing. (fixed all 3 unresolved review threads: non-object JSON body validation, rollback-during-rollback test coverage, unused-import cleanup)
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge; use `--squash` per repo ruleset)
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**: (merged as squash commit `651e4bf`)
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved (reply, then resolve via GraphQL `resolveReviewThread`)
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -91,17 +91,17 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none expected beyond spec sync)
-- [ ] Sync approved spec deltas into `openspec/specs/campaign-crud/spec.md`. After copying, update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-auto-create-default-party/design.md`, and similarly for `../../tasks.md` and any other relative paths into the change directory.
-- [ ] Archive the change: move `openspec/changes/auto-create-default-party/` to `openspec/changes/archive/YYYY-MM-DD-auto-create-default-party/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-auto-create-default-party/` exists and `openspec/changes/auto-create-default-party/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-auto-create-default-party` then `git push -u origin doc/archive-YYYY-MM-DD-auto-create-default-party`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-auto-create-default-party` to `main` with title `docs: archive auto-create-default-party (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge; use `--squash` per repo ruleset)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feat/auto-create-default-party doc/archive-YYYY-MM-DD-auto-create-default-party`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main` (commit `651e4bf`)
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none expected beyond spec sync)
+- [x] Sync approved spec deltas into `openspec/specs/campaign-crud/spec.md`. After copying, update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-auto-create-default-party/design.md`, and similarly for `../../tasks.md` and any other relative paths into the change directory. (per established precedent from prior archived changes, e.g. `2026-06-20-issue-317-roll-share-ui`, the `../../design.md` relative link in `specs/campaign-crud/spec.md` remains valid unchanged since the whole subtree moves together — left as-is)
+- [x] Archive the change: move `openspec/changes/auto-create-default-party/` to `openspec/changes/archive/2026-07-07-auto-create-default-party/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
+- [x] Confirm `openspec/changes/archive/2026-07-07-auto-create-default-party/` exists and `openspec/changes/auto-create-default-party/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-07-07-auto-create-default-party` then `git push -u origin doc/archive-2026-07-07-auto-create-default-party`
+- [x] Open a PR from `doc/archive-2026-07-07-auto-create-default-party` to `main` with title `docs: archive auto-create-default-party (2026-07-07)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge; use `--squash` per repo ruleset)
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/auto-create-default-party doc/archive-2026-07-07-auto-create-default-party`
 
-Required cleanup after archive: `git fetch --prune` and `git branch -D feat/auto-create-default-party doc/archive-YYYY-MM-DD-auto-create-default-party`
+Required cleanup after archive: `git fetch --prune` and `git branch -D feat/auto-create-default-party doc/archive-2026-07-07-auto-create-default-party`
