@@ -254,6 +254,22 @@ describe('PartyMembershipPanel', () => {
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 
+  it('renders a load-failure message instead of the empty-state message when characters failed to load', () => {
+    const party = makeParty('party-1');
+    render(
+      <PartyMembershipPanel
+        campaignId={CAMPAIGN_ID}
+        userId={USER_ID}
+        party={party}
+        characters={[]}
+        charactersUnavailable
+      />
+    );
+
+    expect(screen.getByText(/could not load your characters/i)).toBeInTheDocument();
+    expect(screen.queryByText(/no characters to add/i)).not.toBeInTheDocument();
+  });
+
   it('resyncs checkbox state when the party prop updates after a refetch', () => {
     const party = makeParty('party-1');
     const { rerender } = render(

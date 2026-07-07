@@ -166,6 +166,7 @@ function CampaignMembersContent({ campaignId }: { campaignId: string }) {
   const [members, setMembers] = useState<EnrichedMember[]>([]);
   const [parties, setParties] = useState<Party[]>([]);
   const [myCharacters, setMyCharacters] = useState<Character[]>([]);
+  const [charactersUnavailable, setCharactersUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -199,9 +200,11 @@ function CampaignMembersContent({ campaignId }: { campaignId: string }) {
 
       if (charactersRes.ok) {
         setMyCharacters(await charactersRes.json());
+        setCharactersUnavailable(false);
       } else {
         console.error('Failed to load characters:', charactersRes.status);
         setMyCharacters([]);
+        setCharactersUnavailable(true);
         setError('Failed to load your characters');
       }
     } catch {
@@ -274,6 +277,7 @@ function CampaignMembersContent({ campaignId }: { campaignId: string }) {
                 party={party}
                 characters={myCharacters}
                 userId={currentUserId}
+                charactersUnavailable={charactersUnavailable}
               />
             ))}
           </>

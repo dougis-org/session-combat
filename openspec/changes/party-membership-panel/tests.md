@@ -27,7 +27,7 @@ For each task in `tasks.md`:
 - [x] Member with `status !== 'active'` receives 403 or 404 with no party data. (specs/party-management/spec.md — "Inactive member denied")
 - [x] Campaign with zero parties returns 200 with `[]`. (specs/party-management/spec.md — "Campaign with no parties")
 - [x] Storage read failure returns 500 with a generic error body (no internal details leaked). (specs/party-management/spec.md — "Storage read failure")
-- [x] Response returns within the documented latency budget under normal test conditions. (specs/party-management/spec.md — "Latency budget")
+- [ ] Response returns within the documented latency budget under normal test conditions. (specs/party-management/spec.md — "Latency budget") — no explicit timing assertion was added; not tested.
 
 ### `PartyMembershipPanel` component (Task: Add component)
 

@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Character, Party } from '@/lib/types';
+import type { Character, Party } from '@/lib/types';
 
 interface Props {
   campaignId: string;
   party: Party;
   characters: Character[];
   userId: string;
+  charactersUnavailable?: boolean;
 }
 
 function computeActiveIds(party: Party, characters: Character[]): Set<string> {
@@ -19,7 +20,7 @@ function computeActiveIds(party: Party, characters: Character[]): Set<string> {
   );
 }
 
-export function PartyMembershipPanel({ campaignId, party, characters, userId }: Props) {
+export function PartyMembershipPanel({ campaignId, party, characters, userId, charactersUnavailable = false }: Props) {
   const [activeIds, setActiveIds] = useState<Set<string>>(() => computeActiveIds(party, characters));
   const [toggling, setToggling] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +72,9 @@ export function PartyMembershipPanel({ campaignId, party, characters, userId }: 
 
       <div className="mt-3 space-y-2">
         {characters.length === 0 ? (
-          <p className="text-gray-400 text-sm">No characters to add.</p>
+          <p className="text-gray-400 text-sm">
+            {charactersUnavailable ? 'Could not load your characters.' : 'No characters to add.'}
+          </p>
         ) : (
           characters.map((character) => (
             <label
