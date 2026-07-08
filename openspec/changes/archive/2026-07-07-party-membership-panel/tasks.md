@@ -95,7 +95,7 @@ Blocking resolution flow:
 - [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-07-07-party-membership-panel` then `git push -u origin doc/archive-2026-07-07-party-membership-panel`
 - [x] Open a PR from `doc/archive-2026-07-07-party-membership-panel` to `main` with title `docs: archive party-membership-panel (2026-07-07)` — **do NOT push directly to `main`** (PR #485)
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge; repo only allows squash merges)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feature/party-membership-panel doc/archive-2026-07-07-party-membership-panel`
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat) — merged as #485 after fixing merge-method mismatch (squash-only repo policy) and a transient integration-test flake
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feature/party-membership-panel doc/archive-2026-07-07-party-membership-panel`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D feature/party-membership-panel doc/archive-YYYY-MM-DD-party-membership-panel`
