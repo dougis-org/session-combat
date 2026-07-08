@@ -58,7 +58,7 @@ The system SHALL render one membership panel per party in the current campaign o
 
 - Proposal element -> Requirement: New UI section, one panel per party, wired to existing PUT endpoint -> ADDED Per-party character membership panel on the campaign page
 - Design decision -> Requirement: Decisions 2 & 3 -> ADDED Per-party character membership panel on the campaign page
-- Requirement -> Task(s): See `tasks.md` in `party-membership-panel`.
+- Requirement -> Task(s): See [`tasks.md`](../../changes/archive/2026-07-07-party-membership-panel/tasks.md) in the archived `party-membership-panel` change.
 
 ## Non-Functional Acceptance Criteria
 

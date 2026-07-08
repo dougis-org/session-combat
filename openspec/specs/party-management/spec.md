@@ -65,7 +65,7 @@ The system SHALL allow any active member of a campaign (any role) to retrieve al
 - Requirement -> Task(s): See `tasks.md` in `update-party-members-api`.
 - Proposal element -> Requirement: New `GET /api/campaigns/{id}/parties` endpoint -> ADDED Campaign-scoped party listing for active members
 - Design decision -> Requirement: Decision 1 -> ADDED Campaign-scoped party listing for active members
-- Requirement -> Task(s): See `tasks.md` in `party-membership-panel`.
+- Requirement -> Task(s): See [`tasks.md`](../../changes/archive/2026-07-07-party-membership-panel/tasks.md) in the archived `party-membership-panel` change.
 
 ## Non-Functional Acceptance Criteria
 
