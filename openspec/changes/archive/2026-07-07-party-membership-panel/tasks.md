@@ -92,9 +92,9 @@ Blocking resolution flow:
 - [x] Sync approved spec deltas into `openspec/specs/`: copy `specs/party-management/spec.md` requirement additions into `openspec/specs/party-management/spec.md`, and create `openspec/specs/party-membership-panel/spec.md` from `specs/party-membership-panel/spec.md`. Update relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/2026-07-07-party-membership-panel/design.md`, and similarly for `../../tasks.md`.
 - [x] Archive the change: move `openspec/changes/party-membership-panel/` to `openspec/changes/archive/2026-07-07-party-membership-panel/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
 - [x] Confirm `openspec/changes/archive/2026-07-07-party-membership-panel/` exists and `openspec/changes/party-membership-panel/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-07-07-party-membership-panel` then `git push -u origin doc/archive-2026-07-07-party-membership-panel`
-- [ ] Open a PR from `doc/archive-2026-07-07-party-membership-panel` to `main` with title `docs: archive party-membership-panel (2026-07-07)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-07-07-party-membership-panel` then `git push -u origin doc/archive-2026-07-07-party-membership-panel`
+- [x] Open a PR from `doc/archive-2026-07-07-party-membership-panel` to `main` with title `docs: archive party-membership-panel (2026-07-07)` — **do NOT push directly to `main`** (PR #485)
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge; repo only allows squash merges)
 - [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
 - [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feature/party-membership-panel doc/archive-2026-07-07-party-membership-panel`
 
