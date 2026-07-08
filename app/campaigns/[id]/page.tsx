@@ -239,50 +239,48 @@ function CampaignMembersContent({ campaignId }: { campaignId: string }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">{campaignName || 'Campaign Members'}</h1>
-          <Link href="/campaigns" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
-            Back to Campaigns
-          </Link>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">{campaignName || 'Campaign Members'}</h1>
+        <Link href="/campaigns" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+          Back to Campaigns
+        </Link>
+      </div>
 
-        <ErrorBanner message={error} />
+      <ErrorBanner message={error} />
 
-        {loading ? (
-          <LoadingState label="Loading members..." />
-        ) : (
-          <>
-            <div className="space-y-2">
-              {members.map(member => (
-                <MemberRow
-                  key={member.id}
-                  member={member}
-                  isDM={isDM}
-                  currentUserId={currentUserId}
-                  onRemove={handleRemove}
-                />
-              ))}
-            </div>
-
-            {isDM && (
-              <InviteSection campaignId={campaignId} onInvited={fetchData} />
-            )}
-
-            {parties.map(party => (
-              <PartyMembershipPanel
-                key={party.id}
-                campaignId={campaignId}
-                party={party}
-                characters={myCharacters}
-                userId={currentUserId}
-                charactersUnavailable={charactersUnavailable}
+      {loading ? (
+        <LoadingState label="Loading members..." />
+      ) : (
+        <>
+          <div className="space-y-2">
+            {members.map(member => (
+              <MemberRow
+                key={member.id}
+                member={member}
+                isDM={isDM}
+                currentUserId={currentUserId}
+                onRemove={handleRemove}
               />
             ))}
-          </>
-        )}
-      </div>
+          </div>
+
+          {isDM && (
+            <InviteSection campaignId={campaignId} onInvited={fetchData} />
+          )}
+
+          {parties.map(party => (
+            <PartyMembershipPanel
+              key={party.id}
+              campaignId={campaignId}
+              party={party}
+              characters={myCharacters}
+              userId={currentUserId}
+              charactersUnavailable={charactersUnavailable}
+            />
+          ))}
+        </>
+      )}
     </div>
   );
 }

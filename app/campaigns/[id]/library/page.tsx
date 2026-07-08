@@ -214,47 +214,45 @@ function LibraryContent({ campaignId }: { campaignId: string }) {
   const filtered = activeFilter === 'all' ? items : items.filter(i => i.type === activeFilter);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Content Library</h1>
-          <Link href="/campaigns" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
-            Back to Campaigns
-          </Link>
-        </div>
-
-        <ErrorBanner message={error} />
-
-        {loading ? (
-          <p className="text-gray-400">Loading…</p>
-        ) : (
-          <>
-            <div className="flex gap-2 mb-6 flex-wrap">
-              {FILTER_TABS.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveFilter(tab.id)}
-                  className={`px-4 py-2 rounded text-sm font-medium transition-colors ${activeFilter === tab.id ? 'bg-indigo-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {filtered.length === 0 ? (
-              <p className="text-gray-400 text-center py-12">
-                {items.length === 0
-                  ? 'No saved content yet. Generate a prompt and save it to the library.'
-                  : 'No items match the selected filter.'}
-              </p>
-            ) : (
-              filtered.map(item => (
-                <ContentCard key={item.id} item={item} onDelete={handleDelete} />
-              ))
-            )}
-          </>
-        )}
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Content Library</h1>
+        <Link href="/campaigns" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+          Back to Campaigns
+        </Link>
       </div>
+
+      <ErrorBanner message={error} />
+
+      {loading ? (
+        <p className="text-gray-400">Loading…</p>
+      ) : (
+        <>
+          <div className="flex gap-2 mb-6 flex-wrap">
+            {FILTER_TABS.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveFilter(tab.id)}
+                className={`px-4 py-2 rounded text-sm font-medium transition-colors ${activeFilter === tab.id ? 'bg-indigo-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {filtered.length === 0 ? (
+            <p className="text-gray-400 text-center py-12">
+              {items.length === 0
+                ? 'No saved content yet. Generate a prompt and save it to the library.'
+                : 'No items match the selected filter.'}
+            </p>
+          ) : (
+            filtered.map(item => (
+              <ContentCard key={item.id} item={item} onDelete={handleDelete} />
+            ))
+          )}
+        </>
+      )}
     </div>
   );
 }

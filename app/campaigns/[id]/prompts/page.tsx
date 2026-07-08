@@ -228,98 +228,94 @@ function PromptBuilderContent({ campaignId }: { campaignId: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white">
-        <div className="container mx-auto px-4 py-8">
-          <LoadingState label="Loading campaign and session history..." />
-        </div>
+      <div className="container mx-auto px-4 py-8">
+        <LoadingState label="Loading campaign and session history..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Prompt Builder</h1>
-            {context && <p className="text-gray-400 mt-1">{context.campaign.name}</p>}
-          </div>
-          <Link href="/campaigns" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
-            Back to Campaigns
-          </Link>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Prompt Builder</h1>
+          {context && <p className="text-gray-400 mt-1">{context.campaign.name}</p>}
         </div>
+        <Link href="/campaigns" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+          Back to Campaigns
+        </Link>
+      </div>
 
-        <ErrorBanner message={error} />
+      <ErrorBanner message={error} />
 
-        {context && context.parties.length === 0 && (
-          <div className="bg-yellow-900 border border-yellow-700 rounded p-4 mb-6 text-yellow-200 text-sm">
-            No party linked to this campaign. Prompts will be generated without party context.
+      {context && context.parties.length === 0 && (
+        <div className="bg-yellow-900 border border-yellow-700 rounded p-4 mb-6 text-yellow-200 text-sm">
+          No party linked to this campaign. Prompts will be generated without party context.
+        </div>
+      )}
+
+      {context && (
+        <>
+          <div className="flex gap-2 mb-6 flex-wrap">
+            {TEMPLATES.map(template => (
+              <button
+                key={template.id}
+                onClick={() => selectTemplate(template)}
+                className={`px-4 py-2 rounded text-sm font-medium transition-colors ${activeTemplateId === template.id ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
+              >
+                {template.label}
+              </button>
+            ))}
           </div>
-        )}
 
-        {context && (
-          <>
-            <div className="flex gap-2 mb-6 flex-wrap">
-              {TEMPLATES.map(template => (
-                <button
-                  key={template.id}
-                  onClick={() => selectTemplate(template)}
-                  className={`px-4 py-2 rounded text-sm font-medium transition-colors ${activeTemplateId === template.id ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
-                >
-                  {template.label}
-                </button>
-              ))}
-            </div>
+          {hasNotes && (
+            <label className="flex items-center gap-2 text-sm text-gray-300 mb-4">
+              <input
+                type="checkbox"
+                checked={includeNotes}
+                onChange={e => {
+                  setIncludeNotes(e.target.checked);
+                  setBuiltPrompt(null);
+                  setShowSavePanel(false);
+                }}
+                className="w-4 h-4"
+              />
+              Include DM notes in prompt
+            </label>
+          )}
 
-            {hasNotes && (
-              <label className="flex items-center gap-2 text-sm text-gray-300 mb-4">
-                <input
-                  type="checkbox"
-                  checked={includeNotes}
-                  onChange={e => {
-                    setIncludeNotes(e.target.checked);
-                    setBuiltPrompt(null);
-                    setShowSavePanel(false);
-                  }}
-                  className="w-4 h-4"
-                />
-                Include DM notes in prompt
-              </label>
-            )}
+          <TemplateForm
+            template={activeTemplate}
+            fields={fields}
+            validationError={validationError}
+            onFieldChange={handleFieldChange}
+            onGenerate={() => handleGenerate(context)}
+          />
 
-            <TemplateForm
+          {builtPrompt && <PromptOutput builtPrompt={builtPrompt} />}
+
+          <div className="mt-4">
+            <button
+              disabled={!builtPrompt}
+              onClick={() => setShowSavePanel(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed px-4 py-2 rounded text-sm"
+            >
+              Save to Library
+            </button>
+          </div>
+
+          {builtPrompt && showSavePanel && (
+            <SavePanel
+              campaignId={campaignId}
               template={activeTemplate}
               fields={fields}
-              validationError={validationError}
-              onFieldChange={handleFieldChange}
-              onGenerate={() => handleGenerate(context)}
+              builtPrompt={builtPrompt}
+              chapter={context?.chapter?.title}
+              onClose={() => setShowSavePanel(false)}
             />
-
-            {builtPrompt && <PromptOutput builtPrompt={builtPrompt} />}
-
-            <div className="mt-4">
-              <button
-                disabled={!builtPrompt}
-                onClick={() => setShowSavePanel(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed px-4 py-2 rounded text-sm"
-              >
-                Save to Library
-              </button>
-            </div>
-
-            {builtPrompt && showSavePanel && (
-              <SavePanel
-                campaignId={campaignId}
-                template={activeTemplate}
-                fields={fields}
-                builtPrompt={builtPrompt}
-                chapter={context?.chapter?.title}
-                onClose={() => setShowSavePanel(false)}
-              />
-            )}
-          </>
-        )}
-      </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

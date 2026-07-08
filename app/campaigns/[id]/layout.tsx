@@ -48,7 +48,7 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
           <Link
             key={tab.href}
             href={tab.href}
-            className={`${isActive ? 'border-b-2 border-blue-400 text-white' : 'text-gray-400'} px-2 py-1`}
+            className={`${isActive ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-200'} px-3 py-1.5 rounded-md text-sm font-medium transition-colors`}
           >
             {tab.label}
           </Link>
@@ -70,7 +70,7 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
   if (isChatLarge) {
     return (
       <div className="flex h-screen overflow-hidden">
-        <main className="flex-1 overflow-auto p-4">
+        <main className="flex-1 overflow-auto p-4 bg-gray-900 text-white">
           {header}
           {nav}
           {children}
@@ -80,11 +80,17 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
     )
   }
 
-  return (
-    <>
+  const content = (
+    <div className="bg-gray-900 min-h-screen text-white">
       {header}
       {nav}
       {children}
+    </div>
+  )
+
+  return (
+    <>
+      {content}
       {chat}
     </>
   )
