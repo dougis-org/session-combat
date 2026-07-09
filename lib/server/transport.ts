@@ -25,9 +25,6 @@ const registry = new Map<string, Map<string, Subscription>>();
 // field-level changes on the `campaigns` collection (Decision 3). Cleaned up when the
 // last subscriber for a campaign tears down.
 const lastKnownActiveSessionId = new Map<string, string | null>();
-// Per-campaign polling subscriber count, used to know when to clear
-// lastKnownActiveSessionId in the polling path (mirrors the registry-based count above).
-const pollSubscriberCount = new Map<string, number>();
 let nextSubId = 0;
 let isReplicaSet: boolean | null = null;
 let detectPromise: Promise<boolean> | null = null;
@@ -83,13 +80,23 @@ function emitToRegistry(
   }
 }
 
-// Compares against the last-known activeSessionId for a campaign, updates the map, and
-// reports whether a `session` event should be emitted. Shared by the change-stream path
-// (which dispatches via emitToRegistry) and the polling path (which dispatches directly
-// to its own subscription handler, since poll subscribers aren't in `registry`).
-function shouldEmitSession(campaignId: string, activeSessionId: string | null): boolean {
-  if (lastKnownActiveSessionId.get(campaignId) === activeSessionId) return false;
-  lastKnownActiveSessionId.set(campaignId, activeSessionId);
+// Compares against the last-known activeSessionId for a campaign in the given tracking
+// map, updates it, and reports whether a `session` event should be emitted.
+//
+// The change-stream path uses the shared `lastKnownActiveSessionId` map, since one
+// observed write there fans out to every registry subscriber via a single
+// emitToRegistry call — there's no risk of one subscriber's observation suppressing
+// another's. The polling path instead gives each subscription its own private map:
+// each subscription polls independently, so sharing state across subscriptions for the
+// same campaign would let whichever subscription's poll happens to run first "consume"
+// the transition and starve every other subscriber of that campaign's session event.
+function shouldEmitSession(
+  map: Map<string, string | null>,
+  campaignId: string,
+  activeSessionId: string | null
+): boolean {
+  if (map.get(campaignId) === activeSessionId) return false;
+  map.set(campaignId, activeSessionId);
   return true;
 }
 
@@ -126,7 +133,7 @@ async function demuxCampaignDoc(doc: ChangeDoc, campaignId: string, fullDocument
   const changedFields = doc.updateDescription?.updatedFields ?? fullDocument;
   if ('activeSessionId' in changedFields) {
     const activeSessionId = (fullDocument['activeSessionId'] ?? null) as string | null;
-    if (shouldEmitSession(campaignId, activeSessionId)) {
+    if (shouldEmitSession(lastKnownActiveSessionId, campaignId, activeSessionId)) {
       emitToRegistry(campaignId, { type: 'session', campaignId, data: { activeSessionId } });
     }
   }
@@ -231,7 +238,13 @@ async function openStream(): Promise<ChangeStream> {
   return openPromise;
 }
 
-async function pollCampaigns(campaignId: string, handler: EventHandler, since: Date, db: Awaited<ReturnType<typeof getDatabase>>) {
+async function pollCampaigns(
+  campaignId: string,
+  handler: EventHandler,
+  since: Date,
+  db: Awaited<ReturnType<typeof getDatabase>>,
+  sessionState: Map<string, string | null>
+) {
   const docs = await db
     .collection('campaigns')
     .find({
@@ -250,8 +263,9 @@ async function pollCampaigns(campaignId: string, handler: EventHandler, since: D
 
     // Polling subscribers aren't in `registry` (that's Atlas-only), so the session event
     // must be delivered directly to this poll's own handler rather than via emitToRegistry.
+    // `sessionState` is private to this subscription (see shouldEmitSession's comment).
     const activeSessionId = (doc['activeSessionId'] ?? null) as string | null;
-    if (shouldEmitSession(campaignId, activeSessionId)) {
+    if (shouldEmitSession(sessionState, campaignId, activeSessionId)) {
       handler({ type: 'session', campaignId, data: { activeSessionId } });
     }
   }
@@ -274,7 +288,8 @@ async function pollFn(
   campaignId: string,
   userId: string,
   handler: EventHandler,
-  sinceRef: { value: number }
+  sinceRef: { value: number },
+  sessionState: Map<string, string | null>
 ) {
   // Capture start time before querying so documents created during the query window are not skipped.
   const pollStart = Date.now();
@@ -282,7 +297,7 @@ async function pollFn(
     const db = await getDatabase();
     const since = new Date(sinceRef.value);
 
-    await pollCampaigns(campaignId, handler, since, db);
+    await pollCampaigns(campaignId, handler, since, db, sessionState);
 
     const messages = await pollCollection<CampaignMessage>('campaignMessages', campaignId, since, db);
     const rolls = await pollCollection<CampaignRoll>('campaignRolls', campaignId, since, db);
@@ -338,9 +353,12 @@ export async function subscribe(campaignId: string, userId: string, onEvent: Eve
       }
     };
   } else {
-    pollSubscriberCount.set(campaignId, (pollSubscriberCount.get(campaignId) ?? 0) + 1);
     const sinceRef = { value: Date.now() };
-    const intervalId = setInterval(() => pollFn(campaignId, userId, onEvent, sinceRef), 2000);
+    // Private to this subscription — see shouldEmitSession's comment for why polling
+    // can't share session-tracking state across subscriptions the way registry-backed
+    // change-stream delivery can.
+    const sessionState = new Map<string, string | null>();
+    const intervalId = setInterval(() => pollFn(campaignId, userId, onEvent, sinceRef, sessionState), 2000);
     (intervalId as unknown as { unref?: () => void }).unref?.();
 
     let torn = false;
@@ -348,13 +366,6 @@ export async function subscribe(campaignId: string, userId: string, onEvent: Eve
       if (torn) return;
       torn = true;
       clearInterval(intervalId);
-      const remaining = (pollSubscriberCount.get(campaignId) ?? 1) - 1;
-      if (remaining <= 0) {
-        pollSubscriberCount.delete(campaignId);
-        lastKnownActiveSessionId.delete(campaignId);
-      } else {
-        pollSubscriberCount.set(campaignId, remaining);
-      }
     };
   }
 }

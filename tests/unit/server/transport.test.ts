@@ -817,6 +817,49 @@ describe('T4 — session event derivation', () => {
     expect(handler2).toHaveBeenCalledWith({ type: 'session', campaignId: 'camp-1', data: { activeSessionId: 'session-1' } });
     td2();
   });
+
+  it('polling: two independent subscribers to the same campaign each receive the session event (no shared-state suppression)', async () => {
+    // Regression: session-derivation state must be tracked per-subscription in polling
+    // mode, not shared per-campaignId — otherwise whichever subscription's poll cycle
+    // happens to run first "consumes" the transition and the other subscriber's poll,
+    // observing the identical document, would incorrectly see no change and never emit.
+    jest.useFakeTimers();
+    mockWatch = jest.fn().mockImplementation(() => {
+      throw new Error('not running with --replSet');
+    });
+
+    const now = Date.now();
+    jest.setSystemTime(now);
+    mockToArray = jest.fn().mockResolvedValue([
+      { id: 'camp-1', activeSessionId: 'session-1', updatedAt: new Date(now + 1000) },
+    ]);
+
+    const handler1 = jest.fn();
+    const handler2 = jest.fn();
+    const teardown1 = await transport.subscribe('camp-1', 'user-1', handler1);
+    const teardown2 = await transport.subscribe('camp-1', 'user-2', handler2);
+
+    jest.advanceTimersByTime(2001);
+    await flushMicrotasks();
+
+    expect(handler1).toHaveBeenCalledWith({ type: 'session', campaignId: 'camp-1', data: { activeSessionId: 'session-1' } });
+    expect(handler2).toHaveBeenCalledWith({ type: 'session', campaignId: 'camp-1', data: { activeSessionId: 'session-1' } });
+
+    // Non-terminal teardown: one of two subscribers for camp-1 disconnects. The
+    // surviving subscriber's poll cycle should keep running unaffected.
+    teardown1();
+
+    handler2.mockClear();
+    // Same activeSessionId observed again — no new session event for the surviving
+    // subscriber, since its own per-subscription state already recorded 'session-1'.
+    jest.advanceTimersByTime(2001);
+    await flushMicrotasks();
+
+    const sessionCalls = handler2.mock.calls.filter(([e]) => e.type === 'session');
+    expect(sessionCalls).toHaveLength(0);
+
+    teardown2();
+  });
 });
 
 // ============================================================================
