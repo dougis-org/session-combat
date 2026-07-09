@@ -69,8 +69,8 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
 
   if (isChatLarge) {
     return (
-      <div className="flex h-screen overflow-hidden">
-        <main className="flex-1 overflow-auto p-4 bg-gray-900 text-white">
+      <div className="flex h-screen overflow-hidden bg-gray-900 text-white">
+        <main className="flex-1 overflow-auto p-4">
           {header}
           {nav}
           {children}
@@ -80,18 +80,12 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
     )
   }
 
-  const content = (
+  return (
     <div className="bg-gray-900 min-h-screen text-white">
       {header}
       {nav}
       {children}
-    </div>
-  )
-
-  return (
-    <>
-      {content}
       {chat}
-    </>
+    </div>
   )
 }

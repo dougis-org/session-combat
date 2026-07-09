@@ -142,9 +142,10 @@ describe('CampaignLayout', () => {
     const wrapper = child.closest('.bg-gray-900');
     expect(wrapper).not.toBeNull();
     expect(wrapper).toHaveClass('min-h-screen');
+    expect(wrapper).toContainElement(screen.getByTestId('campaign-chat'));
   });
 
-  test('TC-1.7: isChatLarge branch renders header/nav/children inside a bg-gray-900 <main>', async () => {
+  test('TC-1.7: isChatLarge branch renders a bg-gray-900 outer container wrapping both <main> and the chat panel', async () => {
     mockPathname = '/campaigns/test-id';
     render(
       <CampaignLayout>
@@ -160,7 +161,9 @@ describe('CampaignLayout', () => {
     await waitFor(() => {
       const main = screen.getByTestId('child-content').closest('main');
       expect(main).not.toBeNull();
-      expect(main).toHaveClass('bg-gray-900');
+      const outer = main?.parentElement;
+      expect(outer).toHaveClass('bg-gray-900');
+      expect(outer).toContainElement(screen.getByTestId('campaign-chat'));
     });
   });
 
