@@ -12,6 +12,24 @@ plumbing everything else plugs into.
 
 ## Component layout
 
+Each server instance is independent (Fly.io can run more than one machine
+concurrently), so the transport has two delivery paths that run side by side:
+
+- **Same-instance fast path:** the route handler that processed a write
+  (`messages`, `rolls`, `sessions/active`) calls `emitFiltered()` synchronously,
+  reaching same-instance subscribers with near-zero latency.
+- **Cross-instance-safe path:** a single **database-level** change stream (or,
+  on standalone Mongo, a since-timestamp poll) per instance independently
+  observes writes to `campaigns`, `campaignMessages`, and `campaignRolls` —
+  regardless of which instance made the write — and re-delivers the
+  corresponding event to that instance's own subscribers.
+
+Because a write can be observed via both paths, the client (`CampaignChat`'s
+`seenIds`-keyed dedup) drops the second, redundant delivery by id. `session`
+events are derived from `activeSessionId` field-level changes on `campaigns`
+documents rather than being their own collection, and are idempotent to
+re-apply.
+
 ```mermaid
 flowchart TB
     subgraph Browser
@@ -21,22 +39,28 @@ flowchart TB
         Dock --> Hook --> ES
     end
     subgraph Server["Next.js instance (Fly.io)"]
+        ROUTE["messages/rolls/sessions route handlers"]
         SSE["GET /campaigns/:id/stream (4a)"]
         AUTH["assertCampaignAccess (1e)"]
-        REG["Subscriber registry<br/>(demux by campaignId)"]
-        TA["Transport abstraction<br/>subscribe(campaignId, onEvent)"]
+        REG["Subscriber registry<br/>(demux by campaignId + collection)"]
+        TA["Transport abstraction<br/>subscribe(campaignId, userId, onEvent)"]
+        ROUTE -->|"fast path: emitFiltered()"| REG
         SSE --> AUTH
         SSE --> TA
         TA --> REG
     end
     subgraph Mongo["MongoDB"]
-        CS["ONE shared change stream<br/>per instance (Atlas)"]
-        POLL["since-timestamp poll (local dev)"]
+        CS["ONE shared db-level watch()<br/>per instance (Atlas) — campaigns,<br/>campaignMessages, campaignRolls"]
+        POLL["since-timestamp poll of all three<br/>collections (local dev)"]
+        SESS["activeSessionId field-diff<br/>→ derived 'session' event"]
     end
     ES -- "HTTP text/event-stream" --> SSE
     REG -->|prod · single cursor| CS
     REG -->|fallback| POLL
-    CS -. "events demux'd to all<br/>campaigns + connections" .-> REG
+    CS -. "change/message/roll events<br/>demux'd by ns.coll + campaignId,<br/>visibility-filtered per subscriber" .-> REG
+    CS --> SESS
+    POLL --> SESS
+    SESS -. "cross-instance-safe path<br/>(dedup'd client-side against<br/>the fast path above)" .-> REG
 ```
 
 ## Transport selection (4a)
@@ -45,16 +69,29 @@ The same `subscribe()` interface picks its source at runtime so clients never ch
 
 ```mermaid
 flowchart TD
-    start(["subscribe(campaignId)"]) --> q{"Mongo is a<br/>replica set?"}
-    q -->|yes · Atlas| cs["one shared watch() per instance<br/>(unfiltered) → demux by campaignId"]
-    q -->|no · standalone dev| poll["poll collections since<br/>last-seen timestamp"]
-    cs --> emit["emit typed campaign events"]
-    poll --> emit
+    start(["subscribe(campaignId, userId)"]) --> q{"Mongo is a<br/>replica set?"}
+    q -->|yes · Atlas| cs["one shared db.watch() per instance<br/>(campaigns + campaignMessages +<br/>campaignRolls) → demux by ns.coll + campaignId"]
+    q -->|no · standalone dev| poll["poll all three collections since<br/>last-seen timestamp, per subscription"]
+    cs --> sess{"activeSessionId<br/>changed?"}
+    poll --> sess
+    sess -->|yes| sessEvt["emit derived 'session' event"]
+    sess -->|no| vis
+    sessEvt --> vis{"message/roll?"}
+    vis -->|yes| filt["canSeeMessage / canSeeRoll<br/>per subscriber"]
+    vis -->|no · change| emit
+    filt --> emit["emit typed campaign event"]
     emit --> sse["write SSE frames + heartbeat"]
     sse --> close{"client<br/>disconnected?"}
     close -->|no| emit
-    close -->|yes| teardown["close cursor / stop poll"]
+    close -->|yes| teardown["close cursor / stop poll;<br/>drop per-campaign session state<br/>if last subscriber"]
 ```
+
+Route handlers (`messages`, `rolls`, `sessions/active`) additionally call
+`emitFiltered()` synchronously right after their write, as a same-instance
+fast path that runs independently of (and faster than) the diagram above.
+The client dedups by event id so a same-instance subscriber that receives
+both the fast-path delivery and the later Mongo-observed delivery only
+renders the item once.
 
 ## Deliverables (sub-issues)
 

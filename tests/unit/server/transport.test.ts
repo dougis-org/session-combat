@@ -1,9 +1,14 @@
+import type { CampaignMember } from '@/lib/types';
+
 // --- Mock infrastructure ---
 
 let mockWatch: jest.Mock;
 let mockCursorClose: jest.Mock;
-let mockToArray: jest.Mock;
+let mockToArray: jest.Mock; // campaigns collection
+let mockMessagesToArray: jest.Mock;
+let mockRollsToArray: jest.Mock;
 let mockGetDatabase: jest.Mock;
+let mockListMembers: jest.Mock;
 
 async function* makeCursorIterator(this: { pendingEvents?: Array<unknown>; shouldInvalidate?: boolean }) {
   // hang (stream stays open — tests override watch to return custom cursors)
@@ -20,10 +25,43 @@ function makeStreamCursor() {
   return { close: mockCursorClose, [Symbol.asyncIterator]: makeCursorIterator };
 }
 
+// A cursor whose async iterator can be fed documents on demand via push(), simulating
+// a live MongoDB change-stream cursor that independently observes writes made by any process.
+function createPushableCursor() {
+  const queue: unknown[] = [];
+  let resolveNext: ((v: IteratorResult<unknown>) => void) | null = null;
+  const close = jest.fn().mockResolvedValue(undefined);
+  return {
+    push(doc: unknown) {
+      if (resolveNext) {
+        const r = resolveNext;
+        resolveNext = null;
+        r({ value: doc, done: false });
+      } else {
+        queue.push(doc);
+      }
+    },
+    cursor: {
+      close,
+      [Symbol.asyncIterator]() {
+        return {
+          next(): Promise<IteratorResult<unknown>> {
+            if (queue.length > 0) {
+              return Promise.resolve({ value: queue.shift(), done: false });
+            }
+            return new Promise<IteratorResult<unknown>>(resolve => { resolveNext = resolve; });
+          },
+        };
+      },
+    },
+  };
+}
+
 jest.mock('@/lib/db', () => ({
   connectToDatabase: jest.fn(async () => ({
     client: {
       db: () => ({
+        watch: (...args: unknown[]) => mockWatch(...args),
         collection: () => ({
           watch: (...args: unknown[]) => mockWatch(...args),
         }),
@@ -33,13 +71,26 @@ jest.mock('@/lib/db', () => ({
   getDatabase: jest.fn((...args: unknown[]) => mockGetDatabase(...args)),
 }));
 
+jest.mock('@/lib/storage', () => ({
+  storage: {
+    listMembersForCampaign: (...args: unknown[]) => mockListMembers(...args),
+  },
+}));
+
 function resetMocks() {
   mockCursorClose = jest.fn().mockResolvedValue(undefined);
   mockToArray = jest.fn().mockResolvedValue([]);
+  mockMessagesToArray = jest.fn().mockResolvedValue([]);
+  mockRollsToArray = jest.fn().mockResolvedValue([]);
+  mockListMembers = jest.fn().mockResolvedValue([]);
   mockGetDatabase = jest.fn(async () => ({
-    collection: () => ({
+    collection: (name: string) => ({
       find: (...args: unknown[]) => ({
-        toArray: () => mockToArray(...args),
+        toArray: () => {
+          if (name === 'campaignMessages') return mockMessagesToArray(...args);
+          if (name === 'campaignRolls') return mockRollsToArray(...args);
+          return mockToArray(...args);
+        },
       }),
     }),
   }));
@@ -47,6 +98,23 @@ function resetMocks() {
   mockWatch = jest.fn()
     .mockImplementationOnce(() => makeProbeCursor())
     .mockImplementation(() => makeStreamCursor());
+}
+
+// Poll cycles now chain several sequential awaits (campaigns + messages + rolls + members
+// lookup); flush enough microtask ticks for fake timers to settle fully.
+async function flushMicrotasks(times = 10) {
+  for (let i = 0; i < times; i++) await Promise.resolve();
+}
+
+function member(userId: string, role: 'dm' | 'player' = 'player'): CampaignMember {
+  return {
+    id: `m-${userId}`,
+    campaignId: 'camp-1',
+    userId,
+    role,
+    status: 'active',
+    history: [],
+  };
 }
 
 // Reload transport module before each test to reset module-level singletons.
@@ -341,4 +409,514 @@ it('T3-14: poll DB error is caught and logged; interval continues', async () => 
 
   teardown();
   consoleSpy.mockRestore();
+});
+
+// ============================================================================
+// T2 — Broaden the Atlas change-stream path (db-level watch, ns.coll routing)
+// ============================================================================
+
+describe('T2 — db-level watch and collection routing', () => {
+  it('opens a single database-level watch cursor (not one per collection)', async () => {
+    const teardown = await transport.subscribe('c1', 'user-c1', jest.fn());
+    await new Promise(r => setTimeout(r, 10));
+    // Same call-count contract as before: probe (1) + single shared real cursor (1) = 2.
+    expect(mockWatch).toHaveBeenCalledTimes(2);
+    teardown();
+  });
+
+  it('a campaignRolls change document is routed as a roll event to the right campaign', async () => {
+    mockListMembers = jest.fn().mockResolvedValue([member('player-1')]);
+    const rollDoc = {
+      id: 'roll-1', campaignId: 'A', rollerId: 'player-1', rollerName: 'P1',
+      formula: '1d20', rolls: [15], total: 15, visibility: { scope: 'group' }, createdAt: new Date(),
+    };
+
+    async function* yieldOnce() {
+      yield { ns: { coll: 'campaignRolls' }, fullDocument: rollDoc };
+      await new Promise(() => {});
+    }
+    const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce };
+    mockWatch = jest.fn()
+      .mockImplementationOnce(() => makeProbeCursor())
+      .mockImplementationOnce(() => realCursor);
+
+    const handlerA = jest.fn();
+    const handlerB = jest.fn();
+    const tdA = await transport.subscribe('A', 'player-1', handlerA);
+    const tdB = await transport.subscribe('B', 'player-1', handlerB);
+
+    await new Promise(r => setTimeout(r, 30));
+
+    expect(handlerA).toHaveBeenCalledWith(expect.objectContaining({ type: 'roll', campaignId: 'A', data: rollDoc }));
+    expect(handlerB).not.toHaveBeenCalled();
+    tdA(); tdB();
+  });
+
+  it('a campaignMessages change document is routed as a message event', async () => {
+    mockListMembers = jest.fn().mockResolvedValue([member('player-1')]);
+    const msgDoc = {
+      id: 'msg-1', campaignId: 'A', senderId: 'player-1', senderName: 'P1',
+      text: 'hi', visibility: { scope: 'group' }, createdAt: new Date(),
+    };
+
+    async function* yieldOnce() {
+      yield { ns: { coll: 'campaignMessages' }, fullDocument: msgDoc };
+      await new Promise(() => {});
+    }
+    const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce };
+    mockWatch = jest.fn()
+      .mockImplementationOnce(() => makeProbeCursor())
+      .mockImplementationOnce(() => realCursor);
+
+    const handler = jest.fn();
+    const td = await transport.subscribe('A', 'player-1', handler);
+    await new Promise(r => setTimeout(r, 30));
+
+    expect(handler).toHaveBeenCalledWith(expect.objectContaining({ type: 'message', campaignId: 'A', data: msgDoc }));
+    td();
+  });
+
+  describe('two-instance simulation (Atlas / change-stream)', () => {
+    it('registry maps are independent across two isolated transport module instances', () => {
+      let transportA: typeof import('@/lib/server/transport');
+      let transportB: typeof import('@/lib/server/transport');
+      jest.isolateModules(() => {
+        transportA = require('@/lib/server/transport');
+      });
+      jest.isolateModules(() => {
+        transportB = require('@/lib/server/transport');
+      });
+      expect(transportA!).not.toBe(transportB!);
+    });
+
+    it('session event written "by instance A" is delivered to instance B\'s subscriber without A calling B directly', async () => {
+      const cursors: ReturnType<typeof createPushableCursor>[] = [];
+      mockWatch = jest.fn().mockImplementation((_arg: unknown, opts: Record<string, unknown> | undefined) => {
+        if (opts && 'maxAwaitTimeMS' in opts) return makeProbeCursor();
+        const c = createPushableCursor();
+        cursors.push(c);
+        return c.cursor;
+      });
+
+      let transportA: typeof import('@/lib/server/transport');
+      let transportB: typeof import('@/lib/server/transport');
+      jest.isolateModules(() => { transportA = require('@/lib/server/transport'); });
+      jest.isolateModules(() => { transportB = require('@/lib/server/transport'); });
+
+      const handlerB = jest.fn();
+      await transportA!.subscribe('camp-1', 'dm-1', jest.fn());
+      await transportB!.subscribe('camp-1', 'player-1', handlerB);
+      await new Promise(r => setTimeout(r, 10));
+
+      expect(cursors.length).toBe(2); // one shared cursor per instance
+
+      // Instance A's write is observed independently by both cursors (simulating a
+      // real shared MongoDB change stream), not routed through transportB directly.
+      const writeDoc = {
+        ns: { coll: 'campaigns' },
+        fullDocument: { id: 'camp-1', activeSessionId: 'session-9' },
+        updateDescription: { updatedFields: { activeSessionId: 'session-9' } },
+      };
+      cursors.forEach(c => c.push(writeDoc));
+      await new Promise(r => setTimeout(r, 20));
+
+      expect(handlerB).toHaveBeenCalledWith({ type: 'session', campaignId: 'camp-1', data: { activeSessionId: 'session-9' } });
+    });
+
+    it('roll insert "by instance A" is delivered to instance B\'s subscriber', async () => {
+      mockListMembers = jest.fn().mockResolvedValue([member('player-1')]);
+      const cursors: ReturnType<typeof createPushableCursor>[] = [];
+      mockWatch = jest.fn().mockImplementation((_arg: unknown, opts: Record<string, unknown> | undefined) => {
+        if (opts && 'maxAwaitTimeMS' in opts) return makeProbeCursor();
+        const c = createPushableCursor();
+        cursors.push(c);
+        return c.cursor;
+      });
+
+      let transportA: typeof import('@/lib/server/transport');
+      let transportB: typeof import('@/lib/server/transport');
+      jest.isolateModules(() => { transportA = require('@/lib/server/transport'); });
+      jest.isolateModules(() => { transportB = require('@/lib/server/transport'); });
+
+      const handlerB = jest.fn();
+      await transportA!.subscribe('camp-1', 'dm-1', jest.fn());
+      await transportB!.subscribe('camp-1', 'player-1', handlerB);
+      await new Promise(r => setTimeout(r, 10));
+
+      const rollDoc = {
+        id: 'roll-9', campaignId: 'camp-1', rollerId: 'dm-1', rollerName: 'DM',
+        formula: '1d20', rolls: [12], total: 12, visibility: { scope: 'group' }, createdAt: new Date(),
+      };
+      cursors.forEach(c => c.push({ ns: { coll: 'campaignRolls' }, fullDocument: rollDoc }));
+      await new Promise(r => setTimeout(r, 20));
+
+      expect(handlerB).toHaveBeenCalledWith(expect.objectContaining({ type: 'roll', campaignId: 'camp-1', data: rollDoc }));
+    });
+
+    it('message insert "by instance A" is delivered to instance B\'s subscriber', async () => {
+      mockListMembers = jest.fn().mockResolvedValue([member('player-1')]);
+      const cursors: ReturnType<typeof createPushableCursor>[] = [];
+      mockWatch = jest.fn().mockImplementation((_arg: unknown, opts: Record<string, unknown> | undefined) => {
+        if (opts && 'maxAwaitTimeMS' in opts) return makeProbeCursor();
+        const c = createPushableCursor();
+        cursors.push(c);
+        return c.cursor;
+      });
+
+      let transportA: typeof import('@/lib/server/transport');
+      let transportB: typeof import('@/lib/server/transport');
+      jest.isolateModules(() => { transportA = require('@/lib/server/transport'); });
+      jest.isolateModules(() => { transportB = require('@/lib/server/transport'); });
+
+      const handlerB = jest.fn();
+      await transportA!.subscribe('camp-1', 'dm-1', jest.fn());
+      await transportB!.subscribe('camp-1', 'player-1', handlerB);
+      await new Promise(r => setTimeout(r, 10));
+
+      const msgDoc = {
+        id: 'msg-9', campaignId: 'camp-1', senderId: 'dm-1', senderName: 'DM',
+        text: 'hello from A', visibility: { scope: 'group' }, createdAt: new Date(),
+      };
+      cursors.forEach(c => c.push({ ns: { coll: 'campaignMessages' }, fullDocument: msgDoc }));
+      await new Promise(r => setTimeout(r, 20));
+
+      expect(handlerB).toHaveBeenCalledWith(expect.objectContaining({ type: 'message', campaignId: 'camp-1', data: msgDoc }));
+    });
+  });
+});
+
+// ============================================================================
+// T3 — Broaden the polling path
+// ============================================================================
+
+describe('T3 — polling observes messages and rolls', () => {
+  it('polling subscriber receives a message event for a new campaignMessages doc', async () => {
+    jest.useFakeTimers();
+    mockWatch = jest.fn().mockImplementationOnce(() => {
+      throw new Error('not running with --replSet');
+    });
+    mockListMembers = jest.fn().mockResolvedValue([member('user-c1')]);
+
+    const now = Date.now();
+    jest.setSystemTime(now);
+    const msgDoc = {
+      id: 'msg-1', campaignId: 'c1', senderId: 'user-c1', senderName: 'U1',
+      text: 'hi', visibility: { scope: 'group' }, createdAt: new Date(now + 1000),
+    };
+    mockMessagesToArray = jest.fn().mockResolvedValue([msgDoc]);
+
+    const handler = jest.fn();
+    const teardown = await transport.subscribe('c1', 'user-c1', handler);
+
+    jest.advanceTimersByTime(2001);
+    await flushMicrotasks();
+
+    teardown();
+
+    expect(handler).toHaveBeenCalledWith(expect.objectContaining({ type: 'message', campaignId: 'c1', data: msgDoc }));
+  });
+
+  it('polling subscriber receives a roll event for a new campaignRolls doc', async () => {
+    jest.useFakeTimers();
+    mockWatch = jest.fn().mockImplementationOnce(() => {
+      throw new Error('not running with --replSet');
+    });
+    mockListMembers = jest.fn().mockResolvedValue([member('user-c1')]);
+
+    const now = Date.now();
+    jest.setSystemTime(now);
+    const rollDoc = {
+      id: 'roll-1', campaignId: 'c1', rollerId: 'user-c1', rollerName: 'U1',
+      formula: '1d20', rolls: [7], total: 7, visibility: { scope: 'group' }, createdAt: new Date(now + 1000),
+    };
+    mockRollsToArray = jest.fn().mockResolvedValue([rollDoc]);
+
+    const handler = jest.fn();
+    const teardown = await transport.subscribe('c1', 'user-c1', handler);
+
+    jest.advanceTimersByTime(2001);
+    await flushMicrotasks();
+
+    teardown();
+
+    expect(handler).toHaveBeenCalledWith(expect.objectContaining({ type: 'roll', campaignId: 'c1', data: rollDoc }));
+  });
+
+  it('two-instance polling: a write "by instance A" is observed by instance B\'s next poll cycle', async () => {
+    jest.useFakeTimers();
+    mockWatch = jest.fn().mockImplementation(() => {
+      throw new Error('not running with --replSet');
+    });
+    mockListMembers = jest.fn().mockResolvedValue([member('player-1')]);
+
+    const now = Date.now();
+    jest.setSystemTime(now);
+
+    let transportA: typeof import('@/lib/server/transport');
+    let transportB: typeof import('@/lib/server/transport');
+    jest.isolateModules(() => { transportA = require('@/lib/server/transport'); });
+    jest.isolateModules(() => { transportB = require('@/lib/server/transport'); });
+
+    const handlerB = jest.fn();
+    await transportA!.subscribe('camp-1', 'dm-1', jest.fn());
+    const teardownB = await transportB!.subscribe('camp-1', 'player-1', handlerB);
+
+    // Simulate "instance A wrote a roll" by making it show up in the shared underlying store
+    // that both instances' polls query against.
+    const rollDoc = {
+      id: 'roll-shared', campaignId: 'camp-1', rollerId: 'dm-1', rollerName: 'DM',
+      formula: '1d20', rolls: [3], total: 3, visibility: { scope: 'group' }, createdAt: new Date(now + 500),
+    };
+    mockRollsToArray = jest.fn().mockResolvedValue([rollDoc]);
+
+    jest.advanceTimersByTime(2001);
+    await flushMicrotasks();
+
+    teardownB();
+
+    expect(handlerB).toHaveBeenCalledWith(expect.objectContaining({ type: 'roll', campaignId: 'camp-1', data: rollDoc }));
+  });
+});
+
+// ============================================================================
+// T4 — Session event derivation from activeSessionId
+// ============================================================================
+
+describe('T4 — session event derivation', () => {
+  it('change-stream: unrelated field change does not emit a spurious session event', async () => {
+    async function* yieldTwice() {
+      yield {
+        ns: { coll: 'campaigns' },
+        fullDocument: { id: 'camp-1', activeSessionId: 'session-1' },
+        updateDescription: { updatedFields: { activeSessionId: 'session-1' } },
+      };
+      yield {
+        ns: { coll: 'campaigns' },
+        fullDocument: { id: 'camp-1', activeSessionId: 'session-1', name: 'renamed' },
+        updateDescription: { updatedFields: { name: 'renamed' } },
+      };
+      await new Promise(() => {});
+    }
+    const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldTwice };
+    mockWatch = jest.fn()
+      .mockImplementationOnce(() => makeProbeCursor())
+      .mockImplementationOnce(() => realCursor);
+
+    const handler = jest.fn();
+    const td = await transport.subscribe('camp-1', 'user-1', handler);
+    await new Promise(r => setTimeout(r, 30));
+
+    const sessionCalls = handler.mock.calls.filter(([e]) => e.type === 'session');
+    expect(sessionCalls).toHaveLength(1); // only the first (seeding) write emits
+    td();
+  });
+
+  it('change-stream: activeSessionId change emits a session event', async () => {
+    async function* yieldOnce() {
+      yield {
+        ns: { coll: 'campaigns' },
+        fullDocument: { id: 'camp-1', activeSessionId: 'session-2' },
+        updateDescription: { updatedFields: { activeSessionId: 'session-2' } },
+      };
+      await new Promise(() => {});
+    }
+    const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce };
+    mockWatch = jest.fn()
+      .mockImplementationOnce(() => makeProbeCursor())
+      .mockImplementationOnce(() => realCursor);
+
+    const handler = jest.fn();
+    const td = await transport.subscribe('camp-1', 'user-1', handler);
+    await new Promise(r => setTimeout(r, 30));
+
+    expect(handler).toHaveBeenCalledWith({ type: 'session', campaignId: 'camp-1', data: { activeSessionId: 'session-2' } });
+    td();
+  });
+
+  it('polling: activeSessionId change emits a session event', async () => {
+    jest.useFakeTimers();
+    mockWatch = jest.fn().mockImplementationOnce(() => {
+      throw new Error('not running with --replSet');
+    });
+
+    const now = Date.now();
+    jest.setSystemTime(now);
+    mockToArray = jest.fn().mockResolvedValue([
+      { id: 'camp-1', activeSessionId: 'session-2', updatedAt: new Date(now + 1000) },
+    ]);
+
+    const handler = jest.fn();
+    const teardown = await transport.subscribe('camp-1', 'user-1', handler);
+
+    jest.advanceTimersByTime(2001);
+    await flushMicrotasks();
+
+    teardown();
+
+    expect(handler).toHaveBeenCalledWith({ type: 'session', campaignId: 'camp-1', data: { activeSessionId: 'session-2' } });
+  });
+
+  it('per-campaign session state is cleaned up when the last subscriber tears down', async () => {
+    async function* yieldOnce() {
+      yield {
+        ns: { coll: 'campaigns' },
+        fullDocument: { id: 'camp-1', activeSessionId: 'session-1' },
+        updateDescription: { updatedFields: { activeSessionId: 'session-1' } },
+      };
+      await new Promise(() => {});
+    }
+    const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce };
+    mockWatch = jest.fn()
+      .mockImplementationOnce(() => makeProbeCursor())
+      .mockImplementationOnce(() => realCursor);
+
+    const handler1 = jest.fn();
+    const td1 = await transport.subscribe('camp-1', 'user-1', handler1);
+    await new Promise(r => setTimeout(r, 20));
+    expect(handler1).toHaveBeenCalledWith({ type: 'session', campaignId: 'camp-1', data: { activeSessionId: 'session-1' } });
+    td1(); // last subscriber for camp-1 tears down — state should be cleared
+
+    // Re-subscribe: a fresh cursor observing the SAME activeSessionId should emit again,
+    // proving no stale "already-seen" state leaked across the subscription lifecycle.
+    async function* yieldOnceAgain() {
+      yield {
+        ns: { coll: 'campaigns' },
+        fullDocument: { id: 'camp-1', activeSessionId: 'session-1' },
+        updateDescription: { updatedFields: { activeSessionId: 'session-1' } },
+      };
+      await new Promise(() => {});
+    }
+    const realCursor2 = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnceAgain };
+    mockWatch = jest.fn().mockImplementationOnce(() => realCursor2);
+
+    const handler2 = jest.fn();
+    const td2 = await transport.subscribe('camp-1', 'user-2', handler2);
+    await new Promise(r => setTimeout(r, 20));
+    expect(handler2).toHaveBeenCalledWith({ type: 'session', campaignId: 'camp-1', data: { activeSessionId: 'session-1' } });
+    td2();
+  });
+});
+
+// ============================================================================
+// T5 — Visibility replication in the Mongo-observed path
+// ============================================================================
+
+describe('T5 — visibility enforcement in change-stream/poll delivery', () => {
+  it('change-stream: dm-only roll is withheld from a non-DM subscriber', async () => {
+    mockListMembers = jest.fn().mockResolvedValue([member('player-1', 'player'), member('dm-1', 'dm')]);
+    const rollDoc = {
+      id: 'roll-dm', campaignId: 'camp-1', rollerId: 'dm-1', rollerName: 'DM',
+      formula: '1d20', rolls: [1], total: 1, visibility: { scope: 'dm-only' }, createdAt: new Date(),
+    };
+    async function* yieldOnce() {
+      yield { ns: { coll: 'campaignRolls' }, fullDocument: rollDoc };
+      await new Promise(() => {});
+    }
+    const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce };
+    mockWatch = jest.fn()
+      .mockImplementationOnce(() => makeProbeCursor())
+      .mockImplementationOnce(() => realCursor);
+
+    const handlerPlayer = jest.fn();
+    const handlerDm = jest.fn();
+    const td1 = await transport.subscribe('camp-1', 'player-1', handlerPlayer);
+    const td2 = await transport.subscribe('camp-1', 'dm-1', handlerDm);
+    await new Promise(r => setTimeout(r, 30));
+
+    expect(handlerPlayer).not.toHaveBeenCalled();
+    expect(handlerDm).toHaveBeenCalledWith(expect.objectContaining({ type: 'roll', data: rollDoc }));
+    td1(); td2();
+  });
+
+  it('change-stream: dm-only message is withheld from a non-DM subscriber unless addressed to them', async () => {
+    mockListMembers = jest.fn().mockResolvedValue([member('player-1', 'player'), member('dm-1', 'dm')]);
+    const msgDoc = {
+      id: 'msg-dm', campaignId: 'camp-1', senderId: 'dm-1', senderName: 'DM',
+      text: 'secret', visibility: { scope: 'dm-only' }, createdAt: new Date(),
+    };
+    async function* yieldOnce() {
+      yield { ns: { coll: 'campaignMessages' }, fullDocument: msgDoc };
+      await new Promise(() => {});
+    }
+    const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce };
+    mockWatch = jest.fn()
+      .mockImplementationOnce(() => makeProbeCursor())
+      .mockImplementationOnce(() => realCursor);
+
+    const handlerPlayer = jest.fn();
+    const handlerDm = jest.fn();
+    const td1 = await transport.subscribe('camp-1', 'player-1', handlerPlayer);
+    const td2 = await transport.subscribe('camp-1', 'dm-1', handlerDm);
+    await new Promise(r => setTimeout(r, 30));
+
+    expect(handlerPlayer).not.toHaveBeenCalled();
+    expect(handlerDm).toHaveBeenCalledWith(expect.objectContaining({ type: 'message', data: msgDoc }));
+    td1(); td2();
+  });
+
+  it('polling: dm-only roll is withheld from a non-DM subscriber', async () => {
+    jest.useFakeTimers();
+    mockWatch = jest.fn().mockImplementation(() => {
+      throw new Error('not running with --replSet');
+    });
+    mockListMembers = jest.fn().mockResolvedValue([member('player-1', 'player')]);
+
+    const now = Date.now();
+    jest.setSystemTime(now);
+    const rollDoc = {
+      id: 'roll-dm', campaignId: 'camp-1', rollerId: 'dm-1', rollerName: 'DM',
+      formula: '1d20', rolls: [1], total: 1, visibility: { scope: 'dm-only' }, createdAt: new Date(now + 1000),
+    };
+    mockRollsToArray = jest.fn().mockResolvedValue([rollDoc]);
+
+    const handler = jest.fn();
+    const teardown = await transport.subscribe('camp-1', 'player-1', handler);
+
+    jest.advanceTimersByTime(2001);
+    await flushMicrotasks();
+
+    teardown();
+
+    expect(handler).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'roll' }));
+  });
+
+  it('listMembersForCampaign is memoized per change/poll batch when filtering multiple subscribers', async () => {
+    mockListMembers = jest.fn().mockResolvedValue([member('player-1'), member('player-2')]);
+    const rollDoc = {
+      id: 'roll-batch', campaignId: 'camp-1', rollerId: 'player-1', rollerName: 'P1',
+      formula: '1d20', rolls: [5], total: 5, visibility: { scope: 'group' }, createdAt: new Date(),
+    };
+    async function* yieldOnce() {
+      yield { ns: { coll: 'campaignRolls' }, fullDocument: rollDoc };
+      await new Promise(() => {});
+    }
+    const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce };
+    mockWatch = jest.fn()
+      .mockImplementationOnce(() => makeProbeCursor())
+      .mockImplementationOnce(() => realCursor);
+
+    const td1 = await transport.subscribe('camp-1', 'player-1', jest.fn());
+    const td2 = await transport.subscribe('camp-1', 'player-2', jest.fn());
+    await new Promise(r => setTimeout(r, 30));
+
+    expect(mockListMembers).toHaveBeenCalledTimes(1);
+    td1(); td2();
+  });
+});
+
+// ============================================================================
+// T6 — Same-instance fast path preserved
+// ============================================================================
+
+describe('T6 — fast path', () => {
+  it('emitFiltered invokes the same-instance subscriber synchronously', async () => {
+    const handler = jest.fn();
+    const td = await transport.subscribe('camp-1', 'player-1', handler);
+
+    transport.emitFiltered('camp-1', { type: 'roll', campaignId: 'camp-1', data: {} as never }, () => true);
+
+    // No await/timer advance — must already have fired.
+    expect(handler).toHaveBeenCalledTimes(1);
+    td();
+  });
 });
