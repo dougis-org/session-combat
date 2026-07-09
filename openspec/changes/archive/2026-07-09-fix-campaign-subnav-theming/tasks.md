@@ -113,5 +113,3 @@ Blocking resolution flow:
 - [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
 - [x] Prune merged local branches: `git fetch --prune` and `git branch -D fix-campaign-subnav-theming doc/archive-2026-07-09-fix-campaign-subnav-theming`
-
-Required cleanup after archive: `git fetch --prune` and `git branch -D fix-campaign-subnav-theming doc/archive-2026-07-09-fix-campaign-subnav-theming`

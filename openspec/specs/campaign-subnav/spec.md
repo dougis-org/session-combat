@@ -31,7 +31,7 @@ The system SHALL render the campaign name header, the tab bar, the active sub-pa
 
 #### Scenario: Continuous background on default layout
 
-- **Given** a user is on any campaign sub-page (`/campaigns/[id]`, `/sessions`, `/prompts`, or `/library`) with chat in its default (non-large) state
+- **Given** a user is on any campaign sub-page (`/campaigns/${id}`, `/campaigns/${id}/sessions`, `/campaigns/${id}/prompts`, `/campaigns/${id}/library`, or `/campaigns/${id}/combat`) with chat in its default (non-large) state
 - **When** the layout renders
 - **Then** the header, tab bar, and page content render with no visible background seam between them; the entire visible area uses the same `bg-gray-900` surface
 
