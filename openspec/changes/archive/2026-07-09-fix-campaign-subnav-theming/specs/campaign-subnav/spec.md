@@ -3,7 +3,7 @@
 This document details *changes* to requirements and is additive to the
 [`design.md`](../../design.md) document, not a replacement. It modifies
 requirements previously established in
-[`openspec/specs/campaign-subnav/spec.md`](../../../../specs/campaign-subnav/spec.md).
+[`openspec/specs/campaign-subnav/spec.md`](../../../../../specs/campaign-subnav/spec.md).
 
 ## ADDED Requirements
 

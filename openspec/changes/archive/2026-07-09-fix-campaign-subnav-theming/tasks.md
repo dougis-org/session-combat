@@ -73,14 +73,14 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `fix-campaign-subnav-theming` to `main`. The PR body MUST include `Closes #484`.
-- [ ] **Issue lifecycle: mark in-review**: run `gh issue edit 484 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge). Per project convention, use squash merge since the repo ruleset only allows squash.
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `fix-campaign-subnav-theming` to `main`. The PR body MUST include `Closes #484`.
+- [x] **Issue lifecycle: mark in-review**: run `gh issue edit 484 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge). Per project convention, use squash merge since the repo ruleset only allows squash.
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved. After replying to a comment, also resolve the thread via the `resolveReviewThread` GraphQL mutation, per project convention.
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -101,17 +101,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none expected beyond the OpenSpec artifacts themselves)
-- [ ] Sync approved spec deltas into `openspec/specs/campaign-subnav/spec.md`. After copying `specs/campaign-subnav/spec.md` to `openspec/specs/campaign-subnav/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-fix-campaign-subnav-theming/design.md`, and similarly for any `../../tasks.md` references.
-- [ ] Archive the change: move `openspec/changes/fix-campaign-subnav-theming/` to `openspec/changes/archive/YYYY-MM-DD-fix-campaign-subnav-theming/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-campaign-subnav-theming/` exists and `openspec/changes/fix-campaign-subnav-theming/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-fix-campaign-subnav-theming` then `git push -u origin doc/archive-YYYY-MM-DD-fix-campaign-subnav-theming` (this branch contains only `.md` changes — no code fixes belong here, per project convention)
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-fix-campaign-subnav-theming` to `main` with title `docs: archive fix-campaign-subnav-theming (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D fix-campaign-subnav-theming doc/archive-YYYY-MM-DD-fix-campaign-subnav-theming`
-
-Required cleanup after archive: `git fetch --prune` and `git branch -D fix-campaign-subnav-theming doc/archive-YYYY-MM-DD-fix-campaign-subnav-theming`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none expected beyond the OpenSpec artifacts themselves)
+- [x] Sync approved spec deltas into `openspec/specs/campaign-subnav/spec.md`. After copying `specs/campaign-subnav/spec.md` to `openspec/specs/campaign-subnav/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/2026-07-09-fix-campaign-subnav-theming/design.md`, and similarly for any `../../tasks.md` references.
+- [x] Archive the change: move `openspec/changes/fix-campaign-subnav-theming/` to `openspec/changes/archive/2026-07-09-fix-campaign-subnav-theming/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/2026-07-09-fix-campaign-subnav-theming/` exists and `openspec/changes/fix-campaign-subnav-theming/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-07-09-fix-campaign-subnav-theming` then `git push -u origin doc/archive-2026-07-09-fix-campaign-subnav-theming` (this branch contains only `.md` changes — no code fixes belong here, per project convention)
+- [x] Open a PR from `doc/archive-2026-07-09-fix-campaign-subnav-theming` to `main` with title `docs: archive fix-campaign-subnav-theming (2026-07-09)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D fix-campaign-subnav-theming doc/archive-2026-07-09-fix-campaign-subnav-theming`
