@@ -424,6 +424,28 @@ describe('T2 — db-level watch and collection routing', () => {
     teardown();
   });
 
+  it('a change document from an unrelated collection is ignored (db-level watch is unfiltered at the Mongo level)', async () => {
+    // Documents from a collection outside {campaigns, campaignMessages, campaignRolls}
+    // must never be broadcast as a `change` event, even if they happen to carry an
+    // `id`/`campaignId` field matching a subscribed campaign — otherwise a db-level
+    // watch() (which observes every collection) would leak unrelated document data.
+    async function* yieldOnce() {
+      yield { ns: { coll: 'users' }, fullDocument: { id: 'A', email: 'someone@example.com' } };
+      await new Promise(() => {});
+    }
+    const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce };
+    mockWatch = jest.fn()
+      .mockImplementationOnce(() => makeProbeCursor())
+      .mockImplementationOnce(() => realCursor);
+
+    const handler = jest.fn();
+    const td = await transport.subscribe('A', 'user-A', handler);
+    await new Promise(r => setTimeout(r, 30));
+
+    expect(handler).not.toHaveBeenCalled();
+    td();
+  });
+
   it('a campaignRolls change document is routed as a roll event to the right campaign', async () => {
     mockListMembers = jest.fn().mockResolvedValue([member('player-1')]);
     const rollDoc = {

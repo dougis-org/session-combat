@@ -160,8 +160,13 @@ async function demux(doc: ChangeDoc): Promise<void> {
     await demuxMessageDoc(campaignId, fullDocument);
   } else if (coll === 'campaignRolls') {
     await demuxRollDoc(campaignId, fullDocument);
-  } else {
-    // Undefined ns.coll (legacy/mocked collection-level watch) or 'campaigns' itself.
+  } else if (coll === 'campaigns' || coll === undefined) {
+    // Undefined ns.coll covers the legacy/mocked collection-level watch shape; a real
+    // db-level watch always sets ns.coll. Any other collection name is explicitly
+    // ignored below — the watch is unfiltered at the Mongo level (db-wide), so without
+    // this allowlist a write to an unrelated collection sharing an `id`/`campaignId`
+    // field would otherwise be broadcast to that campaign's subscribers as a `change`
+    // event, leaking data outside the three collections this transport is meant to serve.
     await demuxCampaignDoc(doc, campaignId, fullDocument);
   }
 }
