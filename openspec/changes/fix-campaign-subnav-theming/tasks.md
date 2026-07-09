@@ -7,15 +7,15 @@
 
 ## Preflight
 
-- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. Confirmed present in this environment's skill list. If a future run does not find it, halt immediately, inform the user that the `pr-review-toolkit` plugin is required, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If not found, halt immediately, inform the user that the `pr-review-toolkit` plugin is required, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
 - [x] **Issue lifecycle: mark in-progress**: run `gh issue edit 484 --add-label "in-progress"`. Then discover the GitHub Project linked to `dougis-org/session-combat` via `gh project list --owner dougis-org --format json`, resolve the status field option semantically matching "In Progress" via `gh project field-list <project-number> --owner dougis-org --format json`, and move the item via `gh project item-edit`. If no project item is found for issue #484, log a warning and continue. If the `gh` token lacks the `project` scope, instruct the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
 
 - [x] **Task 1 — `app/campaigns/[id]/layout.tsx`: centralize background, restyle tabs**
-  - Wrap the layout's rendered output in a single dark surface: introduce a `content` value = `<div className="bg-gray-900 min-h-screen text-white">{header}{nav}{children}</div>` and use it in the default return branch (`<>{content}{chat}</>`).
-  - In the `isChatLarge` branch, add `bg-gray-900 text-white` to the existing `<main className="flex-1 overflow-auto p-4">` element (do not introduce an extra nested div there).
+  - Wrap the layout's rendered output in a single dark surface: `<div className="bg-gray-900 min-h-screen text-white">{header}{nav}{children}{chat}</div>` in the default branch, so header, nav, content, and the `CampaignChat` panel share one themed ancestor.
+  - In the `isChatLarge` branch, add `bg-gray-900 text-white` to the outer `<div className="flex h-screen overflow-hidden">` container (not just `<main>`), so `<main>` and the chat panel share the same themed ancestor there too.
   - Update the tab-rendering `.map()`: replace `${isActive ? 'border-b-2 border-blue-400 text-white' : 'text-gray-400'} px-2 py-1` with `${isActive ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-200'} px-3 py-1.5 rounded-md text-sm font-medium transition-colors`.
   - Do not change `usePathname()`-based active-route matching logic.
 

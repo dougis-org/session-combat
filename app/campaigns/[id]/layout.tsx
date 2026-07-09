@@ -48,6 +48,7 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
           <Link
             key={tab.href}
             href={tab.href}
+            aria-current={isActive ? 'page' : undefined}
             className={`${isActive ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-200'} px-3 py-1.5 rounded-md text-sm font-medium transition-colors`}
           >
             {tab.label}
