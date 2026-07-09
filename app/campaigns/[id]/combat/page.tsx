@@ -9,7 +9,7 @@ import { useCombat } from '@/lib/hooks/useCombat';
 function CombatContent({ campaignId }: { campaignId: string }) {
   const combat = useCombat({ campaignId });
   const { user } = useAuth();
-  if (combat.loading) return <div className="flex items-center justify-center text-white">Loading combat data...</div>;
+  if (combat.loading) return <div className="min-h-[50vh] flex items-center justify-center text-white">Loading combat data...</div>;
   if (!combat.combatState) {
     return <CombatSetupView combat={combat} user={user} />;
   }
