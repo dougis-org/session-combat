@@ -383,61 +383,59 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
   const sinceCombatDate = lastSessionDate ?? (context?.campaign?.createdAt ? new Date(context.campaign.createdAt) : null);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Session Journal</h1>
-          <Link href="/campaigns" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
-            Back to Campaigns
-          </Link>
-        </div>
-
-        <ErrorBanner message={error} />
-
-        {!showForm && !editingLog && (
-          <button
-            onClick={() => setShowForm(true)}
-            disabled={loading}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded mb-6"
-          >
-            + New Session
-          </button>
-        )}
-
-        {(showForm || editingLog) && (
-          <SessionForm
-            campaignId={campaignId}
-            existing={editingLog ?? undefined}
-            allMembers={context?.allMembers ?? []}
-            hasParty={(context?.parties.length ?? 0) > 0}
-            lastSessionDate={lastSessionDate}
-            sinceCombatDate={sinceCombatDate}
-            nextSessionNumber={nextSessionNumber}
-            onSave={handleSaved}
-            onCancel={() => { setShowForm(false); setEditingLog(null); }}
-          />
-        )}
-
-        {loading ? (
-          <LoadingState label="Loading session logs..." />
-        ) : logs.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            <p className="text-lg mb-2">No sessions logged yet.</p>
-            <p className="text-sm">Add your first session above.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {logs.map(log => (
-              <SessionEntryCard
-                key={log.id}
-                log={log}
-                onEdit={l => { setEditingLog(l); setShowForm(false); }}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        )}
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Session Journal</h1>
+        <Link href="/campaigns" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+          Back to Campaigns
+        </Link>
       </div>
+
+      <ErrorBanner message={error} />
+
+      {!showForm && !editingLog && (
+        <button
+          onClick={() => setShowForm(true)}
+          disabled={loading}
+          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded mb-6"
+        >
+          + New Session
+        </button>
+      )}
+
+      {(showForm || editingLog) && (
+        <SessionForm
+          campaignId={campaignId}
+          existing={editingLog ?? undefined}
+          allMembers={context?.allMembers ?? []}
+          hasParty={(context?.parties.length ?? 0) > 0}
+          lastSessionDate={lastSessionDate}
+          sinceCombatDate={sinceCombatDate}
+          nextSessionNumber={nextSessionNumber}
+          onSave={handleSaved}
+          onCancel={() => { setShowForm(false); setEditingLog(null); }}
+        />
+      )}
+
+      {loading ? (
+        <LoadingState label="Loading session logs..." />
+      ) : logs.length === 0 ? (
+        <div className="text-center py-16 text-gray-400">
+          <p className="text-lg mb-2">No sessions logged yet.</p>
+          <p className="text-sm">Add your first session above.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {logs.map(log => (
+            <SessionEntryCard
+              key={log.id}
+              log={log}
+              onEdit={l => { setEditingLog(l); setShowForm(false); }}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

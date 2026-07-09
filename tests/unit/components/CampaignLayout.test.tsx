@@ -10,11 +10,13 @@ jest.mock('next/navigation', () => ({
   usePathname: () => mockPathname,
 }));
 
-// Mock CampaignChat to capture the onSessionChange prop
+// Mock CampaignChat to capture the onSessionChange and onSizeChange props
 let capturedOnSessionChange: ((id: string | null) => void) | undefined
+let capturedOnSizeChange: ((isLarge: boolean) => void) | undefined
 jest.mock('@/lib/components/CampaignChat', () => ({
-  CampaignChat: ({ activeSessionId, onSessionChange }: { activeSessionId?: string | null; onSessionChange?: (id: string | null) => void }) => {
+  CampaignChat: ({ activeSessionId, onSessionChange, onSizeChange }: { activeSessionId?: string | null; onSessionChange?: (id: string | null) => void; onSizeChange?: (isLarge: boolean) => void }) => {
     capturedOnSessionChange = onSessionChange
+    capturedOnSizeChange = onSizeChange
     return <div data-testid="campaign-chat" data-active-session={activeSessionId ?? ''} />
   },
 }));
@@ -32,6 +34,7 @@ jest.mock('next/link', () => {
 describe('CampaignLayout', () => {
   beforeEach(() => {
     capturedOnSessionChange = undefined;
+    capturedOnSizeChange = undefined;
     mockPathname = '/campaigns/test-id';
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -55,7 +58,7 @@ describe('CampaignLayout', () => {
     expect(screen.getByRole('link', { name: 'Library' })).toBeInTheDocument();
   });
 
-  test('TC-3.2: Members tab active on exact Members path', async () => {
+  test('TC-1.1 (was TC-3.2): Members tab active on exact Members path', async () => {
     mockPathname = '/campaigns/test-id';
     render(
       <CampaignLayout>
@@ -65,11 +68,13 @@ describe('CampaignLayout', () => {
 
     await waitFor(() => screen.getByRole('heading'));
     const tab = screen.getByRole('link', { name: 'Members' });
-    expect(tab).toHaveClass('border-b-2');
+    expect(tab).toHaveClass('bg-blue-600');
+    expect(tab).not.toHaveClass('border-b-2');
+    expect(screen.getByRole('link', { name: 'Sessions' })).not.toHaveClass('bg-blue-600');
     expect(screen.getByRole('link', { name: 'Sessions' })).not.toHaveClass('border-b-2');
   });
 
-  test('TC-3.3: Sessions tab active on Sessions path', async () => {
+  test('TC-1.2 (was TC-3.3): Sessions tab active on Sessions path', async () => {
     mockPathname = '/campaigns/test-id/sessions';
     render(
       <CampaignLayout>
@@ -79,11 +84,11 @@ describe('CampaignLayout', () => {
 
     await waitFor(() => screen.getByRole('heading'));
     const tab = screen.getByRole('link', { name: 'Sessions' });
-    expect(tab).toHaveClass('border-b-2');
-    expect(screen.getByRole('link', { name: 'Members' })).not.toHaveClass('border-b-2');
+    expect(tab).toHaveClass('bg-blue-600');
+    expect(screen.getByRole('link', { name: 'Members' })).not.toHaveClass('bg-blue-600');
   });
 
-  test('TC-3.4: Prompts tab active on Prompts path', async () => {
+  test('TC-1.3 (was TC-3.4): Prompts tab active on Prompts path', async () => {
     mockPathname = '/campaigns/test-id/prompts';
     render(
       <CampaignLayout>
@@ -93,11 +98,11 @@ describe('CampaignLayout', () => {
 
     await waitFor(() => screen.getByRole('heading'));
     const tab = screen.getByRole('link', { name: 'Prompts' });
-    expect(tab).toHaveClass('border-b-2');
-    expect(screen.getByRole('link', { name: 'Members' })).not.toHaveClass('border-b-2');
+    expect(tab).toHaveClass('bg-blue-600');
+    expect(screen.getByRole('link', { name: 'Members' })).not.toHaveClass('bg-blue-600');
   });
 
-  test('TC-3.5: Library tab active on Library path', async () => {
+  test('TC-1.4 (was TC-3.5): Library tab active on Library path', async () => {
     mockPathname = '/campaigns/test-id/library';
     render(
       <CampaignLayout>
@@ -107,11 +112,11 @@ describe('CampaignLayout', () => {
 
     await waitFor(() => screen.getByRole('heading'));
     const tab = screen.getByRole('link', { name: 'Library' });
-    expect(tab).toHaveClass('border-b-2');
-    expect(screen.getByRole('link', { name: 'Members' })).not.toHaveClass('border-b-2');
+    expect(tab).toHaveClass('bg-blue-600');
+    expect(screen.getByRole('link', { name: 'Members' })).not.toHaveClass('bg-blue-600');
   });
 
-  test('TC-3.6: Sessions tab active on nested sessions sub-route', async () => {
+  test('TC-1.5 (was TC-3.6): Sessions tab active on nested sessions sub-route', async () => {
     mockPathname = '/campaigns/test-id/sessions/some-session-id';
     render(
       <CampaignLayout>
@@ -121,7 +126,45 @@ describe('CampaignLayout', () => {
 
     await waitFor(() => screen.getByRole('heading'));
     const tab = screen.getByRole('link', { name: 'Sessions' });
-    expect(tab).toHaveClass('border-b-2');
+    expect(tab).toHaveClass('bg-blue-600');
+  });
+
+  test('TC-1.6: Default (non-isChatLarge) branch renders a bg-gray-900 min-h-screen wrapper around header/nav/children', async () => {
+    mockPathname = '/campaigns/test-id';
+    render(
+      <CampaignLayout>
+        <div data-testid="child-content">Children content</div>
+      </CampaignLayout>
+    );
+
+    await waitFor(() => screen.getByRole('heading'));
+    const child = screen.getByTestId('child-content');
+    const wrapper = child.closest('.bg-gray-900');
+    expect(wrapper).not.toBeNull();
+    expect(wrapper).toHaveClass('min-h-screen');
+    expect(wrapper).toContainElement(screen.getByTestId('campaign-chat'));
+  });
+
+  test('TC-1.7: isChatLarge branch renders a bg-gray-900 outer container wrapping both <main> and the chat panel', async () => {
+    mockPathname = '/campaigns/test-id';
+    render(
+      <CampaignLayout>
+        <div data-testid="child-content">Children content</div>
+      </CampaignLayout>
+    );
+
+    await waitFor(() => screen.getByRole('heading'));
+    act(() => {
+      capturedOnSizeChange?.(true);
+    });
+
+    await waitFor(() => {
+      const main = screen.getByTestId('child-content').closest('main');
+      expect(main).not.toBeNull();
+      const outer = main?.parentElement;
+      expect(outer).toHaveClass('bg-gray-900');
+      expect(outer).toContainElement(screen.getByTestId('campaign-chat'));
+    });
   });
 
   test('TC-3.7: Campaign name visible in header when fetch succeeds', async () => {
