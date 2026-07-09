@@ -313,7 +313,7 @@ async function pollFn(
 
     sinceRef.value = pollStart;
   } catch (err) {
-    console.error('transport poll error:', err);
+    console.error(`transport poll error (campaign=${campaignId}):`, err);
   }
 }
 

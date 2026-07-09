@@ -498,6 +498,45 @@ describe('T2 — db-level watch and collection routing', () => {
     td();
   });
 
+  it('multi-campaign isolation: a shared cursor with 3 campaigns registered routes each event to only its own campaign', async () => {
+    // The single db-level watch cursor is shared across every subscribed campaign in
+    // this process. This proves the registry-keyed lookup in demux()/emitToRegistry()
+    // doesn't cross-contaminate when several campaigns have live subscribers at once —
+    // not just "one campaign in play, one campaign not," but three simultaneously.
+    mockListMembers = jest.fn().mockResolvedValue([member('player-1'), member('player-2'), member('player-3')]);
+    const msgForB = {
+      id: 'msg-b', campaignId: 'campB', senderId: 'player-2', senderName: 'P2',
+      text: 'hi from B', visibility: { scope: 'group' }, createdAt: new Date(),
+    };
+
+    async function* yieldOnce() {
+      yield { ns: { coll: 'campaignMessages' }, fullDocument: msgForB };
+      await new Promise(() => {});
+    }
+    const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce };
+    mockWatch = jest.fn()
+      .mockImplementationOnce(() => makeProbeCursor())
+      .mockImplementationOnce(() => realCursor);
+
+    const handlerA = jest.fn();
+    const handlerB = jest.fn();
+    const handlerC = jest.fn();
+    const tdA = await transport.subscribe('campA', 'player-1', handlerA);
+    const tdB = await transport.subscribe('campB', 'player-2', handlerB);
+    const tdC = await transport.subscribe('campC', 'player-3', handlerC);
+    await new Promise(r => setTimeout(r, 10));
+
+    // All three subscriptions share exactly one cursor (probe + one real stream call).
+    expect(mockWatch).toHaveBeenCalledTimes(2);
+
+    await new Promise(r => setTimeout(r, 30));
+
+    expect(handlerB).toHaveBeenCalledWith(expect.objectContaining({ type: 'message', campaignId: 'campB', data: msgForB }));
+    expect(handlerA).not.toHaveBeenCalled();
+    expect(handlerC).not.toHaveBeenCalled();
+    tdA(); tdB(); tdC();
+  });
+
   describe('two-instance simulation (Atlas / change-stream)', () => {
     it('registry maps are independent across two isolated transport module instances', () => {
       let transportA: typeof import('@/lib/server/transport');
