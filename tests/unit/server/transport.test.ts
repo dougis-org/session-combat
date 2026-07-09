@@ -498,6 +498,36 @@ describe('T2 — db-level watch and collection routing', () => {
     td();
   });
 
+  it('strips Mongo _id from message/roll payloads so they match the same-instance emitFiltered() shape', async () => {
+    // Raw Mongo documents carry _id (an ObjectId); the same-instance emitFiltered() fast
+    // path never has one (routes build CampaignMessage/CampaignRoll before insert). The
+    // Mongo-observed path must strip it so a subscriber can't tell which path delivered
+    // a given event from its shape.
+    mockListMembers = jest.fn().mockResolvedValue([member('player-1')]);
+    const rollDocWithMongoId = {
+      _id: 'mongo-object-id', id: 'roll-1', campaignId: 'A', rollerId: 'player-1', rollerName: 'P1',
+      formula: '1d20', rolls: [15], total: 15, visibility: { scope: 'group' }, createdAt: new Date(),
+    };
+
+    async function* yieldOnce() {
+      yield { ns: { coll: 'campaignRolls' }, fullDocument: rollDocWithMongoId };
+      await new Promise(() => {});
+    }
+    const realCursor = { close: jest.fn().mockResolvedValue(undefined), [Symbol.asyncIterator]: yieldOnce };
+    mockWatch = jest.fn()
+      .mockImplementationOnce(() => makeProbeCursor())
+      .mockImplementationOnce(() => realCursor);
+
+    const handler = jest.fn();
+    const td = await transport.subscribe('A', 'player-1', handler);
+    await new Promise(r => setTimeout(r, 30));
+
+    const [event] = handler.mock.calls[0];
+    expect(event.data).not.toHaveProperty('_id');
+    expect(event.data.id).toBe('roll-1');
+    td();
+  });
+
   it('multi-campaign isolation: a shared cursor with 3 campaigns registered routes each event to only its own campaign', async () => {
     // The single db-level watch cursor is shared across every subscribed campaign in
     // this process. This proves the registry-keyed lookup in demux()/emitToRegistry()
@@ -675,6 +705,34 @@ describe('T3 — polling observes messages and rolls', () => {
     teardown();
 
     expect(handler).toHaveBeenCalledWith(expect.objectContaining({ type: 'message', campaignId: 'c1', data: msgDoc }));
+  });
+
+  it('polling: strips Mongo _id from message/roll payloads', async () => {
+    jest.useFakeTimers();
+    mockWatch = jest.fn().mockImplementationOnce(() => {
+      throw new Error('not running with --replSet');
+    });
+    mockListMembers = jest.fn().mockResolvedValue([member('user-c1')]);
+
+    const now = Date.now();
+    jest.setSystemTime(now);
+    const msgDocWithMongoId = {
+      _id: 'mongo-object-id', id: 'msg-1', campaignId: 'c1', senderId: 'user-c1', senderName: 'U1',
+      text: 'hi', visibility: { scope: 'group' }, createdAt: new Date(now + 1000),
+    };
+    mockMessagesToArray = jest.fn().mockResolvedValue([msgDocWithMongoId]);
+
+    const handler = jest.fn();
+    const teardown = await transport.subscribe('c1', 'user-c1', handler);
+
+    jest.advanceTimersByTime(2001);
+    await flushMicrotasks();
+
+    teardown();
+
+    const [event] = handler.mock.calls.find(([e]) => e.type === 'message')!;
+    expect(event.data).not.toHaveProperty('_id');
+    expect(event.data.id).toBe('msg-1');
   });
 
   it('polling subscriber receives a roll event for a new campaignRolls doc', async () => {

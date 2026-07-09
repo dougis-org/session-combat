@@ -139,9 +139,18 @@ async function demuxCampaignDoc(doc: ChangeDoc, campaignId: string, fullDocument
   }
 }
 
+// Raw Mongo documents carry `_id` (an ObjectId); the same-instance emitFiltered() fast
+// path never has one (routes construct CampaignMessage/CampaignRoll without it before
+// insert). Strip it here so the Mongo-observed path's payload shape matches the fast
+// path's exactly, regardless of which one a given subscriber's event happens to take.
+function stripMongoId<T extends { _id?: unknown }>(doc: T): Omit<T, '_id'> {
+  const { _id: _ignored, ...rest } = doc;
+  return rest;
+}
+
 async function demuxMessageDoc(campaignId: string, fullDocument: Record<string, unknown>) {
   if (!registry.get(campaignId)?.size) return;
-  const message = fullDocument as unknown as CampaignMessage;
+  const message = stripMongoId(fullDocument as unknown as CampaignMessage);
   const members = await activeMembers(campaignId);
   emitVisible(campaignId, 'message', [message], members, canSeeMessage,
     (event, canReceive) => emitToRegistry(campaignId, event, canReceive));
@@ -149,7 +158,7 @@ async function demuxMessageDoc(campaignId: string, fullDocument: Record<string, 
 
 async function demuxRollDoc(campaignId: string, fullDocument: Record<string, unknown>) {
   if (!registry.get(campaignId)?.size) return;
-  const roll = fullDocument as unknown as CampaignRoll;
+  const roll = stripMongoId(fullDocument as unknown as CampaignRoll);
   const members = await activeMembers(campaignId);
   emitVisible(campaignId, 'roll', [roll], members, canSeeRoll,
     (event, canReceive) => emitToRegistry(campaignId, event, canReceive));
@@ -195,11 +204,20 @@ async function closeStream() {
   }
 }
 
+// Server-side $match narrows the change stream to the three collections this transport
+// serves, so Mongo itself filters out irrelevant collections instead of every document
+// in the database being shipped to this process just to be discarded by demux()'s
+// in-process ns.coll allowlist.
+const WATCHED_COLLECTIONS = ['campaigns', 'campaignMessages', 'campaignRolls'];
+
 async function openStream(): Promise<ChangeStream> {
   if (openPromise) return openPromise;
-  openPromise = (async () => {
+  const promise = (async () => {
     const { client } = await connectToDatabase();
-    const cursor = client.db().watch([], { fullDocument: 'updateLookup' }) as ChangeStream;
+    const cursor = client.db().watch(
+      [{ $match: { 'ns.coll': { $in: WATCHED_COLLECTIONS } } }],
+      { fullDocument: 'updateLookup' }
+    ) as ChangeStream;
     sharedCursor = cursor;
 
     // Start async iteration in background
@@ -235,7 +253,13 @@ async function openStream(): Promise<ChangeStream> {
     return cursor;
   })();
 
-  return openPromise;
+  openPromise = promise;
+  // If connectToDatabase()/watch() itself throws (before the background iteration even
+  // starts), clear openPromise so the next subscribe() retries instead of permanently
+  // reusing this rejected promise.
+  promise.catch(() => { if (openPromise === promise) openPromise = null; });
+
+  return promise;
 }
 
 async function pollCampaigns(
@@ -271,7 +295,7 @@ async function pollCampaigns(
   }
 }
 
-async function pollCollection<T>(
+async function pollCollection<T extends { _id?: unknown }>(
   collectionName: string,
   campaignId: string,
   since: Date,
@@ -281,7 +305,7 @@ async function pollCollection<T>(
     .collection(collectionName)
     .find({ campaignId, createdAt: { $gt: since } })
     .toArray();
-  return docs as unknown as T[];
+  return (docs as unknown as T[]).map(stripMongoId) as T[];
 }
 
 async function pollFn(
