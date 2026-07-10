@@ -40,7 +40,7 @@ flowchart TB
     end
     subgraph Server["Next.js instance (Fly.io)"]
         ROUTE["messages/rolls/sessions route handlers"]
-        SSE["GET /campaigns/:id/stream (4a)"]
+        SSE["GET /api/campaigns/[id]/stream (4a)"]
         AUTH["assertCampaignAccess (1e)"]
         REG["Subscriber registry<br/>(demux by campaignId + collection)"]
         TA["Transport abstraction<br/>subscribe(campaignId, userId, onEvent)"]

@@ -71,17 +71,17 @@
 
 - Requirement: A `session` event reaches a subscriber on a different instance than the one that started/ended the session
   - Design element: Decision 1 (db-level watch/poll observes `campaigns` writes from any instance), Decision 3 (session derivation)
-  - Acceptance criteria reference: `specs/cross-instance-transport/spec.md` (to be authored) — scenario "Session event delivered cross-instance"
+  - Acceptance criteria reference: `specs/transport/spec.md` (to be authored) — scenario "Session event delivered cross-instance"
   - Testability notes: Simulate two `transport.ts` module instances (via `jest.isolateModules` or two separately constructed registries) sharing a mocked Mongo change-stream/poll source; write `activeSessionId` "from" instance A, assert instance B's registered handler receives a `session` event.
 
 - Requirement: A `roll`/`message` event reaches a subscriber on a different instance than the one that handled the POST
   - Design element: Decision 1, Decision 2, Decision 4
-  - Acceptance criteria reference: `specs/cross-instance-transport/spec.md` — scenarios "Roll event delivered cross-instance", "Message event delivered cross-instance"
+  - Acceptance criteria reference: `specs/transport/spec.md` — scenarios "Roll event delivered cross-instance", "Message event delivered cross-instance"
   - Testability notes: Same two-instance simulation; assert the cross-instance subscriber receives the event and that a DM-only roll/message is withheld from a non-DM cross-instance subscriber (visibility still enforced).
 
 - Requirement: No duplicate feed entries when both delivery paths fire for the same write
   - Design element: Decision 2, existing `seenIds` dedup in `CampaignChat.tsx`
-  - Acceptance criteria reference: `specs/cross-instance-transport/spec.md` — scenario "Duplicate delivery deduped by id"
+  - Acceptance criteria reference: `specs/transport/spec.md` — scenario "Duplicate delivery deduped by id"
   - Testability notes: Unit test delivering the same roll/message id twice through `onStreamEvent`; assert feed length increases by exactly one.
 
 ## Non-Functional Requirements Mapping
@@ -89,19 +89,19 @@
 - Requirement category: performance
   - Requirement: Db-level watch/broadened poll must not materially increase per-instance CPU/memory or add unbounded per-campaign state
   - Design element: Decision 1 (single shared cursor, same "one per instance" pattern), Decision 3 (bounded last-seen-`activeSessionId` map, cleaned up with registry teardown)
-  - Acceptance criteria reference: `specs/cross-instance-transport/spec.md` — scenario "Shared cursor count stays at one per instance after broadening scope"
+  - Acceptance criteria reference: `specs/transport/spec.md` — scenario "Shared cursor count stays at one per instance after broadening scope"
   - Testability notes: Existing tests already assert "first subscribe opens exactly one cursor" / "second subscribe reuses cursor" — extend assertions to cover the broadened watch target; add a test that per-campaign session state is removed when the last subscriber for that campaign tears down.
 
 - Requirement category: reliability
   - Requirement: Visibility (DM-only vs group) is enforced identically regardless of which delivery path an event took
   - Design element: Decision 4
-  - Acceptance criteria reference: `specs/cross-instance-transport/spec.md` — scenario "DM-only content withheld via Mongo-observed path"
+  - Acceptance criteria reference: `specs/transport/spec.md` — scenario "DM-only content withheld via Mongo-observed path"
   - Testability notes: Unit test asserting a non-DM subscriber's handler is never called with a DM-only roll/message delivered via the change-stream/poll path.
 
 - Requirement category: reliability
   - Requirement: Behavior is correct in both `detectReplicaSet()` outcomes (Atlas and standalone/local dev)
   - Design element: Decision 1 (both branches broadened in parallel)
-  - Acceptance criteria reference: `specs/cross-instance-transport/spec.md` — scenarios duplicated for both "replica-set path" and "polling path"
+  - Acceptance criteria reference: `specs/transport/spec.md` — scenarios duplicated for both "replica-set path" and "polling path"
   - Testability notes: Mirror every new cross-instance scenario under both `detectReplicaSet` mock outcomes, matching the existing test file's pattern of parallel replica-set/polling test blocks.
 
 ## Risks / Trade-offs
