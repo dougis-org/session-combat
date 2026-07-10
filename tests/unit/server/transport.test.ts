@@ -1121,4 +1121,36 @@ describe('T6 — fast path', () => {
     expect(handler).toHaveBeenCalledTimes(1);
     td();
   });
+
+  it('emitFiltered reaches polling-mode subscribers too (fast path is not Atlas-only)', async () => {
+    // Regression: polling subscribers must be registered in `registry` so the
+    // same-instance emitFiltered() fast path reaches them, not just Atlas subscribers —
+    // previously polling subscriptions were never added to `registry` at all, so in
+    // standalone/local-dev Mongo the "fast path" silently never fired.
+    mockWatch = jest.fn().mockImplementationOnce(() => {
+      throw new Error('not running with --replSet');
+    });
+
+    const handler = jest.fn();
+    const td = await transport.subscribe('camp-1', 'player-1', handler);
+
+    transport.emitFiltered('camp-1', { type: 'roll', campaignId: 'camp-1', data: {} as never }, () => true);
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    td();
+  });
+
+  it('teardown of a polling subscriber removes it from the registry (emitFiltered no longer reaches it)', async () => {
+    mockWatch = jest.fn().mockImplementationOnce(() => {
+      throw new Error('not running with --replSet');
+    });
+
+    const handler = jest.fn();
+    const td = await transport.subscribe('camp-1', 'player-1', handler);
+    td();
+
+    transport.emitFiltered('camp-1', { type: 'roll', campaignId: 'camp-1', data: {} as never }, () => true);
+
+    expect(handler).not.toHaveBeenCalled();
+  });
 });

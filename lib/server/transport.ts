@@ -300,8 +300,10 @@ async function pollCampaigns(
     const { campaignId: _cid, id: _id, ...rest } = doc;
     handler({ type: 'change', campaignId, data: rest });
 
-    // Polling subscribers aren't in `registry` (that's Atlas-only), so the session event
-    // must be delivered directly to this poll's own handler rather than via emitToRegistry.
+    // This poll cycle is scoped to one subscription, so the session event is delivered
+    // directly to its own handler rather than fanned out via emitToRegistry — even
+    // though polling subscribers are also registered in `registry` for the emitFiltered()
+    // fast path, that path is a separate, independent delivery mechanism from polling.
     // `sessionState` is private to this subscription (see shouldEmitSession's comment).
     const activeSessionId = (doc['activeSessionId'] ?? null) as string | null;
     if (shouldEmitSession(sessionState, campaignId, activeSessionId)) {
@@ -364,26 +366,41 @@ export function emitFiltered(
   emitToRegistry(campaignId, event, canReceive);
 }
 
+// Registers a subscription in `registry` so emitFiltered()'s same-instance fast path can
+// reach it, regardless of transport mode. Atlas subscribers are already in `registry` for
+// change-stream demux purposes; polling subscribers previously weren't registered at all,
+// which meant emitFiltered() silently never reached them in standalone/local-dev Mongo —
+// the "fast path" was Atlas-only in practice despite being documented as mode-independent.
+// Returns a teardown that removes just this subscription's registry entry.
+function registerInRegistry(campaignId: string, userId: string, handler: EventHandler): () => void {
+  if (!registry.has(campaignId)) {
+    registry.set(campaignId, new Map());
+  }
+  const subId = `${userId}:${++nextSubId}`;
+  registry.get(campaignId)!.set(subId, { userId, handler });
+
+  return () => {
+    registry.get(campaignId)?.delete(subId);
+    if (registry.get(campaignId)?.size === 0) {
+      registry.delete(campaignId);
+    }
+  };
+}
+
 export async function subscribe(campaignId: string, userId: string, onEvent: EventHandler): Promise<() => void> {
   const atlasMode = await detectReplicaSet();
+  const unregister = registerInRegistry(campaignId, userId, onEvent);
 
   if (atlasMode) {
-    if (!registry.has(campaignId)) {
-      registry.set(campaignId, new Map());
-    }
-    const subId = `${userId}:${++nextSubId}`;
-    registry.get(campaignId)!.set(subId, { userId, handler: onEvent });
     subscriberCount++;
-
     const streamPromise = openStream();
 
     let torn = false;
     return () => {
       if (torn) return;
       torn = true;
-      registry.get(campaignId)?.delete(subId);
-      if (registry.get(campaignId)?.size === 0) {
-        registry.delete(campaignId);
+      unregister();
+      if (!registry.has(campaignId)) {
         lastKnownActiveSessionId.delete(campaignId);
       }
       subscriberCount = Math.max(0, subscriberCount - 1);
@@ -415,6 +432,7 @@ export async function subscribe(campaignId: string, userId: string, onEvent: Eve
       if (torn) return;
       torn = true;
       clearInterval(intervalId);
+      unregister();
     };
   }
 }
