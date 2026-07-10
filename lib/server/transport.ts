@@ -179,10 +179,12 @@ async function demux(doc: ChangeDoc): Promise<void> {
   } else if (coll === 'campaigns' || coll === undefined) {
     // Undefined ns.coll covers the legacy/mocked collection-level watch shape; a real
     // db-level watch always sets ns.coll. Any other collection name is explicitly
-    // ignored below — the watch is unfiltered at the Mongo level (db-wide), so without
-    // this allowlist a write to an unrelated collection sharing an `id`/`campaignId`
-    // field would otherwise be broadcast to that campaign's subscribers as a `change`
-    // event, leaking data outside the three collections this transport is meant to serve.
+    // ignored below. The server-side $match in openStream() already restricts the watch
+    // to the three collections above, but this allowlist stays as defense in depth —
+    // without it, a bug in that pipeline (or a future change to it) that let an
+    // unrelated collection's write through would otherwise be broadcast to that
+    // campaign's subscribers as a `change` event, leaking data outside the three
+    // collections this transport is meant to serve.
     await demuxCampaignDoc(doc, campaignId, fullDocument);
   }
 }
@@ -224,12 +226,25 @@ async function openStream(): Promise<ChangeStream> {
     (async () => {
       try {
         for await (const doc of cursor as AsyncIterable<ChangeDoc>) {
-          await demux(doc);
+          // A single malformed/unexpected document (e.g. a members lookup or visibility
+          // predicate throwing on unexpected shape) must not tear down the shared cursor
+          // — that would kill cross-instance delivery for every campaign, not just the
+          // one document that failed to process.
+          try {
+            await demux(doc);
+          } catch (err) {
+            console.error('transport demux error (document skipped, stream continues):', err);
+          }
         }
       } catch (err) {
         const isInvalidated =
           err instanceof Error &&
           (err.name === 'ChangeStreamInvalidatedError' || err.message.includes('ChangeStreamInvalidated'));
+
+        // Log even the expected-invalidation case (not just genuine failures) — this is
+        // the shared cursor for every campaign on the instance dying, silently or not,
+        // and an operator needs to see it happened even if a reconnect follows.
+        console.error('transport change stream terminated:', err);
 
         // Close the cursor before clearing references to release server-side resources.
         try { await cursor.close(); } catch { /* ignore */ }
@@ -382,7 +397,17 @@ export async function subscribe(campaignId: string, userId: string, onEvent: Eve
     // can't share session-tracking state across subscriptions the way registry-backed
     // change-stream delivery can.
     const sessionState = new Map<string, string | null>();
-    const intervalId = setInterval(() => pollFn(campaignId, userId, onEvent, sinceRef, sessionState), 2000);
+    // Guards against overlapping poll cycles: pollFn now issues four sequential queries
+    // (campaigns, messages, rolls, members) instead of one, so a slow DB round-trip can
+    // take longer than the 2s interval. Without this guard, setInterval would start a
+    // new pollFn call on top of one still in flight, doubling DB load and — because both
+    // calls would compute an overlapping `since` window — redelivering the same events.
+    let pollInFlight = false;
+    const intervalId = setInterval(() => {
+      if (pollInFlight) return;
+      pollInFlight = true;
+      pollFn(campaignId, userId, onEvent, sinceRef, sessionState).finally(() => { pollInFlight = false; });
+    }, 2000);
     (intervalId as unknown as { unref?: () => void }).unref?.();
 
     let torn = false;

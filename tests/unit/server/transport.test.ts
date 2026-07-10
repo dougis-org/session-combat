@@ -339,6 +339,44 @@ it('T3-12: polling teardown clears interval', async () => {
   clearIntervalSpy.mockRestore();
 });
 
+// --- T3-15: Overlapping poll cycles are guarded against ---
+
+it('T3-15: a slow poll cycle is not overlapped by the next interval tick', async () => {
+  jest.useFakeTimers();
+  mockWatch = jest.fn().mockImplementationOnce(() => {
+    throw new Error('not running with --replSet');
+  });
+
+  // getDatabase() never resolves on its own — simulates a poll cycle slower than the
+  // 2s interval. If pollFn lacked an in-flight guard, the second interval tick would
+  // start a second, fully independent getDatabase() call on top of the first.
+  let resolveGetDatabase: (() => void) | null = null;
+  mockGetDatabase = jest.fn(() => new Promise(resolve => {
+    resolveGetDatabase = () => resolve({
+      collection: () => ({ find: () => ({ toArray: () => Promise.resolve([]) }) }),
+    });
+  }));
+
+  const teardown = await transport.subscribe('c1', 'user-c1', jest.fn());
+
+  jest.advanceTimersByTime(2001); // first poll starts, hangs on getDatabase()
+  await Promise.resolve();
+  expect(mockGetDatabase).toHaveBeenCalledTimes(1);
+
+  jest.advanceTimersByTime(2001); // second interval tick — must be skipped, still in flight
+  await Promise.resolve();
+  expect(mockGetDatabase).toHaveBeenCalledTimes(1);
+
+  resolveGetDatabase!();
+  await flushMicrotasks();
+
+  jest.advanceTimersByTime(2001); // now that the first cycle finished, a new one is allowed
+  await flushMicrotasks();
+  expect(mockGetDatabase).toHaveBeenCalledTimes(2);
+
+  teardown();
+});
+
 // --- T3-13: Cursor invalidation triggers one reconnect attempt ---
 
 it('T3-13: cursor invalidation triggers one reconnect attempt', async () => {
@@ -424,11 +462,13 @@ describe('T2 — db-level watch and collection routing', () => {
     teardown();
   });
 
-  it('a change document from an unrelated collection is ignored (db-level watch is unfiltered at the Mongo level)', async () => {
+  it('a change document from an unrelated collection is ignored (defense in depth beyond the server-side $match)', async () => {
     // Documents from a collection outside {campaigns, campaignMessages, campaignRolls}
     // must never be broadcast as a `change` event, even if they happen to carry an
-    // `id`/`campaignId` field matching a subscribed campaign — otherwise a db-level
-    // watch() (which observes every collection) would leak unrelated document data.
+    // `id`/`campaignId` field matching a subscribed campaign. openStream()'s $match
+    // pipeline already restricts the real watch to those three collections server-side —
+    // this test exercises demux()'s in-process allowlist directly (as if the pipeline
+    // weren't applied), proving it independently guards against the same leak.
     async function* yieldOnce() {
       yield { ns: { coll: 'users' }, fullDocument: { id: 'A', email: 'someone@example.com' } };
       await new Promise(() => {});
