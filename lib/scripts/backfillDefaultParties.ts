@@ -1,5 +1,4 @@
 import { getDatabase } from "../db";
-import { storage } from "../storage";
 import { Campaign, Party } from "../types";
 
 export async function backfillDefaultParties(): Promise<{
@@ -9,6 +8,7 @@ export async function backfillDefaultParties(): Promise<{
 }> {
   const db = await getDatabase();
   const campaigns = db.collection<Campaign>("campaigns");
+  const parties = db.collection<Party>("parties");
 
   console.log("Finding campaigns with no associated party...");
 
@@ -19,8 +19,12 @@ export async function backfillDefaultParties(): Promise<{
       {
         $lookup: {
           from: "parties",
-          localField: "id",
-          foreignField: "campaignId",
+          let: { campaignId: "$id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$campaignId", "$$campaignId"] } } },
+            { $limit: 1 },
+            { $project: { _id: 1 } },
+          ],
           as: "linkedParties",
         },
       },
@@ -49,7 +53,7 @@ export async function backfillDefaultParties(): Promise<{
     };
 
     try {
-      await storage.saveParty(party);
+      await parties.insertOne(party as Party & { _id?: unknown });
       console.log(`  Backfilled: ${campaign.name} (${campaign.id})`);
       backfilled++;
     } catch (error) {

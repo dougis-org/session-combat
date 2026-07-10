@@ -1,8 +1,7 @@
-import { Collection, Db } from "mongodb";
+import type { Collection, Db } from "mongodb";
 import { backfillDefaultParties } from "../../../lib/scripts/backfillDefaultParties";
 import { getDatabase, closeDatabase } from "../../../lib/db";
-import { storage } from "../../../lib/storage";
-import { Campaign, Party } from "../../../lib/types";
+import type { Campaign, Party } from "../../../lib/types";
 
 const TEST_MARKER_FIELD = "__backfillTestRun";
 const TEST_MARKER_VALUE = `test-${Date.now()}-${require("crypto").randomBytes(3).toString("hex")}`;
@@ -71,7 +70,7 @@ describe("backfillDefaultParties", () => {
 
     await backfillDefaultParties();
 
-    const created = await parties.findOne({ campaignId: campaign.id });
+    const created = await parties.findOne({ campaignId: { $eq: campaign.id } });
     expect(created).toMatchObject({
       campaignId: campaign.id,
       userId: campaign.userId,
@@ -94,12 +93,12 @@ describe("backfillDefaultParties", () => {
 
   it("does not modify the Campaign document", async () => {
     const campaign = await seedCampaign();
+    const before = await campaigns.findOne({ id: { $eq: campaign.id } });
 
     await backfillDefaultParties();
 
-    const doc = await campaigns.findOne({ id: campaign.id });
-    expect(doc?.updatedAt).toEqual(campaign.updatedAt);
-    expect(doc?.name).toBe(campaign.name);
+    const after = await campaigns.findOne({ id: { $eq: campaign.id } });
+    expect(after).toEqual(before);
   });
 
   it("is idempotent — second run creates no additional party", async () => {
@@ -120,23 +119,32 @@ describe("backfillDefaultParties", () => {
     const first = await seedCampaign();
     const second = await seedCampaign();
 
-    const realSaveParty = storage.saveParty.bind(storage);
-    const saveSpy = jest
-      .spyOn(storage, "saveParty")
-      .mockImplementation((party: Party) => {
+    // `db.collection()` returns a new Collection instance per call, so the spy
+    // must live on the shared prototype to intercept the script's own internally
+    // created `parties` collection object.
+    const proto = Object.getPrototypeOf(parties) as {
+      insertOne: typeof parties.insertOne;
+    };
+    const realInsertOne = proto.insertOne.bind(parties);
+    const insertSpy = jest
+      .spyOn(proto, "insertOne")
+      .mockImplementation(function (
+        this: Collection<Party>,
+        party: Party & { _id?: unknown }
+      ) {
         if (party.campaignId === first.id) {
           throw new Error("simulated insert failure");
         }
-        return realSaveParty(party);
+        return realInsertOne.call(this, party);
       });
 
     const result = await backfillDefaultParties();
 
     expect(result.failed).toBeGreaterThanOrEqual(1);
-    const secondParty = await parties.findOne({ campaignId: second.id });
+    const secondParty = await parties.findOne({ campaignId: { $eq: second.id } });
     expect(secondParty).not.toBeNull();
 
-    saveSpy.mockRestore();
+    insertSpy.mockRestore();
     // Clean up whichever campaign didn't get a party inserted due to the simulated failure
     await parties.deleteMany({ campaignId: { $in: [first.id, second.id] } });
   });
