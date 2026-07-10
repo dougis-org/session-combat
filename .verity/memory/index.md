@@ -4,7 +4,7 @@
 
 > If you are an AI coding agent reading this via CLAUDE.md: scan the catalog below for any node whose title, kind, or file scope is relevant to the task the user just asked you to do. Open the matching files via the Read tool before writing code. Most projects accumulate dozens to hundreds of nodes — do not read them all; pick the few that fit the current change.
 
-## decisions/ (16)
+## decisions/ (23)
 
 - [[n015-model-session-lifecycle-as-its-own-campaign-stream]] — **Model session lifecycle as its own campaign stream event variant**
   *decision* · 84%
@@ -38,6 +38,20 @@
   *decision* · 84%
 - [[n030-clear-invalid-currentchapterid-before-persisting-c]] — **Clear invalid currentChapterId before persisting campaign edits**
   *decision* · 90%
+- [[n031-validate-scenecomposer-file-and-campaign-inputs-be]] — **Validate SceneComposer file and campaign inputs before upload**
+  *decision* · 79% · scope: `**/SceneComposer*`, `**/*SceneComposer*/**`
+- [[n032-mark-monster-import-failures-as-alerts]] — **Mark monster import failures as alerts**
+  *decision* · 83%
+- [[n033-use-data-testid-when-playwright-role-selectors-are]] — **Use `data-testid` when Playwright role selectors are ambiguous**
+  *decision* · 87%
+- [[n034-assert-route-matches-with-an-end-of-path-regex-not]] — **Assert route matches with an end-of-path regex, not substring containment**
+  *decision* · 81%
+- [[n035-preserve-party-membership-history-on-rejoin]] — **Preserve party membership history on rejoin**
+  *decision* · 90%
+- [[n036-allow-membership-changes-by-self-or-active-dm-only]] — **Allow membership changes by self or active DM only**
+  *decision* · 84%
+- [[n037-treat-http-207-as-partial-success-and-keep-the-err]] — **Treat HTTP 207 as partial success and keep the error message visible**
+  *decision* · 88%
 
 ## domain/ (4)
 
