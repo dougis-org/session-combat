@@ -11,14 +11,14 @@ The system SHALL expose a `subscribe(campaignId, onEvent)` function in `lib/serv
 - **Given** the process is connected to an Atlas (replica-set) MongoDB
 - **And** no change stream is currently open
 - **When** `subscribe(campaignId, handler)` is called for the first time
-- **Then** exactly one `MongoClient.watch()` cursor is opened
+- **Then** exactly one `MongoClient.db().watch()` cursor is opened
 - **And** the handler is registered in the subscriber registry under `campaignId`
 
 #### Scenario: Subsequent subscriptions reuse the existing stream
 
 - **Given** a shared change stream is already open
 - **When** `subscribe(campaignId2, handler2)` is called (same or different campaign)
-- **Then** no new `MongoClient.watch()` cursor is opened
+- **Then** no new `MongoClient.db().watch()` cursor is opened
 - **And** the total cursor count remains 1
 
 #### Scenario: Concurrent subscriptions during lazy open do not race
@@ -88,7 +88,7 @@ The system SHALL, when running against a standalone (non-replica-set) MongoDB, p
 - **Given** `db.admin().command({ replSetGetStatus: 1 })` throws a non-replica-set error
 - **When** `subscribe()` is called
 - **Then** the polling path is activated for that connection
-- **And** no `MongoClient.watch()` call is made
+- **And** no `MongoClient.db().watch()` call is made
 
 #### Scenario: Detection result is cached
 
@@ -304,7 +304,7 @@ None.
 
 - **Given** N SSE connections are open (N ≥ 2) across M campaigns (M ≥ 1) on Atlas
 - **When** the transport is running
-- **Then** exactly one `MongoClient.watch()` cursor exists in the process (bound holds after the db-level watch broadened scope to `campaigns`, `campaignMessages`, and `campaignRolls`)
+- **Then** exactly one `MongoClient.db().watch()` cursor exists in the process (bound holds after the db-level watch broadened scope to `campaigns`, `campaignMessages`, and `campaignRolls`)
 
 ### Requirement: Security
 
