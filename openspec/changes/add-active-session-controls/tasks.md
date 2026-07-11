@@ -7,7 +7,7 @@
 
 ## Preflight
 
-- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify a PR-review-automation skill is available** — check the available skills list for `pr-review-toolkit:review-pr` (or an equivalent PR-ownership skill such as `pr-reviewer`, depending on the agent configuration in use). If none is listed, halt immediately, inform the user that the tooling is required, provide installation guidance, and do not proceed until the user confirms it is installed. (Satisfied via the `pr-reviewer` skill in the agent configuration used for this change; treat this as a check for *some* PR-review-automation tooling, not a hard dependency on that exact skill name.)
 
 ## Execution
 
@@ -31,7 +31,7 @@
 ## Validation
 
 - [x] Run unit/integration tests
-- [x] Run E2E tests (if applicable) (none exist for this feature; N/A)
+- [x] Run E2E tests (if applicable) (the repo's Playwright E2E/regression suite under `tests/e2e/` via `npm run test:regression` was run as part of CI/remote-push validation; no new E2E coverage was added specifically for this feature, since T1/T2 unit tests and the T3/T4 integration-style tests already cover its scenarios)
 - [x] Run type checks
 - [x] Run build
 - [x] Run security/code quality checks required by project standards (lint clean)

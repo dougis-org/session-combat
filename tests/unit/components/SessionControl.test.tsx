@@ -212,9 +212,9 @@ describe('SessionControl', () => {
     unmount()
   })
 
-  test('T2-9: End Session 404 calls onSessionChange(null), no error shown', async () => {
+  test('T2-9: End Session 404 "No active session" calls onSessionChange(null), no error shown', async () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
-    ;(global.fetch as jest.Mock).mockResolvedValue({ status: 404 })
+    ;(global.fetch as jest.Mock).mockResolvedValue({ status: 404, json: async () => ({ error: 'No active session' }) })
     const onSessionChange = jest.fn()
     const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
 
@@ -224,6 +224,20 @@ describe('SessionControl', () => {
     expect(global.fetch).toHaveBeenCalledTimes(1)
     expect(onSessionChange).toHaveBeenCalledWith(null)
     expect(container.textContent).not.toMatch(/error/i)
+    unmount()
+  })
+
+  test('End Session 404 "Campaign not found" (unauthorized) shows inline error, does not call onSessionChange', async () => {
+    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
+    ;(global.fetch as jest.Mock).mockResolvedValue({ status: 404, json: async () => ({ error: 'Campaign not found' }) })
+    const onSessionChange = jest.fn()
+    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
+
+    const [endButton] = Array.from(container.querySelectorAll('button'))
+    await act(async () => { endButton.click() })
+
+    expect(onSessionChange).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('Failed to end session')
     unmount()
   })
 
@@ -271,17 +285,20 @@ describe('SessionControl', () => {
     unmount()
   })
 
-  test('T2-11a: Force end 404 (session already cleared) calls onSessionChange(null), no error shown', async () => {
+  test('Force end 404 "Campaign not found" (unauthorized) shows inline error, does not call onSessionChange', async () => {
+    // The route never returns "No active session" for force=true requests (that
+    // check is skipped when force=true), so any 404 here means the caller lost
+    // DM access mid-session and must not be silently treated as success.
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
-    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 404 })
+    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 404, json: async () => ({ error: 'Campaign not found' }) })
     const onSessionChange = jest.fn()
     const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
 
     const [, forceButton] = Array.from(container.querySelectorAll('button'))
     await act(async () => { forceButton.click() })
 
-    expect(onSessionChange).toHaveBeenCalledWith(null)
-    expect(container.textContent).not.toMatch(/error/i)
+    expect(onSessionChange).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('Failed to reset session')
     unmount()
   })
 

@@ -74,12 +74,25 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
     }
   }
 
+  async function isBenign404(res: Response): Promise<boolean> {
+    // The route also returns 404 for "Campaign not found" (e.g. a non-DM whose
+    // permissions changed mid-session) — only "No active session" means the
+    // session was already ended elsewhere and is safe to treat as success.
+    if (res.status !== 404) return false
+    try {
+      const body = await res.json()
+      return body?.error === 'No active session'
+    } catch {
+      return false
+    }
+  }
+
   async function terminateSession(url: string, label: string, errorMessage: string) {
     setBusy(true)
     setError(null)
     try {
       const res = await fetch(url, { method: 'DELETE' })
-      if (res.ok || res.status === 404) {
+      if (res.ok || await isBenign404(res)) {
         onSessionChange(null)
       } else {
         console.error(`SessionControl.${label}: unexpected status ${res.status} for campaign ${campaignId}`)
