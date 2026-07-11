@@ -121,11 +121,13 @@ describe("backfillDefaultParties", () => {
 
     // `db.collection()` returns a new Collection instance per call, so the spy
     // must live on the shared prototype to intercept the script's own internally
-    // created `parties` collection object.
+    // created `parties` collection object. Capture the *unbound* original so it
+    // can be invoked with whatever `this` the mock implementation receives at
+    // call time, rather than being pinned to the test's own `parties` instance.
     const proto = Object.getPrototypeOf(parties) as {
       insertOne: typeof parties.insertOne;
     };
-    const realInsertOne = proto.insertOne.bind(parties);
+    const realInsertOne = proto.insertOne;
     const insertSpy = jest
       .spyOn(proto, "insertOne")
       .mockImplementation(function (
@@ -138,14 +140,16 @@ describe("backfillDefaultParties", () => {
         return realInsertOne.call(this, party);
       });
 
-    const result = await backfillDefaultParties();
+    try {
+      const result = await backfillDefaultParties();
 
-    expect(result.failed).toBeGreaterThanOrEqual(1);
-    const secondParty = await parties.findOne({ campaignId: { $eq: second.id } });
-    expect(secondParty).not.toBeNull();
-
-    insertSpy.mockRestore();
-    // Clean up whichever campaign didn't get a party inserted due to the simulated failure
-    await parties.deleteMany({ campaignId: { $in: [first.id, second.id] } });
+      expect(result.failed).toBeGreaterThanOrEqual(1);
+      const secondParty = await parties.findOne({ campaignId: { $eq: second.id } });
+      expect(secondParty).not.toBeNull();
+    } finally {
+      insertSpy.mockRestore();
+      // Clean up whichever campaign didn't get a party inserted due to the simulated failure
+      await parties.deleteMany({ campaignId: { $in: [first.id, second.id] } });
+    }
   });
 });

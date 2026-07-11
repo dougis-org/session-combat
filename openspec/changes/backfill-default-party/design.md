@@ -123,7 +123,7 @@
 
 ## Operational Blocking Policy
 
-- If CI checks fail: this is a one-off script with no test suite (per Non-Goals); if lint/typecheck fails on the script file itself, fix it before running — do not merge/run a script that doesn't typecheck.
+- If CI checks fail: this is a one-off script with only a lightweight integration test (per Decision 4 — one test covering core query-and-create behavior and idempotency, not a full test suite); if lint/typecheck/tests fail on the script file itself, fix it before running — do not merge/run a script that doesn't pass.
 - If security checks fail: N/A — script has no new external inputs, network endpoints, or user-facing surface; it only touches the existing database connection already used by the rest of the app.
 - If required reviews are blocked/stale: since this is a manually-run, deletable script (not a shipped feature), a human (Doug) reviews and runs it directly; no PR-gate blocking policy applies beyond normal repo review norms for merging the script file itself.
 - Escalation path and timeout: N/A — no automated pipeline depends on this script; if something looks wrong during a manual run, stop (Ctrl+C) and re-examine before re-running.
