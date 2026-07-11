@@ -22,6 +22,7 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
       try {
         const res = await fetch(`/api/campaigns/${campaignId}/members`);
         if (!res.ok) {
+          console.error(`useIsDM: /members returned ${res.status} for campaign ${campaignId}`);
           if (!cancelled) setIsDM(false);
           return;
         }
@@ -31,7 +32,8 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
         if (!cancelled) {
           setIsDM(currentMember?.role === 'dm' && currentMember?.status === 'active');
         }
-      } catch {
+      } catch (err) {
+        console.error(`useIsDM: failed to fetch/parse members for campaign ${campaignId}`, err);
         if (!cancelled) setIsDM(false);
       } finally {
         if (!cancelled) setLoading(false);

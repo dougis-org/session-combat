@@ -33,9 +33,11 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
       } else if (res.status === 409) {
         await reconcileFromCampaign()
       } else {
+        console.error(`SessionControl.handleStart: unexpected status ${res.status} for campaign ${campaignId}`)
         setError('Failed to start session, try again')
       }
-    } catch {
+    } catch (err) {
+      console.error(`SessionControl.handleStart failed for campaign ${campaignId}`, err)
       setError('Failed to start session, try again')
     } finally {
       setBusy(false)
@@ -50,9 +52,11 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
       if (res.status === 200 || res.status === 404) {
         onSessionChange(null)
       } else {
+        console.error(`SessionControl.handleEnd: unexpected status ${res.status} for campaign ${campaignId}`)
         setError('Failed to end session, try again')
       }
-    } catch {
+    } catch (err) {
+      console.error(`SessionControl.handleEnd failed for campaign ${campaignId}`, err)
       setError('Failed to end session, try again')
     } finally {
       setBusy(false)
@@ -67,9 +71,11 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
       if (res.ok) {
         onSessionChange(null)
       } else {
+        console.error(`SessionControl.handleForceEnd: unexpected status ${res.status} for campaign ${campaignId}`)
         setError('Failed to reset session, try again')
       }
-    } catch {
+    } catch (err) {
+      console.error(`SessionControl.handleForceEnd failed for campaign ${campaignId}`, err)
       setError('Failed to reset session, try again')
     } finally {
       setBusy(false)
