@@ -29,7 +29,7 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
   }, [id])
 
   const header = campaignName && (
-    <header className="mb-4 flex items-center justify-between">
+    <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
       <h1 className="text-3xl font-bold text-white">{campaignName}</h1>
       <SessionControl campaignId={id} activeSessionId={activeSessionId} onSessionChange={setActiveSessionId} />
     </header>
