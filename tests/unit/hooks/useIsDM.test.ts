@@ -146,4 +146,56 @@ describe('useIsDM', () => {
     expect(global.fetch).toHaveBeenCalledTimes(1);
     unmountReactRoot(container, root);
   });
+
+  test('transient non-404 error status is retried on the next auth re-check', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 500 });
+
+    const { container, root } = createReactRoot();
+    function Probe({ campaignId }: { campaignId: string }) {
+      useIsDM(campaignId);
+      return null;
+    }
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+    await act(async () => {});
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ role: 'dm', status: 'active' }),
+    });
+    useAuthMock.mockReturnValue({ user: { userId: 'user-1' }, loading: true });
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+    useAuthMock.mockReturnValue({ user: { userId: 'user-1' }, loading: false });
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+    await act(async () => {});
+
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    unmountReactRoot(container, root);
+  });
+
+  test('thrown fetch error is retried on the next auth re-check', async () => {
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('network error'));
+
+    const { container, root } = createReactRoot();
+    function Probe({ campaignId }: { campaignId: string }) {
+      useIsDM(campaignId);
+      return null;
+    }
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+    await act(async () => {});
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ role: 'dm', status: 'active' }),
+    });
+    useAuthMock.mockReturnValue({ user: { userId: 'user-1' }, loading: true });
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+    useAuthMock.mockReturnValue({ user: { userId: 'user-1' }, loading: false });
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+    await act(async () => {});
+
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    unmountReactRoot(container, root);
+  });
 });

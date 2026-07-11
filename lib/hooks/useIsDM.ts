@@ -46,6 +46,9 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
         if (!res.ok) {
           if (res.status !== 404) {
             console.error(`useIsDM: /members/me returned ${res.status} for campaign ${campaignId}`);
+            // Transient failure (not "not a member") — allow a retry on the next
+            // auth re-check instead of getting stuck on this fetch key.
+            fetchedKeyRef.current = null;
           }
           if (!cancelled) setIsDM(false);
           return;
@@ -56,6 +59,8 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
         }
       } catch (err) {
         console.error(`useIsDM: failed to fetch/parse current member for campaign ${campaignId}`, err);
+        // Network error or bad JSON — allow a retry on the next auth re-check.
+        fetchedKeyRef.current = null;
         if (!cancelled) setIsDM(false);
       } finally {
         if (!cancelled) setLoading(false);

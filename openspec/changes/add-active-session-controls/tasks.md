@@ -55,11 +55,11 @@ Use the project's documented commands for each of the above (see project README 
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `fix/443-active-session-controls` to `main`. PR body MUST include `Closes #443` (and reference #400/#317 as related context, not `Closes`, since they are not the bugs this change closes).
-- [ ] **Issue lifecycle: mark in-review**: run `gh issue edit 443 --repo dougis-org/session-combat --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `fix/443-active-session-controls` to `main`. PR body MUST include `Closes #443` (and reference #400/#317 as related context, not `Closes`, since they are not the bugs this change closes). (PR #492)
+- [x] **Issue lifecycle: mark in-review**: run `gh issue edit 443 --repo dougis-org/session-combat --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start (CI already completed — all required checks passing as of this session)
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
 - [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
