@@ -13,6 +13,7 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
   const { isDM, loading } = useIsDM(campaignId)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const safeCampaignId = encodeURIComponent(campaignId)
 
   // activeSessionId is canonical state from CampaignLayout (e.g. driven by the
   // session SSE event); once it changes, any stale error from a prior local
@@ -24,7 +25,7 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
   if (loading || !isDM) return null
 
   async function reconcileFromCampaign() {
-    const res = await fetch(`/api/campaigns/${campaignId}`)
+    const res = await fetch(`/api/campaigns/${safeCampaignId}`)
     if (!res.ok) {
       // A session is known to be active (that's why we're reconciling); without a
       // successful re-fetch we can't learn its id, so we must not report null here
@@ -46,7 +47,7 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
     setBusy(true)
     setError(null)
     try {
-      const res = await fetch(`/api/campaigns/${campaignId}/sessions/active`, { method: 'POST' })
+      const res = await fetch(`/api/campaigns/${safeCampaignId}/sessions/active`, { method: 'POST' })
       if (res.status === 201) {
         const log = await res.json()
         if (typeof log?.id !== 'string' || log.id === '') {
@@ -105,11 +106,11 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
   }
 
   function handleEnd() {
-    return terminateSession(`/api/campaigns/${campaignId}/sessions/active`, 'handleEnd', 'Failed to end session, try again')
+    return terminateSession(`/api/campaigns/${safeCampaignId}/sessions/active`, 'handleEnd', 'Failed to end session, try again')
   }
 
   function handleForceEnd() {
-    return terminateSession(`/api/campaigns/${campaignId}/sessions/active?force=true`, 'handleForceEnd', 'Failed to reset session, try again')
+    return terminateSession(`/api/campaigns/${safeCampaignId}/sessions/active?force=true`, 'handleForceEnd', 'Failed to reset session, try again')
   }
 
   return (
