@@ -1,7 +1,7 @@
 ## Context
 
 - Relevant architecture: `app/campaigns/[id]/layout.tsx` (`CampaignLayout`) is a client component mounted once per campaign (`key={id}` on its `CampaignChat` child, not on itself, but `id` is stable across all campaign tabs). It already fetches `GET /api/campaigns/[id]` once on mount to seed `activeSessionId`/`campaignName`, and already owns `activeSessionId` state that is kept in sync via `CampaignChat`'s `onSessionChange` callback, which fires when a `session` SSE event arrives (`lib/hooks/useCampaignStream.ts` already registers a `session` event listener; `app/api/campaigns/[id]/sessions/active/route.ts` already emits it via `emitFiltered` on both POST and DELETE). DM-role detection is not currently available in the layout; the existing precedent is `app/campaigns/[id]/page.tsx`, which fetches `/api/campaigns/[id]/members`, finds the member matching `useAuth().user.userId`, and computes `isDM = currentMember?.role === 'dm' && currentMember?.status === 'active'`.
-- Dependencies: `POST`/`DELETE /api/campaigns/[id]/sessions/active` (existing, unchanged), `GET /api/campaigns/[id]/members` (existing, unchanged), `lib/hooks/useAuth.ts` (existing, unchanged), `useCampaignStream`'s `session` event (existing, unchanged).
+- Dependencies: `POST`/`DELETE /api/campaigns/[id]/sessions/active` (existing, unchanged), `GET /api/campaigns/[id]/members/me` (existing, unchanged), `lib/hooks/useAuth.ts` (existing, unchanged), `useCampaignStream`'s `session` event (existing, unchanged).
 - Interfaces/contracts touched: `app/campaigns/[id]/layout.tsx` only, plus one new presentational/interactive component for the control. No API, type, or storage changes.
 
 ## Goals / Non-Goals
@@ -31,15 +31,15 @@
 - Rationale: Matches explicit scope decision from the user (camlayout header) and existing componentization pattern (`CampaignChat` is already a sibling extracted component).
 - Trade-offs: One more client component and one more member fetch on every campaign page load; acceptable given `page.tsx` already pays this same cost today for the same reason.
 
-### Decision 2: DM detection via a new `useIsDM(campaignId)` hook wrapping `GET /api/campaigns/[id]/members`
+### Decision 2: DM detection via a new `useIsDM(campaignId)` hook wrapping `GET /api/campaigns/[id]/members/me`
 
-- Chosen: Add `lib/hooks/useIsDM.ts` that fetches `/api/campaigns/[id]/members`, compares against `useAuth().user.userId`, and returns `{ isDM, loading }`, following the exact `currentMember?.role === 'dm' && currentMember?.status === 'active'` logic already used in `app/campaigns/[id]/page.tsx:223`. `SessionControl` uses this hook and renders nothing (`null`) while loading or when `isDM` is false.
+- Chosen: Add `lib/hooks/useIsDM.ts` that fetches `/api/campaigns/[id]/members/me` (the current caller's own membership only — no roster, no username lookup) and returns `{ isDM, loading }`, computing `isDM = role === 'dm' && status === 'active'` from that response, following the same role/status gate logic already used in `app/campaigns/[id]/page.tsx:223`. The hook defers the fetch until `useAuth()` finishes loading, and short-circuits to `{ isDM: false, loading: false }` if auth resolves with no user, to avoid a redundant fetch before the user id is known. `SessionControl` uses this hook and renders nothing (`null`) while loading or when `isDM` is false.
 - Alternatives considered:
   1. Extend `GET /api/campaigns/[id]` to also return the caller's role — rejected: touches an existing, already-relied-upon API contract and route (out of scope per proposal; risk of breaking other consumers of that endpoint's shape).
-  2. Duplicate the fetch-and-compute logic inline in `SessionControl` — rejected: identical logic already exists in `page.tsx`; extracting a hook avoids a second copy-paste and gives both call sites one place to fix if member-role logic changes later.
+  2. Fetch the full `/members` list (as `page.tsx` does) and find the current user's entry client-side — rejected during review: `CampaignChat` already fetches the full roster on mount, so a second full-roster fetch (plus its per-member username lookup) purely to answer "is the caller a DM" is redundant; `/members/me` returns just `{ role, status }` for the caller, avoiding that extra payload and server work.
   3. Lift `isDM` computation into `CampaignLayout` and pass as a prop — rejected: layout doesn't otherwise need member data, and `SessionControl` owning its own gating keeps `layout.tsx`'s diff minimal.
-- Rationale: Reuses a proven pattern instead of inventing a new permissions mechanism, keeps `layout.tsx` changes minimal, and does not touch any existing API contract.
-- Trade-offs: A second network call to `/members` beyond what `page.tsx` already does when the Members tab happens to be active — acceptable, this data is small and already fetched by that page independently.
+- Rationale: Reuses the existing per-member endpoint instead of inventing a new permissions mechanism, keeps `layout.tsx` changes minimal, and does not touch any existing API contract or the full-roster endpoint's shape.
+- Trade-offs: One more network call to `/members/me` per campaign page load — small, single-member payload, acceptable given the control's DM-gating requirement.
 
 ### Decision 3: `SessionControl` is driven entirely by props (`activeSessionId`, `onSessionChange`) from `CampaignLayout` — no local session-id state
 
