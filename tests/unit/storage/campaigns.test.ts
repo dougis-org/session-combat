@@ -19,7 +19,8 @@ function makeMockCollection() {
   const findOne = jest.fn<Promise<unknown>, []>();
   const updateOne = jest.fn<Promise<unknown>, []>();
   const deleteOne = jest.fn<Promise<unknown>, []>();
-  return { find, sort, collation, toArray, findOne, updateOne, deleteOne };
+  const deleteMany = jest.fn<Promise<unknown>, []>().mockResolvedValue({ deletedCount: 0 } as never);
+  return { find, sort, collation, toArray, findOne, updateOne, deleteOne, deleteMany };
 }
 
 const baseCampaign: Campaign = {
@@ -132,8 +133,31 @@ describe("Campaign storage functions", () => {
   });
 
   describe("storage.deleteCampaign", () => {
+    let partiesMock: ReturnType<typeof makeMockCollection>;
+    let campaignMembersMock: ReturnType<typeof makeMockCollection>;
+    let sessionLogsMock: ReturnType<typeof makeMockCollection>;
+    let campaignRollsMock: ReturnType<typeof makeMockCollection>;
+    let campaignCharacterSharesMock: ReturnType<typeof makeMockCollection>;
+
     beforeEach(() => {
+      campaignsMock.findOne.mockResolvedValue(baseCampaign as never);
       campaignsMock.deleteOne.mockResolvedValue({ deletedCount: 1 } as never);
+      partiesMock = makeMockCollection();
+      campaignMembersMock = makeMockCollection();
+      sessionLogsMock = makeMockCollection();
+      campaignRollsMock = makeMockCollection();
+      campaignCharacterSharesMock = makeMockCollection();
+
+      const mocks: Record<string, any> = {
+        campaigns: campaignsMock,
+        parties: partiesMock,
+        campaignMembers: campaignMembersMock,
+        sessionLogs: sessionLogsMock,
+        campaignRolls: campaignRollsMock,
+        campaignCharacterShares: campaignCharacterSharesMock,
+      };
+
+      mockDb.collection = jest.fn((name: string) => mocks[name] || makeMockCollection());
     });
 
     test("deletes campaign by id and userId", async () => {
@@ -143,7 +167,63 @@ describe("Campaign storage functions", () => {
       expect(campaignsMock.deleteOne).toHaveBeenCalledWith({ id: "campaign-1", userId: "user-1" });
     });
 
+    test("cascade deletes matching Party rows", async () => {
+      await storage.deleteCampaign("campaign-1", "user-1");
+
+      expect(mockDb.collection).toHaveBeenCalledWith("parties");
+      expect(partiesMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1", userId: "user-1" });
+    });
+
+    test("cascade deletes CampaignMember rows for the campaign", async () => {
+      await storage.deleteCampaign("campaign-1", "user-1");
+
+      expect(mockDb.collection).toHaveBeenCalledWith("campaignMembers");
+      expect(campaignMembersMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
+    });
+
+    test("cascade deletes session logs, rolls, and character shares", async () => {
+      await storage.deleteCampaign("campaign-1", "user-1");
+
+      expect(mockDb.collection).toHaveBeenCalledWith("sessionLogs");
+      expect(sessionLogsMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1", userId: "user-1" });
+
+      expect(mockDb.collection).toHaveBeenCalledWith("campaignRolls");
+      expect(campaignRollsMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
+
+      expect(mockDb.collection).toHaveBeenCalledWith("campaignCharacterShares");
+      expect(campaignCharacterSharesMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
+    });
+
+    test("deletes children first, then campaign document last (ordering check)", async () => {
+      const callSequence: string[] = [];
+      partiesMock.deleteMany.mockImplementation(async () => { callSequence.push("parties"); return { deletedCount: 0 }; });
+      campaignMembersMock.deleteMany.mockImplementation(async () => { callSequence.push("campaignMembers"); return { deletedCount: 0 }; });
+      sessionLogsMock.deleteMany.mockImplementation(async () => { callSequence.push("sessionLogs"); return { deletedCount: 0 }; });
+      campaignRollsMock.deleteMany.mockImplementation(async () => { callSequence.push("campaignRolls"); return { deletedCount: 0 }; });
+      campaignCharacterSharesMock.deleteMany.mockImplementation(async () => { callSequence.push("campaignCharacterShares"); return { deletedCount: 0 }; });
+      campaignsMock.deleteOne.mockImplementation(async () => { callSequence.push("campaigns"); return { deletedCount: 1 }; });
+
+      await storage.deleteCampaign("campaign-1", "user-1");
+
+      expect(callSequence).toHaveLength(6);
+      expect(callSequence[5]).toBe("campaigns");
+      expect(callSequence.slice(0, 5)).toContain("parties");
+      expect(callSequence.slice(0, 5)).toContain("campaignMembers");
+      expect(callSequence.slice(0, 5)).toContain("sessionLogs");
+      expect(callSequence.slice(0, 5)).toContain("campaignRolls");
+      expect(callSequence.slice(0, 5)).toContain("campaignCharacterShares");
+    });
+
+    test("does not cascade delete if campaign does not exist or does not belong to user", async () => {
+      campaignsMock.findOne.mockResolvedValue(null as never);
+      await storage.deleteCampaign("campaign-1", "user-1");
+
+      expect(partiesMock.deleteMany).not.toHaveBeenCalled();
+      expect(campaignsMock.deleteOne).not.toHaveBeenCalled();
+    });
+
     test("does not throw when campaign does not exist (deleteOne is a no-op)", async () => {
+      campaignsMock.findOne.mockResolvedValue(null as never);
       campaignsMock.deleteOne.mockResolvedValue({ deletedCount: 0 } as never);
 
       await expect(storage.deleteCampaign("nonexistent", "user-1")).resolves.not.toThrow();

@@ -301,7 +301,7 @@ describe("Campaign API Integration Tests", () => {
     expect(defaultParty?.name).toBe("Main Party");
   });
 
-  it("deleting a campaign does not delete associated parties", async () => {
+  it("deleting a campaign cascade deletes associated parties", async () => {
     const campaign = await createCampaign("Campaign To Delete");
 
     const partyRes = await fetch(`${baseUrl}/api/parties`, {
@@ -317,7 +317,7 @@ describe("Campaign API Integration Tests", () => {
     });
 
     const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed() });
-    expect(getPartyRes.status).toBe(200);
+    expect(getPartyRes.status).toBe(404);
   });
 
   // --- Chapters and active chapter ID integration ---

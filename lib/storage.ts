@@ -318,6 +318,23 @@ export const storage = {
   async deleteCampaign(id: string, userId: string): Promise<void> {
     try {
       const db = await getDatabase();
+
+      // Verify campaign exists and belongs to the user before deleting anything
+      const campaign = await db.collection<Campaign>("campaigns").findOne({ id, userId });
+      if (!campaign) {
+        return;
+      }
+
+      // Cascade delete children first
+      await Promise.all([
+        db.collection<Party>("parties").deleteMany({ campaignId: id, userId }),
+        db.collection("campaignMembers").deleteMany({ campaignId: id }),
+        db.collection<SessionLog>("sessionLogs").deleteMany({ campaignId: id, userId }),
+        db.collection("campaignRolls").deleteMany({ campaignId: id }),
+        db.collection<CampaignCharacterShare>("campaignCharacterShares").deleteMany({ campaignId: id }),
+      ]);
+
+      // Delete the parent campaign document last
       await db.collection<Campaign>("campaigns").deleteOne({ id, userId });
     } catch (error) {
       console.error("Error deleting campaign:", error);
