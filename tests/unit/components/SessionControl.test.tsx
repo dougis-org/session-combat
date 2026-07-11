@@ -227,23 +227,12 @@ describe('SessionControl', () => {
     unmount()
   })
 
-  test('End Session 404 "Campaign not found" (unauthorized) shows inline error, does not call onSessionChange', async () => {
+  test.each([
+    { label: 'End Session 404 "Campaign not found" (unauthorized)', response: { status: 404, json: async () => ({ error: 'Campaign not found' }) } },
+    { label: 'End Session 500', response: { status: 500 } },
+  ])('$label shows inline error, does not call onSessionChange', async ({ response }) => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
-    ;(global.fetch as jest.Mock).mockResolvedValue({ status: 404, json: async () => ({ error: 'Campaign not found' }) })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
-
-    const [endButton] = Array.from(container.querySelectorAll('button'))
-    await act(async () => { endButton.click() })
-
-    expect(onSessionChange).not.toHaveBeenCalled()
-    expect(container.textContent).toContain('Failed to end session')
-    unmount()
-  })
-
-  test('T2-10: End Session 500 shows inline error, does not call onSessionChange', async () => {
-    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
-    ;(global.fetch as jest.Mock).mockResolvedValue({ status: 500 })
+    ;(global.fetch as jest.Mock).mockResolvedValue(response)
     const onSessionChange = jest.fn()
     const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
 
@@ -285,12 +274,15 @@ describe('SessionControl', () => {
     unmount()
   })
 
-  test('Force end 404 "Campaign not found" (unauthorized) shows inline error, does not call onSessionChange', async () => {
-    // The route never returns "No active session" for force=true requests (that
-    // check is skipped when force=true), so any 404 here means the caller lost
-    // DM access mid-session and must not be silently treated as success.
+  // The route never returns "No active session" for force=true requests (that
+  // check is skipped when force=true), so any 404 here means the caller lost
+  // DM access mid-session and must not be silently treated as success.
+  test.each([
+    { label: 'Force end 404 "Campaign not found" (unauthorized)', response: { ok: false, status: 404, json: async () => ({ error: 'Campaign not found' }) } },
+    { label: 'T2-11b: Force end 500', response: { ok: false, status: 500 } },
+  ])('$label shows inline error, does not call onSessionChange', async ({ response }) => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
-    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 404, json: async () => ({ error: 'Campaign not found' }) })
+    ;(global.fetch as jest.Mock).mockResolvedValue(response)
     const onSessionChange = jest.fn()
     const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
 
@@ -302,59 +294,21 @@ describe('SessionControl', () => {
     unmount()
   })
 
-  test('T2-11b: Force end 500 shows inline error, does not call onSessionChange', async () => {
-    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
-    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 500 })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
-
-    const [, forceButton] = Array.from(container.querySelectorAll('button'))
-    await act(async () => { forceButton.click() })
-
-    expect(onSessionChange).not.toHaveBeenCalled()
-    expect(container.textContent).toContain('Failed to reset session')
-    unmount()
-  })
-
-  test('Start Session network failure shows inline error, does not call onSessionChange', async () => {
+  test.each([
+    { label: 'Start Session', activeSessionId: null, buttonIndex: 0, errorText: 'Failed to start session' },
+    { label: 'End Session', activeSessionId: 'log-1', buttonIndex: 0, errorText: 'Failed to end session' },
+    { label: 'Force end', activeSessionId: 'log-1', buttonIndex: 1, errorText: 'Failed to reset session' },
+  ])('$label network failure shows inline error, does not call onSessionChange', async ({ activeSessionId, buttonIndex, errorText }) => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock).mockRejectedValue(new Error('network down'))
     const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId, onSessionChange })
 
-    const button = container.querySelector('button')!
-    await act(async () => { button.click() })
-
-    expect(onSessionChange).not.toHaveBeenCalled()
-    expect(container.textContent).toContain('Failed to start session')
-    unmount()
-  })
-
-  test('End Session network failure shows inline error, does not call onSessionChange', async () => {
-    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
-    ;(global.fetch as jest.Mock).mockRejectedValue(new Error('network down'))
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
-
-    const [endButton] = Array.from(container.querySelectorAll('button'))
-    await act(async () => { endButton.click() })
+    const targetButton = Array.from(container.querySelectorAll('button'))[buttonIndex]
+    await act(async () => { targetButton.click() })
 
     expect(onSessionChange).not.toHaveBeenCalled()
-    expect(container.textContent).toContain('Failed to end session')
-    unmount()
-  })
-
-  test('Force end network failure shows inline error, does not call onSessionChange', async () => {
-    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
-    ;(global.fetch as jest.Mock).mockRejectedValue(new Error('network down'))
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
-
-    const [, forceButton] = Array.from(container.querySelectorAll('button'))
-    await act(async () => { forceButton.click() })
-
-    expect(onSessionChange).not.toHaveBeenCalled()
-    expect(container.textContent).toContain('Failed to reset session')
+    expect(container.textContent).toContain(errorText)
     unmount()
   })
 
