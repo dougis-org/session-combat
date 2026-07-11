@@ -272,7 +272,7 @@ describe("Campaign API Integration Tests", () => {
   it("creating a party with valid campaignId persists and returns the campaignId", async () => {
     const campaign = await createCampaign("Party Association Campaign");
 
-    const partyRes = await fetch(`${baseUrl}/api/parties`, {
+    const partyRes = await fetch(new URL("/api/parties", baseUrl), {
       method: "POST",
       headers: authed(),
       body: JSON.stringify({ name: "The Fellowship", campaignId: campaign.id }),
@@ -307,19 +307,19 @@ describe("Campaign API Integration Tests", () => {
   it("deleting a campaign cascade deletes associated parties", async () => {
     const campaign = await createCampaign("Campaign To Delete");
 
-    const partyRes = await fetch(`${baseUrl}/api/parties`, {
+    const partyRes = await fetch(new URL("/api/parties", baseUrl), {
       method: "POST",
       headers: authed(),
       body: JSON.stringify({ name: "Party With Campaign", campaignId: campaign.id }),
     });
     const party = await partyRes.json() as { id: string };
 
-    await fetch(`${baseUrl}/api/campaigns/${campaign.id}`, {
+    await fetch(new URL(`/api/campaigns/${campaign.id}`, baseUrl), {
       method: "DELETE",
       headers: authed(),
     });
 
-    const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed() });
+    const getPartyRes = await fetch(new URL(`/api/parties/${party.id}`, baseUrl), { headers: authed() });
     expect(getPartyRes.status).toBe(404);
   });
 
@@ -343,7 +343,7 @@ describe("Campaign API Integration Tests", () => {
     expect(acceptRes.status).toBe(200);
 
     // User2 creates a party in the campaign
-    const partyRes = await fetch(`${baseUrl}/api/parties`, {
+    const partyRes = await fetch(new URL("/api/parties", baseUrl), {
       method: "POST",
       headers: authed(authCookie2),
       body: JSON.stringify({ name: "User2 Party", campaignId: campaign.id }),
