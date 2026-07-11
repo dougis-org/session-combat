@@ -44,9 +44,9 @@ Before running, determine whether the current change is **docs-only**: run `git 
 
 **Full path** (any non-`.md` file changed):
 
-- **Unit tests** — `npm test` (or project's documented unit test command); all tests must pass
-- **Integration tests** — run the project's integration test suite; all tests must pass
-- **Regression / E2E tests** — run the project's end-to-end or regression test suite; all tests must pass
+- **Unit tests** — `npm run test:unit` (this project's documented unit test command); all tests must pass
+- **Integration tests** — `npm run test:integration`; all tests must pass
+- **Regression / E2E tests** — `npm run test:regression`; all tests must pass
 - **Build** — `npm run build`; build must succeed with no errors
 
 If **ANY** required step fails, you **MUST** iterate and address the failure before pushing.

@@ -4,8 +4,7 @@
 // reactively on session SSE event": proves the existing session-SSE plumbing
 // (CampaignChat's onSessionChange callback, already wired through
 // CampaignLayout) drives the *real* SessionControl's displayed state, with no
-// additional fetch issued by SessionControl itself. No production code
-// changes are expected alongside this test.
+// additional fetch issued by SessionControl itself.
 import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CampaignLayout from '@/app/campaigns/[id]/layout';
