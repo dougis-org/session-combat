@@ -12,7 +12,7 @@ type HookResult = ReturnType<typeof useIsDM>;
 
 function renderHook(campaignId: string): { result: { current: HookResult }; unmount: () => void } {
   const { container, root } = createReactRoot();
-  const resultRef: { current: HookResult } = { current: undefined as unknown as HookResult };
+  const resultRef: { current: HookResult } = { current: { isDM: false, loading: true } };
 
   function Probe() {
     const hookResult = useIsDM(campaignId);
