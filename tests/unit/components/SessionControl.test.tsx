@@ -13,7 +13,15 @@ function render(props: { campaignId: string; activeSessionId: string | null; onS
   act(() => {
     root.render(React.createElement(SessionControl, props))
   })
-  return { container, unmount: () => unmountReactRoot(container, root) }
+  return {
+    container,
+    unmount: () => unmountReactRoot(container, root),
+    rerender: (nextProps: typeof props) => {
+      act(() => {
+        root.render(React.createElement(SessionControl, nextProps))
+      })
+    },
+  }
 }
 
 describe('SessionControl', () => {
@@ -230,6 +238,22 @@ describe('SessionControl', () => {
 
     expect(onSessionChange).not.toHaveBeenCalled()
     expect(container.textContent).toContain('Failed to end session')
+    unmount()
+  })
+
+  test('stale error clears when activeSessionId changes externally (e.g. via SSE)', async () => {
+    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
+    ;(global.fetch as jest.Mock).mockResolvedValue({ status: 500 })
+    const onSessionChange = jest.fn()
+    const { container, unmount, rerender } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
+
+    const [endButton] = Array.from(container.querySelectorAll('button'))
+    await act(async () => { endButton.click() })
+    expect(container.textContent).toContain('Failed to end session')
+
+    rerender({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+
+    expect(container.textContent).not.toMatch(/error|failed/i)
     unmount()
   })
 

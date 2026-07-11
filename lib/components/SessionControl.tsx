@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useIsDM } from '@/lib/hooks/useIsDM'
 
 interface SessionControlProps {
@@ -13,6 +13,13 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
   const { isDM, loading } = useIsDM(campaignId)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // activeSessionId is canonical state from CampaignLayout (e.g. driven by the
+  // session SSE event); once it changes, any stale error from a prior local
+  // action is no longer relevant.
+  useEffect(() => {
+    setError(null)
+  }, [activeSessionId])
 
   if (loading || !isDM) return null
 
