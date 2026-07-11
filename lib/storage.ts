@@ -327,11 +327,13 @@ export const storage = {
 
       // Cascade delete children first
       await Promise.all([
-        db.collection<Party>("parties").deleteMany({ campaignId: id, userId }),
+        db.collection<Party>("parties").deleteMany({ campaignId: id }),
         db.collection("campaignMembers").deleteMany({ campaignId: id }),
         db.collection<SessionLog>("sessionLogs").deleteMany({ campaignId: id, userId }),
         db.collection("campaignRolls").deleteMany({ campaignId: id }),
         db.collection<CampaignCharacterShare>("campaignCharacterShares").deleteMany({ campaignId: id }),
+        db.collection<SavedContent>("savedContent").deleteMany({ campaignId: id }),
+        db.collection("campaignMessages").deleteMany({ campaignId: id }),
       ]);
 
       // Delete the parent campaign document last

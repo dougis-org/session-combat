@@ -4,19 +4,19 @@
 
 ## Why
 
-- Problem statement: `storage.deleteCampaign` only removes the `Campaign` document. It never cleans up the campaign-scoped rows in `parties`, `campaignMembers`, `sessionLogs`, `campaignRolls`, and `campaignCharacterShares`, so every campaign deletion leaves orphaned data behind in five collections.
+- Problem statement: `storage.deleteCampaign` only removes the `Campaign` document. It never cleans up the campaign-scoped rows in `parties`, `campaignMembers`, `sessionLogs`, `campaignRolls`, `campaignCharacterShares`, `savedContent`, and `campaignMessages`, so every campaign deletion leaves orphaned data behind in seven collections.
 - Why now: Filed as a follow-up while building #474 (auto-create default Party on campaign creation), which adds one more piece of state (the default Party) that becomes orphaned on every delete. Epic: #470.
 - Business/user impact: Orphaned rows are invisible to users but accumulate indefinitely in the database, inflate storage/query costs over time, and can resurface as confusing "ghost" data if any future feature queries by `campaignId` without an existence check on the parent campaign.
 
 ## Problem Space
 
 - Current behavior: `DELETE /api/campaigns/[id]` → `storage.deleteCampaign(id, userId)` → `campaigns.deleteOne({ id, userId })`. Nothing else is touched.
-- Desired behavior: Deleting a campaign also deletes every row in the five campaign-scoped collections that reference it, leaving no orphaned data.
+- Desired behavior: Deleting a campaign also deletes every row in the seven campaign-scoped collections that reference it, leaving no orphaned data.
 - Constraints:
   - No MongoDB transactions are used anywhere in this codebase today (confirmed via grep for `startSession`/`withTransaction`); the fix should stay consistent with that and not introduce transactional semantics unilaterally.
   - `storage.deleteCampaign` has a second caller shape: it is also used as a best-effort rollback helper during campaign creation (`app/api/campaigns/route.ts`, `app/api/campaigns/global/[id]/copy/route.ts`) when a later step (`saveParty`/`addMember`) fails. The cascade must not break or meaningfully change behavior for that rollback path.
 - Assumptions:
-  - "Campaign-scoped" means any collection whose documents carry a `campaignId` field. Grepping `lib/storage.ts` and `lib/types.ts` surfaces exactly five: `Party`, `CampaignMember`, `SessionLog`, `CampaignRoll`, `CampaignCharacterShare`.
+  - "Campaign-scoped" means any collection whose documents carry a `campaignId` field. Surfaced seven: `Party`, `CampaignMember`, `SessionLog`, `CampaignRoll`, `CampaignCharacterShare`, `SavedContent`, `CampaignMessage`.
   - Best-effort (non-transactional) parallel deletes are acceptable, matching the existing precedent in `storage.clear(userId)` (lib/storage.ts:1256), which already does a `Promise.all` of `deleteMany` calls across `parties`, `campaignMembers`, and `campaignCharacterShares` scoped by `userId` for full account deletion.
 - Edge cases considered:
   - Campaign has zero children in one or more collections — `deleteMany` matching nothing is a no-op, not an error.
@@ -28,8 +28,8 @@
 
 ### In Scope
 
-- Update `storage.deleteCampaign` to cascade-delete matching rows in `parties`, `campaignMembers`, `sessionLogs`, `campaignRolls`, and `campaignCharacterShares` by `campaignId` (and `userId` where the collection is user-scoped).
-- Unit test coverage for the cascade (all five collections cleaned, ordering, no-op when nothing to clean).
+- Update `storage.deleteCampaign` to cascade-delete matching rows in `parties`, `campaignMembers`, `sessionLogs`, `campaignRolls`, `campaignCharacterShares`, `savedContent`, and `campaignMessages` by `campaignId` (and `userId` where the collection is strictly DM-owned).
+- Unit test coverage for the cascade (all seven collections cleaned, ordering, no-op when nothing to clean).
 
 ### Out of Scope
 

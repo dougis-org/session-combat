@@ -28,15 +28,15 @@ The system SHALL delete all `CampaignMember` documents whose `campaignId` matche
 - **When** the DM calls `storage.deleteCampaign` for that campaign
 - **Then** both members' `CampaignMember` documents are removed, including the player's, even though the player is not the caller of delete
 
-### Requirement: ADDED Cascade delete of SessionLog, CampaignRoll, and CampaignCharacterShare rows on campaign deletion
+### Requirement: ADDED Cascade delete of SessionLog, CampaignRoll, CampaignCharacterShare, SavedContent, and CampaignMessage rows on campaign deletion
 
-The system SHALL delete all `SessionLog`, `CampaignRoll`, and `CampaignCharacterShare` documents whose `campaignId` matches the deleted campaign's `id` when `storage.deleteCampaign` is called.
+The system SHALL delete all `SessionLog`, `CampaignRoll`, `CampaignCharacterShare`, `SavedContent`, and `CampaignMessage` documents whose `campaignId` matches the deleted campaign's `id` when `storage.deleteCampaign` is called.
 
-#### Scenario: Campaign with session history, rolls, and character shares is deleted
+#### Scenario: Campaign with session history, rolls, character shares, saved content, and messages is deleted
 
-- **Given** a campaign has at least one `SessionLog`, one `CampaignRoll`, and one `CampaignCharacterShare` document referencing its `campaignId`
+- **Given** a campaign has at least one `SessionLog`, one `CampaignRoll`, one `CampaignCharacterShare`, one `SavedContent`, and one `CampaignMessage` document referencing its `campaignId`
 - **When** `storage.deleteCampaign` is called for that campaign
-- **Then** all three documents are removed
+- **Then** all five documents are removed
 
 #### Scenario: Existing rollback callers are unaffected
 
@@ -52,19 +52,19 @@ The system SHALL delete the `Campaign` document only after the cascade deletes o
 
 #### Scenario: Campaign document is removed last, after cascade
 
-- **Given** a campaign with dependent rows in one or more of the five campaign-scoped collections
+- **Given** a campaign with dependent rows in one or more of the seven campaign-scoped collections
 - **When** `storage.deleteCampaign` is called
 - **Then** the cascade `deleteMany` calls are issued before the `campaigns.deleteOne` call, so that if the process fails before reaching the final delete, the `Campaign` document still exists and the operation remains retryable
 
 ## Traceability
 
-- Proposal element: "Cascade-delete parties, campaignMembers, sessionLogs, campaignRolls, campaignCharacterShares on campaign delete" -> Requirement: ADDED Cascade delete of Party rows; ADDED Cascade delete of CampaignMember rows; ADDED Cascade delete of SessionLog/CampaignRoll/CampaignCharacterShare rows
+- Proposal element: "Cascade-delete parties, campaignMembers, sessionLogs, campaignRolls, campaignCharacterShares, savedContent, campaignMessages on campaign delete" -> Requirement: ADDED Cascade delete of Party rows; ADDED Cascade delete of CampaignMember rows; ADDED Cascade delete of SessionLog/CampaignRoll/CampaignCharacterShare/SavedContent/CampaignMessage rows
 - Design decision: Decision 1 (parallel deleteMany cascade) -> Requirement: MODIFIED Campaign deletion removes the Campaign document
 - Design decision: Decision 2 (children-first ordering) -> Requirement: MODIFIED Campaign deletion removes the Campaign document (retryability scenario)
 - Design decision: Decision 3 (per-collection filter scoping) -> Requirement: ADDED Cascade delete of CampaignMember rows (cross-user scenario)
 - Requirement: ADDED Cascade delete of Party rows -> Task(s): implement cascade in `storage.deleteCampaign`; add/extend unit tests in `tests/unit/storage/campaigns.test.ts`
 - Requirement: ADDED Cascade delete of CampaignMember rows -> Task(s): implement cascade in `storage.deleteCampaign`; add/extend unit tests
-- Requirement: ADDED Cascade delete of SessionLog/CampaignRoll/CampaignCharacterShare rows -> Task(s): implement cascade in `storage.deleteCampaign`; add/extend unit tests
+- Requirement: ADDED Cascade delete of SessionLog/CampaignRoll/CampaignCharacterShare/SavedContent/CampaignMessage rows -> Task(s): implement cascade in `storage.deleteCampaign`; add/extend unit tests
 - Requirement: MODIFIED Campaign deletion removes the Campaign document -> Task(s): implement cascade ordering (children before campaigns.deleteOne)
 
 ## Non-Functional Acceptance Criteria

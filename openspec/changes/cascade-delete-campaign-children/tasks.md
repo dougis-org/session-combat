@@ -12,17 +12,19 @@
 ## Execution
 
 - [x] **Issue lifecycle: mark in-progress**: run `gh issue edit 480 --add-label "in-progress"`. Then discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [x] Update `lib/storage.ts` `deleteCampaign(id, userId)`: before the existing `campaigns.deleteOne({ id, userId })` call, add a `Promise.all` of five `deleteMany` calls:
-  - `parties.deleteMany({ campaignId: id, userId })`
+- [x] Update `lib/storage.ts` `deleteCampaign(id, userId)`: before the existing `campaigns.deleteOne({ id, userId })` call, add a `Promise.all` of seven `deleteMany` calls:
+  - `parties.deleteMany({ campaignId: id })`
   - `campaignMembers.deleteMany({ campaignId: id })`
   - `sessionLogs.deleteMany({ campaignId: id, userId })`
   - `campaignRolls.deleteMany({ campaignId: id })`
-  - `campaignCharacterShares.deleteMany({ campaignId: id, userId })`
+  - `campaignCharacterShares.deleteMany({ campaignId: id })`
+  - `savedContent.deleteMany({ campaignId: id })`
+  - `campaignMessages.deleteMany({ campaignId: id })`
 - [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch — reuse the exact filter shapes already used elsewhere in `lib/storage.ts` for each collection (e.g. lib/storage.ts:731, :818, :921, :1234) rather than inventing new query shapes; mirror the `Promise.all` structure already used in `storage.clear()` (lib/storage.ts:1256-1272).
 - [x] Write/extend unit tests in `tests/unit/storage/campaigns.test.ts` (`describe("storage.deleteCampaign", ...)`) per the acceptance scenarios in `openspec/changes/cascade-delete-campaign-children/specs/campaign-deletion/spec.md`:
   - Cascade deletes matching `Party` rows, leaves unrelated-campaign parties untouched
   - Cascade deletes `CampaignMember` rows across multiple `userId`s for the same campaign
-  - Cascade deletes `SessionLog`, `CampaignRoll`, `CampaignCharacterShare` rows
+  - Cascade deletes `SessionLog`, `CampaignRoll`, `CampaignCharacterShare`, `SavedContent`, `CampaignMessage` rows
   - No-op (no throw) when a campaign has zero children in some/all collections
   - Existing "nonexistent campaign resolves without throwing" and "underlying delete failure rejects" tests (tests/unit/storage/campaigns.test.ts:149, :155) still pass unmodified
 - [x] Confirm acceptance criteria in `specs/campaign-deletion/spec.md` are covered by the new/updated tests
@@ -60,7 +62,7 @@ If **ANY** required step fails, you **MUST** iterate and address the failure bef
 - [x] Commit all changes to the working branch and push to remote
 - [x] Open PR from `cascade-delete-campaign-children` to `main`. PR body **must** include `Closes #480`.
 - [x] **Issue lifecycle: mark in-review**: run `gh issue edit 480 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
+- [x] Wait 60 seconds for CI to start
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
 - [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (this repo's branch ruleset only allows squash merges — use `--squash`, not `--merge`; NEVER use `--admin` to force the merge)
 - [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:

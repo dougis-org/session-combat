@@ -138,6 +138,8 @@ describe("Campaign storage functions", () => {
     let sessionLogsMock: ReturnType<typeof makeMockCollection>;
     let campaignRollsMock: ReturnType<typeof makeMockCollection>;
     let campaignCharacterSharesMock: ReturnType<typeof makeMockCollection>;
+    let savedContentMock: ReturnType<typeof makeMockCollection>;
+    let campaignMessagesMock: ReturnType<typeof makeMockCollection>;
 
     beforeEach(() => {
       campaignsMock.findOne.mockResolvedValue(baseCampaign as never);
@@ -147,6 +149,8 @@ describe("Campaign storage functions", () => {
       sessionLogsMock = makeMockCollection();
       campaignRollsMock = makeMockCollection();
       campaignCharacterSharesMock = makeMockCollection();
+      savedContentMock = makeMockCollection();
+      campaignMessagesMock = makeMockCollection();
 
       const mocks: Record<string, any> = {
         campaigns: campaignsMock,
@@ -155,6 +159,8 @@ describe("Campaign storage functions", () => {
         sessionLogs: sessionLogsMock,
         campaignRolls: campaignRollsMock,
         campaignCharacterShares: campaignCharacterSharesMock,
+        savedContent: savedContentMock,
+        campaignMessages: campaignMessagesMock,
       };
 
       mockDb.collection = jest.fn((name: string) => mocks[name] || makeMockCollection());
@@ -171,7 +177,7 @@ describe("Campaign storage functions", () => {
       await storage.deleteCampaign("campaign-1", "user-1");
 
       expect(mockDb.collection).toHaveBeenCalledWith("parties");
-      expect(partiesMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1", userId: "user-1" });
+      expect(partiesMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
     });
 
     test("cascade deletes CampaignMember rows for the campaign", async () => {
@@ -181,7 +187,7 @@ describe("Campaign storage functions", () => {
       expect(campaignMembersMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
     });
 
-    test("cascade deletes session logs, rolls, and character shares", async () => {
+    test("cascade deletes session logs, rolls, character shares, saved content, and messages", async () => {
       await storage.deleteCampaign("campaign-1", "user-1");
 
       expect(mockDb.collection).toHaveBeenCalledWith("sessionLogs");
@@ -192,6 +198,12 @@ describe("Campaign storage functions", () => {
 
       expect(mockDb.collection).toHaveBeenCalledWith("campaignCharacterShares");
       expect(campaignCharacterSharesMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
+
+      expect(mockDb.collection).toHaveBeenCalledWith("savedContent");
+      expect(savedContentMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
+
+      expect(mockDb.collection).toHaveBeenCalledWith("campaignMessages");
+      expect(campaignMessagesMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
     });
 
     test("deletes children first, then campaign document last (ordering check)", async () => {
@@ -201,17 +213,21 @@ describe("Campaign storage functions", () => {
       sessionLogsMock.deleteMany.mockImplementation(async () => { callSequence.push("sessionLogs"); return { deletedCount: 0 }; });
       campaignRollsMock.deleteMany.mockImplementation(async () => { callSequence.push("campaignRolls"); return { deletedCount: 0 }; });
       campaignCharacterSharesMock.deleteMany.mockImplementation(async () => { callSequence.push("campaignCharacterShares"); return { deletedCount: 0 }; });
+      savedContentMock.deleteMany.mockImplementation(async () => { callSequence.push("savedContent"); return { deletedCount: 0 }; });
+      campaignMessagesMock.deleteMany.mockImplementation(async () => { callSequence.push("campaignMessages"); return { deletedCount: 0 }; });
       campaignsMock.deleteOne.mockImplementation(async () => { callSequence.push("campaigns"); return { deletedCount: 1 }; });
 
       await storage.deleteCampaign("campaign-1", "user-1");
 
-      expect(callSequence).toHaveLength(6);
-      expect(callSequence[5]).toBe("campaigns");
-      expect(callSequence.slice(0, 5)).toContain("parties");
-      expect(callSequence.slice(0, 5)).toContain("campaignMembers");
-      expect(callSequence.slice(0, 5)).toContain("sessionLogs");
-      expect(callSequence.slice(0, 5)).toContain("campaignRolls");
-      expect(callSequence.slice(0, 5)).toContain("campaignCharacterShares");
+      expect(callSequence).toHaveLength(8);
+      expect(callSequence[7]).toBe("campaigns");
+      expect(callSequence.slice(0, 7)).toContain("parties");
+      expect(callSequence.slice(0, 7)).toContain("campaignMembers");
+      expect(callSequence.slice(0, 7)).toContain("sessionLogs");
+      expect(callSequence.slice(0, 7)).toContain("campaignRolls");
+      expect(callSequence.slice(0, 7)).toContain("campaignCharacterShares");
+      expect(callSequence.slice(0, 7)).toContain("savedContent");
+      expect(callSequence.slice(0, 7)).toContain("campaignMessages");
     });
 
     test("does not cascade delete if campaign does not exist or does not belong to user", async () => {

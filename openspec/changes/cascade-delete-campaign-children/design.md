@@ -36,12 +36,12 @@
 - Rationale: Without transactions, a crash/failure partway through leaves an inconsistent state either way. Deleting children first means that if the process dies before reaching `campaigns.deleteOne`, the `Campaign` document still exists — the delete is naturally retryable (calling `deleteCampaign` again re-runs the now-mostly-no-op cascade and then removes the campaign). Deleting the `Campaign` document first and crashing before the cascade completes would silently reproduce the exact orphan bug this change fixes, with no way to detect it because the parent campaign is already gone.
 - Trade-offs: A failure between the cascade and the final delete could theoretically re-run `deleteMany` cascade calls that already succeeded on retry — harmless, since `deleteMany` matching zero documents is a no-op.
 
-### Decision 3: Collection scoping — filter by `campaignId` plus `userId` where the collection already carries `userId`
+### Decision 3: Collection scoping — filter by `campaignId` plus `userId` only where the collection is strictly DM-owned, and by `campaignId` alone for shared collections
 
-- Chosen: `parties`, `sessionLogs`, `campaignCharacterShares` filters include both `campaignId` and `userId` (matching their existing query patterns elsewhere in storage.ts, e.g. lib/storage.ts:731, :818). `campaignMembers` and `campaignRolls` filter by `campaignId` alone, matching how they're already queried elsewhere (lib/storage.ts:921, :1234) since campaign membership/rolls aren't inherently scoped to the deleting user (other members' rows must be cleaned up too).
-- Alternatives considered: Filter every collection by `campaignId` only.
-- Rationale: `CampaignMember` rows exist for every member of the campaign, not just the DM calling delete — filtering by `userId` there would leave other members' rows orphaned, defeating the purpose. `Party`/`SessionLog`/`CampaignCharacterShare` are already user-scoped in their existing query patterns, so keep that consistent.
-- Trade-offs: Slightly asymmetric filter shape across the five `deleteMany` calls; documented here so it doesn't read as an oversight during review.
+- Chosen: `sessionLogs` filter includes both `campaignId` and `userId` (strictly DM-owned logs). `parties`, `campaignMembers`, `campaignRolls`, `campaignCharacterShares`, `savedContent`, and `campaignMessages` filter by `campaignId` alone.
+- Alternatives considered: Scoping parties and shares by `{ campaignId, userId }`.
+- Rationale: While `Party`, `CampaignCharacterShare`, `SavedContent`, and `CampaignMessage` entities are user-scoped (storing the creator's `userId`), they can exist for multiple users within the same campaign. Scoping the delete cascade by the DM's `userId` would leave other users' records orphaned. Therefore, these collections are cleared campaign-wide by `campaignId` alone.
+- Trade-offs: Asymmetric filter shape across collections; documented here to ensure clarity.
 
 ## Proposal to Design Mapping
 
