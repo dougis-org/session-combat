@@ -173,6 +173,40 @@ describe('useIsDM', () => {
     unmountReactRoot(container, root);
   });
 
+  test('effect cleanup before an in-flight fetch settles clears the cache key so a later run retries', async () => {
+    (global.fetch as jest.Mock).mockReturnValueOnce(new Promise(() => {})); // never settles
+
+    const { container, root } = createReactRoot();
+    const resultRef: { current: HookResult } = { current: { isDM: false, loading: true } };
+    function Probe({ campaignId }: { campaignId: string }) {
+      const hookResult = useIsDM(campaignId);
+      React.useEffect(() => { resultRef.current = hookResult; }, [hookResult]);
+      return null;
+    }
+
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+    await act(async () => {});
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(resultRef.current.loading).toBe(true);
+
+    // authLoading toggles again before the in-flight fetch above ever settles —
+    // the effect is cleaned up and re-run without the fetch having resolved.
+    useAuthMock.mockReturnValue({ user: { userId: 'user-1' }, loading: true });
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ role: 'dm', status: 'active' }),
+    });
+    useAuthMock.mockReturnValue({ user: { userId: 'user-1' }, loading: false });
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+    await act(async () => {});
+
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(resultRef.current).toEqual({ isDM: true, loading: false });
+    unmountReactRoot(container, root);
+  });
+
   test('thrown fetch error is retried on the next auth re-check', async () => {
     (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('network error'));
 

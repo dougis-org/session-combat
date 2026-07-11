@@ -35,6 +35,7 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
     const key = `${campaignId}:${userId}`;
     if (fetchedKeyRef.current === key) return;
     fetchedKeyRef.current = key;
+    let settled = false;
 
     async function load() {
       setLoading(true);
@@ -63,6 +64,7 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
         fetchedKeyRef.current = null;
         if (!cancelled) setIsDM(false);
       } finally {
+        settled = true;
         if (!cancelled) setLoading(false);
       }
     }
@@ -71,6 +73,12 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
 
     return () => {
       cancelled = true;
+      // If the effect was cleaned up (e.g. authLoading toggled again) before the
+      // fetch settled, clear the cache key so a later run with the same key can
+      // retry — otherwise `loading` would be stuck true with no fetch pending.
+      if (!settled && fetchedKeyRef.current === key) {
+        fetchedKeyRef.current = null;
+      }
     };
   }, [campaignId, userId, authLoading]);
 
