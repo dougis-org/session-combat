@@ -25,7 +25,10 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
       throw new Error(`reconcile fetch failed with status ${res.status}`)
     }
     const data = await res.json()
-    onSessionChange(data?.activeSessionId ?? null)
+    if (typeof data?.activeSessionId !== 'string' || data.activeSessionId === '') {
+      throw new Error('reconcile response missing activeSessionId')
+    }
+    onSessionChange(data.activeSessionId)
   }
 
   async function handleStart() {
@@ -60,7 +63,7 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
     setError(null)
     try {
       const res = await fetch(`/api/campaigns/${campaignId}/sessions/active`, { method: 'DELETE' })
-      if (res.status === 200 || res.status === 404) {
+      if (res.ok || res.status === 404) {
         onSessionChange(null)
       } else {
         console.error(`SessionControl.handleEnd: unexpected status ${res.status} for campaign ${campaignId}`)
@@ -79,7 +82,7 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
     setError(null)
     try {
       const res = await fetch(`/api/campaigns/${campaignId}/sessions/active?force=true`, { method: 'DELETE' })
-      if (res.ok) {
+      if (res.ok || res.status === 404) {
         onSessionChange(null)
       } else {
         console.error(`SessionControl.handleForceEnd: unexpected status ${res.status} for campaign ${campaignId}`)

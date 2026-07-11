@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
+import type { MemberRole, MemberStatus } from '@/lib/types';
 
 interface MemberSummary {
   userId: string;
-  role: string;
-  status: string;
+  role: MemberRole;
+  status: MemberStatus;
 }
 
 export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean } {
