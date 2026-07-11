@@ -86,6 +86,22 @@ describe('SessionControl', () => {
     unmount()
   })
 
+  test('T2-5b: Start Session 409 whose reconciliation GET also fails shows an error and does not call onSessionChange(null)', async () => {
+    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
+    ;(global.fetch as jest.Mock)
+      .mockResolvedValueOnce({ status: 409 })
+      .mockResolvedValueOnce({ ok: false, status: 500 })
+    const onSessionChange = jest.fn()
+    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+
+    const button = container.querySelector('button')!
+    await act(async () => { button.click() })
+
+    expect(onSessionChange).not.toHaveBeenCalled()
+    expect(container.textContent).toMatch(/reload the page/i)
+    unmount()
+  })
+
   test('T2-6: Start Session 500 shows inline error, does not call onSessionChange', async () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock).mockResolvedValue({ status: 500 })
@@ -166,6 +182,20 @@ describe('SessionControl', () => {
 
     expect(global.fetch).toHaveBeenCalledWith('/api/campaigns/camp-1/sessions/active?force=true', { method: 'DELETE' })
     expect(onSessionChange).toHaveBeenCalledWith(null)
+    unmount()
+  })
+
+  test('T2-11b: Force end 500 shows inline error, does not call onSessionChange', async () => {
+    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
+    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 500 })
+    const onSessionChange = jest.fn()
+    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
+
+    const [, forceButton] = Array.from(container.querySelectorAll('button'))
+    await act(async () => { forceButton.click() })
+
+    expect(onSessionChange).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('Failed to reset session')
     unmount()
   })
 

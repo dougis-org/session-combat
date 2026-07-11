@@ -18,7 +18,13 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
 
   async function reconcileFromCampaign() {
     const res = await fetch(`/api/campaigns/${campaignId}`)
-    const data = res.ok ? await res.json() : null
+    if (!res.ok) {
+      // A session is known to be active (that's why we're reconciling); without a
+      // successful re-fetch we can't learn its id, so we must not report null here
+      // or the UI would falsely claim no session is active.
+      throw new Error(`reconcile fetch failed with status ${res.status}`)
+    }
+    const data = await res.json()
     onSessionChange(data?.activeSessionId ?? null)
   }
 
@@ -31,7 +37,12 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
         const log = await res.json()
         onSessionChange(log.id)
       } else if (res.status === 409) {
-        await reconcileFromCampaign()
+        try {
+          await reconcileFromCampaign()
+        } catch (err) {
+          console.error(`SessionControl.handleStart: reconciliation after 409 failed for campaign ${campaignId}`, err)
+          setError('A session is already active, but the current state could not be refreshed — reload the page')
+        }
       } else {
         console.error(`SessionControl.handleStart: unexpected status ${res.status} for campaign ${campaignId}`)
         setError('Failed to start session, try again')
