@@ -1,4 +1,4 @@
-// tests/unit/integration/SessionControlReactive.test.tsx
+// tests/unit/components/SessionControlReactive.test.tsx
 //
 // Regression/characterization coverage for spec scenario "Control updates
 // reactively on session SSE event": proves the existing session-SSE plumbing
