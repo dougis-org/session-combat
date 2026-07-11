@@ -52,7 +52,12 @@ The system SHALL expose a `subscribe(campaignId, onEvent)` function in `lib/serv
 
 ### Requirement: ADDED Transport abstraction — change stream path (Atlas)
 
-The system SHALL, when running against a replica-set MongoDB, open a single shared **database-level** change stream per process (not collection-level, and not one cursor per collection) covering the `campaigns`, `campaignMessages`, and `campaignRolls` collections, restricted server-side via a `$match` pipeline on `ns.coll`, and route incoming change documents to the correct per-campaign subscriber set based on both `campaignId` and source collection.
+The system SHALL, when running against a replica-set MongoDB, open a single shared
+**database-level** change stream per process (not collection-level, and not one cursor
+per collection) covering the `campaigns`, `campaignMessages`, and `campaignRolls`
+collections, restricted server-side via a `$match` pipeline on `ns.coll`, and route
+incoming change documents to the correct per-campaign subscriber set based on both
+`campaignId` and source collection.
 
 #### Scenario: Single shared cursor covers all three collections
 
@@ -165,7 +170,12 @@ The system SHALL deliver `message`, `roll`, and `session` `CampaignStreamEvent`s
 
 ### Requirement: ADDED Same-instance fast path preserved alongside cross-instance delivery
 
-The system SHALL continue to deliver `message`, `roll`, and `session` events to same-instance subscribers via the existing synchronous `emitFiltered()` call, in addition to (not instead of) the cross-instance-safe change-stream/poll-derived delivery. This fast path applies to subscribers regardless of transport mode — polling-mode subscriptions are registered alongside Atlas subscriptions so `emitFiltered()` reaches both.
+The system SHALL continue to deliver `message`, `roll`, and `session` events to
+same-instance subscribers via the existing synchronous `emitFiltered()` call, in
+addition to (not instead of) the cross-instance-safe change-stream/poll-derived
+delivery. This fast path applies to subscribers regardless of transport mode —
+polling-mode subscriptions are registered alongside Atlas subscriptions so
+`emitFiltered()` reaches both.
 
 #### Scenario: Same-instance subscriber receives the fast-path delivery immediately
 
@@ -308,7 +318,10 @@ None.
 
 ### Requirement: Security
 
-See functional scenarios in `openspec/specs/sse-stream/spec.md`: "Unauthorized request rejected before stream opens", "Forbidden request rejected for non-member". See also this document's "DM-only roll withheld from a non-DM subscriber via the change-stream path", "Visibility enforcement applies identically in the polling path".
+See functional scenarios in `openspec/specs/sse-stream/spec.md`: "Unauthorized
+request rejected before stream opens", "Forbidden request rejected for non-member".
+See also this document's "DM-only roll withheld from a non-DM subscriber via the
+change-stream path", "Visibility enforcement applies identically in the polling path".
 
 ### Requirement: Reliability
 
