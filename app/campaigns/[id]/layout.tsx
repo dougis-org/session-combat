@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import { CampaignChat } from '@/lib/components/CampaignChat'
+import { SessionControl } from '@/lib/components/SessionControl'
 import Link from 'next/link'
 
 export default function CampaignLayout({ children }: { children: React.ReactNode }) {
@@ -28,8 +29,9 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
   }, [id])
 
   const header = campaignName && (
-    <header className="mb-4">
+    <header className="mb-4 flex items-center justify-between">
       <h1 className="text-3xl font-bold text-white">{campaignName}</h1>
+      <SessionControl campaignId={id} activeSessionId={activeSessionId} onSessionChange={setActiveSessionId} />
     </header>
   )
 
