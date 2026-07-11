@@ -59,13 +59,13 @@ Use the project's documented commands for each of the above (see project README 
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from working branch to `main`. **The PR body MUST include `Closes #479`.**
-- [ ] **Issue lifecycle: mark in-review**: run `gh issue edit 479 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin` to force the merge; this repo's branch protection ruleset only allows squash merges — using `--merge` will leave the PR BLOCKED)
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from working branch to `main`. **The PR body MUST include `Closes #479`.**
+- [x] **Issue lifecycle: mark in-review**: run `gh issue edit 479 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin` to force the merge; this repo's branch protection ruleset only allows squash merges — using `--merge` will leave the PR BLOCKED)
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved. Note: after replying to a comment, also resolve the thread via the `resolveReviewThread` GraphQL mutation — replying alone does not resolve it.
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -86,18 +86,18 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`, including `lib/scripts/backfillDefaultParties.ts`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (if any; this is a one-off internal script, so no user-facing docs are expected to need updates)
-- [ ] Sync approved spec deltas into `openspec/specs/`. After copying `specs/scripts/spec.md` to `openspec/specs/scripts/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-backfill-default-party/design.md`, and similarly for `../../tasks.md`
-- [ ] Archive the change: move `openspec/changes/backfill-default-party/` to `openspec/changes/archive/YYYY-MM-DD-backfill-default-party/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-backfill-default-party/` exists and `openspec/changes/backfill-default-party/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-backfill-default-party` then `git push -u origin doc/archive-YYYY-MM-DD-backfill-default-party`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-backfill-default-party` to `main` with title `docs: archive backfill-default-party (YYYY-MM-DD)` — **do NOT push directly to `main`**. This PR must be docs-only (no code changes); if a code fix is discovered while archiving, put it on a separate hotfix branch instead of mixing it into this branch.
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D 479-backfill-default-party doc/archive-YYYY-MM-DD-backfill-default-party`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`, including `lib/scripts/backfillDefaultParties.ts`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (if any; this is a one-off internal script, so no user-facing docs are expected to need updates)
+- [x] Sync approved spec deltas into `openspec/specs/`. After copying `specs/scripts/spec.md` to `openspec/specs/scripts/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-backfill-default-party/design.md`, and similarly for `../../tasks.md`
+- [x] Archive the change: move `openspec/changes/backfill-default-party/` to `openspec/changes/archive/YYYY-MM-DD-backfill-default-party/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-backfill-default-party/` exists and `openspec/changes/backfill-default-party/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-backfill-default-party` then `git push -u origin doc/archive-YYYY-MM-DD-backfill-default-party`
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-backfill-default-party` to `main` with title `docs: archive backfill-default-party (YYYY-MM-DD)` — **do NOT push directly to `main`**. This PR must be docs-only (no code changes); if a code fix is discovered while archiving, put it on a separate hotfix branch instead of mixing it into this branch.
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D 479-backfill-default-party doc/archive-YYYY-MM-DD-backfill-default-party`
 - [ ] **Reminder (manual, human follow-up, not automated by this task list):** once the script has been run successfully against all target environments (dev/staging/prod as applicable), delete `lib/scripts/backfillDefaultParties.ts` **and its integration test (T6)** in a small follow-up PR — per proposal.md Non-Goals, this script is intentionally deletable and not meant to be kept as a permanent fixture like `seedCampaignTemplates.ts`.
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D 479-backfill-default-party doc/archive-YYYY-MM-DD-backfill-default-party`
