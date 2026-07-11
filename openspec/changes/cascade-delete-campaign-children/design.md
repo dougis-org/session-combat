@@ -22,7 +22,7 @@
 
 ### Decision 1: Cascade shape — parallel `deleteMany` per collection, following the `storage.clear()` precedent
 
-- Chosen: Inside `deleteCampaign`, run a `Promise.all` of seven `deleteMany` calls (one per campaign-scoped collection), filtered by `campaignId` (and `userId` for collections that carry it), then delete the `Campaign` document itself.
+- Chosen: Inside `deleteCampaign`, run a `Promise.all` of seven `deleteMany` calls (one per campaign-scoped collection), filtered by `campaignId` only (see Decision 3), then delete the `Campaign` document itself.
 - Alternatives considered:
   - MongoDB multi-document transaction (`session.withTransaction`) for true atomicity.
   - Sequential deletes (one collection at a time, awaited in series).
@@ -47,7 +47,7 @@
 
 - Proposal element: Cascade-delete `parties`, `campaignMembers`, `sessionLogs`, `campaignRolls`, `campaignCharacterShares`, `savedContent`, and `campaignMessages` on campaign delete.
   - Design decision: Decision 1 (parallel `deleteMany` cascade shape) + Decision 3 (per-collection filter scoping)
-  - Validation approach: Unit test seeds rows in all seven collections for a campaign, calls `deleteCampaign`, asserts all seven are empty and the `Campaign` doc is gone.
+  - Validation approach: Unit tests mock each of the seven collections' `deleteMany`, call `deleteCampaign`, and assert every collection is called with the correct `{ campaignId }` filter (plus an ordering assertion that all seven run before `campaigns.deleteOne`); real end-to-end row removal is verified separately via the integration tests.
 - Proposal element: No transactions; best-effort consistent with existing codebase patterns.
   - Design decision: Decision 1
   - Validation approach: Code review confirms no `session`/`withTransaction` usage introduced; matches `storage.clear()` style.
