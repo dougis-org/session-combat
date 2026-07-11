@@ -65,7 +65,7 @@ If **ANY** required step fails, you **MUST** iterate and address the failure bef
 - [x] Wait 60 seconds for CI to start
 - [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
 - [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (this repo's branch ruleset only allows squash merges — use `--squash`, not `--merge`; NEVER use `--admin` to force the merge)
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; after replying, also resolve the thread via the `resolveReviewThread` GraphQL mutation; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -86,17 +86,17 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main` (`lib/storage.ts` cascade logic and updated tests present)
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change — none identified beyond this change's own artifacts (no README/CLAUDE.md sections describe `deleteCampaign` behavior)
-- [ ] Sync approved spec deltas into `openspec/specs/campaign-deletion/spec.md`. After copying `spec.md`, update relative links that pointed into the change directory: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-cascade-delete-campaign-children/design.md`, and similarly for any `../../tasks.md` references.
-- [ ] Archive the change: move `openspec/changes/cascade-delete-campaign-children/` to `openspec/changes/archive/YYYY-MM-DD-cascade-delete-campaign-children/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-cascade-delete-campaign-children/` exists and `openspec/changes/cascade-delete-campaign-children/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-cascade-delete-campaign-children` then `git push -u origin doc/archive-YYYY-MM-DD-cascade-delete-campaign-children` — this branch must be docs-only (no code changes); if a code fix is discovered during archival, put it on a separate hotfix branch instead
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-cascade-delete-campaign-children` to `main` with title `docs: archive cascade-delete-campaign-children (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D cascade-delete-campaign-children doc/archive-YYYY-MM-DD-cascade-delete-campaign-children`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main` (`lib/storage.ts` cascade logic and updated tests present)
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change — none identified beyond this change's own artifacts (no README/CLAUDE.md sections describe `deleteCampaign` behavior)
+- [x] Sync approved spec deltas into `openspec/specs/campaign-deletion/spec.md`. After copying `spec.md`, update relative links that pointed into the change directory: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-cascade-delete-campaign-children/design.md`, and similarly for any `../../tasks.md` references.
+- [x] Archive the change: move `openspec/changes/cascade-delete-campaign-children/` to `openspec/changes/archive/YYYY-MM-DD-cascade-delete-campaign-children/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-cascade-delete-campaign-children/` exists and `openspec/changes/cascade-delete-campaign-children/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-cascade-delete-campaign-children` then `git push -u origin doc/archive-YYYY-MM-DD-cascade-delete-campaign-children` — this branch must be docs-only (no code changes); if a code fix is discovered during archival, put it on a separate hotfix branch instead
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-cascade-delete-campaign-children` to `main` with title `docs: archive cascade-delete-campaign-children (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D cascade-delete-campaign-children doc/archive-YYYY-MM-DD-cascade-delete-campaign-children`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D cascade-delete-campaign-children doc/archive-YYYY-MM-DD-cascade-delete-campaign-children`
