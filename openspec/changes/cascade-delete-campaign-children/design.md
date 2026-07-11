@@ -8,7 +8,7 @@
 
 ### Goals
 
-- `storage.deleteCampaign` removes the `Campaign` document AND all rows in `parties`, `campaignMembers`, `sessionLogs`, `campaignRolls`, `campaignCharacterShares` that reference that campaign.
+- `storage.deleteCampaign` removes the `Campaign` document AND all rows in `parties`, `campaignMembers`, `sessionLogs`, `campaignRolls`, `campaignCharacterShares`, `savedContent`, and `campaignMessages` that reference that campaign.
 - Cascade behaves as a safe no-op when a collection has no matching rows.
 - Cascade does not change behavior at the existing rollback call sites beyond making them slightly more thorough (harmless).
 
@@ -22,7 +22,7 @@
 
 ### Decision 1: Cascade shape — parallel `deleteMany` per collection, following the `storage.clear()` precedent
 
-- Chosen: Inside `deleteCampaign`, run a `Promise.all` of five `deleteMany` calls (one per campaign-scoped collection), filtered by `campaignId` (and `userId` for collections that carry it), then delete the `Campaign` document itself.
+- Chosen: Inside `deleteCampaign`, run a `Promise.all` of seven `deleteMany` calls (one per campaign-scoped collection), filtered by `campaignId` (and `userId` for collections that carry it), then delete the `Campaign` document itself.
 - Alternatives considered:
   - MongoDB multi-document transaction (`session.withTransaction`) for true atomicity.
   - Sequential deletes (one collection at a time, awaited in series).
@@ -31,7 +31,7 @@
 
 ### Decision 2: Ordering — delete children first, `Campaign` document last
 
-- Chosen: The five `deleteMany` calls run (in parallel) before the `campaigns.deleteOne` call, not after.
+- Chosen: The seven `deleteMany` calls run (in parallel) before the `campaigns.deleteOne` call, not after.
 - Alternatives considered: Delete the `Campaign` document first, then clean up children.
 - Rationale: Without transactions, a crash/failure partway through leaves an inconsistent state either way. Deleting children first means that if the process dies before reaching `campaigns.deleteOne`, the `Campaign` document still exists — the delete is naturally retryable (calling `deleteCampaign` again re-runs the now-mostly-no-op cascade and then removes the campaign). Deleting the `Campaign` document first and crashing before the cascade completes would silently reproduce the exact orphan bug this change fixes, with no way to detect it because the parent campaign is already gone.
 - Trade-offs: A failure between the cascade and the final delete could theoretically re-run `deleteMany` cascade calls that already succeeded on retry — harmless, since `deleteMany` matching zero documents is a no-op.
@@ -45,9 +45,9 @@
 
 ## Proposal to Design Mapping
 
-- Proposal element: Cascade-delete `parties`, `campaignMembers`, `sessionLogs`, `campaignRolls`, `campaignCharacterShares` on campaign delete.
+- Proposal element: Cascade-delete `parties`, `campaignMembers`, `sessionLogs`, `campaignRolls`, `campaignCharacterShares`, `savedContent`, and `campaignMessages` on campaign delete.
   - Design decision: Decision 1 (parallel `deleteMany` cascade shape) + Decision 3 (per-collection filter scoping)
-  - Validation approach: Unit test seeds rows in all five collections for a campaign, calls `deleteCampaign`, asserts all five are empty and the `Campaign` doc is gone.
+  - Validation approach: Unit test seeds rows in all seven collections for a campaign, calls `deleteCampaign`, asserts all seven are empty and the `Campaign` doc is gone.
 - Proposal element: No transactions; best-effort consistent with existing codebase patterns.
   - Design decision: Decision 1
   - Validation approach: Code review confirms no `session`/`withTransaction` usage introduced; matches `storage.clear()` style.
@@ -65,7 +65,7 @@
   - Design element: Decision 3
   - Acceptance criteria reference: specs/campaign-deletion/spec.md — "Cascade deletes campaign-scoped CampaignMember rows for all members"
   - Testability notes: Seed members for two different `userId`s under the same `campaignId`; assert both are removed after the DM calls delete.
-- Requirement: Deleting a campaign removes all `SessionLog`, `CampaignRoll`, `CampaignCharacterShare` rows with matching `campaignId`.
+- Requirement: Deleting a campaign removes all `SessionLog`, `CampaignRoll`, `CampaignCharacterShare`, `SavedContent`, and `CampaignMessage` rows with matching `campaignId`.
   - Design element: Decision 1, Decision 3
   - Acceptance criteria reference: specs/campaign-deletion/spec.md — "Cascade deletes remaining campaign-scoped collections"
   - Testability notes: Same seed/assert pattern per collection.
@@ -82,7 +82,7 @@
   - Acceptance criteria reference: specs/campaign-deletion/spec.md — "Ordering guarantees retryability"
   - Testability notes: Not practically unit-testable (requires simulating a mid-operation crash); covered by design review/reasoning only, called out explicitly here rather than left implicit.
 - Requirement category: performance
-  - Requirement: Cascade must not serialize five sequential round-trips where parallel is safe.
+  - Requirement: Cascade must not serialize seven sequential round-trips where parallel is safe.
   - Design element: Decision 1 (`Promise.all`)
   - Acceptance criteria reference: N/A (not spec-level; implementation detail)
   - Testability notes: Verified by code inspection during review; no dedicated perf test needed at this scale.

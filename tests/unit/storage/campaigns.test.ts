@@ -19,7 +19,7 @@ function makeMockCollection() {
   const findOne = jest.fn<Promise<unknown>, []>();
   const updateOne = jest.fn<Promise<unknown>, []>();
   const deleteOne = jest.fn<Promise<unknown>, []>();
-  const deleteMany = jest.fn<Promise<unknown>, []>().mockResolvedValue({ deletedCount: 0 } as never);
+  const deleteMany = jest.fn<Promise<unknown>, [Record<string, unknown>?]>().mockResolvedValue({ deletedCount: 0 } as never);
   return { find, sort, collation, toArray, findOne, updateOne, deleteOne, deleteMany };
 }
 
