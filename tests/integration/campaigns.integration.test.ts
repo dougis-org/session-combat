@@ -327,7 +327,7 @@ describe("Campaign API Integration Tests", () => {
     const campaign = await createCampaign("Campaign To Delete Multi-User");
 
     // Invite user2 to campaign
-    const inviteRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}/members`, {
+    const inviteRes = await fetch(new URL(`/api/campaigns/${campaign.id}/members`, baseUrl), {
       method: "POST",
       headers: authed(),
       body: JSON.stringify({ userId: userId2 }),
@@ -335,7 +335,7 @@ describe("Campaign API Integration Tests", () => {
     expect(inviteRes.status).toBe(201);
 
     // User2 accepts invitation
-    const acceptRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}/members/me`, {
+    const acceptRes = await fetch(new URL(`/api/campaigns/${campaign.id}/members/me`, baseUrl), {
       method: "PATCH",
       headers: authed(authCookie2),
       body: JSON.stringify({ action: "accept" }),
@@ -352,14 +352,14 @@ describe("Campaign API Integration Tests", () => {
     const party = await partyRes.json() as { id: string; campaignId?: string };
 
     // User1 deletes campaign
-    const deleteRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}`, {
+    const deleteRes = await fetch(new URL(`/api/campaigns/${campaign.id}`, baseUrl), {
       method: "DELETE",
       headers: authed(),
     });
     expect([200, 204]).toContain(deleteRes.status);
 
     // Verify user2's party is also 404 (deleted)
-    const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed(authCookie2) });
+    const getPartyRes = await fetch(new URL(`/api/parties/${party.id}`, baseUrl), { headers: authed(authCookie2) });
     expect(getPartyRes.status).toBe(404);
   });
 

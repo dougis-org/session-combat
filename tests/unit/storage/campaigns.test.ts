@@ -191,7 +191,7 @@ describe("Campaign storage functions", () => {
       await storage.deleteCampaign("campaign-1", "user-1");
 
       expect(mockDb.collection).toHaveBeenCalledWith("sessionLogs");
-      expect(sessionLogsMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1", userId: "user-1" });
+      expect(sessionLogsMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
 
       expect(mockDb.collection).toHaveBeenCalledWith("campaignRolls");
       expect(campaignRollsMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
