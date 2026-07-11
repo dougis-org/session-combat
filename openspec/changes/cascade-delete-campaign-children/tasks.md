@@ -15,7 +15,7 @@
 - [x] Update `lib/storage.ts` `deleteCampaign(id, userId)`: before the existing `campaigns.deleteOne({ id, userId })` call, add a `Promise.all` of seven `deleteMany` calls:
   - `parties.deleteMany({ campaignId: id })`
   - `campaignMembers.deleteMany({ campaignId: id })`
-  - `sessionLogs.deleteMany({ campaignId: id, userId })`
+  - `sessionLogs.deleteMany({ campaignId: id })`
   - `campaignRolls.deleteMany({ campaignId: id })`
   - `campaignCharacterShares.deleteMany({ campaignId: id })`
   - `savedContent.deleteMany({ campaignId: id })`
@@ -63,8 +63,8 @@ If **ANY** required step fails, you **MUST** iterate and address the failure bef
 - [x] Open PR from `cascade-delete-campaign-children` to `main`. PR body **must** include `Closes #480`.
 - [x] **Issue lifecycle: mark in-review**: run `gh issue edit 480 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
 - [x] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (this repo's branch ruleset only allows squash merges — use `--squash`, not `--merge`; NEVER use `--admin` to force the merge)
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (this repo's branch ruleset only allows squash merges — use `--squash`, not `--merge`; NEVER use `--admin` to force the merge)
 - [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; after replying, also resolve the thread via the `resolveReviewThread` GraphQL mutation; continue until all threads are resolved

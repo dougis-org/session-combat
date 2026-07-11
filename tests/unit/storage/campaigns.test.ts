@@ -235,10 +235,16 @@ describe("Campaign storage functions", () => {
       await storage.deleteCampaign("campaign-1", "user-1");
 
       expect(partiesMock.deleteMany).not.toHaveBeenCalled();
+      expect(campaignMembersMock.deleteMany).not.toHaveBeenCalled();
+      expect(sessionLogsMock.deleteMany).not.toHaveBeenCalled();
+      expect(campaignRollsMock.deleteMany).not.toHaveBeenCalled();
+      expect(campaignCharacterSharesMock.deleteMany).not.toHaveBeenCalled();
+      expect(savedContentMock.deleteMany).not.toHaveBeenCalled();
+      expect(campaignMessagesMock.deleteMany).not.toHaveBeenCalled();
       expect(campaignsMock.deleteOne).not.toHaveBeenCalled();
     });
 
-    test("does not throw when campaign does not exist (deleteOne is a no-op)", async () => {
+    test("does not throw when campaign does not exist (early return before deleteOne)", async () => {
       campaignsMock.findOne.mockResolvedValue(null as never);
       campaignsMock.deleteOne.mockResolvedValue({ deletedCount: 0 } as never);
 

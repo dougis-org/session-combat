@@ -306,18 +306,21 @@ describe("Campaign API Integration Tests", () => {
 
   it("deleting a campaign cascade deletes associated parties", async () => {
     const campaign = await createCampaign("Campaign To Delete");
+    expect(campaign.id).toBeDefined();
 
     const partyRes = await fetch(`${baseUrl}/api/parties`, { // nosemgrep
       method: "POST",
       headers: authed(),
       body: JSON.stringify({ name: "Party With Campaign", campaignId: campaign.id }),
     });
+    expect(partyRes.status).toBe(201);
     const party = await partyRes.json() as { id: string };
 
-    await fetch(`${baseUrl}/api/campaigns/${campaign.id}`, { // nosemgrep
+    const deleteRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}`, { // nosemgrep
       method: "DELETE",
       headers: authed(),
     });
+    expect([200, 204]).toContain(deleteRes.status);
 
     const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed() }); // nosemgrep
     expect(getPartyRes.status).toBe(404);

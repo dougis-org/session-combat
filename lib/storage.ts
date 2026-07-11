@@ -320,7 +320,9 @@ export const storage = {
       const db = await getDatabase();
 
       // Verify campaign exists and belongs to the user before deleting anything
-      const campaign = await db.collection<Campaign>("campaigns").findOne({ id, userId }, { projection: { id: 1 } });
+      const campaign = await db
+        .collection<Campaign>("campaigns")
+        .findOne({ id, userId }, { projection: { id: 1 } });
       if (!campaign) {
         return;
       }

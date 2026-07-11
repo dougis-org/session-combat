@@ -28,7 +28,7 @@
 
 ### In Scope
 
-- Update `storage.deleteCampaign` to cascade-delete matching rows in `parties`, `campaignMembers`, `sessionLogs`, `campaignRolls`, `campaignCharacterShares`, `savedContent`, and `campaignMessages` by `campaignId` (and `userId` where the collection is strictly DM-owned).
+- Update `storage.deleteCampaign` to cascade-delete matching rows in `parties`, `campaignMembers`, `sessionLogs`, `campaignRolls`, `campaignCharacterShares`, `savedContent`, and `campaignMessages` by `campaignId` only — none of these collections are scoped by `userId`, since multi-user campaigns can have rows owned by any member, not just the deleting DM.
 - Unit test coverage for the cascade (all seven collections cleaned, ordering, no-op when nothing to clean).
 
 ### Out of Scope
@@ -40,7 +40,7 @@
 
 ## What Changes
 
-- `lib/storage.ts`: `deleteCampaign(id, userId)` gains a cascade step — a `Promise.all` of `deleteMany` calls against the five campaign-scoped collections, run before the `campaigns.deleteOne` call.
+- `lib/storage.ts`: `deleteCampaign(id, userId)` gains a cascade step — a `Promise.all` of `deleteMany` calls against the seven campaign-scoped collections, run before the `campaigns.deleteOne` call.
 - `tests/unit/storage/campaigns.test.ts`: new/updated test cases asserting the cascade.
 
 ## Risks
