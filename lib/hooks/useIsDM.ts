@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import type { MemberRole, MemberStatus } from '@/lib/types';
 
@@ -14,22 +14,27 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
   const userId = user?.userId ?? null;
   const [isDM, setIsDM] = useState(false);
   const [loading, setLoading] = useState(true);
+  const fetchedKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     // Wait for auth to settle before fetching members: avoids an initial fetch
     // with no user followed by a second fetch once the user id becomes known.
-    if (authLoading) {
-      setLoading(true);
-      return;
-    }
+    if (authLoading) return;
 
     if (!userId) {
       setIsDM(false);
       setLoading(false);
+      fetchedKeyRef.current = null;
       return;
     }
+
+    // useAuth() re-checks auth on every route change, toggling authLoading even
+    // when userId is unchanged — skip re-fetching membership in that case.
+    const key = `${campaignId}:${userId}`;
+    if (fetchedKeyRef.current === key) return;
+    fetchedKeyRef.current = key;
 
     async function load() {
       setLoading(true);
@@ -64,5 +69,5 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
     };
   }, [campaignId, userId, authLoading]);
 
-  return { isDM, loading };
+  return { isDM, loading: authLoading || loading };
 }

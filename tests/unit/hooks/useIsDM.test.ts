@@ -121,4 +121,29 @@ describe('useIsDM', () => {
     expect(global.fetch).not.toHaveBeenCalled();
     unmount();
   });
+
+  test('useAuth toggling loading (e.g. route-change recheck) without a userId change does not refetch', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ role: 'dm', status: 'active' }),
+    });
+
+    const { container, root } = createReactRoot();
+    function Probe({ campaignId }: { campaignId: string }) {
+      useIsDM(campaignId);
+      return null;
+    }
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+    await act(async () => {});
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+
+    useAuthMock.mockReturnValue({ user: { userId: 'user-1' }, loading: true });
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+    useAuthMock.mockReturnValue({ user: { userId: 'user-1' }, loading: false });
+    act(() => { root.render(React.createElement(Probe, { campaignId: 'camp-1' })); });
+    await act(async () => {});
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    unmountReactRoot(container, root);
+  });
 });
