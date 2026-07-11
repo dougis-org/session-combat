@@ -42,7 +42,7 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
         // Use the current-member endpoint (not the full /members list) so this
         // hook doesn't duplicate CampaignChat's full-roster fetch just to learn
         // the caller's own role/status.
-        const res = await fetch(`/api/campaigns/${campaignId}/members/me`);
+        const res = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/members/me`);
         if (!res.ok) {
           if (res.status !== 404) {
             console.error(`useIsDM: /members/me returned ${res.status} for campaign ${campaignId}`);
