@@ -74,42 +74,31 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
     }
   }
 
-  async function handleEnd() {
+  async function terminateSession(url: string, label: string, errorMessage: string) {
     setBusy(true)
     setError(null)
     try {
-      const res = await fetch(`/api/campaigns/${campaignId}/sessions/active`, { method: 'DELETE' })
+      const res = await fetch(url, { method: 'DELETE' })
       if (res.ok || res.status === 404) {
         onSessionChange(null)
       } else {
-        console.error(`SessionControl.handleEnd: unexpected status ${res.status} for campaign ${campaignId}`)
-        setError('Failed to end session, try again')
+        console.error(`SessionControl.${label}: unexpected status ${res.status} for campaign ${campaignId}`)
+        setError(errorMessage)
       }
     } catch (err) {
-      console.error(`SessionControl.handleEnd failed for campaign ${campaignId}`, err)
-      setError('Failed to end session, try again')
+      console.error(`SessionControl.${label} failed for campaign ${campaignId}`, err)
+      setError(errorMessage)
     } finally {
       setBusy(false)
     }
   }
 
-  async function handleForceEnd() {
-    setBusy(true)
-    setError(null)
-    try {
-      const res = await fetch(`/api/campaigns/${campaignId}/sessions/active?force=true`, { method: 'DELETE' })
-      if (res.ok || res.status === 404) {
-        onSessionChange(null)
-      } else {
-        console.error(`SessionControl.handleForceEnd: unexpected status ${res.status} for campaign ${campaignId}`)
-        setError('Failed to reset session, try again')
-      }
-    } catch (err) {
-      console.error(`SessionControl.handleForceEnd failed for campaign ${campaignId}`, err)
-      setError('Failed to reset session, try again')
-    } finally {
-      setBusy(false)
-    }
+  function handleEnd() {
+    return terminateSession(`/api/campaigns/${campaignId}/sessions/active`, 'handleEnd', 'Failed to end session, try again')
+  }
+
+  function handleForceEnd() {
+    return terminateSession(`/api/campaigns/${campaignId}/sessions/active?force=true`, 'handleForceEnd', 'Failed to reset session, try again')
   }
 
   return (
