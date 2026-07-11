@@ -363,6 +363,28 @@ describe("Campaign API Integration Tests", () => {
     expect(getPartyRes.status).toBe(404);
   });
 
+  it("deleting a campaign does not affect an unrelated campaign's party", async () => {
+    const deletedCampaign = await createCampaign("Campaign To Delete Isolation");
+    const survivingCampaign = await createCampaign("Campaign To Keep Isolation");
+
+    const survivingPartyRes = await fetch(`${baseUrl}/api/parties`, { // nosemgrep
+      method: "POST",
+      headers: authed(),
+      body: JSON.stringify({ name: "Surviving Party", campaignId: survivingCampaign.id }),
+    });
+    expect(survivingPartyRes.status).toBe(201);
+    const survivingParty = await survivingPartyRes.json() as { id: string };
+
+    const deleteRes = await fetch(`${baseUrl}/api/campaigns/${deletedCampaign.id}`, { // nosemgrep
+      method: "DELETE",
+      headers: authed(),
+    });
+    expect([200, 204]).toContain(deleteRes.status);
+
+    const getSurvivingPartyRes = await fetch(`${baseUrl}/api/parties/${survivingParty.id}`, { headers: authed() }); // nosemgrep
+    expect(getSurvivingPartyRes.status).toBe(200);
+  });
+
   // --- Chapters and active chapter ID integration ---
 
   it("persists chapters and active chapter on POST", async () => {
