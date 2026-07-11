@@ -3,8 +3,9 @@ import { act } from 'react';
 import { createReactRoot, unmountReactRoot } from '../helpers/reactRoot';
 import { useIsDM } from '@/lib/hooks/useIsDM';
 
+const useAuthMock = jest.fn();
 jest.mock('@/lib/hooks/useAuth', () => ({
-  useAuth: () => ({ user: { userId: 'user-1' } }),
+  useAuth: () => useAuthMock(),
 }));
 
 type HookResult = ReturnType<typeof useIsDM>;
@@ -31,6 +32,7 @@ describe('useIsDM', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     global.fetch = jest.fn();
+    useAuthMock.mockReturnValue({ user: { userId: 'user-1' }, loading: false });
   });
 
   test('T1-1: current user is active dm -> isDM true', async () => {
@@ -97,6 +99,28 @@ describe('useIsDM', () => {
       resolve({ ok: true, json: async () => ({ members: [] }) });
     });
 
+    unmount();
+  });
+
+  test('while auth is still loading -> loading true, isDM false, no members fetch', async () => {
+    useAuthMock.mockReturnValue({ user: null, loading: true });
+
+    const { result, unmount } = renderHook('camp-1');
+    await act(async () => {});
+
+    expect(result.current).toEqual({ isDM: false, loading: true });
+    expect(global.fetch).not.toHaveBeenCalled();
+    unmount();
+  });
+
+  test('auth resolved with no user -> isDM false, loading false, no members fetch', async () => {
+    useAuthMock.mockReturnValue({ user: null, loading: false });
+
+    const { result, unmount } = renderHook('camp-1');
+    await act(async () => {});
+
+    expect(result.current).toEqual({ isDM: false, loading: false });
+    expect(global.fetch).not.toHaveBeenCalled();
     unmount();
   });
 });

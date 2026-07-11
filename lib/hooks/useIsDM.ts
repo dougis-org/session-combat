@@ -11,12 +11,26 @@ interface MemberSummary {
 }
 
 export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean } {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const userId = user?.userId ?? null;
   const [isDM, setIsDM] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
+
+    // Wait for auth to settle before fetching members: avoids an initial fetch
+    // with no user followed by a second fetch once the user id becomes known.
+    if (authLoading) {
+      setLoading(true);
+      return;
+    }
+
+    if (!userId) {
+      setIsDM(false);
+      setLoading(false);
+      return;
+    }
 
     async function load() {
       setLoading(true);
@@ -29,7 +43,7 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
         }
         const data = await res.json();
         const members: MemberSummary[] = data.members ?? [];
-        const currentMember = members.find(m => m.userId === user?.userId);
+        const currentMember = members.find(m => m.userId === userId);
         if (!cancelled) {
           setIsDM(currentMember?.role === 'dm' && currentMember?.status === 'active');
         }
@@ -46,7 +60,7 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
     return () => {
       cancelled = true;
     };
-  }, [campaignId, user?.userId]);
+  }, [campaignId, userId, authLoading]);
 
   return { isDM, loading };
 }
