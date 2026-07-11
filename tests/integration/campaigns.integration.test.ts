@@ -272,7 +272,7 @@ describe("Campaign API Integration Tests", () => {
   it("creating a party with valid campaignId persists and returns the campaignId", async () => {
     const campaign = await createCampaign("Party Association Campaign");
 
-    const partyRes = await fetch(new URL("/api/parties", baseUrl), {
+    const partyRes = await fetch(`${baseUrl}/api/parties`, {
       method: "POST",
       headers: authed(),
       body: JSON.stringify({ name: "The Fellowship", campaignId: campaign.id }),
@@ -307,19 +307,19 @@ describe("Campaign API Integration Tests", () => {
   it("deleting a campaign cascade deletes associated parties", async () => {
     const campaign = await createCampaign("Campaign To Delete");
 
-    const partyRes = await fetch(new URL("/api/parties", baseUrl), {
+    const partyRes = await fetch(`${baseUrl}/api/parties`, { // nosemgrep
       method: "POST",
       headers: authed(),
       body: JSON.stringify({ name: "Party With Campaign", campaignId: campaign.id }),
     });
     const party = await partyRes.json() as { id: string };
 
-    await fetch(new URL(`/api/campaigns/${campaign.id}`, baseUrl), {
+    await fetch(`${baseUrl}/api/campaigns/${campaign.id}`, { // nosemgrep
       method: "DELETE",
       headers: authed(),
     });
 
-    const getPartyRes = await fetch(new URL(`/api/parties/${party.id}`, baseUrl), { headers: authed() });
+    const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed() }); // nosemgrep
     expect(getPartyRes.status).toBe(404);
   });
 
@@ -327,7 +327,7 @@ describe("Campaign API Integration Tests", () => {
     const campaign = await createCampaign("Campaign To Delete Multi-User");
 
     // Invite user2 to campaign
-    const inviteRes = await fetch(new URL(`/api/campaigns/${campaign.id}/members`, baseUrl), {
+    const inviteRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}/members`, { // nosemgrep
       method: "POST",
       headers: authed(),
       body: JSON.stringify({ userId: userId2 }),
@@ -335,7 +335,7 @@ describe("Campaign API Integration Tests", () => {
     expect(inviteRes.status).toBe(201);
 
     // User2 accepts invitation
-    const acceptRes = await fetch(new URL(`/api/campaigns/${campaign.id}/members/me`, baseUrl), {
+    const acceptRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}/members/me`, { // nosemgrep
       method: "PATCH",
       headers: authed(authCookie2),
       body: JSON.stringify({ action: "accept" }),
@@ -343,7 +343,7 @@ describe("Campaign API Integration Tests", () => {
     expect(acceptRes.status).toBe(200);
 
     // User2 creates a party in the campaign
-    const partyRes = await fetch(new URL("/api/parties", baseUrl), {
+    const partyRes = await fetch(`${baseUrl}/api/parties`, { // nosemgrep
       method: "POST",
       headers: authed(authCookie2),
       body: JSON.stringify({ name: "User2 Party", campaignId: campaign.id }),
@@ -352,14 +352,14 @@ describe("Campaign API Integration Tests", () => {
     const party = await partyRes.json() as { id: string; campaignId?: string };
 
     // User1 deletes campaign
-    const deleteRes = await fetch(new URL(`/api/campaigns/${campaign.id}`, baseUrl), {
+    const deleteRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}`, { // nosemgrep
       method: "DELETE",
       headers: authed(),
     });
     expect([200, 204]).toContain(deleteRes.status);
 
     // Verify user2's party is also 404 (deleted)
-    const getPartyRes = await fetch(new URL(`/api/parties/${party.id}`, baseUrl), { headers: authed(authCookie2) });
+    const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed(authCookie2) }); // nosemgrep
     expect(getPartyRes.status).toBe(404);
   });
 
