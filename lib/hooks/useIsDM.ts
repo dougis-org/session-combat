@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import type { MemberRole, MemberStatus } from '@/lib/types';
 
-interface MemberSummary {
-  userId: string;
+interface CurrentMember {
   role: MemberRole;
   status: MemberStatus;
 }
@@ -35,20 +34,23 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/campaigns/${campaignId}/members`);
+        // Use the current-member endpoint (not the full /members list) so this
+        // hook doesn't duplicate CampaignChat's full-roster fetch just to learn
+        // the caller's own role/status.
+        const res = await fetch(`/api/campaigns/${campaignId}/members/me`);
         if (!res.ok) {
-          console.error(`useIsDM: /members returned ${res.status} for campaign ${campaignId}`);
+          if (res.status !== 404) {
+            console.error(`useIsDM: /members/me returned ${res.status} for campaign ${campaignId}`);
+          }
           if (!cancelled) setIsDM(false);
           return;
         }
-        const data = await res.json();
-        const members: MemberSummary[] = data.members ?? [];
-        const currentMember = members.find(m => m.userId === userId);
+        const currentMember: CurrentMember = await res.json();
         if (!cancelled) {
           setIsDM(currentMember?.role === 'dm' && currentMember?.status === 'active');
         }
       } catch (err) {
-        console.error(`useIsDM: failed to fetch/parse members for campaign ${campaignId}`, err);
+        console.error(`useIsDM: failed to fetch/parse current member for campaign ${campaignId}`, err);
         if (!cancelled) setIsDM(false);
       } finally {
         if (!cancelled) setLoading(false);

@@ -21,11 +21,11 @@ For each task in `tasks.md`:
 
 ### T1 — `lib/hooks/useIsDM.ts` (new file: `tests/unit/hooks/useIsDM.test.ts`)
 
-- [x] T1-1: Given `/api/campaigns/:id/members` returns the current user as `{ role: 'dm', status: 'active' }`, `useIsDM` returns `{ isDM: true, loading: false }`. — Task: T1. Spec: ADDED "Non-DM members do not see the session control" (negative-case complement).
+- [x] T1-1: Given `/api/campaigns/:id/members/me` returns the current user as `{ role: 'dm', status: 'active' }`, `useIsDM` returns `{ isDM: true, loading: false }`. — Task: T1. Spec: ADDED "Non-DM members do not see the session control" (negative-case complement).
 - [x] T1-2: Given the current user's membership is `{ role: 'player', status: 'active' }`, `useIsDM` returns `{ isDM: false, loading: false }`. — Task: T1. Spec: ADDED "Non-DM members do not see the session control" — Scenario "Non-DM member does not see the control".
 - [x] T1-3: Given the current user's membership is `{ role: 'dm', status: 'invited' }` (not yet active), `useIsDM` returns `{ isDM: false, loading: false }`. — Task: T1. Spec: same as T1-2 (edge case of DM gate).
-- [x] T1-4: Given the current user is not present in the `/members` response at all, `useIsDM` returns `{ isDM: false, loading: false }`. — Task: T1. Spec: same as T1-2 (edge case of DM gate).
-- [x] T1-5: Before the `/members` fetch resolves, `useIsDM` returns `{ isDM: false, loading: true }`. — Task: T1. Spec: supports "renders nothing while loading" behavior consumed by T2.
+- [x] T1-4: Given `/api/campaigns/:id/members/me` returns 404 (current user is not a member), `useIsDM` returns `{ isDM: false, loading: false }`. — Task: T1. Spec: same as T1-2 (edge case of DM gate).
+- [x] T1-5: Before the `/members/me` fetch resolves, `useIsDM` returns `{ isDM: false, loading: true }`. — Task: T1. Spec: supports "renders nothing while loading" behavior consumed by T2.
 
 ### T2 — `lib/components/SessionControl.tsx` (new file: `tests/unit/components/SessionControl.test.tsx`)
 

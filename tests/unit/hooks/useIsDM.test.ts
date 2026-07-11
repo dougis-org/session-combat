@@ -38,12 +38,13 @@ describe('useIsDM', () => {
   test('T1-1: current user is active dm -> isDM true', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => ({ members: [{ userId: 'user-1', role: 'dm', status: 'active' }] }),
+      json: async () => ({ role: 'dm', status: 'active' }),
     });
 
     const { result, unmount } = renderHook('camp-1');
     await act(async () => {});
 
+    expect(global.fetch).toHaveBeenCalledWith('/api/campaigns/camp-1/members/me');
     expect(result.current).toEqual({ isDM: true, loading: false });
     unmount();
   });
@@ -51,7 +52,7 @@ describe('useIsDM', () => {
   test('T1-2: current user is active player -> isDM false', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => ({ members: [{ userId: 'user-1', role: 'player', status: 'active' }] }),
+      json: async () => ({ role: 'player', status: 'active' }),
     });
 
     const { result, unmount } = renderHook('camp-1');
@@ -64,7 +65,7 @@ describe('useIsDM', () => {
   test('T1-3: current user is dm but invited (not active) -> isDM false', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => ({ members: [{ userId: 'user-1', role: 'dm', status: 'invited' }] }),
+      json: async () => ({ role: 'dm', status: 'invited' }),
     });
 
     const { result, unmount } = renderHook('camp-1');
@@ -74,11 +75,8 @@ describe('useIsDM', () => {
     unmount();
   });
 
-  test('T1-4: current user not present in members -> isDM false', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({ members: [{ userId: 'other-user', role: 'dm', status: 'active' }] }),
-    });
+  test('T1-4: current user not a member (404) -> isDM false', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 404 });
 
     const { result, unmount } = renderHook('camp-1');
     await act(async () => {});
@@ -96,7 +94,7 @@ describe('useIsDM', () => {
     expect(result.current).toEqual({ isDM: false, loading: true });
 
     await act(async () => {
-      resolve({ ok: true, json: async () => ({ members: [] }) });
+      resolve({ ok: true, json: async () => ({ role: 'player', status: 'active' }) });
     });
 
     unmount();
