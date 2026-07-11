@@ -77,14 +77,12 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
   async function isBenign404(res: Response): Promise<boolean> {
     // The route also returns 404 for "Campaign not found" (e.g. a non-DM whose
     // permissions changed mid-session) — only "No active session" means the
-    // session was already ended elsewhere and is safe to treat as success.
+    // session was already ended elsewhere and is safe to treat as success. A
+    // malformed body here propagates to terminateSession's own catch, which
+    // already surfaces a generic error — that's the correct fallback too.
     if (res.status !== 404) return false
-    try {
-      const body = await res.json()
-      return body?.error === 'No active session'
-    } catch {
-      return false
-    }
+    const body = await res.json()
+    return body?.error === 'No active session'
   }
 
   async function terminateSession(url: string, label: string, errorMessage: string) {
