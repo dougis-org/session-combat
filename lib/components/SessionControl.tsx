@@ -25,10 +25,14 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
       throw new Error(`reconcile fetch failed with status ${res.status}`)
     }
     const data = await res.json()
-    if (typeof data?.activeSessionId !== 'string' || data.activeSessionId === '') {
-      throw new Error('reconcile response missing activeSessionId')
+    const fetchedId = data?.activeSessionId
+    // A successful re-fetch is authoritative: the session may have ended between
+    // the 409 and this GET resolving, so a null/missing id here means "no active
+    // session" rather than a failed reconciliation.
+    if (fetchedId !== null && fetchedId !== undefined && typeof fetchedId !== 'string') {
+      throw new Error('reconcile response returned a malformed activeSessionId')
     }
-    onSessionChange(data.activeSessionId)
+    onSessionChange(fetchedId === undefined ? null : fetchedId)
   }
 
   async function handleStart() {
@@ -38,7 +42,12 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
       const res = await fetch(`/api/campaigns/${campaignId}/sessions/active`, { method: 'POST' })
       if (res.status === 201) {
         const log = await res.json()
-        onSessionChange(log.id)
+        if (typeof log?.id !== 'string' || log.id === '') {
+          console.error(`SessionControl.handleStart: malformed session id in 201 response for campaign ${campaignId}`, log)
+          setError('Failed to start session, try again')
+        } else {
+          onSessionChange(log.id)
+        }
       } else if (res.status === 409) {
         try {
           await reconcileFromCampaign()

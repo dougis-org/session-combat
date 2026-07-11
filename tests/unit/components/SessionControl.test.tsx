@@ -102,6 +102,55 @@ describe('SessionControl', () => {
     unmount()
   })
 
+  test('Start Session 201 with malformed id shows inline error, does not call onSessionChange', async () => {
+    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      status: 201,
+      json: async () => ({ id: undefined }),
+    })
+    const onSessionChange = jest.fn()
+    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+
+    const button = container.querySelector('button')!
+    await act(async () => { button.click() })
+
+    expect(onSessionChange).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('Failed to start session')
+    unmount()
+  })
+
+  test('Start Session 409 whose reconciliation GET succeeds with a null activeSessionId reconciles to Start Session, no error shown', async () => {
+    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
+    ;(global.fetch as jest.Mock)
+      .mockResolvedValueOnce({ status: 409 })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ activeSessionId: null }) })
+    const onSessionChange = jest.fn()
+    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+
+    const button = container.querySelector('button')!
+    await act(async () => { button.click() })
+
+    expect(onSessionChange).toHaveBeenCalledWith(null)
+    expect(container.textContent).not.toMatch(/error/i)
+    unmount()
+  })
+
+  test('Start Session 409 whose reconciliation GET succeeds with a malformed activeSessionId shows an error', async () => {
+    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
+    ;(global.fetch as jest.Mock)
+      .mockResolvedValueOnce({ status: 409 })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ activeSessionId: 42 }) })
+    const onSessionChange = jest.fn()
+    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+
+    const button = container.querySelector('button')!
+    await act(async () => { button.click() })
+
+    expect(onSessionChange).not.toHaveBeenCalled()
+    expect(container.textContent).toMatch(/reload the page/i)
+    unmount()
+  })
+
   test('T2-6: Start Session 500 shows inline error, does not call onSessionChange', async () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock).mockResolvedValue({ status: 500 })
