@@ -77,6 +77,28 @@ describe('manageCiComments', () => {
     );
   });
 
+  it('should post new comment when a job is cancelled', async () => {
+    mockGithub.rest.issues.listComments.mockResolvedValue({ data: [] });
+    const needs = {
+      build: { result: 'cancelled' },
+      lint: { result: 'success' },
+    };
+
+    await manageCiComments({
+      github: mockGithub,
+      context: mockContext,
+      core: mockCore,
+      needs,
+    });
+
+    expect(mockGithub.rest.issues.createComment).toHaveBeenCalledWith({
+      owner: 'dougis-org',
+      repo: 'session-combat',
+      issue_number: 100,
+      body: expect.stringContaining('build'),
+    });
+  });
+
   it('should update existing comment on subsequent failure', async () => {
     const marker = '<!-- session-combat-build-test-failure -->';
     const priorComment = {
