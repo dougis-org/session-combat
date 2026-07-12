@@ -48,7 +48,7 @@ None.
 
 ## Traceability
 
-- Proposal element: "On failure of any build-test job, post a comment or update the existing one" -> Requirement: ADDED Pull Request Build Failure Comments (Scenario: Post new comment on first failure / Scenario: Update existing comment on subsequent failure)
+- Proposal element: "On failure of any build-test job, post a comment or update the existing one" -> Requirement: ADDED Pull Request Build Failure Comments (Scenario: Post new comment on first failure / Scenario: Post new comment when a job is cancelled / Scenario: Update existing comment on subsequent failure)
 - Proposal element: "On success of all jobs, find and delete the prior failure comment" -> Requirement: ADDED Pull Request Build Failure Comments (Scenario: Delete comment on recovery/success)
 - Design decision: Centralized Evaluation (Decision 2) -> Requirement: MODIFIED central CI gate checks
 - Design decision: Try-Catch Wrapper (Decision 3) -> Requirement: Reliability (Scenario: Recovery behavior / Fork PR tolerance)
