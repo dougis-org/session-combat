@@ -408,8 +408,27 @@ jobs:
     runs-on: ubuntu-latest
     needs: [check-changes, lint, build, unit-tests, integration-tests, regression-tests, upload-and-finalize-coverage, check-codacy-coverage]
     if: always()
+    permissions:
+      pull-requests: write
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Manage Build Failure Comments
+        uses: actions/github-script@v8
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        with:
+          script: |
+            const manageCiComments = require('./lib/github-comments.js');
+            await manageCiComments({
+              github,
+              context,
+              core,
+              needs: JSON.parse(process.env.NEEDS_JSON)
+            });
+
       - name: Check all upstream jobs passed
         run: |
           if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
