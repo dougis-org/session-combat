@@ -4,13 +4,19 @@ This document details *changes* to requirements and is additive to the [`design.
 
 ### Requirement: ADDED Pull Request Build Failure Comments
 
-The system SHALL post/update a summary comment listing failed jobs on a Pull Request when the `build-test` workflow fails or is cancelled, and delete it when the workflow passes.
+The system SHALL post/update a summary comment listing failed jobs on a Pull Request when the `build-test` workflow fails or is cancelled, and delete it when the workflow passes. A cancelled job is treated identically to a failed job for comment management purposes.
 
 #### Scenario: Post new comment on first failure
 
 - **Given** a pull request with no existing build failure comment.
 - **When** a workflow run of `build-test.yml` fails.
 - **Then** a new PR comment is created containing the list of failed jobs, run number, and run link, along with the identifier marker.
+
+#### Scenario: Post new comment when a job is cancelled
+
+- **Given** a pull request with no existing build failure comment.
+- **When** a workflow run of `build-test.yml` has a job with result `cancelled`.
+- **Then** a new PR comment is created listing that job as failed, identical to the failure-path scenario above.
 
 #### Scenario: Update existing comment on subsequent failure
 
@@ -46,7 +52,7 @@ None.
 - Proposal element: "On success of all jobs, find and delete the prior failure comment" -> Requirement: ADDED Pull Request Build Failure Comments (Scenario: Delete comment on recovery/success)
 - Design decision: Centralized Evaluation (Decision 2) -> Requirement: MODIFIED central CI gate checks
 - Design decision: Try-Catch Wrapper (Decision 3) -> Requirement: Reliability (Scenario: Recovery behavior / Fork PR tolerance)
-- Requirement -> Task(s): Tasks are defined in `tasks.md`.
+- Requirement -> Task(s): Tasks are defined in [`tasks.md`](../../changes/archive/2026-07-11-build-test-failure-comments/tasks.md).
 
 ## Non-Functional Acceptance Criteria
 
@@ -60,7 +66,7 @@ None.
 
 ### Requirement: Security
 
-- See functional scenarios: Try-Catch Wrapper for fork PRs.
+- See Reliability Scenario: Recovery behavior (Fork PR tolerance) below.
 - The `GITHUB_TOKEN` credentials must not be logged or leaked in output.
 
 ### Requirement: Reliability
