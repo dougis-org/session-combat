@@ -415,6 +415,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          # Run the trusted script from the base branch, not the PR head, so a
+          # PR cannot modify lib/github-comments.js to abuse the write-capable token.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
 
       - name: Manage Build Failure Comments
         uses: actions/github-script@v8
