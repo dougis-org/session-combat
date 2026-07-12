@@ -409,7 +409,8 @@ jobs:
     needs: [check-changes, lint, build, unit-tests, integration-tests, regression-tests, upload-and-finalize-coverage, check-codacy-coverage]
     if: always()
     permissions:
-      pull-requests: write
+      contents: read
+      issues: write
 
     steps:
       - name: Checkout code

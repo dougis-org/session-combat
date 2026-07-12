@@ -24,22 +24,6 @@
   - **Fork PRs**: Default token has read-only permission. The workflow step must catch permission errors and continue gracefully without failing the job.
   - **Docs-only changes**: Docs-only PRs skip test jobs. The umbrella `ci-gate` job must recognize skipped jobs as non-failures and not post a failure comment.
 
-## Problem Space
-
-- **Current behavior**: No PR comments are posted or managed by the local `build-test.yml` workflow when it fails or succeeds.
-- **Desired behavior**: 
-  - On failure of any `build-test` job: Post a failure summary comment on the PR containing a list of failed jobs, the run number, and a link to the action run. If a prior failure comment exists from the same workflow, update it by prepending the latest run's failure details to the top of the comment.
-  - On success of all jobs: Find any prior failure comment posted by this workflow and delete it.
-- **Constraints**: 
-  - Must use standard GitHub Actions `github-script` or similar tools utilizing `GITHUB_TOKEN`.
-  - Must handle fork PRs where write permissions for comments are unavailable, ensuring the build does not fail because of comment creation limits.
-- **Assumptions**: 
-  - Only run comment management on `pull_request` events.
-  - A hidden marker comment like `<!-- session-combat-build-test-failure -->` is sufficient to identify the comment uniquely.
-- **Edge cases considered**:
-  - **Fork PRs**: Default token has read-only permission. The workflow step must catch permission errors and continue gracefully without failing the job.
-  - **Docs-only changes**: Docs-only PRs skip test jobs. The umbrella `ci-gate` job must recognize skipped jobs as non-failures and not post a failure comment.
-
 ## Scope
 
 ### In Scope

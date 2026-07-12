@@ -58,15 +58,15 @@
 
 - **Requirement**: Find prior comment.
   - **Design element**: `github.rest.issues.listComments` matching `c.body.includes(marker)`.
-  - **Acceptance criteria reference**: `specs/build-test-failure-comments.md`
+  - **Acceptance criteria reference**: `specs/build-test-comments/spec.md`
   - **Testability notes**: Verify that the correct comment is matched even when other comments exist on the PR.
 - **Requirement**: Prepend new failure details.
   - **Design element**: Splitting body on `marker` and inserting new details right below the marker, keeping existing history below.
-  - **Acceptance criteria reference**: `specs/build-test-failure-comments.md`
+  - **Acceptance criteria reference**: `specs/build-test-comments/spec.md`
   - **Testability notes**: Verify subsequent failures stack details chronologically with the newest at the top.
 - **Requirement**: Delete comment on success.
   - **Design element**: `github.rest.issues.deleteComment` for the matched comment ID.
-  - **Acceptance criteria reference**: `specs/build-test-failure-comments.md`
+  - **Acceptance criteria reference**: `specs/build-test-comments/spec.md`
   - **Testability notes**: Verify a successful run deletes the comment.
 
 ## Non-Functional Requirements Mapping
@@ -74,7 +74,7 @@
 - **Requirement category**: Security / Reliability
   - **Requirement**: Do not crash the build on API failures (e.g. fork PR permission limits).
   - **Design element**: Try-catch wrapper inside `actions/github-script`.
-  - **Acceptance criteria reference**: `specs/build-test-failure-comments.md`
+  - **Acceptance criteria reference**: `specs/build-test-comments/spec.md`
   - **Testability notes**: Verify that even if the API throws "Resource not accessible", the workflow continues and passes.
 
 ## Risks / Trade-offs

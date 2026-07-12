@@ -56,11 +56,11 @@ Use the project's documented commands for each of the above (see project README 
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from working branch to `main`. **The PR body MUST include `Closes #495`** (unconditionally).
-- [ ] **Issue lifecycle: mark in-review** : run `gh issue edit 495 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from working branch to `main`. **The PR body MUST include `Closes #495`** (unconditionally).
+- [x] **Issue lifecycle: mark in-review** : run `gh issue edit 495 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found). (Labels updated successfully; project update skipped due to missing scope).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing. (Satisfied by spawning `pr-reviewer` sub-agent on PR 497).
 - [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration

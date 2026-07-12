@@ -72,6 +72,9 @@ describe('manageCiComments', () => {
       issue_number: 100,
       body: expect.stringContaining('Run #42 Failed'),
     });
+    expect(mockGithub.rest.issues.createComment.mock.calls[0][0].body).toContain(
+      '<!-- session-combat-build-test-failure -->'
+    );
   });
 
   it('should update existing comment on subsequent failure', async () => {
