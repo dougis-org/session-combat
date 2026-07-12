@@ -408,8 +408,40 @@ jobs:
     runs-on: ubuntu-latest
     needs: [check-changes, lint, build, unit-tests, integration-tests, regression-tests, upload-and-finalize-coverage, check-codacy-coverage]
     if: always()
+    permissions:
+      contents: read
+      issues: write
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          # Run the trusted script from the base branch, not the PR head, so a
+          # PR cannot modify lib/github-comments.js to abuse the write-capable token.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+
+      - name: Manage Build Failure Comments
+        uses: actions/github-script@v8
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        with:
+          script: |
+            const fs = require('fs');
+            const scriptPath = './lib/github-comments.js';
+            if (!fs.existsSync(scriptPath)) {
+              // lib/github-comments.js doesn't exist on the base branch yet (e.g. the PR
+              // that introduces it). Skip gracefully rather than failing the gate.
+              core.info(`${scriptPath} not found on base ref; skipping comment management.`);
+              return;
+            }
+            const manageCiComments = require(scriptPath);
+            await manageCiComments({
+              github,
+              context,
+              core,
+              needs: JSON.parse(process.env.NEEDS_JSON)
+            });
+
       - name: Check all upstream jobs passed
         run: |
           if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
