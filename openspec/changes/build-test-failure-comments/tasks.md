@@ -14,7 +14,7 @@
 - [x] **Issue lifecycle: mark in-progress** : run `gh issue edit 495 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds). (Label updated successfully; project update skipped due to missing `read:project` scope).
 - [x] **TDD Setup**: Define test scenarios and expected behaviors in `tests.md` before implementing code changes.
 - [x] **Implement Workflow Comments Logic**: Update the `ci-gate` job in `.github/workflows/build-test.yml` to:
-  - Add `pull-requests: write` permissions.
+  - Add `contents: read` and `issues: write` permissions.
   - Add the `actions/github-script` block with logic to find, create, update (prepend history), or delete comments on success or failure, wrapped in a graceful `try-catch` block.
 - [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch
 - [x] Confirm acceptance criteria are covered

@@ -81,7 +81,7 @@
 
 - **Risk/trade-off**: The default GITHUB_TOKEN permissions could be insufficient in some configurations.
   - **Impact**: Comments won't be posted on branch PRs.
-  - **Mitigation**: Add explicit `permissions: pull-requests: write` to the `ci-gate` job in `build-test.yml`.
+  - **Mitigation**: Add explicit `permissions: contents: read, issues: write` to the `ci-gate` job in `build-test.yml`.
 
 ## Rollback / Mitigation
 

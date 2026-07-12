@@ -29,7 +29,7 @@
 ### In Scope
 
 - Adding custom comment management logic (create/update on failure, delete on success) in `.github/workflows/build-test.yml` under the `ci-gate` job.
-- Proper permission setup (`pull-requests: write`) for the `ci-gate` job.
+- Proper permission setup (`contents: read`, `issues: write`) for the `ci-gate` job.
 - Ensuring error handling is robust enough to bypass failure when API operations are rejected (e.g. fork PRs).
 
 ### Out of Scope
@@ -39,7 +39,7 @@
 
 ## What Changes
 
-- `.github/workflows/build-test.yml`: Update the `ci-gate` job to include explicit `pull-requests: write` permissions and a new script step before the status check step to manage the failure comments.
+- `.github/workflows/build-test.yml`: Update the `ci-gate` job to include explicit `contents: read` and `issues: write` permissions and a new script step before the status check step to manage the failure comments.
 
 ## Risks
 
