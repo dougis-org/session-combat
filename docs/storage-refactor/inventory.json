@@ -1,0 +1,1659 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": "lib/storage.ts",
+  "generatedAt": "2026-08-16T22:32:33.454Z",
+  "sourceLineCount": 1294,
+  "planDoc": "./plan.md",
+  "trackingIssues": ["#499", "#500"],
+  "methods": [
+    {
+      "method": "storage.loadEncounters",
+      "parent": null,
+      "domain": "encounters",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 86,
+      "callers": [
+        {
+          "file": "app/api/encounters/[id]/route.ts",
+          "fn": "GET",
+          "line": 8
+        },
+        {
+          "file": "app/api/encounters/[id]/route.ts",
+          "fn": "PUT",
+          "line": 36
+        },
+        {
+          "file": "app/api/encounters/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 78
+        },
+        {
+          "file": "app/api/encounters/route.ts",
+          "fn": "GET",
+          "line": 8
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.loadCharacters",
+      "parent": null,
+      "domain": "characters",
+      "behavior": "mixed",
+      "errorReturn": "[]",
+      "line": 116,
+      "callers": [
+        {
+          "file": "app/api/characters/import/route.ts",
+          "fn": "POST",
+          "line": 22
+        },
+        {
+          "file": "app/api/characters/[id]/route.ts",
+          "fn": "GET",
+          "line": 19
+        },
+        {
+          "file": "app/api/characters/[id]/route.ts",
+          "fn": "PUT",
+          "line": 73
+        },
+        {
+          "file": "app/api/characters/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 221
+        },
+        {
+          "file": "app/api/characters/route.ts",
+          "fn": "GET",
+          "line": 28
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route.ts",
+          "fn": "PUT",
+          "line": 92
+        }
+      ],
+      "existingTests": [
+        "tests/unit/import/characterImportRoute.test.ts",
+        "tests/unit/storage/storage.test.ts"
+      ],
+      "characterizationTest": "tests/unit/lib/storage.characterization.test.ts",
+      "notes": "Two-tier: primary query against the characters_active view has its own inner try/catch that falls back to a direct query against characters with an explicit deletedAt filter; that fallback path has its own independent try/catch swallowing to []. Motivating example for the mixed category."
+    },
+    {
+      "method": "storage.loadCombatState",
+      "parent": null,
+      "domain": "combatState",
+      "behavior": "swallow",
+      "errorReturn": "null",
+      "line": 145,
+      "callers": [],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.loadParties",
+      "parent": null,
+      "domain": "parties",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 159,
+      "callers": [
+        {
+          "file": "app/api/parties/[id]/route.ts",
+          "fn": "GET",
+          "line": 10
+        },
+        {
+          "file": "app/api/parties/[id]/route.ts",
+          "fn": "PUT",
+          "line": 27
+        },
+        {
+          "file": "app/api/parties/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 102
+        },
+        {
+          "file": "app/api/parties/route.ts",
+          "fn": "GET",
+          "line": 8
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.loadMonsterTemplates",
+      "parent": null,
+      "domain": "monsters",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 174,
+      "callers": [
+        {
+          "file": "app/api/monsters/[id]/route.ts",
+          "fn": "loadUserTemplate",
+          "line": 7
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.loadGlobalMonsterTemplates",
+      "parent": null,
+      "domain": "monsters",
+      "behavior": "no-try",
+      "errorReturn": null,
+      "line": 189,
+      "callers": [
+        {
+          "file": "app/api/monsters/global/[id]/route.ts",
+          "fn": "GET",
+          "line": 14
+        },
+        {
+          "file": "app/api/monsters/global/[id]/route.ts",
+          "fn": "PUT",
+          "line": 80
+        },
+        {
+          "file": "app/api/monsters/global/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 169
+        },
+        {
+          "file": "app/api/monsters/global/route.ts",
+          "fn": "GET",
+          "line": 13
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "No own try/catch; delegates to loadMonsterTemplates(GLOBAL_USER_ID), which itself swallows."
+    },
+    {
+      "method": "storage.loadAllMonsterTemplates",
+      "parent": null,
+      "domain": "monsters",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 194,
+      "callers": [
+        {
+          "file": "app/api/monsters/[id]/duplicate/route.ts",
+          "fn": "POST",
+          "line": 8
+        },
+        {
+          "file": "app/api/monsters/route.ts",
+          "fn": "GET",
+          "line": 10
+        }
+      ],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": "Wraps Promise.all of loadMonsterTemplates/loadGlobalMonsterTemplates, both of which already swallow internally; this outer catch is effectively unreachable via a DB error but is retained as written."
+    },
+    {
+      "method": "storage.loadGlobalCampaignTemplates",
+      "parent": null,
+      "domain": "campaignTemplates",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 208,
+      "callers": [
+        {
+          "file": "app/api/campaigns/global/route.ts",
+          "fn": "GET",
+          "line": 10
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/campaigns.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.loadGlobalCampaignTemplateById",
+      "parent": null,
+      "domain": "campaignTemplates",
+      "behavior": "swallow",
+      "errorReturn": "null",
+      "line": 225,
+      "callers": [
+        {
+          "file": "app/api/campaigns/global/[id]/copy/route.ts",
+          "fn": "POST",
+          "line": 9
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/campaigns.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.saveCampaignTemplate",
+      "parent": null,
+      "domain": "campaignTemplates",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 239,
+      "callers": [
+        {
+          "file": "app/api/campaigns/global/route.ts",
+          "fn": "POST",
+          "line": 62
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/campaigns.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.deleteCampaignTemplate",
+      "parent": null,
+      "domain": "campaignTemplates",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 257,
+      "callers": [
+        {
+          "file": "app/api/campaigns/global/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 17
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/campaigns.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "Returns boolean (deletedCount > 0) on success; rethrows on DB error rather than returning false."
+    },
+    {
+      "method": "storage.loadCampaigns",
+      "parent": null,
+      "domain": "campaigns",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 271,
+      "callers": [
+        {
+          "file": "app/api/campaigns/route.ts",
+          "fn": "GET",
+          "line": 10
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/campaigns.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.loadCampaignById",
+      "parent": null,
+      "domain": "campaigns",
+      "behavior": "swallow",
+      "errorReturn": "null",
+      "line": 286,
+      "callers": [],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.saveCampaign",
+      "parent": null,
+      "domain": "campaigns",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 300,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/route.ts",
+          "fn": "PATCH",
+          "line": 77
+        },
+        {
+          "file": "app/api/campaigns/global/[id]/copy/route.ts",
+          "fn": "POST",
+          "line": 34
+        },
+        {
+          "file": "app/api/campaigns/route.ts",
+          "fn": "POST",
+          "line": 62
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/campaigns.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.deleteCampaign",
+      "parent": null,
+      "domain": "campaigns",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 318,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 94
+        },
+        {
+          "file": "app/api/campaigns/global/[id]/copy/route.ts",
+          "fn": "POST",
+          "line": 47
+        },
+        {
+          "file": "app/api/campaigns/route.ts",
+          "fn": "POST",
+          "line": 79
+        },
+        {
+          "file": "app/api/campaigns/route.ts",
+          "fn": "POST",
+          "line": 102
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/campaigns.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "Cascades deletes across 7 collections before deleting the parent campaign document; any failure in the cascade rethrows."
+    },
+    {
+      "method": "storage.setActiveCampaignSession",
+      "parent": null,
+      "domain": "campaigns",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 349,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/sessions/active/route.ts",
+          "fn": "DELETE",
+          "line": 70
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.claimActiveCampaignSession",
+      "parent": null,
+      "domain": "campaigns",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 364,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/sessions/active/route.ts",
+          "fn": "POST",
+          "line": 23
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.load",
+      "parent": null,
+      "domain": "session",
+      "behavior": "swallow",
+      "errorReturn": "{ encounters: [], characters: [], parties: [], campaigns: [] }",
+      "line": 381,
+      "callers": [],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": "Aggregates 5 sub-loads via Promise.all; those sub-loads already swallow internally, so this outer catch is effectively unreachable via a DB error but is retained as written."
+    },
+    {
+      "method": "storage.saveEncounter",
+      "parent": null,
+      "domain": "encounters",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 405,
+      "callers": [
+        {
+          "file": "app/api/encounters/[id]/route.ts",
+          "fn": "PUT",
+          "line": 63
+        },
+        {
+          "file": "app/api/encounters/route.ts",
+          "fn": "POST",
+          "line": 42
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.saveEncounters",
+      "parent": null,
+      "domain": "encounters",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 434,
+      "callers": [],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": "Loops saveEncounter (itself rethrow) sequentially; first failure aborts the loop and rethrows."
+    },
+    {
+      "method": "storage.saveCharacter",
+      "parent": null,
+      "domain": "characters",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 447,
+      "callers": [
+        {
+          "file": "app/api/characters/import/route.ts",
+          "fn": "POST",
+          "line": 57
+        },
+        {
+          "file": "app/api/characters/[id]/route.ts",
+          "fn": "PUT",
+          "line": 206
+        },
+        {
+          "file": "app/api/characters/route.ts",
+          "fn": "POST",
+          "line": 179
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.saveCharacters",
+      "parent": null,
+      "domain": "characters",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 463,
+      "callers": [],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": "Loops saveCharacter (itself rethrow) sequentially; first failure aborts the loop and rethrows."
+    },
+    {
+      "method": "storage.saveCombatState",
+      "parent": null,
+      "domain": "combatState",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 476,
+      "callers": [],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "Early-returns (no-op) when combatState is undefined, before the try/catch."
+    },
+    {
+      "method": "storage.deleteEncounter",
+      "parent": null,
+      "domain": "encounters",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 495,
+      "callers": [
+        {
+          "file": "app/api/encounters/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 88
+        }
+      ],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.deleteCharacter",
+      "parent": null,
+      "domain": "characters",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 530,
+      "callers": [
+        {
+          "file": "app/api/characters/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 231
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage.characters.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "Soft delete; throws a custom \"not found\" Error when matchedCount === 0 in addition to rethrowing DB errors. Party-membership cleanup after the soft delete is not covered by this method's own try/catch (see setPartyMemberLeftAt-style best-effort cleanup elsewhere)."
+    },
+    {
+      "method": "storage.saveParty",
+      "parent": null,
+      "domain": "parties",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 555,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route.ts",
+          "fn": "PUT",
+          "line": 107
+        },
+        {
+          "file": "app/api/campaigns/route.ts",
+          "fn": "POST",
+          "line": 76
+        },
+        {
+          "file": "app/api/parties/[id]/route.ts",
+          "fn": "PUT",
+          "line": 91
+        },
+        {
+          "file": "app/api/parties/route.ts",
+          "fn": "POST",
+          "line": 49
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/storage.test.ts",
+        "tests/integration/campaigns.members.integration.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.saveParties",
+      "parent": null,
+      "domain": "parties",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 575,
+      "callers": [],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": "Loops saveParty (itself rethrow) sequentially; first failure aborts the loop and rethrows."
+    },
+    {
+      "method": "storage.deleteParty",
+      "parent": null,
+      "domain": "parties",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 588,
+      "callers": [
+        {
+          "file": "app/api/campaigns/route.ts",
+          "fn": "POST",
+          "line": 97
+        },
+        {
+          "file": "app/api/parties/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 109
+        }
+      ],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.saveMonsterTemplate",
+      "parent": null,
+      "domain": "monsters",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 599,
+      "callers": [
+        {
+          "file": "lib/import/dedupeEngine.ts",
+          "fn": "importMonsterSingle",
+          "line": 78
+        },
+        {
+          "file": "app/api/monsters/[id]/duplicate/route.ts",
+          "fn": "POST",
+          "line": 25
+        },
+        {
+          "file": "app/api/monsters/[id]/route.ts",
+          "fn": "PUT",
+          "line": 119
+        },
+        {
+          "file": "app/api/monsters/global/[id]/route.ts",
+          "fn": "PUT",
+          "line": 144
+        },
+        {
+          "file": "app/api/monsters/global/route.ts",
+          "fn": "POST",
+          "line": 120
+        },
+        {
+          "file": "app/api/monsters/global/route.ts",
+          "fn": "PUT",
+          "line": 163
+        },
+        {
+          "file": "app/api/monsters/upload/route.ts",
+          "fn": "POST",
+          "line": 57
+        },
+        {
+          "file": "app/api/monsters/route.ts",
+          "fn": "POST",
+          "line": 112
+        }
+      ],
+      "existingTests": [
+        "tests/unit/api/monsters/upload.route.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.deleteMonsterTemplate",
+      "parent": null,
+      "domain": "monsters",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 615,
+      "callers": [
+        {
+          "file": "app/api/monsters/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 136
+        },
+        {
+          "file": "app/api/monsters/global/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 179
+        }
+      ],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.loadSpells",
+      "parent": null,
+      "domain": "spells",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 628,
+      "callers": [
+        {
+          "file": "app/api/spells/route.ts",
+          "fn": "GET",
+          "line": 16
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.loadSpellById",
+      "parent": null,
+      "domain": "spells",
+      "behavior": "swallow",
+      "errorReturn": "null",
+      "line": 649,
+      "callers": [
+        {
+          "file": "app/api/spells/[id]/route.ts",
+          "fn": "GET",
+          "line": 13
+        },
+        {
+          "file": "app/api/spells/[id]/route.ts",
+          "fn": "PUT",
+          "line": 37
+        },
+        {
+          "file": "app/api/spells/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 69
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": "tests/unit/lib/storage.characterization.test.ts",
+      "notes": "Swallows DB errors to null, which is indistinguishable from a genuine not-found (no matching document). Also short-circuits to null before any DB call when id fails a local shape check (missing/non-string/>64 chars) — that guard path is not a DB-error swallow but produces the same sentinel."
+    },
+    {
+      "method": "storage.saveSpellTemplate",
+      "parent": null,
+      "domain": "spells",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 666,
+      "callers": [
+        {
+          "file": "lib/import/dedupeEngine.ts",
+          "fn": "importSpellsFromOpen5E",
+          "line": 128
+        },
+        {
+          "file": "app/api/spells/[id]/route.ts",
+          "fn": "PUT",
+          "line": 49
+        },
+        {
+          "file": "app/api/spells/route.ts",
+          "fn": "POST",
+          "line": 57
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.deleteSpellTemplate",
+      "parent": null,
+      "domain": "spells",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 682,
+      "callers": [
+        {
+          "file": "app/api/spells/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 74
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "No-op (early return, no DB call) when id fails the same local shape check as loadSpellById."
+    },
+    {
+      "method": "storage.spellExistsByNameAndSource",
+      "parent": null,
+      "domain": "spells",
+      "behavior": "swallow",
+      "errorReturn": "false",
+      "line": 698,
+      "callers": [
+        {
+          "file": "lib/import/dedupeEngine.ts",
+          "fn": "shouldImport",
+          "line": 26
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.monsterExistsByNameAndSource",
+      "parent": null,
+      "domain": "monsters",
+      "behavior": "swallow",
+      "errorReturn": "false",
+      "line": 715,
+      "callers": [],
+      "existingTests": [
+        "tests/unit/lib/storage.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.findMonsterByNameAndSource",
+      "parent": null,
+      "domain": "monsters",
+      "behavior": "swallow",
+      "errorReturn": "null",
+      "line": 731,
+      "callers": [
+        {
+          "file": "lib/import/dedupeEngine.ts",
+          "fn": "shouldImport",
+          "line": 30
+        }
+      ],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.loadSessionLogs",
+      "parent": null,
+      "domain": "sessionLogs",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 747,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/sessions/route.ts",
+          "fn": "GET",
+          "line": 15
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/sessionLog.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.getNextSessionNumber",
+      "parent": null,
+      "domain": "sessionLogs",
+      "behavior": "swallow",
+      "errorReturn": "1",
+      "line": 763,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/sessions/active/route.ts",
+          "fn": "POST",
+          "line": 33
+        },
+        {
+          "file": "app/api/campaigns/[id]/sessions/route.ts",
+          "fn": "POST",
+          "line": 43
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/sessionLog.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.saveSessionLog",
+      "parent": null,
+      "domain": "sessionLogs",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 777,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/sessions/active/route.ts",
+          "fn": "POST",
+          "line": 43
+        },
+        {
+          "file": "app/api/campaigns/[id]/sessions/route.ts",
+          "fn": "POST",
+          "line": 61
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/sessionLog.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.updateSessionLog",
+      "parent": null,
+      "domain": "sessionLogs",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 789,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/sessions/[sessionId]/route.ts",
+          "fn": "PATCH",
+          "line": 19
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/sessionLog.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "Returns SessionLog | null; null means \"no matching document to update\" (findOneAndUpdate returned nothing), not a swallowed DB error — DB errors rethrow."
+    },
+    {
+      "method": "storage.deleteSessionLog",
+      "parent": null,
+      "domain": "sessionLogs",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 820,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/sessions/[sessionId]/route.ts",
+          "fn": "DELETE",
+          "line": 38
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/sessionLog.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.addMember",
+      "parent": null,
+      "domain": "campaignMembers",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 898,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/members/route.ts",
+          "fn": "POST",
+          "line": 81
+        },
+        {
+          "file": "app/api/campaigns/global/[id]/copy/route.ts",
+          "fn": "POST",
+          "line": 37
+        },
+        {
+          "file": "app/api/campaigns/route.ts",
+          "fn": "POST",
+          "line": 87
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/campaigns.members.test.ts",
+        "tests/unit/api/campaigns/[id]/members/route.unit.test.ts",
+        "tests/integration/campaigns.members.integration.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "Special-cases a Mongo duplicate-key error (code 11000) into a DuplicateMemberError before rethrowing; all other DB errors are logged and rethrown as-is."
+    },
+    {
+      "method": "storage.updateMemberStatus",
+      "parent": null,
+      "domain": "campaignMembers",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 914,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/members/[userId]/route.ts",
+          "fn": "DELETE",
+          "line": 23
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/me/route.ts",
+          "fn": "PATCH",
+          "line": 44
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/me/route.ts",
+          "fn": "PATCH",
+          "line": 51
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/route.ts",
+          "fn": "POST",
+          "line": 96
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/campaigns.members.test.ts",
+        "tests/unit/api/campaigns/[id]/members/[userId]/route.unit.test.ts",
+        "tests/unit/api/campaigns/[id]/members/me.test.ts",
+        "tests/unit/api/campaigns/[id]/members/route.unit.test.ts",
+        "tests/integration/campaigns.members.integration.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.listMembersForCampaign",
+      "parent": null,
+      "domain": "campaignMembers",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 937,
+      "callers": [
+        {
+          "file": "lib/server/transport.ts",
+          "fn": "activeMembers",
+          "line": 66
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/route.ts",
+          "fn": "GET",
+          "line": 17
+        },
+        {
+          "file": "app/api/campaigns/[id]/rolls/route.ts",
+          "fn": "POST",
+          "line": 83
+        },
+        {
+          "file": "app/api/campaigns/[id]/messages/route.ts",
+          "fn": "POST",
+          "line": 137
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/campaigns.members.test.ts",
+        "tests/unit/api/campaigns/[id]/members/route.unit.test.ts",
+        "tests/integration/campaigns.members.integration.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.getMember",
+      "parent": null,
+      "domain": "campaignMembers",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 955,
+      "callers": [
+        {
+          "file": "lib/utils/campaign.ts",
+          "fn": "assertCampaignAccess",
+          "line": 11
+        },
+        {
+          "file": "app/api/campaigns/[id]/characters/[cid]/route.ts",
+          "fn": "DELETE",
+          "line": 9
+        },
+        {
+          "file": "app/api/campaigns/[id]/characters/route.ts",
+          "fn": "POST",
+          "line": 25
+        },
+        {
+          "file": "app/api/campaigns/[id]/characters/route.ts",
+          "fn": "GET",
+          "line": 60
+        },
+        {
+          "file": "app/api/campaigns/[id]/parties/route.ts",
+          "fn": "GET",
+          "line": 9
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route.ts",
+          "fn": "isAuthorized",
+          "line": 11
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route.ts",
+          "fn": "PUT",
+          "line": 81
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/[userId]/route.ts",
+          "fn": "DELETE",
+          "line": 9
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/[userId]/route.ts",
+          "fn": "DELETE",
+          "line": 18
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/me/route.ts",
+          "fn": "GET",
+          "line": 7
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/me/route.ts",
+          "fn": "PATCH",
+          "line": 34
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/route.ts",
+          "fn": "GET",
+          "line": 12
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/route.ts",
+          "fn": "POST",
+          "line": 72
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/route.ts",
+          "fn": "POST",
+          "line": 77
+        },
+        {
+          "file": "app/api/campaigns/[id]/rolls/route.ts",
+          "fn": "POST",
+          "line": 51
+        },
+        {
+          "file": "app/api/campaigns/[id]/rolls/route.ts",
+          "fn": "GET",
+          "line": 101
+        },
+        {
+          "file": "app/api/campaigns/[id]/messages/route.ts",
+          "fn": "parseVisibility",
+          "line": 65
+        },
+        {
+          "file": "app/api/campaigns/[id]/messages/route.ts",
+          "fn": "POST",
+          "line": 99
+        },
+        {
+          "file": "app/api/campaigns/[id]/messages/route.ts",
+          "fn": "GET",
+          "line": 150
+        }
+      ],
+      "existingTests": [
+        "tests/unit/utils/assertCampaignAccess.test.ts",
+        "tests/unit/storage/campaignMembers.test.ts",
+        "tests/unit/api/campaigns/[id]/characters/[cid]/route.test.ts",
+        "tests/unit/api/campaigns/[id]/characters/route.test.ts",
+        "tests/unit/api/campaigns/[id]/members/[userId]/route.unit.test.ts",
+        "tests/unit/api/campaigns/[id]/members/me.test.ts",
+        "tests/unit/api/campaigns/[id]/members/route.unit.test.ts",
+        "tests/unit/api/campaigns/[id]/members/me.get.test.ts"
+      ],
+      "characterizationTest": "tests/unit/lib/storage.characterization.test.ts",
+      "notes": "Rethrows on DB error. Contrast with loadSpellById (swallow): callers such as lib/utils/campaign.ts assertCampaignAccess() have no local try/catch, so a DB blip becomes an unhandled throw here versus a silent null there."
+    },
+    {
+      "method": "storage.loadCampaignByIdAny",
+      "parent": null,
+      "domain": "campaigns",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 971,
+      "callers": [
+        {
+          "file": "lib/utils/campaign.ts",
+          "fn": "assertCampaignAccess",
+          "line": 13
+        }
+      ],
+      "existingTests": [
+        "tests/unit/utils/assertCampaignAccess.test.ts",
+        "tests/unit/storage/campaignMembers.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.listCampaignsForMember",
+      "parent": null,
+      "domain": "campaignMembers",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 984,
+      "callers": [],
+      "existingTests": [
+        "tests/unit/storage/campaigns.members.test.ts",
+        "tests/integration/campaigns.members.integration.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.getUserById",
+      "parent": null,
+      "domain": "users",
+      "behavior": "no-try",
+      "errorReturn": null,
+      "line": 1009,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/rolls/route.ts",
+          "fn": "POST",
+          "line": 64
+        },
+        {
+          "file": "app/api/campaigns/[id]/messages/route.ts",
+          "fn": "POST",
+          "line": 109
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/users.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "No try/catch around the DB call; DB errors propagate unhandled. Throws InvalidUserIdError synchronously (not a DB error) if userId is not a valid ObjectId."
+    },
+    {
+      "method": "storage.getUsersByIds",
+      "parent": null,
+      "domain": "users",
+      "behavior": "no-try",
+      "errorReturn": null,
+      "line": 1019,
+      "callers": [
+        {
+          "file": "app/api/me/invitations/route.ts",
+          "fn": "GET",
+          "line": 31
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/users.test.ts",
+        "tests/unit/api/me/invitations.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "No try/catch around the DB call; DB errors propagate unhandled. Returns {} early (no DB call) if no valid ObjectIds are present."
+    },
+    {
+      "method": "storage.listInvitationsForUser",
+      "parent": null,
+      "domain": "campaignMembers",
+      "behavior": "no-try",
+      "errorReturn": null,
+      "line": 1039,
+      "callers": [
+        {
+          "file": "app/api/me/invitations/route.ts",
+          "fn": "GET",
+          "line": 15
+        }
+      ],
+      "existingTests": [
+        "tests/unit/storage/campaignMembers.test.ts",
+        "tests/unit/api/me/invitations.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "No try/catch around the DB call; DB errors propagate unhandled."
+    },
+    {
+      "method": "storage.getCampaignsByIds",
+      "parent": null,
+      "domain": "campaigns",
+      "behavior": "no-try",
+      "errorReturn": null,
+      "line": 1052,
+      "callers": [
+        {
+          "file": "app/api/me/invitations/route.ts",
+          "fn": "GET",
+          "line": 30
+        }
+      ],
+      "existingTests": [
+        "tests/unit/api/me/invitations.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "No try/catch around the DB call; DB errors propagate unhandled. Returns [] early (no DB call) if campaignIds is empty."
+    },
+    {
+      "method": "storage.addShare",
+      "parent": null,
+      "domain": "campaignCharacterShares",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 1062,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/characters/route.ts",
+          "fn": "POST",
+          "line": 40
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage-shares.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "Special-cases a Mongo duplicate-key error (code 11000) into a DuplicateShareError before rethrowing; all other DB errors are logged and rethrown as-is."
+    },
+    {
+      "method": "storage.removeShare",
+      "parent": null,
+      "domain": "campaignCharacterShares",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 1078,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/characters/[cid]/route.ts",
+          "fn": "DELETE",
+          "line": 23
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage-shares.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.listSharesForCampaign",
+      "parent": null,
+      "domain": "campaignCharacterShares",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 1091,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/characters/route.ts",
+          "fn": "GET",
+          "line": 70
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage-shares.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.listAllSharesForCampaign",
+      "parent": null,
+      "domain": "campaignCharacterShares",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 1109,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/members/[userId]/route.ts",
+          "fn": "DELETE",
+          "line": 27
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage-shares.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.loadPartiesByCampaign",
+      "parent": null,
+      "domain": "parties",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 1127,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/parties/route.ts",
+          "fn": "GET",
+          "line": 14
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route.ts",
+          "fn": "PUT",
+          "line": 86
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage-shares.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.setPartyMemberLeftAt",
+      "parent": null,
+      "domain": "parties",
+      "behavior": "mixed",
+      "errorReturn": "undefined (void, no throw)",
+      "line": 1147,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/characters/[cid]/route.ts",
+          "fn": "DELETE",
+          "line": 28
+        },
+        {
+          "file": "app/api/campaigns/[id]/members/[userId]/route.ts",
+          "fn": "DELETE",
+          "line": 31
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage-shares.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "Two independent error-handling layers: an inner try/catch around each this.saveParty() call inside the loop logs saveError and continues to the next party (does not rethrow, does not abort the loop); an outer try/catch around the whole method logs any other error (e.g. from loadPartiesByCampaign, which itself rethrows) and also does not rethrow. Net effect: this method never throws, but for a reason that differs at each layer — motivates mixed alongside loadCharacters."
+    },
+    {
+      "method": "storage.canAddToCampaignParty",
+      "parent": null,
+      "domain": "campaignCharacterShares",
+      "behavior": "swallow",
+      "errorReturn": "false",
+      "line": 1172,
+      "callers": [
+        {
+          "file": "app/api/parties/[id]/route.ts",
+          "fn": "PUT",
+          "line": 54
+        },
+        {
+          "file": "app/api/parties/route.ts",
+          "fn": "POST",
+          "line": 30
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage-shares.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.buildSharedCharacterEntries",
+      "parent": null,
+      "domain": "campaignCharacterShares",
+      "behavior": "no-try",
+      "errorReturn": null,
+      "line": 1192,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/characters/route.ts",
+          "fn": "GET",
+          "line": 66
+        }
+      ],
+      "existingTests": [
+        "tests/unit/api/campaigns/[id]/characters/route.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "No try/catch of its own; calls listAllSharesForCampaign (swallow) and getMember/loadCharacterById (rethrow/mixed) internally, so its effective error behavior depends entirely on those callees."
+    },
+    {
+      "method": "storage.loadCharacterById",
+      "parent": null,
+      "domain": "characters",
+      "behavior": "mixed",
+      "errorReturn": "null (view/fallback) but rethrows on outer error",
+      "line": 1208,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/characters/[cid]/route.ts",
+          "fn": "DELETE",
+          "line": 14
+        },
+        {
+          "file": "app/api/campaigns/[id]/characters/route.ts",
+          "fn": "POST",
+          "line": 30
+        }
+      ],
+      "existingTests": [
+        "tests/unit/lib/storage-shares.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "Two-tier like loadCharacters, but the outer catch rethrows instead of swallowing to a sentinel — inner try/catch falls back from characters_active view to a direct characters query silently (view failure produces no log at all, unlike loadCharacters' console.warn); an error from either query path, or the outer scope, propagates via throw."
+    },
+    {
+      "method": "storage.saveCampaignRoll",
+      "parent": null,
+      "domain": "campaignRolls",
+      "behavior": "no-try",
+      "errorReturn": null,
+      "line": 1228,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/rolls/route.ts",
+          "fn": "POST",
+          "line": 81
+        }
+      ],
+      "existingTests": [
+        "tests/unit/api/campaigns/[id]/rolls.route.test.ts"
+      ],
+      "characterizationTest": null,
+      "notes": "No try/catch around the DB call; DB errors propagate unhandled."
+    },
+    {
+      "method": "storage.listCampaignRolls",
+      "parent": null,
+      "domain": "campaignRolls",
+      "behavior": "no-try",
+      "errorReturn": null,
+      "line": 1235,
+      "callers": [
+        {
+          "file": "app/api/campaigns/[id]/rolls/route.ts",
+          "fn": "GET",
+          "line": 125
+        }
+      ],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": "No try/catch around the DB call; DB errors propagate unhandled."
+    },
+    {
+      "method": "storage.clear",
+      "parent": null,
+      "domain": "admin",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 1277,
+      "callers": [],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.savedContent.list",
+      "parent": "savedContent",
+      "domain": "savedContent",
+      "behavior": "swallow",
+      "errorReturn": "[]",
+      "line": 834,
+      "callers": [
+        {
+          "file": "app/api/content/route.ts",
+          "fn": "GET",
+          "line": 13
+        }
+      ],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.savedContent.create",
+      "parent": "savedContent",
+      "domain": "savedContent",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 849,
+      "callers": [
+        {
+          "file": "app/api/content/route.ts",
+          "fn": "POST",
+          "line": 42
+        }
+      ],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": null
+    },
+    {
+      "method": "storage.savedContent.update",
+      "parent": "savedContent",
+      "domain": "savedContent",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 868,
+      "callers": [
+        {
+          "file": "app/api/content/[id]/route.ts",
+          "fn": "PUT",
+          "line": 24
+        }
+      ],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": "Returns boolean (matchedCount > 0) on success; rethrows on DB error rather than returning false."
+    },
+    {
+      "method": "storage.savedContent.remove",
+      "parent": "savedContent",
+      "domain": "savedContent",
+      "behavior": "rethrow",
+      "errorReturn": null,
+      "line": 884,
+      "callers": [
+        {
+          "file": "app/api/content/[id]/route.ts",
+          "fn": "DELETE",
+          "line": 35
+        }
+      ],
+      "existingTests": [],
+      "characterizationTest": null,
+      "notes": "Returns boolean (deletedCount > 0) on success; rethrows on DB error rather than returning false."
+    }
+  ]
+}

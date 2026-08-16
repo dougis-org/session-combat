@@ -94,3 +94,6 @@ regression-test-output.txt
 .verity/.last-reviewed-sha
 .verity/.snapshot/
 .codacy/generated/
+
+# OpenSpec change worktrees
+.worktrees/
