@@ -1,4 +1,4 @@
-import { rollDie } from "@/lib/utils/dice";
+import { rollDie, rollDicePool } from "@/lib/utils/dice";
 
 // ---------------------------------------------------------------------------
 // Supported die sizes and default count behaviour
@@ -126,5 +126,73 @@ describe("rollDie – crypto unavailable", () => {
         configurable: true,
       });
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// rollDicePool – multi-group dice pool
+// ---------------------------------------------------------------------------
+describe("rollDicePool – single-group pool", () => {
+  it("returns tagged results for a single group", () => {
+    const result = rollDicePool([{ sides: 6, count: 2 }]);
+    expect(result).toHaveLength(2);
+    for (const entry of result) {
+      expect(entry.sides).toBe(6);
+      expect(entry.value).toBeGreaterThanOrEqual(1);
+      expect(entry.value).toBeLessThanOrEqual(6);
+    }
+  });
+});
+
+describe("rollDicePool – mixed-group pool", () => {
+  it("returns results tagged by their own group's sides, in group order", () => {
+    const result = rollDicePool([
+      { sides: 6, count: 2 },
+      { sides: 8, count: 2 },
+    ]);
+    expect(result).toHaveLength(4);
+    expect(result[0].sides).toBe(6);
+    expect(result[1].sides).toBe(6);
+    expect(result[2].sides).toBe(8);
+    expect(result[3].sides).toBe(8);
+    expect(result[0].value).toBeGreaterThanOrEqual(1);
+    expect(result[0].value).toBeLessThanOrEqual(6);
+    expect(result[2].value).toBeGreaterThanOrEqual(1);
+    expect(result[2].value).toBeLessThanOrEqual(8);
+  });
+});
+
+describe("rollDicePool – empty group list", () => {
+  it("returns an empty array without error", () => {
+    expect(rollDicePool([])).toEqual([]);
+  });
+});
+
+describe("rollDicePool – validation", () => {
+  it("rejects the whole call when any group has an unsupported die size", () => {
+    expect(() =>
+      rollDicePool([
+        { sides: 6, count: 1 },
+        { sides: 7, count: 1 },
+      ])
+    ).toThrow("Unsupported die size");
+  });
+
+  it("rejects the whole call when any group has an invalid count", () => {
+    expect(() => rollDicePool([{ sides: 6, count: 0 }])).toThrow("Invalid count");
+  });
+});
+
+describe("rollDicePool – unbiased randomness smoke check", () => {
+  it("produces values across the full 1..sides range with no out-of-range values", () => {
+    const seen = new Set<number>();
+    for (let i = 0; i < 200; i++) {
+      const [{ sides, value }] = rollDicePool([{ sides: 6, count: 1 }]);
+      expect(sides).toBe(6);
+      expect(value).toBeGreaterThanOrEqual(1);
+      expect(value).toBeLessThanOrEqual(6);
+      seen.add(value);
+    }
+    expect(seen.size).toBe(6);
   });
 });
