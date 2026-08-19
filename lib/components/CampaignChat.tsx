@@ -380,13 +380,13 @@ function DicePoolTrigger({ campaignId, activeSessionId, streamStatus, onRollPost
 
   async function handleRoll() {
     if (poolTotal === 0 || isRolling) return
-    const groups = getActiveDiceGroups(pool)
-    const formula = buildPoolFormula(groups, modifier)
-    const rolls = rollDicePool(groups).map(r => r.value)
-    const total = rolls.reduce((sum, v) => sum + v, 0) + modifier
     setIsRolling(true)
     setError(null)
     try {
+      const groups = getActiveDiceGroups(pool)
+      const formula = buildPoolFormula(groups, modifier)
+      const rolls = rollDicePool(groups).map(r => r.value)
+      const total = rolls.reduce((sum, v) => sum + v, 0) + modifier
       const res = await fetch(`/api/campaigns/${campaignId}/rolls`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
