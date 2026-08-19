@@ -331,10 +331,16 @@ describe('CampaignChat — dice pool commit', () => {
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
+    const modifierInput = screen.getByRole('textbox', { name: 'Modifier' })
+    await user.clear(modifierInput)
+    await user.type(modifierInput, '5')
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Roll visibility' }), 'dm-only')
     await user.click(screen.getByRole('button', { name: 'Roll' }))
 
     await waitFor(() => expect(screen.getByText('No active session')).toBeInTheDocument())
     expect(screen.getByRole('button', { name: 'Add d20' })).toHaveTextContent('d20 ×1')
+    expect(modifierInput).toHaveValue('5')
+    expect(screen.getByRole('combobox', { name: 'Roll visibility' })).toHaveValue('dm-only')
   })
 
   it('Roll and pool controls are disabled while a commit is in flight, re-enabled after', async () => {
