@@ -290,11 +290,7 @@ interface DicePoolPortalProps {
 
 function DicePoolPortal({ triggerRef, popoutRef, children }: DicePoolPortalProps) {
   const [position, setPosition] = useState<{ bottom: number; left: number } | null>(null)
-  const [root, setRoot] = useState<HTMLElement | null>(null)
-
-  useEffect(() => {
-    setRoot(getDiceOverlayRoot())
-  }, [])
+  const [root] = useState<HTMLElement | null>(() => getDiceOverlayRoot())
 
   useEffect(() => {
     function updatePosition() {
