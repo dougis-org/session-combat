@@ -52,3 +52,39 @@ export function rollDie(sides: number, count = 1): number[] {
   }
   return results;
 }
+
+/**
+ * Roll a mixed pool of dice across multiple die sizes using cryptographically
+ * secure randomness. Each group is validated the same way `rollDie` validates
+ * its `sides`/`count` arguments; if any group is invalid, no dice are rolled.
+ *
+ * @param groups - Array of `{ sides, count }` groups to roll
+ * @returns Flat array of `{ sides, value }` results, one entry per individual
+ *   die, in the same group order the groups were supplied in
+ * @throws Error if any group's sides is not a supported value or count is invalid
+ */
+export function rollDicePool(
+  groups: { sides: number; count: number }[]
+): { sides: number; value: number }[] {
+  for (const { sides, count } of groups) {
+    if (!SUPPORTED_SIDES.includes(sides as SupportedSides)) {
+      throw new Error(
+        `Unsupported die size: ${sides}. Must be one of ${SUPPORTED_SIDES.join(", ")}.`
+      );
+    }
+    if (!Number.isInteger(count) || count < 1) {
+      throw new Error(`Invalid count: ${count}. Must be a positive integer.`);
+    }
+  }
+
+  if (groups.length === 0) return [];
+
+  const cryptoObj = getCrypto();
+  const results: { sides: number; value: number }[] = [];
+  for (const { sides, count } of groups) {
+    for (let i = 0; i < count; i++) {
+      results.push({ sides, value: rollOneDie(sides as SupportedSides, cryptoObj) });
+    }
+  }
+  return results;
+}

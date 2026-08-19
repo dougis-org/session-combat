@@ -1,4 +1,4 @@
-import { render, screen, act, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import type { CampaignRoll, CampaignStreamEvent } from '@/lib/types'
@@ -7,10 +7,6 @@ import type { CampaignRoll, CampaignStreamEvent } from '@/lib/types'
 
 jest.mock('@/lib/offline/LocalStore', () => ({
   LocalStore: { get: jest.fn().mockReturnValue(null), set: jest.fn(), remove: jest.fn() },
-}))
-
-jest.mock('@/lib/utils/dice', () => ({
-  rollDie: jest.fn().mockReturnValue([15]),
 }))
 
 let capturedOnEvent: ((e: CampaignStreamEvent) => void) | null = null
@@ -253,147 +249,8 @@ it('roll item displays dice indicator emoji', async () => {
   expect(screen.getByText('🎲')).toBeInTheDocument()
 })
 
-// ── T4 — RollEntryStrip ───────────────────────────────────────────
-
-// T4.1
-it('roll strip disabled with "No active session" when activeSessionId is null', async () => {
-  await openDock(null)
-  expect(screen.getByText('No active session')).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'd20' })).toBeDisabled()
-  expect(screen.getByLabelText('Modifier')).toBeDisabled()
-  expect(screen.getByLabelText('Roll visibility')).toBeDisabled()
-})
-
-// T4.2
-it('roll strip enabled when activeSessionId is non-null and stream is open', async () => {
-  await openDock('session-1')
-  expect(screen.queryByText('No active session')).not.toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'd20' })).not.toBeDisabled()
-  expect(screen.getByLabelText('Modifier')).not.toBeDisabled()
-  expect(screen.getByLabelText('Roll visibility')).not.toBeDisabled()
-})
-
-// T4.3
-it('clicking d20 with modifier=3 posts correct formula and total', async () => {
-  const { rollDie } = await import('@/lib/utils/dice')
-  ;(rollDie as jest.Mock).mockReturnValue([15])
-  const user = await openDock('session-1')
-  const modifierInput = screen.getByLabelText('Modifier')
-  await user.clear(modifierInput)
-  await user.type(modifierInput, '3')
-  await user.click(screen.getByRole('button', { name: 'd20' }))
-  await waitFor(() => {
-    expect(fetchSpy).toHaveBeenCalledWith(
-      '/api/campaigns/test-campaign/rolls',
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({ formula: '1d20+3', rolls: [15], total: 18, visibility: { scope: 'group' } }),
-      }),
-    )
-  })
-})
-
-// T4.4
-it('clicking d6 with modifier=0 sends formula without +0', async () => {
-  const { rollDie } = await import('@/lib/utils/dice')
-  ;(rollDie as jest.Mock).mockReturnValue([4])
-  await openDock('session-1')
-  await userEvent.click(screen.getByRole('button', { name: 'd6' }))
-  await waitFor(() => {
-    expect(fetchSpy).toHaveBeenCalledWith(
-      '/api/campaigns/test-campaign/rolls',
-      expect.objectContaining({
-        body: JSON.stringify({ formula: '1d6', rolls: [4], total: 4, visibility: { scope: 'group' } }),
-      }),
-    )
-  })
-})
-
-// T4.5
-it('clicking d8 with modifier=-2 sends formula with minus sign', async () => {
-  const { rollDie } = await import('@/lib/utils/dice')
-  ;(rollDie as jest.Mock).mockReturnValue([5])
-  const user = await openDock('session-1')
-  const modifierInput = screen.getByLabelText('Modifier')
-  fireEvent.change(modifierInput, { target: { value: '-2' } })
-  await user.click(screen.getByRole('button', { name: 'd8' }))
-  await waitFor(() => {
-    expect(fetchSpy).toHaveBeenCalledWith(
-      '/api/campaigns/test-campaign/rolls',
-      expect.objectContaining({
-        body: JSON.stringify({ formula: '1d8-2', rolls: [5], total: 3, visibility: { scope: 'group' } }),
-      }),
-    )
-  })
-})
-
-// T4.6
-it('visibility selector defaults to group on first render', async () => {
-  await openDock('session-1')
-  expect(screen.getByLabelText('Roll visibility')).toHaveValue('group')
-})
-
-// T4.7
-it('selecting DM-only sends correct scope', async () => {
-  const { rollDie } = await import('@/lib/utils/dice')
-  ;(rollDie as jest.Mock).mockReturnValue([10])
-  const user = await openDock('session-1')
-  await user.selectOptions(screen.getByLabelText('Roll visibility'), 'dm-only')
-  await user.click(screen.getByRole('button', { name: 'd6' }))
-  await waitFor(() => {
-    expect(fetchSpy).toHaveBeenCalledWith(
-      '/api/campaigns/test-campaign/rolls',
-      expect.objectContaining({
-        body: expect.stringContaining('"scope":"dm-only"'),
-      }),
-    )
-  })
-})
-
-// T4.8 — buttons disabled while roll is in flight
-it('all die buttons are disabled while a roll POST is in flight', async () => {
-  let resolvePost: (value: unknown) => void
-  fetchSpy.mockImplementation((url: string, init?: RequestInit) => {
-    if (url.includes('/rolls') && init?.method === 'POST') {
-      return new Promise(resolve => { resolvePost = resolve })
-    }
-    if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-    if (url.includes('/messages')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    if (url.includes('/rolls')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ rolls: [] }) })
-    return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
-  })
-  await openDock('session-1')
-  // Click a die button — POST hangs
-  userEvent.click(screen.getByRole('button', { name: 'd6' }))
-  // While in flight, all die buttons should be disabled
-  await waitFor(() => {
-    expect(screen.getByRole('button', { name: 'd6' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'd20' })).toBeDisabled()
-  })
-  // Resolve the POST to clean up
-  resolvePost!({ ok: true, status: 201, json: () => Promise.resolve(makeRoll()) })
-})
-
-// T4.9
-it('409 response shows inline "No active session" error', async () => {
-  setupFetchMock({ rollPostStatus: 409 })
-  await openDock('session-1')
-  await userEvent.click(screen.getByRole('button', { name: 'd20' }))
-  await waitFor(() => {
-    expect(screen.getByText('No active session')).toBeInTheDocument()
-  })
-})
-
-// T4.10
-it('successful 201 response calls onRollPosted (roll appears in feed)', async () => {
-  const returnedRoll = makeRoll({ id: 'roll-from-server', formula: '1d20', rolls: [15], total: 15 })
-  setupFetchMock({ rollPostBody: returnedRoll, rollPostStatus: 201 })
-  await openDock('session-1')
-  await userEvent.click(screen.getByRole('button', { name: 'd20' }))
-  await waitFor(() => {
-    expect(screen.getByText(/1d20/)).toBeInTheDocument()
-  })
-})
+// T4 — RollEntryStrip (immediate-click roll UI) is superseded by the dice
+// pool trigger/pop-out; see CampaignChat.dicePool.test.tsx.
 
 // ── T5 — Roll history fetch on expand ────────────────────────────
 

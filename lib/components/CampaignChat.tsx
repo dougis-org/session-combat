@@ -1,10 +1,11 @@
 'use client'
 
 import { useReducer, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import { useCampaignStream } from '@/lib/hooks/useCampaignStream'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { rollDie } from '@/lib/utils/dice'
+import { rollDicePool } from '@/lib/utils/dice'
 import { SceneComposer } from '@/lib/components/SceneComposer'
 import { SceneFeedItem } from '@/lib/components/SceneFeedItem'
 import type { CampaignMessage, CampaignRoll, CampaignStreamEvent, MessageVisibility, RollVisibility } from '@/lib/types'
@@ -253,41 +254,145 @@ function ChatComposer({
 }
 
 const DIE_SIDES = [4, 6, 8, 10, 12, 20] as const
+const EMPTY_POOL: Record<number, number> = { 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 20: 0 }
+const DICE_OVERLAY_ROOT_ID = 'dice-pool-overlay-root'
 
-interface RollEntryStripProps {
+function isBrowserEnv(): boolean {
+  return typeof document !== 'undefined'
+}
+
+function getDiceOverlayRoot(): HTMLElement | null {
+  if (!isBrowserEnv()) return null
+  let root = document.getElementById(DICE_OVERLAY_ROOT_ID)
+  if (!root) {
+    root = document.createElement('div')
+    root.id = DICE_OVERLAY_ROOT_ID
+    document.body.appendChild(root)
+  }
+  return root
+}
+
+function getActiveDiceGroups(pool: Record<number, number>): { sides: number; count: number }[] {
+  return DIE_SIDES.filter(sides => pool[sides] > 0).map(sides => ({ sides, count: pool[sides] }))
+}
+
+function buildPoolFormula(groups: { sides: number; count: number }[], modifier: number): string {
+  let formula = groups.map(({ sides, count }) => `${count}d${sides}`).join('+')
+  if (modifier !== 0) formula += modifier > 0 ? `+${modifier}` : `${modifier}`
+  return formula
+}
+
+interface DicePoolPortalProps {
+  triggerRef: React.RefObject<HTMLElement | null>
+  popoutRef: React.RefObject<HTMLDivElement | null>
+  children: React.ReactNode
+}
+
+function DicePoolPortal({ triggerRef, popoutRef, children }: DicePoolPortalProps) {
+  const [position, setPosition] = useState<{ bottom: number; left: number } | null>(null)
+  const [root] = useState<HTMLElement | null>(() => getDiceOverlayRoot())
+
+  useEffect(() => {
+    function updatePosition() {
+      const rect = triggerRef.current?.getBoundingClientRect()
+      if (!rect) return
+      setPosition({ bottom: window.innerHeight - rect.top + 8, left: rect.left })
+    }
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
+  }, [triggerRef])
+
+  if (!root || !position) return null
+
+  return createPortal(
+    <div
+      ref={popoutRef}
+      aria-label="Dice pool"
+      className="fixed z-50 bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-3 w-64"
+      style={{ bottom: position.bottom, left: position.left }}
+    >
+      {children}
+    </div>,
+    root
+  )
+}
+
+interface DicePoolTriggerProps {
   campaignId: string
   activeSessionId: string | null
   streamStatus: 'connecting' | 'open' | 'error'
   onRollPosted: (roll: CampaignRoll) => void
 }
 
-function RollEntryStrip({ campaignId, activeSessionId, streamStatus, onRollPosted }: RollEntryStripProps) {
+function DicePoolTrigger({ campaignId, activeSessionId, streamStatus, onRollPosted }: DicePoolTriggerProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [pool, setPool] = useState<Record<number, number>>(EMPTY_POOL)
   const [modifierText, setModifierText] = useState('0')
   const modifier = modifierText === '' || modifierText === '-' ? 0 : (parseInt(modifierText, 10) || 0)
   const [visibility, setVisibility] = useState<RollVisibility>({ scope: 'group' })
   const [isRolling, setIsRolling] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const popoutRef = useRef<HTMLDivElement>(null)
 
-  const isDisabled = activeSessionId !== null ? streamStatus !== 'open' || isRolling : true
+  const isTriggerDisabled = activeSessionId !== null ? streamStatus !== 'open' : true
+  const poolTotal = DIE_SIDES.reduce((sum, sides) => sum + pool[sides], 0)
 
-  async function handleDieClick(sides: number) {
-    if (isDisabled) return
-    const [result] = rollDie(sides, 1)
-    const total = result + modifier
-    const formula = modifier !== 0
-      ? `1d${sides}${modifier > 0 ? '+' : ''}${modifier}`
-      : `1d${sides}`
+  useEffect(() => {
+    if (activeSessionId === null) setIsOpen(false)
+  }, [activeSessionId])
+
+  useEffect(() => {
+    if (!isOpen) return
+    function handlePointerDown(e: MouseEvent) {
+      const target = e.target as Node
+      if (popoutRef.current?.contains(target)) return
+      if (triggerRef.current?.contains(target)) return
+      setIsOpen(false)
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setIsOpen(false)
+    }
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen])
+
+  function handleAdd(sides: number) {
+    setPool(prev => ({ ...prev, [sides]: prev[sides] + 1 }))
+  }
+
+  function handleRemove(sides: number) {
+    setPool(prev => ({ ...prev, [sides]: Math.max(0, prev[sides] - 1) }))
+  }
+
+  async function handleRoll() {
+    if (poolTotal === 0 || isRolling) return
     setIsRolling(true)
     setError(null)
     try {
+      const groups = getActiveDiceGroups(pool)
+      const formula = buildPoolFormula(groups, modifier)
+      const rolls = rollDicePool(groups).map(r => r.value)
+      const total = rolls.reduce((sum, v) => sum + v, 0) + modifier
       const res = await fetch(`/api/campaigns/${campaignId}/rolls`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ formula, rolls: [result], total, visibility }),
+        body: JSON.stringify({ formula, rolls, total, visibility }),
       })
       if (res.status === 201) {
         const roll: CampaignRoll = await res.json()
         onRollPosted(roll)
+        setPool(EMPTY_POOL)
+        setModifierText('0')
       } else if (res.status === 409) {
         setError('No active session')
       } else {
@@ -301,47 +406,84 @@ function RollEntryStrip({ campaignId, activeSessionId, streamStatus, onRollPoste
   }
 
   return (
-    <div className="border-t border-gray-700 p-2 flex-shrink-0">
+    <div className="border-t border-gray-700 p-2 flex-shrink-0 flex items-center justify-between">
       {activeSessionId === null && (
-        <p className="text-xs text-gray-500 mb-1">No active session</p>
+        <p className="text-xs text-gray-500">No active session</p>
       )}
-      <div className="flex flex-wrap gap-1 items-center">
-        {DIE_SIDES.map(sides => (
-          <button
-            key={sides}
-            type="button"
-            onClick={() => handleDieClick(sides)}
-            disabled={isDisabled}
-            aria-label={`d${sides}`}
-            className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded"
-          >
-            d{sides}
-          </button>
-        ))}
-        <input
-          type="text"
-          inputMode="numeric"
-          value={modifierText}
-          onChange={e => {
-            const v = e.target.value
-            if (v === '' || v === '-' || /^-?\d+$/.test(v)) setModifierText(v)
-          }}
-          disabled={isDisabled}
-          aria-label="Modifier"
-          className="w-14 text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"
-        />
-        <select
-          value={visibility.scope}
-          onChange={e => setVisibility({ scope: e.target.value as RollVisibility['scope'] })}
-          disabled={isDisabled}
-          aria-label="Roll visibility"
-          className="text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"
-        >
-          <option value="group">Group</option>
-          <option value="dm-only">DM-only</option>
-        </select>
-      </div>
-      {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setIsOpen(o => !o)}
+        disabled={isTriggerDisabled}
+        aria-label="Roll dice"
+        aria-expanded={isOpen}
+        className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-3 py-1.5 rounded-full flex items-center gap-1"
+      >
+        d20
+      </button>
+      {isOpen && (
+        <DicePoolPortal triggerRef={triggerRef} popoutRef={popoutRef}>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap gap-1 items-center">
+              {DIE_SIDES.map(sides => (
+                <div key={sides} className="flex items-center gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(sides)}
+                    disabled={isRolling}
+                    aria-label={`Remove d${sides}`}
+                    className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white w-5 h-5 rounded"
+                  >
+                    −
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAdd(sides)}
+                    disabled={isRolling}
+                    aria-label={`Add d${sides}`}
+                    className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded"
+                  >
+                    d{sides} ×{pool[sides]}
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-1 items-center">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={modifierText}
+                onChange={e => {
+                  const v = e.target.value
+                  if (v === '' || v === '-' || /^-?\d+$/.test(v)) setModifierText(v)
+                }}
+                disabled={isRolling}
+                aria-label="Modifier"
+                className="w-14 text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"
+              />
+              <select
+                value={visibility.scope}
+                onChange={e => setVisibility({ scope: e.target.value as RollVisibility['scope'] })}
+                disabled={isRolling}
+                aria-label="Roll visibility"
+                className="text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"
+              >
+                <option value="group">Group</option>
+                <option value="dm-only">DM-only</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={handleRoll}
+              disabled={poolTotal === 0 || isRolling}
+              className="text-xs bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-3 py-1 rounded"
+            >
+              Roll
+            </button>
+            {error && <p className="text-xs text-red-400">{error}</p>}
+          </div>
+        </DicePoolPortal>
+      )}
     </div>
   )
 }
@@ -850,7 +992,7 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
         onMentionSelect={handleMentionSelect}
         textareaRef={textareaRef}
       />
-      <RollEntryStrip
+      <DicePoolTrigger
         campaignId={campaignId}
         activeSessionId={activeSessionId}
         streamStatus={streamStatus}
