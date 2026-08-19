@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-This document details *changes* to requirements and is additive to the [`design.md`](../../design.md) document, not a replacement.
+This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-08-19-multi-dice-pool-popout/design.md) document, not a replacement.
 
 ### Requirement: ADDED Dice pop-out trigger anchored to the chat dock
 

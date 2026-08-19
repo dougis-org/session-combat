@@ -52,3 +52,36 @@ The system SHALL not require callers to use a separate d20-only helper when the 
 #### Scenario: Current consumers use the centralized operation
 - **WHEN** the combat code or any other current caller needs a d20 roll
 - **THEN** it uses the centralized `rollDie(20, count)` operation instead of a dedicated `rollD20` path
+
+### Requirement: Backend supports multi-group dice-pool rolls
+
+The system SHALL expose a backend dice-pool operation `rollDicePool(groups)` that accepts an array of `{ sides: number; count: number }` groups and returns a single flat array of `{ sides: number; value: number }` results — one entry per individual die across all groups, preserving each result's source die size and the supplied group order.
+
+#### Scenario: Single-group pool returns tagged results
+- **WHEN** a caller requests `rollDicePool([{ sides: 6, count: 2 }])`
+- **THEN** the backend returns an array of exactly two entries, each `{ sides: 6, value: <1-6> }`
+
+#### Scenario: Mixed-group pool returns results tagged by their own group's sides
+- **WHEN** a caller requests `rollDicePool([{ sides: 6, count: 2 }, { sides: 8, count: 2 }])`
+- **THEN** the backend returns an array of exactly four entries: two with `sides: 6` and a `value` between 1 and 6, and two with `sides: 8` and a `value` between 1 and 8
+- **AND** the entries appear in the same group order the groups were supplied in
+
+#### Scenario: Empty group list returns an empty array
+- **WHEN** a caller requests `rollDicePool([])`
+- **THEN** the backend returns an empty array without error
+
+### Requirement: Dice-pool rolls reuse the same secure randomness and validation as single-die rolls
+
+The system SHALL validate every group's `sides` against the same supported die sizes as `rollDie`, and SHALL use the same rejection-sampled secure random generation for each individual die. Validation covers all groups before any dice are rolled — an invalid group anywhere in the request rejects the whole call.
+
+#### Scenario: Unsupported die size in any group is rejected
+- **WHEN** a caller requests `rollDicePool([{ sides: 6, count: 1 }, { sides: 7, count: 1 }])`
+- **THEN** the backend rejects the request with a validation error and rolls no dice from any group
+
+#### Scenario: Invalid count in any group is rejected
+- **WHEN** a caller requests `rollDicePool([{ sides: 6, count: 0 }])`
+- **THEN** the backend rejects the request with a validation error
+
+#### Scenario: Each die within a pool uses unbiased secure randomness
+- **WHEN** the backend generates results for any group within a pool
+- **THEN** each face of that group's die size has an equal probability of being returned, using the same rejection-sampling approach `rollDie` uses
