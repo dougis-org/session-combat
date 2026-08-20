@@ -259,6 +259,11 @@ function ChatComposer({
 
 const DIE_SIDES = [4, 6, 8, 10, 12, 20] as const
 const EMPTY_POOL: Record<number, number> = { 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 20: 0 }
+const ROLL_VISIBILITY_SCOPES = ['group', 'dm-only'] as const
+
+function isRollVisibilityScope(value: string): value is RollVisibility['scope'] {
+  return (ROLL_VISIBILITY_SCOPES as readonly string[]).includes(value)
+}
 
 function getActiveDiceGroups(pool: Record<number, number>): { sides: number; count: number }[] {
   return DIE_SIDES.filter(sides => pool[sides] > 0).map(sides => ({ sides, count: pool[sides] }))
@@ -448,7 +453,7 @@ function DicePoolPanel({
           />
           <select
             value={dp.visibility.scope}
-            onChange={e => dp.setVisibility({ scope: e.target.value as RollVisibility['scope'] })}
+            onChange={e => { if (isRollVisibilityScope(e.target.value)) dp.setVisibility({ scope: e.target.value }) }}
             disabled={dp.isRolling}
             aria-label="Roll visibility"
             className="text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"

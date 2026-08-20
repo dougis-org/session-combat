@@ -1,4 +1,4 @@
-import { render, screen, waitFor, act } from '@testing-library/react'
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import { rollDicePool } from '@/lib/utils/dice'
@@ -203,6 +203,15 @@ describe('CampaignChat — dice pool trigger', () => {
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     expect(screen.getByRole('combobox', { name: 'Roll visibility' })).toHaveValue('group')
+  })
+
+  it('rejects an unsupported visibility value instead of applying it', async () => {
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    const select = screen.getByRole('combobox', { name: 'Roll visibility' })
+    fireEvent.change(select, { target: { value: 'not-a-real-scope' } })
+    expect(select).toHaveValue('group')
+    expect(sharedTestState.fetchSpy).not.toHaveBeenCalledWith(expect.stringContaining('/rolls'), expect.anything())
   })
 
   it('each die-size add control renders the icon matching its own die size', async () => {
