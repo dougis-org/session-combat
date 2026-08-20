@@ -237,7 +237,7 @@ it('roll item has background class that message item does not', async () => {
 })
 
 // T3.4
-it('roll item displays dice indicator emoji', async () => {
+it('roll item displays the vendored d20 icon, not the dice emoji', async () => {
   await openDock('session-1')
   act(() => {
     capturedOnEvent?.({
@@ -246,7 +246,9 @@ it('roll item displays dice indicator emoji', async () => {
       data: makeRoll(),
     })
   })
-  expect(screen.getByText('🎲')).toBeInTheDocument()
+  expect(screen.queryByText('🎲')).not.toBeInTheDocument()
+  const rollItem = screen.getByText('thegm').closest('div[class*="bg-gray-700"]')
+  expect(rollItem?.querySelector('svg')).toBeInTheDocument()
 })
 
 // T4 — RollEntryStrip (immediate-click roll UI) is superseded by the dice
