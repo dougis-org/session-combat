@@ -74,7 +74,10 @@ function dockReducer(state: DockState, action: DockAction): DockState {
     case 'PIN':         return { ...state, isPinned: true }
     case 'UNPIN':       return { ...state, isPinned: false }
     case 'TOGGLE_SIZE': return { ...state, isLarge: !state.isLarge }
-    case 'SET_HEIGHT':  return { ...state, customHeight: Math.max(150, action.payload), isLarge: false }
+    case 'SET_HEIGHT': {
+      const maxHeight = typeof window !== 'undefined' ? window.innerHeight - NAVBAR_HEIGHT : action.payload
+      return { ...state, customHeight: Math.min(Math.max(150, action.payload), Math.max(150, maxHeight)), isLarge: false }
+    }
   }
 }
 
@@ -731,8 +734,9 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
       document.removeEventListener('mouseup', dragListenersRef.current.up)
     }
     let latestHeight = startHeight
+    const maxHeight = Math.max(150, window.innerHeight - NAVBAR_HEIGHT)
     function onMove(e: MouseEvent) {
-      latestHeight = Math.max(150, startHeight - (e.clientY - startY))
+      latestHeight = Math.min(Math.max(150, startHeight - (e.clientY - startY)), maxHeight)
       // Update DOM directly — no React re-render per pixel, dispatch only on mouseup
       if (drawerRef.current) drawerRef.current.style.height = `${latestHeight}px`
     }
