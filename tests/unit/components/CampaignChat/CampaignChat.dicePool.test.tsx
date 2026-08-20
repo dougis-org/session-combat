@@ -58,6 +58,13 @@ describe('CampaignChat — dice pool trigger', () => {
     expect(screen.getByRole('button', { name: /roll|dice/i })).toBeEnabled()
   })
 
+  it('trigger displays the vendored d20 icon, not the literal text d20', async () => {
+    await openDockWithSession('session-1')
+    const trigger = screen.getByRole('button', { name: /roll|dice/i })
+    expect(trigger).not.toHaveTextContent('d20')
+    expect(trigger.querySelector('svg')).toBeInTheDocument()
+  })
+
   it('trigger is disabled when no active session', async () => {
     await openDockWithSession(null)
     expect(screen.getByRole('button', { name: /roll|dice/i })).toBeDisabled()
@@ -117,6 +124,42 @@ describe('CampaignChat — dice pool trigger', () => {
     expect(drawer.contains(rollButton)).toBe(false)
   })
 
+  it('dice panel is a DOM sibling of the drawer, both children of one flex-row wrapper, not a document.body portal', async () => {
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    const panel = screen.getByLabelText('Dice pool')
+    const drawer = screen.getByRole('complementary')
+    expect(panel.parentElement).toBe(drawer.parentElement)
+    expect(document.getElementById('dice-pool-overlay-root')).toBeNull()
+    expect(document.body.contains(panel)).toBe(true)
+    // The panel must be inside the same in-flow wrapper, not directly appended to body
+    expect(panel.parentElement).not.toBe(document.body)
+  })
+
+  it('dice panel appears before the drawer in DOM order (to its left in the flex row)', async () => {
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    const panel = screen.getByLabelText('Dice pool')
+    const drawer = screen.getByRole('complementary')
+    const parent = panel.parentElement!
+    const children = Array.from(parent.children)
+    expect(children.indexOf(panel)).toBeLessThan(children.indexOf(drawer))
+  })
+
+  it('dice panel matches the drawer height', async () => {
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    const panel = screen.getByLabelText('Dice pool')
+    const drawer = screen.getByRole('complementary')
+    expect((panel as HTMLElement).style.height).toBe((drawer as HTMLElement).style.height)
+  })
+
+  it('dice panel is absent from the DOM when closed, and no overlay-root node is created', async () => {
+    await openDockWithSession()
+    expect(screen.queryByLabelText('Dice pool')).not.toBeInTheDocument()
+    expect(document.getElementById('dice-pool-overlay-root')).toBeNull()
+  })
+
   it('adding a d6 twice and a d8 twice sets staged counts and issues zero network requests', async () => {
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
@@ -124,9 +167,9 @@ describe('CampaignChat — dice pool trigger', () => {
     await user.click(screen.getByRole('button', { name: 'Add d6' }))
     await user.click(screen.getByRole('button', { name: 'Add d8' }))
     await user.click(screen.getByRole('button', { name: 'Add d8' }))
-    expect(screen.getByRole('button', { name: 'Add d6' })).toHaveTextContent('d6 ×2')
-    expect(screen.getByRole('button', { name: 'Add d8' })).toHaveTextContent('d8 ×2')
-    expect(screen.getByRole('button', { name: 'Add d4' })).toHaveTextContent('d4 ×0')
+    expect(screen.getByRole('button', { name: 'Add d6' })).toHaveTextContent('×2')
+    expect(screen.getByRole('button', { name: 'Add d8' })).toHaveTextContent('×2')
+    expect(screen.getByRole('button', { name: 'Add d4' })).toHaveTextContent('×0')
     expect(sharedTestState.fetchSpy).not.toHaveBeenCalledWith(expect.stringContaining('/rolls'), expect.anything())
   })
 
@@ -136,14 +179,14 @@ describe('CampaignChat — dice pool trigger', () => {
     await user.click(screen.getByRole('button', { name: 'Add d6' }))
     await user.click(screen.getByRole('button', { name: 'Add d6' }))
     await user.click(screen.getByRole('button', { name: 'Remove d6' }))
-    expect(screen.getByRole('button', { name: 'Add d6' })).toHaveTextContent('d6 ×1')
+    expect(screen.getByRole('button', { name: 'Add d6' })).toHaveTextContent('×1')
   })
 
   it('staged count cannot go below zero', async () => {
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Remove d10' }))
-    expect(screen.getByRole('button', { name: 'Add d10' })).toHaveTextContent('d10 ×0')
+    expect(screen.getByRole('button', { name: 'Add d10' })).toHaveTextContent('×0')
   })
 
   it('modifier is editable independent of staged dice', async () => {
@@ -153,13 +196,22 @@ describe('CampaignChat — dice pool trigger', () => {
     await user.clear(modifierInput)
     await user.type(modifierInput, '-2')
     expect(modifierInput).toHaveValue('-2')
-    expect(screen.getByRole('button', { name: 'Add d6' })).toHaveTextContent('d6 ×0')
+    expect(screen.getByRole('button', { name: 'Add d6' })).toHaveTextContent('×0')
   })
 
   it('visibility selector defaults to group', async () => {
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     expect(screen.getByRole('combobox', { name: 'Roll visibility' })).toHaveValue('group')
+  })
+
+  it('each die-size add control renders the icon matching its own die size', async () => {
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    for (const sides of [4, 6, 8, 10, 12, 20]) {
+      const btn = screen.getByRole('button', { name: `Add d${sides}` })
+      expect(btn.querySelector('svg')).toBeInTheDocument()
+    }
   })
 })
 
@@ -314,7 +366,7 @@ describe('CampaignChat — dice pool commit', () => {
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
     await user.click(screen.getByRole('button', { name: 'Roll' }))
 
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Add d20' })).toHaveTextContent('d20 ×0'))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Add d20' })).toHaveTextContent('×0'))
     expect(screen.getByRole('button', { name: 'Roll' })).toBeDisabled()
   })
 
@@ -338,7 +390,7 @@ describe('CampaignChat — dice pool commit', () => {
     await user.click(screen.getByRole('button', { name: 'Roll' }))
 
     await waitFor(() => expect(screen.getByText('No active session')).toBeInTheDocument())
-    expect(screen.getByRole('button', { name: 'Add d20' })).toHaveTextContent('d20 ×1')
+    expect(screen.getByRole('button', { name: 'Add d20' })).toHaveTextContent('×1')
     expect(modifierInput).toHaveValue('5')
     expect(screen.getByRole('combobox', { name: 'Roll visibility' })).toHaveValue('dm-only')
   })
@@ -393,7 +445,7 @@ describe('CampaignChat — dice pool commit', () => {
     await user.click(screen.getByRole('button', { name: 'Roll' }))
 
     await waitFor(() => expect(screen.getByText('Roll failed, try again')).toBeInTheDocument())
-    expect(screen.getByRole('button', { name: 'Add d20' })).toHaveTextContent('d20 ×1')
+    expect(screen.getByRole('button', { name: 'Add d20' })).toHaveTextContent('×1')
   })
 
   it('a thrown rollDicePool error is caught and shows inline error instead of crashing', async () => {
@@ -442,5 +494,119 @@ describe('CampaignChat — dice pool commit', () => {
       const body = JSON.parse((call![1] as RequestInit).body as string)
       expect(body.visibility).toEqual({ scope: 'dm-only' })
     })
+  })
+})
+
+describe('CampaignChat — feed auto-scroll on own roll', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    sharedTestState.capturedOnEvent = null
+    setupFetchMock()
+    document.getElementById('dice-pool-overlay-root')?.remove()
+  })
+
+  afterEach(() => {
+    restoreFetch()
+  })
+
+  function getFeedContainer(): HTMLElement {
+    const el = document.querySelector('.flex-1.overflow-y-auto')
+    if (!el) throw new Error('feed container not found')
+    return el as HTMLElement
+  }
+
+  it('committing a roll scrolls the feed to reveal it', async () => {
+    mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
+    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
+      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
+      if (url.includes('/rolls') && options?.method === 'POST') {
+        return Promise.resolve({
+          ok: true, status: 201,
+          json: () => Promise.resolve({
+            id: 'roll-scroll-own', campaignId: CAMPAIGN_ID, rollerName: 'tester',
+            formula: '1d20', rolls: [10], total: 10,
+            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
+          }),
+        })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
+    })
+
+    const { user } = await openDockWithSession()
+    const scrollSpy = jest.fn()
+    getFeedContainer().scrollTo = scrollSpy
+
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: 'Add d20' }))
+    await user.click(screen.getByRole('button', { name: 'Roll' }))
+
+    await waitFor(() => {
+      expect(scrollSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }))
+    })
+  })
+
+  it('a roll from another player arriving via SSE does not trigger auto-scroll', async () => {
+    const { user } = await openDockWithSession()
+    const scrollSpy = jest.fn()
+    getFeedContainer().scrollTo = scrollSpy
+
+    act(() => {
+      sharedTestState.capturedOnEvent?.({
+        type: 'roll',
+        campaignId: CAMPAIGN_ID,
+        data: {
+          id: 'roll-other-player', campaignId: CAMPAIGN_ID, sessionId: 'session-1',
+          rollerId: 'user-2', rollerName: 'other', formula: '1d20', rolls: [7], total: 7,
+          visibility: { scope: 'group' }, createdAt: new Date(),
+        },
+      })
+    })
+
+    await waitFor(() => expect(screen.getByText(/1d20/)).toBeInTheDocument())
+    expect(scrollSpy).not.toHaveBeenCalled()
+  })
+
+  it('auto-scroll does not reorder the feed — the new roll stays last', async () => {
+    mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
+    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
+      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
+      if (url.includes('/rolls') && options?.method === 'POST') {
+        return Promise.resolve({
+          ok: true, status: 201,
+          json: () => Promise.resolve({
+            id: 'roll-scroll-order', campaignId: CAMPAIGN_ID, rollerName: 'tester',
+            formula: '1d20', rolls: [10], total: 10,
+            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
+          }),
+        })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
+    })
+
+    const { user } = await openDockWithSession()
+    getFeedContainer().scrollTo = jest.fn()
+
+    act(() => {
+      sharedTestState.capturedOnEvent?.({
+        type: 'message',
+        campaignId: CAMPAIGN_ID,
+        data: {
+          id: 'msg-before', campaignId: CAMPAIGN_ID, senderId: 'user-2', senderName: 'Alice',
+          text: 'earlier message', visibility: { scope: 'group' }, createdAt: new Date(),
+        },
+      })
+    })
+
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: 'Add d20' }))
+    await user.click(screen.getByRole('button', { name: 'Roll' }))
+
+    await waitFor(() => expect(screen.getByText(/1d20/)).toBeInTheDocument())
+
+    const feedItems = getFeedContainer().querySelectorAll(':scope > *')
+    const texts = Array.from(feedItems).map(el => el.textContent ?? '')
+    const lastIdx = texts.length - 1
+    expect(texts[lastIdx]).toContain('1d20')
+    expect(texts.findIndex(t => t.includes('earlier message'))).toBeLessThan(lastIdx)
   })
 })

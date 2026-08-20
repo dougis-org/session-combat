@@ -1,17 +1,18 @@
 'use client'
 
 import { useReducer, useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import { useCampaignStream } from '@/lib/hooks/useCampaignStream'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { rollDicePool } from '@/lib/utils/dice'
+import { DIE_ICONS, DiceD20Icon } from '@/lib/components/icons/dice'
 import { SceneComposer } from '@/lib/components/SceneComposer'
 import { SceneFeedItem } from '@/lib/components/SceneFeedItem'
 import type { CampaignMessage, CampaignRoll, CampaignStreamEvent, MessageVisibility, RollVisibility } from '@/lib/types'
 
-const PIN_KEY = 'campaign-chat-pin'
-const CHAT_SIZE_KEY = 'campaign-chat-size'
+// localStorage key names (not secrets) for the chat dock's persisted UI state
+const PIN_KEY = 'campaign-chat-pin' // nosemgrep
+const CHAT_SIZE_KEY = 'campaign-chat-size' // nosemgrep
 // Navbar height baked into full-height calculation; update if navbar changes
 const NAVBAR_HEIGHT = 60
 
@@ -97,7 +98,7 @@ function RollFeedItem({ roll }: { roll: CampaignRoll }) {
   return (
     <div className="text-sm text-gray-200 bg-gray-700/50 rounded px-2 py-1.5">
       <div className="flex items-center gap-1 flex-wrap">
-        <span aria-hidden="true">🎲</span>
+        <DiceD20Icon width={14} height={14} aria-hidden="true" />
         <span className="font-semibold text-white">{roll.rollerName}</span>
         <span className="text-gray-500 text-xs">{ts}</span>
         {dmMarker && <span className="ml-1 text-xs text-yellow-400">{dmMarker}</span>}
@@ -255,22 +256,6 @@ function ChatComposer({
 
 const DIE_SIDES = [4, 6, 8, 10, 12, 20] as const
 const EMPTY_POOL: Record<number, number> = { 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 20: 0 }
-const DICE_OVERLAY_ROOT_ID = 'dice-pool-overlay-root'
-
-function isBrowserEnv(): boolean {
-  return typeof document !== 'undefined'
-}
-
-function getDiceOverlayRoot(): HTMLElement | null {
-  if (!isBrowserEnv()) return null
-  let root = document.getElementById(DICE_OVERLAY_ROOT_ID)
-  if (!root) {
-    root = document.createElement('div')
-    root.id = DICE_OVERLAY_ROOT_ID
-    document.body.appendChild(root)
-  }
-  return root
-}
 
 function getActiveDiceGroups(pool: Record<number, number>): { sides: number; count: number }[] {
   return DIE_SIDES.filter(sides => pool[sides] > 0).map(sides => ({ sides, count: pool[sides] }))
@@ -282,54 +267,16 @@ function buildPoolFormula(groups: { sides: number; count: number }[], modifier: 
   return formula
 }
 
-interface DicePoolPortalProps {
-  triggerRef: React.RefObject<HTMLElement | null>
-  popoutRef: React.RefObject<HTMLDivElement | null>
-  children: React.ReactNode
-}
-
-function DicePoolPortal({ triggerRef, popoutRef, children }: DicePoolPortalProps) {
-  const [position, setPosition] = useState<{ bottom: number; left: number } | null>(null)
-  const [root] = useState<HTMLElement | null>(() => getDiceOverlayRoot())
-
-  useEffect(() => {
-    function updatePosition() {
-      const rect = triggerRef.current?.getBoundingClientRect()
-      if (!rect) return
-      setPosition({ bottom: window.innerHeight - rect.top + 8, left: rect.left })
-    }
-    updatePosition()
-    window.addEventListener('resize', updatePosition)
-    window.addEventListener('scroll', updatePosition, true)
-    return () => {
-      window.removeEventListener('resize', updatePosition)
-      window.removeEventListener('scroll', updatePosition, true)
-    }
-  }, [triggerRef])
-
-  if (!root || !position) return null
-
-  return createPortal(
-    <div
-      ref={popoutRef}
-      aria-label="Dice pool"
-      className="fixed z-50 bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-3 w-64"
-      style={{ bottom: position.bottom, left: position.left }}
-    >
-      {children}
-    </div>,
-    root
-  )
-}
-
-interface DicePoolTriggerProps {
+interface UseDicePoolArgs {
   campaignId: string
   activeSessionId: string | null
   streamStatus: 'connecting' | 'open' | 'error'
   onRollPosted: (roll: CampaignRoll) => void
+  triggerRef: React.RefObject<HTMLButtonElement | null>
+  panelRef: React.RefObject<HTMLDivElement | null>
 }
 
-function DicePoolTrigger({ campaignId, activeSessionId, streamStatus, onRollPosted }: DicePoolTriggerProps) {
+function useDicePool({ campaignId, activeSessionId, streamStatus, onRollPosted, triggerRef, panelRef }: UseDicePoolArgs) {
   const [isOpen, setIsOpen] = useState(false)
   const [pool, setPool] = useState<Record<number, number>>(EMPTY_POOL)
   const [modifierText, setModifierText] = useState('0')
@@ -337,8 +284,6 @@ function DicePoolTrigger({ campaignId, activeSessionId, streamStatus, onRollPost
   const [visibility, setVisibility] = useState<RollVisibility>({ scope: 'group' })
   const [isRolling, setIsRolling] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const popoutRef = useRef<HTMLDivElement>(null)
 
   const isTriggerDisabled = activeSessionId !== null ? streamStatus !== 'open' : true
   const poolTotal = DIE_SIDES.reduce((sum, sides) => sum + pool[sides], 0)
@@ -351,7 +296,7 @@ function DicePoolTrigger({ campaignId, activeSessionId, streamStatus, onRollPost
     if (!isOpen) return
     function handlePointerDown(e: MouseEvent) {
       const target = e.target as Node
-      if (popoutRef.current?.contains(target)) return
+      if (panelRef.current?.contains(target)) return
       if (triggerRef.current?.contains(target)) return
       setIsOpen(false)
     }
@@ -364,7 +309,7 @@ function DicePoolTrigger({ campaignId, activeSessionId, streamStatus, onRollPost
       document.removeEventListener('mousedown', handlePointerDown)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isOpen])
+  }, [isOpen, panelRef, triggerRef])
 
   function handleAdd(sides: number) {
     setPool(prev => ({ ...prev, [sides]: prev[sides] + 1 }))
@@ -405,6 +350,22 @@ function DicePoolTrigger({ campaignId, activeSessionId, streamStatus, onRollPost
     }
   }
 
+  return {
+    isOpen, setIsOpen, pool, modifierText, setModifierText, visibility, setVisibility,
+    isRolling, error, isTriggerDisabled, poolTotal,
+    handleAdd, handleRemove, handleRoll,
+  }
+}
+
+type DicePool = ReturnType<typeof useDicePool>
+
+function DiceTriggerButton({
+  dp, activeSessionId, triggerRef,
+}: {
+  dp: DicePool
+  activeSessionId: string | null
+  triggerRef: React.RefObject<HTMLButtonElement | null>
+}) {
   return (
     <div className="border-t border-gray-700 p-2 flex-shrink-0 flex items-center justify-between">
       {activeSessionId === null && (
@@ -413,77 +374,96 @@ function DicePoolTrigger({ campaignId, activeSessionId, streamStatus, onRollPost
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setIsOpen(o => !o)}
-        disabled={isTriggerDisabled}
+        onClick={() => dp.setIsOpen(o => !o)}
+        disabled={dp.isTriggerDisabled}
         aria-label="Roll dice"
-        aria-expanded={isOpen}
+        aria-expanded={dp.isOpen}
         className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-3 py-1.5 rounded-full flex items-center gap-1"
       >
-        d20
+        <DiceD20Icon width={16} height={16} aria-hidden="true" />
       </button>
-      {isOpen && (
-        <DicePoolPortal triggerRef={triggerRef} popoutRef={popoutRef}>
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap gap-1 items-center">
-              {DIE_SIDES.map(sides => (
-                <div key={sides} className="flex items-center gap-0.5">
-                  <button
-                    type="button"
-                    onClick={() => handleRemove(sides)}
-                    disabled={isRolling}
-                    aria-label={`Remove d${sides}`}
-                    className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white w-5 h-5 rounded"
-                  >
-                    −
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAdd(sides)}
-                    disabled={isRolling}
-                    aria-label={`Add d${sides}`}
-                    className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded"
-                  >
-                    d{sides} ×{pool[sides]}
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-1 items-center">
-              <input
-                type="text"
-                inputMode="numeric"
-                value={modifierText}
-                onChange={e => {
-                  const v = e.target.value
-                  if (v === '' || v === '-' || /^-?\d+$/.test(v)) setModifierText(v)
-                }}
-                disabled={isRolling}
-                aria-label="Modifier"
-                className="w-14 text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"
-              />
-              <select
-                value={visibility.scope}
-                onChange={e => setVisibility({ scope: e.target.value as RollVisibility['scope'] })}
-                disabled={isRolling}
-                aria-label="Roll visibility"
-                className="text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"
-              >
-                <option value="group">Group</option>
-                <option value="dm-only">DM-only</option>
-              </select>
-            </div>
-            <button
-              type="button"
-              onClick={handleRoll}
-              disabled={poolTotal === 0 || isRolling}
-              className="text-xs bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-3 py-1 rounded"
-            >
-              Roll
-            </button>
-            {error && <p className="text-xs text-red-400">{error}</p>}
-          </div>
-        </DicePoolPortal>
-      )}
+    </div>
+  )
+}
+
+function DicePoolPanel({
+  dp, heightPx, panelRef,
+}: {
+  dp: DicePool
+  heightPx: string
+  panelRef: React.RefObject<HTMLDivElement | null>
+}) {
+  if (!dp.isOpen) return null
+  return (
+    <div
+      ref={panelRef}
+      aria-label="Dice pool"
+      className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-3 w-64 flex-shrink-0 overflow-y-auto"
+      style={{ height: heightPx }}
+    >
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap gap-1 items-center">
+          {DIE_SIDES.map(sides => {
+            const Icon = DIE_ICONS[sides]
+            return (
+              <div key={sides} className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => dp.handleRemove(sides)}
+                  disabled={dp.isRolling}
+                  aria-label={`Remove d${sides}`}
+                  className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white w-5 h-5 rounded"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  onClick={() => dp.handleAdd(sides)}
+                  disabled={dp.isRolling}
+                  aria-label={`Add d${sides}`}
+                  className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded flex items-center gap-1"
+                >
+                  <Icon width={14} height={14} aria-hidden="true" />
+                  ×{dp.pool[sides]}
+                </button>
+              </div>
+            )
+          })}
+        </div>
+        <div className="flex gap-1 items-center">
+          <input
+            type="text"
+            inputMode="numeric"
+            value={dp.modifierText}
+            onChange={e => {
+              const v = e.target.value
+              if (v === '' || v === '-' || /^-?\d+$/.test(v)) dp.setModifierText(v)
+            }}
+            disabled={dp.isRolling}
+            aria-label="Modifier"
+            className="w-14 text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"
+          />
+          <select
+            value={dp.visibility.scope}
+            onChange={e => dp.setVisibility({ scope: e.target.value as RollVisibility['scope'] })}
+            disabled={dp.isRolling}
+            aria-label="Roll visibility"
+            className="text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5 disabled:opacity-50"
+          >
+            <option value="group">Group</option>
+            <option value="dm-only">DM-only</option>
+          </select>
+        </div>
+        <button
+          type="button"
+          onClick={dp.handleRoll}
+          disabled={dp.poolTotal === 0 || dp.isRolling}
+          className="text-xs bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-3 py-1 rounded"
+        >
+          Roll
+        </button>
+        {dp.error && <p className="text-xs text-red-400">{dp.error}</p>}
+      </div>
     </div>
   )
 }
@@ -530,9 +510,12 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   const isMounted = useRef(false)
   const dragListenersRef = useRef<{ move: (e: MouseEvent) => void; up: (e: MouseEvent) => void } | null>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
+  const diceTriggerRef = useRef<HTMLButtonElement>(null)
+  const dicePanelRef = useRef<HTMLDivElement>(null)
 
   const [feed, setFeed] = useState<FeedItem[]>([])
   const seenIds = useRef<Set<string>>(new Set())
+  const pendingScrollRef = useRef(false)
 
   const [members, setMembers] = useState<EnrichedMember[]>([])
 
@@ -582,6 +565,11 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   }
 
   const { status: streamStatus } = useCampaignStream(campaignId, onStreamEvent)
+
+  const dicePool = useDicePool({
+    campaignId, activeSessionId, streamStatus, onRollPosted: handleRollPosted,
+    triggerRef: diceTriggerRef, panelRef: dicePanelRef,
+  })
 
   // ── Init: pin state + last-open timestamp + persisted size ──
   useEffect(() => {
@@ -725,6 +713,15 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
     return () => container.removeEventListener('scroll', handleScroll)
   }, [isExpanded, campaignId])
 
+  // ── Auto-scroll to a roll the current user just posted ──
+  useEffect(() => {
+    if (!pendingScrollRef.current) return
+    pendingScrollRef.current = false
+    const container = feedRef.current
+    if (!container) return
+    container.scrollTo?.({ top: container.scrollHeight, behavior: 'smooth' })
+  }, [feed])
+
   // ── Handlers ──
 
   function handleDragStart(startY: number, startHeight: number) {
@@ -858,6 +855,7 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   function handleRollPosted(roll: CampaignRoll) {
     if (seenIds.current.has(roll.id)) return
     seenIds.current.add(roll.id)
+    pendingScrollRef.current = true
     setFeed(prev => [...prev, { kind: 'roll', data: roll }])
   }
 
@@ -895,109 +893,110 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   const drawerStyle = { height: resolvedHeight }
   const drawerClass = isLarge
     ? 'h-full w-80 flex flex-col bg-gray-800 border-l border-gray-700'
-    : 'fixed bottom-0 right-0 z-40 w-80 flex flex-col bg-gray-800 border-l border-t border-gray-700 rounded-tl-lg'
+    : 'w-80 flex flex-col bg-gray-800 border-l border-t border-gray-700 rounded-tl-lg'
+  const rowWrapperClass = isLarge
+    ? 'h-full flex flex-row items-stretch'
+    : 'fixed bottom-0 right-0 z-40 flex flex-row items-end'
 
   return (
-    <div
-      ref={drawerRef}
-      role="complementary"
-      aria-label="Campaign Chat"
-      className={drawerClass}
-      style={drawerStyle}
-    >
-      {!isLarge && (
-        <DragHandle
-          onDragStart={handleDragStart}
-          currentHeightPx={customHeight ?? Math.round(window.innerHeight * 0.33)}
-        />
-      )}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700 flex-shrink-0">
-        <span className="text-sm font-semibold text-white">Campaign Chat</span>
-        <div className="flex items-center gap-2">
-          <button
-            aria-pressed={isPinned}
-            aria-label={isPinned ? 'Unpin chat' : 'Pin chat open'}
-            onClick={handlePinToggle}
-            className="text-gray-400 hover:text-white"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path d="M11.5 3a1.5 1.5 0 00-3 0v3.586L6.293 8.793A1 1 0 006 9.5v1a1 1 0 001 1h2.5v4.5a.5.5 0 001 0v-4.5H13a1 1 0 001-1v-1a1 1 0 00-.293-.707L11.5 6.586V3z" />
-            </svg>
-          </button>
-          <button
-            aria-label={isLarge ? 'Collapse to compact view' : 'Expand to full height'}
-            onClick={handleToggleSize}
-            className="text-gray-400 hover:text-white"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              {isLarge ? (
-                <>
-                  <path d="M5.5 1a.5.5 0 010 1H2.707l3.147 3.146a.5.5 0 01-.708.708L2 2.707V5.5a.5.5 0 01-1 0V1.5A.5.5 0 011.5 1H5.5z" />
-                  <path d="M10.5 15a.5.5 0 010-1h2.793l-3.147-3.146a.5.5 0 01.708-.708L14 13.293V10.5a.5.5 0 011 0v4a.5.5 0 01-.5.5H10.5z" />
-                </>
-              ) : (
-                <>
-                  <path d="M1.5 1H5.5a.5.5 0 010 1H2.707l3.147 3.146a.5.5 0 01-.708.708L2 2.707V5.5a.5.5 0 01-1 0V1.5A.5.5 0 011.5 1z" />
-                  <path d="M14.5 15H10.5a.5.5 0 010-1h2.793l-3.147-3.146a.5.5 0 01.708-.708L14 13.293V10.5a.5.5 0 011 0v4a.5.5 0 01-.5.5z" />
-                </>
-              )}
-            </svg>
-          </button>
-          <button
-            aria-label="Collapse chat"
-            onClick={handleCollapse}
-            className="text-gray-400 hover:text-white text-lg leading-none"
-          >
-            ×
-          </button>
+    <div className={rowWrapperClass}>
+      <DicePoolPanel dp={dicePool} heightPx={resolvedHeight} panelRef={dicePanelRef} />
+      <div
+        ref={drawerRef}
+        role="complementary"
+        aria-label="Campaign Chat"
+        className={drawerClass}
+        style={drawerStyle}
+      >
+        {!isLarge && (
+          <DragHandle
+            onDragStart={handleDragStart}
+            currentHeightPx={customHeight ?? Math.round(window.innerHeight * 0.33)}
+          />
+        )}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700 flex-shrink-0">
+          <span className="text-sm font-semibold text-white">Campaign Chat</span>
+          <div className="flex items-center gap-2">
+            <button
+              aria-pressed={isPinned}
+              aria-label={isPinned ? 'Unpin chat' : 'Pin chat open'}
+              onClick={handlePinToggle}
+              className="text-gray-400 hover:text-white"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M11.5 3a1.5 1.5 0 00-3 0v3.586L6.293 8.793A1 1 0 006 9.5v1a1 1 0 001 1h2.5v4.5a.5.5 0 001 0v-4.5H13a1 1 0 001-1v-1a1 1 0 00-.293-.707L11.5 6.586V3z" />
+              </svg>
+            </button>
+            <button
+              aria-label={isLarge ? 'Collapse to compact view' : 'Expand to full height'}
+              onClick={handleToggleSize}
+              className="text-gray-400 hover:text-white"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                {isLarge ? (
+                  <>
+                    <path d="M5.5 1a.5.5 0 010 1H2.707l3.147 3.146a.5.5 0 01-.708.708L2 2.707V5.5a.5.5 0 01-1 0V1.5A.5.5 0 011.5 1H5.5z" />
+                    <path d="M10.5 15a.5.5 0 010-1h2.793l-3.147-3.146a.5.5 0 01.708-.708L14 13.293V10.5a.5.5 0 011 0v4a.5.5 0 01-.5.5H10.5z" />
+                  </>
+                ) : (
+                  <>
+                    <path d="M1.5 1H5.5a.5.5 0 010 1H2.707l3.147 3.146a.5.5 0 01-.708.708L2 2.707V5.5a.5.5 0 01-1 0V1.5A.5.5 0 011.5 1z" />
+                    <path d="M14.5 15H10.5a.5.5 0 010-1h2.793l-3.147-3.146a.5.5 0 01.708-.708L14 13.293V10.5a.5.5 0 011 0v4a.5.5 0 01-.5.5z" />
+                  </>
+                )}
+              </svg>
+            </button>
+            <button
+              aria-label="Collapse chat"
+              onClick={handleCollapse}
+              className="text-gray-400 hover:text-white text-lg leading-none"
+            >
+              ×
+            </button>
+          </div>
         </div>
-      </div>
-      <ChatFeed
-        feed={feed}
-        isLoadingHistory={isLoadingHistory}
-        members={members}
-        feedRef={feedRef}
-        campaignId={campaignId}
-      />
-      {isDM && !showSceneComposer && (
-        <div className="border-t border-gray-700 px-3 py-2 flex-shrink-0">
-          <button
-            type="button"
-            onClick={() => setShowSceneComposer(true)}
-            className="text-xs bg-yellow-700 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-          >
-            Push Scene
-          </button>
-        </div>
-      )}
-      {isDM && showSceneComposer && (
-        <SceneComposer
+        <ChatFeed
+          feed={feed}
+          isLoadingHistory={isLoadingHistory}
+          members={members}
+          feedRef={feedRef}
           campaignId={campaignId}
-          onSuccess={handleSceneSuccess}
-          onCancel={() => setShowSceneComposer(false)}
         />
-      )}
-      <ChatComposer
-        composerText={composerText}
-        onTextChange={handleTextChange}
-        onKeyDown={handleComposerKeyDown}
-        visibility={visibility}
-        onVisibilityChange={handleVisibilityChange}
-        isSending={isSending}
-        streamStatus={streamStatus}
-        members={members}
-        onSend={handleSend}
-        onBlur={handleMentionBlur}
-        mentionResults={mentionResults}
-        onMentionSelect={handleMentionSelect}
-        textareaRef={textareaRef}
-      />
-      <DicePoolTrigger
-        campaignId={campaignId}
-        activeSessionId={activeSessionId}
-        streamStatus={streamStatus}
-        onRollPosted={handleRollPosted}
-      />
+        {isDM && !showSceneComposer && (
+          <div className="border-t border-gray-700 px-3 py-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowSceneComposer(true)}
+              className="text-xs bg-yellow-700 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+            >
+              Push Scene
+            </button>
+          </div>
+        )}
+        {isDM && showSceneComposer && (
+          <SceneComposer
+            campaignId={campaignId}
+            onSuccess={handleSceneSuccess}
+            onCancel={() => setShowSceneComposer(false)}
+          />
+        )}
+        <ChatComposer
+          composerText={composerText}
+          onTextChange={handleTextChange}
+          onKeyDown={handleComposerKeyDown}
+          visibility={visibility}
+          onVisibilityChange={handleVisibilityChange}
+          isSending={isSending}
+          streamStatus={streamStatus}
+          members={members}
+          onSend={handleSend}
+          onBlur={handleMentionBlur}
+          mentionResults={mentionResults}
+          onMentionSelect={handleMentionSelect}
+          textareaRef={textareaRef}
+        />
+        <DiceTriggerButton dp={dicePool} activeSessionId={activeSessionId} triggerRef={diceTriggerRef} />
+      </div>
     </div>
   )
 }
