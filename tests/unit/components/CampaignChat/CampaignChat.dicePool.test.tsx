@@ -764,6 +764,59 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     await waitFor(() => expect(scrollSpy).toHaveBeenCalledTimes(1))
   })
 
+  it('still force-scrolls the roller to their own roll when the SSE echo wins the race while they had scrolled up', async () => {
+    mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
+    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
+      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
+      if (url.includes('/rolls') && options?.method === 'POST') {
+        return Promise.resolve({
+          ok: true, status: 201,
+          json: () => Promise.resolve({
+            id: 'roll-race-own-sse-wins', campaignId: CAMPAIGN_ID, rollerName: 'tester',
+            formula: '1d20', rolls: [10], total: 10,
+            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
+          }),
+        })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
+    })
+
+    const { user } = await openDockWithSession()
+    const container = getFeedContainer()
+    const scrollSpy = jest.fn()
+    container.scrollTo = scrollSpy
+    // The roller had scrolled up to read history before rolling.
+    Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true })
+    Object.defineProperty(container, 'clientHeight', { value: 300, configurable: true })
+    Object.defineProperty(container, 'scrollTop', { value: 0, configurable: true })
+
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: 'Add d20' }))
+
+    // The SSE echo of the roller's own roll wins the race and is processed
+    // before the POST response resolves, so handleRollPosted's seenIds
+    // guard will short-circuit — the SSE path must still force-scroll
+    // because it recognizes this as the local user's own roll.
+    act(() => {
+      sharedTestState.capturedOnEvent?.({
+        type: 'roll',
+        campaignId: CAMPAIGN_ID,
+        data: {
+          id: 'roll-race-own-sse-wins', campaignId: CAMPAIGN_ID, sessionId: 'session-1',
+          rollerId: 'user-1', rollerName: 'tester', formula: '1d20', rolls: [10], total: 10,
+          visibility: { scope: 'group' }, createdAt: new Date(),
+        },
+      })
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Roll' }))
+
+    await waitFor(() => expect(screen.getByText(/1d20/)).toBeInTheDocument())
+    await waitFor(() => {
+      expect(scrollSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }))
+    })
+  })
+
   it('a new chat message does not trigger auto-scroll', async () => {
     await openDockWithSession()
     const scrollSpy = jest.fn()

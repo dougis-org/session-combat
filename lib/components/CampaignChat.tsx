@@ -586,7 +586,12 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
       if (seenIds.current.has(roll.id)) return
       seenIds.current.add(roll.id)
       setFeed(prev => [...prev, { kind: 'roll', data: roll }])
-      scrollToBottom()
+      // If this is the local user's own roll winning the SSE/POST race
+      // (echoed back before the POST response resolves), force-scroll it
+      // the same as handleRollPosted would — otherwise handleRollPosted's
+      // seenIds guard short-circuits before it ever runs, and a roller
+      // who'd scrolled up would silently miss their own roll.
+      scrollToBottom(roll.rollerId === user?.userId)
     } else if (e.type === 'session') {
       onSessionChange?.(e.data.activeSessionId)
     }
