@@ -552,18 +552,22 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
     : []
 
   function scrollToBottom(force = false) {
+    // Measure proximity to the bottom now, before the pending feed update
+    // commits — measuring inside the rAF below would include the height of
+    // the roll card that's about to be appended, making every remote roll
+    // look "far away" even when the user was already at the bottom.
+    const container = feedRef.current
+    const wasNearBottom = container
+      ? container.scrollHeight - container.scrollTop - container.clientHeight <= 100
+      : true
     requestAnimationFrame(() => {
-      const container = feedRef.current
-      if (!container) return
-      if (!force) {
-        // Don't yank a user who has scrolled up to read history (or is
-        // sitting at scrollTop 0 to trigger the older-page load below)
-        // down to the bottom just because a roll from another player came in.
-        const distanceFromBottom =
-          container.scrollHeight - container.scrollTop - container.clientHeight
-        if (distanceFromBottom > 100) return
-      }
-      container.scrollTo?.({ top: container.scrollHeight, behavior: 'smooth' })
+      const el = feedRef.current
+      if (!el) return
+      // Don't yank a user who has scrolled up to read history (or is
+      // sitting at scrollTop 0 to trigger the older-page load below)
+      // down to the bottom just because a roll from another player came in.
+      if (!force && !wasNearBottom) return
+      el.scrollTo?.({ top: el.scrollHeight, behavior: 'smooth' })
     })
   }
 
