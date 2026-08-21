@@ -277,9 +277,9 @@ The system SHALL render the dice panel (staging pool, modifier, visibility selec
 
 ---
 
-### Requirement: MODIFIED Feed auto-scrolls on a new dice roll, for any user
+### Requirement: MODIFIED Feed auto-scrolls on a new dice roll, gated by bottom proximity for remote rolls
 
-The system SHALL scroll the chat feed so a newly appended dice roll is visible immediately after it is appended, regardless of whether the roll was committed by the current user or arrived via the SSE stream from another player, and regardless of which code path (local POST-response callback or SSE stream event) is the one that appends it to the feed. Auto-scroll SHALL fire exactly once per roll. The feed's item order is unaffected. Auto-scroll does NOT apply to plain chat messages (unchanged from today: messages never auto-scroll).
+The system SHALL scroll the chat feed so the current user's own committed roll is always visible immediately after it is appended, regardless of whether the local POST-response callback or the SSE echo of that same roll is the code path that appends it to the feed. For a roll committed by a different user, the system SHALL only auto-scroll if the feed was already within approximately 100px of the bottom immediately before the roll was appended — a user who has scrolled up to read history (or is at the top triggering an older-page load) is NOT auto-scrolled by another player's roll. Auto-scroll SHALL fire at most once per roll. The feed's item order is unaffected. Auto-scroll does NOT apply to plain chat messages (unchanged from today: messages never auto-scroll).
 
 #### Scenario: Committing a roll scrolls the feed to show it
 
@@ -287,16 +287,28 @@ The system SHALL scroll the chat feed so a newly appended dice roll is visible i
 - **When** the user clicks "Roll" and the commit succeeds (POST returns 201)
 - **Then** the feed container's scroll position moves so the newly-appended roll item is visible, without requiring the user to scroll manually
 
-#### Scenario: A roll from another player also triggers auto-scroll
+#### Scenario: The roller is scrolled to their own roll even if they had scrolled away from the bottom
 
-- **Given** the feed is scrolled such that the bottom is not visible
+- **Given** the feed is scrolled such that the bottom is not visible, and the current user has just committed a roll
+- **When** the commit succeeds and the roll is appended to the feed
+- **Then** the feed container's scroll position moves so the roll is visible, regardless of how far from the bottom the user had scrolled
+
+#### Scenario: A roll from another player triggers auto-scroll when the user is already near the bottom
+
+- **Given** the feed's scroll position is within 100px of the bottom
 - **When** an SSE `roll` event for a roll posted by a different user arrives and is appended to the feed
 - **Then** the feed container's scroll position moves so the newly-appended roll item is visible
+
+#### Scenario: A roll from another player does not yank the feed when the user has scrolled away to read history
+
+- **Given** the feed's scroll position is more than 100px from the bottom (e.g. the user scrolled up to read earlier messages, or is at the top to trigger the older-page load)
+- **When** an SSE `roll` event for a roll posted by a different user arrives and is appended to the feed
+- **Then** the feed container's scroll position does NOT change
 
 #### Scenario: The current user's own roll scrolls the feed even if the SSE echo of it arrives before the POST response
 
 - **Given** the feed is scrolled such that the bottom is not visible, and the current user has just committed a roll
-- **When** the SSE broadcast of that same roll (identified by its id) is delivered to the current user's own connection before, at the same time as, or after the local POST-response callback for that roll
+- **When** the SSE broadcast of that same roll (identified by its id, and identifiable as the current user's own roll via `rollerId`) is delivered to the current user's own connection before, at the same time as, or after the local POST-response callback for that roll
 - **Then** the feed still scrolls to show the roll exactly once, regardless of the order in which the two events are processed
 
 #### Scenario: Auto-scroll does not reorder the feed
@@ -385,7 +397,7 @@ Reason for removal: Superseded by the stage-then-commit model. The prior behavio
 
 - Proposal element "Vendor dice-face SVG icon set (d4-d20), replace text/emoji glyphs" → Requirements: MODIFIED Dice pop-out trigger anchored to the chat dock; MODIFIED Dice staging pool; MODIFIED Roll feed item rendering (see also the `dice-iconography` capability)
 - Proposal element "Dice panel as flex sibling replacing the document.body portal" → Requirements: MODIFIED Dice panel renders as an in-flow flex sibling to the left of the chat dock; REMOVED Floating dice pop-out renders outside the chat dock's DOM subtree
-- Proposal element "Auto-scroll feed to the user's own newly-posted roll" → Requirements: MODIFIED Feed auto-scrolls on a new dice roll, for any user
+- Proposal element "Auto-scroll feed to the user's own newly-posted roll" → Requirements: MODIFIED Feed auto-scrolls on a new dice roll, gated by bottom proximity for remote rolls
 - Requirements → Tasks: see `openspec/changes/archive/2026-08-20-dice-roll-enhancements/tasks.md`
 
 **From the `dice-panel-scroll-fixes` change (archived 2026-08-21):**
@@ -393,7 +405,7 @@ Reason for removal: Superseded by the stage-then-commit model. The prior behavio
 - Proposal element "Increase dice icon sizes by 50%" → Requirements: MODIFIED Dice pop-out trigger anchored to the chat dock; MODIFIED Dice staging pool
 - Proposal element "Add native `title` tooltips" → Requirements: MODIFIED Dice pop-out trigger anchored to the chat dock (tooltip scenario); MODIFIED Dice staging pool (tooltip scenario)
 - Proposal element "Remove the dice panel's forced height-match to the chat drawer" → Requirements: MODIFIED Dice panel renders as an in-flow flex sibling to the left of the chat dock
-- Proposal element "Auto-scroll the feed to the bottom for every new dice roll, for every user" → Requirements: MODIFIED Feed auto-scrolls on a new dice roll, for any user
+- Proposal element "Auto-scroll the feed to the bottom for every new dice roll, for every user" → Requirements: MODIFIED Feed auto-scrolls on a new dice roll, gated by bottom proximity for remote rolls (refined from unconditional to bottom-proximity-gated for remote rolls during PR review on PR #519 — the roller's own roll always scrolls regardless of proximity)
 - Requirements → Tasks: see `openspec/changes/archive/2026-08-21-dice-panel-scroll-fixes/tasks.md`
 
 ---
