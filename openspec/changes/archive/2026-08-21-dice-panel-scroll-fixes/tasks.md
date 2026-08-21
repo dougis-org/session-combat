@@ -9,11 +9,11 @@ Issue-driven: yes — GitHub issue #514 ("Dice roll improvements").
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list. Halt and prompt for installation if missing.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — confirmed present in the available skills list.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 514 --add-label "in-progress"`, then move the linked GitHub Project item to "In Progress" (discover project/field/option IDs via `gh project list --owner dougis-org --format json` and `gh project field-list --format json`; warn and skip if not found).
+- [x] **Issue lifecycle: mark in-progress** — labeled `in-progress` and moved the linked GitHub Project item to "In Progress".
 
 ### 1. Icon sizes
 
@@ -50,18 +50,18 @@ Issue-driven: yes — GitHub issue #514 ("Dice roll improvements").
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Automatically apply all clearly-correct findings, re-run tests, then commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Automatically apply all clearly-correct findings, re-run tests, then commit. — Ran; zero findings on the scoped diff. See PR #519.
 
 ## Validation
 
-- [x] Run unit/integration tests — `npx jest tests/unit/components/CampaignChat` (115/115 passing)
-- [ ] Run E2E tests (if applicable)
+- [x] Run unit/integration tests — `npx jest tests/unit/components/CampaignChat` (115/115 passing locally); CI `unit-tests`/`integration-tests` jobs also passed on PR #519
+- [x] Run E2E tests (if applicable) — CI `regression-tests` job passed on PR #519
 - [x] Run type checks — `npx tsc --noEmit -p tsconfig.json` (clean)
-- [ ] Run build
-- [ ] Run security/code quality checks required by project standards (Verity gate — see open findings below)
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
-- [ ] Manual browser smoke test: open the dice panel, confirm no dead space below its controls at various drawer heights; roll a die and confirm the feed scrolls; confirm icons read clearly at the new size; confirm hovering each dice control shows its tooltip.
+- [x] Run build — CI `build` job passed on PR #519
+- [x] Run security/code quality checks required by project standards — Verity pre-commit/pre-push gates passed; Codacy Static Code Analysis and Codacy Diff Coverage passed. `check-codacy-coverage` (a workflow step that polls Codacy for a `Codacy Coverage Variation` check) timed out waiting on that external check and was retried once via `gh run rerun --failed`; it timed out again on the retry. **The PR was merged with this one check still failing, via a manual override by the repo owner** (not via this schema's `gh pr merge --auto --merge` review-gate flow) — see PR and Merge section below.
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation] — satisfied via CI on PR #519 (see checks above)
+- [ ] Manual browser smoke test: open the dice panel, confirm no dead space below its controls at various drawer heights; roll a die and confirm the feed scrolls; confirm icons read clearly at the new size; confirm hovering each dice control shows its tooltip. **Not performed** — no authenticated dev environment with an active campaign/session was available in the working sandbox. Automated test coverage (unit/integration/regression, all passing) is the substitute evidence.
 
 ### Open Verity gate findings (from prior automated pass)
 
@@ -73,30 +73,27 @@ Issue-driven: yes — GitHub issue #514 ("Dice roll improvements").
 
 Determine docs-only status via `git diff --name-only HEAD` against `main`. This change touches `.tsx`/`.test.tsx` files, so the **full path** applies:
 
-- [ ] Unit tests pass
-- [ ] Integration tests pass
-- [ ] Regression / E2E tests pass
-- [ ] Build succeeds
+- [x] Unit tests pass
+- [x] Integration tests pass
+- [x] Regression / E2E tests pass
+- [x] Build succeeds
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `worktree-dice-panel-scroll-fixes` to `main`. PR body **must include `Closes #514`**.
-- [ ] **Issue lifecycle: mark in-review** — `gh issue edit 514 --add-label "in-review" --remove-label "in-progress"`; move project item to "In Review".
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings until zero remain (report a stall after 3+ iterations with no progress)
-- [ ] Enable auto-merge only after the review gate passes: `gh pr merge <PR-URL> --auto --merge` (never `--admin`)
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED`:
-  1. Build/tests (Remote push validation) — fix, commit, push before anything else
-  2. PR comments — resolve every unresolved review thread, commit, validate, push, wait 180s
-  3. CI check failures — fix, commit, validate, push, wait 180s, restart from step 1
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `worktree-dice-panel-scroll-fixes` to `main`. PR body **includes `Closes #514`**. → [PR #519](https://github.com/dougis-org/session-combat/pull/519)
+- [x] **Issue lifecycle: mark in-review** — labeled `in-review`, removed `in-progress`; project item moved to "In Review".
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; addressed all findings until zero remained (zero findings survived review) and enabled auto-merge
+- [x] Enable auto-merge only after the review gate passes: `gh pr merge 519 --auto --merge` (never `--admin`) — enabled by the automated flow
+- [x] **Iterate until merged** — every check passed except `check-codacy-coverage`, which twice hit an external timeout waiting on a Codacy check that never posted (`Codacy Diff Coverage` itself passed; this was a workflow polling failure, not a coverage regression). **The repo owner manually overrode the gate and merged PR #519 directly** rather than waiting for that check to clear or for the automated `--auto --merge` flow to complete on its own. Deviation from the schema's "never force-merge, iterate until the automated flow reports MERGED" instruction — recorded here for traceability, not corrected after the fact since the merge is already done.
 
 Ownership metadata:
 
-- Implementer: (this session)
-- Reviewer(s): TBD
-- Required approvals: per repo branch protection
+- Implementer: this session (agent-assisted)
+- Reviewer(s): `pr-review-toolkit:review-pr` (automated), Doug Hubbard (manual merge decision)
+- Required approvals: per repo branch protection; merged via manual override with one non-required-looking check (`check-codacy-coverage`) still failing due to an external timeout
 
 Blocking resolution flow:
 
@@ -106,14 +103,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none identified beyond this change's own artifacts)
-- [ ] Sync approved spec deltas into `openspec/specs/roll-share-ui/spec.md`; fix relative links to point at the archive location
+- [x] `git checkout main` and `git pull --ff-only` — this worktree could not literally check out `main` (already checked out in the primary worktree at `/home/doug/dev/session-combat`); verified via `git fetch origin` + `git log origin/main` instead, and branched the doc work from `origin/main`.
+- [x] Verify the merged changes appear on `main` — confirmed: `78fbb43 fix: dice icon sizing, tooltips, content-driven panel height, and roll auto-scroll (#519)` is the tip of `origin/main`.
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none identified beyond this change's own artifacts)
+- [x] Sync approved spec deltas into `openspec/specs/roll-share-ui/spec.md`; fix relative links to point at the archive location — done; no relative links into this change's directory existed in the delta spec, so no link rewrites were needed.
 - [ ] Archive the change: move `openspec/changes/dice-panel-scroll-fixes/` to `openspec/changes/archive/2026-08-21-dice-panel-scroll-fixes/` in a single commit (copy + delete together)
 - [ ] Confirm the archive path exists and the original change directory is gone
-- [ ] Create a doc branch: `git checkout -b doc/archive-2026-08-21-dice-panel-scroll-fixes`, push it
+- [x] Create a doc branch: `git checkout -b doc/archive-2026-08-21-dice-panel-scroll-fixes`, push it
 - [ ] Open a PR from the doc branch to `main` titled `docs: archive dice-panel-scroll-fixes (2026-08-21)`
 - [ ] Immediately enable auto-merge on the doc PR (never `--admin`)
 - [ ] Monitor the doc PR until merged (same loop as the implementation PR)
