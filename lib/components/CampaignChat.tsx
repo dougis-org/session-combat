@@ -551,10 +551,18 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
     ? members.filter(m => m.status === 'active' && m.username.toLowerCase().startsWith(mentionQuery.toLowerCase()))
     : []
 
-  function scrollToBottom() {
+  function scrollToBottom(force = false) {
     requestAnimationFrame(() => {
       const container = feedRef.current
       if (!container) return
+      if (!force) {
+        // Don't yank a user who has scrolled up to read history (or is
+        // sitting at scrollTop 0 to trigger the older-page load below)
+        // down to the bottom just because a roll from another player came in.
+        const distanceFromBottom =
+          container.scrollHeight - container.scrollTop - container.clientHeight
+        if (distanceFromBottom > 100) return
+      }
       container.scrollTo?.({ top: container.scrollHeight, behavior: 'smooth' })
     })
   }
@@ -864,7 +872,9 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
     if (seenIds.current.has(roll.id)) return
     seenIds.current.add(roll.id)
     setFeed(prev => [...prev, { kind: 'roll', data: roll }])
-    scrollToBottom()
+    // Always pull the roller down to their own roll, even if they'd
+    // scrolled up — this is a direct result of their own action.
+    scrollToBottom(true)
   }
 
   function handleSceneSuccess(msg: CampaignMessage) {

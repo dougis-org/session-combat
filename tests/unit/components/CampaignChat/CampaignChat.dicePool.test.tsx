@@ -236,6 +236,24 @@ describe('CampaignChat — dice pool trigger', () => {
     expect(trigger).toHaveAttribute('title', 'Dice Rolls for main screen pop out')
   })
 
+  it('trigger icon renders at the enlarged 24px size', async () => {
+    await openDockWithSession()
+    const trigger = screen.getByRole('button', { name: /roll|dice/i })
+    const svg = trigger.querySelector('svg')
+    expect(svg).toHaveAttribute('width', '24')
+    expect(svg).toHaveAttribute('height', '24')
+  })
+
+  it('each per-die add control renders its icon at the enlarged 21px size', async () => {
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    for (const sides of [4, 6, 8, 10, 12, 20]) {
+      const svg = screen.getByRole('button', { name: `Add d${sides}` }).querySelector('svg')
+      expect(svg).toHaveAttribute('width', '21')
+      expect(svg).toHaveAttribute('height', '21')
+    }
+  })
+
   it('each per-die add control exposes a tooltip matching its die size', async () => {
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
@@ -597,6 +615,110 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     await waitFor(() => {
       expect(scrollSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }))
     })
+  })
+
+  it('a roll from another player does not yank the feed down when the user has scrolled up to read history', async () => {
+    const { user } = await openDockWithSession()
+    const container = getFeedContainer()
+    const scrollSpy = jest.fn()
+    container.scrollTo = scrollSpy
+    // Simulate the user having scrolled well away from the bottom.
+    Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true })
+    Object.defineProperty(container, 'clientHeight', { value: 300, configurable: true })
+    Object.defineProperty(container, 'scrollTop', { value: 0, configurable: true })
+
+    act(() => {
+      sharedTestState.capturedOnEvent?.({
+        type: 'roll',
+        campaignId: CAMPAIGN_ID,
+        data: {
+          id: 'roll-other-player-far', campaignId: CAMPAIGN_ID, sessionId: 'session-1',
+          rollerId: 'user-2', rollerName: 'other', formula: '1d20', rolls: [7], total: 7,
+          visibility: { scope: 'group' }, createdAt: new Date(),
+        },
+      })
+    })
+
+    await waitFor(() => expect(screen.getByText(/1d20/)).toBeInTheDocument())
+    expect(scrollSpy).not.toHaveBeenCalled()
+  })
+
+  it('the roller is always pulled down to their own roll even if they had scrolled up', async () => {
+    mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
+    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
+      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
+      if (url.includes('/rolls') && options?.method === 'POST') {
+        return Promise.resolve({
+          ok: true, status: 201,
+          json: () => Promise.resolve({
+            id: 'roll-scroll-own-far', campaignId: CAMPAIGN_ID, rollerName: 'tester',
+            formula: '1d20', rolls: [10], total: 10,
+            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
+          }),
+        })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
+    })
+
+    const { user } = await openDockWithSession()
+    const container = getFeedContainer()
+    const scrollSpy = jest.fn()
+    container.scrollTo = scrollSpy
+    Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true })
+    Object.defineProperty(container, 'clientHeight', { value: 300, configurable: true })
+    Object.defineProperty(container, 'scrollTop', { value: 0, configurable: true })
+
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: 'Add d20' }))
+    await user.click(screen.getByRole('button', { name: 'Roll' }))
+
+    await waitFor(() => {
+      expect(scrollSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }))
+    })
+  })
+
+  it('a duplicate roll id racing with the POST response resolving before the SSE echo still scrolls exactly once', async () => {
+    mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
+    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
+      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
+      if (url.includes('/rolls') && options?.method === 'POST') {
+        return Promise.resolve({
+          ok: true, status: 201,
+          json: () => Promise.resolve({
+            id: 'roll-race-reverse', campaignId: CAMPAIGN_ID, rollerName: 'tester',
+            formula: '1d20', rolls: [10], total: 10,
+            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
+          }),
+        })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
+    })
+
+    const { user } = await openDockWithSession()
+    const scrollSpy = jest.fn()
+    getFeedContainer().scrollTo = scrollSpy
+
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: 'Add d20' }))
+
+    // POST response resolves first (handleRollPosted wins the race)...
+    await user.click(screen.getByRole('button', { name: 'Roll' }))
+    await waitFor(() => expect(screen.getByText(/1d20/)).toBeInTheDocument())
+
+    // ...then the SSE echo for the same roll id arrives afterwards.
+    act(() => {
+      sharedTestState.capturedOnEvent?.({
+        type: 'roll',
+        campaignId: CAMPAIGN_ID,
+        data: {
+          id: 'roll-race-reverse', campaignId: CAMPAIGN_ID, sessionId: 'session-1',
+          rollerId: 'user-1', rollerName: 'tester', formula: '1d20', rolls: [10], total: 10,
+          visibility: { scope: 'group' }, createdAt: new Date(),
+        },
+      })
+    })
+
+    await waitFor(() => expect(scrollSpy).toHaveBeenCalledTimes(1))
   })
 
   it('a duplicate roll id racing between the SSE echo and the POST response still scrolls exactly once', async () => {
