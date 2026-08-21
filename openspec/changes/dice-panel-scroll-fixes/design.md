@@ -66,3 +66,10 @@ Replace the `pendingScrollRef`-gated effect with a direct call at the point each
 ## Migration Plan
 
 No data migration. This is a UI-only change to a single client component and its existing icon module call sites. Deploy as a normal PR merge; no feature flag, no phased rollout — the prior behavior (small icons, no tooltips, height-matched panel, self-roll-only/racy auto-scroll) has no dependents outside `CampaignChat.tsx` itself. Rollback is a plain revert if needed.
+
+## Operational Blocking Policy
+
+- **CI failure** (unit tests, typecheck, build): blocking — must be fixed before merge. No override.
+- **Failing/flaky auto-scroll or panel-height test**: blocking — these encode the exact race condition and dead-space bugs this change exists to fix; do not skip or `.skip()` them.
+- **Code review findings from `pr-review-toolkit:review-pr` or the Verity quality gate**: blocking for anything within this change's declared scope (icon size, tooltips, panel height, auto-scroll). Findings against pre-existing code outside that scope (e.g. the unbounded modifier input, overall file size) are non-blocking for *this* PR — they must be triaged as either an explicit scope amendment to this proposal (with proposal/design updated first, per the change-control note) or filed as a separate follow-up change, but they do not gate this merge. The unbounded-modifier-input finding was triaged this way: filed as [issue #516](https://github.com/dougis-org/session-combat/issues/516), left unfixed here.
+- **Manual smoke-test failure** (task 5.2-equivalent in `tasks.md`): blocking if a regression is observed in the browser that the automated suite didn't catch; non-blocking (may proceed with a tracked follow-up) if the browser check simply couldn't be run due to environment limitations, provided automated coverage of the same behavior is green.

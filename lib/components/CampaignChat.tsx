@@ -386,19 +386,19 @@ function DiceTriggerButton({
         disabled={dp.isTriggerDisabled}
         aria-label="Roll dice"
         aria-expanded={dp.isOpen}
+        title="Dice Rolls for main screen pop out"
         className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-3 py-1.5 rounded-full flex items-center gap-1"
       >
-        <DiceD20Icon width={16} height={16} aria-hidden="true" />
+        <DiceD20Icon width={24} height={24} aria-hidden="true" />
       </button>
     </div>
   )
 }
 
 function DicePoolPanel({
-  dp, heightPx, panelRef,
+  dp, panelRef,
 }: {
   dp: DicePool
-  heightPx: string
   panelRef: React.RefObject<HTMLDivElement | null>
 }) {
   if (!dp.isOpen) return null
@@ -407,7 +407,6 @@ function DicePoolPanel({
       ref={panelRef}
       aria-label="Dice pool"
       className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-3 w-64 flex-shrink-0 overflow-y-auto"
-      style={{ height: heightPx }}
     >
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-1 items-center">
@@ -429,9 +428,10 @@ function DicePoolPanel({
                   onClick={() => dp.handleAdd(sides)}
                   disabled={dp.isRolling}
                   aria-label={`Add d${sides}`}
+                  title={`d${sides}`}
                   className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded flex items-center gap-1"
                 >
-                  <Icon width={14} height={14} aria-hidden="true" />
+                  <Icon width={21} height={21} aria-hidden="true" />
                   ×{dp.pool[sides]}
                 </button>
               </div>
@@ -523,7 +523,6 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
 
   const [feed, setFeed] = useState<FeedItem[]>([])
   const seenIds = useRef<Set<string>>(new Set())
-  const pendingScrollRef = useRef(false)
 
   const [members, setMembers] = useState<EnrichedMember[]>([])
 
@@ -552,6 +551,14 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
     ? members.filter(m => m.status === 'active' && m.username.toLowerCase().startsWith(mentionQuery.toLowerCase()))
     : []
 
+  function scrollToBottom() {
+    requestAnimationFrame(() => {
+      const container = feedRef.current
+      if (!container) return
+      container.scrollTo?.({ top: container.scrollHeight, behavior: 'smooth' })
+    })
+  }
+
   // ── SSE stream ──
   function onStreamEvent(e: CampaignStreamEvent) {
     if (e.type === 'message') {
@@ -567,6 +574,7 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
       if (seenIds.current.has(roll.id)) return
       seenIds.current.add(roll.id)
       setFeed(prev => [...prev, { kind: 'roll', data: roll }])
+      scrollToBottom()
     } else if (e.type === 'session') {
       onSessionChange?.(e.data.activeSessionId)
     }
@@ -721,15 +729,6 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
     return () => container.removeEventListener('scroll', handleScroll)
   }, [isExpanded, campaignId])
 
-  // ── Auto-scroll to a roll the current user just posted ──
-  useEffect(() => {
-    if (!pendingScrollRef.current) return
-    pendingScrollRef.current = false
-    const container = feedRef.current
-    if (!container) return
-    container.scrollTo?.({ top: container.scrollHeight, behavior: 'smooth' })
-  }, [feed])
-
   // ── Handlers ──
 
   function handleDragStart(startY: number, startHeight: number) {
@@ -864,8 +863,8 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   function handleRollPosted(roll: CampaignRoll) {
     if (seenIds.current.has(roll.id)) return
     seenIds.current.add(roll.id)
-    pendingScrollRef.current = true
     setFeed(prev => [...prev, { kind: 'roll', data: roll }])
+    scrollToBottom()
   }
 
   function handleSceneSuccess(msg: CampaignMessage) {
@@ -909,7 +908,7 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
 
   return (
     <div className={rowWrapperClass}>
-      <DicePoolPanel dp={dicePool} heightPx={resolvedHeight} panelRef={dicePanelRef} />
+      <DicePoolPanel dp={dicePool} panelRef={dicePanelRef} />
       <div
         ref={drawerRef}
         role="complementary"
