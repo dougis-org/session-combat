@@ -37,13 +37,19 @@ All cases live in `tests/unit/components/CampaignChat/CampaignChat.dicePool.test
 - [x] Panel height is content-driven and does not track a large custom drawer height — `dice panel height is content-driven, not tied to a large custom drawer height`
 - [x] Panel remains a DOM sibling of the drawer, positioned to its left, absent from the DOM when closed — pre-existing coverage retained: `dice panel is a DOM sibling of the drawer...`, `dice panel appears before the drawer in DOM order...`, `dice panel is absent from the DOM when closed...`
 
-### Auto-scroll on any dice roll (tasks 4.1–4.6 / spec: MODIFIED Feed auto-scrolls on a new dice roll, for any user)
+### Auto-scroll on any dice roll (tasks 4.1–4.6 / spec: MODIFIED Feed auto-scrolls on a new dice roll, gated by bottom proximity for remote rolls)
 
 - [x] Committing a roll (POST-response path) scrolls the feed — `committing a roll scrolls the feed to reveal it`
-- [x] A roll from another player arriving via SSE also scrolls the feed — `a roll from another player arriving via SSE also triggers auto-scroll`
+- [x] A roll from another player arriving via SSE also scrolls the feed, when near the bottom — `a roll from another player arriving via SSE also triggers auto-scroll`
 - [x] A duplicate roll id racing between the SSE echo and the POST response scrolls exactly once — `a duplicate roll id racing between the SSE echo and the POST response still scrolls exactly once`
 - [x] A new chat message does not trigger auto-scroll — `a new chat message does not trigger auto-scroll`
 - [x] Auto-scroll does not reorder the feed — `auto-scroll does not reorder the feed — the new roll stays last`
+
+#### Added during PR review (`pr-review-toolkit:review-pr` on PR #519): bottom-proximity guard for remote rolls
+
+- [x] A roll from another player does NOT auto-scroll when the user has scrolled away to read history — `a roll from another player does not yank the feed down when the user has scrolled up to read history`
+- [x] The roller is always scrolled to their own roll even if they'd scrolled away — `the roller is always pulled down to their own roll even if they had scrolled up`
+- [x] The roller is still force-scrolled to their own roll when the SSE echo wins the append race (even while scrolled away) — `still force-scrolls the roller to their own roll when the SSE echo wins the race`
 
 ### Regression coverage (unchanged behavior, re-verified)
 
