@@ -108,11 +108,11 @@ Blocking resolution flow:
 - [x] Mark all remaining tasks as complete (`- [x]`)
 - [x] Update repository documentation impacted by the change (none identified beyond this change's own artifacts)
 - [x] Sync approved spec deltas into `openspec/specs/roll-share-ui/spec.md`; fix relative links to point at the archive location — done; no relative links into this change's directory existed in the delta spec, so no link rewrites were needed.
-- [ ] Archive the change: move `openspec/changes/dice-panel-scroll-fixes/` to `openspec/changes/archive/2026-08-21-dice-panel-scroll-fixes/` in a single commit (copy + delete together)
-- [ ] Confirm the archive path exists and the original change directory is gone
+- [x] Archive the change: move `openspec/changes/dice-panel-scroll-fixes/` to `openspec/changes/archive/2026-08-21-dice-panel-scroll-fixes/` in a single commit (copy + delete together)
+- [x] Confirm the archive path exists and the original change directory is gone
 - [x] Create a doc branch: `git checkout -b doc/archive-2026-08-21-dice-panel-scroll-fixes`, push it
-- [ ] Open a PR from the doc branch to `main` titled `docs: archive dice-panel-scroll-fixes (2026-08-21)`
-- [ ] Immediately enable auto-merge on the doc PR (never `--admin`)
+- [x] Open a PR from the doc branch to `main` titled `docs: archive dice-panel-scroll-fixes (2026-08-21)` → [PR #520](https://github.com/dougis-org/session-combat/pull/520)
+- [x] Immediately enable auto-merge on the doc PR (never `--admin`) — enabled via `gh pr merge 520 --auto --merge`
 - [ ] Monitor the doc PR until merged (same loop as the implementation PR)
 - [ ] Prune merged local branches: `git fetch --prune` and delete `worktree-dice-panel-scroll-fixes` and the doc branch
 
