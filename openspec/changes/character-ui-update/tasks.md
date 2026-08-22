@@ -2,37 +2,37 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Create and publish working branch:** `git checkout -b character-ui-update-impl` then immediately `git push -u origin character-ui-update-impl`
+- [x] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
+- [x] **Step 2 — Create and publish working branch:** `git checkout -b character-ui-update-impl` then immediately `git push -u origin character-ui-update-impl`
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-reviewer` is available** — check the available skills list for `pr-reviewer`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] Extract `CharacterEditor` component
+- [x] Extract `CharacterEditor` component
   - Create `lib/components/CharacterEditor.tsx`
   - Move the `CharacterEditor` component function and its local state/hooks from `app/characters/page.tsx` to the new file.
   - Export `CharacterEditor` and ensure all required imports (`Character`, `VALID_CLASSES`, etc.) are present.
-- [ ] Create `CharacterCard` component
+- [x] Create `CharacterCard` component
   - Create `lib/components/CharacterCard.tsx`
   - Import `CharacterMiniSummary` or create the summary layout directly.
   - Add `isExpanded` state (`useState`).
   - Render the summary view when collapsed, and `<CreatureStatBlock isCompact={false} />` when expanded.
   - Include "Expand/Collapse" toggle button.
   - Include "View Character", "Edit", and "Delete" action buttons.
-- [ ] Update `app/characters/page.tsx`
+- [x] Update `app/characters/page.tsx`
   - Import the new `CharacterCard` and `CharacterEditor` components.
   - Remove the inline `CharacterEditor` definition.
   - Update the rendering loop to use `CharacterCard`.
-- [ ] Create Dedicated Detail View
+- [x] Create Dedicated Detail View
   - Create `app/characters/[id]/page.tsx`
   - Fetch character data using the existing API (`/api/characters/[id]`).
   - Render the full `CreatureStatBlock` for the character.
   - Include an "Edit" button that shows the `CharacterEditor` when clicked.
   - Add a "Back to Characters" link.
-- [ ] Confirm acceptance criteria are covered (check toggle behavior, edit flow in both places, detail route fetching).
+- [x] Confirm acceptance criteria are covered (check toggle behavior, edit flow in both places, detail route fetching).
 
 ## Pre-Commit Code Review
 
@@ -74,7 +74,7 @@ Use the project's documented commands for each of the above (see project README 
 - [ ] Commit all changes to the working branch and push to remote
 - [ ] Open PR from working branch to `main`.
 - [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [ ] Spawn a sub-agent to run `pr-reviewer`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
 - [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
