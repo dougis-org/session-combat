@@ -81,10 +81,10 @@ If **ANY** required step fails, iterate and fix before pushing.
 - [x] Commit all changes to the working branch and push to remote
 - [x] Open PR from `decouple-dice-panel-from-chat` to `main`. The PR body **must** include `Closes #521`.
 - [x] **Issue lifecycle: mark in-review**: run `gh issue edit 521 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — never wait for a human to report the merge; never force-merge:
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — never wait for a human to report the merge; never force-merge:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -105,17 +105,17 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (if any docs reference dice-rolling being session/campaign-only)
-- [ ] Sync approved spec deltas into `openspec/specs/`: create `openspec/specs/global-dice-fab/spec.md` and `openspec/specs/dice-session-bridge/spec.md` (new capabilities), and merge the `roll-share-ui` delta's new "ADDED" requirement into `openspec/specs/roll-share-ui/spec.md`'s existing ADDED section. Update all relative links that pointed into the change directory (`../../design.md`, `../../tasks.md`) to `../../changes/archive/YYYY-MM-DD-decouple-dice-panel-from-chat/design.md` and `.../tasks.md`.
-- [ ] Archive the change: move `openspec/changes/decouple-dice-panel-from-chat/` to `openspec/changes/archive/YYYY-MM-DD-decouple-dice-panel-from-chat/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-decouple-dice-panel-from-chat/` exists and `openspec/changes/decouple-dice-panel-from-chat/` is gone
-- [ ] **Create a doc branch**: `git checkout -b doc/archive-YYYY-MM-DD-decouple-dice-panel-from-chat` then `git push -u origin doc/archive-YYYY-MM-DD-decouple-dice-panel-from-chat`
-- [ ] Open a PR from that branch to `main` with title `docs: archive decouple-dice-panel-from-chat (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] **Immediately** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D decouple-dice-panel-from-chat doc/archive-YYYY-MM-DD-decouple-dice-panel-from-chat`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (if any docs reference dice-rolling being session/campaign-only)
+- [x] Sync approved spec deltas into `openspec/specs/`: create `openspec/specs/global-dice-fab/spec.md` and `openspec/specs/dice-session-bridge/spec.md` (new capabilities), and merge the `roll-share-ui` delta's new "ADDED" requirement into `openspec/specs/roll-share-ui/spec.md`'s existing ADDED section. Update all relative links that pointed into the change directory (`../../design.md`, `../../tasks.md`) to `../../changes/archive/2026-08-22-decouple-dice-panel-from-chat/design.md` and `.../tasks.md`.
+- [x] Archive the change: move `openspec/changes/decouple-dice-panel-from-chat/` to `openspec/changes/archive/2026-08-22-decouple-dice-panel-from-chat/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/2026-08-22-decouple-dice-panel-from-chat/` exists and `openspec/changes/decouple-dice-panel-from-chat/` is gone
+- [x] **Create a doc branch**: `git checkout -b doc/archive-2026-08-22-decouple-dice-panel-from-chat` then `git push -u origin doc/archive-2026-08-22-decouple-dice-panel-from-chat`
+- [x] Open a PR from that branch to `main` with title `docs: archive decouple-dice-panel-from-chat (2026-08-22)` — do NOT push directly to `main`
+- [x] **Immediately** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D decouple-dice-panel-from-chat doc/archive-2026-08-22-decouple-dice-panel-from-chat`
 
-Required cleanup after archive: `git fetch --prune` and `git branch -D decouple-dice-panel-from-chat doc/archive-YYYY-MM-DD-decouple-dice-panel-from-chat`
+Required cleanup after archive: `git fetch --prune` and `git branch -D decouple-dice-panel-from-chat doc/archive-2026-08-22-decouple-dice-panel-from-chat`
