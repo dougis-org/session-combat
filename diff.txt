@@ -1,0 +1,870 @@
+diff --git a/app/characters/[id]/page.tsx b/app/characters/[id]/page.tsx
+new file mode 100644
+index 0000000..83d5f36
+--- /dev/null
++++ b/app/characters/[id]/page.tsx
+@@ -0,0 +1,202 @@
++'use client';
++
++import { useState, useEffect } from 'react';
++import { useParams, useRouter } from 'next/navigation';
++import Link from 'next/link';
++import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
++import { CharacterEditor } from '@/lib/components/CharacterEditor';
++import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
++import { Character, calculateTotalLevel } from '@/lib/types';
++
++function CharacterDetailContent() {
++  const params = useParams();
++  const router = useRouter();
++  const id = params.id as string;
++  
++  const [character, setCharacter] = useState<Character | null>(null);
++  const [loading, setLoading] = useState(true);
++  const [error, setError] = useState<string | null>(null);
++  const [isEditing, setIsEditing] = useState(false);
++
++  useEffect(() => {
++    fetchCharacter();
++  }, [id]);
++
++  const fetchCharacter = async () => {
++    try {
++      const response = await fetch(`/api/characters/${id}`);
++      if (!response.ok) {
++        if (response.status === 404) {
++          setError('Character not found');
++        } else {
++          setError('Failed to load character');
++        }
++        return;
++      }
++      const data = await response.json();
++      setCharacter(data);
++    } catch (err) {
++      setError('An error occurred while fetching the character');
++    } finally {
++      setLoading(false);
++    }
++  };
++
++  const handleSave = async (updatedCharacter: Character) => {
++    try {
++      const response = await fetch(`/api/characters/${id}`, {
++        method: 'PUT',
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify(updatedCharacter),
++      });
++
++      if (!response.ok) {
++        throw new Error('Failed to save character');
++      }
++
++      const data = await response.json();
++      setCharacter(data);
++      setIsEditing(false);
++    } catch (err) {
++      alert(err instanceof Error ? err.message : 'An error occurred while saving');
++    }
++  };
++
++  const handleDelete = async () => {
++    if (!confirm('Are you sure you want to delete this character?')) return;
++    
++    try {
++      const response = await fetch(`/api/characters/${id}`, {
++        method: 'DELETE',
++      });
++      
++      if (!response.ok) {
++        throw new Error('Failed to delete character');
++      }
++      
++      router.push('/characters');
++    } catch (err) {
++      alert(err instanceof Error ? err.message : 'An error occurred while deleting');
++    }
++  };
++
++  if (loading) {
++    return (
++      <div className="min-h-screen bg-gray-900 text-white p-8">
++        <div className="max-w-4xl mx-auto">
++          <p className="text-gray-400">Loading character...</p>
++        </div>
++      </div>
++    );
++  }
++
++  if (error || !character) {
++    return (
++      <div className="min-h-screen bg-gray-900 text-white p-8">
++        <div className="max-w-4xl mx-auto">
++          <div className="mb-6">
++            <Link href="/characters" className="text-blue-400 hover:text-blue-300 flex items-center gap-2 w-fit">
++              <span aria-hidden="true">&larr;</span> Back to Characters
++            </Link>
++          </div>
++          <div className="p-4 bg-red-900 border border-red-700 rounded text-red-200">
++            {error || 'Character not found'}
++          </div>
++        </div>
++      </div>
++    );
++  }
++
++  return (
++    <div className="min-h-screen bg-gray-900 text-white p-8">
++      <div className="max-w-4xl mx-auto">
++        <div className="mb-6 flex justify-between items-center">
++          <Link href="/characters" className="text-blue-400 hover:text-blue-300 flex items-center gap-2 w-fit">
++            <span aria-hidden="true">&larr;</span> Back to Characters
++          </Link>
++          
++          <div className="flex gap-2">
++            {!isEditing && (
++              <>
++                <button
++                  onClick={() => setIsEditing(true)}
++                  className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-semibold"
++                >
++                  Edit Character
++                </button>
++                <button
++                  onClick={handleDelete}
++                  className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-semibold"
++                >
++                  Delete
++                </button>
++              </>
++            )}
++          </div>
++        </div>
++
++        {isEditing ? (
++          <CharacterEditor
++            character={character}
++            onSave={handleSave}
++            onCancel={() => setIsEditing(false)}
++            isNew={false}
++          />
++        ) : (
++          <div className="bg-gray-800 rounded-lg p-6">
++            <h1 className="text-3xl font-bold mb-2">{character.name}</h1>
++            <div className="text-gray-400 mb-6 pb-4 border-b border-gray-700">
++              {character.classes && character.classes.length > 0 && (
++                <div>
++                  {character.classes.map((c, idx) => (
++                    <span key={idx}>
++                      {c.class} Level {c.level}
++                      {idx < character.classes.length - 1 && ' / '}
++                    </span>
++                  ))}
++                  <span className="ml-2 font-semibold">
++                    (Total Level {calculateTotalLevel(character.classes)})
++                  </span>
++                </div>
++              )}
++              {(character.gender || character.race) && (
++                <div>
++                  {[character.gender, character.race].filter(Boolean).join(' ')}
++                </div>
++              )}
++            </div>
++
++            <CreatureStatBlock
++              abilityScores={character.abilityScores}
++              ac={character.ac}
++              acNote={character.acNote}
++              hp={character.hp}
++              maxHp={character.maxHp}
++              skills={character.skills}
++              savingThrows={character.savingThrows}
++              damageResistances={character.damageResistances}
++              damageImmunities={character.damageImmunities}
++              damageVulnerabilities={character.damageVulnerabilities}
++              conditionImmunities={character.conditionImmunities}
++              senses={character.senses}
++              languages={character.languages}
++              traits={character.traits}
++              actions={character.actions}
++              bonusActions={character.bonusActions}
++              reactions={character.reactions}
++              isCompact={false}
++            />
++          </div>
++        )}
++      </div>
++    </div>
++  );
++}
++
++export default function CharacterDetailPage() {
++  return (
++    <ProtectedRoute>
++      <CharacterDetailContent />
++    </ProtectedRoute>
++  );
++}
+diff --git a/app/characters/page.tsx b/app/characters/page.tsx
+index c0467e1..16846c7 100644
+--- a/app/characters/page.tsx
++++ b/app/characters/page.tsx
+@@ -3,21 +3,14 @@
+ import { useState, useEffect } from 'react';
+ import Link from 'next/link';
+ import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
+-import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
+-import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
+-import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
++import { CharacterCard } from '@/lib/components/CharacterCard';
++import { CharacterEditor } from '@/lib/components/CharacterEditor';
+ import {
+   Character,
+   CharacterType,
+   CHARACTER_TYPE_LABELS,
+   CHARACTER_TYPE_ORDER,
+-  CreatureStats,
+-  calculateTotalLevel,
+   getCharacterType,
+-  VALID_CLASSES,
+-  VALID_RACES,
+-  DnDRace,
+-  normalizeAlignment,
+ } from '@/lib/types';
+ 
+ interface ImportConflictState {
+@@ -352,62 +345,15 @@ export function CharactersContent() {
+                   </h2>
+                   <div className="grid md:grid-cols-2 gap-4">
+                     {group.map(character => (
+-                      <div key={character.id} className="bg-gray-800 rounded-lg p-4">
+-                        <div className="flex justify-between items-start mb-4">
+-                          <h3 className="text-xl font-semibold">{character.name}</h3>
+-                          <div className="flex gap-2">
+-                            <button
+-                              onClick={() => {
+-                                setEditingCharacter(character);
+-                                setIsAdding(false);
+-                              }}
+-                              className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+-                            >
+-                              Edit
+-                            </button>
+-                            <button
+-                              onClick={() => deleteCharacter(character.id)}
+-                              className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
+-                            >
+-                              Delete
+-                            </button>
+-                          </div>
+-                        </div>
+-                        {character.classes && character.classes.length > 0 && (
+-                          <div className="text-sm text-gray-400 mb-2">
+-                            {character.classes.map((c, idx) => (
+-                              <span key={idx}>
+-                                {c.class} Level {c.level}
+-                                {idx < character.classes.length - 1 && ' / '}
+-                              </span>
+-                            ))}
+-                            <span className="ml-2 font-semibold">
+-                              (Total Level {calculateTotalLevel(character.classes)})
+-                            </span>
+-                            {(character.gender || character.race) && ` - ${[character.gender, character.race].filter(Boolean).join(' ')}`}
+-                          </div>
+-                        )}
+-                        <CreatureStatBlock
+-                          abilityScores={character.abilityScores}
+-                          ac={character.ac}
+-                          acNote={character.acNote}
+-                          hp={character.hp}
+-                          maxHp={character.maxHp}
+-                          skills={character.skills}
+-                          savingThrows={character.savingThrows}
+-                          damageResistances={character.damageResistances}
+-                          damageImmunities={character.damageImmunities}
+-                          damageVulnerabilities={character.damageVulnerabilities}
+-                          conditionImmunities={character.conditionImmunities}
+-                          senses={character.senses}
+-                          languages={character.languages}
+-                          traits={character.traits}
+-                          actions={character.actions}
+-                          bonusActions={character.bonusActions}
+-                          reactions={character.reactions}
+-                          isCompact={false}
+-                        />
+-                      </div>
++                      <CharacterCard
++                        key={character.id}
++                        character={character}
++                        onEdit={() => {
++                          setEditingCharacter(character);
++                          setIsAdding(false);
++                        }}
++                        onDelete={() => deleteCharacter(character.id)}
++                      />
+                     ))}
+                   </div>
+                 </div>
+@@ -441,219 +387,6 @@ async function readImportResponseBody(
+   }
+ }
+ 
+-function CharacterEditor({
+-  character,
+-  onSave,
+-  onCancel,
+-  isNew,
+-}: {
+-  character: Character;
+-  onSave: (character: Character) => void;
+-  onCancel: () => void;
+-  isNew: boolean;
+-}) {
+-  const [name, setName] = useState(character.name);
+-  const [classes, setClasses] = useState(character.classes || [{ class: 'Fighter', level: 1 }]);
+-  const [race, setRace] = useState(character.race || '');
+-  const [gender, setGender] = useState(character.gender || '');
+-  const [alignment, setAlignment] = useState(
+-    normalizeAlignment(character.alignment) ?? '',
+-  );
+-  const [characterType, setCharacterType] = useState<CharacterType>(character.characterType ?? 'character');
+-  const [stats, setStats] = useState<CreatureStats>(character);
+-  const [saving, setSaving] = useState(false);
+-  const [validationError, setValidationError] = useState<string | null>(null);
+-
+-  const handleStatsChange = (newStats: CreatureStats) => {
+-    setStats(newStats);
+-  };
+-
+-  const handleSave = async () => {
+-    setValidationError(null);
+-
+-    if (stats.hp > stats.maxHp) {
+-      setValidationError('Current HP cannot be greater than Max HP');
+-      return;
+-    }
+-
+-    if (!name.trim()) {
+-      setValidationError('Character name is required');
+-      return;
+-    }
+-
+-    setSaving(true);
+-    try {
+-      const characterData: Character = {
+-        ...stats,
+-        id: character.id,
+-        userId: character.userId,
+-        name,
+-        classes,
+-        race: (race as DnDRace) || undefined,
+-        gender: gender.trim(),
+-        alignment: normalizeAlignment(alignment),
+-        characterType,
+-      };
+-      await onSave(characterData);
+-    } finally {
+-      setSaving(false);
+-    }
+-  };
+-
+-  return (
+-    <div className="bg-gray-800 rounded-lg p-6 mb-6 border-2 border-blue-500">
+-      <h2 className="text-2xl font-bold mb-4">{isNew ? 'Create Character' : 'Edit Character'}</h2>
+-
+-      {validationError && (
+-        <div className="p-3 bg-red-900 border border-red-700 rounded text-red-200 mb-4">
+-          {validationError}
+-        </div>
+-      )}
+-
+-      {/* Character Info */}
+-      <div className="grid md:grid-cols-2 gap-4 mb-6 pb-6 border-b border-gray-700">
+-        <div>
+-          <label className="block mb-1 text-sm font-bold">Name</label>
+-          <input
+-            type="text"
+-            value={name}
+-            onChange={e => setName(e.target.value)}
+-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+-            disabled={saving}
+-            aria-label="Character name"
+-          />
+-        </div>
+-
+-        <div>
+-          <label className="block mb-1 text-sm font-bold">Classes (Multiclass)</label>
+-          <div className="space-y-2">
+-            {classes.map((classEntry, idx) => (
+-              <div key={idx} className="flex gap-2">
+-                <select
+-                  value={classEntry.class}
+-                  onChange={e => {
+-                    const newClasses = [...classes];
+-                    newClasses[idx].class = e.target.value as any;
+-                    setClasses(newClasses);
+-                  }}
+-                  className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
+-                  disabled={saving}
+-                  aria-label="Character class"
+-                >
+-                  <option value="">Select class...</option>
+-                  {VALID_CLASSES.map(cls => (
+-                    <option key={cls} value={cls}>{cls}</option>
+-                  ))}
+-                </select>
+-                <input
+-                  type="number"
+-                  value={classEntry.level}
+-                  onChange={e => {
+-                    const newClasses = [...classes];
+-                    newClasses[idx].level = parseInt(e.target.value) || 1;
+-                    setClasses(newClasses);
+-                  }}
+-                  className="w-20 bg-gray-700 rounded px-3 py-2 text-white"
+-                  disabled={saving}
+-                  min="1"
+-                  max="20"
+-                  aria-label="Class level"
+-                />
+-                <button
+-                  onClick={() => setClasses(classes.filter((_, i) => i !== idx))}
+-                  disabled={saving || classes.length === 1}
+-                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 px-3 py-2 rounded text-sm"
+-                >
+-                  Remove
+-                </button>
+-              </div>
+-            ))}
+-            <button
+-              onClick={() => setClasses([...classes, { class: 'Fighter', level: 1 }])}
+-              disabled={saving}
+-              className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm"
+-            >
+-              Add Class
+-            </button>
+-            <div className="text-sm text-gray-300">
+-              Total Level: {calculateTotalLevel(classes)}
+-            </div>
+-          </div>
+-        </div>
+-
+-        <div>
+-          <label className="block mb-1 text-sm font-bold">Race</label>
+-          <select
+-            value={race}
+-            onChange={e => setRace(e.target.value)}
+-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+-            disabled={saving}
+-            aria-label="Character race"
+-          >
+-            <option value="">Select a race...</option>
+-            {VALID_RACES.map(r => (
+-              <option key={r} value={r}>{r}</option>
+-            ))}
+-          </select>
+-        </div>
+-
+-        <div className="md:col-span-2">
+-          <AlignmentSelect value={alignment} onChange={setAlignment} disabled={saving} />
+-        </div>
+-
+-        <div className="md:col-span-2">
+-          <label className="block mb-1 text-sm font-bold">Gender</label>
+-          <input
+-            type="text"
+-            value={gender}
+-            onChange={e => setGender(e.target.value)}
+-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+-            disabled={saving}
+-            aria-label="Character gender"
+-            placeholder="e.g., Female, Male, Non-binary, etc."
+-            maxLength={50}
+-          />
+-        </div>
+-
+-        <div>
+-          <label className="block mb-1 text-sm font-bold">Type</label>
+-          <select
+-            value={characterType}
+-            onChange={e => setCharacterType(e.target.value as CharacterType)}
+-            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
+-            disabled={saving}
+-            aria-label="Character type"
+-          >
+-            <option value="character">Player Character</option>
+-            <option value="npc">Travelling NPC</option>
+-            <option value="companion">Companion</option>
+-          </select>
+-        </div>
+-      </div>
+-
+-      {/* Creature Stats */}
+-      <CreatureStatsForm stats={stats} onChange={handleStatsChange} />
+-
+-      <div className="flex gap-2 mt-6">
+-        <button
+-          onClick={handleSave}
+-          disabled={saving || !name.trim()}
+-          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded"
+-        >
+-          {saving ? 'Saving...' : 'Save Character'}
+-        </button>
+-        <button
+-          onClick={onCancel}
+-          disabled={saving}
+-          className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 px-4 py-2 rounded"
+-        >
+-          Cancel
+-        </button>
+-      </div>
+-    </div>
+-  );
+-}
+-
+ export default function CharactersPage() {
+   return (
+     <ProtectedRoute>
+diff --git a/lib/components/CharacterCard.tsx b/lib/components/CharacterCard.tsx
+new file mode 100644
+index 0000000..56c098a
+--- /dev/null
++++ b/lib/components/CharacterCard.tsx
+@@ -0,0 +1,102 @@
++'use client';
++
++import { useState } from 'react';
++import Link from 'next/link';
++import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
++import { Character, calculateTotalLevel } from '@/lib/types';
++
++export function CharacterCard({
++  character,
++  onEdit,
++  onDelete,
++}: {
++  character: Character;
++  onEdit: () => void;
++  onDelete: () => void;
++}) {
++  const [isExpanded, setIsExpanded] = useState(false);
++
++  return (
++    <div className="bg-gray-800 rounded-lg p-4">
++      <div className="flex justify-between items-start mb-2">
++        <h3 className="text-xl font-semibold">{character.name}</h3>
++        <div className="flex gap-2">
++          <Link
++            href={`/characters/${character.id}`}
++            className="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded text-sm text-white"
++          >
++            View Character
++          </Link>
++          <button
++            onClick={onEdit}
++            className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm text-white"
++          >
++            Edit
++          </button>
++          <button
++            onClick={onDelete}
++            className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm text-white"
++          >
++            Delete
++          </button>
++        </div>
++      </div>
++
++      <div className="text-sm text-gray-400 mb-2">
++        {character.classes && character.classes.length > 0 && (
++          <div>
++            {character.classes.map((c, idx) => (
++              <span key={idx}>
++                {c.class} Level {c.level}
++                {idx < character.classes.length - 1 && ' / '}
++              </span>
++            ))}
++            <span className="ml-2 font-semibold">
++              (Total Level {calculateTotalLevel(character.classes)})
++            </span>
++          </div>
++        )}
++        {(character.gender || character.race) && (
++          <div>
++            {[character.gender, character.race].filter(Boolean).join(' ')}
++          </div>
++        )}
++        <div>
++          HP: {character.hp} / {character.maxHp} | AC: {character.ac} {character.acNote ? `(${character.acNote})` : ''}
++        </div>
++      </div>
++
++      <div className="mb-2">
++        <button
++          onClick={() => setIsExpanded(!isExpanded)}
++          className="text-gray-300 hover:text-white underline text-sm"
++        >
++          {isExpanded ? 'Collapse' : 'Expand'}
++        </button>
++      </div>
++
++      {isExpanded && (
++        <CreatureStatBlock
++          abilityScores={character.abilityScores}
++          ac={character.ac}
++          acNote={character.acNote}
++          hp={character.hp}
++          maxHp={character.maxHp}
++          skills={character.skills}
++          savingThrows={character.savingThrows}
++          damageResistances={character.damageResistances}
++          damageImmunities={character.damageImmunities}
++          damageVulnerabilities={character.damageVulnerabilities}
++          conditionImmunities={character.conditionImmunities}
++          senses={character.senses}
++          languages={character.languages}
++          traits={character.traits}
++          actions={character.actions}
++          bonusActions={character.bonusActions}
++          reactions={character.reactions}
++          isCompact={false}
++        />
++      )}
++    </div>
++  );
++}
+diff --git a/lib/components/CharacterEditor.tsx b/lib/components/CharacterEditor.tsx
+new file mode 100644
+index 0000000..e45b1ae
+--- /dev/null
++++ b/lib/components/CharacterEditor.tsx
+@@ -0,0 +1,228 @@
++'use client';
++
++import { useState } from 'react';
++import { CreatureStatsForm } from '@/lib/components/CreatureStatsForm';
++import { AlignmentSelect } from '@/lib/components/AlignmentSelect';
++import {
++  Character,
++  CharacterType,
++  CreatureStats,
++  calculateTotalLevel,
++  VALID_CLASSES,
++  VALID_RACES,
++  DnDRace,
++  normalizeAlignment,
++} from '@/lib/types';
++
++export function CharacterEditor({
++  character,
++  onSave,
++  onCancel,
++  isNew,
++}: {
++  character: Character;
++  onSave: (character: Character) => void;
++  onCancel: () => void;
++  isNew: boolean;
++}) {
++  const [name, setName] = useState(character.name);
++  const [classes, setClasses] = useState(character.classes || [{ class: 'Fighter', level: 1 }]);
++  const [race, setRace] = useState(character.race || '');
++  const [gender, setGender] = useState(character.gender || '');
++  const [alignment, setAlignment] = useState(
++    normalizeAlignment(character.alignment) ?? '',
++  );
++  const [characterType, setCharacterType] = useState<CharacterType>(character.characterType ?? 'character');
++  const [stats, setStats] = useState<CreatureStats>(character);
++  const [saving, setSaving] = useState(false);
++  const [validationError, setValidationError] = useState<string | null>(null);
++
++  const handleStatsChange = (newStats: CreatureStats) => {
++    setStats(newStats);
++  };
++
++  const handleSave = async () => {
++    setValidationError(null);
++
++    if (stats.hp > stats.maxHp) {
++      setValidationError('Current HP cannot be greater than Max HP');
++      return;
++    }
++
++    if (!name.trim()) {
++      setValidationError('Character name is required');
++      return;
++    }
++
++    setSaving(true);
++    try {
++      const characterData: Character = {
++        ...stats,
++        id: character.id,
++        userId: character.userId,
++        name,
++        classes,
++        race: (race as DnDRace) || undefined,
++        gender: gender.trim(),
++        alignment: normalizeAlignment(alignment),
++        characterType,
++      };
++      await onSave(characterData);
++    } finally {
++      setSaving(false);
++    }
++  };
++
++  return (
++    <div className="bg-gray-800 rounded-lg p-6 mb-6 border-2 border-blue-500">
++      <h2 className="text-2xl font-bold mb-4">{isNew ? 'Create Character' : 'Edit Character'}</h2>
++
++      {validationError && (
++        <div className="p-3 bg-red-900 border border-red-700 rounded text-red-200 mb-4">
++          {validationError}
++        </div>
++      )}
++
++      {/* Character Info */}
++      <div className="grid md:grid-cols-2 gap-4 mb-6 pb-6 border-b border-gray-700">
++        <div>
++          <label className="block mb-1 text-sm font-bold">Name</label>
++          <input
++            type="text"
++            value={name}
++            onChange={e => setName(e.target.value)}
++            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
++            disabled={saving}
++            aria-label="Character name"
++          />
++        </div>
++
++        <div>
++          <label className="block mb-1 text-sm font-bold">Classes (Multiclass)</label>
++          <div className="space-y-2">
++            {classes.map((classEntry, idx) => (
++              <div key={idx} className="flex gap-2">
++                <select
++                  value={classEntry.class}
++                  onChange={e => {
++                    const newClasses = [...classes];
++                    newClasses[idx].class = e.target.value as any;
++                    setClasses(newClasses);
++                  }}
++                  className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
++                  disabled={saving}
++                  aria-label="Character class"
++                >
++                  <option value="">Select class...</option>
++                  {VALID_CLASSES.map(cls => (
++                    <option key={cls} value={cls}>{cls}</option>
++                  ))}
++                </select>
++                <input
++                  type="number"
++                  value={classEntry.level}
++                  onChange={e => {
++                    const newClasses = [...classes];
++                    newClasses[idx].level = parseInt(e.target.value) || 1;
++                    setClasses(newClasses);
++                  }}
++                  className="w-20 bg-gray-700 rounded px-3 py-2 text-white"
++                  disabled={saving}
++                  min="1"
++                  max="20"
++                  aria-label="Class level"
++                />
++                <button
++                  onClick={() => setClasses(classes.filter((_, i) => i !== idx))}
++                  disabled={saving || classes.length === 1}
++                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 px-3 py-2 rounded text-sm"
++                >
++                  Remove
++                </button>
++              </div>
++            ))}
++            <button
++              onClick={() => setClasses([...classes, { class: 'Fighter', level: 1 }])}
++              disabled={saving}
++              className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm"
++            >
++              Add Class
++            </button>
++            <div className="text-sm text-gray-300">
++              Total Level: {calculateTotalLevel(classes)}
++            </div>
++          </div>
++        </div>
++
++        <div>
++          <label className="block mb-1 text-sm font-bold">Race</label>
++          <select
++            value={race}
++            onChange={e => setRace(e.target.value)}
++            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
++            disabled={saving}
++            aria-label="Character race"
++          >
++            <option value="">Select a race...</option>
++            {VALID_RACES.map(r => (
++              <option key={r} value={r}>{r}</option>
++            ))}
++          </select>
++        </div>
++
++        <div className="md:col-span-2">
++          <AlignmentSelect value={alignment} onChange={setAlignment} disabled={saving} />
++        </div>
++
++        <div className="md:col-span-2">
++          <label className="block mb-1 text-sm font-bold">Gender</label>
++          <input
++            type="text"
++            value={gender}
++            onChange={e => setGender(e.target.value)}
++            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
++            disabled={saving}
++            aria-label="Character gender"
++            placeholder="e.g., Female, Male, Non-binary, etc."
++            maxLength={50}
++          />
++        </div>
++
++        <div>
++          <label className="block mb-1 text-sm font-bold">Type</label>
++          <select
++            value={characterType}
++            onChange={e => setCharacterType(e.target.value as CharacterType)}
++            className="w-full bg-gray-700 rounded px-3 py-2 text-white"
++            disabled={saving}
++            aria-label="Character type"
++          >
++            <option value="character">Player Character</option>
++            <option value="npc">Travelling NPC</option>
++            <option value="companion">Companion</option>
++          </select>
++        </div>
++      </div>
++
++      {/* Creature Stats */}
++      <CreatureStatsForm stats={stats} onChange={handleStatsChange} />
++
++      <div className="flex gap-2 mt-6">
++        <button
++          onClick={handleSave}
++          disabled={saving || !name.trim()}
++          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded"
++        >
++          {saving ? 'Saving...' : 'Save Character'}
++        </button>
++        <button
++          onClick={onCancel}
++          disabled={saving}
++          className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 px-4 py-2 rounded"
++        >
++          Cancel
++        </button>
++      </div>
++    </div>
++  );
++}
