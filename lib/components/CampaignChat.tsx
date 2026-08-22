@@ -617,10 +617,14 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   // ── Dice session bridge: accept externally-requested rolls that match our current campaign/session ──
   useEffect(() => {
     return onRollRequested(payload => {
-      if (payload.campaignId !== campaignId) return
-      if (payload.sessionId !== activeSessionId) return
+      if (payload.campaignId !== campaignId || payload.sessionId !== activeSessionId) {
+        payload.onResult?.('ignored')
+        return
+      }
       submitRoll(payload.roll.formula, payload.roll.rolls, payload.roll.total, payload.roll.visibility)
+        .then(result => payload.onResult?.(result))
     })
+  // submitRoll only closes over campaignId (already a dep), refs, and state setters — safe to omit.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignId, activeSessionId])
 

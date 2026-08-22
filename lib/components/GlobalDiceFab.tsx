@@ -4,20 +4,14 @@ import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { rollDicePool, DIE_SIDES, EMPTY_POOL, getActiveDiceGroups, buildPoolFormula } from '@/lib/utils/dice'
 import { DIE_ICONS, DiceD20Icon } from '@/lib/components/icons/dice'
-import { onPresenceChange, requestRoll, type DicePresence } from '@/lib/dice/diceSessionBridge'
-import type { RollVisibility } from '@/lib/types'
-
-interface RollResult {
-  formula: string
-  rolls: number[]
-  total: number
-  visibility: RollVisibility
-}
+import { onPresenceChange, requestRoll, type DicePresence, type RollOutcome } from '@/lib/dice/diceSessionBridge'
 
 // Bounds on user-controlled pool inputs so a standalone (no server validation) roll
 // can't be used to force excessive client-side computation or an outsized payload.
 const MAX_PER_DIE = 20
 const MAX_MODIFIER = 999
+
+type SendState = 'idle' | 'pending' | 'sent' | 'failed'
 
 export function GlobalDiceFab() {
   const { user } = useAuth()
@@ -26,9 +20,9 @@ export function GlobalDiceFab() {
   const [modifierText, setModifierText] = useState('0')
   const rawModifier = modifierText === '' || modifierText === '-' ? 0 : (parseInt(modifierText, 10) || 0)
   const modifier = Math.max(-MAX_MODIFIER, Math.min(MAX_MODIFIER, rawModifier))
-  const [result, setResult] = useState<RollResult | null>(null)
+  const [result, setResult] = useState<RollOutcome | null>(null)
   const [presence, setPresence] = useState<DicePresence | null>(null)
-  const [sent, setSent] = useState(false)
+  const [sendState, setSendState] = useState<SendState>('idle')
 
   const triggerRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -39,6 +33,9 @@ export function GlobalDiceFab() {
 
   useEffect(() => {
     if (!isOpen) return
+    panelRef.current?.focus()
+    const trigger = triggerRef.current
+
     function handlePointerDown(e: MouseEvent) {
       const target = e.target as Node
       if (panelRef.current?.contains(target)) return
@@ -53,6 +50,7 @@ export function GlobalDiceFab() {
     return () => {
       document.removeEventListener('mousedown', handlePointerDown)
       document.removeEventListener('keydown', handleKeyDown)
+      trigger?.focus()
     }
   }, [isOpen])
 
@@ -68,7 +66,7 @@ export function GlobalDiceFab() {
 
   function handleOpen() {
     setResult(null)
-    setSent(false)
+    setSendState('idle')
     setIsOpen(true)
   }
 
@@ -79,13 +77,18 @@ export function GlobalDiceFab() {
     const rolls = rollDicePool(groups).map(r => r.value)
     const total = rolls.reduce((sum, v) => sum + v, 0) + modifier
     setResult({ formula, rolls, total, visibility: { scope: 'group' } })
-    setSent(false)
+    setSendState('idle')
   }
 
   function handleSendToChat() {
     if (!result || !presence) return
-    requestRoll({ campaignId: presence.campaignId, sessionId: presence.sessionId, roll: result })
-    setSent(true)
+    setSendState('pending')
+    requestRoll({
+      campaignId: presence.campaignId,
+      sessionId: presence.sessionId,
+      roll: result,
+      onResult: outcome => setSendState(outcome === 'success' ? 'sent' : 'failed'),
+    })
   }
 
   return (
@@ -104,9 +107,13 @@ export function GlobalDiceFab() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div
             ref={panelRef}
-            aria-label="Roll dice"
-            className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-4 w-72 flex flex-col gap-3"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="global-dice-fab-heading"
+            tabIndex={-1}
+            className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-4 w-72 flex flex-col gap-3 outline-none"
           >
+            <p id="global-dice-fab-heading" className="text-sm font-semibold text-white">Roll dice</p>
             <div className="flex flex-wrap gap-1 items-center">
               {DIE_SIDES.map(sides => {
                 const Icon = DIE_ICONS[sides]
@@ -141,7 +148,7 @@ export function GlobalDiceFab() {
               value={modifierText}
               onChange={e => {
                 const v = e.target.value
-                if (v === '' || v === '-' || /^-?\d{1,4}$/.test(v)) setModifierText(v)
+                if (v === '' || v === '-' || /^-?\d{1,3}$/.test(v)) setModifierText(v)
               }}
               aria-label="Modifier"
               className="w-14 text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5"
@@ -159,16 +166,18 @@ export function GlobalDiceFab() {
                 <div>
                   {result.formula} → [{result.rolls.join(', ')}] = <span className="font-bold text-white">{result.total}</span>
                 </div>
-                {presence && !sent && (
+                {presence && sendState !== 'sent' && (
                   <button
                     type="button"
                     onClick={handleSendToChat}
-                    className="mt-2 text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded"
+                    disabled={sendState === 'pending'}
+                    className="mt-2 text-xs bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-3 py-1 rounded"
                   >
-                    Send to session chat
+                    {sendState === 'pending' ? 'Sending…' : sendState === 'failed' ? 'Retry send' : 'Send to session chat'}
                   </button>
                 )}
-                {sent && <p className="mt-2 text-xs text-green-400">Sent to session chat</p>}
+                {sendState === 'sent' && <p className="mt-2 text-xs text-green-400">Sent to session chat</p>}
+                {sendState === 'failed' && <p className="mt-2 text-xs text-red-400">Couldn&apos;t send to session chat — try again</p>}
               </div>
             )}
           </div>

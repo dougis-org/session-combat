@@ -49,6 +49,12 @@ describe('GlobalDiceFab — visibility', () => {
 })
 
 describe('GlobalDiceFab — standalone modal', () => {
+  it('the modal is not mounted until the fab is first opened', () => {
+    mockAuthed()
+    render(<GlobalDiceFab />)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
   it('opening the fab shows a center-screen modal with controls for all six die sizes', async () => {
     mockAuthed()
     const user = userEvent.setup()
@@ -165,6 +171,62 @@ describe('GlobalDiceFab — send to session chat', () => {
     expect(screen.getByRole('button', { name: /send to session chat/i })).toBeInTheDocument()
     act(() => { clearPresence() })
     expect(screen.queryByRole('button', { name: /send to session chat/i })).not.toBeInTheDocument()
+  })
+
+  async function rollAndSend(user: ReturnType<typeof userEvent.setup>) {
+    act(() => { announcePresence({ campaignId: 'camp-1', sessionId: 'sess-1' }) })
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: 'Add d20' }))
+    await user.click(screen.getByRole('button', { name: 'Roll' }))
+    await user.click(screen.getByRole('button', { name: /send to session chat/i }))
+  }
+
+  it('shows a pending state immediately after send, before the ack resolves', async () => {
+    mockAuthed()
+    onRollRequested(() => { /* never acks */ })
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    await rollAndSend(user)
+    expect(screen.getByRole('button', { name: /sending/i })).toBeDisabled()
+  })
+
+  it('shows a confirmed "Sent" state only once the receiving CampaignChat acks success', async () => {
+    mockAuthed()
+    onRollRequested(payload => payload.onResult?.('success'))
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    await rollAndSend(user)
+    await waitFor(() => {
+      expect(screen.getByText(/sent to session chat/i)).toBeInTheDocument()
+    })
+  })
+
+  it('shows a failure state and does not claim success when the roll could not be delivered', async () => {
+    mockAuthed()
+    onRollRequested(payload => payload.onResult?.('error'))
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    await rollAndSend(user)
+    await waitFor(() => {
+      expect(screen.queryByText(/sent to session chat/i)).not.toBeInTheDocument()
+      expect(screen.getByText(/couldn.t send/i)).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /retry send/i })).toBeInTheDocument()
+  })
+
+  it('shows a failure state when no CampaignChat is mounted to receive the request', async () => {
+    mockAuthed()
+    // no onRollRequested subscriber at all — requestRoll() drops the payload before dispatch
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    act(() => { announcePresence({ campaignId: 'camp-1', sessionId: 'sess-1' }) })
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: 'Add d20' }))
+    await user.click(screen.getByRole('button', { name: 'Roll' }))
+    await user.click(screen.getByRole('button', { name: /send to session chat/i }))
+    // With zero subscribers, requestRoll delivers to nobody and no ack ever fires;
+    // the button must not silently flip to a false "sent" confirmation.
+    expect(screen.queryByText(/sent to session chat/i)).not.toBeInTheDocument()
   })
 })
 

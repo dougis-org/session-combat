@@ -109,6 +109,16 @@ describe('CampaignChat — dice session bridge presence lifecycle', () => {
     unmount()
     expect(spy).toHaveBeenCalled()
   })
+
+  it('transitioning directly from one active session to another clears the old presence and announces the new one', () => {
+    const clearSpy = jest.spyOn(bridge, 'clearPresence')
+    const announceSpy = jest.spyOn(bridge, 'announcePresence')
+    const { rerender } = render(<CampaignChat campaignId={CAMPAIGN_ID} activeSessionId="session-1" />)
+    announceSpy.mockClear()
+    rerender(<CampaignChat campaignId={CAMPAIGN_ID} activeSessionId="session-2" />)
+    expect(clearSpy).toHaveBeenCalled()
+    expect(announceSpy).toHaveBeenCalledWith({ campaignId: CAMPAIGN_ID, sessionId: 'session-2' })
+  })
 })
 
 describe('CampaignChat — dice session bridge roll-request scoping', () => {
@@ -165,5 +175,80 @@ describe('CampaignChat — dice session bridge roll-request scoping', () => {
     await waitFor(() => {
       expect(screen.queryByText(/1d4/)).not.toBeInTheDocument()
     })
+  })
+
+  it('a network failure on an externally-requested roll (fetch throws) adds nothing and does not crash', async () => {
+    fetchSpy = jest.fn().mockImplementation((url: string, init?: RequestInit) => {
+      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
+      if (url.includes('/messages')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
+      if (url.includes('/rolls') && (!init || init.method !== 'POST')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ rolls: [] }) })
+      if (url.includes('/rolls') && init?.method === 'POST') return Promise.reject(new Error('network down'))
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+    })
+    global.fetch = fetchSpy as unknown as typeof global.fetch
+    await openDock(CAMPAIGN_ID, 'session-1')
+    let ackResult: string | undefined
+    await act(async () => {
+      requestRoll({
+        campaignId: CAMPAIGN_ID,
+        sessionId: 'session-1',
+        roll: { formula: '1d6', rolls: [4], total: 4, visibility: { scope: 'group' } },
+        onResult: r => { ackResult = r },
+      })
+      await Promise.resolve()
+    })
+    await waitFor(() => expect(ackResult).toBe('error'))
+    expect(screen.queryByText(/1d6/)).not.toBeInTheDocument()
+  })
+
+  it('a successful externally-requested roll acks "success" back to the sender', async () => {
+    await openDock(CAMPAIGN_ID, 'session-1')
+    let ackResult: string | undefined
+    act(() => {
+      requestRoll({
+        campaignId: CAMPAIGN_ID,
+        sessionId: 'session-1',
+        roll: { formula: '2d6', rolls: [3, 5], total: 8, visibility: { scope: 'group' } },
+        onResult: r => { ackResult = r },
+      })
+    })
+    await waitFor(() => expect(ackResult).toBe('success'))
+  })
+
+  it('a mismatched roll request acks "ignored" back to the sender', async () => {
+    await openDock(CAMPAIGN_ID, 'session-1')
+    let ackResult: string | undefined
+    act(() => {
+      requestRoll({
+        campaignId: 'other-campaign',
+        sessionId: 'session-1',
+        roll: { formula: '1d20', rolls: [10], total: 10, visibility: { scope: 'group' } },
+        onResult: r => { ackResult = r },
+      })
+    })
+    expect(ackResult).toBe('ignored')
+  })
+
+  it('an externally-requested roll force-scrolls the feed, matching the own-committed-roll rule', async () => {
+    setupFetchMock({ rollPostBody: makeRoll({ id: 'roll-3d6', formula: '3d6', rolls: [1, 2, 3], total: 6 }) })
+    await openDock(CAMPAIGN_ID, 'session-1')
+    const feed = screen.getByRole('complementary', { name: /campaign chat/i }).querySelector('[class*="overflow-y-auto"]') as HTMLElement
+    const scrollToSpy = jest.fn()
+    Object.defineProperty(feed, 'scrollTo', { value: scrollToSpy, writable: true })
+    // Simulate the user having scrolled away from the bottom — the bottom-proximity-gated
+    // rule (used for remote/other-user rolls) would skip scrolling in this state.
+    Object.defineProperty(feed, 'scrollHeight', { value: 1000, configurable: true })
+    Object.defineProperty(feed, 'scrollTop', { value: 0, configurable: true })
+    Object.defineProperty(feed, 'clientHeight', { value: 200, configurable: true })
+
+    act(() => {
+      requestRoll({
+        campaignId: CAMPAIGN_ID,
+        sessionId: 'session-1',
+        roll: { formula: '3d6', rolls: [1, 2, 3], total: 6, visibility: { scope: 'group' } },
+      })
+    })
+    await waitFor(() => expect(screen.getByText(/3d6/)).toBeInTheDocument())
+    await waitFor(() => expect(scrollToSpy).toHaveBeenCalled())
   })
 })
