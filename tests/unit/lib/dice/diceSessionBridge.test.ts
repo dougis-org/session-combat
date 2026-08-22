@@ -78,6 +78,27 @@ describe('diceSessionBridge — roll-request channel', () => {
     ).not.toThrow()
   })
 
+  it('a malformed roll request (invalid ids, out-of-bounds dice) is silently dropped', () => {
+    const cb = jest.fn()
+    onRollRequested(cb)
+    requestRoll({
+      campaignId: '',
+      sessionId: 's1',
+      roll: { formula: '1d6', rolls: [3], total: 3, visibility: { scope: 'group' } },
+    } as never)
+    requestRoll({
+      campaignId: 'c1',
+      sessionId: 's1',
+      roll: { formula: '1d6', rolls: [999], total: 999, visibility: { scope: 'group' } },
+    })
+    requestRoll({
+      campaignId: 'c1',
+      sessionId: 's1',
+      roll: { formula: '1d6', rolls: Array(500).fill(1), total: 500, visibility: { scope: 'group' } },
+    })
+    expect(cb).not.toHaveBeenCalled()
+  })
+
   it('unsubscribing stops further roll-request notifications', () => {
     const cb = jest.fn()
     const unsubscribe = onRollRequested(cb)

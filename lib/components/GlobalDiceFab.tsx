@@ -14,12 +14,18 @@ interface RollResult {
   visibility: RollVisibility
 }
 
+// Bounds on user-controlled pool inputs so a standalone (no server validation) roll
+// can't be used to force excessive client-side computation or an outsized payload.
+const MAX_PER_DIE = 20
+const MAX_MODIFIER = 999
+
 export function GlobalDiceFab() {
   const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [pool, setPool] = useState<Record<number, number>>(EMPTY_POOL)
   const [modifierText, setModifierText] = useState('0')
-  const modifier = modifierText === '' || modifierText === '-' ? 0 : (parseInt(modifierText, 10) || 0)
+  const rawModifier = modifierText === '' || modifierText === '-' ? 0 : (parseInt(modifierText, 10) || 0)
+  const modifier = Math.max(-MAX_MODIFIER, Math.min(MAX_MODIFIER, rawModifier))
   const [result, setResult] = useState<RollResult | null>(null)
   const [presence, setPresence] = useState<DicePresence | null>(null)
   const [sent, setSent] = useState(false)
@@ -53,7 +59,7 @@ export function GlobalDiceFab() {
   if (!user) return null
 
   function handleAdd(sides: number) {
-    setPool(prev => ({ ...prev, [sides]: prev[sides] + 1 }))
+    setPool(prev => ({ ...prev, [sides]: Math.min(MAX_PER_DIE, prev[sides] + 1) }))
   }
 
   function handleRemove(sides: number) {
@@ -117,9 +123,10 @@ export function GlobalDiceFab() {
                     <button
                       type="button"
                       onClick={() => handleAdd(sides)}
+                      disabled={pool[sides] >= MAX_PER_DIE}
                       aria-label={`Add d${sides}`}
                       title={`d${sides}`}
-                      className="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded flex items-center gap-1"
+                      className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded flex items-center gap-1"
                     >
                       <Icon width={21} height={21} aria-hidden="true" />
                       ×{pool[sides]}
@@ -134,7 +141,7 @@ export function GlobalDiceFab() {
               value={modifierText}
               onChange={e => {
                 const v = e.target.value
-                if (v === '' || v === '-' || /^-?\d+$/.test(v)) setModifierText(v)
+                if (v === '' || v === '-' || /^-?\d{1,4}$/.test(v)) setModifierText(v)
               }}
               aria-label="Modifier"
               className="w-14 text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5"

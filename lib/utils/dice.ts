@@ -3,11 +3,9 @@ type SupportedSides = (typeof SUPPORTED_SIDES)[number];
 
 function getCrypto(): Crypto {
   const cryptoObj =
-    (typeof crypto !== "undefined"
+    typeof crypto !== "undefined"
       ? crypto
-      : typeof globalThis !== "undefined"
-      ? (globalThis as any).crypto
-      : undefined);
+      : (globalThis as { crypto?: Crypto }).crypto;
 
   if (!cryptoObj || typeof cryptoObj.getRandomValues !== "function") {
     throw new Error("Secure random number generation is not available in this environment.");
