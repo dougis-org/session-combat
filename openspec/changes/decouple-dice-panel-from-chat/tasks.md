@@ -48,17 +48,17 @@
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] Run unit/integration tests
-- [ ] Run E2E tests (if applicable)
-- [ ] Run type checks
-- [ ] Run build
-- [ ] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests
+- [x] Run E2E tests (if applicable)
+- [x] Run type checks
+- [x] Run build
+- [x] Run security/code quality checks required by project standards
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -77,10 +77,10 @@ If **ANY** required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `decouple-dice-panel-from-chat` to `main`. The PR body **must** include `Closes #521`.
-- [ ] **Issue lifecycle: mark in-review**: run `gh issue edit 521 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `decouple-dice-panel-from-chat` to `main`. The PR body **must** include `Closes #521`.
+- [x] **Issue lifecycle: mark in-review**: run `gh issue edit 521 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
 - [ ] Wait 60 seconds for CI to start
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
 - [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
