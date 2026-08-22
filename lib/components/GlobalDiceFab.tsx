@@ -2,16 +2,17 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { rollDicePool, DIE_SIDES, EMPTY_POOL, getActiveDiceGroups, buildPoolFormula } from '@/lib/utils/dice'
+import { rollDicePool, DIE_SIDES, EMPTY_POOL, getActiveDiceGroups, buildPoolFormula, MAX_PER_DIE, MAX_MODIFIER } from '@/lib/utils/dice'
 import { DIE_ICONS, DiceD20Icon } from '@/lib/components/icons/dice'
 import { onPresenceChange, requestRoll, type DicePresence, type RollOutcome } from '@/lib/dice/diceSessionBridge'
 
-// Bounds on user-controlled pool inputs so a standalone (no server validation) roll
-// can't be used to force excessive client-side computation or an outsized payload.
-const MAX_PER_DIE = 20
-const MAX_MODIFIER = 999
-
 type SendState = 'idle' | 'pending' | 'sent' | 'failed'
+
+const SEND_BUTTON_LABEL: Record<Exclude<SendState, 'sent'>, string> = {
+  idle: 'Send to session chat',
+  pending: 'Sending…',
+  failed: 'Retry send',
+}
 
 export function GlobalDiceFab() {
   const { user } = useAuth()
@@ -173,7 +174,7 @@ export function GlobalDiceFab() {
                     disabled={sendState === 'pending'}
                     className="mt-2 text-xs bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-3 py-1 rounded"
                   >
-                    {sendState === 'pending' ? 'Sending…' : sendState === 'failed' ? 'Retry send' : 'Send to session chat'}
+                    {SEND_BUTTON_LABEL[sendState as Exclude<SendState, 'sent'>]}
                   </button>
                 )}
                 {sendState === 'sent' && <p className="mt-2 text-xs text-green-400">Sent to session chat</p>}

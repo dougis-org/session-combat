@@ -4,7 +4,7 @@
 
 > If you are an AI coding agent reading this via CLAUDE.md: scan the catalog below for any node whose title, kind, or file scope is relevant to the task the user just asked you to do. Open the matching files via the Read tool before writing code. Most projects accumulate dozens to hundreds of nodes — do not read them all; pick the few that fit the current change.
 
-## decisions/ (23)
+## decisions/ (33)
 
 - [[n015-model-session-lifecycle-as-its-own-campaign-stream]] — **Model session lifecycle as its own campaign stream event variant**
   *decision* · 84%
@@ -52,6 +52,26 @@
   *decision* · 84%
 - [[n037-treat-http-207-as-partial-success-and-keep-the-err]] — **Treat HTTP 207 as partial success and keep the error message visible**
   *decision* · 88%
+- [[n042-rollback-campaign-creation-if-dependent-party-memb]] — **Rollback campaign creation if dependent party/member creation fails**
+  *decision* · 80%
+- [[n043-route-storage-events-through-one-logging-seam-for]] — **Route storage events through one logging seam for future telemetry**
+  *decision* · 91%
+- [[n044-decompose-storage-by-domain-behind-a-stable-storag]] — **Decompose storage by domain behind a stable storage facade**
+  *decision* · 88% · scope: `lib/storage.ts`
+- [[n045-use-a-four-value-taxonomy-for-storage-error-behavi]] — **Use a four-value taxonomy for storage error behavior**
+  *decision* · 88% · scope: `lib/storage.ts`, `openspec/**`
+- [[n046-build-formulas-from-structured-staged-counts-not-f]] — **Build formulas from structured staged counts, not free-form input**
+  *decision* · 84%
+- [[n047-render-dice-popouts-through-a-body-level-portal]] — **Render dice popouts through a body-level portal**
+  *decision* · 88%
+- [[n048-validate-every-dice-pool-group-before-producing-an]] — **Validate every dice-pool group before producing any results**
+  *decision* · 90%
+- [[n049-keep-staged-dice-local-until-the-roll-is-committed]] — **Keep staged dice local until the roll is committed**
+  *decision* · 78%
+- [[n050-keep-dice-generation-client-side-only-with-server]] — **Keep dice generation client-side only with server validation of submitted results**
+  *decision* · 86% · scope: `**/dice/**`, `**/rolls/**`
+- [[n051-centralize-unbiased-dice-generation-behind-a-rejec]] — **Centralize unbiased dice generation behind a rejection-sampling utility**
+  *decision* · 86%
 
 ## domain/ (4)
 

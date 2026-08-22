@@ -57,23 +57,31 @@ function isValidPresence(value: unknown): value is DicePresence {
   return isNonEmptyBoundedString(v.campaignId, MAX_ID_LENGTH) && isNonEmptyBoundedString(v.sessionId, MAX_ID_LENGTH)
 }
 
+function isValidRollShape(roll: unknown): roll is RollOutcome {
+  if (!roll || typeof roll !== 'object') return false
+  const r = roll as Record<string, unknown>
+  const rolls = r.rolls
+  const visibility = r.visibility as { scope?: unknown } | undefined
+  const checks = [
+    isNonEmptyBoundedString(r.formula, MAX_FORMULA_LENGTH),
+    Array.isArray(rolls) && rolls.length > 0 && rolls.length <= MAX_DICE_IN_ROLL,
+    Array.isArray(rolls) && rolls.every(v => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= MAX_DIE_VALUE),
+    typeof r.total === 'number' && Number.isFinite(r.total) && Math.abs(r.total) <= MAX_TOTAL_MAGNITUDE,
+    !!visibility && (visibility.scope === 'group' || visibility.scope === 'dm-only'),
+  ]
+  return checks.every(Boolean)
+}
+
 function isValidRollRequestPayload(payload: unknown): payload is RollRequestPayload {
   if (!payload || typeof payload !== 'object') return false
   const p = payload as Record<string, unknown>
-  if (!isNonEmptyBoundedString(p.campaignId, MAX_ID_LENGTH)) return false
-  if (!isNonEmptyBoundedString(p.sessionId, MAX_ID_LENGTH)) return false
-  if (p.onResult !== undefined && typeof p.onResult !== 'function') return false
-
-  const roll = p.roll as Record<string, unknown> | undefined
-  if (!roll || typeof roll !== 'object') return false
-  if (!isNonEmptyBoundedString(roll.formula, MAX_FORMULA_LENGTH)) return false
-  if (!Array.isArray(roll.rolls) || roll.rolls.length === 0 || roll.rolls.length > MAX_DICE_IN_ROLL) return false
-  if (!roll.rolls.every(v => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= MAX_DIE_VALUE)) return false
-  if (typeof roll.total !== 'number' || !Number.isFinite(roll.total) || Math.abs(roll.total) > MAX_TOTAL_MAGNITUDE) return false
-  const visibility = roll.visibility as { scope?: unknown } | undefined
-  if (!visibility || (visibility.scope !== 'group' && visibility.scope !== 'dm-only')) return false
-
-  return true
+  const checks = [
+    isNonEmptyBoundedString(p.campaignId, MAX_ID_LENGTH),
+    isNonEmptyBoundedString(p.sessionId, MAX_ID_LENGTH),
+    p.onResult === undefined || typeof p.onResult === 'function',
+    isValidRollShape(p.roll),
+  ]
+  return checks.every(Boolean)
 }
 
 export function announcePresence(presence: DicePresence): void {

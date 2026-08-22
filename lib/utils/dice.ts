@@ -93,6 +93,14 @@ export const DIE_SIDES = [4, 6, 8, 10, 12, 20] as const;
 /** A dice pool with every offered die size zeroed out. Frozen — always spread before mutating. */
 export const EMPTY_POOL: Readonly<Record<number, number>> = Object.freeze({ 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 20: 0 });
 
+/**
+ * Shared bounds on user-controlled pool inputs (in-chat and standalone FAB builders alike),
+ * so a pool can't be grown/modified into excessive client-side computation or an outsized
+ * payload. Defense-in-depth only — the server route is the real trust boundary.
+ */
+export const MAX_PER_DIE = 20;
+export const MAX_MODIFIER = 999;
+
 /** Reduce a dice pool to the `{ sides, count }` groups that have at least one die selected. */
 export function getActiveDiceGroups(
   pool: Record<number, number>

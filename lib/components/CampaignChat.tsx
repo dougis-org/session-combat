@@ -4,7 +4,7 @@ import { useReducer, useEffect, useRef, useState } from 'react'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import { useCampaignStream } from '@/lib/hooks/useCampaignStream'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { rollDicePool, DIE_SIDES, EMPTY_POOL, getActiveDiceGroups, buildPoolFormula } from '@/lib/utils/dice'
+import { rollDicePool, DIE_SIDES, EMPTY_POOL, getActiveDiceGroups, buildPoolFormula, MAX_PER_DIE, MAX_MODIFIER } from '@/lib/utils/dice'
 import { DIE_ICONS, DiceD20Icon } from '@/lib/components/icons/dice'
 import { announcePresence, clearPresence, onRollRequested } from '@/lib/dice/diceSessionBridge'
 import { SceneComposer } from '@/lib/components/SceneComposer'
@@ -278,7 +278,8 @@ function useDicePool({ activeSessionId, streamStatus, submitRoll, triggerRef, pa
   const [isOpen, setIsOpen] = useState(false)
   const [pool, setPool] = useState<Record<number, number>>(EMPTY_POOL)
   const [modifierText, setModifierText] = useState('0')
-  const modifier = modifierText === '' || modifierText === '-' ? 0 : (parseInt(modifierText, 10) || 0)
+  const rawModifier = modifierText === '' || modifierText === '-' ? 0 : (parseInt(modifierText, 10) || 0)
+  const modifier = Math.max(-MAX_MODIFIER, Math.min(MAX_MODIFIER, rawModifier))
   const [visibility, setVisibility] = useState<RollVisibility>({ scope: 'group' })
   const [isRolling, setIsRolling] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -310,7 +311,7 @@ function useDicePool({ activeSessionId, streamStatus, submitRoll, triggerRef, pa
   }, [isOpen, panelRef, triggerRef])
 
   function handleAdd(sides: number) {
-    setPool(prev => ({ ...prev, [sides]: prev[sides] + 1 }))
+    setPool(prev => ({ ...prev, [sides]: Math.min(MAX_PER_DIE, prev[sides] + 1) }))
   }
 
   function handleRemove(sides: number) {
@@ -410,7 +411,7 @@ function DicePoolPanel({
                 <button
                   type="button"
                   onClick={() => dp.handleAdd(sides)}
-                  disabled={dp.isRolling}
+                  disabled={dp.isRolling || dp.pool[sides] >= MAX_PER_DIE}
                   aria-label={`Add d${sides}`}
                   title={`d${sides}`}
                   className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded flex items-center gap-1"
@@ -429,7 +430,7 @@ function DicePoolPanel({
             value={dp.modifierText}
             onChange={e => {
               const v = e.target.value
-              if (v === '' || v === '-' || /^-?\d+$/.test(v)) dp.setModifierText(v)
+              if (v === '' || v === '-' || /^-?\d{1,3}$/.test(v)) dp.setModifierText(v)
             }}
             disabled={dp.isRolling}
             aria-label="Modifier"
