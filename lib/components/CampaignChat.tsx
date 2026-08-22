@@ -4,8 +4,9 @@ import { useReducer, useEffect, useRef, useState } from 'react'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import { useCampaignStream } from '@/lib/hooks/useCampaignStream'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { rollDicePool } from '@/lib/utils/dice'
+import { rollDicePool, DIE_SIDES, EMPTY_POOL, getActiveDiceGroups, buildPoolFormula } from '@/lib/utils/dice'
 import { DIE_ICONS, DiceD20Icon } from '@/lib/components/icons/dice'
+import { announcePresence, clearPresence, onRollRequested } from '@/lib/dice/diceSessionBridge'
 import { SceneComposer } from '@/lib/components/SceneComposer'
 import { SceneFeedItem } from '@/lib/components/SceneFeedItem'
 import type { CampaignMessage, CampaignRoll, CampaignStreamEvent, MessageVisibility, RollVisibility } from '@/lib/types'
@@ -257,34 +258,23 @@ function ChatComposer({
   )
 }
 
-const DIE_SIDES = [4, 6, 8, 10, 12, 20] as const
-const EMPTY_POOL: Record<number, number> = { 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 20: 0 }
 const ROLL_VISIBILITY_SCOPES = ['group', 'dm-only'] as const
 
 function isRollVisibilityScope(value: string): value is RollVisibility['scope'] {
   return (ROLL_VISIBILITY_SCOPES as readonly string[]).includes(value)
 }
 
-function getActiveDiceGroups(pool: Record<number, number>): { sides: number; count: number }[] {
-  return DIE_SIDES.filter(sides => pool[sides] > 0).map(sides => ({ sides, count: pool[sides] }))
-}
-
-function buildPoolFormula(groups: { sides: number; count: number }[], modifier: number): string {
-  let formula = groups.map(({ sides, count }) => `${count}d${sides}`).join('+')
-  if (modifier !== 0) formula += modifier > 0 ? `+${modifier}` : `${modifier}`
-  return formula
-}
+type RollSubmitResult = 'success' | 'conflict' | 'error'
 
 interface UseDicePoolArgs {
-  campaignId: string
   activeSessionId: string | null
   streamStatus: 'connecting' | 'open' | 'error'
-  onRollPosted: (roll: CampaignRoll) => void
+  submitRoll: (formula: string, rolls: number[], total: number, visibility: RollVisibility) => Promise<RollSubmitResult>
   triggerRef: React.RefObject<HTMLButtonElement | null>
   panelRef: React.RefObject<HTMLDivElement | null>
 }
 
-function useDicePool({ campaignId, activeSessionId, streamStatus, onRollPosted, triggerRef, panelRef }: UseDicePoolArgs) {
+function useDicePool({ activeSessionId, streamStatus, submitRoll, triggerRef, panelRef }: UseDicePoolArgs) {
   const [isOpen, setIsOpen] = useState(false)
   const [pool, setPool] = useState<Record<number, number>>(EMPTY_POOL)
   const [modifierText, setModifierText] = useState('0')
@@ -336,17 +326,11 @@ function useDicePool({ campaignId, activeSessionId, streamStatus, onRollPosted, 
       const formula = buildPoolFormula(groups, modifier)
       const rolls = rollDicePool(groups).map(r => r.value)
       const total = rolls.reduce((sum, v) => sum + v, 0) + modifier
-      const res = await fetch(`/api/campaigns/${campaignId}/rolls`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ formula, rolls, total, visibility }),
-      })
-      if (res.status === 201) {
-        const roll: CampaignRoll = await res.json()
-        onRollPosted(roll)
+      const result = await submitRoll(formula, rolls, total, visibility)
+      if (result === 'success') {
         setPool(EMPTY_POOL)
         setModifierText('0')
-      } else if (res.status === 409) {
+      } else if (result === 'conflict') {
         setError('No active session')
       } else {
         setError('Roll failed, try again')
@@ -599,10 +583,46 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
 
   const { status: streamStatus } = useCampaignStream(campaignId, onStreamEvent)
 
+  async function submitRoll(formula: string, rolls: number[], total: number, visibility: RollVisibility): Promise<RollSubmitResult> {
+    try {
+      const res = await fetch(`/api/campaigns/${campaignId}/rolls`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ formula, rolls, total, visibility }),
+      })
+      if (res.status === 201) {
+        const roll: CampaignRoll = await res.json()
+        handleRollPosted(roll)
+        return 'success'
+      }
+      if (res.status === 409) return 'conflict'
+      return 'error'
+    } catch {
+      return 'error'
+    }
+  }
+
   const dicePool = useDicePool({
-    campaignId, activeSessionId, streamStatus, onRollPosted: handleRollPosted,
+    activeSessionId, streamStatus, submitRoll,
     triggerRef: diceTriggerRef, panelRef: dicePanelRef,
   })
+
+  // ── Dice session bridge: announce/clear presence in lockstep with our own active session ──
+  useEffect(() => {
+    if (activeSessionId === null) return
+    announcePresence({ campaignId, sessionId: activeSessionId })
+    return () => { clearPresence() }
+  }, [campaignId, activeSessionId])
+
+  // ── Dice session bridge: accept externally-requested rolls that match our current campaign/session ──
+  useEffect(() => {
+    return onRollRequested(payload => {
+      if (payload.campaignId !== campaignId) return
+      if (payload.sessionId !== activeSessionId) return
+      submitRoll(payload.roll.formula, payload.roll.rolls, payload.roll.total, payload.roll.visibility)
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaignId, activeSessionId])
 
   // ── Init: pin state + last-open timestamp + persisted size ──
   useEffect(() => {

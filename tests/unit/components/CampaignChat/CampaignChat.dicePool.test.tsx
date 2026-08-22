@@ -28,6 +28,7 @@ jest.mock('@/lib/hooks/useAuth', () => ({
 }))
 
 jest.mock('@/lib/utils/dice', () => ({
+  ...jest.requireActual('@/lib/utils/dice'),
   rollDicePool: jest.fn(),
 }))
 

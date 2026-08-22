@@ -2,49 +2,49 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Create and publish working branch:** `git checkout -b decouple-dice-panel-from-chat` then immediately `git push -u origin decouple-dice-panel-from-chat`
+- [x] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
+- [x] **Step 2 — Create and publish working branch:** `git checkout -b decouple-dice-panel-from-chat` then immediately `git push -u origin decouple-dice-panel-from-chat`
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — this change is issue-driven (GitHub issue #521). Run `gh issue edit 521 --add-label "in-progress"`. Then discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] **Issue lifecycle: mark in-progress** — this change is issue-driven (GitHub issue #521). Run `gh issue edit 521 --add-label "in-progress"`. Then discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
 
 ### 1. `dice-session-bridge` — presence + roll-request module
 
-- [ ] Add `lib/dice/diceSessionBridge.ts`: module-scoped singleton state; `announcePresence({campaignId, sessionId})`, `clearPresence()`, `onPresenceChange(cb)` (returns unsubscribe, replays current value to a new subscriber immediately per spec); `requestRoll({campaignId, sessionId, roll})`, `onRollRequested(cb)` (returns unsubscribe); test-only `resetDiceSessionBridge()` export.
-- [ ] Write unit tests covering every scenario in `openspec/changes/decouple-dice-panel-from-chat/specs/dice-session-bridge/spec.md` (presence announce/clear/replay/unsubscribe, roll-request notify/no-op-with-no-subscribers).
-- [ ] Confirm acceptance criteria in that spec file are covered by the new tests.
+- [x] Add `lib/dice/diceSessionBridge.ts`: module-scoped singleton state; `announcePresence({campaignId, sessionId})`, `clearPresence()`, `onPresenceChange(cb)` (returns unsubscribe, replays current value to a new subscriber immediately per spec); `requestRoll({campaignId, sessionId, roll})`, `onRollRequested(cb)` (returns unsubscribe); test-only `resetDiceSessionBridge()` export.
+- [x] Write unit tests covering every scenario in `openspec/changes/decouple-dice-panel-from-chat/specs/dice-session-bridge/spec.md` (presence announce/clear/replay/unsubscribe, roll-request notify/no-op-with-no-subscribers).
+- [x] Confirm acceptance criteria in that spec file are covered by the new tests.
 
 ### 2. `CampaignChat` — bridge wiring (additive only)
 
-- [ ] Add an effect in `CampaignChat` (near the existing `activeSessionId`/`streamStatus` state) that calls `announcePresence({campaignId, sessionId: activeSessionId})` whenever `activeSessionId` is non-null, and `clearPresence()` on unmount or when `activeSessionId` becomes null.
-- [ ] Add a subscription via `onRollRequested` that, on receiving a payload, compares `payload.campaignId`/`payload.sessionId` against the component's current `campaignId` prop / `activeSessionId` state, and — only on an exact match — routes `payload.roll` through the existing POST-to-`/api/campaigns/:id/rolls` → success/409/error → append/dedupe → scroll tail (extract the shared tail from `handleRoll` into a small internal function if needed so both the in-chat trigger and the bridge subscription call the same code path; do not duplicate the POST/append/scroll logic).
-- [ ] Do **not** modify `useDicePool`, `DicePoolPanel`, `DiceTriggerButton`, or any existing prop/behavior of `CampaignChat`'s own in-chat dice pool.
-- [ ] Write/extend unit tests per `openspec/changes/decouple-dice-panel-from-chat/specs/dice-session-bridge/spec.md` ("CampaignChat only acts on a roll request matching its own current campaign and session", "CampaignChat announces and clears presence in lockstep...") and `openspec/changes/decouple-dice-panel-from-chat/specs/roll-share-ui/spec.md` (externally-requested roll reaches the feed identically; 409 handling; in-chat trigger unaffected).
-- [ ] Run the existing `tests/unit/components/CampaignChat/CampaignChat.dicePool*.test.tsx`, `CampaignChat.roll.test.tsx`, and `CampaignChat.resize.test.tsx` suites unmodified and confirm they still pass (regression gate for "existing chat-roll behavior must not change").
+- [x] Add an effect in `CampaignChat` (near the existing `activeSessionId`/`streamStatus` state) that calls `announcePresence({campaignId, sessionId: activeSessionId})` whenever `activeSessionId` is non-null, and `clearPresence()` on unmount or when `activeSessionId` becomes null.
+- [x] Add a subscription via `onRollRequested` that, on receiving a payload, compares `payload.campaignId`/`payload.sessionId` against the component's current `campaignId` prop / `activeSessionId` state, and — only on an exact match — routes `payload.roll` through the existing POST-to-`/api/campaigns/:id/rolls` → success/409/error → append/dedupe → scroll tail (extract the shared tail from `handleRoll` into a small internal function if needed so both the in-chat trigger and the bridge subscription call the same code path; do not duplicate the POST/append/scroll logic).
+- [x] Do **not** modify `useDicePool`, `DicePoolPanel`, `DiceTriggerButton`, or any existing prop/behavior of `CampaignChat`'s own in-chat dice pool.
+- [x] Write/extend unit tests per `openspec/changes/decouple-dice-panel-from-chat/specs/dice-session-bridge/spec.md` ("CampaignChat only acts on a roll request matching its own current campaign and session", "CampaignChat announces and clears presence in lockstep...") and `openspec/changes/decouple-dice-panel-from-chat/specs/roll-share-ui/spec.md` (externally-requested roll reaches the feed identically; 409 handling; in-chat trigger unaffected).
+- [x] Run the existing `tests/unit/components/CampaignChat/CampaignChat.dicePool*.test.tsx`, `CampaignChat.roll.test.tsx`, and `CampaignChat.resize.test.tsx` suites unmodified and confirm they still pass (regression gate for "existing chat-roll behavior must not change").
 
 ### 3. `GlobalDiceFab` — standalone fab + modal
 
-- [ ] Add `lib/components/GlobalDiceFab.tsx`: fixed lower-left button (reuse `DiceD20Icon` from `lib/components/icons/dice.tsx`), gated by `useAuth()` (renders nothing when `user` is `null`); center-screen modal on click, built from a pool-builder UI equivalent to the existing `DicePoolPanel` controls (extract/share the per-die-size stepper row if straightforward, otherwise duplicate minimally — see design.md's accepted trade-off) using `rollDicePool()` from `lib/utils/dice.ts` for computation.
-- [ ] Implement Escape/outside-click close (mirror the existing `handlePointerDown`/`handleKeyDown` pattern from `useDicePool` in `CampaignChat.tsx`); no timeout-based close.
-- [ ] Subscribe to `onPresenceChange`; show a "send to session chat" control only while presence is non-null; on click, call `requestRoll` using the *current* presence value read at click-time.
-- [ ] Ensure no `document`/portal access occurs during SSR (mirror the guard already proven in `CampaignChat.dicePool.ssr.test.tsx`).
-- [ ] Write unit tests covering every scenario in `openspec/changes/decouple-dice-panel-from-chat/specs/global-dice-fab/spec.md`.
+- [x] Add `lib/components/GlobalDiceFab.tsx`: fixed lower-left button (reuse `DiceD20Icon` from `lib/components/icons/dice.tsx`), gated by `useAuth()` (renders nothing when `user` is `null`); center-screen modal on click, built from a pool-builder UI equivalent to the existing `DicePoolPanel` controls (extract/share the per-die-size stepper row if straightforward, otherwise duplicate minimally — see design.md's accepted trade-off) using `rollDicePool()` from `lib/utils/dice.ts` for computation.
+- [x] Implement Escape/outside-click close (mirror the existing `handlePointerDown`/`handleKeyDown` pattern from `useDicePool` in `CampaignChat.tsx`); no timeout-based close.
+- [x] Subscribe to `onPresenceChange`; show a "send to session chat" control only while presence is non-null; on click, call `requestRoll` using the *current* presence value read at click-time.
+- [x] Ensure no `document`/portal access occurs during SSR (mirror the guard already proven in `CampaignChat.dicePool.ssr.test.tsx`).
+- [x] Write unit tests covering every scenario in `openspec/changes/decouple-dice-panel-from-chat/specs/global-dice-fab/spec.md`.
 
 ### 4. Mount `GlobalDiceFab` in the root layout
 
-- [ ] Add `<GlobalDiceFab />` to `app/layout.tsx` alongside `<NavBar />`.
-- [ ] Manual check: load a few representative routes (a non-campaign page, a campaign page with no active session, a campaign page with an active session) and confirm the fab renders correctly, doesn't visually collide with the footer/nav, and the "send to session chat" option appears/disappears as expected.
+- [x] Add `<GlobalDiceFab />` to `app/layout.tsx` alongside `<NavBar />`.
+- [x] Manual check: load a few representative routes (a non-campaign page, a campaign page with no active session, a campaign page with an active session) and confirm the fab renders correctly, doesn't visually collide with the footer/nav, and the "send to session chat" option appears/disappears as expected.
 
 ### 5. General
 
-- [ ] Implement sub-tasks in small, testable increments, in the order above (bridge → CampaignChat wiring → fab → root-layout mount), running the relevant test file after each step.
-- [ ] Before writing new logic, check for existing reusable pieces (`rollDicePool`, `DIE_ICONS`/`DiceD20Icon`, the outside-click/Escape pattern in `useDicePool`, `useAuth`) — do not reimplement any of these.
-- [ ] Confirm every acceptance criterion in `openspec/changes/decouple-dice-panel-from-chat/proposal.md` and every scenario across the three new/updated spec files is covered by a passing test or an explicit manual-check note above.
+- [x] Implement sub-tasks in small, testable increments, in the order above (bridge → CampaignChat wiring → fab → root-layout mount), running the relevant test file after each step.
+- [x] Before writing new logic, check for existing reusable pieces (`rollDicePool`, `DIE_ICONS`/`DiceD20Icon`, the outside-click/Escape pattern in `useDicePool`, `useAuth`) — do not reimplement any of these.
+- [x] Confirm every acceptance criterion in `openspec/changes/decouple-dice-panel-from-chat/proposal.md` and every scenario across the three new/updated spec files is covered by a passing test or an explicit manual-check note above.
 
 ## Pre-Commit Code Review
 

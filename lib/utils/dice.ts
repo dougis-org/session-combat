@@ -88,3 +88,29 @@ export function rollDicePool(
   }
   return results;
 }
+
+/** Die sizes offered by the standalone dice-pool builder UI (in-chat and global FAB). */
+export const DIE_SIDES = [4, 6, 8, 10, 12, 20] as const;
+
+/** A dice pool with every offered die size zeroed out. */
+export const EMPTY_POOL: Record<number, number> = { 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 20: 0 };
+
+/** Reduce a dice pool to the `{ sides, count }` groups that have at least one die selected. */
+export function getActiveDiceGroups(
+  pool: Record<number, number>
+): { sides: number; count: number }[] {
+  return DIE_SIDES.filter((sides) => pool[sides] > 0).map((sides) => ({
+    sides,
+    count: pool[sides],
+  }));
+}
+
+/** Render a dice-pool formula string (e.g. `2d6+1d20+3`) from groups and a flat modifier. */
+export function buildPoolFormula(
+  groups: { sides: number; count: number }[],
+  modifier: number
+): string {
+  let formula = groups.map(({ sides, count }) => `${count}d${sides}`).join("+");
+  if (modifier !== 0) formula += modifier > 0 ? `+${modifier}` : `${modifier}`;
+  return formula;
+}
