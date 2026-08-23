@@ -150,4 +150,93 @@ describe('CharacterDetailPage', () => {
       expect(screen.getByText('Hero Synced')).toBeInTheDocument();
     });
   });
+  it('shows sync button when viewing a character', async () => {
+    render(<CharacterDetailPage />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Hero')).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole('button', { name: /sync from d&d beyond/i })).toBeInTheDocument();
+  });
+
+  it('shows sync button when editing a character', async () => {
+    render(<CharacterDetailPage />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Hero')).toBeInTheDocument();
+    });
+
+    const editBtn = screen.getByRole('button', { name: /edit character/i });
+    fireEvent.click(editBtn);
+
+    expect(screen.getByRole('button', { name: /sync from d&d beyond/i })).toBeInTheDocument();
+  });
+
+  it('handles sync character from D&D Beyond while editing', async () => {
+    (global.fetch as jest.Mock).mockImplementation((url, options) => {
+      if (url === '/api/characters/char-1') {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            id: 'char-1',
+            name: 'Hero',
+            characterType: 'character',
+            hp: 10,
+            maxHp: 10,
+            ac: 10,
+            abilityScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+            externalSync: {
+              provider: 'dndbeyond',
+              url: 'https://ddb.ac/characters/12345'
+            }
+          })
+        });
+      }
+      if (url === '/api/characters/import') {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            character: {
+              id: 'char-1',
+              name: 'Hero Synced',
+              hp: 12,
+              maxHp: 12,
+              ac: 10,
+              abilityScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+            }
+          })
+        });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+
+    render(<CharacterDetailPage />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Hero')).toBeInTheDocument();
+    });
+
+    const editBtn = screen.getByRole('button', { name: /edit character/i });
+    fireEvent.click(editBtn);
+
+    const syncBtn = screen.getByRole('button', { name: /sync from d&d beyond/i });
+    fireEvent.click(syncBtn);
+
+    expect(screen.getByText('Warning: Full Replacement')).toBeInTheDocument();
+
+    const confirmSyncBtn = screen.getByRole('button', { name: /confirm sync/i });
+    fireEvent.click(confirmSyncBtn);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith('/api/characters/import', expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ url: 'https://ddb.ac/characters/12345', overwrite: true })
+      }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Hero Synced')).toBeInTheDocument();
+    });
+  });
 });
