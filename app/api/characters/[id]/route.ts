@@ -218,8 +218,8 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
 export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
     // Verify ownership before deleting
-    const characters = await storage.loadCharacters(auth.userId);
-    const character = characters.find((c) => c.id === id);
+    const db = await (await import("@/lib/db")).getDatabase();
+    const character = await db.collection("characters").findOne({ id, userId: auth.userId, deletedAt: { $exists: false } });
 
     if (!character) {
       return NextResponse.json(
