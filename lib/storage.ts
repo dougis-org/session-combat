@@ -57,6 +57,7 @@ function normalizeCampaign(campaign: Campaign): Campaign {
   return {
     ...campaign,
     chapters: Array.isArray(campaign.chapters) ? campaign.chapters : [],
+    encounterIds: Array.isArray(campaign.encounterIds) ? campaign.encounterIds : [],
     status: campaign.status ?? 'active',
     notes: campaign.notes ?? '',
   };

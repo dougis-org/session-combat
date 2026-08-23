@@ -19,6 +19,7 @@ The repository utilizes a custom OpenSpec schema defined in the [openspec-shared
    git submodule add https://github.com/dougis-org/openspec-shared .github/openspec-shared
    sh .github/openspec-shared/bootstrap.sh
    ```
+2. **Re-run this after creating a git worktree**: `git worktree add` does **not** carry submodules over into the new worktree — `.github/openspec-shared` starts out as an empty placeholder there, and `openspec/schemas` (a symlink into it) will silently resolve to the wrong/default schema instead of erroring. Since this repo's own OpenSpec workflow runs every change from a dedicated worktree at `.worktrees/<change-name>`, run `git submodule update --init --recursive` again immediately after creating one, before generating any artifacts. Verify with `openspec schema which sdd-with-feedback-loop` — it should report `Source: project`, not fall back to the built-in `spec-driven` schema.
 
 #### Contribution & Change Flow
 All work in this repository must follow this specific process:
