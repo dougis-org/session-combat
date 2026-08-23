@@ -40,6 +40,7 @@ export const metadata: Metadata = {
 
 async function getVersionData() {
   try {
+    // @ts-ignore
     const versionData = await import('@/lib/version.json')
     return versionData.default || versionData
   } catch (error) {

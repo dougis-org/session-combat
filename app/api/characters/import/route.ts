@@ -52,6 +52,11 @@ export const POST = withAuth(async (request, auth) => {
       userId: auth.userId,
       createdAt: existingCharacter?.createdAt || now,
       updatedAt: now,
+      externalSync: {
+        provider: 'dndbeyond',
+        url,
+        lastSyncedAt: now,
+      },
     };
 
     await storage.saveCharacter(characterToSave);
