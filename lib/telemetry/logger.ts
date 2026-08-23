@@ -9,5 +9,9 @@ export interface StorageEvent {
 }
 
 export function logStorageEvent(event: StorageEvent): void {
+  if (event.outcome === "error") {
+    console.error(event);
+    return;
+  }
   console.log(event);
 }

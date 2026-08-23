@@ -9,5 +9,8 @@ export class StorageError extends Error {
     this.name = "StorageError";
     this.op = op;
     this.collection = collection;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, StorageError);
+    }
   }
 }

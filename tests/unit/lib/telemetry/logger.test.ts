@@ -6,13 +6,16 @@ import { logStorageEvent } from "@/lib/telemetry/logger";
 
 describe("logStorageEvent", () => {
   let consoleSpy: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     consoleSpy = jest.spyOn(console, "log").mockImplementation();
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
   });
 
   afterEach(() => {
     consoleSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
   test("emits name, collection, outcome, durationMs for a success event", () => {
@@ -50,7 +53,7 @@ describe("logStorageEvent", () => {
     });
   });
 
-  test("emits error outcome carrying the original error", () => {
+  test("emits error outcome carrying the original error via console.error", () => {
     const originalError = new Error("connection refused");
 
     logStorageEvent({
@@ -61,7 +64,9 @@ describe("logStorageEvent", () => {
       error: originalError,
     });
 
-    const [entry] = consoleSpy.mock.calls[0];
+    expect(consoleSpy).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    const [entry] = consoleErrorSpy.mock.calls[0];
     expect(entry).toMatchObject({
       name: "getMember",
       collection: "campaignMembers",

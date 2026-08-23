@@ -113,6 +113,21 @@ describe("runStorageOp", () => {
     expect(storageError.collection).toBe(loggedEvent.collection);
   });
 
+  test("a throwing isEmpty classifier is not caught and reported as a storage error", async () => {
+    const value = { id: "abc" };
+    const fn = jest.fn().mockResolvedValue(value);
+    const classifierError = new Error("bad classifier");
+    const isEmpty = jest.fn(() => {
+      throw classifierError;
+    });
+
+    await expect(
+      runStorageOp({ name: "loadCampaignById", collection: "campaigns", isEmpty }, fn),
+    ).rejects.toBe(classifierError);
+
+    expect(logSpy).not.toHaveBeenCalled();
+  });
+
   test("durationMs is >= 0 and captured for success and error outcomes", async () => {
     const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

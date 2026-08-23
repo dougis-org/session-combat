@@ -12,16 +12,9 @@ export async function runStorageOp<T>(
   fn: () => Promise<T>,
 ): Promise<T> {
   const start = Date.now();
+  let result: T;
   try {
-    const result = await fn();
-    const outcome = meta.isEmpty?.(result) ? "not_found" : "success";
-    logStorageEvent({
-      name: meta.name,
-      collection: meta.collection,
-      outcome,
-      durationMs: Date.now() - start,
-    });
-    return result;
+    result = await fn();
   } catch (error) {
     logStorageEvent({
       name: meta.name,
@@ -32,4 +25,13 @@ export async function runStorageOp<T>(
     });
     throw new StorageError(meta.name, meta.collection, { cause: error });
   }
+
+  const outcome = meta.isEmpty?.(result) ? "not_found" : "success";
+  logStorageEvent({
+    name: meta.name,
+    collection: meta.collection,
+    outcome,
+    durationMs: Date.now() - start,
+  });
+  return result;
 }
