@@ -15,7 +15,17 @@ jest.mock("@/lib/storage", () => ({
   storage: {
     loadCharacters: jest.fn(),
     saveCharacter: jest.fn(),
+    deleteCharacter: jest.fn(),
   },
+}));
+
+const mockFindOne = jest.fn();
+jest.mock("@/lib/db", () => ({
+  getDatabase: jest.fn().mockResolvedValue({
+    collection: jest.fn().mockReturnValue({
+      findOne: mockFindOne,
+    }),
+  }),
 }));
 
 const mockedStorage = jest.mocked(storage);
@@ -153,3 +163,43 @@ describe("PUT /api/characters/[id] — alignment validation", () => {
     200,
   );
 });
+
+describe("DELETE /api/characters/[id]", () => {
+  const { DELETE } = require("@/app/api/characters/[id]/route");
+
+  beforeEach(() => {
+    mockFindOne.mockReset();
+    mockedStorage.deleteCharacter.mockReset();
+  });
+
+  it("deletes character successfully", async () => {
+    mockFindOne.mockResolvedValue(EXISTING_CHARACTER);
+    mockedStorage.deleteCharacter.mockResolvedValue(undefined as any);
+
+    const req = makeRouteRequest("http://localhost/api/characters/char-1", "DELETE");
+    const response = await DELETE(req, { params: PARAMS });
+
+    expect(response.status).toBe(200);
+    expect(mockedStorage.deleteCharacter).toHaveBeenCalledWith("char-1", MOCK_AUTH.userId);
+  });
+
+  it("returns 404 if character not found", async () => {
+    mockFindOne.mockResolvedValue(null);
+
+    const req = makeRouteRequest("http://localhost/api/characters/char-1", "DELETE");
+    const response = await DELETE(req, { params: PARAMS });
+
+    expect(response.status).toBe(404);
+    expect(mockedStorage.deleteCharacter).not.toHaveBeenCalled();
+  });
+
+  it("returns 500 on database error", async () => {
+    mockFindOne.mockRejectedValue(new Error("DB error"));
+
+    const req = makeRouteRequest("http://localhost/api/characters/char-1", "DELETE");
+    const response = await DELETE(req, { params: PARAMS });
+
+    expect(response.status).toBe(500);
+  });
+});
+
