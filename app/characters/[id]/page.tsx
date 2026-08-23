@@ -84,6 +84,7 @@ function CharacterDetailContent() {
       const data = await response.json();
       setCharacter(data.character);
       setShowSyncModal(false);
+      setIsEditing(false);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'An error occurred while syncing');
     } finally {
@@ -145,16 +146,16 @@ function CharacterDetailContent() {
           </Link>
           
           <div className="flex gap-2">
+            {character.externalSync?.provider === 'dndbeyond' && character.externalSync?.url && (
+              <button
+                onClick={() => setShowSyncModal(true)}
+                className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm font-semibold flex items-center gap-2"
+              >
+                Sync from D&D Beyond
+              </button>
+            )}
             {!isEditing && (
               <>
-                {character.externalSync?.provider === 'dndbeyond' && character.externalSync?.url && (
-                  <button
-                    onClick={() => setShowSyncModal(true)}
-                    className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm font-semibold flex items-center gap-2"
-                  >
-                    Sync from D&D Beyond
-                  </button>
-                )}
                 <button
                   onClick={() => setIsEditing(true)}
                   className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-semibold"
