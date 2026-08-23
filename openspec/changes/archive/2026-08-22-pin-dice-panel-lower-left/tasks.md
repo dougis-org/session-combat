@@ -25,15 +25,15 @@
 
 ## PR and Merge
 
-- [ ] Commit changes with an appropriate message.
-- [ ] Push the branch to origin.
-- [ ] Open a PR for this branch. Include `Closes #526` in the PR body.
-- [ ] Run `gh issue edit #526 --add-label "in-review" --remove-label "in-progress"`.
-- [ ] Move the GitHub Project item to the "In Review" status column.
-- [ ] Wait 60 seconds, then spawn a sub-agent to run `pr-review-toolkit:review-pr`.
-- [ ] Address all findings until zero findings remain.
-- [ ] Enable auto-merge via `gh pr merge <PR-URL> --auto --merge`.
+- [x] Commit changes with an appropriate message.
+- [x] Push the branch to origin.
+- [x] Open a PR for this branch. Include `Closes #526` in the PR body.
+- [x] Run `gh issue edit #526 --add-label "in-review" --remove-label "in-progress"`.
+- [x] Move the GitHub Project item to the "In Review" status column.
+- [x] Wait 60 seconds, then spawn a sub-agent to run `pr-review-toolkit:review-pr`.
+- [x] Address all findings until zero findings remain.
+- [x] Enable auto-merge via `gh pr merge <PR-URL> --auto --merge`.
 
 ## Post-Merge
 
-- [ ] Wait for auto-merge to complete.
+- [x] Wait for auto-merge to complete.
