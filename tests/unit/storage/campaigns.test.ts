@@ -29,6 +29,7 @@ const baseCampaign: Campaign = {
   name: "Test Campaign",
   moduleName: "Test Module",
   chapters: [],
+  encounterIds: [],
   status: "active",
   notes: "",
   createdAt: new Date("2024-01-01"),

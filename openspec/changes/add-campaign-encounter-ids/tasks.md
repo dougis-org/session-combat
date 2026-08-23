@@ -9,7 +9,7 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available
   skills list for `pr-review-toolkit:review-pr`. If the skill is not listed,
   halt immediately, inform the user that the plugin is required, provide
   installation guidance, and do not proceed until the user confirms it is
@@ -17,7 +17,7 @@
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run
+- [x] **Issue lifecycle: mark in-progress** — run
   `gh issue edit 535 --repo dougis-org/session-combat --add-label "in-progress"`.
   Then discover the GitHub Project linked to `dougis-org/session-combat`
   (`gh project list --owner dougis-org --format json`), resolve the status
@@ -28,28 +28,28 @@
   `project` scope, surface a message instructing the user to run
   `gh auth refresh -s project` and skip the project-item update (issue
   label update still proceeds).
-- [ ] **Write failing unit tests first (TDD)** for `normalizeCampaign()` in
+- [x] **Write failing unit tests first (TDD)** for `normalizeCampaign()` in
   `lib/storage.test.ts` (or the matching existing test file), covering the
   three scenarios from `specs/campaign-model/spec.md`:
   - legacy doc with no `encounterIds` key → `[]`
   - doc with a valid `encounterIds: string[]` → preserved unchanged
   - doc with a malformed non-array `encounterIds` (e.g. `null`) → `[]`
-- [ ] **Add `encounterIds?: string[]` to `Campaign`** in `lib/types.ts`
+- [x] **Add `encounterIds?: string[]` to `Campaign`** in `lib/types.ts`
   (`lib/types.ts:603`), next to the other optional fields
   (`currentChapterId?`, `templateId?`).
-- [ ] **Add the normalization line** to `normalizeCampaign()` in
+- [x] **Add the normalization line** to `normalizeCampaign()` in
   `lib/storage.ts` (`lib/storage.ts:56`), directly beside the existing
   `chapters` line, following the identical `Array.isArray(...)` guard
   style:
   `encounterIds: Array.isArray(campaign.encounterIds) ? campaign.encounterIds : []`
-- [ ] Confirm the new unit tests pass and no existing `normalizeCampaign()`
+- [x] Confirm the new unit tests pass and no existing `normalizeCampaign()`
   / storage test regresses.
-- [ ] Confirm acceptance criteria in `proposal.md` and
+- [x] Confirm acceptance criteria in `proposal.md` and
   `specs/campaign-model/spec.md` are covered by the tests above.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the
   `openspec-review-code` skill. The primary agent must automatically apply
   all clearly-correct findings directly to the code — without stopping,
   without presenting the findings list to the user, and without asking
@@ -58,15 +58,15 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests
-- [ ] Run E2E tests (if applicable — not expected to be affected by this
+- [x] Run unit/integration tests
+- [x] Run E2E tests (if applicable — not expected to be affected by this
   change, but run the existing suite to confirm no regression)
-- [ ] Run type checks (`tsc --noEmit` or project equivalent)
-- [ ] Run build
-- [ ] Run security/code quality checks required by project standards
+- [x] Run type checks (`tsc --noEmit` or project equivalent)
+- [x] Run build
+- [x] Run security/code quality checks required by project standards
   (Codacy, as configured for this repo)
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 

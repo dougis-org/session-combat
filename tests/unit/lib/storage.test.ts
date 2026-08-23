@@ -178,6 +178,36 @@ describe("storage", () => {
       expect(result).not.toBeNull();
       expect(result!.activeSessionId).toBeNull();
     });
+
+    it("defaults encounterIds to [] when the field is absent (legacy doc)", async () => {
+      mockedCollection.findOne.mockResolvedValue(BASE_CAMPAIGN);
+
+      const result = await storage.loadCampaignById("campaign-1", "user-123");
+
+      expect(result).not.toBeNull();
+      expect(result!.encounterIds).toEqual([]);
+    });
+
+    it("preserves a valid encounterIds array unchanged", async () => {
+      mockedCollection.findOne.mockResolvedValue({
+        ...BASE_CAMPAIGN,
+        encounterIds: ["enc-1", "enc-2"],
+      });
+
+      const result = await storage.loadCampaignById("campaign-1", "user-123");
+
+      expect(result).not.toBeNull();
+      expect(result!.encounterIds).toEqual(["enc-1", "enc-2"]);
+    });
+
+    it("defaults a malformed non-array encounterIds value to []", async () => {
+      mockedCollection.findOne.mockResolvedValue({ ...BASE_CAMPAIGN, encounterIds: null });
+
+      const result = await storage.loadCampaignById("campaign-1", "user-123");
+
+      expect(result).not.toBeNull();
+      expect(result!.encounterIds).toEqual([]);
+    });
   });
 
   describe("loadSpellById", () => {

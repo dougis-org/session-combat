@@ -609,6 +609,7 @@ export interface Campaign {
   chapters: CampaignChapter[];
   currentChapterId?: string;
   templateId?: string;
+  encounterIds?: string[];
   status: CampaignStatus;
   notes: string;
   createdAt: Date;
