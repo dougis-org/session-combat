@@ -467,6 +467,7 @@ export interface Character extends CreatureStats {
    * Characters with deletedAt != null should be excluded from queries using the characters_active view.
    */
   deletedAt?: Date;
+  externalSync?: { provider: 'dndbeyond'; url: string; lastSyncedAt?: Date };
 }
 
 // Helper function to calculate total character level from classes array

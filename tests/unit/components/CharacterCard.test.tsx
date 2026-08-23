@@ -5,31 +5,27 @@ import { Character } from '@/lib/types';
 
 const mockCharacter: Character = {
   id: 'char-1',
-  ownerId: 'user-1',
+  userId: 'user-1',
   name: 'Test Character',
-  level: 5,
   hp: 40,
   maxHp: 40,
   ac: 16,
   acNote: 'Chain Mail',
   abilityScores: {
-    str: 15, dex: 12, con: 14, int: 10, wis: 13, cha: 8
+    strength: 15, dexterity: 12, constitution: 14, intelligence: 10, wisdom: 13, charisma: 8
   },
   classes: [
     { class: 'Fighter', level: 5 }
   ],
-  type: 'humanoid',
-  size: 'Medium',
   alignment: 'Neutral Good',
-  speed: '30 ft.',
-  senses: '',
+  senses: {},
   languages: ['Common'],
   traits: [],
   actions: [],
   bonusActions: [],
   reactions: [],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
 };
 
 describe('CharacterCard', () => {
