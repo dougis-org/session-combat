@@ -55,7 +55,7 @@ describe('GlobalDiceFab — standalone modal', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('opening the fab shows a center-screen modal with controls for all six die sizes', async () => {
+  it('opening the fab shows a modal anchored to the bottom-left with controls for all six die sizes', async () => {
     mockAuthed()
     const user = userEvent.setup()
     render(<GlobalDiceFab />)
@@ -64,6 +64,54 @@ describe('GlobalDiceFab — standalone modal', () => {
       expect(screen.getByRole('button', { name: `Add d${sides}` })).toBeInTheDocument()
     }
     expect(screen.getByLabelText('Modifier')).toBeInTheDocument()
+    
+    const panel = screen.getByRole('dialog')
+    expect(panel).toHaveClass('absolute', 'bottom-4', 'left-4')
+  })
+
+  it('background dimming overlay bg-black/50 is present and clicking it closes the modal', async () => {
+    mockAuthed()
+    const user = userEvent.setup()
+    const { container } = render(<GlobalDiceFab />)
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    
+    // Find the overlay which is the parent of the dialog
+    const panel = screen.getByRole('dialog')
+    const overlay = panel.parentElement!
+    
+    expect(overlay).toHaveClass('fixed', 'inset-0', 'bg-black/50')
+    expect(overlay).not.toHaveClass('flex', 'items-center', 'justify-center')
+    
+    // The previous test checks closing, but we ensure it works by clicking the overlay
+    await user.click(overlay)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('hovering a dice button displays custom tooltip text and removes it on leave', async () => {
+    mockAuthed()
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    
+    // The native title attribute should not be present, but the text should appear in the custom tooltip when hovered
+    const d20Button = screen.getByRole('button', { name: 'Add d20' })
+    expect(screen.queryByText('d20')).not.toBeInTheDocument()
+    
+    await user.hover(d20Button)
+    expect(screen.getByText('d20')).toBeInTheDocument()
+    
+    await user.unhover(d20Button)
+    expect(screen.queryByText('d20')).not.toBeInTheDocument()
+  })
+
+  it('dice buttons do not have native title attributes', async () => {
+    mockAuthed()
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    
+    const d20Button = screen.getByRole('button', { name: 'Add d20' })
+    expect(d20Button).not.toHaveAttribute('title')
   })
 
   it('rolling with no presence produces a local result and no network call', async () => {

@@ -24,6 +24,7 @@ export function GlobalDiceFab() {
   const [result, setResult] = useState<RollOutcome | null>(null)
   const [presence, setPresence] = useState<DicePresence | null>(null)
   const [sendState, setSendState] = useState<SendState>('idle')
+  const [hoveredDie, setHoveredDie] = useState<number | null>(null)
 
   const triggerRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -105,21 +106,21 @@ export function GlobalDiceFab() {
         <DiceD20Icon width={28} height={28} aria-hidden="true" />
       </button>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="fixed inset-0 z-50 bg-black/50">
           <div
             ref={panelRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="global-dice-fab-heading"
             tabIndex={-1}
-            className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-4 w-72 flex flex-col gap-3 outline-none"
+            className="absolute bottom-4 left-4 bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-4 w-72 flex flex-col gap-3 outline-none"
           >
             <p id="global-dice-fab-heading" className="text-sm font-semibold text-white">Roll dice</p>
             <div className="flex flex-wrap gap-1 items-center">
               {DIE_SIDES.map(sides => {
                 const Icon = DIE_ICONS[sides]
                 return (
-                  <div key={sides} className="flex items-center gap-0.5">
+                  <div key={sides} className="relative flex items-center gap-0.5">
                     <button
                       type="button"
                       onClick={() => handleRemove(sides)}
@@ -133,12 +134,18 @@ export function GlobalDiceFab() {
                       onClick={() => handleAdd(sides)}
                       disabled={pool[sides] >= MAX_PER_DIE}
                       aria-label={`Add d${sides}`}
-                      title={`d${sides}`}
+                      onMouseEnter={() => setHoveredDie(sides)}
+                      onMouseLeave={() => setHoveredDie(null)}
                       className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded flex items-center gap-1"
                     >
                       <Icon width={21} height={21} aria-hidden="true" />
                       ×{pool[sides]}
                     </button>
+                    {hoveredDie === sides && (
+                      <div className="absolute left-1/2 bottom-full mb-1 -translate-x-1/2 bg-gray-800 border border-gray-700 rounded px-2 py-1 shadow-lg z-50 text-xs text-white whitespace-nowrap pointer-events-none">
+                        d{sides}
+                      </div>
+                    )}
                   </div>
                 )
               })}
