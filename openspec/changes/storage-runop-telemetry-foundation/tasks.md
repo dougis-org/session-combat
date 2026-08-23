@@ -12,12 +12,12 @@
 ## Execution
 
 - [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 501 --add-label "in-progress"`. Discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, instruct the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] **`lib/storage/errors.ts`** — implement `StorageError` per design.md Decision 3: extends `Error`, constructor `(op: string, collection: string, options: { cause: unknown })`, sets `name = "StorageError"`, exposes `op` and `collection` as readonly fields, passes `cause` through to the native `Error` `cause` option.
-- [ ] **`lib/telemetry/logger.ts`** — implement `logStorageEvent({ name, collection, outcome, durationMs, error? })` per design.md Decision 1/spec "logStorageEvent emits a fixed structured shape": `outcome` is `"success" | "not_found" | "error"`; console-backed for now (this is the seam #505 later swaps to OpenTelemetry); emits all fields on every call regardless of outcome.
-- [ ] **`lib/storage/runOp.ts`** — implement `runStorageOp<T>({ name, collection, isEmpty? }, fn)` per design.md Decision 1: on success, classify `outcome` as `"not_found"` if `isEmpty?.(result)` is true else `"success"`, log via `logStorageEvent`, return `result` unmodified; on catch, log via `logStorageEvent` with `outcome: "error"`, then throw `new StorageError(name, collection, { cause: error })`. Capture `durationMs` around the `fn()` call for both paths.
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (checked: no existing error-wrapper or structured-logging seam exists in this repo — confirmed during `/opsx:explore #501`; these are genuinely new).
-- [ ] Confirm none of the three new files are imported by `lib/storage.ts` or any of its 36 existing caller files — this issue is foundation-only, per proposal.md Scope
-- [ ] Confirm acceptance criteria from issue #501 are covered: not-found/failure distinction, structured `logStorageEvent` fields, `StorageError` cause/op/collection
+- [x] **`lib/storage/errors.ts`** — implement `StorageError` per design.md Decision 3: extends `Error`, constructor `(op: string, collection: string, options: { cause: unknown })`, sets `name = "StorageError"`, exposes `op` and `collection` as readonly fields, passes `cause` through to the native `Error` `cause` option.
+- [x] **`lib/telemetry/logger.ts`** — implement `logStorageEvent({ name, collection, outcome, durationMs, error? })` per design.md Decision 1/spec "logStorageEvent emits a fixed structured shape": `outcome` is `"success" | "not_found" | "error"`; console-backed for now (this is the seam #505 later swaps to OpenTelemetry); emits all fields on every call regardless of outcome.
+- [x] **`lib/storage/runOp.ts`** — implement `runStorageOp<T>({ name, collection, isEmpty? }, fn)` per design.md Decision 1: on success, classify `outcome` as `"not_found"` if `isEmpty?.(result)` is true else `"success"`, log via `logStorageEvent`, return `result` unmodified; on catch, log via `logStorageEvent` with `outcome: "error"`, then throw `new StorageError(name, collection, { cause: error })`. Capture `durationMs` around the `fn()` call for both paths.
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (checked: no existing error-wrapper or structured-logging seam exists in this repo — confirmed during `/opsx:explore #501`; these are genuinely new).
+- [x] Confirm none of the three new files are imported by `lib/storage.ts` or any of its 36 existing caller files — this issue is foundation-only, per proposal.md Scope
+- [x] Confirm acceptance criteria from issue #501 are covered: not-found/failure distinction, structured `logStorageEvent` fields, `StorageError` cause/op/collection
 
 ## Pre-Commit Code Review
 
@@ -25,13 +25,13 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests (`tests/unit/lib/storage/runOp.test.ts`, `tests/unit/lib/storage/errors.test.ts`, `tests/unit/lib/telemetry/logger.test.ts`) — all pass
-- [ ] Run full existing unit test suite — all 11 existing `storage` mock-consuming test files and 36 caller files remain green, unmodified (proves zero blast radius per design.md Reliability NFR)
-- [ ] Run E2E tests (if applicable) — not applicable; no UI/route surface touched by this change
-- [ ] Run type checks
-- [ ] Run build
+- [x] Run unit/integration tests (`tests/unit/lib/storage/runOp.test.ts`, `tests/unit/lib/storage/errors.test.ts`, `tests/unit/lib/telemetry/logger.test.ts`) — all pass
+- [x] Run full existing unit test suite — all 11 existing `storage` mock-consuming test files and 36 caller files remain green, unmodified (proves zero blast radius per design.md Reliability NFR)
+- [x] Run E2E tests (if applicable) — not applicable; no UI/route surface touched by this change
+- [x] Run type checks — pre-existing failures in `tests/unit/components/CharacterCard*.test.tsx` (AbilityScores typing) confirmed present on `main` too, unrelated to this change; no new errors introduced by the three new files
+- [x] Run build — succeeds
 - [ ] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
+- [x] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
 
 ## Remote push validation
