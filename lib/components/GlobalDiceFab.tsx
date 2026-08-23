@@ -136,6 +136,8 @@ export function GlobalDiceFab() {
                       aria-label={`Add d${sides}`}
                       onMouseEnter={() => setHoveredDie(sides)}
                       onMouseLeave={() => setHoveredDie(null)}
+                      onFocus={() => setHoveredDie(sides)}
+                      onBlur={() => setHoveredDie(null)}
                       className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded flex items-center gap-1"
                     >
                       <Icon width={21} height={21} aria-hidden="true" />
