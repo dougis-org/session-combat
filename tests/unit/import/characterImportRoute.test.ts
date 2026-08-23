@@ -71,6 +71,14 @@ describe("character import route", () => {
     expect(mockedImportCharacter).not.toHaveBeenCalled();
   });
 
+  test("returns 400 when the body is not provided properly or url is not string", async () => {
+    const response = await POST(createRequest({ url: 123 }));
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toMatch(/url is required/i);
+  });
+
   test("returns duplicate-name conflicts without overwriting", async () => {
     mockedLoadCharacters.mockResolvedValue([
       {
@@ -203,6 +211,54 @@ describe("character import route", () => {
     const body = await response.json();
 
     expect(response.status).toBe(502);
+    expect(body.error).toBe("Failed to import D&D Beyond character.");
+  });
+
+  test("hides message when exposeMessage is false", async () => {
+    const err = new DndBeyondImportError("Secret internal error", { status: 400 });
+    err.exposeMessage = false;
+    mockedImportCharacter.mockRejectedValue(err);
+
+    const response = await POST(
+      createRequest({
+        url: "https://www.dndbeyond.com/characters/123/invalid",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("Failed to import D&D Beyond character.");
+  });
+
+  test("exposes message when exposeMessage is undefined and status < 500", async () => {
+    // an error object with status < 500 and message, but no exposeMessage boolean
+    const err = { status: 404, message: "Custom not found error" };
+    mockedImportCharacter.mockRejectedValue(err);
+
+    const response = await POST(
+      createRequest({
+        url: "https://www.dndbeyond.com/characters/123/invalid",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.error).toBe("Custom not found error");
+  });
+
+  test("does not expose message when exposeMessage is undefined and status >= 500", async () => {
+    // an error object with status >= 500 and message, but no exposeMessage boolean
+    const err = { status: 500, message: "Custom server error" };
+    mockedImportCharacter.mockRejectedValue(err);
+
+    const response = await POST(
+      createRequest({
+        url: "https://www.dndbeyond.com/characters/123/invalid",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
     expect(body.error).toBe("Failed to import D&D Beyond character.");
   });
 });
