@@ -181,3 +181,50 @@ The system SHALL treat any Campaign document missing a `status` or `notes` field
 - **Given** a MongoDB document with no `status` field
 - **When** the PATCH handler loads the campaign
 - **Then** the campaign is treated as `status: 'active'` and the PATCH proceeds without error
+
+### Requirement: Campaign encounter links field
+
+The system SHALL accept and normalize an `encounterIds` field on
+`Campaign` representing the many-to-many link from a campaign to the
+encounters available to it.
+
+#### Scenario: Type declaration accepts encounterIds
+
+- **Given** a `Campaign` object being constructed in application code
+- **When** it includes `encounterIds: ['enc-1', 'enc-2']`
+- **Then** the object type-checks against the `Campaign` interface in
+  `lib/types.ts` with no compiler error
+
+#### Scenario: Load campaign with existing encounterIds preserves the array
+
+- **Given** a campaign document stored in MongoDB with
+  `encounterIds: ['enc-1', 'enc-2']`
+- **When** `storage.loadCampaignById(id, userId)` or
+  `storage.loadCampaigns(userId)` reads that document
+- **Then** the returned `Campaign` object's `encounterIds` is exactly
+  `['enc-1', 'enc-2']`, unchanged
+
+#### Scenario: Load legacy campaign with no encounterIds field defaults to empty array
+
+- **Given** a campaign document stored in MongoDB that predates this
+  change and has no `encounterIds` key at all
+- **When** `storage.loadCampaignById(id, userId)` or
+  `storage.loadCampaigns(userId)` reads that document
+- **Then** the returned `Campaign` object's `encounterIds` is `[]`
+
+#### Scenario: Load campaign with a malformed encounterIds value defaults to empty array
+
+- **Given** a campaign document stored in MongoDB where `encounterIds`
+  is present but is not an array (for example `null` or a string)
+- **When** `storage.loadCampaignById(id, userId)` or
+  `storage.loadCampaigns(userId)` reads that document
+- **Then** the returned `Campaign` object's `encounterIds` is `[]`
+
+#### Scenario: Saving a campaign persists encounterIds without a dedicated write path
+
+- **Given** an in-memory `Campaign` object with
+  `encounterIds: ['enc-1']`
+- **When** `storage.saveCampaign(campaign)` is called
+- **Then** the persisted document in the `campaigns` collection includes
+  `encounterIds: ['enc-1']`, without any change to `saveCampaign()`
+  beyond what already exists (the full object is spread into `$set`)
