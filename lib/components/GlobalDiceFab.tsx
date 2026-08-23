@@ -24,7 +24,7 @@ export function GlobalDiceFab() {
   const [result, setResult] = useState<RollOutcome | null>(null)
   const [presence, setPresence] = useState<DicePresence | null>(null)
   const [sendState, setSendState] = useState<SendState>('idle')
-  const [hoveredDie, setHoveredDie] = useState<number | null>(null)
+  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
 
   const triggerRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -70,6 +70,7 @@ export function GlobalDiceFab() {
     setResult(null)
     setSendState('idle')
     setIsOpen(true)
+    setHoveredTooltip(null)
   }
 
   function handleRoll() {
@@ -95,16 +96,26 @@ export function GlobalDiceFab() {
 
   return (
     <>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={handleOpen}
-        aria-label="Roll dice"
-        title="Roll dice"
-        className="fixed bottom-4 left-4 z-40 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
-      >
-        <DiceD20Icon width={28} height={28} aria-hidden="true" />
-      </button>
+      <div className="fixed bottom-4 left-4 z-40 flex items-center">
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={handleOpen}
+          onMouseEnter={() => setHoveredTooltip('trigger')}
+          onMouseLeave={() => setHoveredTooltip(null)}
+          onFocus={() => setHoveredTooltip('trigger')}
+          onBlur={() => setHoveredTooltip(null)}
+          aria-label="Roll dice"
+          className="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg relative"
+        >
+          <DiceD20Icon width={28} height={28} aria-hidden="true" />
+          {hoveredTooltip === 'trigger' && !isOpen && (
+            <div className="absolute left-full ml-3 bg-gray-800 border border-gray-700 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap pointer-events-none">
+              Roll dice
+            </div>
+          )}
+        </button>
+      </div>
       {isOpen && (
         <div className="fixed inset-0 z-50 bg-black/50">
           <div
@@ -120,7 +131,7 @@ export function GlobalDiceFab() {
               {DIE_SIDES.map(sides => {
                 const Icon = DIE_ICONS[sides]
                 return (
-                  <div key={sides} className="relative flex items-center gap-0.5">
+                  <div key={sides} className="flex items-center gap-0.5">
                     <button
                       type="button"
                       onClick={() => handleRemove(sides)}
@@ -129,25 +140,27 @@ export function GlobalDiceFab() {
                     >
                       −
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => handleAdd(sides)}
-                      disabled={pool[sides] >= MAX_PER_DIE}
-                      aria-label={`Add d${sides}`}
-                      onMouseEnter={() => setHoveredDie(sides)}
-                      onMouseLeave={() => setHoveredDie(null)}
-                      onFocus={() => setHoveredDie(sides)}
-                      onBlur={() => setHoveredDie(null)}
-                      className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded flex items-center gap-1"
-                    >
-                      <Icon width={21} height={21} aria-hidden="true" />
-                      ×{pool[sides]}
-                    </button>
-                    {hoveredDie === sides && (
-                      <div className="absolute left-1/2 bottom-full mb-1 -translate-x-1/2 bg-gray-800 border border-gray-700 rounded px-2 py-1 shadow-lg z-50 text-xs text-white whitespace-nowrap pointer-events-none">
-                        d{sides}
-                      </div>
-                    )}
+                    <div className="relative flex">
+                      <button
+                        type="button"
+                        onClick={() => handleAdd(sides)}
+                        onMouseEnter={() => setHoveredTooltip(`d${sides}`)}
+                        onMouseLeave={() => setHoveredTooltip(null)}
+                        onFocus={() => setHoveredTooltip(`d${sides}`)}
+                        onBlur={() => setHoveredTooltip(null)}
+                        disabled={pool[sides] >= MAX_PER_DIE}
+                        aria-label={`Add d${sides}`}
+                        className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded flex items-center gap-1"
+                      >
+                        <Icon width={21} height={21} aria-hidden="true" />
+                        ×{pool[sides]}
+                      </button>
+                      {hoveredTooltip === `d${sides}` && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-gray-800 border border-gray-700 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap pointer-events-none z-10">
+                          d{sides}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )
               })}
