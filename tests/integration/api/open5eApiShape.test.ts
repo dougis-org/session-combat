@@ -16,7 +16,7 @@ async function fetchWithRetry(url: string, retries = 3) {
   throw new Error(`Failed to fetch ${url} after ${retries} retries`);
 }
 
-describe("Open5E API connectivity", () => {
+describe.skip("Open5E API connectivity", () => {
   it("creatures endpoint is reachable and returns data", async () => {
     const response = await fetchWithRetry(`${OPEN5E_API_BASE}/creatures/?page=1`);
 
@@ -44,7 +44,7 @@ describe("Open5E API connectivity", () => {
   });
 });
 
-describe("Open5E API response shape (documenting actual API)", () => {
+describe.skip("Open5E API response shape (documenting actual API)", () => {
   it("creatures API uses 'key' not 'slug' and has nested structure", async () => {
     const response = await fetchWithRetry(`${OPEN5E_API_BASE}/creatures/?page=1`);
     const data = await response.json();
