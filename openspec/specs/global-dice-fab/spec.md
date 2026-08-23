@@ -28,13 +28,14 @@ The system SHALL render a fixed-position d20 icon button in the lower-left corne
 
 ### Requirement: ADDED Standalone dice pool modal with no session dependency
 
-The system SHALL let an authenticated user open a center-screen modal from the fab that provides a dice pool builder (add/remove d4/d6/d8/d10/d12/d20, edit a shared modifier) and roll it using `rollDicePool()`, entirely independent of any campaign or session context, with no network request required to see a result.
+The system SHALL let an authenticated user open a modal anchored to the bottom-left corner over the trigger button from the fab that provides a dice pool builder (add/remove d4/d6/d8/d10/d12/d20, edit a shared modifier) and roll it using `rollDicePool()`, entirely independent of any campaign or session context, with no network request required to see a result.
 
-#### Scenario: Opening the fab shows a center-screen modal
+#### Scenario: Opening the fab shows a modal anchored to the bottom-left
 
 - **Given** the fab is visible and the modal is closed
 - **When** the user clicks the fab
-- **Then** a modal appears centered in the viewport containing die add/remove controls for all six supported sizes and a modifier input
+- **Then** a modal appears with its bottom-left corner overlaying the trigger button containing die add/remove controls for all six supported sizes and a modifier input
+- **And** the background dimming overlay is displayed
 
 #### Scenario: Rolling with no active-session presence produces a local result and no network call
 
@@ -98,13 +99,29 @@ The system SHALL show a "send to session chat" control in the modal only while t
 
 ---
 
+### Requirement: ADDED Instant tooltips for dice buttons
+
+The system SHALL provide immediate tooltip feedback when hovering over dice size buttons inside the global dice fab panel.
+
+#### Scenario: Hovering a dice button
+
+- **Given** the global dice panel is open
+- **When** the user hovers the cursor over a specific dice button (e.g., d20)
+- **Then** a tooltip with the dice name appears instantly without OS/browser delay
+
+---
+
 ## Traceability
 
 - Proposal element "Persistent d20 icon, lower-left corner, every page, requires login" → Requirements: ADDED Persistent dice fab visible on every page for authenticated users
 - Proposal element "Center-screen modal, pool builder + result" → Requirements: ADDED Standalone dice pool modal with no session dependency
 - Proposal element "Escape/outside-click close, no timeout" → Requirements: ADDED Modal closes only on Escape or outside click, never on a timeout
 - Proposal element "Additional option to send the roll to session chat when applicable" → Requirements: ADDED "Send to session chat" option appears only while a matching campaign session is present
+- Proposal element "Repositioning the GlobalDiceFab panel fixed to the bottom-left corner" → Requirements: MODIFIED Global Dice Panel Positioning
+- Proposal element "Replacing native title attributes with custom instant tooltips" → Requirements: ADDED Instant tooltips for dice buttons
 - Design decision 1 (global fab + modal, root-layout mount) → Requirements: all ADDED requirements in this capability
+- Design decision 1 (Panel Positioning strategy) → Requirements: MODIFIED Global Dice Panel Positioning
+- Design decision 2 (Instant Tooltips implementation) → Requirements: ADDED Instant tooltips for dice buttons
 - Requirement → Task(s): see `openspec/changes/archive/2026-08-22-decouple-dice-panel-from-chat/tasks.md`, "GlobalDiceFab" task group
 
 ## Non-Functional Acceptance Criteria
