@@ -1,0 +1,20 @@
+{
+  "changeName": "scope-campaign-encounter-picker",
+  "artifactId": "tests",
+  "schemaName": "sdd-with-feedback-loop",
+  "changeDir": "/home/doug/dev2/session-combat/openspec/changes/scope-campaign-encounter-picker",
+  "outputPath": "tests.md",
+  "description": "Test cases following a strict TDD workflow",
+  "instruction": "Create test cases for all tasks following strict TDD (fail, pass, refactor).\nMap each case to a task in tasks.md and an acceptance scenario in specs.\n",
+  "context": "Use default OpenSpec sdd-with-feedback-loop flow (proposal -> design -> specs -> tasks -> apply -> archive).\nKeep artifacts concise and implementation-ready.\nPreserve default OpenSpec artifact lifecycle and dependency ordering.\nAll file and folder references must be project-root-relative paths (for example, openspec/changes/my-change/proposal.md).\nAll work on a change — from the first proposal artifact through apply and archive — happens inside a dedicated git worktree at `.worktrees/<change-name>`, never in the primary checkout. This lets multiple agents work on different changes from the same repo clone in parallel without one agent's branch checkout disrupting another's in-progress files.",
+  "template": "---\nname: tests\ndescription: Tests for the change\n---\n\n# Tests\n\n## Overview\n\nThis document outlines the tests for the `<change-name>` change. All work should follow a strict TDD (Test-Driven Development) process.\n\n## Testing Steps\n\nFor each task in `tasks.md`:\n\n1.  **Write a failing test:** Before writing any implementation code, write a test that captures the requirements of the task. Run the test and ensure it fails.\n2.  **Write code to pass the test:** Write the simplest possible code to make the test pass.\n3.  **Refactor:** Improve the code quality and structure while ensuring the test still passes.\n\n## Test Cases\n\n- [ ] Test case 1 for task 1\n- [ ] Test case 2 for task 1\n- [ ] Test case 1 for task 2\n",
+  "dependencies": [
+    {
+      "id": "tasks",
+      "done": true,
+      "path": "tasks.md",
+      "description": "Implementation task checklist with Preparation through Post-Merge steps"
+    }
+  ],
+  "unlocks": []
+}

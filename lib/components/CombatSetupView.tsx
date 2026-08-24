@@ -69,18 +69,27 @@ export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
               
               <div className="mb-4">
                 <label className="block text-sm mb-2">Select Encounter (Optional)</label>
-                <select
-                  value={selectedEncounterId}
-                  onChange={(e) => setSelectedEncounterId(e.target.value)}
-                  className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
-                >
-                  <option value="">No encounter</option>
-                  {encounters.map(encounter => (
-                    <option key={encounter.id} value={encounter.id}>
-                      {encounter.name}
-                    </option>
-                  ))}
-                </select>
+                {combat.campaignId && encounters.length === 0 ? (
+                  <div className="bg-gray-700 rounded p-3 text-sm text-gray-300">
+                    <p>No encounters linked to this campaign.</p>
+                    <Link href={`/campaigns/${combat.campaignId}/encounters`} className="text-blue-400 hover:underline mt-1 inline-block">
+                      Manage Campaign Encounters
+                    </Link>
+                  </div>
+                ) : (
+                  <select
+                    value={selectedEncounterId}
+                    onChange={(e) => setSelectedEncounterId(e.target.value)}
+                    className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
+                  >
+                    <option value="">No encounter</option>
+                    {encounters.map(encounter => (
+                      <option key={encounter.id} value={encounter.id}>
+                        {encounter.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div className="mb-4">
