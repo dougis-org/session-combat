@@ -4,7 +4,6 @@ import { storage } from '@/lib/storage';
 import { Encounter } from '@/lib/types';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
 import { validateString } from '@/lib/validation/core';
-import { validateMonsterData } from '@/lib/validation/monsterUpload';
 
 export const GET = withAuth(async (request, auth) => {
   try {
@@ -43,16 +42,8 @@ export const POST = withAuth(async (request, auth) => {
       return NextResponse.json({ error: descriptionResult.error.message }, { status: 400 });
     }
 
-    if (monsters !== undefined) {
-      if (!Array.isArray(monsters)) {
-        return NextResponse.json({ error: 'monsters must be an array' }, { status: 400 });
-      }
-      for (let i = 0; i < monsters.length; i++) {
-        const monsterResult = validateMonsterData(monsters[i] ?? {}, i);
-        if (!monsterResult.valid) {
-          return NextResponse.json({ error: monsterResult.errors[0].message }, { status: 400 });
-        }
-      }
+    if (monsters !== undefined && !Array.isArray(monsters)) {
+      return NextResponse.json({ error: 'monsters must be an array' }, { status: 400 });
     }
 
     let linkedCampaignId: string | undefined;
