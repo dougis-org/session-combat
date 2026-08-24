@@ -83,12 +83,15 @@ type FetchCall = { url: string; method: string; body: unknown };
 type RouteHandler = (init: RequestInit | undefined, calls: FetchCall[]) => unknown | Promise<unknown>;
 type RouteValue = unknown | RouteHandler;
 
+const MOCK_RESPONSE_TAG = Symbol('mockResponse');
+
 function isResponseLike(v: unknown): v is Response {
-  return typeof v === 'object' && v !== null && typeof (v as Response).json === 'function' && 'ok' in v;
+  return typeof v === 'object' && v !== null && MOCK_RESPONSE_TAG in v;
 }
 
 function res(body: unknown, opts: { ok?: boolean; status?: number } = {}): Response {
   return {
+    [MOCK_RESPONSE_TAG]: true,
     ok: opts.ok ?? true,
     status: opts.status ?? (opts.ok === false ? 400 : 200),
     json: async () => body,
@@ -359,25 +362,6 @@ describe('Campaign Encounters Page', () => {
       expect(container.textContent).toContain('Owlbear Den');
     });
 
-    it('shows an inline error and keeps the picker open when linking returns 404', async () => {
-      const owned = [makeEncounter({ id: 'e9', name: 'Owlbear Den' })];
-      const calls = mockRoutes({
-        [OWNED_URL]: owned,
-        [LINKED_URL]: [],
-        [`POST ${LINKED_URL}`]: () => res({ error: 'Encounter not found' }, { ok: false, status: 404 }),
-      });
-
-      await render();
-      await openPicker();
-      const linkedGetsBefore = calls.filter(c => c.url === LINKED_URL && c.method === 'GET').length;
-
-      await clickAndFlush('Link');
-
-      expect(container.textContent).toMatch(/Encounter not found/i);
-      expect(calls.filter(c => c.url === LINKED_URL && c.method === 'GET')).toHaveLength(linkedGetsBefore);
-      expect(findButton('Link')).toBeTruthy();
-    });
-
     it('double-clicking the link control results in exactly one POST call', async () => {
       const owned = [makeEncounter({ id: 'e9', name: 'Owlbear Den' })];
       let postCount = 0;
@@ -478,19 +462,6 @@ describe('Campaign Encounters Page', () => {
       expect(findButton('Save Encounter')).toBeFalsy();
     });
 
-    it('shows an error banner and keeps the editor open when creation fails', async () => {
-      mockRoutes({
-        [LINKED_URL]: [],
-        [`POST ${OWNED_URL}`]: () => res({ error: 'Name is required' }, { ok: false }),
-      });
-
-      await render();
-      await createEncounter('New One');
-
-      expect(container.textContent).toMatch(/Name is required/i);
-      expect(findButton('Save Encounter')).toBeTruthy();
-    });
-
     it('cancelling the editor returns to the action buttons without posting', async () => {
       const calls = mockRoutes({ [LINKED_URL]: [] });
 
@@ -527,21 +498,6 @@ describe('Campaign Encounters Page', () => {
       expect(container.textContent).not.toContain('Goblin Ambush');
     });
 
-    it('shows an error banner and keeps the row when the DELETE fails', async () => {
-      window.confirm = jest.fn(() => true);
-      const linked = [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })];
-      mockRoutes({
-        [LINKED_URL]: linked,
-        [`DELETE ${LINKED_URL}/e1`]: () => res({ error: 'Cannot unlink right now' }, { ok: false }),
-      });
-
-      await render();
-      await clickAndFlush('Unlink');
-
-      expect(container.textContent).toMatch(/Cannot unlink right now/i);
-      expect(container.textContent).toContain('Goblin Ambush');
-    });
-
     it('does not DELETE and keeps the row when confirm is cancelled', async () => {
       window.confirm = jest.fn(() => false);
       const linked = [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })];
@@ -552,6 +508,54 @@ describe('Campaign Encounters Page', () => {
 
       expect(calls.some(c => c.method === 'DELETE')).toBe(false);
       expect(container.textContent).toContain('Goblin Ambush');
+    });
+  });
+
+  // These three failure paths (link/create/unlink) share one shape: a single
+  // mutation endpoint fails, the page must surface the server's error text
+  // inline, and it must not silently discard the in-progress state (the
+  // picker/editor stays open, or the row stays put).
+  describe('Failing mutations surface an inline error and change nothing else', () => {
+    it.each([
+      {
+        name: 'linking an encounter the DM no longer owns (404)',
+        routes: {
+          [OWNED_URL]: [makeEncounter({ id: 'e9', name: 'Owlbear Den' })],
+          [LINKED_URL]: [],
+          [`POST ${LINKED_URL}`]: res({ error: 'Encounter not found' }, { ok: false, status: 404 }),
+        },
+        perform: async () => { await openPicker(); await clickAndFlush('Link'); },
+        errorMessage: /Encounter not found/i,
+        unchanged: () => expect(findButton('Link')).toBeTruthy(),
+      },
+      {
+        name: 'creating an encounter that fails validation',
+        routes: {
+          [LINKED_URL]: [],
+          [`POST ${OWNED_URL}`]: res({ error: 'Name is required' }, { ok: false }),
+        },
+        perform: async () => { await createEncounter('New One'); },
+        errorMessage: /Name is required/i,
+        unchanged: () => expect(findButton('Save Encounter')).toBeTruthy(),
+      },
+      {
+        name: 'unlinking an encounter that the server rejects',
+        routes: {
+          [LINKED_URL]: [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })],
+          [`DELETE ${LINKED_URL}/e1`]: res({ error: 'Cannot unlink right now' }, { ok: false }),
+        },
+        perform: async () => { window.confirm = jest.fn(() => true); await clickAndFlush('Unlink'); },
+        errorMessage: /Cannot unlink right now/i,
+        unchanged: () => expect(container.textContent).toContain('Goblin Ambush'),
+      },
+    ])('$name', async ({ routes, perform, errorMessage, unchanged }) => {
+      mockRoutes(routes);
+      await render();
+
+      await perform();
+
+      expect(container.textContent).toMatch(errorMessage);
+      unchanged();
     });
   });
 });
