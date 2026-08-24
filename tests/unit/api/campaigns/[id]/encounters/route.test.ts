@@ -132,6 +132,23 @@ describe("GET /api/campaigns/[id]/encounters", () => {
     const body = await response.json();
     expect(body).toEqual([]);
   });
+
+  it("returns 500 when loadEncountersByIds throws", async () => {
+    mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
+    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedStorage.loadEncountersByIds.mockRejectedValue(new Error("Storage error"));
+
+    const response = await GET(makeGetRequest(), { params: PARAMS });
+
+    expect(response.status).toBe(500);
+  });
+
+  it("returns 400 when id param is an empty string", async () => {
+    const response = await GET(makeGetRequest(), { params: Promise.resolve({ id: "" }) });
+
+    expect(response.status).toBe(400);
+    expect(mockedStorage.getMember).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /api/campaigns/[id]/encounters", () => {
@@ -217,5 +234,37 @@ describe("POST /api/campaigns/[id]/encounters", () => {
 
     expect(response.status).toBe(400);
     expect(mockedStorage.addEncounterToCampaign).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when encounterId is omitted", async () => {
+    mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
+
+    const response = await POST(makePostRequest({}), { params: PARAMS });
+
+    expect(response.status).toBe(400);
+    expect(mockedStorage.getMember).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when encounterId is an empty string", async () => {
+    mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
+
+    const response = await POST(makePostRequest({ encounterId: "   " }), { params: PARAMS });
+
+    expect(response.status).toBe(400);
+    expect(mockedStorage.getMember).not.toHaveBeenCalled();
+  });
+
+  it("returns 500 when addEncounterToCampaign throws", async () => {
+    mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
+    mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
+    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedStorage.loadEncountersByIds.mockResolvedValue([
+      { id: "e3", userId: DM_ID, name: "Owlbear", description: "", monsters: [], createdAt: new Date(), updatedAt: new Date() },
+    ]);
+    mockedStorage.addEncounterToCampaign.mockRejectedValue(new Error("Storage error"));
+
+    const response = await POST(makePostRequest({ encounterId: "e3" }), { params: PARAMS });
+
+    expect(response.status).toBe(500);
   });
 });

@@ -72,6 +72,12 @@ describe("storage.loadEncountersByIds", () => {
 
     expect(mockedCollection.find).toHaveBeenCalledTimes(1);
   });
+
+  it("rethrows when the underlying query fails, rather than returning []", async () => {
+    mockedCollection.toArray.mockRejectedValue(new Error("connection reset"));
+
+    await expect(storage.loadEncountersByIds(["e1"], OWNER)).rejects.toThrow("connection reset");
+  });
 });
 
 describe("storage.addEncounterToCampaign", () => {
@@ -83,6 +89,14 @@ describe("storage.addEncounterToCampaign", () => {
     expect(mockedCollection.updateOne).toHaveBeenCalledWith(
       { id: "camp-1", userId: "dm-user" },
       { $addToSet: { encounterIds: "e3" } }
+    );
+  });
+
+  it("rethrows when the underlying update fails", async () => {
+    mockedCollection.updateOne.mockRejectedValue(new Error("connection reset"));
+
+    await expect(storage.addEncounterToCampaign("camp-1", "e3", "dm-user")).rejects.toThrow(
+      "connection reset"
     );
   });
 });
@@ -105,5 +119,13 @@ describe("storage.removeEncounterFromCampaign", () => {
     await expect(
       storage.removeEncounterFromCampaign("camp-1", "e7", "dm-user")
     ).resolves.toBeUndefined();
+  });
+
+  it("rethrows when the underlying update fails", async () => {
+    mockedCollection.updateOne.mockRejectedValue(new Error("connection reset"));
+
+    await expect(storage.removeEncounterFromCampaign("camp-1", "e3", "dm-user")).rejects.toThrow(
+      "connection reset"
+    );
   });
 });

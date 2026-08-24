@@ -414,7 +414,7 @@ export const storage = {
       return encounters.map(normalizeStoredEntityId);
     } catch (error) {
       console.error("Error loading encounters by ids:", error);
-      return [];
+      throw error;
     }
   },
 

@@ -178,6 +178,14 @@ describe("POST /api/encounters with campaignId", () => {
     expect(mockedStorage.addEncounterToCampaign).not.toHaveBeenCalled();
   });
 
+  it("returns 400 when campaignId is an empty string", async () => {
+    const response = await POST(makeRequest({ name: "Test", campaignId: "   " }));
+
+    expect(response.status).toBe(400);
+    expect(mockedStorage.getMember).not.toHaveBeenCalled();
+    expect(mockedStorage.saveEncounter).not.toHaveBeenCalled();
+  });
+
   it("Requester is not the campaign's DM", async () => {
     mockedStorage.getMember.mockResolvedValue(PLAYER_MEMBER);
     mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);

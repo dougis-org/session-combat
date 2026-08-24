@@ -110,4 +110,33 @@ describe("DELETE /api/campaigns/[id]/encounters/[encounterId]", () => {
     expect(response.status).toBe(404);
     expect(mockedStorage.removeEncounterFromCampaign).not.toHaveBeenCalled();
   });
+
+  it("returns 500 when removeEncounterFromCampaign throws", async () => {
+    mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
+    mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
+    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedStorage.removeEncounterFromCampaign.mockRejectedValue(new Error("Storage error"));
+
+    const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
+
+    expect(response.status).toBe(500);
+  });
+
+  it("returns 400 when id param is an empty string", async () => {
+    const response = await DELETE(makeDeleteRequest(), {
+      params: Promise.resolve({ id: "", encounterId: ENCOUNTER_ID }),
+    });
+
+    expect(response.status).toBe(400);
+    expect(mockedStorage.getMember).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when encounterId param is an empty string", async () => {
+    const response = await DELETE(makeDeleteRequest(), {
+      params: Promise.resolve({ id: CAMPAIGN_ID, encounterId: "" }),
+    });
+
+    expect(response.status).toBe(400);
+    expect(mockedStorage.getMember).not.toHaveBeenCalled();
+  });
 });
