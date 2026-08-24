@@ -1,0 +1,273 @@
+'use client';
+
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams } from 'next/navigation';
+import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
+import { ErrorBanner } from '@/lib/components/ui';
+import type { Encounter } from '@/lib/types';
+import { EncounterEditor } from '@/app/encounters/EncounterEditor';
+
+function unlinkConfirmMessage(name: string): string {
+  return `Unlink "${name}" from the campaign? It will not be deleted and will remain available in the global Encounters list.`;
+}
+
+function EncountersManagementContent({ campaignId }: { campaignId: string }) {
+  const [encounters, setEncounters] = useState<Encounter[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [isLinkingEncounter, setIsLinkingEncounter] = useState(false);
+  const [owned, setOwned] = useState<Encounter[]>([]);
+  const [ownedLoading, setOwnedLoading] = useState(false);
+  const [pickerError, setPickerError] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [linkingId, setLinkingId] = useState<string | null>(null);
+  const linkingIdRef = useRef<string | null>(null);
+
+  const [isCreatingEncounter, setIsCreatingEncounter] = useState(false);
+  const [createWarning, setCreateWarning] = useState<string | null>(null);
+
+  const fetchLinked = useCallback(async () => {
+    try {
+      setError(null);
+      const response = await fetch(`/api/campaigns/${campaignId}/encounters`);
+      if (!response.ok) throw new Error('Failed to load linked encounters');
+      const data = await response.json();
+      setEncounters(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load linked encounters');
+    } finally {
+      setLoading(false);
+    }
+  }, [campaignId]);
+
+  useEffect(() => { fetchLinked(); }, [fetchLinked]);
+
+  async function openPicker() {
+    setIsLinkingEncounter(true);
+    setPickerError(null);
+    setSearch('');
+    setOwnedLoading(true);
+    try {
+      const response = await fetch('/api/encounters');
+      if (!response.ok) throw new Error('Failed to load encounters');
+      const data = await response.json();
+      setOwned(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setPickerError(err instanceof Error ? err.message : 'Failed to load encounters');
+    } finally {
+      setOwnedLoading(false);
+    }
+  }
+
+  function closePicker() {
+    setIsLinkingEncounter(false);
+    setPickerError(null);
+    setSearch('');
+  }
+
+  async function handleLink(encounter: Encounter) {
+    if (linkingIdRef.current) return;
+    linkingIdRef.current = encounter.id;
+    setLinkingId(encounter.id);
+    setPickerError(null);
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}/encounters`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ encounterId: encounter.id }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to link encounter');
+      }
+      await fetchLinked();
+    } catch (err) {
+      setPickerError(err instanceof Error ? err.message : 'Failed to link encounter');
+    } finally {
+      linkingIdRef.current = null;
+      setLinkingId(null);
+    }
+  }
+
+  async function handleCreateSave(encounter: Encounter) {
+    setError(null);
+    setCreateWarning(null);
+    try {
+      const response = await fetch('/api/encounters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: encounter.name,
+          description: encounter.description,
+          monsters: encounter.monsters,
+          campaignId,
+        }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to create encounter');
+      }
+      const data = await response.json();
+      setIsCreatingEncounter(false);
+      if (data.linkWarning) {
+        setCreateWarning(data.linkWarning);
+      }
+      await fetchLinked();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create encounter');
+    }
+  }
+
+  async function handleUnlink(encounter: Encounter) {
+    const confirmed = window.confirm(unlinkConfirmMessage(encounter.name));
+    if (!confirmed) return;
+    setError(null);
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}/encounters/${encounter.id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to unlink encounter');
+      await fetchLinked();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to unlink encounter');
+    }
+  }
+
+  const linkedIds = new Set(encounters.map(e => e.id));
+  const unlinkedOwned = owned.filter(e => !linkedIds.has(e.id));
+  const filteredOwned = unlinkedOwned.filter(e => e.name.toLowerCase().includes(search.toLowerCase()));
+  const allOwnedAlreadyLinked = owned.length > 0 && unlinkedOwned.length === 0;
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Encounters</h1>
+      </div>
+
+      <ErrorBanner message={error} />
+
+      {!isLinkingEncounter && !isCreatingEncounter && (
+        <div className="flex gap-3 mb-6">
+          <button
+            onClick={openPicker}
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm"
+          >
+            Link Existing Encounter
+          </button>
+          <button
+            onClick={() => { setCreateWarning(null); setIsCreatingEncounter(true); }}
+            className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm"
+          >
+            Create New Encounter
+          </button>
+        </div>
+      )}
+
+      {createWarning && (
+        <div className="p-4 bg-yellow-900 border border-yellow-700 rounded text-yellow-200 mb-6">
+          {createWarning}
+        </div>
+      )}
+
+      {isCreatingEncounter && (
+        <EncounterEditor
+          encounter={{
+            id: '',
+            userId: '',
+            name: '',
+            description: '',
+            monsters: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }}
+          onSave={handleCreateSave}
+          onCancel={() => setIsCreatingEncounter(false)}
+          isNew={true}
+        />
+      )}
+
+      {isLinkingEncounter && (
+        <div className="bg-gray-800 rounded-lg p-6 mb-6 border-2 border-blue-500">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Link Existing Encounter</h2>
+            <button onClick={closePicker} className="bg-gray-600 hover:bg-gray-700 px-3 py-1.5 rounded text-sm">
+              Cancel
+            </button>
+          </div>
+
+          {pickerError && (
+            <div className="p-3 bg-red-900 border border-red-700 rounded text-red-200 mb-4">
+              {pickerError}
+            </div>
+          )}
+
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search encounters..."
+            className="w-full bg-gray-700 rounded px-3 py-2 text-white mb-4"
+          />
+
+          {ownedLoading ? (
+            <p className="text-gray-400">Loading…</p>
+          ) : allOwnedAlreadyLinked ? (
+            <p className="text-gray-400 text-center py-4">All of your owned encounters are already linked.</p>
+          ) : (
+            <div className="space-y-2">
+              {filteredOwned.map(encounter => (
+                <div key={encounter.id} className="bg-gray-700 rounded p-3 flex justify-between items-center">
+                  <span className="font-medium">{encounter.name}</span>
+                  <button
+                    onClick={() => handleLink(encounter)}
+                    disabled={linkingId === encounter.id}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-3 py-1 rounded text-sm"
+                  >
+                    {linkingId === encounter.id ? 'Linking…' : 'Link'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {loading ? (
+        <p className="text-gray-400">Loading…</p>
+      ) : encounters.length === 0 ? (
+        <p className="text-gray-400 text-center py-12">
+          No encounters linked yet. Link an existing encounter or create a new one to get started.
+        </p>
+      ) : (
+        <div className="space-y-4">
+          {encounters.map(encounter => (
+            <div key={encounter.id} className="bg-gray-800 rounded-lg p-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-xl font-semibold">{encounter.name}</h2>
+                  {encounter.description && <p className="text-gray-400">{encounter.description}</p>}
+                </div>
+                <button
+                  onClick={() => handleUnlink(encounter)}
+                  className="bg-red-700 hover:bg-red-800 px-3 py-1.5 rounded text-sm"
+                >
+                  Unlink
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function CampaignEncountersPage() {
+  const params = useParams<{ id: string }>();
+  const campaignId = Array.isArray(params.id) ? params.id[0] : params.id;
+
+  return (
+    <ProtectedRoute>
+      <EncountersManagementContent campaignId={campaignId as string} />
+    </ProtectedRoute>
+  );
+}
