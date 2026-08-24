@@ -36,7 +36,7 @@ function mockDb(user: unknown) {
     collection: jest.fn().mockReturnValue({
       findOne: jest.fn().mockResolvedValue(user),
     }),
-  } as any);
+  } as unknown as ReturnType<typeof getDatabase>);
 }
 
 beforeEach(() => {
@@ -242,7 +242,7 @@ describe("POST /api/auth/password/forgot", () => {
         collection: jest.fn().mockReturnValue({
           findOne: findOneMock,
         }),
-      } as any);
+      } as unknown as ReturnType<typeof getDatabase>);
 
       const res = await POST(makeRequest({ email: "UsEr@EXample.COM" }));
       expect(res.status).toBe(200);

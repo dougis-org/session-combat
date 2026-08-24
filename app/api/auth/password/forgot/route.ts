@@ -70,9 +70,10 @@ export async function POST(request: NextRequest) {
           await storeResetToken(userId, tokenHash);
           await sendPasswordResetEmail(trimmedEmail, resetUrl);
           console.log(`[reset-email] sent userId=${userId}`);
-        } catch (err: any) {
-          const status = err?.response?.status ?? err?.status ?? 'unknown';
-          const data = err?.response?.data ?? err?.message ?? String(err);
+        } catch (err: unknown) {
+          const typedErr = err as any;
+          const status = typedErr?.response?.status ?? typedErr?.status ?? 'unknown';
+          const data = typedErr?.response?.data ?? typedErr?.message ?? String(err);
           console.error(`[reset-email] failed userId=${userId} status=${status}`, data);
         }
       }
@@ -81,7 +82,11 @@ export async function POST(request: NextRequest) {
       const dummyToken = generateResetToken();
       hashToken(dummyToken);
       // Wait a randomized amount between 50-150ms to simulate the email sending/DB saving
-      await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 100));
+      // Using crypto.getRandomValues instead of Math.random() for security
+      const randomValue = new Uint32Array(1);
+      crypto.getRandomValues(randomValue);
+      const randomMs = (randomValue[0] % 100);
+      await new Promise(resolve => setTimeout(resolve, 50 + randomMs));
     }
 
     const response = NextResponse.json({ message: GENERIC_MESSAGE }, { status: 200 });
