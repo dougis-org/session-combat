@@ -216,7 +216,7 @@ describe("character import route", () => {
 
   test("hides message when exposeMessage is false", async () => {
     const err = new DndBeyondImportError("Secret internal error", { status: 400 });
-    err.exposeMessage = false;
+    (err as any).exposeMessage = false;
     mockedImportCharacter.mockRejectedValue(err);
 
     const response = await POST(

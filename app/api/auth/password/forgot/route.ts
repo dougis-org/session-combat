@@ -52,11 +52,12 @@ export async function POST(request: NextRequest) {
 
     const db = await getDatabase();
     const usersCollection = db.collection<User>('users');
-    const user = await usersCollection.findOne({ email: { $eq: trimmedEmail } });
+    const escapedEmail = trimmedEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const user = await usersCollection.findOne({ email: { $regex: `^${escapedEmail}$`, $options: 'i' } });
 
-    // Return generic response immediately — anti-enumeration (D4 + D7)
-    const response = NextResponse.json({ message: GENERIC_MESSAGE }, { status: 200 });
-
+    // If user doesn't exist, we must use a dummy delay and hash to prevent timing attacks.
+    // We delay the response until the background promise chain (or dummy chain) completes.
+    
     if (user) {
       const userId = user._id?.toString();
       if (userId) {
@@ -65,17 +66,30 @@ export async function POST(request: NextRequest) {
         const baseUrl = (process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? 'http://localhost:3000').replace(/\/$/, '');
         const resetUrl = `${baseUrl}/reset-password?token=${token}`;
 
-        storeResetToken(userId, tokenHash)
-          .then(() => sendPasswordResetEmail(trimmedEmail, resetUrl))
-          .then(() => console.log(`[reset-email] sent userId=${userId}`))
-          .catch((err) => {
-            const status = err?.response?.status ?? err?.status ?? 'unknown';
-            const data = err?.response?.data ?? err?.message ?? String(err);
-            console.error(`[reset-email] failed userId=${userId} status=${status}`, data);
-          });
+        try {
+          await storeResetToken(userId, tokenHash);
+          await sendPasswordResetEmail(trimmedEmail, resetUrl);
+          console.log(`[reset-email] sent userId=${userId}`);
+        } catch (err: unknown) {
+          const typedErr = err as any;
+          const status = typedErr?.response?.status ?? typedErr?.status ?? 'unknown';
+          const data = typedErr?.response?.data ?? typedErr?.message ?? String(err);
+          console.error(`[reset-email] failed userId=${userId} status=${status}`, data);
+        }
       }
+    } else {
+      // Dummy execution to prevent timing attacks (Anti-enumeration)
+      const dummyToken = generateResetToken();
+      hashToken(dummyToken);
+      // Wait a randomized amount between 50-150ms to simulate the email sending/DB saving
+      // Using crypto.getRandomValues instead of Math.random() for security
+      const randomValue = new Uint32Array(1);
+      crypto.getRandomValues(randomValue);
+      const randomMs = (randomValue[0] % 100);
+      await new Promise(resolve => setTimeout(resolve, 50 + randomMs));
     }
 
+    const response = NextResponse.json({ message: GENERIC_MESSAGE }, { status: 200 });
     return response;
   } catch (error) {
     console.error('Forgot password error:', error);
