@@ -27,9 +27,18 @@ jest.mock('@/lib/hooks/useAuth', () => ({
 // Import after mocks
 import CampaignEncountersPage from '@/app/campaigns/[id]/encounters/page';
 
+let nextFixtureId = 0;
+function makeFixtureId(): string {
+  // Deterministic fallback in case global.crypto.randomUUID isn't available in
+  // the test environment; also keeps failures reproducible.
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `fixture-${++nextFixtureId}`;
+}
+
 function makeEncounter(overrides: Partial<Encounter> = {}): Encounter {
   return {
-    id: crypto.randomUUID(),
+    id: makeFixtureId(),
     userId: 'user-1',
     name: 'Test Encounter',
     description: '',

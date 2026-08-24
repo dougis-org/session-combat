@@ -39,7 +39,7 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
   const fetchLinked = useCallback(async () => {
     try {
       setError(null);
-      const response = await fetch(`/api/campaigns/${campaignId}/encounters`);
+      const response = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/encounters`);
       if (!response.ok) throw new Error(await extractErrorMessage(response, 'Failed to load linked encounters'));
       const data = await response.json();
       setEncounters(Array.isArray(data) ? data : []);
@@ -86,7 +86,7 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
     setLinkingId(encounter.id);
     setPickerError(null);
     try {
-      const response = await fetch(`/api/campaigns/${campaignId}/encounters`, {
+      const response = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/encounters`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ encounterId: encounter.id }),
@@ -134,7 +134,10 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
     if (!confirmed) return;
     setError(null);
     try {
-      const response = await fetch(`/api/campaigns/${campaignId}/encounters/${encounter.id}`, { method: 'DELETE' });
+      const response = await fetch(
+        `/api/campaigns/${encodeURIComponent(campaignId)}/encounters/${encodeURIComponent(encounter.id)}`,
+        { method: 'DELETE' }
+      );
       if (!response.ok) throw new Error(await extractErrorMessage(response, 'Failed to unlink encounter'));
       await fetchLinked();
     } catch (err) {
@@ -145,7 +148,11 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
 
   const linkedIds = new Set(encounters.map(e => e.id));
   const unlinkedOwned = owned.filter(e => !linkedIds.has(e.id));
-  const filteredOwned = unlinkedOwned.filter(e => e.name.toLowerCase().includes(search.toLowerCase()));
+  // API responses are trusted but not schema-validated at this boundary; guard
+  // against a malformed/missing name rather than letting toLowerCase() throw.
+  const filteredOwned = unlinkedOwned.filter(e =>
+    String(e.name ?? '').toLowerCase().includes(search.toLowerCase())
+  );
   // These three states are mutually exclusive and cover every reason the picker
   // list could be empty: the user owns nothing at all, everything owned is already
   // linked, or a search term matches nothing. Each needs its own message so the
