@@ -9,8 +9,10 @@ jest.mock('next/link', () => ({
     React.createElement('a', { href, ...props }, children),
 }));
 
+let mockParamsId: string | string[] = 'campaign-123';
+
 jest.mock('next/navigation', () => ({
-  useParams: () => ({ id: 'campaign-123' }),
+  useParams: () => ({ id: mockParamsId }),
 }));
 
 jest.mock('@/lib/components/ProtectedRoute', () => ({
@@ -111,6 +113,32 @@ describe('Campaign Encounters Page', () => {
     });
   });
 
+  describe('campaignId from an array param (catch-all route defensiveness)', () => {
+    afterEach(() => { mockParamsId = 'campaign-123'; });
+
+    it('renders nothing when useParams().id is an empty array', async () => {
+      mockParamsId = [];
+      global.fetch = jest.fn(async () => ({ ok: true, json: async () => [] }) as unknown as Response) as typeof fetch;
+
+      await render();
+
+      expect(container.textContent).toBe('');
+    });
+
+    it('uses the first element when useParams().id is a populated array', async () => {
+      mockParamsId = ['campaign-arr', 'extra'];
+      const calls: string[] = [];
+      global.fetch = jest.fn(async (input: unknown) => {
+        calls.push(String(input));
+        return { ok: true, json: async () => [] } as unknown as Response;
+      }) as typeof fetch;
+
+      await render();
+
+      expect(calls).toContain('/api/campaigns/campaign-arr/encounters');
+    });
+  });
+
   describe('Task D — Link Existing Encounter picker', () => {
     function mockLinkedThenOwned(linked: Encounter[], owned: Encounter[]) {
       const calls: string[] = [];
@@ -137,6 +165,54 @@ describe('Campaign Encounters Page', () => {
       await flush();
 
       expect(calls.filter(u => u === '/api/encounters')).toHaveLength(1);
+    });
+
+    it('shows a picker error banner when GET /api/encounters fails, without crashing', async () => {
+      global.fetch = jest.fn(async (input: unknown) => {
+        const url = String(input);
+        if (url === '/api/campaigns/campaign-123/encounters') {
+          return { ok: true, json: async () => [] } as unknown as Response;
+        }
+        if (url === '/api/encounters') {
+          return { ok: false, json: async () => ({ error: 'Could not load your encounters' }) } as unknown as Response;
+        }
+        return { ok: true, json: async () => ({}) } as unknown as Response;
+      }) as typeof fetch;
+
+      await render();
+      await act(async () => { findButton('Link Existing Encounter')!.click(); });
+      await flush();
+
+      expect(container.textContent).toMatch(/Could not load your encounters/i);
+      expect(findButton('Link')).toBeFalsy();
+    });
+
+    it('shows an empty-owned message when the user has no encounters at all', async () => {
+      mockLinkedThenOwned([], []);
+      await render();
+
+      await act(async () => { findButton('Link Existing Encounter')!.click(); });
+      await flush();
+
+      expect(container.textContent).toMatch(/don't have any encounters yet/i);
+    });
+
+    it('shows a no-matches message when a search term matches nothing', async () => {
+      const owned = [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })];
+      mockLinkedThenOwned([], owned);
+      await render();
+
+      await act(async () => { findButton('Link Existing Encounter')!.click(); });
+      await flush();
+
+      const searchInput = container.querySelector('input[type="text"]') as HTMLInputElement;
+      await act(async () => {
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')!.set!;
+        setter.call(searchInput, 'zzz-no-match');
+        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+
+      expect(container.textContent).toMatch(/no encounters match your search/i);
     });
 
     it('excludes already-linked encounters from the picker', async () => {
@@ -379,6 +455,55 @@ describe('Campaign Encounters Page', () => {
       expect(container.textContent).toMatch(/could not be linked/i);
       expect(findButton('Save Encounter')).toBeFalsy();
     });
+
+    it('shows an error banner and keeps the editor open when creation fails', async () => {
+      global.fetch = jest.fn(async (input: unknown, init?: unknown) => {
+        const url = String(input);
+        const method = (init as RequestInit | undefined)?.method;
+        if (url === '/api/encounters' && method === 'POST') {
+          return { ok: false, json: async () => ({ error: 'Name is required' }) } as unknown as Response;
+        }
+        return { ok: true, json: async () => [] } as unknown as Response;
+      }) as typeof fetch;
+
+      await render();
+      await act(async () => { findButton('Create New Encounter')!.click(); });
+      await flush();
+
+      const nameInput = container.querySelector('#encounter-name') as HTMLInputElement;
+      await act(async () => {
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')!.set!;
+        setter.call(nameInput, 'New One');
+        nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      await act(async () => { findButton('Save Encounter')!.click(); });
+      await flush();
+
+      expect(container.textContent).toMatch(/Name is required/i);
+      expect(findButton('Save Encounter')).toBeTruthy();
+    });
+
+    it('cancelling the editor returns to the action buttons without posting', async () => {
+      let postCalled = false;
+      global.fetch = jest.fn(async (input: unknown, init?: unknown) => {
+        const url = String(input);
+        const method = (init as RequestInit | undefined)?.method;
+        if (url === '/api/encounters' && method === 'POST') { postCalled = true; }
+        return { ok: true, json: async () => [] } as unknown as Response;
+      }) as typeof fetch;
+
+      await render();
+      await act(async () => { findButton('Create New Encounter')!.click(); });
+      await flush();
+
+      expect(findButton('Save Encounter')).toBeTruthy();
+      await act(async () => { findButton('Cancel')!.click(); });
+      await flush();
+
+      expect(postCalled).toBe(false);
+      expect(findButton('Save Encounter')).toBeFalsy();
+      expect(findButton('Create New Encounter')).toBeTruthy();
+    });
   });
 
   describe('Task F — Unlink per row', () => {
@@ -409,6 +534,26 @@ describe('Campaign Encounters Page', () => {
       expect(confirmText.toLowerCase()).toContain('not be deleted');
       expect(deletedUrl).toBe('/api/campaigns/campaign-123/encounters/e1');
       expect(container.textContent).not.toContain('Goblin Ambush');
+    });
+
+    it('shows an error banner and keeps the row when the DELETE fails', async () => {
+      window.confirm = jest.fn(() => true);
+      const linked = [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })];
+
+      global.fetch = jest.fn(async (input: unknown, init?: unknown) => {
+        const method = (init as RequestInit | undefined)?.method;
+        if (method === 'DELETE') {
+          return { ok: false, json: async () => ({ error: 'Cannot unlink right now' }) } as unknown as Response;
+        }
+        return { ok: true, json: async () => linked } as unknown as Response;
+      }) as typeof fetch;
+
+      await render();
+      await act(async () => { findButton('Unlink')!.click(); });
+      await flush();
+
+      expect(container.textContent).toMatch(/Cannot unlink right now/i);
+      expect(container.textContent).toContain('Goblin Ambush');
     });
 
     it('does not DELETE and keeps the row when confirm is cancelled', async () => {

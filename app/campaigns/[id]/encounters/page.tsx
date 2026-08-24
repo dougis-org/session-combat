@@ -3,12 +3,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { ErrorBanner } from '@/lib/components/ui';
+import { ErrorBanner, ValidationError } from '@/lib/components/ui';
 import type { Encounter } from '@/lib/types';
 import { EncounterEditor } from '@/app/encounters/EncounterEditor';
 
 function unlinkConfirmMessage(name: string): string {
   return `Unlink "${name}" from the campaign? It will not be deleted and will remain available in the global Encounters list.`;
+}
+
+/** Extracts a server-supplied error message from a failed response, falling back when the body is missing or not JSON. */
+async function extractErrorMessage(response: Response, fallback: string): Promise<string> {
+  const data = await response.json().catch(() => ({}) as { error?: string });
+  return data.error || fallback;
 }
 
 function EncountersManagementContent({ campaignId }: { campaignId: string }) {
@@ -22,6 +28,9 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
   const [pickerError, setPickerError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [linkingId, setLinkingId] = useState<string | null>(null);
+  // Synchronous double-submit guard: `linkingId` state isn't visible until the next
+  // render, so a second rapid click could slip through a state-only check. This ref
+  // is set/read immediately inside handleLink instead.
   const linkingIdRef = useRef<string | null>(null);
 
   const [isCreatingEncounter, setIsCreatingEncounter] = useState(false);
@@ -31,11 +40,13 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
     try {
       setError(null);
       const response = await fetch(`/api/campaigns/${campaignId}/encounters`);
-      if (!response.ok) throw new Error('Failed to load linked encounters');
+      if (!response.ok) throw new Error(await extractErrorMessage(response, 'Failed to load linked encounters'));
       const data = await response.json();
       setEncounters(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load linked encounters');
+      const message = err instanceof Error ? err.message : 'Failed to load linked encounters';
+      console.error('Failed to load linked encounters:', err);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -47,14 +58,17 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
     setIsLinkingEncounter(true);
     setPickerError(null);
     setSearch('');
+    setOwned([]);
     setOwnedLoading(true);
     try {
       const response = await fetch('/api/encounters');
-      if (!response.ok) throw new Error('Failed to load encounters');
+      if (!response.ok) throw new Error(await extractErrorMessage(response, 'Failed to load encounters'));
       const data = await response.json();
       setOwned(Array.isArray(data) ? data : []);
     } catch (err) {
-      setPickerError(err instanceof Error ? err.message : 'Failed to load encounters');
+      const message = err instanceof Error ? err.message : 'Failed to load encounters';
+      console.error('Failed to load encounters for picker:', err);
+      setPickerError(message);
     } finally {
       setOwnedLoading(false);
     }
@@ -77,12 +91,10 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ encounterId: encounter.id }),
       });
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to link encounter');
-      }
+      if (!response.ok) throw new Error(await extractErrorMessage(response, 'Failed to link encounter'));
       await fetchLinked();
     } catch (err) {
+      console.error('Failed to link encounter:', err);
       setPickerError(err instanceof Error ? err.message : 'Failed to link encounter');
     } finally {
       linkingIdRef.current = null;
@@ -104,10 +116,7 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
           campaignId,
         }),
       });
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to create encounter');
-      }
+      if (!response.ok) throw new Error(await extractErrorMessage(response, 'Failed to create encounter'));
       const data = await response.json();
       setIsCreatingEncounter(false);
       if (data.linkWarning) {
@@ -115,6 +124,7 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
       }
       await fetchLinked();
     } catch (err) {
+      console.error('Failed to create encounter:', err);
       setError(err instanceof Error ? err.message : 'Failed to create encounter');
     }
   }
@@ -125,9 +135,10 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
     setError(null);
     try {
       const response = await fetch(`/api/campaigns/${campaignId}/encounters/${encounter.id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to unlink encounter');
+      if (!response.ok) throw new Error(await extractErrorMessage(response, 'Failed to unlink encounter'));
       await fetchLinked();
     } catch (err) {
+      console.error('Failed to unlink encounter:', err);
       setError(err instanceof Error ? err.message : 'Failed to unlink encounter');
     }
   }
@@ -135,7 +146,13 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
   const linkedIds = new Set(encounters.map(e => e.id));
   const unlinkedOwned = owned.filter(e => !linkedIds.has(e.id));
   const filteredOwned = unlinkedOwned.filter(e => e.name.toLowerCase().includes(search.toLowerCase()));
+  // These three states are mutually exclusive and cover every reason the picker
+  // list could be empty: the user owns nothing at all, everything owned is already
+  // linked, or a search term matches nothing. Each needs its own message so the
+  // panel never renders as a silent blank list.
+  const ownsNoEncounters = owned.length === 0;
   const allOwnedAlreadyLinked = owned.length > 0 && unlinkedOwned.length === 0;
+  const noSearchMatches = !ownsNoEncounters && !allOwnedAlreadyLinked && filteredOwned.length === 0;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -194,24 +211,25 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
             </button>
           </div>
 
-          {pickerError && (
-            <div className="p-3 bg-red-900 border border-red-700 rounded text-red-200 mb-4">
-              {pickerError}
-            </div>
-          )}
+          <ValidationError message={pickerError} />
 
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search encounters..."
+            aria-label="Search encounters"
             className="w-full bg-gray-700 rounded px-3 py-2 text-white mb-4"
           />
 
           {ownedLoading ? (
             <p className="text-gray-400">Loading…</p>
+          ) : ownsNoEncounters ? (
+            <p className="text-gray-400 text-center py-4">You don&apos;t have any encounters yet. Create one instead.</p>
           ) : allOwnedAlreadyLinked ? (
             <p className="text-gray-400 text-center py-4">All of your owned encounters are already linked.</p>
+          ) : noSearchMatches ? (
+            <p className="text-gray-400 text-center py-4">No encounters match your search.</p>
           ) : (
             <div className="space-y-2">
               {filteredOwned.map(encounter => (
@@ -219,7 +237,7 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
                   <span className="font-medium">{encounter.name}</span>
                   <button
                     onClick={() => handleLink(encounter)}
-                    disabled={linkingId === encounter.id}
+                    disabled={linkingId !== null}
                     className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-3 py-1 rounded text-sm"
                   >
                     {linkingId === encounter.id ? 'Linking…' : 'Link'}
@@ -263,11 +281,16 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
 
 export default function CampaignEncountersPage() {
   const params = useParams<{ id: string }>();
+  // This is a single dynamic segment ([id], not [...id]), so params.id is always a
+  // string in practice; Array.isArray is defensive boilerplate consistent with how
+  // Next.js types useParams for catch-all routes.
   const campaignId = Array.isArray(params.id) ? params.id[0] : params.id;
+
+  if (!campaignId) return null;
 
   return (
     <ProtectedRoute>
-      <EncountersManagementContent campaignId={campaignId as string} />
+      <EncountersManagementContent campaignId={campaignId} />
     </ProtectedRoute>
   );
 }

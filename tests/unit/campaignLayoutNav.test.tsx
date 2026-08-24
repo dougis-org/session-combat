@@ -86,4 +86,16 @@ describe('CampaignLayout nav', () => {
     expect(encountersLink?.getAttribute('aria-current')).toBe('page');
     expect(membersLink?.getAttribute('aria-current')).toBeFalsy();
   });
+
+  it('marks the Combat tab active when on /campaigns/[id]/combat, and Encounters is not active', async () => {
+    mockPathname = '/campaigns/campaign-123/combat';
+    await render();
+
+    const links = Array.from(container.querySelectorAll('a'));
+    const combatLink = links.find(a => a.textContent?.trim() === 'Combat');
+    const encountersLink = links.find(a => a.textContent?.trim() === 'Encounters');
+
+    expect(combatLink?.getAttribute('aria-current')).toBe('page');
+    expect(encountersLink?.getAttribute('aria-current')).toBeFalsy();
+  });
 });
