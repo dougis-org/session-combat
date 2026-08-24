@@ -110,6 +110,7 @@ describe('Campaign Encounters Page', () => {
       await render();
 
       expect(container.querySelector('.bg-red-900')).toBeTruthy();
+      expect(container.textContent).toMatch(/boom/);
     });
   });
 
@@ -185,6 +186,40 @@ describe('Campaign Encounters Page', () => {
 
       expect(container.textContent).toMatch(/Could not load your encounters/i);
       expect(findButton('Link')).toBeFalsy();
+      // owned ends up empty after a failed fetch too, but the empty-state copy
+      // must not contradict the error banner by claiming the user has no encounters.
+      expect(container.textContent).not.toMatch(/don't have any encounters yet/i);
+    });
+
+    it('resets the owned list when reopening the picker after a failed fetch', async () => {
+      let ownedShouldFail = false;
+      const owned = [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })];
+      global.fetch = jest.fn(async (input: unknown) => {
+        const url = String(input);
+        if (url === '/api/campaigns/campaign-123/encounters') {
+          return { ok: true, json: async () => [] } as unknown as Response;
+        }
+        if (url === '/api/encounters') {
+          if (ownedShouldFail) {
+            return { ok: false, json: async () => ({ error: 'Temporary failure' }) } as unknown as Response;
+          }
+          return { ok: true, json: async () => owned } as unknown as Response;
+        }
+        return { ok: true, json: async () => ({}) } as unknown as Response;
+      }) as typeof fetch;
+
+      await render();
+      await act(async () => { findButton('Link Existing Encounter')!.click(); });
+      await flush();
+      expect(container.textContent).toContain('Goblin Ambush');
+
+      await act(async () => { findButton('Cancel')!.click(); });
+      ownedShouldFail = true;
+      await act(async () => { findButton('Link Existing Encounter')!.click(); });
+      await flush();
+
+      expect(container.textContent).toMatch(/Temporary failure/i);
+      expect(container.textContent).not.toContain('Goblin Ambush');
     });
 
     it('shows an empty-owned message when the user has no encounters at all', async () => {
@@ -250,6 +285,7 @@ describe('Campaign Encounters Page', () => {
 
       const searchInput = container.querySelector('input[type="text"]') as HTMLInputElement;
       expect(searchInput).toBeTruthy();
+      expect(searchInput.getAttribute('aria-label')).toBe('Search encounters');
       await act(async () => {
         const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')!.set!;
         setter.call(searchInput, 'gob');
@@ -373,6 +409,44 @@ describe('Campaign Encounters Page', () => {
       await act(async () => { resolvePost?.(); await new Promise(r => setTimeout(r, 0)); });
 
       expect(postCount).toBe(1);
+    });
+
+    it('disables every Link button, not just the row being linked, while a link is in flight', async () => {
+      const owned = [
+        makeEncounter({ id: 'e1', name: 'Owlbear Den' }),
+        makeEncounter({ id: 'e2', name: 'Goblin Ambush' }),
+      ];
+      let resolvePost: (() => void) | null = null;
+      global.fetch = jest.fn(async (input: unknown, init?: unknown) => {
+        const url = String(input);
+        const method = (init as RequestInit | undefined)?.method;
+        if (url === '/api/campaigns/campaign-123/encounters' && method === 'POST') {
+          await new Promise<void>(resolve => { resolvePost = resolve; });
+          return { ok: true, json: async () => ({ message: 'linked' }) } as unknown as Response;
+        }
+        if (url === '/api/campaigns/campaign-123/encounters') {
+          return { ok: true, json: async () => [] } as unknown as Response;
+        }
+        if (url === '/api/encounters') {
+          return { ok: true, json: async () => owned } as unknown as Response;
+        }
+        return { ok: true, json: async () => ({}) } as unknown as Response;
+      }) as typeof fetch;
+
+      await render();
+      await act(async () => { findButton('Link Existing Encounter')!.click(); });
+      await flush();
+
+      const linkButtons = buttons().filter(b => b.textContent?.trim() === 'Link');
+      expect(linkButtons).toHaveLength(2);
+
+      await act(async () => { linkButtons[0].click(); });
+
+      const stillLabeledLink = buttons().filter(b => b.textContent?.trim() === 'Link');
+      expect(stillLabeledLink).toHaveLength(1);
+      expect(stillLabeledLink[0].disabled).toBe(true);
+
+      await act(async () => { resolvePost?.(); await new Promise(r => setTimeout(r, 0)); });
     });
   });
 

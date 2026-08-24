@@ -149,10 +149,12 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
   // These three states are mutually exclusive and cover every reason the picker
   // list could be empty: the user owns nothing at all, everything owned is already
   // linked, or a search term matches nothing. Each needs its own message so the
-  // panel never renders as a silent blank list.
-  const ownsNoEncounters = owned.length === 0;
-  const allOwnedAlreadyLinked = owned.length > 0 && unlinkedOwned.length === 0;
-  const noSearchMatches = !ownsNoEncounters && !allOwnedAlreadyLinked && filteredOwned.length === 0;
+  // panel never renders as a silent blank list. All three are suppressed while
+  // pickerError is set, since owned is also empty during/after a failed fetch and
+  // showing "you have no encounters" alongside the error banner would contradict it.
+  const ownsNoEncounters = !pickerError && owned.length === 0;
+  const allOwnedAlreadyLinked = !pickerError && owned.length > 0 && unlinkedOwned.length === 0;
+  const noSearchMatches = !pickerError && !ownsNoEncounters && !allOwnedAlreadyLinked && filteredOwned.length === 0;
 
   return (
     <div className="container mx-auto px-4 py-8">
