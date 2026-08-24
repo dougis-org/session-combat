@@ -402,6 +402,48 @@ export const storage = {
     }
   },
 
+  // Load encounters by id, scoped to their owner
+  async loadEncountersByIds(ids: string[], ownerUserId: string): Promise<Encounter[]> {
+    if (ids.length === 0) return [];
+    try {
+      const db = await getDatabase();
+      const encounters = await db
+        .collection<Encounter>("encounters")
+        .find({ id: { $in: ids }, userId: ownerUserId })
+        .toArray();
+      return encounters.map(normalizeStoredEntityId);
+    } catch (error) {
+      console.error("Error loading encounters by ids:", error);
+      return [];
+    }
+  },
+
+  // Link an encounter to a campaign (idempotent)
+  async addEncounterToCampaign(campaignId: string, encounterId: string, dmUserId: string): Promise<void> {
+    try {
+      const db = await getDatabase();
+      await db
+        .collection<Campaign>("campaigns")
+        .updateOne({ id: campaignId, userId: dmUserId }, { $addToSet: { encounterIds: encounterId } });
+    } catch (error) {
+      console.error("Error adding encounter to campaign:", error);
+      throw error;
+    }
+  },
+
+  // Unlink an encounter from a campaign (idempotent)
+  async removeEncounterFromCampaign(campaignId: string, encounterId: string, dmUserId: string): Promise<void> {
+    try {
+      const db = await getDatabase();
+      await db
+        .collection<Campaign>("campaigns")
+        .updateOne({ id: campaignId, userId: dmUserId }, { $pull: { encounterIds: encounterId } });
+    } catch (error) {
+      console.error("Error removing encounter from campaign:", error);
+      throw error;
+    }
+  },
+
   // Save encounter
   async saveEncounter(encounter: Encounter): Promise<void> {
     try {

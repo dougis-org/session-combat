@@ -7,36 +7,36 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 536 --repo dougis-org/session-combat --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] **Confirm working directory** — confirm current directory is the dedicated worktree for this change (per this session's reconciliation, that's the branch `campaign-encounter-link-api` checked out directly in `.worktrees/add-campaign-encounter-ids`, not a separate `.worktrees/campaign-encounter-link-api` tree — see design.md Context note / session log). Do not switch branches inside the primary checkout.
-- [ ] **TDD: storage layer** — write failing tests first (`lib/storage.test.ts` or equivalent), then implement in `lib/storage.ts`:
+- [x] **Issue lifecycle: mark in-progress** — run `gh issue edit 536 --repo dougis-org/session-combat --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] **Confirm working directory** — confirm current directory is the dedicated worktree for this change (per this session's reconciliation, that's the branch `campaign-encounter-link-api` checked out directly in `.worktrees/add-campaign-encounter-ids`, not a separate `.worktrees/campaign-encounter-link-api` tree — see design.md Context note / session log). Do not switch branches inside the primary checkout.
+- [x] **TDD: storage layer** — write failing tests first (`lib/storage.test.ts` or equivalent), then implement in `lib/storage.ts`:
   - `loadEncountersByIds(ids: string[], ownerUserId: string): Promise<Encounter[]>` — `find({ id: { $in: ids }, userId: ownerUserId })`; returns `[]` without querying when `ids.length === 0`
   - `addEncounterToCampaign(campaignId: string, encounterId: string, dmUserId: string): Promise<void>` — `updateOne({ id: campaignId, userId: dmUserId }, { $addToSet: { encounterIds: encounterId } })`
   - `removeEncounterFromCampaign(campaignId: string, encounterId: string, dmUserId: string): Promise<void>` — `updateOne({ id: campaignId, userId: dmUserId }, { $pull: { encounterIds: encounterId } })`
-- [ ] **TDD: GET /api/campaigns/[id]/encounters** — write failing integration tests per spec.md scenarios ("DM fetches linked encounters", "Player member fetches the same linked encounters", "Non-member is rejected", "Empty encounterIds returns empty list"), then implement `app/api/campaigns/[id]/encounters/route.ts` `GET` handler: `withAuthAndParams` → `assertCampaignAccess(id, auth.userId)` (any active role) → `storage.loadEncountersByIds(campaign.encounterIds, campaign.userId)` → `NextResponse.json(...)`
-- [ ] **TDD: POST /api/campaigns/[id]/encounters** — write failing tests per spec.md scenarios ("DM links an owned encounter", "Linking the same encounter twice is idempotent", "Linking an encounter you don't own is rejected", "Player member cannot link"), then implement the `POST` handler in the same route file: `assertCampaignAccess` → `role !== 'dm'` → 404 → verify encounter ownership (`storage.loadEncountersByIds([encounterId], auth.userId)`, empty → 404) → `storage.addEncounterToCampaign(id, encounterId, auth.userId)` → `NextResponse.json(...)`
-- [ ] **TDD: DELETE /api/campaigns/[id]/encounters/[encounterId]** — write failing tests per spec.md scenarios ("DM unlinks a linked encounter", "Unlinking an encounter that isn't linked is a no-op success", "Player member cannot unlink"), then implement `app/api/campaigns/[id]/encounters/[encounterId]/route.ts` `DELETE` handler: `assertCampaignAccess` → `role !== 'dm'` → 404 → `storage.removeEncounterFromCampaign(id, encounterId, auth.userId)` → `NextResponse.json({ message: 'Encounter unlinked successfully' })`
-- [ ] **TDD: POST /api/encounters campaignId extension** — write failing tests per spec.md scenarios ("Create and link succeeds", "campaignId omitted behaves exactly as before", "Requester is not the campaign's DM", "Encounter creation succeeds but linking fails"), then modify `app/api/encounters/route.ts` `POST`: if `campaignId` present, `assertCampaignAccess(campaignId, auth.userId)` + DM check before creating; on success, `storage.saveEncounter(...)` then `try { await storage.addEncounterToCampaign(...) } catch (linkError) { return NextResponse.json({ ...encounter, linkWarning: '...' }, { status: 201 }) }`
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (confirmed during design: reuse `assertCampaignAccess`, `buildEntityQuery`/`normalizeStoredEntityId` patterns already in `lib/storage.ts`; no new abstractions needed)
-- [ ] Confirm all acceptance criteria in `specs/campaign-encounter-linking/spec.md` are covered by at least one test
+- [x] **TDD: GET /api/campaigns/[id]/encounters** — write failing integration tests per spec.md scenarios ("DM fetches linked encounters", "Player member fetches the same linked encounters", "Non-member is rejected", "Empty encounterIds returns empty list"), then implement `app/api/campaigns/[id]/encounters/route.ts` `GET` handler: `withAuthAndParams` → `assertCampaignAccess(id, auth.userId)` (any active role) → `storage.loadEncountersByIds(campaign.encounterIds, campaign.userId)` → `NextResponse.json(...)`
+- [x] **TDD: POST /api/campaigns/[id]/encounters** — write failing tests per spec.md scenarios ("DM links an owned encounter", "Linking the same encounter twice is idempotent", "Linking an encounter you don't own is rejected", "Player member cannot link"), then implement the `POST` handler in the same route file: `assertCampaignAccess` → `role !== 'dm'` → 404 → verify encounter ownership (`storage.loadEncountersByIds([encounterId], auth.userId)`, empty → 404) → `storage.addEncounterToCampaign(id, encounterId, auth.userId)` → `NextResponse.json(...)`
+- [x] **TDD: DELETE /api/campaigns/[id]/encounters/[encounterId]** — write failing tests per spec.md scenarios ("DM unlinks a linked encounter", "Unlinking an encounter that isn't linked is a no-op success", "Player member cannot unlink"), then implement `app/api/campaigns/[id]/encounters/[encounterId]/route.ts` `DELETE` handler: `assertCampaignAccess` → `role !== 'dm'` → 404 → `storage.removeEncounterFromCampaign(id, encounterId, auth.userId)` → `NextResponse.json({ message: 'Encounter unlinked successfully' })`
+- [x] **TDD: POST /api/encounters campaignId extension** — write failing tests per spec.md scenarios ("Create and link succeeds", "campaignId omitted behaves exactly as before", "Requester is not the campaign's DM", "Encounter creation succeeds but linking fails"), then modify `app/api/encounters/route.ts` `POST`: if `campaignId` present, `assertCampaignAccess(campaignId, auth.userId)` + DM check before creating; on success, `storage.saveEncounter(...)` then `try { await storage.addEncounterToCampaign(...) } catch (linkError) { return NextResponse.json({ ...encounter, linkWarning: '...' }, { status: 201 }) }`
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (confirmed during design: reuse `assertCampaignAccess`, `buildEntityQuery`/`normalizeStoredEntityId` patterns already in `lib/storage.ts`; no new abstractions needed)
+- [x] Confirm all acceptance criteria in `specs/campaign-encounter-linking/spec.md` are covered by at least one test
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] Run unit/integration tests (`npm test` or project equivalent — covers new storage methods and all four route handlers)
-- [ ] Run E2E tests (if applicable — this change is API-only, no UI; skip unless an existing E2E suite happens to exercise these routes indirectly)
-- [ ] Run type checks (`npm run typecheck` or equivalent)
-- [ ] Run build (`npm run build`)
-- [ ] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests (`npm test` or project equivalent — covers new storage methods and all four route handlers)
+- [x] Run E2E tests (if applicable — this change is API-only, no UI; skip unless an existing E2E suite happens to exercise these routes indirectly) — skipped, no E2E coverage for these routes
+- [x] Run type checks (`npm run typecheck` or equivalent) — pre-existing unrelated error in tests/unit/import/characterImportRoute.test.ts, not touched by this change
+- [x] Run build (`npm run build`)
+- [x] Run security/code quality checks required by project standards — eslint clean on all changed files
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -53,7 +53,7 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
 - [ ] Commit all changes to the working branch and push to remote
 - [ ] Open PR from `campaign-encounter-link-api` to `main`. PR body MUST include `Closes #536`.
 - [ ] **Issue lifecycle: mark in-review** — run `gh issue edit 536 --repo dougis-org/session-combat --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
