@@ -19,7 +19,10 @@ change — issues are created in `dougis-org/session-combat` for later work.
 3. **[#537 — Campaign encounters management screen](https://github.com/dougis-org/session-combat/issues/537)**
    — new `app/campaigns/[id]/encounters/page.tsx` (link existing /
    create new / unlink), reusing `EncounterEditor`. Depends on #536 —
-   needs the link API to exist.
+   needs the link API to exist. **Done** (PR #553) — also folded in
+   #540's nav-tab sub-scope (Encounters + Combat tabs on
+   `app/campaigns/[id]/layout.tsx`), so a future #540 pass only needs
+   the campaign-list "Start Encounter" button split.
 4. **[#538 — Scope the campaign combat-setup encounter picker](https://github.com/dougis-org/session-combat/issues/538)**
    — `useCombat`/`CombatSetupView` fetch campaign-scoped encounters when
    `campaignId` is present; empty-state messaging. Depends on #536 only;
@@ -32,7 +35,10 @@ change — issues are created in `dougis-org/session-combat` for later work.
    — `app/campaigns/[id]/layout.tsx` tabs, `app/campaigns/page.tsx`
    button split into "Encounters" + "Start Combat". Depends on #537 so
    the new Encounters tab has somewhere to point; do this last among
-   the UI work so both destination pages already exist.
+   the UI work so both destination pages already exist. **Partially
+   done**: the nav-tab addition was absorbed into #537 (PR #553).
+   Remaining scope is only the campaign-list button split on
+   `app/campaigns/page.tsx`.
 7. **[#541 — Tests: campaign-encounter linking + campaign-aware combat start](https://github.com/dougis-org/session-combat/issues/541)**
    — API route tests for #536, E2E coverage for the full
    campaign → encounters → start combat flow and the ad hoc banner.
