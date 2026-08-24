@@ -1,6 +1,6 @@
 ## GitHub Issues
 
-- #536
+- #536 — body and metadata verified via `gh issue view 536 --repo dougis-org/session-combat` (the GitHub MCP tool's `issue_read` call failed with an invalid-session error during exploration; the CLI call succeeded and is the source of truth for the issue text quoted below). #535 (dependency, closed/merged) verified the same way.
 
 ## Why
 
