@@ -42,6 +42,8 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
         { label: 'Sessions', href: `/campaigns/${id}/sessions` },
         { label: 'Prompts', href: `/campaigns/${id}/prompts` },
         { label: 'Library', href: `/campaigns/${id}/library` },
+        { label: 'Encounters', href: `/campaigns/${id}/encounters` },
+        { label: 'Combat', href: `/campaigns/${id}/combat` },
       ].map(tab => {
         const isActive = pathname
           ? (tab.href === `/campaigns/${id}` ? pathname === tab.href : pathname.startsWith(tab.href))
