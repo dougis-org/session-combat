@@ -47,8 +47,9 @@ export function useCombat(options: UseCombatOptions = {}) {
         setLoading(true);
         setLoadingTemplates(true);
         setError(null);
+        const encountersUrl = campaignId ? `/api/campaigns/${campaignId}/encounters` : '/api/encounters';
         const [encountersRes, charactersRes, combatRes, monstersRes, partiesRes] = await Promise.all([
-          fetch('/api/encounters'),
+          fetch(encountersUrl),
           fetch('/api/characters'),
           fetch('/api/combat'),
           fetch('/api/monsters'),
@@ -80,7 +81,7 @@ export function useCombat(options: UseCombatOptions = {}) {
     };
 
     loadData();
-  }, []);
+  }, [campaignId]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -445,6 +446,7 @@ export function useCombat(options: UseCombatOptions = {}) {
   return {
     loading,
     error,
+    campaignId,
     encounters,
     characters,
     monsterTemplates,
@@ -510,6 +512,7 @@ export function useCombat(options: UseCombatOptions = {}) {
 export interface UseCombatReturn {
   loading: boolean;
   error: string | null;
+  campaignId?: string;
   encounters: Encounter[];
   characters: Character[];
   monsterTemplates: MonsterTemplate[];

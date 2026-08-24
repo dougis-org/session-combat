@@ -143,7 +143,7 @@ function createFetchMock({
       return response(body);
     }
 
-    if (url === '/api/encounters') return response(encounters);
+    if (url === '/api/encounters' || url.match(/^\/api\/campaigns\/[^/]+\/encounters$/)) return response(encounters);
     if (url === '/api/characters') return response(characters);
     if (url === '/api/combat') return response(combat);
     if (url === '/api/monsters') return response(monsters);
