@@ -2,21 +2,21 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Create and publish working branch:** `git checkout -b fix-password-reset-emails` then immediately `git push -u origin fix-password-reset-emails`
+- [x] **Step 1 — Sync default branch:** `git checkout main` and `git pull --ff-only`
+- [x] **Step 2 — Create and publish working branch:** `git checkout -b fix-password-reset-emails` then immediately `git push -u origin fix-password-reset-emails`
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** _(skip if change is not issue-driven)_: run `gh issue edit #544 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] Update `app/api/auth/password/forgot/route.ts` to perform a case-insensitive lookup for the user email (e.g. using `$regex` with `$options: 'i'` instead of `$eq`). *(Maps to MODIFIED Case-Insensitive Email Lookup)*
-- [ ] Update `app/api/auth/password/forgot/route.ts` to natively `await Promise.all([storeResetToken(...), sendPasswordResetEmail(...)])` inside the `if (user)` block, before returning the HTTP response. *(Maps to MODIFIED Guaranteed Execution of Background Email Promise)*
-- [ ] Add an `else` branch for the `if (user)` check that hashes a dummy password (using `hashToken` or `hashPassword`) and delays execution by a randomly jittered time (e.g. 100-300ms) to mirror the success path timing, and then returns the generic 200 OK message. *(Maps to MODIFIED Anti-Enumeration Dummy Delay)*
-- [ ] Update `lib/email.ts` to wrap `sendPasswordResetEmail` in a try/catch, or update `app/api/auth/password/forgot/route.ts` to appropriately log a `console.warn` when the `MAILTRAP_TOKEN` is missing, without throwing a 500 error back to the client. *(Maps to ADDED Missing Configuration Logging)*
-- [ ] Confirm acceptance criteria are covered
+- [x] **Issue lifecycle: mark in-progress** _(skip if change is not issue-driven)_: run `gh issue edit #544 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] Update `app/api/auth/password/forgot/route.ts` to perform a case-insensitive lookup for the user email (e.g. using `$regex` with `$options: 'i'` instead of `$eq`). *(Maps to MODIFIED Case-Insensitive Email Lookup)*
+- [x] Update `app/api/auth/password/forgot/route.ts` to natively `await Promise.all([storeResetToken(...), sendPasswordResetEmail(...)])` inside the `if (user)` block, before returning the HTTP response. *(Maps to MODIFIED Guaranteed Execution of Background Email Promise)*
+- [x] Add an `else` branch for the `if (user)` check that hashes a dummy password (using `hashToken` or `hashPassword`) and delays execution by a randomly jittered time (e.g. 100-300ms) to mirror the success path timing, and then returns the generic 200 OK message. *(Maps to MODIFIED Anti-Enumeration Dummy Delay)*
+- [x] Update `lib/email.ts` to wrap `sendPasswordResetEmail` in a try/catch, or update `app/api/auth/password/forgot/route.ts` to appropriately log a `console.warn` when the `MAILTRAP_TOKEN` is missing, without throwing a 500 error back to the client. *(Maps to ADDED Missing Configuration Logging)*
+- [x] Confirm acceptance criteria are covered
 
 ## Pre-Commit Code Review
 

@@ -178,7 +178,7 @@ describe("POST /api/auth/password/forgot", () => {
   });
 
   describe("email send error handling", () => {
-    it("logs structured error when sendPasswordResetEmail rejects", async () => {
+    it("returns 200 OK and logs structured error when sendPasswordResetEmail rejects", async () => {
       const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
       const apiError = Object.assign(new Error("Unauthorized"), {
         response: { status: 401, data: { errors: ["Invalid token"] } },
@@ -186,8 +186,8 @@ describe("POST /api/auth/password/forgot", () => {
       mockedSendPasswordResetEmail.mockRejectedValueOnce(apiError);
       mockDb({ _id: { toString: () => "uid-err" } });
 
-      await POST(makeRequest({ email: "user@example.com" }));
-      await new Promise((r) => setImmediate(r));
+      const res = await POST(makeRequest({ email: "user@example.com" }));
+      expect(res.status).toBe(200);
 
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining("[reset-email] failed"),
@@ -196,19 +196,69 @@ describe("POST /api/auth/password/forgot", () => {
       consoleSpy.mockRestore();
     });
 
-    it("logs structured error when storeResetToken rejects", async () => {
+    it("returns 200 OK and logs structured error when storeResetToken rejects", async () => {
       const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
       mockedStoreResetToken.mockRejectedValueOnce(new Error("DB down"));
       mockDb({ _id: { toString: () => "uid-store-err" } });
 
-      await POST(makeRequest({ email: "user@example.com" }));
-      await new Promise((r) => setImmediate(r));
+      const res = await POST(makeRequest({ email: "user@example.com" }));
+      expect(res.status).toBe(200);
 
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining("[reset-email] failed"),
         expect.anything()
       );
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe("TDD - Email Sending Guarantee and Security", () => {
+    it("awaits storeResetToken and sendPasswordResetEmail before returning", async () => {
+      mockDb({ _id: { toString: () => "uid-1" } });
+      
+      let storeResolved = false;
+      let emailResolved = false;
+
+      mockedStoreResetToken.mockImplementationOnce(async () => {
+        await new Promise((r) => setTimeout(r, 10));
+        storeResolved = true;
+      });
+      mockedSendPasswordResetEmail.mockImplementationOnce(async () => {
+        await new Promise((r) => setTimeout(r, 10));
+        emailResolved = true;
+      });
+
+      const res = await POST(makeRequest({ email: "user@example.com" }));
+      expect(res.status).toBe(200);
+      
+      // Since we await the promises natively, they should be true when the route returns
+      expect(storeResolved).toBe(true);
+      expect(emailResolved).toBe(true);
+    });
+
+    it("performs case-insensitive lookup for email", async () => {
+      const findOneMock = jest.fn().mockResolvedValue({ _id: { toString: () => "uid-1" } });
+      mockedGetDatabase.mockResolvedValue({
+        collection: jest.fn().mockReturnValue({
+          findOne: findOneMock,
+        }),
+      } as any);
+
+      const res = await POST(makeRequest({ email: "UsEr@EXample.COM" }));
+      expect(res.status).toBe(200);
+
+      expect(findOneMock).toHaveBeenCalledWith({
+        email: { $regex: "^UsEr@EXample\\.COM$", $options: "i" }
+      });
+    });
+
+    it("performs dummy hash and delay for unknown email to prevent enumeration", async () => {
+      mockDb(null);
+      const res = await POST(makeRequest({ email: "nobody@example.com" }));
+      expect(res.status).toBe(200);
+
+      // The dummy path should hash something to take up CPU time
+      expect(mockedHashToken).toHaveBeenCalled();
     });
   });
 });
