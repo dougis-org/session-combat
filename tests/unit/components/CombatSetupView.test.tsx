@@ -103,4 +103,35 @@ describe('CombatSetupView', () => {
     await user.click(screen.getByRole('button', { name: /remove fighter/i }));
     expect(removeCombatantFromSetup).toHaveBeenCalledWith('s1');
   });
+
+  it('renders campaign empty state with a link to manage campaign encounters when campaignId is set and encounters is empty', () => {
+    const combat = makeUseCombat({ campaignId: 'campaign-1', encounters: [] });
+    render(<CombatSetupView combat={combat} user={null} />);
+    expect(screen.getByText('No encounters linked to this campaign.')).toBeInTheDocument();
+    const link = screen.getByRole('link', { name: 'Manage Campaign Encounters' });
+    expect(link).toHaveAttribute('href', '/campaigns/campaign-1/encounters');
+    expect(screen.queryByDisplayValue('No encounter')).not.toBeInTheDocument();
+  });
+
+  it('renders the encounter select instead of the empty state when campaignId is set and encounters is non-empty', () => {
+    const encounter = makeEncounter({ id: 'e1', name: 'Goblin Ambush' });
+    const combat = makeUseCombat({ campaignId: 'campaign-1', encounters: [encounter] });
+    render(<CombatSetupView combat={combat} user={null} />);
+    expect(screen.queryByText('No encounters linked to this campaign.')).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue('No encounter')).toBeInTheDocument();
+  });
+
+  it('renders the encounter select instead of the empty state when campaignId is unset, even with no encounters', () => {
+    const combat = makeUseCombat({ campaignId: undefined, encounters: [] });
+    render(<CombatSetupView combat={combat} user={null} />);
+    expect(screen.queryByText('No encounters linked to this campaign.')).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue('No encounter')).toBeInTheDocument();
+  });
+
+  it('encodes special characters in campaignId when building the empty-state link href', () => {
+    const combat = makeUseCombat({ campaignId: 'a/b?c', encounters: [] });
+    render(<CombatSetupView combat={combat} user={null} />);
+    const link = screen.getByRole('link', { name: 'Manage Campaign Encounters' });
+    expect(link).toHaveAttribute('href', '/campaigns/a%2Fb%3Fc/encounters');
+  });
 });

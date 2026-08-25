@@ -72,7 +72,7 @@ export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
                 {combat.campaignId && encounters.length === 0 ? (
                   <div className="bg-gray-700 rounded p-3 text-sm text-gray-300">
                     <p>No encounters linked to this campaign.</p>
-                    <Link href={`/campaigns/${combat.campaignId}/encounters`} className="text-blue-400 hover:underline mt-1 inline-block">
+                    <Link href={`/campaigns/${encodeURIComponent(combat.campaignId)}/encounters`} className="text-blue-400 hover:underline mt-1 inline-block">
                       Manage Campaign Encounters
                     </Link>
                   </div>

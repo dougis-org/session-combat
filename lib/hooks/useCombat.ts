@@ -47,7 +47,7 @@ export function useCombat(options: UseCombatOptions = {}) {
         setLoading(true);
         setLoadingTemplates(true);
         setError(null);
-        const encountersUrl = campaignId ? `/api/campaigns/${campaignId}/encounters` : '/api/encounters';
+        const encountersUrl = campaignId ? `/api/campaigns/${encodeURIComponent(campaignId)}/encounters` : '/api/encounters';
         const [encountersRes, charactersRes, combatRes, monstersRes, partiesRes] = await Promise.all([
           fetch(encountersUrl),
           fetch('/api/characters'),
