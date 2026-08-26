@@ -273,10 +273,16 @@ export function CampaignsContent() {
                         Session Log
                       </Link>
                       <Link
-                        href="/encounters"
+                        href={`/campaigns/${campaign.id}/encounters`}
+                        className="bg-cyan-600 hover:bg-cyan-700 px-3 py-1 rounded text-sm"
+                      >
+                        Encounters
+                      </Link>
+                      <Link
+                        href={`/campaigns/${campaign.id}/combat`}
                         className="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm"
                       >
-                        Start Encounter
+                        Start Combat
                       </Link>
                     </div>
 

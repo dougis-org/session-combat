@@ -191,7 +191,7 @@ describe('T4 — Dashboard section UI', () => {
     await renderPage();
     expect(container.textContent).toContain('No active campaigns');
     expect(container.textContent).toContain('set one to Active or create a new one');
-    expect(container.textContent).not.toContain('Start Encounter');
+    expect(container.textContent).not.toContain('Start Combat');
   });
 
   it('T4.2 — two active campaigns render two campaign cards', async () => {
@@ -201,7 +201,7 @@ describe('T4 — Dashboard section UI', () => {
     expect(container.textContent).toContain('My Campaign');
     expect(container.textContent).toContain('Second Campaign');
     const encounterLinks = Array.from(container.querySelectorAll('a')).filter(
-      a => a.textContent?.includes('Start Encounter')
+      a => a.textContent?.includes('Start Combat')
     );
     expect(encounterLinks).toHaveLength(2);
   });
@@ -249,7 +249,7 @@ describe('T4 — Dashboard section UI', () => {
     setupFetch({ campaigns: [planningCampaign], parties: [], characters: [] });
     await renderPage();
     expect(container.textContent).toContain('No active campaigns');
-    expect(container.textContent).not.toContain('Start Encounter');
+    expect(container.textContent).not.toContain('Start Combat');
   });
 
   it('T4.N2 — campaign with status on-hold does not appear in Active Campaigns section', async () => {
@@ -389,7 +389,7 @@ describe('T5 — Last Session card', () => {
 
     // Campaign card visible before session resolves
     expect(container.textContent).toContain('My Campaign');
-    expect(container.textContent).toContain('Start Encounter');
+    expect(container.textContent).toContain('Start Combat');
     expect(container.textContent).not.toContain('Session 11');
 
     resolveSession(undefined);
