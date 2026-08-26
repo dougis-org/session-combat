@@ -200,10 +200,10 @@ describe('T4 — Dashboard section UI', () => {
     await renderPage();
     expect(container.textContent).toContain('My Campaign');
     expect(container.textContent).toContain('Second Campaign');
-    const encounterLinks = Array.from(container.querySelectorAll('a')).filter(
+    const startCombatLinks = Array.from(container.querySelectorAll('a')).filter(
       a => a.textContent?.includes('Start Combat')
     );
-    expect(encounterLinks).toHaveLength(2);
+    expect(startCombatLinks).toHaveLength(2);
   });
 
   it('T4.3 — active campaign with two linked parties renders two party sub-cards', async () => {
