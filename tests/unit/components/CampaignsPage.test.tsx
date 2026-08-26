@@ -308,6 +308,52 @@ describe('Campaign Catalog UI', () => {
     });
   });
 
+  describe('Encounters and Start Combat links', () => {
+    it('renders an Encounters link pointing to /campaigns/[id]/encounters', async () => {
+      const activeCampaign = { ...MOCK_CAMPAIGN, status: 'active' as const };
+      setupFetch([activeCampaign], []);
+      renderPage();
+      await screen.findAllByText('My Campaign');
+      const links = screen.getAllByRole('link');
+      const encountersLink = links.find(a => a.textContent?.trim() === 'Encounters');
+      expect(encountersLink).toBeTruthy();
+      expect(encountersLink?.getAttribute('href')).toBe(`/campaigns/${activeCampaign.id}/encounters`);
+    });
+
+    it('renders a Start Combat link pointing to /campaigns/[id]/combat', async () => {
+      const activeCampaign = { ...MOCK_CAMPAIGN, status: 'active' as const };
+      setupFetch([activeCampaign], []);
+      renderPage();
+      await screen.findAllByText('My Campaign');
+      const links = screen.getAllByRole('link');
+      const startCombatLink = links.find(a => a.textContent?.trim() === 'Start Combat');
+      expect(startCombatLink).toBeTruthy();
+      expect(startCombatLink?.getAttribute('href')).toBe(`/campaigns/${activeCampaign.id}/combat`);
+    });
+
+    it('does not render a Start Encounter link or a link to /encounters', async () => {
+      const activeCampaign = { ...MOCK_CAMPAIGN, status: 'active' as const };
+      setupFetch([activeCampaign], []);
+      renderPage();
+      await screen.findAllByText('My Campaign');
+      const links = screen.getAllByRole('link');
+      expect(links.find(a => a.textContent?.includes('Start Encounter'))).toBeFalsy();
+      expect(links.find(a => a.getAttribute('href') === '/encounters')).toBeFalsy();
+    });
+
+    it('sibling links Members, Prompt Builder, Library, Session Log remain present', async () => {
+      const activeCampaign = { ...MOCK_CAMPAIGN, status: 'active' as const };
+      setupFetch([activeCampaign], []);
+      renderPage();
+      await screen.findAllByText('My Campaign');
+      const links = screen.getAllByRole('link');
+      expect(links.find(a => a.textContent?.trim() === 'Members')).toBeTruthy();
+      expect(links.find(a => a.textContent?.includes('Prompt Builder'))).toBeTruthy();
+      expect(links.find(a => a.textContent?.includes('Library'))).toBeTruthy();
+      expect(links.find(a => a.textContent?.includes('Session Log'))).toBeTruthy();
+    });
+  });
+
   describe('Members link', () => {
     it('renders a Members link pointing to /campaigns/[id]', async () => {
       setupFetch([MOCK_CAMPAIGN], []);
@@ -379,7 +425,8 @@ describe('Campaign Catalog UI', () => {
       expect(links.find(a => a.textContent?.trim() === 'Members')).toBeTruthy();
       expect(links.find(a => a.textContent?.includes('Prompt Builder'))).toBeTruthy();
       expect(links.find(a => a.textContent?.includes('Library'))).toBeTruthy();
-      expect(links.find(a => a.textContent?.includes('Start Encounter'))).toBeTruthy();
+      expect(links.find(a => a.textContent?.trim() === 'Encounters')).toBeTruthy();
+      expect(links.find(a => a.textContent?.includes('Start Combat'))).toBeTruthy();
     });
 
     it('active campaigns: heading precedes Members link in DOM order', async () => {
