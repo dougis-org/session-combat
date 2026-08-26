@@ -28,7 +28,7 @@
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
@@ -60,9 +60,9 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 - [x] Open PR from `campaign-nav-fix-and-encounter-tests` to `main`. **PR body MUST include both `Closes #540` and `Closes #541`** so both issues close on merge. The PR description should note explicitly that #541's API unit/integration test requirement was satisfied by pre-existing tests (cite the two file paths) rather than new tests added by this PR, and that the in-progress-campaign-banner E2E scenario originally listed under #541 is intentionally excluded (blocked on open issue #539).
 - [x] **Issue lifecycle: mark in-review (both issues)** — run `gh issue edit 540 --add-label "in-review" --remove-label "in-progress" --repo dougis-org/session-combat` and `gh issue edit 541 --add-label "in-review" --remove-label "in-progress" --repo dougis-org/session-combat`. Then move both project items to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
 - [x] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — never wait for a human to report the merge; never force-merge:
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — never wait for a human to report the merge; never force-merge:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -83,18 +83,18 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none expected beyond this openspec change itself; confirm no README/CLAUDE.md references to the old "Start Encounter" link need updating)
-- [ ] Sync approved spec deltas into `openspec/specs/campaign-nav-encounter-fix/spec.md`. After copying, update relative links that pointed into the change directory — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-campaign-nav-fix-and-encounter-tests/design.md`, and similarly for `../../tasks.md`.
-- [ ] Archive the change: move `openspec/changes/campaign-nav-fix-and-encounter-tests/` to `openspec/changes/archive/YYYY-MM-DD-campaign-nav-fix-and-encounter-tests/` and stage both the new location and the deletion of the old location in a single commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-nav-fix-and-encounter-tests/` exists and `openspec/changes/campaign-nav-fix-and-encounter-tests/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-campaign-nav-fix-and-encounter-tests` then `git push -u origin doc/archive-YYYY-MM-DD-campaign-nav-fix-and-encounter-tests`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-campaign-nav-fix-and-encounter-tests` to `main` with title `docs: archive campaign-nav-fix-and-encounter-tests (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D campaign-nav-fix-and-encounter-tests doc/archive-YYYY-MM-DD-campaign-nav-fix-and-encounter-tests`
-- [ ] Remove the change's dedicated worktree: `git worktree remove .worktrees/campaign-nav-fix-and-encounter-tests`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none expected beyond this openspec change itself; confirm no README/CLAUDE.md references to the old "Start Encounter" link need updating)
+- [x] Sync approved spec deltas into `openspec/specs/campaign-nav-encounter-fix/spec.md`. After copying, update relative links that pointed into the change directory — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-campaign-nav-fix-and-encounter-tests/design.md`, and similarly for `../../tasks.md`.
+- [x] Archive the change: move `openspec/changes/campaign-nav-fix-and-encounter-tests/` to `openspec/changes/archive/YYYY-MM-DD-campaign-nav-fix-and-encounter-tests/` and stage both the new location and the deletion of the old location in a single commit
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-campaign-nav-fix-and-encounter-tests/` exists and `openspec/changes/campaign-nav-fix-and-encounter-tests/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-campaign-nav-fix-and-encounter-tests` then `git push -u origin doc/archive-YYYY-MM-DD-campaign-nav-fix-and-encounter-tests`
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-campaign-nav-fix-and-encounter-tests` to `main` with title `docs: archive campaign-nav-fix-and-encounter-tests (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D campaign-nav-fix-and-encounter-tests doc/archive-YYYY-MM-DD-campaign-nav-fix-and-encounter-tests`
+- [x] Remove the change's dedicated worktree: `git worktree remove .worktrees/campaign-nav-fix-and-encounter-tests`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D campaign-nav-fix-and-encounter-tests doc/archive-YYYY-MM-DD-campaign-nav-fix-and-encounter-tests`
