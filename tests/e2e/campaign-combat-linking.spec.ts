@@ -17,6 +17,15 @@ async function seedActiveCampaign(page: Page, name: string): Promise<string> {
   return created.id as string;
 }
 
+/**
+ * Assert the page has navigated to an exact pathname, without constructing a
+ * RegExp from a dynamic string (Codacy flags `new RegExp(nonLiteral)` as a
+ * potential ReDoS source, even though these paths are server-generated UUIDs).
+ */
+async function expectPathname(page: Page, pathname: string): Promise<void> {
+  await expect.poll(() => new URL(page.url()).pathname, { timeout: 15000 }).toBe(pathname);
+}
+
 test.describe("Campaign list — Start Combat routing", () => {
   test("clicking Start Combat on a campaign card reaches campaign-scoped combat setup, not the encounter browser", async ({
     page,
@@ -31,14 +40,14 @@ test.describe("Campaign list — Start Combat routing", () => {
 
     await page.getByRole("link", { name: "Start Combat" }).click();
 
-    await expect(page).toHaveURL(new RegExp(`/campaigns/${campaignId}/combat$`));
+    await expectPathname(page, `/campaigns/${campaignId}/combat`);
     await expect(page.getByRole("heading", { name: "Start New Combat" })).toBeVisible({ timeout: 15000 });
 
     // Encounters link, asserted only in unit tests otherwise, also routes correctly.
     // Scoped by href, not role name, because the global NavBar also has an "Encounters" link.
     await page.goto("/campaigns");
     await page.locator(`a[href="/campaigns/${campaignId}/encounters"]`).click();
-    await expect(page).toHaveURL(new RegExp(`/campaigns/${campaignId}/encounters$`));
+    await expectPathname(page, `/campaigns/${campaignId}/encounters`);
     await expect(page.getByRole("heading", { name: "Encounters" })).toBeVisible({ timeout: 15000 });
   });
 });
