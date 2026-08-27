@@ -4,7 +4,7 @@ This document details *changes* to requirements and is additive to the `design.m
 
 ### Requirement: ADDED Session log creation
 
-The system SHALL allow a DM to create a session log entry scoped to a campaign, recording: session number, optional title, date played, freeform summary, structured events, and optional milestone + new level.
+The system SHALL allow a DM to create a session log entry scoped to a campaign, recording: session number, optional title, date played, freeform summary, structured events, and optional milestone + new level. When `sessionNumber` is omitted, it SHALL be computed as `MAX(existing sessionNumber for this campaign) + 1` via `storage.getNextSessionNumber`, which SHALL throw rather than return a numeric sentinel if that computation cannot be completed due to a datastore failure (see "Session number generation failure is surfaced explicitly").
 
 #### Scenario: Create session log with all fields
 
@@ -23,6 +23,31 @@ The system SHALL allow a DM to create a session log entry scoped to a campaign, 
 - **Given** an authenticated user
 - **When** a POST is sent without `datePlayed`
 - **Then** the response is 400 with an error message indicating `datePlayed` is required
+
+### Requirement: Session number generation failure is surfaced explicitly
+
+The system SHALL NOT silently number a new session `1` (or any other value) when the underlying session-number lookup fails due to a datastore error. When `storage.getNextSessionNumber` fails, both session-creation endpoints (`POST /api/campaigns/[id]/sessions` without an explicit `sessionNumber`, and `POST /api/campaigns/[id]/sessions/active`) SHALL respond with a distinct, identifiable failure rather than the generic error message used for other unrelated failures in the same handler, and SHALL NOT create a session log document.
+
+#### Scenario: Datastore failure while creating a session without an explicit number
+
+- **Given** an authenticated DM with an existing campaign that already has a session numbered `1`
+- **And** the datastore is unavailable when `storage.getNextSessionNumber` queries for the latest session
+- **When** a POST to `/api/campaigns/[id]/sessions` is sent with `{ datePlayed: "2026-05-20", summary: "..." }` (no `sessionNumber`)
+- **Then** the response is not 201, no `SessionLog` document is created, and the response body/status is distinguishable from the generic "Failed to create session log" 500 response used for other failures in this handler
+
+#### Scenario: Datastore failure while opening an active session
+
+- **Given** an authenticated DM with an existing campaign with no currently active session
+- **And** the datastore is unavailable when `storage.getNextSessionNumber` queries for the latest session
+- **When** a POST to `/api/campaigns/[id]/sessions/active` is sent
+- **Then** the response is not 201, no `SessionLog` document is created, the campaign's `activeSessionId` remains unclaimed (unchanged from before the request), and the response body/status is distinguishable from the generic "Failed to open active session" 500 response used for other failures in this handler
+
+#### Scenario: Explicit sessionNumber bypasses the lookup entirely
+
+- **Given** an authenticated DM with an existing campaign
+- **And** the datastore is unavailable when `storage.getNextSessionNumber` would query for the latest session
+- **When** a POST to `/api/campaigns/[id]/sessions` is sent with an explicit valid `sessionNumber` (e.g. `{ sessionNumber: 5, datePlayed: "2026-05-20" }`)
+- **Then** `getNextSessionNumber` is never invoked and the request succeeds or fails based only on `saveSessionLog`'s outcome, unaffected by this requirement
 
 ### Requirement: ADDED Session log listing
 
@@ -126,6 +151,7 @@ No requirements removed by this capability.
 - Design decision 1 (storage.ts pattern) → ADDED creation, listing, update, deletion
 - Design decision 5 (session number MAX+1) → ADDED creation scenario (required fields only)
 - Requirements → Tasks: session-log-storage, session-log-api, session-log-ui task groups in tasks.md
+- Change `fix-get-next-session-number-fallback` (#527) → ADDED "Session number generation failure is surfaced explicitly"; MODIFIED "ADDED Session log creation" (throw-on-failure behavior for `getNextSessionNumber`)
 
 ## Non-Functional Acceptance Criteria
 

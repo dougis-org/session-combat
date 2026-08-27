@@ -81,14 +81,14 @@ Use the project's documented commands for each of the above (see project README 
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from working branch to `main`. **If this change is issue-driven, the PR body MUST include `Closes #527`.**
-- [ ] **Issue lifecycle: mark in-review** _(skip if change is not issue-driven)_: run `gh issue edit #527 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column matching "In Review" (warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — never wait for a human to report the merge; never force-merge:
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote (commit 56ed200)
+- [x] Open PR from working branch to `main`. **If this change is issue-driven, the PR body MUST include `Closes #527`.** (PR #563: https://github.com/dougis-org/session-combat/pull/563)
+- [x] **Issue lifecycle: mark in-review** _(skip if change is not issue-driven)_: run `gh issue edit #527 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column matching "In Review" (warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing. (sub-agent dispatched; zero blocking findings, all CI checks passed)
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — never wait for a human to report the merge; never force-merge: (merged — all 11 checks passed: build, lint, unit-tests, integration-tests, regression-tests, Codacy analysis/coverage, ci-gate)
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -109,14 +109,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec). After copying each `spec.md` to `openspec/specs/<cap>/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location.
-- [ ] Archive the change: move `openspec/changes/fix-get-next-session-number-fallback/` to `openspec/changes/archive/YYYY-MM-DD-fix-get-next-session-number-fallback/` **and stage both the new location and the deletion of the old location in a single commit**.
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-get-next-session-number-fallback/` exists and `openspec/changes/fix-get-next-session-number-fallback/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-fix-get-next-session-number-fallback` then `git push -u origin doc/archive-YYYY-MM-DD-fix-get-next-session-number-fallback`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch (commit fdf8d34)
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (n/a — no user-facing docs beyond the spec delta below)
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec). After copying each `spec.md` to `openspec/specs/<cap>/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location. (repo uses `openspec/specs/session-log/session-log.md`, not the `spec.md` convention the CLI's auto-sync expects — archived with `--skip-specs` and merged the ADDED requirement + MODIFIED creation-requirement text into that file by hand)
+- [x] Archive the change: move `openspec/changes/fix-get-next-session-number-fallback/` to `openspec/changes/archive/YYYY-MM-DD-fix-get-next-session-number-fallback/` **and stage both the new location and the deletion of the old location in a single commit**.
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-get-next-session-number-fallback/` exists and `openspec/changes/fix-get-next-session-number-fallback/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-fix-get-next-session-number-fallback` then `git push -u origin doc/archive-YYYY-MM-DD-fix-get-next-session-number-fallback`
 - [ ] Open a PR from `doc/archive-YYYY-MM-DD-fix-get-next-session-number-fallback` to `main` with title `docs: archive fix-get-next-session-number-fallback (YYYY-MM-DD)` — **do NOT push directly to `main`**
 - [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] Monitor the doc PR until it merges (same loop as the implementation PR)
