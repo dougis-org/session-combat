@@ -184,4 +184,39 @@ describe("POST /api/campaigns/[id]/sessions", () => {
     PARAMS,
     () => mockedStorage.saveSessionLog.mockRejectedValue(new Error("DB error"))
   );
+
+  it("returns 503 with SESSION_NUMBER_UNAVAILABLE when getNextSessionNumber throws, and never calls saveSessionLog", async () => {
+    mockedStorage.getNextSessionNumber.mockRejectedValue(new Error("DB error"));
+    const res = await POST(makePostReq({ datePlayed: "2026-05-01" }), { params: PARAMS });
+    expect(res.status).toBe(503);
+    const body = await res.json();
+    expect(body.code).toBe("SESSION_NUMBER_UNAVAILABLE");
+    expect(mockedStorage.saveSessionLog).not.toHaveBeenCalled();
+  });
+
+  it("the 503/SESSION_NUMBER_UNAVAILABLE response is distinct from the generic 500 saveSessionLog failure", async () => {
+    mockedStorage.getNextSessionNumber.mockRejectedValue(new Error("DB error"));
+    const numberFailureRes = await POST(makePostReq({ datePlayed: "2026-05-01" }), { params: PARAMS });
+    const numberFailureBody = await numberFailureRes.json();
+
+    mockedStorage.getNextSessionNumber.mockResolvedValue(2);
+    mockedStorage.saveSessionLog.mockRejectedValue(new Error("DB error"));
+    const saveFailureRes = await POST(makePostReq({ datePlayed: "2026-05-01" }), { params: PARAMS });
+    const saveFailureBody = await saveFailureRes.json();
+
+    expect(numberFailureRes.status).toBe(503);
+    expect(saveFailureRes.status).toBe(500);
+    expect(numberFailureBody).not.toEqual(saveFailureBody);
+  });
+
+  it("succeeds with an explicit sessionNumber even when getNextSessionNumber would throw (never invoked)", async () => {
+    mockedStorage.getNextSessionNumber.mockRejectedValue(new Error("DB error"));
+    const res = await POST(
+      makePostReq({ datePlayed: "2026-05-01", sessionNumber: 5 }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(201);
+    expect((await res.json()).sessionNumber).toBe(5);
+    expect(mockedStorage.getNextSessionNumber).not.toHaveBeenCalled();
+  });
 });

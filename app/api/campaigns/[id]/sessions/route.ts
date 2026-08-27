@@ -37,10 +37,20 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       return NextResponse.json({ error: 'datePlayed is required' }, { status: 400 });
     }
 
-    const resolvedSessionNumber =
-      typeof sessionNumber === 'number' && Number.isInteger(sessionNumber) && sessionNumber >= 0
-        ? sessionNumber
-        : await storage.getNextSessionNumber(campaign.userId, campaignId);
+    let resolvedSessionNumber: number;
+    if (typeof sessionNumber === 'number' && Number.isInteger(sessionNumber) && sessionNumber >= 0) {
+      resolvedSessionNumber = sessionNumber;
+    } else {
+      try {
+        resolvedSessionNumber = await storage.getNextSessionNumber(campaign.userId, campaignId);
+      } catch (error) {
+        console.error('Error determining next session number:', error);
+        return NextResponse.json(
+          { error: 'Failed to determine next session number', code: 'SESSION_NUMBER_UNAVAILABLE' },
+          { status: 503 },
+        );
+      }
+    }
 
     const now = new Date();
     const log: SessionLog = {

@@ -19,6 +19,17 @@ export const POST = withAuthAndParams<Params>(async (_request, _auth, { id: camp
       return NextResponse.json({ error: 'A session is already active' }, { status: 409 });
     }
 
+    let sessionNumber: number;
+    try {
+      sessionNumber = await storage.getNextSessionNumber(campaign.userId, campaignId);
+    } catch (error) {
+      console.error('Error determining next session number:', error);
+      return NextResponse.json(
+        { error: 'Failed to determine next session number', code: 'SESSION_NUMBER_UNAVAILABLE' },
+        { status: 503 },
+      );
+    }
+
     const logId = crypto.randomUUID();
     const claimed = await storage.claimActiveCampaignSession(campaignId, campaign.userId, logId);
     if (!claimed) {
@@ -30,7 +41,7 @@ export const POST = withAuthAndParams<Params>(async (_request, _auth, { id: camp
       id: logId,
       userId: campaign.userId,
       campaignId,
-      sessionNumber: await storage.getNextSessionNumber(campaign.userId, campaignId),
+      sessionNumber,
       datePlayed: now,
       title: undefined,
       summary: undefined,

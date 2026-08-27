@@ -27,6 +27,7 @@ import {
 import { DuplicateMemberError, DuplicateShareError } from "./errors";
 import { GLOBAL_USER_ID } from "./constants";
 import { InvalidUserIdError } from "./permissions";
+import { runStorageOp } from "@/lib/storage/runOp";
 import { ObjectId, Filter, Document } from "mongodb";
 
 interface QueryableEntity {
@@ -804,16 +805,13 @@ export const storage = {
 
   // Get the next session number (MAX + 1, or 1 if none exist)
   async getNextSessionNumber(userId: string, campaignId: string): Promise<number> {
-    try {
+    return runStorageOp({ name: "getNextSessionNumber", collection: "sessionLogs" }, async () => {
       const db = await getDatabase();
       const latest = await db
         .collection<SessionLog>("sessionLogs")
         .findOne({ userId, campaignId }, { sort: { sessionNumber: -1 } });
       return latest ? latest.sessionNumber + 1 : 1;
-    } catch (error) {
-      console.error("Error getting next session number:", error);
-      return 1;
-    }
+    });
   },
 
   // Save a new session log (insert)
