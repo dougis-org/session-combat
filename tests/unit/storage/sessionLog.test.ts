@@ -4,6 +4,8 @@
 import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
 import type { SessionLog } from "@/lib/types";
+import { StorageError } from "@/lib/storage/errors";
+import * as logger from "@/lib/telemetry/logger";
 
 jest.mock("@/lib/db", () => ({
   getDatabase: jest.fn(),
@@ -30,12 +32,18 @@ function makeCollectionMock(methods: Record<string, jest.Mock>) {
 describe("getNextSessionNumber", () => {
   let mockFindOne: jest.Mock;
   let mockDb: { collection: jest.Mock };
+  let logSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mockFindOne = jest.fn();
     const mockCollection = { findOne: mockFindOne };
     mockDb = { collection: jest.fn(() => mockCollection) };
     mockedGetDatabase.mockResolvedValue(mockDb as never);
+    logSpy = jest.spyOn(logger, "logStorageEvent").mockImplementation();
+  });
+
+  afterEach(() => {
+    logSpy.mockRestore();
   });
 
   test("returns 1 when no sessions exist for the campaign", async () => {
@@ -50,10 +58,47 @@ describe("getNextSessionNumber", () => {
     expect(result).toBe(6);
   });
 
-  test("returns 1 on error (fallback)", async () => {
+  test("rejects with a StorageError on DB failure (not a resolved 1)", async () => {
     mockFindOne.mockRejectedValue(new Error("DB error") as never);
-    const result = await storage.getNextSessionNumber("user-1", "campaign-1");
-    expect(result).toBe(1);
+
+    await expect(
+      storage.getNextSessionNumber("user-1", "campaign-1")
+    ).rejects.toBeInstanceOf(StorageError);
+  });
+
+  test("thrown StorageError has op getNextSessionNumber / collection sessionLogs and logs exactly one error event", async () => {
+    mockFindOne.mockRejectedValue(new Error("DB error") as never);
+
+    let caught: unknown;
+    try {
+      await storage.getNextSessionNumber("user-1", "campaign-1");
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(StorageError);
+    const storageError = caught as StorageError;
+    expect(storageError.op).toBe("getNextSessionNumber");
+    expect(storageError.collection).toBe("sessionLogs");
+    expect(logSpy).toHaveBeenCalledTimes(1);
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "getNextSessionNumber",
+        collection: "sessionLogs",
+        outcome: "error",
+      })
+    );
+  });
+
+  test("no-collision: DB failure after an existing session #1 throws instead of resolving to 1 again", async () => {
+    mockFindOne.mockResolvedValueOnce({ ...baseLog, sessionNumber: 1 } as never);
+    const first = await storage.getNextSessionNumber("user-1", "campaign-1");
+    expect(first).toBe(2);
+
+    mockFindOne.mockRejectedValueOnce(new Error("DB error") as never);
+    await expect(
+      storage.getNextSessionNumber("user-1", "campaign-1")
+    ).rejects.toBeInstanceOf(StorageError);
   });
 });
 

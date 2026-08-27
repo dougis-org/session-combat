@@ -166,6 +166,36 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
     PARAMS,
     () => mockedStorage.saveSessionLog.mockRejectedValue(new Error("DB error"))
   );
+
+  it("returns 503 with SESSION_NUMBER_UNAVAILABLE when getNextSessionNumber throws", async () => {
+    mockedStorage.getNextSessionNumber.mockRejectedValue(new Error("DB error"));
+    const res = await POST(makePostReq(), { params: PARAMS });
+    expect(res.status).toBe(503);
+    expect((await res.json()).code).toBe("SESSION_NUMBER_UNAVAILABLE");
+  });
+
+  it("does not call saveSessionLog or emit a session event when getNextSessionNumber throws", async () => {
+    mockedStorage.getNextSessionNumber.mockRejectedValue(new Error("DB error"));
+    await POST(makePostReq(), { params: PARAMS });
+    expect(mockedStorage.saveSessionLog).not.toHaveBeenCalled();
+    expect(emitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("does not call claimActiveCampaignSession when getNextSessionNumber throws — closes the dangling-claim window", async () => {
+    mockedStorage.getNextSessionNumber.mockRejectedValue(new Error("DB error"));
+    await POST(makePostReq(), { params: PARAMS });
+    expect(mockedStorage.claimActiveCampaignSession).not.toHaveBeenCalled();
+  });
+
+  it("short-circuits with 409 before calling getNextSessionNumber when a session is already active", async () => {
+    mockedAssertCampaignAccess.mockResolvedValue({
+      campaign: { ...MOCK_CAMPAIGN, activeSessionId: "existing-session-id" } as any,
+      role: "dm",
+    });
+    const res = await POST(makePostReq(), { params: PARAMS });
+    expect(res.status).toBe(409);
+    expect(mockedStorage.getNextSessionNumber).not.toHaveBeenCalled();
+  });
 });
 
 // ─── DELETE /api/campaigns/[id]/sessions/active ──────────────────────────────
