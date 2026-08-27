@@ -46,7 +46,7 @@ async function addActiveMember(
   const db = await getDatabase();
   await db.collection("campaignMembers").updateOne(
     { campaignId, userId },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     { $set: { status: "active" } } as any
   );
 }

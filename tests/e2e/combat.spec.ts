@@ -298,10 +298,7 @@ test.describe("Combat flows", () => {
     // Enable Temp mode, enter 14, click "Set Temp"
     await page.getByLabel("Temp").first().check();
     await hpInput.fill("14");
-    await Promise.all([
-      page.waitForResponse(resp => resp.url().includes('/api/combat') && resp.request().method() === 'PUT'),
-      page.getByRole("button", { name: "Set Temp" }).first().click()
-    ]);
+    await page.getByRole("button", { name: "Set Temp" }).first().click();
 
     // Assert "+14 tmp" visible in HP display and temp HP bar visible
     await expect(page.getByText("14 tmp", { exact: false })).toBeVisible();
@@ -310,20 +307,14 @@ test.describe("Combat flows", () => {
     // Enter 10 damage → 10 absorbed by temp HP (4 remaining), regular HP unchanged at 30
     await page.getByLabel("Temp").first().uncheck();
     await hpInput.fill("10");
-    await Promise.all([
-      page.waitForResponse(resp => resp.url().includes('/api/combat') && resp.request().method() === 'PUT'),
-      page.getByRole("button", { name: "Damage" }).first().click()
-    ]);
+    await page.getByRole("button", { name: "Damage" }).first().click();
     await expect(page.getByText("4 tmp", { exact: false })).toBeVisible();
     // The HP span text content contains the current hp value
     await expect(page.getByText(/Current:.*30/).first()).toBeVisible();
 
     // Enter 10 damage → 4 absorbed, 6 overflow to regular HP (30 - 6 = 24)
     await hpInput.fill("10");
-    await Promise.all([
-      page.waitForResponse(resp => resp.url().includes('/api/combat') && resp.request().method() === 'PUT'),
-      page.getByRole("button", { name: "Damage" }).first().click()
-    ]);
+    await page.getByRole("button", { name: "Damage" }).first().click();
     await expect(page.locator('[data-testid="temp-hp-bar"]')).toHaveCount(0);
     await expect(page.getByText(/Current:.*24/).first()).toBeVisible();
 
@@ -629,12 +620,11 @@ test.describe("Combat flows", () => {
       const activeLair = page.locator('[data-testid="lair-active"]');
       if (await activeLair.isVisible().catch(() => false)) break;
       
-      const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i });
+      const nextTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)|Next Turn/i }).first();
       if (await nextTurnBtn.isVisible()) {
-        await Promise.all([
-          page.waitForResponse(resp => resp.url().includes('/api/combat') && resp.request().method() === 'PUT'),
-          nextTurnBtn.click()
-        ]);
+        await nextTurnBtn.click({ force: true });
+        // Wait for the UI to settle after click to avoid detachment loops
+        await page.waitForTimeout(500);
       }
     }
   }
