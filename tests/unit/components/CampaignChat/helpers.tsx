@@ -93,6 +93,49 @@ export function fireMsg(
   })
 }
 
+export function rollResponse(
+  overrides: Partial<{
+    id: string
+    formula: string
+    rolls: number[]
+    total: number
+    visibility: MessageVisibility
+  }> = {}
+) {
+  return {
+    id: overrides.id ?? 'roll-test',
+    campaignId: CAMPAIGN_ID,
+    rollerName: 'tester',
+    formula: overrides.formula ?? '1d20',
+    rolls: overrides.rolls ?? [10],
+    total: overrides.total ?? 10,
+    visibility: overrides.visibility ?? { scope: 'group' },
+    createdAt: new Date().toISOString(),
+  }
+}
+
+function rollPostRoute(handler: (options?: RequestInit) => unknown) {
+  sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
+    if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
+    if (url.includes('/rolls') && options?.method === 'POST') return Promise.resolve(handler(options))
+    return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
+  })
+}
+
+export function mockRollPost(result: { status: 201; body: ReturnType<typeof rollResponse> } | { status: 409 | 500 }) {
+  rollPostRoute(() =>
+    result.status === 201
+      ? { ok: true, status: 201, json: () => Promise.resolve(result.body) }
+      : { ok: false, status: result.status, json: () => Promise.resolve({}) }
+  )
+}
+
+export function mockRollPostPending() {
+  let resolvePost!: (value: unknown) => void
+  rollPostRoute(() => new Promise(resolve => { resolvePost = resolve }))
+  return { resolve: (body: unknown) => resolvePost(body) }
+}
+
 export function withMembers(
   extra: Array<{ id: string; userId: string; username: string; role?: string; status?: string }> = []
 ) {

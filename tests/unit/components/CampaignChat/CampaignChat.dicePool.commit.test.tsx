@@ -1,6 +1,9 @@
 import { screen, waitFor } from '@testing-library/react'
 import { rollDicePool } from '@/lib/utils/dice'
-import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDockWithSession } from './helpers'
+import {
+  sharedTestState, setupFetchMock, restoreFetch, openDockWithSession,
+  rollResponse, mockRollPost, mockRollPostPending,
+} from './helpers'
 
 jest.mock('@/lib/offline/LocalStore', () => ({
   LocalStore: {
@@ -32,6 +35,13 @@ jest.mock('@/lib/utils/dice', () => ({
 
 const mockedRollDicePool = rollDicePool as jest.Mock
 
+function postedRollBody() {
+  const call = sharedTestState.fetchSpy.mock.calls.find(
+    (c: unknown[]) => (c[0] as string).includes('/rolls') && (c[1] as RequestInit)?.method === 'POST'
+  )
+  return call ? JSON.parse((call[1] as RequestInit).body as string) : undefined
+}
+
 describe('CampaignChat — dice pool commit', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -49,20 +59,7 @@ describe('CampaignChat — dice pool commit', () => {
       { sides: 6, value: 3 }, { sides: 6, value: 5 },
       { sides: 8, value: 2 }, { sides: 8, value: 7 },
     ])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true, status: 201,
-          json: () => Promise.resolve({
-            id: 'roll-1', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-            formula: '2d6+2d8+3', rolls: [3, 5, 2, 7], total: 20,
-            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-          }),
-        })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-1', formula: '2d6+2d8+3', rolls: [3, 5, 2, 7], total: 20 }) })
 
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
@@ -76,11 +73,8 @@ describe('CampaignChat — dice pool commit', () => {
     await user.click(screen.getByRole('button', { name: 'Roll' }))
 
     await waitFor(() => {
-      const call = sharedTestState.fetchSpy.mock.calls.find(
-        (c: unknown[]) => (c[0] as string).includes('/rolls') && (c[1] as RequestInit)?.method === 'POST'
-      )
-      expect(call).toBeDefined()
-      const body = JSON.parse((call![1] as RequestInit).body as string)
+      const body = postedRollBody()
+      expect(body).toBeDefined()
       expect(body.formula).toBe('2d6+2d8+3')
       expect(body.rolls).toEqual([3, 5, 2, 7])
       expect(body.total).toBe(20)
@@ -90,69 +84,32 @@ describe('CampaignChat — dice pool commit', () => {
 
   it('commit with zero modifier omits the modifier from formula', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 15 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true, status: 201,
-          json: () => Promise.resolve({
-            id: 'roll-2', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-            formula: '1d20', rolls: [15], total: 15,
-            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-          }),
-        })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-2', formula: '1d20', rolls: [15], total: 15 }) })
 
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
     await user.click(screen.getByRole('button', { name: 'Roll' }))
 
-    await waitFor(() => {
-      const call = sharedTestState.fetchSpy.mock.calls.find(
-        (c: unknown[]) => (c[0] as string).includes('/rolls') && (c[1] as RequestInit)?.method === 'POST'
-      )
-      const body = JSON.parse((call![1] as RequestInit).body as string)
-      expect(body.formula).toBe('1d20')
-    })
+    await waitFor(() => expect(postedRollBody().formula).toBe('1d20'))
   })
 
   it('adding a single die issues no POST; only Roll issues exactly one POST', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true, status: 201,
-          json: () => Promise.resolve({
-            id: 'roll-3', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-            formula: '1d20', rolls: [10], total: 10,
-            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-          }),
-        })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-3' }) })
+
+    const postCount = () =>
+      sharedTestState.fetchSpy.mock.calls.filter(
+        (c: unknown[]) => (c[0] as string).includes('/rolls') && (c[1] as RequestInit)?.method === 'POST'
+      ).length
 
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
-    expect(
-      sharedTestState.fetchSpy.mock.calls.filter(
-        (c: unknown[]) => (c[0] as string).includes('/rolls') && (c[1] as RequestInit)?.method === 'POST'
-      )
-    ).toHaveLength(0)
+    expect(postCount()).toBe(0)
 
     await user.click(screen.getByRole('button', { name: 'Roll' }))
-    await waitFor(() => {
-      expect(
-        sharedTestState.fetchSpy.mock.calls.filter(
-          (c: unknown[]) => (c[0] as string).includes('/rolls') && (c[1] as RequestInit)?.method === 'POST'
-        )
-      ).toHaveLength(1)
-    })
+    await waitFor(() => expect(postCount()).toBe(1))
   })
 
   it('Roll button is disabled when the pool is empty', async () => {
@@ -163,20 +120,7 @@ describe('CampaignChat — dice pool commit', () => {
 
   it('successful commit clears the staged pool', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true, status: 201,
-          json: () => Promise.resolve({
-            id: 'roll-4', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-            formula: '1d20', rolls: [10], total: 10,
-            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-          }),
-        })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-4' }) })
 
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
@@ -189,13 +133,7 @@ describe('CampaignChat — dice pool commit', () => {
 
   it('409 response shows inline error and preserves the staged pool', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({ ok: false, status: 409, json: () => Promise.resolve({}) })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 409 })
 
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
@@ -214,14 +152,7 @@ describe('CampaignChat — dice pool commit', () => {
 
   it('Roll and pool controls are disabled while a commit is in flight, re-enabled after', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    let resolvePost: (value: unknown) => void
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return new Promise(resolve => { resolvePost = resolve })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    const pending = mockRollPostPending()
 
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
@@ -234,27 +165,14 @@ describe('CampaignChat — dice pool commit', () => {
       expect(screen.getByRole('button', { name: 'Remove d20' })).toBeDisabled()
     })
 
-    resolvePost!({
-      ok: true, status: 201,
-      json: () => Promise.resolve({
-        id: 'roll-6', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-        formula: '1d20', rolls: [10], total: 10,
-        visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-      }),
-    })
+    pending.resolve({ ok: true, status: 201, json: () => Promise.resolve(rollResponse({ id: 'roll-6' })) })
 
     await waitFor(() => expect(screen.getByRole('button', { name: 'Add d20' })).not.toBeDisabled())
   })
 
   it('non-409 failure (e.g. 500) shows inline error and preserves the staged pool', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({ ok: false, status: 500, json: () => Promise.resolve({}) })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 500 })
 
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
@@ -267,10 +185,6 @@ describe('CampaignChat — dice pool commit', () => {
 
   it('a thrown rollDicePool error is caught and shows inline error instead of crashing', async () => {
     mockedRollDicePool.mockImplementation(() => { throw new Error('boom') })
-    sharedTestState.fetchSpy.mockImplementation((url: string) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
 
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
@@ -283,20 +197,7 @@ describe('CampaignChat — dice pool commit', () => {
 
   it('DM-only visibility sends correct scope', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true, status: 201,
-          json: () => Promise.resolve({
-            id: 'roll-5', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-            formula: '1d20', rolls: [10], total: 10,
-            visibility: { scope: 'dm-only' }, createdAt: new Date().toISOString(),
-          }),
-        })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-5', visibility: { scope: 'dm-only' } }) })
 
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
@@ -304,12 +205,6 @@ describe('CampaignChat — dice pool commit', () => {
     await user.selectOptions(screen.getByRole('combobox', { name: 'Roll visibility' }), 'dm-only')
     await user.click(screen.getByRole('button', { name: 'Roll' }))
 
-    await waitFor(() => {
-      const call = sharedTestState.fetchSpy.mock.calls.find(
-        (c: unknown[]) => (c[0] as string).includes('/rolls') && (c[1] as RequestInit)?.method === 'POST'
-      )
-      const body = JSON.parse((call![1] as RequestInit).body as string)
-      expect(body.visibility).toEqual({ scope: 'dm-only' })
-    })
+    await waitFor(() => expect(postedRollBody().visibility).toEqual({ scope: 'dm-only' }))
   })
 })

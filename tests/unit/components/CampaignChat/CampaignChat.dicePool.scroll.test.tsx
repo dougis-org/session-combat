@@ -1,6 +1,9 @@
 import { screen, waitFor, act } from '@testing-library/react'
 import { rollDicePool } from '@/lib/utils/dice'
-import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDockWithSession } from './helpers'
+import {
+  CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDockWithSession,
+  rollResponse, mockRollPost,
+} from './helpers'
 
 jest.mock('@/lib/offline/LocalStore', () => ({
   LocalStore: {
@@ -32,6 +35,27 @@ jest.mock('@/lib/utils/dice', () => ({
 
 const mockedRollDicePool = rollDicePool as jest.Mock
 
+function fireRollEvent(overrides: Partial<{ id: string; rollerId: string; rollerName: string }> = {}) {
+  act(() => {
+    sharedTestState.capturedOnEvent?.({
+      type: 'roll',
+      campaignId: CAMPAIGN_ID,
+      data: {
+        id: overrides.id ?? 'roll-event', campaignId: CAMPAIGN_ID, sessionId: 'session-1',
+        rollerId: overrides.rollerId ?? 'user-2', rollerName: overrides.rollerName ?? 'other',
+        formula: '1d20', rolls: [7], total: 7,
+        visibility: { scope: 'group' }, createdAt: new Date(),
+      },
+    })
+  })
+}
+
+function scrolledUp(container: HTMLElement) {
+  Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true })
+  Object.defineProperty(container, 'clientHeight', { value: 300, configurable: true })
+  Object.defineProperty(container, 'scrollTop', { value: 0, configurable: true })
+}
+
 describe('CampaignChat — feed auto-scroll on any dice roll', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -52,20 +76,7 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
 
   it('committing a roll scrolls the feed to reveal it', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true, status: 201,
-          json: () => Promise.resolve({
-            id: 'roll-scroll-own', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-            formula: '1d20', rolls: [10], total: 10,
-            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-          }),
-        })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-scroll-own' }) })
 
     const { user } = await openDockWithSession()
     const scrollSpy = jest.fn()
@@ -81,21 +92,11 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
   })
 
   it('a roll from another player arriving via SSE also triggers auto-scroll', async () => {
-    const { user } = await openDockWithSession()
+    await openDockWithSession()
     const scrollSpy = jest.fn()
     getFeedContainer().scrollTo = scrollSpy
 
-    act(() => {
-      sharedTestState.capturedOnEvent?.({
-        type: 'roll',
-        campaignId: CAMPAIGN_ID,
-        data: {
-          id: 'roll-other-player', campaignId: CAMPAIGN_ID, sessionId: 'session-1',
-          rollerId: 'user-2', rollerName: 'other', formula: '1d20', rolls: [7], total: 7,
-          visibility: { scope: 'group' }, createdAt: new Date(),
-        },
-      })
-    })
+    fireRollEvent({ id: 'roll-other-player' })
 
     await waitFor(() => expect(screen.getByText(/1d20/)).toBeInTheDocument())
     await waitFor(() => {
@@ -104,26 +105,13 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
   })
 
   it('a roll from another player does not yank the feed down when the user has scrolled up to read history', async () => {
-    const { user } = await openDockWithSession()
+    await openDockWithSession()
     const container = getFeedContainer()
     const scrollSpy = jest.fn()
     container.scrollTo = scrollSpy
-    // Simulate the user having scrolled well away from the bottom.
-    Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true })
-    Object.defineProperty(container, 'clientHeight', { value: 300, configurable: true })
-    Object.defineProperty(container, 'scrollTop', { value: 0, configurable: true })
+    scrolledUp(container)
 
-    act(() => {
-      sharedTestState.capturedOnEvent?.({
-        type: 'roll',
-        campaignId: CAMPAIGN_ID,
-        data: {
-          id: 'roll-other-player-far', campaignId: CAMPAIGN_ID, sessionId: 'session-1',
-          rollerId: 'user-2', rollerName: 'other', formula: '1d20', rolls: [7], total: 7,
-          visibility: { scope: 'group' }, createdAt: new Date(),
-        },
-      })
-    })
+    fireRollEvent({ id: 'roll-other-player-far' })
 
     await waitFor(() => expect(screen.getByText(/1d20/)).toBeInTheDocument())
     expect(scrollSpy).not.toHaveBeenCalled()
@@ -131,28 +119,13 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
 
   it('the roller is always pulled down to their own roll even if they had scrolled up', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true, status: 201,
-          json: () => Promise.resolve({
-            id: 'roll-scroll-own-far', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-            formula: '1d20', rolls: [10], total: 10,
-            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-          }),
-        })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-scroll-own-far' }) })
 
     const { user } = await openDockWithSession()
     const container = getFeedContainer()
     const scrollSpy = jest.fn()
     container.scrollTo = scrollSpy
-    Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true })
-    Object.defineProperty(container, 'clientHeight', { value: 300, configurable: true })
-    Object.defineProperty(container, 'scrollTop', { value: 0, configurable: true })
+    scrolledUp(container)
 
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
@@ -165,20 +138,7 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
 
   it('a duplicate roll id racing with the POST response resolving before the SSE echo still scrolls exactly once', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true, status: 201,
-          json: () => Promise.resolve({
-            id: 'roll-race-reverse', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-            formula: '1d20', rolls: [10], total: 10,
-            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-          }),
-        })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-race-reverse' }) })
 
     const { user } = await openDockWithSession()
     const scrollSpy = jest.fn()
@@ -192,37 +152,14 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     await waitFor(() => expect(screen.getByText(/1d20/)).toBeInTheDocument())
 
     // ...then the SSE echo for the same roll id arrives afterwards.
-    act(() => {
-      sharedTestState.capturedOnEvent?.({
-        type: 'roll',
-        campaignId: CAMPAIGN_ID,
-        data: {
-          id: 'roll-race-reverse', campaignId: CAMPAIGN_ID, sessionId: 'session-1',
-          rollerId: 'user-1', rollerName: 'tester', formula: '1d20', rolls: [10], total: 10,
-          visibility: { scope: 'group' }, createdAt: new Date(),
-        },
-      })
-    })
+    fireRollEvent({ id: 'roll-race-reverse', rollerId: 'user-1', rollerName: 'tester' })
 
     await waitFor(() => expect(scrollSpy).toHaveBeenCalledTimes(1))
   })
 
   it('a duplicate roll id racing between the SSE echo and the POST response still scrolls exactly once', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true, status: 201,
-          json: () => Promise.resolve({
-            id: 'roll-race', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-            formula: '1d20', rolls: [10], total: 10,
-            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-          }),
-        })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-race' }) })
 
     const { user } = await openDockWithSession()
     const scrollSpy = jest.fn()
@@ -232,17 +169,7 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
 
     // Simulate the SSE echo of the roll winning the race, before the POST response resolves
-    act(() => {
-      sharedTestState.capturedOnEvent?.({
-        type: 'roll',
-        campaignId: CAMPAIGN_ID,
-        data: {
-          id: 'roll-race', campaignId: CAMPAIGN_ID, sessionId: 'session-1',
-          rollerId: 'user-1', rollerName: 'tester', formula: '1d20', rolls: [10], total: 10,
-          visibility: { scope: 'group' }, createdAt: new Date(),
-        },
-      })
-    })
+    fireRollEvent({ id: 'roll-race', rollerId: 'user-1', rollerName: 'tester' })
 
     await user.click(screen.getByRole('button', { name: 'Roll' }))
 
@@ -252,29 +179,14 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
 
   it('still force-scrolls the roller to their own roll when the SSE echo wins the race while they had scrolled up', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true, status: 201,
-          json: () => Promise.resolve({
-            id: 'roll-race-own-sse-wins', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-            formula: '1d20', rolls: [10], total: 10,
-            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-          }),
-        })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-race-own-sse-wins' }) })
 
     const { user } = await openDockWithSession()
     const container = getFeedContainer()
     const scrollSpy = jest.fn()
     container.scrollTo = scrollSpy
     // The roller had scrolled up to read history before rolling.
-    Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true })
-    Object.defineProperty(container, 'clientHeight', { value: 300, configurable: true })
-    Object.defineProperty(container, 'scrollTop', { value: 0, configurable: true })
+    scrolledUp(container)
 
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
@@ -283,17 +195,7 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     // before the POST response resolves, so handleRollPosted's seenIds
     // guard will short-circuit — the SSE path must still force-scroll
     // because it recognizes this as the local user's own roll.
-    act(() => {
-      sharedTestState.capturedOnEvent?.({
-        type: 'roll',
-        campaignId: CAMPAIGN_ID,
-        data: {
-          id: 'roll-race-own-sse-wins', campaignId: CAMPAIGN_ID, sessionId: 'session-1',
-          rollerId: 'user-1', rollerName: 'tester', formula: '1d20', rolls: [10], total: 10,
-          visibility: { scope: 'group' }, createdAt: new Date(),
-        },
-      })
-    })
+    fireRollEvent({ id: 'roll-race-own-sse-wins', rollerId: 'user-1', rollerName: 'tester' })
 
     await user.click(screen.getByRole('button', { name: 'Roll' }))
 
@@ -325,20 +227,7 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
 
   it('auto-scroll does not reorder the feed — the new roll stays last', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
-    sharedTestState.fetchSpy.mockImplementation((url: string, options?: RequestInit) => {
-      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
-      if (url.includes('/rolls') && options?.method === 'POST') {
-        return Promise.resolve({
-          ok: true, status: 201,
-          json: () => Promise.resolve({
-            id: 'roll-scroll-order', campaignId: CAMPAIGN_ID, rollerName: 'tester',
-            formula: '1d20', rolls: [10], total: 10,
-            visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
-          }),
-        })
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ messages: [] }) })
-    })
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-scroll-order' }) })
 
     const { user } = await openDockWithSession()
     getFeedContainer().scrollTo = jest.fn()
