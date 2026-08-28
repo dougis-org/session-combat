@@ -12,6 +12,10 @@ import { makeUseCombat } from '@/tests/unit/fixtures/useCombat';
 import { makeCombatant, makeEncounter } from '@/tests/unit/fixtures/combatHelpers';
 import type { CombatantState, Party } from '@/lib/types';
 
+jest.mock('@/lib/components/ActiveCampaignBanner', () => ({
+  ActiveCampaignBanner: () => null,
+}));
+
 function makeSetupCombatant(overrides: Partial<CombatantState> = {}): CombatantState {
   return makeCombatant({ id: 's1', name: 'Fighter', type: 'player', initiative: 0, hp: 20, maxHp: 20, ac: 16, abilityScores: { strength: 16, dexterity: 12, constitution: 14, intelligence: 10, wisdom: 10, charisma: 10 }, ...overrides });
 }

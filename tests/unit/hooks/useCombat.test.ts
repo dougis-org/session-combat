@@ -510,7 +510,7 @@ describe('useCombat', () => {
     unmount();
   });
 
-  test('saveCombatState updates local state from PUT response', async () => {
+  test('saveCombatState does not overwrite optimistic local state from PUT response', async () => {
     const serverUpdated = { ...makeCombatState([makeCombatant('c1', 'Bard', 'player')]), currentRound: 99 };
     global.fetch = jest.fn(async (url: string, options?: RequestInit) => {
       if (options?.method === 'POST') return { ok: true, json: async () => makeCombatState([makeCombatant('c1', 'Bard', 'player')]) };
@@ -529,7 +529,8 @@ describe('useCombat', () => {
       await result.current.saveCombatState({ ...makeCombatState([makeCombatant('c1', 'Bard', 'player')]), currentRound: 2 });
     });
 
-    expect(result.current.combatState?.currentRound).toBe(99);
+    // Local state should remain 2 (optimistic), not overwritten by server response (99)
+    expect(result.current.combatState?.currentRound).toBe(2);
     unmount();
   });
 });

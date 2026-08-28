@@ -28,7 +28,7 @@ async function addActiveMember(
   });
   expect(res.status).toBe(201);
   const db = await getDatabase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   await db.collection("campaignMembers").updateOne(
     { campaignId, userId },
     { $set: { status: "active" } } as any

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { CombatSetupAndActiveModals } from '@/lib/components/CombatSetupAndActiveModals';
+import { ActiveCampaignBanner } from '@/lib/components/ActiveCampaignBanner';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
 import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { AuthUser } from '@/lib/hooks/useAuth';
@@ -55,6 +56,8 @@ export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
             {error}
           </div>
         )}
+
+        <ActiveCampaignBanner />
 
         <div className="bg-gray-800 rounded-lg p-6 max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold mb-6">Start New Combat</h2>

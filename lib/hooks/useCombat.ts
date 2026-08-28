@@ -39,6 +39,7 @@ export function useCombat(options: UseCombatOptions = {}) {
   const setupCombatantsRef = useRef<CombatantState[]>([]);
   const serverCombatIdRef = useRef<string | null>(null);
   const isCreatingRef = useRef(false);
+  const pendingUpdateRef = useRef<CombatState | null>(null);
   const { toast, showToast } = useToast();
 
   useEffect(() => {
@@ -60,11 +61,13 @@ export function useCombat(options: UseCombatOptions = {}) {
           throw new Error('Failed to load data');
         }
 
-        const encountersData = await encountersRes.json();
-        const charactersData = await charactersRes.json();
-        const combatData = await combatRes.json();
-        const monstersData = await monstersRes.json();
-        const partiesData = await partiesRes.json();
+        const [encountersData, charactersData, combatData, monstersData, partiesData] = await Promise.all([
+          encountersRes.json(),
+          charactersRes.json(),
+          combatRes.json(),
+          monstersRes.json(),
+          partiesRes.json(),
+        ]);
 
         setEncounters(encountersData || []);
         setCharacters(charactersData || []);
@@ -121,18 +124,26 @@ export function useCombat(options: UseCombatOptions = {}) {
       setCombatState(state);
       if (state) {
         if (!serverCombatIdRef.current) {
-          if (isCreatingRef.current) return;
+          if (isCreatingRef.current) {
+            pendingUpdateRef.current = state;
+            return;
+          }
           isCreatingRef.current = true;
           try {
             const saved = await combatFetch('POST', '/api/combat', state);
             serverCombatIdRef.current = saved.id;
-            setCombatState(saved);
+            setCombatState(prev => prev ? { ...prev, id: saved.id } : saved);
+            if (pendingUpdateRef.current) {
+              const pending = pendingUpdateRef.current;
+              pendingUpdateRef.current = null;
+              const pendingWithId = { ...pending, id: saved.id };
+              await combatFetch('PUT', `/api/combat/${saved.id}`, pendingWithId);
+            }
           } finally {
             isCreatingRef.current = false;
           }
         } else {
-          const updated = await combatFetch('PUT', `/api/combat/${serverCombatIdRef.current}`, state);
-          setCombatState(updated);
+          await combatFetch('PUT', `/api/combat/${serverCombatIdRef.current}`, state);
         }
       }
     } catch (err) {
