@@ -59,6 +59,13 @@ export async function openDock() {
   return user
 }
 
+export async function openDockWithSession(activeSessionId: string | null = 'session-1') {
+  const user = userEvent.setup()
+  const { rerender } = render(<CampaignChat campaignId={CAMPAIGN_ID} activeSessionId={activeSessionId} />)
+  await user.click(screen.getByRole('button', { name: /chat/i }))
+  return { user, rerender }
+}
+
 export function fireMsg(
   overrides: Partial<{
     id: string

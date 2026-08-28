@@ -252,7 +252,7 @@ it('roll item displays the vendored d20 icon, not the dice emoji', async () => {
 })
 
 // T4 — RollEntryStrip (immediate-click roll UI) is superseded by the dice
-// pool trigger/pop-out; see CampaignChat.dicePool.test.tsx.
+// pool trigger/pop-out; see CampaignChat/CampaignChat.dicePool.{ui,commit,scroll}.test.tsx.
 
 // ── T5 — Roll history fetch on expand ────────────────────────────
 
