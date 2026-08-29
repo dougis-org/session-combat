@@ -32,48 +32,6 @@ The system SHALL provide a `lib/dice/diceSessionBridge.ts` module exposing `anno
 
 ---
 
-### Requirement: ADDED Typed, scoped roll-request channel from the global dice fab to CampaignChat
-
-The system SHALL provide `requestRoll({campaignId, sessionId, roll})` and `onRollRequested(callback)` on the same module, where `roll` matches the existing `{formula, rolls, total, visibility}` shape already accepted by `POST /api/campaigns/[id]/rolls`.
-
-#### Scenario: Requesting a roll notifies current subscribers with the full scoped payload
-
-- **Given** a subscriber has registered via `onRollRequested`
-- **When** `requestRoll({campaignId: "c1", sessionId: "s1", roll: {formula: "1d20", rolls: [14], total: 14, visibility: {scope: "group"}}})` is called
-- **Then** the subscriber's callback is invoked with that exact payload
-
-#### Scenario: A roll request with no subscribers is a silent no-op
-
-- **Given** no subscriber is currently registered via `onRollRequested`
-- **When** `requestRoll(...)` is called
-- **Then** the call completes without throwing and has no observable side effect
-
----
-
-### Requirement: ADDED CampaignChat only acts on a roll request matching its own current campaign and session
-
-The system SHALL cause `CampaignChat`'s roll-request subscriber to ignore any received payload whose `campaignId` or `sessionId` does not exactly match its own currently-mounted `campaignId` prop and current `activeSessionId` state at the moment the event is received.
-
-#### Scenario: Matching payload is submitted through the existing roll-persistence path
-
-- **Given** `CampaignChat` is mounted with `campaignId="c1"` and `activeSessionId="s1"`
-- **When** a roll request arrives with `{campaignId: "c1", sessionId: "s1", roll: {...}}`
-- **Then** `CampaignChat` performs the same POST to `/api/campaigns/c1/rolls` it performs for its own in-chat trigger, and on success appends the result to the feed and scrolls, using its existing dedupe/scroll logic unchanged
-
-#### Scenario: Payload for a different campaign is ignored
-
-- **Given** `CampaignChat` is mounted with `campaignId="c1"` and `activeSessionId="s1"`
-- **When** a roll request arrives with `{campaignId: "c2", sessionId: "s1", roll: {...}}`
-- **Then** no POST is made and the feed is not mutated
-
-#### Scenario: Payload for a stale/mismatched session is ignored
-
-- **Given** `CampaignChat` is mounted with `campaignId="c1"`, and `activeSessionId` has since changed from `"s1"` to `"s2"` (e.g. the session ended and a new one started)
-- **When** a roll request arrives with `{campaignId: "c1", sessionId: "s1", roll: {...}}` (the stale session id)
-- **Then** no POST is made and the feed is not mutated
-
----
-
 ### Requirement: ADDED CampaignChat announces and clears presence in lockstep with its own active-session lifecycle
 
 The system SHALL cause `CampaignChat` to call `announcePresence({campaignId, sessionId: activeSessionId})` whenever it has a non-null `activeSessionId`, and to call `clearPresence()` when it unmounts or when `activeSessionId` transitions to null.
@@ -107,11 +65,16 @@ The system SHALL cause `CampaignChat` to call `announcePresence({campaignId, ses
 ## Traceability
 
 - Proposal element "Presence channel: CampaignChat → GlobalDiceFab" → Requirements: ADDED Typed, scoped presence channel from CampaignChat to the global dice fab; ADDED CampaignChat announces and clears presence in lockstep with its own active-session lifecycle
-- Proposal element "Roll-request channel: GlobalDiceFab → CampaignChat" → Requirements: ADDED Typed, scoped roll-request channel from the global dice fab to CampaignChat
-- Proposal element "Roll requested for non-matching campaign/session is ignored" → Requirements: ADDED CampaignChat only acts on a roll request matching its own current campaign and session
-- Design decision 2 (bridge module shape) → Requirements: both ADDED channel requirements
-- Design decision 3 (scoping/id-match) → Requirements: ADDED CampaignChat only acts on a roll request matching its own current campaign and session; ADDED CampaignChat announces and clears presence in lockstep with its own active-session lifecycle
+- Design decision 2 (bridge module shape) → Requirements: ADDED Typed, scoped presence channel from CampaignChat to the global dice fab
+- Design decision 3 (scoping/id-match) → Requirements: ADDED CampaignChat announces and clears presence in lockstep with its own active-session lifecycle
 - Requirement → Task(s): see `openspec/changes/archive/2026-08-22-decouple-dice-panel-from-chat/tasks.md`, "diceSessionBridge" task group
+
+**Note (2026-08-29, `decouple-dice-roll-capability`):** The roll-request channel
+(`requestRoll`/`onRollRequested`) and `CampaignChat`'s campaign/session-matching subscriber
+were removed — `GlobalDiceFab` now submits rolls directly via `lib/dice/useRollSubmission.ts`
+instead of asking whichever `CampaignChat` instance is mounted to submit on its behalf. See
+`openspec/changes/archive/2026-08-29-decouple-dice-roll-capability/design.md` decision 3 and
+the `dice-pool-shared-state` capability for where submission now lives.
 
 ## Non-Functional Acceptance Criteria
 
