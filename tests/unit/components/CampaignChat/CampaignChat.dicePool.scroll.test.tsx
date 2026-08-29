@@ -74,7 +74,7 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     return el as HTMLElement
   }
 
-  it('committing a roll scrolls the feed to reveal it', async () => {
+  it('committing a roll, once echoed back via SSE, scrolls the feed to reveal it', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
     mockRollPost({ status: 201, body: rollResponse({ id: 'roll-scroll-own' }) })
 
@@ -85,6 +85,10 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
     await user.click(screen.getByRole('button', { name: 'Roll' }))
+
+    // A submitted roll now only enters the feed via the SSE 'roll' stream event,
+    // same as any other client's roll — simulate the server round-trip echo.
+    fireRollEvent({ id: 'roll-scroll-own', rollerId: 'user-1', rollerName: 'tester' })
 
     await waitFor(() => {
       expect(scrollSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }))
@@ -130,13 +134,14 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
     await user.click(screen.getByRole('button', { name: 'Roll' }))
+    fireRollEvent({ id: 'roll-scroll-own-far', rollerId: 'user-1', rollerName: 'tester' })
 
     await waitFor(() => {
       expect(scrollSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }))
     })
   })
 
-  it('a duplicate roll id racing with the POST response resolving before the SSE echo still scrolls exactly once', async () => {
+  it('a duplicate roll id echoed twice via SSE still scrolls exactly once', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
     mockRollPost({ status: 201, body: rollResponse({ id: 'roll-race-reverse' }) })
 
@@ -146,12 +151,12 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
 
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
-
-    // POST response resolves first (handleRollPosted wins the race)...
     await user.click(screen.getByRole('button', { name: 'Roll' }))
-    await waitFor(() => expect(screen.getByText(/1d20/)).toBeInTheDocument())
 
-    // ...then the SSE echo for the same roll id arrives afterwards.
+    // The SSE echo for the roll's own committed roll arrives, and a second
+    // (duplicate) echo of the same id must not scroll or append a second time.
+    fireRollEvent({ id: 'roll-race-reverse', rollerId: 'user-1', rollerName: 'tester' })
+    await waitFor(() => expect(screen.getByText(/1d20/)).toBeInTheDocument())
     fireRollEvent({ id: 'roll-race-reverse', rollerId: 'user-1', rollerName: 'tester' })
 
     await waitFor(() => expect(scrollSpy).toHaveBeenCalledTimes(1))
@@ -246,6 +251,7 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
     await user.click(screen.getByRole('button', { name: 'Roll' }))
+    fireRollEvent({ id: 'roll-scroll-order', rollerId: 'user-1', rollerName: 'tester' })
 
     await waitFor(() => expect(screen.getByText(/1d20/)).toBeInTheDocument())
 

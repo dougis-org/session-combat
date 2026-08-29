@@ -90,6 +90,9 @@ export function rollDicePool(
 /** Die sizes offered by the standalone dice-pool builder UI (in-chat and global FAB). */
 export const DIE_SIDES = [4, 6, 8, 10, 12, 20] as const;
 
+/** One of the die sizes offered by the pool-builder UI. */
+export type DieSides = (typeof DIE_SIDES)[number];
+
 /** A dice pool with every offered die size zeroed out. Frozen — always spread before mutating. */
 export const EMPTY_POOL: Readonly<Record<number, number>> = Object.freeze({ 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 20: 0 });
 

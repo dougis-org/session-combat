@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDock } from './helpers'
@@ -68,5 +69,40 @@ describe('CampaignChat — history', () => {
     setupFetchMock({ messages: { messages } })
     await openDock()
     await waitFor(() => expect(screen.getByText('Message 0')).toBeInTheDocument())
+  })
+
+  // A transient failure on the first history fetch must not permanently
+  // suppress retries — reopening the drawer should try again.
+  it('a failed history fetch retries on the next expand instead of loading forever', async () => {
+    const user = userEvent.setup()
+    let messagesCallCount = 0
+    sharedTestState.fetchSpy = jest.fn().mockImplementation((url: string) => {
+      if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
+      if (url.includes('/messages')) {
+        messagesCallCount += 1
+        if (messagesCallCount === 1) return Promise.resolve({ ok: false, json: () => Promise.resolve(null) })
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            messages: [{
+              id: 'msg-retry', campaignId: CAMPAIGN_ID, senderId: 'user-1', senderName: 'Alice',
+              text: 'Recovered', visibility: { scope: 'group' }, createdAt: new Date().toISOString(),
+            }],
+          }),
+        })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+    })
+    global.fetch = sharedTestState.fetchSpy as unknown as typeof global.fetch
+
+    render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+    await user.click(screen.getByRole('button', { name: /chat/i }))
+    await waitFor(() => expect(messagesCallCount).toBe(1))
+
+    await user.click(screen.getByRole('button', { name: 'Collapse chat' }))
+    await user.click(screen.getByRole('button', { name: /chat/i }))
+
+    await waitFor(() => expect(messagesCallCount).toBe(2))
+    await waitFor(() => expect(screen.getByText('Recovered')).toBeInTheDocument())
   })
 })
