@@ -2,8 +2,6 @@ import {
   announcePresence,
   clearPresence,
   onPresenceChange,
-  requestRoll,
-  onRollRequested,
   resetDiceSessionBridge,
 } from '@/lib/dice/diceSessionBridge'
 
@@ -53,61 +51,12 @@ describe('diceSessionBridge — presence channel', () => {
     clearPresence()
     expect(cb).not.toHaveBeenCalled()
   })
-})
 
-describe('diceSessionBridge — roll-request channel', () => {
-  it('requesting a roll notifies current subscribers with the full scoped payload', () => {
+  it('rejects a malformed presence value instead of applying it', () => {
     const cb = jest.fn()
-    onRollRequested(cb)
-    const payload = {
-      campaignId: 'c1',
-      sessionId: 's1',
-      roll: { formula: '1d20', rolls: [14], total: 14, visibility: { scope: 'group' as const } },
-    }
-    requestRoll(payload)
-    expect(cb).toHaveBeenCalledWith(payload)
-  })
-
-  it('a roll request with no subscribers is a silent no-op', () => {
-    expect(() =>
-      requestRoll({
-        campaignId: 'c1',
-        sessionId: 's1',
-        roll: { formula: '1d6', rolls: [3], total: 3, visibility: { scope: 'group' } },
-      })
-    ).not.toThrow()
-  })
-
-  it('a malformed roll request (invalid ids, out-of-bounds dice) is silently dropped', () => {
-    const cb = jest.fn()
-    onRollRequested(cb)
-    requestRoll({
-      campaignId: '',
-      sessionId: 's1',
-      roll: { formula: '1d6', rolls: [3], total: 3, visibility: { scope: 'group' } },
-    } as never)
-    requestRoll({
-      campaignId: 'c1',
-      sessionId: 's1',
-      roll: { formula: '1d6', rolls: [999], total: 999, visibility: { scope: 'group' } },
-    })
-    requestRoll({
-      campaignId: 'c1',
-      sessionId: 's1',
-      roll: { formula: '1d6', rolls: Array(500).fill(1), total: 500, visibility: { scope: 'group' } },
-    })
-    expect(cb).not.toHaveBeenCalled()
-  })
-
-  it('unsubscribing stops further roll-request notifications', () => {
-    const cb = jest.fn()
-    const unsubscribe = onRollRequested(cb)
-    unsubscribe()
-    requestRoll({
-      campaignId: 'c1',
-      sessionId: 's1',
-      roll: { formula: '1d6', rolls: [3], total: 3, visibility: { scope: 'group' } },
-    })
+    onPresenceChange(cb)
+    cb.mockClear()
+    announcePresence({ campaignId: '', sessionId: 's1' } as never)
     expect(cb).not.toHaveBeenCalled()
   })
 })
@@ -115,9 +64,7 @@ describe('diceSessionBridge — roll-request channel', () => {
 describe('diceSessionBridge — reliability', () => {
   it('resetDiceSessionBridge clears presence and listeners between tests', () => {
     const presenceCb = jest.fn()
-    const rollCb = jest.fn()
     onPresenceChange(presenceCb)
-    onRollRequested(rollCb)
     announcePresence({ campaignId: 'c1', sessionId: 's1' })
 
     resetDiceSessionBridge()
@@ -125,12 +72,5 @@ describe('diceSessionBridge — reliability', () => {
     const freshPresenceCb = jest.fn()
     onPresenceChange(freshPresenceCb)
     expect(freshPresenceCb).toHaveBeenCalledWith(null)
-
-    requestRoll({
-      campaignId: 'c1',
-      sessionId: 's1',
-      roll: { formula: '1d6', rolls: [3], total: 3, visibility: { scope: 'group' } },
-    })
-    expect(rollCb).not.toHaveBeenCalled()
   })
 })
