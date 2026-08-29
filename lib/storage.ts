@@ -30,29 +30,7 @@ import { InvalidUserIdError } from "./permissions";
 import { runStorageOp } from "@/lib/storage/runOp";
 import { ObjectId, Filter, Document } from "mongodb";
 
-interface QueryableEntity {
-  _id?: string;
-  id: string;
-  userId: string;
-}
-
-function buildEntityQuery<T extends QueryableEntity>(entity: T): Filter<T> {
-  const query: Filter<Document> = { userId: entity.userId };
-  if (entity._id) {
-    return { ...query, _id: new ObjectId(entity._id) } as Filter<T>;
-  }
-  return { ...query, id: entity.id } as Filter<T>;
-}
-
-function normalizeStoredEntityId<T extends { id?: string; _id?: string }>(
-  entity: T,
-): T & { id: string | undefined } {
-  return {
-    ...entity,
-    // Preserve the app-level UUID for reads; fall back to `_id` only when deriving the returned `id` value.
-    id: entity.id || entity._id?.toString(),
-  };
-}
+import { buildEntityQuery, normalizeStoredEntityId, QueryableEntity } from "./storage/helpers";
 
 function normalizeCampaign(campaign: Campaign): Campaign {
   return {
@@ -64,40 +42,20 @@ function normalizeCampaign(campaign: Campaign): Campaign {
   };
 }
 
-type LegacyPartyDoc = Omit<Party, 'members'> & { members?: PartyMember[]; characterIds?: string[] };
-
-function migrateParty(party: LegacyPartyDoc): Party {
-  if (Array.isArray(party.members)) {
-    return party as Party;
-  }
-  const legacyIds: string[] = Array.isArray(party.characterIds) ? party.characterIds : [];
-  const addedAt = party.createdAt ?? new Date(0);
-  const { characterIds: _discarded, ...rest } = party;
-  return {
-    ...rest,
-    members: legacyIds.map(characterId => ({ characterId, addedAt })),
-  } as Party;
-}
 
 /**
  * Server-side storage functions for MongoDB
  * Note: Use API routes for client-side data fetching
  */
+
+import * as encounterRepo from "./storage/encounterRepo";
+import * as characterRepo from "./storage/characterRepo";
+import * as combatStateRepo from "./storage/combatStateRepo";
+import * as partyRepo from "./storage/partyRepo";
+
 export const storage = {
   // Load encounters for a user
-  async loadEncounters(userId: string): Promise<Encounter[]> {
-    try {
-      const db = await getDatabase();
-      const encounters = await db
-        .collection<Encounter>("encounters")
-        .find({ userId })
-        .toArray();
-      return encounters.map(normalizeStoredEntityId);
-    } catch (error) {
-      console.error("Error loading encounters:", error);
-      return [];
-    }
-  },
+  async loadEncounters(userId: string): Promise<Encounter[]> { return encounterRepo.loadEncounters(userId); },
 
   /**
    * Load all active characters for a user.
@@ -115,62 +73,13 @@ export const storage = {
    * - The explicit 'id' field is preserved; MongoDB's '_id' is used as fallback only
    * - Returns empty array on error (logged to console)
    */
-  async loadCharacters(userId: string): Promise<Character[]> {
-    try {
-      const db = await getDatabase();
-      try {
-        const characters = await db
-          .collection<Character>("characters_active")
-          .find({ userId })
-          .toArray();
-        return characters.map(normalizeStoredEntityId);
-      } catch (viewError) {
-        // Fall back to querying the underlying collection with an explicit filter
-        // when the view is unavailable (e.g., initialization failed or missing privileges).
-        console.warn(
-          "characters_active view unavailable, falling back to direct query:",
-          viewError,
-        );
-        const characters = await db
-          .collection<Character>("characters")
-          .find({ userId, deletedAt: null as unknown as Date })
-          .toArray();
-        return characters.map(normalizeStoredEntityId);
-      }
-    } catch (error) {
-      console.error("Error loading characters:", error);
-      return [];
-    }
-  },
+  async loadCharacters(userId: string): Promise<Character[]> { return characterRepo.loadCharacters(userId); },
 
   // Load combat state for a user
-  async loadCombatState(userId: string): Promise<CombatState | null> {
-    try {
-      const db = await getDatabase();
-      const combatState = await db
-        .collection<CombatState>("combatStates")
-        .findOne({ userId });
-      return combatState || null;
-    } catch (error) {
-      console.error("Error loading combat state:", error);
-      return null;
-    }
-  },
+  async loadCombatState(userId: string): Promise<CombatState | null> { return combatStateRepo.loadCombatState(userId); },
 
   // Load parties for a user
-  async loadParties(userId: string): Promise<Party[]> {
-    try {
-      const db = await getDatabase();
-      const parties = await db
-        .collection<LegacyPartyDoc>("parties")
-        .find({ userId })
-        .toArray();
-      return parties.map(normalizeStoredEntityId).map(migrateParty);
-    } catch (error) {
-      console.error("Error loading parties:", error);
-      return [];
-    }
-  },
+  async loadParties(userId: string): Promise<Party[]> { return partyRepo.loadParties(userId); },
 
   // Load monster templates for a user
   async loadMonsterTemplates(userId: string): Promise<MonsterTemplate[]> {
@@ -446,105 +355,22 @@ export const storage = {
   },
 
   // Save encounter
-  async saveEncounter(encounter: Encounter): Promise<void> {
-    try {
-      const db = await getDatabase();
-      const { _id, ...encounterData } = encounter;
-      console.log("saveEncounter called with:", {
-        id: encounter.id,
-        _id: encounter._id,
-        name: encounter.name,
-        userId: encounter.userId,
-      });
-
-      const query = buildEntityQuery(encounter);
-      console.log("Query for updateOne:", query);
-
-      const result = await db
-        .collection<Encounter>("encounters")
-        .updateOne(query, { $set: encounterData }, { upsert: true });
-      console.log("updateOne result:", {
-        matchedCount: result.matchedCount,
-        modifiedCount: result.modifiedCount,
-        upsertedId: result.upsertedId,
-      });
-    } catch (error) {
-      console.error("Error saving encounter:", error);
-      throw error;
-    }
-  },
+  async saveEncounter(encounter: Encounter): Promise<void> { return encounterRepo.saveEncounter(encounter); },
 
   // Save multiple encounters
-  async saveEncounters(encounters: Encounter[]): Promise<void> {
-    try {
-      const db = await getDatabase();
-      for (const encounter of encounters) {
-        await this.saveEncounter(encounter);
-      }
-    } catch (error) {
-      console.error("Error saving encounters:", error);
-      throw error;
-    }
-  },
+  async saveEncounters(encounters: Encounter[]): Promise<void> { return encounterRepo.saveEncounters(encounters); },
 
   // Save character
-  async saveCharacter(character: Character): Promise<void> {
-    try {
-      const db = await getDatabase();
-      const { _id, ...characterData } = character;
-
-      const query = buildEntityQuery(character);
-      await db
-        .collection<Character>("characters")
-        .updateOne(query, { $set: characterData }, { upsert: true });
-    } catch (error) {
-      console.error("Error saving character:", error);
-      throw error;
-    }
-  },
+  async saveCharacter(character: Character): Promise<void> { return characterRepo.saveCharacter(character); },
 
   // Save multiple characters
-  async saveCharacters(characters: Character[]): Promise<void> {
-    try {
-      const db = await getDatabase();
-      for (const character of characters) {
-        await this.saveCharacter(character);
-      }
-    } catch (error) {
-      console.error("Error saving characters:", error);
-      throw error;
-    }
-  },
+  async saveCharacters(characters: Character[]): Promise<void> { return characterRepo.saveCharacters(characters); },
 
   // Save combat state
-  async saveCombatState(combatState: CombatState | undefined): Promise<void> {
-    if (!combatState) {
-      return;
-    }
-    try {
-      const db = await getDatabase();
-      const { _id, ...combatStateData } = combatState;
-
-      const query = buildEntityQuery(combatState);
-      await db
-        .collection<CombatState>("combatStates")
-        .updateOne(query, { $set: combatStateData }, { upsert: true });
-    } catch (error) {
-      console.error("Error saving combat state:", error);
-      throw error;
-    }
-  },
+  async saveCombatState(combatState: CombatState | undefined): Promise<void> { return combatStateRepo.saveCombatState(combatState); },
 
   // Delete encounter
-  async deleteEncounter(id: string, userId: string): Promise<void> {
-    try {
-      const db = await getDatabase();
-      await db.collection<Encounter>("encounters").deleteOne({ id, userId });
-    } catch (error) {
-      console.error("Error deleting encounter:", error);
-      throw error;
-    }
-  },
+  async deleteEncounter(id: string, userId: string): Promise<void> { return encounterRepo.deleteEncounter(id, userId); },
 
   /**
    * Soft delete a character by marking it with a deletedAt timestamp.
@@ -571,73 +397,16 @@ export const storage = {
    *
    * @throws Error if database operation fails
    */
-  async deleteCharacter(id: string, userId: string): Promise<void> {
-    try {
-      const db = await getDatabase();
-      // Soft delete: mark with deletedAt timestamp
-      const result = await db
-        .collection<Character>("characters")
-        .updateOne({ id, userId }, { $set: { deletedAt: new Date() } });
-      if (result.matchedCount === 0) {
-        throw new Error(`Character ${id} not found`);
-      }
-      // Set leftAt on all active party memberships for the deleted character
-      await db
-        .collection<Party>("parties")
-        .updateMany(
-          { userId, "members.characterId": id, "members.leftAt": { $exists: false } },
-          { $set: { "members.$[elem].leftAt": new Date() } },
-          { arrayFilters: [{ "elem.characterId": id, "elem.leftAt": { $exists: false } }] }
-        );
-    } catch (error) {
-      console.error("Error deleting character:", error);
-      throw error;
-    }
-  },
+  async deleteCharacter(id: string, userId: string): Promise<void> { return characterRepo.deleteCharacter(id, userId); },
 
   // Save party
-  async saveParty(party: Party): Promise<void> {
-    try {
-      const db = await getDatabase();
-      const { _id, ...partyData } = party;
-
-      // Parties are persisted by app-level id plus userId, not MongoDB _id.
-      await db
-        .collection<Party>("parties")
-        .updateOne(
-          { id: party.id, userId: party.userId },
-          { $set: partyData },
-          { upsert: true }
-        );
-    } catch (error) {
-      console.error("Error saving party:", error);
-      throw error;
-    }
-  },
+  async saveParty(party: Party): Promise<void> { return partyRepo.saveParty(party); },
 
   // Save multiple parties
-  async saveParties(parties: Party[]): Promise<void> {
-    try {
-      const db = await getDatabase();
-      for (const party of parties) {
-        await this.saveParty(party);
-      }
-    } catch (error) {
-      console.error("Error saving parties:", error);
-      throw error;
-    }
-  },
+  async saveParties(parties: Party[]): Promise<void> { return partyRepo.saveParties(parties); },
 
   // Delete party
-  async deleteParty(id: string, userId: string): Promise<void> {
-    try {
-      const db = await getDatabase();
-      await db.collection<Party>("parties").deleteOne({ id, userId });
-    } catch (error) {
-      console.error("Error deleting party:", error);
-      throw error;
-    }
-  },
+  async deleteParty(id: string, userId: string): Promise<void> { return partyRepo.deleteParty(id, userId); },
 
   // Save monster template
   async saveMonsterTemplate(template: MonsterTemplate): Promise<void> {
@@ -1165,106 +934,15 @@ export const storage = {
     }
   },
 
-  async loadPartiesByCampaign(campaignId: string): Promise<Party[]> {
-    // TODO: add campaignId index on parties if >50ms becomes common
-    const start = Date.now();
-    try {
-      const db = await getDatabase();
-      const parties = await db
-        .collection<LegacyPartyDoc>("parties")
-        .find({ campaignId } as unknown as Filter<LegacyPartyDoc>)
-        .toArray();
-      const duration = Date.now() - start;
-      if (duration > 10) {
-        console.log(`[perf] loadPartiesByCampaign ${campaignId}: ${duration}ms`);
-      }
-      return parties.map(normalizeStoredEntityId).map(migrateParty);
-    } catch (error) {
-      console.error("Error loading parties by campaign:", error);
-      throw error;
-    }
-  },
+  async loadPartiesByCampaign(campaignId: string): Promise<Party[]> { return partyRepo.loadPartiesByCampaign(campaignId); },
 
-  async setPartyMemberLeftAt(campaignId: string, characterId: string, timestamp: Date): Promise<void> {
-    try {
-      const parties = await this.loadPartiesByCampaign(campaignId);
-      for (const party of parties) {
-        let modified = false;
-        const updatedMembers = party.members.map((m) => {
-          if (m.characterId === characterId && !m.leftAt) {
-            modified = true;
-            return { ...m, leftAt: timestamp };
-          }
-          return m;
-        });
-        if (modified) {
-          try {
-            await this.saveParty({ ...party, members: updatedMembers });
-          } catch (saveError) {
-            console.error(`Error saving party ${party.id} during setPartyMemberLeftAt:`, saveError);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error in setPartyMemberLeftAt:", error);
-    }
-  },
+  async setPartyMemberLeftAt(campaignId: string, characterId: string, timestamp: Date): Promise<void> { return partyRepo.setPartyMemberLeftAt(campaignId, characterId, timestamp); },
 
-  async canAddToCampaignParty(campaignId: string, characterId: string, dmUserId: string): Promise<boolean> {
-    try {
-      const character = await this.loadCharacterById(characterId);
-      if (!character) return false;
-      if (character.userId === dmUserId) return true;
+  async canAddToCampaignParty(campaignId: string, characterId: string, dmUserId: string): Promise<boolean> { return partyRepo.canAddToCampaignParty(campaignId, characterId, dmUserId); },
 
-      const db = await getDatabase();
-      const share = await db
-        .collection<CampaignCharacterShare>("campaignCharacterShares")
-        .findOne({ campaignId, characterId });
-      if (!share) return false;
+  async buildSharedCharacterEntries(campaignId: string): Promise<SharedCharacterEntry[]> { return partyRepo.buildSharedCharacterEntries(campaignId); },
 
-      const member = await this.getMember(campaignId, share.userId);
-      return member?.status === 'active';
-    } catch (error) {
-      console.error("Error in canAddToCampaignParty:", error);
-      return false;
-    }
-  },
-
-  async buildSharedCharacterEntries(campaignId: string): Promise<SharedCharacterEntry[]> {
-    const shares = await this.listAllSharesForCampaign(campaignId);
-    const results = await Promise.all(
-      shares.map(async (share) => {
-        const [member, character] = await Promise.all([
-          this.getMember(campaignId, share.userId),
-          this.loadCharacterById(share.characterId),
-        ]);
-        if (!member || member.status !== 'active') return null;
-        if (!character || character.deletedAt) return null;
-        return { share, character };
-      })
-    );
-    return results.filter((e): e is SharedCharacterEntry => e !== null);
-  },
-
-  async loadCharacterById(id: string): Promise<Character | null> {
-    try {
-      const db = await getDatabase();
-      try {
-        const character = await db
-          .collection<Character>("characters_active")
-          .findOne({ id });
-        return character ? normalizeStoredEntityId(character) : null;
-      } catch {
-        const character = await db
-          .collection<Character>("characters")
-          .findOne({ id, deletedAt: null as unknown as Date });
-        return character ? normalizeStoredEntityId(character) : null;
-      }
-    } catch (error) {
-      console.error("Error loading character by ID:", error);
-      throw error;
-    }
-  },
+  async loadCharacterById(id: string): Promise<Character | null> { return characterRepo.loadCharacterById(id); },
 
   async saveCampaignRoll(roll: CampaignRoll): Promise<void> {
     const db = await getDatabase();

@@ -76,12 +76,9 @@ describe("storage.loadCharacters", () => {
     expect(result).toEqual(fallbackChars);
   });
 
-  test("returns empty array when getDatabase fails", async () => {
+  test("throws StorageError when getDatabase fails", async () => {
     mockedGetDatabase.mockRejectedValue(new Error("connection failed") as never);
-
-    const result = await storage.loadCharacters("user1");
-
-    expect(result).toEqual([]);
+    await expect(storage.loadCharacters("user1")).rejects.toThrow("Storage operation \"loadCharacters\" failed");
   });
 });
 
@@ -268,7 +265,7 @@ describe("storage.deleteCharacter", () => {
   test("throws error on database failure", async () => {
     charactersMock.updateOne.mockRejectedValue(new Error("db error") as never);
 
-    await expect(storage.deleteCharacter("char1", "user1")).rejects.toThrow("db error");
+    await expect(storage.deleteCharacter("char1", "user1")).rejects.toThrow("Storage operation \"deleteCharacter\" failed");
   });
 });
 

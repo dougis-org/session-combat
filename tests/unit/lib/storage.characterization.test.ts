@@ -130,10 +130,10 @@ describe("storage.loadCharacters (behavior: mixed)", () => {
   // Proves the outer swallow catches the fallback's failure too, not just
   // the view's — the double-failure case resolves to [] rather than
   // rejecting.
-  it("resolves to [] when both the view query and the fallback query reject", async () => {
+  it("throws StorageError when both the view query and the fallback query reject", async () => {
     mockActiveCollection.toArray.mockRejectedValue(new Error("view unavailable"));
     mockFallbackCollection.toArray.mockRejectedValue(new Error("fallback also unavailable"));
 
-    await expect(storage.loadCharacters("user-1")).resolves.toEqual([]);
+    await expect(storage.loadCharacters("user-1")).rejects.toThrow("Storage operation \"loadCharacters\" failed");
   });
 });
