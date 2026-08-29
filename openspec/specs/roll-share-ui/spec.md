@@ -100,33 +100,15 @@ The system SHALL fetch roll history for the active session when the chat dock is
 
 ---
 
-### Requirement: ADDED CampaignChat submits externally-requested rolls through its existing commit path
-
-The system SHALL cause `CampaignChat` to treat a matching roll request received from `lib/dice/diceSessionBridge.ts` (see `dice-session-bridge` capability) exactly as it treats its own in-chat "Roll" commit: one POST to `/api/campaigns/[id]/rolls` with the request's `formula`/`rolls`/`total`/`visibility`, followed by the existing success/409/error handling, feed append, dedupe, and scroll behavior.
-
-#### Scenario: Externally-requested roll appears in the feed identically to an in-chat roll
-
-- **Given** `CampaignChat` is mounted for `campaignId="c1"` with `activeSessionId="s1"` and an open stream
-- **When** a matching roll request `{campaignId: "c1", sessionId: "s1", roll: {formula: "2d6", rolls: [3,5], total: 8, visibility: {scope: "group"}}}` is received via the bridge
-- **Then** a POST is made to `/api/campaigns/c1/rolls` with that formula/rolls/total/visibility, and on a 201 response the roll appears in the feed as a `RollFeedItem`, indistinguishable in rendering from a roll committed via the in-chat pop-out
-
-#### Scenario: Externally-requested roll triggers the same auto-scroll rule as a self-committed roll
-
-- **Given** `CampaignChat`'s feed is scrolled such that the bottom is not visible
-- **When** an externally-requested roll (matching the mounted campaign/session) is successfully committed
-- **Then** the feed scrolls to show the new roll, following the existing "own committed roll always scrolls" rule (see this capability's "MODIFIED Feed auto-scrolls on a new dice roll" requirement) rather than the bottom-proximity-gated rule used for remote/other-user rolls
-
-#### Scenario: 409 (no active session race) on an externally-requested roll surfaces the same inline handling
-
-- **Given** a matching roll request arrives but the session has just become inactive server-side
-- **When** the POST resolves with 409
-- **Then** `CampaignChat` handles it exactly as it does for its own in-chat commit today (no roll added to the feed; no crash), per the existing "409 response (no active session race)" scenario
-
-#### Scenario: In-chat dice pool trigger and behavior are unaffected
-
-- **Given** `CampaignChat` is mounted with an active session
-- **When** the user uses the existing in-chat dice pop-out trigger and pool (unrelated to the global fab)
-- **Then** all existing scenarios for staging, committing, and rendering rolls continue to behave exactly as specified in this capability, with no observable change
+**Note (removed 2026-08-29, `decouple-dice-roll-capability`):** The requirement formerly
+here — "ADDED CampaignChat submits externally-requested rolls through its existing commit
+path" — was removed. `GlobalDiceFab` (and any future roll-triggering surface) now submits
+directly via the shared `lib/dice/useRollSubmission.ts` capability (see
+`dice-pool-shared-state` capability); there is no longer an "externally-requested roll"
+concept for `CampaignChat` to receive, scope-check, or forward. Chat consumes every roll —
+its own and everyone else's — purely via the SSE `'roll'` stream event. See this
+capability's "MODIFIED Feed auto-scrolls on a new dice roll, consumed solely via the SSE
+stream" requirement below for the current behavior.
 
 ---
 
@@ -307,50 +289,67 @@ The system SHALL render the dice panel (staging pool, modifier, visibility selec
 
 ---
 
-### Requirement: MODIFIED Feed auto-scrolls on a new dice roll, gated by bottom proximity for remote rolls
+### Requirement: MODIFIED Feed auto-scrolls on a new dice roll, consumed solely via the SSE stream
 
-The system SHALL scroll the chat feed so the current user's own committed roll is always visible immediately after it is appended, regardless of whether the local POST-response callback or the SSE echo of that same roll is the code path that appends it to the feed. For a roll committed by a different user, the system SHALL only auto-scroll if the feed was already within approximately 100px of the bottom immediately before the roll was appended — a user who has scrolled up to read history (or is at the top triggering an older-page load) is NOT auto-scrolled by another player's roll. Auto-scroll SHALL fire at most once per roll. The feed's item order is unaffected. Auto-scroll does NOT apply to plain chat messages (unchanged from today: messages never auto-scroll).
+_(Modified 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL scroll the chat feed so the current user's own committed roll is always visible immediately after it is appended, and shall append every roll to the feed solely via the SSE `'roll'` stream event — there is no longer a separate local POST-response callback path that appends a roll to the feed ahead of, or independent from, the stream. For a roll committed by a different user, the system SHALL only auto-scroll if the feed was already within approximately 100px of the bottom immediately before the roll was appended — a user who has scrolled up to read history (or is at the top triggering an older-page load) is NOT auto-scrolled by another player's roll. Auto-scroll SHALL fire at most once per roll, determined by checking the ingested roll's `rollerId` against the current user, not by which code path appended it (since there is now only one). The feed's item order is unaffected. Auto-scroll does NOT apply to plain chat messages (unchanged from today: messages never auto-scroll).
 
-#### Scenario: Committing a roll scrolls the feed to show it
+#### Scenario: Committing a roll scrolls the feed to show it once ingested via the stream
 
-- **Given** the feed is scrolled such that the bottom is not visible, and the dice panel is open with a non-empty staged pool
-- **When** the user clicks "Roll" and the commit succeeds (POST returns 201)
-- **Then** the feed container's scroll position moves so the newly-appended roll item is visible, without requiring the user to scroll manually
+- **Given** the feed is scrolled such that the bottom is not visible, and the dice panel
+  (whether chat-docked or `GlobalDiceFab`, once sent to session chat) has just had a roll
+  committed by the current user
+- **When** the SSE `'roll'` event for that roll is received and appended to the feed
+- **Then** the feed container's scroll position moves so the newly-appended roll item is
+  visible, without requiring the user to scroll manually, and without any earlier
+  optimistic append having already placed the item in the feed
 
 #### Scenario: The roller is scrolled to their own roll even if they had scrolled away from the bottom
 
-- **Given** the feed is scrolled such that the bottom is not visible, and the current user has just committed a roll
-- **When** the commit succeeds and the roll is appended to the feed
-- **Then** the feed container's scroll position moves so the roll is visible, regardless of how far from the bottom the user had scrolled
+- **Given** the feed is scrolled such that the bottom is not visible, and the current user
+  has just committed a roll (via either the chat-docked panel or `GlobalDiceFab`'s "send to
+  session chat")
+- **When** the SSE `'roll'` event for that roll arrives, identified as the current user's
+  own roll via `rollerId === user.userId`
+- **Then** the feed container's scroll position moves so the roll is visible, regardless of
+  how far from the bottom the user had scrolled
 
 #### Scenario: A roll from another player triggers auto-scroll when the user is already near the bottom
 
 - **Given** the feed's scroll position is within 100px of the bottom
-- **When** an SSE `roll` event for a roll posted by a different user arrives and is appended to the feed
-- **Then** the feed container's scroll position moves so the newly-appended roll item is visible
+- **When** an SSE `roll` event for a roll posted by a different user arrives and is
+  appended to the feed
+- **Then** the feed container's scroll position moves so the newly-appended roll item is
+  visible
 
 #### Scenario: A roll from another player does not yank the feed when the user has scrolled away to read history
 
-- **Given** the feed's scroll position is more than 100px from the bottom (e.g. the user scrolled up to read earlier messages, or is at the top to trigger the older-page load)
-- **When** an SSE `roll` event for a roll posted by a different user arrives and is appended to the feed
+- **Given** the feed's scroll position is more than 100px from the bottom (e.g. the user
+  scrolled up to read earlier messages, or is at the top to trigger the older-page load)
+- **When** an SSE `roll` event for a roll posted by a different user arrives and is
+  appended to the feed
 - **Then** the feed container's scroll position does NOT change
 
-#### Scenario: The current user's own roll scrolls the feed even if the SSE echo of it arrives before the POST response
+#### Scenario: A roll submitted while chat was unmounted still scrolls the feed once ingested after chat mounts
 
-- **Given** the feed is scrolled such that the bottom is not visible, and the current user has just committed a roll
-- **When** the SSE broadcast of that same roll (identified by its id, and identifiable as the current user's own roll via `rollerId`) is delivered to the current user's own connection before, at the same time as, or after the local POST-response callback for that roll
-- **Then** the feed still scrolls to show the roll exactly once, regardless of the order in which the two events are processed
+- **Given** a roll was submitted via `GlobalDiceFab` while no `CampaignChat` instance was
+  mounted, and the user subsequently opens/mounts chat
+- **When** the feed loads that roll via history (on expand) or, if chat was already open
+  when the roll landed, via the SSE stream
+- **Then** the roll appears in the feed exactly as any other roll does, with the same
+  rollerId-based auto-scroll rule applied if it arrives live via the stream
 
 #### Scenario: Auto-scroll does not reorder the feed
 
 - **Given** the feed contains items in chronological order
 - **When** a roll is appended and the auto-scroll occurs
-- **Then** the feed's item order is unchanged (the new roll remains the last item, appended in place; it is not moved to the top or re-sorted)
+- **Then** the feed's item order is unchanged (the new roll remains the last item, appended
+  in place; it is not moved to the top or re-sorted)
 
 #### Scenario: A new chat message does not trigger auto-scroll
 
 - **Given** the feed is scrolled such that the bottom is not visible
-- **When** a new `message`-kind item (from either the composer's optimistic append or an SSE `message` event) is appended to the feed
+- **When** a new `message`-kind item (from either the composer's optimistic append or an
+  SSE `message` event) is appended to the feed
 - **Then** the feed's scroll position does not change
 
 ---
@@ -437,6 +436,17 @@ Reason for removal: Superseded by the stage-then-commit model. The prior behavio
 - Proposal element "Remove the dice panel's forced height-match to the chat drawer" → Requirements: MODIFIED Dice panel renders as an in-flow flex sibling to the left of the chat dock
 - Proposal element "Auto-scroll the feed to the bottom for every new dice roll, for every user" → Requirements: MODIFIED Feed auto-scrolls on a new dice roll, gated by bottom proximity for remote rolls (refined from unconditional to bottom-proximity-gated for remote rolls during PR review on PR #519 — the roller's own roll always scrolls regardless of proximity)
 - Requirements → Tasks: see `openspec/changes/archive/2026-08-21-dice-panel-scroll-fixes/tasks.md`
+
+**From the `decouple-dice-roll-capability` change (archived 2026-08-29):**
+
+- Proposal "What Changes" (chat's optimistic roll append removed) → Requirements: MODIFIED
+  Feed auto-scrolls on a new dice roll, consumed solely via the SSE stream
+- Proposal "Scope" (external-roll-request path removed) → Requirements: REMOVED ADDED
+  CampaignChat submits externally-requested rolls through its existing commit path
+- Design decision 4 (`useChatFeed` owns SSE-only ingestion, `handleRollPosted` deleted) →
+  Requirements: MODIFIED Feed auto-scrolls on a new dice roll, consumed solely via the SSE
+  stream
+- Requirements → Tasks: see `openspec/changes/archive/2026-08-29-decouple-dice-roll-capability/tasks.md`, "Remove optimistic roll append" and "Delete diceSessionBridge test coverage for externally-requested rolls" task groups
 
 ---
 

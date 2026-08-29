@@ -34,7 +34,7 @@ The system SHALL provide a single `lib/dice/useDicePoolState.ts` module exposing
 
 ### Requirement: ADDED Shared roll-submission capability callable independent of any mounted component
 
-The system SHALL provide a single `lib/dice/useRollSubmission.ts` module exposing a `submitRoll(campaignId, formula, rolls, total, visibility)` function that POSTs to `/api/campaigns/[id]/rolls` and resolves to `'success'` (HTTP 201), `'conflict'` (HTTP 409), or `'error'` (any other status or a thrown/network error), callable directly by any component without requiring any other specific component to be mounted.
+The system SHALL provide a single `lib/dice/useRollSubmission.ts` module exposing a `useRollSubmission(campaignId)` hook that returns a `submitRoll(formula, rolls, total, visibility)` function. `submitRoll` POSTs to `/api/campaigns/[id]/rolls` (with `campaignId` URL-encoded) and resolves to `'success'` (HTTP 201, response body never parsed since it is unused by any caller), `'conflict'` (HTTP 409), or `'error'` (any other status or a thrown/network error), callable directly by any component without requiring any other specific component to be mounted.
 
 #### Scenario: Submission succeeds identically regardless of caller
 
@@ -67,4 +67,4 @@ The system SHALL provide a single `lib/dice/useRollSubmission.ts` module exposin
   this capability
 - Design decision 1 (`useDicePoolState`/`useRollSubmission` split) → Requirements: both
   requirements in this capability
-- Requirement → Task(s): see `tasks.md`, "Shared dice hooks" task group
+- Requirement → Task(s): see `openspec/changes/archive/2026-08-29-decouple-dice-roll-capability/tasks.md`, "Shared dice hooks" task group
