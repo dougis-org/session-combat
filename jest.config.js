@@ -12,6 +12,7 @@ module.exports = {
   testPathIgnorePatterns: [
     "/node_modules/",
     "/.verity/",
+    "/.worktrees/"
   ],
   testTimeout: 120000,
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],

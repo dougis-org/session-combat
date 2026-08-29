@@ -4,6 +4,7 @@ module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
   testMatch: ["**/tests/integration/**/*.test.ts"],
+  testPathIgnorePatterns: ["/node_modules/", "/.worktrees/", "/.verity/"],
   testTimeout: 120000,
   globalSetup: "./tests/integration/global.setup.ts",
   globalTeardown: "./tests/integration/global.teardown.ts",
