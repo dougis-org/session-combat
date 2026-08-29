@@ -162,7 +162,7 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     await waitFor(() => expect(scrollSpy).toHaveBeenCalledTimes(1))
   })
 
-  it('a duplicate roll id racing between the SSE echo and the POST response still scrolls exactly once', async () => {
+  it('an SSE echo that arrives before the Roll click resolves still scrolls exactly once', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
     mockRollPost({ status: 201, body: rollResponse({ id: 'roll-race' }) })
 
@@ -173,7 +173,9 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
 
-    // Simulate the SSE echo of the roll winning the race, before the POST response resolves
+    // The SSE echo of the roll arrives before the Roll click's POST resolves.
+    // A submitted roll only ever enters the feed via this SSE path, so this
+    // just confirms ordering relative to the click doesn't cause a double-scroll.
     fireRollEvent({ id: 'roll-race', rollerId: 'user-1', rollerName: 'tester' })
 
     await user.click(screen.getByRole('button', { name: 'Roll' }))
@@ -182,7 +184,7 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     await waitFor(() => expect(scrollSpy).toHaveBeenCalledTimes(1))
   })
 
-  it('still force-scrolls the roller to their own roll when the SSE echo wins the race while they had scrolled up', async () => {
+  it('still force-scrolls the roller to their own roll when the SSE echo arrives before the Roll click resolves, while they had scrolled up', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
     mockRollPost({ status: 201, body: rollResponse({ id: 'roll-race-own-sse-wins' }) })
 
@@ -196,10 +198,11 @@ describe('CampaignChat — feed auto-scroll on any dice roll', () => {
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
 
-    // The SSE echo of the roller's own roll wins the race and is processed
-    // before the POST response resolves, so handleRollPosted's seenIds
-    // guard will short-circuit — the SSE path must still force-scroll
-    // because it recognizes this as the local user's own roll.
+    // The SSE echo of the roller's own roll arrives before the Roll button
+    // is even clicked. A submitted roll only ever enters the feed via this
+    // SSE path (there is no longer a separate local-commit append path), so
+    // this simply confirms the force-scroll fires for the local user's own
+    // roll regardless of the order SSE delivery happens to arrive in.
     fireRollEvent({ id: 'roll-race-own-sse-wins', rollerId: 'user-1', rollerName: 'tester' })
 
     await user.click(screen.getByRole('button', { name: 'Roll' }))
