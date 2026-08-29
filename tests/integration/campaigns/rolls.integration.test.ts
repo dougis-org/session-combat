@@ -243,6 +243,35 @@ describe("Campaign Rolls API Integration Tests", () => {
     expect(body.rolls.some((r) => r.id === roll2.id)).toBe(false);
   });
 
+  it("T10 — percentile (d%) roll round-trips through the rolls API", async () => {
+    const sessionId = await openSession(dm.cookie, campaignId);
+    const percentileRoll = {
+      formula: "d%",
+      rolls: [97],
+      total: 97,
+      visibility: { scope: "group" as const },
+    };
+    const res = await fetch(ROLLS_PATH(campaignId), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: dm.cookie },
+      body: JSON.stringify(percentileRoll),
+    });
+    expect(res.status).toBe(201);
+    const data = (await res.json()) as CampaignRoll;
+    expect(data.formula).toBe("d%");
+    expect(data.rolls).toEqual([97]);
+    expect(data.total).toBe(97);
+
+    const getRes = await fetch(`${ROLLS_PATH(campaignId)}?sessionId=${sessionId}`, {
+      headers: { Cookie: dm.cookie },
+    });
+    expect(getRes.status).toBe(200);
+    const getBody = (await getRes.json()) as { rolls: CampaignRoll[] };
+    const persisted = getBody.rolls.find((r) => r.id === data.id);
+    expect(persisted?.formula).toBe("d%");
+    expect(persisted?.rolls).toEqual([97]);
+  });
+
   it("T8 — Unauthenticated POST → 401", async () => {
     const res = await fetch(ROLLS_PATH(campaignId), {
       method: "POST",

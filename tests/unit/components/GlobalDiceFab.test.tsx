@@ -1,4 +1,4 @@
-import { render, screen, act, waitFor } from '@testing-library/react'
+import { render, screen, act, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GlobalDiceFab } from '@/lib/components/GlobalDiceFab'
 import { rollDicePool } from '@/lib/utils/dice'
@@ -99,21 +99,21 @@ describe('GlobalDiceFab — standalone modal', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('hovering a dice button displays custom tooltip text and removes it on leave', async () => {
+  it('each die control shows a persistent visible label with no hover tooltip', async () => {
     mockAuthed()
     const user = userEvent.setup()
     render(<GlobalDiceFab />)
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
 
-    // The native title attribute should not be present, but the text should appear in the custom tooltip when hovered
+    // The label is always visible — not gated behind hover — and unchanged by hover/unhover.
     const d20Button = screen.getByRole('button', { name: 'Add d20' })
-    expect(screen.queryByText('d20')).not.toBeInTheDocument()
-
-    await user.hover(d20Button)
     expect(screen.getByText('d20')).toBeInTheDocument()
 
+    await user.hover(d20Button)
+    expect(screen.getAllByText('d20')).toHaveLength(1)
+
     await user.unhover(d20Button)
-    expect(screen.queryByText('d20')).not.toBeInTheDocument()
+    expect(screen.getByText('d20')).toBeInTheDocument()
   })
 
   it('dice buttons do not have native title attributes', async () => {
@@ -145,6 +145,54 @@ describe('GlobalDiceFab — standalone modal', () => {
     render(<GlobalDiceFab />)
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     expect(screen.getByRole('button', { name: 'Roll' })).toBeDisabled()
+  })
+})
+
+describe('GlobalDiceFab — percentile control', () => {
+  it('each die control shows a persistent visible label', async () => {
+    mockAuthed()
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    for (const sides of [4, 6, 8, 10, 12, 20]) {
+      expect(within(screen.getByRole('button', { name: `Add d${sides}` })).getByText(`d${sides}`)).toBeInTheDocument()
+    }
+  })
+
+  it('activating the inline percentile control sets a local d% result with a 1..100 total and no network call', async () => {
+    mockAuthed()
+    const fetchSpy = jest.fn()
+    global.fetch = fetchSpy as unknown as typeof global.fetch
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: /percentile|d%/i }))
+
+    const resultLine = screen.getByText(/d% → \[\d+\] =/)
+    const total = Number(resultLine.textContent!.match(/=\s*(\d+)\s*$/)![1])
+    expect(total).toBeGreaterThanOrEqual(1)
+    expect(total).toBeLessThanOrEqual(100)
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('"Send to session chat" submits the percentile result unchanged when presence exists', async () => {
+    mockAuthed()
+    mockRollPost({ status: 201 })
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    act(() => { announcePresence({ campaignId: 'camp-1', sessionId: 'sess-1' }) })
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: /percentile|d%/i }))
+    const total = Number(screen.getByText(/d% → \[\d+\] =/).textContent!.match(/=\s*(\d+)\s*$/)![1])
+    await user.click(screen.getByRole('button', { name: /send to session chat/i }))
+    await waitFor(() => {
+      const call = (global.fetch as jest.Mock).mock.calls.find(c => String(c[0]).includes('/rolls'))
+      expect(call).toBeDefined()
+      const body = JSON.parse((call![1] as RequestInit).body as string)
+      expect(body.formula).toBe('d%')
+      expect(body.rolls).toEqual([total])
+      expect(body.total).toBe(total)
+    })
   })
 })
 

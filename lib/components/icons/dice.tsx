@@ -8,6 +8,9 @@
 // (physics-based, via @3d-dice/dice-box) were explicitly scoped out of the
 // dice-roll-enhancements change — see openspec/changes/dice-roll-enhancements/design.md
 // ("Risks / Trade-offs" and "Non-Goals") — and are not built here.
+// Groundwork for that: `rollPercentile()` in lib/utils/dice.ts already returns the two
+// physical d10 faces (tensFace/onesFace), not just the decoded value, so the animation
+// layer can tumble two dice without a contract change.
 
 import type { ReactElement, SVGProps } from 'react'
 

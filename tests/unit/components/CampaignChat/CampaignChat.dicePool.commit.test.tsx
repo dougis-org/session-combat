@@ -195,6 +195,42 @@ describe('CampaignChat — dice pool commit', () => {
     expect(screen.getByRole('button', { name: 'Roll' })).not.toBeDisabled()
   })
 
+  it('the percentile control commits exactly one d% roll and leaves the staged pool alone', async () => {
+    mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-pct', formula: 'd%', rolls: [42], total: 42 }) })
+
+    const postCount = () =>
+      sharedTestState.fetchSpy.mock.calls.filter(
+        (c: unknown[]) => (c[0] as string).includes('/rolls') && (c[1] as RequestInit)?.method === 'POST'
+      ).length
+
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: 'Add d6' }))
+    await user.click(screen.getByRole('button', { name: /percentile|d%/i }))
+
+    await waitFor(() => expect(postCount()).toBe(1))
+    const body = postedRollBody()
+    expect(body.formula).toBe('d%')
+    expect(body.rolls).toHaveLength(1)
+    expect(body.rolls[0]).toBeGreaterThanOrEqual(1)
+    expect(body.rolls[0]).toBeLessThanOrEqual(100)
+    expect(body.total).toBe(body.rolls[0])
+    expect(body.visibility).toEqual({ scope: 'group' })
+    // staged pool untouched
+    expect(screen.getByRole('button', { name: 'Add d6' })).toHaveTextContent('×1')
+  })
+
+  it('a 409 on the percentile control shows "No active session" and preserves the pool', async () => {
+    mockRollPost({ status: 409 })
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: 'Add d6' }))
+    await user.click(screen.getByRole('button', { name: /percentile|d%/i }))
+    await waitFor(() => expect(screen.getByText('No active session')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: 'Add d6' })).toHaveTextContent('×1')
+  })
+
   it('DM-only visibility sends correct scope', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
     mockRollPost({ status: 201, body: rollResponse({ id: 'roll-5', visibility: { scope: 'dm-only' } }) })

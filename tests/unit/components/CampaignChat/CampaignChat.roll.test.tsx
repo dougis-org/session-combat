@@ -124,6 +124,32 @@ it('stream roll event appends a roll item to the feed', async () => {
   expect(screen.getByText('1d20+3 → [17] =')).toBeInTheDocument()
 })
 
+it('renders a percentile roll through the standard formula path', async () => {
+  await openDock('session-1')
+  act(() => {
+    capturedOnEvent?.({
+      type: 'roll',
+      campaignId: 'test-campaign',
+      data: makeRoll({ id: 'roll-pct-1', formula: 'd%', rolls: [97], total: 97 }),
+    })
+  })
+  expect(screen.getByText('d% → [97] =')).toBeInTheDocument()
+  expect(screen.getByText('97')).toBeInTheDocument()
+})
+
+it('renders the percentile 100 result through the standard formula path', async () => {
+  await openDock('session-1')
+  act(() => {
+    capturedOnEvent?.({
+      type: 'roll',
+      campaignId: 'test-campaign',
+      data: makeRoll({ id: 'roll-pct-2', formula: 'd%', rolls: [100], total: 100 }),
+    })
+  })
+  expect(screen.getByText('d% → [100] =')).toBeInTheDocument()
+  expect(screen.getByText('100')).toBeInTheDocument()
+})
+
 // T2.2
 it('duplicate roll id from stream is ignored', async () => {
   await openDock('session-1')

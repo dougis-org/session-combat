@@ -68,6 +68,37 @@ describe('useDicePoolState — modifier clamping', () => {
   })
 })
 
+describe('useDicePoolState — buildPercentileRoll', () => {
+  it("returns { formula: 'd%', rolls: [v], total: v } with v in 1..100 equal to total", () => {
+    const { result } = setup()
+    for (let i = 0; i < 50; i++) {
+      const built = result.current.buildPercentileRoll()
+      expect(built.formula).toBe('d%')
+      expect(built.rolls).toHaveLength(1)
+      const [v] = built.rolls
+      expect(v).toBeGreaterThanOrEqual(1)
+      expect(v).toBeLessThanOrEqual(100)
+      expect(built.total).toBe(v)
+    }
+  })
+
+  it('is independent of staged pool and modifier, issues no roll of the pool', () => {
+    mockedRollDicePool.mockReturnValue([{ sides: 20, value: 1 }])
+    const { result } = setup()
+    act(() => {
+      result.current.handleAdd(20)
+      result.current.handleAdd(6)
+      result.current.setModifierText('50')
+    })
+    const built = result.current.buildPercentileRoll()
+    expect(built.rolls[0]).toBeLessThanOrEqual(100)
+    expect(mockedRollDicePool).not.toHaveBeenCalled()
+    // pool + modifier untouched
+    expect(result.current.pool[20]).toBe(1)
+    expect(result.current.modifierText).toBe('50')
+  })
+})
+
 describe('useDicePoolState — open/close', () => {
   it('outside click closes the panel', () => {
     const { result } = setup()

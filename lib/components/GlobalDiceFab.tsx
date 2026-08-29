@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { DIE_SIDES, MAX_PER_DIE } from '@/lib/utils/dice'
-import { DIE_ICONS, DiceD20Icon } from '@/lib/components/icons/dice'
+import { DIE_SIDES } from '@/lib/utils/dice'
+import { DiceD20Icon } from '@/lib/components/icons/dice'
+import { DiePoolButton } from '@/lib/components/dice/DiePoolButton'
+import { PercentileButton } from '@/lib/components/dice/PercentileButton'
 import { onPresenceChange, type DicePresence } from '@/lib/dice/diceSessionBridge'
 import { useDicePoolState, type BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { useRollSubmission } from '@/lib/dice/useRollSubmission'
@@ -21,7 +23,7 @@ export function GlobalDiceFab() {
   const [result, setResult] = useState<BuiltRoll | null>(null)
   const [presence, setPresence] = useState<DicePresence | null>(null)
   const [sendState, setSendState] = useState<SendState>('idle')
-  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
+  const [triggerTooltip, setTriggerTooltip] = useState(false)
 
   const triggerRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -46,12 +48,17 @@ export function GlobalDiceFab() {
     setResult(null)
     setSendState('idle')
     dp.setIsOpen(true)
-    setHoveredTooltip(null)
+    setTriggerTooltip(false)
   }
 
   function handleRoll() {
     if (dp.poolTotal === 0) return
     setResult(dp.buildRoll())
+    setSendState('idle')
+  }
+
+  function handlePercentileRoll() {
+    setResult(dp.buildPercentileRoll())
     setSendState('idle')
   }
 
@@ -69,15 +76,15 @@ export function GlobalDiceFab() {
           ref={triggerRef}
           type="button"
           onClick={handleOpen}
-          onMouseEnter={() => setHoveredTooltip('trigger')}
-          onMouseLeave={() => setHoveredTooltip(null)}
-          onFocus={() => setHoveredTooltip('trigger')}
-          onBlur={() => setHoveredTooltip(null)}
+          onMouseEnter={() => setTriggerTooltip(true)}
+          onMouseLeave={() => setTriggerTooltip(false)}
+          onFocus={() => setTriggerTooltip(true)}
+          onBlur={() => setTriggerTooltip(false)}
           aria-label="Roll dice"
           className="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg relative"
         >
           <DiceD20Icon width={28} height={28} aria-hidden="true" />
-          {hoveredTooltip === 'trigger' && !dp.isOpen && (
+          {triggerTooltip && !dp.isOpen && (
             <div className="absolute left-full ml-3 bg-gray-800 border border-gray-700 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap pointer-events-none">
               Roll dice
             </div>
@@ -96,42 +103,16 @@ export function GlobalDiceFab() {
           >
             <p id="global-dice-fab-heading" className="text-sm font-semibold text-white">Roll dice</p>
             <div className="flex flex-wrap gap-1 items-center">
-              {DIE_SIDES.map(sides => {
-                const Icon = DIE_ICONS[sides]
-                return (
-                  <div key={sides} className="flex items-center gap-0.5">
-                    <button
-                      type="button"
-                      onClick={() => dp.handleRemove(sides)}
-                      aria-label={`Remove d${sides}`}
-                      className="text-xs bg-gray-700 hover:bg-gray-600 text-white w-5 h-5 rounded"
-                    >
-                      −
-                    </button>
-                    <div className="relative flex">
-                      <button
-                        type="button"
-                        onClick={() => dp.handleAdd(sides)}
-                        onMouseEnter={() => setHoveredTooltip(`d${sides}`)}
-                        onMouseLeave={() => setHoveredTooltip(null)}
-                        onFocus={() => setHoveredTooltip(`d${sides}`)}
-                        onBlur={() => setHoveredTooltip(null)}
-                        disabled={dp.pool[sides] >= MAX_PER_DIE}
-                        aria-label={`Add d${sides}`}
-                        className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded flex items-center gap-1"
-                      >
-                        <Icon width={21} height={21} aria-hidden="true" />
-                        ×{dp.pool[sides]}
-                      </button>
-                      {hoveredTooltip === `d${sides}` && (
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-gray-800 border border-gray-700 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap pointer-events-none z-10">
-                          d{sides}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
+              {DIE_SIDES.map(sides => (
+                <DiePoolButton
+                  key={sides}
+                  sides={sides}
+                  count={dp.pool[sides]}
+                  onAdd={dp.handleAdd}
+                  onRemove={dp.handleRemove}
+                />
+              ))}
+              <PercentileButton onRoll={handlePercentileRoll} />
             </div>
             <input
               type="text"

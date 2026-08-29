@@ -49,7 +49,7 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
     members, setFeed: chatFeed.setFeed, seenIds: chatFeed.seenIds,
   })
 
-  const { dicePool, isTriggerDisabled, isRolling, rollError, handleDiceRoll } = useCampaignDice({
+  const { dicePool, isTriggerDisabled, isRolling, rollError, handleDiceRoll, handlePercentileRoll } = useCampaignDice({
     campaignId, activeSessionId, streamStatus: chatFeed.streamStatus,
     triggerRef: diceTriggerRef, panelRef: dicePanelRef,
   })
@@ -106,7 +106,7 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
 
   return (
     <div className={rowWrapperClass}>
-      <DicePoolPanel dp={dicePool} panelRef={dicePanelRef} isRolling={isRolling} error={rollError} onRoll={handleDiceRoll} />
+      <DicePoolPanel dp={dicePool} panelRef={dicePanelRef} isRolling={isRolling} error={rollError} onRoll={handleDiceRoll} onRollPercentile={handlePercentileRoll} />
       <div
         ref={drawerRef}
         role="complementary"
