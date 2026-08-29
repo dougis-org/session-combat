@@ -12,7 +12,12 @@ module.exports = {
   testPathIgnorePatterns: [
     "/node_modules/",
     "/.verity/",
-    "/.worktrees/"
+    // Anchored to <rootDir> (the checkout jest.config.js actually lives in) so this
+    // only excludes *nested* worktrees under the main checkout — e.g. .worktrees/foo —
+    // and never matches when jest is invoked from inside one of those worktrees
+    // themselves (a bare "/.worktrees/" substring match would exclude everything
+    // there too, since a worktree's own absolute path always contains that segment).
+    "<rootDir>/.worktrees/"
   ],
   testTimeout: 120000,
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
