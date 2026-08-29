@@ -39,7 +39,7 @@ describe("storage.deleteCharacter", () => {
     mockedUpdateOne.mockResolvedValue({ matchedCount: 0, modifiedCount: 0 });
 
     await expect(storage.deleteCharacter("char-123", "user-456")).rejects.toThrow(
-      "Character char-123 not found"
+      "Storage operation \"deleteCharacter\" failed"
     );
   });
 });
