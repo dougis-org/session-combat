@@ -84,6 +84,30 @@ describe('useDiceAnimation — degradation', () => {
     expect(warnSpy).toHaveBeenCalledTimes(1)
     expect(rollMock).not.toHaveBeenCalled()
   })
+
+  it('a stale run\'s init failure does not latch the hook or disturb the newer run', async () => {
+    stubWebGL(true)
+    let rejectFirstInit!: (e: unknown) => void
+    initMock
+      .mockImplementationOnce(() => new Promise((_res, rej) => { rejectFirstInit = rej }))
+      .mockResolvedValueOnce(undefined)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+
+    await act(async () => {
+      const stale = result.current.run(built, container)
+      await new Promise(r => setTimeout(r, 0))
+      // a newer run supersedes while the first is still initialising
+      await result.current.run(built, container)
+      // now the stale init fails
+      rejectFirstInit(new Error('slow asset load, too late'))
+      await stale
+    })
+
+    // the stale failure must NOT flip the hook to unsupported
+    expect(result.current.status).toBe('idle')
+    expect(warnSpy).not.toHaveBeenCalled()
+  })
 })
 
 describe('useDiceAnimation — dynamic import is lazy', () => {
