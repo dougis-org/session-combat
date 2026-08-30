@@ -10,25 +10,25 @@ Ownership metadata:
 
 ## Preparation
 
-- [ ] **Step 1 — Confirm the dedicated worktree:** verify `.worktrees/remove-chat-docked-dice`
+- [x] **Step 1 — Confirm the dedicated worktree:** verify `.worktrees/remove-chat-docked-dice`
   exists (created during propose) and `cd` into it. If missing, from the primary checkout
   run `git fetch origin main` then
   `git worktree add .worktrees/remove-chat-docked-dice -b remove-chat-docked-dice origin/main`.
   Never checkout this branch in the primary checkout.
-- [ ] **Step 2 — Confirm the branch is published:** `git rev-parse --abbrev-ref HEAD` is
+- [x] **Step 2 — Confirm the branch is published:** `git rev-parse --abbrev-ref HEAD` is
   `remove-chat-docked-dice`; if `git status` shows it is not tracking a remote, run
   `git push -u origin remove-chat-docked-dice` from inside the worktree.
-- [ ] **Step 3 — Ensure the openspec submodule is present in the worktree:**
+- [x] **Step 3 — Ensure the openspec submodule is present in the worktree:**
   `git submodule update --init .github/openspec-shared` (needed for `openspec` schema
   resolution inside the worktree).
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills
   list. If not listed, halt, tell the user the `pr-review-toolkit` plugin is required,
   give installation guidance, and do not proceed until they confirm it is installed.
-- [ ] **Baseline green:** `npm run test:unit -- tests/unit/components/CampaignChat tests/unit/components/dice tests/unit/components/GlobalDiceFab.test.tsx` and `npm run typecheck` pass on the untouched branch (so later failures are attributable to this change).
-- [ ] **Confirm the dead-code inventory is still accurate:**
+- [x] **Baseline green:** `npm run test:unit -- tests/unit/components/CampaignChat tests/unit/components/dice tests/unit/components/GlobalDiceFab.test.tsx` and `npm run typecheck` pass on the untouched branch (so later failures are attributable to this change).
+- [x] **Confirm the dead-code inventory is still accurate:**
   `grep -rn "DicePoolPanel\|DiceTriggerButton\|useCampaignDice" lib/ app/ tests/`
   returns only: `lib/components/CampaignChat/index.tsx`,
   `lib/components/dice/DicePoolPanel.tsx`, `lib/components/dice/DiceTriggerButton.tsx`,
@@ -49,13 +49,13 @@ Ownership metadata:
 
 ### T1 — Write failing tests first (BDD/TDD) — see `tests.md`
 
-- [ ] Add `CampaignChat` footer tests (new `it` blocks in
+- [x] Add `CampaignChat` footer tests (new `it` blocks in
   `tests/unit/components/CampaignChat/CampaignChat.drawer.test.tsx` or a small new
   `CampaignChat.footer.test.tsx`): "No active session" text present iff
   `activeSessionId == null`; no `/roll|dice/i` button and no
   `title="Dice Rolls for main screen pop out"` in the drawer in either state. These fail
   now (the dice trigger is still rendered).
-- [ ] If `tests/unit/components/CampaignChat/CampaignChat.dicePool.scroll.test.tsx` holds
+- [x] If `tests/unit/components/CampaignChat/CampaignChat.dicePool.scroll.test.tsx` holds
   any SSE-stream-driven auto-scroll assertion (rollerId self, rollerId other + near-bottom
   gate) not already present in `CampaignChat.roll.test.tsx`, port that case into
   `CampaignChat.roll.test.tsx`, driving the roll via a mocked SSE `'roll'` event instead
@@ -64,43 +64,43 @@ Ownership metadata:
 
 ### T2 — Edit `lib/components/CampaignChat/index.tsx`
 
-- [ ] Remove imports: `DicePoolPanel`, `DiceTriggerButton`, `useCampaignDice`.
-- [ ] Remove refs `diceTriggerRef`, `dicePanelRef`.
-- [ ] Remove the `useCampaignDice({...})` call and its destructured values (`dicePool`,
+- [x] Remove imports: `DicePoolPanel`, `DiceTriggerButton`, `useCampaignDice`.
+- [x] Remove refs `diceTriggerRef`, `dicePanelRef`.
+- [x] Remove the `useCampaignDice({...})` call and its destructured values (`dicePool`,
   `isTriggerDisabled`, `isRolling`, `rollError`, `handleDiceRoll`, `handlePercentileRoll`).
-- [ ] Remove `<DicePoolPanel ... />` from the flex-row wrapper (keep the wrapper —
+- [x] Remove `<DicePoolPanel ... />` from the flex-row wrapper (keep the wrapper —
   design Decision 3).
-- [ ] Replace the always-rendered bottom bar
+- [x] Replace the always-rendered bottom bar
   (`<div className="border-t border-gray-700 p-2 flex-shrink-0 flex items-center justify-between">…</div>`)
   with a footer rendered only when `activeSessionId === null`:
   `{activeSessionId === null && (<div className="border-t border-gray-700 px-3 py-2 flex-shrink-0"><p className="text-xs text-gray-500">No active session</p></div>)}`.
-- [ ] Keep the `announcePresence` / `clearPresence` effect and the `activeSessionId` prop
+- [x] Keep the `announcePresence` / `clearPresence` effect and the `activeSessionId` prop
   untouched.
-- [ ] `npm run typecheck` — expect no unused-symbol / missing-import errors from this file.
+- [x] `npm run typecheck` — expect no unused-symbol / missing-import errors from this file.
 
 ### T3 — Delete dead source
 
-- [ ] `git rm lib/components/dice/DicePoolPanel.tsx lib/components/dice/DiceTriggerButton.tsx lib/components/CampaignChat/useCampaignDice.ts`
-- [ ] Re-run `grep -rn "DicePoolPanel\|DiceTriggerButton\|useCampaignDice" lib/ app/ tests/`
+- [x] `git rm lib/components/dice/DicePoolPanel.tsx lib/components/dice/DiceTriggerButton.tsx lib/components/CampaignChat/useCampaignDice.ts`
+- [x] Re-run `grep -rn "DicePoolPanel\|DiceTriggerButton\|useCampaignDice" lib/ app/ tests/`
   — only the four `CampaignChat.dicePool.*` test files should remain.
 
 ### T4 — Delete / adjust dead tests
 
-- [ ] `git rm tests/unit/components/CampaignChat/CampaignChat.dicePool.ui.test.tsx tests/unit/components/CampaignChat/CampaignChat.dicePool.commit.test.tsx tests/unit/components/CampaignChat/CampaignChat.dicePool.scroll.test.tsx tests/unit/components/CampaignChat/CampaignChat.dicePool.ssr.test.tsx`
+- [x] `git rm tests/unit/components/CampaignChat/CampaignChat.dicePool.ui.test.tsx tests/unit/components/CampaignChat/CampaignChat.dicePool.commit.test.tsx tests/unit/components/CampaignChat/CampaignChat.dicePool.scroll.test.tsx tests/unit/components/CampaignChat/CampaignChat.dicePool.ssr.test.tsx`
   (after T1 has ported any unique auto-scroll case).
-- [ ] Verify `tests/unit/components/dice/{DieGlyph,DiePoolButton,PercentileButton}.test.tsx`
+- [x] Verify `tests/unit/components/dice/{DieGlyph,DiePoolButton,PercentileButton}.test.tsx`
   and `tests/unit/components/GlobalDiceFab*.test.tsx` are untouched and still pass.
-- [ ] Scan the remaining `tests/unit/components/CampaignChat/*.test.tsx` for any query that
+- [x] Scan the remaining `tests/unit/components/CampaignChat/*.test.tsx` for any query that
   targeted the dice trigger (`/roll|dice/i` button, `Dice Rolls for main screen pop out`);
   update or remove only those assertions, leaving all other assertions verbatim.
 
 ### T5 — Confirm acceptance criteria are covered
 
-- [ ] Every scenario in `specs/roll-share-ui/spec.md` (ADDED footer, MODIFIED
+- [x] Every scenario in `specs/roll-share-ui/spec.md` (ADDED footer, MODIFIED
   activeSessionId prop, MODIFIED auto-scroll, REMOVED requirements) and
   `specs/campaign-chat-dock/spec.md` (MODIFIED source location) maps to a passing test or
   a `grep`/`ls` check recorded in `tests.md`.
-- [ ] `openspec validate remove-chat-docked-dice --strict` passes.
+- [x] `openspec validate remove-chat-docked-dice --strict` passes.
 
 ## Pre-Commit Code Review
 
@@ -111,13 +111,13 @@ Ownership metadata:
 
 ## Validation
 
-- [ ] `npm run test:unit` — full unit suite green (special attention to
+- [x] `npm run test:unit` — full unit suite green (special attention to
   `tests/unit/components/CampaignChat/` and `tests/unit/components/dice/`).
-- [ ] `npm run test:integration` — via the project harness (not Jest directly); green.
+- [x] `npm run test:integration` — via the project harness (not Jest directly); green.
 - [ ] `npm run test:e2e` (or the project's E2E command) if the dice/chat E2E specs exist;
   green. Use a free port (not 3000) for any E2E server.
-- [ ] `npm run typecheck` — green.
-- [ ] `npm run build` — green.
+- [x] `npm run typecheck` — green.
+- [x] `npm run build` — green.
 - [ ] `npm run lint` and the Verity pre-commit/pre-push gate — green (fix findings; do not
   waive).
 - [ ] Manual/visual check via the `run` skill: expand the chat dock with an active session
