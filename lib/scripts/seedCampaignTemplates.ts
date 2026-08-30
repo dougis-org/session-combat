@@ -3,6 +3,7 @@ import { getDatabase } from "../db";
 import { CampaignTemplate, CampaignChapter, EncounterTemplate } from "../types";
 import { GLOBAL_USER_ID } from "../constants";
 import { randomUUID } from "crypto";
+import { CUSTOM_MONSTERS } from "../data/customMonsters";
 
 const now = new Date();
 
