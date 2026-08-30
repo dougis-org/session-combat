@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { useDiceAnimation } from '@/lib/dice/useDiceAnimation'
+import { DICE_BASE_SCALE, diceAnimationScale } from '@/lib/dice/diceAnimationScale'
 
 const rollMock = jest.fn().mockResolvedValue([])
 const initMock = jest.fn().mockResolvedValue(undefined)
@@ -122,6 +123,119 @@ describe('useDiceAnimation — single-instance invariant', () => {
     expect(rollMock).toHaveBeenCalledWith('2d6@3,4')
   })
 
+  it('run() resolves true when the roll settles as the current run', async () => {
+    stubWebGL(true)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    let outcome: boolean | undefined
+    await act(async () => {
+      outcome = await result.current.run(built, container)
+    })
+    expect(outcome).toBe(true)
+  })
+
+  it('run() resolves false for a run superseded mid-tumble', async () => {
+    stubWebGL(true)
+    let resolveFirst: ((v: unknown) => void) | undefined
+    rollMock.mockImplementationOnce(() => new Promise(res => { resolveFirst = res }))
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+
+    let firstOutcome: boolean | undefined
+    let firstPromise!: Promise<boolean>
+    await act(async () => {
+      firstPromise = result.current.run(built, container)
+      firstPromise.then(v => { firstOutcome = v })
+      await new Promise(r => setTimeout(r, 0))
+      // supersede while the first roll is still pending
+      await result.current.run(built, container)
+      resolveFirst!(undefined)
+      await firstPromise
+    })
+    expect(firstOutcome).toBe(false)
+  })
+
+  it('run() resolves true when the roll fails but this run is still current', async () => {
+    stubWebGL(true)
+    rollMock.mockRejectedValueOnce(new Error('bad notation'))
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    let outcome: boolean | undefined
+    await act(async () => {
+      outcome = await result.current.run(built, container)
+    })
+    expect(outcome).toBe(true)
+    expect(result.current.status).toBe('idle')
+    errSpy.mockRestore()
+  })
+
+  it('run() resolves false when WebGL is unavailable', async () => {
+    stubWebGL(false)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    let outcome: boolean | undefined
+    await act(async () => {
+      outcome = await result.current.run(built, container)
+    })
+    expect(outcome).toBe(false)
+  })
+
+  function poolBuilt(n: number): BuiltRoll {
+    const breakdown = Array.from({ length: n }, () => ({ sides: 6, value: 3 }))
+    return { formula: `${n}d6`, rolls: breakdown.map(d => d.value), total: n * 3, breakdown, modifier: 0 }
+  }
+
+  it('constructs DiceBox with an enlarged base scale for a 6-die roll', async () => {
+    stubWebGL(true)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    await act(async () => {
+      await result.current.run(poolBuilt(6), container)
+    })
+    expect(ctorMock.mock.calls[0][0].scale).toBe(DICE_BASE_SCALE)
+  })
+
+  it('constructs DiceBox with a reduced scale when more than 6 dice animate', async () => {
+    stubWebGL(true)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    await act(async () => {
+      await result.current.run(poolBuilt(12), container)
+    })
+    expect(ctorMock.mock.calls[0][0].scale).toBe(diceAnimationScale(12))
+    expect(ctorMock.mock.calls[0][0].scale).toBeLessThan(DICE_BASE_SCALE)
+  })
+
+  it('caps the scale count at 15 for very large pools', async () => {
+    stubWebGL(true)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    await act(async () => {
+      await result.current.run(poolBuilt(120), container)
+    })
+    expect(ctorMock.mock.calls[0][0].scale).toBe(diceAnimationScale(15))
+  })
+
+  it('run() does not resolve until the mocked box.roll() resolves', async () => {
+    stubWebGL(true)
+    let resolveRoll: ((v: unknown) => void) | undefined
+    rollMock.mockImplementationOnce(() => new Promise(res => { resolveRoll = res }))
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+
+    let settled = false
+    await act(async () => {
+      const p = result.current.run(poolBuilt(2), container).then(() => { settled = true })
+      await new Promise(r => setTimeout(r, 0))
+      expect(rollMock).toHaveBeenCalled()
+      expect(settled).toBe(false)
+      resolveRoll!(undefined)
+      await p
+    })
+    expect(settled).toBe(true)
+  })
+
   it('constructs DiceBox with a single config object carrying a CSS selector string', async () => {
     // Regression guard: dice-box v1.1.x rejects a DOM element / two-arg form.
     stubWebGL(true)
@@ -159,5 +273,39 @@ describe('useDiceAnimation — single-instance invariant', () => {
       await result.current.run(built, container)
     })
     expect(ctorMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('a box.roll() that never settles is bounded — run() resolves, box torn down, status stays idle', async () => {
+    jest.useFakeTimers()
+    try {
+      stubWebGL(true)
+      rollMock.mockImplementationOnce(() => new Promise(() => {}))
+      const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      const container = document.createElement('div')
+      const { result } = renderHook(() => useDiceAnimation())
+
+      let settled = false
+      let outcome: boolean | undefined
+      let runPromise!: Promise<void>
+      await act(async () => {
+        runPromise = result.current.run(built, container).then(v => { settled = true; outcome = v })
+        // let the import / init chain settle (real microtasks), then trip the roll timeout
+        for (let i = 0; i < 20; i++) await Promise.resolve()
+        expect(rollMock).toHaveBeenCalled()
+        expect(settled).toBe(false)
+        jest.advanceTimersByTime(12000)
+        await runPromise
+      })
+
+      expect(settled).toBe(true)
+      // the tumble is over (unsuccessfully) but still this run's — caller should reveal
+      expect(outcome).toBe(true)
+      expect(result.current.status).toBe('idle')
+      expect(clearMock).toHaveBeenCalled()
+      expect(errSpy).toHaveBeenCalled()
+      errSpy.mockRestore()
+    } finally {
+      jest.useRealTimers()
+    }
   })
 })

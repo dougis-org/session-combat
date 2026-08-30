@@ -19,6 +19,9 @@ export function GlobalDiceFab() {
   const { user } = useAuth()
   const [result, setResult] = useState<BuiltRoll | null>(null)
   const [overlayRoll, setOverlayRoll] = useState<BuiltRoll | null>(null)
+  const [animationSettled, setAnimationSettled] = useState(false)
+  // Bumped per roll so the overlay remounts and re-gates its modal for each new roll.
+  const [rollSeq, setRollSeq] = useState(0)
   const [presence, setPresence] = useState<DicePresence | null>(null)
   const [sendState, setSendState] = useState<SendState>('idle')
   const [triggerTooltip, setTriggerTooltip] = useState(false)
@@ -54,7 +57,11 @@ export function GlobalDiceFab() {
   const runAnimation = useCallback(
     (container: HTMLElement) => {
       if (!overlayRoll) return
-      void animation.run(overlayRoll, container)
+      // `run()` resolves `true` only if this run settled as the current run, so a superseded
+      // or torn-down roll's late resolution can never reveal a newer roll's modal.
+      void animation.run(overlayRoll, container).then(settled => {
+        if (settled) setAnimationSettled(true)
+      })
     },
     [animation, overlayRoll],
   )
@@ -76,6 +83,11 @@ export function GlobalDiceFab() {
       } else {
         setSendState('idle')
       }
+      // Re-gate the modal for the new roll: reset the completion flag and remount the
+      // overlay (via `key={rollSeq}`). A superseded previous run resolves `false`, so it
+      // cannot flip `animationSettled` back on.
+      setAnimationSettled(false)
+      setRollSeq(seq => seq + 1)
       setOverlayRoll(built)
     } finally {
       rollInFlightRef.current = false
@@ -216,10 +228,13 @@ export function GlobalDiceFab() {
       )}
       {overlayRoll && (
         <DiceRollOverlay
+          key={rollSeq}
           built={overlayRoll}
           disableAnimation={prefs.disableAnimation}
           onClose={closeOverlay}
           onCanvasReady={runAnimation}
+          animationSettled={animationSettled}
+          animationStatus={animation.status}
         />
       )}
     </>

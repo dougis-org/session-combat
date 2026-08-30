@@ -2,13 +2,24 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
-import { toDiceBoxNotation } from '@/lib/dice/toDiceBoxNotation'
+import { animatedDiceCount, toDiceBoxNotation } from '@/lib/dice/toDiceBoxNotation'
+import { diceAnimationScale } from '@/lib/dice/diceAnimationScale'
 
 /** `'idle'` while the 3D path is (or may be) usable; `'unsupported'` once it has failed. */
 export type DiceAnimationStatus = 'idle' | 'unsupported'
 
 const ASSET_PATH = '/dice-box/assets/'
-const INIT_TIMEOUT_MS = 6000
+/** Cap on how long the lazy `import('@3d-dice/dice-box')` chunk may take to load. */
+export const IMPORT_TIMEOUT_MS = 15000
+/** Cap on how long `box.init()` (WebGL context + asset/WASM load) may stay pending. */
+export const INIT_TIMEOUT_MS = 6000
+/**
+ * Cap on how long `box.roll()` may stay pending. dice-box `^1.1.4` exposes no way to abort a
+ * wedged settle (lost WebGL context, throttled tab), so once this elapses we stop waiting,
+ * tear the box down, and resolve `run()` — keeping the completion signal bounded for every
+ * caller rather than leaving hang-recovery to each consumer.
+ */
+export const ROLL_TIMEOUT_MS = 12000
 
 /** True only when a real WebGL context can be created. */
 function hasWebGL(): boolean {
@@ -22,9 +33,9 @@ function hasWebGL(): boolean {
   }
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, ms: number, label = 'dice-box init'): Promise<T> {
   return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('dice-box init timed out')), ms)
+    const timer = setTimeout(() => reject(new Error(`${label} timed out`)), ms)
     promise.then(
       value => {
         clearTimeout(timer)
@@ -47,12 +58,18 @@ interface DiceBoxLike {
 export interface DiceAnimation {
   status: DiceAnimationStatus
   /**
-   * Play the predetermined tumble for `built` inside `container`, resolving when the dice
-   * settle. If WebGL is unavailable or the library/assets fail to load, resolves
-   * immediately (instant path), sets `status` to `'unsupported'`, and logs once. A second
-   * `run()` while one is active tears the first down first (single-instance invariant).
+   * Play the predetermined tumble for `built` inside `container`. Resolves to `true` once
+   * the tumble for this roll is **over and this run is still the current one** — whether the
+   * dice settled cleanly or `box.roll()` failed / hit `ROLL_TIMEOUT_MS` (either way the
+   * animation is done and the caller should reveal the result). Resolves to `false` when the
+   * reveal is not this run's job: WebGL unavailable or a library/asset/init failure (these
+   * also set `status` to `'unsupported'` and log once, and the caller reveals off that), or
+   * the run was superseded by a later `run()` / `teardown()`. Callers therefore need no
+   * external staleness bookkeeping. `run()` is self-bounded (`IMPORT_TIMEOUT_MS` +
+   * `INIT_TIMEOUT_MS` + `ROLL_TIMEOUT_MS`). A second `run()` while one is active tears the
+   * first down first (single-instance invariant).
    */
-  run: (built: BuiltRoll, container: HTMLElement) => Promise<void>
+  run: (built: BuiltRoll, container: HTMLElement) => Promise<boolean>
   /** Tear down any active box. Safe to call repeatedly. */
   teardown: () => void
 }
@@ -91,14 +108,14 @@ export function useDiceAnimation(): DiceAnimation {
   }, [])
 
   const run = useCallback(
-    async (built: BuiltRoll, container: HTMLElement) => {
-      if (unsupportedRef.current) return
+    async (built: BuiltRoll, container: HTMLElement): Promise<boolean> => {
+      if (unsupportedRef.current) return false
       // Probe WebGL once per mounted hook, not once per roll — each probe otherwise leaks
       // a WebGL context and browsers cap concurrent contexts.
       if (webglOkRef.current === null) webglOkRef.current = hasWebGL()
       if (!webglOkRef.current) {
         markUnsupported(new Error('WebGL unavailable'))
-        return
+        return false
       }
 
       // Single-instance invariant: replace any open box (also bumps the run token).
@@ -107,8 +124,8 @@ export function useDiceAnimation(): DiceAnimation {
 
       let box: DiceBoxLike
       try {
-        const mod = await import('@3d-dice/dice-box')
-        if (runIdRef.current !== myRun) return
+        const mod = await withTimeout(import('@3d-dice/dice-box'), IMPORT_TIMEOUT_MS, 'dice-box import')
+        if (runIdRef.current !== myRun) return false
         const DiceBox = mod.default
         // dice-box v1.1.x wants a single config object with a CSS *selector* string.
         if (!container.id) container.id = 'dice-roll-canvas'
@@ -116,12 +133,15 @@ export function useDiceAnimation(): DiceAnimation {
           container: `#${container.id}`,
           assetPath: ASSET_PATH,
           theme: 'default',
+          // Enlarge the dice well past the library default (5) and shrink them progressively
+          // once more than six animate, so the settled cluster fits above the result modal.
+          scale: diceAnimationScale(animatedDiceCount(built)),
         }) as unknown as DiceBoxLike
         await withTimeout(box.init(), INIT_TIMEOUT_MS)
       } catch (err) {
         teardown()
         markUnsupported(err)
-        return
+        return false
       }
 
       if (runIdRef.current !== myRun) {
@@ -130,18 +150,33 @@ export function useDiceAnimation(): DiceAnimation {
         } catch {
           /* nothing to clear */
         }
-        return
+        return false
       }
       boxRef.current = box
 
-      // A per-roll failure (e.g. a malformed predetermined notation) tears the box down and
-      // logs, but must NOT latch the whole session to the instant path.
+      // A per-roll failure (malformed notation) or a settle that never completes tears the
+      // box down and logs, but must NOT latch the whole session to the instant path. Either
+      // way the tumble for this roll is over — report "reveal the modal" so the caller does
+      // not wait out the overlay's fallback for a roll we already know has finished.
       try {
-        await box.roll(toDiceBoxNotation(built))
+        await withTimeout(box.roll(toDiceBoxNotation(built)), ROLL_TIMEOUT_MS, 'dice-box roll')
       } catch (err) {
-        teardown()
         console.error('[dice-animation] roll failed', err)
+        // Drop the failed box without bumping the run token — this run still owns its reveal,
+        // and the next run() teardown (or an explicit teardown) will re-arm the 3D path.
+        if (boxRef.current === box) {
+          try {
+            box.clear()
+          } catch {
+            /* box already gone */
+          }
+          boxRef.current = null
+        }
       }
+
+      // Report completion only if this run is still the current one (a superseding run or an
+      // explicit teardown will have bumped the token, and that run owns the reveal instead).
+      return runIdRef.current === myRun
     },
     [markUnsupported, teardown],
   )

@@ -1,11 +1,12 @@
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 
 /**
- * Maximum number of dice animated regardless of pool size (design Decision 6). The total
- * modal and inline result always show the exact total for the whole pool; only the visual
- * tumble is capped.
+ * Maximum number of dice animated regardless of pool size (design Decision 4 of
+ * `improve-dice-roll-animation`). Fewer, larger dice read better and keep the settled
+ * cluster inside the clear zone above the result modal. The total modal and inline result
+ * always show the exact total for the whole pool; only the visual tumble is capped.
  */
-export const DICE_ANIM_CAP = 30
+export const DICE_ANIM_CAP = 15
 
 /**
  * Map a built roll to `@3d-dice/dice-box` **predetermined** notation
@@ -36,4 +37,14 @@ export function toDiceBoxNotation(built: BuiltRoll): string {
   return groups
     .map(g => `${g.values.length}d${g.sides}@${g.values.join(',')}`)
     .join('+')
+}
+
+/**
+ * The number of physical dice that will actually animate for `built`, after the
+ * {@link DICE_ANIM_CAP} cap. Percentile always animates its two physical d10s. Used to pick
+ * the down-scaling factor so the settled cluster fits the clear zone above the modal.
+ */
+export function animatedDiceCount(built: BuiltRoll): number {
+  if (built.percentileFaces) return 2
+  return Math.min(built.breakdown.length, DICE_ANIM_CAP)
 }
