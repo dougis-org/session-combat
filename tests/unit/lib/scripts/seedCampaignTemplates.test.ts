@@ -10,16 +10,16 @@ jest.mock("../../../../lib/constants", () => ({
   GLOBAL_USER_ID: "GLOBAL",
 }));
 
-function makeCollection(existingDocs: any[] = []) {
+function makeCollection(existingDocs: Array<{name: string; userId: string}> = []) {
   return {
-    findOne: jest.fn().mockImplementation(async (query: any) => {
+    findOne: jest.fn().mockImplementation(async (query: {name: string; userId: string}) => {
       return existingDocs.find(d => d.name === query.name && d.userId === query.userId) || null;
     }),
     insertOne: jest.fn().mockResolvedValue({ insertedId: "some-id" }),
   };
 }
 
-function makeDb(existingDocs: any[] = []) {
+function makeDb(existingDocs: Array<{name: string; userId: string}> = []) {
   return { collection: jest.fn().mockReturnValue(makeCollection(existingDocs)) };
 }
 

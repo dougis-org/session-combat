@@ -65,6 +65,7 @@ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id
       try {
         await storage.deleteCampaign(campaign.id, auth.userId);
       } catch (rollbackError) {
+        // istanbul ignore next
         console.error('Failed to rollback campaign creation after error:', rollbackError);
       }
       throw creationError;
