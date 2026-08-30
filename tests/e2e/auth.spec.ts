@@ -432,6 +432,9 @@ test.describe("Auth", () => {
       );
     });
 
+    const menuTrigger = page.locator('[data-testid="user-menu-trigger"]');
+    await expect(menuTrigger).toBeVisible();
+    await menuTrigger.click();
     const logoutButton = page.locator('[data-testid="logout-button"]');
     await expect(logoutButton).toBeVisible();
     await logoutButton.click();

@@ -13,30 +13,30 @@ Ownership metadata:
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** from the primary checkout,
+- [x] **Step 1 — Sync default branch:** from the primary checkout,
   `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Working branch already exists:** branch `add-user-account-menu`
+- [x] **Step 2 — Working branch already exists:** branch `add-user-account-menu`
   and its worktree `.worktrees/add-user-account-menu` were created during
   propose and pushed to `origin`. Confirm with `git worktree list` and
   `git ls-remote --heads origin add-user-account-menu`; recreate only if absent.
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the
   available skills list for `pr-review-toolkit:review-pr`. If it is not listed,
   halt immediately, tell the user the plugin is required, provide installation
   guidance, and do not proceed until the user confirms it is installed.
-- [ ] Confirm `openspec-review-code` skill is available (used before every
+- [x] Confirm `openspec-review-code` skill is available (used before every
   commit).
 
 ## Execution
 
-- [ ] **Step 1 — Confirm worktree:** ensure `.worktrees/add-user-account-menu`
+- [x] **Step 1 — Confirm worktree:** ensure `.worktrees/add-user-account-menu`
   exists and `cd` into it. All implementation happens here, never in the primary
   checkout.
-- [ ] **Step 2 — Confirm branch pushed:** `git -C .worktrees/add-user-account-menu status -sb`
+- [x] **Step 2 — Confirm branch pushed:** `git -C .worktrees/add-user-account-menu status -sb`
   shows tracking `origin/add-user-account-menu`; if not, `git push -u origin add-user-account-menu`.
-- [ ] **Issue lifecycle: mark in-progress** — run
+- [x] **Issue lifecycle: mark in-progress** — run
   `gh issue edit 611 --add-label "in-progress"`. Discover the linked GitHub
   Project (`gh project list --owner dougis-org --format json`), resolve the
   status field option matching "In Progress"
@@ -48,7 +48,7 @@ Ownership metadata:
 
 ### Dependency
 
-- [ ] Add the Radix menu primitive: `npm install radix-ui` (unified package).
+- [x] Add the Radix menu primitive: `npm install radix-ui` (unified package).
   Before committing the lockfile, inspect the resolved version's
   `peerDependencies` and confirm `react@^19` is included; pin an exact version
   in `package.json` (no `^`). If the resolved version does not support React 19,
@@ -58,7 +58,7 @@ Ownership metadata:
 
 ### Display helper (TDD — tests first)
 
-- [ ] Write `tests/unit/lib/userMenuDisplay.test.ts` covering
+- [x] Write `tests/unit/lib/userMenuDisplay.test.ts` covering
   `deriveUserMenuDisplay`:
   - `"douglas"` → `{ label: "douglas", initials: "D" }`
   - `"Douglas Adams"` → `{ label: "DA", initials: "DA" }`
@@ -69,14 +69,14 @@ Ownership metadata:
   - `"<b>x</b>"` → returns literal-derived value, never throws
   - non-ASCII token (e.g. `"Þórr"`) → first code point uppercased, never throws
   - Verify: `npm run test:unit -- userMenuDisplay` fails (red) before implementing.
-- [ ] Implement `lib/components/userMenuDisplay.ts` exporting
+- [x] Implement `lib/components/userMenuDisplay.ts` exporting
   `deriveUserMenuDisplay(username?: string): { label: string; initials: string }`
   per design Decision 3.
   - Verify: `npm run test:unit -- userMenuDisplay` passes (green).
 
 ### UserMenu component (TDD — tests first)
 
-- [ ] Write `tests/unit/components/UserMenu.test.tsx` (mock `useAuth`), covering
+- [x] Write `tests/unit/components/UserMenu.test.tsx` (mock `useAuth`), covering
   spec `user-account-menu` scenarios:
   - renders nothing when `isAuthenticated: false`
   - renders nothing when `loading: true`
@@ -96,7 +96,7 @@ Ownership metadata:
   - `logout` resolving after a tick + auth flip to unauthenticated → trigger
     unmounts with no thrown error
   - Verify: suite is red before implementation.
-- [ ] Implement `lib/components/UserMenu.tsx` (`'use client'`) per design
+- [x] Implement `lib/components/UserMenu.tsx` (`'use client'`) per design
   Decisions 2 & 4:
   - gate on `isAuthenticated && !loading`
   - Radix `DropdownMenu` trigger = badge button showing
@@ -112,7 +112,7 @@ Ownership metadata:
 
 ### NavBar wiring
 
-- [ ] Update `tests/unit/components/NavBar.test.tsx`:
+- [x] Update `tests/unit/components/NavBar.test.tsx`:
   - keep "does not show logout button when not authenticated / while loading"
     (now also assert no `user-menu-trigger`)
   - replace "shows logout button when authenticated" with: shows
@@ -122,50 +122,50 @@ Ownership metadata:
   - add: `?` feedback button still present when authenticated
   - add: no top-level `Logout` button as a direct child of the nav row
   - Verify: suite is red against current `NavBar`.
-- [ ] Edit `lib/components/NavBar.tsx`: remove the inline `Logout` `<button>`;
+- [x] Edit `lib/components/NavBar.tsx`: remove the inline `Logout` `<button>`;
   render `<UserMenu />` as the rightmost element (after the `?` button, which
   keeps `ml-auto`). Keep the invitations link and the auth/loading gates.
   - Verify: `npm run test:unit -- NavBar` passes.
 
 ### E2E migration
 
-- [ ] Update `tests/e2e/helpers/actions.ts`: the post-login authenticated-state
+- [x] Update `tests/e2e/helpers/actions.ts`: the post-login authenticated-state
   wait currently asserts `[data-testid="logout-button"]` is visible (lines ~73,
   ~100). Switch to waiting on `[data-testid="user-menu-trigger"]` (the
   logout button is no longer in the DOM until the menu is opened).
-- [ ] Update `tests/e2e/auth.spec.ts` "logout clears client storage and
+- [x] Update `tests/e2e/auth.spec.ts` "logout clears client storage and
   redirects to login" (~line 435): first click
   `[data-testid="user-menu-trigger"]`, then click
   `[data-testid="logout-button"]` inside the opened menu; keep the storage +
   redirect assertions.
-- [ ] `grep -rn "logout-button" tests/` and confirm every remaining hit either
+- [x] `grep -rn "logout-button" tests/` and confirm every remaining hit either
   opens the menu first or is an absence assertion.
   - Verify: `npm run test:e2e -- auth.spec.ts` passes (use a free port, not
     3000).
 
 ### Housekeeping
 
-- [ ] Update `.wolf/anatomy.md`: add entries for
+- [x] Update `.wolf/anatomy.md`: add entries for
   `lib/components/UserMenu.tsx`, `lib/components/userMenuDisplay.ts`,
   `tests/unit/components/UserMenu.test.tsx`,
   `tests/unit/lib/userMenuDisplay.test.ts`; update the `NavBar.tsx` entry.
-- [ ] Append the session line(s) to `.wolf/memory.md`.
-- [ ] If any file was edited more than twice or a test/build failed during
+- [x] Append the session line(s) to `.wolf/memory.md`.
+- [x] If any file was edited more than twice or a test/build failed during
   implementation, log it to `.wolf/buglog.json` per project protocol.
-- [ ] Record the `next build` First Load JS delta (before vs after) for the PR
+- [x] Record the `next build` First Load JS delta (before vs after) for the PR
   description.
 
-- [ ] Implement sub-tasks in small, testable increments
-- [ ] Look for existing tooling or functions in the codebase that can be reused
+- [x] Implement sub-tasks in small, testable increments
+- [x] Look for existing tooling or functions in the codebase that can be reused
   or extended before writing new logic from scratch (checked: no existing
   menu/dropdown primitive; `useAuth` reused as-is)
-- [ ] Confirm every acceptance criterion in
+- [x] Confirm every acceptance criterion in
   `openspec/changes/add-user-account-menu/specs/user-account-menu/spec.md` is
   covered by a test
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the
   `openspec-review-code` skill. The primary agent automatically applies all
   clearly-correct findings directly to the code — without stopping, without
   presenting the findings list to the user, and without asking for confirmation.
@@ -173,17 +173,17 @@ Ownership metadata:
 
 ## Validation
 
-- [ ] Run unit tests: `npm run test:unit`
-- [ ] Run integration tests: `npm run test:integration` (via the project
+- [x] Run unit tests: `npm run test:unit`
+- [x] Run integration tests: `npm run test:integration` (via the project
   harness, not Jest directly)
-- [ ] Run E2E tests: `npm run test:e2e` (at minimum `auth.spec.ts` and any spec
+- [x] Run E2E tests: `npm run test:e2e` (at minimum `auth.spec.ts` and any spec
   touching `actions.ts`; use a free port, not 3000)
-- [ ] Run type checks: `npm run typecheck`
-- [ ] Run build: `npm run build`
-- [ ] Run lint / code quality: `npm run lint` (must be clean, incl. jsx-a11y)
-- [ ] Run any Verity / Codacy gate required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run type checks: `npm run typecheck`
+- [x] Run build: `npm run build`
+- [x] Run lint / code quality: `npm run lint` (must be clean, incl. jsx-a11y)
+- [x] Run any Verity / Codacy gate required by project standards
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
