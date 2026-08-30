@@ -201,6 +201,21 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
     }
   })
 
+  it('a click on the dice area during the tumble does not dismiss the overlay', () => {
+    const onClose = jest.fn()
+    render(<DiceRollOverlay built={built} disableAnimation={false} onClose={onClose} />)
+    // modal not revealed yet — clicking the canvas region must not close the overlay
+    act(() => {
+      fireEvent.mouseDown(screen.getByTestId('dice-roll-canvas'))
+    })
+    expect(onClose).not.toHaveBeenCalled()
+    // clicking the surrounding backdrop still closes it
+    act(() => {
+      fireEvent.mouseDown(document.body)
+    })
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
   it('re-gates the modal when a new built roll arrives', () => {
     const { rerender } = render(
       <DiceRollOverlay built={built} disableAnimation={false} animationSettled onClose={jest.fn()} />,

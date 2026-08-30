@@ -13,11 +13,10 @@ export const DICE_ROLL_CANVAS_ID = 'dice-roll-canvas'
  * completion. If the animation never signals (WebGL context lost, tab backgrounded, library
  * hang) the modal is revealed anyway so the user is never stranded without a result.
  *
- * Must comfortably exceed `useDiceAnimation`'s worst-case bounded run: the lazy import plus
- * the dice-box init timeout (~6s) plus dice-box's own `settleTimeout` (~5s). `run()` always
- * resolves within that window (settle, instant path, or a caught failure), so in practice
- * the `animationSettled` signal reveals the modal first and this backstop only covers a
- * genuinely stuck promise.
+ * `useDiceAnimation` bounds only dice-box *init* (~6s); a wedged physics settle can leave
+ * `box.roll()` — and therefore the `animationSettled` signal — pending forever, so this
+ * timeout is the sole guarantee the modal appears. Set it well above a healthy worst case
+ * (import + ~6s init + a slow 15-die settle) so it never pre-empts a slow-but-live tumble.
  */
 export const MODAL_REVEAL_FALLBACK_MS = 20000
 
@@ -62,6 +61,7 @@ export function DiceRollOverlay({
   })
   const modalRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
   const canvasReadyFiredRef = useRef(false)
   const [fallbackElapsed, setFallbackElapsed] = useState(false)
 
@@ -111,7 +111,10 @@ export function DiceRollOverlay({
       onClose()
     }
     function handlePointerDown(e: MouseEvent) {
-      if (modalRef.current?.contains(e.target as Node)) return
+      // "Outside" = outside the centered dice+modal stack — clicking the dice area (or the
+      // space it will occupy before the modal reveals) must not dismiss the overlay, only
+      // the surrounding backdrop does.
+      if (contentRef.current?.contains(e.target as Node)) return
       e.stopPropagation()
       onClose()
     }
@@ -134,28 +137,30 @@ export function DiceRollOverlay({
   if (!root) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 bg-black/60">
-      {!disableAnimation && (
-        <div
-          ref={canvasRef}
-          id={DICE_ROLL_CANVAS_ID}
-          data-testid="dice-roll-canvas"
-          className="pointer-events-none relative w-[90vw] max-w-[480px] h-[38vh] max-h-[340px]"
-        />
-      )}
-      {modalRevealed && (
-        <div
-          ref={modalRef}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Dice roll result"
-          tabIndex={-1}
-          className="relative bg-gray-800 border border-gray-700 rounded-lg shadow-xl px-10 py-8 text-center"
-        >
-          <p className="text-xs uppercase tracking-wide text-gray-400">{built.formula}</p>
-          <p className="mt-1 text-5xl font-bold text-white">{built.total}</p>
-        </div>
-      )}
+    <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/60">
+      <div ref={contentRef} className="flex flex-col items-center gap-6">
+        {!disableAnimation && (
+          <div
+            ref={canvasRef}
+            id={DICE_ROLL_CANVAS_ID}
+            data-testid="dice-roll-canvas"
+            className="pointer-events-none relative w-[90vw] max-w-[480px] h-[38vh] max-h-[340px]"
+          />
+        )}
+        {modalRevealed && (
+          <div
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Dice roll result"
+            tabIndex={-1}
+            className="relative bg-gray-800 border border-gray-700 rounded-lg shadow-xl px-10 py-8 text-center"
+          >
+            <p className="text-xs uppercase tracking-wide text-gray-400">{built.formula}</p>
+            <p className="mt-1 text-5xl font-bold text-white">{built.total}</p>
+          </div>
+        )}
+      </div>
     </div>,
     root,
   )

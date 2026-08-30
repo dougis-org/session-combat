@@ -48,9 +48,10 @@
 ### Decision 2: Gate the result modal on an explicit "animation complete" signal, with a fallback timeout
 
 - Chosen: `DiceRollOverlay` holds internal state `modalRevealed` (initially `false`). It is set `true` when any of: (a) `disableAnimation` is `true` (immediately), (b) the animation `status` is `'unsupported'` (immediately), (c) the animation-complete signal fires, or (d) a fallback timeout (`MODAL_REVEAL_FALLBACK_MS`, ~20000ms) elapses. `useDiceAnimation`
-passes dice-box a `settleTimeout` so `run()` always resolves in bounded time (lazy import +
-~6s init + ~5s settle); the fallback sits above that worst case so it only ever covers a
-genuinely stuck promise, never a slow-but-healthy cold-cache load. The completion signal is the resolution of `animation.run(...)` promise, surfaced by `GlobalDiceFab` awaiting it and passing a `animationComplete` boolean (or an `onAnimationSettled` callback) to the overlay. `useDiceAnimation.run` is adjusted so its promise resolves **after** settle (it already awaits `box.roll()`; ensure the instant/teardown paths also resolve, never hang).
+bounds only dice-box *init* (~6s); a wedged physics settle can leave `box.roll()` pending
+indefinitely, so this timeout is the sole guarantee the modal appears. It is set well above
+a healthy worst case (import + ~6s init + a slow 15-die settle) so it never pre-empts a
+slow-but-live tumble. The completion signal is the resolution of `animation.run(...)` promise, surfaced by `GlobalDiceFab` awaiting it and passing a `animationComplete` boolean (or an `onAnimationSettled` callback) to the overlay. `useDiceAnimation.run` is adjusted so its promise resolves **after** settle (it already awaits `box.roll()`; ensure the instant/teardown paths also resolve, never hang).
 - Alternatives considered:
   - Keep `void animation.run()` and use only a timer: rejected — either reveals too early (bad) or too late (sluggish).
   - Wire dice-box `onRollComplete` directly into the overlay: rejected — the overlay does not own the `DiceBox`; keeping the box inside `useDiceAnimation` preserves the single-instance invariant.
