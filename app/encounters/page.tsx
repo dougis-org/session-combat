@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import type { Encounter } from '@/lib/types';
+import { EncounterCard } from '@/lib/components/EncounterCard';
 import { EncounterEditor } from './EncounterEditor';
 
 export function EncountersContent() {
@@ -138,13 +139,11 @@ export function EncountersContent() {
               </div>
             ) : (
               encounters.map(encounter => (
-                <div key={encounter.id} className="bg-gray-800 rounded-lg p-4" data-testid="encounter-card">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h2 className="text-xl font-semibold">{encounter.name}</h2>
-                      <p className="text-gray-400">{encounter.description}</p>
-                    </div>
-                    <div className="flex gap-2">
+                <EncounterCard
+                  key={encounter.id}
+                  encounter={encounter}
+                  actions={
+                    <>
                       <button
                         onClick={() => {
                           setEditingEncounter(encounter);
@@ -160,23 +159,9 @@ export function EncountersContent() {
                       >
                         Delete
                       </button>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <h3 className="font-semibold mb-2">Monsters ({encounter.monsters.length})</h3>
-                    <div className="grid gap-2">
-                      {encounter.monsters.map(monster => (
-                        <div key={monster.id} className="bg-gray-700 rounded p-2 text-sm">
-                          <span className="font-medium">{monster.name}</span>
-                          <span className="text-gray-400 ml-2">
-                            HP: {monster.hp}/{monster.maxHp}, AC: {monster.ac}, DEX: {monster.abilityScores.dexterity}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                    </>
+                  }
+                />
               ))
             )}
           </div>
