@@ -17,7 +17,8 @@
     "test:e2e:debug": "playwright test --debug",
     "opsx:init-change": "sh scripts/init-change.sh",
     "prepare": "husky install",
-    "test:regression": "playwright test tests/e2e/"
+    "test:regression": "playwright test tests/e2e/",
+    "migrate:encounters": "npx tsx lib/scripts/backfillCampaignEncounters.ts"
   },
   "keywords": [],
   "author": "",
