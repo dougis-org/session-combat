@@ -171,11 +171,12 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
     expect(screen.getByRole('dialog')).toHaveTextContent('14')
   })
 
-  it('reveals the modal immediately when the dice engine is unsupported', () => {
+  it('reveals the modal immediately when the dice engine is unsupported, with no empty canvas band', () => {
     render(
       <DiceRollOverlay built={built} disableAnimation={false} animationStatus="unsupported" onClose={jest.fn()} />,
     )
     expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.queryByTestId('dice-roll-canvas')).not.toBeInTheDocument()
   })
 
   it('reveals the modal via the fallback timeout and aborts the animation if completion never signals', () => {
@@ -196,6 +197,7 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
       })
       expect(screen.getByRole('dialog')).toHaveTextContent('14')
       expect(onAnimationAbort).toHaveBeenCalledTimes(1)
+      expect(screen.queryByTestId('dice-roll-canvas')).not.toBeInTheDocument()
     } finally {
       jest.useRealTimers()
     }

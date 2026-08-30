@@ -72,6 +72,10 @@ export function DiceRollOverlay({
   const modalRevealed =
     disableAnimation || animationStatus === 'unsupported' || animationSettled || fallbackElapsed
 
+  // Only reserve the (large) canvas band while a tumble can actually play. On the disabled /
+  // unsupported / timed-out paths it would just push the modal off-centre behind a blank gap.
+  const showCanvas = !disableAnimation && animationStatus !== 'unsupported' && !fallbackElapsed
+
   useEffect(() => {
     if (!root) return
     document.body.appendChild(root)
@@ -139,7 +143,7 @@ export function DiceRollOverlay({
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/60">
       <div ref={contentRef} className="flex flex-col items-center gap-6">
-        {!disableAnimation && (
+        {showCanvas && (
           <div
             ref={canvasRef}
             id={DICE_ROLL_CANVAS_ID}
