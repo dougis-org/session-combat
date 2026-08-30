@@ -50,11 +50,11 @@
 - Chosen: `DiceRollOverlay` holds internal state `modalRevealed` (initially `false`). It is set `true` when any of: (a) `disableAnimation` is `true` (immediately), (b) the animation `status` is `'unsupported'` (immediately), (c) the animation-complete signal fires, or (d) a fallback timeout (`MODAL_REVEAL_FALLBACK_MS`, ~20000ms) elapses. `useDiceAnimation`
 bounds only dice-box *init* (~6s); a wedged physics settle can leave `box.roll()` pending
 indefinitely, so this timeout is the sole guarantee the modal appears. On expiry the overlay
-only *reveals the modal* — it does not tear the engine down, so a slow-but-live tumble that
-overruns the window keeps playing beneath the modal instead of being cut mid-air. The engine
-is released when the overlay closes or the next roll starts (`useDiceAnimation`'s
-single-instance teardown); dice-box `^1.1.4` exposes no `destroy`, so unmounting its canvas
-host on a timeout would strand its render loop anyway. The completion signal is the resolution of `animation.run(...)` promise, surfaced by `GlobalDiceFab` awaiting it and passing a `animationComplete` boolean (or an `onAnimationSettled` callback) to the overlay. `useDiceAnimation.run` is adjusted so its promise resolves **after** settle (it already awaits `box.roll()`; ensure the instant/teardown paths also resolve, never hang).
+reveals the modal and sets the canvas band aside (`hidden`, no layout space) so the result is
+centred and unobstructed; it does **not** tear the engine down. The engine is released when
+the overlay closes or the next roll starts (`useDiceAnimation`'s single-instance teardown) —
+dice-box `^1.1.4` exposes no `destroy`, so the canvas host stays mounted (just hidden) for the
+overlay's lifetime rather than being unmounted mid-run and stranding its render loop. The completion signal is the resolution of `animation.run(...)` promise, surfaced by `GlobalDiceFab` awaiting it and passing a `animationComplete` boolean (or an `onAnimationSettled` callback) to the overlay. `useDiceAnimation.run` is adjusted so its promise resolves **after** settle (it already awaits `box.roll()`; ensure the instant/teardown paths also resolve, never hang).
 - Alternatives considered:
   - Keep `void animation.run()` and use only a timer: rejected — either reveals too early (bad) or too late (sluggish).
   - Wire dice-box `onRollComplete` directly into the overlay: rejected — the overlay does not own the `DiceBox`; keeping the box inside `useDiceAnimation` preserves the single-instance invariant.

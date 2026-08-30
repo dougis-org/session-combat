@@ -15,10 +15,10 @@ export const DICE_ROLL_CANVAS_ID = 'dice-roll-canvas'
  * `animationSettled` signal — pending forever, so this timeout is the sole guarantee the
  * modal appears.
  *
- * On expiry the overlay only *reveals the modal* — it does not tear the dice engine down.
- * A slow-but-live tumble that overruns this window keeps playing beneath the modal rather
- * than being cut mid-air; the engine is released when the overlay closes or the next roll
- * starts (`useDiceAnimation`'s single-instance teardown). Kept generously above a healthy
+ * On expiry the overlay reveals the modal and sets the canvas band aside (`hidden`) so the
+ * result is centred and unobstructed. The dice engine is *not* torn down — it is released
+ * when the overlay closes or the next roll starts (`useDiceAnimation`'s single-instance
+ * teardown) — so nothing is stranded, only hidden. Kept generously above a healthy
  * worst case so the reveal is rarely the thing the user notices.
  */
 export const MODAL_REVEAL_FALLBACK_MS = 20000
@@ -64,6 +64,7 @@ export function DiceRollOverlay({
   const contentRef = useRef<HTMLDivElement>(null)
   const canvasReadyFiredRef = useRef(false)
   const [fallbackElapsed, setFallbackElapsed] = useState(false)
+  const [liveResult, setLiveResult] = useState('')
 
   // The result modal stays hidden until the animation reports completion; it is shown
   // straight away on the non-animated paths, and unconditionally once the fallback timeout
@@ -94,6 +95,13 @@ export function DiceRollOverlay({
     const timer = setTimeout(() => setFallbackElapsed(true), MODAL_REVEAL_FALLBACK_MS)
     return () => clearTimeout(timer)
   }, [disableAnimation, animationStatus, animationSettled])
+
+  // Populate the live region a tick after mount, not in the initial commit — screen readers
+  // announce subsequent mutations to a live region, not the content it renders with.
+  useEffect(() => {
+    const t = setTimeout(() => setLiveResult(`${built.formula} rolled ${built.total}`), 50)
+    return () => clearTimeout(t)
+  }, [built.formula, built.total])
 
   // Pull focus into the overlay as soon as it mounts — including during the tumble, before
   // the modal reveals — so keyboard / screen-reader users are not left on the now-obscured
@@ -144,10 +152,11 @@ export function DiceRollOverlay({
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/60">
-      {/* Convey the result to assistive tech immediately — the visual dialog is gated on the
-          tumble finishing, which can be several seconds (or the fallback window). */}
+      {/* Convey the result to assistive tech without waiting for the gated visual dialog
+          (which is held back for the tumble, up to the fallback window). Populated a tick
+          after mount so the live region actually announces. */}
       <p className="sr-only" role="status" aria-live="polite">
-        {built.formula} rolled {built.total}
+        {liveResult}
       </p>
       <div ref={contentRef} tabIndex={-1} className="flex flex-col items-center gap-6 outline-none">
         {!disableAnimation && (
@@ -168,11 +177,12 @@ export function DiceRollOverlay({
             role="dialog"
             aria-modal="true"
             aria-label="Dice roll result"
+            aria-describedby="dice-roll-result-total"
             tabIndex={-1}
             className="relative bg-gray-800 border border-gray-700 rounded-lg shadow-xl px-10 py-8 text-center"
           >
             <p className="text-xs uppercase tracking-wide text-gray-400">{built.formula}</p>
-            <p className="mt-1 text-5xl font-bold text-white">{built.total}</p>
+            <p id="dice-roll-result-total" className="mt-1 text-5xl font-bold text-white">{built.total}</p>
           </div>
         )}
       </div>

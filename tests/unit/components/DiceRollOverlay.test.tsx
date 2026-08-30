@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { useEffect, useState } from 'react'
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { DiceRollOverlay, MODAL_REVEAL_FALLBACK_MS } from '@/lib/components/dice/DiceRollOverlay'
@@ -197,12 +197,21 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
     }
   })
 
-  it('exposes the roll result to assistive tech immediately via a live region', () => {
+  it('exposes the roll result to assistive tech via a live region populated after mount', async () => {
     render(<DiceRollOverlay built={built} disableAnimation={false} onClose={jest.fn()} />)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     const status = screen.getByRole('status')
-    expect(status).toHaveTextContent('3d6+2 rolled 14')
     expect(status).toHaveAttribute('aria-live', 'polite')
+    // empty on first commit so a real screen reader treats the fill-in as an announcement
+    expect(status).toHaveTextContent('')
+    await waitFor(() => expect(status).toHaveTextContent('3d6+2 rolled 14'))
+  })
+
+  it('names the revealed dialog with the rolled total via aria-describedby', () => {
+    render(<DiceRollOverlay built={built} disableAnimation animationSettled onClose={jest.fn()} />)
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toHaveAttribute('aria-describedby', 'dice-roll-result-total')
+    expect(document.getElementById('dice-roll-result-total')).toHaveTextContent('14')
   })
 
   it('a click on the dice area during the tumble dismisses neither the overlay nor the panel behind it', () => {
