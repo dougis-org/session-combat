@@ -177,7 +177,7 @@ The unit tests verifying the `CampaignChat` dock shell behavior (drawer visibili
 
 ### Requirement: ADDED Source location for CampaignChat submodules
 
-The source implementing the `CampaignChat` dock shell, feed, composer, and dock-state logic SHALL be organized under `lib/components/CampaignChat/` as `index.tsx` (coordinator), `ChatFeed.tsx`, `Composer.tsx`, `useDockState.ts`, `useChatFeed.ts`, `useHistoryPagination.ts`, `useComposer.ts`, `useMembers.ts`, `useCampaignDice.ts`, and `DragHandle.tsx`, in place of the single `lib/components/CampaignChat.tsx` file, with no dice-pool selection or roll-submission logic remaining in any of these files (see `dice-pool-shared-state` capability for where that logic now lives). The public import `import { CampaignChat } from '@/lib/components/CampaignChat'` SHALL continue to resolve unchanged.
+The source implementing the `CampaignChat` dock shell, feed, composer, and dock-state logic SHALL be organized under `lib/components/CampaignChat/` as `index.tsx` (coordinator), `ChatFeed.tsx`, `Composer.tsx`, `useDockState.ts`, `useChatFeed.ts`, `useHistoryPagination.ts`, `useComposer.ts`, `useMembers.ts`, and `DragHandle.tsx`, in place of the single `lib/components/CampaignChat.tsx` file, with **no dice-pool selection, roll-submission, or dice-pool-wiring hook** remaining in any of these files. The `useCampaignDice.ts` hook that previously lived here was deleted by `remove-chat-docked-dice` (2026-08-30); all dice-pool and roll-submission logic lives in `lib/dice/` and is consumed only by `GlobalDiceFab` (see `dice-pool-shared-state` and `global-dice-fab` capabilities). The public import `import { CampaignChat } from '@/lib/components/CampaignChat'` SHALL continue to resolve unchanged.
 
 #### Scenario: Public import path is unaffected by the split
 
@@ -203,13 +203,14 @@ The source implementing the `CampaignChat` dock shell, feed, composer, and dock-
 - **Then** all existing dock-shell test files under `tests/unit/components/CampaignChat/`
   pass without modification to their original assertions
 
-#### Scenario: No dice-pool or roll-submission code remains in the CampaignChat submodules
+#### Scenario: No dice-pool, roll-submission, or dice-wiring code remains in the CampaignChat submodules
 
-- **Given** the split is complete
+- **Given** the split is complete and `remove-chat-docked-dice` (2026-08-30) has landed
 - **When** every file under `lib/components/CampaignChat/` is inspected
-- **Then** none of them defines dice-pool selection state or a POST call to
-  `/api/campaigns/[id]/rolls` — both live exclusively in `lib/dice/` (see
-  `dice-pool-shared-state` capability) and are consumed by `index.tsx` via the shared hooks
+- **Then** none of them defines dice-pool selection state, a POST call to
+  `/api/campaigns/[id]/rolls`, an import of `useDicePoolState` / `useRollSubmission`, or a
+  render of `DicePoolPanel` / `DiceTriggerButton`
+- **And** `lib/components/CampaignChat/useCampaignDice.ts` does not exist
 
 ### Traceability
 
