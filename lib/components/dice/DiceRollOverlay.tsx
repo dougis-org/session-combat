@@ -12,8 +12,12 @@ export const DICE_ROLL_CANVAS_ID = 'dice-roll-canvas'
  * Upper bound on how long the result modal stays hidden waiting for the tumble to report
  * completion. If the animation never signals (WebGL context lost, tab backgrounded, library
  * hang) the modal is revealed anyway so the user is never stranded without a result.
+ *
+ * Must comfortably exceed `useDiceAnimation`'s own dice-box init timeout (~6s) plus a
+ * typical tumble, so a slow cold-cache load of the 3D engine is not mistaken for a hang and
+ * torn down mid-animation.
  */
-export const MODAL_REVEAL_FALLBACK_MS = 6000
+export const MODAL_REVEAL_FALLBACK_MS = 12000
 
 interface DiceRollOverlayProps {
   built: BuiltRoll
@@ -85,13 +89,17 @@ export function DiceRollOverlay({
     return () => clearTimeout(timer)
   }, [disableAnimation, animationStatus, animationSettled, onAnimationAbort])
 
-  // Move focus into the modal once it is revealed so keyboard / screen-reader users are not
-  // left inside the now-inert panel behind it; restore focus when it closes.
+  // Restore focus to whatever the opener focused (the panel / trigger) when the overlay
+  // closes — unconditionally, even if it is dismissed mid-tumble before the modal reveals.
   useEffect(() => {
-    if (!modalRevealed) return
     const previouslyFocused = document.activeElement as HTMLElement | null
-    modalRef.current?.focus()
     return () => previouslyFocused?.focus?.()
+  }, [])
+
+  // Move focus into the modal once it is revealed so keyboard / screen-reader users are not
+  // left inside the now-inert panel behind it.
+  useEffect(() => {
+    if (modalRevealed) modalRef.current?.focus()
   }, [modalRevealed])
 
   useEffect(() => {

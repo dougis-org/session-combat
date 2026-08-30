@@ -72,10 +72,10 @@ If ANY required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent ran and all findings were auto-addressed before the final commit.
-- [ ] Commit all changes on `improve-dice-roll-animation` and push to `origin`.
-- [ ] Open a PR from `improve-dice-roll-animation` → `main`. **The PR body MUST include `Closes #596`** (unconditional). Search for a PR template (`.github/PULL_REQUEST_TEMPLATE/` or `.github/pull_request_template.md`) and follow it. Include the E7 visual-verification notes/screenshots.
-- [ ] **Issue lifecycle: mark in-review**: `gh issue edit 596 --add-label "in-review" --remove-label "in-progress"`. Move the project item to the status column semantically matching "In Review" (same project/field/option discovery as the in-progress step; warn and skip if not found).
+- [x] Ensure the `openspec-review-code` sub-agent ran and all findings were auto-addressed before the final commit.
+- [x] Commit all changes on `improve-dice-roll-animation` and push to `origin`.
+- [x] Open a PR from `improve-dice-roll-animation` → `main`. **The PR body MUST include `Closes #596`** (unconditional). Search for a PR template (`.github/PULL_REQUEST_TEMPLATE/` or `.github/pull_request_template.md`) and follow it. Include the E7 visual-verification notes/screenshots.
+- [x] **Issue lifecycle: mark in-review**: `gh issue edit 596 --add-label "in-review" --remove-label "in-progress"`. Move the project item to the status column semantically matching "In Review" (same project/field/option discovery as the in-progress step; warn and skip if not found).
 - [ ] Wait 60 seconds for CI to start.
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (run Pre-Commit Code Review, commit, push, re-run) until zero findings remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
 - [ ] **Only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER `--admin`).

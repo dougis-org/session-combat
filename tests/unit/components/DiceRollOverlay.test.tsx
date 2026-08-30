@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { useEffect, useState } from 'react'
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
-import { DiceRollOverlay } from '@/lib/components/dice/DiceRollOverlay'
+import { DiceRollOverlay, MODAL_REVEAL_FALLBACK_MS } from '@/lib/components/dice/DiceRollOverlay'
 
 const built: BuiltRoll = {
   formula: '3d6+2', rolls: [3, 4, 5], total: 14,
@@ -192,7 +192,7 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
       )
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
       act(() => {
-        jest.advanceTimersByTime(6000)
+        jest.advanceTimersByTime(MODAL_REVEAL_FALLBACK_MS)
       })
       expect(screen.getByRole('dialog')).toHaveTextContent('14')
       expect(onAnimationAbort).toHaveBeenCalledTimes(1)
@@ -223,5 +223,18 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
     )
     rerender(<DiceRollOverlay built={built} disableAnimation={false} animationSettled onClose={jest.fn()} />)
     expect(screen.getByRole('dialog')).toHaveFocus()
+  })
+
+  it('restores focus to the opener even when dismissed before the modal is revealed', () => {
+    const opener = document.createElement('button')
+    document.body.appendChild(opener)
+    opener.focus()
+    const { unmount } = render(
+      <DiceRollOverlay built={built} disableAnimation={false} onClose={jest.fn()} />,
+    )
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    unmount()
+    expect(opener).toHaveFocus()
+    opener.remove()
   })
 })
