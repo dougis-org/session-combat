@@ -1,8 +1,13 @@
 import { getDatabase } from "../db";
-import { CampaignTemplate, CampaignChapter, EncounterTemplate } from "../types";
+import { CampaignTemplate, CampaignChapter, EncounterTemplate, Monster } from "../types";
 import { GLOBAL_USER_ID } from "../constants";
 import { randomUUID } from "crypto";
-import { CUSTOM_MONSTERS } from "../data/customMonsters";
+import {
+  CUSTOM_MONSTERS,
+  findCustomMonsterById,
+  toEncounterMonster,
+  toEncounterMonsters,
+} from "../data/customMonsters";
 
 const now = new Date();
 
@@ -25,6 +30,153 @@ function makeTemplate(
     createdAt: now,
     updatedAt: now,
   };
+}
+
+/**
+ * Build the encounter list for the Vecna: Eve of Ruin campaign.
+ * One encounter per chapter covering the 11-chapter adventure structure,
+ * with a key boss encounter where applicable. Monsters are pulled from
+ * CUSTOM_MONSTERS via toEncounterMonster/toEncounterMonsters to ensure
+ * each instance gets a unique id (independent HP/conditions).
+ */
+function vecnaEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const cultist = findCustomMonsterById("cm-vecna-cultist");
+  const impaler = findCustomMonsterById("cm-relentless-impaler");
+  const spiderdragon = findCustomMonsterById("cm-spiderdragon");
+  const deathwolf = findCustomMonsterById("cm-deathwolf");
+  const kasVampire = findCustomMonsterById("cm-kas-vampire");
+  const kasDeathKnight = findCustomMonsterById("cm-kas-death-knight");
+  const vecna = findCustomMonsterById("cm-vecna");
+  const acererak = findCustomMonsterById("cm-acererak");
+  const miska = findCustomMonsterById("cm-miska");
+  const lordSoth = findCustomMonsterById("cm-lord-soth");
+  const tiamat = findCustomMonsterById("cm-tiamat-servant");
+  const necro = findCustomMonsterById("cm-necromancer-wizard");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Ch 1 — Return from Neverdeath Graveyard (Neverwinter)
+    encounter(
+      "Cultists of the Whispered One",
+      "Fanatical cultists performing a dark ritual atop a Dolindar tomb.",
+      compact([m(cultist), many(cultist, 2)])
+    ),
+    // Ch 2 — The Wizards Three (Sigil)
+    encounter(
+      "Kas's Vampire Ambush",
+      "Kas the Bloody confronts the party in his vampiric form on the streets of Sigil.",
+      compact([m(kasVampire), many(deathwolf, 2)])
+    ),
+    encounter(
+      "Planescape Dabus Escort",
+      "Sigil's faceless dabus wardens demand a toll at a portal gate.",
+      compact([many(necro, 2)])
+    ),
+    // Ch 3 — The Lambent Zenith's Last Voyage (Astral Sea / Spelljammer)
+    encounter(
+      "Wreck of the Lambent Zenith",
+      "Astral dreadnought-creatures and necromancer survivors of a lost spelljammer.",
+      compact([many(necro, 2), many(cultist, 4), many(deathwolf, 2)])
+    ),
+    // Ch 4 — The Ruined Colossus (Eberron / Mount Ironrot)
+    encounter(
+      "Blades of Eberron at Ironrot",
+      "Eberron warforged blade scouts and their lieutenant patrol the ruined colossus.",
+      compact([many(necro, 2), many(cultist, 4)])
+    ),
+    encounter(
+      "Eye Monger Patrol",
+      "Aberrant-eyed servants of Vecna scour Mount Ironrot for the Rod fragment.",
+      compact([many(necro, 1), many(cultist, 3)])
+    ),
+    // Ch 5 — Death House (Ravenloft / Barovia)
+    encounter(
+      "Death House Lurching Halls",
+      "Animated furniture, sorrowsworn echoes, and Strahd's shadow guards stalk the cursed manor.",
+      compact([many(cultist, 4), m(impaler)])
+    ),
+    // Ch 6 — Night of Blue Fire (Krynn / Dragonlance)
+    encounter(
+      "Lord Soth's Vanguard",
+      "The death knight Lord Soth leads draconian shock troops against the party in Bittergrass Fen.",
+      compact([m(lordSoth), many(cultist, 4), many(deathwolf, 2)])
+    ),
+    // Ch 7 — Tomb of Wayward Souls (Greyhawk / Oerth)
+    encounter(
+      "Acererak's False Liches",
+      "Acererak's decoy liches and necromancer lieutenants test intruders in the upper tomb.",
+      compact([many(necro, 3), m(impaler), m(spiderdragon)])
+    ),
+    encounter(
+      "Acererak, the Archlich",
+      "Acererak himself manifests to halt the party's progress through the Tomb of Wayward Souls.",
+      compact([m(acererak), many(necro, 2), many(impaler, 2)])
+    ),
+    // Ch 8 — The Dragon Queen's Pride (Avernus / Nine Hells)
+    encounter(
+      "Abishai Court at the Red Belvedere",
+      "Tiamat's fiendish lieutenants and cultist throngs defend the Dragon Queen's casino in Avernus.",
+      compact([many(necro, 3), many(deathwolf, 3), m(impaler)])
+    ),
+    encounter(
+      "Tiamat's Material Aspect",
+      "An aspect of Tiamat in huge five-headed dragon form confronts the party atop the Dragon's Pride.",
+      compact([m(tiamat), many(necro, 2)])
+    ),
+    // Ch 9 — The Betrayer Revealed (Kas sheds vampire disguise)
+    encounter(
+      "Kas Reveals True Form",
+      "Kas drops his vampiric disguise and ascends to his true death-knight form.",
+      compact([m(kasVampire), m(kasDeathKnight), many(deathwolf, 2)])
+    ),
+    // Ch 10 — The War of Pandesmos (Abyss)
+    encounter(
+      "Spyder-Fiend Vanguard",
+      "Lolth-sent spider-fiends and abyss-touched cultists pour through a wound in the Abyss.",
+      compact([many(necro, 3), many(spiderdragon, 2), many(deathwolf, 2)])
+    ),
+    encounter(
+      "Miska, the Wolf-Spider",
+      "The demon lord Miska leads the abyss-borne armies of Pandesmos against the multiverse itself.",
+      compact([m(miska), many(necro, 3), many(deathwolf, 3), many(spiderdragon, 2)])
+    ),
+    // Ch 11 — Eve of Ruin (final confrontation)
+    encounter(
+      "Vecna's Inner Guard",
+      "Vecna's elite deathwolf pack and relentless impaler honor guard hold the approach to the Eye.",
+      compact([many(deathwolf, 4), many(impaler, 3), many(necro, 2)])
+    ),
+    encounter(
+      "Kas, the Bloody-Handed",
+      "Kas the Bloody in his true death-knight form defends Vecna's inner sanctum.",
+      compact([m(kasDeathKnight), many(impaler, 3), many(deathwolf, 2)])
+    ),
+    encounter(
+      "Acererak Joins the Eve",
+      "The demilich returns as Vecna's final ally, commanding false liches and necromancer lieutenants.",
+      compact([m(acererak), many(necro, 3), many(impaler, 2)])
+    ),
+    encounter(
+      "Vecna, the Whispered One",
+      "The archlich Vecna himself manifests to remake the multiverse — the Eve of Ruin.",
+      compact([m(vecna), many(impaler, 3), many(deathwolf, 4), m(kasDeathKnight)])
+    ),
+  ];
 }
 
 const CAMPAIGN_CATALOG: CampaignTemplate[] = [
@@ -910,36 +1062,19 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
     "VEoR",
     "D&D's 50th anniversary adventure. The archlich Vecna plots to remake reality. Heroes must travel the multiverse collecting the Rod of Seven Parts before he can destroy existence.",
     [
-      { title: "The Lich Rises", order: 1, levelRange: "10-12", location: "Neverwinter, Evernight" },
+      { title: "Return from Neverdeath Graveyard", order: 1, levelRange: "10-12", location: "Neverwinter, Evernight" },
       { title: "The Wizards Three", order: 2, levelRange: "12-13", location: "Sigil" },
-      { title: "Tomb of Mordenkainen", order: 3, levelRange: "13-14", location: "Forgotten Realms" },
-      { title: "Aboard the Plaguewrought", order: 4, levelRange: "14-15", location: "Eberron" },
-      { title: "A Land of War", order: 5, levelRange: "15-16", location: "Krynn, Dragonlance" },
-      { title: "The Living City", order: 6, levelRange: "16-18", location: "Greyhawk" },
-      { title: "The Citadel of Vecna", order: 7, levelRange: "18-20", location: "Vecna's Domain" },
+      { title: "The Lambent Zenith's Last Voyage", order: 3, levelRange: "13-14", location: "Astral Sea, Spelljammer" },
+      { title: "The Ruined Colossus", order: 4, levelRange: "14-15", location: "Mount Ironrot, Eberron" },
+      { title: "Death House", order: 5, levelRange: "15-16", location: "Barovia, Ravenloft" },
+      { title: "Night of Blue Fire", order: 6, levelRange: "15-16", location: "Krynn, Dragonlance" },
+      { title: "Tomb of Wayward Souls", order: 7, levelRange: "16-17", location: "Oerth, Greyhawk" },
+      { title: "The Dragon Queen's Pride", order: 8, levelRange: "17-18", location: "Avernus, Nine Hells" },
+      { title: "The Betrayer Revealed", order: 9, levelRange: "17-18", location: "Pandesmos, Abyss" },
+      { title: "The War of Pandesmos", order: 10, levelRange: "18-19", location: "Pandesmos, Abyss" },
+      { title: "Eve of Ruin", order: 11, levelRange: "19-20", location: "Vecna's Domain, multiverse" },
     ],
-    [
-      {
-        "name": "Cultists of the Whispered One",
-        "description": "Fanatical cultists performing a dark ritual.",
-        "monsters": []
-      },
-      {
-        "name": "The Relentless Impaler",
-        "description": "A horrifying undead creation of Vecna guarding a planar tear.",
-        "monsters": []
-      },
-      {
-        "name": "Spiderdragon Ambush",
-        "description": "A terrifying hybrid beast sent by Lolth.",
-        "monsters": []
-      },
-      {
-        "name": "Deathwolf Vanguard",
-        "description": "Kas the Betrayer's elite undead wolves.",
-        "monsters": []
-      }
-    ]
+    vecnaEncounters()
   ),
 ];
 
