@@ -1,7 +1,7 @@
 import { getDatabase } from "../db";
 import { storage } from "../storage";
 import { Campaign, CampaignTemplate, Encounter } from "../types";
-import crypto from "crypto";
+import { randomUUID } from "node:crypto";
 
 export async function backfillCampaignEncounters(): Promise<{
   migrated: number;
@@ -70,7 +70,7 @@ export async function backfillCampaignEncounters(): Promise<{
       for (const missing of missingEncounters) {
         const newEncounter: Encounter = {
           ...missing,
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           userId: campaign.userId,
           createdAt: now,
           updatedAt: now,
