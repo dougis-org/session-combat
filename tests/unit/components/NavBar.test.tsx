@@ -54,30 +54,43 @@ describe('NavBar', () => {
     expect(screen.getByRole('link', { name: 'Combat' })).toHaveAttribute('href', '/combat');
   });
 
-  it('does not show logout button when not authenticated', () => {
+  it('does not show the account menu when not authenticated', () => {
     mockAuth({});
     render(<NavBar />);
+    expect(screen.queryByTestId('user-menu-trigger')).not.toBeInTheDocument();
     expect(screen.queryByTestId('logout-button')).not.toBeInTheDocument();
   });
 
-  it('does not show logout button while loading', () => {
+  it('does not show the account menu while loading', () => {
     mockAuth({ isAuthenticated: true, loading: true });
     render(<NavBar />);
+    expect(screen.queryByTestId('user-menu-trigger')).not.toBeInTheDocument();
     expect(screen.queryByTestId('logout-button')).not.toBeInTheDocument();
   });
 
-  it('shows logout button when authenticated and not loading', () => {
+  it('shows the account menu trigger when authenticated and not loading', () => {
     mockAuth({ isAuthenticated: true, user: { userId: 'u1', email: 'u@test.com' } });
     render(<NavBar />);
-    expect(screen.getByTestId('logout-button')).toBeInTheDocument();
+    expect(screen.getByTestId('user-menu-trigger')).toBeInTheDocument();
   });
 
-  it('calls logout when logout button clicked', async () => {
+  it('has no standalone Logout button as a direct child of the nav row', () => {
+    mockAuth({ isAuthenticated: true, user: { userId: 'u1', email: 'u@test.com' } });
+    render(<NavBar />);
+    // logout is only reachable after opening the account menu
+    expect(screen.queryByTestId('logout-button')).not.toBeInTheDocument();
+    // ...but the account menu trigger and the feedback button both remain
+    expect(screen.getByTestId('user-menu-trigger')).toBeInTheDocument();
+    expect(screen.getByTestId('feedback-button')).toBeInTheDocument();
+  });
+
+  it('calls logout when logout is activated from the account menu', async () => {
     const user = userEvent.setup();
-    const logout = jest.fn() as any;
+    const logout = jest.fn().mockResolvedValue(undefined) as any;
     mockAuth({ isAuthenticated: true, user: { userId: 'u1', email: 'u@test.com' }, logout });
     render(<NavBar />);
-    await user.click(screen.getByTestId('logout-button'));
+    await user.click(screen.getByTestId('user-menu-trigger'));
+    await user.click(await screen.findByTestId('logout-button'));
     expect(logout).toHaveBeenCalledTimes(1);
   });
 

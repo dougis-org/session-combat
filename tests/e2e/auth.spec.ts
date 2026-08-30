@@ -432,6 +432,9 @@ test.describe("Auth", () => {
       );
     });
 
+    const menuTrigger = page.locator('[data-testid="user-menu-trigger"]');
+    await expect(menuTrigger).toBeVisible();
+    await menuTrigger.click();
     const logoutButton = page.locator('[data-testid="logout-button"]');
     await expect(logoutButton).toBeVisible();
     await logoutButton.click();
@@ -459,5 +462,31 @@ test.describe("Auth", () => {
 
     await page.goBack();
     expect(await page.locator("text=/welcome/i").count()).toBe(0);
+  });
+
+  test("account menu opens and logs out via keyboard, redirecting to login", async ({
+    page,
+    context,
+  }) => {
+    const email = generateUniqueEmail();
+    const registerResponse = await context.request.post("/api/auth/register", {
+      data: { email, password: STRONG_PASSWORD, username: `kbd_${Date.now()}` },
+    });
+    await expect(registerResponse).toBeOK();
+
+    await page.goto("/campaigns");
+    await expect(page).toHaveURL(/\/campaigns/);
+
+    const menuTrigger = page.locator('[data-testid="user-menu-trigger"]');
+    await expect(menuTrigger).toBeVisible();
+    await menuTrigger.focus();
+    await page.keyboard.press("Enter");
+
+    const logoutItem = page.locator('[data-testid="logout-button"]');
+    await expect(logoutItem).toBeVisible();
+    await page.keyboard.press("Enter");
+
+    await page.waitForURL("**/login", { timeout: 5000 });
+    expect(page.url()).toContain("/login");
   });
 });

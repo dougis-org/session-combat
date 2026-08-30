@@ -60,7 +60,7 @@ export async function submitRegistrationForm(page: Page): Promise<void> {
 
 /**
  * Complete full registration flow: navigate, fill, submit, and wait for
- * the authenticated state (logout button visible) before returning.
+ * the authenticated state (account menu trigger visible) before returning.
  */
 export async function registerUser(
   page: Page,
@@ -70,7 +70,7 @@ export async function registerUser(
   await page.goto("/register");
   await fillRegistrationForm(page, email, password);
   await submitRegistrationForm(page);
-  await expect(page.locator('[data-testid="logout-button"]')).toBeVisible({
+  await expect(page.locator('[data-testid="user-menu-trigger"]')).toBeVisible({
     timeout: 15000,
   });
 }
@@ -97,7 +97,7 @@ export async function loginUser(
     { timeout: 30000 },
   );
 
-  await expect(page.locator('[data-testid="logout-button"]')).toBeVisible({
+  await expect(page.locator('[data-testid="user-menu-trigger"]')).toBeVisible({
     timeout: 15000,
   });
 }

@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { FeedbackModal } from './FeedbackModal';
+import { UserMenu } from './UserMenu';
 
 export function NavBar() {
-  const { isAuthenticated, loading, logout } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const [invitationCount, setInvitationCount] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -60,13 +61,7 @@ export function NavBar() {
             >
               ?
             </button>
-            <button
-              data-testid="logout-button"
-              onClick={() => void logout()}
-              className="text-gray-400 hover:text-white transition-colors text-sm"
-            >
-              Logout
-            </button>
+            <UserMenu />
           </>
         )}
       </div>
