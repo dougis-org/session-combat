@@ -14,6 +14,12 @@ export interface BuiltRoll {
   formula: string
   rolls: number[]
   total: number
+  /** One entry per individual die, preserving its size — sourced from `rollDicePool`. */
+  breakdown: { sides: number; value: number }[]
+  /** The clamped applied modifier (0 for percentile rolls). */
+  modifier: number
+  /** The two physical d10 faces, present only for percentile rolls. */
+  percentileFaces?: [number, number]
 }
 
 interface UseDicePoolStateArgs {
@@ -66,16 +72,24 @@ export function useDicePoolState({ triggerRef, panelRef }: UseDicePoolStateArgs)
   function buildRoll(): BuiltRoll {
     const groups = getActiveDiceGroups(pool)
     const formula = buildPoolFormula(groups, modifier)
-    const rolls = rollDicePool(groups).map(r => r.value)
+    const breakdown = rollDicePool(groups)
+    const rolls = breakdown.map(r => r.value)
     const total = rolls.reduce((sum, v) => sum + v, 0) + modifier
-    return { formula, rolls, total }
+    return { formula, rolls, total, breakdown, modifier }
   }
 
   // Standalone percentile roll: two d10 faces decoded to 1..100. Not a poolable
   // die — ignores the staged pool and the shared modifier entirely.
   function buildPercentileRoll(): BuiltRoll {
-    const { value } = rollPercentile()
-    return { formula: PERCENTILE_FORMULA, rolls: [value], total: value }
+    const { tensFace, onesFace, value } = rollPercentile()
+    return {
+      formula: PERCENTILE_FORMULA,
+      rolls: [value],
+      total: value,
+      breakdown: [],
+      modifier: 0,
+      percentileFaces: [tensFace, onesFace],
+    }
   }
 
   return {

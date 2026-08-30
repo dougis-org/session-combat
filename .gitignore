@@ -97,3 +97,7 @@ regression-test-output.txt
 
 # OpenSpec change worktrees
 .worktrees/
+
+# @3d-dice/dice-box postinstall dumps a copy of its assets here on `npm install`;
+# the assets this app actually serves are vendored under public/dice-box/assets/.
+/public/assets/
