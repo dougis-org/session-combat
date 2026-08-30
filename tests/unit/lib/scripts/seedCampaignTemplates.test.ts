@@ -16,6 +16,7 @@ function makeCollection(existingDocs: Array<{name: string; userId: string}> = []
       return existingDocs.find(d => d.name === query.name && d.userId === query.userId) || null;
     }),
     insertOne: jest.fn().mockResolvedValue({ insertedId: "some-id" }),
+    updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
   };
 }
 
@@ -42,8 +43,31 @@ describe("seedCampaignTemplates", () => {
 
     // Since there are 24 templates currently (approx), one is skipped, rest inserted.
     expect(result.skipped).toBe(1);
+    expect(result.updated).toBe(0);
     expect(result.inserted).toBeGreaterThan(10);
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("Skipping (exists): Curse of Strahd"));
+  });
+
+  it("force-updates existing templates when force=true", async () => {
+    const mockDb = makeDb([{ name: "Curse of Strahd", userId: "GLOBAL" }]);
+    (getDatabase as jest.Mock).mockResolvedValue(mockDb);
+    const col = mockDb.collection("campaignTemplates");
+
+    const result = await seedCampaignTemplates({ force: true });
+
+    expect(result.updated).toBe(1);
+    expect(result.skipped).toBe(0);
+    expect(col.updateOne).toHaveBeenCalled();
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("Force updated: Curse of Strahd"));
+  });
+
+  it("returns zero updated when no templates exist and force=true", async () => {
+    (getDatabase as jest.Mock).mockResolvedValue(makeDb());
+
+    const result = await seedCampaignTemplates({ force: true });
+
+    expect(result.updated).toBe(0);
+    expect(result.inserted).toBeGreaterThan(0);
   });
 });
 
@@ -63,6 +87,16 @@ describe("runCli", () => {
 
   it("executes seed and exits 0 on success", async () => {
     await runCli();
+    expect(exitSpy).toHaveBeenCalledWith(0);
+  });
+
+  it("passes force=true to seed when --force is in process.argv", async () => {
+    process.argv.push("--force");
+    try {
+      await runCli();
+    } finally {
+      process.argv.pop();
+    }
     expect(exitSpy).toHaveBeenCalledWith(0);
   });
 });

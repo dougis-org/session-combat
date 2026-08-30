@@ -11,4 +11,4 @@
 
 ## 3. Pull Request Review
 
-- [ ] 3.1 Perform a PR review, address comments/feedback, and ensure all required checks pass.
+- [x] 3.1 Perform a PR review, address comments/feedback, and ensure all required checks pass.
