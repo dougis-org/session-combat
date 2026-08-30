@@ -115,11 +115,12 @@ export function DiceRollOverlay({
       onClose()
     }
     function handlePointerDown(e: MouseEvent) {
-      // "Outside" = outside the centered dice+modal stack — clicking the dice area (or the
-      // space it will occupy before the modal reveals) must not dismiss the overlay, only
-      // the surrounding backdrop does.
-      if (contentRef.current?.contains(e.target as Node)) return
+      // Always stop the press from reaching the dice panel's own document-level close
+      // handler behind the overlay. "Outside" = outside the centered dice+modal stack —
+      // clicking the dice area (or the space it will occupy before the modal reveals) must
+      // not dismiss the overlay, only the surrounding backdrop does.
       e.stopPropagation()
+      if (contentRef.current?.contains(e.target as Node)) return
       onClose()
     }
     document.addEventListener('keydown', handleKeyDown, true)
