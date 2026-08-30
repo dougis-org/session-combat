@@ -13,19 +13,21 @@ import { DIE_ICONS, DiceD10Icon } from '@/lib/components/icons/dice'
 import type { DieSides } from '@/lib/utils/dice'
 
 function StaticRollResult({ built }: { built: BuiltRoll }) {
-  if (built.percentileFaces) {
+  if (built.percentileFaces && built.percentileFaces.length >= 2) {
+    const tens = built.percentileFaces[0] === 10 ? '00' : `${built.percentileFaces[0]}0`
+    const ones = built.percentileFaces[1] === 10 ? '0' : built.percentileFaces[1]
     return (
       <div className="flex flex-row justify-center gap-4 mt-4 mb-2">
         <div className="relative w-16 h-16 text-gray-300">
           <DiceD10Icon className="w-full h-full" />
           <span className="absolute inset-0 flex items-center justify-center text-xl font-bold mt-2">
-            {built.percentileFaces[0]}
+            {tens}
           </span>
         </div>
         <div className="relative w-16 h-16 text-gray-300">
           <DiceD10Icon className="w-full h-full" />
           <span className="absolute inset-0 flex items-center justify-center text-xl font-bold mt-2">
-            {built.percentileFaces[1]}
+            {ones}
           </span>
         </div>
       </div>
@@ -36,7 +38,15 @@ function StaticRollResult({ built }: { built: BuiltRoll }) {
     <div className="flex flex-row flex-wrap justify-center gap-4 mt-4 mb-2 max-w-[80vw]">
       {built.breakdown.map((die, idx) => {
         const Icon = DIE_ICONS[die.sides as DieSides]
-        if (!Icon) return null
+        if (!Icon) {
+          return (
+            <div key={idx} data-testid="fallback-die" className="relative w-12 h-12 text-gray-300 border-2 border-gray-400 rounded-md flex items-center justify-center">
+              <span className="text-lg font-bold">
+                {die.value}
+              </span>
+            </div>
+          )
+        }
         return (
           <div key={idx} className="relative w-12 h-12 text-gray-300">
             <Icon className="w-full h-full" />
