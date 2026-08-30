@@ -46,6 +46,23 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Ruins of Berez", order: 11, levelRange: "7-8", location: "Barovia" },
       { title: "The Amber Temple", order: 12, levelRange: "8-9", location: "Mount Ghakis" },
       { title: "Castle Ravenloft", order: 13, levelRange: "9-10", location: "Castle Ravenloft" },
+    ],
+    [
+      {
+        "name": "Vampire Spawn Ambush",
+        "description": "Strahd's spawn attack the party in the streets of Vallaki.",
+        "monsters": []
+      },
+      {
+        "name": "Baba Lysaga's Creeping Hut",
+        "description": "A battle in the swamps of Berez against a witch and her animated hut.",
+        "monsters": []
+      },
+      {
+        "name": "The Wintersplinter",
+        "description": "Druids summon a massive tree blight atop Yester Hill.",
+        "monsters": []
+      }
     ]
   ),
 
@@ -59,6 +76,23 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Dwellers of the Forbidden City", order: 3, levelRange: "5-7", location: "Omu" },
       { title: "Fane of the Night Serpent", order: 4, levelRange: "7-9", location: "Omu" },
       { title: "Tomb of the Nine Gods", order: 5, levelRange: "9-11", location: "Tomb of Annihilation" },
+    ],
+    [
+      {
+        "name": "Zombie T-Rex",
+        "description": "An undead tyrannosaurus regurgitates zombies in the jungles of Chult.",
+        "monsters": []
+      },
+      {
+        "name": "Yuan-ti Temple Guards",
+        "description": "Serpentfolk defending the Fane of the Night Serpent.",
+        "monsters": []
+      },
+      {
+        "name": "Acererak's Arrival",
+        "description": "The archlich himself appears to stop the party from destroying the Soulmonger.",
+        "monsters": []
+      }
     ]
   ),
 
@@ -71,6 +105,23 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Phandalin", order: 2, levelRange: "2-3", location: "Phandalin" },
       { title: "The Spider's Web", order: 3, levelRange: "3-4", location: "Sword Coast Frontier" },
       { title: "Wave Echo Cave", order: 4, levelRange: "4-5", location: "Wave Echo Cave" },
+    ],
+    [
+      {
+        "name": "Cragmaw Ambush",
+        "description": "Goblins ambush the party on the Triboar Trail.",
+        "monsters": []
+      },
+      {
+        "name": "Redbrand Ruffians",
+        "description": "Bandits confront the party in the streets of Phandalin.",
+        "monsters": []
+      },
+      {
+        "name": "Venomfang",
+        "description": "A young green dragon nesting in the ruins of Thundertree.",
+        "monsters": []
+      }
     ]
   ),
 
@@ -102,6 +153,18 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Autumn: The Cassalanters Villain", order: 7, levelRange: "4-5", location: "Waterdeep" },
       { title: "Winter: Jarlaxle's Villain", order: 8, levelRange: "4-5", location: "Waterdeep" },
       { title: "Volo's Waterdeep Enchiridion", order: 9, levelRange: "5", location: "Waterdeep" },
+    ],
+    [
+      {
+        "name": "Zhentarim Thugs",
+        "description": "A street brawl spills out of the Yawning Portal.",
+        "monsters": []
+      },
+      {
+        "name": "Kenku Ambush",
+        "description": "Kenku hiding in a warehouse attempt to silence the party.",
+        "monsters": []
+      }
     ]
   ),
 
@@ -120,6 +183,18 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Maelstrom", order: 8, levelRange: "10-11", location: "Maelstrom, Trackless Sea" },
       { title: "Citadel Felbarr", order: 9, levelRange: "10-11", location: "Citadel Felbarr" },
       { title: "Hold of the Storm Giant King", order: 10, levelRange: "11", location: "Maelstrom" },
+    ],
+    [
+      {
+        "name": "Hill Giant Raid",
+        "description": "Starving hill giants attack a fortified settlement for food.",
+        "monsters": []
+      },
+      {
+        "name": "Iymrith's Deception",
+        "description": "The ancient blue dragon reveals her true form in the giant court.",
+        "monsters": []
+      }
     ]
   ),
 
@@ -145,6 +220,18 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The City of Spiders", order: 15, levelRange: "14", location: "Menzoberranzan" },
       { title: "The Fetid Wedding", order: 16, levelRange: "14-15", location: "Sloobludop" },
       { title: "Against the Demon Lords", order: 17, levelRange: "15", location: "Underdark" },
+    ],
+    [
+      {
+        "name": "Drow Pursuit",
+        "description": "Ilvara and her drow elite catch up to the fleeing prisoners.",
+        "monsters": []
+      },
+      {
+        "name": "Demogorgon's Rise",
+        "description": "The Prince of Demons surfaces in Sloobludop, causing mass madness.",
+        "monsters": []
+      }
     ]
   ),
 
@@ -174,6 +261,18 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Thither", order: 3, levelRange: "4-6", location: "Thither, Prismeer" },
       { title: "Yon", order: 4, levelRange: "6-7", location: "Yon, Prismeer" },
       { title: "Palace of Heart's Desire", order: 5, levelRange: "7-8", location: "Palace of Heart's Desire" },
+    ],
+    [
+      {
+        "name": "Harengon Brigands",
+        "description": "Agdon Longscarf and his bandits demand a toll.",
+        "monsters": []
+      },
+      {
+        "name": "Jabberwock",
+        "description": "A burbling, fearsome dragon-like fey creature.",
+        "monsters": []
+      }
     ]
   ),
 
@@ -210,6 +309,18 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Auril's Abode", order: 5, levelRange: "7", location: "Solstice, Auril's Island" },
       { title: "Caves of Hunger", order: 6, levelRange: "8", location: "Reghed Glacier" },
       { title: "Doom of Ythryn", order: 7, levelRange: "9-12", location: "Ythryn, Netherese Necropolis" },
+    ],
+    [
+      {
+        "name": "Coldlight Walker",
+        "description": "An undead frozen wanderer attacks in the endless blizzard.",
+        "monsters": []
+      },
+      {
+        "name": "Chardalyn Dragon",
+        "description": "A mechanical dragon made of corrupted crystal assaults Ten-Towns.",
+        "monsters": []
+      }
     ]
   ),
 
@@ -223,6 +334,18 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Avernus", order: 3, levelRange: "6-10", location: "Avernus, Nine Hells" },
       { title: "Sword of Zariel", order: 4, levelRange: "10-12", location: "Avernus" },
       { title: "Escape from Avernus", order: 5, levelRange: "12-13", location: "Avernus" },
+    ],
+    [
+      {
+        "name": "Cult of the Dead Three",
+        "description": "Cultists perform grisly murders in the bathhouse dungeon.",
+        "monsters": []
+      },
+      {
+        "name": "Hellwasp Swarm",
+        "description": "Massive fiendish insects attack the party's infernal war machine.",
+        "monsters": []
+      }
     ]
   ),
 
@@ -794,6 +917,28 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "A Land of War", order: 5, levelRange: "15-16", location: "Krynn, Dragonlance" },
       { title: "The Living City", order: 6, levelRange: "16-18", location: "Greyhawk" },
       { title: "The Citadel of Vecna", order: 7, levelRange: "18-20", location: "Vecna's Domain" },
+    ],
+    [
+      {
+        "name": "Cultists of the Whispered One",
+        "description": "Fanatical cultists performing a dark ritual.",
+        "monsters": []
+      },
+      {
+        "name": "The Relentless Impaler",
+        "description": "A horrifying undead creation of Vecna guarding a planar tear.",
+        "monsters": []
+      },
+      {
+        "name": "Spiderdragon Ambush",
+        "description": "A terrifying hybrid beast sent by Lolth.",
+        "monsters": []
+      },
+      {
+        "name": "Deathwolf Vanguard",
+        "description": "Kas the Betrayer's elite undead wolves.",
+        "monsters": []
+      }
     ]
   ),
 ];
