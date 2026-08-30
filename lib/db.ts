@@ -125,37 +125,27 @@ async function initializeDatabase(db: Db): Promise<void> {
       }
     }
 
-    // Check if characters_active already exists as a view; only drop views,
-    // never a real collection, to avoid accidental data loss during re-initialization.
+    // Check if characters_active already exists as a view.
+    // We use collMod to update it instead of dropping it to prevent race
+    // conditions when multiple processes (e.g. test workers) initialize the DB concurrently.
     const existing = await db
       .listCollections({ name: "characters_active" })
       .toArray();
-    if (existing.length > 0 && existing[0].type === "view") {
-      try {
-        await db.dropCollection("characters_active");
-      } catch (error) {
-        // Only ignore NamespaceNotFound; rethrow any other error so the outer
-        // catch block can handle it appropriately.
-        if (
-          !(
-            error instanceof Error &&
-            "codeName" in error &&
-            (error as { codeName?: string }).codeName === "NamespaceNotFound"
-          )
-        ) {
-          throw error;
-        }
-      }
+      
+    if (existing.length === 0) {
+      await db.createCollection("characters_active", {
+        viewOn: "characters",
+        pipeline: [{ $match: { deletedAt: null } }],
+      });
+      console.log("Created characters_active view");
+    } else if (existing[0].type === "view") {
+      await db.command({
+        collMod: "characters_active",
+        viewOn: "characters",
+        pipeline: [{ $match: { deletedAt: null } }],
+      });
+      console.log("Updated characters_active view");
     }
-
-    // Create characters_active MongoDB view that filters out soft-deleted characters.
-    // { deletedAt: null } matches both null values AND missing fields, providing
-    // backward compatibility with characters created before soft delete was implemented.
-    await db.createCollection("characters_active", {
-      viewOn: "characters",
-      pipeline: [{ $match: { deletedAt: null } }],
-    });
-    console.log("Created characters_active view");
   } catch (error) {
     // Silently ignore view/index errors - they may already exist or fail in read-only environments
     if (error instanceof Error && !error.message.includes("already exists")) {
