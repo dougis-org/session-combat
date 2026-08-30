@@ -130,6 +130,29 @@ curl -X PUT http://localhost:3000/api/monsters/global
 
 See [docs/MONSTER_LIBRARY.md](docs/MONSTER_LIBRARY.md) for complete documentation on the monster library system.
 
+## Campaign Templates
+
+The application includes a rich set of pre-configured campaign templates (e.g., Curse of Strahd, Tomb of Annihilation) that can be seeded into the database.
+
+### Seeding Campaign Templates
+
+To seed the initial campaign templates into your database, run:
+
+```bash
+npm run seed
+```
+
+By default, this command skips any campaigns that already exist in the database to prevent accidental overwrites of live data.
+
+If you want to force an update of existing campaigns with the latest template definitions (for example, if new encounters were added to the templates), run:
+
+```bash
+npm run seed:force
+# or npm run seed -- --force
+```
+
+**Warning:** Using the force flag will overwrite existing templates with the exact definition in the seed script, using an upsert operation.
+
 ## Technology Stack
 
 - **Next.js 16** - React framework

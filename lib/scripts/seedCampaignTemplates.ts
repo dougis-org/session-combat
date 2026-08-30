@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import { getDatabase } from "../db";
 import { CampaignTemplate, CampaignChapter, EncounterTemplate } from "../types";
 import { GLOBAL_USER_ID } from "../constants";
@@ -944,7 +943,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
   ),
 ];
 
-export async function seedCampaignTemplates(): Promise<{ inserted: number; skipped: number }> {
+export async function seedCampaignTemplates(options: { force?: boolean } = {}): Promise<{ inserted: number; skipped: number; updated: number }> {
   const db = await getDatabase();
   const collection = db.collection<CampaignTemplate>("campaignTemplates");
 
@@ -952,6 +951,7 @@ export async function seedCampaignTemplates(): Promise<{ inserted: number; skipp
 
   let inserted = 0;
   let skipped = 0;
+  let updated = 0;
 
   for (const template of CAMPAIGN_CATALOG) {
     const existing = await collection.findOne({
@@ -960,8 +960,18 @@ export async function seedCampaignTemplates(): Promise<{ inserted: number; skipp
     });
 
     if (existing) {
-      console.log(`  Skipping (exists): ${template.name}`);
-      skipped++;
+      if (options.force) {
+        await collection.updateOne(
+          { name: template.name, userId: GLOBAL_USER_ID },
+          { $set: template },
+          { upsert: true }
+        );
+        console.log(`  Force updated: ${template.name}`);
+        updated++;
+      } else {
+        console.log(`  Skipping (exists): ${template.name}`);
+        skipped++;
+      }
       continue;
     }
 
@@ -970,12 +980,13 @@ export async function seedCampaignTemplates(): Promise<{ inserted: number; skipp
     inserted++;
   }
 
-  console.log(`\nDone. Inserted: ${inserted}, Skipped: ${skipped}`);
-  return { inserted, skipped };
+  console.log(`\nDone. Inserted: ${inserted}, Updated: ${updated}, Skipped: ${skipped}`);
+  return { inserted, skipped, updated };
 }
 
 export async function runCli(): Promise<void> {
-  await seedCampaignTemplates();
+  const force = process.argv.includes("--force");
+  await seedCampaignTemplates({ force });
   process.exit(0);
 }
 
