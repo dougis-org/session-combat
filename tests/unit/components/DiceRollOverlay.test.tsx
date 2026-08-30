@@ -171,15 +171,18 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
     expect(screen.getByRole('dialog')).toHaveTextContent('14')
   })
 
-  it('reveals the modal immediately when the dice engine is unsupported, with no empty canvas band', () => {
+  it('reveals the modal immediately when unsupported and collapses the canvas band (host stays mounted)', () => {
     render(
       <DiceRollOverlay built={built} disableAnimation={false} animationStatus="unsupported" onClose={jest.fn()} />,
     )
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.queryByTestId('dice-roll-canvas')).not.toBeInTheDocument()
+    // host stays in the DOM (dice-box has no destroy) but reserves no layout space
+    const canvas = screen.getByTestId('dice-roll-canvas')
+    expect(canvas).toHaveClass('hidden')
+    expect(canvas.className).not.toContain('h-[38vh]')
   })
 
-  it('reveals the modal via the fallback timeout without cutting the tumble', () => {
+  it('reveals the modal via the fallback timeout, keeping the canvas host mounted but collapsed', () => {
     jest.useFakeTimers()
     try {
       render(<DiceRollOverlay built={built} disableAnimation={false} onClose={jest.fn()} />)
@@ -188,11 +191,18 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
         jest.advanceTimersByTime(MODAL_REVEAL_FALLBACK_MS)
       })
       expect(screen.getByRole('dialog')).toHaveTextContent('14')
-      // the canvas host stays mounted — the tumble it holds may still be live
-      expect(screen.getByTestId('dice-roll-canvas')).toBeInTheDocument()
+      expect(screen.getByTestId('dice-roll-canvas')).toHaveClass('hidden')
     } finally {
       jest.useRealTimers()
     }
+  })
+
+  it('exposes the roll result to assistive tech immediately via a live region', () => {
+    render(<DiceRollOverlay built={built} disableAnimation={false} onClose={jest.fn()} />)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    const status = screen.getByRole('status')
+    expect(status).toHaveTextContent('3d6+2 rolled 14')
+    expect(status).toHaveAttribute('aria-live', 'polite')
   })
 
   it('a click on the dice area during the tumble dismisses neither the overlay nor the panel behind it', () => {

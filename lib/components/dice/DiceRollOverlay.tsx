@@ -72,11 +72,12 @@ export function DiceRollOverlay({
   const modalRevealed =
     disableAnimation || animationStatus === 'unsupported' || animationSettled || fallbackElapsed
 
-  // Only reserve the (large) canvas band while a tumble can actually play. On the disabled /
-  // unsupported paths it would just push the modal off-centre behind a blank gap. After the
-  // fallback the canvas stays: the tumble it hosts may still be live, and unmounting the
-  // div would strand dice-box's <canvas> and its render loop (v1.1.4 exposes no destroy).
-  const showCanvas = !disableAnimation && animationStatus !== 'unsupported'
+  // The canvas host is mounted for the whole overlay lifetime whenever animation was
+  // attempted (dice-box `^1.1.4` has no `destroy`, so unmounting it mid-run would strand its
+  // <canvas> and render loop). It only *reserves layout space* while a tumble can actually
+  // be seen — on the unsupported / post-fallback paths it collapses to `hidden` so the modal
+  // stays centred instead of being pushed down behind a blank gap.
+  const reserveCanvasSpace = animationStatus !== 'unsupported' && !fallbackElapsed
 
   useEffect(() => {
     if (!root) return
@@ -143,13 +144,22 @@ export function DiceRollOverlay({
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/60">
+      {/* Convey the result to assistive tech immediately — the visual dialog is gated on the
+          tumble finishing, which can be several seconds (or the fallback window). */}
+      <p className="sr-only" role="status" aria-live="polite">
+        {built.formula} rolled {built.total}
+      </p>
       <div ref={contentRef} tabIndex={-1} className="flex flex-col items-center gap-6 outline-none">
-        {showCanvas && (
+        {!disableAnimation && (
           <div
             ref={canvasRef}
             id={DICE_ROLL_CANVAS_ID}
             data-testid="dice-roll-canvas"
-            className="pointer-events-none relative w-[90vw] max-w-[480px] h-[38vh] max-h-[340px]"
+            className={
+              reserveCanvasSpace
+                ? 'pointer-events-none relative w-[90vw] max-w-[480px] h-[38vh] max-h-[340px]'
+                : 'hidden'
+            }
           />
         )}
         {modalRevealed && (

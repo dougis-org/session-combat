@@ -59,7 +59,7 @@ host on a timeout would strand its render loop anyway. The completion signal is 
   - Keep `void animation.run()` and use only a timer: rejected — either reveals too early (bad) or too late (sluggish).
   - Wire dice-box `onRollComplete` directly into the overlay: rejected — the overlay does not own the `DiceBox`; keeping the box inside `useDiceAnimation` preserves the single-instance invariant.
 - Rationale: The promise already encodes settle timing; the overlay just needs to know. The fallback timeout is the reliability backstop for context loss / backgrounded tabs.
-- Trade-offs: Focus moves into `role="dialog"` later (during/after the tumble). The panel's inline `formula → [rolls] = total` line still renders immediately, so non-visual users get the result without waiting. Documented in Risks.
+- Trade-offs: `role="dialog"` appears later (during/after the tumble). Mitigations: on mount the overlay moves focus into its content container so keyboard/SR users are not left on the obscured panel, and a visually-hidden `role="status"` `aria-live="polite"` region in the overlay announces `"<formula> rolled <total>"` immediately — so the result reaches assistive tech without waiting for the visual modal (the panel's inline line is covered by the overlay and is not a sufficient mitigation on its own). Documented in Risks.
 
 ### Decision 3: Land the dice in the clear zone directly above the modal
 
@@ -169,9 +169,9 @@ host on a timeout would strand its render loop anyway. The completion signal is 
 - Risk/trade-off: 15 large dice pile up / clip / rest on the modal edge.
   - Impact: Total obscured.
   - Mitigation: down-scaling curve sized for 15; canvas floor margin above the modal; validate `15d6` and `120d6` in tasks.
-- Risk/trade-off: Delayed focus into the dialog for keyboard / screen-reader users.
-  - Impact: brief focus limbo during the tumble.
-  - Mitigation: inline panel result renders immediately; focus still moves to the modal when revealed.
+- Risk/trade-off: `role="dialog"` and its content appear only after the tumble, for keyboard / screen-reader users.
+  - Impact: the result would be unannounced and focus unplaced for the tumble duration (up to `MODAL_REVEAL_FALLBACK_MS`).
+  - Mitigation: the overlay moves focus into its content container on mount; a visually-hidden `role="status"` `aria-live="polite"` region announces `"<formula> rolled <total>"` immediately; focus moves to the dialog when it reveals and back to the opener on close.
 - Risk/trade-off: Regression of instant/unsupported fallback or Escape-closes-overlay-only.
   - Impact: broken overlay for no-WebGL users; panel closes on Escape.
   - Mitigation: keep existing tests green; add explicit fallback-path and dismissal regression tests.
