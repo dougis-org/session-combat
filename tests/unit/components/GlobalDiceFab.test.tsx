@@ -217,6 +217,13 @@ describe('GlobalDiceFab — roll overlay + total modal', () => {
     await user.click(screen.getByRole('button', { name: 'Add d20' }))
     await user.click(screen.getByRole('button', { name: 'Roll' }))
     await screen.findByRole('dialog', { name: /dice roll result/i })
+
+    // Picker state is cleared after a roll, so the Roll button becomes disabled
+    expect(screen.getByRole('button', { name: 'Roll' })).toBeDisabled()
+
+    // ...so we must add a die again for the next roll
+    await user.click(screen.getByRole('button', { name: 'Add d20' }))
+    expect(screen.getByRole('button', { name: 'Roll' })).not.toBeDisabled()
     await user.click(screen.getByRole('button', { name: 'Roll' }))
     expect(document.body.querySelectorAll('[data-dice-roll-overlay-root]')).toHaveLength(1)
   })
@@ -278,6 +285,8 @@ describe('GlobalDiceFab — roll overlay + total modal', () => {
       await act(async () => { pending[0](true) })
       await screen.findByRole('dialog', { name: /dice roll result/i })
 
+      // Picker state is cleared after a roll, so we must add a die again for the next roll
+      await user.click(screen.getByRole('button', { name: 'Add d20' }))
       await user.click(screen.getByRole('button', { name: 'Roll' }))
       await waitFor(() =>
         expect(screen.queryByRole('dialog', { name: /dice roll result/i })).not.toBeInTheDocument(),

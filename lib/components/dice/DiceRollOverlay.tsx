@@ -9,6 +9,56 @@ import {
   ROLL_TIMEOUT_MS,
   type DiceAnimationStatus,
 } from '@/lib/dice/useDiceAnimation'
+import { DIE_ICONS, DiceD10Icon } from '@/lib/components/icons/dice'
+import type { DieSides } from '@/lib/utils/dice'
+
+function StaticRollResult({ built }: { built: BuiltRoll }) {
+  if (built.percentileFaces && built.percentileFaces.length >= 2) {
+    const tens = built.percentileFaces[0] === 10 ? '00' : `${built.percentileFaces[0]}0`
+    const ones = built.percentileFaces[1] === 10 ? '0' : built.percentileFaces[1]
+    return (
+      <div className="flex flex-row justify-center gap-4 mt-4 mb-2">
+        <div className="relative w-16 h-16 text-gray-300">
+          <DiceD10Icon className="w-full h-full" />
+          <span className="absolute inset-0 flex items-center justify-center text-xl font-bold mt-2">
+            {tens}
+          </span>
+        </div>
+        <div className="relative w-16 h-16 text-gray-300">
+          <DiceD10Icon className="w-full h-full" />
+          <span className="absolute inset-0 flex items-center justify-center text-xl font-bold mt-2">
+            {ones}
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-row flex-wrap justify-center gap-4 mt-4 mb-2 max-w-[80vw]">
+      {built.breakdown.map((die, idx) => {
+        const Icon = DIE_ICONS[die.sides as DieSides]
+        if (!Icon) {
+          return (
+            <div key={idx} data-testid="fallback-die" className="relative w-12 h-12 text-gray-300 border-2 border-gray-400 rounded-md flex items-center justify-center">
+              <span className="text-lg font-bold">
+                {die.value}
+              </span>
+            </div>
+          )
+        }
+        return (
+          <div key={idx} className="relative w-12 h-12 text-gray-300">
+            <Icon className="w-full h-full" />
+            <span className="absolute inset-0 flex items-center justify-center text-lg font-bold">
+              {die.value}
+            </span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 /** Stable id so `@3d-dice/dice-box` can be handed a CSS selector for its mount point. */
 export const DICE_ROLL_CANVAS_ID = 'dice-roll-canvas'
@@ -190,7 +240,8 @@ export function DiceRollOverlay({
             tabIndex={-1}
             className="relative bg-gray-800 border border-gray-700 rounded-lg shadow-xl px-10 py-8 text-center"
           >
-            <p className="text-xs uppercase tracking-wide text-gray-400">{built.formula}</p>
+            <p className="text-2xl font-bold uppercase tracking-wide text-gray-400">{built.formula}</p>
+            <StaticRollResult built={built} />
             <p id="dice-roll-result-total" className="mt-1 text-5xl font-bold text-white">{built.total}</p>
           </div>
         )}

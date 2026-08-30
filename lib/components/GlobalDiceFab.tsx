@@ -76,6 +76,7 @@ export function GlobalDiceFab() {
       // the overlay/animation opens only after a shared roll is persisted, but the
       // instant inline line renders straight away.
       setResult(built)
+      dp.reset()
       if (prefs.sendToChat && presence) {
         setSendState('pending')
         const outcome = await submitRoll(built.formula, built.rolls, built.total, dp.visibility)
