@@ -1,4 +1,6 @@
-import { backfillCampaignEncounters } from "@/lib/scripts/backfillCampaignEncounters";
+/**
+ * @jest-environment node
+ */
 import { getDatabase } from "@/lib/db";
 import { storage } from "@/lib/storage";
 
@@ -9,6 +11,12 @@ describe("backfillCampaignEncounters", () => {
   let mockDb: any;
   let mockCampaignsCol: any;
   let mockTemplatesCol: any;
+  let backfillCampaignEncounters: any;
+
+  beforeAll(async () => {
+    const mod = await import("@/lib/scripts/backfillCampaignEncounters");
+    backfillCampaignEncounters = mod.backfillCampaignEncounters;
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
