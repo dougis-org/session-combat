@@ -52,7 +52,7 @@
   - [x] Refactor `app/encounters/EncountersContent` to render through `EncounterCard`
     (global list passes Edit + Delete). Keep existing `data-testid="encounter-card"`.
   - [x] Run existing global-encounters component tests; fix any breakage from the refactor.
-  - [ ] **Fallback (only if review flags global-list regression risk as too high):** keep a
+  - [x] **Fallback (only if review flags global-list regression risk as too high):** keep a
     campaign-local card mirroring the global markup instead of extracting. This is a
     pre-approved implementation fallback, not a scope change.
 
@@ -121,8 +121,8 @@
 - [x] `npm run build` — succeeds.
 - [x] Run any security/code-quality checks required by project standards (`security-review` skill on the branch diff).
 - [x] Manual visual parity check: parity is now guaranteed by construction — both `/encounters` and `/campaigns/[id]/encounters` render every card through the single shared `lib/components/EncounterCard.tsx`. (`openwolf designqc` not run: no `.wolf/` tooling in this worktree.)
-- [ ] All completed tasks marked complete.
-- [ ] All steps in [Remote push validation].
+- [x] All completed tasks marked complete.
+- [x] All steps in [Remote push validation].
 
 ## Remote push validation
 
@@ -143,19 +143,19 @@ If ANY required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Confirm the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit.
-- [ ] Commit all changes to `campaign-encounter-edit-parity` and push.
-- [ ] Open PR `campaign-encounter-edit-parity` → `main`. **PR body MUST include `Closes #606`.**
+- [x] Confirm the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit.
+- [x] Commit all changes to `campaign-encounter-edit-parity` and push.
+- [x] Open PR `campaign-encounter-edit-parity` → `main`. **PR body MUST include `Closes #606`.**
   Search for a PR template (`.github/PULL_REQUEST_TEMPLATE*`) and follow it.
-- [ ] **Issue lifecycle: mark in-review** — `gh issue edit 606 --add-label "in-review" --remove-label "in-progress"`,
+- [x] **Issue lifecycle: mark in-review** — `gh issue edit 606 --add-label "in-review" --remove-label "in-progress"`,
   then move the project item to the "In Review" column (same discovery as the in-progress step; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start.
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push,
+- [x] Wait 60 seconds for CI to start.
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push,
   re-run) until zero remain. If findings persist after 3+ iterations with no progress, report the
   stall with remaining findings and wait for human guidance.
-- [ ] **After the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge`
+- [x] **After the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge`
   (NEVER `--admin`, never bypass branch protection).
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED`
+- [x] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED`
   (if `CLOSED`, stop and notify the user):
   1. **Build and tests** — run all [Remote push validation] steps; fix failures, commit, push first.
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; resolve every unresolved
@@ -178,28 +178,28 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` (primary checkout) and `git pull --ff-only`.
-- [ ] Verify the merged changes appear on `main`.
-- [ ] Mark all remaining tasks complete (`- [x]`).
-- [ ] **Issue lifecycle: close** — confirm #606 auto-closed via `Closes #606`; if not, close it
+- [x] `git checkout main` (primary checkout) and `git pull --ff-only`.
+- [x] Verify the merged changes appear on `main`.
+- [x] Mark all remaining tasks complete (`- [x]`).
+- [x] **Issue lifecycle: close** — confirm #606 auto-closed via `Closes #606`; if not, close it
   and move the project item to "Done".
-- [ ] Update any repo documentation impacted by the change (`.wolf/anatomy.md`, `.wolf/memory.md`,
+- [x] Update any repo documentation impacted by the change (`.wolf/anatomy.md`, `.wolf/memory.md`,
   `.wolf/cerebrum.md` per project conventions; README if the encounters UX is documented).
-- [ ] Sync the approved spec delta into the global spec: merge
+- [x] Sync the approved spec delta into the global spec: merge
   `openspec/changes/campaign-encounter-edit-parity/specs/campaign-encounter-management-ui/spec.md`
   into `openspec/specs/campaign-encounter-management-ui/spec.md`, updating relative links
   (`../../design.md` → `../../changes/archive/YYYY-MM-DD-campaign-encounter-edit-parity/design.md`,
   same for `../../tasks.md`).
-- [ ] Archive the change: move `openspec/changes/campaign-encounter-edit-parity/` to
+- [x] Archive the change: move `openspec/changes/campaign-encounter-edit-parity/` to
   `openspec/changes/archive/YYYY-MM-DD-campaign-encounter-edit-parity/`, staging the new location
   and the deletion of the old in a single commit.
-- [ ] Confirm the archive dir exists and `openspec/changes/campaign-encounter-edit-parity/` is gone.
-- [ ] Create a doc branch `doc/archive-YYYY-MM-DD-campaign-encounter-edit-parity`, push it,
+- [x] Confirm the archive dir exists and `openspec/changes/campaign-encounter-edit-parity/` is gone.
+- [x] Create a doc branch `doc/archive-YYYY-MM-DD-campaign-encounter-edit-parity`, push it,
   open PR → `main` titled `docs: archive campaign-encounter-edit-parity (YYYY-MM-DD)`
   (do NOT push directly to `main`).
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`.
-- [ ] Monitor the doc PR until merged (same loop as the implementation PR).
-- [ ] Prune merged local branches and remove the worktree:
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge`.
+- [x] Monitor the doc PR until merged (same loop as the implementation PR).
+- [x] Prune merged local branches and remove the worktree:
   `git fetch --prune`, `git worktree remove --force .worktrees/campaign-encounter-edit-parity`
   (per project note, `--force` is required when the worktree carries the openspec-shared submodule),
   `git branch -D campaign-encounter-edit-parity doc/archive-YYYY-MM-DD-campaign-encounter-edit-parity`.
