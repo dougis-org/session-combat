@@ -2,19 +2,19 @@
 
 ## Preparation
 
-- [x] **Step 1 — Sync default branch:** `git checkout <default-branch>` and `git pull --ff-only`
-- [x] **Step 2 — Create and publish working branch:** `git checkout -b <feature-branch-name>` then immediately `git push -u origin <feature-branch-name>`
+- [ ] **Step 1 — Sync default branch:** `git checkout <default-branch>` and `git pull --ff-only`
+- [ ] **Step 2 — Create and publish working branch:** `git checkout -b <feature-branch-name>` then immediately `git push -u origin <feature-branch-name>`
 
 ## Preflight
 
-- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [x] **Issue lifecycle: mark in-progress** _(skip if change is not issue-driven)_: run `gh issue edit #N --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner <owner> --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner <owner> --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [x] Implement sub-tasks in small, testable increments
-- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch
-- [x] Confirm acceptance criteria are covered
+- [ ] **Issue lifecycle: mark in-progress** _(skip if change is not issue-driven)_: run `gh issue edit #N --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner <owner> --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner <owner> --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [ ] Implement sub-tasks in small, testable increments
+- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch
+- [ ] Confirm acceptance criteria are covered
 
 **Sub-tasks:**
 - [x] Update `lib/types.ts`: Define `EncounterTemplate` and add `encounters?: EncounterTemplate[]` to the `CampaignTemplate` interface.
@@ -65,14 +65,14 @@ Use the project's documented commands for each of the above (see project README 
 
 ## PR and Merge
 
-- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [x] Commit all changes to the working branch and push to remote
-- [x] Open PR from working branch to `<default-branch>`. **If this change is issue-driven, the PR body MUST include `Closes #N` for each linked issue** (unconditionally, not as an optional conditional).
-- [x] **Issue lifecycle: mark in-review** _(skip if change is not issue-driven)_: run `gh issue edit #N --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [x] Wait 60 seconds for CI to start
-- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
+- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [ ] Commit all changes to the working branch and push to remote
+- [ ] Open PR from working branch to `<default-branch>`. **If this change is issue-driven, the PR body MUST include `Closes #N` for each linked issue** (unconditionally, not as an optional conditional).
+- [ ] **Issue lifecycle: mark in-review** _(skip if change is not issue-driven)_: run `gh issue edit #N --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [ ] Wait 60 seconds for CI to start
+- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -93,17 +93,17 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [x] `git checkout <default-branch>` and `git pull --ff-only`
-- [x] Verify the merged changes appear on the default branch
-- [x] Mark all remaining tasks as complete (`- [x]`)
-- [x] Update repository documentation impacted by the change
-- [x] Sync approved spec deltas into `openspec/specs/` (global spec). After copying each `spec.md` to `openspec/specs/<cap>/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-<name>/design.md`, and similarly for `../../tasks.md` and any other relative paths into the change directory.
-- [x] Archive the change: move `openspec/changes/<name>/` to `openspec/changes/archive/YYYY-MM-DD-<name>/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
-- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-<name>/` exists and `openspec/changes/<name>/` is gone
-- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-<name>` then `git push -u origin doc/archive-YYYY-MM-DD-<name>`
-- [x] Open a PR from `doc/archive-YYYY-MM-DD-<name>` to `<default-branch>` with title `docs: archive <name> (YYYY-MM-DD)` — **do NOT push directly to `<default-branch>`**
-- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [x] Prune merged local branches: `git fetch --prune` and `git branch -D <feature-branch> doc/archive-YYYY-MM-DD-<name>`
+- [ ] `git checkout <default-branch>` and `git pull --ff-only`
+- [ ] Verify the merged changes appear on the default branch
+- [ ] Mark all remaining tasks as complete (`- [x]`)
+- [ ] Update repository documentation impacted by the change
+- [ ] Sync approved spec deltas into `openspec/specs/` (global spec). After copying each `spec.md` to `openspec/specs/<cap>/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-<name>/design.md`, and similarly for `../../tasks.md` and any other relative paths into the change directory.
+- [ ] Archive the change: move `openspec/changes/<name>/` to `openspec/changes/archive/YYYY-MM-DD-<name>/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
+- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-<name>/` exists and `openspec/changes/<name>/` is gone
+- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-<name>` then `git push -u origin doc/archive-YYYY-MM-DD-<name>`
+- [ ] Open a PR from `doc/archive-YYYY-MM-DD-<name>` to `<default-branch>` with title `docs: archive <name> (YYYY-MM-DD)` — **do NOT push directly to `<default-branch>`**
+- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
+- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D <feature-branch> doc/archive-YYYY-MM-DD-<name>`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D <feature-branch> doc/archive-YYYY-MM-DD-<name>`
