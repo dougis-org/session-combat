@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { useDiceAnimation } from '@/lib/dice/useDiceAnimation'
+import { DICE_BASE_SCALE, diceAnimationScale } from '@/lib/dice/diceAnimationScale'
 
 const rollMock = jest.fn().mockResolvedValue([])
 const initMock = jest.fn().mockResolvedValue(undefined)
@@ -120,6 +121,61 @@ describe('useDiceAnimation — single-instance invariant', () => {
       await result.current.run(built, container)
     })
     expect(rollMock).toHaveBeenCalledWith('2d6@3,4')
+  })
+
+  function poolBuilt(n: number): BuiltRoll {
+    const breakdown = Array.from({ length: n }, () => ({ sides: 6, value: 3 }))
+    return { formula: `${n}d6`, rolls: breakdown.map(d => d.value), total: n * 3, breakdown, modifier: 0 }
+  }
+
+  it('constructs DiceBox with an enlarged base scale for a 6-die roll', async () => {
+    stubWebGL(true)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    await act(async () => {
+      await result.current.run(poolBuilt(6), container)
+    })
+    expect(ctorMock.mock.calls[0][0].scale).toBe(DICE_BASE_SCALE)
+  })
+
+  it('constructs DiceBox with a reduced scale when more than 6 dice animate', async () => {
+    stubWebGL(true)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    await act(async () => {
+      await result.current.run(poolBuilt(12), container)
+    })
+    expect(ctorMock.mock.calls[0][0].scale).toBe(diceAnimationScale(12))
+    expect(ctorMock.mock.calls[0][0].scale).toBeLessThan(DICE_BASE_SCALE)
+  })
+
+  it('caps the scale count at 15 for very large pools', async () => {
+    stubWebGL(true)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    await act(async () => {
+      await result.current.run(poolBuilt(120), container)
+    })
+    expect(ctorMock.mock.calls[0][0].scale).toBe(diceAnimationScale(15))
+  })
+
+  it('run() does not resolve until the mocked box.roll() resolves', async () => {
+    stubWebGL(true)
+    let resolveRoll: ((v: unknown) => void) | undefined
+    rollMock.mockImplementationOnce(() => new Promise(res => { resolveRoll = res }))
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+
+    let settled = false
+    await act(async () => {
+      const p = result.current.run(poolBuilt(2), container).then(() => { settled = true })
+      await new Promise(r => setTimeout(r, 0))
+      expect(rollMock).toHaveBeenCalled()
+      expect(settled).toBe(false)
+      resolveRoll!(undefined)
+      await p
+    })
+    expect(settled).toBe(true)
   })
 
   it('constructs DiceBox with a single config object carrying a CSS selector string', async () => {

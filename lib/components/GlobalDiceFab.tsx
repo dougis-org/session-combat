@@ -19,6 +19,9 @@ export function GlobalDiceFab() {
   const { user } = useAuth()
   const [result, setResult] = useState<BuiltRoll | null>(null)
   const [overlayRoll, setOverlayRoll] = useState<BuiltRoll | null>(null)
+  const [animationSettled, setAnimationSettled] = useState(false)
+  // Bumped per roll so the overlay remounts and re-gates its modal for each new roll.
+  const [rollSeq, setRollSeq] = useState(0)
   const [presence, setPresence] = useState<DicePresence | null>(null)
   const [sendState, setSendState] = useState<SendState>('idle')
   const [triggerTooltip, setTriggerTooltip] = useState(false)
@@ -29,6 +32,9 @@ export function GlobalDiceFab() {
   // mid-flight — `sendState === 'pending'` only covers the shared-submit path, not a
   // local roll, so without this two overlays / animations could stack.
   const rollInFlightRef = useRef(false)
+  // Identifies the current animation run so a previous roll's tumble settling late cannot
+  // reveal the new roll's modal prematurely.
+  const runSeqRef = useRef(0)
 
   const dp = useDicePoolState({ triggerRef, panelRef })
   const { submitRoll } = useRollSubmission(presence?.campaignId ?? '')
@@ -54,7 +60,11 @@ export function GlobalDiceFab() {
   const runAnimation = useCallback(
     (container: HTMLElement) => {
       if (!overlayRoll) return
-      void animation.run(overlayRoll, container)
+      const mySeq = (runSeqRef.current += 1)
+      setAnimationSettled(false)
+      void animation.run(overlayRoll, container).then(() => {
+        if (runSeqRef.current === mySeq) setAnimationSettled(true)
+      })
     },
     [animation, overlayRoll],
   )
@@ -76,6 +86,8 @@ export function GlobalDiceFab() {
       } else {
         setSendState('idle')
       }
+      setAnimationSettled(false)
+      setRollSeq(seq => seq + 1)
       setOverlayRoll(built)
     } finally {
       rollInFlightRef.current = false
@@ -216,10 +228,14 @@ export function GlobalDiceFab() {
       )}
       {overlayRoll && (
         <DiceRollOverlay
+          key={rollSeq}
           built={overlayRoll}
           disableAnimation={prefs.disableAnimation}
           onClose={closeOverlay}
           onCanvasReady={runAnimation}
+          animationSettled={animationSettled}
+          animationStatus={animation.status}
+          onAnimationAbort={animation.teardown}
         />
       )}
     </>

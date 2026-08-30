@@ -230,6 +230,64 @@ describe('GlobalDiceFab — roll overlay + total modal', () => {
     await waitFor(() => expect(runMock).toHaveBeenCalledTimes(1))
   })
 
+  it('the total modal stays hidden until the animation settles, then shows built.total', async () => {
+    mockAuthed()
+    let resolveRun!: (v: unknown) => void
+    runMock.mockImplementationOnce(() => new Promise(res => { resolveRun = res }))
+    mockedRollDicePool.mockReturnValue([{ sides: 20, value: 14 }])
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    await open(user)
+    await user.click(screen.getByRole('button', { name: 'Add d20' }))
+    await user.click(screen.getByRole('button', { name: 'Roll' }))
+
+    // inline result renders immediately; the overlay modal does not
+    expect(screen.getByText(/1d20 →/)).toBeInTheDocument()
+    await waitFor(() => expect(runMock).toHaveBeenCalledTimes(1))
+    expect(screen.queryByRole('dialog', { name: /dice roll result/i })).not.toBeInTheDocument()
+
+    await act(async () => { resolveRun(undefined) })
+    const dialog = await screen.findByRole('dialog', { name: /dice roll result/i })
+    expect(dialog).toHaveTextContent('14')
+  })
+
+  it('a 120d6 pool shows the full-pool total in the modal even though the tumble is capped', async () => {
+    mockAuthed()
+    mockedRollDicePool.mockReturnValue(Array.from({ length: 120 }, () => ({ sides: 6, value: 4 })))
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    await open(user)
+    await user.click(screen.getByRole('button', { name: 'Add d6' }))
+    await user.click(screen.getByRole('button', { name: 'Roll' }))
+    const dialog = await screen.findByRole('dialog', { name: /dice roll result/i })
+    expect(dialog).toHaveTextContent('480')
+  })
+
+  it('a second roll re-gates the modal', async () => {
+    mockAuthed()
+    const pending: Array<(v: unknown) => void> = []
+    try {
+      runMock.mockImplementation(() => new Promise(res => { pending.push(res) }))
+      const user = userEvent.setup()
+      render(<GlobalDiceFab />)
+      await open(user)
+      await user.click(screen.getByRole('button', { name: 'Add d20' }))
+      await user.click(screen.getByRole('button', { name: 'Roll' }))
+      await waitFor(() => expect(runMock).toHaveBeenCalledTimes(1))
+      await act(async () => { pending[0](undefined) })
+      await screen.findByRole('dialog', { name: /dice roll result/i })
+
+      await user.click(screen.getByRole('button', { name: 'Roll' }))
+      await waitFor(() =>
+        expect(screen.queryByRole('dialog', { name: /dice roll result/i })).not.toBeInTheDocument(),
+      )
+      expect(document.body.querySelectorAll('[data-dice-roll-overlay-root]')).toHaveLength(1)
+    } finally {
+      runMock.mockReset()
+      runMock.mockResolvedValue(undefined)
+    }
+  })
+
   it('"Disable animation" checked → overlay opens with total modal, no canvas, seam not run', async () => {
     mockAuthed()
     const user = userEvent.setup()

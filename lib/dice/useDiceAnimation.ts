@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
-import { toDiceBoxNotation } from '@/lib/dice/toDiceBoxNotation'
+import { animatedDiceCount, toDiceBoxNotation } from '@/lib/dice/toDiceBoxNotation'
+import { diceAnimationScale } from '@/lib/dice/diceAnimationScale'
 
 /** `'idle'` while the 3D path is (or may be) usable; `'unsupported'` once it has failed. */
 export type DiceAnimationStatus = 'idle' | 'unsupported'
@@ -116,6 +117,9 @@ export function useDiceAnimation(): DiceAnimation {
           container: `#${container.id}`,
           assetPath: ASSET_PATH,
           theme: 'default',
+          // Enlarge the dice well past the library default (5) and shrink them progressively
+          // once more than six animate, so the settled cluster fits above the result modal.
+          scale: diceAnimationScale(animatedDiceCount(built)),
         }) as unknown as DiceBoxLike
         await withTimeout(box.init(), INIT_TIMEOUT_MS)
       } catch (err) {
