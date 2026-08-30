@@ -99,41 +99,154 @@ The system SHALL close the standalone dice modal when the user presses Escape or
 
 ### Requirement: MODIFIED "Send to session chat" option appears only while a matching campaign session is present
 
-_(Modified 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL show a "send to session chat" control in the modal only while the dice-session bridge (see `dice-session-bridge` capability) reports a non-null presence, and SHALL omit it otherwise. Choosing to send SHALL call the shared roll-submission capability (`lib/dice/useRollSubmission.ts`, see `dice-pool-shared-state` capability) directly with the current presence's `campaignId` and the rolled `{formula, rolls, total, visibility}`, rather than routing the request through `lib/dice/diceSessionBridge.ts`'s `requestRoll`.
+_(Modified 2026-08-29, `decouple-dice-roll-capability`; modified again 2026-08-30, `add-dice-roll-animation`.)_ The system SHALL replace the post-roll "send to session chat" **button** with a persisted **checkbox** in the dice panel, shown only while the dice-session bridge (see `dice-session-bridge` capability) reports a non-null presence and omitted otherwise. When the checkbox is checked **and** a matching campaign session is present, clicking Roll (or the percentile control) SHALL submit the roll via the shared roll-submission capability (`lib/dice/useRollSubmission.ts`, see `dice-pool-shared-state` capability) with the current presence's `campaignId` and the rolled `{formula, rolls, total, visibility}` — the POST body SHALL be unchanged. The dice animation SHALL begin only after the submission resolves to `'success'` (HTTP 201). When the checkbox is unchecked, or no session presence exists, the roll SHALL be local only, SHALL issue no HTTP request, and the animation SHALL begin immediately. The checkbox state SHALL be persisted to `localStorage` and restored on mount. A failed persistence SHALL still animate the local result and show the existing retry affordance.
 
 #### Scenario: Option hidden with no presence
 
-- **Given** the modal is open and no presence has been announced (the user is not on a campaign page with an active session)
-- **When** the user rolls
-- **Then** no "send to session chat" control is shown alongside the result
+- **Given** the dice panel is open and no presence has been announced
+- **When** the panel is displayed
+- **Then** no "send to session chat" checkbox is shown
 
-#### Scenario: Option shown once presence is announced
+#### Scenario: Checked with an active session persists the roll before animating
 
-- **Given** the user is on a campaign page whose `CampaignChat` has announced presence for `{campaignId, sessionId}`
-- **When** the user opens the fab's modal and rolls
-- **Then** a "send to session chat" control is shown alongside the result
+- **Given** presence is `{campaignId: "camp-1", sessionId: "sess-1"}` and the "send to
+  session chat" checkbox is checked
+- **When** the user clicks Roll
+- **Then** `submitRoll` is called exactly once with `campaignId: "camp-1"` and the rolled
+  `{formula, rolls, total, visibility}` (no extra fields)
+- **And** the dice animation does not begin until `submitRoll` resolves
+- **And** on a `'success'` result `sendState` transitions to `'sent'` and the animation
+  then plays
 
-#### Scenario: Choosing to send submits the roll directly, using current presence
+#### Scenario: Unchecked makes a local roll with no network request
 
-- **Given** presence is currently `{campaignId: "camp-1", sessionId: "sess-1"}` and the
-  user has just rolled
-- **When** the user clicks "send to session chat"
-- **Then** the fab calls the shared `submitRoll` function with `campaignId: "camp-1"` and
-  the rolled `{formula, rolls, total, visibility}`, using the *current* presence value at
-  the time of the click, not a value cached from when the modal was opened, and awaits its
-  `'success' | 'conflict' | 'error'` result directly (no `onResult` callback indirection)
+- **Given** presence exists but the "send to session chat" checkbox is unchecked
+- **When** the user clicks Roll
+- **Then** no HTTP request is issued and `submitRoll` is not called
+- **And** the animation begins immediately
 
-#### Scenario: Successful send updates sendState from the direct submission result
+#### Scenario: No session presence makes a local roll even if the box is checked
 
-- **Given** the user has clicked "send to session chat"
-- **When** `submitRoll` resolves to `'success'`
-- **Then** `sendState` transitions to `'sent'` and the confirmation message is shown
+- **Given** no dice-session presence has been announced and the checkbox is checked
+- **When** the user clicks Roll
+- **Then** no HTTP request is issued and the animation begins immediately
 
-#### Scenario: Conflict or error result updates sendState to failed
+#### Scenario: Failed persistence still animates the local result and offers retry
 
-- **Given** the user has clicked "send to session chat"
+- **Given** the checkbox is checked, presence exists, and the user clicks Roll
 - **When** `submitRoll` resolves to `'conflict'` or `'error'`
-- **Then** `sendState` transitions to `'failed'` and the retry affordance is shown
+- **Then** `sendState` transitions to `'failed'`, the existing retry affordance is shown
+- **And** the dice animation still plays and the total modal is still shown for the
+  already-decided local result
+- **And** no exception is thrown
+
+#### Scenario: Checkbox state persists across remount
+
+- **Given** the user checks the "send to session chat" checkbox
+- **When** the component unmounts and remounts while presence still exists
+- **Then** the checkbox is still checked
+
+---
+
+### Requirement: ADDED Rolling plays a dice animation then a total modal
+
+_(Added 2026-08-30, `add-dice-roll-animation`.)_ The system SHALL, when the user rolls in `GlobalDiceFab` (a pool roll or a percentile roll), present a dice-roll overlay that animates the staged dice coming to rest on their already-decided face values and then displays a modal showing the roll total. The roll outcome SHALL be decided before the animation begins, by the existing `buildRoll()` / `buildPercentileRoll()` path (see `dice-pool-shared-state` capability); the animation SHALL only visually settle on faces already chosen and SHALL NOT introduce any new randomness or HTTP request of its own. The overlay SHALL be rendered through a lazily created `document.body` overlay root, layered above the dice panel. No more than `DICE_ANIM_CAP` (30) dice SHALL be animated regardless of pool size; the total modal and inline result SHALL always show the exact total.
+
+#### Scenario: Pool roll animates the staged dice and shows the total
+
+- **Given** the dice panel is open with a staged pool of `2d20+1d6` and modifier `+3`
+- **When** the user clicks Roll
+- **Then** the overlay opens showing a dice animation of 2 d20 dice and 1 d6 die, each
+  settling on the value from the built roll's per-die breakdown
+- **And** when the dice settle, a modal is shown displaying the roll total equal to
+  `built.total`
+- **And** the inline `formula → [rolls] = total` result line is also rendered in the panel
+
+#### Scenario: Percentile roll animates two d10s and shows the decoded value
+
+- **Given** the dice panel is open
+- **When** the user clicks the percentile control
+- **Then** the overlay opens showing two d10 dice settling on the built roll's
+  `percentileFaces`
+- **And** the total modal displays the single decoded value in 1..100 equal to `built.total`
+
+#### Scenario: Animation is skipped when animation is disabled
+
+- **Given** the resolved "Disable Animation" preference is `true`
+- **When** the user rolls
+- **Then** the overlay opens immediately with the total modal and no dice tumble is played
+- **And** the inline result line still renders
+
+#### Scenario: Roll outcome is decided before the animation starts
+
+- **Given** any staged pool
+- **When** the user rolls
+- **Then** the per-die values shown by the animation are exactly those in the built roll's
+  breakdown, and no die value is generated or altered during or after the animation
+
+#### Scenario: Large pools animate a capped subset
+
+- **Given** a staged pool of 120 dice (e.g. `120d6`)
+- **When** the user rolls with animation enabled
+- **Then** no more than `DICE_ANIM_CAP` (30) dice are animated
+- **And** the total modal and inline result show the exact total for all 120 dice
+
+---
+
+### Requirement: ADDED Dismissing the roll overlay leaves the dice panel open
+
+_(Added 2026-08-30, `add-dice-roll-animation`.)_ The system SHALL keep the dice-roll overlay and its total modal visible until the user dismisses them by pressing Escape or clicking/tapping outside the modal. Dismissal SHALL close only the overlay; the `GlobalDiceFab` dice panel SHALL remain open with the staged pool and modifier unchanged. The overlay's key/pointer dismissal handling SHALL take precedence over the dice panel's own Escape/outside-click close (see `dice-pool-shared-state` capability) so that a single Escape press does not also close the panel. A new roll while an overlay is open SHALL tear down that overlay and show a single new one (never two stacked overlays).
+
+#### Scenario: Escape closes only the overlay
+
+- **Given** the overlay with its total modal is open above the dice panel, and the panel
+  has a staged pool of `3d6`
+- **When** the user presses Escape once
+- **Then** the overlay and total modal are removed from the document
+- **And** the dice panel is still open with the `3d6` pool and modifier intact
+
+#### Scenario: Outside click closes only the overlay
+
+- **Given** the overlay with its total modal is open
+- **When** the user clicks outside the modal content
+- **Then** the overlay is removed and the dice panel remains open
+
+#### Scenario: A new roll replaces an open overlay
+
+- **Given** the overlay is open from a previous roll
+- **When** the user rolls again
+- **Then** the previous overlay is torn down and a single new overlay is shown
+
+---
+
+### Requirement: ADDED Animation preference follows reduced-motion until explicitly set
+
+_(Added 2026-08-30, `add-dice-roll-animation`.)_ The system SHALL provide a "Disable Animation" checkbox in the dice panel. Its resolved value SHALL be: the user's explicitly stored choice when one exists, otherwise the value of `prefers-reduced-motion: reduce`. The first time the user toggles the checkbox, the choice SHALL be persisted to `localStorage` and SHALL take precedence over the media query from then on, even if the media query later changes. Storage being unavailable SHALL degrade to an in-session value without throwing.
+
+#### Scenario: No stored choice, reduced motion requested
+
+- **Given** no stored animation preference and `prefers-reduced-motion: reduce` matches
+- **When** the dice panel opens
+- **Then** the "Disable Animation" checkbox is checked and rolls skip the tumble
+
+#### Scenario: No stored choice, reduced motion not requested
+
+- **Given** no stored animation preference and `prefers-reduced-motion: reduce` does not match
+- **When** the dice panel opens
+- **Then** the "Disable Animation" checkbox is unchecked and rolls play the tumble
+
+#### Scenario: Explicit choice overrides the media query
+
+- **Given** the user has explicitly unchecked "Disable Animation" and
+  `prefers-reduced-motion: reduce` matches
+- **When** the user rolls
+- **Then** the tumble is played, because the stored explicit choice wins over the media query
+
+#### Scenario: Preference persists across remount
+
+- **Given** the user checks "Disable Animation"
+- **When** the component unmounts and remounts
+- **Then** the checkbox is still checked
 
 ---
 
@@ -171,6 +284,10 @@ _(Added 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL cause `G
 - Design decision 1 (global fab + modal, root-layout mount) → Requirements: all ADDED requirements in this capability
 - Design decision 1 (Panel Positioning strategy) → Requirements: MODIFIED Global Dice Panel Positioning
 - (2026-08-29, `decouple-dice-roll-capability`) Proposal "What Changes" (`GlobalDiceFab` updated to submit directly) → Requirements: MODIFIED "Send to session chat" option, ADDED Sending to session chat succeeds whether or not CampaignChat is mounted
+- (2026-08-30, `add-dice-roll-animation`) 3D animation of staged dice + total modal → Requirement: ADDED Rolling plays a dice animation then a total modal
+- (2026-08-30, `add-dice-roll-animation`) overlay persists, dismiss closes only the overlay → Requirement: ADDED Dismissing the roll overlay leaves the dice panel open
+- (2026-08-30, `add-dice-roll-animation`) "Disable Animation" checkbox, reduced-motion default, stored override → Requirement: ADDED Animation preference follows reduced-motion until explicitly set
+- (2026-08-30, `add-dice-roll-animation`) "Send to session chat" → persisted checkbox, auto-submit on Roll, animate after persist → Requirement: MODIFIED "Send to session chat" option. See `openspec/changes/archive/2026-08-30-add-dice-roll-animation/tasks.md`.
 - Design decision 2 (Instant Tooltips implementation) → Requirements: ADDED Instant tooltips for dice buttons
 - Requirement → Task(s): see `openspec/changes/archive/2026-08-22-decouple-dice-panel-from-chat/tasks.md`, "GlobalDiceFab" task group
 
@@ -183,6 +300,39 @@ _(Added 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL cause `G
 - **Given** the fab is rendered on a page but the modal has never been opened
 - **When** the page's DOM is inspected
 - **Then** no modal DOM subtree exists until the user first opens it (mirrors the existing content-driven, mount-on-open pattern already used for the in-chat dice pop-out)
+
+#### Scenario: Dice animation code is not in the initial bundle
+
+_(Added 2026-08-30, `add-dice-roll-animation`.)_
+
+- **Given** a production build of the app
+- **When** the entry/first-load JavaScript chunks are inspected
+- **Then** the 3D dice library package (`@3d-dice/dice-box`) and its runtime assets are
+  absent from them, and are requested only when the first animated roll needs them
+
+### Reliability — roll animation
+
+_(Added 2026-08-30, `add-dice-roll-animation`.)_
+
+#### Scenario: Roll result survives an animation failure
+
+- **Given** WebGL is unavailable, or the 3D library assets fail to load or time out
+- **When** the user rolls
+- **Then** the overlay opens with the total modal and no dice canvas
+- **And** the inline `formula → [rolls] = total` result is shown
+- **And** for the remainder of the session, rolls use the instant path without retrying the
+  failed asset load
+
+### Operability — roll animation
+
+_(Added 2026-08-30, `add-dice-roll-animation`.)_
+
+#### Scenario: Animation failure is logged once and not shown to the user
+
+- **Given** the 3D library fails to initialize
+- **When** the fallback to the instant path occurs
+- **Then** a single diagnostic event is emitted via the existing client logging seam
+- **And** no error message or broken overlay is presented to the user
 
 ### Security
 

@@ -8,7 +8,30 @@ Provide shared, component-agnostic hooks for dice-pool selection state (`useDice
 
 The system SHALL provide a single `lib/dice/useDicePoolState.ts` module exposing pool selection state (staged count per die size, shared modifier, `poolTotal`, open/close state for a panel keyed to a trigger/panel ref pair, a `buildRoll()` function producing `{formula, rolls, total}` from the current pool via the existing `rollDicePool`, `buildPoolFormula`, and `getActiveDiceGroups` utilities, and a `buildPercentileRoll()` function producing `{formula, rolls, total}` for a standalone percentile roll), used identically by both the chat-docked dice panel and `GlobalDiceFab`, replacing the two independent copies of this state machine that exist today.
 
+_(Modified 2026-08-30, `add-dice-roll-animation`.)_ `buildRoll()` SHALL **additionally** return `breakdown: { sides: number; value: number }[]` (one entry per individual die, preserving the per-die size from `rollDicePool`) and `modifier: number` (the clamped applied modifier); the `formula`, `rolls`, and `total` fields SHALL be byte-for-byte identical to their pre-change values. `buildPercentileRoll()` SHALL **additionally** return `percentileFaces: [tensFace, onesFace]` (the two physical d10 faces from `rollPercentile()`). These additional fields SHALL be additive only: consumers that read `formula` / `rolls` / `total`, and the roll-submission payload (`{formula, rolls, total, visibility}`), SHALL be unaffected.
+
 `buildPercentileRoll()` SHALL delegate to the centralized `rollPercentile()` helper (see `dice-rolling` capability) and return `{ formula: "d%", rolls: [value], total: value }` where `value` is the decoded percentile result (1..100). It SHALL NOT read the staged pool or the shared modifier.
+
+#### Scenario: Built rolls carry a per-die breakdown without changing the submission payload
+
+- **Given** a staged pool of `2d20+1d6` with modifier `+3`
+- **When** `buildRoll()` is called
+- **Then** it returns `formula`, `rolls`, and `total` exactly as before
+- **And** it also returns `breakdown` with 3 entries — two `{ sides: 20, value }` and one
+  `{ sides: 6, value }` — whose `value`s sum with `modifier` (`3`) to equal `total`
+- **And** it also returns `modifier: 3`
+- **And** when this roll is submitted, the POST body to `/api/campaigns/[id]/rolls` contains
+  only `{formula, rolls, total, visibility}` — no `breakdown` or `modifier` field
+
+#### Scenario: Built percentile rolls carry the two physical d10 faces
+
+- **Given** any staged pool contents and any modifier
+- **When** `buildPercentileRoll()` is called
+- **Then** it returns `{ formula: "d%", rolls: [value], total: value }` with `value` in
+  1..100 as before
+- **And** it also returns `percentileFaces: [tensFace, onesFace]`, each in 1..10, which
+  decode (tens `% 10` * 10 + ones `% 10`, with `0` → `100`) to `value`
+- **And** no HTTP request is issued and the staged pool and modifier are unchanged
 
 #### Scenario: Both consumers observe identical pool-selection behavior
 
@@ -80,3 +103,4 @@ The system SHALL provide a single `lib/dice/useRollSubmission.ts` module exposin
 - Design decision 1 (`useDicePoolState`/`useRollSubmission` split) → Requirements: both
   requirements in this capability
 - Requirement → Task(s): see `openspec/changes/archive/2026-08-29-decouple-dice-roll-capability/tasks.md`, "Shared dice hooks" task group
+- (2026-08-30, `add-dice-roll-animation`) Additive `BuiltRoll` data seam (`breakdown` / `modifier` / `percentileFaces`) → Requirement: MODIFIED Shared dice-pool selection state usable by any trigger UI. See `openspec/changes/archive/2026-08-30-add-dice-roll-animation/tasks.md`, task group E1.

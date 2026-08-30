@@ -124,7 +124,7 @@ All work happens inside `.worktrees/add-dice-roll-animation`, never the primary 
   Make `handleRoll` / `handlePercentileRoll` async: `build → (if sendToChat && presence:
   await submitRoll, set sendState) → animate (or instant) → setResult`. Disable Roll +
   percentile controls while `sendState === 'pending'` (existing behavior — verify).
-- [ ] Update `.wolf/anatomy.md` (new files) and append to `.wolf/memory.md`.
+- [x] Update `.wolf/anatomy.md` (new files) and append to `.wolf/memory.md`.
 
 ### E6 — Spec/behaviour reconciliation
 
@@ -147,10 +147,10 @@ All work happens inside `.worktrees/add-dice-roll-animation`, never the primary 
   a free port, not 3000)
 - [x] Run type checks
 - [x] Run build (`next build`) and confirm the 3D library is not in the entry chunk
-- [ ] Run security / code-quality checks required by project standards (Verity gate — fix
+- [x] Run security / code-quality checks required by project standards (Verity gate — fix
   findings, do not `verity waive` on agent judgment)
-- [ ] All completed tasks marked complete
-- [ ] All steps in [Remote push validation]
+- [x] All completed tasks marked complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -171,24 +171,24 @@ commands (README / CLAUDE.md).
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent ran and all findings were auto-addressed
+- [x] Ensure the `openspec-review-code` sub-agent ran and all findings were auto-addressed
   before the final commit
-- [ ] Commit all changes to `add-dice-roll-animation` and push to remote
-- [ ] Open PR from `add-dice-roll-animation` → `main`. **PR body MUST include
+- [x] Commit all changes to `add-dice-roll-animation` and push to remote
+- [x] Open PR from `add-dice-roll-animation` → `main`. **PR body MUST include
   `Closes #586`** (unconditional). Search for a PR template
   (`.github/PULL_REQUEST_TEMPLATE*`) and follow it.
-- [ ] **Issue lifecycle: mark in-review** — `gh issue edit 586 --add-label "in-review"
+- [x] **Issue lifecycle: mark in-review** — `gh issue edit 586 --add-label "in-review"
   --remove-label "in-progress"`, then move the project item to the "In Review" column (same
   discovery as the in-progress step; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit,
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit,
   push, re-run) until zero findings remain. If findings persist after three or more
   iterations with no progress, report the stall with remaining findings and wait for human
   guidance.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):**
+- [x] **Enable auto-merge only after the review gate passes (zero findings):**
   `gh pr merge <PR-URL> --auto --merge` (NEVER `--admin`; never force-merge; never bypass
   branch protection)
-- [ ] **Iterate until merged** — repeat continuously until
+- [x] **Iterate until merged** — repeat continuously until
   `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and notify the
   user). Never wait for a human to report the merge:
   1. **Build and tests** — run all [Remote push validation] steps; fix failures, commit,
@@ -215,36 +215,36 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (README dice section, if any;
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (README dice section, if any;
   `.wolf/anatomy.md`; `.wolf/cerebrum.md` learnings)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy
+- [x] Sync approved spec deltas into `openspec/specs/`: copy
   `specs/global-dice-fab/spec.md` and `specs/dice-pool-shared-state/spec.md` into
   `openspec/specs/<cap>/spec.md`, merging ADDED/MODIFIED into the live requirements. Fix
   relative links: `../../design.md` → `../../changes/archive/<date>-add-dice-roll-animation/design.md`,
   same for `../../tasks.md`.
-- [ ] Archive the change: move `openspec/changes/add-dice-roll-animation/` to
+- [x] Archive the change: move `openspec/changes/add-dice-roll-animation/` to
   `openspec/changes/archive/<YYYY-MM-DD>-add-dice-roll-animation/` and stage the new
   location **and** the deletion of the old location in a **single** commit
-- [ ] Confirm the archive dir exists and `openspec/changes/add-dice-roll-animation/` is gone
-- [ ] Create a doc branch: `git checkout -b doc/archive-<YYYY-MM-DD>-add-dice-roll-animation`
+- [x] Confirm the archive dir exists and `openspec/changes/add-dice-roll-animation/` is gone
+- [x] Create a doc branch: `git checkout -b doc/archive-<YYYY-MM-DD>-add-dice-roll-animation`
   then `git push -u origin doc/archive-<YYYY-MM-DD>-add-dice-roll-animation`
-- [ ] Open a PR from that doc branch → `main`, title
+- [x] Open a PR from that doc branch → `main`, title
   `docs: archive add-dice-roll-animation (<YYYY-MM-DD>)` — do NOT push directly to `main`
-- [ ] **Immediately** enable auto-merge on the doc PR:
+- [x] **Immediately** enable auto-merge on the doc PR:
   `gh pr merge <DOC-PR-URL> --auto --merge` (never `--admin`)
-- [ ] Monitor the doc PR until merged (same loop as the implementation PR)
-- [ ] Remove the change's worktree: from the primary checkout,
+- [x] Monitor the doc PR until merged (same loop as the implementation PR)
+- [x] Remove the change's worktree: from the primary checkout,
   `git worktree remove .worktrees/add-dice-roll-animation` (use `--force` if the
   openspec-shared submodule blocks removal — memory: worktree-submodule-removal)
-- [ ] Prune merged local branches: `git fetch --prune` and
+- [x] Prune merged local branches: `git fetch --prune` and
   `git branch -D add-dice-roll-animation doc/archive-<YYYY-MM-DD>-add-dice-roll-animation`
 
 Completion checklist:
 
-- [ ] Docs updated (README, `.wolf/anatomy.md`, `.wolf/cerebrum.md`)
-- [ ] Approved spec deltas synced into `openspec/specs/` before/with archive
-- [ ] Change archived as a single atomic commit
-- [ ] Change worktree removed and merged local branches pruned
+- [x] Docs updated (README, `.wolf/anatomy.md`, `.wolf/cerebrum.md`)
+- [x] Approved spec deltas synced into `openspec/specs/` before/with archive
+- [x] Change archived as a single atomic commit
+- [x] Change worktree removed and merged local branches pruned
