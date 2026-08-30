@@ -122,7 +122,7 @@ export function useDiceAnimation(): DiceAnimation {
       teardown()
       const myRun = runIdRef.current
 
-      let box: DiceBoxLike
+      let box: DiceBoxLike | undefined
       try {
         const mod = await withTimeout(import('@3d-dice/dice-box'), IMPORT_TIMEOUT_MS, 'dice-box import')
         if (runIdRef.current !== myRun) return false
@@ -139,14 +139,25 @@ export function useDiceAnimation(): DiceAnimation {
         }) as unknown as DiceBoxLike
         await withTimeout(box.init(), INIT_TIMEOUT_MS)
       } catch (err) {
-        teardown()
-        markUnsupported(err)
+        if (runIdRef.current === myRun) {
+          // Genuine failure for the current run — latch the whole session to the instant path.
+          teardown()
+          markUnsupported(err)
+        } else if (box) {
+          // A stale run (a newer run() or teardown already superseded it): clear only our own
+          // half-built box and leave the current run's shared state untouched.
+          try {
+            box.clear()
+          } catch {
+            /* nothing to clear */
+          }
+        }
         return false
       }
 
-      if (runIdRef.current !== myRun) {
+      if (!box || runIdRef.current !== myRun) {
         try {
-          box.clear()
+          box?.clear()
         } catch {
           /* nothing to clear */
         }
