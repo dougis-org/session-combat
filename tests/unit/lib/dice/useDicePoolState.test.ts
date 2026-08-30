@@ -130,6 +130,81 @@ describe('useDicePoolState — buildRoll output', () => {
     expect(built.total).toBe(8)
   })
 
+  it('breakdown carries one {sides,value} per staged die with sizes matching the pool', () => {
+    mockedRollDicePool.mockReturnValue([
+      { sides: 20, value: 11 }, { sides: 20, value: 4 }, { sides: 6, value: 2 },
+    ])
+    const { result } = setup()
+    act(() => {
+      result.current.handleAdd(20)
+      result.current.handleAdd(20)
+      result.current.handleAdd(6)
+      result.current.setModifierText('3')
+    })
+    const built = result.current.buildRoll()
+    expect(built.breakdown).toEqual([
+      { sides: 20, value: 11 }, { sides: 20, value: 4 }, { sides: 6, value: 2 },
+    ])
+    expect(built.breakdown.filter(d => d.sides === 20)).toHaveLength(2)
+    expect(built.breakdown.filter(d => d.sides === 6)).toHaveLength(1)
+  })
+
+  it('breakdown values plus modifier sum to total; modifier field equals the clamped applied modifier', () => {
+    mockedRollDicePool.mockReturnValue([{ sides: 20, value: 11 }, { sides: 6, value: 2 }])
+    const { result } = setup()
+    act(() => {
+      result.current.handleAdd(20)
+      result.current.handleAdd(6)
+      result.current.setModifierText('3')
+    })
+    const built = result.current.buildRoll()
+    expect(built.modifier).toBe(3)
+    expect(built.breakdown.reduce((s, d) => s + d.value, 0) + built.modifier).toBe(built.total)
+  })
+
+  it('adding breakdown/modifier does not change formula/rolls/total shape', () => {
+    mockedRollDicePool.mockReturnValue([{ sides: 6, value: 3 }, { sides: 6, value: 5 }])
+    const { result } = setup()
+    act(() => {
+      result.current.handleAdd(6)
+      result.current.handleAdd(6)
+    })
+    const built = result.current.buildRoll()
+    expect(built.formula).toContain('2d6')
+    expect(built.rolls).toEqual([3, 5])
+    expect(built.total).toBe(8)
+  })
+
+  it('buildRoll issues no HTTP request', () => {
+    const fetchSpy = jest.fn()
+    const original = global.fetch
+    global.fetch = fetchSpy as unknown as typeof fetch
+    mockedRollDicePool.mockReturnValue([{ sides: 6, value: 3 }])
+    const { result } = setup()
+    act(() => result.current.handleAdd(6))
+    result.current.buildRoll()
+    expect(fetchSpy).not.toHaveBeenCalled()
+    global.fetch = original
+  })
+
+  it('buildPercentileRoll returns percentileFaces that decode to total; rolls stays [value]', () => {
+    const { result } = setup()
+    for (let i = 0; i < 50; i++) {
+      const built = result.current.buildPercentileRoll()
+      expect(built.percentileFaces).toHaveLength(2)
+      const [tens, ones] = built.percentileFaces!
+      expect(tens).toBeGreaterThanOrEqual(1)
+      expect(tens).toBeLessThanOrEqual(10)
+      expect(ones).toBeGreaterThanOrEqual(1)
+      expect(ones).toBeLessThanOrEqual(10)
+      const decoded = ((tens % 10) * 10 + (ones % 10)) || 100
+      expect(decoded).toBe(built.total)
+      expect(built.rolls).toEqual([built.total])
+      expect(built.breakdown).toEqual([])
+      expect(built.modifier).toBe(0)
+    }
+  })
+
   it('reset clears the pool and modifier', () => {
     const { result } = setup()
     act(() => {

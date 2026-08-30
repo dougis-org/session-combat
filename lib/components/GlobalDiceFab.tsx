@@ -1,35 +1,39 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { DIE_SIDES } from '@/lib/utils/dice'
 import { DiceD20Icon } from '@/lib/components/icons/dice'
 import { DiePoolButton } from '@/lib/components/dice/DiePoolButton'
 import { PercentileButton } from '@/lib/components/dice/PercentileButton'
+import { DiceRollOverlay } from '@/lib/components/dice/DiceRollOverlay'
 import { onPresenceChange, type DicePresence } from '@/lib/dice/diceSessionBridge'
 import { useDicePoolState, type BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { useRollSubmission } from '@/lib/dice/useRollSubmission'
+import { useDiceFabPreferences } from '@/lib/dice/useDiceFabPreferences'
+import { useDiceAnimation } from '@/lib/dice/useDiceAnimation'
 
 type SendState = 'idle' | 'pending' | 'sent' | 'failed'
-
-const SEND_BUTTON_LABEL: Record<Exclude<SendState, 'sent'>, string> = {
-  idle: 'Send to session chat',
-  pending: 'Sending…',
-  failed: 'Retry send',
-}
 
 export function GlobalDiceFab() {
   const { user } = useAuth()
   const [result, setResult] = useState<BuiltRoll | null>(null)
+  const [overlayRoll, setOverlayRoll] = useState<BuiltRoll | null>(null)
   const [presence, setPresence] = useState<DicePresence | null>(null)
   const [sendState, setSendState] = useState<SendState>('idle')
   const [triggerTooltip, setTriggerTooltip] = useState(false)
 
   const triggerRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  // Guards against a second Roll/percentile click landing while `performRoll` is still
+  // mid-flight — `sendState === 'pending'` only covers the shared-submit path, not a
+  // local roll, so without this two overlays / animations could stack.
+  const rollInFlightRef = useRef(false)
 
   const dp = useDicePoolState({ triggerRef, panelRef })
   const { submitRoll } = useRollSubmission(presence?.campaignId ?? '')
+  const prefs = useDiceFabPreferences()
+  const animation = useDiceAnimation()
 
   useEffect(() => onPresenceChange(setPresence), [])
 
@@ -42,7 +46,41 @@ export function GlobalDiceFab() {
     return () => { trigger?.focus() }
   }, [dp.isOpen])
 
+  const closeOverlay = useCallback(() => {
+    animation.teardown()
+    setOverlayRoll(null)
+  }, [animation])
+
+  const runAnimation = useCallback(
+    (container: HTMLElement) => {
+      if (!overlayRoll) return
+      void animation.run(overlayRoll, container)
+    },
+    [animation, overlayRoll],
+  )
+
   if (!user) return null
+
+  async function performRoll(built: BuiltRoll) {
+    if (rollInFlightRef.current) return
+    rollInFlightRef.current = true
+    try {
+      // build → inline result + (maybe persist) → animate (decisions n124 / n126):
+      // the overlay/animation opens only after a shared roll is persisted, but the
+      // instant inline line renders straight away.
+      setResult(built)
+      if (prefs.sendToChat && presence) {
+        setSendState('pending')
+        const outcome = await submitRoll(built.formula, built.rolls, built.total, dp.visibility)
+        setSendState(outcome === 'success' ? 'sent' : 'failed')
+      } else {
+        setSendState('idle')
+      }
+      setOverlayRoll(built)
+    } finally {
+      rollInFlightRef.current = false
+    }
+  }
 
   function handleOpen() {
     setResult(null)
@@ -52,17 +90,16 @@ export function GlobalDiceFab() {
   }
 
   function handleRoll() {
-    if (dp.poolTotal === 0) return
-    setResult(dp.buildRoll())
-    setSendState('idle')
+    if (dp.poolTotal === 0 || sendState === 'pending') return
+    void performRoll(dp.buildRoll())
   }
 
   function handlePercentileRoll() {
-    setResult(dp.buildPercentileRoll())
-    setSendState('idle')
+    if (sendState === 'pending') return
+    void performRoll(dp.buildPercentileRoll())
   }
 
-  async function handleSendToChat() {
+  async function handleRetry() {
     if (!result || !presence) return
     setSendState('pending')
     const outcome = await submitRoll(result.formula, result.rolls, result.total, dp.visibility)
@@ -125,6 +162,24 @@ export function GlobalDiceFab() {
               aria-label="Modifier"
               className="w-14 text-xs bg-gray-700 border border-gray-600 text-white rounded px-1 py-0.5"
             />
+            {presence && (
+              <label className="flex items-center gap-2 text-xs text-gray-200">
+                <input
+                  type="checkbox"
+                  checked={prefs.sendToChat}
+                  onChange={e => prefs.setSendToChat(e.target.checked)}
+                />
+                Send to session chat
+              </label>
+            )}
+            <label className="flex items-center gap-2 text-xs text-gray-200">
+              <input
+                type="checkbox"
+                checked={prefs.disableAnimation}
+                onChange={e => prefs.setDisableAnimation(e.target.checked)}
+              />
+              Disable animation
+            </label>
             <button
               type="button"
               onClick={handleRoll}
@@ -138,22 +193,34 @@ export function GlobalDiceFab() {
                 <div>
                   {result.formula} → [{result.rolls.join(', ')}] = <span className="font-bold text-white">{result.total}</span>
                 </div>
-                {presence && sendState !== 'sent' && (
-                  <button
-                    type="button"
-                    onClick={handleSendToChat}
-                    disabled={sendState === 'pending'}
-                    className="mt-2 text-xs bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-3 py-1 rounded"
-                  >
-                    {SEND_BUTTON_LABEL[sendState as Exclude<SendState, 'sent'>]}
-                  </button>
-                )}
+                {sendState === 'pending' && <p className="mt-2 text-xs text-gray-300">Sending…</p>}
                 {sendState === 'sent' && <p className="mt-2 text-xs text-green-400">Sent to session chat</p>}
-                {sendState === 'failed' && <p className="mt-2 text-xs text-red-400">Couldn&apos;t send to session chat — try again</p>}
+                {sendState === 'failed' && (
+                  <div className="mt-2 flex flex-col gap-1">
+                    <p className="text-xs text-red-400">Couldn&apos;t send to session chat — try again</p>
+                    {presence && (
+                      <button
+                        type="button"
+                        onClick={handleRetry}
+                        className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded self-start"
+                      >
+                        Retry send
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
+      )}
+      {overlayRoll && (
+        <DiceRollOverlay
+          built={overlayRoll}
+          disableAnimation={prefs.disableAnimation}
+          onClose={closeOverlay}
+          onCanvasReady={runAnimation}
+        />
       )}
     </>
   )
