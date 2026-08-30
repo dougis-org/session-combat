@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { rollDicePool, DIE_SIDES, EMPTY_POOL, getActiveDiceGroups, buildPoolFormula, MAX_PER_DIE, MAX_MODIFIER, type DieSides } from '@/lib/utils/dice'
+import { rollDicePool, rollPercentile, PERCENTILE_FORMULA, DIE_SIDES, EMPTY_POOL, getActiveDiceGroups, buildPoolFormula, MAX_PER_DIE, MAX_MODIFIER, type DieSides } from '@/lib/utils/dice'
 import type { RollVisibility } from '@/lib/types'
 
 const ROLL_VISIBILITY_SCOPES = ['group', 'dm-only'] as const
@@ -71,9 +71,16 @@ export function useDicePoolState({ triggerRef, panelRef }: UseDicePoolStateArgs)
     return { formula, rolls, total }
   }
 
+  // Standalone percentile roll: two d10 faces decoded to 1..100. Not a poolable
+  // die — ignores the staged pool and the shared modifier entirely.
+  function buildPercentileRoll(): BuiltRoll {
+    const { value } = rollPercentile()
+    return { formula: PERCENTILE_FORMULA, rolls: [value], total: value }
+  }
+
   return {
     isOpen, setIsOpen, pool, modifierText, setModifierText, visibility, setVisibility,
-    poolTotal, handleAdd, handleRemove, buildRoll, reset,
+    poolTotal, handleAdd, handleRemove, buildRoll, buildPercentileRoll, reset,
   }
 }
 

@@ -6,10 +6,15 @@
 //
 // Deferred future work: these are flat/static icons only. Real animated 3D dice rolls
 // (physics-based, via @3d-dice/dice-box) were explicitly scoped out of the
-// dice-roll-enhancements change — see openspec/changes/dice-roll-enhancements/design.md
-// ("Risks / Trade-offs" and "Non-Goals") — and are not built here.
+// dice-roll-enhancements change — see
+// openspec/changes/archive/2026-08-20-dice-roll-enhancements/design.md
+// ("Risks / Trade-offs" and "Goals / Non-Goals") — and are not built here.
+// Groundwork for that: `rollPercentile()` in lib/utils/dice.ts already returns the two
+// physical d10 faces (tensFace/onesFace), not just the decoded value, so the animation
+// layer can tumble two dice without a contract change.
 
 import type { ReactElement, SVGProps } from 'react'
+import type { DieSides } from '@/lib/utils/dice'
 
 type DiceIconProps = SVGProps<SVGSVGElement>
 
@@ -71,7 +76,7 @@ export function DiceD20Icon(props: DiceIconProps) {
   return <DiceIcon path={D20_PATH} {...props} />
 }
 
-export const DIE_ICONS: Record<number, (props: DiceIconProps) => ReactElement> = {
+export const DIE_ICONS: Record<DieSides, (props: DiceIconProps) => ReactElement> = {
   4: DiceD4Icon,
   6: DiceD6Icon,
   8: DiceD8Icon,

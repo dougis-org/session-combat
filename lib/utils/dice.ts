@@ -51,6 +51,36 @@ export function rollDie(sides: number, count = 1): number[] {
   return results;
 }
 
+/** Formula string persisted for a percentile (d%) roll. */
+export const PERCENTILE_FORMULA = "d%";
+
+/** Result of a single percentile roll: the two physical d10 faces plus the decoded 1..100 value. */
+export interface PercentileRoll {
+  tensFace: number;
+  onesFace: number;
+  value: number;
+}
+
+/**
+ * Roll a percentile (d%) result as two independent d10 draws on the same
+ * rejection-sampled secure generator `rollDie` uses, then decode them with the
+ * standard tabletop rule:
+ *
+ *   tensDigit = tensFace % 10   (face 10 → 0, i.e. "00")
+ *   onesDigit = onesFace % 10   (face 10 → 0)
+ *   value     = tensDigit * 10 + onesDigit, and 0 decodes to 100
+ *
+ * Two draws (not one `rollDie(100)`) so callers — including future roll-animation
+ * code — can present two physical d10 results.
+ */
+export function rollPercentile(): PercentileRoll {
+  const cryptoObj = getCrypto();
+  const tensFace = rollOneDie(10, cryptoObj);
+  const onesFace = rollOneDie(10, cryptoObj);
+  const value = (tensFace % 10) * 10 + (onesFace % 10) || 100;
+  return { tensFace, onesFace, value };
+}
+
 /**
  * Roll a mixed pool of dice across multiple die sizes using cryptographically
  * secure randomness. Each group is validated the same way `rollDie` validates

@@ -195,6 +195,74 @@ describe('CampaignChat — dice pool commit', () => {
     expect(screen.getByRole('button', { name: 'Roll' })).not.toBeDisabled()
   })
 
+  it('the percentile control commits exactly one d% roll and leaves the staged pool alone', async () => {
+    mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-pct', formula: 'd%', rolls: [42], total: 42 }) })
+
+    const postCount = () =>
+      sharedTestState.fetchSpy.mock.calls.filter(
+        (c: unknown[]) => (c[0] as string).includes('/rolls') && (c[1] as RequestInit)?.method === 'POST'
+      ).length
+
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: 'Add d6' }))
+    await user.click(screen.getByRole('button', { name: /percentile|d%/i }))
+
+    await waitFor(() => expect(postCount()).toBe(1))
+    const body = postedRollBody()
+    expect(body.formula).toBe('d%')
+    expect(body.rolls).toHaveLength(1)
+    expect(body.rolls[0]).toBeGreaterThanOrEqual(1)
+    expect(body.rolls[0]).toBeLessThanOrEqual(100)
+    expect(body.total).toBe(body.rolls[0])
+    expect(body.visibility).toEqual({ scope: 'group' })
+    // staged pool untouched
+    expect(screen.getByRole('button', { name: 'Add d6' })).toHaveTextContent('×1')
+  })
+
+  it('a 409 on the percentile control shows "No active session" and preserves the pool', async () => {
+    mockRollPost({ status: 409 })
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: 'Add d6' }))
+    await user.click(screen.getByRole('button', { name: /percentile|d%/i }))
+    await waitFor(() => expect(screen.getByText('No active session')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: 'Add d6' })).toHaveTextContent('×1')
+  })
+
+  it('a non-409 failure on the percentile control shows "Roll failed, try again" and clears on retry', async () => {
+    mockRollPost({ status: 500 })
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: /percentile|d%/i }))
+    await waitFor(() => expect(screen.getByText('Roll failed, try again')).toBeInTheDocument())
+
+    // a subsequent successful percentile roll clears the error
+    mockRollPost({ status: 201, body: rollResponse({ id: 'roll-pct-ok', formula: 'd%', rolls: [7], total: 7 }) })
+    await user.click(screen.getByRole('button', { name: /percentile|d%/i }))
+    await waitFor(() => expect(screen.queryByText('Roll failed, try again')).not.toBeInTheDocument())
+  })
+
+  it('the percentile control cannot double-fire while a roll is in flight', async () => {
+    const pending = mockRollPostPending()
+    const postCount = () =>
+      sharedTestState.fetchSpy.mock.calls.filter(
+        (c: unknown[]) => (c[0] as string).includes('/rolls') && (c[1] as RequestInit)?.method === 'POST'
+      ).length
+
+    const { user } = await openDockWithSession()
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    const pct = screen.getByRole('button', { name: /percentile|d%/i })
+    user.click(pct)
+    await waitFor(() => expect(pct).toBeDisabled())
+    await user.click(pct).catch(() => {})
+    expect(postCount()).toBe(1)
+
+    pending.resolve({ ok: true, status: 201, json: () => Promise.resolve(rollResponse({ id: 'roll-pct-p', formula: 'd%', rolls: [5], total: 5 })) })
+    await waitFor(() => expect(pct).not.toBeDisabled())
+  })
+
   it('DM-only visibility sends correct scope', async () => {
     mockedRollDicePool.mockReturnValue([{ sides: 20, value: 10 }])
     mockRollPost({ status: 201, body: rollResponse({ id: 'roll-5', visibility: { scope: 'dm-only' } }) })

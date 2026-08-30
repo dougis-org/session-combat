@@ -1,8 +1,9 @@
 'use client'
 
-import { DIE_SIDES, MAX_PER_DIE } from '@/lib/utils/dice'
-import { DIE_ICONS } from '@/lib/components/icons/dice'
+import { DIE_SIDES } from '@/lib/utils/dice'
 import { isRollVisibilityScope, type DicePoolState } from '@/lib/dice/useDicePoolState'
+import { DiePoolButton } from './DiePoolButton'
+import { PercentileButton } from './PercentileButton'
 
 interface DicePoolPanelProps {
   dp: DicePoolState
@@ -10,9 +11,10 @@ interface DicePoolPanelProps {
   isRolling: boolean
   error: string | null
   onRoll: () => void
+  onRollPercentile: () => void
 }
 
-export function DicePoolPanel({ dp, panelRef, isRolling, error, onRoll }: DicePoolPanelProps) {
+export function DicePoolPanel({ dp, panelRef, isRolling, error, onRoll, onRollPercentile }: DicePoolPanelProps) {
   if (!dp.isOpen) return null
   return (
     <div
@@ -22,33 +24,17 @@ export function DicePoolPanel({ dp, panelRef, isRolling, error, onRoll }: DicePo
     >
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-1 items-center">
-          {DIE_SIDES.map(sides => {
-            const Icon = DIE_ICONS[sides]
-            return (
-              <div key={sides} className="flex items-center gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => dp.handleRemove(sides)}
-                  disabled={isRolling}
-                  aria-label={`Remove d${sides}`}
-                  className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white w-5 h-5 rounded"
-                >
-                  −
-                </button>
-                <button
-                  type="button"
-                  onClick={() => dp.handleAdd(sides)}
-                  disabled={isRolling || dp.pool[sides] >= MAX_PER_DIE}
-                  aria-label={`Add d${sides}`}
-                  title={`d${sides}`}
-                  className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-2 py-1 rounded flex items-center gap-1"
-                >
-                  <Icon width={21} height={21} aria-hidden="true" />
-                  ×{dp.pool[sides]}
-                </button>
-              </div>
-            )
-          })}
+          {DIE_SIDES.map(sides => (
+            <DiePoolButton
+              key={sides}
+              sides={sides}
+              count={dp.pool[sides]}
+              onAdd={dp.handleAdd}
+              onRemove={dp.handleRemove}
+              disabled={isRolling}
+            />
+          ))}
+          <PercentileButton onRoll={onRollPercentile} disabled={isRolling} />
         </div>
         <div className="flex gap-1 items-center">
           <input

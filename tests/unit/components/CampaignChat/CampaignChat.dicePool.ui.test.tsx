@@ -1,4 +1,4 @@
-import { screen, act, fireEvent } from '@testing-library/react'
+import { screen, act, fireEvent, within } from '@testing-library/react'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import { rollDicePool } from '@/lib/utils/dice'
 import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDockWithSession } from './helpers'
@@ -247,12 +247,13 @@ describe('CampaignChat — dice pool trigger', () => {
     }
   })
 
-  it('each per-die add control exposes a tooltip matching its die size', async () => {
+  it('each per-die add control shows a persistent visible label and no title tooltip', async () => {
     const { user } = await openDockWithSession()
     await user.click(screen.getByRole('button', { name: /roll|dice/i }))
     for (const sides of [4, 6, 8, 10, 12, 20]) {
       const btn = screen.getByRole('button', { name: `Add d${sides}` })
-      expect(btn).toHaveAttribute('title', `d${sides}`)
+      expect(btn).not.toHaveAttribute('title')
+      expect(within(btn).getByText(`d${sides}`)).toBeInTheDocument()
     }
   })
 })
