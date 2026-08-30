@@ -20,6 +20,7 @@
     "test:regression": "playwright test tests/e2e/",
     "migrate:encounters": "npx tsx lib/scripts/backfillCampaignEncounters.ts",
     "seed": "npx tsx lib/scripts/seedCampaignTemplates.ts",
+    "seed:force": "npx tsx lib/scripts/seedCampaignTemplates.ts --force",
     "seed:monsters": "npx tsx lib/scripts/seedGlobalMonsters.ts"
   },
   "keywords": [],
