@@ -176,7 +176,7 @@ _(Added 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL cause `G
 
 ## Non-Functional Acceptance Criteria
 
-### Requirement: Performance
+### Performance
 
 #### Scenario: Modal mounts only while open
 
@@ -184,11 +184,11 @@ _(Added 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL cause `G
 - **When** the page's DOM is inspected
 - **Then** no modal DOM subtree exists until the user first opens it (mirrors the existing content-driven, mount-on-open pattern already used for the in-chat dice pop-out)
 
-### Requirement: Security
+### Security
 
 See functional scenario: "Fab is absent for an unauthenticated user". No additional access-control surface is introduced: as of `decouple-dice-roll-capability` (2026-08-29), the fab submits directly to `/api/campaigns/[id]/rolls` via the shared `lib/dice/useRollSubmission.ts` capability (see `dice-pool-shared-state`) rather than through `CampaignChat`, but that server route (see `roll-share-ui` capability) remains the sole authorization/validation boundary and is unaffected by this change.
 
-### Requirement: Reliability
+### Reliability
 
 #### Scenario: No `document` access during server render
 

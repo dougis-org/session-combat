@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Provide a typed, session-scoped in-memory presence channel (`lib/dice/diceSessionBridge.ts`) that lets `CampaignChat` announce an active `{campaignId, sessionId}` and the global dice fab observe it, so a roll can be sent to session chat without the fab depending on any mounted chat component.
+
+## Requirements
 
 This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-08-22-decouple-dice-panel-from-chat/design.md) document, not a replacement.
 
@@ -78,7 +82,7 @@ the `dice-pool-shared-state` capability for where submission now lives.
 
 ## Non-Functional Acceptance Criteria
 
-### Requirement: Performance
+### Performance
 
 #### Scenario: Bridge notification is synchronous and O(subscribers)
 
@@ -86,11 +90,11 @@ the `dice-pool-shared-state` capability for where submission now lives.
 - **When** `announcePresence`, `clearPresence`, or `requestRoll` is called
 - **Then** exactly those N subscribers are invoked synchronously, with no network I/O or artificial delay introduced by the bridge itself
 
-### Requirement: Security
+### Security
 
 See functional scenario: "Payload for a different campaign is ignored" and "Payload for a stale/mismatched session is ignored". The bridge carries no authority of its own — see `roll-share-ui` capability's unchanged reliance on `app/api/campaigns/[id]/rolls` for the actual authorization/validation boundary. This module must never be extended to bypass or duplicate that route's checks.
 
-### Requirement: Reliability
+### Reliability
 
 #### Scenario: Bridge state does not leak between test cases
 
