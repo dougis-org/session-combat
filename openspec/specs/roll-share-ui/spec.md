@@ -136,7 +136,7 @@ The system SHALL accept an `activeSessionId: string | null` prop on `CampaignCha
 
 ### Requirement: MODIFIED Roll-entry strip is replaced by the dice pop-out trigger and pool
 
-The always-visible roll-entry strip (six immediate-click die buttons, a modifier input, and a visibility selector, permanently rendered below the chat composer) is removed from the chat dock's default layout and replaced by the dice pop-out trigger (see "MODIFIED Dice pop-out trigger anchored to the chat dock"). The modifier input and visibility selector remain, relocated into the pop-out.
+The system SHALL NOT render the always-visible roll-entry strip (six immediate-click die buttons, a modifier input, and a visibility selector, permanently rendered below the chat composer) in the chat dock's default layout; it is replaced by the dice pop-out trigger (see "MODIFIED Dice pop-out trigger anchored to the chat dock"). The modifier input and visibility selector SHALL remain, relocated into the pop-out.
 
 #### Scenario: No always-visible die buttons remain in the chat dock body
 
@@ -454,17 +454,15 @@ The system SHALL render roll events in the chat feed as a distinct visual item s
 
 ---
 
-### Requirement: REMOVED Immediate-click-to-roll behavior
+## Historical removals
 
-Reason for removal: Superseded by the stage-then-commit model. The prior behavior (a single click on a die button immediately rolled and posted) is replaced by "ADDED Dice staging pool" and "ADDED Commit rolls the entire staged pool as one combined roll," which require an explicit "Roll" commit for every roll, including a pool of exactly one die.
+These requirements were removed by earlier changes; the full rationale lives in the
+corresponding archived changes. They are retained here only as a pointer.
 
----
-
-### Requirement: REMOVED Floating dice pop-out renders outside the chat dock's DOM subtree
-
-**Reason**: Superseded by "ADDED Dice panel renders as an in-flow flex sibling to the left of the chat dock" (subsequently further modified — see "MODIFIED Dice panel renders as an in-flow flex sibling to the left of the chat dock"). The `document.body`-portal mechanism (with its own overlay root and `fixed`-position coordinates computed from the trigger's `getBoundingClientRect()`) solved height-clipping but anchored the panel *above* the trigger, which still visually stacks it over the chat dock — the exact "opens over the top of it" problem raised in GitHub issue #512. The new flex-sibling approach achieves the original non-clipping goal through in-flow layout instead of positioned-overlay math, while also placing the panel beside (not over) the dock.
-
-**Migration**: Any test or code asserting the dice panel is portaled to a `#dice-pool-overlay-root` node under `document.body`, or asserting it is positioned via `fixed` coordinates independent of the drawer's layout, must be updated to assert sibling placement instead — see "MODIFIED Dice panel renders as an in-flow flex sibling to the left of the chat dock".
+- **Immediate-click-to-roll behavior** — superseded by the stage-then-commit model
+  (`multi-dice-pool-popout`, archived 2026-08-19).
+- **Floating dice pop-out renders outside the chat dock's DOM subtree** — superseded by
+  the in-flow flex-sibling panel (`dice-roll-enhancements`, archived 2026-08-20).
 
 ---
 
@@ -520,7 +518,7 @@ Reason for removal: Superseded by the stage-then-commit model. The prior behavio
 
 ## Non-Functional Acceptance Criteria
 
-### Requirement: Performance
+### Performance
 
 #### Scenario: Feed append does not re-sort on SSE roll event
 
@@ -528,11 +526,11 @@ Reason for removal: Superseded by the stage-then-commit model. The prior behavio
 - **When** a single SSE roll event arrives
 - **Then** the feed item is appended without a full array sort; no perceptible layout thrash occurs
 
-### Requirement: Security
+### Security
 
 See functional scenarios: "DM-only visibility sends correct scope", "409 response (no active session race) shows inline error". Visibility enforcement is owned by the server (SSE fan-out in `emitFiltered`) and is not re-implemented in the UI beyond using `canSeeRoll` as a secondary guard for unexpected events.
 
-### Requirement: Reliability
+### Reliability
 
 #### Scenario: Duplicate roll dedup across history and stream
 
