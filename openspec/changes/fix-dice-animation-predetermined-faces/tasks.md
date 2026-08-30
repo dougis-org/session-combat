@@ -5,33 +5,32 @@ All work happens inside the dedicated worktree
 `.worktrees/fix-dice-animation-predetermined-faces` on branch
 `fix-dice-animation-predetermined-faces`, never in the primary checkout.
 
+> **Rewritten 2026-08-30.** The Decision 1 spike on `@3d-dice/dice-box@1.1.4`
+> proved that engine has no forced-face mechanism. This change now **replaces the
+> engine** with `@drdreo/dice-box-threejs@1.1.0`, which natively honors the `@`
+> predetermined notation the code already emits. See `proposal.md` History.
+
 ## Preparation
 
-- [ ] **Step 1 — Confirm the dedicated worktree exists and enter it:** verify
-  `.worktrees/fix-dice-animation-predetermined-faces` exists (created during
-  propose) and `cd` into it. If it does not exist, from the primary checkout run
-  `git fetch origin main` then
-  `git worktree add .worktrees/fix-dice-animation-predetermined-faces -b fix-dice-animation-predetermined-faces origin/main`.
-  Never checkout a different branch in the primary checkout.
-- [ ] **Step 2 — Confirm the working branch is published:** `git status -sb`
-  shows the branch tracks `origin/fix-dice-animation-predetermined-faces`; if
-  not, `git push -u origin fix-dice-animation-predetermined-faces` from inside
-  the worktree before any implementation work.
-- [ ] **Step 3 — Sync with base:** `git fetch origin main` and
-  `git merge --ff-only origin/main` (or rebase) so the branch is current.
-- [ ] **Step 4 — Install dependencies in the worktree:** `npm ci` (the worktree
-  has no `node_modules` yet; the Decision 1 spike needs `@3d-dice/dice-box`
-  source available). Ensure the `.github/openspec-shared` submodule is checked
-  out (`git submodule update --init --force .github/openspec-shared`).
+- [x] **Step 1 — Confirm the dedicated worktree exists and enter it.**
+- [x] **Step 2 — Confirm the working branch is published** (`git status -sb`
+  tracks `origin/fix-dice-animation-predetermined-faces`).
+- [x] **Step 3 — Sync with base:** `git fetch origin main` and rebase onto
+  `origin/main`.
+- [x] **Step 4 — Install dependencies in the worktree** (`npm ci`); check out the
+  `.github/openspec-shared` submodule.
+- [x] **Step 5 — Add the new engine deps** (`@drdreo/dice-box-threejs@1.1.0`
+  pinned, `three`, `cannon-es`) so the spike can drive the real package.
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available
-  skills list. If it is not listed, halt immediately, inform the user the plugin
-  is required, provide installation guidance, and do not proceed until the user
-  confirms it is installed.
-- [ ] **Confirm `openspec-review-code` is available** for the pre-commit review
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available
+  skills list. If not listed, halt, inform the user, provide installation
+  guidance, do not proceed until confirmed.
+- [x] **Confirm `openspec-review-code` is available** for the pre-commit review
   step; if not, halt and inform the user.
+- [x] **Confirm the rewritten proposal/design/specs/tasks/tests are validated:**
+  `openspec validate fix-dice-animation-predetermined-faces --strict` passes.
 
 ## Execution
 
@@ -39,142 +38,163 @@ All work happens inside the dedicated worktree
 
 - [ ] Run `gh issue edit 624 --add-label "in-progress"`.
 - [ ] Discover the linked GitHub Project
-  (`gh project list --owner dougis-org --format json`), resolve the status field
-  option semantically matching "In Progress"
-  (`gh project field-list <project-number> --owner dougis-org --format json`),
-  and move the item via `gh project item-edit`. If no project item is found, log
-  a warning and continue. If the `gh` token lacks the `project` scope, tell the
-  user to run `gh auth refresh -s project` and skip the project-item update (the
-  label update still proceeds).
+  (`gh project list --owner dougis-org --format json`), resolve the "In Progress"
+  status option, and move the item via `gh project item-edit`. If no project item
+  is found, log a warning and continue. If the `gh` token lacks the `project`
+  scope, tell the user to run `gh auth refresh -s project` and skip the
+  project-item update (the label update still proceeds).
 
-### E1 — Spike: confirm the dice-box forced-results API (design Decision 1)
+### E1 — Spike: confirm `@drdreo/dice-box-threejs` forced faces + teardown (design Decision 1)
 
-- [ ] Read `node_modules/@3d-dice/dice-box` source and its shipped `README.md`;
-  determine exactly how `@3d-dice/dice-box@1.1.4` accepts forced per-die
-  results. Check, in order: (1) object/array roll notation with a per-die
-  `value`; (2) `roll()` + bounded `reroll()` toward target faces; (3) the
-  `@3d-dice/dice-parser-interface` / `dice-roller-parser` layer.
-- [ ] Write a throwaway spike (a `*.spike.test.ts` or a scratch script, deleted
-  before the final commit) that drives dice-box headlessly / in a jsdom+webgl
-  stub or a Playwright page and confirms whether the chosen mechanism actually
-  lands the requested faces for `d6`, `d12`, `d20`, and `2d10` percentile.
-- [ ] Record the finding as a short note appended to `design.md` "Open
-  Questions" (resolved) and confirm which design path applies:
-  - Mechanism found → proceed with tasks E2–E4 (Decision 2 + 3 + 5).
-  - No mechanism → **STOP**, update `proposal.md` Scope / What Changes and
-    `design.md` per Change Control, get user acknowledgement, then proceed with
-    Decision 4 (E3 + E5 only, `toDiceBoxNotation` emits plain random notation).
-- [ ] Confirm the shape of `DiceBoxResult` returned by `box.roll()` from the
-  real source (fields, ordering, grouping, percentile `0`/`10` encoding) and
-  update `types/dice-box.d.ts` to match.
+- [x] Write a throwaway spike (a `*.spike.test.ts` Playwright test or a scratch
+  script under a real browser context, deleted before the final commit) that
+  drives `@drdreo/dice-box-threejs@1.1.0` against a `public/`-served asset path
+  and confirms:
+  1. `roll("Nd<sides>@v1,v2,…")` lands each physical die on its `@` value for
+     `d4`, `d6`, `d8`, `d10`, `d12`, `d20`, with `reason: "forced"` in the
+     returned `DiceResults`.
+  2. `roll("2d10@t,o")` lands both percentile d10s, including a `0`/`10` face.
+  3. Multi-group `"2d20@14,2+1d6@5"` returns one `DiceSet` per group with the
+     forced values.
+  4. `clearDice()` + dropping the instance reference stops the render loop and
+     frees the WebGL context (roll → clear → new instance → roll again works
+     within one page).
+  5. The working `assetPath` value that resolves `textures/…` under `public/`.
+- [x] Record the finding as a short note appended to `design.md` "Open Questions"
+  (resolved) and confirm which path applies:
+  - Forced faces reliable → proceed with E2–E7.
+  - Not reliable → **STOP**, update `proposal.md` / `design.md` / `specs` per
+    Change Control to the detect-and-skip fallback, get user acknowledgement,
+    then proceed (E3 reconciliation still applies; `toDiceBoxNotation` emits
+    plain random notation; every roll is reconciled and mismatches skip).
+- [x] Confirm the exact `DiceResults` / `DiceSet` / `DiceResult` shape from the
+  package's `types/index.d.ts` and the runtime (percentile `0`/`10` encoding,
+  grouping, ordering).
 
-### E2 — Pass predetermined faces to the engine (design Decision 2)
+### E2 — Swap the engine dependency and assets (design Decisions 2, 5)
 
-- [ ] Rewrite `lib/dice/toDiceBoxNotation.ts` to return the spike-confirmed
-  forced-results argument shape (likely a typed `DiceBoxRollSpec` object/array
-  instead of a string). Keep it pure (no RNG import), keep die-size grouping in
-  first-seen order, keep the percentile `2 × d10` mapping (`00` → `10,10`), keep
-  the `DICE_ANIM_CAP = 15` truncation. `animatedDiceCount()` unchanged.
-- [ ] Update `types/dice-box.d.ts` for the new `roll()` argument type.
-- [ ] Update `lib/dice/useDiceAnimation.ts` to pass the new argument to
-  `box.roll()`.
-- [ ] Rewrite `tests/unit/lib/dice/toDiceBoxNotation.test.ts` for the new shape:
-  single die types, mixed pool + modifier (modifier is not a die), percentile
-  faces, `00` percentile, 120-die pool capped at 15, 15- and 6-die boundaries.
+- [x] Remove `@3d-dice/dice-box` from `package.json` / lockfile.
+- [x] Add a committed asset-copy step (npm script or a small `scripts/` copier,
+  matching how the project already handles static assets) that copies
+  `node_modules/@drdreo/dice-box-threejs/dist/textures/` to
+  `public/dice-box-threejs/textures/`. Do not copy `sounds/` (`sounds: false`).
+  Wire it into `postinstall` / `prebuild` as appropriate; add the copied path to
+  `.gitignore` if the project ignores generated public assets, otherwise commit
+  them.
+- [x] Delete `types/dice-box.d.ts`; if `tsconfig.json` `types` / `typeRoots` or
+  `files` referenced it, update them.
 
-### E3 — Capture and reconcile engine results (design Decision 3 / 4)
+### E3 — Rewrite `useDiceAnimation` against the new engine (design Decision 2)
 
-- [ ] In `lib/dice/useDiceAnimation.ts`, stop discarding the `box.roll()` return
-  value (currently `lib/dice/useDiceAnimation.ts:173`). Capture the
-  `DiceBoxResult[]`.
-- [ ] Add a pure helper (e.g. `reconcileDiceFaces(expected, settled)` in a
-  sibling module) that compares expected vs settled faces **per die-size group
-  as an unordered multiset** over the first `animatedDiceCount()` dice of each
-  group, with percentile `0`/`10` normalization. Returns match / mismatch.
-- [ ] On mismatch: classify as a **transient per-roll failure** (same class as a
-  thrown `roll()` error): tear down the box without bumping the run token, emit
-  exactly one diagnostic via the existing client logging seam with a message
-  distinct from the malformed-roll `console.error` and the persistent-unsupported
-  `console.warn`, keep `status` at `idle`, and resolve `run()` `true` so
-  `GlobalDiceFab` reveals the result promptly (not via the fallback timeout).
-- [ ] (Only if the spike selected the reroll mechanism) implement a single
-  bounded `reroll()` pass toward target faces before the mismatch classification;
-  keep the whole `run()` within `ROLL_TIMEOUT_MS`.
-- [ ] Once-per-mount log guard for mismatch (mirror the existing `loggedRef`
-  pattern).
-- [ ] Unit tests in `tests/unit/lib/dice/useDiceAnimation.test.ts`: matching
-  results resolve `true` with no log; mismatched results resolve `true`, keep
-  `status idle`, emit one warn; reordered results match; percentile `0`/`10`
-  match; a second mismatch in the same mount does not log again; no `fetch` from
-  the reconciliation path.
+- [x] Rewrite `lib/dice/useDiceAnimation.ts`:
+  - lazy `import('@drdreo/dice-box-threejs')` under `IMPORT_TIMEOUT_MS`.
+  - `new DiceBox(container, { assetPath, baseScale:
+    diceAnimationScale(animatedDiceCount(built)), theme_material, sounds: false,
+    shadows, iterationLimit })`.
+  - `await withTimeout(box.initialize(), INIT_TIMEOUT_MS)`.
+  - `const results = await withTimeout(box.roll(toDiceBoxNotation(built)),
+    ROLL_TIMEOUT_MS)` — **capture** `results` (currently discarded at line 173).
+  - `box.clearDice()` everywhere `box.clear()` was called.
+  - Keep the exported `DiceAnimation` contract, `DiceAnimationStatus`, the
+    timeout constants, `runIdRef` single-instance invariant, `webglOkRef` probe,
+    `loggedRef` once-guard, and the persistent-vs-transient failure split
+    unchanged.
+- [x] Import `DiceResults` / `DiceResult` types from
+  `@drdreo/dice-box-threejs` (no more ambient `types/dice-box.d.ts`).
+- [x] `ASSET_PATH` constant updated to the spike-confirmed `public/` path.
 
-### E4 — E2E: assert settled faces, not just the total
+### E4 — Capture and reconcile engine results (design Decision 3)
 
-- [ ] Extend `tests/e2e/dice-roll-animation.spec.ts` so the pool-roll test reads
-  the dice engine's resolved per-die results (via a test-only hook exposed from
-  `useDiceAnimation` / `onRollComplete`, or by asserting the modal's new per-die
+- [x] Add a pure `lib/dice/reconcileDiceFaces.ts`:
+  `reconcileDiceFaces(expected, settled)` compares expected vs settled faces
+  **per die-size group as an unordered multiset** over the first
+  `animatedDiceCount()` dice of each group, with percentile `0`/`10`
+  normalization. Returns match / mismatch. Reuse any existing helper in
+  `lib/utils/dice.ts` (percentile decode, multiset compare) before writing new
+  ones.
+- [x] In `useDiceAnimation`, after `roll()` resolves, flatten
+  `results.sets[].rolls[]` and call `reconcileDiceFaces`. On mismatch: classify
+  as a **transient per-roll failure** — `clearDice()` without bumping the run
+  token, emit exactly one diagnostic via the existing client logging seam with a
+  message distinct from the malformed-roll `console.error` and the
+  persistent-unsupported `console.warn`, keep `status` at `idle`, resolve
+  `run()` `true` so `GlobalDiceFab` reveals promptly.
+- [x] Once-per-mount log guard for mismatch (mirror the existing `loggedRef`
+  pattern; a separate ref).
+- [x] `toDiceBoxNotation.ts`: keep the `@` string form; adjust only if the spike
+  found a multi-group / percentile notation quirk. Keep it pure, keep die-size
+  grouping in first-seen order, keep the `DICE_ANIM_CAP = 15` truncation,
+  `animatedDiceCount()` unchanged.
+
+### E5 — Retune the scale curve (design Decision 4)
+
+- [x] Retune `DICE_BASE_SCALE` / `DICE_MIN_SCALE` in
+  `lib/dice/diceAnimationScale.ts` for `@drdreo/dice-box-threejs`'s `baseScale`
+  units (default 100). Keep the curve shape and invariants (monotonic
+  non-increasing, `count<=6` returns base, floored at min, non-positive → 1).
+  Update `tests/unit/lib/dice/diceAnimationScale.test.ts` numeric expectations.
+
+### E6 — Legibility: `+N more` on the existing readout (design Decision 6)
+
+- [x] In `lib/components/dice/DiceRollOverlay.tsx` `StaticRollResult`: above
+  `DICE_ANIM_CAP`, render the first `DICE_ANIM_CAP` dice plus a `+N more`
+  indicator (`N = breakdown.length - DICE_ANIM_CAP`); total stays `built.total`.
+  Below the cap, unchanged. Confirm the readout still renders on every reveal
+  path (it is inside the `modalRevealed` block).
+- [x] Re-check the canvas band `max-w` / `max-h` for the new engine's camera /
+  `baseScale`; adjust the Tailwind classes if 15 dice clip or obscure the modal,
+  keeping the fixed margin above the modal (n047 layout preserved).
+
+### E7 — E2E: assert settled faces, not just the total
+
+- [x] Extend `tests/e2e/dice-roll-animation.spec.ts` so the pool-roll test reads
+  the engine's resolved per-die results (via a test-only hook exposed from
+  `useDiceAnimation` / `onRollComplete`, or by asserting the modal's per-die
   readout) and asserts they equal the inline `[a, b]` values — not only the
   aggregate total.
-- [ ] Add a percentile assertion that the two d10 faces shown decode to the
-  modal total.
-- [ ] Keep the existing dismissal / panel-stays-open assertions green.
+- [x] Add a percentile assertion that the two d10 faces shown decode to the modal
+  total.
+- [x] Keep the existing dismissal / panel-stays-open assertions green.
+- [x] CI-no-WebGL path: the result modal and per-die readout still appear via the
+  instant path.
 
-### E5 — Legibility (design Decision 5)
+### E8 — Wire-up and spec sync
 
-- [ ] Raise `DICE_BASE_SCALE` in `lib/dice/diceAnimationScale.ts` and retune the
-  shrink curve / `DICE_MIN_SCALE` floor so 15 dice still fit the clear zone.
-  Update `tests/unit/lib/dice/*` for the new constants (curve still monotonic
-  non-increasing, `count<=6` returns the raised base, floored at the minimum).
-- [ ] Widen the canvas band `max-w` / `max-h` in
-  `lib/components/dice/DiceRollOverlay.tsx` within the centered stack, keeping
-  the fixed margin above the modal (n047 layout preserved).
-- [ ] Add a per-die result readout to the result modal in `DiceRollOverlay.tsx`,
-  rendered from `built.breakdown` / `built.percentileFaces` as plain DOM text
-  styled like the inline result line. Show it on every reveal path (animated,
-  disabled, unsupported, fallback, mismatch). Above the 15-die cap show the
-  animated subset plus a `+N more` indicator; total stays the full-pool total.
-- [ ] `tests/unit/components/DiceRollOverlay.test.tsx`: readout renders for pool
-  and percentile; present under `disableAnimation`, `animationStatus`
-  `'unsupported'`, and settled paths; total text unchanged through the overlay;
-  large-pool `+N more` indicator.
-- [ ] Visual-check task: run the app, roll `2d12`, `2d20`, `d%`, and `15d6`;
-  capture screenshots at 1280px and 375px viewport widths; record the chosen
-  `scale` / container constants in `design.md` (Decision 5). Confirm dice and
-  the per-die readout are readable and the modal is not obscured.
-
-### E6 — Wire-up and spec sync
-
-- [ ] Confirm `GlobalDiceFab` and any other `toDiceBoxNotation` /
-  `useDiceAnimation` consumers compile against the new shapes (`tsc --noEmit`).
-- [ ] Look for existing helpers before adding new ones (multiset compare,
-  percentile decode already in `lib/utils/dice.ts`).
-- [ ] Confirm every acceptance scenario in
-  `openspec/changes/fix-dice-animation-predetermined-faces/specs/global-dice-fab/spec.md`
-  is covered by a test or a visual-check task.
+- [x] Confirm `GlobalDiceFab` and every `toDiceBoxNotation` / `useDiceAnimation`
+  consumer compiles against the new shapes (`npm run typecheck`).
+- [x] Confirm every acceptance scenario in
+  `openspec/changes/fix-dice-animation-predetermined-faces/specs/**/*.md` is
+  covered by a test or a visual-check task.
+- [ ] Visual-check task: run the app, roll `2d12`, `2d20`, `d%`, `15d6`; capture
+  screenshots at 1280px and 375px; record the chosen `baseScale` / container
+  constants in `design.md` (Decision 4 / 6). Confirm dice and the readout are
+  readable and the modal is not obscured.
 
 ## Pre-Commit Code Review
 
 - [ ] **Before every commit**, spawn a dedicated sub-agent to run the
   `openspec-review-code` skill on the staged diff. The primary agent must
-  automatically apply all clearly-correct findings directly to the code —
-  without stopping, without presenting the findings list to the user, and
-  without asking for confirmation. Apply fixes, re-run the affected tests to
-  confirm they pass, then commit.
+  automatically apply all clearly-correct findings directly to the code — without
+  stopping, without presenting the findings list to the user, without asking for
+  confirmation. Apply fixes, re-run the affected tests, then commit.
 
 ## Validation
 
-- [ ] `npm run test:unit` — all pass (new `toDiceBoxNotation`, `useDiceAnimation`,
-  `DiceRollOverlay`, `diceAnimationScale` tests included).
+- [ ] `npm run test:unit` — all pass (rewritten `useDiceAnimation`, new
+  `reconcileDiceFaces`, retuned `diceAnimationScale`, `DiceRollOverlay`,
+  `toDiceBoxNotation` tests).
 - [ ] `npm run test:integration` — all pass.
 - [ ] `npm run test:e2e -- tests/e2e/dice-roll-animation.spec.ts` then the full
   `npm run test:regression` — all pass.
 - [ ] `npm run typecheck` — no errors.
 - [ ] `npm run lint` — no errors.
-- [ ] `npm run build` — succeeds.
+- [ ] `npm run build` — succeeds; `@drdreo/dice-box-threejs` / `three` /
+  `cannon-es` are in an async chunk, not the initial bundle.
 - [ ] Verity pre-commit / pre-push gate — no findings (fix, do not waive).
 - [ ] Codacy checks — no new issues.
-- [ ] Throwaway spike files removed; no stray `node_modules` or `.worktrees`
-  content staged.
+- [ ] Throwaway spike files removed; `@3d-dice/dice-box` fully gone from
+  `package.json`, lockfile, `types/`, and code; no stray `node_modules` /
+  `.worktrees` content staged.
 - [ ] All completed tasks marked `[x]`.
 - [ ] All steps in [Remote push validation] pass.
 
@@ -205,11 +225,13 @@ If any required step fails, iterate and fix before pushing.
 - [ ] Commit all changes to `fix-dice-animation-predetermined-faces` and push.
 - [ ] Open a PR from `fix-dice-animation-predetermined-faces` to `main`. The PR
   body MUST include `Closes #624`. Search `.github/PULL_REQUEST_TEMPLATE*` and
-  follow the template if present.
+  follow the template if present. Call out the new dependencies
+  (`@drdreo/dice-box-threejs`, `three`, `cannon-es`) and the removal of
+  `@3d-dice/dice-box` explicitly.
 - [ ] **Issue lifecycle: mark in-review** — run
   `gh issue edit 624 --add-label "in-review" --remove-label "in-progress"`, then
-  move the project item to the "In Review" status column (same discovery pattern
-  as E0; warn and skip if not found).
+  move the project item to "In Review" (same discovery pattern as E0; warn and
+  skip if not found).
 - [ ] Wait 60 seconds for CI to start.
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
   findings (commit, run [Remote push validation], push, re-run) until zero
@@ -244,32 +266,27 @@ Blocking resolution flow:
   judgement) → commit → validate → push → re-scan.
 - Review comment → address → commit → validate → push → confirm thread resolved.
 - Spike inconclusive after its time box → stop, report to user, do not proceed
-  past Decision 4.
+  past Decision 3.
 
 ## Post-Merge
 
 - [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`.
 - [ ] Verify the merged changes appear on `main`.
 - [ ] Mark all remaining tasks `[x]`.
-- [ ] Update any repository docs impacted by the change (none expected beyond the
-  spec sync).
-- [ ] Sync the approved spec delta into the global spec: apply the
+- [ ] Sync the approved spec deltas into the global specs: apply the
   ADDED/MODIFIED requirements from
   `openspec/changes/fix-dice-animation-predetermined-faces/specs/global-dice-fab/spec.md`
-  into `openspec/specs/global-dice-fab/spec.md`. After copying, update relative
-  links that pointed into the change dir so they resolve from the archive
-  location (`../../design.md` →
-  `../../changes/archive/YYYY-MM-DD-fix-dice-animation-predetermined-faces/design.md`,
-  same for `tasks.md`).
+  into `openspec/specs/global-dice-fab/spec.md`, and from
+  `.../specs/dice-roll/spec.md` into `openspec/specs/dice-roll/spec.md`. Fix
+  relative links to resolve from the archive location.
 - [ ] Archive the change: move
   `openspec/changes/fix-dice-animation-predetermined-faces/` to
   `openspec/changes/archive/YYYY-MM-DD-fix-dice-animation-predetermined-faces/`
   and stage the copy and the deletion of the old location in a **single** commit.
 - [ ] Confirm the archive dir exists and the original change dir is gone.
-- [ ] Create a doc branch:
-  `git checkout -b doc/archive-YYYY-MM-DD-fix-dice-animation-predetermined-faces`
-  then `git push -u origin doc/archive-YYYY-MM-DD-fix-dice-animation-predetermined-faces`.
-- [ ] Open a PR from that doc branch to `main` titled
+- [ ] Create a doc branch
+  `doc/archive-YYYY-MM-DD-fix-dice-animation-predetermined-faces`, push it, open a
+  PR to `main` titled
   `docs: archive fix-dice-animation-predetermined-faces (YYYY-MM-DD)` — do NOT
   push directly to `main`.
 - [ ] **IMMEDIATELY** enable auto-merge on the doc PR:

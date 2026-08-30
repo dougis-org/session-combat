@@ -25,9 +25,13 @@ normalized (`0` and `10` treated as equal) before comparison.
   SHALL NOT latch the dice engine into the unsupported state — a subsequent roll
   SHALL still attempt the 3D animation.
 
+The reconciliation step SHALL be a synchronous comparison over the results the
+engine already returned: no additional `fetch` / XHR, and no additional awaited
+engine round-trip.
+
 The roll total and per-die values presented to the user (`built.total`,
-`built.rolls`, the inline result line, the persisted roll) SHALL be unchanged by
-the reconciliation outcome.
+`built.rolls`, `built.breakdown`, the inline result line, the persisted roll)
+SHALL be unchanged by the reconciliation outcome.
 
 #### Scenario: Settled faces match the decided roll
 
@@ -74,87 +78,42 @@ the reconciliation outcome.
 - **When** the dice engine returns two d10 results reported as `0` and `0`
 - **Then** the reconciliation treats the roll as a match
 
-### Requirement: ADDED Result modal shows the per-die rolled values
-
-The system SHALL render, in the dice-roll result modal, a per-die readout of the
-rolled values in addition to the roll total. The readout SHALL be plain DOM text
-(not dependent on the WebGL canvas), legible at a 375px viewport width, and
-SHALL be derived from the built roll's `breakdown` (pool rolls) or
-`percentileFaces` (percentile rolls).
-
-The readout SHALL be present on every path that reveals the result modal:
-animation completed, animation disabled, dice engine unsupported, fallback
-timeout, and the face-mismatch path. When the pool exceeds the 15-die animation
-cap, the readout SHALL show the animated subset and indicate the count of
-additional dice; the total SHALL remain the exact total for the entire pool.
-
-#### Scenario: Per-die values shown after a pool roll
-
-- **Given** the user rolls a staged pool of `2d12` with built breakdown `[4, 3]`
-- **When** the result modal is revealed
-- **Then** the modal shows a per-die readout containing `4` and `3` as well as
-  the total `7`
-
-#### Scenario: Per-die readout is shown when animation is disabled
-
-- **Given** the resolved "Disable Animation" preference is `true`
-- **When** the user rolls a staged pool of `3d6`
-- **Then** the result modal is shown immediately and includes the per-die readout
-  for all three dice
-
-#### Scenario: Per-die readout is shown when the dice engine is unsupported
-
-- **Given** the dice animation status is `unsupported`
-- **When** the user rolls
-- **Then** the result modal is shown immediately and includes the per-die readout
-
-#### Scenario: Percentile readout shows the two d10 faces
-
-- **Given** a percentile roll whose `percentileFaces` are `[4, 2]` (decoded `42`)
-- **When** the result modal is revealed
-- **Then** the modal shows the two d10 faces and the decoded total `42`
-
-#### Scenario: Large pool readout shows the animated subset and a remainder count
-
-- **Given** the user rolls a staged pool of `120d6`
-- **When** the result modal is revealed
-- **Then** the per-die readout shows 15 values and indicates that 105 further
-  dice were rolled
-- **And** the total shown is the exact total for all 120 dice
-
 ## MODIFIED Requirements
 
 ### Requirement: MODIFIED Rolling plays a dice animation then a total modal
 
 The system SHALL, when the user rolls in `GlobalDiceFab` (a pool roll or a
 percentile roll), present a dice-roll overlay that animates the staged dice
-coming to rest, then displays a modal showing the roll total **and a per-die
-readout of the rolled values**.
+coming to rest **on their already-decided face values**, then displays a modal
+showing the roll total and a per-die readout of the rolled values.
 
 _(Added 2026-08-30, `add-dice-roll-animation`; modified 2026-08-30,
 `improve-dice-roll-animation`; modified by `fix-dice-animation-predetermined-faces`
-— animated dice enlarged further, engine fidelity qualified, per-die readout added
-to the modal, reconciliation guard introduced.)_
+— the 3D dice engine is replaced with one that natively honors predetermined
+per-die faces, and a reconciliation guard is added.)_
 
 The roll outcome SHALL be decided before the animation begins, by the existing
 `buildRoll()` / `buildPercentileRoll()` path (see `dice-pool-shared-state`
-capability); the animation SHALL NOT introduce any new randomness or HTTP request
-of its own. The overlay SHALL be rendered through a lazily created
-`document.body` overlay root, layered above the dice panel.
+capability); the animation SHALL only visually settle on faces already chosen and
+SHALL NOT introduce any new randomness or HTTP request of its own. The overlay
+SHALL be rendered through a lazily created `document.body` overlay root, layered
+above the dice panel.
 
 The system SHALL pass the predetermined per-die faces to the dice engine using
-an engine-supported mechanism for forced results. The animated physical dice
-SHALL settle showing those faces **when the dice engine honors the forced
-results**; when the engine settles on other faces, the overlay SHALL follow the
-reconciliation behavior in "Animated dice faces are reconciled against the
-decided roll" rather than presenting the mismatched tumble as the result.
+the engine's supported forced-results notation, and the dice engine SHALL be one
+that honors that notation. The animated physical dice SHALL settle showing those
+faces. When the engine nonetheless settles on other faces, the overlay SHALL
+follow the reconciliation behavior in "Animated dice faces are reconciled against
+the decided roll" rather than presenting the mismatched tumble as the result.
+
+The dice engine and its rendering assets SHALL be self-hosted and loaded lazily
+(dynamic `import()`), never included in the initial application bundle.
 
 The dice animation SHALL be rendered inside a bounded, horizontally centered
 region, and the dice SHALL be sized to be clearly readable at a 375px viewport
-width — a further increase over the previous enlarged size. The animated dice
-SHALL come to rest in the clear area directly above the result modal, such that
-the settled dice and the total modal are visible at the same time; the dice
-SHALL NOT obscure the total or the per-die readout.
+width. The animated dice SHALL come to rest in the clear area directly above the
+result modal, such that the settled dice and the total modal are visible at the
+same time; the dice SHALL NOT obscure the total or the per-die readout.
 
 The result modal SHALL remain hidden until the dice animation reports completion
 (match), is skipped (disabled / unsupported / face mismatch), or the bounded
@@ -165,7 +124,7 @@ animated, the dice SHALL be scaled down progressively with the animated dice
 count, floored at the defined minimum scale, so the settled cluster continues to
 fit the clear area above the modal.
 
-#### Scenario: Pool roll animates enlarged dice then reveals the modal with a per-die readout
+#### Scenario: Pool roll animates dice on their decided faces then reveals the modal
 
 - **Given** the dice panel is open with a staged pool of `2d20+1d6` and modifier
   `+3`
@@ -173,30 +132,32 @@ fit the clear area above the modal.
 - **Then** the overlay opens with a bounded, horizontally centered dice canvas
   region positioned above where the result modal will appear (the canvas is not a
   full-viewport `inset-0` element)
-- **And** the dice engine is configured with an explicit scale larger than the
-  previous enlarged base scale, and is given the predetermined per-die faces via
-  the engine's forced-results mechanism
+- **And** the dice engine is given the predetermined per-die faces via its
+  forced-results notation, and is configured with an explicit scale for
+  readability
 - **And** the total modal is NOT present in the document while the tumble is in
   progress
 - **And** the inline `formula → [rolls] = total` result line IS rendered in the
   panel immediately
 - **When** the dice settle and reconciliation confirms a match
-- **Then** the total modal appears below the settled dice, showing the total
-  equal to `built.total` and a per-die readout of the `d20` and `d6` values,
-  with the dice and the modal visible together
+- **Then** the 2 d20 dice and the 1 d6 die each show the value from the built
+  roll's per-die breakdown
+- **And** the total modal appears below the settled dice, showing the total equal
+  to `built.total` and a per-die readout of the `d20` and `d6` values, with the
+  dice and the modal visible together
 
-#### Scenario: Percentile roll animates two enlarged d10s then reveals the decoded value and faces
+#### Scenario: Percentile roll animates two d10s on their decided faces
 
 - **Given** the dice panel is open
 - **When** the user clicks the percentile control
-- **Then** the overlay opens with two enlarged d10 dice in the centered canvas
-  region, given the built roll's `percentileFaces` via the forced-results
-  mechanism, and the total modal is not yet shown
+- **Then** the overlay opens with two d10 dice in the centered canvas region,
+  given the built roll's `percentileFaces` via the forced-results notation, and
+  the total modal is not yet shown
 - **When** the dice settle and reconciliation confirms a match (with `0`/`10`
   normalization)
-- **Then** the total modal appears displaying the decoded value in 1..100 equal
-  to `built.total` and the two d10 faces (the persisted / inline value is
-  unchanged; see `dice-pool-shared-state` capability)
+- **Then** the two d10 faces shown decode to the value in 1..100 equal to
+  `built.total` (the persisted / inline value is unchanged; see
+  `dice-pool-shared-state` capability)
 
 #### Scenario: Roll outcome is decided before the animation starts
 
@@ -218,7 +179,7 @@ fit the clear area above the modal.
 
 - **Given** a staged pool that animates 6 dice
 - **When** the user rolls with animation enabled
-- **Then** the dice engine is configured with the base (un-reduced) enlarged scale
+- **Then** the dice engine is configured with the base (un-reduced) scale
 - **Given** a staged pool that animates 10 dice
 - **When** the user rolls with animation enabled
 - **Then** the dice engine is configured with a scale strictly smaller than the
@@ -228,46 +189,26 @@ fit the clear area above the modal.
 
 ## REMOVED Requirements
 
-_None._ This change modifies the existing animation requirement and adds two new
-requirements; no requirement is removed.
+_None._ This change modifies the existing animation requirement and adds one new
+requirement; no requirement is removed.
 
 ## Traceability
 
-- Proposal element "Repair the predetermined-value path" -> Requirement
-  "MODIFIED Rolling plays a dice animation then a total modal" (forced-results
-  mechanism clause).
-- Proposal element "Reconciliation guard on `box.roll()` results" -> Requirement
-  "ADDED Animated dice faces are reconciled against the decided roll".
+- Proposal element "Replace the 3D dice engine" -> Requirement "MODIFIED Rolling
+  plays a dice animation then a total modal" (forced-results notation + self-host
+  clauses) + design Decisions 1, 2, 5.
+- Proposal element "Reconciliation guard on `roll()` results" -> Requirement
+  "ADDED Animated dice faces are reconciled against the decided roll" + design
+  Decision 3.
 - Proposal element "E2E asserts per-die faces" -> Requirement "ADDED Animated
   dice faces are reconciled against the decided roll" (scenario "Settled faces
   match the decided roll") + `tasks.md` E2E task.
-- Proposal element "Legibility — bigger dice, readable per-die values" ->
-  Requirements "ADDED Result modal shows the per-die rolled values" and the size
-  clauses of "MODIFIED Rolling plays a dice animation then a total modal".
-- Proposal element "No change to `built.total` / `built.rolls`" -> "MODIFIED
-  Rolling plays a dice animation then a total modal" (scenario "Roll outcome is
-  decided before the animation starts") + "ADDED Animated dice faces are
-  reconciled…" (final paragraph).
-- Design Decision 1 (spike) -> "MODIFIED Rolling…" forced-results clause
-  (mechanism left engine-defined).
-- Design Decision 2 (`toDiceBoxNotation` shape) -> "MODIFIED Rolling…"
-  forced-results clause.
-- Design Decision 3 (reconciliation) -> "ADDED Animated dice faces are
-  reconciled against the decided roll".
-- Design Decision 4 (fallback: detect + skip) -> "ADDED Animated dice faces are
-  reconciled…" mismatch bullet + "MODIFIED Rolling…" ("rather than presenting the
-  mismatched tumble").
-- Design Decision 5 (legibility) -> "ADDED Result modal shows the per-die rolled
-  values" + "MODIFIED Rolling…" size clauses.
-- Requirement "ADDED Animated dice faces are reconciled…" -> `tasks.md` tasks:
-  "Capture and reconcile engine results", "Classify mismatch as transient",
-  "E2E: assert settled faces".
-- Requirement "ADDED Result modal shows the per-die rolled values" -> `tasks.md`
-  tasks: "Add per-die readout to the result modal", "Readout on all reveal
-  paths".
-- Requirement "MODIFIED Rolling…" -> `tasks.md` tasks: "Spike the dice-box forced
-  API", "Rewrite `toDiceBoxNotation`", "Raise scale / retune curve",
-  "Enlarge canvas band".
+- Proposal element "Legibility — `+N more`, canvas band" -> the size clauses of
+  "MODIFIED Rolling…" + the `dice-roll` capability spec delta + design Decisions
+  4, 6.
+- Proposal element "No change to `built.*`" -> "MODIFIED Rolling…" (scenario
+  "Roll outcome is decided before the animation starts") + "ADDED Animated dice
+  faces are reconciled…" (final paragraph).
 
 ## Non-Functional Acceptance Criteria
 
@@ -278,10 +219,17 @@ requirements; no requirement is removed.
 - **Given** a roll has been animated and the dice engine has reported its settled
   results
 - **When** the reconciliation step runs
-- **Then** it completes as a synchronous comparison with no `fetch` / XHR and,
-  in the no-reroll design, no additional `roll()` / `reroll()` call
+- **Then** it completes as a synchronous comparison with no `fetch` / XHR and no
+  additional `roll()` / `reroll()` call
 - **And** the result modal reveal for a matched roll occurs within the existing
   `ROLL_TIMEOUT_MS` animation budget with no added delay
+
+#### Scenario: Dice engine is not in the initial bundle
+
+- **Given** a production build of the application
+- **When** the main entry bundle is inspected
+- **Then** `@drdreo/dice-box-threejs`, `three`, and `cannon-es` are only present
+  in an asynchronously loaded chunk, not the initial bundle
 
 ### Requirement: Security
 
@@ -289,7 +237,8 @@ See functional scenarios in the base `global-dice-fab` spec ("Fab is absent for
 an unauthenticated user") and `dice-pool-shared-state` / `roll-share-ui`. This
 change introduces no new access-control surface: it is presentational and
 client-only, reads existing `BuiltRoll` data, adds no route, and the server roll
-route remains the sole authorization/validation boundary.
+route remains the sole authorization/validation boundary. The dice engine and its
+assets are served from the application's own origin.
 
 ### Requirement: Reliability
 

@@ -98,6 +98,8 @@ regression-test-output.txt
 # OpenSpec change worktrees
 .worktrees/
 
-# @3d-dice/dice-box postinstall dumps a copy of its assets here on `npm install`;
-# the assets this app actually serves are vendored under public/dice-box/assets/.
+# The 3D dice engine's rendering assets are vendored under
+# public/dice-box-threejs/ (committed) via `node scripts/vendor-dice-assets.mjs`.
+# A stale `/public/assets/` dir may linger from the previously used
+# @3d-dice/dice-box postinstall copier; it is not served and is ignored here.
 /public/assets/
