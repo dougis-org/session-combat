@@ -4,7 +4,7 @@ import { DieGlyph } from './DieGlyph'
 
 interface PercentileButtonProps {
   onRoll: () => void
-  /** Disables the control on the same terms as the pool "Roll" commit control. */
+  /** Disables the control (e.g. while a roll is in flight). */
   disabled?: boolean
 }
 

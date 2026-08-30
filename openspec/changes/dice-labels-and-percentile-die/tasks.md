@@ -67,16 +67,16 @@ Issue-driven: **#573**. Default branch: `main`. Feature branch: `feat/573-dice-l
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Automatically apply all clearly-correct findings directly to the code — no stopping, no presenting the list, no confirmation. Apply fixes, re-run tests, then commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Automatically apply all clearly-correct findings directly to the code — no stopping, no presenting the list, no confirmation. Apply fixes, re-run tests, then commit.
 
 ## Validation
 
 - [x] `npm run test:unit`
-- [ ] `npm run test:integration` (via the project harness — starts Mongo, cleans the test DB, starts Next.js)
+- [x] `npm run test:integration` (via the project harness — starts Mongo, cleans the test DB, starts Next.js)
 - [ ] `npm run test:regression` (E2E) if any user-facing flow is affected
 - [x] `npm run typecheck`
 - [x] `npm run lint`
-- [ ] `npm run build`
+- [x] `npm run build`
 - [ ] All completed tasks marked `- [x]`
 - [ ] All steps in [Remote push validation]
 
@@ -97,10 +97,10 @@ If ANY required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
-- [ ] Commit all changes to the working branch and push
-- [ ] Open PR from `feat/573-dice-labels-and-percentile-die` to `main`. **PR body MUST include `Closes #573`** (unconditional).
-- [ ] **Issue lifecycle: mark in-review** — `gh issue edit 573 --add-label "in-review" --remove-label "in-progress"`; move the project item to the "In Review" column (same discovery as the in-progress step; warn and skip if not found).
+- [x] Ensure the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
+- [x] Commit all changes to the working branch and push
+- [x] Open PR from `feat/573-dice-labels-and-percentile-die` to `main`. **PR body MUST include `Closes #573`** (unconditional).
+- [x] **Issue lifecycle: mark in-review** — `gh issue edit 573 --add-label "in-review" --remove-label "in-progress"`; move the project item to the "In Review" column (same discovery as the in-progress step; warn and skip if not found).
 - [ ] Wait 60 seconds for CI to start
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
 - [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER `--admin`)

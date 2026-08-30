@@ -194,6 +194,27 @@ describe('GlobalDiceFab — percentile control', () => {
       expect(body.total).toBe(total)
     })
   })
+
+  it('the percentile control is disabled while a "Send to session chat" is in flight', async () => {
+    mockAuthed()
+    let resolveFetch!: (v: unknown) => void
+    global.fetch = jest.fn(() => new Promise(resolve => { resolveFetch = resolve })) as unknown as typeof fetch
+    const user = userEvent.setup()
+    render(<GlobalDiceFab />)
+    act(() => { announcePresence({ campaignId: 'camp-1', sessionId: 'sess-1' }) })
+    await user.click(screen.getByRole('button', { name: /roll|dice/i }))
+    await user.click(screen.getByRole('button', { name: /percentile|d%/i }))
+    const total = Number(screen.getByText(/d% → \[\d+\] =/).textContent!.match(/=\s*(\d+)\s*$/)![1])
+
+    user.click(screen.getByRole('button', { name: /send to session chat/i }))
+    await waitFor(() => expect(screen.getByRole('button', { name: /percentile|d%/i })).toBeDisabled())
+    // The in-flight result cannot be re-targeted by a fresh d% roll.
+    await user.click(screen.getByRole('button', { name: /percentile|d%/i }))
+    expect(screen.getByText(/d% → \[\d+\] =/).textContent).toContain(`= ${total}`)
+
+    resolveFetch({ status: 201, json: () => Promise.resolve({ id: 'roll-sent' }) })
+    await waitFor(() => expect(screen.getByRole('button', { name: /percentile|d%/i })).not.toBeDisabled())
+  })
 })
 
 describe('GlobalDiceFab — modal close behavior', () => {

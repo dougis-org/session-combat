@@ -21,6 +21,11 @@ describe('PercentileButton', () => {
     expect(onRoll).toHaveBeenCalledTimes(1)
   })
 
+  it('renders no title attribute', () => {
+    const { container } = render(<PercentileButton onRoll={jest.fn()} />)
+    expect(container.querySelector('[title]')).toBeNull()
+  })
+
   it('is inert when disabled', async () => {
     const user = userEvent.setup()
     const onRoll = jest.fn()

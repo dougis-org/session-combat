@@ -112,7 +112,7 @@ export function GlobalDiceFab() {
                   onRemove={dp.handleRemove}
                 />
               ))}
-              <PercentileButton onRoll={handlePercentileRoll} />
+              <PercentileButton onRoll={handlePercentileRoll} disabled={sendState === 'pending'} />
             </div>
             <input
               type="text"
@@ -128,7 +128,7 @@ export function GlobalDiceFab() {
             <button
               type="button"
               onClick={handleRoll}
-              disabled={dp.poolTotal === 0}
+              disabled={dp.poolTotal === 0 || sendState === 'pending'}
               className="text-xs bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-3 py-1 rounded"
             >
               Roll

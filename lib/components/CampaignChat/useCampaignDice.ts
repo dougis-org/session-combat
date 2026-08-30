@@ -55,12 +55,13 @@ export function useCampaignDice({ campaignId, activeSessionId, streamStatus, tri
     try {
       const built = dicePool.buildPercentileRoll()
       const result = await submitRoll(built.formula, built.rolls, built.total, dicePool.visibility)
-      if (result === 'conflict') {
+      if (result === 'success') {
+        // Percentile is not a pooled roll — leave the staged pool untouched.
+      } else if (result === 'conflict') {
         setRollError('No active session')
-      } else if (result !== 'success') {
+      } else {
         setRollError('Roll failed, try again')
       }
-      // Percentile is not a pooled roll — leave the staged pool untouched.
     } catch {
       setRollError('Roll failed, try again')
     } finally {
