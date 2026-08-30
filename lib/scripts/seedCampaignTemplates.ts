@@ -797,7 +797,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
   ),
 ];
 
-async function seedCampaignTemplates(): Promise<void> {
+export async function seedCampaignTemplates(): Promise<{ inserted: number; skipped: number }> {
   const db = await getDatabase();
   const collection = db.collection<CampaignTemplate>("campaignTemplates");
 
@@ -824,13 +824,19 @@ async function seedCampaignTemplates(): Promise<void> {
   }
 
   console.log(`\nDone. Inserted: ${inserted}, Skipped: ${skipped}`);
+  return { inserted, skipped };
 }
 
-seedCampaignTemplates()
-  .then(() => {
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error("Seed failed:", error);
-    process.exit(1);
-  });
+export async function runCli(): Promise<void> {
+  await seedCampaignTemplates();
+  process.exit(0);
+}
+
+export function handleCliError(error: unknown): never {
+  console.error("Seed failed:", error);
+  process.exit(1);
+}
+
+if (require.main === module) {
+  runCli().catch(handleCliError);
+}
