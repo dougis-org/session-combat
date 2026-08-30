@@ -104,7 +104,7 @@
 
 ## Change Control
 
-If scope changes after proposal approval, update `openspec/changes/improve-dice-roll-animation/proposal.md`,
-`openspec/changes/improve-dice-roll-animation/design.md`,
-`openspec/changes/improve-dice-roll-animation/specs/**/*.md`, and
-`openspec/changes/improve-dice-roll-animation/tasks.md` before implementation starts.
+If scope changes after proposal approval, update `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/proposal.md`,
+`openspec/changes/archive/2026-08-30-improve-dice-roll-animation/design.md`,
+`openspec/changes/archive/2026-08-30-improve-dice-roll-animation/specs/**/*.md`, and
+`openspec/changes/archive/2026-08-30-improve-dice-roll-animation/tasks.md` before implementation starts.

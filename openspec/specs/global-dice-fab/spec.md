@@ -150,32 +150,96 @@ _(Modified 2026-08-29, `decouple-dice-roll-capability`; modified again 2026-08-3
 
 ### Requirement: ADDED Rolling plays a dice animation then a total modal
 
-_(Added 2026-08-30, `add-dice-roll-animation`.)_ The system SHALL, when the user rolls in `GlobalDiceFab` (a pool roll or a percentile roll), present a dice-roll overlay that animates the staged dice coming to rest on their already-decided face values and then displays a modal showing the roll total. The roll outcome SHALL be decided before the animation begins, by the existing `buildRoll()` / `buildPercentileRoll()` path (see `dice-pool-shared-state` capability); the animation SHALL only visually settle on faces already chosen and SHALL NOT introduce any new randomness or HTTP request of its own. The overlay SHALL be rendered through a lazily created `document.body` overlay root, layered above the dice panel. No more than `DICE_ANIM_CAP` (30) dice SHALL be animated regardless of pool size; the total modal and inline result SHALL always show the exact total.
+_(Added 2026-08-30, `add-dice-roll-animation`; modified 2026-08-30, `improve-dice-roll-animation` — larger centered dice, modal gated on completion, cap lowered to 15, down-scaling.)_
 
-#### Scenario: Pool roll animates the staged dice and shows the total
+The system SHALL, when the user rolls in `GlobalDiceFab` (a pool roll or a percentile
+roll), present a dice-roll overlay that animates the staged dice coming to rest on their
+already-decided face values and then displays a modal showing the roll total.
+
+The roll outcome SHALL be decided before the animation begins, by the existing
+`buildRoll()` / `buildPercentileRoll()` path (see `dice-pool-shared-state` capability); the
+animation SHALL only visually settle on faces already chosen and SHALL NOT introduce any
+new randomness or HTTP request of its own. The overlay SHALL be rendered through a
+lazily created `document.body` overlay root, layered above the dice panel.
+
+The dice animation SHALL be rendered inside a bounded, horizontally centered region, and
+the dice SHALL be sized so that a die face is on roughly the same visual order as the
+result modal's total text (a substantial increase over the library default). The animated
+dice SHALL come to rest in the clear area directly above the result modal, such that the
+settled dice and the total modal are visible at the same time; the dice SHALL NOT obscure
+the total.
+
+The result modal SHALL remain hidden until the dice animation reports completion. The
+modal SHALL instead be shown immediately when the resolved "Disable Animation" preference
+is `true`, or when the dice engine is unsupported (no WebGL / asset load failure / instant
+path). If the animation never reports completion, the modal SHALL still be revealed after a
+bounded fallback timeout so the user is never left without a result.
+
+No more than 15 dice SHALL be animated regardless of pool size. The total modal and the
+inline `formula → [rolls] = total` result line SHALL always show the exact total for the
+entire pool. When more than 6 dice are animated, the dice SHALL be scaled down
+progressively with the animated dice count so the settled cluster continues to fit the
+clear area above the modal.
+
+#### Scenario: Pool roll animates larger centered dice then reveals the modal
 
 - **Given** the dice panel is open with a staged pool of `2d20+1d6` and modifier `+3`
 - **When** the user clicks Roll
-- **Then** the overlay opens showing a dice animation of 2 d20 dice and 1 d6 die, each
-  settling on the value from the built roll's per-die breakdown
-- **And** when the dice settle, a modal is shown displaying the roll total equal to
-  `built.total`
-- **And** the inline `formula → [rolls] = total` result line is also rendered in the panel
+- **Then** the overlay opens with a bounded, horizontally centered dice canvas region
+  positioned above where the result modal will appear (the canvas is not a full-viewport
+  `inset-0` element)
+- **And** the dice engine is configured with an explicit enlarged scale so the dice render
+  far larger than the library default
+- **And** the 2 d20 dice and 1 d6 die each settle on the value from the built roll's
+  per-die breakdown
+- **And** the total modal is NOT present in the document while the tumble is in progress
+- **And** the inline `formula → [rolls] = total` result line IS rendered in the panel
+  immediately
+- **When** the dice settle and the animation reports completion
+- **Then** the total modal appears below the settled dice, showing the roll total equal to
+  `built.total`, with both the dice and the modal visible together
 
-#### Scenario: Percentile roll animates two d10s and shows the decoded value
+#### Scenario: Percentile roll animates two centered d10s then reveals the decoded value
 
 - **Given** the dice panel is open
 - **When** the user clicks the percentile control
-- **Then** the overlay opens showing two d10 dice settling on the built roll's
-  `percentileFaces`
-- **And** the total modal displays the single decoded value in 1..100 equal to `built.total`
+- **Then** the overlay opens with two enlarged d10 dice in the centered canvas region,
+  settling on the built roll's `percentileFaces`, and the total modal is not yet shown
+- **When** the dice settle
+- **Then** the total modal appears displaying the single decoded value in 1..100 equal to
+  `built.total` (the persisted/inline value is unchanged; see `dice-pool-shared-state`
+  capability)
 
-#### Scenario: Animation is skipped when animation is disabled
+#### Scenario: Modal stays hidden until the tumble settles
+
+- **Given** animation is enabled and the dice engine is supported
+- **When** the user rolls and the dice animation has started but not yet completed
+- **Then** no element with `role="dialog"` for the roll result is present in the document
+- **When** the animation reports completion
+- **Then** the roll-result dialog is present
+
+#### Scenario: Modal shows immediately when animation is disabled
 
 - **Given** the resolved "Disable Animation" preference is `true`
 - **When** the user rolls
-- **Then** the overlay opens immediately with the total modal and no dice tumble is played
+- **Then** the overlay opens immediately with the total modal shown and no dice tumble is
+  played
 - **And** the inline result line still renders
+
+#### Scenario: Modal shows immediately when the dice engine is unsupported
+
+- **Given** the dice animation status is `unsupported` (no WebGL or the library/assets
+  failed to load)
+- **When** the user rolls
+- **Then** the total modal is shown immediately with no dice tumble
+- **And** the inline result line still renders
+
+#### Scenario: Modal is revealed by the fallback timeout if completion never signals
+
+- **Given** animation is enabled and started, but the animation never reports completion
+  (e.g. the WebGL context is lost mid-roll)
+- **When** the bounded fallback timeout elapses
+- **Then** the total modal is revealed showing the roll total equal to `built.total`
 
 #### Scenario: Roll outcome is decided before the animation starts
 
@@ -184,12 +248,23 @@ _(Added 2026-08-30, `add-dice-roll-animation`.)_ The system SHALL, when the user
 - **Then** the per-die values shown by the animation are exactly those in the built roll's
   breakdown, and no die value is generated or altered during or after the animation
 
-#### Scenario: Large pools animate a capped subset
+#### Scenario: Large pools animate a capped subset of 15
 
 - **Given** a staged pool of 120 dice (e.g. `120d6`)
 - **When** the user rolls with animation enabled
-- **Then** no more than `DICE_ANIM_CAP` (30) dice are animated
+- **Then** no more than 15 dice are animated
 - **And** the total modal and inline result show the exact total for all 120 dice
+
+#### Scenario: More than six dice shrink to fit the clear zone
+
+- **Given** a staged pool that animates 6 dice
+- **When** the user rolls with animation enabled
+- **Then** the dice engine is configured with the base (un-reduced) scale
+- **Given** a staged pool that animates 10 dice
+- **When** the user rolls with animation enabled
+- **Then** the dice engine is configured with a scale strictly smaller than the base scale
+- **And** a pool that animates 15 dice uses a scale no larger than the 10-dice scale and
+  not below the defined minimum scale
 
 ---
 
@@ -285,6 +360,7 @@ _(Added 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL cause `G
 - Design decision 1 (Panel Positioning strategy) → Requirements: MODIFIED Global Dice Panel Positioning
 - (2026-08-29, `decouple-dice-roll-capability`) Proposal "What Changes" (`GlobalDiceFab` updated to submit directly) → Requirements: MODIFIED "Send to session chat" option, ADDED Sending to session chat succeeds whether or not CampaignChat is mounted
 - (2026-08-30, `add-dice-roll-animation`) 3D animation of staged dice + total modal → Requirement: ADDED Rolling plays a dice animation then a total modal
+- (2026-08-30, `improve-dice-roll-animation`, issue #596) larger centered dice, result modal gated on animation completion, animated-dice cap 30 → 15, progressive down-scaling past 6 dice → Requirement: ADDED (modified) Rolling plays a dice animation then a total modal. See `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/`.
 - (2026-08-30, `add-dice-roll-animation`) overlay persists, dismiss closes only the overlay → Requirement: ADDED Dismissing the roll overlay leaves the dice panel open
 - (2026-08-30, `add-dice-roll-animation`) "Disable Animation" checkbox, reduced-motion default, stored override → Requirement: ADDED Animation preference follows reduced-motion until explicitly set
 - (2026-08-30, `add-dice-roll-animation`) "Send to session chat" → persisted checkbox, auto-submit on Roll, animate after persist → Requirement: MODIFIED "Send to session chat" option. See `openspec/changes/archive/2026-08-30-add-dice-roll-animation/tasks.md`.
@@ -318,10 +394,21 @@ _(Added 2026-08-30, `add-dice-roll-animation`.)_
 
 - **Given** WebGL is unavailable, or the 3D library assets fail to load or time out
 - **When** the user rolls
-- **Then** the overlay opens with the total modal and no dice canvas
+- **Then** the overlay opens with the total modal and no visible dice canvas band
 - **And** the inline `formula → [rolls] = total` result is shown
 - **And** for the remainder of the session, rolls use the instant path without retrying the
   failed asset load
+
+#### Scenario: Result modal is revealed even if the animation never signals completion
+
+_(Added 2026-08-30, `improve-dice-roll-animation`.)_
+
+- **Given** the dice animation is enabled and has started
+- **When** the animation fails to report completion within the bounded fallback timeout
+  (context loss, backgrounded tab, or library hang)
+- **Then** the overlay reveals the total modal with the correct total, leaving the user with
+  a usable, dismissable result rather than a stuck overlay; the dice engine is released when
+  the overlay is closed or the next roll begins (not by the timeout itself)
 
 ### Operability — roll animation
 

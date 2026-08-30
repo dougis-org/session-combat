@@ -141,7 +141,7 @@ _No requirements are removed by this change._
 - Design Decision 3 (land above the modal) -> landing clause.
 - Design Decision 4 (`DICE_ANIM_CAP = 15`, `diceAnimationScale`) -> 15-cap + down-scaling clauses.
 - Design Decision 5 (preserve fallback + dismissal semantics) -> "Modal shows immediately when the dice engine is unsupported" scenario; the unchanged "Dismissing the roll overlay leaves the dice panel open" requirement is regression-guarded (tasks.md).
-- Requirement -> Task(s): see `openspec/changes/improve-dice-roll-animation/tasks.md` Execution steps E1–E6 and `openspec/changes/improve-dice-roll-animation/tests.md`.
+- Requirement -> Task(s): see `tasks.md` Execution steps E1–E6 and `tests.md`.
 
 ## Non-Functional Acceptance Criteria
 

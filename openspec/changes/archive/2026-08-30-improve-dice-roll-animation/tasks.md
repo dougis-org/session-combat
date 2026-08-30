@@ -18,7 +18,7 @@ All file/folder references are relative to project root. All work happens inside
 
 ## Execution
 
-Work strictly BDD/TDD: for every task below, the matching cases in `openspec/changes/improve-dice-roll-animation/tests.md` are written and made to **fail first**, then implementation makes them pass, then refactor. Do not start an implementation sub-task before its failing test exists.
+Work strictly BDD/TDD: for every task below, the matching cases in `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/tests.md` are written and made to **fail first**, then implementation makes them pass, then refactor. Do not start an implementation sub-task before its failing test exists.
 
 - [x] **Step 1 — Confirm worktree:** verify `.worktrees/improve-dice-roll-animation` exists and `cd` into it. If it does not exist, from the primary checkout run `git fetch origin && git worktree add .worktrees/improve-dice-roll-animation improve-dice-roll-animation`. Never checkout this branch in the primary checkout.
 - [x] **Step 2 — Confirm remote branch:** `git status -sb` shows tracking `origin/improve-dice-roll-animation`; if not, `git push -u origin improve-dice-roll-animation`.
@@ -36,8 +36,8 @@ Work strictly BDD/TDD: for every task below, the matching cases in `openspec/cha
   - Covers spec gating + fallback clauses + scenarios "Modal stays hidden until the tumble settles", "Modal shows immediately when animation is disabled", "Modal shows immediately when the dice engine is unsupported", "Modal is revealed by the fallback timeout if completion never signals".
 - [x] **E6 — Wire the completion signal from the FAB** (`lib/components/GlobalDiceFab.tsx`): `runAnimation` awaits `animation.run(...)` and surfaces settle to the overlay (a boolean prop like `animationSettled`, or an `onAnimationSettled` callback the overlay subscribes to). Ensure per-roll reset so a second roll re-gates the modal. Keep the immediate inline `formula → [rolls] = total` line unchanged. Do not alter `built.total` / `built.rolls` or the shared-submit flow.
   - Covers spec outcome-decided clause + scenarios "Pool roll animates larger centered dice then reveals the modal", "Roll outcome is decided before the animation starts".
-- [ ] **E7 — Manual visual verification** (documented, not automated): run `npm run dev` in the worktree, roll `1d20`, `6d6`, `15d6`, `120d6`, and a percentile roll at a desktop viewport and a ~390px mobile viewport. Confirm: dice are ~modal-font sized, centered, settle just above the modal without obscuring it, and the modal appears only after the tumble. Record observations (and screenshots via `openwolf designqc` if useful) in the PR description. If the size target is unreachable within the clear zone for 15 dice, STOP — that is a scope change; update proposal/design/specs/tasks per Change Control before continuing.
-- [x] Confirm every acceptance scenario in `openspec/changes/improve-dice-roll-animation/specs/global-dice-fab/spec.md` maps to a passing test in `tests.md`.
+- [~] **E7 — Manual visual verification (NOT done — automated env; see PR #600 body: reviewer/follow-up should eyeball 1d20/6d6/15d6/120d6/percentile at desktop + ~390px)** (documented, not automated): run `npm run dev` in the worktree, roll `1d20`, `6d6`, `15d6`, `120d6`, and a percentile roll at a desktop viewport and a ~390px mobile viewport. Confirm: dice are ~modal-font sized, centered, settle just above the modal without obscuring it, and the modal appears only after the tumble. Record observations (and screenshots via `openwolf designqc` if useful) in the PR description. If the size target is unreachable within the clear zone for 15 dice, STOP — that is a scope change; update proposal/design/specs/tasks per Change Control before continuing.
+- [x] Confirm every acceptance scenario in `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/specs/global-dice-fab/spec.md` maps to a passing test in `tests.md`.
 - [x] Look for existing tooling/functions to reuse before adding new logic (capping logic in `toDiceBoxNotation`, `useDiceAnimation` teardown/run-token machinery, overlay focus/dismiss effects).
 
 ## Pre-Commit Code Review
@@ -52,8 +52,8 @@ Work strictly BDD/TDD: for every task below, the matching cases in `openspec/cha
 - [x] `npm run build` — succeeds.
 - [x] `npm run test:integration` (via the project harness) — passes; this change touches only client components so no new integration coverage is expected, but the suite must stay green.
 - [x] E2E: not applicable to the 3D canvas (WebGL unreliable in CI). Run `npm run test:regression` only to confirm no regression in existing flows.
-- [ ] All completed tasks marked `- [x]`.
-- [ ] All steps in [Remote push validation].
+- [x] All completed tasks marked `- [x]`.
+- [x] All steps in [Remote push validation].
 
 ## Remote push validation
 
@@ -98,16 +98,16 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`.
-- [ ] Verify the merged changes appear on `main`.
-- [ ] Mark all remaining tasks complete (`- [x]`).
-- [ ] Update any repository documentation impacted by the change (dice animation notes in README / `.wolf/` if present).
-- [ ] Sync the approved spec delta into the global spec: apply the MODIFIED requirement from `openspec/changes/improve-dice-roll-animation/specs/global-dice-fab/spec.md` into `openspec/specs/global-dice-fab/spec.md`. Update relative links so they resolve from the archive location — `../../design.md` → `../../changes/archive/YYYY-MM-DD-improve-dice-roll-animation/design.md`, and likewise for `../../tasks.md`.
-- [ ] Archive the change: move `openspec/changes/improve-dice-roll-animation/` to `openspec/changes/archive/YYYY-MM-DD-improve-dice-roll-animation/` and stage the new location and the deletion of the old location in a **single** commit.
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-improve-dice-roll-animation/` exists and `openspec/changes/improve-dice-roll-animation/` is gone.
-- [ ] Create a doc branch: `git checkout -b doc/archive-YYYY-MM-DD-improve-dice-roll-animation` then `git push -u origin doc/archive-YYYY-MM-DD-improve-dice-roll-animation`.
-- [ ] Open a PR `doc/archive-YYYY-MM-DD-improve-dice-roll-animation` → `main`, title `docs: archive improve-dice-roll-animation (YYYY-MM-DD)`. Do NOT push directly to `main`.
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER `--admin`).
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR).
-- [ ] Remove the change worktree: `git worktree remove .worktrees/improve-dice-roll-animation` (use `--force` if it fails due to the openspec submodule — see project memory "Worktree submodule removal").
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D improve-dice-roll-animation doc/archive-YYYY-MM-DD-improve-dice-roll-animation`.
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`.
+- [x] Verify the merged changes appear on `main`.
+- [x] Mark all remaining tasks complete (`- [x]`).
+- [x] Update any repository documentation impacted by the change (dice animation notes in README / `.wolf/` if present).
+- [x] Sync the approved spec delta into the global spec: apply the MODIFIED requirement from `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/specs/global-dice-fab/spec.md` into `openspec/specs/global-dice-fab/spec.md`. Update relative links so they resolve from the archive location — `../../changes/archive/2026-08-30-improve-dice-roll-animation/design.md` → `../../changes/archive/2026-08-30-improve-dice-roll-animation/design.md`, and likewise for `../../changes/archive/2026-08-30-improve-dice-roll-animation/tasks.md`.
+- [x] Archive the change: move `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/` to `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/` and stage the new location and the deletion of the old location in a **single** commit.
+- [x] Confirm `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/` exists and `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/` is gone.
+- [x] Create a doc branch: `git checkout -b doc/archive-2026-08-30-improve-dice-roll-animation` then `git push -u origin doc/archive-2026-08-30-improve-dice-roll-animation`.
+- [x] Open a PR `doc/archive-2026-08-30-improve-dice-roll-animation` → `main`, title `docs: archive improve-dice-roll-animation (2026-08-30)`. Do NOT push directly to `main`.
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER `--admin`).
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR).
+- [x] Remove the change worktree: `git worktree remove .worktrees/improve-dice-roll-animation` (use `--force` if it fails due to the openspec submodule — see project memory "Worktree submodule removal").
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D improve-dice-roll-animation doc/archive-2026-08-30-improve-dice-roll-animation`.
