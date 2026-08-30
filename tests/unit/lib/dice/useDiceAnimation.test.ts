@@ -123,6 +123,49 @@ describe('useDiceAnimation — single-instance invariant', () => {
     expect(rollMock).toHaveBeenCalledWith('2d6@3,4')
   })
 
+  it('run() resolves true when the roll settles as the current run', async () => {
+    stubWebGL(true)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    let outcome: boolean | undefined
+    await act(async () => {
+      outcome = await result.current.run(built, container)
+    })
+    expect(outcome).toBe(true)
+  })
+
+  it('run() resolves false for a run superseded mid-tumble', async () => {
+    stubWebGL(true)
+    let resolveFirst: ((v: unknown) => void) | undefined
+    rollMock.mockImplementationOnce(() => new Promise(res => { resolveFirst = res }))
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+
+    let firstOutcome: boolean | undefined
+    let firstPromise!: Promise<boolean>
+    await act(async () => {
+      firstPromise = result.current.run(built, container)
+      firstPromise.then(v => { firstOutcome = v })
+      await new Promise(r => setTimeout(r, 0))
+      // supersede while the first roll is still pending
+      await result.current.run(built, container)
+      resolveFirst!(undefined)
+      await firstPromise
+    })
+    expect(firstOutcome).toBe(false)
+  })
+
+  it('run() resolves false when WebGL is unavailable', async () => {
+    stubWebGL(false)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    let outcome: boolean | undefined
+    await act(async () => {
+      outcome = await result.current.run(built, container)
+    })
+    expect(outcome).toBe(false)
+  })
+
   function poolBuilt(n: number): BuiltRoll {
     const breakdown = Array.from({ length: n }, () => ({ sides: 6, value: 3 }))
     return { formula: `${n}d6`, rolls: breakdown.map(d => d.value), total: n * 3, breakdown, modifier: 0 }
@@ -227,9 +270,10 @@ describe('useDiceAnimation — single-instance invariant', () => {
       const { result } = renderHook(() => useDiceAnimation())
 
       let settled = false
+      let outcome: boolean | undefined
       let runPromise!: Promise<void>
       await act(async () => {
-        runPromise = result.current.run(built, container).then(() => { settled = true })
+        runPromise = result.current.run(built, container).then(v => { settled = true; outcome = v })
         // let the import / init chain settle (real microtasks), then trip the roll timeout
         for (let i = 0; i < 20; i++) await Promise.resolve()
         expect(rollMock).toHaveBeenCalled()
@@ -239,6 +283,7 @@ describe('useDiceAnimation — single-instance invariant', () => {
       })
 
       expect(settled).toBe(true)
+      expect(outcome).toBe(false)
       expect(result.current.status).toBe('idle')
       expect(clearMock).toHaveBeenCalled()
       expect(errSpy).toHaveBeenCalled()

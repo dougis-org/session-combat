@@ -3,25 +3,29 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
-import type { DiceAnimationStatus } from '@/lib/dice/useDiceAnimation'
+import {
+  INIT_TIMEOUT_MS,
+  ROLL_TIMEOUT_MS,
+  type DiceAnimationStatus,
+} from '@/lib/dice/useDiceAnimation'
 
 /** Stable id so `@3d-dice/dice-box` can be handed a CSS selector for its mount point. */
 export const DICE_ROLL_CANVAS_ID = 'dice-roll-canvas'
 
 /**
- * Upper bound on how long the result modal stays hidden waiting for the tumble to report
- * completion. `useDiceAnimation` bounds only dice-box *init* (~6s); a wedged physics settle
- * (context lost, tab backgrounded, library hang) can leave `box.roll()` — and therefore the
- * `animationSettled` signal — pending forever, so this timeout is the sole guarantee the
- * modal appears.
+ * Last-resort bound on how long the result modal stays hidden waiting for the tumble to
+ * report completion. `useDiceAnimation.run()` already bounds itself (init + settle, see
+ * below), so `animationSettled` normally fires well within this window; the only gap this
+ * covers is a hung dynamic `import('@3d-dice/dice-box')`, which nothing else times out.
+ *
+ * Sits clear of the hook's own worst case so a slow-but-successful roll is never cut: it
+ * exceeds `INIT_TIMEOUT_MS + ROLL_TIMEOUT_MS` plus margin for the import.
  *
  * On expiry the overlay reveals the modal and sets the canvas band aside (`hidden`) so the
- * result is centred and unobstructed. The dice engine is *not* torn down — it is released
- * when the overlay closes or the next roll starts (`useDiceAnimation`'s single-instance
- * teardown) — so nothing is stranded, only hidden. Kept generously above a healthy
- * worst case so the reveal is rarely the thing the user notices.
+ * result is centred; the dice engine is *not* torn down — it is released when the overlay
+ * closes or the next roll starts (`useDiceAnimation`'s single-instance teardown).
  */
-export const MODAL_REVEAL_FALLBACK_MS = 20000
+export const MODAL_REVEAL_FALLBACK_MS = INIT_TIMEOUT_MS + ROLL_TIMEOUT_MS + 7000
 
 interface DiceRollOverlayProps {
   built: BuiltRoll

@@ -32,9 +32,6 @@ export function GlobalDiceFab() {
   // mid-flight — `sendState === 'pending'` only covers the shared-submit path, not a
   // local roll, so without this two overlays / animations could stack.
   const rollInFlightRef = useRef(false)
-  // Identifies the current animation run so a previous roll's tumble settling late cannot
-  // reveal the new roll's modal prematurely.
-  const runSeqRef = useRef(0)
 
   const dp = useDicePoolState({ triggerRef, panelRef })
   const { submitRoll } = useRollSubmission(presence?.campaignId ?? '')
@@ -53,9 +50,6 @@ export function GlobalDiceFab() {
   }, [dp.isOpen])
 
   const closeOverlay = useCallback(() => {
-    // Advance the run token so an aborted tumble's late `run()` resolution cannot write
-    // `animationSettled` after the overlay is gone.
-    runSeqRef.current += 1
     animation.teardown()
     setOverlayRoll(null)
   }, [animation])
@@ -63,11 +57,10 @@ export function GlobalDiceFab() {
   const runAnimation = useCallback(
     (container: HTMLElement) => {
       if (!overlayRoll) return
-      // `performRoll` already advanced `runSeqRef` and reset `animationSettled` synchronously
-      // when it staged this roll, so a previous roll's late `run()` resolution is disqualified.
-      const mySeq = runSeqRef.current
-      void animation.run(overlayRoll, container).then(() => {
-        if (runSeqRef.current === mySeq) setAnimationSettled(true)
+      // `run()` resolves `true` only if this run settled as the current run, so a superseded
+      // or torn-down roll's late resolution can never reveal a newer roll's modal.
+      void animation.run(overlayRoll, container).then(settled => {
+        if (settled) setAnimationSettled(true)
       })
     },
     [animation, overlayRoll],
@@ -90,9 +83,9 @@ export function GlobalDiceFab() {
       } else {
         setSendState('idle')
       }
-      // Advance the animation-run token synchronously so any in-flight previous roll's
-      // `run().then()` can no longer flip `animationSettled` for this new roll.
-      runSeqRef.current += 1
+      // Re-gate the modal for the new roll: reset the completion flag and remount the
+      // overlay (via `key={rollSeq}`). A superseded previous run resolves `false`, so it
+      // cannot flip `animationSettled` back on.
       setAnimationSettled(false)
       setRollSeq(seq => seq + 1)
       setOverlayRoll(built)

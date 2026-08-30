@@ -9,14 +9,15 @@ import { diceAnimationScale } from '@/lib/dice/diceAnimationScale'
 export type DiceAnimationStatus = 'idle' | 'unsupported'
 
 const ASSET_PATH = '/dice-box/assets/'
-const INIT_TIMEOUT_MS = 6000
+/** Cap on how long `box.init()` (WebGL context + asset/WASM load) may stay pending. */
+export const INIT_TIMEOUT_MS = 6000
 /**
  * Cap on how long `box.roll()` may stay pending. dice-box `^1.1.4` exposes no way to abort a
  * wedged settle (lost WebGL context, throttled tab), so once this elapses we stop waiting,
  * tear the box down, and resolve `run()` — keeping the completion signal bounded for every
  * caller rather than leaving hang-recovery to each consumer.
  */
-const ROLL_TIMEOUT_MS = 12000
+export const ROLL_TIMEOUT_MS = 12000
 
 /** True only when a real WebGL context can be created. */
 function hasWebGL(): boolean {
@@ -55,12 +56,16 @@ interface DiceBoxLike {
 export interface DiceAnimation {
   status: DiceAnimationStatus
   /**
-   * Play the predetermined tumble for `built` inside `container`, resolving when the dice
-   * settle. If WebGL is unavailable or the library/assets fail to load, resolves
-   * immediately (instant path), sets `status` to `'unsupported'`, and logs once. A second
-   * `run()` while one is active tears the first down first (single-instance invariant).
+   * Play the predetermined tumble for `built` inside `container`. Resolves to `true` only
+   * when this run reached and completed `box.roll()` as the current run — i.e. the dice
+   * actually settled and no later `run()` / `teardown()` superseded it. Resolves to `false`
+   * on every other path: WebGL unavailable, library/asset load failure (also sets `status`
+   * to `'unsupported'` and logs once), a settle that fails or times out, or the run being
+   * superseded. Callers can therefore treat `true` as "this roll's animation finished" with
+   * no external staleness bookkeeping. A second `run()` while one is active tears the first
+   * down first (single-instance invariant).
    */
-  run: (built: BuiltRoll, container: HTMLElement) => Promise<void>
+  run: (built: BuiltRoll, container: HTMLElement) => Promise<boolean>
   /** Tear down any active box. Safe to call repeatedly. */
   teardown: () => void
 }
@@ -99,14 +104,14 @@ export function useDiceAnimation(): DiceAnimation {
   }, [])
 
   const run = useCallback(
-    async (built: BuiltRoll, container: HTMLElement) => {
-      if (unsupportedRef.current) return
+    async (built: BuiltRoll, container: HTMLElement): Promise<boolean> => {
+      if (unsupportedRef.current) return false
       // Probe WebGL once per mounted hook, not once per roll — each probe otherwise leaks
       // a WebGL context and browsers cap concurrent contexts.
       if (webglOkRef.current === null) webglOkRef.current = hasWebGL()
       if (!webglOkRef.current) {
         markUnsupported(new Error('WebGL unavailable'))
-        return
+        return false
       }
 
       // Single-instance invariant: replace any open box (also bumps the run token).
@@ -116,7 +121,7 @@ export function useDiceAnimation(): DiceAnimation {
       let box: DiceBoxLike
       try {
         const mod = await import('@3d-dice/dice-box')
-        if (runIdRef.current !== myRun) return
+        if (runIdRef.current !== myRun) return false
         const DiceBox = mod.default
         // dice-box v1.1.x wants a single config object with a CSS *selector* string.
         if (!container.id) container.id = 'dice-roll-canvas'
@@ -132,7 +137,7 @@ export function useDiceAnimation(): DiceAnimation {
       } catch (err) {
         teardown()
         markUnsupported(err)
-        return
+        return false
       }
 
       if (runIdRef.current !== myRun) {
@@ -141,7 +146,7 @@ export function useDiceAnimation(): DiceAnimation {
         } catch {
           /* nothing to clear */
         }
-        return
+        return false
       }
       boxRef.current = box
 
@@ -152,7 +157,11 @@ export function useDiceAnimation(): DiceAnimation {
       } catch (err) {
         teardown()
         console.error('[dice-animation] roll failed', err)
+        return false
       }
+
+      // Only report completion if this run is still the current one.
+      return runIdRef.current === myRun
     },
     [markUnsupported, teardown],
   )

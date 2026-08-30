@@ -9,7 +9,7 @@
   - `@3d-dice/dice-box@^1.1.4` — config keys used today: `container`, `assetPath`, `theme`. Available and relevant: `scale` (default 5), `settleTimeout` (default 5000ms), `onRollComplete(results)` callback; `roll()` returns a promise that resolves when dice settle.
   - React 18 client components; Tailwind for layout; `react-dom` `createPortal`.
 - Interfaces/contracts touched:
-  - `DiceAnimation.run(built, container)` return contract — today resolves after `box.roll()` or immediately on the instant path. Stays a `Promise<void>` that resolves **only when the tumble has settled or the instant path was taken**; callers may now rely on that timing.
+  - `DiceAnimation.run(built, container)` return contract — changes from `Promise<void>` to `Promise<boolean>`. It resolves `true` only when this run reached and completed `box.roll()` **as the current run** (dice settled, not superseded / torn down); it resolves `false` on every other path (WebGL unavailable, asset/init failure, roll failure or `ROLL_TIMEOUT_MS` timeout, or superseded). Callers treat `true` as "this roll's animation finished" and need no external staleness bookkeeping. `run()` is now self-bounded: `INIT_TIMEOUT_MS` for init, `ROLL_TIMEOUT_MS` for the settle.
   - `DiceRollOverlayProps` — gains no required prop change to callers that is behaviorally breaking, but adds an internal "modal revealed" state and a completion signal wired from `GlobalDiceFab`.
   - `toDiceBoxNotation` — `DICE_ANIM_CAP` constant value changes 30 -> 15 (exported; referenced by tests and spec).
   - `openspec/specs/global-dice-fab/spec.md` — MODIFIED requirement.
@@ -54,7 +54,7 @@ reveals the modal and sets the canvas band aside (`hidden`, no layout space) so 
 centred and unobstructed; it does **not** tear the engine down. The engine is released when
 the overlay closes or the next roll starts (`useDiceAnimation`'s single-instance teardown) —
 dice-box `^1.1.4` exposes no `destroy`, so the canvas host stays mounted (just hidden) for the
-overlay's lifetime rather than being unmounted mid-run and stranding its render loop. The completion signal is the resolution of `animation.run(...)` promise, surfaced by `GlobalDiceFab` awaiting it and passing a `animationComplete` boolean (or an `onAnimationSettled` callback) to the overlay. `useDiceAnimation.run` is adjusted so its promise resolves **after** settle (it already awaits `box.roll()`; ensure the instant/teardown paths also resolve, never hang).
+overlay's lifetime rather than being unmounted mid-run and stranding its render loop. The completion signal is `animation.run(...)` resolving `true` (see the contract note above). `GlobalDiceFab` awaits it and, only on `true`, sets an `animationSettled` boolean it passes to the overlay. Because `run()` reports `false` for superseded / torn-down runs, the FAB needs no run-token of its own — a stale roll's late resolution simply resolves `false`. The overlay is remounted per roll (`key={rollSeq}`) so its gate state resets cleanly.
 - Alternatives considered:
   - Keep `void animation.run()` and use only a timer: rejected — either reveals too early (bad) or too late (sluggish).
   - Wire dice-box `onRollComplete` directly into the overlay: rejected — the overlay does not own the `DiceBox`; keeping the box inside `useDiceAnimation` preserves the single-instance invariant.

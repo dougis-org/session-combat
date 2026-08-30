@@ -14,9 +14,10 @@ jest.mock('@/lib/utils/dice', () => ({
   rollDicePool: jest.fn(),
 }))
 
-const runMock = jest.fn().mockResolvedValue(undefined)
+const runMock = jest.fn().mockResolvedValue(true)
 const teardownMock = jest.fn()
 jest.mock('@/lib/dice/useDiceAnimation', () => ({
+  ...jest.requireActual('@/lib/dice/useDiceAnimation'),
   useDiceAnimation: () => ({ status: 'idle', run: runMock, teardown: teardownMock }),
 }))
 
@@ -246,7 +247,7 @@ describe('GlobalDiceFab — roll overlay + total modal', () => {
     await waitFor(() => expect(runMock).toHaveBeenCalledTimes(1))
     expect(screen.queryByRole('dialog', { name: /dice roll result/i })).not.toBeInTheDocument()
 
-    await act(async () => { resolveRun(undefined) })
+    await act(async () => { resolveRun(true) })
     const dialog = await screen.findByRole('dialog', { name: /dice roll result/i })
     expect(dialog).toHaveTextContent('14')
   })
@@ -274,7 +275,7 @@ describe('GlobalDiceFab — roll overlay + total modal', () => {
       await user.click(screen.getByRole('button', { name: 'Add d20' }))
       await user.click(screen.getByRole('button', { name: 'Roll' }))
       await waitFor(() => expect(runMock).toHaveBeenCalledTimes(1))
-      await act(async () => { pending[0](undefined) })
+      await act(async () => { pending[0](true) })
       await screen.findByRole('dialog', { name: /dice roll result/i })
 
       await user.click(screen.getByRole('button', { name: 'Roll' }))
@@ -284,7 +285,7 @@ describe('GlobalDiceFab — roll overlay + total modal', () => {
       expect(document.body.querySelectorAll('[data-dice-roll-overlay-root]')).toHaveLength(1)
     } finally {
       runMock.mockReset()
-      runMock.mockResolvedValue(undefined)
+      runMock.mockResolvedValue(true)
     }
   })
 
