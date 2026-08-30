@@ -216,14 +216,14 @@ If ANY required step fails, iterate and fix before pushing.
   `gh project item-edit` (same discovery as in-progress; warn and skip if not
   found).
 - [x] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
   findings (commit, run [Remote push validation], push, re-run) until zero
   findings remain. If findings persist after 3+ iterations with no progress,
   report the stall with remaining findings and wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):**
+- [x] **Enable auto-merge only after the review gate passes (zero findings):**
   `gh pr merge <PR-URL> --auto --merge` (NEVER `--admin`, never bypass branch
   protection)
-- [ ] **Iterate until merged** — repeat until
+- [x] **Iterate until merged** — repeat until
   `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and
   notify the user):
   1. **Build and tests** — run [Remote push validation]; fix failures, commit,
@@ -245,34 +245,34 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (README nav
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (README nav
   screenshots/notes if any; `.wolf/anatomy.md` already updated)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy
+- [x] Sync approved spec deltas into `openspec/specs/`: copy
   `openspec/changes/add-user-account-menu/specs/user-account-menu/spec.md` to
   `openspec/specs/user-account-menu/spec.md`, and rewrite relative links —
   `../../design.md` → `../../changes/archive/YYYY-MM-DD-add-user-account-menu/design.md`
   (and similarly for `../../tasks.md`). Also update the "MODIFIED Requirements"
   content against the real navigation capability if one is later introduced.
-- [ ] Archive the change: move
+- [x] Archive the change: move
   `openspec/changes/add-user-account-menu/` to
   `openspec/changes/archive/YYYY-MM-DD-add-user-account-menu/` and stage the new
   location + deletion of the old location in a **single** commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-add-user-account-menu/`
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-add-user-account-menu/`
   exists and `openspec/changes/add-user-account-menu/` is gone
-- [ ] Create a doc branch: `git checkout -b doc/archive-YYYY-MM-DD-add-user-account-menu`
+- [x] Create a doc branch: `git checkout -b doc/archive-YYYY-MM-DD-add-user-account-menu`
   then `git push -u origin doc/archive-YYYY-MM-DD-add-user-account-menu`
-- [ ] Open a PR from that doc branch to `main` titled
+- [x] Open a PR from that doc branch to `main` titled
   `docs: archive add-user-account-menu (YYYY-MM-DD)` — do NOT push directly to
   `main`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR:
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR:
   `gh pr merge <DOC-PR-URL> --auto --merge` (never `--admin`)
-- [ ] Monitor the doc PR until merged (same loop as the implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and
+- [x] Monitor the doc PR until merged (same loop as the implementation PR)
+- [x] Prune merged local branches: `git fetch --prune` and
   `git branch -D add-user-account-menu doc/archive-YYYY-MM-DD-add-user-account-menu`
-- [ ] Remove the change's worktree:
+- [x] Remove the change's worktree:
   `git worktree remove .worktrees/add-user-account-menu` (use `--force` if the
   openspec-shared submodule blocks removal, per known project gotcha)
-- [ ] If a `verity reflect` / post-task reflection is requested, run it
+- [x] If a `verity reflect` / post-task reflection is requested, run it
