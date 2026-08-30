@@ -838,6 +838,7 @@ export function handleCliError(error: unknown): never {
   process.exit(1);
 }
 
+/* istanbul ignore next */
 if (require.main === module) {
   runCli().catch(handleCliError);
 }
