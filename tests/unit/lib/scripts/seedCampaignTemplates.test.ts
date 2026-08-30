@@ -69,6 +69,83 @@ describe("seedCampaignTemplates", () => {
     expect(result.updated).toBe(0);
     expect(result.inserted).toBeGreaterThan(0);
   });
+
+  it("Vecna template has 11 chapters covering all of Eve of Ruin", async () => {
+    (getDatabase as jest.Mock).mockResolvedValue(makeDb());
+
+    let seededTemplate: any = null;
+    const col = {
+      findOne: jest.fn().mockResolvedValue(null),
+      insertOne: jest.fn().mockImplementation(async (doc: any) => {
+        if (doc.name === "Vecna: Eve of Ruin") seededTemplate = doc;
+        return { insertedId: "some-id" };
+      }),
+      updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
+    };
+    (getDatabase as jest.Mock).mockResolvedValue({ collection: jest.fn().mockReturnValue(col) });
+
+    await seedCampaignTemplates();
+
+    expect(seededTemplate).not.toBeNull();
+    expect(seededTemplate.chapters).toHaveLength(11);
+    // Each chapter has a unique title covering the 11 official chapters
+    const titles = seededTemplate.chapters.map((c: { title: string }) => c.title);
+    expect(titles).toContain("Return from Neverdeath Graveyard");
+    expect(titles).toContain("Tomb of Wayward Souls");
+    expect(titles).toContain("Eve of Ruin");
+  });
+
+  it("Vecna template encounters contain full Monster stat blocks, not empty arrays", async () => {
+    (getDatabase as jest.Mock).mockResolvedValue(makeDb());
+
+    let seededTemplate: any = null;
+    const col = {
+      findOne: jest.fn().mockResolvedValue(null),
+      insertOne: jest.fn().mockImplementation(async (doc: any) => {
+        if (doc.name === "Vecna: Eve of Ruin") seededTemplate = doc;
+        return { insertedId: "some-id" };
+      }),
+      updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
+    };
+    (getDatabase as jest.Mock).mockResolvedValue({ collection: jest.fn().mockReturnValue(col) });
+
+    await seedCampaignTemplates();
+
+    expect(seededTemplate.encounters.length).toBeGreaterThanOrEqual(11);
+    let emptyEncounterCount = 0;
+    for (const enc of seededTemplate.encounters) {
+      if (!enc.monsters || enc.monsters.length === 0) emptyEncounterCount++;
+      for (const monster of enc.monsters || []) {
+        expect(monster.id).toBeDefined();
+        expect(monster.name).toBeDefined();
+        expect(monster.challengeRating).toBeDefined();
+        expect(monster.abilityScores).toBeDefined();
+        expect(monster.hp).toBeGreaterThan(0);
+      }
+    }
+    expect(emptyEncounterCount).toBe(0);
+  });
+
+  it("Vecna encounter instances are uniquely id'd even when same stat block repeats", async () => {
+    (getDatabase as jest.Mock).mockResolvedValue(makeDb());
+
+    let seededTemplate: any = null;
+    const col = {
+      findOne: jest.fn().mockResolvedValue(null),
+      insertOne: jest.fn().mockImplementation(async (doc: any) => {
+        if (doc.name === "Vecna: Eve of Ruin") seededTemplate = doc;
+        return { insertedId: "some-id" };
+      }),
+      updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
+    };
+    (getDatabase as jest.Mock).mockResolvedValue({ collection: jest.fn().mockReturnValue(col) });
+
+    await seedCampaignTemplates();
+
+    // Every monster instance across all encounters must have a unique id
+    const allIds = seededTemplate.encounters.flatMap((e: any) => e.monsters.map((m: any) => m.id));
+    expect(new Set(allIds).size).toBe(allIds.length);
+  });
 });
 
 describe("runCli", () => {
