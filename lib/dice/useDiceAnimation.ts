@@ -10,6 +10,13 @@ export type DiceAnimationStatus = 'idle' | 'unsupported'
 
 const ASSET_PATH = '/dice-box/assets/'
 const INIT_TIMEOUT_MS = 6000
+/**
+ * Cap on how long `box.roll()` may stay pending. dice-box `^1.1.4` exposes no way to abort a
+ * wedged settle (lost WebGL context, throttled tab), so once this elapses we stop waiting,
+ * tear the box down, and resolve `run()` — keeping the completion signal bounded for every
+ * caller rather than leaving hang-recovery to each consumer.
+ */
+const ROLL_TIMEOUT_MS = 12000
 
 /** True only when a real WebGL context can be created. */
 function hasWebGL(): boolean {
@@ -23,9 +30,9 @@ function hasWebGL(): boolean {
   }
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, ms: number, label = 'dice-box init'): Promise<T> {
   return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('dice-box init timed out')), ms)
+    const timer = setTimeout(() => reject(new Error(`${label} timed out`)), ms)
     promise.then(
       value => {
         clearTimeout(timer)
@@ -138,10 +145,10 @@ export function useDiceAnimation(): DiceAnimation {
       }
       boxRef.current = box
 
-      // A per-roll failure (e.g. a malformed predetermined notation) tears the box down and
-      // logs, but must NOT latch the whole session to the instant path.
+      // A per-roll failure (malformed notation) or a settle that never completes tears the
+      // box down and logs, but must NOT latch the whole session to the instant path.
       try {
-        await box.roll(toDiceBoxNotation(built))
+        await withTimeout(box.roll(toDiceBoxNotation(built)), ROLL_TIMEOUT_MS, 'dice-box roll')
       } catch (err) {
         teardown()
         console.error('[dice-animation] roll failed', err)

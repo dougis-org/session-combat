@@ -73,12 +73,15 @@ export function DiceRollOverlay({
   const modalRevealed =
     disableAnimation || animationStatus === 'unsupported' || animationSettled || fallbackElapsed
 
-  // The canvas host is mounted for the whole overlay lifetime whenever animation was
-  // attempted (dice-box `^1.1.4` has no `destroy`, so unmounting it mid-run would strand its
-  // <canvas> and render loop). It only *reserves layout space* while a tumble can actually
-  // be seen — on the unsupported / post-fallback paths it collapses to `hidden` so the modal
-  // stays centred instead of being pushed down behind a blank gap.
-  const reserveCanvasSpace = animationStatus !== 'unsupported' && !fallbackElapsed
+  // Whether this overlay ever started a tumble — captured at mount and never revised, so a
+  // later `disableAnimation` toggle cannot unmount dice-box's canvas mid-run (v1.1.4 has no
+  // `destroy`; unmounting would strand its <canvas> and render loop). The host stays mounted
+  // for the overlay's life but only *reserves layout space* while a tumble can be seen; on
+  // the disabled / unsupported / post-fallback paths it collapses to `hidden` so the modal
+  // stays centred instead of sitting below a blank gap.
+  const [animationAttempted] = useState(!disableAnimation)
+  const reserveCanvasSpace =
+    !disableAnimation && animationStatus !== 'unsupported' && !fallbackElapsed
 
   useEffect(() => {
     if (!root) return
@@ -159,7 +162,7 @@ export function DiceRollOverlay({
         {liveResult}
       </p>
       <div ref={contentRef} tabIndex={-1} className="flex flex-col items-center gap-6 outline-none">
-        {!disableAnimation && (
+        {animationAttempted && (
           <div
             ref={canvasRef}
             id={DICE_ROLL_CANVAS_ID}

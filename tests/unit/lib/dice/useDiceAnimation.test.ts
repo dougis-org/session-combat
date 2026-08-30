@@ -216,4 +216,35 @@ describe('useDiceAnimation — single-instance invariant', () => {
     })
     expect(ctorMock).toHaveBeenCalledTimes(2)
   })
+
+  it('a box.roll() that never settles is bounded — run() resolves, box torn down, status stays idle', async () => {
+    jest.useFakeTimers()
+    try {
+      stubWebGL(true)
+      rollMock.mockImplementationOnce(() => new Promise(() => {}))
+      const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      const container = document.createElement('div')
+      const { result } = renderHook(() => useDiceAnimation())
+
+      let settled = false
+      let runPromise!: Promise<void>
+      await act(async () => {
+        runPromise = result.current.run(built, container).then(() => { settled = true })
+        // let the import / init chain settle (real microtasks), then trip the roll timeout
+        for (let i = 0; i < 20; i++) await Promise.resolve()
+        expect(rollMock).toHaveBeenCalled()
+        expect(settled).toBe(false)
+        jest.advanceTimersByTime(12000)
+        await runPromise
+      })
+
+      expect(settled).toBe(true)
+      expect(result.current.status).toBe('idle')
+      expect(clearMock).toHaveBeenCalled()
+      expect(errSpy).toHaveBeenCalled()
+      errSpy.mockRestore()
+    } finally {
+      jest.useRealTimers()
+    }
+  })
 })

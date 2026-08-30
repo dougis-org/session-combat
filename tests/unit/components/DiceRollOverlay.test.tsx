@@ -207,6 +207,17 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
     await waitFor(() => expect(status).toHaveTextContent('3d6+2 rolled 14'))
   })
 
+  it('keeps the canvas host mounted (just hidden) if animation is disabled mid-tumble', () => {
+    const { rerender } = render(
+      <DiceRollOverlay built={built} disableAnimation={false} onClose={jest.fn()} />,
+    )
+    expect(screen.getByTestId('dice-roll-canvas')).toBeInTheDocument()
+    rerender(<DiceRollOverlay built={built} disableAnimation onClose={jest.fn()} />)
+    const canvas = screen.getByTestId('dice-roll-canvas')
+    expect(canvas).toBeInTheDocument()
+    expect(canvas).toHaveClass('hidden')
+  })
+
   it('names the revealed dialog with the rolled total via aria-describedby', () => {
     render(<DiceRollOverlay built={built} disableAnimation animationSettled onClose={jest.fn()} />)
     const dialog = screen.getByRole('dialog')

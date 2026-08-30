@@ -53,6 +53,9 @@ export function GlobalDiceFab() {
   }, [dp.isOpen])
 
   const closeOverlay = useCallback(() => {
+    // Advance the run token so an aborted tumble's late `run()` resolution cannot write
+    // `animationSettled` after the overlay is gone.
+    runSeqRef.current += 1
     animation.teardown()
     setOverlayRoll(null)
   }, [animation])
