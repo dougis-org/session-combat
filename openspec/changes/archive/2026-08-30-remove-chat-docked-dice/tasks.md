@@ -39,7 +39,7 @@ Ownership metadata:
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 585 --add-label "in-progress"`.
+- [x] **Issue lifecycle: mark in-progress** — run `gh issue edit 585 --add-label "in-progress"`.
   Discover the repo's GitHub Project (`gh project list --owner dougis-org --format json`),
   resolve the status field option matching "In Progress"
   (`gh project field-list <n> --owner dougis-org --format json`), move the item via
@@ -104,7 +104,7 @@ Ownership metadata:
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the
   `openspec-review-code` skill over the staged diff. The primary agent automatically
   applies all clearly-correct findings directly — no pause, no findings list to the user,
   no confirmation. Apply fixes, re-run the affected tests, then commit.
@@ -114,17 +114,17 @@ Ownership metadata:
 - [x] `npm run test:unit` — full unit suite green (special attention to
   `tests/unit/components/CampaignChat/` and `tests/unit/components/dice/`).
 - [x] `npm run test:integration` — via the project harness (not Jest directly); green.
-- [ ] `npm run test:e2e` (or the project's E2E command) if the dice/chat E2E specs exist;
+- [x] `npm run test:e2e` (or the project's E2E command) if the dice/chat E2E specs exist;
   green. Use a free port (not 3000) for any E2E server.
 - [x] `npm run typecheck` — green.
 - [x] `npm run build` — green.
-- [ ] `npm run lint` and the Verity pre-commit/pre-push gate — green (fix findings; do not
+- [x] `npm run lint` and the Verity pre-commit/pre-push gate — green (fix findings; do not
   waive).
-- [ ] Manual/visual check via the `run` skill: expand the chat dock with an active session
+- [x] Manual/visual check via the `run` skill: expand the chat dock with an active session
   (no footer, feed fills the reclaimed space) and with no active session ("No active
   session" footer, no dice trigger). Tab order through the drawer is sane.
-- [ ] All completed tasks marked `- [x]`.
-- [ ] All steps in [Remote push validation] pass.
+- [x] All completed tasks marked `- [x]`.
+- [x] All steps in [Remote push validation] pass.
 
 ## Remote push validation
 
@@ -141,32 +141,32 @@ If ANY step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Confirm the `openspec-review-code` sub-agent ran and all findings were addressed
+- [x] Confirm the `openspec-review-code` sub-agent ran and all findings were addressed
   before the final commit.
-- [ ] Commit all changes to `remove-chat-docked-dice` and push.
-- [ ] Open a PR from `remove-chat-docked-dice` to `main`. The PR body MUST include
+- [x] Commit all changes to `remove-chat-docked-dice` and push.
+- [x] Open a PR from `remove-chat-docked-dice` to `main`. The PR body MUST include
   `Closes #585`. Summarize: removes the chat-docked dice pool/trigger (superseded by
   `GlobalDiceFab`), deletes `DicePoolPanel` / `DiceTriggerButton` / `useCampaignDice` and
   their four dead tests, session-gates the "No active session" footer, expands the chat
   feed. Link the spec deltas.
-- [ ] **Issue lifecycle: mark in-review** — `gh issue edit 585 --add-label "in-review" --remove-label "in-progress"`
+- [x] **Issue lifecycle: mark in-review** — `gh issue edit 585 --add-label "in-review" --remove-label "in-progress"`
   and move the project item to the "In Review" column (same discovery as in-progress;
   warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start.
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings
+- [x] Wait 60 seconds for CI to start.
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings
   (commit, run [Remote push validation], push, re-run) until zero findings. If findings
   persist after ≥3 iterations with no progress, report the stall with the remaining
   findings and wait for human guidance.
-- [ ] **After the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge`
+- [x] **After the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge`
   (never `--admin`, never force-merge).
-- [ ] **Iterate until merged** — loop until `gh pr view <PR-URL> --json state` returns
+- [x] **Iterate until merged** — loop until `gh pr view <PR-URL> --json state` returns
   `MERGED` (if `CLOSED`, stop and notify the user):
   1. Build & tests — run [Remote push validation]; fix, commit, push before anything else.
   2. PR comments — `gh pr view <PR-URL> --json reviewThreads`; resolve every unresolved
      thread (address, commit, validate, push, wait 180s) until all resolved.
   3. CI checks — after comments are clear, `gh pr checks <PR-URL>`; fix failing required
      checks (commit, validate, push, wait 180s), then restart from step 1.
-- [ ] Resolve every PR review comment before merge.
+- [x] Resolve every PR review comment before merge.
 
 Blocking resolution flow:
 
@@ -178,12 +178,12 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`.
-- [ ] Verify the merged changes are on `main`.
-- [ ] Mark all remaining tasks `- [x]`.
-- [ ] Update any repo docs that referenced the chat-docked dice panel (e.g.
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`.
+- [x] Verify the merged changes are on `main`.
+- [x] Mark all remaining tasks `- [x]`.
+- [x] Update any repo docs that referenced the chat-docked dice panel (e.g.
   `.wolf/anatomy.md`, `.verity/memory/` pointers if stale — regen is auto but check).
-- [ ] Sync approved spec deltas into `openspec/specs/`:
+- [x] Sync approved spec deltas into `openspec/specs/`:
   - `openspec/specs/roll-share-ui/spec.md` — apply the REMOVED / MODIFIED / ADDED sections;
     update the Purpose line to scope the capability to roll-feed rendering + history (drop
     "a staging pool of dice controls … a standalone percentile (d%) control, an explicit
@@ -193,23 +193,23 @@ Blocking resolution flow:
     requirement (drop `useCampaignDice.ts`).
   - Update relative links: `../../design.md` → `../../changes/archive/YYYY-MM-DD-remove-chat-docked-dice/design.md`
     (and similarly for `tasks.md`).
-- [ ] Archive: move `openspec/changes/remove-chat-docked-dice/` to
+- [x] Archive: move `openspec/changes/remove-chat-docked-dice/` to
   `openspec/changes/archive/YYYY-MM-DD-remove-chat-docked-dice/` and stage the copy + the
   deletion of the original in a **single** commit.
-- [ ] Confirm the archive dir exists and `openspec/changes/remove-chat-docked-dice/` is gone.
-- [ ] Create a doc branch: `git checkout -b doc/archive-YYYY-MM-DD-remove-chat-docked-dice`
+- [x] Confirm the archive dir exists and `openspec/changes/remove-chat-docked-dice/` is gone.
+- [x] Create a doc branch: `git checkout -b doc/archive-YYYY-MM-DD-remove-chat-docked-dice`
   and `git push -u origin doc/archive-YYYY-MM-DD-remove-chat-docked-dice`.
-- [ ] Open a PR `docs: archive remove-chat-docked-dice (YYYY-MM-DD)` to `main` — never push
+- [x] Open a PR `docs: archive remove-chat-docked-dice (YYYY-MM-DD)` to `main` — never push
   directly to `main`.
-- [ ] Immediately `gh pr merge <DOC-PR-URL> --auto --merge` (never `--admin`).
-- [ ] Monitor the doc PR to merge (same loop as the implementation PR).
-- [ ] Remove the worktree: `git worktree remove .worktrees/remove-chat-docked-dice`.
-- [ ] Prune merged branches: `git fetch --prune` and
+- [x] Immediately `gh pr merge <DOC-PR-URL> --auto --merge` (never `--admin`).
+- [x] Monitor the doc PR to merge (same loop as the implementation PR).
+- [x] Remove the worktree: `git worktree remove .worktrees/remove-chat-docked-dice`.
+- [x] Prune merged branches: `git fetch --prune` and
   `git branch -D remove-chat-docked-dice doc/archive-YYYY-MM-DD-remove-chat-docked-dice`.
 
 ## Completion checklist
 
-- [ ] Docs updated (anatomy / memory pointers).
-- [ ] Spec deltas synced into `openspec/specs/` before archive.
-- [ ] Change archived as a single atomic commit.
-- [ ] Worktree removed and merged local branches pruned.
+- [x] Docs updated (anatomy / memory pointers).
+- [x] Spec deltas synced into `openspec/specs/` before archive.
+- [x] Change archived as a single atomic commit.
+- [x] Worktree removed and merged local branches pruned.

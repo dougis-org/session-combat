@@ -1,58 +1,17 @@
 ## Purpose
 
-Define the in-chat dice-rolling UI: a staging pool of dice controls with visible labels, a standalone percentile (d%) control, an explicit commit that submits one combined roll through `/api/campaigns/[id]/rolls`, and an interleaved feed that renders roll history and streamed rolls alongside chat messages.
+Define how the campaign chat dock renders rolls: an interleaved feed that shows roll history and streamed rolls alongside chat messages, roll-feed-item rendering (including percentile rolls), and rollerId-based feed auto-scroll on a streamed roll. The staging pool of dice controls, the standalone percentile (d%) control, and the explicit commit that submits one combined roll through `/api/campaigns/[id]/rolls` are no longer part of the chat dock — they live only in `GlobalDiceFab` (see `global-dice-fab` and `dice-pool-shared-state` capabilities). Removed by `remove-chat-docked-dice` (2026-08-30).
 
 ## Requirements
 
 This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-06-20-issue-317-roll-share-ui/design.md) document, not a replacement.
 
-### Requirement: ADDED Commit rolls the entire staged pool as one combined roll
-
-The system SHALL, on explicit commit ("Roll"), roll every staged die across all sizes plus the modifier as a single combined roll, and POST one request to `/api/campaigns/[id]/rolls` matching the existing API contract unchanged.
-
-#### Scenario: Commit posts one combined formula, rolls, and total
-
-- **Given** the pool has 2 staged d6, 2 staged d8, and modifier 3
-- **When** the user clicks "Roll"
-- **Then** exactly one POST to `/api/campaigns/[id]/rolls` is made with `formula: "2d6+2d8+3"`, `rolls` containing exactly 4 numeric values (each within its die's 1..sides range), `total` equal to the sum of `rolls` plus 3, and `visibility` matching the pop-out's current visibility selection
-
-#### Scenario: Commit with zero modifier omits the modifier from formula
-
-- **Given** the pool has 1 staged d20 and modifier is empty or 0
-- **When** the user clicks "Roll"
-- **Then** the POST is made with `formula: "1d20"` (no `+0` suffix)
-
-#### Scenario: Commit with a single staged die still requires explicit commit
-
-- **Given** the pool has exactly 1 staged d20 and no other dice
-- **When** the user adds the d20 to the pool
-- **Then** no roll occurs and no POST is made
-- **And when** the user then clicks "Roll"
-- **Then** exactly one POST is made for that single die
-
-#### Scenario: Roll button is disabled when the pool is empty
-
-- **Given** the pool has zero staged dice of any size
-- **When** the pop-out renders
-- **Then** the "Roll" commit control is disabled
-
-#### Scenario: Roll button is disabled while a commit is in flight
-
-- **Given** a roll POST is pending (awaiting server response)
-- **When** the pop-out re-renders
-- **Then** the "Roll" control and all pool add/remove controls are disabled until the POST resolves or rejects
-
-#### Scenario: Successful commit clears the staged pool
-
-- **Given** a commit POST resolves with status 201
-- **When** the response is handled
-- **Then** the staged pool returns to empty (all counts 0, modifier reset to 0) and the resulting roll is passed to the feed exactly as `RollFeedItem` renders rolls today
-
-#### Scenario: 409 response (no active session race) shows inline error and preserves the staged pool
-
-- **Given** the pop-out appears enabled (an active session existed when opened) but the server returns 409 on commit
-- **When** the POST resolves with status 409
-- **Then** an inline error message "No active session" is shown in the pop-out, no roll is added to the feed, and the staged pool, modifier, and visibility selection are NOT cleared (the user can retry once a session is active again)
+**Note (removed 2026-08-30, `remove-chat-docked-dice`):** The requirement formerly here —
+"ADDED Commit rolls the entire staged pool as one combined roll" — was removed. The chat
+dock no longer hosts a dice staging pool or a "Roll" commit control; building and
+committing a combined pool roll is provided solely by `GlobalDiceFab`, which composes the
+roll via `dice-pool-shared-state` (`buildRoll`) and submits it through `useRollSubmission`.
+The `/api/campaigns/[id]/rolls` contract is unchanged. See "Historical removals".
 
 ---
 
@@ -118,178 +77,62 @@ stream" requirement below for the current behavior.
 
 ### Requirement: MODIFIED CampaignChat accepts activeSessionId prop
 
-The system SHALL accept an `activeSessionId: string | null` prop on `CampaignChat` and use it to gate roll history fetching and the dice pop-out trigger.
+The system SHALL accept an `activeSessionId: string | null` prop on `CampaignChat` and use
+it to gate roll-history fetching and dice-session presence announcement (see
+`dice-session-bridge` capability). It SHALL NOT gate any dice-rolling control, because the
+chat dock no longer renders one; all dice rolling is provided by `GlobalDiceFab` (see
+`global-dice-fab` capability).
 
-#### Scenario: activeSessionId null disables roll functionality
+#### Scenario: activeSessionId null disables roll history and presence, feed still loads
 
 - **Given** `CampaignChat` is rendered with `activeSessionId={null}`
 - **When** the dock is expanded
-- **Then** the dice pop-out trigger is disabled, no roll history fetch is attempted, and the message feed loads normally
+- **Then** no roll-history fetch to `/api/campaigns/[id]/rolls` is attempted
+- **And** no dice-session presence is announced
+- **And** the message feed loads normally
+- **And** the "No active session" footer is shown (see "ADDED Chat dock shows a no-active-session footer instead of a dice bar")
 
-#### Scenario: activeSessionId non-null enables roll functionality
+#### Scenario: activeSessionId non-null enables roll history and presence
 
 - **Given** `CampaignChat` is rendered with `activeSessionId="session-abc"`
 - **When** the dock is expanded
-- **Then** the dice pop-out trigger is enabled and roll history is fetched for "session-abc"
+- **Then** roll history is fetched for "session-abc"
+- **And** dice-session presence `{ campaignId, sessionId: "session-abc" }` is announced while the component owns that active session
+- **And** no dice control is rendered in the drawer
 
 ---
 
-### Requirement: MODIFIED Roll-entry strip is replaced by the dice pop-out trigger and pool
+### Requirement: ADDED Chat dock shows a no-active-session footer instead of a dice bar
 
-The system SHALL NOT render the always-visible roll-entry strip (six immediate-click die buttons, a modifier input, and a visibility selector, permanently rendered below the chat composer) in the chat dock's default layout; it is replaced by the dice pop-out trigger (see "MODIFIED Dice pop-out trigger anchored to the chat dock"). The modifier input and visibility selector SHALL remain, relocated into the pop-out.
+The chat dock's drawer SHALL render a footer strip **only when** `activeSessionId` is
+`null`, containing exactly the text "No active session" and no interactive controls. When
+`activeSessionId` is a non-null string the drawer SHALL render no footer strip at all (the
+chat feed and composer fill the drawer). No dice pop-out trigger, dice panel, or dice-pool
+control SHALL be rendered in the drawer under any condition (see "Historical removals").
 
-#### Scenario: No always-visible die buttons remain in the chat dock body
+#### Scenario: Footer message shown when no session is active
 
-- **Given** a campaign page where the chat dock is expanded and `activeSessionId` is non-null
-- **When** the dock content renders
-- **Then** no permanently-visible d4/d6/d8/d10/d12/d20 buttons are present in the chat dock's body outside of the (closed-by-default) pop-out
+- **Given** `CampaignChat` is rendered expanded with `activeSessionId={null}`
+- **When** the drawer content renders
+- **Then** the visible text "No active session" is present in the drawer
+- **And** no button with an accessible name matching `/roll|dice/i` is present in the drawer
+- **And** no element with `title="Dice Rolls for main screen pop out"` is present
 
-#### Scenario: Visibility selector defaults to group, now inside the pop-out
+#### Scenario: No footer strip when a session is active
 
-- **Given** the pop-out is first opened
-- **When** no user interaction with the visibility control has occurred
-- **Then** the visibility selector inside the pop-out shows "Group" as the selected value
+- **Given** `CampaignChat` is rendered expanded with `activeSessionId="session-abc"`
+- **When** the drawer content renders
+- **Then** the text "No active session" is not present
+- **And** no dice trigger, dice panel, or dice-pool control is present in the drawer
+- **And** the chat feed region remains the flex-growing element of the drawer
 
-#### Scenario: DM-only visibility sends correct scope
+#### Scenario: Footer appears and disappears as the active session changes while open
 
-- **Given** the user has selected "DM-only" in the pop-out's visibility selector
-- **When** the user commits a roll
-- **Then** the POST body includes `visibility: { scope: "dm-only" }`
-
----
-
-### Requirement: MODIFIED Dice pop-out trigger anchored to the chat dock
-
-The system SHALL display a persistent dice-pool trigger button anchored at the bottom of the chat dock, which opens/closes the dice pool panel on click. The trigger SHALL render the vendored d20 icon (see `dice-iconography` capability) at 24x24px (a 50% increase from the icon size shipped by `dice-roll-enhancements`), instead of literal `d20` text, while keeping its existing accessible name (matching `/roll|dice/i`) unchanged. The trigger SHALL carry a `title` attribute of "Dice Rolls for main screen pop out".
-
-#### Scenario: Trigger renders and is enabled when a session is active
-
-- **Given** a campaign page where `activeSessionId` is a non-null string
-- **When** the chat dock renders
-- **Then** a button with accessible name matching `/roll|dice/i` is visible and enabled at the bottom of the chat dock
-
-#### Scenario: Trigger is disabled when no active session
-
-- **Given** a campaign page where `activeSessionId` is null
-- **When** the chat dock renders
-- **Then** the dice pool trigger button is disabled and, if opened previously, the panel is closed
-
-#### Scenario: Clicking the trigger opens the panel
-
-- **Given** the trigger is enabled and the panel is closed
-- **When** the user clicks the trigger
-- **Then** the dice panel becomes visible in the document
-
-#### Scenario: Clicking the trigger again closes the panel
-
-- **Given** the panel is open
-- **When** the user clicks the trigger again
-- **Then** the dice panel is removed from the document
-
-#### Scenario: Trigger displays the d20 icon at the increased size, not text
-
-- **Given** the chat dock renders with an enabled trigger
-- **When** the trigger button's contents are inspected
-- **Then** it renders the vendored d20 icon component at 24x24px and does not render the literal text `d20`
-
-#### Scenario: Trigger exposes a tooltip on hover
-
-- **Given** the chat dock renders with an enabled trigger
-- **When** the trigger button's `title` attribute is inspected
-- **Then** it equals "Dice Rolls for main screen pop out"
-
----
-
-### Requirement: MODIFIED Dice staging pool
-
-The system SHALL let the user add and remove dice of any supported size (d4, d6, d8, d10, d12, d20) to a staging pool within the dice panel, and edit a shared modifier, without issuing any roll or network request until the user explicitly commits. Each die-size control SHALL display that die size's vendored icon (see `dice-iconography` capability) at 21x21px alongside its staged count **and a persistent, visible `d{sides}` text label**. The previously-required per-control `title` tooltip is no longer required (the visible label supersedes it) and SHALL be removed.
-
-#### Scenario: Adding a die increments its staged count
-
-- **Given** the panel is open and the pool is empty
-- **When** the user adds a d6 twice and a d8 twice
-- **Then** the pool shows a staged count of 2 for d6 and 2 for d8, and 0 for all other sizes
-- **AND** no network request has been made
-
-#### Scenario: Removing a die decrements its staged count
-
-- **Given** the pool has a staged count of 2 for d6
-- **When** the user removes one d6
-- **Then** the pool shows a staged count of 1 for d6
-
-#### Scenario: Staged count cannot go below zero
-
-- **Given** the pool has a staged count of 0 for d10
-- **When** the user attempts to remove a d10
-- **Then** the staged count for d10 remains 0 and no error is raised
-
-#### Scenario: Modifier is editable independent of staged dice
-
-- **Given** the pool is empty
-- **When** the user sets the modifier to -2
-- **Then** the modifier value is -2 and no die counts change
-
-#### Scenario: Each die-size control shows its matching icon at the increased size
-
-- **Given** the panel is open
-- **When** the six die-size add/remove controls are inspected
-- **Then** each control renders the icon from `DIE_ICONS` matching its own die size at 21x21px (e.g. the d20 control renders the d20 icon, not a d6 icon or plain text)
-
-#### Scenario: Each die-size control shows a persistent visible label
-
-- **Given** the panel is open
-- **When** the d20 add control is inspected
-- **Then** the visible text `d20` is rendered within the control (not only in a `title` or `aria-label`), and analogously for d4, d6, d8, d10, d12
-
-#### Scenario: Die-size controls carry no title tooltip
-
-- **Given** the panel is open
-- **When** any die-size add control is inspected
-- **Then** it has no `title` attribute
-
----
-
-### Requirement: ADDED Standalone percentile (d%) roll control
-
-The dice panel SHALL provide a standalone percentile control, rendered inline in the same row as the pool die controls (as the last item), that on activation performs a single percentile roll. The control is not a poolable die: it has no staged count, no remove affordance, is not combined with staged dice, and does not apply the shared modifier. It SHALL render two `DiceD10Icon`s and the visible label `d%` (see `dice-iconography` capability).
-
-A percentile roll SHALL be produced by two independent `rollDie(10)` results (`tensFace`, `onesFace`) decoded as:
-
-- `tensDigit = tensFace % 10`, `onesDigit = onesFace % 10`
-- `value = tensDigit * 10 + onesDigit`; when `value` is `0`, `value` is `100`
-
-It SHALL be committed through `/api/campaigns/[id]/rolls` with the existing contract unchanged: `formula: "d%"`, `rolls: [value]` (a single integer, 1..100 — the decoded value), `total: value`, and `visibility` matching the panel's current selection.
-
-#### Scenario: Percentile control renders with the d% glyph and no count
-
-- **Given** the dice panel is open
-- **When** the percentile control is inspected
-- **Then** it renders two d10 icons and the visible label `d%`, has no staged-count badge, and has no remove control
-
-#### Scenario: Activating the percentile control commits one roll
-
-- **Given** the dice panel is open and a campaign session is active
-- **When** the user activates the percentile control
-- **Then** exactly one POST to `/api/campaigns/[id]/rolls` is made with `formula: "d%"`, `rolls` containing exactly one integer in 1..100, `total` equal to that integer, and `visibility` matching the panel's current selection
-- **AND** the staged pool and modifier are unchanged
-
-#### Scenario: Percentile decode covers the tabletop special case
-
-- **Given** the two d10 results are `tensFace = 10` and `onesFace = 10`
-- **When** the percentile value is decoded
-- **Then** the value is `100`
-
-#### Scenario: Percentile decode of a "00" tens with a non-zero ones
-
-- **Given** the two d10 results are `tensFace = 10` and `onesFace = 9`
-- **When** the percentile value is decoded
-- **Then** the value is `9`
-
-#### Scenario: Percentile control is unavailable without an active session
-
-- **Given** the chat-dock dice panel and `activeSessionId` is null
-- **When** the panel state is inspected
-- **Then** the percentile control is disabled on the same terms as the pool "Roll" commit control
+- **Given** the drawer is expanded with `activeSessionId="session-abc"` and no footer strip
+- **When** the same `CampaignChat` instance re-renders with `activeSessionId={null}`
+- **Then** the "No active session" footer strip becomes present
+- **And when** it re-renders again with `activeSessionId="session-xyz"`
+- **Then** the footer strip is removed and no error is raised
 
 ---
 
@@ -311,63 +154,22 @@ The system SHALL render a persisted percentile `CampaignRoll` (`formula: "d%"`, 
 
 ---
 
-### Requirement: MODIFIED Dice panel renders as an in-flow flex sibling to the left of the chat dock
-
-The system SHALL render the dice panel (staging pool, modifier, visibility selector, and commit control) as an in-flow flex sibling positioned to the left of the `CampaignChat` drawer, mounted only while the panel is open, rather than as a `position: fixed` overlay portaled to `document.body`. The panel SHALL size its height to its own content (not to the drawer's height); the panel and drawer are no longer required to share the same height.
-
-#### Scenario: Dice panel DOM node is a sibling of the drawer, not a document.body portal
-
-- **Given** the dice panel is open
-- **When** the DOM is queried
-- **Then** the panel's root element is found as a sibling of the chat dock's `role="complementary"` drawer element (both children of the same flex-row wrapper), and is NOT rendered under a separate `document.body`-attached overlay root
-
-#### Scenario: Dice panel appears to the left of the chat drawer
-
-- **Given** the dice panel is open
-- **When** the bounding positions of the panel and the drawer are compared
-- **Then** the panel's horizontal position is entirely to the left of the drawer's horizontal position (the panel does not overlap the drawer)
-
-#### Scenario: Dice panel is not clipped by the drawer's height/overflow constraint
-
-- **Given** the chat dock drawer has a fixed height and `overflow` constraint (as it does today via `customHeight`/dock sizing)
-- **When** the dice panel is open
-- **Then** the panel renders fully visible and unclipped, at its own content-driven height, independent of the drawer's current height
-
-#### Scenario: Dice panel height matches its content, not the drawer's height
-
-- **Given** the dice panel is open and the chat drawer's current height is substantially taller than the panel's content (e.g. the drawer has been drag-resized to a large height)
-- **When** the panel's rendered height is measured
-- **Then** the panel's height reflects only its own content (the die controls, modifier/visibility row, and Roll button, plus any inline error text) and does not extend to match the drawer's height
-
-#### Scenario: Dice panel closes on outside click
-
-- **Given** the panel is open
-- **When** the user clicks outside both the panel and the trigger
-- **Then** the panel closes
-
-#### Scenario: Dice panel closes on Escape
-
-- **Given** the panel is open
-- **When** the user presses Escape
-- **Then** the panel closes
-
-#### Scenario: Dice panel is absent from the DOM when closed
-
-- **Given** the panel is closed
-- **When** the DOM is queried
-- **Then** no dice panel element is present, and no overlay-root DOM node is created for it
+**Note (removed 2026-08-30, `remove-chat-docked-dice`):** The requirement formerly here —
+"MODIFIED Dice panel renders as an in-flow flex sibling to the left of the chat dock" — was
+removed. There is no dice panel in the chat dock to position; `GlobalDiceFab`'s modal owns
+its own anchoring per the `global-dice-fab` capability. The `CampaignChat` flex-row wrapper
+is retained but now has the drawer as its only child. See "Historical removals".
 
 ---
 
 ### Requirement: MODIFIED Feed auto-scrolls on a new dice roll, consumed solely via the SSE stream
 
-_(Modified 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL scroll the chat feed so the current user's own committed roll is always visible immediately after it is appended, and shall append every roll to the feed solely via the SSE `'roll'` stream event — there is no longer a separate local POST-response callback path that appends a roll to the feed ahead of, or independent from, the stream. For a roll committed by a different user, the system SHALL only auto-scroll if the feed was already within approximately 100px of the bottom immediately before the roll was appended — a user who has scrolled up to read history (or is at the top triggering an older-page load) is NOT auto-scrolled by another player's roll. Auto-scroll SHALL fire at most once per roll, determined by checking the ingested roll's `rollerId` against the current user, not by which code path appended it (since there is now only one). The feed's item order is unaffected. Auto-scroll does NOT apply to plain chat messages (unchanged from today: messages never auto-scroll).
+_(Modified 2026-08-29, `decouple-dice-roll-capability`; 2026-08-30, `remove-chat-docked-dice` — rolls now originate entirely from `GlobalDiceFab`.)_ The system SHALL scroll the chat feed so the current user's own committed roll is always visible immediately after it is appended, and shall append every roll to the feed solely via the SSE `'roll'` stream event — there is no longer a separate local POST-response callback path that appends a roll to the feed ahead of, or independent from, the stream. For a roll committed by a different user, the system SHALL only auto-scroll if the feed was already within approximately 100px of the bottom immediately before the roll was appended — a user who has scrolled up to read history (or is at the top triggering an older-page load) is NOT auto-scrolled by another player's roll. Auto-scroll SHALL fire at most once per roll, determined by checking the ingested roll's `rollerId` against the current user, not by which code path appended it (since there is now only one). The feed's item order is unaffected. Auto-scroll does NOT apply to plain chat messages (unchanged from today: messages never auto-scroll).
 
 #### Scenario: Committing a roll scrolls the feed to show it once ingested via the stream
 
-- **Given** the feed is scrolled such that the bottom is not visible, and the dice panel
-  (whether chat-docked or `GlobalDiceFab`, once sent to session chat) has just had a roll
-  committed by the current user
+- **Given** the feed is scrolled such that the bottom is not visible, and the current user
+  has just committed a roll via `GlobalDiceFab`'s "send to session chat"
 - **When** the SSE `'roll'` event for that roll is received and appended to the feed
 - **Then** the feed container's scroll position moves so the newly-appended roll item is
   visible, without requiring the user to scroll manually, and without any earlier
@@ -376,8 +178,7 @@ _(Modified 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL scrol
 #### Scenario: The roller is scrolled to their own roll even if they had scrolled away from the bottom
 
 - **Given** the feed is scrolled such that the bottom is not visible, and the current user
-  has just committed a roll (via either the chat-docked panel or `GlobalDiceFab`'s "send to
-  session chat")
+  has just committed a roll via `GlobalDiceFab`'s "send to session chat"
 - **When** the SSE `'roll'` event for that roll arrives, identified as the current user's
   own roll via `rollerId === user.userId`
 - **Then** the feed container's scroll position moves so the roll is visible, regardless of
@@ -463,6 +264,15 @@ corresponding archived changes. They are retained here only as a pointer.
   (`multi-dice-pool-popout`, archived 2026-08-19).
 - **Floating dice pop-out renders outside the chat dock's DOM subtree** — superseded by
   the in-flow flex-sibling panel (`dice-roll-enhancements`, archived 2026-08-20).
+- **The entire chat-docked dice UI** — the dice pop-out trigger anchored to the chat dock
+  (`DiceTriggerButton`, `title="Dice Rolls for main screen pop out"`), the dice staging
+  pool (`DicePoolPanel`), the standalone in-chat percentile (d%) control, the "Roll" commit
+  that submitted one combined pooled roll, the flex-sibling panel positioning, and the
+  roll-entry-strip replacement — all removed by `remove-chat-docked-dice` (2026-08-30,
+  issue #585). `GlobalDiceFab` is now the sole staging-pool + percentile + commit surface
+  (see `global-dice-fab` and `dice-pool-shared-state` capabilities); it submits through
+  the unchanged `/api/campaigns/[id]/rolls` contract and its rolls reach chat only via the
+  SSE `'roll'` stream. The chat drawer renders no roll-entry affordance of any kind.
 
 ---
 
