@@ -89,6 +89,7 @@ export function GlobalDiceFab() {
       setAnimationSettled(false)
       setRollSeq(seq => seq + 1)
       setOverlayRoll(built)
+      dp.reset()
     } finally {
       rollInFlightRef.current = false
     }
