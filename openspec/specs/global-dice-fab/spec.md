@@ -1,8 +1,12 @@
-## ADDED Requirements
+## Purpose
+
+Provide a persistent lower-left dice fab, visible on every page for authenticated users, that opens a standalone dice-pool modal (including a percentile control) usable with no campaign or session context, and can send a result to session chat when dice-session presence exists.
+
+## Requirements
 
 This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-08-22-decouple-dice-panel-from-chat/design.md) document, not a replacement.
 
-### Requirement: ADDED Persistent dice fab visible on every page for authenticated users
+### Requirement: Persistent dice fab visible on every page for authenticated users
 
 The system SHALL render a fixed-position d20 icon button in the lower-left corner of every page, mounted once from the root layout, visible only to authenticated users.
 
@@ -26,9 +30,9 @@ The system SHALL render a fixed-position d20 icon button in the lower-left corne
 
 ---
 
-### Requirement: ADDED Standalone dice pool modal with no session dependency
+### Requirement: Standalone dice pool modal with no session dependency
 
-The system SHALL let an authenticated user open a modal anchored to the bottom-left corner over the trigger button from the fab that provides a dice pool builder (add/remove d4/d6/d8/d10/d12/d20, edit a shared modifier) and roll it using `rollDicePool()`, entirely independent of any campaign or session context, with no network request required to see a result.
+The system SHALL let an authenticated user open a modal anchored to the bottom-left corner over the trigger button from the fab that provides a dice pool builder (add/remove d4/d6/d8/d10/d12/d20, edit a shared modifier) and roll it using `rollDicePool()`, entirely independent of any campaign or session context, with no network request required to see a result. Each die control SHALL be rendered via the shared `DiePoolButton` component (see `dice-iconography` capability), showing the die's icon, staged count, and a persistent visible `d{sides}` label. The modal SHALL also present a standalone percentile control (shared `PercentileButton`, `d%` glyph) that produces a single percentile result via `buildPercentileRoll()` (see `dice-pool-shared-state` capability), separate from the staged pool.
 
 #### Scenario: Opening the fab shows a modal anchored to the bottom-left
 
@@ -36,6 +40,12 @@ The system SHALL let an authenticated user open a modal anchored to the bottom-l
 - **When** the user clicks the fab
 - **Then** a modal appears with its bottom-left corner overlaying the trigger button containing die add/remove controls for all six supported sizes and a modifier input
 - **And** the background dimming overlay is displayed
+
+#### Scenario: Each die control shows a persistent visible label
+
+- **Given** the modal is open
+- **When** the six die controls are inspected
+- **Then** each renders the visible text `d{sides}` matching its own die size (as rendered content, not only a tooltip)
 
 #### Scenario: Rolling with no active-session presence produces a local result and no network call
 
@@ -47,7 +57,19 @@ The system SHALL let an authenticated user open a modal anchored to the bottom-l
 
 - **Given** the modal is open and every die size has a staged count of 0
 - **When** the user looks at the roll control
-- **Then** the roll control is disabled
+- **Then** the pool roll control is disabled (the standalone percentile control is unaffected by the staged-pool count)
+
+#### Scenario: Percentile control produces a local d% result
+
+- **Given** the modal is open and no presence has been announced
+- **When** the user activates the percentile control
+- **Then** the modal displays a result with `formula` `d%` and a total in 1..100 computed by `buildPercentileRoll()`, and no HTTP request is made
+
+#### Scenario: A local percentile result is sendable to session chat on the same terms as a pool roll
+
+- **Given** dice-session presence exists and the user has just produced a percentile result
+- **When** the user clicks "send to session chat"
+- **Then** the fab calls the shared `submitRoll` with `formula: "d%"`, `rolls: [value]`, `total: value`, and the current visibility, and `sendState` transitions per the shared submission result
 
 ---
 
@@ -135,18 +157,6 @@ _(Added 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL cause `G
 - **When** the server responds with a non-201, non-409 status or the request throws
 - **Then** `sendState` transitions to `'failed'`, and the failure reason is a real
   submission error — never "no CampaignChat instance available to receive the request"
-
----
-
-### Requirement: ADDED Instant tooltips for dice buttons
-
-The system SHALL provide immediate tooltip feedback when hovering over dice size buttons inside the global dice fab panel.
-
-#### Scenario: Hovering a dice button
-
-- **Given** the global dice panel is open
-- **When** the user hovers the cursor over a specific dice button (e.g., d20)
-- **Then** a tooltip with the dice name appears instantly without OS/browser delay
 
 ---
 

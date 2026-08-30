@@ -73,12 +73,12 @@ Issue-driven: **#573**. Default branch: `main`. Feature branch: `feat/573-dice-l
 
 - [x] `npm run test:unit`
 - [x] `npm run test:integration` (via the project harness — starts Mongo, cleans the test DB, starts Next.js)
-- [ ] `npm run test:regression` (E2E) if any user-facing flow is affected
+- [x] `npm run test:regression` (E2E) if any user-facing flow is affected
 - [x] `npm run typecheck`
 - [x] `npm run lint`
 - [x] `npm run build`
-- [ ] All completed tasks marked `- [x]`
-- [ ] All steps in [Remote push validation]
+- [x] All completed tasks marked `- [x]`
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -101,10 +101,10 @@ If ANY required step fails, iterate and fix before pushing.
 - [x] Commit all changes to the working branch and push
 - [x] Open PR from `feat/573-dice-labels-and-percentile-die` to `main`. **PR body MUST include `Closes #573`** (unconditional).
 - [x] **Issue lifecycle: mark in-review** — `gh issue edit 573 --add-label "in-review" --remove-label "in-progress"`; move the project item to the "In Review" column (same discovery as the in-progress step; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER `--admin`)
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and notify the user); never wait for a human to report the merge, never force-merge:
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER `--admin`)
+- [x] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and notify the user); never wait for a human to report the merge, never force-merge:
   1. **Build and tests** — run all [Remote push validation] steps; fix failures, commit, push before anything else this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for each unresolved thread, address, commit, run [Remote push validation], push, wait 180s; continue until all resolved (see project memory `feedback_resolve_pr_comments`)
   3. **CI check failures** — only after all comments resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks, commit, run [Remote push validation], push, wait 180s; restart from step 1
@@ -123,15 +123,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (`.wolf/anatomy.md`, `.wolf/cerebrum.md` if a convention was learned)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy each `specs/<cap>/spec.md` into `openspec/specs/<cap>/spec.md`, merging ADDED/MODIFIED/REMOVED into the live spec; fix relative links to resolve from the archive location (`../../design.md` → `../../changes/archive/2026-08-29-dice-labels-and-percentile-die/design.md`, likewise for `../../tasks.md`)
-- [ ] Archive: move `openspec/changes/dice-labels-and-percentile-die/` to `openspec/changes/archive/2026-08-29-dice-labels-and-percentile-die/`, staging the new location and the deletion of the old in a **single commit**
-- [ ] Confirm the archive path exists and `openspec/changes/dice-labels-and-percentile-die/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-2026-08-29-dice-labels-and-percentile-die` then `git push -u origin doc/archive-2026-08-29-dice-labels-and-percentile-die`
-- [ ] Open a PR from that branch to `main`, title `docs: archive dice-labels-and-percentile-die (2026-08-29)` — **do NOT push directly to `main`** (see project memory `feedback_no_branch_protection_bypass`)
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER `--admin`)
-- [ ] Monitor the doc PR until merged (same loop as the implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feat/573-dice-labels-and-percentile-die doc/archive-2026-08-29-dice-labels-and-percentile-die`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (`.wolf/anatomy.md`, `.wolf/cerebrum.md` if a convention was learned)
+- [x] Sync approved spec deltas into `openspec/specs/`: copy each `specs/<cap>/spec.md` into `openspec/specs/<cap>/spec.md`, merging ADDED/MODIFIED/REMOVED into the live spec; fix relative links to resolve from the archive location (`../../design.md` → `../../changes/archive/2026-08-29-dice-labels-and-percentile-die/design.md`, likewise for `../../tasks.md`)
+- [x] Archive: move `openspec/changes/dice-labels-and-percentile-die/` to `openspec/changes/archive/2026-08-29-dice-labels-and-percentile-die/`, staging the new location and the deletion of the old in a **single commit**
+- [x] Confirm the archive path exists and `openspec/changes/dice-labels-and-percentile-die/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-2026-08-29-dice-labels-and-percentile-die` then `git push -u origin doc/archive-2026-08-29-dice-labels-and-percentile-die`
+- [x] Open a PR from that branch to `main`, title `docs: archive dice-labels-and-percentile-die (2026-08-29)` — **do NOT push directly to `main`** (see project memory `feedback_no_branch_protection_bypass`)
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER `--admin`)
+- [x] Monitor the doc PR until merged (same loop as the implementation PR)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feat/573-dice-labels-and-percentile-die doc/archive-2026-08-29-dice-labels-and-percentile-die`

@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Provide a single vendored set of dice-face SVG icon components (d4/d6/d8/d10/d12/d20) sourced from game-icons.net, exposed as React components with a `DIE_ICONS` lookup and a shared `DieGlyph` component that pairs each icon with its always-visible die label, so every dice surface renders the same iconography.
+
+## Requirements
 
 This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-08-20-dice-roll-enhancements/design.md) document, not a replacement.
 
@@ -52,6 +56,38 @@ The system SHALL include a visible attribution to game-icons.net and its contrib
 
 - **WHEN** the icon module's source file is inspected
 - **THEN** it contains a comment (or a clear reference to a notice file) crediting "game-icons.net" and its authors and naming the CC BY 3.0 license
+
+### Requirement: Shared die glyph component pairs each icon with a visible label
+
+The system SHALL provide a shared presentational `DieGlyph` component that renders a die's vendored icon(s) together with a visible text label, used by every die control in both the chat-dock dice panel and the global dice fab so the icon/label pairing is defined in exactly one place.
+
+- For `sides` in `{4, 6, 8, 10, 12, 20}`, `DieGlyph` SHALL render `DIE_ICONS[sides]` and the visible text label `d{sides}`.
+- For the percentile variant (`sides = '%'`), `DieGlyph` SHALL render exactly two `DiceD10Icon`s and the visible text label `d%`.
+- `DieGlyph` SHALL contain no roll or state logic.
+
+#### Scenario: Standard die glyph renders matching icon and label
+
+- **WHEN** `DieGlyph` is rendered with `sides = 20`
+- **THEN** it renders the d20 icon component from `DIE_ICONS` and the visible text `d20`
+
+#### Scenario: Percentile glyph renders two d10 icons and the d% label
+
+- **WHEN** `DieGlyph` is rendered with the percentile variant
+- **THEN** it renders exactly two `DiceD10Icon` components and the visible text `d%`
+
+#### Scenario: Label is visible text, not only an attribute
+
+- **WHEN** any `DieGlyph` is rendered
+- **THEN** its label is present as rendered text content, not solely as a `title` or `aria-label`
+
+### Requirement: DIE_ICONS keys are unchanged by percentile support
+
+The system SHALL NOT add a d100 entry to `DIE_ICONS`; percentile support reuses the existing `DiceD10Icon`. The keys of `DIE_ICONS` SHALL remain exactly `4, 6, 8, 10, 12, 20`.
+
+#### Scenario: Lookup still covers exactly the six die sizes
+
+- **WHEN** the keys of `DIE_ICONS` are enumerated
+- **THEN** they are exactly `4, 6, 8, 10, 12, 20` (no `100` entry added)
 
 ---
 
