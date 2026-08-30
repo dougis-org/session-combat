@@ -3,6 +3,10 @@
 // E2E smoke, not the type checker.
 declare module '@3d-dice/dice-box' {
   export interface DiceBoxConfig {
+    /** CSS selector string for the mount point. v1.1.x rejects a DOM element here. */
+    container?: string
+    /** DOM id applied to the generated `<canvas>`. */
+    id?: string
     assetPath?: string
     origin?: string
     scale?: number
@@ -20,7 +24,8 @@ declare module '@3d-dice/dice-box' {
   }
 
   export default class DiceBox {
-    constructor(selector: string | HTMLElement, config?: DiceBoxConfig)
+    // v1.1.x: a single config object. `container` must be a CSS selector string.
+    constructor(config: DiceBoxConfig)
     init(): Promise<unknown>
     roll(notation: string): Promise<DiceBoxResult[]>
     clear(): void

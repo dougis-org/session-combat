@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 
+/** Stable id so `@3d-dice/dice-box` can be handed a CSS selector for its mount point. */
+export const DICE_ROLL_CANVAS_ID = 'dice-roll-canvas'
+
 interface DiceRollOverlayProps {
   built: BuiltRoll
   /** When true, no dice canvas is mounted and the total modal shows immediately. */
@@ -29,6 +32,7 @@ export function DiceRollOverlay({ built, disableAnimation, onClose, onCanvasRead
   })
   const modalRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
+  const canvasReadyFiredRef = useRef(false)
 
   useEffect(() => {
     if (!root) return
@@ -37,6 +41,14 @@ export function DiceRollOverlay({ built, disableAnimation, onClose, onCanvasRead
       root.remove()
     }
   }, [root])
+
+  // Move focus into the overlay so keyboard / screen-reader users are not left inside the
+  // now-inert panel behind it; restore focus on close (mirrors the panel's own handling).
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null
+    modalRef.current?.focus()
+    return () => previouslyFocused?.focus?.()
+  }, [])
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -58,7 +70,9 @@ export function DiceRollOverlay({ built, disableAnimation, onClose, onCanvasRead
   }, [onClose])
 
   useEffect(() => {
-    if (!disableAnimation && canvasRef.current) onCanvasReady?.(canvasRef.current)
+    if (canvasReadyFiredRef.current || disableAnimation || !canvasRef.current) return
+    canvasReadyFiredRef.current = true
+    onCanvasReady?.(canvasRef.current)
   }, [disableAnimation, onCanvasReady])
 
   if (!root) return null
@@ -68,6 +82,7 @@ export function DiceRollOverlay({ built, disableAnimation, onClose, onCanvasRead
       {!disableAnimation && (
         <div
           ref={canvasRef}
+          id={DICE_ROLL_CANVAS_ID}
           data-testid="dice-roll-canvas"
           className="pointer-events-none absolute inset-0"
         />
@@ -77,6 +92,7 @@ export function DiceRollOverlay({ built, disableAnimation, onClose, onCanvasRead
         role="dialog"
         aria-modal="true"
         aria-label="Dice roll result"
+        tabIndex={-1}
         className="relative bg-gray-800 border border-gray-700 rounded-lg shadow-xl px-10 py-8 text-center"
       >
         <p className="text-xs uppercase tracking-wide text-gray-400">{built.formula}</p>

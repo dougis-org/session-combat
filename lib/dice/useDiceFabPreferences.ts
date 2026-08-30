@@ -10,7 +10,9 @@ const DISABLE_ANIMATION_KEY = 'dice-fab-disable-animation' // nosemgrep
 function safeGet<T>(key: string): T | null {
   try {
     return LocalStore.get<T>(key)
-  } catch {
+  } catch (err) {
+    // Degrade to defaults, but keep the failure observable (matches lib/clientStorage).
+    console.warn(`[dice-fab-prefs] localStorage read failed for "${key}"`, err)
     return null
   }
 }
@@ -18,8 +20,9 @@ function safeGet<T>(key: string): T | null {
 function safeSet(key: string, val: unknown): void {
   try {
     LocalStore.set(key, val)
-  } catch {
-    /* storage unavailable — degrade to an in-session value */
+  } catch (err) {
+    // Storage unavailable — degrade to an in-session value, but log it.
+    console.warn(`[dice-fab-prefs] localStorage write failed for "${key}"`, err)
   }
 }
 

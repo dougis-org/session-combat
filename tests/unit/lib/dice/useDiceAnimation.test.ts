@@ -121,4 +121,43 @@ describe('useDiceAnimation — single-instance invariant', () => {
     })
     expect(rollMock).toHaveBeenCalledWith('2d6@3,4')
   })
+
+  it('constructs DiceBox with a single config object carrying a CSS selector string', async () => {
+    // Regression guard: dice-box v1.1.x rejects a DOM element / two-arg form.
+    stubWebGL(true)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    await act(async () => {
+      await result.current.run(built, container)
+    })
+    expect(ctorMock).toHaveBeenCalledTimes(1)
+    const [arg, ...rest] = ctorMock.mock.calls[0]
+    expect(rest).toHaveLength(0)
+    expect(typeof arg).toBe('object')
+    expect(typeof arg.container).toBe('string')
+    expect(arg.container.startsWith('#')).toBe(true)
+  })
+
+  it('a roll() rejection tears the box down but does NOT latch the instant path', async () => {
+    stubWebGL(true)
+    rollMock.mockRejectedValueOnce(new Error('bad notation'))
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+
+    await act(async () => {
+      await result.current.run(built, container)
+    })
+
+    expect(result.current.status).toBe('idle')
+    expect(clearMock).toHaveBeenCalled()
+    expect(errSpy).toHaveBeenCalled()
+    errSpy.mockRestore()
+
+    // the next roll still attempts the 3D path
+    await act(async () => {
+      await result.current.run(built, container)
+    })
+    expect(ctorMock).toHaveBeenCalledTimes(2)
+  })
 })

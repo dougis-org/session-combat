@@ -62,8 +62,12 @@ export function useDiceAnimation(): DiceAnimation {
   const boxRef = useRef<DiceBoxLike | null>(null)
   const unsupportedRef = useRef(false)
   const loggedRef = useRef(false)
+  const webglOkRef = useRef<boolean | null>(null)
+  const runIdRef = useRef(0)
 
   const teardown = useCallback(() => {
+    // Bump the run token so any in-flight run() (still awaiting import/init) is abandoned.
+    runIdRef.current += 1
     if (boxRef.current) {
       try {
         boxRef.current.clear()
@@ -89,28 +93,54 @@ export function useDiceAnimation(): DiceAnimation {
   const run = useCallback(
     async (built: BuiltRoll, container: HTMLElement) => {
       if (unsupportedRef.current) return
-      if (!hasWebGL()) {
+      // Probe WebGL once per mounted hook, not once per roll — each probe otherwise leaks
+      // a WebGL context and browsers cap concurrent contexts.
+      if (webglOkRef.current === null) webglOkRef.current = hasWebGL()
+      if (!webglOkRef.current) {
         markUnsupported(new Error('WebGL unavailable'))
         return
       }
 
-      // Single-instance invariant: replace any open box.
+      // Single-instance invariant: replace any open box (also bumps the run token).
       teardown()
+      const myRun = runIdRef.current
 
+      let box: DiceBoxLike
       try {
         const mod = await import('@3d-dice/dice-box')
+        if (runIdRef.current !== myRun) return
         const DiceBox = mod.default
-        const box = new DiceBox(container, {
+        // dice-box v1.1.x wants a single config object with a CSS *selector* string.
+        if (!container.id) container.id = 'dice-roll-canvas'
+        box = new DiceBox({
+          container: `#${container.id}`,
           assetPath: ASSET_PATH,
-          origin: typeof window !== 'undefined' ? window.location.origin : undefined,
           theme: 'default',
         }) as unknown as DiceBoxLike
         await withTimeout(box.init(), INIT_TIMEOUT_MS)
-        boxRef.current = box
-        await box.roll(toDiceBoxNotation(built))
       } catch (err) {
         teardown()
         markUnsupported(err)
+        return
+      }
+
+      if (runIdRef.current !== myRun) {
+        try {
+          box.clear()
+        } catch {
+          /* nothing to clear */
+        }
+        return
+      }
+      boxRef.current = box
+
+      // A per-roll failure (e.g. a malformed predetermined notation) tears the box down and
+      // logs, but must NOT latch the whole session to the instant path.
+      try {
+        await box.roll(toDiceBoxNotation(built))
+      } catch (err) {
+        teardown()
+        console.error('[dice-animation] roll failed', err)
       }
     },
     [markUnsupported, teardown],
