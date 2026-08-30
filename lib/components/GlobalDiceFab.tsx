@@ -60,7 +60,9 @@ export function GlobalDiceFab() {
   const runAnimation = useCallback(
     (container: HTMLElement) => {
       if (!overlayRoll) return
-      const mySeq = (runSeqRef.current += 1)
+      // `performRoll` already advanced `runSeqRef` synchronously when it staged this roll,
+      // so a previous roll's late `run()` resolution is already disqualified by here.
+      const mySeq = runSeqRef.current
       setAnimationSettled(false)
       void animation.run(overlayRoll, container).then(() => {
         if (runSeqRef.current === mySeq) setAnimationSettled(true)
@@ -86,6 +88,9 @@ export function GlobalDiceFab() {
       } else {
         setSendState('idle')
       }
+      // Advance the animation-run token synchronously so any in-flight previous roll's
+      // `run().then()` can no longer flip `animationSettled` for this new roll.
+      runSeqRef.current += 1
       setAnimationSettled(false)
       setRollSeq(seq => seq + 1)
       setOverlayRoll(built)

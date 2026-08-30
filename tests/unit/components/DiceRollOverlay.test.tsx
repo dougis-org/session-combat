@@ -241,6 +241,16 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
     expect(screen.getByRole('dialog')).toHaveFocus()
   })
 
+  it('pulls focus off the opener as soon as it mounts, before the modal reveals', () => {
+    const opener = document.createElement('button')
+    document.body.appendChild(opener)
+    opener.focus()
+    render(<DiceRollOverlay built={built} disableAnimation={false} onClose={jest.fn()} />)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(opener).not.toHaveFocus()
+    opener.remove()
+  })
+
   it('restores focus to the opener even when dismissed before the modal is revealed', () => {
     const opener = document.createElement('button')
     document.body.appendChild(opener)

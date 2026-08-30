@@ -94,15 +94,16 @@ export function DiceRollOverlay({
     return () => clearTimeout(timer)
   }, [disableAnimation, animationStatus, animationSettled])
 
-  // Restore focus to whatever the opener focused (the panel / trigger) when the overlay
-  // closes — unconditionally, even if it is dismissed mid-tumble before the modal reveals.
+  // Pull focus into the overlay as soon as it mounts — including during the tumble, before
+  // the modal reveals — so keyboard / screen-reader users are not left on the now-obscured
+  // dice panel behind it. Restore focus to the opener when the overlay closes.
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null
+    contentRef.current?.focus()
     return () => previouslyFocused?.focus?.()
   }, [])
 
-  // Move focus into the modal once it is revealed so keyboard / screen-reader users are not
-  // left inside the now-inert panel behind it.
+  // Hand focus to the result dialog once it is revealed.
   useEffect(() => {
     if (modalRevealed) modalRef.current?.focus()
   }, [modalRevealed])
@@ -142,7 +143,7 @@ export function DiceRollOverlay({
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/60">
-      <div ref={contentRef} className="flex flex-col items-center gap-6">
+      <div ref={contentRef} tabIndex={-1} className="flex flex-col items-center gap-6 outline-none">
         {showCanvas && (
           <div
             ref={canvasRef}
