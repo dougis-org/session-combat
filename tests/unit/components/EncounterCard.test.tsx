@@ -3,9 +3,10 @@ import { render, screen } from '@testing-library/react';
 import { EncounterCard } from '@/lib/components/EncounterCard';
 import type { Encounter, Monster } from '@/lib/types';
 
+let monsterSeq = 0;
 function makeMonster(overrides: Partial<Monster> = {}): Monster {
   return {
-    id: `m-${Math.random().toString(36).slice(2)}`,
+    id: `m-${++monsterSeq}`,
     name: 'Goblin',
     size: 'small',
     type: 'humanoid',

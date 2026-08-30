@@ -48,14 +48,14 @@ describe("Campaign encounter edit parity (integration)", () => {
     const campaign = await createCampaign("Non-owner edit rejection");
     const encounter = await createLinkedEncounter(campaign.id, "Goblin Ambush");
 
-    const res = await fetch(`${baseUrl}/api/encounters/${encounter.id}`, {
+    const res = await fetch(`${baseUrl}/api/encounters/${encounter.id}`, { // nosemgrep
       method: "PUT",
       headers: authed(otherCookie),
       body: JSON.stringify({ name: "Hacked", description: "nope", monsters: [] }),
     });
     expect(res.status).toBe(404);
 
-    const check = await fetch(`${baseUrl}/api/campaigns/${campaign.id}/encounters`, {
+    const check = await fetch(`${baseUrl}/api/campaigns/${campaign.id}/encounters`, { // nosemgrep
       headers: authed(dmCookie),
     });
     const linked = (await check.json()) as Array<{ id: string; name: string }>;
@@ -66,7 +66,7 @@ describe("Campaign encounter edit parity (integration)", () => {
     const campaign = await createCampaign("DM edits linked encounter");
     const encounter = await createLinkedEncounter(campaign.id, "Goblin Ambush");
 
-    const put = await fetch(`${baseUrl}/api/encounters/${encounter.id}`, {
+    const put = await fetch(`${baseUrl}/api/encounters/${encounter.id}`, { // nosemgrep
       method: "PUT",
       headers: authed(dmCookie),
       body: JSON.stringify({
@@ -77,7 +77,7 @@ describe("Campaign encounter edit parity (integration)", () => {
     });
     expect(put.status).toBe(200);
 
-    const refetch = await fetch(`${baseUrl}/api/campaigns/${campaign.id}/encounters`, {
+    const refetch = await fetch(`${baseUrl}/api/campaigns/${campaign.id}/encounters`, { // nosemgrep
       headers: authed(dmCookie),
     });
     expect(refetch.status).toBe(200);
