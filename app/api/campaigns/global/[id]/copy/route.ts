@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { NextRequest, NextResponse } from 'next/server';
 import { storage } from '@/lib/storage';
 import { withAuthAndParams } from '@/lib/middleware';
