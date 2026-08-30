@@ -13,11 +13,13 @@ export const DICE_ROLL_CANVAS_ID = 'dice-roll-canvas'
  * completion. If the animation never signals (WebGL context lost, tab backgrounded, library
  * hang) the modal is revealed anyway so the user is never stranded without a result.
  *
- * Must comfortably exceed `useDiceAnimation`'s own dice-box init timeout (~6s) plus a
- * typical tumble, so a slow cold-cache load of the 3D engine is not mistaken for a hang and
- * torn down mid-animation.
+ * Must comfortably exceed `useDiceAnimation`'s worst-case bounded run: the lazy import plus
+ * the dice-box init timeout (~6s) plus dice-box's own `settleTimeout` (~5s). `run()` always
+ * resolves within that window (settle, instant path, or a caught failure), so in practice
+ * the `animationSettled` signal reveals the modal first and this backstop only covers a
+ * genuinely stuck promise.
  */
-export const MODAL_REVEAL_FALLBACK_MS = 12000
+export const MODAL_REVEAL_FALLBACK_MS = 20000
 
 interface DiceRollOverlayProps {
   built: BuiltRoll

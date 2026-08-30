@@ -10,6 +10,8 @@ export type DiceAnimationStatus = 'idle' | 'unsupported'
 
 const ASSET_PATH = '/dice-box/assets/'
 const INIT_TIMEOUT_MS = 6000
+/** Bound dice-box's physics settle so `roll()` cannot hang indefinitely. */
+const SETTLE_TIMEOUT_MS = 5000
 
 /** True only when a real WebGL context can be created. */
 function hasWebGL(): boolean {
@@ -120,6 +122,8 @@ export function useDiceAnimation(): DiceAnimation {
           // Enlarge the dice well past the library default (5) and shrink them progressively
           // once more than six animate, so the settled cluster fits above the result modal.
           scale: diceAnimationScale(animatedDiceCount(built)),
+          // Cap physics settle so run()'s promise always resolves in bounded time.
+          settleTimeout: SETTLE_TIMEOUT_MS,
         }) as unknown as DiceBoxLike
         await withTimeout(box.init(), INIT_TIMEOUT_MS)
       } catch (err) {

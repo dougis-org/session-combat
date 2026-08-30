@@ -8,15 +8,18 @@
  * animate, {@link diceAnimationScale} shrinks the dice progressively (down to
  * `DICE_MIN_SCALE`) so fifteen dice still settle inside the clear zone above the modal.
  *
- * Pure — no imports, no side effects — so the curve is unit-testable in isolation.
+ * Depends only on `DICE_ANIM_CAP` (a plain constant) so the curve stays unit-testable and
+ * locked to the animated-dice cap.
  */
+import { DICE_ANIM_CAP } from '@/lib/dice/toDiceBoxNotation'
+
 export const DICE_BASE_SCALE = 12
 export const DICE_MIN_SCALE = 6
 
 /** Dice count at/below which no down-scaling is applied. */
 const NO_SHRINK_THRESHOLD = 6
-/** Dice count at which the curve reaches `DICE_MIN_SCALE` (matches `DICE_ANIM_CAP`). */
-const FULL_SHRINK_COUNT = 15
+/** Dice count at which the curve reaches `DICE_MIN_SCALE` — the animated-dice cap. */
+const FULL_SHRINK_COUNT = DICE_ANIM_CAP
 
 /**
  * Map an animated dice count to the dice-box `scale`: `DICE_BASE_SCALE` for `count <= 6`,
