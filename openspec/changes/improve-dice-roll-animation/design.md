@@ -9,7 +9,7 @@
   - `@3d-dice/dice-box@^1.1.4` — config keys used today: `container`, `assetPath`, `theme`. Available and relevant: `scale` (default 5), `settleTimeout` (default 5000ms), `onRollComplete(results)` callback; `roll()` returns a promise that resolves when dice settle.
   - React 18 client components; Tailwind for layout; `react-dom` `createPortal`.
 - Interfaces/contracts touched:
-  - `DiceAnimation.run(built, container)` return contract — changes from `Promise<void>` to `Promise<boolean>`. It resolves `true` only when this run reached and completed `box.roll()` **as the current run** (dice settled, not superseded / torn down); it resolves `false` on every other path (WebGL unavailable, asset/init failure, roll failure or `ROLL_TIMEOUT_MS` timeout, or superseded). Callers treat `true` as "this roll's animation finished" and need no external staleness bookkeeping. `run()` is now self-bounded: `INIT_TIMEOUT_MS` for init, `ROLL_TIMEOUT_MS` for the settle.
+  - `DiceAnimation.run(built, container)` return contract — changes from `Promise<void>` to `Promise<boolean>`. It resolves `true` once the tumble for this roll is **over and this run is still the current one** — the dice settled cleanly *or* `box.roll()` failed / hit `ROLL_TIMEOUT_MS` (either way the animation is done, so the caller reveals the result). It resolves `false` when the reveal is not this run's job: WebGL unavailable or an import/init failure (which also set `status = 'unsupported'`, and the caller reveals off that), or the run was superseded. Callers treat the boolean directly and need no staleness bookkeeping. `run()` is fully self-bounded: `IMPORT_TIMEOUT_MS` + `INIT_TIMEOUT_MS` + `ROLL_TIMEOUT_MS`.
   - `DiceRollOverlayProps` — gains no required prop change to callers that is behaviorally breaking, but adds an internal "modal revealed" state and a completion signal wired from `GlobalDiceFab`.
   - `toDiceBoxNotation` — `DICE_ANIM_CAP` constant value changes 30 -> 15 (exported; referenced by tests and spec).
   - `openspec/specs/global-dice-fab/spec.md` — MODIFIED requirement.
@@ -47,9 +47,11 @@
 
 ### Decision 2: Gate the result modal on an explicit "animation complete" signal, with a fallback timeout
 
-- Chosen: `DiceRollOverlay` holds internal state `modalRevealed` (initially `false`). It is set `true` when any of: (a) `disableAnimation` is `true` (immediately), (b) the animation `status` is `'unsupported'` (immediately), (c) the animation-complete signal fires, or (d) a fallback timeout (`MODAL_REVEAL_FALLBACK_MS`, ~20000ms) elapses. `useDiceAnimation`
-bounds only dice-box *init* (~6s); a wedged physics settle can leave `box.roll()` pending
-indefinitely, so this timeout is the sole guarantee the modal appears. On expiry the overlay
+- Chosen: `DiceRollOverlay` holds internal state `modalRevealed` (initially `false`). It is set `true` when any of: (a) `disableAnimation` is `true` (immediately), (b) the animation `status` is `'unsupported'` (immediately), (c) the animation-complete signal fires, or (d) a fallback timeout (`MODAL_REVEAL_FALLBACK_MS` = `IMPORT_TIMEOUT_MS + INIT_TIMEOUT_MS
++ ROLL_TIMEOUT_MS + 5000`, ~38s) elapses. `useDiceAnimation.run()` is fully self-bounded, so
+`animationSettled` / `'unsupported'` normally reveals the modal well before this; the timeout
+only catches a case where `run()`'s promise never settles at all, and its derivation from the
+hook's caps guarantees it can never cut a slow-but-successful roll. On expiry the overlay
 reveals the modal and sets the canvas band aside (`hidden`, no layout space) so the result is
 centred and unobstructed; it does **not** tear the engine down. The engine is released when
 the overlay closes or the next roll starts (`useDiceAnimation`'s single-instance teardown) —

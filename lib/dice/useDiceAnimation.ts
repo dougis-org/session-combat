@@ -9,6 +9,8 @@ import { diceAnimationScale } from '@/lib/dice/diceAnimationScale'
 export type DiceAnimationStatus = 'idle' | 'unsupported'
 
 const ASSET_PATH = '/dice-box/assets/'
+/** Cap on how long the lazy `import('@3d-dice/dice-box')` chunk may take to load. */
+export const IMPORT_TIMEOUT_MS = 15000
 /** Cap on how long `box.init()` (WebGL context + asset/WASM load) may stay pending. */
 export const INIT_TIMEOUT_MS = 6000
 /**
@@ -56,14 +58,16 @@ interface DiceBoxLike {
 export interface DiceAnimation {
   status: DiceAnimationStatus
   /**
-   * Play the predetermined tumble for `built` inside `container`. Resolves to `true` only
-   * when this run reached and completed `box.roll()` as the current run — i.e. the dice
-   * actually settled and no later `run()` / `teardown()` superseded it. Resolves to `false`
-   * on every other path: WebGL unavailable, library/asset load failure (also sets `status`
-   * to `'unsupported'` and logs once), a settle that fails or times out, or the run being
-   * superseded. Callers can therefore treat `true` as "this roll's animation finished" with
-   * no external staleness bookkeeping. A second `run()` while one is active tears the first
-   * down first (single-instance invariant).
+   * Play the predetermined tumble for `built` inside `container`. Resolves to `true` once
+   * the tumble for this roll is **over and this run is still the current one** — whether the
+   * dice settled cleanly or `box.roll()` failed / hit `ROLL_TIMEOUT_MS` (either way the
+   * animation is done and the caller should reveal the result). Resolves to `false` when the
+   * reveal is not this run's job: WebGL unavailable or a library/asset/init failure (these
+   * also set `status` to `'unsupported'` and log once, and the caller reveals off that), or
+   * the run was superseded by a later `run()` / `teardown()`. Callers therefore need no
+   * external staleness bookkeeping. `run()` is self-bounded (`IMPORT_TIMEOUT_MS` +
+   * `INIT_TIMEOUT_MS` + `ROLL_TIMEOUT_MS`). A second `run()` while one is active tears the
+   * first down first (single-instance invariant).
    */
   run: (built: BuiltRoll, container: HTMLElement) => Promise<boolean>
   /** Tear down any active box. Safe to call repeatedly. */
@@ -120,7 +124,7 @@ export function useDiceAnimation(): DiceAnimation {
 
       let box: DiceBoxLike
       try {
-        const mod = await import('@3d-dice/dice-box')
+        const mod = await withTimeout(import('@3d-dice/dice-box'), IMPORT_TIMEOUT_MS, 'dice-box import')
         if (runIdRef.current !== myRun) return false
         const DiceBox = mod.default
         // dice-box v1.1.x wants a single config object with a CSS *selector* string.
@@ -151,16 +155,27 @@ export function useDiceAnimation(): DiceAnimation {
       boxRef.current = box
 
       // A per-roll failure (malformed notation) or a settle that never completes tears the
-      // box down and logs, but must NOT latch the whole session to the instant path.
+      // box down and logs, but must NOT latch the whole session to the instant path. Either
+      // way the tumble for this roll is over — report "reveal the modal" so the caller does
+      // not wait out the overlay's fallback for a roll we already know has finished.
       try {
         await withTimeout(box.roll(toDiceBoxNotation(built)), ROLL_TIMEOUT_MS, 'dice-box roll')
       } catch (err) {
-        teardown()
         console.error('[dice-animation] roll failed', err)
-        return false
+        // Drop the failed box without bumping the run token — this run still owns its reveal,
+        // and the next run() teardown (or an explicit teardown) will re-arm the 3D path.
+        if (boxRef.current === box) {
+          try {
+            box.clear()
+          } catch {
+            /* box already gone */
+          }
+          boxRef.current = null
+        }
       }
 
-      // Only report completion if this run is still the current one.
+      // Report completion only if this run is still the current one (a superseding run or an
+      // explicit teardown will have bumped the token, and that run owns the reveal instead).
       return runIdRef.current === myRun
     },
     [markUnsupported, teardown],

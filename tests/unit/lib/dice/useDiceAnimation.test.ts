@@ -155,6 +155,21 @@ describe('useDiceAnimation — single-instance invariant', () => {
     expect(firstOutcome).toBe(false)
   })
 
+  it('run() resolves true when the roll fails but this run is still current', async () => {
+    stubWebGL(true)
+    rollMock.mockRejectedValueOnce(new Error('bad notation'))
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    let outcome: boolean | undefined
+    await act(async () => {
+      outcome = await result.current.run(built, container)
+    })
+    expect(outcome).toBe(true)
+    expect(result.current.status).toBe('idle')
+    errSpy.mockRestore()
+  })
+
   it('run() resolves false when WebGL is unavailable', async () => {
     stubWebGL(false)
     const container = document.createElement('div')
@@ -283,7 +298,8 @@ describe('useDiceAnimation — single-instance invariant', () => {
       })
 
       expect(settled).toBe(true)
-      expect(outcome).toBe(false)
+      // the tumble is over (unsuccessfully) but still this run's — caller should reveal
+      expect(outcome).toBe(true)
       expect(result.current.status).toBe('idle')
       expect(clearMock).toHaveBeenCalled()
       expect(errSpy).toHaveBeenCalled()

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import {
+  IMPORT_TIMEOUT_MS,
   INIT_TIMEOUT_MS,
   ROLL_TIMEOUT_MS,
   type DiceAnimationStatus,
@@ -14,18 +15,19 @@ export const DICE_ROLL_CANVAS_ID = 'dice-roll-canvas'
 
 /**
  * Last-resort bound on how long the result modal stays hidden waiting for the tumble to
- * report completion. `useDiceAnimation.run()` already bounds itself (init + settle, see
- * below), so `animationSettled` normally fires well within this window; the only gap this
- * covers is a hung dynamic `import('@3d-dice/dice-box')`, which nothing else times out.
- *
- * Sits clear of the hook's own worst case so a slow-but-successful roll is never cut: it
- * exceeds `INIT_TIMEOUT_MS + ROLL_TIMEOUT_MS` plus margin for the import.
+ * report completion. `useDiceAnimation.run()` is fully self-bounded (import + init + settle,
+ * and it reports completion even on a failed roll), so `animationSettled` — or the
+ * `'unsupported'` status — normally reveals the modal well within this window. This only
+ * catches a pathological case where `run()`'s promise never settles at all (e.g. a React
+ * render/effect that never runs); it derives from the hook's own caps plus margin so a
+ * slow-but-successful roll can never be cut mid-tumble.
  *
  * On expiry the overlay reveals the modal and sets the canvas band aside (`hidden`) so the
  * result is centred; the dice engine is *not* torn down — it is released when the overlay
  * closes or the next roll starts (`useDiceAnimation`'s single-instance teardown).
  */
-export const MODAL_REVEAL_FALLBACK_MS = INIT_TIMEOUT_MS + ROLL_TIMEOUT_MS + 7000
+export const MODAL_REVEAL_FALLBACK_MS =
+  IMPORT_TIMEOUT_MS + INIT_TIMEOUT_MS + ROLL_TIMEOUT_MS + 5000
 
 interface DiceRollOverlayProps {
   built: BuiltRoll
