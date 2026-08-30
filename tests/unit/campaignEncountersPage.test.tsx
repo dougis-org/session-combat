@@ -700,10 +700,10 @@ describe('Campaign Encounters Page', () => {
       await flush();
       expect(nameInput().value).toBe('Goblin Ambush');
 
-      // The editor for e1 is now mounted above the list; the two card "Edit"
-      // buttons still correspond to e1 and e2 in order. Click e2's.
+      // The editor for e1 replaces the card for e1. The only "Edit" button left
+      // is for e2.
       const editButtons2 = buttons().filter(b => b.textContent?.trim() === 'Edit');
-      await act(async () => { editButtons2[1].click(); });
+      await act(async () => { editButtons2[0].click(); });
       await flush();
 
       expect(container.querySelectorAll('#encounter-name')).toHaveLength(1);
@@ -750,7 +750,7 @@ describe('Campaign Encounters Page', () => {
 
       expect(container.querySelector('.bg-red-900')).toBeTruthy();
       expect(calls.filter(c => c.method === 'GET' && c.url === LINKED_URL).length).toBe(getsBeforeSave);
-      expect(container.textContent).toContain('Goblin Ambush');
+      expect(nameInput().value).toBe('Goblin Ambush');
     });
   });
 });

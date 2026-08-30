@@ -251,16 +251,6 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
         />
       )}
 
-      {isDM && editingEncounter && (
-        <EncounterEditor
-          key={editingEncounter.id}
-          encounter={editingEncounter}
-          onSave={handleEditSave}
-          onCancel={() => setEditingEncounter(null)}
-          isNew={false}
-        />
-      )}
-
       {isDM && isLinkingEncounter && (
         <div className="bg-gray-800 rounded-lg p-6 mb-6 border-2 border-blue-500">
           <div className="flex justify-between items-center mb-4">
@@ -316,30 +306,40 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
         </p>
       ) : (
         <div className="space-y-4">
-          {encounters.map(encounter => (
-            <EncounterCard
-              key={encounter.id}
-              encounter={encounter}
-              actions={
-                isDM ? (
-                  <>
-                    <button
-                      onClick={() => startEditing(encounter)}
-                      className="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleUnlink(encounter)}
-                      className="bg-red-700 hover:bg-red-800 px-3 py-1.5 rounded text-sm"
-                    >
-                      Unlink
-                    </button>
-                  </>
-                ) : null
-              }
-            />
-          ))}
+          {encounters.map(encounter =>
+            editingEncounter?.id === encounter.id ? (
+              <EncounterEditor
+                key={encounter.id}
+                encounter={editingEncounter}
+                onSave={handleEditSave}
+                onCancel={() => setEditingEncounter(null)}
+                isNew={false}
+              />
+            ) : (
+              <EncounterCard
+                key={encounter.id}
+                encounter={encounter}
+                actions={
+                  isDM ? (
+                    <>
+                      <button
+                        onClick={() => startEditing(encounter)}
+                        className="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleUnlink(encounter)}
+                        className="bg-red-700 hover:bg-red-800 px-3 py-1.5 rounded text-sm"
+                      >
+                        Unlink
+                      </button>
+                    </>
+                  ) : null
+                }
+              />
+            )
+          )}
         </div>
       )}
     </div>

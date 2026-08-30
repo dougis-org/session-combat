@@ -117,13 +117,13 @@ export function EncountersContent() {
           Add New Encounter
         </button>
 
-        {editingEncounter && (
+        {isAddingEncounter && editingEncounter && (
           <EncounterEditor
             key={editingEncounter.id}
             encounter={editingEncounter}
             onSave={saveEncounter}
             onCancel={cancelEdit}
-            isNew={isAddingEncounter}
+            isNew={true}
           />
         )}
 
@@ -138,31 +138,41 @@ export function EncountersContent() {
                 No encounters yet. Create one to get started!
               </div>
             ) : (
-              encounters.map(encounter => (
-                <EncounterCard
-                  key={encounter.id}
-                  encounter={encounter}
-                  actions={
-                    <>
-                      <button
-                        onClick={() => {
-                          setEditingEncounter(encounter);
-                          setIsAddingEncounter(false);
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteEncounter(encounter.id)}
-                        className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
-                      >
-                        Delete
-                      </button>
-                    </>
-                  }
-                />
-              ))
+              encounters.map(encounter =>
+                !isAddingEncounter && editingEncounter?.id === encounter.id ? (
+                  <EncounterEditor
+                    key={encounter.id}
+                    encounter={editingEncounter}
+                    onSave={saveEncounter}
+                    onCancel={cancelEdit}
+                    isNew={false}
+                  />
+                ) : (
+                  <EncounterCard
+                    key={encounter.id}
+                    encounter={encounter}
+                    actions={
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditingEncounter(encounter);
+                            setIsAddingEncounter(false);
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteEncounter(encounter.id)}
+                          className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    }
+                  />
+                )
+              )
             )}
           </div>
         )}
