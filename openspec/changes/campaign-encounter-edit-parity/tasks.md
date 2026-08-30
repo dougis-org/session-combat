@@ -7,32 +7,32 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Confirm worktree + branch:** in `.worktrees/campaign-encounter-edit-parity`,
+- [x] **Step 1 — Confirm worktree + branch:** in `.worktrees/campaign-encounter-edit-parity`,
   verify `git branch --show-current` is `campaign-encounter-edit-parity` and it tracks
   `origin/campaign-encounter-edit-parity`. Rebase onto latest `origin/main`
   (`git fetch origin && git rebase origin/main`).
-- [ ] **Step 2 — Branch already published:** confirm `git push -u origin campaign-encounter-edit-parity`
+- [x] **Step 2 — Branch already published:** confirm `git push -u origin campaign-encounter-edit-parity`
   is in place (done during proposal). No new branch needed.
-- [ ] **Step 3 — Confirm submodule:** ensure `.github/openspec-shared/openspec/schemas/sdd-with-feedback-loop/`
+- [x] **Step 3 — Confirm submodule:** ensure `.github/openspec-shared/openspec/schemas/sdd-with-feedback-loop/`
   is present in the worktree (needed for `openspec` commands).
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list.
   If not listed, halt immediately, tell the user the `pr-review-toolkit` plugin is required,
   provide installation guidance, and do not proceed until they confirm it is installed.
-- [ ] **Re-read the spec deltas** (`openspec/changes/campaign-encounter-edit-parity/specs/campaign-encounter-management-ui/spec.md`)
+- [x] **Re-read the spec deltas** (`openspec/changes/campaign-encounter-edit-parity/specs/campaign-encounter-management-ui/spec.md`)
   and confirm every scenario has a planned test below.
-- [ ] **Confirm no API changes are needed** — `GET /api/campaigns/[id]/encounters` returns full
+- [x] **Confirm no API changes are needed** — `GET /api/campaigns/[id]/encounters` returns full
   encounter objects incl. `monsters`; `PUT /api/encounters/[id]` supports the edit. If either
   assumption is wrong, stop and update `proposal.md` / `design.md` / this file before coding.
-- [ ] **Resolve open questions or accept defaults** — co-DM editing: gate on `isDM` only,
+- [x] **Resolve open questions or accept defaults** — co-DM editing: gate on `isDM` only,
   non-owner save errors via the standard path. Editor note about shared-record semantics:
   omit. Proceed with these defaults unless the requester (Doug) says otherwise.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 606 --add-label "in-progress"`.
+- [x] **Issue lifecycle: mark in-progress** — run `gh issue edit 606 --add-label "in-progress"`.
   Discover the repo's GitHub Project (`gh project list --owner dougis-org --format json`),
   resolve the status field option matching "In Progress"
   (`gh project field-list <project-number> --owner dougis-org --format json`), and move the
@@ -40,87 +40,87 @@
   If the token lacks `project` scope, tell the user to run `gh auth refresh -s project` and
   skip the project-item update (the label update still proceeds).
 
-- [ ] **Task A — Shared `EncounterCard` (Design Decision 3).** _Covers spec: "Linked-encounter
+- [x] **Task A — Shared `EncounterCard` (Design Decision 3).** _Covers spec: "Linked-encounter
   cards show the encounter's monster roster", "MODIFIED ... lists only the current campaign's
   linked encounters" (card presentation)._
-  - [ ] Write component tests for a new `lib/components/EncounterCard.tsx`: renders name,
+  - [x] Write component tests for a new `lib/components/EncounterCard.tsx`: renders name,
     optional description, `Monsters (N)` heading + one row per monster (name + HP/AC);
     renders an actions slot; with no monsters shows `Monsters (0)` and no rows.
-  - [ ] Implement `EncounterCard` as a pure presentational component (no fetch, no state),
+  - [x] Implement `EncounterCard` as a pure presentational component (no fetch, no state),
     props roughly `{ encounter, actions?: ReactNode }` (or explicit `onEdit`/`onDelete`/`onUnlink`
     — pick the shape that keeps both call sites simplest).
-  - [ ] Refactor `app/encounters/EncountersContent` to render through `EncounterCard`
+  - [x] Refactor `app/encounters/EncountersContent` to render through `EncounterCard`
     (global list passes Edit + Delete). Keep existing `data-testid="encounter-card"`.
-  - [ ] Run existing global-encounters component tests; fix any breakage from the refactor.
+  - [x] Run existing global-encounters component tests; fix any breakage from the refactor.
   - [ ] **Fallback (only if review flags global-list regression risk as too high):** keep a
     campaign-local card mirroring the global markup instead of extracting. This is a
     pre-approved implementation fallback, not a scope change.
 
-- [ ] **Task B — DM-awareness / read-only path (Design Decision 1).** _Covers spec: "Campaign
+- [x] **Task B — DM-awareness / read-only path (Design Decision 1).** _Covers spec: "Campaign
   encounters page renders read-only for non-DM members", "MODIFIED ... " (non-DM scenario)._
-  - [ ] Write component tests for `app/campaigns/[id]/encounters/page.tsx` with `useIsDM`
+  - [x] Write component tests for `app/campaigns/[id]/encounters/page.tsx` with `useIsDM`
     mocked: `{isDM:true}` → Link/Create bar + per-card Edit + Unlink present;
     `{isDM:false}` → list renders with name/description/roster, none of Link/Create/Edit/Unlink,
     no error banner; `{loading:true}` → list renders with no management controls (no
     show-then-hide).
-  - [ ] Consume `useIsDM(campaignId)` in `EncountersManagementContent`. Gate the Link/Create
+  - [x] Consume `useIsDM(campaignId)` in `EncountersManagementContent`. Gate the Link/Create
     action bar, the picker, the `Edit` button, and the `Unlink` button on
     `isDM === true`. While `loading`, render the list without controls.
 
-- [ ] **Task C — Inline edit (Design Decision 2).** _Covers spec: "DM edits a linked encounter
+- [x] **Task C — Inline edit (Design Decision 2).** _Covers spec: "DM edits a linked encounter
   inline from the campaign encounters page" (all scenarios)._
-  - [ ] Write component tests: click `Edit` → `EncounterEditor` mounts with encounter data
+  - [x] Write component tests: click `Edit` → `EncounterEditor` mounts with encounter data
     (`isNew={false}`); save → `PUT /api/encounters/e1` with updated `name`/`description`/`monsters`
     → on success editor closes, `GET /api/campaigns/[id]/encounters` called again, card shows
     updated text; on failure → error banner shows server `error`, editor stays open, no refetch;
     opening `Edit` on a second card closes the first editor (one editor at a time).
-  - [ ] Add `editingEncounter: Encounter | null` state and `handleEditSave(encounter)` that
+  - [x] Add `editingEncounter: Encounter | null` state and `handleEditSave(encounter)` that
     `PUT`s to `/api/encounters/${encounter.id}` with `{ name, description, monsters }`, and on
     success clears `editingEncounter` and calls `fetchLinked()`; on failure sets the page error
     via `ErrorBanner` and leaves the editor open. Mirror the existing `handleCreateSave`.
-  - [ ] Render `EncounterEditor` inline (keyed by `editingEncounter.id`) when set; wire the
+  - [x] Render `EncounterEditor` inline (keyed by `editingEncounter.id`) when set; wire the
     per-card `Edit` button to set `editingEncounter` and ensure `isCreatingEncounter` /
     picker are closed.
-  - [ ] Pass the `Edit` (and existing `Unlink`) action into `EncounterCard`; do NOT pass any
+  - [x] Pass the `Edit` (and existing `Unlink`) action into `EncounterCard`; do NOT pass any
     delete action. _Covers spec: "Campaign encounters page offers no encounter-deletion action"._
-  - [ ] Add a component test asserting no `Delete` control and no path to `DELETE /api/encounters/[id]`
+  - [x] Add a component test asserting no `Delete` control and no path to `DELETE /api/encounters/[id]`
     from this page.
 
-- [ ] **Task D — Server-side authorization guard test (NFAC Security).** _Covers spec:
+- [x] **Task D — Server-side authorization guard test (NFAC Security).** _Covers spec:
   "Non-owner edit attempt is rejected by the server"._
-  - [ ] Ensure an integration test exists (add if missing) that `PUT /api/encounters/[id]` by a
+  - [x] Ensure an integration test exists (add if missing) that `PUT /api/encounters/[id]` by a
     non-owner returns `404` and does not mutate the encounter. Run via the project harness
     (`npm run test:integration`), never `jest` directly (per project standard).
 
-- [ ] **Task E — Campaign edit integration test (Reliability + functional).** _Covers spec:
+- [x] **Task E — Campaign edit integration test (Reliability + functional).** _Covers spec:
   "DM edits a linked encounter and saves", "List stays consistent after a failed edit"._
-  - [ ] Add an integration test (harness): seed a campaign with a linked encounter owned by the
+  - [x] Add an integration test (harness): seed a campaign with a linked encounter owned by the
     DM, `PUT` an edit via the campaign edit path, reload linked encounters, assert the change
     persisted. Use a free port for any server (not 3000).
 
-- [ ] Confirm every spec scenario in
+- [x] Confirm every spec scenario in
   `openspec/changes/campaign-encounter-edit-parity/specs/campaign-encounter-management-ui/spec.md`
   maps to a passing test.
-- [ ] Look for existing tooling/helpers (`useIsDM`, `EncounterEditor`, `ErrorBanner`,
+- [x] Look for existing tooling/helpers (`useIsDM`, `EncounterEditor`, `ErrorBanner`,
   `ValidationError`, test fixtures under `tests/fixtures`) and reuse rather than re-implement.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code`
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code`
   skill against the staged + unstaged diff. The primary agent automatically applies all
   clearly-correct findings directly — without stopping, without presenting the list, without
   asking for confirmation. Apply fixes, re-run the relevant tests to confirm they pass, then commit.
 
 ## Validation
 
-- [ ] `npm run test:unit` — all pass (includes new component tests).
-- [ ] `npm run test:integration` — all pass (harness owns MongoDB + Next lifecycle; never run `jest` directly).
-- [ ] `npm run test:e2e` — run if an E2E path touches the encounters screens; otherwise note N/A.
-- [ ] `npm run typecheck` — clean.
-- [ ] `npm run lint` — clean.
-- [ ] `npm run build` — succeeds.
-- [ ] Run any security/code-quality checks required by project standards (`security-review` skill on the branch diff).
-- [ ] Manual visual parity check: `openwolf designqc` on `/encounters` and `/campaigns/[id]/encounters`; confirm the cards read as the same component.
+- [x] `npm run test:unit` — all pass (includes new component tests).
+- [x] `npm run test:integration` — all pass (harness owns MongoDB + Next lifecycle; never run `jest` directly).
+- [x] `npm run test:e2e` — ran `tests/e2e/campaign-combat-linking.spec.ts` (3) + `tests/e2e/encounters.spec.ts` (4), all pass on chromium.
+- [x] `npm run typecheck` — clean.
+- [x] `npm run lint` — clean.
+- [x] `npm run build` — succeeds.
+- [x] Run any security/code-quality checks required by project standards (`security-review` skill on the branch diff).
+- [x] Manual visual parity check: parity is now guaranteed by construction — both `/encounters` and `/campaigns/[id]/encounters` render every card through the single shared `lib/components/EncounterCard.tsx`. (`openwolf designqc` not run: no `.wolf/` tooling in this worktree.)
 - [ ] All completed tasks marked complete.
 - [ ] All steps in [Remote push validation].
 

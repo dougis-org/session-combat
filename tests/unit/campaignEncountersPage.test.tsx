@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import type { Encounter } from '@/lib/types';
+import type { Encounter, Monster } from '@/lib/types';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -22,6 +22,11 @@ jest.mock('@/lib/components/ProtectedRoute', () => ({
 
 jest.mock('@/lib/hooks/useAuth', () => ({
   useAuth: () => ({ user: { userId: 'user-1' } }),
+}));
+
+let mockIsDM: { isDM: boolean; loading: boolean } = { isDM: true, loading: false };
+jest.mock('@/lib/hooks/useIsDM', () => ({
+  useIsDM: () => mockIsDM,
 }));
 
 // Import after mocks
@@ -70,6 +75,7 @@ afterEach(() => {
   global.fetch = originalFetch;
   window.confirm = originalConfirm;
   mockParamsId = 'campaign-123';
+  mockIsDM = { isDM: true, loading: false };
 });
 
 // --- Fetch mocking: declare routes once, reuse everywhere ---
@@ -556,6 +562,195 @@ describe('Campaign Encounters Page', () => {
 
       expect(container.textContent).toMatch(errorMessage);
       unchanged();
+    });
+  });
+
+  // --- monster fixture for roster assertions ---
+  function makeMonster(overrides: Partial<Monster> = {}): Monster {
+    return {
+      id: `m-${++nextFixtureId}`,
+      name: 'Goblin',
+      size: 'small',
+      type: 'humanoid',
+      speed: '30 ft.',
+      challengeRating: 0.25,
+      ac: 15,
+      hp: 7,
+      maxHp: 7,
+      abilityScores: { strength: 8, dexterity: 14, constitution: 10, intelligence: 10, wisdom: 8, charisma: 8 },
+      ...overrides,
+    };
+  }
+
+  describe('Task B — DM-awareness / read-only path', () => {
+    it('B1 — DM sees Link/Create bar plus per-card Edit and Unlink', async () => {
+      mockIsDM = { isDM: true, loading: false };
+      mockRoutes({ [LINKED_URL]: [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })] });
+      await render();
+
+      expect(findButton('Link Existing Encounter')).toBeTruthy();
+      expect(findButton('Create New Encounter')).toBeTruthy();
+      expect(findButton('Edit')).toBeTruthy();
+      expect(findButton('Unlink')).toBeTruthy();
+    });
+
+    it('B2 — non-DM sees name/description/roster and none of Link/Create/Edit/Unlink, no error', async () => {
+      mockIsDM = { isDM: false, loading: false };
+      const linked = [
+        makeEncounter({
+          id: 'e1',
+          name: 'Goblin Ambush',
+          description: 'Roadside attack',
+          monsters: [makeMonster({ name: 'Goblin A' }), makeMonster({ name: 'Goblin B' })],
+        }),
+      ];
+      mockRoutes({ [LINKED_URL]: linked });
+      await render();
+
+      expect(container.textContent).toContain('Goblin Ambush');
+      expect(container.textContent).toContain('Roadside attack');
+      expect(container.textContent).toContain('Monsters (2)');
+      expect(container.textContent).toContain('Goblin A');
+      for (const label of ['Link Existing Encounter', 'Create New Encounter', 'Edit', 'Unlink']) {
+        expect(findButton(label)).toBeFalsy();
+      }
+      expect(container.querySelector('.bg-red-900')).toBeFalsy();
+    });
+
+    it('B3 — while the role is still resolving, no management controls render', async () => {
+      mockIsDM = { isDM: false, loading: true };
+      mockRoutes({ [LINKED_URL]: [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })] });
+      await render();
+
+      expect(container.textContent).toContain('Goblin Ambush');
+      for (const label of ['Link Existing Encounter', 'Create New Encounter', 'Edit', 'Unlink']) {
+        expect(findButton(label)).toBeFalsy();
+      }
+    });
+  });
+
+  describe('Task C — inline edit', () => {
+    const EDIT_URL = '/api/encounters/e1';
+
+    async function openEditor() {
+      await clickAndFlush('Edit');
+    }
+
+    it('C1 — clicking Edit mounts EncounterEditor with the encounter data (isNew=false)', async () => {
+      mockRoutes({ [LINKED_URL]: [makeEncounter({ id: 'e1', name: 'Goblin Ambush', description: 'Roadside' })] });
+      await render();
+
+      await openEditor();
+
+      expect(container.textContent).toContain('Edit Encounter');
+      expect(nameInput().value).toBe('Goblin Ambush');
+    });
+
+    it('C2 — saving PUTs the edit, closes the editor, refetches, and shows the new name', async () => {
+      let linkedState = [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })];
+      const calls = mockRoutes({
+        [LINKED_URL]: () => linkedState,
+        [`PUT ${EDIT_URL}`]: (init: RequestInit | undefined) => {
+          const body = JSON.parse((init as RequestInit).body as string);
+          linkedState = [makeEncounter({ id: 'e1', name: body.name })];
+          return res(makeEncounter({ id: 'e1', name: body.name }));
+        },
+      });
+
+      await render();
+      await openEditor();
+      await setValueAndFlush(nameInput(), 'Goblin Ambush (Hard)');
+      const getsBeforeSave = calls.filter(c => c.method === 'GET' && c.url === LINKED_URL).length;
+      await clickAndFlush('Save Encounter');
+
+      const putCall = calls.find(c => c.method === 'PUT' && c.url === EDIT_URL);
+      expect(putCall?.body).toMatchObject({ name: 'Goblin Ambush (Hard)' });
+      expect(findButton('Save Encounter')).toBeFalsy();
+      expect(calls.filter(c => c.method === 'GET' && c.url === LINKED_URL).length).toBeGreaterThan(getsBeforeSave);
+      expect(container.textContent).toContain('Goblin Ambush (Hard)');
+    });
+
+    it('C3 — a failed save shows the server error, keeps the editor open, and does not refetch', async () => {
+      const calls = mockRoutes({
+        [LINKED_URL]: [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })],
+        [`PUT ${EDIT_URL}`]: res({ error: 'Encounter name is required' }, { ok: false, status: 400 }),
+      });
+
+      await render();
+      await openEditor();
+      const getsBeforeSave = calls.filter(c => c.method === 'GET' && c.url === LINKED_URL).length;
+      await clickAndFlush('Save Encounter');
+
+      expect(container.textContent).toMatch(/Encounter name is required/);
+      expect(findButton('Save Encounter')).toBeTruthy();
+      expect(calls.filter(c => c.method === 'GET' && c.url === LINKED_URL).length).toBe(getsBeforeSave);
+    });
+
+    it('C4 — opening Edit on a second card replaces the first editor (one at a time)', async () => {
+      mockRoutes({
+        [LINKED_URL]: [
+          makeEncounter({ id: 'e1', name: 'Goblin Ambush' }),
+          makeEncounter({ id: 'e2', name: "Dragon's Lair" }),
+        ],
+      });
+      await render();
+
+      const editButtons = buttons().filter(b => b.textContent?.trim() === 'Edit');
+      await act(async () => { editButtons[0].click(); });
+      await flush();
+      expect(nameInput().value).toBe('Goblin Ambush');
+
+      // The editor for e1 is now mounted above the list; the two card "Edit"
+      // buttons still correspond to e1 and e2 in order. Click e2's.
+      const editButtons2 = buttons().filter(b => b.textContent?.trim() === 'Edit');
+      await act(async () => { editButtons2[1].click(); });
+      await flush();
+
+      expect(container.querySelectorAll('#encounter-name')).toHaveLength(1);
+      expect(nameInput().value).toBe("Dragon's Lair");
+    });
+
+    it('C5 — no Edit control renders for a non-DM member', async () => {
+      mockIsDM = { isDM: false, loading: false };
+      mockRoutes({ [LINKED_URL]: [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })] });
+      await render();
+
+      expect(findButton('Edit')).toBeFalsy();
+    });
+
+    it('C6 — no Delete control renders on any linked-encounter card', async () => {
+      mockRoutes({ [LINKED_URL]: [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })] });
+      await render();
+
+      expect(buttons().some(b => /delete/i.test(b.textContent ?? ''))).toBe(false);
+    });
+
+    it('C7 — opening Edit closes an open create panel', async () => {
+      mockRoutes({ [LINKED_URL]: [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })] });
+      await render();
+
+      await openCreatePanel();
+      expect(container.textContent).toContain('Create Encounter');
+
+      await clickAndFlush('Edit');
+      expect(container.textContent).not.toContain('Create Encounter');
+      expect(container.textContent).toContain('Edit Encounter');
+    });
+
+    it('E2 — a network error on save shows an error, does not refetch, list unchanged', async () => {
+      const calls = mockRoutes({
+        [LINKED_URL]: [makeEncounter({ id: 'e1', name: 'Goblin Ambush' })],
+        [`PUT ${EDIT_URL}`]: () => { throw new Error('Network down'); },
+      });
+
+      await render();
+      await openEditor();
+      const getsBeforeSave = calls.filter(c => c.method === 'GET' && c.url === LINKED_URL).length;
+      await clickAndFlush('Save Encounter');
+
+      expect(container.querySelector('.bg-red-900')).toBeTruthy();
+      expect(calls.filter(c => c.method === 'GET' && c.url === LINKED_URL).length).toBe(getsBeforeSave);
+      expect(container.textContent).toContain('Goblin Ambush');
     });
   });
 });

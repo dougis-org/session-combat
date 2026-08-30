@@ -5,7 +5,9 @@ import { useParams } from 'next/navigation';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, ValidationError } from '@/lib/components/ui';
 import type { Encounter } from '@/lib/types';
+import { EncounterCard } from '@/lib/components/EncounterCard';
 import { EncounterEditor } from '@/app/encounters/EncounterEditor';
+import { useIsDM } from '@/lib/hooks/useIsDM';
 
 function unlinkConfirmMessage(name: string): string {
   return `Unlink "${name}" from the campaign? It will not be deleted and will remain available in the global Encounters list.`;
@@ -18,9 +20,11 @@ async function extractErrorMessage(response: Response, fallback: string): Promis
 }
 
 function EncountersManagementContent({ campaignId }: { campaignId: string }) {
+  const { isDM } = useIsDM(campaignId);
   const [encounters, setEncounters] = useState<Encounter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingEncounter, setEditingEncounter] = useState<Encounter | null>(null);
 
   const [isLinkingEncounter, setIsLinkingEncounter] = useState(false);
   const [owned, setOwned] = useState<Encounter[]>([]);
@@ -55,6 +59,8 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
   useEffect(() => { fetchLinked(); }, [fetchLinked]);
 
   async function openPicker() {
+    setEditingEncounter(null);
+    setIsCreatingEncounter(false);
     setIsLinkingEncounter(true);
     setPickerError(null);
     setSearch('');
@@ -129,6 +135,40 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
     }
   }
 
+  async function handleEditSave(encounter: Encounter) {
+    setError(null);
+    try {
+      const response = await fetch(`/api/encounters/${encodeURIComponent(encounter.id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: encounter.name,
+          description: encounter.description,
+          monsters: encounter.monsters,
+        }),
+      });
+      if (!response.ok) throw new Error(await extractErrorMessage(response, 'Failed to save encounter'));
+      setEditingEncounter(null);
+      await fetchLinked();
+    } catch (err) {
+      console.error('Failed to save encounter:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save encounter');
+    }
+  }
+
+  function startEditing(encounter: Encounter) {
+    setEditingEncounter(encounter);
+    setIsCreatingEncounter(false);
+    closePicker();
+  }
+
+  function startCreating() {
+    setCreateWarning(null);
+    setEditingEncounter(null);
+    closePicker();
+    setIsCreatingEncounter(true);
+  }
+
   async function handleUnlink(encounter: Encounter) {
     const confirmed = window.confirm(unlinkConfirmMessage(encounter.name));
     if (!confirmed) return;
@@ -171,7 +211,7 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
 
       <ErrorBanner message={error} />
 
-      {!isLinkingEncounter && !isCreatingEncounter && (
+      {isDM && !isLinkingEncounter && !isCreatingEncounter && !editingEncounter && (
         <div className="flex gap-3 mb-6">
           <button
             onClick={openPicker}
@@ -180,7 +220,7 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
             Link Existing Encounter
           </button>
           <button
-            onClick={() => { setCreateWarning(null); setIsCreatingEncounter(true); }}
+            onClick={startCreating}
             className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm"
           >
             Create New Encounter
@@ -194,7 +234,7 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
         </div>
       )}
 
-      {isCreatingEncounter && (
+      {isDM && isCreatingEncounter && (
         <EncounterEditor
           encounter={{
             id: '',
@@ -211,7 +251,17 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
         />
       )}
 
-      {isLinkingEncounter && (
+      {isDM && editingEncounter && (
+        <EncounterEditor
+          key={editingEncounter.id}
+          encounter={editingEncounter}
+          onSave={handleEditSave}
+          onCancel={() => setEditingEncounter(null)}
+          isNew={false}
+        />
+      )}
+
+      {isDM && isLinkingEncounter && (
         <div className="bg-gray-800 rounded-lg p-6 mb-6 border-2 border-blue-500">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Link Existing Encounter</h2>
@@ -267,20 +317,28 @@ function EncountersManagementContent({ campaignId }: { campaignId: string }) {
       ) : (
         <div className="space-y-4">
           {encounters.map(encounter => (
-            <div key={encounter.id} className="bg-gray-800 rounded-lg p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h2 className="text-xl font-semibold">{encounter.name}</h2>
-                  {encounter.description && <p className="text-gray-400">{encounter.description}</p>}
-                </div>
-                <button
-                  onClick={() => handleUnlink(encounter)}
-                  className="bg-red-700 hover:bg-red-800 px-3 py-1.5 rounded text-sm"
-                >
-                  Unlink
-                </button>
-              </div>
-            </div>
+            <EncounterCard
+              key={encounter.id}
+              encounter={encounter}
+              actions={
+                isDM ? (
+                  <>
+                    <button
+                      onClick={() => startEditing(encounter)}
+                      className="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleUnlink(encounter)}
+                      className="bg-red-700 hover:bg-red-800 px-3 py-1.5 rounded text-sm"
+                    >
+                      Unlink
+                    </button>
+                  </>
+                ) : null
+              }
+            />
           ))}
         </div>
       )}
