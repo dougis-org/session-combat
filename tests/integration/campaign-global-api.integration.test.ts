@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import { MongoClient } from "mongodb";
 import { registerTestUser, makeUserAdmin } from "./helpers/users";
 
 interface TemplateResponse {
@@ -22,24 +23,38 @@ interface CampaignResponse {
   templateId?: string;
   status: string;
   notes: string;
+  encounterIds?: string[];
 }
 
 describe("Campaign Global API Integration Tests", () => {
   let baseUrl: string;
   let userCookie: string;
+  let userId: string;
   let adminCookie: string;
+  let mongoClient: MongoClient;
 
   beforeAll(async () => {
     baseUrl = process.env.TEST_BASE_URL!;
     if (!baseUrl) throw new Error("TEST_BASE_URL not set — globalSetup was not wired correctly");
 
-    userCookie = (await registerTestUser(baseUrl, "campaign-global-user")).cookie;
+    const user = await registerTestUser(baseUrl, "campaign-global-user");
+    userCookie = user.cookie;
+    userId = user.userId;
 
     const adminUser = await registerTestUser(baseUrl, "campaign-global-admin");
     adminCookie = adminUser.cookie;
 
     await makeUserAdmin(adminUser.userId);
+
+    mongoClient = new MongoClient(process.env.MONGODB_URI!);
+    await mongoClient.connect();
   }, 30000);
+
+  afterAll(async () => {
+    if (mongoClient) {
+      await mongoClient.close();
+    }
+  });
 
   function authedUser() { return { "Content-Type": "application/json", Cookie: userCookie }; }
   function authedAdmin() { return { "Content-Type": "application/json", Cookie: adminCookie }; }
@@ -258,5 +273,119 @@ describe("Campaign Global API Integration Tests", () => {
     const copy1 = await copy1Res.json() as CampaignResponse;
     const copy2 = await copy2Res.json() as CampaignResponse;
     expect(copy1.id).not.toBe(copy2.id);
+  });
+
+  it("persists a campaignMembers record with role dm and status active after copy", async () => {
+    const createRes = await fetch(`${baseUrl}/api/campaigns/global`, {
+      method: "POST",
+      headers: authedAdmin(),
+      body: JSON.stringify({ name: "Member Test" }),
+    });
+    const template = await createRes.json() as TemplateResponse;
+
+    const copyRes = await fetch(`${baseUrl}/api/campaigns/global/${template.id}/copy`, {
+      method: "POST",
+      headers: authedUser(),
+    });
+    const campaign = await copyRes.json() as CampaignResponse;
+
+    const db = mongoClient.db(process.env.MONGODB_DB!);
+    const member = await db.collection("campaignMembers").findOne({
+      campaignId: { $eq: campaign.id },
+    });
+
+    expect(member).not.toBeNull();
+    expect(member!.userId).toBe(userId);
+    expect(member!.role).toBe("dm");
+    expect(member!.status).toBe("active");
+  });
+
+  it("copies a campaign template that contains encounters, ensuring new Encounter objects are created and linked", async () => {
+    const db = mongoClient.db(process.env.MONGODB_DB!);
+    const tplId = "tpl-enc-" + Date.now();
+    await db.collection("campaignTemplates").insertOne({
+      id: tplId,
+      userId: "GLOBAL",
+      isGlobal: true,
+      name: "With Encounters",
+      moduleName: "WE",
+      chapters: [],
+      encounters: [
+        { name: "Encounter 1", description: "Desc 1", monsters: [] },
+        { name: "Encounter 2", description: "Desc 2", monsters: [] }
+      ],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    const copyRes = await fetch(`${baseUrl}/api/campaigns/global/${tplId}/copy`, {
+      method: "POST",
+      headers: authedUser(),
+    });
+    expect(copyRes.status).toBe(201);
+    const campaign = await copyRes.json() as CampaignResponse;
+    
+    expect(campaign.encounterIds).toBeDefined();
+    expect(campaign.encounterIds?.length).toBe(2);
+
+    const encountersCount = await db.collection("encounters").countDocuments({
+      id: { $in: campaign.encounterIds }
+    });
+    expect(encountersCount).toBe(2);
+    
+    // cleanup
+    await db.collection("campaignTemplates").deleteOne({ id: tplId });
+    await db.collection("campaigns").deleteOne({ id: campaign.id });
+    await db.collection("encounters").deleteMany({ id: { $in: campaign.encounterIds! } });
+  });
+
+  it("rolls back campaign creation if encounter DB insertion fails", async () => {
+    const db = mongoClient.db(process.env.MONGODB_DB!);
+    const tplId = "tpl-enc-fail-" + Date.now();
+    
+    await db.collection("campaignTemplates").insertOne({
+      id: tplId,
+      userId: "GLOBAL",
+      isGlobal: true,
+      name: "Fail Template",
+      moduleName: "FT",
+      chapters: [],
+      encounters: [
+        { name: "Giant Encounter", description: "This will fail due to validator", monsters: [] }
+      ],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    // Create encounters collection with a strict validator that forces failure
+    try {
+      await db.createCollection("encounters");
+    } catch (e) {
+      // Ignore if exists
+    }
+    await db.command({
+      collMod: "encounters",
+      validator: { $jsonSchema: { required: ["impossible_field"] } }
+    });
+
+    const copyRes = await fetch(`${baseUrl}/api/campaigns/global/${tplId}/copy`, {
+      method: "POST",
+      headers: authedUser(),
+    });
+    
+    // Should fail with 500 because the BSON insert will throw
+    expect(copyRes.status).toBe(500);
+    
+    // Verify rollback: Campaign should not exist
+    const campaignMatch = await db.collection("campaigns").findOne({ templateId: tplId });
+    expect(campaignMatch).toBeNull();
+
+    const encountersCount = await db.collection("encounters").countDocuments({ name: "Giant Encounter" });
+    expect(encountersCount).toBe(0);
+
+    // cleanup
+    await db.collection("campaignTemplates").deleteOne({ id: tplId });
+    // remove validator
+    await db.command({ collMod: "encounters", validator: {} });
   });
 });

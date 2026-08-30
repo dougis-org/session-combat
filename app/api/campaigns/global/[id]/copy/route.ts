@@ -42,13 +42,32 @@ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id
         status: 'active',
         history: [{ action: 'active' as const, by: auth.userId, at: new Date() }],
       });
-    } catch (memberError) {
+
+      if (template.encounters && template.encounters.length > 0) {
+        const encounterIds: string[] = [];
+        for (const encounterTpl of template.encounters) {
+          const encounter = {
+            id: randomUUID(),
+            userId: auth.userId,
+            name: encounterTpl.name,
+            description: encounterTpl.description,
+            monsters: encounterTpl.monsters || [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+          await storage.saveEncounter(encounter);
+          encounterIds.push(encounter.id);
+        }
+        campaign.encounterIds = encounterIds;
+        await storage.saveCampaign(campaign);
+      }
+    } catch (creationError) {
       try {
         await storage.deleteCampaign(campaign.id, auth.userId);
       } catch (rollbackError) {
-        console.error('Failed to rollback campaign creation after member insert error:', rollbackError);
+        console.error('Failed to rollback campaign creation after error:', rollbackError);
       }
-      throw memberError;
+      throw creationError;
     }
 
     return NextResponse.json(campaign, { status: 201 });
