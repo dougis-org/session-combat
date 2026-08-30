@@ -1,8 +1,14 @@
-## ADDED Requirements
+## Purpose
 
-### Requirement: ADDED Shared dice-pool selection state usable by any trigger UI
+Provide shared, component-agnostic hooks for dice-pool selection state (`useDicePoolState`) and roll submission (`useRollSubmission`), so the chat-docked dice panel and `GlobalDiceFab` — and any future trigger UI — drive identical behavior from one implementation.
 
-The system SHALL provide a single `lib/dice/useDicePoolState.ts` module exposing pool selection state (staged count per die size, shared modifier, `poolTotal`, open/close state for a panel keyed to a trigger/panel ref pair, and a `buildRoll()` function producing `{formula, rolls, total}` from the current pool via the existing `rollDicePool`, `buildPoolFormula`, and `getActiveDiceGroups` utilities), used identically by both the chat-docked dice panel and `GlobalDiceFab`, replacing the two independent copies of this state machine that exist today.
+## Requirements
+
+### Requirement: Shared dice-pool selection state usable by any trigger UI
+
+The system SHALL provide a single `lib/dice/useDicePoolState.ts` module exposing pool selection state (staged count per die size, shared modifier, `poolTotal`, open/close state for a panel keyed to a trigger/panel ref pair, a `buildRoll()` function producing `{formula, rolls, total}` from the current pool via the existing `rollDicePool`, `buildPoolFormula`, and `getActiveDiceGroups` utilities, and a `buildPercentileRoll()` function producing `{formula, rolls, total}` for a standalone percentile roll), used identically by both the chat-docked dice panel and `GlobalDiceFab`, replacing the two independent copies of this state machine that exist today.
+
+`buildPercentileRoll()` SHALL delegate to the centralized `rollPercentile()` helper (see `dice-rolling` capability) and return `{ formula: "d%", rolls: [value], total: value }` where `value` is the decoded percentile result (1..100). It SHALL NOT read the staged pool or the shared modifier.
 
 #### Scenario: Both consumers observe identical pool-selection behavior
 
@@ -30,9 +36,15 @@ The system SHALL provide a single `lib/dice/useDicePoolState.ts` module exposing
 - **Then** it returns `{formula, rolls, total}` computed purely client-side via
   `rollDicePool`, with no HTTP request issued
 
+#### Scenario: buildPercentileRoll produces a decoded percentile result independent of the pool
+
+- **Given** any staged pool contents and any modifier value
+- **When** `buildPercentileRoll()` is called
+- **Then** it returns `{ formula: "d%", rolls: [value], total: value }` with a single integer `value` in 1..100 equal to `total`, computed client-side via `rollPercentile()`, with no HTTP request issued and no change to the staged pool or modifier
+
 ---
 
-### Requirement: ADDED Shared roll-submission capability callable independent of any mounted component
+### Requirement: Shared roll-submission capability callable independent of any mounted component
 
 The system SHALL provide a single `lib/dice/useRollSubmission.ts` module exposing a `useRollSubmission(campaignId)` hook that returns a `submitRoll(formula, rolls, total, visibility)` function. `submitRoll` POSTs to `/api/campaigns/[id]/rolls` (with `campaignId` URL-encoded) and resolves to `'success'` (HTTP 201, response body never parsed since it is unused by any caller), `'conflict'` (HTTP 409), or `'error'` (any other status or a thrown/network error), callable directly by any component without requiring any other specific component to be mounted.
 

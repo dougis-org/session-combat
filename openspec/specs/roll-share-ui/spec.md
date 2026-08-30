@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define the in-chat dice-rolling UI: a staging pool of dice controls with visible labels, a standalone percentile (d%) control, an explicit commit that submits one combined roll through `/api/campaigns/[id]/rolls`, and an interleaved feed that renders roll history and streamed rolls alongside chat messages.
+
+## Requirements
 
 This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-06-20-issue-317-roll-share-ui/design.md) document, not a replacement.
 
@@ -112,8 +116,6 @@ stream" requirement below for the current behavior.
 
 ---
 
-## MODIFIED Requirements
-
 ### Requirement: MODIFIED CampaignChat accepts activeSessionId prop
 
 The system SHALL accept an `activeSessionId: string | null` prop on `CampaignChat` and use it to gate roll history fetching and the dice pop-out trigger.
@@ -200,7 +202,7 @@ The system SHALL display a persistent dice-pool trigger button anchored at the b
 
 ### Requirement: MODIFIED Dice staging pool
 
-The system SHALL let the user add and remove dice of any supported size (d4, d6, d8, d10, d12, d20) to a staging pool within the dice panel, and edit a shared modifier, without issuing any roll or network request until the user explicitly commits. Each die-size control SHALL display that die size's vendored icon (see `dice-iconography` capability) at 21x21px (a 50% increase from the icon size shipped by `dice-roll-enhancements`) alongside its staged count, instead of a plain `d{sides}` text label, and SHALL carry a `title` attribute matching its die size (e.g. `"d20"`).
+The system SHALL let the user add and remove dice of any supported size (d4, d6, d8, d10, d12, d20) to a staging pool within the dice panel, and edit a shared modifier, without issuing any roll or network request until the user explicitly commits. Each die-size control SHALL display that die size's vendored icon (see `dice-iconography` capability) at 21x21px alongside its staged count **and a persistent, visible `d{sides}` text label**. The previously-required per-control `title` tooltip is no longer required (the visible label supersedes it) and SHALL be removed.
 
 #### Scenario: Adding a die increments its staged count
 
@@ -233,11 +235,79 @@ The system SHALL let the user add and remove dice of any supported size (d4, d6,
 - **When** the six die-size add/remove controls are inspected
 - **Then** each control renders the icon from `DIE_ICONS` matching its own die size at 21x21px (e.g. the d20 control renders the d20 icon, not a d6 icon or plain text)
 
-#### Scenario: Each die-size control exposes a tooltip naming its die size
+#### Scenario: Each die-size control shows a persistent visible label
 
 - **Given** the panel is open
-- **When** the `title` attribute of the d20 add control is inspected
-- **Then** it equals "d20" (and analogously for d4, d6, d8, d10, d12)
+- **When** the d20 add control is inspected
+- **Then** the visible text `d20` is rendered within the control (not only in a `title` or `aria-label`), and analogously for d4, d6, d8, d10, d12
+
+#### Scenario: Die-size controls carry no title tooltip
+
+- **Given** the panel is open
+- **When** any die-size add control is inspected
+- **Then** it has no `title` attribute
+
+---
+
+### Requirement: ADDED Standalone percentile (d%) roll control
+
+The dice panel SHALL provide a standalone percentile control, rendered inline in the same row as the pool die controls (as the last item), that on activation performs a single percentile roll. The control is not a poolable die: it has no staged count, no remove affordance, is not combined with staged dice, and does not apply the shared modifier. It SHALL render two `DiceD10Icon`s and the visible label `d%` (see `dice-iconography` capability).
+
+A percentile roll SHALL be produced by two independent `rollDie(10)` results (`tensFace`, `onesFace`) decoded as:
+
+- `tensDigit = tensFace % 10`, `onesDigit = onesFace % 10`
+- `value = tensDigit * 10 + onesDigit`; when `value` is `0`, `value` is `100`
+
+It SHALL be committed through `/api/campaigns/[id]/rolls` with the existing contract unchanged: `formula: "d%"`, `rolls: [value]` (a single integer, 1..100 — the decoded value), `total: value`, and `visibility` matching the panel's current selection.
+
+#### Scenario: Percentile control renders with the d% glyph and no count
+
+- **Given** the dice panel is open
+- **When** the percentile control is inspected
+- **Then** it renders two d10 icons and the visible label `d%`, has no staged-count badge, and has no remove control
+
+#### Scenario: Activating the percentile control commits one roll
+
+- **Given** the dice panel is open and a campaign session is active
+- **When** the user activates the percentile control
+- **Then** exactly one POST to `/api/campaigns/[id]/rolls` is made with `formula: "d%"`, `rolls` containing exactly one integer in 1..100, `total` equal to that integer, and `visibility` matching the panel's current selection
+- **AND** the staged pool and modifier are unchanged
+
+#### Scenario: Percentile decode covers the tabletop special case
+
+- **Given** the two d10 results are `tensFace = 10` and `onesFace = 10`
+- **When** the percentile value is decoded
+- **Then** the value is `100`
+
+#### Scenario: Percentile decode of a "00" tens with a non-zero ones
+
+- **Given** the two d10 results are `tensFace = 10` and `onesFace = 9`
+- **When** the percentile value is decoded
+- **Then** the value is `9`
+
+#### Scenario: Percentile control is unavailable without an active session
+
+- **Given** the chat-dock dice panel and `activeSessionId` is null
+- **When** the panel state is inspected
+- **Then** the percentile control is disabled on the same terms as the pool "Roll" commit control
+
+---
+
+### Requirement: ADDED Roll feed renders a percentile roll through the existing formula path
+
+The system SHALL render a persisted percentile `CampaignRoll` (`formula: "d%"`, single-element `rolls`) using the same roll-feed-item treatment as any other roll — roller name, timestamp, visibility marker, formula, breakdown, total — with no percentile-specific layout.
+
+#### Scenario: Percentile roll feed item
+
+- **Given** a `CampaignRoll` with `formula: "d%"`, `rolls: [97]`, `total: 97`
+- **When** the roll is rendered in the feed
+- **Then** the item displays `d%`, the breakdown `[97]`, and `97`, with the standard roll-item visual treatment
+
+#### Scenario: Percentile roll feed item for the 100 result
+
+- **Given** a `CampaignRoll` with `formula: "d%"`, `rolls: [100]`, `total: 100`
+- **When** the roll is rendered in the feed
+- **Then** the item displays `d%`, the breakdown `[100]`, and `100`
 
 ---
 
@@ -383,8 +453,6 @@ The system SHALL render roll events in the chat feed as a distinct visual item s
 - **Then** it renders the vendored d20 icon component and does not render the 🎲 emoji character
 
 ---
-
-## REMOVED Requirements
 
 ### Requirement: REMOVED Immediate-click-to-roll behavior
 
