@@ -79,6 +79,9 @@ describe('NavBar', () => {
     render(<NavBar />);
     // logout is only reachable after opening the account menu
     expect(screen.queryByTestId('logout-button')).not.toBeInTheDocument();
+    // ...but the account menu trigger and the feedback button both remain
+    expect(screen.getByTestId('user-menu-trigger')).toBeInTheDocument();
+    expect(screen.getByTestId('feedback-button')).toBeInTheDocument();
   });
 
   it('calls logout when logout is activated from the account menu', async () => {

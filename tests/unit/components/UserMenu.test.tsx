@@ -41,23 +41,25 @@ describe('UserMenu', () => {
     mockAuth({ user: { userId: 'u1', email: 'u@test.com', username: 'douglas' } });
     render(<UserMenu />);
     const trigger = screen.getByTestId('user-menu-trigger');
-    expect(trigger).toHaveTextContent('douglas');
+    expect(trigger.textContent?.trim()).toBe('douglas');
     expect(trigger).toHaveAttribute('aria-label', 'douglas');
+    expect(trigger).toHaveAttribute('title', 'douglas');
   });
 
   it('shows initials for a long username, full name as accessible name', () => {
     mockAuth({ user: { userId: 'u1', email: 'u@test.com', username: 'Douglas Adams' } });
     render(<UserMenu />);
     const trigger = screen.getByTestId('user-menu-trigger');
-    expect(trigger).toHaveTextContent('DA');
+    expect(trigger.textContent?.trim()).toBe('DA');
     expect(trigger).toHaveAttribute('aria-label', 'Douglas Adams');
+    expect(trigger).toHaveAttribute('title', 'Douglas Adams');
   });
 
   it('shows a single initial for a long single-token username', () => {
     mockAuth({ user: { userId: 'u1', email: 'u@test.com', username: 'stridertheranger' } });
     render(<UserMenu />);
     const trigger = screen.getByTestId('user-menu-trigger');
-    expect(trigger).toHaveTextContent('S');
+    expect(trigger.textContent?.trim()).toBe('S');
     expect(trigger).toHaveAttribute('aria-label', 'stridertheranger');
   });
 
@@ -66,7 +68,7 @@ describe('UserMenu', () => {
     render(<UserMenu />);
     const trigger = screen.getByTestId('user-menu-trigger');
     expect(trigger).toHaveAttribute('aria-label', 'Account');
-    expect(trigger.textContent?.trim()).not.toBe('');
+    expect(trigger.textContent?.trim()).toBe('Account');
   });
 
   it('renders markup in the username as inert text', () => {
@@ -82,6 +84,7 @@ describe('UserMenu', () => {
     render(<UserMenu />);
     const trigger = screen.getByTestId('user-menu-trigger');
     expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
+    expect(trigger).not.toHaveAttribute('aria-expanded', 'true');
     await user.click(trigger);
     const menu = await screen.findByRole('menu');
     expect(menu).toBeInTheDocument();
@@ -91,15 +94,21 @@ describe('UserMenu', () => {
     expect(screen.getAllByRole('menuitem')).toHaveLength(1);
   });
 
-  it('opens via keyboard (ArrowDown) on the focused trigger', async () => {
-    const user = userEvent.setup();
-    mockAuth({});
-    render(<UserMenu />);
-    const trigger = screen.getByTestId('user-menu-trigger');
-    trigger.focus();
-    await user.keyboard('{ArrowDown}');
-    expect(await screen.findByRole('menu')).toBeInTheDocument();
-  });
+  it.each(['{ArrowDown}', '{Enter}', '{ }'])(
+    'opens via keyboard (%s) on the focused trigger and moves focus into the menu',
+    async (key) => {
+      const user = userEvent.setup();
+      mockAuth({});
+      render(<UserMenu />);
+      const trigger = screen.getByTestId('user-menu-trigger');
+      trigger.focus();
+      await user.keyboard(key);
+      expect(await screen.findByRole('menu')).toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.getByRole('menuitem', { name: 'Logout' })).toHaveFocus(),
+      );
+    },
+  );
 
   it('closes on Escape and returns focus to the trigger', async () => {
     const user = userEvent.setup();
@@ -143,8 +152,23 @@ describe('UserMenu', () => {
     expect(logout).toHaveBeenCalledTimes(1);
   });
 
+  it('still calls logout once when the logout flow rejects, without surfacing an error', async () => {
+    const user = userEvent.setup();
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const logout = jest.fn().mockRejectedValue(new Error('network down')) as never;
+    mockAuth({ logout });
+    render(<UserMenu />);
+    await user.click(screen.getByTestId('user-menu-trigger'));
+    await user.click(await screen.findByTestId('logout-button'));
+    expect(logout).toHaveBeenCalledTimes(1);
+    // the rejection is owned/swallowed by useAuth().logout(); the menu must not throw it
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
   it('unmounts cleanly when auth flips to unauthenticated during logout', async () => {
     const user = userEvent.setup();
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
     const logout = jest.fn().mockResolvedValue(undefined) as never;
     mockAuth({ logout });
     const { rerender } = render(<UserMenu />);
@@ -153,5 +177,7 @@ describe('UserMenu', () => {
     mockAuth({ isAuthenticated: false, user: null });
     expect(() => rerender(<UserMenu />)).not.toThrow();
     expect(screen.queryByTestId('user-menu-trigger')).not.toBeInTheDocument();
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
   });
 });

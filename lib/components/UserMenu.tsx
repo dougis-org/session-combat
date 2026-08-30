@@ -5,18 +5,17 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { deriveUserMenuDisplay } from './userMenuDisplay';
 
 /**
- * Top-right account trigger + menu. Renders nothing unless the user is
- * authenticated and auth state has settled (same gate as the former inline
- * logout button). The single menu item, Logout, runs the existing
- * `useAuth().logout()` flow. See design.md Decisions 1, 2 and 4.
+ * Account trigger + dropdown menu (positioned by `NavBar`). Renders nothing
+ * unless the user is authenticated and auth state has settled (same gate as the
+ * former inline logout button). The single menu item, Logout, runs the existing
+ * `useAuth().logout()` flow. See design.md Decisions 1–4.
  */
 export function UserMenu() {
   const { isAuthenticated, loading, user, logout } = useAuth();
 
   if (!isAuthenticated || loading) return null;
 
-  const { label } = deriveUserMenuDisplay(user?.username);
-  const accessibleName = user?.username?.trim() || 'Account';
+  const { label, accessibleName } = deriveUserMenuDisplay(user?.username);
 
   return (
     <DropdownMenu.Root>
@@ -37,7 +36,12 @@ export function UserMenu() {
         >
           <DropdownMenu.Item
             data-testid="logout-button"
-            onSelect={() => void logout()}
+            // useAuth().logout() already swallows and logs its own failures;
+            // the extra catch keeps a contract change from surfacing as an
+            // unhandled rejection out of the menu.
+            onSelect={() => {
+              void logout().catch(() => {});
+            }}
             className="cursor-pointer rounded px-3 py-2 outline-none hover:bg-gray-800 hover:text-white focus:bg-gray-800 focus:text-white data-[highlighted]:bg-gray-800 data-[highlighted]:text-white"
           >
             Logout

@@ -14,8 +14,9 @@ if (typeof globalThis.crypto?.randomUUID !== 'function') {
   });
 }
 
-// jsdom lacks the pointer-capture / scroll / observer APIs that Radix UI menus
-// call during open/close; stub them so component tests can exercise the menu.
+// jsdom lacks the pointer-capture, scrollIntoView and ResizeObserver APIs that
+// Radix UI menus call during open/close; stub them so component tests can
+// exercise the menu.
 if (typeof Element !== 'undefined') {
   Element.prototype.hasPointerCapture ??= () => false;
   Element.prototype.setPointerCapture ??= () => undefined;
