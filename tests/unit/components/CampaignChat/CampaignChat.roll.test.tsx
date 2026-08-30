@@ -332,6 +332,76 @@ it('merged feed is sorted by createdAt', async () => {
   })
 })
 
+// ── Feed auto-scroll on a stream 'roll' event ────────────────────
+// Ported from the removed CampaignChat.dicePool.scroll.test.tsx: rolls now
+// reach the feed only via the SSE 'roll' stream event (GlobalDiceFab is the
+// sole roll surface), so auto-scroll is driven purely by the ingested roll's
+// rollerId, not by any in-dock commit path.
+
+function getFeedContainer(): HTMLElement {
+  const el = document.querySelector('.flex-1.overflow-y-auto')
+  if (!el) throw new Error('feed container not found')
+  return el as HTMLElement
+}
+
+function markScrolledUp(container: HTMLElement) {
+  Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true })
+  Object.defineProperty(container, 'clientHeight', { value: 300, configurable: true })
+  Object.defineProperty(container, 'scrollTop', { value: 0, configurable: true })
+}
+
+it("auto-scrolls to the current user's own roll ingested via SSE even when scrolled up", async () => {
+  await openDock('session-1')
+  const container = getFeedContainer()
+  const scrollSpy = jest.fn()
+  container.scrollTo = scrollSpy
+  markScrolledUp(container)
+
+  act(() => {
+    capturedOnEvent?.({
+      type: 'roll',
+      campaignId: 'test-campaign',
+      data: makeRoll({ id: 'roll-own-sse', rollerId: 'user-1', formula: '1d20', rolls: [7], total: 7 }),
+    })
+  })
+
+  await waitFor(() => {
+    expect(scrollSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }))
+  })
+})
+
+it("auto-scrolls for another player's roll only when the feed is near the bottom", async () => {
+  await openDock('session-1')
+  const container = getFeedContainer()
+  const scrollSpy = jest.fn()
+  container.scrollTo = scrollSpy
+
+  // Near the bottom (jsdom defaults: all offsets 0) → scrolls.
+  act(() => {
+    capturedOnEvent?.({
+      type: 'roll',
+      campaignId: 'test-campaign',
+      data: makeRoll({ id: 'roll-other-near', rollerId: 'user-2', rollerName: 'other', formula: '1d20', rolls: [7], total: 7 }),
+    })
+  })
+  await waitFor(() => {
+    expect(scrollSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }))
+  })
+
+  // Scrolled up to read history → does not yank the feed down.
+  scrollSpy.mockClear()
+  markScrolledUp(container)
+  act(() => {
+    capturedOnEvent?.({
+      type: 'roll',
+      campaignId: 'test-campaign',
+      data: makeRoll({ id: 'roll-other-far', rollerId: 'user-2', rollerName: 'other', formula: '1d20', rolls: [7], total: 7 }),
+    })
+  })
+  await waitFor(() => expect(screen.getAllByText(/1d20/).length).toBeGreaterThan(0))
+  expect(scrollSpy).not.toHaveBeenCalled()
+})
+
 // T5.4
 it('roll id in both history and prior stream event appears only once', async () => {
   setupFetchMock({

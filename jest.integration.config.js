@@ -4,7 +4,11 @@ module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
   testMatch: ["**/tests/integration/**/*.test.ts"],
-  testPathIgnorePatterns: ["/node_modules/", "/.worktrees/", "/.verity/"],
+  // "/.worktrees/" is anchored to <rootDir> (the checkout this config lives in) so it
+  // only excludes *nested* worktrees under the main checkout and never matches when
+  // jest runs from inside one of those worktrees itself — see jest.config.js for the
+  // same reasoning.
+  testPathIgnorePatterns: ["/node_modules/", "<rootDir>/.worktrees/", "/.verity/"],
   testTimeout: 120000,
   globalSetup: "./tests/integration/global.setup.ts",
   globalTeardown: "./tests/integration/global.teardown.ts",

@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { DicePoolPanel } from '@/lib/components/dice/DicePoolPanel'
-import { DiceTriggerButton } from '@/lib/components/dice/DiceTriggerButton'
 import { announcePresence, clearPresence } from '@/lib/dice/diceSessionBridge'
 import { SceneComposer } from '@/lib/components/SceneComposer'
 import type { CampaignMessage } from '@/lib/types'
@@ -11,7 +9,6 @@ import { useDockState } from './useDockState'
 import { useChatFeed } from './useChatFeed'
 import { useComposer } from './useComposer'
 import { useMembers } from './useMembers'
-import { useCampaignDice } from './useCampaignDice'
 import { ChatFeed } from './ChatFeed'
 import { ChatComposer } from './Composer'
 import { DragHandle } from './DragHandle'
@@ -28,8 +25,6 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
   const triggerRef = useRef<HTMLButtonElement>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
   const feedRef = useRef<HTMLDivElement>(null)
-  const diceTriggerRef = useRef<HTMLButtonElement>(null)
-  const dicePanelRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const dock = useDockState({ triggerRef, drawerRef, onSizeChange })
@@ -47,11 +42,6 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
     campaignId, streamStatus: chatFeed.streamStatus,
     currentUserId: user?.userId, currentUsername: user?.username, currentUserEmail: user?.email,
     members, setFeed: chatFeed.setFeed, seenIds: chatFeed.seenIds,
-  })
-
-  const { dicePool, isTriggerDisabled, isRolling, rollError, handleDiceRoll, handlePercentileRoll } = useCampaignDice({
-    campaignId, activeSessionId, streamStatus: chatFeed.streamStatus,
-    triggerRef: diceTriggerRef, panelRef: dicePanelRef,
   })
 
   // ── Dice session bridge: announce/clear presence in lockstep with our own active session ──
@@ -106,7 +96,6 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
 
   return (
     <div className={rowWrapperClass}>
-      <DicePoolPanel dp={dicePool} panelRef={dicePanelRef} isRolling={isRolling} error={rollError} onRoll={handleDiceRoll} onRollPercentile={handlePercentileRoll} />
       <div
         ref={drawerRef}
         role="complementary"
@@ -201,12 +190,11 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
           onMentionSelect={composer.handleMentionSelect}
           textareaRef={textareaRef}
         />
-        <div className="border-t border-gray-700 p-2 flex-shrink-0 flex items-center justify-between">
-          {activeSessionId === null && (
+        {activeSessionId === null && (
+          <div className="border-t border-gray-700 px-3 py-2 flex-shrink-0">
             <p className="text-xs text-gray-500">No active session</p>
-          )}
-          <DiceTriggerButton dp={dicePool} isDisabled={isTriggerDisabled} triggerRef={diceTriggerRef} />
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )
