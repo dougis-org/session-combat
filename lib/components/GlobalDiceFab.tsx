@@ -25,6 +25,10 @@ export function GlobalDiceFab() {
 
   const triggerRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  // Guards against a second Roll/percentile click landing while `performRoll` is still
+  // mid-flight — `sendState === 'pending'` only covers the shared-submit path, not a
+  // local roll, so without this two overlays / animations could stack.
+  const rollInFlightRef = useRef(false)
 
   const dp = useDicePoolState({ triggerRef, panelRef })
   const { submitRoll } = useRollSubmission(presence?.campaignId ?? '')
@@ -58,18 +62,24 @@ export function GlobalDiceFab() {
   if (!user) return null
 
   async function performRoll(built: BuiltRoll) {
-    // build → inline result + (maybe persist) → animate (decisions n124 / n126):
-    // the overlay/animation opens only after a shared roll is persisted, but the
-    // instant inline line renders straight away.
-    setResult(built)
-    if (prefs.sendToChat && presence) {
-      setSendState('pending')
-      const outcome = await submitRoll(built.formula, built.rolls, built.total, dp.visibility)
-      setSendState(outcome === 'success' ? 'sent' : 'failed')
-    } else {
-      setSendState('idle')
+    if (rollInFlightRef.current) return
+    rollInFlightRef.current = true
+    try {
+      // build → inline result + (maybe persist) → animate (decisions n124 / n126):
+      // the overlay/animation opens only after a shared roll is persisted, but the
+      // instant inline line renders straight away.
+      setResult(built)
+      if (prefs.sendToChat && presence) {
+        setSendState('pending')
+        const outcome = await submitRoll(built.formula, built.rolls, built.total, dp.visibility)
+        setSendState(outcome === 'success' ? 'sent' : 'failed')
+      } else {
+        setSendState('idle')
+      }
+      setOverlayRoll(built)
+    } finally {
+      rollInFlightRef.current = false
     }
-    setOverlayRoll(built)
   }
 
   function handleOpen() {
