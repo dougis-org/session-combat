@@ -179,25 +179,17 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
     expect(screen.queryByTestId('dice-roll-canvas')).not.toBeInTheDocument()
   })
 
-  it('reveals the modal via the fallback timeout and aborts the animation if completion never signals', () => {
+  it('reveals the modal via the fallback timeout without cutting the tumble', () => {
     jest.useFakeTimers()
     try {
-      const onAnimationAbort = jest.fn()
-      render(
-        <DiceRollOverlay
-          built={built}
-          disableAnimation={false}
-          onClose={jest.fn()}
-          onAnimationAbort={onAnimationAbort}
-        />,
-      )
+      render(<DiceRollOverlay built={built} disableAnimation={false} onClose={jest.fn()} />)
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
       act(() => {
         jest.advanceTimersByTime(MODAL_REVEAL_FALLBACK_MS)
       })
       expect(screen.getByRole('dialog')).toHaveTextContent('14')
-      expect(onAnimationAbort).toHaveBeenCalledTimes(1)
-      expect(screen.queryByTestId('dice-roll-canvas')).not.toBeInTheDocument()
+      // the canvas host stays mounted — the tumble it holds may still be live
+      expect(screen.getByTestId('dice-roll-canvas')).toBeInTheDocument()
     } finally {
       jest.useRealTimers()
     }

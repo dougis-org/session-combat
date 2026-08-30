@@ -49,9 +49,12 @@
 
 - Chosen: `DiceRollOverlay` holds internal state `modalRevealed` (initially `false`). It is set `true` when any of: (a) `disableAnimation` is `true` (immediately), (b) the animation `status` is `'unsupported'` (immediately), (c) the animation-complete signal fires, or (d) a fallback timeout (`MODAL_REVEAL_FALLBACK_MS`, ~20000ms) elapses. `useDiceAnimation`
 bounds only dice-box *init* (~6s); a wedged physics settle can leave `box.roll()` pending
-indefinitely, so this timeout is the sole guarantee the modal appears. It is set well above
-a healthy worst case (import + ~6s init + a slow 15-die settle) so it never pre-empts a
-slow-but-live tumble. The completion signal is the resolution of `animation.run(...)` promise, surfaced by `GlobalDiceFab` awaiting it and passing a `animationComplete` boolean (or an `onAnimationSettled` callback) to the overlay. `useDiceAnimation.run` is adjusted so its promise resolves **after** settle (it already awaits `box.roll()`; ensure the instant/teardown paths also resolve, never hang).
+indefinitely, so this timeout is the sole guarantee the modal appears. On expiry the overlay
+only *reveals the modal* — it does not tear the engine down, so a slow-but-live tumble that
+overruns the window keeps playing beneath the modal instead of being cut mid-air. The engine
+is released when the overlay closes or the next roll starts (`useDiceAnimation`'s
+single-instance teardown); dice-box `^1.1.4` exposes no `destroy`, so unmounting its canvas
+host on a timeout would strand its render loop anyway. The completion signal is the resolution of `animation.run(...)` promise, surfaced by `GlobalDiceFab` awaiting it and passing a `animationComplete` boolean (or an `onAnimationSettled` callback) to the overlay. `useDiceAnimation.run` is adjusted so its promise resolves **after** settle (it already awaits `box.roll()`; ensure the instant/teardown paths also resolve, never hang).
 - Alternatives considered:
   - Keep `void animation.run()` and use only a timer: rejected — either reveals too early (bad) or too late (sluggish).
   - Wire dice-box `onRollComplete` directly into the overlay: rejected — the overlay does not own the `DiceBox`; keeping the box inside `useDiceAnimation` preserves the single-instance invariant.
@@ -162,7 +165,7 @@ slow-but-live tumble. The completion signal is the resolution of `animation.run(
   - Mitigation: viewport-unit container sizing with a `max` cap; `scale` as a single tunable constant; down-scaling curve unit-tested; explicit desktop + mobile visual-check task.
 - Risk/trade-off: Completion signal may never fire (context loss, backgrounded tab).
   - Impact: Modal never appears.
-  - Mitigation: mandatory overlay fallback timeout independent of dice-box; on timeout reveal modal and tear down the box.
+  - Mitigation: mandatory overlay fallback timeout independent of dice-box; on timeout reveal the modal (the box is released on overlay close / next roll, not by the timeout).
 - Risk/trade-off: 15 large dice pile up / clip / rest on the modal edge.
   - Impact: Total obscured.
   - Mitigation: down-scaling curve sized for 15; canvas floor margin above the modal; validate `15d6` and `120d6` in tasks.

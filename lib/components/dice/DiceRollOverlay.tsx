@@ -10,13 +10,16 @@ export const DICE_ROLL_CANVAS_ID = 'dice-roll-canvas'
 
 /**
  * Upper bound on how long the result modal stays hidden waiting for the tumble to report
- * completion. If the animation never signals (WebGL context lost, tab backgrounded, library
- * hang) the modal is revealed anyway so the user is never stranded without a result.
+ * completion. `useDiceAnimation` bounds only dice-box *init* (~6s); a wedged physics settle
+ * (context lost, tab backgrounded, library hang) can leave `box.roll()` — and therefore the
+ * `animationSettled` signal — pending forever, so this timeout is the sole guarantee the
+ * modal appears.
  *
- * `useDiceAnimation` bounds only dice-box *init* (~6s); a wedged physics settle can leave
- * `box.roll()` — and therefore the `animationSettled` signal — pending forever, so this
- * timeout is the sole guarantee the modal appears. Set it well above a healthy worst case
- * (import + ~6s init + a slow 15-die settle) so it never pre-empts a slow-but-live tumble.
+ * On expiry the overlay only *reveals the modal* — it does not tear the dice engine down.
+ * A slow-but-live tumble that overruns this window keeps playing beneath the modal rather
+ * than being cut mid-air; the engine is released when the overlay closes or the next roll
+ * starts (`useDiceAnimation`'s single-instance teardown). Kept generously above a healthy
+ * worst case so the reveal is rarely the thing the user notices.
  */
 export const MODAL_REVEAL_FALLBACK_MS = 20000
 
@@ -32,8 +35,6 @@ interface DiceRollOverlayProps {
   animationSettled?: boolean
   /** Current animation status; `'unsupported'` reveals the modal immediately. */
   animationStatus?: DiceAnimationStatus
-  /** Called when the fallback timeout fires so the caller can tear the dice engine down. */
-  onAnimationAbort?: () => void
 }
 
 /**
@@ -51,7 +52,6 @@ export function DiceRollOverlay({
   onCanvasReady,
   animationSettled = false,
   animationStatus = 'idle',
-  onAnimationAbort,
 }: DiceRollOverlayProps) {
   const [root] = useState<HTMLDivElement | null>(() => {
     if (typeof document === 'undefined') return null
@@ -73,8 +73,10 @@ export function DiceRollOverlay({
     disableAnimation || animationStatus === 'unsupported' || animationSettled || fallbackElapsed
 
   // Only reserve the (large) canvas band while a tumble can actually play. On the disabled /
-  // unsupported / timed-out paths it would just push the modal off-centre behind a blank gap.
-  const showCanvas = !disableAnimation && animationStatus !== 'unsupported' && !fallbackElapsed
+  // unsupported paths it would just push the modal off-centre behind a blank gap. After the
+  // fallback the canvas stays: the tumble it hosts may still be live, and unmounting the
+  // div would strand dice-box's <canvas> and its render loop (v1.1.4 exposes no destroy).
+  const showCanvas = !disableAnimation && animationStatus !== 'unsupported'
 
   useEffect(() => {
     if (!root) return
@@ -85,15 +87,12 @@ export function DiceRollOverlay({
   }, [root])
 
   // Reliability backstop: if the tumble never signals completion (WebGL context lost, tab
-  // backgrounded, library hang) reveal the modal anyway and tear the dice engine down.
+  // backgrounded, library hang) reveal the modal anyway so the user is never stranded.
   useEffect(() => {
     if (disableAnimation || animationStatus === 'unsupported' || animationSettled) return
-    const timer = setTimeout(() => {
-      setFallbackElapsed(true)
-      onAnimationAbort?.()
-    }, MODAL_REVEAL_FALLBACK_MS)
+    const timer = setTimeout(() => setFallbackElapsed(true), MODAL_REVEAL_FALLBACK_MS)
     return () => clearTimeout(timer)
-  }, [disableAnimation, animationStatus, animationSettled, onAnimationAbort])
+  }, [disableAnimation, animationStatus, animationSettled])
 
   // Restore focus to whatever the opener focused (the panel / trigger) when the overlay
   // closes — unconditionally, even if it is dismissed mid-tumble before the modal reveals.

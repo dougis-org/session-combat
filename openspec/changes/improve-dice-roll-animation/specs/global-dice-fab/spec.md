@@ -152,8 +152,10 @@ _No requirements are removed by this change._
 - **Given** the dice animation is enabled and has started
 - **When** the animation fails to report completion within the bounded fallback timeout
   (context loss, backgrounded tab, or library hang)
-- **Then** the overlay reveals the total modal with the correct total and tears down the
-  dice engine, leaving the user with a usable result rather than a stuck overlay
+- **Then** the overlay reveals the total modal with the correct total, leaving the user with
+  a usable, dismissable result rather than a stuck overlay; the dice engine is released when
+  the overlay is closed or the next roll begins (not by the timeout itself, which would cut
+  a slow-but-still-running tumble)
 
 ### Requirement: Performance
 

@@ -235,7 +235,6 @@ export function GlobalDiceFab() {
           onCanvasReady={runAnimation}
           animationSettled={animationSettled}
           animationStatus={animation.status}
-          onAnimationAbort={animation.teardown}
         />
       )}
     </>
