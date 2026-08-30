@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { getDatabase } from "../db";
 import { CampaignTemplate, CampaignChapter, EncounterTemplate } from "../types";
 import { GLOBAL_USER_ID } from "../constants";
