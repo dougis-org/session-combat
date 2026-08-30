@@ -1,5 +1,6 @@
+/* eslint-disable no-await-in-loop */
 import { getDatabase } from "../db";
-import { CampaignTemplate, CampaignChapter } from "../types";
+import { CampaignTemplate, CampaignChapter, EncounterTemplate } from "../types";
 import { GLOBAL_USER_ID } from "../constants";
 import { randomUUID } from "crypto";
 
@@ -9,7 +10,8 @@ function makeTemplate(
   name: string,
   moduleName: string,
   description: string,
-  chapters: Omit<CampaignChapter, "id">[]
+  chapters: Omit<CampaignChapter, "id">[],
+  encounters?: EncounterTemplate[]
 ): CampaignTemplate {
   return {
     id: randomUUID(),
@@ -19,6 +21,7 @@ function makeTemplate(
     moduleName,
     description,
     chapters: chapters.map((ch) => ({ ...ch, id: randomUUID() })),
+    ...(encounters ? { encounters } : {}),
     createdAt: now,
     updatedAt: now,
   };
@@ -769,6 +772,13 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Mid-Range Quests", order: 2, levelRange: "3-4", location: "Sword Coast Frontier" },
       { title: "Advanced Quests", order: 3, levelRange: "4-5", location: "Sword Mountains" },
       { title: "Icespire Hold", order: 4, levelRange: "6-7", location: "Icespire Hold" },
+    ],
+    [
+      {
+        name: "Manticore at Umbrage Hill",
+        description: "A manticore is attacking the windmill at Umbrage Hill.",
+        monsters: []
+      }
     ]
   ),
 
@@ -788,7 +798,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
   ),
 ];
 
-async function seedCampaignTemplates(): Promise<void> {
+export async function seedCampaignTemplates(): Promise<{ inserted: number; skipped: number }> {
   const db = await getDatabase();
   const collection = db.collection<CampaignTemplate>("campaignTemplates");
 
@@ -815,13 +825,20 @@ async function seedCampaignTemplates(): Promise<void> {
   }
 
   console.log(`\nDone. Inserted: ${inserted}, Skipped: ${skipped}`);
+  return { inserted, skipped };
 }
 
-seedCampaignTemplates()
-  .then(() => {
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error("Seed failed:", error);
-    process.exit(1);
-  });
+export async function runCli(): Promise<void> {
+  await seedCampaignTemplates();
+  process.exit(0);
+}
+
+export function handleCliError(error: unknown): never {
+  console.error("Seed failed:", error);
+  process.exit(1);
+}
+
+/* istanbul ignore next */
+if (require.main === module) {
+  runCli().catch(handleCliError);
+}

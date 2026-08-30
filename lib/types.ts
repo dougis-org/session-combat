@@ -476,6 +476,13 @@ export function calculateTotalLevel(classes: CharacterClass[]): number {
   return classes.reduce((total, classLevel) => total + classLevel.level, 0);
 }
 
+export interface EncounterTemplate {
+  id?: string;
+  name: string;
+  description: string;
+  monsters: Monster[];
+}
+
 export interface Encounter {
   _id?: string;
   id: string;
@@ -594,6 +601,7 @@ export interface CampaignTemplate {
   moduleName: string;
   description?: string;
   chapters: CampaignChapter[];
+  encounters?: EncounterTemplate[];
   createdAt: Date;
   updatedAt: Date;
 }
