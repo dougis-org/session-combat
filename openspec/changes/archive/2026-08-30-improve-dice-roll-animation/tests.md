@@ -7,7 +7,7 @@ description: Tests for the improve-dice-roll-animation change
 
 ## Overview
 
-This document outlines the tests for the `improve-dice-roll-animation` change. All work follows strict TDD: write a failing test, write the minimum code to pass, refactor. Every case below maps to a task in `openspec/changes/improve-dice-roll-animation/tasks.md` and an acceptance scenario in `openspec/changes/improve-dice-roll-animation/specs/global-dice-fab/spec.md`.
+This document outlines the tests for the `improve-dice-roll-animation` change. All work follows strict TDD: write a failing test, write the minimum code to pass, refactor. Every case below maps to a task in `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/tasks.md` and an acceptance scenario in `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/specs/global-dice-fab/spec.md`.
 
 ## Testing Steps
 
@@ -68,7 +68,8 @@ Test files:
 - [ ] After the completion signal fires, the dialog is present and shows `built.total`.
 - [ ] With `disableAnimation` true, the dialog is present on first render (no waiting) and no canvas mount is rendered.
 - [ ] With animation `status === 'unsupported'`, the dialog is present immediately and no tumble is attempted.
-- [ ] Using fake timers: completion signal never fires; after `MODAL_REVEAL_FALLBACK_MS` the dialog appears with `built.total`, and the animation teardown is invoked.
+- [ ] Using fake timers: completion signal never fires; after `MODAL_REVEAL_FALLBACK_MS` the dialog appears with `built.total`, the canvas host stays mounted but collapses to `hidden` (no teardown by the timeout).
+- [ ] Closing the overlay (Escape / outside-click) or a new roll releases the dice engine via `useDiceAnimation`'s single-instance teardown.
 - [ ] Changing the `built` prop to a new roll resets the gate: the dialog disappears until the new completion signal (or fallback) fires.
 - [ ] Escape key (capture phase) closes only the overlay — `onClose` is called, `stopPropagation` prevents the panel's document-level handler (regression guard for the unchanged "Dismissing the roll overlay leaves the dice panel open" requirement).
 - [ ] Outside-click closes only the overlay; click inside the modal does not.
@@ -85,7 +86,7 @@ Test files:
 
 ### Non-functional (spec: NFAC Reliability / Performance)
 
-- [ ] Reliability: fake-timer test — animation enabled, completion promise never resolves; the fallback timeout reveals the modal with the correct total and calls animation teardown (same as E5 fallback case, asserted as the reliability recovery scenario).
+- [ ] Reliability: fake-timer test — animation enabled, completion promise never resolves; the fallback timeout reveals the modal with the correct total without tearing the engine down (same as E5 fallback case); a separate case asserts close/new-roll releases the engine.
 - [ ] Performance: for `120d6`, the notation passed to `box.roll()` contains at most 15 dice, and the overlay issues no network request of its own.
 
 ### Regression (existing suites must stay green)
