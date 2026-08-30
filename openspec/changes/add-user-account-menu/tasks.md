@@ -204,18 +204,18 @@ If ANY required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings
   addressed before the final commit
-- [ ] Commit all changes to `add-user-account-menu` and push to remote
-- [ ] Open PR from `add-user-account-menu` to `main`. **PR body MUST include
+- [x] Commit all changes to `add-user-account-menu` and push to remote
+- [x] Open PR from `add-user-account-menu` to `main`. **PR body MUST include
   `Closes #611`** (unconditionally). Include the First Load JS delta and the
   chosen menu library + version.
-- [ ] **Issue lifecycle: mark in-review** — run
+- [x] **Issue lifecycle: mark in-review** — run
   `gh issue edit 611 --add-label "in-review" --remove-label "in-progress"`, then
   move the project item to the status column matching "In Review" via
   `gh project item-edit` (same discovery as in-progress; warn and skip if not
   found).
-- [ ] Wait 60 seconds for CI to start
+- [x] Wait 60 seconds for CI to start
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
   findings (commit, run [Remote push validation], push, re-run) until zero
   findings remain. If findings persist after 3+ iterations with no progress,
