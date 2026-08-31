@@ -37,6 +37,7 @@ function normalizeCampaign(campaign: Campaign): Campaign {
     ...campaign,
     chapters: Array.isArray(campaign.chapters) ? campaign.chapters : [],
     encounterIds: Array.isArray(campaign.encounterIds) ? campaign.encounterIds : [],
+    partyIds: Array.isArray(campaign.partyIds) ? campaign.partyIds : [],
     status: campaign.status ?? 'active',
     notes: campaign.notes ?? '',
   };
@@ -226,19 +227,54 @@ export const storage = {
   },
 
   async addPartyToCampaign(campaignId: string, partyId: string): Promise<void> {
-    const db = await getDatabase();
-    await db.collection("campaigns").updateOne(
-      { id: campaignId },
-      { $addToSet: { partyIds: partyId } }
-    );
+    return runStorageOp({ name: "addPartyToCampaign", collection: "campaigns" }, async () => {
+      const db = await getDatabase();
+      const campaign = await db.collection("campaigns").findOne({ id: campaignId });
+      if (campaign && campaign.partyIds === undefined) {
+        const legacyParties = await db.collection("parties").find({ campaignId } as any).toArray();
+        const migratedIds = legacyParties.map((p: any) => p.id);
+        migratedIds.push(partyId);
+        await db.collection("campaigns").updateOne(
+          { id: campaignId },
+          { $set: { partyIds: migratedIds } }
+        );
+      } else {
+        await db.collection("campaigns").updateOne(
+          { id: campaignId },
+          { $addToSet: { partyIds: partyId } }
+        );
+      }
+    });
   },
 
   async removePartyFromCampaign(campaignId: string, partyId: string): Promise<void> {
-    const db = await getDatabase();
-    await db.collection("campaigns").updateOne(
-      { id: campaignId },
-      { $pull: { partyIds: partyId } }
-    );
+    return runStorageOp({ name: "removePartyFromCampaign", collection: "campaigns" }, async () => {
+      const db = await getDatabase();
+      const campaign = await db.collection("campaigns").findOne({ id: campaignId });
+      if (campaign && campaign.partyIds === undefined) {
+        const legacyParties = await db.collection("parties").find({ campaignId } as any).toArray();
+        const migratedIds = legacyParties.map((p: any) => p.id).filter((id: string) => id !== partyId);
+        await db.collection("campaigns").updateOne(
+          { id: campaignId },
+          { $set: { partyIds: migratedIds } }
+        );
+      } else {
+        await db.collection("campaigns").updateOne(
+          { id: campaignId },
+          { $pull: { partyIds: partyId } }
+        );
+      }
+    });
+  },
+
+  async removePartyFromAllCampaigns(partyId: string): Promise<void> {
+    return runStorageOp({ name: "removePartyFromAllCampaigns", collection: "campaigns" }, async () => {
+      const db = await getDatabase();
+      await db.collection("campaigns").updateMany(
+        { partyIds: partyId },
+        { $pull: { partyIds: partyId } }
+      );
+    });
   },
 
   // Delete campaign

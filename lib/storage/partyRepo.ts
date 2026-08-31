@@ -97,11 +97,15 @@ export async function loadPartiesByCampaign(campaignId: string): Promise<Party[]
           .toArray();
           
         if (campaign) {
-          const migratedPartyIds = parties.map(p => p.id);
-          await db.collection("campaigns").updateOne(
-            { id: campaignId },
-            { $set: { partyIds: migratedPartyIds } }
-          );
+          try {
+            const migratedPartyIds = parties.map(p => p.id);
+            await db.collection("campaigns").updateOne(
+              { id: campaignId },
+              { $set: { partyIds: migratedPartyIds } }
+            );
+          } catch (e) {
+            console.warn(`[migration] Failed to save migrated partyIds for campaign ${campaignId}:`, e);
+          }
         }
       }
 

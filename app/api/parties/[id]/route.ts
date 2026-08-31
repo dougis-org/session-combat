@@ -82,16 +82,22 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
     if (campaignId !== undefined) {
       const normalized = typeof campaignId === 'string' ? campaignId.trim() : '';
       
-      if (existingParty.campaignId && existingParty.campaignId !== normalized) {
-        await storage.removePartyFromCampaign(existingParty.campaignId, updatedParty.id);
-      }
-
+      // Remove from all campaigns (UI expects 1-to-1 for now)
+      await storage.removePartyFromAllCampaigns(updatedParty.id);
+      
       if (normalized) {
-        await storage.addPartyToCampaign(normalized, updatedParty.id);
-        updatedParty.campaignId = normalized;
-      } else {
-        delete updatedParty.campaignId;
+        try {
+          await storage.addPartyToCampaign(normalized, updatedParty.id);
+        } catch (err) {
+          if (existingParty.campaignId) {
+            await storage.addPartyToCampaign(existingParty.campaignId, updatedParty.id).catch(() => {});
+          }
+          throw err;
+        }
       }
+      
+      // Ensure field stays decoupled
+      delete updatedParty.campaignId;
     }
 
     await storage.saveParty(updatedParty);

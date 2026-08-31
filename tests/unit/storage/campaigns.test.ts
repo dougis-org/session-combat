@@ -30,6 +30,7 @@ const baseCampaign: Campaign = {
   moduleName: "Test Module",
   chapters: [],
   encounterIds: [],
+    partyIds: [],
   status: "active",
   notes: "",
   createdAt: new Date("2024-01-01"),
@@ -172,6 +173,11 @@ describe("Campaign storage functions", () => {
 
       expect(mockDb.collection).toHaveBeenCalledWith("campaigns");
       expect(campaignsMock.deleteOne).toHaveBeenCalledWith({ id: "campaign-1", userId: "user-1" });
+    });
+
+    test("does not cascade delete parties", async () => {
+      await storage.deleteCampaign("campaign-1", "user-1");
+      expect(partiesMock.deleteMany).not.toHaveBeenCalled();
     });
 
     test("cascade deletes CampaignMember rows for the campaign", async () => {

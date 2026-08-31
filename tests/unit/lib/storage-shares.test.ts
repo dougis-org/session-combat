@@ -253,6 +253,32 @@ describe("storage.loadPartiesByCampaign", () => {
     expect(result).toEqual([]);
   });
 
+  it("A3-4: performs lazy migration when partyIds is undefined", async () => {
+    const mockToArray = jest.fn().mockResolvedValue([makeParty("p-legacy", "camp-legacy")]);
+    const mockFind = jest.fn().mockReturnValue({ toArray: mockToArray });
+    const mockFindOne = jest.fn().mockResolvedValue({ id: "camp-legacy" }); // partyIds is undefined
+    const mockUpdateOne = jest.fn().mockResolvedValue({ modifiedCount: 1 });
+    
+    mockedDb.collection.mockImplementation((name) => {
+      if (name === "campaigns") return { findOne: mockFindOne, updateOne: mockUpdateOne };
+      return { find: mockFind };
+    });
+
+    const result = await storage.loadPartiesByCampaign("camp-legacy");
+
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("p-legacy");
+    
+    // Assert it queried by campaignId
+    expect(mockFind).toHaveBeenCalledWith({ campaignId: "camp-legacy" });
+    
+    // Assert it triggered migration
+    expect(mockUpdateOne).toHaveBeenCalledWith(
+      { id: "camp-legacy" },
+      { $set: { partyIds: ["p-legacy"] } }
+    );
+  });
+
   it("A3-3: emits perf log when query exceeds 10ms", async () => {
     let nowCallCount = 0;
     const nowSpy = jest.spyOn(Date, "now").mockImplementation(() => {

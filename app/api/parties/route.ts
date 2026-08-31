@@ -50,8 +50,12 @@ export const POST = withAuth(async (request, auth) => {
     await storage.saveParty(party);
 
     if (typeof campaignId === 'string' && campaignId.trim()) {
-      const cid = campaignId.trim();
-      await storage.addPartyToCampaign(cid, partyId);
+      try {
+        await storage.addPartyToCampaign(campaignId.trim(), partyId);
+      } catch (err) {
+        await storage.deleteParty(partyId, auth.userId);
+        throw err;
+      }
     }
 
     return NextResponse.json(party, { status: 201 });

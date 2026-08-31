@@ -26,6 +26,7 @@ jest.mock("@/lib/storage", () => ({
     saveCampaign: jest.fn(),
     addPartyToCampaign: jest.fn(),
     removePartyFromCampaign: jest.fn(),
+    removePartyFromAllCampaigns: jest.fn(),
   },
 }));
 
@@ -225,7 +226,7 @@ describe("PUT /api/parties/[id]", () => {
       { params: Promise.resolve({ id: "party-123" }) }
     );
     const saved = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
-    expect(saved.campaignId).toBe("camp-1");
+    expect(saved.campaignId).toBeUndefined();
   });
 
   it("removes campaignId when empty string provided", async () => {

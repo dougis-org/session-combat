@@ -619,7 +619,7 @@ export interface Campaign {
   currentChapterId?: string;
   templateId?: string;
   encounterIds?: string[];
-  partyIds?: string[];
+  partyIds: string[];
   status: CampaignStatus;
   notes: string;
   createdAt: Date;
