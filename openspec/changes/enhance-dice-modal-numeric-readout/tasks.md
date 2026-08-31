@@ -15,17 +15,17 @@ Ownership metadata:
 
 ## Preparation
 
-- [ ] **Step 1 — Confirm the dedicated worktree:** verify
+- [x] **Step 1 — Confirm the dedicated worktree:** verify
       `.worktrees/enhance-dice-modal-numeric-readout` exists (created during
       propose) and `cd` into it. If missing: from the primary checkout run
       `git fetch origin main` then
       `git worktree add .worktrees/enhance-dice-modal-numeric-readout -b enhance-dice-modal-numeric-readout origin/main`.
       Never checkout a different branch in the primary checkout.
-- [ ] **Step 2 — Confirm the working branch is pushed:** from inside the
+- [x] **Step 2 — Confirm the working branch is pushed:** from inside the
       worktree, `git status -sb` must show it tracking
       `origin/enhance-dice-modal-numeric-readout`; if not, run
       `git push -u origin enhance-dice-modal-numeric-readout`.
-- [ ] **Step 3 — Submodule sync:** ensure `.github/openspec-shared` is checked
+- [x] **Step 3 — Submodule sync:** ensure `.github/openspec-shared` is checked
       out in the worktree (`git submodule update --init .github/openspec-shared`)
       so the `sdd-with-feedback-loop` schema resolves.
 - [ ] **Step 4 — Issue-driven hooks:** `gh issue edit 634 --add-label "in-progress"`.
@@ -39,18 +39,23 @@ Ownership metadata:
 
 ## Preflight
 
-- [ ] Verify `pr-review-toolkit:review-pr` is available in the current
+- [x] Verify `pr-review-toolkit:review-pr` is available in the current
       environment. If it is not, **halt**, inform the user the plugin is
       required, provide installation guidance, and do not proceed until the user
       confirms it is installed.
-- [ ] Verify `gh` is authenticated (`gh auth status`) and can edit issue #634.
-- [ ] Confirm `npm ci` completes cleanly in the worktree.
+- [x] Verify `gh` is authenticated (`gh auth status`) and can edit issue #634.
+- [x] Confirm `npm ci` completes cleanly in the worktree.
 
 ## Execution
 
 Implement in small, testable increments. All edits inside the worktree.
 
-- [ ] **E1 — Rewrite `StaticRollResult` (pool path):** in
+- [x] **E0 — Reuse before writing:** before adding new markup or logic, check
+      `DiceRollOverlay.tsx`, `lib/components/dice/`, and `lib/utils/dice.ts` for
+      an existing chip / label / formatting helper (e.g. a `d{sides}` formatter,
+      a shared readout container) that can be reused or extended rather than
+      written from scratch.
+- [x] **E1 — Rewrite `StaticRollResult` (pool path):** in
       `lib/components/dice/DiceRollOverlay.tsx`, replace the icon-plus-overlay
       rendering with a single numeric-chip path for every die in
       `built.breakdown.slice(0, DICE_ANIM_CAP)`: the `die.value` as the dominant
@@ -59,40 +64,40 @@ Implement in small, testable increments. All edits inside the worktree.
       `data-testid="fallback-die"` branch. Reuse the existing
       `flex flex-row flex-wrap justify-center items-center gap-4 ... max-w-[80vw]`
       container.
-- [ ] **E2 — Percentile path:** replace the two
+- [x] **E2 — Percentile path:** replace the two
       `<div class="relative w-16 h-16"><DiceD10Icon/><span/></div>` cells with two
       numeric chips showing the existing `tens` / `ones` strings, each labelled
       `d%`. Remove the `mt-2` nudge.
-- [ ] **E3 — Keep the cap:** leave `built.breakdown.slice(0, DICE_ANIM_CAP)`, the
+- [x] **E3 — Keep the cap:** leave `built.breakdown.slice(0, DICE_ANIM_CAP)`, the
       `remainder` computation, and the
       `data-testid="dice-readout-remainder"` `+{remainder} more` note unchanged.
       Confirm `DICE_ANIM_CAP` is still the only import needed from
       `lib/dice/toDiceBoxNotation.ts`.
-- [ ] **E4 — Drop dead imports:** remove
+- [x] **E4 — Drop dead imports:** remove
       `import { DIE_ICONS, DiceD10Icon } from '@/lib/components/icons/dice'` and
       the now-unused `DieSides` import from `DiceRollOverlay.tsx` if nothing else
       in the file uses them. Do **not** touch `lib/components/icons/dice.tsx`,
       `DieGlyph.tsx`, or `DiePoolButton.tsx`.
-- [ ] **E5 — Tests:** `git grep -n -E "DIE_ICONS|DiceD10Icon|die-face|fallback-die|dice-readout-remainder" tests/`
+- [x] **E5 — Tests:** `git grep -n -E "DIE_ICONS|DiceD10Icon|die-face|fallback-die|dice-readout-remainder" tests/`
       and update every result:
-  - [ ] `tests/unit/components/DiceRollOverlay.test.tsx` — remove assertions that
+  - [x] `tests/unit/components/DiceRollOverlay.test.tsx` — remove assertions that
         a die-face `<svg>` renders in the modal; add: (a) each `die-face` chip's
         text equals the corresponding `breakdown` value; (b) a `d{sides}` label
         per chip; (c) `role="dialog"` subtree has no die-face `<svg>`; (d)
         percentile → two chips `d%`, no `DiceD10Icon`; (e) `breakdown.length` 20 →
         15 chips + `+5 more`, total = full-pool total; (f) readout identical
         across the four reveal triggers.
-  - [ ] `tests/e2e/dice-roll-animation.spec.ts` — only adjust selectors if they
+  - [x] `tests/e2e/dice-roll-animation.spec.ts` — only adjust selectors if they
         key off an icon; keep all per-die **value** assertions.
-- [ ] **E6 — Review for duplication / unnecessary complexity:** the pool chip and
+- [x] **E6 — Review for duplication / unnecessary complexity:** the pool chip and
       percentile chip should share one small presentational sub-component or
       className constant rather than duplicating markup.
-- [ ] Confirm every acceptance scenario in
+- [x] Confirm every acceptance scenario in
       `specs/global-dice-fab/spec.md` is covered by a test.
 
 ## Pre-Commit Code Review
 
-- [ ] Before **every** commit, spawn a sub-agent to run the
+- [x] Before **every** commit, spawn a sub-agent to run the
       `openspec-review-code` skill (per
       `skills/openspec-apply-change/SKILL.md`) over the working-tree diff. The
       primary agent automatically applies all clearly-correct findings to the
@@ -104,15 +109,15 @@ Implement in small, testable increments. All edits inside the worktree.
 
 Non-`.md` files change here, so the full path applies.
 
-- [ ] **V1 — Unit tests:** `npm run test:unit` — all pass (watch coverage
+- [x] **V1 — Unit tests:** `npm run test:unit` — all pass (watch coverage
       thresholds for `DiceRollOverlay.tsx`).
-- [ ] **V2 — Integration tests:** `npm run test:integration` — all pass.
-- [ ] **V3 — E2E / regression:** `npm run test:e2e` — all pass (in particular
+- [x] **V2 — Integration tests:** `npm run test:integration` — all pass.
+- [x] **V3 — E2E / regression:** `npm run test:e2e` — all pass (in particular
       `dice-roll-animation.spec.ts`).
-- [ ] **V4 — Type check:** `npm run typecheck` — clean.
-- [ ] **V5 — Lint:** `npm run lint` — clean (no unused-import warning from the
+- [x] **V4 — Type check:** `npm run typecheck` — clean.
+- [x] **V5 — Lint:** `npm run lint` — clean (no unused-import warning from the
       removed `DIE_ICONS` line).
-- [ ] **V6 — Build:** `npm run build` — succeeds; no new chunk/asset.
+- [x] **V6 — Build:** `npm run build` — succeeds; no new chunk/asset.
 - [ ] **V7 — Visual check:** run `openwolf designqc` (or a manual roll in the
       fab) at a `15d6` pool and at 375px viewport width; confirm the chips wrap
       cleanly, the values are legible, and the modal is not obscured by the
@@ -120,8 +125,27 @@ Non-`.md` files change here, so the full path applies.
 - [ ] **V8 — Project quality gate:** run the Verity pre-commit/pre-push gate;
       fix findings (do not waive on agent judgement).
 - [ ] All completed tasks marked `- [x]`.
+- [ ] All steps in [Remote push validation] pass.
 
 If **any** required step fails, iterate and fix before pushing.
+
+## Remote push validation
+
+Determine whether the current change is **docs-only**: run
+`git diff --name-only HEAD` (or compare the working branch against `main`) and
+check whether every changed file ends in `.md`.
+
+- **This change is NOT docs-only** — it edits `lib/components/dice/DiceRollOverlay.tsx`
+  and `tests/**`, so the **full path** applies on every push:
+  - **Unit tests** — `npm run test:unit`; all pass
+  - **Integration tests** — `npm run test:integration`; all pass
+  - **Regression / E2E tests** — `npm run test:e2e` (incl.
+    `dice-roll-animation.spec.ts`); all pass
+  - **Build** — `npm run build`; succeeds with no errors
+- **Docs-only path** (would apply only if a later revision changes nothing but
+  `.md` files): run `npm run build` only; skip integration and E2E.
+
+If **any** required step fails, iterate and address it before pushing.
 
 ## PR and Merge
 
@@ -143,7 +167,8 @@ If **any** required step fails, iterate and fix before pushing.
       `gh pr merge <PR-URL> --auto --merge`. Never force-merge.
 - [ ] **Iterate until merged** — loop until `gh pr view <PR-URL> --json state`
       returns `MERGED` (if `CLOSED`, exit and notify the user):
-  1. Build and tests — run Validation V1–V6; fix any failure, commit, push first.
+  1. Build and tests — run all steps in [Remote push validation]; fix any
+     failure, commit, and push before anything else in the iteration.
   2. PR comments — address every unresolved thread, commit, re-validate, push,
      wait 180s; repeat until all resolved.
   3. CI failures — only after comments are clear, fix each failing required
@@ -175,14 +200,26 @@ Perform in order:
       `openspec/changes/enhance-dice-modal-numeric-readout/` to
       `openspec/changes/archive/YYYY-MM-DD-enhance-dice-modal-numeric-readout/`
       and stage the copy **and** the deletion of the original in a **single**
-      commit.
+      commit — do not commit the copy and delete separately.
 - [ ] Confirm the archive dir exists and the original is gone.
-- [ ] Commit and push the archive to `main` in one commit.
+- [ ] **Create a doc branch** for the archive + spec sync:
+      `git checkout -b doc/archive-YYYY-MM-DD-enhance-dice-modal-numeric-readout`
+      then `git push -u origin doc/archive-YYYY-MM-DD-enhance-dice-modal-numeric-readout`.
+      **Do NOT push the archive/spec commit directly to `main`.**
+- [ ] Open a PR from `doc/archive-YYYY-MM-DD-enhance-dice-modal-numeric-readout`
+      → `main` with title
+      `docs: archive enhance-dice-modal-numeric-readout (YYYY-MM-DD)`.
+- [ ] **IMMEDIATELY** enable auto-merge on the doc PR:
+      `gh pr merge <DOC-PR-URL> --auto --merge` (never `--admin`).
+- [ ] Monitor the doc PR until it merges — same loop as the implementation PR:
+      run [Remote push validation] before each push, address every unresolved
+      comment and failing required check, push to the same doc branch, repeat
+      until `gh pr view <DOC-PR-URL> --json state` returns `MERGED`.
 - [ ] Remove the worktree: `git worktree remove .worktrees/enhance-dice-modal-numeric-readout`
       (use `--force` if it refuses because of the `.github/openspec-shared`
       submodule).
-- [ ] Prune the merged branch: `git fetch --prune` and
-      `git branch -D enhance-dice-modal-numeric-readout`.
+- [ ] Prune the merged branches: `git fetch --prune` and
+      `git branch -D enhance-dice-modal-numeric-readout doc/archive-YYYY-MM-DD-enhance-dice-modal-numeric-readout`.
 - [ ] Issue-driven hooks: confirm #634 auto-closed via `Closes #634`; move the
       project item to "Done".
 
@@ -191,7 +228,10 @@ Perform in order:
 - [ ] Docs updated (or explicitly N/A)
 - [ ] Approved spec delta synced into `openspec/specs/global-dice-fab/spec.md`
 - [ ] Change directory archived under `openspec/changes/archive/`
-- [ ] Archive committed as a single atomic commit and pushed to `main`
+- [ ] Archive + spec sync committed as a single atomic commit on a
+      `doc/archive-YYYY-MM-DD-…` branch (NOT pushed directly to `main`)
+- [ ] Doc PR opened, auto-merge enabled, and merged into `main`
 - [ ] Worktree `.worktrees/enhance-dice-modal-numeric-readout` removed
-- [ ] Merged local branch `enhance-dice-modal-numeric-readout` pruned
+- [ ] Merged local branches (`enhance-dice-modal-numeric-readout` and the doc
+      branch) pruned
 - [ ] Issue #634 closed and project item moved to Done
