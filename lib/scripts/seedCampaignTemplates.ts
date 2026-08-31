@@ -179,6 +179,397 @@ function vecnaEncounters(): EncounterTemplate[] {
   ];
 }
 
+/**
+ * Build the encounter list for Curse of Strahd.
+ * One encounter per major arc covering the 13-chapter campaign.
+ */
+function cosEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const animatedArmor = findCustomMonsterById("cm-animated-armor");
+  const ghoul = findCustomMonsterById("cm-ghoul");
+  const shamblingMound = findCustomMonsterById("cm-shambling-mound");
+  const vampireSpawn = findCustomMonsterById("cm-vampire-spawn");
+  const nightHag = findCustomMonsterById("cm-night-hag");
+  const wight = findCustomMonsterById("cm-wight");
+  const vampire = findCustomMonsterById("cm-vampire");
+  const wintersplinter = findCustomMonsterById("cm-wintersplinter");
+  const babaLysaga = findCustomMonsterById("cm-baba-lysaga");
+  const creepingHut = findCustomMonsterById("cm-creeping-hut");
+  const strahd = findCustomMonsterById("cm-strahd-von-zarovich");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Ch 1 — Death House (lvl 1-2)
+    encounter(
+      "Death House Lurching Halls",
+      "Animated armor and ghouls stalk the haunted manor of Death House in Barovia.",
+      compact([many(animatedArmor, 4), many(ghoul, 3), m(shamblingMound)])
+    ),
+    // Ch 5 — The Town of Vallaki (lvl 3-5)
+    encounter(
+      "Vampire Spawn Ambush at Vallaki",
+      "Strahd's vampire spawn attack the party on the streets of Vallaki.",
+      compact([many(vampireSpawn, 3)])
+    ),
+    // Ch 6 — Old Bonegrinder (lvl 4-6)
+    encounter(
+      "Old Bonegrinder Dream Eaters",
+      "Three night hag sisters grind children's bones in the windmill.",
+      compact([many(nightHag, 3)])
+    ),
+    // Ch 9 — Yester Hill (lvl 6-8)
+    encounter(
+      "The Wintersplinter Awakens",
+      "Druids of the Ravenkin awaken a blighted treant atop Yester Hill to crush Strahd.",
+      compact([m(wintersplinter), many(wight, 2)])
+    ),
+    // Ch 11 — The Ruins of Berez (lvl 7-8)
+    encounter(
+      "Baba Lysaga's Creeping Hut",
+      "The swamp witch Baba Lysaga attacks atop her walking hut to defend Ireena's infant form.",
+      compact([m(babaLysaga), m(creepingHut), many(wight, 2)])
+    ),
+    // Ch 13 — Castle Ravenloft (lvl 9-10)
+    encounter(
+      "Strahd's Heart of Sorrow",
+      "Count Strahd von Zarovich confronts the party in his study atop Castle Ravenloft.",
+      compact([m(strahd), many(vampireSpawn, 2), m(vampire)])
+    ),
+  ];
+}
+
+/**
+ * Build the encounter list for Tomb of Annihilation.
+ * Covers the five-chapter structure with key set-piece encounters.
+ */
+function toaEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const tyrannoZombie = findCustomMonsterById("cm-tyrannosaurus-zombie");
+  const firenewtWarlock = findCustomMonsterById("cm-firenewt-warlock");
+  const firenewtWarrior = findCustomMonsterById("cm-firenewt-warrior");
+  const broodguard = findCustomMonsterById("cm-yuan-ti-broodguard");
+  const nightmare = findCustomMonsterById("cm-yuan-ti-nightmare-speaker");
+  const rasNsi = findCustomMonsterById("cm-ras-nsi");
+  const acererak = findCustomMonsterById("cm-acererak");
+  const atropal = findCustomMonsterById("cm-atropal");
+  const bodak = findCustomMonsterById("cm-bodak");
+  const skeleton = findCustomMonsterById("cm-skeleton");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Ch 2 — The Land of Chult (lvl 5-6)
+    encounter(
+      "Zombie T-Rex in the Jungles of Chult",
+      "An undead tyrannosaurus regurgitates zombie fodder in the Chult jungle.",
+      compact([m(tyrannoZombie), many(skeleton, 4)])
+    ),
+    encounter(
+      "Firenewt Ambush",
+      "Firenewt warlocks of Imix patrol the jungle with their warrior escort.",
+      compact([many(firenewtWarlock, 2), many(firenewtWarrior, 3)])
+    ),
+    // Ch 4 — Fane of the Night Serpent (lvl 7-9)
+    encounter(
+      "Yuan-ti Temple Guards of the Fane",
+      "Serpentfolk defend the inner sanctum of the Fane of the Night Serpent.",
+      compact([many(broodguard, 2), many(nightmare, 1), many(firenewtWarrior, 4)])
+    ),
+    encounter(
+      "Ras Nsi's Final Stand",
+      "The cursed paladin Ras Nsi defends the Fane as the exarch of Ubtao.",
+      compact([m(rasNsi), many(broodguard, 2), many(nightmare, 1)])
+    ),
+    // Ch 5 — Tomb of the Nine Gods (lvl 9-11)
+    encounter(
+      "Acererak's Arrival at the Soulmonger",
+      "Acererak himself manifests to stop the party from destroying the Soulmonger.",
+      compact([m(acererak), m(atropal), many(bodak, 2), many(skeleton, 4)])
+    ),
+  ];
+}
+
+/**
+ * Build the encounter list for Lost Mine of Phandelver.
+ * Covers the four-part intro adventure with key set-piece encounters.
+ */
+function lmopEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const goblin = findCustomMonsterById("cm-goblin");
+  const bugbearChief = findCustomMonsterById("cm-bugbear-chief");
+  const bandit = findCustomMonsterById("cm-bandit");
+  const banditCaptain = findCustomMonsterById("cm-bandit-captain");
+  const mage = findCustomMonsterById("cm-mage");
+  const doppelganger = findCustomMonsterById("cm-doppelganger");
+  const greenHag = findCustomMonsterById("cm-green-hag");
+  const wyvern = findCustomMonsterById("cm-wyvern");
+  const orc = findCustomMonsterById("cm-orc");
+  const drowMage = findCustomMonsterById("cm-drow-mage");
+  const spectator = findCustomMonsterById("cm-spectator");
+  const venomfang = findCustomMonsterById("cm-young-green-dragon");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Part 1 — Goblin Arrows (lvl 1-2)
+    encounter(
+      "Cragmaw Ambush on the Triboar Trail",
+      "Goblins ambush the party on the Triboar Trail.",
+      compact([many(goblin, 4)])
+    ),
+    encounter(
+      "Cragmaw Hideout: Klarg's Cave",
+      "The bugbear chief Klarg rules a cave hideout full of goblins.",
+      compact([m(bugbearChief), many(goblin, 6)])
+    ),
+    // Part 2 — Phandalin (lvl 2-3)
+    encounter(
+      "Redbrand Ruffians in Phandalin",
+      "Redbrand ruffians confront the party in the streets of Phandalin.",
+      compact([many(bandit, 4), m(banditCaptain)])
+    ),
+    encounter(
+      "Redbrand Hideout: Glasstaff",
+      "Glasstaff — actually a doppelganger — defends the Tresendar Manor.",
+      compact([many(bandit, 3), m(banditCaptain), m(doppelganger), m(mage)])
+    ),
+    // Part 3 — The Spider's Web (lvl 3-4)
+    encounter(
+      "Agatha the Green Hag at Conyberry",
+      "A reclusive green hag offers the party a magical item in exchange for a quest.",
+      compact([m(greenHag)])
+    ),
+    encounter(
+      "Wyvern Tor",
+      "A wyvern and its orc riders attack on the Triboar Trail.",
+      compact([m(wyvern), many(orc, 3)])
+    ),
+    encounter(
+      "Venomfang at Thundertree",
+      "Venomfang, the young green dragon, threatens the ruins of Thundertree.",
+      compact([m(venomfang)])
+    ),
+    // Part 4 — Wave Echo Cave (lvl 4-5)
+    encounter(
+      "Wave Echo Cave: The Black Spider",
+      "Nezznar the Black Spider guards the Forge of Spells in Wave Echo Cave.",
+      compact([m(drowMage), many(doppelganger, 2), m(spectator)])
+    ),
+  ];
+}
+
+/**
+ * Build the encounter list for Tyranny of Dragons.
+ * Spans the 13-episode, 17-chapter compilation covering HotDQ + RotT.
+ */
+function todEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const cyanwrath = findCustomMonsterById("cm-langdedrosa-cyanwrath");
+  const guardDrake = findCustomMonsterById("cm-guard-drake");
+  const koboldInventor = findCustomMonsterById("cm-kobold-inventor");
+  const koboldScale = findCustomMonsterById("cm-kobold-scale-sorcerer");
+  const mondath = findCustomMonsterById("cm-frulam-mondath");
+  const rezmir = findCustomMonsterById("cm-rezmir");
+  const dragonclaw = findCustomMonsterById("cm-dragonclaw");
+  const dragonfang = findCustomMonsterById("cm-dragonfang");
+  const dragonsoul = findCustomMonsterById("cm-dragonsoul");
+  const dragonwing = findCustomMonsterById("cm-dragonwing");
+  const blagothkus = findCustomMonsterById("cm-blagothkus");
+  const iceToad = findCustomMonsterById("cm-ice-toad");
+  const talis = findCustomMonsterById("cm-talis-the-white");
+  const tiamat = findCustomMonsterById("cm-tiamat");
+  const severin = findCustomMonsterById("cm-severin");
+  const rathModar = findCustomMonsterById("cm-rath-modar");
+  const ambushDrake = findCustomMonsterById("cm-ambush-drake");
+  const halfDragon = findCustomMonsterById("cm-half-dragon-veteran");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Episode 1 — Greenest in Flames (lvl 1-2)
+    encounter(
+      "Attack on Greenest",
+      "Cyanwrath the half-blue-dragon veteran leads kobold sappers in burning Greenest.",
+      compact([m(cyanwrath), many(guardDrake, 2), many(koboldInventor, 2)])
+    ),
+    // Episode 2 — Raiders' Camp (lvl 2-3)
+    encounter(
+      "Raiders' Camp Assault",
+      "The party infiltrates the cult's roadside raider camp led by Frulam Mondath.",
+      compact([m(mondath), many(dragonsoul, 2)])
+    ),
+    // Episode 3 — Dragon Hatchery (lvl 3)
+    encounter(
+      "Dragon Hatchery in the Dreaming Cave",
+      "Cultists harvest dragon eggs in the Dreaming Cave under guard drake protection.",
+      compact([many(guardDrake, 2), many(koboldScale, 2)])
+    ),
+    // Episode 6 — Castle Naerytar (lvl 4-5)
+    encounter(
+      "Castle Naerytar: Rezmir's Court",
+      "Rezmir the half-black-dragon Wyrmspeaker leads her cult cadre in Castle Naerytar.",
+      compact([m(rezmir), many(dragonclaw, 3), many(dragonfang, 1), many(dragonsoul, 1)])
+    ),
+    // Episode 8 — Castle in the Clouds (lvl 5-7)
+    encounter(
+      "Castle in the Clouds: Blagothkus",
+      "Blagothkus the cloud giant warlord commands Skyreach Castle.",
+      compact([m(blagothkus), many(dragonwing, 2)])
+    ),
+    // Episode 10 — Sea of Moving Ice (lvl 9-10)
+    encounter(
+      "Sea of Moving Ice: Ice Toads",
+      "Frost giants unleash ice toad packs on the party at Oyaviggaton.",
+      compact([many(iceToad, 4), many(ambushDrake, 2)])
+    ),
+    // Episode 12 — The Factions Unite (lvl 11-13)
+    encounter(
+      "Council of Dragons: Talis the White",
+      "Talis the White, adult silver dragon, rallies metallic allies against Tiamat.",
+      compact([m(talis), many(halfDragon, 4)])
+    ),
+    // Episode 13 — The Well of Dragons (lvl 13-15)
+    encounter(
+      "The Well of Dragons: Tiamat's Return",
+      "Tiamat manifests at the Well of Dragons as Severin and Rath Modar lead the final assault.",
+      compact([m(tiamat), m(severin), m(rathModar), many(ambushDrake, 3)])
+    ),
+  ];
+}
+
+/**
+ * Build the encounter list for Baldur's Gate: Descent into Avernus.
+ * Covers the five-chapter structure with key Avernus set-pieces.
+ */
+function bgdiaEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const cultist = findCustomMonsterById("cm-cultist-dead-three");
+  const merregon = findCustomMonsterById("cm-merregon");
+  const narzugon = findCustomMonsterById("cm-narzugon");
+  const hellwasp = findCustomMonsterById("cm-hellwasp");
+  const hellwaspSwarm = findCustomMonsterById("cm-hellwasp-swarm");
+  const swordWraith = findCustomMonsterById("cm-sword-wraith-commander");
+  const bulezau = findCustomMonsterById("cm-bulezau");
+  const whiteAbishai = findCustomMonsterById("cm-white-abishai");
+  const zariel = findCustomMonsterById("cm-zariel");
+  const yeenoghu = findCustomMonsterById("cm-yeenoghu");
+  const hollyphant = findCustomMonsterById("cm-hollyphant");
+  const fleshGolem = findCustomMonsterById("cm-fiendish-flesh-golem");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Ch 1 — A Tale of Two Cities (lvl 1-4)
+    encounter(
+      "Cult of the Dead Three in the Bathhouse Dungeon",
+      "Cultists of the Dead Three perform grisly rituals in a bathhouse dungeon beneath Baldur's Gate.",
+      compact([many(cultist, 4), m(fleshGolem)])
+    ),
+    // Ch 1 — Vanthampur Villa dungeon (lvl 3-5)
+    encounter(
+      "Vanthampur Villa Dungeon",
+      "Merregon devil soldiers and a fiendish flesh golem defend the Vanthampur Villa basement.",
+      compact([many(merregon, 2), m(fleshGolem), m(narzugon)])
+    ),
+    // Ch 2 — Elturel Has Fallen (lvl 4-6)
+    encounter(
+      "Elturel's Burning Refugees",
+      "Hellriders on narzugon mounts pursue refugees fleeing the burning city of Elturel.",
+      compact([many(narzugon, 2), many(cultist, 4)])
+    ),
+    // Ch 3 — Hellwasp Nest (lvl 6-8)
+    encounter(
+      "Hellwasp Nest",
+      "Massive hellwasps attack the party's infernal war machine in the bone fields of Avernus.",
+      compact([m(hellwasp), m(hellwaspSwarm), many(hellwasp, 2)])
+    ),
+    // Ch 3 — Crypt of the Hellriders (lvl 7-9)
+    encounter(
+      "Crypt of the Hellriders",
+      "Sword wraith commanders lead undead knights in the Crypt of the Hellriders.",
+      compact([m(swordWraith), many(merregon, 2)])
+    ),
+    // Ch 3 — Bel's Forge (lvl 8-10)
+    encounter(
+      "Bel's Forge: The Archdevil's Workshop",
+      "Bel's bulezau and narzugon guard the infernal war factory at the Forge.",
+      compact([m(bulezau), many(merregon, 4), many(narzugon, 2), m(whiteAbishai)])
+    ),
+    // Ch 5 — Zariel's Flying Fortress (lvl 12-13)
+    encounter(
+      "Zariel's Flying Fortress",
+      "The archdevil Zariel awaits in her flying citadel, with Yeenoghu as a surprise cameo.",
+      compact([m(zariel), m(yeenoghu), m(hollyphant), many(merregon, 4)])
+    ),
+  ];
+}
+
 const CAMPAIGN_CATALOG: CampaignTemplate[] = [
   makeTemplate(
     "Curse of Strahd",
@@ -199,23 +590,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Amber Temple", order: 12, levelRange: "8-9", location: "Mount Ghakis" },
       { title: "Castle Ravenloft", order: 13, levelRange: "9-10", location: "Castle Ravenloft" },
     ],
-    [
-      {
-        "name": "Vampire Spawn Ambush",
-        "description": "Strahd's spawn attack the party in the streets of Vallaki.",
-        "monsters": []
-      },
-      {
-        "name": "Baba Lysaga's Creeping Hut",
-        "description": "A battle in the swamps of Berez against a witch and her animated hut.",
-        "monsters": []
-      },
-      {
-        "name": "The Wintersplinter",
-        "description": "Druids summon a massive tree blight atop Yester Hill.",
-        "monsters": []
-      }
-    ]
+    cosEncounters()
   ),
 
   makeTemplate(
@@ -229,23 +604,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Fane of the Night Serpent", order: 4, levelRange: "7-9", location: "Omu" },
       { title: "Tomb of the Nine Gods", order: 5, levelRange: "9-11", location: "Tomb of Annihilation" },
     ],
-    [
-      {
-        "name": "Zombie T-Rex",
-        "description": "An undead tyrannosaurus regurgitates zombies in the jungles of Chult.",
-        "monsters": []
-      },
-      {
-        "name": "Yuan-ti Temple Guards",
-        "description": "Serpentfolk defending the Fane of the Night Serpent.",
-        "monsters": []
-      },
-      {
-        "name": "Acererak's Arrival",
-        "description": "The archlich himself appears to stop the party from destroying the Soulmonger.",
-        "monsters": []
-      }
-    ]
+    toaEncounters()
   ),
 
   makeTemplate(
@@ -258,23 +617,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Spider's Web", order: 3, levelRange: "3-4", location: "Sword Coast Frontier" },
       { title: "Wave Echo Cave", order: 4, levelRange: "4-5", location: "Wave Echo Cave" },
     ],
-    [
-      {
-        "name": "Cragmaw Ambush",
-        "description": "Goblins ambush the party on the Triboar Trail.",
-        "monsters": []
-      },
-      {
-        "name": "Redbrand Ruffians",
-        "description": "Bandits confront the party in the streets of Phandalin.",
-        "monsters": []
-      },
-      {
-        "name": "Venomfang",
-        "description": "A young green dragon nesting in the ruins of Thundertree.",
-        "monsters": []
-      }
-    ]
+    lmopEncounters()
   ),
 
   makeTemplate(
@@ -487,18 +830,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Sword of Zariel", order: 4, levelRange: "10-12", location: "Avernus" },
       { title: "Escape from Avernus", order: 5, levelRange: "12-13", location: "Avernus" },
     ],
-    [
-      {
-        "name": "Cult of the Dead Three",
-        "description": "Cultists perform grisly murders in the bathhouse dungeon.",
-        "monsters": []
-      },
-      {
-        "name": "Hellwasp Swarm",
-        "description": "Massive fiendish insects attack the party's infernal war machine.",
-        "monsters": []
-      }
-    ]
+    bgdiaEncounters()
   ),
 
   makeTemplate(
@@ -977,7 +1309,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Episode 11: Xonthal's Tower", order: 11, levelRange: "10-11", location: "Xonthal's Tower" },
       { title: "Episode 12: The Factions Unite", order: 12, levelRange: "11-13", location: "Waterdeep" },
       { title: "Episode 13: The Well of Dragons", order: 13, levelRange: "13-15", location: "Well of Dragons" },
-    ]
+    ],
+    todEncounters()
   ),
 
   makeTemplate(
