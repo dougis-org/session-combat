@@ -21,7 +21,12 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Install node modules
+# `patches/` must be present before `npm ci` so the `postinstall` `patch-package`
+# step applies the vendored d4 forced-face patch (#627) into node_modules before
+# `next build` bundles the dice engine. Without this COPY, patch-package logs
+# "No patch files found", exits 0, and the image ships the unpatched engine.
 COPY package-lock.json package.json ./
+COPY patches ./patches
 RUN npm ci --include=dev
 
 # Copy application code

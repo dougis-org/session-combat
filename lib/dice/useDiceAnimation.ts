@@ -25,9 +25,10 @@ export const INIT_TIMEOUT_MS = 6000
  */
 export const ROLL_TIMEOUT_MS = 12000
 
-/** Physics-solver effort for forcing `@` faces. High enough to land d6..d20 reliably; kept
- * modest so a bad solve fails fast rather than spinning. (d4 is never forced — see
- * `toDiceBoxNotation` — so it does not reach this path with an `@` target.) */
+/** Physics-solver effort for forcing `@` faces. High enough to land d4..d20 reliably; kept
+ * modest so a bad solve fails fast rather than spinning. One shared bound for every die
+ * size — d4 forcing (restored by the vendored engine patch, #627) settles well within it
+ * (spike: forced d4 ~1.7-2.1s, on par with forced d6). */
 const ITERATION_LIMIT = 2000
 
 /** True only when a real WebGL context can be created. */
@@ -196,10 +197,10 @@ export function useDiceAnimation(): DiceAnimation {
       boxRef.current = box
 
       // A per-roll failure (settle error / timeout) or a reconciliation mismatch (the engine
-      // settled on faces other than the decided ones — always the case for a d4, which the
-      // engine cannot force) tears the box down and logs, but must NOT latch the whole
-      // session to the instant path. Either way the tumble for this roll is over — report
-      // "reveal the modal" so the caller does not wait out the overlay's fallback.
+      // settled on faces other than the decided ones — e.g. a d4 group if the vendored engine
+      // patch is absent) tears the box down and logs, but must NOT latch the whole session to
+      // the instant path. Either way the tumble for this roll is over — report "reveal the
+      // modal" so the caller does not wait out the overlay's fallback.
       try {
         const activeBox = box
         await withTimeout(

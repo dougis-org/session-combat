@@ -9,21 +9,23 @@ import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 export const DICE_ANIM_CAP = 15
 
 /**
- * Die sizes `@drdreo/dice-box-threejs@1.1.0` can land on a forced `@` value. The d4 in
- * this engine ignores `@` notation (it rolls naturally, and with a high `iterationLimit`
- * can hang), so d4 groups are emitted as plain `Nd4` — a pool containing a d4 then
- * reconciles as a mismatch and reveals through the instant path (design Decision 1 spike,
- * resolved 2026-08-30).
+ * Die sizes `@drdreo/dice-box-threejs@1.1.0` can land on a forced `@` value — every
+ * standard D&D die. Stock `1.1.0` ignored `@` notation for d4 (its `swapDiceFace_D4`
+ * branch rotated the geometry but never cleared the natural value stored during the
+ * pre-simulation, so the roll returned that stale value); `restore-d4-forced-face-support`
+ * (#627) fixes this with a vendored `patch-package` patch — `patches/@drdreo+dice-box-threejs+1.1.0.patch`.
+ * If that patch is ever absent, a d4 group still reconciles as a mismatch and reveals
+ * through the instant path — cosmetic only, never a wrong total or a hang.
  */
-const FORCEABLE_SIDES = new Set([6, 8, 10, 12, 20])
+const FORCEABLE_SIDES = new Set([4, 6, 8, 10, 12, 20])
 
 export interface DiceGroupPlan {
   sides: number
   /** The predetermined face for each die in this group, in `breakdown` order. */
   values: number[]
-  /** `@drdreo/dice-box-threejs` notation for this group (`"3d6@1,4,6"`, or `"2d4"` for d4). */
+  /** `@drdreo/dice-box-threejs` notation for this group (`"3d6@1,4,6"`). */
   notation: string
-  /** False for d4 — the engine cannot force these faces, so a mismatch is expected. */
+  /** True for every standard die size — the engine (patched, for d4) lands each die on its `@` value. */
   forced: boolean
 }
 

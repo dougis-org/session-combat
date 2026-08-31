@@ -15,18 +15,19 @@ function poolRoll(breakdown: { sides: number; value: number }[], modifier = 0): 
 const notations = (built: BuiltRoll) => toDiceBoxNotation(built).groups.map(g => g.notation)
 
 describe('toDiceBoxNotation — single die types', () => {
-  it.each([6, 8, 10, 12, 20])('d%i emits a forced @ notation with the exact value', (sides) => {
+  it.each([4, 6, 8, 10, 12, 20])('d%i emits a forced @ notation with the exact value', (sides) => {
     const plan = toDiceBoxNotation(poolRoll([{ sides, value: 3 }]))
     expect(plan.groups).toEqual([
       { sides, values: [3], notation: `1d${sides}@3`, forced: true },
     ])
   })
 
-  it('d4 emits plain notation (the engine cannot force a d4) and is marked not forced', () => {
-    const plan = toDiceBoxNotation(poolRoll([{ sides: 4, value: 3 }]))
+  it('d4 is now forced via the vendored engine patch (#627): @ notation, forced: true', () => {
+    const plan = toDiceBoxNotation(poolRoll([{ sides: 4, value: 3 }, { sides: 4, value: 1 }, { sides: 4, value: 4 }]))
     expect(plan.groups).toEqual([
-      { sides: 4, values: [3], notation: '1d4', forced: false },
+      { sides: 4, values: [3, 1, 4], notation: '3d4@3,1,4', forced: true },
     ])
+    expect(plan.groups[0].notation).toMatch(/^\d+d4@[\d,]+$/)
   })
 })
 
@@ -43,14 +44,15 @@ describe('toDiceBoxNotation — mixed pool + modifier', () => {
     expect(plan.groups.flatMap(g => g.values)).toHaveLength(3)
   })
 
-  it('a d4 group in a mixed pool stays plain while the others are forced', () => {
+  it('a mixed d4 + d6 pool forces both groups (#627)', () => {
     const plan = toDiceBoxNotation(
-      poolRoll([{ sides: 4, value: 1 }, { sides: 4, value: 4 }, { sides: 20, value: 11 }]),
+      poolRoll([{ sides: 4, value: 1 }, { sides: 4, value: 4 }, { sides: 6, value: 2 }, { sides: 6, value: 3 }, { sides: 6, value: 6 }]),
     )
     expect(plan.groups).toEqual([
-      { sides: 4, values: [1, 4], notation: '2d4', forced: false },
-      { sides: 20, values: [11], notation: '1d20@11', forced: true },
+      { sides: 4, values: [1, 4], notation: '2d4@1,4', forced: true },
+      { sides: 6, values: [2, 3, 6], notation: '3d6@2,3,6', forced: true },
     ])
+    expect(plan.groups.every(g => g.forced)).toBe(true)
   })
 })
 

@@ -41,8 +41,16 @@ describe('reconcileDiceFaces', () => {
     expect(reconcileDiceFaces([group(8, [5])], [])).toBe(false)
   })
 
-  it('a non-forced (d4) group is compared like any other — a natural roll mismatches', () => {
-    expect(reconcileDiceFaces([group(4, [2], false)], [die(4, 4)])).toBe(false)
-    expect(reconcileDiceFaces([group(4, [2], false)], [die(4, 2)])).toBe(true)
+  it('a forced d4 group is compared exactly like every other size (#627)', () => {
+    // Patch present: the engine lands the decided faces → match.
+    expect(reconcileDiceFaces([group(4, [1, 2, 4])], [die(4, 4), die(4, 1), die(4, 2)])).toBe(true)
+    // Patch absent: the engine rolls d4 naturally → mismatch → instant reveal.
+    expect(reconcileDiceFaces([group(4, [2, 4])], [die(4, 1), die(4, 4)])).toBe(false)
+  })
+
+  it('a mixed d4 + d6 pool reconciles per group', () => {
+    const plan = [group(4, [1, 4]), group(6, [2, 3, 6])]
+    expect(reconcileDiceFaces(plan, [die(6, 6), die(4, 4), die(6, 2), die(4, 1), die(6, 3)])).toBe(true)
+    expect(reconcileDiceFaces(plan, [die(4, 4), die(4, 1), die(6, 2), die(6, 3), die(6, 5)])).toBe(false)
   })
 })
