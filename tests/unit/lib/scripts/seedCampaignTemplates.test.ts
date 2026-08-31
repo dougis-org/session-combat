@@ -148,6 +148,134 @@ describe("seedCampaignTemplates", () => {
   });
 });
 
+/**
+ * Helper: run seedCampaignTemplates against an empty in-memory DB and capture
+ * the seeded template for the campaign matching `name`.
+ */
+async function captureTemplate(name: string): Promise<any> {
+  let seeded: any = null;
+  const col = {
+    findOne: jest.fn().mockResolvedValue(null),
+    insertOne: jest.fn().mockImplementation(async (doc: any) => {
+      if (doc.name === name) seeded = doc;
+      return { insertedId: "some-id" };
+    }),
+    updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
+  };
+  (getDatabase as jest.Mock).mockResolvedValue({ collection: jest.fn().mockReturnValue(col) });
+  await seedCampaignTemplates();
+  return seeded;
+}
+
+/** Asserts the seeded campaign meets the shared encounter-quality contract. */
+function assertCampaignEncounterContract(seeded: any, campaignName: string, expectedChapterCount: number) {
+  expect(seeded).not.toBeNull();
+  expect(seeded.chapters).toHaveLength(expectedChapterCount);
+  expect(Array.isArray(seeded.encounters)).toBe(true);
+  expect(seeded.encounters.length).toBeGreaterThan(0);
+  let emptyEncounterCount = 0;
+  for (const enc of seeded.encounters) {
+    expect(enc.name).toBeDefined();
+    expect(enc.description).toBeDefined();
+    if (!enc.monsters || enc.monsters.length === 0) emptyEncounterCount++;
+    for (const monster of enc.monsters || []) {
+      expect(monster.id).toBeDefined();
+      expect(monster.name).toBeDefined();
+      expect(monster.challengeRating).toBeDefined();
+      expect(monster.abilityScores).toBeDefined();
+      expect(monster.hp).toBeGreaterThan(0);
+    }
+  }
+  expect(emptyEncounterCount).toBe(0);
+  const allIds = seeded.encounters.flatMap((e: any) => e.monsters.map((m: any) => m.id));
+  expect(new Set(allIds).size).toBe(allIds.length);
+}
+
+describe("Curse of Strahd encounters", () => {
+  let logSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("CoS has 13 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Curse of Strahd");
+    assertCampaignEncounterContract(seeded, "Curse of Strahd", 13);
+  });
+});
+
+describe("Tomb of Annihilation encounters", () => {
+  let logSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("ToA has 5 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Tomb of Annihilation");
+    assertCampaignEncounterContract(seeded, "Tomb of Annihilation", 5);
+  });
+});
+
+describe("Lost Mine of Phandelver encounters", () => {
+  let logSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("LMoP has 4 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Lost Mine of Phandelver");
+    assertCampaignEncounterContract(seeded, "Lost Mine of Phandelver", 4);
+  });
+});
+
+describe("Tyranny of Dragons encounters", () => {
+  let logSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("ToD has 13 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Tyranny of Dragons");
+    assertCampaignEncounterContract(seeded, "Tyranny of Dragons", 13);
+  });
+});
+
+describe("Baldur's Gate: Descent into Avernus encounters", () => {
+  let logSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("BGDIA has 5 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Baldur's Gate: Descent into Avernus");
+    assertCampaignEncounterContract(seeded, "Baldur's Gate: Descent into Avernus", 5);
+  });
+});
+
 describe("runCli", () => {
   let exitSpy: jest.SpyInstance;
   let logSpy: jest.SpyInstance;
