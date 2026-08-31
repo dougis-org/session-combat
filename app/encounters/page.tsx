@@ -111,7 +111,7 @@ export function EncountersContent() {
 
         <button
           onClick={addEncounter}
-          disabled={loading}
+          disabled={loading || !!editingEncounter}
           className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded mb-6"
         >
           Add New Encounter

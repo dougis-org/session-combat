@@ -28,7 +28,7 @@ jest.mock('@/lib/components/ProtectedRoute', () => ({
 }));
 
 jest.mock('@/app/encounters/EncounterEditor', () => ({
-  EncounterEditor: () => null,
+  EncounterEditor: () => <div data-testid="encounter-editor" />,
 }));
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -110,6 +110,24 @@ describe('EncountersContent — list rendering', () => {
     global.fetch = jest.fn(async () => { throw new Error('Network failure'); }) as typeof fetch;
     render(<EncountersContent />);
     expect(await screen.findByText(/network failure/i)).toBeInTheDocument();
+  });
+
+  it('conditionally maps EncounterEditor when editingEncounter.id === encounter.id', async () => {
+    const user = userEvent.setup();
+    setupFetch([MOCK_ENCOUNTER, MOCK_ENCOUNTER_2]);
+    render(<EncountersContent />);
+    await screen.findByText('Goblin Ambush');
+
+    // Click edit on the first encounter
+    const editButtons = screen.getAllByRole('button', { name: /edit/i });
+    await user.click(editButtons[0]);
+
+    // The editor should be mounted
+    expect(screen.getByTestId('encounter-editor')).toBeInTheDocument();
+    
+    // The second encounter should still have its edit button, but first shouldn't
+    const remainingEditButtons = screen.getAllByRole('button', { name: /edit/i });
+    expect(remainingEditButtons).toHaveLength(1);
   });
 });
 
