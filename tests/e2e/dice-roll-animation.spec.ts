@@ -6,6 +6,24 @@ test.beforeEach(async ({ page }) => {
   await page.context().clearCookies();
 });
 
+/**
+ * Collect any `useDiceAnimation` reconciliation-mismatch warnings the page logs.
+ * With d4 forcing patched in (#627) this list must stay empty — without the patch,
+ * a d4 pool mismatches and the roll drops to the instant reveal. Only a positive
+ * signal when WebGL is available; on a WebGL-less browser the whole roll takes the
+ * instant path silently, so an empty list asserts the warning is never *wrongly*
+ * emitted, not that the tumble ran.
+ */
+function collectMismatchWarnings(page: import("@playwright/test").Page): string[] {
+  const warnings: string[] = [];
+  page.on("console", (msg) => {
+    if (msg.type() === "warning" && /did not match the decided roll/i.test(msg.text())) {
+      warnings.push(msg.text());
+    }
+  });
+  return warnings;
+}
+
 test.describe("GlobalDiceFab — roll animation smoke", () => {
   test("rolling a pool shows the 3D overlay settling on a total modal, dismissible without closing the panel", async ({
     page,
@@ -73,6 +91,8 @@ test.describe("GlobalDiceFab — roll animation smoke", () => {
     await registerUser(page, identity.email, STRONG_PASSWORD);
     await page.goto("/campaigns");
 
+    const mismatchWarnings = collectMismatchWarnings(page);
+
     await page.getByRole("button", { name: "Roll dice" }).click();
     const panel = page.getByRole("dialog", { name: "Roll dice" });
     await expect(panel).toBeVisible();
@@ -94,9 +114,8 @@ test.describe("GlobalDiceFab — roll animation smoke", () => {
     expect(total).toBeLessThanOrEqual(12);
     await expect(resultModal).toContainText(String(total));
 
-    // The settled dice (with d4 forcing patched in) equal the decided faces — the same
-    // settled-face == decided-face contract asserted for d6/d20 above. On any fallback
-    // path the DOM readout still reflects the decided breakdown.
+    // The per-die readout equals the decided faces (true on both the tumble and the
+    // instant-fallback path — the DOM always reflects the decided breakdown).
     const inlineFaces = inlineText
       .match(/\[([^\]]+)\]/)![1]
       .split(",")
@@ -113,6 +132,9 @@ test.describe("GlobalDiceFab — roll animation smoke", () => {
       .map((s) => Number(s.trim()))
       .sort((a, b) => a - b);
     expect(modalFaces).toEqual(inlineFaces);
+
+    // #627: d4 reconciliation must never report a mismatch.
+    expect(mismatchWarnings).toEqual([]);
   });
 
   test("a mixed d4 + d6 pool settles both groups on their predetermined faces (#627)", async ({
@@ -121,6 +143,8 @@ test.describe("GlobalDiceFab — roll animation smoke", () => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);
     await page.goto("/campaigns");
+
+    const mismatchWarnings = collectMismatchWarnings(page);
 
     await page.getByRole("button", { name: "Roll dice" }).click();
     const panel = page.getByRole("dialog", { name: "Roll dice" });
@@ -159,6 +183,9 @@ test.describe("GlobalDiceFab — roll animation smoke", () => {
       .map((s) => Number(s.trim()))
       .sort((a, b) => a - b);
     expect(modalFaces).toEqual(allInlineFaces);
+
+    // #627: neither the d4 nor the d6 group may reconcile as a mismatch.
+    expect(mismatchWarnings).toEqual([]);
   });
 
   test("percentile roll shows a decoded 1..100 total modal", async ({ page }, testInfo) => {

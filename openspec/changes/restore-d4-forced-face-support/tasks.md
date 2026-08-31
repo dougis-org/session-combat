@@ -183,12 +183,24 @@ Ownership metadata:
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the
-  `openspec-review-code` skill. The primary agent automatically applies all
-  clearly-correct findings directly to the code — without stopping, without
-  showing the findings list to the user, without asking for confirmation. Apply
-  fixes, re-run `npm run test:unit` (and `test:e2e` if touched), then commit.
-- [ ] Confirm the throwaway spike file(s) from Task 1 are deleted before the
+- [x] `openspec-review-code` run pre-commit (initial commit `1b0359c`): dropped a
+  brittle whitespace-exact marker assertion and a redundant expect/throw pair in
+  `d4EnginePatch.test.ts`.
+- [x] `pr-review-toolkit:review-pr` (code-reviewer + pr-test-analyzer +
+  silent-failure-hunter) on PR #635. Findings addressed:
+  - **CRITICAL** — the Docker build ran `npm ci` before `COPY . .`, so
+    `patch-package` found no `patches/` dir, exited 0, and the deployed image
+    shipped the *unpatched* engine (the exact #627 regression, prod-only). Fixed:
+    `Dockerfile` now `COPY patches ./patches` before `npm ci`; a unit test asserts
+    that ordering.
+  - E2E d4 cases now also assert the reconciliation-mismatch `console.warn` never
+    fires — a real #627 regression signal, not just DOM-readout parity.
+  - `patch-package` moved to `dependencies` (postinstall runs unconditionally;
+    protects a future `npm ci --omit=dev` builder). Unit test enforces it.
+  - `d4EnginePatch.test.ts` workflow scan scoped to `npm ci/install` lines + guarded
+    with `existsSync`; added a `lib/dice` static guard against `=== 4` special-casing.
+  - silent-failure-hunter: clean (no hang / wrong total / session latch).
+- [x] Confirm the throwaway spike file(s) from Task 1 are deleted before the
   final commit.
 
 ## Validation
