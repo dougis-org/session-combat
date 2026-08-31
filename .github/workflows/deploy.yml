@@ -1,0 +1,50 @@
+name: Deploy to Fly.io
+
+on:
+  push:
+    branches:
+      - main
+    # Docs / spec / agent-metadata commits do not change the deployed image.
+    # Skipping them keeps the deploy queue clear during rapid doc-archive merges,
+    # which is what starved the shared Depot build cache and left `npm ci` hanging
+    # (deploy runs #609, #610, #600, #612, #613 each stalled until cancelled).
+    paths-ignore:
+      - 'docs/**'
+      - 'openspec/**'
+      - '.verity/**'
+      - '.wolf/**'
+      - '.claude/**'
+      - 'memory/**'
+      - '**/*.md'
+
+# Only one deploy in flight at a time. A newer main commit cancels an older,
+# still-running deploy before starting its own, so there is never a second
+# `flyctl deploy` racing the same two app VMs or the same Depot cache entry.
+concurrency:
+  group: deploy-flyio-main
+  cancel-in-progress: true
+
+jobs:
+  version-and-deploy:
+    runs-on: ubuntu-latest
+    # Remote Depot builds normally finish in ~5 min; 25 min covers build + push +
+    # rolling update. A hard timeout fails faster than waiting for an external cancel.
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install Fly CLI
+        run: |
+          curl -L https://fly.io/install.sh | sh
+          echo "$HOME/.fly/bin" >> "$GITHUB_PATH"
+
+      - name: Deploy to Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        # `immediate` rolls both machines at once rather than one-at-a-time, which
+        # avoids the `failed to acquire lease on VM` errors seen when a rolling
+        # update raced itself (releases v689/v690, 2026-08-30).
+        run: flyctl deploy --remote-only --strategy immediate
