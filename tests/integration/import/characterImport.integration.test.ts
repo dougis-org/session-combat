@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { registerTestUser } from "../helpers/users";
 import {
   DND_BEYOND_CHARACTER_NAME,
@@ -34,7 +33,9 @@ describe("Character import API integration", () => {
     const body = await response.json();
     expect(body.character.name).toBe(DND_BEYOND_CHARACTER_NAME);
     expect(body.character.id).toBeTruthy();
-    expect(body.warnings).toEqual(expect.any(Array));
+    // Array.isArray, not expect.any(Array): native fetch's Response.json()
+    // returns host-realm objects that fail the vm-realm instanceof check.
+    expect(Array.isArray(body.warnings)).toBe(true);
     expect(body.sourceUrl).toBe(DND_BEYOND_CHARACTER_URL);
   });
 

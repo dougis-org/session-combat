@@ -1,11 +1,13 @@
 /**
  * @jest-environment node
  */
-import fetch from "node-fetch";
 import jwt from "jsonwebtoken";
 import { registerTestUser } from "./helpers/users";
 
-const JWT_SECRET = process.env.JWT_SECRET ?? "dev-secret-key-change-in-production";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET not set — globalSetup was not wired correctly");
+}
 
 interface CampaignResponse {
   id: string;

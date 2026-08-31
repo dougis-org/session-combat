@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { registerTestUser } from "./helpers/users";
 
 const SEARCH_PATH = "/api/users/search";

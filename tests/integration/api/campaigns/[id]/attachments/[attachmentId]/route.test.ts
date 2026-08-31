@@ -1,8 +1,6 @@
 /**
  * @jest-environment node
  */
-import fetch from "node-fetch";
-import FormData from "form-data";
 import { ObjectId, GridFSBucket } from "mongodb";
 import { connectToDatabase, closeDatabase, getDatabase } from "@/lib/db";
 import { registerTestUser } from "@/tests/integration/helpers/users";
@@ -50,10 +48,10 @@ async function uploadFile(
   mimeType = "image/jpeg"
 ): Promise<string> {
   const form = new FormData();
-  form.append("file", smallJpeg(), { filename: "test.jpg", contentType: mimeType });
+  form.append("file", new Blob([Uint8Array.from(smallJpeg())], { type: mimeType }), "test.jpg");
   const res = await fetch(`${BASE_URL()}/api/campaigns/${campaignId}/attachments`, {
     method: "POST",
-    headers: { ...form.getHeaders(), Cookie: cookie },
+    headers: { Cookie: cookie },
     body: form,
   });
   if (res.status !== 201) throw new Error(`Upload failed: ${res.status}`);
@@ -151,7 +149,7 @@ describe("GET /api/campaigns/[id]/attachments/[attachmentId]", () => {
     const res = await fetch(serveUrl(), { headers: { Cookie: dmCookie } });
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("image/jpeg");
-    const body = await res.buffer();
+    const body = Buffer.from(await res.arrayBuffer());
     expect(body.length).toBeGreaterThan(0);
   });
 
@@ -159,7 +157,7 @@ describe("GET /api/campaigns/[id]/attachments/[attachmentId]", () => {
     const res = await fetch(serveUrl(), { headers: { Cookie: playerCookie } });
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("image/jpeg");
-    const body = await res.buffer();
+    const body = Buffer.from(await res.arrayBuffer());
     expect(body.length).toBeGreaterThan(0);
   });
 

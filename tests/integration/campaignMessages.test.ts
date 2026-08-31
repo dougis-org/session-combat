@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-import fetch from "node-fetch";
 import { connectToDatabase, closeDatabase, getDatabase } from "@/lib/db";
 import { registerTestUser } from "./helpers/users";
 import type { CampaignMessage } from "@/lib/types";
@@ -79,9 +78,10 @@ async function openSSEConnection(
   (async () => {
     try {
       const body = res.body!;
+      const decoder = new TextDecoder();
       let buffer = "";
-      for await (const chunk of body as unknown as AsyncIterable<Buffer>) {
-        buffer += chunk.toString();
+      for await (const chunk of body as unknown as AsyncIterable<Uint8Array>) {
+        buffer += decoder.decode(chunk, { stream: true });
         const parts = buffer.split("\n\n");
         buffer = parts.pop() ?? "";
         for (const part of parts) {

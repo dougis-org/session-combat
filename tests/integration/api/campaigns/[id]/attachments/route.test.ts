@@ -1,8 +1,6 @@
 /**
  * @jest-environment node
  */
-import fetch from "node-fetch";
-import FormData from "form-data";
 import { connectToDatabase, closeDatabase, getDatabase } from "@/lib/db";
 import { registerTestUser } from "@/tests/integration/helpers/users";
 
@@ -49,7 +47,7 @@ async function createCampaign(cookie: string): Promise<string> {
 function makeFormWithFile(mimeType = "image/jpeg", sizeBytes?: number): FormData {
   const form = new FormData();
   const content = sizeBytes ? Buffer.alloc(sizeBytes) : smallJpeg();
-  form.append("file", content, { filename: "test.jpg", contentType: mimeType });
+  form.append("file", new Blob([Uint8Array.from(content)], { type: mimeType }), "test.jpg");
   return form;
 }
 
@@ -91,7 +89,6 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile();
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: form.getHeaders(),
       body: form,
     });
     expect(res.status).toBe(401);
@@ -103,7 +100,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile();
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: playerCookie },
+      headers: { Cookie: playerCookie },
       body: form,
     });
     expect(res.status).toBe(403);
@@ -113,7 +110,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile();
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: nonMemberCookie },
+      headers: { Cookie: nonMemberCookie },
       body: form,
     });
     expect(res.status).toBe(404);
@@ -123,7 +120,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile();
     const res = await fetch(`${BASE_URL()}/api/campaigns/nonexistent-id/attachments`, {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: dmCookie },
+      headers: { Cookie: dmCookie },
       body: form,
     });
     expect(res.status).toBe(404);
@@ -136,7 +133,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     form.append("other", "value");
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: dmCookie },
+      headers: { Cookie: dmCookie },
       body: form,
     });
     expect(res.status).toBe(400);
@@ -148,7 +145,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile("application/pdf");
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: dmCookie },
+      headers: { Cookie: dmCookie },
       body: form,
     });
     expect(res.status).toBe(415);
@@ -160,7 +157,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile("image/jpeg", 5 * 1024 * 1024 + 1);
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: dmCookie },
+      headers: { Cookie: dmCookie },
       body: form,
     });
     expect(res.status).toBe(413);
@@ -174,7 +171,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile("image/jpeg");
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: dmCookie },
+      headers: { Cookie: dmCookie },
       body: form,
     });
     expect(res.status).toBe(201);
@@ -187,7 +184,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile("image/png");
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: dmCookie },
+      headers: { Cookie: dmCookie },
       body: form,
     });
     expect(res.status).toBe(201);
@@ -199,7 +196,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile("image/webp");
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: dmCookie },
+      headers: { Cookie: dmCookie },
       body: form,
     });
     expect(res.status).toBe(201);
@@ -211,7 +208,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile("image/gif");
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: dmCookie },
+      headers: { Cookie: dmCookie },
       body: form,
     });
     expect(res.status).toBe(201);
@@ -248,7 +245,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile("image/jpeg");
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: dmCookie },
+      headers: { Cookie: dmCookie },
       body: form,
     });
     expect(res.status).toBe(201);
@@ -282,7 +279,7 @@ describe("POST /api/campaigns/[id]/attachments", () => {
     const form = makeFormWithFile("image/jpeg");
     const res = await fetch(uploadUrl(), {
       method: "POST",
-      headers: { ...form.getHeaders(), Cookie: dmCookie },
+      headers: { Cookie: dmCookie },
       body: form,
     });
     expect(res.status).toBe(201);

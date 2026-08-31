@@ -1,7 +1,7 @@
 import React from "react";
 import { act } from "react";
 import { createRoot, Root } from "react-dom/client";
-import { Response as FetchResponse } from "node-fetch";
+import { MockFetchResponse } from '@/tests/unit/helpers/mockFetchResponse';
 import { CharactersContent } from "@/app/characters/page";
 import {
   CONFLICT_WARNING,
@@ -12,7 +12,7 @@ import {
 } from "@/tests/helpers/dndBeyondImport";
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return new FetchResponse(JSON.stringify(body), {
+  return new MockFetchResponse(JSON.stringify(body), {
     status,
     headers: { "Content-Type": "application/json" },
   }) as unknown as Response;
@@ -218,7 +218,7 @@ describe("Characters page import UI", () => {
         }
 
         if (url === "/api/characters/import") {
-          return new FetchResponse("gateway timeout", {
+          return new MockFetchResponse("gateway timeout", {
             status: 502,
             headers: { "Content-Type": "text/plain" },
           }) as unknown as Response;
