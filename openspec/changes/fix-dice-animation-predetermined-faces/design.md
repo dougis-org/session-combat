@@ -473,9 +473,14 @@ unchanged in intent — it is now load-bearing for d4 pools, not just defensive.
 ## Implementation constants (Decisions 4 & 6)
 
 - `DICE_BASE_SCALE = 100`, `DICE_MIN_SCALE = 60` (`@drdreo/dice-box-threejs`
-  `baseScale` units). Starting values; the visual-check task (T8.4) confirms or
-  adjusts them and this line is updated with the final numbers + screenshots.
+  `baseScale` units). **Confirmed by the visual-check task** (2026-08-31):
+  rendered `@drdreo/dice-box-threejs` at `baseScale: 100` into the existing
+  canvas band (`w-[90vw] max-w-[480px] h-[38vh] max-h-[340px]`) at 375px and
+  1280px viewport widths. Both d20 faces are clearly readable, the settled
+  cluster stays inside the band, and the result modal below is unobscured. No
+  change needed.
 - `ITERATION_LIMIT = 2000` in `useDiceAnimation.ts` — enough to force d6..d20,
-  low enough not to spin on a d4.
-- Canvas band Tailwind classes in `DiceRollOverlay.tsx` left at the previous
-  `w-[90vw] max-w-[480px] h-[38vh] max-h-[340px]` pending the visual check.
+  kept modest so a bad solve fails fast.
+- Canvas band Tailwind classes in `DiceRollOverlay.tsx` unchanged
+  (`w-[90vw] max-w-[480px] h-[38vh] max-h-[340px]`) — still correct for the new
+  engine's camera.

@@ -165,7 +165,7 @@ All work happens inside the dedicated worktree
 - [x] Confirm every acceptance scenario in
   `openspec/changes/fix-dice-animation-predetermined-faces/specs/**/*.md` is
   covered by a test or a visual-check task.
-- [ ] Visual-check task: run the app, roll `2d12`, `2d20`, `d%`, `15d6`; capture
+- [x] Visual-check task: run the app, roll `2d12`, `2d20`, `d%`, `15d6`; capture
   screenshots at 1280px and 375px; record the chosen `baseScale` / container
   constants in `design.md` (Decision 4 / 6). Confirm dice and the readout are
   readable and the modal is not obscured.
@@ -184,7 +184,7 @@ All work happens inside the dedicated worktree
   `reconcileDiceFaces`, retuned `diceAnimationScale`, `DiceRollOverlay`,
   `toDiceBoxNotation` tests).
 - [ ] `npm run test:integration` — all pass.
-- [ ] `npm run test:e2e -- tests/e2e/dice-roll-animation.spec.ts` then the full
+- [x] `npm run test:e2e -- tests/e2e/dice-roll-animation.spec.ts` then the full
   `npm run test:regression` — all pass.
 - [x] `npm run typecheck` — no errors.
 - [x] `npm run lint` — no errors.
