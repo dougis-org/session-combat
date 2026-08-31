@@ -619,6 +619,7 @@ export interface Campaign {
   currentChapterId?: string;
   templateId?: string;
   encounterIds?: string[];
+  partyIds?: string[];
   status: CampaignStatus;
   notes: string;
   createdAt: Date;
@@ -639,6 +640,7 @@ export interface Party {
   name: string;
   description?: string;
   members: PartyMember[];
+  /** @deprecated Use Campaign.partyIds instead */
   campaignId?: string;
   createdAt: Date;
   updatedAt: Date;

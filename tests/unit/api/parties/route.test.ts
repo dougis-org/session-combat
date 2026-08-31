@@ -22,6 +22,8 @@ jest.mock("@/lib/storage", () => ({
     saveParty: jest.fn(),
     deleteParty: jest.fn(),
     canAddToCampaignParty: jest.fn(),
+    loadCampaignByIdAny: jest.fn(),
+    saveCampaign: jest.fn(),
   },
 }));
 

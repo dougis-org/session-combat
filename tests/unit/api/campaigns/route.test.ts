@@ -242,7 +242,6 @@ describe("POST /api/campaigns", () => {
     expect(mockedStorage.saveParty).toHaveBeenCalledWith(
       expect.objectContaining({
         name: "Main Party",
-        campaignId: body.id,
         userId: "user-123",
         members: [],
       })

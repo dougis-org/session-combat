@@ -227,7 +227,11 @@ describe("storage.loadPartiesByCampaign", () => {
   it("A3-1: returns only parties matching the campaignId", async () => {
     const mockToArray = jest.fn().mockResolvedValue([makeParty("p-1", "camp-A")]);
     const mockFind = jest.fn().mockReturnValue({ toArray: mockToArray });
-    mockedDb.collection.mockReturnValue({ find: mockFind });
+    const mockFindOne = jest.fn().mockResolvedValue({ id: "camp-A", partyIds: [] });
+    mockedDb.collection.mockImplementation((name) => {
+      if (name === "campaigns") return { findOne: mockFindOne, updateOne: jest.fn() };
+      return { find: mockFind };
+    });
 
     const result = await storage.loadPartiesByCampaign("camp-A");
 
@@ -238,7 +242,11 @@ describe("storage.loadPartiesByCampaign", () => {
   it("A3-2: returns empty array when no parties in campaign", async () => {
     const mockToArray = jest.fn().mockResolvedValue([]);
     const mockFind = jest.fn().mockReturnValue({ toArray: mockToArray });
-    mockedDb.collection.mockReturnValue({ find: mockFind });
+    const mockFindOne = jest.fn().mockResolvedValue({ id: "camp-X", partyIds: [] });
+    mockedDb.collection.mockImplementation((name) => {
+      if (name === "campaigns") return { findOne: mockFindOne, updateOne: jest.fn() };
+      return { find: mockFind };
+    });
 
     const result = await storage.loadPartiesByCampaign("camp-X");
 
@@ -254,7 +262,11 @@ describe("storage.loadPartiesByCampaign", () => {
 
     const mockToArray = jest.fn().mockResolvedValue([]);
     const mockFind = jest.fn().mockReturnValue({ toArray: mockToArray });
-    mockedDb.collection.mockReturnValue({ find: mockFind });
+    const mockFindOne = jest.fn().mockResolvedValue({ id: "camp-slow", partyIds: [] });
+    mockedDb.collection.mockImplementation((name) => {
+      if (name === "campaigns") return { findOne: mockFindOne, updateOne: jest.fn() };
+      return { find: mockFind };
+    });
 
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 

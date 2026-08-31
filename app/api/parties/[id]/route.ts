@@ -81,7 +81,13 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
 
     if (campaignId !== undefined) {
       const normalized = typeof campaignId === 'string' ? campaignId.trim() : '';
+      
+      if (existingParty.campaignId && existingParty.campaignId !== normalized) {
+        await storage.removePartyFromCampaign(existingParty.campaignId, updatedParty.id);
+      }
+
       if (normalized) {
+        await storage.addPartyToCampaign(normalized, updatedParty.id);
         updatedParty.campaignId = normalized;
       } else {
         delete updatedParty.campaignId;

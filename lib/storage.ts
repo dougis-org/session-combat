@@ -225,6 +225,22 @@ export const storage = {
     }
   },
 
+  async addPartyToCampaign(campaignId: string, partyId: string): Promise<void> {
+    const db = await getDatabase();
+    await db.collection("campaigns").updateOne(
+      { id: campaignId },
+      { $addToSet: { partyIds: partyId } }
+    );
+  },
+
+  async removePartyFromCampaign(campaignId: string, partyId: string): Promise<void> {
+    const db = await getDatabase();
+    await db.collection("campaigns").updateOne(
+      { id: campaignId },
+      { $pull: { partyIds: partyId } }
+    );
+  },
+
   // Delete campaign
   async deleteCampaign(id: string, userId: string): Promise<void> {
     try {
@@ -240,7 +256,6 @@ export const storage = {
 
       // Cascade delete children first
       await Promise.all([
-        db.collection<Party>("parties").deleteMany({ campaignId: id }),
         db.collection("campaignMembers").deleteMany({ campaignId: id }),
         db.collection<SessionLog>("sessionLogs").deleteMany({ campaignId: id }),
         db.collection("campaignRolls").deleteMany({ campaignId: id }),

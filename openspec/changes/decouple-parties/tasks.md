@@ -2,24 +2,24 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git checkout <default-branch>` and `git pull --ff-only`
-- [ ] **Step 2 — Create and publish working branch:** `git checkout -b <feature-branch-name>` then immediately `git push -u origin <feature-branch-name>`
+- [x] **Step 1 — Sync default branch:** `git checkout <default-branch>` and `git pull --ff-only`
+- [x] **Step 2 — Create and publish working branch:** `git checkout -b <feature-branch-name>` then immediately `git push -u origin <feature-branch-name>`
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** _(skip if change is not issue-driven)_: run `gh issue edit #N --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner <owner> --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner <owner> --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] Implement sub-tasks in small, testable increments
-  - [ ] **Task 1:** Update `Campaign` interface in `lib/types.ts` to include `partyIds?: string[]`.
-  - [ ] **Task 2:** Deprecate `campaignId?: string` in `Party` interface in `lib/types.ts`.
-  - [ ] **Task 3:** Update `deleteCampaign` in `lib/storage.ts` to remove the cascade deletion of parties (`db.collection<Party>("parties").deleteMany({ campaignId: id })`).
-  - [ ] **Task 4:** Update `loadPartiesByCampaign` in `lib/storage/partyRepo.ts` to query parties using `Campaign.partyIds` with a fallback lazy migration.
-  - [ ] **Task 5:** Update any API routes modifying party associations to update `Campaign.partyIds`.
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch
-- [ ] Confirm acceptance criteria are covered
+- [x] **Issue lifecycle: mark in-progress** _(skip if change is not issue-driven)_: run `gh issue edit #N --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner <owner> --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner <owner> --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] Implement sub-tasks in small, testable increments
+  - [x] **Task 1:** Update `Campaign` interface in `lib/types.ts` to include `partyIds?: string[]`.
+  - [x] **Task 2:** Deprecate `campaignId?: string` in `Party` interface in `lib/types.ts`.
+  - [x] **Task 3:** Update `deleteCampaign` in `lib/storage.ts` to remove the cascade deletion of parties (`db.collection<Party>("parties").deleteMany({ campaignId: id })`).
+  - [x] **Task 4:** Update `loadPartiesByCampaign` in `lib/storage/partyRepo.ts` to query parties using `Campaign.partyIds` with a fallback lazy migration.
+  - [x] **Task 5:** Update any API routes modifying party associations to update `Campaign.partyIds`.
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch
+- [x] Confirm acceptance criteria are covered
 
 ## Pre-Commit Code Review
 
