@@ -96,8 +96,8 @@
   faces.
 - Unit test updates for `toDiceBoxNotation` and `reconcileDiceFaces`.
 - CI: ensure `patch-package` runs before unit + e2e jobs.
-- An upstream PR to `drdreo/dice-box-threejs` (tracked as a follow-up task; the
-  PR link recorded in this change before archive, merge not required).
+- An upstream PR to `drdreo/dice-box-threejs` (parallel follow-up, merge not
+  required): https://github.com/drdreo/dice-box-threejs/pull/2
 
 ### Out of Scope
 
