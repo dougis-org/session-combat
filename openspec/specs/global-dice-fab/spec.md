@@ -150,7 +150,7 @@ _(Modified 2026-08-29, `decouple-dice-roll-capability`; modified again 2026-08-3
 
 ### Requirement: ADDED Rolling plays a dice animation then a total modal
 
-_(Added 2026-08-30, `add-dice-roll-animation`; modified 2026-08-30, `improve-dice-roll-animation` — larger centered dice, modal gated on completion, cap lowered to 15, down-scaling; modified 2026-08-30, `fix-dice-animation-predetermined-faces` — the 3D dice engine is replaced with one that natively honours predetermined per-die faces, engine + assets are self-hosted and lazy-loaded, and a reconciliation guard is added.)_
+_(Added 2026-08-30, `add-dice-roll-animation`; modified 2026-08-30, `improve-dice-roll-animation` — larger centered dice, modal gated on completion, cap lowered to 15, down-scaling; modified 2026-08-30, `fix-dice-animation-predetermined-faces` — the 3D dice engine is replaced with one that natively honours predetermined per-die faces, engine + assets are self-hosted and lazy-loaded, and a reconciliation guard is added; modified 2026-08-31, `restore-d4-forced-face-support` — d4 forcing is restored via a vendored engine patch, so **all** supported die sizes animate on their decided faces and no code path special-cases `sides === 4`.)_
 
 The system SHALL, when the user rolls in `GlobalDiceFab` (a pool roll or a percentile
 roll), present a dice-roll overlay that animates the staged dice coming to rest on their
@@ -164,9 +164,16 @@ new randomness or HTTP request of its own. The overlay SHALL be rendered through
 lazily created `document.body` overlay root, layered above the dice panel.
 
 The system SHALL pass the predetermined per-die faces to the dice engine using the
-engine's supported forced-results notation, and the dice engine SHALL be one that honours
-that notation. The animated physical dice SHALL settle showing those faces. When the
-engine nonetheless settles on other faces, the overlay SHALL follow the reconciliation
+engine's supported forced-results ("`@`") notation, for **every** die size in a standard
+D&D set — d4, d6, d8, d10, d12, d20, and percentile (rendered as two d10s). `toDiceBoxNotation`
+SHALL emit forced notation for d4 groups (`forced: true`) exactly as it does for the other
+sizes, and no code path in `toDiceBoxNotation`, `reconcileDiceFaces`, or `useDiceAnimation`
+SHALL special-case `sides === 4`. The dice engine SHALL be one that honours that notation;
+d4 forcing is provided by a vendored `patch-package` patch against
+`@drdreo/dice-box-threejs@1.1.0` (see "The 3D dice engine's d4 forced-face support is
+restored via a vendored patch"). The animated physical dice SHALL settle showing those
+faces. When the engine nonetheless settles on other faces (for any die size, including d4 —
+e.g. because the vendored patch is absent), the overlay SHALL follow the reconciliation
 behaviour in "Animated dice faces are reconciled against the decided roll" rather than
 presenting the mismatched tumble as the result. The dice engine and its rendering assets
 SHALL be self-hosted and loaded lazily (dynamic `import()`), never included in the initial
@@ -257,6 +264,28 @@ clear area above the modal.
 - **When** the user rolls
 - **Then** the per-die values shown by the animation are exactly those in the built roll's
   breakdown, and no die value is generated or altered during or after the animation
+
+#### Scenario: d4 pool animates on its decided faces then reveals the modal
+
+- **Given** the vendored engine patch is applied and animation is enabled
+- **And** the dice panel is open with a staged pool of `3d4` and modifier `+1`
+- **When** the user clicks Roll
+- **Then** the dice engine is given the three predetermined d4 faces via its forced-results
+  notation (`3d4@a,b,c`)
+- **And** the three animated d4 dice settle showing exactly the built roll's per-die `d4`
+  breakdown values
+- **When** the dice settle and reconciliation confirms a match
+- **Then** the total modal appears showing the total equal to `built.total`
+
+#### Scenario: Mixed d4 + d6 pool forces both groups
+
+- **Given** the vendored engine patch is applied and animation is enabled
+- **And** the user rolls a staged pool of `2d4+3d6`
+- **When** the roll is animated
+- **Then** the d4 group is driven with `roll("2d4@…")` and the d6 group with a subsequent
+  `add("3d6@…")` (no `+`-joined multi-size notation)
+- **And** both groups settle on their predetermined faces and reconciliation confirms a
+  match
 
 #### Scenario: Large pools animate a capped subset of 15
 
@@ -356,6 +385,66 @@ reconciliation outcome.
 
 ---
 
+### Requirement: ADDED The 3D dice engine's d4 forced-face support is restored via a vendored patch
+
+_(Added 2026-08-31, `restore-d4-forced-face-support`.)_
+
+The system SHALL restore predetermined-face ("`@`" notation) support for **d4** dice in
+`@drdreo/dice-box-threejs@1.1.0` through a patch committed to this repository and applied
+at dependency-install time, without depending on an upstream release.
+
+The patch SHALL be applied automatically by an install-time step (`patch-package` via
+`postinstall`), SHALL fail the install loudly if it cannot be applied cleanly, and SHALL be
+pinned to the exact engine version by its filename. The patch SHALL NOT alter forcing
+behaviour for any other die size, and SHALL NOT introduce randomness, network calls, or
+changes to persisted roll data. Every environment that builds or bundles the dice engine —
+CI jobs and the production Docker image alike — SHALL run the install-time patch step
+before the engine is bundled.
+
+A parallel upstream pull request against `drdreo/dice-box-threejs` SHALL be opened with an
+equivalent fix; its URL SHALL be recorded before this change is archived. Upstream merge
+SHALL NOT be a precondition for archiving.
+
+#### Scenario: Forced d4 lands on its target face
+
+- **Given** the vendored patch is applied to the installed engine
+- **When** the engine is driven with `roll("1d4@2")` in this app's headless-Chromium WebGL
+  setup
+- **Then** the returned d4 result has `value` equal to `2` and `reason` equal to `"forced"`
+- **And** the call returns without hanging
+
+#### Scenario: Forced d4 does not hang at a high iteration limit
+
+- **Given** the vendored patch is applied to the installed engine
+- **When** the engine is driven with `roll("1d4@3")` configured with `iterationLimit: 20000`
+- **Then** the roll settles and returns within the hook's bounded roll timeout, showing
+  face `3`
+
+#### Scenario: Missing patch degrades to the instant reveal, never a hang
+
+- **Given** a checkout where the install-time patch step did not run, so the engine still
+  ignores `@` notation for d4
+- **When** the user rolls a staged pool of `3d4` with animation enabled
+- **Then** the reconciliation step detects a face mismatch for the d4 group
+- **And** the result modal is revealed promptly through the instant path with the correct
+  total
+- **And** no roll hangs and no die value is altered
+
+#### Scenario: Install-time patch failure is visible in CI
+
+- **Given** the patch file no longer applies cleanly to the pinned engine version
+- **When** dependencies are installed in CI
+- **Then** the install step fails with a non-zero exit code before the unit and e2e jobs run
+
+#### Scenario: A guard test catches a silently absent patch
+
+- **Given** the engine file is installed
+- **When** the unit test suite runs
+- **Then** a test asserts the installed engine file contains the patch's marker string and
+  fails if it is absent
+
+---
+
 ### Requirement: ADDED Dismissing the roll overlay leaves the dice panel open
 
 _(Added 2026-08-30, `add-dice-roll-animation`.)_ The system SHALL keep the dice-roll overlay and its total modal visible until the user dismisses them by pressing Escape or clicking/tapping outside the modal. Dismissal SHALL close only the overlay; the `GlobalDiceFab` dice panel SHALL remain open with the staged pool and modifier unchanged. The overlay's key/pointer dismissal handling SHALL take precedence over the dice panel's own Escape/outside-click close (see `dice-pool-shared-state` capability) so that a single Escape press does not also close the panel. A new roll while an overlay is open SHALL tear down that overlay and show a single new one (never two stacked overlays).
@@ -449,6 +538,7 @@ _(Added 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL cause `G
 - (2026-08-29, `decouple-dice-roll-capability`) Proposal "What Changes" (`GlobalDiceFab` updated to submit directly) → Requirements: MODIFIED "Send to session chat" option, ADDED Sending to session chat succeeds whether or not CampaignChat is mounted
 - (2026-08-30, `add-dice-roll-animation`) 3D animation of staged dice + total modal → Requirement: ADDED Rolling plays a dice animation then a total modal
 - (2026-08-30, `improve-dice-roll-animation`, issue #596) larger centered dice, result modal gated on animation completion, animated-dice cap 30 → 15, progressive down-scaling past 6 dice → Requirement: ADDED (modified) Rolling plays a dice animation then a total modal. See `openspec/changes/archive/2026-08-30-improve-dice-roll-animation/`.
+- (2026-08-31, `restore-d4-forced-face-support`, issue #627) d4 forced-face support restored via a vendored `patch-package` patch against `@drdreo/dice-box-threejs@1.1.0`; `toDiceBoxNotation` forces d4, no code path special-cases `sides === 4` → Requirements: ADDED (modified) Rolling plays a dice animation then a total modal; ADDED The 3D dice engine's d4 forced-face support is restored via a vendored patch. See `openspec/changes/archive/2026-08-31-restore-d4-forced-face-support/`.
 - (2026-08-30, `add-dice-roll-animation`) overlay persists, dismiss closes only the overlay → Requirement: ADDED Dismissing the roll overlay leaves the dice panel open
 - (2026-08-30, `add-dice-roll-animation`) "Disable Animation" checkbox, reduced-motion default, stored override → Requirement: ADDED Animation preference follows reduced-motion until explicitly set
 - (2026-08-30, `add-dice-roll-animation`) "Send to session chat" → persisted checkbox, auto-submit on Roll, animate after persist → Requirement: MODIFIED "Send to session chat" option. See `openspec/changes/archive/2026-08-30-add-dice-roll-animation/tasks.md`.
@@ -485,6 +575,17 @@ _(Added 2026-08-30, `fix-dice-animation-predetermined-faces`.)_
   `roll()` / `reroll()` call
 - **And** the result modal reveal for a matched roll occurs within the existing animation
   timeout budget with no added delay
+
+#### Scenario: Forced d4 settles within the roll timeout budget
+
+_(Added 2026-08-31, `restore-d4-forced-face-support`.)_
+
+- **Given** the vendored engine patch is applied and animation is enabled
+- **When** a `3d4` pool is animated in headless-Chromium WebGL in CI
+- **Then** the engine reports the roll settled before the hook's `ROLL_TIMEOUT` /
+  `iterationLimit` bound elapses, using the same shared bound as every other die size
+- **And** the e2e case completes within the dice-animation spec's existing per-test wait
+  budget
 
 ### Reliability — roll animation
 
@@ -532,6 +633,26 @@ _(Added 2026-08-30, `fix-dice-animation-predetermined-faces`.)_
   persistent-unsupported warning
 - **And** a second mismatch within the same mounted hook does not emit a further event
 - **And** no error message or broken overlay is shown to the user
+
+#### Scenario: Recovery after a mismatched d4 tumble does not disable later animations
+
+_(Added 2026-08-31, `restore-d4-forced-face-support`.)_
+
+- **Given** a d4 pool in the current mounted session was revealed via the reconciliation
+  mismatch path (patch absent)
+- **When** the user rolls again with animation enabled
+- **Then** the 3D dice animation is attempted again for the new roll, and the dice animation
+  status is not latched to `unsupported`
+
+#### Scenario: CI applies the patch before tests
+
+_(Added 2026-08-31, `restore-d4-forced-face-support`.)_
+
+- **Given** the CI pipeline runs `npm ci`
+- **When** the install completes
+- **Then** the `postinstall` patch step has run and the marker guard test passes in the unit
+  job before the e2e job starts
+- **And** no workflow step passes `--ignore-scripts` to an npm install
 
 ### Security
 
