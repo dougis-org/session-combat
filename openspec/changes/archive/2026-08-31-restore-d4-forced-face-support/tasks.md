@@ -163,15 +163,15 @@ Ownership metadata:
 
 ### Task 8 — Upstream PR to `drdreo/dice-box-threejs` _(parallel; not a merge gate)_
 
-- [x] Upstream contribution package prepared (source-form one-line fix for
-  `swapDiceFace_D4`, `git apply` patch, PR title/body, manual-verification
-  snippet — the repo has no test suite). Handoff to the repo owner to fork
-  `drdreo/dice-box-threejs` and push under their account.
-- [ ] Open the PR; paste its URL here:
-  `Upstream PR: <URL — fill in before archive>`.
-- [ ] Link the upstream PR from a comment on issue #627.
-- **Verify:** PR URL recorded in this file; upstream merge is **not** required to
-  proceed.
+- [x] Forked `drdreo/dice-box-threejs`, applied the source-form one-line fix on
+  branch `dougis:fix/d4-forced-face` (`swapDiceFace_D4` clears `dicemesh.result`
+  after the geometry swap; the repo has no test suite so verification is the
+  manual snippet in the PR body).
+- [x] Opened the PR: **`Upstream PR: https://github.com/drdreo/dice-box-threejs/pull/2`**
+- [x] Linked from a comment on issue #627.
+- **Verify:** PR URL recorded here and on #627; upstream merge is **not** required.
+  Follow-up: when it merges and a release ships, bump `@drdreo/dice-box-threejs`
+  and drop `patches/@drdreo+dice-box-threejs+1.1.0.patch` + the `postinstall` hook.
 
 ### Task 9 — Confirm acceptance criteria
 
