@@ -36,8 +36,8 @@ All work happens inside the dedicated worktree
 
 ### E0 — Issue lifecycle: mark in-progress
 
-- [ ] Run `gh issue edit 624 --add-label "in-progress"`.
-- [ ] Discover the linked GitHub Project
+- [x] Run `gh issue edit 624 --add-label "in-progress"`.
+- [x] Discover the linked GitHub Project
   (`gh project list --owner dougis-org --format json`), resolve the "In Progress"
   status option, and move the item via `gh project item-edit`. If no project item
   is found, log a warning and continue. If the `gh` token lacks the `project`
@@ -180,19 +180,19 @@ All work happens inside the dedicated worktree
 
 ## Validation
 
-- [ ] `npm run test:unit` — all pass (rewritten `useDiceAnimation`, new
+- [x] `npm run test:unit` — all pass (rewritten `useDiceAnimation`, new
   `reconcileDiceFaces`, retuned `diceAnimationScale`, `DiceRollOverlay`,
   `toDiceBoxNotation` tests).
 - [ ] `npm run test:integration` — all pass.
 - [ ] `npm run test:e2e -- tests/e2e/dice-roll-animation.spec.ts` then the full
   `npm run test:regression` — all pass.
-- [ ] `npm run typecheck` — no errors.
-- [ ] `npm run lint` — no errors.
-- [ ] `npm run build` — succeeds; `@drdreo/dice-box-threejs` / `three` /
+- [x] `npm run typecheck` — no errors.
+- [x] `npm run lint` — no errors.
+- [x] `npm run build` — succeeds; `@drdreo/dice-box-threejs` / `three` /
   `cannon-es` are in an async chunk, not the initial bundle.
 - [ ] Verity pre-commit / pre-push gate — no findings (fix, do not waive).
 - [ ] Codacy checks — no new issues.
-- [ ] Throwaway spike files removed; `@3d-dice/dice-box` fully gone from
+- [x] Throwaway spike files removed; `@3d-dice/dice-box` fully gone from
   `package.json`, lockfile, `types/`, and code; no stray `node_modules` /
   `.worktrees` content staged.
 - [ ] All completed tasks marked `[x]`.
@@ -220,15 +220,15 @@ If any required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent ran and all findings were
+- [x] Ensure the `openspec-review-code` sub-agent ran and all findings were
   addressed before the final commit.
-- [ ] Commit all changes to `fix-dice-animation-predetermined-faces` and push.
-- [ ] Open a PR from `fix-dice-animation-predetermined-faces` to `main`. The PR
+- [x] Commit all changes to `fix-dice-animation-predetermined-faces` and push.
+- [x] Open a PR from `fix-dice-animation-predetermined-faces` to `main`. The PR
   body MUST include `Closes #624`. Search `.github/PULL_REQUEST_TEMPLATE*` and
   follow the template if present. Call out the new dependencies
   (`@drdreo/dice-box-threejs`, `three`, `cannon-es`) and the removal of
   `@3d-dice/dice-box` explicitly.
-- [ ] **Issue lifecycle: mark in-review** — run
+- [x] **Issue lifecycle: mark in-review** — run
   `gh issue edit 624 --add-label "in-review" --remove-label "in-progress"`, then
   move the project item to "In Review" (same discovery pattern as E0; warn and
   skip if not found).
