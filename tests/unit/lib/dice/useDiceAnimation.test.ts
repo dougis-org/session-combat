@@ -168,15 +168,9 @@ describe('useDiceAnimation — lazy import', () => {
     renderHook(() => useDiceAnimation())
     expect(ctorMock).not.toHaveBeenCalled()
   })
-
-  it('useDiceAnimation.ts imports the engine dynamically, not at module top level', () => {
-    const fs = require('fs') as typeof import('fs')
-    const path = require('path') as typeof import('path')
-    const src = fs.readFileSync(path.resolve(__dirname, '../../../../lib/dice/useDiceAnimation.ts'), 'utf8')
-    // a value (non-type) top-level import would put the engine in the initial bundle
-    expect(src).not.toMatch(/^import (?!type )[^\n]*['"]@drdreo\/dice-box-threejs['"]/m)
-    expect(src).toMatch(/import\(\s*['"]@drdreo\/dice-box-threejs['"]\s*\)/)
-  })
+  // The engine is loaded via `import('@drdreo/dice-box-threejs')` inside run(); that it
+  // stays out of the initial bundle is asserted by the build-time NFAC check (tasks E8),
+  // not a source-string regex here.
 })
 
 describe('useDiceAnimation — settle + reconciliation', () => {
@@ -206,6 +200,44 @@ describe('useDiceAnimation — settle + reconciliation', () => {
 
     expect(rollMock).toHaveBeenCalledWith('2d20@14,2')
     expect(addMock).toHaveBeenCalledWith('1d6@5')
+  })
+
+  it('drives a 3-die-size pool with roll() then add() per extra group, in first-seen order', async () => {
+    stubWebGL(true)
+    const three: BuiltRoll = {
+      formula: '2d20+1d6+1d8', rolls: [14, 2, 5, 8], total: 29,
+      breakdown: [
+        { sides: 20, value: 14 }, { sides: 20, value: 2 },
+        { sides: 6, value: 5 }, { sides: 8, value: 8 },
+      ],
+      modifier: 0,
+    }
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    await act(async () => { await result.current.run(three, container) })
+
+    expect(rollMock).toHaveBeenCalledWith('2d20@14,2')
+    expect(addMock.mock.calls.map(c => c[0])).toEqual(['1d6@5', '1d8@8'])
+    expect(warnSpy).not.toHaveBeenCalled()
+  })
+
+  it('a mismatch in an add() group (not the first roll group) still routes to the instant reveal', async () => {
+    stubWebGL(true)
+    const mixed: BuiltRoll = {
+      formula: '2d20+1d6', rolls: [14, 2, 5], total: 21,
+      breakdown: [{ sides: 20, value: 14 }, { sides: 20, value: 2 }, { sides: 6, value: 5 }], modifier: 0,
+    }
+    // only the d6 (add group) settles wrong
+    faceOverride = (n, forced) => (n.startsWith('1d6') ? forced.map(d => ({ ...d, value: d.value + 1 })) : forced)
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    let outcome: boolean | undefined
+    await act(async () => { outcome = await result.current.run(mixed, container) })
+
+    expect(outcome).toBe(true)
+    expect(result.current.status).toBe('idle')
+    expect(warnSpy).toHaveBeenCalledTimes(1)
+    expect(warnSpy.mock.calls[0][0]).toMatch(/did not match/i)
   })
 
   it('a face mismatch resolves true, keeps status idle, and warns exactly once (distinct message)', async () => {

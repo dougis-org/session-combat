@@ -49,6 +49,9 @@ test.describe("GlobalDiceFab — roll animation smoke", () => {
       .split(",")
       .map((s) => Number(s.trim()))
       .sort((a, b) => a - b);
+    await expect(resultModal.getByTestId("die-face")).toHaveCount(
+      inlineFaces.length,
+    );
     const modalFaces = (
       await resultModal.getByTestId("die-face").allTextContents()
     )
@@ -82,6 +85,7 @@ test.describe("GlobalDiceFab — roll animation smoke", () => {
     await expect(resultModal).toContainText(String(value));
 
     // The two d10 faces shown decode to the modal total.
+    await expect(resultModal.getByTestId("die-face")).toHaveCount(2);
     const [tensText, onesText] = await resultModal
       .getByTestId("die-face")
       .allTextContents();

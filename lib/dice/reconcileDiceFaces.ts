@@ -28,10 +28,9 @@ function multisetEqual(a: number[], b: number[]): boolean {
  *
  * `plan` is the per-die-size groups from `toDiceBoxNotation`; `settled` is the flattened
  * dice the engine reported. The comparison is per die-size group as an unordered multiset
- * over the first `plan[i].values.length` settled dice of that size, so a different
- * ordering or an extra
- * cocked-die result the engine may return is not a false mismatch. d10 `0`/`10` faces are
- * normalized first.
+ * over the first `plan[i].values.length` settled dice of that size, so neither a different
+ * ordering nor an extra cocked-die result the engine may return is a false mismatch. d10
+ * `0`/`10` faces are normalized first.
  *
  * Groups the engine cannot force (d4, `forced: false`) are still compared — they are
  * expected to mismatch, which is exactly what routes the roll to the instant reveal.

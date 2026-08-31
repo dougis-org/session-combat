@@ -18,15 +18,16 @@ export const IMPORT_TIMEOUT_MS = 15000
 export const INIT_TIMEOUT_MS = 6000
 /**
  * Cap on how long the settle (`box.roll()` plus one `box.add()` per extra die-size group)
- * may stay pending. The engine exposes no way to abort a wedged settle (lost WebGL
- * context, throttled tab, or the d4 forced-roll hang the Decision 1 spike observed), so
- * once this elapses we stop waiting, tear the box down, and resolve `run()` — keeping the
+ * may stay pending. The engine exposes no way to abort a wedged settle — a lost WebGL
+ * context, a throttled background tab, or a physics solve that never converges — so once
+ * this elapses we stop waiting, tear the box down, and resolve `run()`, keeping the
  * completion signal bounded for every caller.
  */
 export const ROLL_TIMEOUT_MS = 12000
 
-/** Physics-solver effort for forcing `@` faces — high enough to land d6..d20, low enough
- * not to spin on a d4 (which cannot be forced). */
+/** Physics-solver effort for forcing `@` faces. High enough to land d6..d20 reliably; kept
+ * modest so a bad solve fails fast rather than spinning. (d4 is never forced — see
+ * `toDiceBoxNotation` — so it does not reach this path with an `@` target.) */
 const ITERATION_LIMIT = 2000
 
 /** True only when a real WebGL context can be created. */

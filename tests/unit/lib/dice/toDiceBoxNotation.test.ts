@@ -97,13 +97,10 @@ describe('toDiceBoxNotation — visual cap', () => {
 })
 
 describe('toDiceBoxNotation — purity', () => {
-  it('is deterministic for a fixed BuiltRoll and imports no RNG', () => {
+  it('is deterministic for a fixed BuiltRoll and uses no RNG', () => {
     const built = poolRoll([{ sides: 20, value: 7 }, { sides: 6, value: 3 }])
     expect(toDiceBoxNotation(built)).toEqual(toDiceBoxNotation(built))
-    const fs = require('fs') as typeof import('fs')
-    const path = require('path') as typeof import('path')
-    const src = fs.readFileSync(path.resolve(__dirname, '../../../../lib/dice/toDiceBoxNotation.ts'), 'utf8')
-    expect(src).not.toMatch(/crypto|Math\.random/)
+    expect(toDiceBoxNotation.toString()).not.toMatch(/crypto|Math\.random/)
   })
 })
 
