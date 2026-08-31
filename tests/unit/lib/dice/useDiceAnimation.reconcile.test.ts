@@ -113,7 +113,7 @@ describe('useDiceAnimation — settle + reconciliation', () => {
     errSpy.mockRestore()
   })
 
-  it('a d4 pool always mismatches (engine cannot force d4) → reveal without tumble, no @ notation sent', async () => {
+  it('a d4 pool is forced with @ notation and reconciles like any other size (#627)', async () => {
     stubWebGL(true)
     const d4roll: BuiltRoll = {
       formula: '2d4',
@@ -127,9 +127,80 @@ describe('useDiceAnimation — settle + reconciliation', () => {
     let outcome: boolean | undefined
     await act(async () => { outcome = await result.current.run(d4roll, container) })
 
-    expect(rollMock).toHaveBeenCalledWith('2d4')
+    // Same per-group path as every other size: forced "@" notation, no d4 branch.
+    expect(rollMock).toHaveBeenCalledWith('2d4@1,2')
     expect(outcome).toBe(true)
     expect(result.current.status).toBe('idle')
+    expect(warnSpy).not.toHaveBeenCalled()
+  })
+
+  it('a mixed d4 + d6 pool drives roll(d4) then add(d6) — no +-joined notation (#627)', async () => {
+    stubWebGL(true)
+    const mixed: BuiltRoll = {
+      formula: '2d4+1d6',
+      rolls: [1, 4, 5],
+      total: 10,
+      breakdown: [{ sides: 4, value: 1 }, { sides: 4, value: 4 }, { sides: 6, value: 5 }],
+      modifier: 0,
+    }
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    let outcome: boolean | undefined
+    await act(async () => { outcome = await result.current.run(mixed, container) })
+
+    expect(rollMock).toHaveBeenCalledWith('2d4@1,4')
+    expect(addMock).toHaveBeenCalledWith('1d6@5')
+    expect(outcome).toBe(true)
+    expect(result.current.status).toBe('idle')
+    expect(warnSpy).not.toHaveBeenCalled()
+  })
+
+  it('a d4 pool with the engine patch absent (natural faces) degrades to the instant reveal, never a hang (#627)', async () => {
+    stubWebGL(true)
+    // Simulate the unpatched engine: d4 ignores "@" and settles naturally.
+    engineMock.faceOverride = (_n, forced) =>
+      forced.map(d => (d.sides === 4 ? { ...d, value: (d.value % 4) + 1 } : d))
+    const d4roll: BuiltRoll = {
+      formula: '3d4',
+      rolls: [1, 2, 4],
+      total: 7,
+      breakdown: [{ sides: 4, value: 1 }, { sides: 4, value: 2 }, { sides: 4, value: 4 }],
+      modifier: 0,
+    }
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    let outcome: boolean | undefined
+    await act(async () => { outcome = await result.current.run(d4roll, container) })
+
+    expect(outcome).toBe(true)
+    expect(result.current.status).toBe('idle') // not latched to 'unsupported'
+    expect(warnSpy).toHaveBeenCalledTimes(1)
+    expect(warnSpy.mock.calls[0][0]).toMatch(/did not match/i)
+  })
+
+  it('the decided roll (total/rolls/breakdown) is identical on the d4 match and mismatch paths (#627)', async () => {
+    stubWebGL(true)
+    const d4roll: BuiltRoll = {
+      formula: '3d4',
+      rolls: [1, 2, 4],
+      total: 7,
+      breakdown: [{ sides: 4, value: 1 }, { sides: 4, value: 2 }, { sides: 4, value: 4 }],
+      modifier: 0,
+    }
+    const snapshot = JSON.stringify(d4roll)
+    const container = document.createElement('div')
+
+    // Match path (patch present).
+    const a = renderHook(() => useDiceAnimation())
+    await act(async () => { await a.result.current.run(d4roll, container) })
+    expect(JSON.stringify(d4roll)).toBe(snapshot)
+
+    // Mismatch path (patch absent — engine settles d4 naturally).
+    engineMock.faceOverride = (_n, forced) =>
+      forced.map(d => (d.sides === 4 ? { ...d, value: (d.value % 4) + 1 } : d))
+    const b = renderHook(() => useDiceAnimation())
+    await act(async () => { await b.result.current.run(d4roll, container) })
+    expect(JSON.stringify(d4roll)).toBe(snapshot)
   })
 
   it('a second mismatch in the same mount does not warn again', async () => {

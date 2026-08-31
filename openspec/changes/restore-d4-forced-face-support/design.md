@@ -316,3 +316,40 @@
 - Spike outcomes to be recorded here after Task 1: (a) exact defect location and
   patch size; (b) confirmation the hang shares the root cause; (c) forced-d4
   settle-iteration count and whether `iterationLimit` needs raising.
+
+### Spike findings (Task 1, 2026-08-30) — go/no-go: **GO, defect is SMALL**
+
+Harness: standalone Playwright (`chromium`, headless, swiftshader WebGL) serving
+the real vendored `dist/dice-box-threejs.es.js` + assets; drove `box.roll()`
+directly.
+
+- **Reproduced (stock engine):** `roll("1d4@2")` → `{value: 1, reason:
+  "natural"}`; `roll("3d4@1,2,4")` → all `reason: "natural"`, wrong values.
+  Control `roll("1d6@5")` → `{value: 5, reason: "forced"}` (non-d4 forcing works).
+- **Hang:** `roll("1d4@3")` at `iterationLimit: 20000` did **not** hang in this
+  headless-swiftshader setup — it returned promptly (~2.4s) with the wrong
+  (natural) value. The reported hang is environment-dependent; the shared root
+  cause is confirmed by the fix resolving both symptoms.
+- **Defect location:** `swapDiceFace_D4(e, t)` in the engine bundle (minified;
+  `es.js` ~line 19059). The non-d4 `swapDiceFace` ends with `e.geometry = a,
+  e.result = []` — clearing the natural value stored during `simulateThrow()` so
+  `throwFinished()` re-reads the rotated geometry after the real throw and
+  restores the value with `reason: "forced"`. **`swapDiceFace_D4` rotates the
+  material indices correctly but never clears `e.result`**, so `throwFinished()`
+  sees `result.length > 0`, skips the re-store, and the stale natural value +
+  `"natural"` reason are what the roll returns. The index/rotation math is
+  already correct (`h = M_nat + (target - natural) - 1`, wrap 1..4, `+1` →
+  `getFaceValue` returns `target`).
+- **Patch size:** one line — append `e.result = [];` at the end of
+  `swapDiceFace_D4` (with the `/* d4-forced-face patch #627 */` marker).
+- **Verified (patched engine, same harness):** `roll("1d4@2")` → `{value: 2,
+  reason: "forced"}`; `roll("1d4@3")` at `il: 20000` → `{value: 3, reason:
+  "forced"}` in ~1.7s; `roll("3d4@1,2,4")` → values `[1,2,4]` correct. Control
+  `1d6@5` still forced.
+- **Known-benign residual:** when a d4's natural landing already equals its
+  target, `swapDiceFace` is not invoked at all (engine-wide behavior for every
+  die size, not d4-specific), so `reason` stays `"natural"` while `value` is
+  correct. The app reconciles by face **value** (multiset), so this is not a
+  correctness issue and is out of scope.
+- **`iterationLimit`:** no bump needed. Forced-d4 wall-clock (~1.7–2.1s) is on par
+  with forced-d6 (~2.1–2.6s); both well inside `ROLL_TIMEOUT_MS` (12000).

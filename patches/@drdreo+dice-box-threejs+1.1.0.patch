@@ -1,0 +1,12 @@
+diff --git a/node_modules/@drdreo/dice-box-threejs/dist/dice-box-threejs.es.js b/node_modules/@drdreo/dice-box-threejs/dist/dice-box-threejs.es.js
+index f7bf691..35a8c2b 100644
+--- a/node_modules/@drdreo/dice-box-threejs/dist/dice-box-threejs.es.js
++++ b/node_modules/@drdreo/dice-box-threejs/dist/dice-box-threejs.es.js
+@@ -19074,6 +19074,7 @@ class i0 {
+       }
+     }
+     s != 0 && (s < 0 && (s += 4), e.material = this.DiceFactory.createMaterials(n, 0, 0, !1, s)), e.geometry = o;
++    e.result = []; /* d4-forced-face patch #627 */
+   }
+   spawnDice(e, t = !1) {
+     const { pos: n, axis: i, angle: s, velocity: o } = e;

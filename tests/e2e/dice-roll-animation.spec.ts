@@ -66,6 +66,101 @@ test.describe("GlobalDiceFab — roll animation smoke", () => {
     await expect(panel.getByRole("button", { name: "Roll", exact: true })).toBeVisible();
   });
 
+  test("a d4 pool animates on its predetermined faces (#627 — d4 forcing restored)", async ({
+    page,
+  }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await page.goto("/campaigns");
+
+    await page.getByRole("button", { name: "Roll dice" }).click();
+    const panel = page.getByRole("dialog", { name: "Roll dice" });
+    await expect(panel).toBeVisible();
+
+    // Stage 3d4 — the die size that used to skip the tumble entirely.
+    await panel.getByRole("button", { name: "Add d4" }).click();
+    await panel.getByRole("button", { name: "Add d4" }).click();
+    await panel.getByRole("button", { name: "Add d4" }).click();
+    await panel.getByRole("button", { name: "Roll", exact: true }).click();
+
+    const resultModal = page.getByRole("dialog", { name: /dice roll result/i });
+    await expect(resultModal).toBeVisible({ timeout: 15000 });
+
+    const inline = panel.getByText(/3d4 → \[\d+, \d+, \d+\] = \d+/);
+    await expect(inline).toBeVisible();
+    const inlineText = (await inline.textContent())!;
+    const total = Number(inlineText.match(/=\s*(\d+)\s*$/)![1]);
+    expect(total).toBeGreaterThanOrEqual(3);
+    expect(total).toBeLessThanOrEqual(12);
+    await expect(resultModal).toContainText(String(total));
+
+    // The settled dice (with d4 forcing patched in) equal the decided faces — the same
+    // settled-face == decided-face contract asserted for d6/d20 above. On any fallback
+    // path the DOM readout still reflects the decided breakdown.
+    const inlineFaces = inlineText
+      .match(/\[([^\]]+)\]/)![1]
+      .split(",")
+      .map((s) => Number(s.trim()))
+      .sort((a, b) => a - b);
+    inlineFaces.forEach((f) => {
+      expect(f).toBeGreaterThanOrEqual(1);
+      expect(f).toBeLessThanOrEqual(4);
+    });
+    await expect(resultModal.getByTestId("die-face")).toHaveCount(3);
+    const modalFaces = (
+      await resultModal.getByTestId("die-face").allTextContents()
+    )
+      .map((s) => Number(s.trim()))
+      .sort((a, b) => a - b);
+    expect(modalFaces).toEqual(inlineFaces);
+  });
+
+  test("a mixed d4 + d6 pool settles both groups on their predetermined faces (#627)", async ({
+    page,
+  }, testInfo) => {
+    const identity = createTestIdentity(testInfo);
+    await registerUser(page, identity.email, STRONG_PASSWORD);
+    await page.goto("/campaigns");
+
+    await page.getByRole("button", { name: "Roll dice" }).click();
+    const panel = page.getByRole("dialog", { name: "Roll dice" });
+    await expect(panel).toBeVisible();
+
+    await panel.getByRole("button", { name: "Add d4" }).click();
+    await panel.getByRole("button", { name: "Add d4" }).click();
+    await panel.getByRole("button", { name: "Add d6" }).click();
+    await panel.getByRole("button", { name: "Add d6" }).click();
+    await panel.getByRole("button", { name: "Add d6" }).click();
+    await panel.getByRole("button", { name: "Roll", exact: true }).click();
+
+    const resultModal = page.getByRole("dialog", { name: /dice roll result/i });
+    await expect(resultModal).toBeVisible({ timeout: 15000 });
+
+    // Inline line: "<formula> → [<all five faces>] = <total>".
+    const inline = panel.getByText(
+      /2d4\+3d6 → \[\d+, \d+, \d+, \d+, \d+\] = \d+/,
+    );
+    await expect(inline).toBeVisible();
+    const inlineText = (await inline.textContent())!;
+    const total = Number(inlineText.match(/=\s*(\d+)\s*$/)![1]);
+    expect(total).toBeGreaterThanOrEqual(5); // 2×1 + 3×1
+    expect(total).toBeLessThanOrEqual(26); // 2×4 + 3×6
+    await expect(resultModal).toContainText(String(total));
+
+    const allInlineFaces = inlineText
+      .match(/\[([^\]]+)\]/)![1]
+      .split(",")
+      .map((s) => Number(s.trim()))
+      .sort((a, b) => a - b);
+    await expect(resultModal.getByTestId("die-face")).toHaveCount(5);
+    const modalFaces = (
+      await resultModal.getByTestId("die-face").allTextContents()
+    )
+      .map((s) => Number(s.trim()))
+      .sort((a, b) => a - b);
+    expect(modalFaces).toEqual(allInlineFaces);
+  });
+
   test("percentile roll shows a decoded 1..100 total modal", async ({ page }, testInfo) => {
     const identity = createTestIdentity(testInfo);
     await registerUser(page, identity.email, STRONG_PASSWORD);

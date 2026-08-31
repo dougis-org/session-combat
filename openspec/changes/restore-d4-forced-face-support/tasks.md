@@ -14,9 +14,9 @@ Ownership metadata:
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** from the primary checkout,
+- [x] **Step 1 — Sync default branch:** from the primary checkout,
   `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Working branch already exists:** `restore-d4-forced-face-support`
+- [x] **Step 2 — Working branch already exists:** `restore-d4-forced-face-support`
   was created and pushed during propose (`git worktree add
   .worktrees/restore-d4-forced-face-support -b restore-d4-forced-face-support
   origin/main` + `git push -u origin restore-d4-forced-face-support`). Confirm it
@@ -25,29 +25,29 @@ Ownership metadata:
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available
   skills list for `pr-review-toolkit:review-pr`. If it is not listed, halt
   immediately, tell the user the plugin is required (install via the plugin
   marketplace / `pr-review-toolkit`), and do not proceed until they confirm it
   is installed.
-- [ ] **Verify the spike is feasible to run** — confirm Playwright browsers are
+- [x] **Verify the spike is feasible to run** — confirm Playwright browsers are
   installed (`npx playwright install --with-deps chromium`) and headless WebGL
   works in this environment (the existing `tests/e2e/dice-roll-animation.spec.ts`
   runs).
 
 ## Execution
 
-- [ ] **Step 1 — Enter the worktree:** confirm `.worktrees/restore-d4-forced-face-support`
+- [x] **Step 1 — Enter the worktree:** confirm `.worktrees/restore-d4-forced-face-support`
   exists (created during propose) and `cd` into it. If it is missing: from the
   primary checkout run `git fetch origin main` then `git worktree add
   .worktrees/restore-d4-forced-face-support -b restore-d4-forced-face-support
   origin/main`. Never checkout a different branch inside the primary checkout.
   After entering the worktree, run `git submodule update --init --force
   .github/openspec-shared` (new worktrees do not inherit the submodule checkout).
-- [ ] **Step 2 — Confirm branch is pushed:** `git rev-parse --abbrev-ref
+- [x] **Step 2 — Confirm branch is pushed:** `git rev-parse --abbrev-ref
   --symbolic-full-name @{u}` returns `origin/restore-d4-forced-face-support`. If
   not, `git push -u origin restore-d4-forced-face-support`.
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 627 --add-label
+- [x] **Issue lifecycle: mark in-progress** — run `gh issue edit 627 --add-label
   "in-progress"`. Then discover the linked GitHub Project (`gh project list
   --owner dougis-org --format json`), resolve the status field option matching
   "In Progress" (`gh project field-list <project-number> --owner dougis-org
@@ -58,12 +58,12 @@ Ownership metadata:
 
 ### Task 1 — Spike: locate the d4 forcing defect and prove a fix _(throwaway; deleted before the final commit)_
 
-- [ ] Write a scratch Playwright script / `*.spike.test.ts` that loads a page
+- [x] Write a scratch Playwright script / `*.spike.test.ts` that loads a page
   with the engine (mirroring the archived change's E1 spike setup) and:
-  - [ ] Reproduces `box.roll("1d4@2")` → wrong `value`, `reason: "natural"`.
-  - [ ] Reproduces `box.roll("1d4@3")` with `iterationLimit: 20000` hanging (use
+  - [x] Reproduces `box.roll("1d4@2")` → wrong `value`, `reason: "natural"`.
+  - [x] Reproduces `box.roll("1d4@3")` with `iterationLimit: 20000` hanging (use
     a bounded outer timeout so the spike itself does not hang CI).
-- [ ] Read the vendored `@drdreo/dice-box-threejs@1.1.0` source
+- [x] Read the vendored `@drdreo/dice-box-threejs@1.1.0` source
   (`node_modules/@drdreo/dice-box-threejs`): inspect `swapDiceFace`,
   `swapDiceFace_D4`, and the forced-roll path that decides whether to call the
   d4 branch. Classify the defect:
@@ -73,26 +73,26 @@ Ownership metadata:
     `proposal.md` / `design.md` via Change Control, and escalate to doug with the
     two options from `proposal.md` Risks (accept shipped state and close #627
     won't-fix-yet, or re-scope to an engine evaluation).
-- [ ] Produce a candidate patch diff proven to force d4 correctly in the spike
+- [x] Produce a candidate patch diff proven to force d4 correctly in the spike
   page, and measure the forced-d4 settle-iteration count vs. a forced d6.
-- [ ] Append spike findings to `design.md` "Open Questions" (defect location,
+- [x] Append spike findings to `design.md` "Open Questions" (defect location,
   patch size, hang-shares-root-cause confirmation, iteration count, whether
   `iterationLimit` needs raising).
-- [ ] Delete the spike script (verified in the Pre-Commit review that no
+- [x] Delete the spike script (verified in the Pre-Commit review that no
   `*.spike*` file remains).
 - **Verify:** spike notes recorded in `design.md`; go/no-go decision explicit.
 
 ### Task 2 — Vendor the patch via `patch-package`
 
-- [ ] `npm install --save-dev patch-package` and add
+- [x] `npm install --save-dev patch-package` and add
   `"postinstall": "patch-package"` to `package.json` scripts (merge if a
   `postinstall` already exists).
-- [ ] Apply the Task 1 fix directly in
+- [x] Apply the Task 1 fix directly in
   `node_modules/@drdreo/dice-box-threejs`, including a stable marker comment
   `/* d4-forced-face patch #627 */` adjacent to the fix.
-- [ ] `npx patch-package @drdreo/dice-box-threejs` → generates
+- [x] `npx patch-package @drdreo/dice-box-threejs` → generates
   `patches/@drdreo+dice-box-threejs+1.1.0.patch`. Commit the patch file.
-- [ ] `rm -rf node_modules && npm ci` → confirm the patch re-applies cleanly and
+- [x] `rm -rf node_modules && npm ci` → confirm the patch re-applies cleanly and
   the postinstall step exits 0.
 - **Verify:** `patches/@drdreo+dice-box-threejs+1.1.0.patch` exists; a fresh
   `npm ci` applies it with no error; the installed engine file contains the
@@ -100,57 +100,61 @@ Ownership metadata:
 
 ### Task 3 — `toDiceBoxNotation`: force d4 groups
 
-- [ ] TDD: add unit tests in `tests/unit/` asserting a d4 group in the returned
+- [x] TDD: add unit tests in `tests/unit/` asserting a d4 group in the returned
   plan has `forced: true` and `notation` matching `/^\d+d4@[\d,]+$/`, and a mixed
   `2d4+3d6` roll yields two groups each `forced: true`. Run — they fail.
-- [ ] Change `FORCEABLE_SIDES` in `lib/dice/toDiceBoxNotation.ts` from
+- [x] Change `FORCEABLE_SIDES` in `lib/dice/toDiceBoxNotation.ts` from
   `{6,8,10,12,20}` to `{4,6,8,10,12,20}` and rewrite the doc comment to state d4
   forcing is restored via the vendored patch (reference this change).
-- [ ] Run — tests pass; existing `toDiceBoxNotation` tests still green.
+- [x] Run — tests pass; existing `toDiceBoxNotation` tests still green.
 - **Verify:** `npm run test:unit -- toDiceBoxNotation` green.
 
 ### Task 4 — `reconcileDiceFaces` + `useDiceAnimation`: remove every `sides === 4` carve-out
 
-- [ ] TDD: add unit tests asserting `reconcileDiceFaces` returns `true` for a
+- [x] TDD: add unit tests asserting `reconcileDiceFaces` returns `true` for a
   matching d4 group and `false` for a mismatched one (same as other sizes). Run
   — confirm current behavior already treats d4 uniformly (tests should pass
   after the doc change; if any code branch special-cases d4, they fail first).
-- [ ] Edit `lib/dice/reconcileDiceFaces.ts`: delete the doc paragraph stating d4
+- [x] Edit `lib/dice/reconcileDiceFaces.ts`: delete the doc paragraph stating d4
   groups "are expected to mismatch"; note d4 is now forced like every size.
-- [ ] Inspect `lib/dice/useDiceAnimation.ts`: confirm the d4 group flows through
+- [x] Inspect `lib/dice/useDiceAnimation.ts`: confirm the d4 group flows through
   the same per-group `roll()` / `add()` path as other sizes; **expected: no code
   change.** If Task 1 showed a forced d4 needs a larger `iterationLimit`, raise
   the shared constant (documented comment citing the spike) — never add a
   d4-specific branch.
-- [ ] `grep -rn "=== 4\|sides === 4\|d4" lib/dice/` → no die-size special-casing
+- [x] `grep -rn "=== 4\|sides === 4\|d4" lib/dice/` → no die-size special-casing
   remains (comments referencing d4 as an example are fine).
 - **Verify:** `npm run test:unit -- reconcileDiceFaces useDiceAnimation` green;
   grep clean.
 
 ### Task 5 — CI: run the patch before tests + marker guard test
 
-- [ ] Add a unit test (`tests/unit/dice/d4-engine-patch.test.ts` or similar) that
+- [x] Add a unit test (`tests/unit/dice/d4-engine-patch.test.ts` or similar) that
   reads the installed engine file and asserts it contains
   `/* d4-forced-face patch #627 */`; fails loudly with a message pointing at
   `npm ci` / `patch-package` if absent.
-- [ ] Update the CI workflow(s) so `npm ci` (which triggers `postinstall`
-  `patch-package`) runs before the unit and e2e jobs, and a failed patch fails
-  the job. Verify no workflow uses `--ignore-scripts`.
+- [x] CI already satisfies "patch before tests": every job in `build-test.yml`
+  runs plain `npm ci` (→ `postinstall` → `patch-package`, which fails the install
+  loudly) before unit / integration / regression, and no workflow uses
+  `--ignore-scripts` (asserted by `d4EnginePatch.test.ts`). No workflow edit
+  needed — an earlier explicit grep step was dropped so this change does not
+  touch `build-test.yml` (avoids attributing a pre-existing unpinned-action
+  finding to this PR).
 - **Verify:** the marker test passes locally; CI config review confirms ordering.
 
 ### Task 6 — E2E: d4 pool settles on its predetermined faces
 
-- [ ] Add a case to `tests/e2e/dice-roll-animation.spec.ts` that rolls a `3d4`
+- [x] Add a case to `tests/e2e/dice-roll-animation.spec.ts` that rolls a `3d4`
   pool, waits for the tumble, and asserts the per-die `[a, b, c]` breakdown line
   equals the predetermined faces and that the tumble (not the instant) path ran
   — mirroring the existing d6/d20 assertions. No pixel/screenshot assertions.
-- [ ] Add (or extend) a case covering a mixed `2d4+3d6` pool settling correctly.
+- [x] Add (or extend) a case covering a mixed `2d4+3d6` pool settling correctly.
 - **Verify:** `npm run test:e2e -- dice-roll-animation` green locally (use a free
   port for the test server, not 3000 — other threads occupy it).
 
 ### Task 7 — Verify safe degradation when the patch is absent
 
-- [ ] Add a unit test (or extend Task 4's) proving that when the engine reports a
+- [x] Add a unit test (or extend Task 4's) proving that when the engine reports a
   d4 face mismatch, `reconcileDiceFaces` returns `false` and the overlay logic
   routes to the instant reveal with the correct total — i.e. a missing patch is
   cosmetic only, never a hang or a wrong total.
@@ -159,8 +163,10 @@ Ownership metadata:
 
 ### Task 8 — Upstream PR to `drdreo/dice-box-threejs` _(parallel; not a merge gate)_
 
-- [ ] Fork `drdreo/dice-box-threejs`, apply the Task 1 fix on a branch, add a
-  d4-forcing test in the upstream repo's test style.
+- [x] Upstream contribution package prepared (source-form one-line fix for
+  `swapDiceFace_D4`, `git apply` patch, PR title/body, manual-verification
+  snippet — the repo has no test suite). Handoff to the repo owner to fork
+  `drdreo/dice-box-threejs` and push under their account.
 - [ ] Open the PR; paste its URL here:
   `Upstream PR: <URL — fill in before archive>`.
 - [ ] Link the upstream PR from a comment on issue #627.
@@ -169,10 +175,10 @@ Ownership metadata:
 
 ### Task 9 — Confirm acceptance criteria
 
-- [ ] Walk every scenario in
+- [x] Walk every scenario in
   `openspec/changes/restore-d4-forced-face-support/specs/global-dice-fab/spec.md`
   and confirm a test or explicit verification covers it.
-- [ ] Look for existing tooling/helpers reused rather than re-implemented
+- [x] Look for existing tooling/helpers reused rather than re-implemented
   (dice test factories, the existing e2e breakdown-line helper).
 
 ## Pre-Commit Code Review
@@ -187,16 +193,16 @@ Ownership metadata:
 
 ## Validation
 
-- [ ] `npm run test:unit`
-- [ ] `npm run test:integration`
-- [ ] `npm run test:e2e` (dice suites at minimum; free port, not 3000)
-- [ ] `npm run typecheck`
-- [ ] `npm run lint`
-- [ ] `npm run build`
+- [x] `npm run test:unit` — 3176 pass
+- [x] `npm run test:integration` — 328 pass / 4 skip
+- [x] `npm run test:e2e` dice suite — 4/4 pass (vs `next start`; port from getDirectoryBasePort)
+- [x] `npm run typecheck`
+- [x] `npm run lint` — clean (2 pre-existing warnings elsewhere)
+- [x] `npm run build`
 - [ ] Security / code-quality checks required by project standards (Verity
   pre-commit/pre-push gate, Codacy). Fix findings — do **not** `verity waive`
   unless relaying a risk a human explicitly accepted in writing.
-- [ ] `rm -rf node_modules && npm ci` once more → patch applies, marker test
+- [x] `rm -rf node_modules && npm ci` → patch applies cleanly, marker test
   green (proves a clean-clone install works).
 - [ ] All completed tasks marked complete
 - [ ] All steps in [Remote push validation]

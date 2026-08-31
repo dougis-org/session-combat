@@ -32,8 +32,11 @@ function multisetEqual(a: number[], b: number[]): boolean {
  * ordering nor an extra cocked-die result the engine may return is a false mismatch. d10
  * `0`/`10` faces are normalized first.
  *
- * Groups the engine cannot force (d4, `forced: false`) are still compared — they are
- * expected to mismatch, which is exactly what routes the roll to the instant reveal.
+ * Every die size is compared the same way — d4 included (the vendored engine patch,
+ * `restore-d4-forced-face-support` / #627, restored d4 `@` forcing, so `toDiceBoxNotation`
+ * marks d4 groups `forced: true` like every other size). If that patch is ever absent the
+ * d4 group simply mismatches here and the roll reveals through the instant path — no code
+ * path special-cases `sides === 4`.
  *
  * Pure; no library import. Returns `true` when every group matches.
  */
