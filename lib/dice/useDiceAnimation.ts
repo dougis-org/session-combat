@@ -1,25 +1,34 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { DiceResults } from '@drdreo/dice-box-threejs'
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { animatedDiceCount, toDiceBoxNotation } from '@/lib/dice/toDiceBoxNotation'
 import { diceAnimationScale } from '@/lib/dice/diceAnimationScale'
+import { reconcileDiceFaces, type SettledDie } from '@/lib/dice/reconcileDiceFaces'
 
 /** `'idle'` while the 3D path is (or may be) usable; `'unsupported'` once it has failed. */
 export type DiceAnimationStatus = 'idle' | 'unsupported'
 
-const ASSET_PATH = '/dice-box/assets/'
-/** Cap on how long the lazy `import('@3d-dice/dice-box')` chunk may take to load. */
+/** Where `scripts/vendor-dice-assets.mjs` places the engine's textures under `public/`. */
+const ASSET_PATH = '/dice-box-threejs/'
+/** Cap on how long the lazy `import('@drdreo/dice-box-threejs')` chunk may take to load. */
 export const IMPORT_TIMEOUT_MS = 15000
-/** Cap on how long `box.init()` (WebGL context + asset/WASM load) may stay pending. */
+/** Cap on how long `box.initialize()` (WebGL context + texture load) may stay pending. */
 export const INIT_TIMEOUT_MS = 6000
 /**
- * Cap on how long `box.roll()` may stay pending. dice-box `^1.1.4` exposes no way to abort a
- * wedged settle (lost WebGL context, throttled tab), so once this elapses we stop waiting,
- * tear the box down, and resolve `run()` — keeping the completion signal bounded for every
- * caller rather than leaving hang-recovery to each consumer.
+ * Cap on how long the settle (`box.roll()` plus one `box.add()` per extra die-size group)
+ * may stay pending. The engine exposes no way to abort a wedged settle — a lost WebGL
+ * context, a throttled background tab, or a physics solve that never converges — so once
+ * this elapses we stop waiting, tear the box down, and resolve `run()`, keeping the
+ * completion signal bounded for every caller.
  */
 export const ROLL_TIMEOUT_MS = 12000
+
+/** Physics-solver effort for forcing `@` faces. High enough to land d6..d20 reliably; kept
+ * modest so a bad solve fails fast rather than spinning. (d4 is never forced — see
+ * `toDiceBoxNotation` — so it does not reach this path with an `@` target.) */
+const ITERATION_LIMIT = 2000
 
 /** True only when a real WebGL context can be created. */
 function hasWebGL(): boolean {
@@ -50,9 +59,24 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label = 'dice-box init'
 }
 
 interface DiceBoxLike {
-  init: () => Promise<unknown>
-  roll: (notation: string) => Promise<unknown>
-  clear: () => void
+  initialize: () => Promise<unknown>
+  roll: (notation: string) => Promise<DiceResults>
+  add: (notation: string) => Promise<unknown>
+  getDiceResults: () => DiceResults
+  clearDice: () => void
+}
+
+/** Thrown internally when the engine's settled faces do not match the decided roll. */
+class FaceMismatchError extends Error {
+  constructor() {
+    super('dice-box settled faces did not match the decided roll')
+    this.name = 'FaceMismatchError'
+  }
+}
+
+/** Flatten the engine's grouped results into a flat list of settled dice. */
+function flattenSettled(results: DiceResults): SettledDie[] {
+  return results.sets.flatMap(set => set.rolls.map(die => ({ sides: die.sides, value: die.value })))
 }
 
 export interface DiceAnimation {
@@ -60,12 +84,12 @@ export interface DiceAnimation {
   /**
    * Play the predetermined tumble for `built` inside `container`. Resolves to `true` once
    * the tumble for this roll is **over and this run is still the current one** — whether the
-   * dice settled cleanly or `box.roll()` failed / hit `ROLL_TIMEOUT_MS` (either way the
-   * animation is done and the caller should reveal the result). Resolves to `false` when the
-   * reveal is not this run's job: WebGL unavailable or a library/asset/init failure (these
-   * also set `status` to `'unsupported'` and log once, and the caller reveals off that), or
-   * the run was superseded by a later `run()` / `teardown()`. Callers therefore need no
-   * external staleness bookkeeping. `run()` is self-bounded (`IMPORT_TIMEOUT_MS` +
+   * dice settled on the decided faces, the engine settled on other faces (reconciliation
+   * mismatch), or the settle failed / hit `ROLL_TIMEOUT_MS` (either way the animation is
+   * done and the caller should reveal the result). Resolves to `false` when the reveal is
+   * not this run's job: WebGL unavailable or a library/asset/init failure (these also set
+   * `status` to `'unsupported'` and log once), or the run was superseded by a later
+   * `run()` / `teardown()`. `run()` is self-bounded (`IMPORT_TIMEOUT_MS` +
    * `INIT_TIMEOUT_MS` + `ROLL_TIMEOUT_MS`). A second `run()` while one is active tears the
    * first down first (single-instance invariant).
    */
@@ -79,6 +103,7 @@ export function useDiceAnimation(): DiceAnimation {
   const boxRef = useRef<DiceBoxLike | null>(null)
   const unsupportedRef = useRef(false)
   const loggedRef = useRef(false)
+  const mismatchLoggedRef = useRef(false)
   const webglOkRef = useRef<boolean | null>(null)
   const runIdRef = useRef(0)
 
@@ -87,7 +112,7 @@ export function useDiceAnimation(): DiceAnimation {
     runIdRef.current += 1
     if (boxRef.current) {
       try {
-        boxRef.current.clear()
+        boxRef.current.clearDice()
       } catch {
         /* box already gone */
       }
@@ -122,22 +147,27 @@ export function useDiceAnimation(): DiceAnimation {
       teardown()
       const myRun = runIdRef.current
 
+      const plan = toDiceBoxNotation(built)
+      // Nothing to animate (e.g. a modifier-only formula) — let the caller reveal at once.
+      if (plan.groups.length === 0) return runIdRef.current === myRun
+
       let box: DiceBoxLike | undefined
       try {
-        const mod = await withTimeout(import('@3d-dice/dice-box'), IMPORT_TIMEOUT_MS, 'dice-box import')
+        const mod = await withTimeout(
+          import('@drdreo/dice-box-threejs'),
+          IMPORT_TIMEOUT_MS,
+          'dice-box import',
+        )
         if (runIdRef.current !== myRun) return false
         const DiceBox = mod.default
-        // dice-box v1.1.x wants a single config object with a CSS *selector* string.
-        if (!container.id) container.id = 'dice-roll-canvas'
-        box = new DiceBox({
-          container: `#${container.id}`,
+        box = new DiceBox(container, {
           assetPath: ASSET_PATH,
-          theme: 'default',
-          // Enlarge the dice well past the library default (5) and shrink them progressively
-          // once more than six animate, so the settled cluster fits above the result modal.
-          scale: diceAnimationScale(animatedDiceCount(built)),
+          baseScale: diceAnimationScale(animatedDiceCount(built)),
+          sounds: false,
+          shadows: false,
+          iterationLimit: ITERATION_LIMIT,
         }) as unknown as DiceBoxLike
-        await withTimeout(box.init(), INIT_TIMEOUT_MS)
+        await withTimeout(box.initialize(), INIT_TIMEOUT_MS)
       } catch (err) {
         if (runIdRef.current === myRun) {
           // Genuine failure for the current run — latch the whole session to the instant path.
@@ -147,7 +177,7 @@ export function useDiceAnimation(): DiceAnimation {
           // A stale run (a newer run() or teardown already superseded it): clear only our own
           // half-built box and leave the current run's shared state untouched.
           try {
-            box.clear()
+            box.clearDice()
           } catch {
             /* nothing to clear */
           }
@@ -157,7 +187,7 @@ export function useDiceAnimation(): DiceAnimation {
 
       if (!box || runIdRef.current !== myRun) {
         try {
-          box?.clear()
+          box?.clearDice()
         } catch {
           /* nothing to clear */
         }
@@ -165,19 +195,43 @@ export function useDiceAnimation(): DiceAnimation {
       }
       boxRef.current = box
 
-      // A per-roll failure (malformed notation) or a settle that never completes tears the
-      // box down and logs, but must NOT latch the whole session to the instant path. Either
-      // way the tumble for this roll is over — report "reveal the modal" so the caller does
-      // not wait out the overlay's fallback for a roll we already know has finished.
+      // A per-roll failure (settle error / timeout) or a reconciliation mismatch (the engine
+      // settled on faces other than the decided ones — always the case for a d4, which the
+      // engine cannot force) tears the box down and logs, but must NOT latch the whole
+      // session to the instant path. Either way the tumble for this roll is over — report
+      // "reveal the modal" so the caller does not wait out the overlay's fallback.
       try {
-        await withTimeout(box.roll(toDiceBoxNotation(built)), ROLL_TIMEOUT_MS, 'dice-box roll')
+        const activeBox = box
+        await withTimeout(
+          (async () => {
+            await activeBox.roll(plan.groups[0].notation)
+            for (const group of plan.groups.slice(1)) {
+              await activeBox.add(group.notation)
+            }
+            const settled = flattenSettled(activeBox.getDiceResults())
+            if (!reconcileDiceFaces(plan.groups, settled)) {
+              throw new FaceMismatchError()
+            }
+          })(),
+          ROLL_TIMEOUT_MS,
+          'dice-box roll',
+        )
       } catch (err) {
-        console.error('[dice-animation] roll failed', err)
-        // Drop the failed box without bumping the run token — this run still owns its reveal,
-        // and the next run() teardown (or an explicit teardown) will re-arm the 3D path.
+        if (err instanceof FaceMismatchError) {
+          if (!mismatchLoggedRef.current) {
+            mismatchLoggedRef.current = true
+            console.warn(
+              '[dice-animation] settled faces did not match the decided roll; revealing the result without the tumble',
+            )
+          }
+        } else {
+          console.error('[dice-animation] roll failed', err)
+        }
+        // Drop the box without bumping the run token — this run still owns its reveal, and
+        // the next run() teardown (or an explicit teardown) re-arms the 3D path.
         if (boxRef.current === box) {
           try {
-            box.clear()
+            box.clearDice()
           } catch {
             /* box already gone */
           }

@@ -11,6 +11,7 @@ import {
 } from '@/lib/dice/useDiceAnimation'
 import { DIE_ICONS, DiceD10Icon } from '@/lib/components/icons/dice'
 import type { DieSides } from '@/lib/utils/dice'
+import { DICE_ANIM_CAP } from '@/lib/dice/toDiceBoxNotation'
 
 function StaticRollResult({ built }: { built: BuiltRoll }) {
   if (built.percentileFaces && built.percentileFaces.length >= 2) {
@@ -20,13 +21,13 @@ function StaticRollResult({ built }: { built: BuiltRoll }) {
       <div className="flex flex-row justify-center gap-4 mt-4 mb-2">
         <div className="relative w-16 h-16 text-gray-300">
           <DiceD10Icon className="w-full h-full" />
-          <span className="absolute inset-0 flex items-center justify-center text-xl font-bold mt-2">
+          <span data-testid="die-face" className="absolute inset-0 flex items-center justify-center text-xl font-bold mt-2">
             {tens}
           </span>
         </div>
         <div className="relative w-16 h-16 text-gray-300">
           <DiceD10Icon className="w-full h-full" />
-          <span className="absolute inset-0 flex items-center justify-center text-xl font-bold mt-2">
+          <span data-testid="die-face" className="absolute inset-0 flex items-center justify-center text-xl font-bold mt-2">
             {ones}
           </span>
         </div>
@@ -34,14 +35,19 @@ function StaticRollResult({ built }: { built: BuiltRoll }) {
     )
   }
 
+  // Above the animation cap the tumble only ever shows the first DICE_ANIM_CAP dice, so the
+  // readout matches it and adds a "+N more" note. The total below is always the full pool.
+  const shown = built.breakdown.slice(0, DICE_ANIM_CAP)
+  const remainder = built.breakdown.length - shown.length
+
   return (
-    <div className="flex flex-row flex-wrap justify-center gap-4 mt-4 mb-2 max-w-[80vw]">
-      {built.breakdown.map((die, idx) => {
+    <div className="flex flex-row flex-wrap justify-center items-center gap-4 mt-4 mb-2 max-w-[80vw]">
+      {shown.map((die, idx) => {
         const Icon = DIE_ICONS[die.sides as DieSides]
         if (!Icon) {
           return (
             <div key={idx} data-testid="fallback-die" className="relative w-12 h-12 text-gray-300 border-2 border-gray-400 rounded-md flex items-center justify-center">
-              <span className="text-lg font-bold">
+              <span data-testid="die-face" className="text-lg font-bold">
                 {die.value}
               </span>
             </div>
@@ -50,17 +56,22 @@ function StaticRollResult({ built }: { built: BuiltRoll }) {
         return (
           <div key={idx} className="relative w-12 h-12 text-gray-300">
             <Icon className="w-full h-full" />
-            <span className="absolute inset-0 flex items-center justify-center text-lg font-bold">
+            <span data-testid="die-face" className="absolute inset-0 flex items-center justify-center text-lg font-bold">
               {die.value}
             </span>
           </div>
         )
       })}
+      {remainder > 0 && (
+        <span data-testid="dice-readout-remainder" className="text-lg font-bold text-gray-400">
+          +{remainder} more
+        </span>
+      )}
     </div>
   )
 }
 
-/** Stable id so `@3d-dice/dice-box` can be handed a CSS selector for its mount point. */
+/** Stable id for the dice engine's mount point / a CSS selector into it. */
 export const DICE_ROLL_CANVAS_ID = 'dice-roll-canvas'
 
 /**

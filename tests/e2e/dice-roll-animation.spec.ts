@@ -40,6 +40,25 @@ test.describe("GlobalDiceFab — roll animation smoke", () => {
     expect(total).toBeLessThanOrEqual(12);
     await expect(resultModal).toContainText(String(total));
 
+    // The per-die readout in the modal must show the SAME faces as the inline
+    // [a, b] line — not just the matching aggregate total. With the forced-face
+    // engine the settled dice equal the decided roll; on any fallback path the
+    // DOM readout still reflects the decided breakdown.
+    const inlineFaces = (await inline.textContent())!
+      .match(/\[([^\]]+)\]/)![1]
+      .split(",")
+      .map((s) => Number(s.trim()))
+      .sort((a, b) => a - b);
+    await expect(resultModal.getByTestId("die-face")).toHaveCount(
+      inlineFaces.length,
+    );
+    const modalFaces = (
+      await resultModal.getByTestId("die-face").allTextContents()
+    )
+      .map((s) => Number(s.trim()))
+      .sort((a, b) => a - b);
+    expect(modalFaces).toEqual(inlineFaces);
+
     // Escape dismisses only the overlay; the panel stays open with the pool intact.
     await page.keyboard.press("Escape");
     await expect(resultModal).toBeHidden();
@@ -64,5 +83,15 @@ test.describe("GlobalDiceFab — roll animation smoke", () => {
     expect(value).toBeGreaterThanOrEqual(1);
     expect(value).toBeLessThanOrEqual(100);
     await expect(resultModal).toContainText(String(value));
+
+    // The two d10 faces shown decode to the modal total.
+    await expect(resultModal.getByTestId("die-face")).toHaveCount(2);
+    const [tensText, onesText] = await resultModal
+      .getByTestId("die-face")
+      .allTextContents();
+    const tens = tensText.trim() === "00" ? 0 : Number(tensText.trim()) / 10;
+    const ones = onesText.trim() === "0" ? 0 : Number(onesText.trim());
+    const decoded = tens * 10 + ones || 100;
+    expect(decoded).toBe(value);
   });
 });

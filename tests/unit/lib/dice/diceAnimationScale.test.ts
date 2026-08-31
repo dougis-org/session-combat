@@ -40,7 +40,9 @@ describe('diceAnimationScale', () => {
     }
   })
 
-  it('exposes a base scale well above the library default of 5', () => {
-    expect(DICE_BASE_SCALE).toBeGreaterThan(5)
+  it('exposes a positive base scale in @drdreo/dice-box-threejs baseScale units', () => {
+    expect(DICE_BASE_SCALE).toBeGreaterThan(0)
+    expect(DICE_MIN_SCALE).toBeGreaterThan(0)
+    expect(DICE_MIN_SCALE).toBeLessThan(DICE_BASE_SCALE)
   })
 })

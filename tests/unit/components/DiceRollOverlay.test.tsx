@@ -293,4 +293,55 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
     expect(opener).toHaveFocus()
     opener.remove()
   })
+
+  describe('per-die readout', () => {
+    it('renders every die value and the total for a small pool', () => {
+      render(<DiceRollOverlay built={built} disableAnimation animationSettled onClose={jest.fn()} />)
+      const dialog = screen.getByRole('dialog')
+      expect(dialog).toHaveTextContent('3')
+      expect(dialog).toHaveTextContent('4')
+      expect(dialog).toHaveTextContent('5')
+      expect(screen.getByText('14')).toBeInTheDocument()
+      expect(screen.queryByTestId('dice-readout-remainder')).not.toBeInTheDocument()
+    })
+
+    it('caps at DICE_ANIM_CAP dice and shows a "+N more" indicator for a large pool; total is the full-pool total', () => {
+      const breakdown = Array.from({ length: 120 }, () => ({ sides: 6, value: 4 }))
+      const big: BuiltRoll = {
+        formula: '120d6', rolls: breakdown.map(d => d.value), total: 480, breakdown, modifier: 0,
+      }
+      render(<DiceRollOverlay built={big} disableAnimation animationSettled onClose={jest.fn()} />)
+      // 15 icon dice rendered (each glyph superimposes its value)
+      const dialog = screen.getByRole('dialog')
+      expect(dialog.querySelectorAll('svg').length).toBe(15)
+      expect(screen.getByTestId('dice-readout-remainder')).toHaveTextContent('+105 more')
+      expect(screen.getByText('480')).toBeInTheDocument()
+    })
+
+    it('is present on the unsupported reveal path', () => {
+      render(
+        <DiceRollOverlay
+          built={built}
+          disableAnimation={false}
+          animationStatus="unsupported"
+          onClose={jest.fn()}
+        />,
+      )
+      const dialog = screen.getByRole('dialog')
+      expect(dialog).toHaveTextContent('3')
+      expect(dialog).toHaveTextContent('4')
+      expect(dialog).toHaveTextContent('5')
+    })
+
+    it('shows the two d10 faces and decoded total for a percentile roll', () => {
+      const pct: BuiltRoll = {
+        formula: 'd%', rolls: [42], total: 42, breakdown: [], modifier: 0, percentileFaces: [4, 2],
+      }
+      render(<DiceRollOverlay built={pct} disableAnimation animationSettled onClose={jest.fn()} />)
+      const dialog = screen.getByRole('dialog')
+      expect(dialog).toHaveTextContent('40')
+      expect(dialog).toHaveTextContent('2')
+      expect(screen.getByText('42')).toBeInTheDocument()
+    })
+  })
 })

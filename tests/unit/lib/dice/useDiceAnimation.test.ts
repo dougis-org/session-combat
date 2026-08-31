@@ -1,46 +1,26 @@
 import { renderHook, act } from '@testing-library/react'
-import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { useDiceAnimation } from '@/lib/dice/useDiceAnimation'
 import { DICE_BASE_SCALE, diceAnimationScale } from '@/lib/dice/diceAnimationScale'
+import {
+  engineMock,
+  resetEngineMock,
+  built,
+  poolBuilt,
+  stubWebGL,
+} from './__helpers__/diceAnimationHarness'
 
-const rollMock = jest.fn().mockResolvedValue([])
-const initMock = jest.fn().mockResolvedValue(undefined)
-const clearMock = jest.fn()
-const ctorMock = jest.fn()
+// The reconciliation-specific behaviour lives in `useDiceAnimation.reconcile.test.ts`;
+// this file covers degradation, laziness, the single-instance invariant, scale, and the
+// bounded-settle backstop. Both share the engine stand-in in `./__helpers__`.
+jest.mock('@drdreo/dice-box-threejs', () =>
+  require('./__helpers__/diceAnimationHarness').diceBoxMockFactory(),
+)
 
-jest.mock('@3d-dice/dice-box', () => ({
-  __esModule: true,
-  default: class {
-    constructor(...args: unknown[]) {
-      ctorMock(...args)
-    }
-    init = initMock
-    roll = rollMock
-    clear = clearMock
-  },
-}))
-
-const built: BuiltRoll = {
-  formula: '2d6', rolls: [3, 4], total: 7,
-  breakdown: [{ sides: 6, value: 3 }, { sides: 6, value: 4 }], modifier: 0,
-}
-
-function stubWebGL(available: boolean) {
-  const original = HTMLCanvasElement.prototype.getContext
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(function (this: HTMLCanvasElement, type: string, ...rest: unknown[]) {
-      if (type === 'webgl' || type === 'experimental-webgl') {
-        return available ? ({} as unknown as RenderingContext) : null
-      }
-      return (original as (...a: unknown[]) => unknown).call(this, type, ...rest) as RenderingContext | null
-    })
-}
-
+const { ctorMock, clearMock, rollMock, initMock } = engineMock
 let warnSpy: jest.SpyInstance
 
 beforeEach(() => {
-  jest.clearAllMocks()
+  resetEngineMock()
   warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
 })
 
@@ -49,43 +29,38 @@ afterEach(() => {
   jest.restoreAllMocks()
 })
 
-describe('useDiceAnimation — degradation', () => {
-  it('WebGL unavailable → run() resolves immediately, status is unsupported, logs once', async () => {
+describe('useDiceAnimation — degradation (persistent)', () => {
+  it('WebGL unavailable → run() resolves false, status unsupported, logs once', async () => {
     stubWebGL(false)
     const container = document.createElement('div')
     const { result } = renderHook(() => useDiceAnimation())
 
-    await act(async () => {
-      await result.current.run(built, container)
-    })
+    let outcome: boolean | undefined
+    await act(async () => { outcome = await result.current.run(built, container) })
 
+    expect(outcome).toBe(false)
     expect(result.current.status).toBe('unsupported')
     expect(ctorMock).not.toHaveBeenCalled()
     expect(warnSpy).toHaveBeenCalledTimes(1)
 
-    // a second roll does not log again
-    await act(async () => {
-      await result.current.run(built, container)
-    })
+    await act(async () => { await result.current.run(built, container) })
     expect(warnSpy).toHaveBeenCalledTimes(1)
   })
 
-  it('library init rejection → instant resolve, single log, status unsupported', async () => {
+  it('initialize() rejection → instant resolve false, single log, status unsupported, roll not attempted', async () => {
     stubWebGL(true)
     initMock.mockRejectedValueOnce(new Error('asset load failed'))
     const container = document.createElement('div')
     const { result } = renderHook(() => useDiceAnimation())
 
-    await act(async () => {
-      await result.current.run(built, container)
-    })
+    await act(async () => { await result.current.run(built, container) })
 
     expect(result.current.status).toBe('unsupported')
     expect(warnSpy).toHaveBeenCalledTimes(1)
     expect(rollMock).not.toHaveBeenCalled()
   })
 
-  it('a stale run\'s init failure does not latch the hook or disturb the newer run', async () => {
+  it("a stale run's init failure does not latch the hook or disturb the newer run", async () => {
     stubWebGL(true)
     let rejectFirstInit!: (e: unknown) => void
     initMock
@@ -97,71 +72,43 @@ describe('useDiceAnimation — degradation', () => {
     await act(async () => {
       const stale = result.current.run(built, container)
       await new Promise(r => setTimeout(r, 0))
-      // a newer run supersedes while the first is still initialising
       await result.current.run(built, container)
-      // now the stale init fails
       rejectFirstInit(new Error('slow asset load, too late'))
       await stale
     })
 
-    // the stale failure must NOT flip the hook to unsupported
     expect(result.current.status).toBe('idle')
     expect(warnSpy).not.toHaveBeenCalled()
   })
 })
 
-describe('useDiceAnimation — dynamic import is lazy', () => {
-  it('the 3D library constructor is never invoked when run() is not called', () => {
+describe('useDiceAnimation — lazy import', () => {
+  it('the engine constructor is never invoked until run() is called', () => {
     stubWebGL(true)
     renderHook(() => useDiceAnimation())
     expect(ctorMock).not.toHaveBeenCalled()
   })
+  // The engine is loaded via `import('@drdreo/dice-box-threejs')` inside run(); that it
+  // stays out of the initial bundle is asserted by the build-time NFAC check (tasks E8),
+  // not a source-string regex here.
 })
 
 describe('useDiceAnimation — single-instance invariant', () => {
-  it('a second run() tears down the first box before starting a new one', async () => {
+  it('a second run() clears the first box before constructing a new one', async () => {
     stubWebGL(true)
     const container = document.createElement('div')
     const { result } = renderHook(() => useDiceAnimation())
-
-    await act(async () => {
-      await result.current.run(built, container)
-    })
+    await act(async () => { await result.current.run(built, container) })
     expect(ctorMock).toHaveBeenCalledTimes(1)
-
-    await act(async () => {
-      await result.current.run(built, container)
-    })
-    // first box cleared before the second constructed
+    await act(async () => { await result.current.run(built, container) })
     expect(clearMock).toHaveBeenCalled()
     expect(ctorMock).toHaveBeenCalledTimes(2)
-  })
-
-  it('run() passes the predetermined notation to roll()', async () => {
-    stubWebGL(true)
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => {
-      await result.current.run(built, container)
-    })
-    expect(rollMock).toHaveBeenCalledWith('2d6@3,4')
-  })
-
-  it('run() resolves true when the roll settles as the current run', async () => {
-    stubWebGL(true)
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    let outcome: boolean | undefined
-    await act(async () => {
-      outcome = await result.current.run(built, container)
-    })
-    expect(outcome).toBe(true)
   })
 
   it('run() resolves false for a run superseded mid-tumble', async () => {
     stubWebGL(true)
     let resolveFirst: ((v: unknown) => void) | undefined
-    rollMock.mockImplementationOnce(() => new Promise(res => { resolveFirst = res }))
+    engineMock.rollOverride = () => new Promise(res => { resolveFirst = res })
     const container = document.createElement('div')
     const { result } = renderHook(() => useDiceAnimation())
 
@@ -171,139 +118,57 @@ describe('useDiceAnimation — single-instance invariant', () => {
       firstPromise = result.current.run(built, container)
       firstPromise.then(v => { firstOutcome = v })
       await new Promise(r => setTimeout(r, 0))
-      // supersede while the first roll is still pending
+      engineMock.rollOverride = null
       await result.current.run(built, container)
       resolveFirst!(undefined)
       await firstPromise
     })
     expect(firstOutcome).toBe(false)
   })
+})
 
-  it('run() resolves true when the roll fails but this run is still current', async () => {
-    stubWebGL(true)
-    rollMock.mockRejectedValueOnce(new Error('bad notation'))
-    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    let outcome: boolean | undefined
-    await act(async () => {
-      outcome = await result.current.run(built, container)
-    })
-    expect(outcome).toBe(true)
-    expect(result.current.status).toBe('idle')
-    errSpy.mockRestore()
-  })
-
-  it('run() resolves false when WebGL is unavailable', async () => {
-    stubWebGL(false)
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    let outcome: boolean | undefined
-    await act(async () => {
-      outcome = await result.current.run(built, container)
-    })
-    expect(outcome).toBe(false)
-  })
-
-  function poolBuilt(n: number): BuiltRoll {
-    const breakdown = Array.from({ length: n }, () => ({ sides: 6, value: 3 }))
-    return { formula: `${n}d6`, rolls: breakdown.map(d => d.value), total: n * 3, breakdown, modifier: 0 }
-  }
-
-  it('constructs DiceBox with an enlarged base scale for a 6-die roll', async () => {
+describe('useDiceAnimation — scale', () => {
+  it('constructs the engine with the base baseScale (and sounds off) for a 6-die roll', async () => {
     stubWebGL(true)
     const container = document.createElement('div')
     const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => {
-      await result.current.run(poolBuilt(6), container)
-    })
-    expect(ctorMock.mock.calls[0][0].scale).toBe(DICE_BASE_SCALE)
+    await act(async () => { await result.current.run(poolBuilt(6), container) })
+    expect(ctorMock.mock.calls[0][1].baseScale).toBe(DICE_BASE_SCALE)
+    expect(ctorMock.mock.calls[0][1].sounds).toBe(false)
   })
 
-  it('constructs DiceBox with a reduced scale when more than 6 dice animate', async () => {
+  it('constructs the engine with a reduced baseScale for >6 dice, capped at 15', async () => {
     stubWebGL(true)
     const container = document.createElement('div')
     const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => {
-      await result.current.run(poolBuilt(12), container)
-    })
-    expect(ctorMock.mock.calls[0][0].scale).toBe(diceAnimationScale(12))
-    expect(ctorMock.mock.calls[0][0].scale).toBeLessThan(DICE_BASE_SCALE)
+    await act(async () => { await result.current.run(poolBuilt(12), container) })
+    expect(ctorMock.mock.calls[0][1].baseScale).toBe(diceAnimationScale(12))
+    expect(ctorMock.mock.calls[0][1].baseScale).toBeLessThan(DICE_BASE_SCALE)
+
+    resetEngineMock()
+    await act(async () => { await result.current.run(poolBuilt(120), container) })
+    expect(ctorMock.mock.calls[0][1].baseScale).toBe(diceAnimationScale(15))
   })
 
-  it('caps the scale count at 15 for very large pools', async () => {
+  it('constructs the engine with the container element and a config object (2 args)', async () => {
     stubWebGL(true)
     const container = document.createElement('div')
     const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => {
-      await result.current.run(poolBuilt(120), container)
-    })
-    expect(ctorMock.mock.calls[0][0].scale).toBe(diceAnimationScale(15))
+    await act(async () => { await result.current.run(built, container) })
+    const call = ctorMock.mock.calls[0]
+    expect(call).toHaveLength(2)
+    expect(call[0]).toBe(container)
+    expect(typeof call[1]).toBe('object')
+    expect(call[1].assetPath).toBe('/dice-box-threejs/')
   })
+})
 
-  it('run() does not resolve until the mocked box.roll() resolves', async () => {
-    stubWebGL(true)
-    let resolveRoll: ((v: unknown) => void) | undefined
-    rollMock.mockImplementationOnce(() => new Promise(res => { resolveRoll = res }))
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-
-    let settled = false
-    await act(async () => {
-      const p = result.current.run(poolBuilt(2), container).then(() => { settled = true })
-      await new Promise(r => setTimeout(r, 0))
-      expect(rollMock).toHaveBeenCalled()
-      expect(settled).toBe(false)
-      resolveRoll!(undefined)
-      await p
-    })
-    expect(settled).toBe(true)
-  })
-
-  it('constructs DiceBox with a single config object carrying a CSS selector string', async () => {
-    // Regression guard: dice-box v1.1.x rejects a DOM element / two-arg form.
-    stubWebGL(true)
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => {
-      await result.current.run(built, container)
-    })
-    expect(ctorMock).toHaveBeenCalledTimes(1)
-    const [arg, ...rest] = ctorMock.mock.calls[0]
-    expect(rest).toHaveLength(0)
-    expect(typeof arg).toBe('object')
-    expect(typeof arg.container).toBe('string')
-    expect(arg.container.startsWith('#')).toBe(true)
-  })
-
-  it('a roll() rejection tears the box down but does NOT latch the instant path', async () => {
-    stubWebGL(true)
-    rollMock.mockRejectedValueOnce(new Error('bad notation'))
-    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-
-    await act(async () => {
-      await result.current.run(built, container)
-    })
-
-    expect(result.current.status).toBe('idle')
-    expect(clearMock).toHaveBeenCalled()
-    expect(errSpy).toHaveBeenCalled()
-    errSpy.mockRestore()
-
-    // the next roll still attempts the 3D path
-    await act(async () => {
-      await result.current.run(built, container)
-    })
-    expect(ctorMock).toHaveBeenCalledTimes(2)
-  })
-
-  it('a box.roll() that never settles is bounded — run() resolves, box torn down, status stays idle', async () => {
+describe('useDiceAnimation — bounded settle', () => {
+  it('a roll() that never settles is bounded — run() resolves true, box torn down, status idle', async () => {
     jest.useFakeTimers()
     try {
       stubWebGL(true)
-      rollMock.mockImplementationOnce(() => new Promise(() => {}))
+      engineMock.rollOverride = () => new Promise(() => {})
       const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
       const container = document.createElement('div')
       const { result } = renderHook(() => useDiceAnimation())
@@ -313,16 +178,13 @@ describe('useDiceAnimation — single-instance invariant', () => {
       let runPromise!: Promise<void>
       await act(async () => {
         runPromise = result.current.run(built, container).then(v => { settled = true; outcome = v })
-        // let the import / init chain settle (real microtasks), then trip the roll timeout
         for (let i = 0; i < 20; i++) await Promise.resolve()
-        expect(rollMock).toHaveBeenCalled()
         expect(settled).toBe(false)
         jest.advanceTimersByTime(12000)
         await runPromise
       })
 
       expect(settled).toBe(true)
-      // the tumble is over (unsuccessfully) but still this run's — caller should reveal
       expect(outcome).toBe(true)
       expect(result.current.status).toBe('idle')
       expect(clearMock).toHaveBeenCalled()
