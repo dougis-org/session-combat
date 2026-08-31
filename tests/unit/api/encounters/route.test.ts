@@ -139,6 +139,7 @@ describe("POST /api/encounters with campaignId", () => {
     moduleName: "mod",
     chapters: [],
     encounterIds: [],
+    partyIds: [],
     status: "active" as const,
     notes: "",
     createdAt: new Date(),

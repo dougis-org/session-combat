@@ -155,6 +155,7 @@ export function CampaignsContent() {
       name: '',
       moduleName: '',
       chapters: [],
+      partyIds: [],
       status: 'active',
       notes: '',
       createdAt: new Date(),

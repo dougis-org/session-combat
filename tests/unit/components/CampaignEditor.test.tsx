@@ -47,6 +47,7 @@ const BASE_CAMPAIGN: Campaign = {
   name: 'Test Campaign',
   moduleName: 'LMoP',
   chapters: [],
+  partyIds: [],
   status: 'planning',
   notes: '',
   createdAt: new Date('2026-01-01'),

@@ -46,6 +46,8 @@ export const POST = withAuth(async (request, auth) => {
         ? (status as (typeof CAMPAIGN_STATUSES)[number])
         : 'active';
 
+    const partyId = crypto.randomUUID();
+
     const campaign: Campaign = {
       id: crypto.randomUUID(),
       userId: auth.userId,
@@ -55,6 +57,7 @@ export const POST = withAuth(async (request, auth) => {
       currentChapterId: sanitizedCurrentChapterId,
       status: resolvedStatus,
       notes: typeof notes === 'string' ? notes : '',
+      partyIds: [partyId],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -62,12 +65,11 @@ export const POST = withAuth(async (request, auth) => {
     await storage.saveCampaign(campaign);
 
     const party: Party = {
-      id: crypto.randomUUID(),
+      id: partyId,
       userId: auth.userId,
       name: 'Main Party',
       description: '',
       members: [],
-      campaignId: campaign.id,
       createdAt: campaign.createdAt,
       updatedAt: campaign.updatedAt,
     };

@@ -63,6 +63,7 @@ const makeCampaign = (id: string, name: string): Campaign => ({
   name,
   moduleName: 'Test',
   chapters: [],
+  partyIds: [],
   status: 'active',
   notes: '',
   createdAt: new Date(),

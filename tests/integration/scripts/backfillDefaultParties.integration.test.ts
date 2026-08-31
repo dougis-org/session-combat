@@ -38,6 +38,7 @@ function seedCampaign(overrides: Partial<Campaign> = {}): Promise<Campaign> {
     name: "Test Campaign",
     moduleName: "",
     chapters: [],
+    partyIds: [],
     status: "active",
     notes: "",
     createdAt: new Date("2020-01-01"),

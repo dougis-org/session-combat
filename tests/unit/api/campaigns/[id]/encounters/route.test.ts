@@ -60,6 +60,7 @@ const CAMPAIGN: Campaign = {
   moduleName: "sunless-citadel",
   chapters: [],
   encounterIds: ["e1", "e2"],
+  partyIds: [],
   status: "active",
   notes: "",
   createdAt: new Date(),

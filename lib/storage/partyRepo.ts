@@ -79,10 +79,36 @@ export async function loadPartiesByCampaign(campaignId: string): Promise<Party[]
     { name: "loadPartiesByCampaign", collection: "parties", isEmpty: (res) => res.length === 0 },
     async () => {
       const db = await getDatabase();
-      const parties = await db
-        .collection<LegacyPartyDoc>("parties")
-        .find({ campaignId } as unknown as Filter<LegacyPartyDoc>)
-        .toArray();
+      
+      const campaign = await db.collection("campaigns").findOne({ id: campaignId });
+      let parties: LegacyPartyDoc[] = [];
+
+      if (campaign && campaign.partyIds !== undefined) {
+        if (campaign.partyIds.length > 0) {
+          parties = await db
+            .collection<LegacyPartyDoc>("parties")
+            .find({ id: { $in: campaign.partyIds } })
+            .toArray();
+        }
+      } else {
+        parties = await db
+          .collection<LegacyPartyDoc>("parties")
+          .find({ campaignId } as unknown as Filter<LegacyPartyDoc>)
+          .toArray();
+          
+        if (campaign) {
+          try {
+            const migratedPartyIds = parties.map(p => p.id);
+            await db.collection("campaigns").updateOne(
+              { id: campaignId },
+              { $set: { partyIds: migratedPartyIds } }
+            );
+          } catch (e) {
+            console.warn(`[migration] Failed to save migrated partyIds for campaign ${campaignId}:`, e);
+          }
+        }
+      }
+
       const duration = Date.now() - start;
       if (duration > 10) {
         console.log(`[perf] loadPartiesByCampaign ${campaignId}: ${duration}ms`);

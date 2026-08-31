@@ -35,18 +35,28 @@ export const POST = withAuth(async (request, auth) => {
 
     const members: PartyMember[] = ids.map(characterId => ({ characterId, addedAt: now }));
 
+    const partyId = crypto.randomUUID();
+
     const party: Party = {
-      id: crypto.randomUUID(),
+      id: partyId,
       userId: auth.userId,
       name: name.trim(),
       description: description?.trim() || '',
       members,
-      ...(typeof campaignId === 'string' && campaignId.trim() && { campaignId: campaignId.trim() }),
       createdAt: now,
       updatedAt: now,
     };
 
     await storage.saveParty(party);
+
+    if (typeof campaignId === 'string' && campaignId.trim()) {
+      try {
+        await storage.addPartyToCampaign(campaignId.trim(), partyId);
+      } catch (err) {
+        await storage.deleteParty(partyId, auth.userId);
+        throw err;
+      }
+    }
 
     return NextResponse.json(party, { status: 201 });
   } catch (error) {
