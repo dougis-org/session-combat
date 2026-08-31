@@ -211,13 +211,13 @@ Ownership metadata:
 - [x] `npm run typecheck`
 - [x] `npm run lint` — clean (2 pre-existing warnings elsewhere)
 - [x] `npm run build`
-- [ ] Security / code-quality checks required by project standards (Verity
+- [x] Security / code-quality checks required by project standards (Verity
   pre-commit/pre-push gate, Codacy). Fix findings — do **not** `verity waive`
   unless relaying a risk a human explicitly accepted in writing.
 - [x] `rm -rf node_modules && npm ci` → patch applies cleanly, marker test
   green (proves a clean-clone install works).
-- [ ] All completed tasks marked complete
-- [ ] All steps in [Remote push validation]
+- [x] All completed tasks marked complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -235,23 +235,23 @@ If ANY step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings
   addressed before the final commit
-- [ ] Commit all changes to `restore-d4-forced-face-support` and push
-- [ ] Open PR from `restore-d4-forced-face-support` to `main`. **PR body MUST
+- [x] Commit all changes to `restore-d4-forced-face-support` and push
+- [x] Open PR from `restore-d4-forced-face-support` to `main`. **PR body MUST
   include `Closes #627`.** Check for `.github/PULL_REQUEST_TEMPLATE` and follow it.
-- [ ] **Issue lifecycle: mark in-review** — `gh issue edit 627 --add-label
+- [x] **Issue lifecycle: mark in-review** — `gh issue edit 627 --add-label
   "in-review" --remove-label "in-progress"`; move the project item to the "In
   Review" column (same discovery pattern as in-progress; warn and skip if not
   found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
   findings (commit → [Remote push validation] → push → re-run) until zero
   findings remain. If findings persist after 3+ iterations with no progress,
   report the stall with remaining findings and wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes:** `gh pr merge
+- [x] **Enable auto-merge only after the review gate passes:** `gh pr merge
   <PR-URL> --auto --merge` (NEVER `--admin`; never push directly to `main`)
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state`
+- [x] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state`
   is `MERGED` (if `CLOSED`, exit and notify the user):
   1. **Build and tests** — run [Remote push validation]; fix failures, commit,
     push before anything else
@@ -261,7 +261,7 @@ If ANY step fails, iterate and fix before pushing.
   3. **CI check failures** — only after comments resolved, poll `gh pr checks
     <PR-URL>`; fix failing required checks, commit, validate, push, wait 180s;
     restart from step 1
-- [ ] Address every PR review comment before merge (project rule: resolve all PR
+- [x] Address every PR review comment before merge (project rule: resolve all PR
   comments).
 
 Blocking resolution flow:
@@ -279,46 +279,46 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (e.g. a
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (e.g. a
   `patches/README` or CONTRIBUTING note on the `patch-package` workflow;
   `.wolf/anatomy.md` + `.wolf/cerebrum.md` per project protocol)
-- [ ] Sync approved spec deltas into `openspec/specs/global-dice-fab/spec.md`.
+- [x] Sync approved spec deltas into `openspec/specs/global-dice-fab/spec.md`.
   After copying, update relative links that pointed into the change directory so
   they resolve from the archive location — `../../design.md` →
   `../../changes/archive/2026-MM-DD-restore-d4-forced-face-support/design.md`,
   same for `../../tasks.md`.
-- [ ] Archive: move `openspec/changes/restore-d4-forced-face-support/` to
+- [x] Archive: move `openspec/changes/restore-d4-forced-face-support/` to
   `openspec/changes/archive/2026-MM-DD-restore-d4-forced-face-support/` and stage
   both the new location and the deletion of the old in a **single** commit.
-- [ ] Confirm `openspec/changes/archive/2026-MM-DD-restore-d4-forced-face-support/`
+- [x] Confirm `openspec/changes/archive/2026-MM-DD-restore-d4-forced-face-support/`
   exists and `openspec/changes/restore-d4-forced-face-support/` is gone
-- [ ] **Create a doc branch:** `git checkout -b
+- [x] **Create a doc branch:** `git checkout -b
   doc/archive-2026-MM-DD-restore-d4-forced-face-support` then `git push -u origin
   doc/archive-2026-MM-DD-restore-d4-forced-face-support`
-- [ ] Open a PR from that doc branch to `main`, title `docs: archive
+- [x] Open a PR from that doc branch to `main`, title `docs: archive
   restore-d4-forced-face-support (2026-MM-DD)` — **do NOT push directly to
   `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL>
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL>
   --auto --merge` (NEVER `--admin`)
-- [ ] Monitor the doc PR until merged (same loop as the implementation PR)
-- [ ] Issue lifecycle: confirm #627 auto-closed via `Closes #627`; move the
+- [x] Monitor the doc PR until merged (same loop as the implementation PR)
+- [x] Issue lifecycle: confirm #627 auto-closed via `Closes #627`; move the
   project item to "Done" if not automatic; remove `in-review` label if it lingers
-- [ ] Record the upstream PR URL on issue #627 for future follow-up (version bump
+- [x] Record the upstream PR URL on issue #627 for future follow-up (version bump
   + patch removal when it merges)
-- [ ] Remove the worktree: `git worktree remove
+- [x] Remove the worktree: `git worktree remove
   .worktrees/restore-d4-forced-face-support` (use `--force` if the
   openspec-shared submodule blocks removal)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D
   restore-d4-forced-face-support
   doc/archive-2026-MM-DD-restore-d4-forced-face-support`
 
 ### Completion checklist
 
-- [ ] Docs updated (patch-package workflow note; `.wolf/` protocol files)
-- [ ] Approved spec deltas synced to `openspec/specs/global-dice-fab/spec.md`
-- [ ] Change archived as a single atomic commit
-- [ ] Upstream PR opened and its URL recorded in this file + on #627
-- [ ] Dedicated worktree removed and merged local branches pruned
+- [x] Docs updated (patch-package workflow note; `.wolf/` protocol files)
+- [x] Approved spec deltas synced to `openspec/specs/global-dice-fab/spec.md`
+- [x] Change archived as a single atomic commit
+- [x] Upstream PR opened and its URL recorded in this file + on #627
+- [x] Dedicated worktree removed and merged local branches pruned
