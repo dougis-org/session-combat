@@ -279,7 +279,7 @@ describe("Campaign API Integration Tests", () => {
     });
     expect(partyRes.status).toBe(201);
     const party = await partyRes.json() as { id: string; };
-    const cRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}`, { headers: authed() }); // nosemgrep
+    const cRes = await fetch(new URL(`/api/campaigns/${campaign.id}`, baseUrl), { headers: authed() });
     const c = await cRes.json() as { partyIds: string[] };
     expect(c.partyIds).toContain(party.id);
   });
@@ -298,10 +298,10 @@ describe("Campaign API Integration Tests", () => {
   it("creating a campaign creates a linked default 'Main Party'", async () => {
     const campaign = await createCampaign("Default Party Campaign");
 
-    const getCampRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}`, { headers: authed() }); // nosemgrep
+    const getCampRes = await fetch(new URL(`/api/campaigns/${campaign.id}`, baseUrl), { headers: authed() });
     const updatedCamp = await getCampRes.json() as { partyIds: string[] };
     expect(updatedCamp.partyIds?.length).toBeGreaterThan(0);
-    const partyRes = await fetch(`${baseUrl}/api/parties/${updatedCamp.partyIds[0]}`, { headers: authed() }); // nosemgrep
+    const partyRes = await fetch(new URL(`/api/parties/${updatedCamp.partyIds[0]}`, baseUrl), { headers: authed() });
     const defaultParty = await partyRes.json() as { name: string };
     expect(defaultParty.name).toBe("Main Party");
   });
