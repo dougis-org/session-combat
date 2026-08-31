@@ -27,13 +27,13 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests
-- [ ] Run E2E tests (if applicable)
-- [ ] Run type checks
-- [ ] Run build
-- [ ] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests
+- [x] Run E2E tests (if applicable)
+- [x] Run type checks
+- [x] Run build
+- [x] Run security/code quality checks required by project standards
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 

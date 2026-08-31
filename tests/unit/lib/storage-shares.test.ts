@@ -227,7 +227,7 @@ describe("storage.loadPartiesByCampaign", () => {
   it("A3-1: returns only parties matching the campaignId", async () => {
     const mockToArray = jest.fn().mockResolvedValue([makeParty("p-1", "camp-A")]);
     const mockFind = jest.fn().mockReturnValue({ toArray: mockToArray });
-    const mockFindOne = jest.fn().mockResolvedValue({ id: "camp-A", partyIds: [] });
+    const mockFindOne = jest.fn().mockResolvedValue({ id: "camp-A", partyIds: ["p-1"] });
     mockedDb.collection.mockImplementation((name) => {
       if (name === "campaigns") return { findOne: mockFindOne, updateOne: jest.fn() };
       return { find: mockFind };
