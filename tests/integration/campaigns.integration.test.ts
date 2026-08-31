@@ -269,7 +269,7 @@ describe("Campaign API Integration Tests", () => {
 
   // --- Party + Campaign association ---
 
-  it("creating a party with valid campaignId persists and returns the campaignId", async () => {
+  it("creating a party with valid campaignId persists and adds to campaign", async () => {
     const campaign = await createCampaign("Party Association Campaign");
 
     const partyRes = await fetch(`${baseUrl}/api/parties`, {
@@ -278,8 +278,10 @@ describe("Campaign API Integration Tests", () => {
       body: JSON.stringify({ name: "The Fellowship", campaignId: campaign.id }),
     });
     expect(partyRes.status).toBe(201);
-    const party = await partyRes.json() as { id: string; campaignId?: string };
-    expect(party.campaignId).toBe(campaign.id);
+    const party = await partyRes.json() as { id: string; };
+    const cRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}`, { headers: authed() });
+    const c = await cRes.json() as { partyIds: string[] };
+    expect(c.partyIds).toContain(party.id);
   });
 
   it("creating a party without campaignId succeeds with no campaignId", async () => {
@@ -296,15 +298,15 @@ describe("Campaign API Integration Tests", () => {
   it("creating a campaign creates a linked default 'Main Party'", async () => {
     const campaign = await createCampaign("Default Party Campaign");
 
-    const partiesRes = await fetch(`${baseUrl}/api/parties`, { headers: authed() });
-    expect(partiesRes.status).toBe(200);
-    const parties = await partiesRes.json() as { id: string; name: string; campaignId?: string }[];
-    const defaultParty = parties.find(p => p.campaignId === campaign.id);
-    expect(defaultParty).toBeDefined();
-    expect(defaultParty?.name).toBe("Main Party");
+    const getCampRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}`, { headers: authed() });
+    const updatedCamp = await getCampRes.json() as { partyIds: string[] };
+    expect(updatedCamp.partyIds?.length).toBeGreaterThan(0);
+    const partyRes = await fetch(`${baseUrl}/api/parties/${updatedCamp.partyIds[0]}`, { headers: authed() });
+    const defaultParty = await partyRes.json() as { name: string };
+    expect(defaultParty.name).toBe("Main Party");
   });
 
-  it("deleting a campaign cascade deletes associated parties", async () => {
+  it("deleting a campaign does not delete associated parties", async () => {
     const campaign = await createCampaign("Campaign To Delete");
     expect(campaign.id).toBeDefined();
 
@@ -323,10 +325,10 @@ describe("Campaign API Integration Tests", () => {
     expect([200, 204]).toContain(deleteRes.status);
 
     const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed() }); // nosemgrep
-    expect(getPartyRes.status).toBe(404);
+    expect(getPartyRes.status).toBe(200);
   });
 
-  it("deleting a campaign cascade deletes associated parties, including for other campaign members", async () => {
+  it("deleting a campaign does not delete associated parties, including for other campaign members", async () => {
     const campaign = await createCampaign("Campaign To Delete Multi-User");
 
     // Invite user2 to campaign
@@ -352,7 +354,7 @@ describe("Campaign API Integration Tests", () => {
       body: JSON.stringify({ name: "User2 Party", campaignId: campaign.id }),
     });
     expect(partyRes.status).toBe(201);
-    const party = await partyRes.json() as { id: string; campaignId?: string };
+    const party = await partyRes.json() as { id: string; };
 
     // User1 deletes campaign
     const deleteRes = await fetch(`${baseUrl}/api/campaigns/${campaign.id}`, { // nosemgrep
@@ -361,9 +363,9 @@ describe("Campaign API Integration Tests", () => {
     });
     expect([200, 204]).toContain(deleteRes.status);
 
-    // Verify user2's party is also 404 (deleted)
+    // Verify user2's party is also 200 (survives)
     const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed(authCookie2) }); // nosemgrep
-    expect(getPartyRes.status).toBe(404);
+    expect(getPartyRes.status).toBe(200);
   });
 
   it("deleting a campaign does not affect an unrelated campaign's party", async () => {
