@@ -313,9 +313,7 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
       render(<DiceRollOverlay built={mixedPool} disableAnimation animationSettled onClose={jest.fn()} />)
       const faces = screen.getAllByTestId('die-face').map(el => el.textContent)
       expect(faces).toEqual(['14', '2', '5'])
-      const tags = screen.getAllByTestId('die-readout-chip').map(
-        chip => chip.querySelector('span:not([data-testid])')?.textContent,
-      )
+      const tags = screen.getAllByTestId('die-readout-tag').map(el => el.textContent)
       expect(tags).toEqual(['d20', 'd20', 'd6'])
       expect(screen.getByRole('dialog')).toHaveTextContent('21')
     })
@@ -339,6 +337,16 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
       expect(screen.getByRole('dialog').querySelectorAll('svg')).toHaveLength(0)
       expect(screen.getByTestId('dice-readout-remainder')).toHaveTextContent('+105 more')
       expect(screen.getByText('480')).toBeInTheDocument()
+    })
+
+    it('shows "+1 more" one die past the cap', () => {
+      const breakdown = Array.from({ length: 16 }, () => ({ sides: 6, value: 3 }))
+      const pool: BuiltRoll = {
+        formula: '16d6', rolls: breakdown.map(d => d.value), total: 48, breakdown, modifier: 0,
+      }
+      render(<DiceRollOverlay built={pool} disableAnimation animationSettled onClose={jest.fn()} />)
+      expect(screen.getAllByTestId('die-face')).toHaveLength(15)
+      expect(screen.getByTestId('dice-readout-remainder')).toHaveTextContent('+1 more')
     })
 
     it('shows no remainder note at exactly DICE_ANIM_CAP dice', () => {
@@ -380,8 +388,23 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
       const unsupported = readoutHtml(
         <DiceRollOverlay built={built} disableAnimation={false} animationStatus="unsupported" onClose={jest.fn()} />,
       )
+      jest.useFakeTimers()
+      let fallback: string
+      try {
+        const { unmount } = render(
+          <DiceRollOverlay built={built} disableAnimation={false} onClose={jest.fn()} />,
+        )
+        act(() => {
+          jest.advanceTimersByTime(MODAL_REVEAL_FALLBACK_MS)
+        })
+        fallback = screen.getAllByTestId('die-readout-chip').map(c => c.outerHTML).join('|')
+        unmount()
+      } finally {
+        jest.useRealTimers()
+      }
       expect(disabled).toBe(settled)
       expect(unsupported).toBe(settled)
+      expect(fallback).toBe(settled)
     })
 
     it('shows the two d10 faces (d% tagged, no icon) and decoded total for a percentile roll', () => {
@@ -392,9 +415,7 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
       const dialog = screen.getByRole('dialog')
       const faces = screen.getAllByTestId('die-face').map(el => el.textContent)
       expect(faces).toEqual(['40', '2'])
-      const tags = screen.getAllByTestId('die-readout-chip').map(
-        chip => chip.querySelector('span:not([data-testid])')?.textContent,
-      )
+      const tags = screen.getAllByTestId('die-readout-tag').map(el => el.textContent)
       expect(tags).toEqual(['d%', 'd%'])
       expect(dialog.querySelectorAll('svg')).toHaveLength(0)
       for (const chip of screen.getAllByTestId('die-readout-chip')) {

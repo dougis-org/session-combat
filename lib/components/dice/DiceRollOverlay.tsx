@@ -28,7 +28,7 @@ function DieReadoutChip({ value, label }: { value: string | number; label: strin
       <span data-testid="die-face" className="text-2xl font-bold leading-none text-white">
         {value}
       </span>
-      <span className="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+      <span data-testid="die-readout-tag" className="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
         {label}
       </span>
     </div>

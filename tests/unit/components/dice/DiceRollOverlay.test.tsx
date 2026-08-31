@@ -49,6 +49,9 @@ describe('DiceRollOverlay / StaticRollResult', () => {
 
     expect(screen.getByText('00')).toBeInTheDocument()
     expect(screen.getByText('0')).toBeInTheDocument()
+    // both faces of a natural 100 carry the d% tag, no die-face SVG
+    expect(screen.getAllByTestId('die-readout-tag').map(el => el.textContent)).toEqual(['d%', 'd%'])
+    expect(screen.getByRole('dialog').querySelectorAll('svg')).toHaveLength(0)
   })
 
   it('renders breakdown of multiple dice', () => {
