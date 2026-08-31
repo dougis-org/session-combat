@@ -150,11 +150,12 @@ _(Modified 2026-08-29, `decouple-dice-roll-capability`; modified again 2026-08-3
 
 ### Requirement: ADDED Rolling plays a dice animation then a total modal
 
-_(Added 2026-08-30, `add-dice-roll-animation`; modified 2026-08-30, `improve-dice-roll-animation` — larger centered dice, modal gated on completion, cap lowered to 15, down-scaling.)_
+_(Added 2026-08-30, `add-dice-roll-animation`; modified 2026-08-30, `improve-dice-roll-animation` — larger centered dice, modal gated on completion, cap lowered to 15, down-scaling; modified 2026-08-30, `fix-dice-animation-predetermined-faces` — the 3D dice engine is replaced with one that natively honours predetermined per-die faces, engine + assets are self-hosted and lazy-loaded, and a reconciliation guard is added.)_
 
 The system SHALL, when the user rolls in `GlobalDiceFab` (a pool roll or a percentile
 roll), present a dice-roll overlay that animates the staged dice coming to rest on their
-already-decided face values and then displays a modal showing the roll total.
+already-decided face values and then displays a modal showing the roll total and a per-die
+readout of the rolled values.
 
 The roll outcome SHALL be decided before the animation begins, by the existing
 `buildRoll()` / `buildPercentileRoll()` path (see `dice-pool-shared-state` capability); the
@@ -162,18 +163,27 @@ animation SHALL only visually settle on faces already chosen and SHALL NOT intro
 new randomness or HTTP request of its own. The overlay SHALL be rendered through a
 lazily created `document.body` overlay root, layered above the dice panel.
 
+The system SHALL pass the predetermined per-die faces to the dice engine using the
+engine's supported forced-results notation, and the dice engine SHALL be one that honours
+that notation. The animated physical dice SHALL settle showing those faces. When the
+engine nonetheless settles on other faces, the overlay SHALL follow the reconciliation
+behaviour in "Animated dice faces are reconciled against the decided roll" rather than
+presenting the mismatched tumble as the result. The dice engine and its rendering assets
+SHALL be self-hosted and loaded lazily (dynamic `import()`), never included in the initial
+application bundle.
+
 The dice animation SHALL be rendered inside a bounded, horizontally centered region, and
-the dice SHALL be sized so that a die face is on roughly the same visual order as the
-result modal's total text (a substantial increase over the library default). The animated
+the dice SHALL be sized to be clearly readable at a 375px viewport width. The animated
 dice SHALL come to rest in the clear area directly above the result modal, such that the
 settled dice and the total modal are visible at the same time; the dice SHALL NOT obscure
-the total.
+the total or the per-die readout.
 
-The result modal SHALL remain hidden until the dice animation reports completion. The
-modal SHALL instead be shown immediately when the resolved "Disable Animation" preference
-is `true`, or when the dice engine is unsupported (no WebGL / asset load failure / instant
-path). If the animation never reports completion, the modal SHALL still be revealed after a
-bounded fallback timeout so the user is never left without a result.
+The result modal SHALL remain hidden until the dice animation reports completion (match),
+is skipped (disabled / unsupported / face mismatch), or a bounded fallback timeout
+elapses. The modal SHALL be shown immediately when the resolved "Disable Animation"
+preference is `true`, or when the dice engine is unsupported (no WebGL / asset load
+failure / instant path). If the animation never reports completion, the modal SHALL still
+be revealed after the bounded fallback timeout so the user is never left without a result.
 
 No more than 15 dice SHALL be animated regardless of pool size. The total modal and the
 inline `formula → [rolls] = total` result line SHALL always show the exact total for the
@@ -265,6 +275,84 @@ clear area above the modal.
 - **Then** the dice engine is configured with a scale strictly smaller than the base scale
 - **And** a pool that animates 15 dice uses a scale no larger than the 10-dice scale and
   not below the defined minimum scale
+
+#### Scenario: Roll outcome is decided before the animation starts
+
+- **Given** any staged pool
+- **When** the user rolls
+- **Then** the per-die values shown in the result modal and inline line are exactly those
+  in the built roll's breakdown, and no die value is generated or altered during or after
+  the animation, regardless of what faces the engine settled on
+
+---
+
+### Requirement: ADDED Animated dice faces are reconciled against the decided roll
+
+_(Added 2026-08-30, `fix-dice-animation-predetermined-faces`.)_
+
+The system SHALL, after the dice engine reports that a roll has settled, compare the faces
+the engine actually settled on against the predetermined per-die values for that roll (the
+capped `breakdown`, or the two `percentileFaces` for a percentile roll).
+
+The comparison SHALL be made per die-size group as an unordered multiset over the first
+`animatedDiceCount()` dice of each group, so that a different die ordering returned by the
+engine is not treated as a mismatch. Percentile faces SHALL be normalized (`0` and `10`
+treated as equal) before comparison. The reconciliation step SHALL be a synchronous
+comparison over the results the engine already returned: no additional `fetch` / XHR, and
+no additional awaited engine round-trip.
+
+- When the settled faces match the predetermined values, the overlay SHALL reveal the
+  result modal through the normal animation-complete path.
+- When the settled faces do not match, the system SHALL treat this as a transient per-roll
+  condition: it SHALL NOT display or continue holding the mismatched tumble, it SHALL
+  reveal the result modal promptly through the instant path (not by waiting out the bounded
+  fallback timeout), it SHALL emit a single diagnostic event through the existing client
+  logging seam, and it SHALL NOT latch the dice engine into the unsupported state — a
+  subsequent roll SHALL still attempt the 3D animation.
+
+The roll total and per-die values presented to the user (`built.total`, `built.rolls`,
+`built.breakdown`, the inline result line, the persisted roll) SHALL be unchanged by the
+reconciliation outcome.
+
+#### Scenario: Settled faces match the decided roll
+
+- **Given** animation is enabled and the dice engine is supported
+- **And** the user rolls a staged pool of `2d12`
+- **When** the dice engine settles with per-die results equal (as a multiset) to the built
+  roll's `breakdown` values
+- **Then** the result modal is revealed through the normal animation-complete path
+- **And** no mismatch diagnostic is emitted
+
+#### Scenario: Face mismatch reveals the result without showing a wrong tumble
+
+- **Given** animation is enabled and the dice engine is supported
+- **And** the user rolls a staged pool whose built breakdown is `[4, 3]`
+- **When** the dice engine settles with per-die results that are not a multiset match for
+  `[4, 3]` (e.g. `[7, 3]`)
+- **Then** the mismatched tumble is not presented as the roll result
+- **And** the result modal is revealed before the bounded fallback timeout would elapse,
+  showing the total `7`
+- **And** exactly one diagnostic event is emitted through the client logging seam
+- **And** the dice animation status remains `idle` (not `unsupported`)
+
+#### Scenario: A mismatch does not disable later animations
+
+- **Given** a previous roll in the same mounted session was revealed via the mismatch path
+- **When** the user rolls again with animation enabled
+- **Then** the 3D dice animation is attempted again for the new roll
+
+#### Scenario: Engine returns dice in a different order
+
+- **Given** the user rolls `2d20+1d6` with built breakdown values `d20: [14, 2]`, `d6: [5]`
+- **When** the dice engine returns settled results ordered `d6: 5`, `d20: 2`, `d20: 14`
+- **Then** the reconciliation treats the roll as a match (multiset comparison per die-size
+  group)
+
+#### Scenario: Percentile face normalization
+
+- **Given** a percentile roll whose `percentileFaces` are `[10, 10]` (decoded value `100`)
+- **When** the dice engine returns two d10 results reported as `0` and `0`
+- **Then** the reconciliation treats the roll as a match
 
 ---
 
@@ -379,12 +467,24 @@ _(Added 2026-08-29, `decouple-dice-roll-capability`.)_ The system SHALL cause `G
 
 #### Scenario: Dice animation code is not in the initial bundle
 
-_(Added 2026-08-30, `add-dice-roll-animation`.)_
+_(Added 2026-08-30, `add-dice-roll-animation`; modified 2026-08-30, `fix-dice-animation-predetermined-faces` — engine is now `@drdreo/dice-box-threejs`.)_
 
 - **Given** a production build of the app
 - **When** the entry/first-load JavaScript chunks are inspected
-- **Then** the 3D dice library package (`@3d-dice/dice-box`) and its runtime assets are
-  absent from them, and are requested only when the first animated roll needs them
+- **Then** the 3D dice library package (`@drdreo/dice-box-threejs`, and any bundled
+  `three` / `cannon-es`) and its runtime assets are absent from them, and are requested
+  only when the first animated roll needs them
+
+#### Scenario: Reconciliation adds no round-trip or network cost
+
+_(Added 2026-08-30, `fix-dice-animation-predetermined-faces`.)_
+
+- **Given** a roll has been animated and the dice engine has reported its settled results
+- **When** the reconciliation step runs
+- **Then** it completes as a synchronous comparison with no `fetch` / XHR and no additional
+  `roll()` / `reroll()` call
+- **And** the result modal reveal for a matched roll occurs within the existing animation
+  timeout budget with no added delay
 
 ### Reliability — roll animation
 
@@ -420,6 +520,18 @@ _(Added 2026-08-30, `add-dice-roll-animation`.)_
 - **When** the fallback to the instant path occurs
 - **Then** a single diagnostic event is emitted via the existing client logging seam
 - **And** no error message or broken overlay is presented to the user
+
+#### Scenario: A face mismatch is logged once and distinguishable
+
+_(Added 2026-08-30, `fix-dice-animation-predetermined-faces`.)_
+
+- **Given** the dice engine settles on faces that do not match the decided roll
+- **When** the mismatch path runs
+- **Then** a single diagnostic event is emitted through the existing client logging seam,
+  with a message distinct from the malformed-`roll()` error and from the
+  persistent-unsupported warning
+- **And** a second mismatch within the same mounted hook does not emit a further event
+- **And** no error message or broken overlay is shown to the user
 
 ### Security
 

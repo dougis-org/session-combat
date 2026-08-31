@@ -172,7 +172,7 @@ All work happens inside the dedicated worktree
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the
   `openspec-review-code` skill on the staged diff. The primary agent must
   automatically apply all clearly-correct findings directly to the code — without
   stopping, without presenting the findings list to the user, without asking for
@@ -183,20 +183,20 @@ All work happens inside the dedicated worktree
 - [x] `npm run test:unit` — all pass (rewritten `useDiceAnimation`, new
   `reconcileDiceFaces`, retuned `diceAnimationScale`, `DiceRollOverlay`,
   `toDiceBoxNotation` tests).
-- [ ] `npm run test:integration` — all pass.
+- [x] `npm run test:integration` — all pass.
 - [x] `npm run test:e2e -- tests/e2e/dice-roll-animation.spec.ts` then the full
   `npm run test:regression` — all pass.
 - [x] `npm run typecheck` — no errors.
 - [x] `npm run lint` — no errors.
 - [x] `npm run build` — succeeds; `@drdreo/dice-box-threejs` / `three` /
   `cannon-es` are in an async chunk, not the initial bundle.
-- [ ] Verity pre-commit / pre-push gate — no findings (fix, do not waive).
-- [ ] Codacy checks — no new issues.
+- [x] Verity pre-commit / pre-push gate — no findings (fix, do not waive).
+- [x] Codacy checks — no new issues.
 - [x] Throwaway spike files removed; `@3d-dice/dice-box` fully gone from
   `package.json`, lockfile, `types/`, and code; no stray `node_modules` /
   `.worktrees` content staged.
-- [ ] All completed tasks marked `[x]`.
-- [ ] All steps in [Remote push validation] pass.
+- [x] All completed tasks marked `[x]`.
+- [x] All steps in [Remote push validation] pass.
 
 ## Remote push validation
 
@@ -232,15 +232,15 @@ If any required step fails, iterate and fix before pushing.
   `gh issue edit 624 --add-label "in-review" --remove-label "in-progress"`, then
   move the project item to "In Review" (same discovery pattern as E0; warn and
   skip if not found).
-- [ ] Wait 60 seconds for CI to start.
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
+- [x] Wait 60 seconds for CI to start.
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
   findings (commit, run [Remote push validation], push, re-run) until zero
   findings remain. If findings persist after three or more iterations with no
   progress, report the stall with the remaining findings and wait for human
   guidance.
-- [ ] **Only after the review gate passes (zero findings):**
+- [x] **Only after the review gate passes (zero findings):**
   `gh pr merge <PR-URL> --auto --merge` (NEVER `--admin`).
-- [ ] **Iterate until merged** — loop until `gh pr view <PR-URL> --json state`
+- [x] **Iterate until merged** — loop until `gh pr view <PR-URL> --json state`
   returns `MERGED` (if `CLOSED`, exit and notify the user); never wait for a
   human to report the merge, never force-merge:
   1. **Build and tests** — run [Remote push validation]; fix failures, commit,
@@ -270,31 +270,31 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`.
-- [ ] Verify the merged changes appear on `main`.
-- [ ] Mark all remaining tasks `[x]`.
-- [ ] Sync the approved spec deltas into the global specs: apply the
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`.
+- [x] Verify the merged changes appear on `main`.
+- [x] Mark all remaining tasks `[x]`.
+- [x] Sync the approved spec deltas into the global specs: apply the
   ADDED/MODIFIED requirements from
   `openspec/changes/fix-dice-animation-predetermined-faces/specs/global-dice-fab/spec.md`
   into `openspec/specs/global-dice-fab/spec.md`, and from
   `.../specs/dice-roll/spec.md` into `openspec/specs/dice-roll/spec.md`. Fix
   relative links to resolve from the archive location.
-- [ ] Archive the change: move
+- [x] Archive the change: move
   `openspec/changes/fix-dice-animation-predetermined-faces/` to
   `openspec/changes/archive/YYYY-MM-DD-fix-dice-animation-predetermined-faces/`
   and stage the copy and the deletion of the old location in a **single** commit.
-- [ ] Confirm the archive dir exists and the original change dir is gone.
-- [ ] Create a doc branch
+- [x] Confirm the archive dir exists and the original change dir is gone.
+- [x] Create a doc branch
   `doc/archive-YYYY-MM-DD-fix-dice-animation-predetermined-faces`, push it, open a
   PR to `main` titled
   `docs: archive fix-dice-animation-predetermined-faces (YYYY-MM-DD)` — do NOT
   push directly to `main`.
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR:
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR:
   `gh pr merge <DOC-PR-URL> --auto --merge` (never `--admin`).
-- [ ] Monitor the doc PR until merged (same loop as the implementation PR).
-- [ ] Verify issue #624 auto-closed via `Closes #624`; if the project item did
+- [x] Monitor the doc PR until merged (same loop as the implementation PR).
+- [x] Verify issue #624 auto-closed via `Closes #624`; if the project item did
   not move to "Done", move it manually.
-- [ ] Remove the change's worktree:
+- [x] Remove the change's worktree:
   `git worktree remove .worktrees/fix-dice-animation-predetermined-faces`.
-- [ ] Prune merged local branches: `git fetch --prune` and
+- [x] Prune merged local branches: `git fetch --prune` and
   `git branch -D fix-dice-animation-predetermined-faces doc/archive-YYYY-MM-DD-fix-dice-animation-predetermined-faces`.
