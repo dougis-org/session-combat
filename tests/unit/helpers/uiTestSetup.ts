@@ -2,10 +2,10 @@ import React from 'react';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
-import { Response as FetchResponse } from 'node-fetch';
+import { MockFetchResponse } from '@/tests/unit/helpers/mockFetchResponse';
 
 export function jsonResponse(body: unknown, status = 200): Response {
-  return new FetchResponse(JSON.stringify(body), {
+  return new MockFetchResponse(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json' },
   }) as unknown as Response;

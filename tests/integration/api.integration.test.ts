@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { registerTestUser } from "./helpers/users";
 import { createTestEmail } from "@/tests/integration/auth.test.helpers";
 

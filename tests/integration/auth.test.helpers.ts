@@ -3,7 +3,7 @@
  * Centralizes common patterns, test data, and helper functions to reduce duplication
  */
 
-import fetch, { RequestInit, Response } from "node-fetch";
+// fetch, RequestInit, Response are provided as Node globals (native fetch)
 import { randomUUID } from "node:crypto";
 
 // ============================================================================

@@ -2,10 +2,10 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FeedbackModal } from '@/lib/components/FeedbackModal';
-import { Response as FetchResponse } from 'node-fetch';
+import { MockFetchResponse } from '@/tests/unit/helpers/mockFetchResponse';
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return new FetchResponse(JSON.stringify(body), {
+  return new MockFetchResponse(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json' },
   }) as unknown as Response;

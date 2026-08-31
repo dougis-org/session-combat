@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { MongoClient } from "mongodb";
 import { registerTestUser, makeUserAdmin } from "./helpers/users";
 

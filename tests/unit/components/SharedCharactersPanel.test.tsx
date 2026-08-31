@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Response as FetchResponse } from 'node-fetch';
+import { MockFetchResponse } from '@/tests/unit/helpers/mockFetchResponse';
 import { SharedCharactersPanel } from '@/lib/components/SharedCharactersPanel';
 import { Character, CampaignCharacterShare, CampaignMember } from '@/lib/types';
 
@@ -11,7 +11,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return new FetchResponse(JSON.stringify(body), {
+  return new MockFetchResponse(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json' },
   }) as unknown as Response;
@@ -164,7 +164,7 @@ describe('SharedCharactersPanel', () => {
       if (url === `/api/campaigns/${CAMPAIGN_ID}/members/me`) return jsonResponse(ACTIVE_PLAYER);
       if (url === `/api/campaigns/${CAMPAIGN_ID}/characters` && !options?.method) return jsonResponse([SHARE_X]);
       if (url === `/api/campaigns/${CAMPAIGN_ID}/characters/char-x` && options?.method === 'DELETE') {
-        return new FetchResponse('', { status: 204 }) as unknown as Response;
+        return new MockFetchResponse('', { status: 204 }) as unknown as Response;
       }
       return jsonResponse({ error: 'Not found' }, 404);
     }) as unknown as typeof global.fetch;

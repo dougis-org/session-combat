@@ -1,6 +1,6 @@
 import { MongoDBContainer } from "@testcontainers/mongodb";
 import { spawn } from "child_process";
-import fetch from "node-fetch";
+import { randomBytes } from "crypto";
 import { getDirectoryPort } from "../shared/port";
 import { dropTestDatabase } from "../shared/mongo";
 import { startDndBeyondMockServer } from "../mocks/dndBeyond/server";
@@ -52,6 +52,12 @@ async function globalSetup(): Promise<void> {
   const port = await getDirectoryPort();
   console.log(`[port-select] cwd=${process.cwd()} port=${port}`);
 
+  // Pin a JWT secret for the run so the spawned server and any test that signs
+  // its own token agree on one value. Generated (never hardcoded) unless the
+  // environment already supplies one.
+  const jwtSecret = process.env.JWT_SECRET ?? randomBytes(32).toString("hex");
+  process.env.JWT_SECRET = jwtSecret;
+
   const nextProcess = spawn("npx", ["next", "start"], {
     env: {
       ...process.env,
@@ -59,6 +65,7 @@ async function globalSetup(): Promise<void> {
       HOSTNAME: "0.0.0.0",
       MONGODB_URI: mongoUri,
       MONGODB_DB: "session-combat-test",
+      JWT_SECRET: jwtSecret,
       DND_BEYOND_CHARACTER_SERVICE_BASE_URL: dndBeyondBaseUrl,
       ALLOW_INSECURE_DND_BEYOND_CHARACTER_SERVICE_BASE_URL: "true",
     },

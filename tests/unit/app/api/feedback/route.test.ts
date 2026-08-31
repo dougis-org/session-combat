@@ -7,7 +7,7 @@ import {
   makeRouteRequest,
   mockAuthState,
 } from '@/tests/unit/helpers/route.test.helpers';
-import { Response as FetchResponse } from 'node-fetch';
+import { MockFetchResponse } from '@/tests/unit/helpers/mockFetchResponse';
 
 jest.mock('@/lib/middleware', () =>
   require('@/tests/unit/helpers/route.test.helpers').createMockMiddleware()
@@ -41,7 +41,7 @@ function makeRequest(body: unknown) {
 function mockFetchSuccess(issueUrl = 'https://github.com/issues/1') {
   global.fetch = jest.fn(() =>
     Promise.resolve(
-      new FetchResponse(JSON.stringify({ html_url: issueUrl }), {
+      new MockFetchResponse(JSON.stringify({ html_url: issueUrl }), {
         status: 201,
         headers: { 'Content-Type': 'application/json' },
       }) as unknown as Response
@@ -52,7 +52,7 @@ function mockFetchSuccess(issueUrl = 'https://github.com/issues/1') {
 function mockFetchFailure(status = 500) {
   global.fetch = jest.fn(() =>
     Promise.resolve(
-      new FetchResponse(JSON.stringify({ message: 'GitHub error' }), {
+      new MockFetchResponse(JSON.stringify({ message: 'GitHub error' }), {
         status,
         headers: { 'Content-Type': 'application/json' },
       }) as unknown as Response

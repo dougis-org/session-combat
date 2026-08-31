@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-import fetch from "node-fetch";
 import { connectToDatabase, closeDatabase, getDatabase } from "@/lib/db";
 import { registerTestUser } from "../helpers/users";
 import type { CampaignRoll } from "@/lib/types";

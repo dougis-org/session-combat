@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { MongoClient, ObjectId } from "mongodb";
 import { createTestUser } from "@/tests/integration/auth.test.helpers";
 

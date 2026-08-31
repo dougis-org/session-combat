@@ -1,4 +1,4 @@
-import { Response as FetchResponse } from 'node-fetch';
+import { MockFetchResponse } from '@/tests/unit/helpers/mockFetchResponse';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -32,7 +32,7 @@ describe('NavBar', () => {
   beforeEach(() => {
     originalFetch = global.fetch;
     global.fetch = jest.fn(() =>
-      Promise.resolve(new FetchResponse(JSON.stringify({ invitations: [] }), {
+      Promise.resolve(new MockFetchResponse(JSON.stringify({ invitations: [] }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       }) as unknown as Response)
@@ -122,7 +122,7 @@ describe('NavBar', () => {
 });
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return new FetchResponse(JSON.stringify(body), {
+  return new MockFetchResponse(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json' },
   }) as unknown as Response;

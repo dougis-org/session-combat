@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react';
 import { Root, createRoot } from 'react-dom/client';
-import { Response as FetchResponse } from 'node-fetch';
+import { MockFetchResponse } from '@/tests/unit/helpers/mockFetchResponse';
 import { CampaignsContent } from '@/app/campaigns/page';
 
 jest.mock('@/lib/components/ProtectedRoute', () => ({
@@ -15,7 +15,7 @@ jest.mock('next/link', () => ({
 }));
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return new FetchResponse(JSON.stringify(body), {
+  return new MockFetchResponse(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json' },
   }) as unknown as Response;

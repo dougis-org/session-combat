@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { makeAuthedHeaders } from "../helpers/server";
 import { registerTestUser } from "../helpers/users";
 import { Party } from "@/lib/types";

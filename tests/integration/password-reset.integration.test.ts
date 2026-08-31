@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { MongoClient, ObjectId } from "mongodb";
 import {
   createTestEmail,
