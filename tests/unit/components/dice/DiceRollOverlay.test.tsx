@@ -49,6 +49,9 @@ describe('DiceRollOverlay / StaticRollResult', () => {
 
     expect(screen.getByText('00')).toBeInTheDocument()
     expect(screen.getByText('0')).toBeInTheDocument()
+    // both faces of a natural 100 carry the d% tag, no die-face SVG
+    expect(screen.getAllByTestId('die-readout-tag').map(el => el.textContent)).toEqual(['d%', 'd%'])
+    expect(screen.getByRole('dialog').querySelectorAll('svg')).toHaveLength(0)
   })
 
   it('renders breakdown of multiple dice', () => {
@@ -75,13 +78,13 @@ describe('DiceRollOverlay / StaticRollResult', () => {
     expect(screen.getByText('6')).toBeInTheDocument()
   })
 
-  it('renders fallback for unsupported die types gracefully', () => {
+  it('renders an unmapped die size through the same numeric chip path', () => {
     const built: BuiltRoll = {
       formula: '1d3',
       total: 2,
       rolls: [2],
       breakdown: [
-        { sides: 3, value: 2 }, // No icon mapped for d3
+        { sides: 3, value: 2 }, // No dedicated icon for d3
       ],
       modifier: 0,
     }
@@ -94,8 +97,10 @@ describe('DiceRollOverlay / StaticRollResult', () => {
       />
     )
 
-    // It should fallback to generic text container instead of throwing
-    expect(screen.getByTestId('fallback-die')).toHaveTextContent('2')
+    // One numeric chip with the value and a d3 size tag — no distinct "fallback" box.
+    expect(screen.queryByTestId('fallback-die')).not.toBeInTheDocument()
+    expect(screen.getByTestId('die-face')).toHaveTextContent('2')
+    expect(screen.getByText('d3')).toBeInTheDocument()
     expect(screen.getByText('1d3')).toBeInTheDocument()
   })
 })

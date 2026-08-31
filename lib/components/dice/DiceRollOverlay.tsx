@@ -9,28 +9,40 @@ import {
   ROLL_TIMEOUT_MS,
   type DiceAnimationStatus,
 } from '@/lib/dice/useDiceAnimation'
-import { DIE_ICONS, DiceD10Icon } from '@/lib/components/icons/dice'
-import type { DieSides } from '@/lib/utils/dice'
 import { DICE_ANIM_CAP } from '@/lib/dice/toDiceBoxNotation'
+
+/**
+ * One die in the result-modal readout: the rolled value as the dominant element with a
+ * small non-dominant size tag (`d{sides}`, or `d%` for a percentile face). Every die —
+ * pool or percentile, known size or not — renders through this single path; there is no
+ * die-face SVG, pip pattern, or number-over-icon overlay (issue #634). The 3D tumble
+ * already provides the physical-dice fantasy; this readout is a plain numeric echo of the
+ * already-decided values.
+ */
+function DieReadoutChip({ value, label }: { value: string | number; label: string }) {
+  return (
+    <div
+      data-testid="die-readout-chip"
+      className="flex flex-col items-center justify-center min-w-[3rem] rounded-md bg-gray-700/60 px-3 py-2"
+    >
+      <span data-testid="die-face" className="text-2xl font-bold leading-none text-white">
+        {value}
+      </span>
+      <span data-testid="die-readout-tag" className="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        {label}
+      </span>
+    </div>
+  )
+}
 
 function StaticRollResult({ built }: { built: BuiltRoll }) {
   if (built.percentileFaces && built.percentileFaces.length >= 2) {
     const tens = built.percentileFaces[0] === 10 ? '00' : `${built.percentileFaces[0]}0`
-    const ones = built.percentileFaces[1] === 10 ? '0' : built.percentileFaces[1]
+    const ones = built.percentileFaces[1] === 10 ? '0' : `${built.percentileFaces[1]}`
     return (
-      <div className="flex flex-row justify-center gap-4 mt-4 mb-2">
-        <div className="relative w-16 h-16 text-gray-300">
-          <DiceD10Icon className="w-full h-full" />
-          <span data-testid="die-face" className="absolute inset-0 flex items-center justify-center text-xl font-bold mt-2">
-            {tens}
-          </span>
-        </div>
-        <div className="relative w-16 h-16 text-gray-300">
-          <DiceD10Icon className="w-full h-full" />
-          <span data-testid="die-face" className="absolute inset-0 flex items-center justify-center text-xl font-bold mt-2">
-            {ones}
-          </span>
-        </div>
+      <div className="flex flex-row flex-wrap justify-center items-center gap-4 mt-4 mb-2">
+        <DieReadoutChip value={tens} label="d%" />
+        <DieReadoutChip value={ones} label="d%" />
       </div>
     )
   }
@@ -42,26 +54,9 @@ function StaticRollResult({ built }: { built: BuiltRoll }) {
 
   return (
     <div className="flex flex-row flex-wrap justify-center items-center gap-4 mt-4 mb-2 max-w-[80vw]">
-      {shown.map((die, idx) => {
-        const Icon = DIE_ICONS[die.sides as DieSides]
-        if (!Icon) {
-          return (
-            <div key={idx} data-testid="fallback-die" className="relative w-12 h-12 text-gray-300 border-2 border-gray-400 rounded-md flex items-center justify-center">
-              <span data-testid="die-face" className="text-lg font-bold">
-                {die.value}
-              </span>
-            </div>
-          )
-        }
-        return (
-          <div key={idx} className="relative w-12 h-12 text-gray-300">
-            <Icon className="w-full h-full" />
-            <span data-testid="die-face" className="absolute inset-0 flex items-center justify-center text-lg font-bold">
-              {die.value}
-            </span>
-          </div>
-        )
-      })}
+      {shown.map((die, idx) => (
+        <DieReadoutChip key={idx} value={die.value} label={`d${die.sides}`} />
+      ))}
       {remainder > 0 && (
         <span data-testid="dice-readout-remainder" className="text-lg font-bold text-gray-400">
           +{remainder} more
