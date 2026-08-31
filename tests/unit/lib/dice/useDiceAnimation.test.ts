@@ -1,106 +1,26 @@
 import { renderHook, act } from '@testing-library/react'
-import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { useDiceAnimation } from '@/lib/dice/useDiceAnimation'
 import { DICE_BASE_SCALE, diceAnimationScale } from '@/lib/dice/diceAnimationScale'
+import {
+  engineMock,
+  resetEngineMock,
+  built,
+  poolBuilt,
+  stubWebGL,
+} from './__helpers__/diceAnimationHarness'
 
-// --- engine mock -----------------------------------------------------------
-// A stateful stand-in for @drdreo/dice-box-threejs: roll()/add() parse the "@"
-// notation and accumulate settled dice; getDiceResults() returns the running set.
-// By default every die settles on its forced value so reconciliation passes.
+// The reconciliation-specific behaviour lives in `useDiceAnimation.reconcile.test.ts`;
+// this file covers degradation, laziness, the single-instance invariant, scale, and the
+// bounded-settle backstop. Both share the engine stand-in in `./__helpers__`.
+jest.mock('@drdreo/dice-box-threejs', () =>
+  require('./__helpers__/diceAnimationHarness').diceBoxMockFactory(),
+)
 
-const initMock = jest.fn().mockResolvedValue(undefined)
-const clearMock = jest.fn()
-const ctorMock = jest.fn()
-const rollMock = jest.fn()
-const addMock = jest.fn()
-
-interface FakeDie { sides: number; value: number }
-let accumulated: FakeDie[] = []
-/** Override the faces a given notation settles on (for mismatch tests). */
-let faceOverride: ((notation: string, forced: FakeDie[]) => FakeDie[]) | null = null
-/** When set, roll() returns this promise instead of settling (for hang / supersede tests). */
-let rollOverride: (() => Promise<unknown>) | null = null
-
-function parseNotation(notation: string): FakeDie[] {
-  const [head, tail] = notation.split('@')
-  const m = head.match(/^(\d+)d(\d+)$/)!
-  const [, qtyStr, sidesStr] = m
-  const sides = Number(sidesStr)
-  const qty = Number(qtyStr)
-  if (tail) return tail.split(',').map(v => ({ sides, value: Number(v) }))
-  // no "@": plain roll — deterministic filler so tests are stable (never the forced value)
-  return Array.from({ length: qty }, () => ({ sides, value: sides }))
-}
-
-function toResults(dice: FakeDie[]) {
-  const bySize = new Map<number, FakeDie[]>()
-  for (const d of dice) bySize.set(d.sides, [...(bySize.get(d.sides) ?? []), d])
-  return {
-    notation: '',
-    modifier: 0,
-    total: dice.reduce((s, d) => s + d.value, 0),
-    sets: [...bySize.entries()].map(([sides, rolls]) => ({
-      num: rolls.length, type: `d${sides}`, sides, total: rolls.reduce((s, d) => s + d.value, 0),
-      rolls: rolls.map((d, id) => ({ type: `d${sides}`, sides, id, value: d.value, reason: 'forced' })),
-    })),
-  }
-}
-
-jest.mock('@drdreo/dice-box-threejs', () => ({
-  __esModule: true,
-  default: class {
-    constructor(...args: unknown[]) { ctorMock(...args) }
-    initialize = initMock
-    clearDice = clearMock
-    roll = (notation: string) => {
-      rollMock(notation)
-      if (rollOverride) return rollOverride()
-      accumulated = []
-      const forced = parseNotation(notation)
-      accumulated.push(...(faceOverride ? faceOverride(notation, forced) : forced))
-      return Promise.resolve(toResults(accumulated))
-    }
-    add = (notation: string) => {
-      addMock(notation)
-      const forced = parseNotation(notation)
-      const settled = faceOverride ? faceOverride(notation, forced) : forced
-      accumulated.push(...settled)
-      return Promise.resolve(settled)
-    }
-    getDiceResults = () => toResults(accumulated)
-  },
-}))
-
-const built: BuiltRoll = {
-  formula: '2d6', rolls: [3, 4], total: 7,
-  breakdown: [{ sides: 6, value: 3 }, { sides: 6, value: 4 }], modifier: 0,
-}
-
-function poolBuilt(n: number, sides = 6): BuiltRoll {
-  const breakdown = Array.from({ length: n }, () => ({ sides, value: 3 }))
-  return { formula: `${n}d${sides}`, rolls: breakdown.map(d => d.value), total: n * 3, breakdown, modifier: 0 }
-}
-
-function stubWebGL(available: boolean) {
-  const original = HTMLCanvasElement.prototype.getContext
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(function (this: HTMLCanvasElement, type: string, ...rest: unknown[]) {
-      if (type === 'webgl' || type === 'experimental-webgl') {
-        return available ? ({} as unknown as RenderingContext) : null
-      }
-      return (original as (...a: unknown[]) => unknown).call(this, type, ...rest) as RenderingContext | null
-    })
-}
-
+const { ctorMock, clearMock, rollMock, initMock } = engineMock
 let warnSpy: jest.SpyInstance
 
 beforeEach(() => {
-  jest.clearAllMocks()
-  accumulated = []
-  faceOverride = null
-  rollOverride = null
-  initMock.mockResolvedValue(undefined)
+  resetEngineMock()
   warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
 })
 
@@ -173,168 +93,6 @@ describe('useDiceAnimation — lazy import', () => {
   // not a source-string regex here.
 })
 
-describe('useDiceAnimation — settle + reconciliation', () => {
-  it('passes the per-group forced notation to roll(); resolves true; status stays idle; no warn', async () => {
-    stubWebGL(true)
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-
-    let outcome: boolean | undefined
-    await act(async () => { outcome = await result.current.run(built, container) })
-
-    expect(rollMock).toHaveBeenCalledWith('2d6@3,4')
-    expect(outcome).toBe(true)
-    expect(result.current.status).toBe('idle')
-    expect(warnSpy).not.toHaveBeenCalled()
-  })
-
-  it('drives a mixed pool with roll() then add() per die size', async () => {
-    stubWebGL(true)
-    const mixed: BuiltRoll = {
-      formula: '2d20+1d6', rolls: [14, 2, 5], total: 21,
-      breakdown: [{ sides: 20, value: 14 }, { sides: 20, value: 2 }, { sides: 6, value: 5 }], modifier: 0,
-    }
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => { await result.current.run(mixed, container) })
-
-    expect(rollMock).toHaveBeenCalledWith('2d20@14,2')
-    expect(addMock).toHaveBeenCalledWith('1d6@5')
-  })
-
-  it('drives a 3-die-size pool with roll() then add() per extra group, in first-seen order', async () => {
-    stubWebGL(true)
-    const three: BuiltRoll = {
-      formula: '2d20+1d6+1d8', rolls: [14, 2, 5, 8], total: 29,
-      breakdown: [
-        { sides: 20, value: 14 }, { sides: 20, value: 2 },
-        { sides: 6, value: 5 }, { sides: 8, value: 8 },
-      ],
-      modifier: 0,
-    }
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => { await result.current.run(three, container) })
-
-    expect(rollMock).toHaveBeenCalledWith('2d20@14,2')
-    expect(addMock.mock.calls.map(c => c[0])).toEqual(['1d6@5', '1d8@8'])
-    expect(warnSpy).not.toHaveBeenCalled()
-  })
-
-  it('a mismatch in an add() group (not the first roll group) still routes to the instant reveal', async () => {
-    stubWebGL(true)
-    const mixed: BuiltRoll = {
-      formula: '2d20+1d6', rolls: [14, 2, 5], total: 21,
-      breakdown: [{ sides: 20, value: 14 }, { sides: 20, value: 2 }, { sides: 6, value: 5 }], modifier: 0,
-    }
-    // only the d6 (add group) settles wrong
-    faceOverride = (n, forced) => (n.startsWith('1d6') ? forced.map(d => ({ ...d, value: d.value + 1 })) : forced)
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    let outcome: boolean | undefined
-    await act(async () => { outcome = await result.current.run(mixed, container) })
-
-    expect(outcome).toBe(true)
-    expect(result.current.status).toBe('idle')
-    expect(warnSpy).toHaveBeenCalledTimes(1)
-    expect(warnSpy.mock.calls[0][0]).toMatch(/did not match/i)
-  })
-
-  it('a face mismatch resolves true, keeps status idle, and warns exactly once (distinct message)', async () => {
-    stubWebGL(true)
-    faceOverride = (_n, forced) => forced.map((d, i) => (i === 0 ? { ...d, value: d.value + 1 } : d))
-    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-
-    let outcome: boolean | undefined
-    await act(async () => { outcome = await result.current.run(built, container) })
-
-    expect(outcome).toBe(true)
-    expect(result.current.status).toBe('idle')
-    expect(clearMock).toHaveBeenCalled()
-    expect(errSpy).not.toHaveBeenCalled()
-    expect(warnSpy).toHaveBeenCalledTimes(1)
-    expect(warnSpy.mock.calls[0][0]).toMatch(/did not match/i)
-    errSpy.mockRestore()
-  })
-
-  it('a d4 pool always mismatches (engine cannot force d4) → reveal without tumble, no @ notation sent', async () => {
-    stubWebGL(true)
-    // plain "2d4" → mock returns value=sides=4 for both, expected [1,2] → mismatch
-    const d4roll: BuiltRoll = {
-      formula: '2d4', rolls: [1, 2], total: 3,
-      breakdown: [{ sides: 4, value: 1 }, { sides: 4, value: 2 }], modifier: 0,
-    }
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    let outcome: boolean | undefined
-    await act(async () => { outcome = await result.current.run(d4roll, container) })
-
-    expect(rollMock).toHaveBeenCalledWith('2d4')
-    expect(outcome).toBe(true)
-    expect(result.current.status).toBe('idle')
-  })
-
-  it('a second mismatch in the same mount does not warn again', async () => {
-    stubWebGL(true)
-    faceOverride = (_n, forced) => forced.map(d => ({ ...d, value: d.value + 1 }))
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => { await result.current.run(built, container) })
-    await act(async () => { await result.current.run(built, container) })
-    expect(warnSpy).toHaveBeenCalledTimes(1)
-  })
-
-  it('after a mismatch, a later run() still attempts the engine', async () => {
-    stubWebGL(true)
-    faceOverride = (_n, forced) => forced.map(d => ({ ...d, value: d.value + 1 }))
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => { await result.current.run(built, container) })
-    faceOverride = null
-    await act(async () => { await result.current.run(built, container) })
-    expect(ctorMock).toHaveBeenCalledTimes(2)
-  })
-
-  it('reordered engine results still reconcile as a match', async () => {
-    stubWebGL(true)
-    faceOverride = (_n, forced) => [...forced].reverse()
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => { await result.current.run(built, container) })
-    expect(warnSpy).not.toHaveBeenCalled()
-  })
-
-  it('percentile 0/10 faces reconcile after normalization', async () => {
-    stubWebGL(true)
-    const pct: BuiltRoll = {
-      formula: 'd%', rolls: [100], total: 100, breakdown: [], modifier: 0, percentileFaces: [10, 10],
-    }
-    faceOverride = () => [{ sides: 10, value: 0 }, { sides: 10, value: 0 }]
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => { await result.current.run(pct, container) })
-    expect(rollMock).toHaveBeenCalledWith('2d10@10,10')
-    expect(warnSpy).not.toHaveBeenCalled()
-  })
-
-  it('reconciliation issues no fetch', async () => {
-    stubWebGL(true)
-    const fetchSpy = jest.fn(() => { throw new Error('no network from the reconciliation path') })
-    const prev = (global as { fetch?: unknown }).fetch
-    ;(global as { fetch?: unknown }).fetch = fetchSpy
-    try {
-      const container = document.createElement('div')
-      const { result } = renderHook(() => useDiceAnimation())
-      await act(async () => { await result.current.run(built, container) })
-      expect(fetchSpy).not.toHaveBeenCalled()
-    } finally {
-      ;(global as { fetch?: unknown }).fetch = prev
-    }
-  })
-})
-
 describe('useDiceAnimation — single-instance invariant', () => {
   it('a second run() clears the first box before constructing a new one', async () => {
     stubWebGL(true)
@@ -350,7 +108,7 @@ describe('useDiceAnimation — single-instance invariant', () => {
   it('run() resolves false for a run superseded mid-tumble', async () => {
     stubWebGL(true)
     let resolveFirst: ((v: unknown) => void) | undefined
-    rollOverride = () => new Promise(res => { resolveFirst = res })
+    engineMock.rollOverride = () => new Promise(res => { resolveFirst = res })
     const container = document.createElement('div')
     const { result } = renderHook(() => useDiceAnimation())
 
@@ -360,7 +118,7 @@ describe('useDiceAnimation — single-instance invariant', () => {
       firstPromise = result.current.run(built, container)
       firstPromise.then(v => { firstOutcome = v })
       await new Promise(r => setTimeout(r, 0))
-      rollOverride = null
+      engineMock.rollOverride = null
       await result.current.run(built, container)
       resolveFirst!(undefined)
       await firstPromise
@@ -370,7 +128,7 @@ describe('useDiceAnimation — single-instance invariant', () => {
 })
 
 describe('useDiceAnimation — scale', () => {
-  it('constructs the engine with the base baseScale for a 6-die roll', async () => {
+  it('constructs the engine with the base baseScale (and sounds off) for a 6-die roll', async () => {
     stubWebGL(true)
     const container = document.createElement('div')
     const { result } = renderHook(() => useDiceAnimation())
@@ -387,8 +145,7 @@ describe('useDiceAnimation — scale', () => {
     expect(ctorMock.mock.calls[0][1].baseScale).toBe(diceAnimationScale(12))
     expect(ctorMock.mock.calls[0][1].baseScale).toBeLessThan(DICE_BASE_SCALE)
 
-    jest.clearAllMocks()
-    accumulated = []
+    resetEngineMock()
     await act(async () => { await result.current.run(poolBuilt(120), container) })
     expect(ctorMock.mock.calls[0][1].baseScale).toBe(diceAnimationScale(15))
   })
@@ -411,7 +168,7 @@ describe('useDiceAnimation — bounded settle', () => {
     jest.useFakeTimers()
     try {
       stubWebGL(true)
-      rollOverride = () => new Promise(() => {})
+      engineMock.rollOverride = () => new Promise(() => {})
       const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
       const container = document.createElement('div')
       const { result } = renderHook(() => useDiceAnimation())
