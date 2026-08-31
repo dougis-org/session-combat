@@ -334,13 +334,14 @@
 
 ## Open Questions
 
-- First-login conflict rule when a key is set both locally and server-side:
-  server-wins (assumed) vs newest-wins via `LocalStore` `updatedAt`. Owner: @doug.
-  Not a blocker — default is server-wins with local adoption only for server-unset keys.
-- Should preference writes ride `SyncQueue` for offline durability, or is best-effort
-  debounced PATCH enough for v1? Owner: @doug. Not a blocker — default best-effort.
-- Storage location: embedded sub-document (assumed) vs dedicated `userPreferences`
-  collection. Owner: @doug. Not a blocker.
-- Confirm the exact v1 key set (`dice.sendToChat`, `dice.disableAnimation`,
-  `chat.pinned`, `chat.size`, reserved `dice.color`) and that nothing else is
-  migrated now. Owner: @doug. Not a blocker.
+All open questions were resolved by @doug on 2026-08-31; the decisions above are final
+for v1.
+
+- Resolved — First-login conflict rule: **server value wins**; local values adopted
+  only for keys with no stored server value (Decision 5). "Newest-wins" rejected.
+- Resolved — Write durability: **best-effort debounced PATCH** with optimistic local
+  mirror; `SyncQueue` integration deferred (Decision 3).
+- Resolved — Storage location: **embedded `preferences` sub-document on `users`**
+  (Decision 1); dedicated collection rejected for v1.
+- Resolved — v1 key set: `dice.sendToChat`, `dice.disableAnimation`, `chat.pinned`,
+  `chat.size`, reserved `dice.color`; nothing else migrated (Decision 4).

@@ -171,26 +171,19 @@
 
 ## Open Questions
 
-- Question: First-login conflict rule — when a key is set BOTH locally and
-  server-side at first post-rollout login, does the server value always win, or does
-  the most recently updated value win (using `LocalStore` `updatedAt`)?
-  - Needed from: @doug
-  - Blocker for apply: no (default assumed: server value wins; local adopted only
-    when server key is unset)
-- Question: Should preference writes ride the existing `SyncQueue` for offline
-  durability, or is best-effort fire-and-forget PATCH sufficient for v1?
-  - Needed from: @doug
-  - Blocker for apply: no (default assumed: best-effort PATCH with optimistic local
-    mirror; `SyncQueue` integration deferred)
-- Question: Storage location — embedded `preferences` sub-document on `users`
-  (assumed) vs a dedicated `userPreferences` collection?
-  - Needed from: @doug
-  - Blocker for apply: no (default assumed: embedded sub-document)
-- Question: Initial preference key set — confirm the v1 list is exactly the three
-  existing values (`dice.sendToChat`, `dice.disableAnimation`, `chat.pinned`,
-  `chat.size`) plus a reserved `dice.color` slot, with nothing else migrated now.
-  - Needed from: @doug
-  - Blocker for apply: no (default assumed as listed)
+All four questions raised during exploration were resolved by the requester (@doug,
+2026-08-31) in favour of the proposed defaults. No unresolved ambiguity remains.
+
+- Resolved: First-login conflict rule — **server value wins**; a local value is
+  adopted only when the server has no stored value for that key. ("Newest-wins" via
+  `LocalStore` `updatedAt` was rejected.)
+- Resolved: Preference writes use a **best-effort debounced PATCH** with an optimistic
+  local mirror; `SyncQueue` integration is deferred (not in v1).
+- Resolved: Storage location is an **embedded `preferences` sub-document on the
+  `users` collection**; a dedicated `userPreferences` collection was rejected for v1.
+- Resolved: v1 preference keys are exactly `dice.sendToChat`, `dice.disableAnimation`,
+  `chat.pinned`, `chat.size`, plus a reserved `dice.color` slot. Nothing else is
+  migrated now.
 
 ## Non-Goals
 
