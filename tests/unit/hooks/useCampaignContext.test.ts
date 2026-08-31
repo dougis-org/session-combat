@@ -13,7 +13,7 @@ const { fetchCampaignContext } = require('@/lib/utils/campaignContext') as { fet
 const makeContext = (): CampaignContext => ({
   campaign: {
     id: 'camp-1', userId: 'u1', name: 'CoS', moduleName: 'CoS',
-    chapters: [], status: 'active', notes: '', createdAt: new Date(), updatedAt: new Date(),
+    chapters: [], partyIds: [], status: 'active', notes: '', createdAt: new Date(), updatedAt: new Date(),
   },
   chapter: null,
   parties: [],

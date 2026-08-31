@@ -23,6 +23,7 @@ const MOCK_CAMPAIGN = {
   name: "Test Campaign",
   moduleName: "",
   chapters: [],
+  partyIds: [],
   status: "active" as const,
   notes: "",
   createdAt: new Date("2026-01-01"),

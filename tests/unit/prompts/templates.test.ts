@@ -18,6 +18,7 @@ const makeContext = (overrides: Partial<CampaignContext> = {}): CampaignContext 
     moduleName: 'CoS',
     chapters: [{ id: 'ch-2', title: 'Act II', order: 2 }],
     currentChapterId: 'ch-2',
+    partyIds: [],
     status: 'active',
     notes: '',
     createdAt: new Date(),
@@ -127,7 +128,7 @@ describe('buildSystemPrompt', () => {
 });
 
 describe('buildSystemPrompt — DM notes toggle', () => {
-  const ctxWithNotes = makeContext({ campaign: { id: 'camp-1', userId: 'u1', name: 'Curse of Strahd', moduleName: 'CoS', chapters: [], currentChapterId: undefined, status: 'active', notes: 'Quest hook: the gate is sealed.', createdAt: new Date(), updatedAt: new Date() } });
+  const ctxWithNotes = makeContext({ campaign: { id: 'camp-1', userId: 'u1', name: 'Curse of Strahd', moduleName: 'CoS', chapters: [], currentChapterId: undefined, partyIds: [], status: 'active', notes: 'Quest hook: the gate is sealed.', createdAt: new Date(), updatedAt: new Date() } });
   const ctxWhitespaceNotes = makeContext({ campaign: { ...ctxWithNotes.campaign, notes: '   ' } });
 
   test('TC-N1: notes block absent when opts omitted', () => {

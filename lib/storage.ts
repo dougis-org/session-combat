@@ -261,7 +261,7 @@ export const storage = {
       } else {
         await db.collection("campaigns").updateOne(
           { id: campaignId },
-          { $pull: { partyIds: partyId } }
+          { $pull: { partyIds: partyId } as any }
         );
       }
     });
@@ -272,7 +272,7 @@ export const storage = {
       const db = await getDatabase();
       await db.collection("campaigns").updateMany(
         { partyIds: partyId },
-        { $pull: { partyIds: partyId } }
+        { $pull: { partyIds: partyId } as any }
       );
     });
   },
