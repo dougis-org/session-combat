@@ -407,6 +407,31 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
       expect(fallback).toBe(settled)
     })
 
+    it('5.4-a is byte-identical with a non-default dice appearance stored (instant path is appearance-agnostic)', () => {
+      const chips = (ui: Parameters<typeof render>[0]) => {
+        const { unmount } = render(ui)
+        const html = screen.getAllByTestId('die-readout-chip').map(c => c.outerHTML).join('|')
+        unmount()
+        return html
+      }
+      const baseline = chips(
+        <DiceRollOverlay built={built} disableAnimation animationSettled onClose={jest.fn()} />,
+      )
+      localStorage.setItem(
+        'sessionCombat:v1:dice-fab-colorset',
+        JSON.stringify({ v: 1, data: 'glitterparty', updatedAt: '' }),
+      )
+      localStorage.setItem(
+        'sessionCombat:v1:dice-fab-material',
+        JSON.stringify({ v: 1, data: 'wood', updatedAt: '' }),
+      )
+      const withAppearance = chips(
+        <DiceRollOverlay built={built} disableAnimation animationSettled onClose={jest.fn()} />,
+      )
+      localStorage.clear()
+      expect(withAppearance).toBe(baseline)
+    })
+
     it('shows the two d10 faces (d% tagged, no icon) and decoded total for a percentile roll', () => {
       const pct: BuiltRoll = {
         formula: 'd%', rolls: [42], total: 42, breakdown: [], modifier: 0, percentileFaces: [4, 2],
