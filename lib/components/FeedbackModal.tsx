@@ -76,7 +76,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       {result === 'success' && (
         <div className="flex flex-col gap-4 items-center text-center">
           <p className="text-green-400 text-lg font-medium">Thank you for your feedback!</p>
-          <p className="text-gray-300 text-sm">Your report has been submitted and a GitHub issue has been created.</p>
+          <p className="text-gray-300 text-sm">Your feedback has been sent. Thank you!</p>
           <button
             onClick={handleClose}
             className="py-2 px-6 rounded text-sm font-medium bg-blue-600 text-white hover:bg-blue-500 transition-colors"

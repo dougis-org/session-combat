@@ -14,17 +14,68 @@ function getClient(): MailtrapClient {
   return client;
 }
 
-export async function sendPasswordResetEmail(
-  to: string,
-  resetUrl: string
-): Promise<void> {
-  const client = getClient();
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * Accept only an absolute https URL or a site-relative path; anything else
+ * (other schemes, protocol-relative `//host`, garbage) collapses to '#'.
+ */
+function safeLinkHref(url: string): string {
+  if (url.startsWith("/") && !url.startsWith("//")) return url;
+  try {
+    return new URL(url).protocol === "https:" ? url : "#";
+  } catch {
+    return "#";
+  }
+}
+
+function resolveFromEmail(): string {
   if (!process.env.MAILTRAP_FROM_EMAIL) {
     console.warn(
       "MAILTRAP_FROM_EMAIL is not set — falling back to noreply@session-combat.app. Set this in production to avoid unverified-sender failures."
     );
   }
-  const fromEmail = process.env.MAILTRAP_FROM_EMAIL || "noreply@session-combat.app";
+  return process.env.MAILTRAP_FROM_EMAIL || "noreply@session-combat.app";
+}
+
+export interface FeedbackEmailInput {
+  to: string;
+  replyTo: string;
+  subject: string;
+  text: string;
+}
+
+export async function sendFeedbackEmail({
+  to,
+  replyTo,
+  subject,
+  text,
+}: FeedbackEmailInput): Promise<void> {
+  const client = getClient();
+  await client.send({
+    from: { email: resolveFromEmail(), name: "Session Combat" },
+    to: [{ email: to }],
+    reply_to: { email: replyTo },
+    category: "feedback",
+    subject,
+    text,
+  });
+}
+
+export async function sendPasswordResetEmail(
+  to: string,
+  resetUrl: string
+): Promise<void> {
+  const client = getClient();
+  const fromEmail = resolveFromEmail();
+  const safeUrl = escapeHtml(safeLinkHref(resetUrl));
 
   await client.send({
     from: { email: fromEmail, name: "Session Combat" },
@@ -32,7 +83,7 @@ export async function sendPasswordResetEmail(
     category: "password-reset",
     subject: "Reset your Session Combat password",
     html: `<p>You requested a password reset.</p>
-<p><a href="${resetUrl}">Click here to reset your password</a></p>
+<p><a href="${safeUrl}">Click here to reset your password</a></p>
 <p>This link expires in 15 minutes. If you did not request a reset, ignore this email.</p>`,
     text: `You requested a password reset.\n\nReset your password: ${resetUrl}\n\nThis link expires in 15 minutes. If you did not request a reset, ignore this email.`,
   });

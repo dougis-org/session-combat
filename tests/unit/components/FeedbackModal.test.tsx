@@ -35,7 +35,7 @@ describe('FeedbackModal', () => {
   it('shows success state after successful submission', async () => {
     const user = userEvent.setup();
     global.fetch = jest.fn(() =>
-      Promise.resolve(jsonResponse({ issueUrl: 'https://github.com/issues/1' }, 201))
+      Promise.resolve(jsonResponse({ ok: true }, 201))
     ) as unknown as jest.MockedFunction<typeof fetch>;
 
     render(<FeedbackModal isOpen={true} onClose={jest.fn()} />);
@@ -43,15 +43,18 @@ describe('FeedbackModal', () => {
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/thank you for your feedback/i)).toBeInTheDocument();
+      expect(screen.getByText(/your feedback has been sent/i)).toBeInTheDocument();
     });
     expect(screen.queryByLabelText(/title/i)).not.toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/github|issue/i);
   });
 
-  it('shows error state on API failure', async () => {
+  it('shows error state with server message and a retry control on 502', async () => {
     const user = userEvent.setup();
     global.fetch = jest.fn(() =>
-      Promise.resolve(jsonResponse({ error: 'GitHub unavailable' }, 502))
+      Promise.resolve(
+        jsonResponse({ error: 'Failed to send feedback. Please try again later.' }, 502)
+      )
     ) as unknown as jest.MockedFunction<typeof fetch>;
 
     render(<FeedbackModal isOpen={true} onClose={jest.fn()} />);
@@ -59,7 +62,23 @@ describe('FeedbackModal', () => {
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/github unavailable/i)).toBeInTheDocument();
+      expect(screen.getByText(/failed to send feedback/i)).toBeInTheDocument();
+    });
+    expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
+  });
+
+  it('shows the server message on 503', async () => {
+    const user = userEvent.setup();
+    global.fetch = jest.fn(() =>
+      Promise.resolve(jsonResponse({ error: 'Feedback is not available.' }, 503))
+    ) as unknown as jest.MockedFunction<typeof fetch>;
+
+    render(<FeedbackModal isOpen={true} onClose={jest.fn()} />);
+    await user.type(screen.getByLabelText(/title/i), 'Test bug');
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/feedback is not available/i)).toBeInTheDocument();
     });
   });
 
@@ -67,13 +86,13 @@ describe('FeedbackModal', () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
     global.fetch = jest.fn(() =>
-      Promise.resolve(jsonResponse({ issueUrl: 'https://github.com/issues/1' }, 201))
+      Promise.resolve(jsonResponse({ ok: true }, 201))
     ) as unknown as jest.MockedFunction<typeof fetch>;
 
     render(<FeedbackModal isOpen={true} onClose={onClose} />);
     await user.type(screen.getByLabelText(/title/i), 'Test bug');
     await user.click(screen.getByRole('button', { name: /submit/i }));
-    await waitFor(() => screen.getByText(/thank you for your feedback/i));
+    await waitFor(() => screen.getByText(/your feedback has been sent/i));
     await user.click(screen.getByRole('button', { name: 'Close' }));
 
     expect(onClose).toHaveBeenCalledTimes(1);

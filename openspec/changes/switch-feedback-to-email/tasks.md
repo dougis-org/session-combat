@@ -10,28 +10,28 @@ Ownership metadata:
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** from the primary checkout, `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Working branch:** branch `switch-feedback-to-email` and its worktree `.worktrees/switch-feedback-to-email` were created during propose and pushed to origin. Confirm `git worktree list` shows it and `git ls-remote --heads origin switch-feedback-to-email` returns a ref.
+- [x] **Step 1 — Sync default branch:** from the primary checkout, `git checkout main` and `git pull --ff-only`
+- [x] **Step 2 — Working branch:** branch `switch-feedback-to-email` and its worktree `.worktrees/switch-feedback-to-email` were created during propose and pushed to origin. Confirm `git worktree list` shows it and `git ls-remote --heads origin switch-feedback-to-email` returns a ref.
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list. If not listed, halt, tell the user the `pr-review-toolkit` plugin is required, provide installation guidance, and do not proceed until they confirm it is installed.
-- [ ] Confirm `.worktrees/` is in `.gitignore` (it is — line ~99) and all work happens inside `.worktrees/switch-feedback-to-email`.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list. If not listed, halt, tell the user the `pr-review-toolkit` plugin is required, provide installation guidance, and do not proceed until they confirm it is installed.
+- [x] Confirm `.worktrees/` is in `.gitignore` (it is — line ~99) and all work happens inside `.worktrees/switch-feedback-to-email`.
 
 ## Execution
 
-- [ ] **Step 1 — Worktree:** confirm `.worktrees/switch-feedback-to-email` exists and `cd` into it. If missing, from the primary checkout: `git fetch origin main` then `git worktree add .worktrees/switch-feedback-to-email switch-feedback-to-email`. Never checkout the feature branch in the primary checkout.
-- [ ] **Step 2 — Remote branch:** confirm `switch-feedback-to-email` is on origin; if not, `git push -u origin switch-feedback-to-email` from inside the worktree.
+- [x] **Step 1 — Worktree:** confirm `.worktrees/switch-feedback-to-email` exists and `cd` into it. If missing, from the primary checkout: `git fetch origin main` then `git worktree add .worktrees/switch-feedback-to-email switch-feedback-to-email`. Never checkout the feature branch in the primary checkout.
+- [x] **Step 2 — Remote branch:** confirm `switch-feedback-to-email` is on origin; if not, `git push -u origin switch-feedback-to-email` from inside the worktree.
 - [ ] **Step 3 — Issue lifecycle: mark in-progress:** run `gh issue edit 650 --add-label "in-progress"`. Discover the repo's GitHub Project via `gh project list --owner dougis-org --format json`, resolve the status field option matching "In Progress" via `gh project field-list <project-number> --owner dougis-org --format json`, and move the item with `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item move (the label edit still proceeds).
 
 ### Implementation (strict TDD — write the failing test first, then the code)
 
-- [ ] **T1 — `lib/email.ts`: shared sender helper.** Extract the `MAILTRAP_FROM_EMAIL` → `noreply@session-combat.app` fallback (plus the existing `console.warn`) into a private helper used by `sendPasswordResetEmail`. Test: `tests/unit/lib/email.test.ts` — assert `from.email` is the env value when set and the fallback (with warn) when unset. No behavior change to password reset.
-- [ ] **T2 — `lib/email.ts`: `sendFeedbackEmail`.** Add `export async function sendFeedbackEmail({ to, replyTo, subject, text }: FeedbackEmailInput): Promise<void>` calling `getClient().send({ from: { email: <helper>, name: "Session Combat" }, to: [{ email: to }], reply_to: { email: replyTo }, category: "feedback", subject, text })`. Tests: asserts `client.send` (the **live** send method) is invoked with exactly those fields; asserts it rejects/propagates when `client.send` rejects; asserts `getClient()` throwing (no `MAILTRAP_TOKEN`) propagates.
+- [x] **T1 — `lib/email.ts`: shared sender helper.** Extract the `MAILTRAP_FROM_EMAIL` → `noreply@session-combat.app` fallback (plus the existing `console.warn`) into a private helper used by `sendPasswordResetEmail`. Test: `tests/unit/lib/email.test.ts` — assert `from.email` is the env value when set and the fallback (with warn) when unset. No behavior change to password reset.
+- [x] **T2 — `lib/email.ts`: `sendFeedbackEmail`.** Add `export async function sendFeedbackEmail({ to, replyTo, subject, text }: FeedbackEmailInput): Promise<void>` calling `getClient().send({ from: { email: <helper>, name: "Session Combat" }, to: [{ email: to }], reply_to: { email: replyTo }, category: "feedback", subject, text })`. Tests: asserts `client.send` (the **live** send method) is invoked with exactly those fields; asserts it rejects/propagates when `client.send` rejects; asserts `getClient()` throwing (no `MAILTRAP_TOKEN`) propagates.
   - Covers spec: "POST /api/feedback — sends feedback email" (sender, reply_to, category).
-- [ ] **T3 — `app/api/feedback/route.ts`: rename `buildIssueBody` → `buildFeedbackBody`.** Implementation unchanged (context block + `---` + description; context-only when description empty). Keep `sanitizeIssueText` and the page-URL clamp exactly as-is.
+- [x] **T3 — `app/api/feedback/route.ts`: rename `buildIssueBody` → `buildFeedbackBody`.** Implementation unchanged (context block + `---` + description; context-only when description empty). Keep `sanitizeIssueText` and the page-URL clamp exactly as-is.
   - Covers spec: "Auto-context in feedback email" (all three scenarios).
-- [ ] **T4 — `app/api/feedback/route.ts`: replace the GitHub sink.**
+- [x] **T4 — `app/api/feedback/route.ts`: replace the GitHub sink.**
   - Remove `const githubToken = process.env.GITHUB_FEEDBACK_TOKEN` and the `fetch('https://api.github.com/...')` block.
   - After the rate-limit gate: `const to = process.env.FEEDBACK_TO_EMAIL;` and check `process.env.MAILTRAP_TOKEN`. If either is falsy → `console.error(...)` naming the missing var and `return NextResponse.json({ error: 'Feedback is not available.' }, { status: 503 })`.
   - Build `const subject = sanitizeIssueText(\`[\${type === 'bug' ? 'Bug' : 'Feature'}] \${title.trim()}\`, 200);`
@@ -40,13 +40,13 @@ Ownership metadata:
   - `return NextResponse.json({ ok: true }, { status: 201 });`
   - Tests (`tests/unit/app/api/feedback/route.test.ts`, mock `@/lib/email`): success → 201 `{ ok: true }`, `sendFeedbackEmail` called once with expected args, **no `fetch` to github**; `type` bug vs feature → subject prefix; title with newlines/control chars/>200 chars → sanitized+truncated subject; `FEEDBACK_TO_EMAIL` unset → 503, not called; `MAILTRAP_TOKEN` unset → 503; `sendFeedbackEmail` rejects → 502; rate-limited → 429, not called; malformed body → 400; bad `pageUrl` (`//evil`, `http://`, `javascript:`) → excluded from body.
   - Covers spec: "POST /api/feedback — sends feedback email" (all scenarios), "MODIFIED IP rate limiting", "MODIFIED Reliability", "MODIFIED Security".
-- [ ] **T5 — `lib/components/FeedbackModal.tsx`: success copy.** Change the success `<p>` from "Your report has been submitted and a GitHub issue has been created." to "Your feedback has been sent. Thank you!" Keep the `response.status === 201` branch. Remove any read of `issueUrl` (there is none beyond the sentence). Test (`tests/unit/components/FeedbackModal.test.tsx`): success branch renders the new text and does **not** contain "GitHub" or "issue"; error branch still shows the server `error` string; 502 response renders the retry affordance.
+- [x] **T5 — `lib/components/FeedbackModal.tsx`: success copy.** Change the success `<p>` from "Your report has been submitted and a GitHub issue has been created." to "Your feedback has been sent. Thank you!" Keep the `response.status === 201` branch. Remove any read of `issueUrl` (there is none beyond the sentence). Test (`tests/unit/components/FeedbackModal.test.tsx`): success branch renders the new text and does **not** contain "GitHub" or "issue"; error branch still shows the server `error` string; 502 response renders the retry affordance.
   - Covers spec: scenario "Modal shows success state after submission", "Modal shows error state on send failure".
-- [ ] **T6 — `.env.example`:** add under the Mailtrap section:
+- [x] **T6 — `.env.example`:** add under the Mailtrap section:
   `# FEEDBACK_TO_EMAIL=dnd@dougis.com   # required — recipient for in-app bug/feature feedback`
   and drop or comment the now-unused `# GITHUB_FEEDBACK_TOKEN=` line (leave a one-line note that it is no longer used).
-- [ ] **T7 — grep sweep:** `grep -rn "GITHUB_FEEDBACK_TOKEN\|issueUrl\|api.github.com/repos/dougis-org/session-combat/issues" app lib tests` returns only intentional references (tests asserting absence, comments). Update `README.md` / `CONTRIBUTING.md` / `docs/` if they document the feedback-creates-an-issue behavior.
-- [ ] Confirm every acceptance scenario in `openspec/changes/switch-feedback-to-email/specs/feedback-help-menu/spec.md` maps to a passing test above.
+- [x] **T7 — grep sweep:** `grep -rn "GITHUB_FEEDBACK_TOKEN\|issueUrl\|api.github.com/repos/dougis-org/session-combat/issues" app lib tests` returns only intentional references (tests asserting absence, comments). Update `README.md` / `CONTRIBUTING.md` / `docs/` if they document the feedback-creates-an-issue behavior.
+- [x] Confirm every acceptance scenario in `openspec/changes/switch-feedback-to-email/specs/feedback-help-menu/spec.md` maps to a passing test above.
 
 ## Pre-Commit Code Review
 
@@ -54,13 +54,13 @@ Ownership metadata:
 
 ## Validation
 
-- [ ] `npm run test:unit` — all pass, coverage not regressed for touched files
-- [ ] `npm run typecheck` — clean
-- [ ] `npm run lint` — clean
-- [ ] `npm run build` — succeeds
+- [x] `npm run test:unit` — all pass, coverage not regressed for touched files
+- [x] `npm run typecheck` — clean
+- [x] `npm run lint` — clean
+- [x] `npm run build` — succeeds
 - [ ] `npm run test:integration` — all pass (non-`.md` code changed → full path)
 - [ ] `npm run test:e2e` — feedback-related specs pass (use a free port, not 3000 — other threads occupy 3000)
-- [ ] `openspec validate switch-feedback-to-email` — valid
+- [x] `openspec validate switch-feedback-to-email` — valid
 - [ ] Verity pre-commit / pre-push gate — PASS (fix findings; do not waive)
 - [ ] All completed tasks marked `- [x]`
 - [ ] All steps in [Remote push validation]

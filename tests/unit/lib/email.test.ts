@@ -67,4 +67,60 @@ describe("lib/email.ts", () => {
       }
     );
   });
+
+  describe("sendFeedbackEmail", () => {
+    const INPUT = {
+      to: "dnd@dougis.com",
+      replyTo: "reporter@example.com",
+      subject: "[Bug] It broke",
+      text: "context\n\n---\n\ndetails",
+    };
+
+    it("calls the live client.send once with the expected fields", async () => {
+      process.env.MAILTRAP_TOKEN = "test-token";
+      process.env.MAILTRAP_FROM_EMAIL = "noreply@session-combat.app";
+      const { sendFeedbackEmail } = await import("@/lib/email");
+
+      await sendFeedbackEmail(INPUT);
+
+      expect(mockSend).toHaveBeenCalledTimes(1);
+      expect(mockSend.mock.calls[0][0]).toEqual({
+        from: { email: "noreply@session-combat.app", name: "Session Combat" },
+        to: [{ email: INPUT.to }],
+        reply_to: { email: INPUT.replyTo },
+        category: "feedback",
+        subject: INPUT.subject,
+        text: INPUT.text,
+      });
+    });
+
+    it("uses the fallback sender and warns when MAILTRAP_FROM_EMAIL is unset", async () => {
+      process.env.MAILTRAP_TOKEN = "test-token";
+      delete process.env.MAILTRAP_FROM_EMAIL;
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const { sendFeedbackEmail } = await import("@/lib/email");
+
+      await sendFeedbackEmail(INPUT);
+
+      expect(mockSend.mock.calls[0][0].from.email).toBe("noreply@session-combat.app");
+      expect(warn).toHaveBeenCalledTimes(1);
+      warn.mockRestore();
+    });
+
+    it("propagates a rejection from client.send", async () => {
+      process.env.MAILTRAP_TOKEN = "test-token";
+      mockSend.mockRejectedValueOnce(new Error("send failed"));
+      const { sendFeedbackEmail } = await import("@/lib/email");
+
+      await expect(sendFeedbackEmail(INPUT)).rejects.toThrow("send failed");
+    });
+
+    it("throws the config error when MAILTRAP_TOKEN is unset", async () => {
+      delete process.env.MAILTRAP_TOKEN;
+      const { sendFeedbackEmail } = await import("@/lib/email");
+
+      await expect(sendFeedbackEmail(INPUT)).rejects.toThrow(/MAILTRAP_TOKEN/);
+      expect(mockSend).not.toHaveBeenCalled();
+    });
+  });
 });
