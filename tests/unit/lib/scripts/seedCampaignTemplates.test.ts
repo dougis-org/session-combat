@@ -276,6 +276,91 @@ describe("Baldur's Gate: Descent into Avernus encounters", () => {
   });
 });
 
+describe("Waterdeep: Dragon Heist encounters", () => {
+  let logSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("WDH has 9 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Waterdeep: Dragon Heist");
+    assertCampaignEncounterContract(seeded, "Waterdeep: Dragon Heist", 9);
+  });
+});
+
+describe("Storm King's Thunder encounters", () => {
+  let logSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("SKT has 10 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Storm King's Thunder");
+    assertCampaignEncounterContract(seeded, "Storm King's Thunder", 10);
+  });
+});
+
+describe("Out of the Abyss encounters", () => {
+  let logSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("OotA has 17 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Out of the Abyss");
+    assertCampaignEncounterContract(seeded, "Out of the Abyss", 17);
+  });
+});
+
+describe("Dragon of Icespire Peak encounters", () => {
+  let logSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("DIP has 4 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Dragon of Icespire Peak");
+    assertCampaignEncounterContract(seeded, "Dragon of Icespire Peak", 4);
+  });
+});
+
+describe("Phandelver and Below: The Shattered Obelisk encounters", () => {
+  let logSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("PaBtSO has 8 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Phandelver and Below: The Shattered Obelisk");
+    assertCampaignEncounterContract(seeded, "Phandelver and Below: The Shattered Obelisk", 8);
+  });
+});
+
 describe("runCli", () => {
   let exitSpy: jest.SpyInstance;
   let logSpy: jest.SpyInstance;

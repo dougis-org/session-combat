@@ -570,6 +570,459 @@ function bgdiaEncounters(): EncounterTemplate[] {
   ];
 }
 
+function wdhEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const zhentarim = findCustomMonsterById("cm-zhentarim-thug");
+  const manshoon = findCustomMonsterById("cm-manshoon-manyfaced");
+  const jarlaxle = findCustomMonsterById("cm-jarlaxle-baenre");
+  const veteran = findCustomMonsterById("cm-veteran");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "Zhentarim Thugs at the Yawning Portal",
+      "A street-level Zhentarim ambush spills out of the Yawning Portal tavern.",
+      compact([many(zhentarim, 4)])
+    ),
+    encounter(
+      "Manshoon's Tower",
+      "Manshoon the Manyfaced confronts the party in Kolat Towers' parlor.",
+      compact([m(manshoon), many(zhentarim, 4), many(veteran, 2)])
+    ),
+    encounter(
+      "Jarlaxle's Shadowy Deal",
+      "Drow mercenary Jarlaxle Baenre offers the party a deal at the Stonecutters' Guildhall.",
+      compact([m(jarlaxle), many(veteran, 3)])
+    ),
+  ];
+}
+
+function sktEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const chiefGuh = findCustomMonsterById("cm-chief-guh");
+  const jarlStorvald = findCustomMonsterById("cm-jarl-storvald");
+  const dukeZalto = findCustomMonsterById("cm-duke-zalto");
+  const yikaria = findCustomMonsterById("cm-yikaria");
+  const uthgardtShaman = findCustomMonsterById("cm-uthgardt-shaman");
+  const slarkrethel = findCustomMonsterById("cm-slarkrethel");
+  const kingHekaton = findCustomMonsterById("cm-king-hekaton");
+  const iymrithDisguised = findCustomMonsterById("cm-iymrith-disguised");
+  const iymrithAncientBlue = findCustomMonsterById("cm-iymrith-ancient-blue");
+  const maegera = findCustomMonsterById("cm-maegera-dawn-titan");
+  const hillGiant = findCustomMonsterById("cm-hill-giant");
+  const fireGiant = findCustomMonsterById("cm-fire-giant");
+  const frostGiant = findCustomMonsterById("cm-frost-giant");
+  const cloudGiant = findCustomMonsterById("cm-cloud-giant");
+  const ogre = findCustomMonsterById("cm-ogre");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "Hill Giant Raid on Nightstone",
+      "Starving hill giants attack the refuge of Nightstone for food.",
+      compact([many(hillGiant, 4), many(ogre, 4)])
+    ),
+    encounter(
+      "Chief Guh at Grudd Haug",
+      "The hill giant chief Chief Guh holds court in his throne room.",
+      compact([m(chiefGuh), many(hillGiant, 6)])
+    ),
+    encounter(
+      "Jarl Storvald's Glacial Rift",
+      "Frost giant Jarl Storvald guards the rift leading to Maelstrom.",
+      compact([m(jarlStorvald), many(frostGiant, 4)])
+    ),
+    encounter(
+      "Duke Zalto's Fire Forge",
+      "Fire giant Duke Zalto forges the Ordning Crown at Ironslag.",
+      compact([m(dukeZalto), many(fireGiant, 4)])
+    ),
+    encounter(
+      "Slarkrethel's Lair",
+      "The kraken Slarkrethel ambushes the party underwater in the Trackless Sea.",
+      compact([m(slarkrethel)])
+    ),
+    encounter(
+      "Yikaria's Floating Citadel",
+      "Giant-king Yikaria holds court on a cloud-borne flying palace.",
+      compact([m(yikaria), many(cloudGiant, 4)])
+    ),
+    encounter(
+      "King Hekaton at Maelstrom",
+      "The storm giant king Hekaton is rescued from his underwater prison.",
+      compact([m(kingHekaton)])
+    ),
+    encounter(
+      "Uthgardt Shaman at Stone Bridge",
+      "An Uthgardt barbarian shaman challenges the party at a sacred stone bridge.",
+      compact([m(uthgardtShaman), many(ogre, 4)])
+    ),
+    encounter(
+      "Iymrith Revealed",
+      "The ancient blue dragon Iymrith drops her giant form and reveals her true self.",
+      compact([m(iymrithDisguised), m(iymrithAncientBlue)])
+    ),
+    encounter(
+      "Maegera, the Dawn Titan",
+      "The primordial Maegera erupts from the Dawn Titan's Tomb beneath the Maelstrom.",
+      compact([m(maegera)])
+    ),
+  ];
+}
+
+function ootEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const drowEliteWarrior = findCustomMonsterById("cm-drow-elite-warrior");
+  const drider = findCustomMonsterById("cm-driders");
+  const ilvara = findCustomMonsterById("cm-ilvara-mizzrym");
+  const themberchaud = findCustomMonsterById("cm-themberchaud");
+  const rockblight = findCustomMonsterById("cm-rockblight");
+  const puddingKing = findCustomMonsterById("cm-pudding-king");
+  const troglodyte = findCustomMonsterById("cm-troglodyte");
+  const troglodyteChampion = findCustomMonsterById("cm-troglodyte-champion");
+  const darkHunter = findCustomMonsterById("cm-dark-hunter");
+  const elderPurpleWorm = findCustomMonsterById("cm-elder-purple-worm");
+  const mazeEngine = findCustomMonsterById("cm-maze-engine");
+  const sporeServantBrute = findCustomMonsterById("cm-spore-servant-brute");
+  const demogorgon = findCustomMonsterById("cm-demogorgon");
+  const orcus = findCustomMonsterById("cm-orcus");
+  const zuggtmoy = findCustomMonsterById("cm-zuggtmoy");
+  const juiblex = findCustomMonsterById("cm-juiblex");
+  const frazUrbluu = findCustomMonsterById("cm-fraz-urbluu");
+  const yeenoghu = findCustomMonsterById("cm-gnoll-fang-of-yeenoghu");
+  const derroSavant = findCustomMonsterById("cm-derro-savant");
+  const ixitxachitl = findCustomMonsterById("cm-ixitxachitl");
+  const duergar = findCustomMonsterById("cm-duergar");
+  const deathSlaad = findCustomMonsterById("cm-death-slaad");
+  const grick = findCustomMonsterById("cm-grimlock");
+  const beholder = findCustomMonsterById("cm-beholder");
+  const purpleWorm = findCustomMonsterById("cm-purple-worm");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "Velkenvelve Escape",
+      "The drow Ilvara Mizzrym and her elite guard pursue the escaping prisoners.",
+      compact([m(ilvara), many(drowEliteWarrior, 6), many(drider, 2)])
+    ),
+    encounter(
+      "Themberchaud the Wyvern",
+      "The arrogant wyvern Themberchaud guards his rockblight nest.",
+      compact([m(themberchaud), m(rockblight), many(troglodyte, 6)])
+    ),
+    encounter(
+      "Neverlight Grove",
+      "The demon lord Zuggtmoy's spore servants corrupt a once-beautiful grove.",
+      compact([m(zuggtmoy), many(sporeServantBrute, 6), m(puddingKing)])
+    ),
+    encounter(
+      "Gracklstugh Duergar Council",
+      "The duergar stone-guard council debates whether to surrender the party to the drow.",
+      compact([many(duergar, 6)])
+    ),
+    encounter(
+      "Blingdenstone Defense",
+      "The derro savant captures the party and challenges them in the fungal arena.",
+      compact([m(derroSavant), many(grick, 4)])
+    ),
+    encounter(
+      "Darklake Aboleth Lair",
+      "An aboleth plots beneath the Darklake, enslaving ixitxachitl vigilante priests.",
+      compact([m(beholder), many(ixitxachitl, 4)])
+    ),
+    encounter(
+      "Demon Lord Encounter — Demogorgon",
+      "The Prince of Demons erupts from Sloobludop's fetid waters.",
+      compact([m(demogorgon), many(yeenoghu, 4)])
+    ),
+    encounter(
+      "Demon Lord Encounter — Orcus",
+      "The Demon Prince of the Undead arises from a corrupted shrine.",
+      compact([m(orcus), many(deathSlaad, 6)])
+    ),
+    encounter(
+      "Demon Lord Encounter — Zuggtmoy",
+      "The demon queen of rot claims a festering grotto for her fungal court.",
+      compact([m(zuggtmoy), many(purpleWorm, 2)])
+    ),
+    encounter(
+      "Demon Lord Encounter — Juiblex",
+      "The Faceless Lord's ooze-pit bubbles up around the party.",
+      compact([m(juiblex)])
+    ),
+    encounter(
+      "Demon Lord Encounter — Fraz-Urb'luu",
+      "The self-styled Prince of Deception reveals his true, terrible form.",
+      compact([m(frazUrbluu)])
+    ),
+    encounter(
+      "Gauntlgrym Pit Fight",
+      "Fighting pit arena — drow, duergar, and prisoners in a chaotic brawl.",
+      compact([many(drowEliteWarrior, 4), many(duergar, 4), many(troglodyte, 4)])
+    ),
+    encounter(
+      "Audience with the Mages of Menzobarranzan",
+      "Drow mage council interviews the party at the gates of the Underdark city.",
+      compact([many(drowEliteWarrior, 8), m(mazeEngine)])
+    ),
+    encounter(
+      "Mantol-Derith Dark Marketplace",
+      "Caravan ambush by mind flayers and their grimlock servants.",
+      compact([many(beholder, 2), many(grick, 6), m(darkHunter)])
+    ),
+    encounter(
+      "Maze Engine Awakens",
+      "The wandering maze spawns a maze engine, hunting the party.",
+      compact([m(mazeEngine)])
+    ),
+    encounter(
+      "Escape from the Abyss",
+      "Last stand at the surface — drow pursuit and elder purple worm attack.",
+      compact([many(drowEliteWarrior, 4), many(drider, 2), m(elderPurpleWorm)])
+    ),
+  ];
+}
+
+function dipEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const manticore = findCustomMonsterById("cm-manticore");
+  const cryovain = findCustomMonsterById("cm-cryovain");
+  const orc = findCustomMonsterById("cm-orc");
+  const orog = findCustomMonsterById("cm-orog");
+  const hobgoblin = findCustomMonsterById("cm-hobgoblin");
+  const hobgoblinCaptain = findCustomMonsterById("cm-hobgoblin-captain");
+  const stirges = findCustomMonsterById("cm-stirges");
+  const owlbear = findCustomMonsterById("cm-owlbear");
+  const gnoll = findCustomMonsterById("cm-gnoll-fang-of-yeenoghu");
+  const ankheg = findCustomMonsterById("cm-giant-spider");
+  const giantSpider = findCustomMonsterById("cm-giant-spider");
+  const bugbear = findCustomMonsterById("cm-bugbear");
+  const polarBear = findCustomMonsterById("cm-polar-bear");
+  const yeti = findCustomMonsterById("cm-yeti");
+  const piercer = findCustomMonsterById("cm-piercer");
+  const ogre = findCustomMonsterById("cm-ogre");
+  const youngRedDragon = findCustomMonsterById("cm-young-red-dragon");
+  const veteran = findCustomMonsterById("cm-veteran");
+  const stormGiant = findCustomMonsterById("cm-storm-giant-awakened");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "Manticore at Umbrage Hill",
+      "A manticore attacks the windmill at Umbrage Hill.",
+      compact([m(manticore), many(stirges, 4)])
+    ),
+    encounter(
+      "Orc Tuskenross Ambush",
+      "An orc war band led by an orog lies in wait at the Triboar Trail.",
+      compact([many(orc, 8), m(orog)])
+    ),
+    encounter(
+      "Hobgoblin Captain at Conyberry",
+      "A hobgoblin captain rallies a raiding force outside Conyberry.",
+      compact([m(hobgoblinCaptain), many(hobgoblin, 6), many(veteran, 2)])
+    ),
+    encounter(
+      "Giant Spider's Lair",
+      "A giant spider has strung her web across the road leading to Phandalin.",
+      compact([m(giantSpider), many(stirges, 6)])
+    ),
+    encounter(
+      "Owlbear Mountain Den",
+      "A territorial owlbear defends its mountain lair.",
+      compact([m(owlbear)])
+    ),
+    encounter(
+      "Gnoll Pack at Wyvern Tor",
+      "A gnoll pack ambushes the party at Wyvern Tor.",
+      compact([many(gnoll, 6)])
+    ),
+    encounter(
+      "Triboar Lane Ambush",
+      "Mixed creature ambush — orc and hobgoblin raids collide on the Triboar.",
+      compact([many(orc, 4), many(hobgoblin, 4), m(bugbear)])
+    ),
+    encounter(
+      "Bugbear Chief at Axeholm",
+      "A bugbear chief has fortified an abandoned dwarven outpost.",
+      compact([m(bugbear), many(bugbear, 4)])
+    ),
+    encounter(
+      "Yeti in the Spine of the World",
+      "An albino yeti stalks the party across the Spine of the World's snowfields.",
+      compact([m(yeti), many(polarBear, 2)])
+    ),
+    encounter(
+      "Piercer Ambush in the Peaks",
+      "Piercers drop from the ceiling of a narrow mountain pass.",
+      compact([many(piercer, 6)])
+    ),
+    encounter(
+      "Ogre Stronghold",
+      "An ogre war band occupies an abandoned bandit camp.",
+      compact([many(ogre, 4)])
+    ),
+    encounter(
+      "Falcon's Hunting Lodge",
+      "Mountain predators surround the party's lodge in the foothills.",
+      compact([m(owlbear), many(polarBear, 3)])
+    ),
+    encounter(
+      "Rezil's Tower Assault",
+      "A veteran mage holds the tower against the party's assault.",
+      compact([many(veteran, 4), m(hobgoblinCaptain)])
+    ),
+    encounter(
+      "Cryovain at Icespire Hold",
+      "The young white dragon Cryovain descends upon Icespire Peak.",
+      compact([m(cryovain), m(stormGiant), many(ogre, 4)])
+    ),
+    encounter(
+      "Storm Giant's Wrath",
+      "An awakened storm giant unleashes thunder and lightning upon the climbing party.",
+      compact([m(stormGiant), m(youngRedDragon), many(orc, 6)])
+    ),
+  ];
+}
+
+function pabtsoEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const psionicGoblin = findCustomMonsterById("cm-psionic-goblin");
+  const psionicGoblinBoss = findCustomMonsterById("cm-psionic-goblin-boss");
+  const cloaker = findCustomMonsterById("cm-cloaker");
+  const nezznar = findCustomMonsterById("cm-nezznar");
+  const mindFlayerCultist = findCustomMonsterById("cm-mind-flayer-cultist");
+  const obeliskSentinel = findCustomMonsterById("cm-obelisk-sentinel");
+  const elderBrainDragon = findCustomMonsterById("cm-elder-brain-dragon");
+  const nethereseObeliskBoss = findCustomMonsterById("cm-netherese-obelisk-boss");
+  const shadow = findCustomMonsterById("cm-shadow");
+  const hookHorror = findCustomMonsterById("cm-hook-horror");
+  const drider = findCustomMonsterById("cm-driders");
+  const hobgoblin = findCustomMonsterById("cm-hobgoblin");
+  const mindFlayer = findCustomMonsterById("cm-mind-flayer");
+  const veteran = findCustomMonsterById("cm-veteran");
+  const giantSpider = findCustomMonsterById("cm-giant-spider");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "Cragmaw Ambush at Triboar Trail",
+      "Cragmaw goblins, led by a psionic goblin boss, ambush the wagon.",
+      compact([many(psionicGoblin, 6), m(psionicGoblinBoss)])
+    ),
+    encounter(
+      "Spider's Web — Cragmaw Castle",
+      "Spiders and goblins patrol the goblin castle beneath Phandalin.",
+      compact([many(psionicGoblin, 6), m(giantSpider)])
+    ),
+    encounter(
+      "Hook Horror Ambush",
+      "Hook horrors burst from a cavern wall at the party's approach.",
+      compact([many(hookHorror, 4)])
+    ),
+    encounter(
+      "Cloaker Mutate",
+      "A cloaker mutates and ambushes the party from beneath a stone bridge.",
+      compact([m(cloaker), many(shadow, 4)])
+    ),
+    encounter(
+      "Wave Echo Cave Obelisk",
+      "A mind flayer cultist tends to an obelisk fragment in the depths of Wave Echo Cave.",
+      compact([m(mindFlayerCultist), m(obeliskSentinel), many(shadow, 6)])
+    ),
+    encounter(
+      "Nezznar's Fortress Ambush",
+      "The doppelganger crime lord Nezznar confronts the party at his hidden fortress.",
+      compact([m(nezznar), m(mindFlayer), many(veteran, 4)])
+    ),
+    encounter(
+      "Shattered Obelisk Awakens",
+      "The Netherese obelisk pulses with malevolent psionic energy.",
+      compact([m(nethereseObeliskBoss), m(obeliskSentinel), many(shadow, 8)])
+    ),
+    encounter(
+      "Elder Brain Dragon Confrontation",
+      "A mind flayer elder brain fused with a dragon attacks the party's stronghold.",
+      compact([m(elderBrainDragon), many(mindFlayer, 4), many(drider, 2)])
+    ),
+    encounter(
+      "Cragmaw Reinforcements at Phandalin",
+      "Hobgoblin commandos and mind flayer thralls assault the town.",
+      compact([many(hobgoblin, 6), m(mindFlayerCultist), m(mindFlayer)])
+    ),
+  ];
+}
+
 const CAMPAIGN_CATALOG: CampaignTemplate[] = [
   makeTemplate(
     "Curse of Strahd",
@@ -649,18 +1102,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Winter: Jarlaxle's Villain", order: 8, levelRange: "4-5", location: "Waterdeep" },
       { title: "Volo's Waterdeep Enchiridion", order: 9, levelRange: "5", location: "Waterdeep" },
     ],
-    [
-      {
-        "name": "Zhentarim Thugs",
-        "description": "A street brawl spills out of the Yawning Portal.",
-        "monsters": []
-      },
-      {
-        "name": "Kenku Ambush",
-        "description": "Kenku hiding in a warehouse attempt to silence the party.",
-        "monsters": []
-      }
-    ]
+    wdhEncounters()
   ),
 
   makeTemplate(
@@ -679,18 +1121,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Citadel Felbarr", order: 9, levelRange: "10-11", location: "Citadel Felbarr" },
       { title: "Hold of the Storm Giant King", order: 10, levelRange: "11", location: "Maelstrom" },
     ],
-    [
-      {
-        "name": "Hill Giant Raid",
-        "description": "Starving hill giants attack a fortified settlement for food.",
-        "monsters": []
-      },
-      {
-        "name": "Iymrith's Deception",
-        "description": "The ancient blue dragon reveals her true form in the giant court.",
-        "monsters": []
-      }
-    ]
+    sktEncounters()
   ),
 
   makeTemplate(
@@ -716,18 +1147,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Fetid Wedding", order: 16, levelRange: "14-15", location: "Sloobludop" },
       { title: "Against the Demon Lords", order: 17, levelRange: "15", location: "Underdark" },
     ],
-    [
-      {
-        "name": "Drow Pursuit",
-        "description": "Ilvara and her drow elite catch up to the fleeing prisoners.",
-        "monsters": []
-      },
-      {
-        "name": "Demogorgon's Rise",
-        "description": "The Prince of Demons surfaces in Sloobludop, causing mass madness.",
-        "monsters": []
-      }
-    ]
+    ootEncounters()
   ),
 
   makeTemplate(
@@ -1053,7 +1473,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Shattered Obelisk", order: 6, levelRange: "6-8", location: "Talhundereth" },
       { title: "Into the Underdark", order: 7, levelRange: "8-10", location: "Underdark" },
       { title: "The Netherese Obelisk", order: 8, levelRange: "10-12", location: "Illithinoch" },
-    ]
+    ],
+    pabtsoEncounters()
   ),
 
   makeTemplate(
@@ -1381,13 +1802,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Advanced Quests", order: 3, levelRange: "4-5", location: "Sword Mountains" },
       { title: "Icespire Hold", order: 4, levelRange: "6-7", location: "Icespire Hold" },
     ],
-    [
-      {
-        name: "Manticore at Umbrage Hill",
-        description: "A manticore is attacking the windmill at Umbrage Hill.",
-        monsters: []
-      }
-    ]
+    dipEncounters()
   ),
 
   makeTemplate(

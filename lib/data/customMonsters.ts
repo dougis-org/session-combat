@@ -4191,7 +4191,3280 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
         description: "The golem exhales a 15-foot cone of hellfire. Each creature in the area makes a DC 16 Dexterity save, taking 28 (8d6) fire damage on a failure, or half on a success."
       }
     ]
-  }
+  },
+  // ─── Waterdeep: Dragon Heist ─────────────────────────────────────────
+  {
+    id: "cm-zhentarim-thug",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Waterdeep: Dragon Heist",
+    name: "Zhentarim Thug",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Any Non-Lawful Alignment",
+    speed: "30 ft.",
+    challengeRating: 0.5,
+    ac: 12,
+    acNote: "leather armor",
+    hp: 11,
+    maxHp: 11,
+    abilityScores: {
+      strength: 11, dexterity: 12, constitution: 12,
+      intelligence: 10, wisdom: 10, charisma: 10
+    },
+    skills: { Intimidation: 2 },
+    senses: { "passive Perception": "10" },
+    languages: ["Common"],
+    description: "A hired blade of the Zhentarim Black Network who enforces the merchant cartel's 'interest' along the Sword Coast.",
+    traits: [
+      { name: "Black Network Loyalty", description: "The thug has advantage on saving throws against being charmed or frightened while within 30 ft. of another Zhentarim ally." }
+    ],
+    actions: [
+      { name: "Scimitar", description: "Melee Weapon Attack", attackBonus: 3, damageDescription: "4 (1d6 + 1) slashing damage." },
+      { name: "Light Crossbow", description: "Ranged Weapon Attack", attackBonus: 3, damageDescription: "5 (1d8 + 1) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-manshoon-manyfaced",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Waterdeep: Dragon Heist",
+    name: "Manshoon the Manyfaced",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Lawful Evil",
+    speed: "30 ft.",
+    challengeRating: 12,
+    experiencePoints: 8400,
+    ac: 14,
+    acNote: "Mage Armor",
+    hp: 168,
+    maxHp: 168,
+    abilityScores: {
+      strength: 10, dexterity: 16, constitution: 16,
+      intelligence: 20, wisdom: 16, charisma: 16
+    },
+    savingThrows: { intelligence: 11, wisdom: 9 },
+    skills: { Arcana: 11, Deception: 9, History: 11, Insight: 9, Perception: 9 },
+    senses: { truesight: "30 ft.", "passive Perception": "19" },
+    languages: ["Common", "Deep Speech", "Infernal", "Thayan"],
+    description: "A Zhentarim clone of Manshoon the Warlock who masquerades as Kolat Towers' landlord, secretly scheming to claim the gold for the Black Network.",
+    traits: [
+      { name: "Shapechanger", description: "Manshoon can use his action to polymorph into any humanoid he has seen, or back into his true form. His statistics, other than his size and speed, are the same in each form." },
+      { name: "Spellcasting", description: "Manshoon is an 18th-level spellcaster. His spellcasting ability is Intelligence (spell save DC 19, +11 to hit with spell attacks). At will: detect magic, mage hand. 3/day each: counterspell, dispel magic, fireball, hold person, major image, suggestion. 1/day each: dominate person, mass suggestion, polymorph, teleport." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Manshoon makes two Dagger attacks." },
+      { name: "Dagger", description: "Melee or Ranged Weapon Attack", attackBonus: 8, damageDescription: "7 (1d4 + 5) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-jarlaxle-baenre",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Waterdeep: Dragon Heist",
+    name: "Jarlaxle Baenre",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Chaotic Neutral",
+    speed: "30 ft.",
+    challengeRating: 13,
+    experiencePoints: 10000,
+    ac: 18,
+    acNote: "studded leather + bracers of defense",
+    hp: 195,
+    maxHp: 195,
+    abilityScores: {
+      strength: 12, dexterity: 20, constitution: 16,
+      intelligence: 18, wisdom: 14, charisma: 18
+    },
+    savingThrows: { dexterity: 10, intelligence: 9, charisma: 9 },
+    skills: { Deception: 9, Perception: 7, Persuasion: 9, Stealth: 10 },
+    damageImmunities: ["poison"],
+    conditionImmunities: ["poisoned"],
+    senses: { darkvision: "120 ft.", truesight: "30 ft.", "passive Perception": "17" },
+    languages: ["Common", "Elvish", "Undercommon"],
+    description: "The flamboyant drow mercenary leader of Bregan D'aerthe. Wears the legendary hat of disguise and wields the eye of Lhammar (a sentient magical eye that fires force bolts).",
+    traits: [
+      { name: "Fey Ancestry", description: "Jarlaxle has advantage on saving throws against being charmed, and magic can't put him to sleep." },
+      { name: "Hat of Disguise", description: "Jarlaxle can use his action to cast disguise self at will without expending a spell slot." },
+      { name: "Innate Spellcasting", description: "Jarlaxle's innate spellcasting ability is Charisma (spell save DC 16). At will: dancing lights. 1/day each: darkness, faerie fire." },
+      { name: "Spellcasting", description: "Jarlaxle is a 12th-level spellcaster. His spellcasting ability is Intelligence (spell save DC 17, +9 to hit with spell attacks). At will: light, mage hand, ray of frost. 3/day each: counterspell, fireball, hold person. 1/day each: confusion, detect magic, shield." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Jarlaxle makes three attacks: one Dagger, one Shortsword, and one Eye Ray." },
+      { name: "Dagger", description: "Melee or Ranged Weapon Attack", attackBonus: 10, damageDescription: "7 (1d4 + 5) piercing damage plus 10 (3d6) poison damage." },
+      { name: "Shortsword", description: "Melee Weapon Attack", attackBonus: 10, damageDescription: "8 (1d6 + 5) piercing damage plus 10 (3d6) poison damage." },
+      { name: "Eye Ray", description: "Ranged Spell Attack", attackBonus: 9, damageDescription: "18 (4d8) force damage." }
+    ],
+    legendaryActionCount: 3,
+    legendaryActions: [
+      { name: "Eye Ray", description: "Jarlaxle uses his Eye Ray." },
+      { name: "Cast a Spell", description: "Jarlaxle casts one of his prepared spells." },
+      { name: "Disappear (Costs 2 Actions)", description: "Jarlaxle casts greater invisibility on himself without expending a spell slot." }
+    ]
+  },
+  // SRD-faithful mirrors used in Waterdeep: Dragon Heist encounters
+  {
+    id: "cm-kenku",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Waterdeep: Dragon Heist",
+    name: "Kenku",
+    size: "small",
+    type: "humanoid",
+    alignment: "Chaotic Neutral",
+    speed: "30 ft.",
+    challengeRating: 0.25,
+    ac: 13,
+    hp: 13,
+    maxHp: 13,
+    abilityScores: {
+      strength: 10, dexterity: 16, constitution: 10,
+      intelligence: 11, wisdom: 10, charisma: 10
+    },
+    skills: { Deception: 4, Perception: 2, Stealth: 6 },
+    senses: { darkvision: "60 ft.", "passive Perception": "12" },
+    languages: ["understands Common and Auran but can't speak"],
+    traits: [
+      { name: "Mimicry", description: "The kenku can mimic any sound it has heard, including voices. A creature that hears the sounds can tell they are imitations with a successful DC 14 Wisdom (Insight) check." }
+    ],
+    actions: [
+      { name: "Shortsword", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "6 (1d6 + 3) piercing damage." },
+      { name: "Shortbow", description: "Ranged Weapon Attack", attackBonus: 5, damageDescription: "6 (1d6 + 3) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-veteran",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Waterdeep: Dragon Heist",
+    name: "Veteran",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Any Alignment",
+    speed: "30 ft.",
+    challengeRating: 3,
+    ac: 17,
+    acNote: "splint armor, shield",
+    hp: 58,
+    maxHp: 58,
+    abilityScores: {
+      strength: 16, dexterity: 13, constitution: 14,
+      intelligence: 10, wisdom: 11, charisma: 10
+    },
+    savingThrows: { strength: 5, constitution: 4 },
+    skills: { Athletics: 5, Perception: 2 },
+    senses: { "passive Perception": "12" },
+    languages: ["any one language (usually Common)"],
+    traits: [],
+    actions: [
+      { name: "Multiattack", description: "The veteran makes two Longsword attacks. If it has a shortsword drawn, it can also make a Shortsword attack." },
+      { name: "Longsword", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "7 (1d8 + 3) slashing damage, or 8 (1d10 + 3) if used two-handed." },
+      { name: "Shortsword", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "6 (1d6 + 3) piercing damage." },
+      { name: "Heavy Crossbow", description: "Ranged Weapon Attack", attackBonus: 3, damageDescription: "7 (1d10 + 1) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-beholder",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Waterdeep: Dragon Heist",
+    name: "Beholder",
+    size: "large",
+    type: "aberration",
+    alignment: "Lawful Evil",
+    speed: "0 ft., fly 20 ft. (hover)",
+    challengeRating: 13,
+    experiencePoints: 10000,
+    ac: 18,
+    acNote: "natural armor",
+    hp: 180,
+    maxHp: 180,
+    abilityScores: {
+      strength: 10, dexterity: 14, constitution: 18,
+      intelligence: 17, wisdom: 15, charisma: 13
+    },
+    savingThrows: { intelligence: 7, wisdom: 6 },
+    skills: { Perception: 12 },
+    conditionImmunities: ["prone"],
+    senses: { darkvision: "120 ft.", "passive Perception": "22" },
+    languages: ["Deep Speech", "Undercommon"],
+    description: "The Xanathar, a paranoid beholder crime lord who runs the Xanathar Guild from a beholder-sized lair beneath the Skulks.",
+    traits: [
+      { name: "Antimagic Cone", description: "The beholder's central eye creates a 150-foot cone of antimagic at the start of each of its turns. The eye can't be closed; the cone can be suppressed for 1 minute by a successful DC 14 Constitution save taken as an action." }
+    ],
+    actions: [
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "14 (2d10 + 3) piercing damage." },
+      { name: "Eye Rays", description: "The beholder shoots three of the following magical eye rays at random (reroll duplicates), choosing targets it can see within 120 ft.: Charm Ray (DC 16 Wis), Paralyzing Ray (DC 16 Con), Fear Ray (DC 16 Wis), Slowing Ray (DC 16 Wis), Enervation Ray (DC 16 Dex), Telekinetic Ray (DC 16 Str), Sleep Ray (DC 15 Wis), Petrification Ray (DC 16 Con), Disintegration Ray (DC 16 Dex), Death Ray (DC 16 Dex)." }
+    ],
+    legendaryActionCount: 3,
+    legendaryActions: [
+      { name: "Eye Ray", description: "The beholder uses one random eye ray." },
+      { name: "Move", description: "The beholder moves up to half its speed without provoking opportunity attacks." }
+    ]
+  },
+  {
+    id: "cm-grimlock",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Waterdeep: Dragon Heist",
+    name: "Grimlock",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Neutral Evil",
+    speed: "30 ft.",
+    challengeRating: 0.25,
+    ac: 11,
+    hp: 11,
+    maxHp: 11,
+    abilityScores: {
+      strength: 12, dexterity: 14, constitution: 11,
+      intelligence: 9, wisdom: 8, charisma: 6
+    },
+    skills: { Athletics: 3, Perception: 3, Stealth: 4 },
+    conditionImmunities: ["blinded"],
+    senses: { blindsight: "30 ft.", "passive Perception": "13" },
+    languages: ["Undercommon"],
+    traits: [],
+    actions: [
+      { name: "Multiattack", description: "The grimlock makes two attacks." },
+      { name: "Spiked Bone Club", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-nothic",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Waterdeep: Dragon Heist",
+    name: "Nothic",
+    size: "medium",
+    type: "aberration",
+    alignment: "Neutral Evil",
+    speed: "30 ft.",
+    challengeRating: 2,
+    ac: 15,
+    acNote: "natural armor",
+    hp: 45,
+    maxHp: 45,
+    abilityScores: {
+      strength: 14, dexterity: 16, constitution: 14,
+      intelligence: 13, wisdom: 10, charisma: 8
+    },
+    skills: { Arcana: 3, Perception: 5, Stealth: 4 },
+    senses: { truesight: "60 ft.", darkvision: "60 ft.", "passive Perception": "15" },
+    languages: ["Undercommon"],
+    description: "A degenerate aberration with one magical eye that crawls through the Xanathar Guild's secret passages, feeding on fear and using its weird gaze to glean secrets.",
+    traits: [
+      { name: "Keen Sight", description: "The nothic has advantage on Wisdom (Perception) checks that rely on sight." },
+      { name: "Weird Insight", description: "The nothic can target one creature it can see within 30 ft. The target must make a DC 12 Wisdom save or the nothic learns one of its ideals, bonds, or flaws." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The nothic makes two Rotting Claw attacks." },
+      { name: "Rotting Claw", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "8 (2d4 + 3) slashing damage." },
+      { name: "Rotting Gaze", description: "The nothic targets one creature it can see within 30 ft. The target makes a DC 12 Constitution save, taking 6 (1d8 + 2) necrotic damage on a failure." }
+    ]
+  },
+  // ─── Storm King's Thunder ────────────────────────────────────────────
+  {
+    id: "cm-chief-guh",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Chief Guh",
+    size: "large",
+    type: "giant",
+    alignment: "Chaotic Evil",
+    speed: "40 ft.",
+    challengeRating: 7,
+    experiencePoints: 2900,
+    ac: 13,
+    acNote: "natural armor",
+    hp: 105,
+    maxHp: 105,
+    abilityScores: {
+      strength: 21, dexterity: 8, constitution: 17,
+      intelligence: 6, wisdom: 10, charisma: 8
+    },
+    savingThrows: { strength: 8, constitution: 6 },
+    skills: { Athletics: 8, Perception: 3 },
+    senses: { "passive Perception": "13" },
+    languages: ["Common", "Giant"],
+    description: "Hill giant chief of Grudd Haug. Holds captives for ransom and feasts on anyone who can't pay.",
+    traits: [
+      { name: "Hill Giant Chief", description: "Guh has advantage on Strength (Athletics) checks and adds twice his proficiency bonus (included) to damage rolls with boulder attacks." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Guh makes two Greatclub attacks." },
+      { name: "Greatclub", description: "Melee Weapon Attack", attackBonus: 8, damageDescription: "18 (3d8 + 5) bludgeoning damage." },
+      { name: "Boulder", description: "Ranged Weapon Attack", attackBonus: 8, damageDescription: "21 (3d10 + 5) bludgeoning damage." }
+    ],
+    reactions: [
+      { name: "Catch Rock", description: "Guh has advantage on Dexterity saving throws to avoid taking damage from a ranged attack that deals bludgeoning damage, and he catches the rock if he avoids the damage." }
+    ]
+  },
+  {
+    id: "cm-jarl-storvald",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Jarl Storvald",
+    size: "large",
+    type: "giant",
+    alignment: "Neutral Evil",
+    speed: "40 ft.",
+    challengeRating: 9,
+    experiencePoints: 5000,
+    ac: 15,
+    acNote: "natural armor",
+    hp: 168,
+    maxHp: 168,
+    abilityScores: {
+      strength: 23, dexterity: 9, constitution: 20,
+      intelligence: 10, wisdom: 12, charisma: 13
+    },
+    savingThrows: { strength: 10, constitution: 9, charisma: 5 },
+    skills: { Athletics: 10, Perception: 5, Persuasion: 5 },
+    senses: { "passive Perception": "15" },
+    languages: ["Common", "Giant"],
+    description: "Frost giant jarl of the Glacial Rift who refuses to share the ordning and keeps the Vonindod skull.",
+    traits: [
+      { name: "Frost Giant Jarl", description: "Storvald deals an extra 1d8 cold damage on weapon attacks (included)." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Storvald makes two Greataxe attacks." },
+      { name: "Greataxe", description: "Melee Weapon Attack", attackBonus: 10, damageDescription: "25 (3d12 + 6) slashing damage, or 21 (3d10 + 6) if used one-handed." },
+      { name: "Boulder", description: "Ranged Weapon Attack", attackBonus: 10, damageDescription: "28 (4d10 + 6) bludgeoning damage." },
+      { name: "Frost Breath (Recharge 5-6)", description: "Storvald exhales a 30-foot cone of cold. Each creature in the area makes a DC 17 Constitution save, taking 21 (6d6) cold damage on a failure, or half on a success." }
+    ],
+    reactions: [
+      { name: "Catch Rock", description: "Storvald has advantage on Dexterity saving throws to avoid taking damage from a ranged attack that deals bludgeoning damage, and he catches the rock if he avoids the damage." }
+    ]
+  },
+  {
+    id: "cm-duke-zalto",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Duke Zalto",
+    size: "huge",
+    type: "giant",
+    alignment: "Lawful Evil",
+    speed: "40 ft.",
+    challengeRating: 11,
+    experiencePoints: 7200,
+    ac: 17,
+    acNote: "plate armor",
+    hp: 200,
+    maxHp: 200,
+    abilityScores: {
+      strength: 25, dexterity: 9, constitution: 21,
+      intelligence: 14, wisdom: 13, charisma: 16
+    },
+    savingThrows: { strength: 11, constitution: 9, charisma: 7 },
+    skills: { Athletics: 11, Intimidation: 7, Perception: 5 },
+    senses: { "passive Perception": "15" },
+    languages: ["Common", "Giant", "Ignan"],
+    description: "Fire giant duke of Ironslag who forges the Vonindod skeleton from golden dragon bones.",
+    traits: [
+      { name: "Fire Giant Duke", description: "Zalto deals an extra 2d6 fire damage on weapon attacks (included)." },
+      { name: "Smith's Hammer", description: "Zalto can repair damaged constructs or forge a new magic item with 1 day's uninterrupted work." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Zalto makes three War Pick attacks." },
+      { name: "War Pick", description: "Melee Weapon Attack", attackBonus: 11, damageDescription: "22 (3d8 + 9) piercing damage plus 7 (2d6) fire damage." },
+      { name: "Boulder", description: "Ranged Weapon Attack", attackBonus: 11, damageDescription: "30 (4d10 + 9) bludgeoning damage." },
+      { name: "Fire Breath (Recharge 5-6)", description: "Zalto exhales a 30-foot cone of flame. Each creature makes a DC 17 Dexterity save, taking 28 (8d6) fire damage on a failure, or half on a success." }
+    ],
+    reactions: [
+      { name: "Catch Rock", description: "Zalto has advantage on Dexterity saving throws to avoid taking damage from a ranged attack that deals bludgeoning damage, and he catches the rock if he avoids the damage." }
+    ]
+  },
+  {
+    id: "cm-yikaria",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Yikaria the Yakfolk",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Neutral Evil",
+    speed: "30 ft.",
+    challengeRating: 8,
+    experiencePoints: 3900,
+    ac: 14,
+    acNote: "Mage Armor",
+    hp: 110,
+    maxHp: 110,
+    abilityScores: {
+      strength: 10, dexterity: 14, constitution: 14,
+      intelligence: 17, wisdom: 12, charisma: 13
+    },
+    savingThrows: { intelligence: 7, wisdom: 5 },
+    skills: { Arcana: 7, Deception: 5, Insight: 5 },
+    senses: { darkvision: "60 ft.", "passive Perception": "11" },
+    languages: ["Common", "Giant", "Yakfolk"],
+    description: "A yakfolk mage and prisoner of Duke Zalto at Ironslag. Once freed, may join or betray the party.",
+    traits: [
+      { name: "Magic Resistance", description: "Yikaria has advantage on saving throws against spells and other magical effects." },
+      { name: "Spellcasting", description: "Yikaria is an 11th-level spellcaster. Her spellcasting ability is Intelligence (spell save DC 15, +7 to hit with spell attacks). At will: detect magic, light, mage hand, prestidigitation. 3/day each: counterspell, fireball, hold person, suggestion. 1/day each: confusion, polymorph, teleport." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Yikaria makes two Dagger attacks." },
+      { name: "Dagger", description: "Melee or Ranged Weapon Attack", attackBonus: 6, damageDescription: "6 (1d4 + 4) piercing damage plus 3 (1d6) poison damage." }
+    ]
+  },
+  {
+    id: "cm-uthgardt-shaman",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Uthgardt Shaman",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Chaotic Neutral",
+    speed: "30 ft.",
+    challengeRating: 5,
+    experiencePoints: 1800,
+    ac: 13,
+    acNote: "Mage Armor",
+    hp: 75,
+    maxHp: 75,
+    abilityScores: {
+      strength: 10, dexterity: 14, constitution: 14,
+      intelligence: 12, wisdom: 16, charisma: 11
+    },
+    savingThrows: { wisdom: 6 },
+    skills: { Medicine: 6, Nature: 4, Religion: 6 },
+    senses: { "passive Perception": "13" },
+    languages: ["Common", "Druidic"],
+    description: "Tribal shaman of the Uthgardt, the barbarian people of the North. Allies with frost giants after the ordning broke.",
+    traits: [
+      { name: "Spellcasting", description: "The shaman is a 7th-level spellcaster. Its spellcasting ability is Wisdom (spell save DC 14, +6 to hit with spell attacks). At will: druidcraft, guidance. 3/day each: cure wounds, thunderwave. 1/day each: call lightning, healing spirit, lightning bolt." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The shaman makes two attacks." },
+      { name: "Quarterstaff", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "6 (1d8 + 2) bludgeoning damage." },
+      { name: "Javelin", description: "Melee or Ranged Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-slarkrethel",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Slarkrethel the Kraken",
+    size: "huge",
+    type: "monstrosity",
+    alignment: "Chaotic Evil",
+    speed: "20 ft., swim 60 ft.",
+    challengeRating: 23,
+    experiencePoints: 50000,
+    ac: 18,
+    acNote: "natural armor",
+    hp: 472,
+    maxHp: 472,
+    abilityScores: {
+      strength: 25, dexterity: 11, constitution: 25,
+      intelligence: 21, wisdom: 18, charisma: 19
+    },
+    savingThrows: { strength: 12, dexterity: 6, constitution: 12, wisdom: 9 },
+    skills: { Perception: 14 },
+    damageImmunities: ["lightning", "poison"],
+    conditionImmunities: ["frightened", "poisoned"],
+    senses: { truesight: "120 ft.", "passive Perception": "24" },
+    languages: ["Abyssal", "Common", "Deep Speech", "telepathy 120 ft."],
+    description: "The kraken patron of the Kraken Society, manipulating events from its lair in the Trackless Sea.",
+    traits: [
+      { name: "Amphibious", description: "Slarkrethel can breathe air and water." },
+      { name: "Freedom of Movement", description: "Slarkrethel ignores difficult terrain, magical or otherwise, and effects that would end his movement or reduce his speed." },
+      { name: "Magic Resistance", description: "Slarkrethel has advantage on saving throws against spells and other magical effects." },
+      { name: "Siege Monster", description: "Slarkrethel deals double damage to objects and structures." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Slarkrethel makes three Tentacle attacks, one Beak attack, and uses Fling." },
+      { name: "Tentacle", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "20 (3d8 + 7) bludgeoning damage. The target is grappled (escape DC 18). Until this grapple ends, the target is restrained and takes 20 (3d8 + 7) bludgeoning damage at the start of each of Slarkrethel's turns." },
+      { name: "Beak", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "32 (5d10 + 7) piercing damage." },
+      { name: "Lightning Storm (Recharge 5-6)", description: "Slarkrethel magically creates three bolts of lightning, each of which can be aimed at any point he can see within 120 ft. Each creature within 5 ft. of a bolt makes a DC 18 Dexterity save, taking 22 (4d10) lightning damage on a failure, or half on a success." },
+      { name: "Fling", description: "Slarkrethel flings one grappled creature up to 60 ft. in any direction. The creature takes 20 (3d8 + 7) bludgeoning damage on landing." }
+    ],
+    legendaryActions: [
+      { name: "Tentacle Attack", description: "Slarkrethel makes one Tentacle attack." },
+      { name: "Lightning Storm (Costs 2 Actions)", description: "Slarkrethel uses Lightning Storm, creating only two lightning bolts." },
+      { name: "Ink Cloud", description: "Slarkrethel creates a 60-foot-radius cloud of ink centered on a point he can see within 120 ft. The cloud spreads around corners, heavily obscures the area, and lasts for 1 minute. Slarkrethel can see through the cloud." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-king-hekaton",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "King Hekaton",
+    size: "huge",
+    type: "giant",
+    alignment: "Chaotic Good",
+    speed: "50 ft., swim 50 ft.",
+    challengeRating: 16,
+    experiencePoints: 15000,
+    ac: 20,
+    acNote: "natural armor",
+    hp: 230,
+    maxHp: 230,
+    abilityScores: {
+      strength: 29, dexterity: 14, constitution: 20,
+      intelligence: 16, wisdom: 18, charisma: 18
+    },
+    savingThrows: { strength: 14, dexterity: 8, constitution: 11, wisdom: 10, charisma: 10 },
+    skills: { Athletics: 14, Insight: 10, Perception: 10, Persuasion: 10 },
+    senses: { "passive Perception": "20" },
+    languages: ["Common", "Giant", "Primordial"],
+    description: "The storm giant king of the Maelstrom, patriarch of the royal line. Captured by Iymrith and freed by the party.",
+    traits: [
+      { name: "Amphibious", description: "Hekaton can breathe air and water." },
+      { name: "Innate Spellcasting", description: "Hekaton's innate spellcasting ability is Charisma (spell save DC 18). At will: detect magic, fog cloud, light. 1/day each: control weather, water breathing." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Hekaton makes two Trident attacks and uses Lightning Throw if available." },
+      { name: "Trident", description: "Melee or Ranged Weapon Attack", attackBonus: 14, damageDescription: "22 (3d8 + 9) piercing damage, or 24 (3d10 + 9) if used two-handed." },
+      { name: "Lightning Strike (Recharge 4-6)", description: "Hekaton hurls a magical lightning bolt at a point he can see within 500 ft. Each creature within 10 ft. of the point makes a DC 19 Dexterity save, taking 49 (9d10) lightning damage on a failure, or half on a success." }
+    ],
+    legendaryActions: [
+      { name: "Trident Attack", description: "Hekaton makes one Trident attack." },
+      { name: "Lightning Strike (Costs 2 Actions)", description: "Hekaton uses Lightning Strike if available, otherwise makes one Trident attack." },
+      { name: "Storm's Blessing", description: "Hekaton targets one ally he can see. That ally has advantage on its next attack roll." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-iymrith-disguised",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Iymrith in Human Form",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Chaotic Evil",
+    speed: "30 ft.",
+    challengeRating: 0.125,
+    ac: 10,
+    hp: 4,
+    maxHp: 4,
+    abilityScores: {
+      strength: 10, dexterity: 10, constitution: 10,
+      intelligence: 10, wisdom: 10, charisma: 10
+    },
+    senses: { "passive Perception": "10" },
+    languages: ["Common"],
+    description: "The ancient blue dragon Iymrith disguised as a pale human attendant at the Eye of the All-Father. Maintains her true form on another plane.",
+    traits: [
+      { name: "Polymorphed Dragon", description: "This is the human form of Iymrith the Blue Dragon. She is invulnerable to harm in this form while her true form remains alive on another plane. Detect magic reveals strong conjuration magic; true seeing reveals her draconic nature." }
+    ],
+    actions: []
+  },
+  {
+    id: "cm-iymrith-ancient-blue",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Iymrith the Blue Dragon",
+    size: "huge",
+    type: "dragon",
+    alignment: "Chaotic Evil",
+    speed: "40 ft., burrow 40 ft., fly 80 ft.",
+    challengeRating: 22,
+    experiencePoints: 41000,
+    ac: 19,
+    acNote: "natural armor",
+    hp: 481,
+    maxHp: 481,
+    abilityScores: {
+      strength: 27, dexterity: 10, constitution: 25,
+      intelligence: 16, wisdom: 13, charisma: 13
+    },
+    savingThrows: { dexterity: 5, constitution: 12, wisdom: 6, charisma: 6 },
+    skills: { Perception: 16, Persuasion: 6, Stealth: 5 },
+    damageImmunities: ["lightning"],
+    senses: { blindsight: "60 ft.", darkvision: "120 ft.", truesight: "30 ft.", "passive Perception": "26" },
+    languages: ["Common", "Draconic"],
+    description: "An ancient blue dragon masquerading as the storm giant princess Iymrith. The secret mastermind behind the giant civil war and the final boss of Storm King's Thunder.",
+    traits: [
+      { name: "Legendary Resistance (3/Day)", description: "If Iymrith fails a saving throw, she can choose to succeed instead." },
+      { name: "Magic Resistance", description: "Iymrith has advantage on saving throws against spells and other magical effects." },
+      { name: "Innate Spellcasting", description: "Iymrith's spellcasting ability is Charisma (spell save DC 18). At will: detect magic, minor illusion. 1/day each: confusion, hold monster, suggestion, Major Image (as 4th level)." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Iymrith makes three attacks: one Bite and two Claws." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "19 (2d10 + 8) piercing damage plus 9 (2d8) lightning damage." },
+      { name: "Claw", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "15 (2d6 + 8) slashing damage." },
+      { name: "Tail", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "17 (2d8 + 8) bludgeoning damage." },
+      { name: "Lightning Breath (Recharge 5-6)", description: "Iymrith exhales lightning in a 120-foot line that is 10 ft. wide. Each creature makes a DC 20 Dexterity save, taking 88 (16d10) lightning damage on a failure, or half on a success." }
+    ],
+    legendaryActions: [
+      { name: "Bite Attack", description: "Iymrith makes one Bite attack." },
+      { name: "Claw Attack", description: "Iymrith makes one Claw attack." },
+      { name: "Wing Attack (Costs 2 Actions)", description: "Iymrith beats her wings. Each creature within 15 ft. makes a DC 22 Strength save or is knocked prone and pushed 30 ft. away. Iymrith can then fly up to half her speed." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-maegera-dawn-titan",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Maegera the Dawn Titan",
+    size: "huge",
+    type: "elemental",
+    alignment: "Chaotic Good",
+    speed: "40 ft.",
+    challengeRating: 22,
+    experiencePoints: 41000,
+    ac: 22,
+    acNote: "natural armor",
+    hp: 481,
+    maxHp: 481,
+    abilityScores: {
+      strength: 30, dexterity: 10, constitution: 26,
+      intelligence: 14, wisdom: 14, charisma: 20
+    },
+    savingThrows: { strength: 15, dexterity: 5, constitution: 13, wisdom: 7, charisma: 10 },
+    skills: { Athletics: 15, Perception: 7 },
+    damageImmunities: ["fire"],
+    senses: { truesight: "60 ft.", "passive Perception": "17" },
+    languages: ["Common", "Ignan", "Primordial"],
+    description: "An elder fire titan trapped beneath Iymrith's desert lair. Imprisoned by the dragon and freed during the final confrontation.",
+    traits: [
+      { name: "Damage Resistance (Nonmagical)", description: "Maegera takes no damage from bludgeoning, piercing, and slashing attacks that are nonmagical." },
+      { name: "Legendary Resistance (3/Day)", description: "If Maegera fails a saving throw, she can choose to succeed instead." },
+      { name: "Magic Resistance", description: "Maegera has advantage on saving throws against spells and other magical effects." },
+      { name: "Siege Monster", description: "Maegera deals double damage to objects and structures." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Maegera makes two Molten Boulder attacks and one Fiery Slam attack." },
+      { name: "Fiery Slam", description: "Melee Weapon Attack", attackBonus: 15, damageDescription: "22 (3d8 + 10) bludgeoning damage plus 14 (4d6) fire damage." },
+      { name: "Molten Boulder", description: "Ranged Weapon Attack", attackBonus: 15, damageDescription: "21 (3d8 + 10) bludgeoning damage plus 14 (4d6) fire damage." },
+      { name: "Dawn Fire (Recharge 5-6)", description: "Maegera emits a 60-foot cone of brilliant flame. Each creature makes a DC 21 Dexterity save, taking 66 (12d10) fire damage and 66 (12d10) radiant damage on a failure, or half on a success." }
+    ],
+    legendaryActions: [
+      { name: "Molten Boulder", description: "Maegera makes one Molten Boulder attack." },
+      { name: "Dawn Step", description: "Maegera teleports up to 60 ft. to an unoccupied space she can see." },
+      { name: "Immolating Aura (Costs 2 Actions)", description: "Each creature of Maegera's choice within 30 ft. makes a DC 21 Constitution save, taking 21 (6d6) fire damage on a failure, or half on a success." }
+    ],
+    legendaryActionCount: 3
+  },
+  // SRD-faithful mirrors used in Storm King's Thunder encounters
+  {
+    id: "cm-cloud-giant",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Cloud Giant",
+    size: "huge",
+    type: "giant",
+    alignment: "Neutral Good",
+    speed: "40 ft.",
+    challengeRating: 9,
+    experiencePoints: 5000,
+    ac: 14,
+    acNote: "natural armor",
+    hp: 200,
+    maxHp: 200,
+    abilityScores: {
+      strength: 27, dexterity: 10, constitution: 22,
+      intelligence: 12, wisdom: 16, charisma: 16
+    },
+    savingThrows: { constitution: 10, charisma: 7 },
+    skills: { Insight: 7, Perception: 7 },
+    senses: { "passive Perception": "17" },
+    languages: ["Common", "Giant"],
+    description: "A cloud giant - one of the giant lords displaced by the breaking of the ordning.",
+    traits: [
+      { name: "Keen Smell", description: "The giant has advantage on Wisdom (Perception) checks that rely on smell." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The giant makes two Morningstar attacks." },
+      { name: "Morningstar", description: "Melee Weapon Attack", attackBonus: 12, damageDescription: "29 (4d8 + 9) piercing damage." },
+      { name: "Rock", description: "Ranged Weapon Attack", attackBonus: 12, damageDescription: "35 (7d6 + 9) bludgeoning damage." }
+    ],
+    reactions: [
+      { name: "Catch Rock", description: "The giant has advantage on Dexterity saving throws to avoid taking damage from a ranged attack that deals bludgeoning damage, and it catches the rock if it avoids the damage." }
+    ]
+  },
+  {
+    id: "cm-frost-giant",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Frost Giant",
+    size: "large",
+    type: "giant",
+    alignment: "Neutral Evil",
+    speed: "40 ft.",
+    challengeRating: 8,
+    experiencePoints: 3900,
+    ac: 15,
+    acNote: "natural armor",
+    hp: 138,
+    maxHp: 138,
+    abilityScores: {
+      strength: 23, dexterity: 9, constitution: 21,
+      intelligence: 9, wisdom: 10, charisma: 12
+    },
+    savingThrows: { constitution: 8, charisma: 4 },
+    skills: { Athletics: 9, Perception: 3 },
+    senses: { "passive Perception": "13" },
+    languages: ["Common", "Giant"],
+    description: "A frost giant of the frozen north, displaced by the breaking of the ordning.",
+    traits: [
+      { name: "Keen Smell", description: "The giant has advantage on Wisdom (Perception) checks that rely on smell." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The giant makes two Greataxe attacks." },
+      { name: "Greataxe", description: "Melee Weapon Attack", attackBonus: 9, damageDescription: "25 (3d12 + 6) slashing damage, or 21 (3d10 + 6) if used one-handed." },
+      { name: "Rock", description: "Ranged Weapon Attack", attackBonus: 9, damageDescription: "28 (4d10 + 6) bludgeoning damage." }
+    ],
+    reactions: [
+      { name: "Catch Rock", description: "The giant has advantage on Dexterity saving throws to avoid taking damage from a ranged attack that deals bludgeoning damage, and it catches the rock if it avoids the damage." }
+    ]
+  },
+  {
+    id: "cm-fire-giant",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Fire Giant",
+    size: "huge",
+    type: "giant",
+    alignment: "Lawful Evil",
+    speed: "30 ft.",
+    challengeRating: 9,
+    experiencePoints: 5000,
+    ac: 18,
+    acNote: "plate armor",
+    hp: 162,
+    maxHp: 162,
+    abilityScores: {
+      strength: 25, dexterity: 9, constitution: 23,
+      intelligence: 11, wisdom: 14, charisma: 13
+    },
+    savingThrows: { strength: 12, dexterity: 4, constitution: 10, wisdom: 6, charisma: 5 },
+    skills: { Athletics: 12, Perception: 6 },
+    senses: { "passive Perception": "16" },
+    languages: ["Common", "Giant"],
+    description: "A fire giant from the Muspelheim, displaced by the breaking of the ordning.",
+    traits: [
+      { name: "Keen Smell", description: "The giant has advantage on Wisdom (Perception) checks that rely on smell." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The giant makes two Melee attacks." },
+      { name: "Melee Attack", description: "Melee Weapon Attack", attackBonus: 11, damageDescription: "21 (3d8 + 7) bludgeoning damage, or 22 (3d10 + 7) if used two-handed." },
+      { name: "Rock", description: "Ranged Weapon Attack", attackBonus: 11, damageDescription: "29 (4d10 + 7) bludgeoning damage." }
+    ],
+    reactions: [
+      { name: "Catch Rock", description: "The giant has advantage on Dexterity saving throws to avoid taking damage from a ranged attack that deals bludgeoning damage, and it catches the rock if it avoids the damage." }
+    ]
+  },
+  {
+    id: "cm-hill-giant",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Hill Giant",
+    size: "large",
+    type: "giant",
+    alignment: "Chaotic Evil",
+    speed: "40 ft.",
+    challengeRating: 5,
+    experiencePoints: 1800,
+    ac: 13,
+    acNote: "natural armor",
+    hp: 105,
+    maxHp: 105,
+    abilityScores: {
+      strength: 21, dexterity: 8, constitution: 17,
+      intelligence: 5, wisdom: 9, charisma: 6
+    },
+    savingThrows: { strength: 8, constitution: 6 },
+    skills: { Athletics: 8, Perception: 2 },
+    senses: { "passive Perception": "12" },
+    languages: ["Common", "Giant"],
+    description: "A hill giant raider displaced by the breaking of the ordning.",
+    traits: [],
+    actions: [
+      { name: "Multiattack", description: "The giant makes two Greatclub attacks." },
+      { name: "Greatclub", description: "Melee Weapon Attack", attackBonus: 8, damageDescription: "18 (3d8 + 5) bludgeoning damage." },
+      { name: "Rock", description: "Ranged Weapon Attack", attackBonus: 8, damageDescription: "21 (3d10 + 5) bludgeoning damage." }
+    ],
+    reactions: [
+      { name: "Catch Rock", description: "The giant has advantage on Dexterity saving throws to avoid taking damage from a ranged attack that deals bludgeoning damage, and it catches the rock if he avoids the damage." }
+    ]
+  },
+  {
+    id: "cm-ogre",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Ogre",
+    size: "large",
+    type: "giant",
+    alignment: "Chaotic Evil",
+    speed: "40 ft.",
+    challengeRating: 2,
+    experiencePoints: 450,
+    ac: 11,
+    acNote: "hide armor",
+    hp: 59,
+    maxHp: 59,
+    abilityScores: {
+      strength: 19, dexterity: 8, constitution: 16,
+      intelligence: 5, wisdom: 7, charisma: 7
+    },
+    skills: { Athletics: 6 },
+    senses: { darkvision: "60 ft.", "passive Perception": "8" },
+    languages: ["Common", "Giant"],
+    description: "Brutish giants used as foot soldiers by hill giants and other larger giants.",
+    traits: [],
+    actions: [
+      { name: "Greatclub", description: "Melee Weapon Attack", attackBonus: 6, damageDescription: "13 (2d8 + 4) bludgeoning damage." },
+      { name: "Javelin", description: "Melee or Ranged Weapon Attack", attackBonus: 6, damageDescription: "11 (2d6 + 4) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-yeti",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Yeti",
+    size: "large",
+    type: "monstrosity",
+    alignment: "Chaotic Evil",
+    speed: "40 ft., climb 40 ft.",
+    challengeRating: 4,
+    experiencePoints: 1100,
+    ac: 13,
+    acNote: "natural armor",
+    hp: 51,
+    maxHp: 51,
+    abilityScores: {
+      strength: 18, dexterity: 10, constitution: 18,
+      intelligence: 8, wisdom: 12, charisma: 7
+    },
+    skills: { Perception: 4, Stealth: 3 },
+    senses: { darkvision: "60 ft.", "passive Perception": "14" },
+    languages: ["Yeti"],
+    description: "A terrifying predator of the frozen north.",
+    traits: [
+      { name: "Keen Smell", description: "The yeti has advantage on Wisdom (Perception) checks that rely on smell." },
+      { name: "Snow Camouflage", description: "The yeti has advantage on Dexterity (Stealth) checks made to hide in snowy terrain." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The yeti makes two attacks: one with its claws and one with its bite." },
+      { name: "Claw", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "11 (2d6 + 4) slashing damage plus 3 (1d6) cold damage." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "10 (1d10 + 4) piercing damage plus 3 (1d6) cold damage." },
+      { name: "Chilling Gaze", description: "The yeti targets one creature within 30 ft. The target makes a DC 13 Constitution save, taking 10 (3d6) cold damage on a failure, or half on a success." }
+    ]
+  },
+  {
+    id: "cm-polar-bear",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Polar Bear",
+    size: "large",
+    type: "beast",
+    alignment: "Unaligned",
+    speed: "40 ft., swim 30 ft.",
+    challengeRating: 2,
+    experiencePoints: 450,
+    ac: 12,
+    hp: 42,
+    maxHp: 42,
+    abilityScores: {
+      strength: 20, dexterity: 10, constitution: 16,
+      intelligence: 2, wisdom: 13, charisma: 7
+    },
+    skills: { Perception: 3 },
+    senses: { "passive Perception": "13" },
+    languages: ["understands Common but can't speak"],
+    description: "A massive bear of the arctic, often found in the company of frost giants.",
+    traits: [
+      { name: "Keen Smell", description: "The bear has advantage on Wisdom (Perception) checks that rely on smell." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The bear makes two attacks: one Bite and one Claw." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "9 (1d8 + 5) piercing damage." },
+      { name: "Claw", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "11 (2d6 + 5) slashing damage." }
+    ]
+  },
+  {
+    id: "cm-magmin",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Magmin",
+    size: "small",
+    type: "elemental",
+    alignment: "Chaotic Neutral",
+    speed: "30 ft.",
+    challengeRating: 0.5,
+    experiencePoints: 100,
+    ac: 14,
+    acNote: "natural armor",
+    hp: 9,
+    maxHp: 9,
+    abilityScores: {
+      strength: 7, dexterity: 15, constitution: 12,
+      intelligence: 8, wisdom: 11, charisma: 10
+    },
+    damageImmunities: ["fire"],
+    senses: { "passive Perception": "10" },
+    languages: ["Ignan"],
+    description: "A small flame elemental that serves fire giants.",
+    traits: [
+      { name: "Death Burst", description: "When the magmin dies, it explodes. Each creature within 5 ft. makes a DC 11 Constitution save, taking 3 (1d6) fire damage on a failure, or half on a success." },
+      { name: "Fire Form", description: "The magmin can move through a space as narrow as 1 inch wide without squeezing. Any creature that touches the magmin takes 2 (1d4) fire damage. The magmin can deliberately ignite flammable objects with a touch." }
+    ],
+    actions: [
+      { name: "Touch", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "4 (1d4 + 2) fire damage. If the target is a flammable object that hasn't been worn or carried, it catches fire." }
+    ]
+  },
+  {
+    id: "cm-cult-fanatic",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Storm King's Thunder",
+    name: "Cult Fanatic",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Any Non-Good Alignment",
+    speed: "30 ft.",
+    challengeRating: 2,
+    experiencePoints: 450,
+    ac: 13,
+    acNote: "leather armor",
+    hp: 33,
+    maxHp: 33,
+    abilityScores: {
+      strength: 11, dexterity: 14, constitution: 12,
+      intelligence: 10, wisdom: 13, charisma: 14
+    },
+    skills: { Deception: 4, Persuasion: 4, Religion: 2 },
+    senses: { "passive Perception": "11" },
+    languages: ["any one language (usually Common)"],
+    description: "A fanatic adherent of a dark cult - Kraken Society, Iymrith's cult, or similar.",
+    traits: [
+      { name: "Dark Devotion", description: "The fanatic has advantage on saving throws against being charmed or frightened." },
+      { name: "Spellcasting", description: "The fanatic is a 4th-level spellcaster. Its spellcasting ability is Wisdom (spell save DC 11, +3 to hit with spell attacks). At will: light, sacred flame. 1/day each: command, shield of faith." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The fanatic makes two melee attacks." },
+      { name: "Dagger", description: "Melee or Ranged Weapon Attack", attackBonus: 4, damageDescription: "4 (1d4 + 2) piercing damage." }
+    ]
+  },
+  // ─── Out of the Abyss ─────────────────────────────────────────────────
+  {
+    id: "cm-ilvara-mizzrym",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Ilvara Mizzrym",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Neutral Evil",
+    speed: "30 ft.",
+    challengeRating: 5,
+    experiencePoints: 1800,
+    ac: 15,
+    acNote: "studded leather",
+    hp: 84,
+    maxHp: 84,
+    abilityScores: {
+      strength: 10, dexterity: 18, constitution: 14,
+      intelligence: 13, wisdom: 16, charisma: 17
+    },
+    savingThrows: { dexterity: 7, wisdom: 6, charisma: 6 },
+    skills: { Deception: 6, Insight: 6, Perception: 6, Persuasion: 6, Stealth: 7 },
+    senses: { darkvision: "120 ft.", "passive Perception": "16" },
+    languages: ["Common", "Elvish", "Undercommon"],
+    description: "Drow priestess of Lolth who commands the Velkynvelve outpost. Pursues the party across the Underdark for chapters 1-7.",
+    traits: [
+      { name: "Fey Ancestry", description: "Ilvara has advantage on saving throws against being charmed, and magic can't put her to sleep." },
+      { name: "Innate Spellcasting", description: "Ilvara's innate spellcasting ability is Wisdom (spell save DC 13, +5 to hit with spell attacks). At will: dancing lights. 1/day each: darkness, faerie fire." },
+      { name: "Spellcasting", description: "Ilvara is a 5th-level spellcaster. Her spellcasting ability is Wisdom (spell save DC 13, +5 to hit with spell attacks). At will: guidance, sacred flame, thaumaturgy. 2/day each: command, detect magic, inflict wounds. 1/day each: death word, dispel magic." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Ilvara makes two Rapier attacks." },
+      { name: "Rapier", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "7 (1d8 + 3) piercing damage plus 3 (1d6) poison damage." },
+      { name: "Hand Crossbow", description: "Ranged Weapon Attack", attackBonus: 7, damageDescription: "6 (1d6 + 3) piercing damage plus 3 (1d6) poison damage." }
+    ]
+  },
+  {
+    id: "cm-themberchaud",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Themberchaud the Fire Giant Wyrmrider",
+    size: "huge",
+    type: "giant",
+    alignment: "Neutral Evil",
+    speed: "30 ft.",
+    challengeRating: 9,
+    experiencePoints: 5000,
+    ac: 18,
+    acNote: "plate armor",
+    hp: 155,
+    maxHp: 155,
+    abilityScores: {
+      strength: 25, dexterity: 9, constitution: 21,
+      intelligence: 8, wisdom: 12, charisma: 14
+    },
+    savingThrows: { strength: 12, constitution: 9, wisdom: 5 },
+    skills: { Athletics: 12, Intimidation: 6, Perception: 5 },
+    senses: { "passive Perception": "15" },
+    languages: ["Common", "Giant", "Draconic"],
+    description: "A fire giant who rules Gracklstugh from below, riding a young red dragon named Ashvaxar and commanding the city's duergar through intimidation.",
+    traits: [
+      { name: "Wyrmrider", description: "Themberchaud is always mounted on his dragon Ashvaxar. While mounted, he cannot be targeted by melee attacks unless the attacker can also reach the dragon." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Themberchaud makes two War Pick attacks." },
+      { name: "War Pick", description: "Melee Weapon Attack", attackBonus: 11, damageDescription: "22 (3d8 + 8) piercing damage." },
+      { name: "Rock", description: "Ranged Weapon Attack", attackBonus: 11, damageDescription: "30 (4d10 + 8) bludgeoning damage." },
+      { name: "Fire Breath (Recharge 5-6)", description: "Themberchaud exhales fire in a 30-foot cone. Each creature makes a DC 16 Dexterity save, taking 28 (8d6) fire damage on a failure, or half on a success." }
+    ]
+  },
+  {
+    id: "cm-rockblight",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Rockblight (Corrupted Svirfneblin)",
+    size: "small",
+    type: "humanoid",
+    alignment: "Chaotic Evil",
+    speed: "20 ft.",
+    challengeRating: 2,
+    experiencePoints: 450,
+    ac: 14,
+    hp: 39,
+    maxHp: 39,
+    abilityScores: {
+      strength: 8, dexterity: 14, constitution: 12,
+      intelligence: 11, wisdom: 12, charisma: 9
+    },
+    skills: { Perception: 3, Stealth: 6 },
+    damageVulnerabilities: ["radiant"],
+    senses: { darkvision: "60 ft.", "passive Perception": "13" },
+    languages: ["Common", "Gnomish", "Undercommon"],
+    description: "A svirfneblin whose mind was broken by the aboleth Song of the Deep. Now serves the Blingdenstone aboleth overlord with zealous obedience.",
+    traits: [
+      { name: "Compulsion", description: "If the rockblight takes psychic damage, it has disadvantage on attack rolls until the end of its next turn." },
+      { name: "Psychic Resistance", description: "The rockblight has advantage on saving throws against being charmed." },
+      { name: "Stone Camouflage", description: "The rockblight has advantage on Dexterity (Stealth) checks made to hide in rocky terrain." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The rockblight makes two attacks: one with its shortsword and one with its poison bite." },
+      { name: "Shortsword", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) piercing damage." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "3 (1d4 + 1) piercing damage plus 4 (1d8) poison damage." },
+      { name: "Poison Spray", description: "Ranged Spell Attack", attackBonus: 4, damageDescription: "5 (2d4) poison damage." }
+    ]
+  },
+  {
+    id: "cm-pudding-king",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "The Pudding King",
+    size: "large",
+    type: "ooze",
+    alignment: "Neutral Evil",
+    speed: "20 ft., climb 20 ft.",
+    challengeRating: 8,
+    experiencePoints: 3900,
+    ac: 6,
+    hp: 152,
+    maxHp: 152,
+    abilityScores: {
+      strength: 14, dexterity: 6, constitution: 20,
+      intelligence: 2, wisdom: 6, charisma: 1
+    },
+    conditionImmunities: ["blinded", "charmed", "deafened", "exhaustion", "frightened", "prone"],
+    senses: { blindsight: "60 ft.", "passive Perception": "8" },
+    languages: ["understands Undercommon but can't speak"],
+    description: "An awakened, sentient gelatinous cube that rules the Pudding Court in Blingdenstone. Forms a crude crown of absorbed treasure.",
+    traits: [
+      { name: "Amorphous", description: "The Pudding King can move through a space as narrow as 1 inch wide without squeezing." },
+      { name: "Damage Immunity (Acid)", description: "The Pudding King is immune to acid damage and any acid damage dealt to it is converted into temporary HP for one round." },
+      { name: "Ooze Cube", description: "If the Pudding King is hit by a melee attack, the attacker takes 10 (3d6) acid damage. The Pudding King can occupy the same space as another creature." },
+      { name: "Royal Parasol", description: "As a reaction, the Pudding King creates a 15-foot dome of hardened slime that grants three-quarters cover to allies within it for 1 minute (recharges after a long rest)." }
+    ],
+    actions: [
+      { name: "Pseudopod", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "12 (3d6 + 3) acid damage. The target is grappled (escape DC 13). Until this grapple ends, the target takes 12 (3d6 + 3) acid damage at the start of each of the Pudding King's turns." },
+      { name: "Engulf", description: "The Pudding King moves up to its speed. While doing so, it can enter Large or smaller creatures' spaces. Each time the Pudding King enters a creature's space, the creature makes a DC 13 Dexterity save or is engulfed and restrained." },
+      { name: "Royal Command (Recharge 5-6)", description: "Each creature within 30 ft. that can hear the Pudding King makes a DC 14 Wisdom save or is charmed for 1 minute." }
+    ]
+  },
+  {
+    id: "cm-troglodyte-champion",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Troglodyte Champion",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Chaotic Evil",
+    speed: "30 ft.",
+    challengeRating: 3,
+    experiencePoints: 700,
+    ac: 14,
+    acNote: "natural armor",
+    hp: 75,
+    maxHp: 75,
+    abilityScores: {
+      strength: 17, dexterity: 12, constitution: 16,
+      intelligence: 6, wisdom: 11, charisma: 9
+    },
+    skills: { Athletics: 6, Intimidation: 3 },
+    damageImmunities: ["poison"],
+    conditionImmunities: ["poisoned"],
+    senses: { darkvision: "60 ft.", "passive Perception": "10" },
+    languages: ["Troglodyte"],
+    description: "An elite troglodyte champion who leads a hunting pack in the Wormwrithings.",
+    traits: [
+      { name: "Chameleon Skin", description: "The troglodyte has advantage on Dexterity (Stealth) checks." },
+      { name: "Stench of Death", description: "Any creature other than a troglodyte that starts its turn within 5 ft. makes a DC 13 Constitution save or is poisoned until the start of its next turn." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The troglodyte makes three attacks: one Bite and two Claws." },
+      { name: "Multiattack (Spit)", description: "The troglodyte makes a Bite attack and uses Spit." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "6 (1d6 + 3) piercing damage." },
+      { name: "Claw", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "7 (1d8 + 3) slashing damage." },
+      { name: "Spit", description: "Ranged Weapon Attack", attackBonus: 5, damageDescription: "7 (2d6) poison damage. The target must succeed on a DC 13 Constitution save or be poisoned for 1 minute." }
+    ]
+  },
+  {
+    id: "cm-dark-hunter",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Dark Hunter",
+    size: "medium",
+    type: "monstrosity",
+    alignment: "Neutral",
+    speed: "30 ft., climb 30 ft.",
+    challengeRating: 5,
+    experiencePoints: 1800,
+    ac: 16,
+    acNote: "natural armor",
+    hp: 75,
+    maxHp: 75,
+    abilityScores: {
+      strength: 16, dexterity: 18, constitution: 14,
+      intelligence: 5, wisdom: 12, charisma: 6
+    },
+    skills: { Perception: 6, Stealth: 9 },
+    senses: { blindsight: "30 ft.", darkvision: "60 ft.", "passive Perception": "16" },
+    languages: ["understands Undercommon but can't speak"],
+    description: "An aberration that stalks the Wormwrithings tunnels, ambushing lone travelers. It can phase through solid stone at will.",
+    traits: [
+      { name: "Stone Strider", description: "The dark hunter can move through solid rock as if it were difficult terrain. It can't end its turn inside an object." },
+      { name: "Keen Smell", description: "The hunter has advantage on Wisdom (Perception) checks that rely on smell." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The dark hunter makes two Bite or Claw attacks." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "8 (1d8 + 4) piercing damage." },
+      { name: "Claw", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "9 (2d4 + 4) slashing damage." }
+    ]
+  },
+  {
+    id: "cm-elder-purple-worm",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Elder Purple Worm",
+    size: "gargantuan",
+    type: "monstrosity",
+    alignment: "Unaligned",
+    speed: "50 ft., burrow 30 ft.",
+    challengeRating: 12,
+    experiencePoints: 8400,
+    ac: 18,
+    acNote: "natural armor",
+    hp: 247,
+    maxHp: 247,
+    abilityScores: {
+      strength: 28, dexterity: 8, constitution: 22,
+      intelligence: 1, wisdom: 8, charisma: 4
+    },
+    savingThrows: { constitution: 11 },
+    skills: { Perception: 4 },
+    senses: { blindsight: "30 ft.", tremorsense: "120 ft.", "passive Perception": "14" },
+    languages: ["understands Common but can't speak"],
+    description: "A massive purple worm from the deepest Underdark, much larger than its standard kin. The Vast Oblivium is its breeding ground.",
+    traits: [],
+    actions: [
+      { name: "Multiattack", description: "The worm makes three attacks: one Bite, one Stinger, and one Tail. It can use its Tail attack only if its Stinger attack hits the same turn." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "32 (4d12 + 9) piercing damage. If the target is a Large or smaller creature, it is grappled (escape DC 19) and pulled into the worm's gullet. While grappled this way, the target is blinded and restrained, and takes 28 (8d6) bludgeoning damage at the start of each of the worm's turns." },
+      { name: "Stinger", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "21 (3d8 + 9) piercing damage. The target makes a DC 19 Constitution save, taking 24 (7d6) poison damage on a failure, or half on a success." },
+      { name: "Tail", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "24 (3d10 + 9) bludgeoning damage. The target makes a DC 19 Strength save or is knocked prone." }
+    ]
+  },
+  {
+    id: "cm-maze-engine",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "The Maze Engine",
+    size: "huge",
+    type: "construct",
+    alignment: "Unaligned",
+    speed: "0 ft.",
+    challengeRating: 14,
+    experiencePoints: 11500,
+    ac: 18,
+    acNote: "natural armor",
+    hp: 222,
+    maxHp: 222,
+    abilityScores: {
+      strength: 21, dexterity: 6, constitution: 20,
+      intelligence: 22, wisdom: 16, charisma: 10
+    },
+    savingThrows: { intelligence: 11, wisdom: 8 },
+    skills: { Arcana: 11, Perception: 8 },
+    damageImmunities: ["poison", "psychic"],
+    conditionImmunities: ["blinded", "charmed", "deafened", "exhaustion", "frightened", "paralyzed", "petrified", "poisoned", "stunned"],
+    senses: { truesight: "120 ft.", "passive Perception": "18" },
+    languages: ["understands all languages but can't speak"],
+    description: "An ancient construct at the heart of the Labyrinth that endlessly rebuilds its maze to entrap intruders.",
+    traits: [
+      { name: "Immutable Form", description: "The Maze Engine is immune to any spell or effect that would alter its form." },
+      { name: "Magic Resistance", description: "The Maze Engine has advantage on saving throws against spells and other magical effects." },
+      { name: "Wall Mover", description: "As a bonus action on each of its turns, the Maze Engine can teleport any portion of wall or floor within the Labyrinth up to 30 ft. Creatures within teleported space make a DC 18 Dexterity save, taking 21 (6d6) force damage on a failure, or half on a success." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The Maze Engine makes two Slam attacks and casts one spell." },
+      { name: "Slam", description: "Melee Weapon Attack", attackBonus: 10, damageDescription: "23 (3d10 + 7) bludgeoning damage plus 10 (3d6) force damage." },
+      { name: "Spellcasting", description: "The Maze Engine is a 15th-level spellcaster. Its spellcasting ability is Intelligence (spell save DC 19, +11 to hit with spell attacks). At will: detect magic, mage hand. 3/day each: dispel magic, fear, hold person, lightning bolt. 1/day each: confusion, maze, prismatic wall, wall of force." }
+    ],
+    legendaryActions: [
+      { name: "Wall Mover", description: "The Maze Engine uses its Wall Mover trait." },
+      { name: "Slam", description: "The Maze Engine makes one Slam attack." },
+      { name: "Cast a Spell", description: "The Maze Engine casts one of its prepared spells." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-spore-servant-brute",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Spore Servant Brute",
+    size: "medium",
+    type: "plant",
+    alignment: "Neutral Evil",
+    speed: "30 ft.",
+    challengeRating: 4,
+    experiencePoints: 1100,
+    ac: 13,
+    acNote: "natural armor",
+    hp: 90,
+    maxHp: 90,
+    abilityScores: {
+      strength: 18, dexterity: 8, constitution: 16,
+      intelligence: 5, wisdom: 10, charisma: 5
+    },
+    skills: { Athletics: 7 },
+    damageVulnerabilities: ["fire"],
+    damageImmunities: ["poison"],
+    conditionImmunities: ["blinded", "deafened", "frightened", "poisoned"],
+    senses: { blindsight: "30 ft.", "passive Perception": "10" },
+    languages: ["understands Demonic but can't speak"],
+    description: "A once-human corpse reanimated by Zuggtmoy's fungal spores and bloated to enormous size. Found in the Araumycos and Demogorgon's lair.",
+    traits: [
+      { name: "Spore Infection", description: "Any creature that starts its turn within 5 ft. makes a DC 13 Constitution save or is infected with a disease. The disease has an incubation period of 1d4 days; afterwards the target takes 8 (2d8) necrotic damage per long rest and sprouts fungal growths (becoming a spore servant if reduced to 0 HP)." },
+      { name: "False Appearance", description: "While motionless, the brute is indistinguishable from a normal pile of mushrooms." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The brute makes two Fist attacks." },
+      { name: "Fist", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "12 (2d8 + 4) bludgeoning damage plus 5 (1d10) necrotic damage." },
+      { name: "Spore Burst (Recharge 5-6)", description: "The brute releases a 15-foot cone of spores. Each creature makes a DC 13 Constitution save, taking 14 (4d6) poison damage on a failure, or half on a success." }
+    ]
+  },
+  {
+    id: "cm-demogorgon",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Demogorgon, Prince of Demons",
+    size: "huge",
+    type: "fiend",
+    alignment: "Chaotic Evil",
+    speed: "40 ft., swim 40 ft.",
+    challengeRating: 26,
+    experiencePoints: 90000,
+    ac: 22,
+    acNote: "natural armor",
+    hp: 666,
+    maxHp: 666,
+    abilityScores: {
+      strength: 29, dexterity: 14, constitution: 24,
+      intelligence: 26, wisdom: 20, charisma: 24
+    },
+    savingThrows: { strength: 15, dexterity: 10, constitution: 14, wisdom: 12, charisma: 14 },
+    skills: { Deception: 14, Perception: 12, Persuasion: 14 },
+    damageImmunities: ["poison"],
+    conditionImmunities: ["charmed", "exhausted", "frightened", "paralyzed", "poisoned"],
+    senses: { truesight: "120 ft.", "passive Perception": "22" },
+    languages: ["Abyssal", "all", "telepathy 120 ft."],
+    description: "The twin-headed Prince of Demons, mad-schemer of the Abyss. Demogorgon manifests in the Fetid Wedding and the final confrontation.",
+    traits: [
+      { name: "Damage Resistance (Nonmagical)", description: "Demogorgon takes no damage from bludgeoning, piercing, and slashing attacks that are nonmagical." },
+      { name: "Legendary Resistance (5/Day)", description: "If Demogorgon fails a saving throw, he can choose to succeed instead." },
+      { name: "Magic Resistance", description: "Demogorgon has advantage on saving throws against spells and other magical effects." },
+      { name: "Two Heads", description: "Demogorgon has advantage on Wisdom (Perception) checks and on saving throws against being blinded, charmed, deafened, frightened, stunned, or knocked unconscious." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Demogorgon makes two Bite attacks, one with each head, and four Tentacle attacks. He can use Spellcasting in place of any of these attacks." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 17, damageDescription: "29 (4d10 + 9) piercing damage plus 14 (4d6) poison damage." },
+      { name: "Tentacle", description: "Melee Weapon Attack", attackBonus: 17, damageDescription: "23 (4d8 + 9) bludgeoning damage plus 14 (4d6) poison damage, and the target is grappled (escape DC 22)." },
+      { name: "Spellcasting", description: "Demogorgon is a 20th-level spellcaster. His spellcasting ability is Intelligence (spell save DC 24, +16 to hit with spell attacks). At will: detect magic, major image. 3/day each: dispel magic, fear, hold monster, telekinesis. 1/day each: confusion, project image, teleport." }
+    ],
+    legendaryActions: [
+      { name: "Bite or Tentacle Attack", description: "Demogorgon makes one Bite or Tentacle attack with each head." },
+      { name: "Cast a Spell", description: "Demogorgon casts one of his prepared spells." },
+      { name: "Acid Breath (Costs 2 Actions)", description: "Each head exhales acid in a 30-foot cone. Each creature makes a DC 22 Dexterity save, taking 35 (10d6) acid damage on a failure, or half on a success." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-orcus",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Orcus, Demon Prince of Undeath",
+    size: "huge",
+    type: "fiend",
+    alignment: "Chaotic Evil",
+    speed: "40 ft., fly 40 ft.",
+    challengeRating: 27,
+    experiencePoints: 105000,
+    ac: 22,
+    acNote: "natural armor",
+    hp: 660,
+    maxHp: 660,
+    abilityScores: {
+      strength: 27, dexterity: 14, constitution: 26,
+      intelligence: 22, wisdom: 18, charisma: 26
+    },
+    savingThrows: { strength: 15, dexterity: 10, constitution: 15, wisdom: 11, charisma: 15 },
+    skills: { Arcana: 14, Persuasion: 15 },
+    damageImmunities: ["poison"],
+    conditionImmunities: ["charmed", "exhausted", "frightened", "paralyzed", "poisoned"],
+    senses: { truesight: "120 ft.", "passive Perception": "20" },
+    languages: ["Abyssal", "all", "telepathy 120 ft."],
+    description: "The Demon Prince of Undeath, wielder of the Wand of Orcus. Seeks to make all existence undead.",
+    traits: [
+      { name: "Damage Resistance (Nonmagical)", description: "Orcus takes no damage from bludgeoning, piercing, and slashing attacks that are nonmagical." },
+      { name: "Legendary Resistance (5/Day)", description: "If Orcus fails a saving throw, he can choose to succeed instead." },
+      { name: "Magic Resistance", description: "Orcus has advantage on saving throws against spells and other magical effects." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Orcus makes one Wand of Orcus attack, one Maul attack, and one Tail attack." },
+      { name: "Wand of Orcus", description: "Melee Weapon Attack", attackBonus: 17, damageDescription: "21 (2d10 + 10) bludgeoning damage plus 35 (10d6) necrotic damage." },
+      { name: "Maul", description: "Melee Weapon Attack", attackBonus: 17, damageDescription: "30 (4d8 + 12) bludgeoning damage." },
+      { name: "Tail", description: "Melee Weapon Attack", attackBonus: 17, damageDescription: "21 (2d10 + 10) bludgeoning damage." },
+      { name: "Death Implosion (Recharge 5-6)", description: "Each creature within 60 ft. of Orcus makes a DC 24 Constitution save, taking 70 (20d6) necrotic damage on a failure, or half on a success. Humanoids killed by this attack rise as ghouls under Orcus's control." }
+    ],
+    legendaryActions: [
+      { name: "Wand of Orcus", description: "Orcus makes one Wand of Orcus attack." },
+      { name: "Cast a Spell", description: "Orcus casts one of his prepared spells." },
+      { name: "Necrotic Burst (Costs 2 Actions)", description: "Each creature of Orcus's choice within 30 ft. makes a DC 24 Constitution save, taking 28 (8d6) necrotic damage on a failure, or half on a success." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-zuggtmoy",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Zuggtmoy, Lady of Fungi",
+    size: "huge",
+    type: "fiend",
+    alignment: "Chaotic Evil",
+    speed: "30 ft.",
+    challengeRating: 22,
+    experiencePoints: 41000,
+    ac: 20,
+    acNote: "natural armor",
+    hp: 480,
+    maxHp: 480,
+    abilityScores: {
+      strength: 24, dexterity: 14, constitution: 24,
+      intelligence: 22, wisdom: 18, charisma: 24
+    },
+    savingThrows: { constitution: 13, wisdom: 11, charisma: 13 },
+    skills: { Deception: 13, Perception: 11 },
+    damageImmunities: ["poison"],
+    conditionImmunities: ["blinded", "charmed", "deafened", "exhausted", "frightened", "paralyzed", "poisoned", "stunned"],
+    senses: { truesight: "120 ft.", "passive Perception": "21" },
+    languages: ["Abyssal", "all", "telepathy 120 ft."],
+    description: "The Demon Queen of Fungi, who corrupts myconids and plant life. She appears in Neverlight Grove (Ch 5) and the final confrontation (Ch 17).",
+    traits: [
+      { name: "Damage Resistance (Nonmagical)", description: "Zuggtmoy takes no damage from bludgeoning, piercing, and slashing attacks that are nonmagical." },
+      { name: "Legendary Resistance (4/Day)", description: "If Zuggtmoy fails a saving throw, she can choose to succeed instead." },
+      { name: "Magic Resistance", description: "Zuggtmoy has advantage on saving throws against spells and other magical effects." },
+      { name: "Spore Aura", description: "Any creature that starts its turn within 30 ft. makes a DC 22 Constitution save or is infected with demon spores (DC 22 Constitution save every 24 hours or 11 (2d10) necrotic damage and paralyzed until the end of the next turn)." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Zuggtmoy makes two Slam attacks and one Infestation attack." },
+      { name: "Slam", description: "Melee Weapon Attack", attackBonus: 13, damageDescription: "23 (3d10 + 8) bludgeoning damage plus 14 (4d6) poison damage." },
+      { name: "Infestation", description: "Melee Spell Attack", attackBonus: 13, damageDescription: "21 (4d8 + 3) necrotic damage. The target is infected with demon spores (see Spore Aura)." },
+      { name: "Fungal Bloom (Recharge 5-6)", description: "Zuggtmoy fills a 60-foot radius with toxic spores. Each creature in the area makes a DC 22 Constitution save, taking 49 (14d6) poison damage on a failure, or half on a success. Plant creatures and undead are unaffected." }
+    ],
+    legendaryActions: [
+      { name: "Slam", description: "Zuggtmoy makes one Slam attack." },
+      { name: "Infestation", description: "Zuggtmoy makes one Infestation attack." },
+      { name: "Summon Spore Servants (Costs 2 Actions)", description: "Zuggtmoy summons 2d4 spore servants in unoccupied spaces she can see." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-juiblex",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Juiblex, Demon Prince of Oozes",
+    size: "huge",
+    type: "fiend",
+    alignment: "Chaotic Evil",
+    speed: "20 ft., climb 20 ft., swim 20 ft.",
+    challengeRating: 22,
+    experiencePoints: 41000,
+    ac: 14,
+    acNote: "natural armor",
+    hp: 450,
+    maxHp: 450,
+    abilityScores: {
+      strength: 26, dexterity: 6, constitution: 26,
+      intelligence: 20, wisdom: 16, charisma: 18
+    },
+    savingThrows: { strength: 14, constitution: 14, wisdom: 10 },
+    skills: { Perception: 10 },
+    damageImmunities: ["acid", "poison"],
+    conditionImmunities: ["blinded", "charmed", "deafened", "exhausted", "frightened", "grappled", "paralyzed", "poisoned", "prone", "restrained", "stunned"],
+    senses: { blindsight: "120 ft.", "passive Perception": "20" },
+    languages: ["Abyssal", "all", "telepathy 120 ft."],
+    description: "The Faceless Lord, Demon Prince of Oozes. A writhing mass of black ichor and acidic slime.",
+    traits: [
+      { name: "Damage Resistance (Nonmagical)", description: "Juiblex takes no damage from bludgeoning, piercing, and slashing attacks that are nonmagical." },
+      { name: "Legendary Resistance (4/Day)", description: "If Juiblex fails a saving throw, he can choose to succeed instead." },
+      { name: "Magic Resistance", description: "Juiblex has advantage on saving throws against spells and other magical effects." },
+      { name: "Ooze Form", description: "Juiblex can occupy the space of another Large creature and can move through a space as narrow as 1 inch wide." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Juiblex makes two Pseudopod attacks and one Acid Breath attack." },
+      { name: "Pseudopod", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "22 (3d10 + 8) bludgeoning damage plus 21 (6d6) acid damage." },
+      { name: "Constrict", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "13 (2d8 + 8) bludgeoning damage. The target is grappled (escape DC 22)." },
+      { name: "Acid Breath (Recharge 5-6)", description: "Juiblex exhales acid in a 60-foot cone. Each creature makes a DC 22 Dexterity save, taking 70 (20d6) acid damage on a failure, or half on a success." }
+    ],
+    legendaryActions: [
+      { name: "Pseudopod", description: "Juiblex makes one Pseudopod attack." },
+      { name: "Constrict", description: "Juiblex makes one Constrict attack." },
+      { name: "Split (Costs 2 Actions)", description: "Juiblex splits into two Juiblex duplicates, each with half its current HP. Each duplicate acts on the same initiative count. The duplicates merge back together at the start of Juiblex's next turn." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-fraz-urbluu",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Fraz-Urb'luu, Prince of Deception",
+    size: "huge",
+    type: "fiend",
+    alignment: "Chaotic Evil",
+    speed: "40 ft.",
+    challengeRating: 21,
+    experiencePoints: 33000,
+    ac: 20,
+    acNote: "natural armor",
+    hp: 437,
+    maxHp: 437,
+    abilityScores: {
+      strength: 24, dexterity: 16, constitution: 24,
+      intelligence: 22, wisdom: 20, charisma: 22
+    },
+    savingThrows: { strength: 13, dexterity: 10, constitution: 13, wisdom: 11, charisma: 11 },
+    skills: { Deception: 18, Persuasion: 11 },
+    damageImmunities: ["psychic"],
+    conditionImmunities: ["charmed", "exhausted", "frightened"],
+    senses: { truesight: "120 ft.", "passive Perception": "20" },
+    languages: ["Abyssal", "all", "telepathy 120 ft."],
+    description: "The Prince of Deception, exiled to the Stygian depths by his fellow demon lords. His image stands in Mantol-Derith.",
+    traits: [
+      { name: "Damage Resistance (Nonmagical)", description: "Fraz-Urb'luu takes no damage from bludgeoning, piercing, and slashing attacks that are nonmagical." },
+      { name: "Legendary Resistance (4/Day)", description: "If Fraz-Urb'luu fails a saving throw, he can choose to succeed instead." },
+      { name: "Magic Resistance", description: "Fraz-Urb'luu has advantage on saving throws against spells and other magical effects." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Fraz-Urb'luu makes two Fist attacks and casts one spell." },
+      { name: "Fist", description: "Melee Weapon Attack", attackBonus: 13, damageDescription: "21 (3d8 + 8) bludgeoning damage plus 10 (3d6) psychic damage." },
+      { name: "Spellcasting", description: "Fraz-Urb'luu is a 16th-level spellcaster. His spellcasting ability is Charisma (spell save DC 19, +11 to hit with spell attacks). At will: detect magic, disguise self. 3/day each: charm monster, hold monster, major image. 1/day each: dominate monster, feeblemind, project image, teleport." }
+    ],
+    legendaryActions: [
+      { name: "Fist Attack", description: "Fraz-Urb'luu makes one Fist attack." },
+      { name: "Cast a Spell", description: "Fraz-Urb'luu casts one of his prepared spells." },
+      { name: "Prying Eyes (Costs 2 Actions)", description: "Fraz-Urb'luu summons 1d6 magic eye servants that scout for him." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-derro-savant",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Derro Savant",
+    size: "small",
+    type: "humanoid",
+    alignment: "Chaotic Evil",
+    speed: "30 ft.",
+    challengeRating: 5,
+    experiencePoints: 1800,
+    ac: 15,
+    acNote: "Mage Armor",
+    hp: 75,
+    maxHp: 75,
+    abilityScores: {
+      strength: 10, dexterity: 14, constitution: 12,
+      intelligence: 17, wisdom: 12, charisma: 8
+    },
+    savingThrows: { intelligence: 7, wisdom: 4 },
+    skills: { Arcana: 7, Perception: 4 },
+    senses: { darkvision: "120 ft.", "passive Perception": "14" },
+    languages: ["Common", "Dwarvish", "Undercommon"],
+    description: "A mad, psionic derro mage who manipulates the party's minds during the Underdark journey.",
+    traits: [
+      { name: "Innate Spellcasting (Psionics)", description: "The savant's spellcasting ability is Intelligence (spell save DC 14, +7 to hit with spell attacks). At will: friends, mage hand. 1/day each: charm person, detect thoughts, phantasmal force, sleep." },
+      { name: "Magic Resistance", description: "The savant has advantage on saving throws against spells and other magical effects." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The savant makes two attacks." },
+      { name: "Dagger", description: "Melee or Ranged Weapon Attack", attackBonus: 5, damageDescription: "4 (1d4 + 2) piercing damage." },
+      { name: "Psychic Lance (Recharge 5-6)", description: "The savant targets one creature within 60 ft. The target makes a DC 14 Intelligence save, taking 22 (4d10) psychic damage on a failure, or half on a success." }
+    ]
+  },
+  {
+    id: "cm-ixitxachitl",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Ixitxachitl (Vampiric)",
+    size: "medium",
+    type: "aberration",
+    alignment: "Chaotic Evil",
+    speed: "0 ft., swim 40 ft.",
+    challengeRating: 6,
+    experiencePoints: 2300,
+    ac: 17,
+    acNote: "natural armor",
+    hp: 110,
+    maxHp: 110,
+    abilityScores: {
+      strength: 14, dexterity: 14, constitution: 18,
+      intelligence: 10, wisdom: 11, charisma: 8
+    },
+    skills: { Perception: 2, Stealth: 4 },
+    senses: { darkvision: "60 ft.", "passive Perception": "12" },
+    languages: ["Abyssal", "Undercommon"],
+    description: "A vampiric ray-like aberration that lurks in the dark waters of the Underdark, draining blood from prey.",
+    traits: [
+      { name: "Blood Frenzy", description: "The ixitxachitl has advantage on attack rolls against any creature that doesn't have all its hit points." },
+      { name: "Damage Resistance (Nonmagical)", description: "The ixitxachitl takes no damage from bludgeoning, piercing, and slashing attacks that are nonmagical." },
+      { name: "Incorporeal Movement", description: "The ixitxachitl can move through other creatures and objects as if they were difficult terrain. It takes 5 (1d10) force damage if it ends its turn inside an object." }
+    ],
+    actions: [
+      { name: "Life Drain", description: "Melee Spell Attack", attackBonus: 6, damageDescription: "14 (3d8 + 1) necrotic damage. The target makes a DC 14 Constitution save or its hit point maximum is reduced by an amount equal to the damage taken. The ixitxachitl regains hit points equal to that amount." }
+    ]
+  },  // SRD-faithful mirrors used in Out of the Abyss encounters
+  {
+    id: "cm-drow-elite-warrior",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Drow Elite Warrior",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Neutral Evil",
+    speed: "30 ft.",
+    challengeRating: 5,
+    experiencePoints: 1800,
+    ac: 18,
+    acNote: "chain shirt, shield",
+    hp: 71,
+    maxHp: 71,
+    abilityScores: {
+      strength: 13, dexterity: 18, constitution: 14,
+      intelligence: 13, wisdom: 14, charisma: 13
+    },
+    savingThrows: { dexterity: 7, intelligence: 4, wisdom: 4 },
+    skills: { Perception: 4, Stealth: 7 },
+    damageImmunities: ["poison"],
+    conditionImmunities: ["poisoned"],
+    senses: { darkvision: "120 ft.", "passive Perception": "14" },
+    languages: ["Common", "Elvish", "Undercommon"],
+    traits: [
+      { name: "Fey Ancestry", description: "The drow has advantage on saving throws against being charmed, and magic can't put it to sleep." },
+      { name: "Innate Spellcasting", description: "Innate spellcasting ability is Charisma (spell save DC 12). At will: dancing lights. 1/day each: darkness, faerie fire." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The drow makes three attacks: two with its shortsword and one with its hand crossbow. It can replace one shortsword attack with a bite attack." },
+      { name: "Shortsword", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "6 (1d6 + 3) piercing damage plus 10 (3d6) poison damage." },
+      { name: "Hand Crossbow", description: "Ranged Weapon Attack", attackBonus: 7, damageDescription: "6 (1d6 + 3) piercing damage plus 10 (3d6) poison damage." }
+    ]
+  },
+  {
+    id: "cm-drider",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Drider",
+    size: "large",
+    type: "monstrosity",
+    alignment: "Chaotic Evil",
+    speed: "30 ft., climb 30 ft.",
+    challengeRating: 6,
+    experiencePoints: 2300,
+    ac: 16,
+    acNote: "chain shirt",
+    hp: 120,
+    maxHp: 120,
+    abilityScores: {
+      strength: 16, dexterity: 16, constitution: 14,
+      intelligence: 13, wisdom: 14, charisma: 12
+    },
+    skills: { Perception: 5, Stealth: 9 },
+    damageImmunities: ["poison"],
+    conditionImmunities: ["poisoned"],
+    senses: { darkvision: "120 ft.", "passive Perception": "15" },
+    languages: ["Common", "Elvish", "Undercommon"],
+    traits: [
+      { name: "Fey Ancestry", description: "The drider has advantage on saving throws against being charmed, and magic can't put it to sleep." },
+      { name: "Innate Spellcasting", description: "Innate spellcasting ability is Wisdom (spell save DC 12). At will: dancing lights. 1/day each: darkness, faerie fire." },
+      { name: "Spider Climb", description: "The drider can climb difficult surfaces, including upside down on ceilings, without making an ability check." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The drider makes three attacks: two with its longsword and one with its bite. It can replace one attack with a use of Innate Spellcasting if available." },
+      { name: "Longsword", description: "Melee Weapon Attack", attackBonus: 6, damageDescription: "7 (1d8 + 3) slashing damage, or 8 (1d10 + 3) if used two-handed." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 6, damageDescription: "5 (1d6 + 2) piercing damage plus 10 (3d6) poison damage." }
+    ]
+  },
+  {
+    id: "cm-svirfneblin",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Svirfneblin",
+    size: "small",
+    type: "humanoid",
+    alignment: "Neutral Good",
+    speed: "20 ft.",
+    challengeRating: 0.25,
+    ac: 15,
+    acNote: "studded leather + stone",
+    hp: 9,
+    maxHp: 9,
+    abilityScores: {
+      strength: 8, dexterity: 14, constitution: 11,
+      intelligence: 10, wisdom: 11, charisma: 9
+    },
+    skills: { Investigation: 2, Perception: 2, Stealth: 4 },
+    senses: { darkvision: "120 ft.", "passive Perception": "12" },
+    languages: ["Common", "Gnomish", "Undercommon"],
+    traits: [
+      { name: "Stone Camouflage", description: "The svirfneblin has advantage on Dexterity (Stealth) checks made to hide in rocky terrain." },
+      { name: "Gnome Cunning", description: "The svirfneblin has advantage on Intelligence, Wisdom, and Charisma saving throws against magic." }
+    ],
+    actions: [
+      { name: "War Pick", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "5 (1d8 + 1) piercing damage." },
+      { name: "Poisoned Blowdart", description: "Ranged Weapon Attack", attackBonus: 4, damageDescription: "3 (1d4 + 1) piercing damage plus 7 (2d6) poison damage." }
+    ]
+  },
+  {
+    id: "cm-duergar",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Duergar",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Lawful Evil",
+    speed: "25 ft.",
+    challengeRating: 1,
+    experiencePoints: 200,
+    ac: 16,
+    acNote: "scale mail, shield",
+    hp: 26,
+    maxHp: 26,
+    abilityScores: {
+      strength: 14, dexterity: 11, constitution: 14,
+      intelligence: 11, wisdom: 10, charisma: 9
+    },
+    skills: { Perception: 2 },
+    damageImmunities: ["poison"],
+    conditionImmunities: ["charmed", "frightened", "paralyzed", "poisoned"],
+    senses: { darkvision: "120 ft.", "passive Perception": "12" },
+    languages: ["Common", "Dwarvish", "Undercommon"],
+    traits: [
+      { name: "Duergar Resilience", description: "The duergar has advantage on saving throws against poison, and it has resistance against poison damage." },
+      { name: "Innate Spellcasting", description: "Innate spellcasting ability is Intelligence (spell save DC 10). 1/day each: enlarge/reduce, invisibility." },
+      { name: "Sunlight Sensitivity", description: "While in sunlight, the duergar has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight." }
+    ],
+    actions: [
+      { name: "War Pick", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "6 (1d8 + 2) piercing damage." },
+      { name: "Javelin", description: "Melee or Ranged Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-duergar-stone-guard",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Duergar Stone Guard",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Lawful Evil",
+    speed: "25 ft.",
+    challengeRating: 2,
+    experiencePoints: 450,
+    ac: 18,
+    acNote: "plate armor, shield",
+    hp: 49,
+    maxHp: 49,
+    abilityScores: {
+      strength: 16, dexterity: 11, constitution: 16,
+      intelligence: 10, wisdom: 10, charisma: 9
+    },
+    damageImmunities: ["poison"],
+    conditionImmunities: ["charmed", "frightened", "paralyzed", "poisoned"],
+    senses: { darkvision: "120 ft.", "passive Perception": "10" },
+    languages: ["Common", "Dwarvish", "Undercommon"],
+    traits: [
+      { name: "Duergar Resilience", description: "The stone guard has advantage on saving throws against poison, and it has resistance against poison damage." },
+      { name: "Innate Spellcasting", description: "1/day each: enlarge/reduce, invisibility." },
+      { name: "Sunlight Sensitivity", description: "While in sunlight, the stone guard has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The stone guard makes two War Pick attacks." },
+      { name: "War Pick", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "8 (1d8 + 4) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-shield-guardian",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Shield Guardian",
+    size: "large",
+    type: "construct",
+    alignment: "Unaligned",
+    speed: "30 ft.",
+    challengeRating: 7,
+    experiencePoints: 2900,
+    ac: 17,
+    acNote: "natural armor",
+    hp: 142,
+    maxHp: 142,
+    abilityScores: {
+      strength: 18, dexterity: 8, constitution: 18,
+      intelligence: 7, wisdom: 10, charisma: 1
+    },
+    senses: { darkvision: "120 ft.", "passive Perception": "10" },
+    languages: ["understands commands in any language but can't speak"],
+    traits: [
+      { name: "Bound", description: "The shield guardian is magically bound to an amulet. The amulet's wearer can telepathically call the guardian to travel to its location and back." },
+      { name: "Regeneration", description: "The guardian regains 10 hit points at the start of its turn if it has at least 1 hit point." },
+      { name: "Spell Storing", description: "A spell can be stored in the guardian. The guardian can use the stored spell as a reaction when its bonded wearer is targeted by an attack." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The guardian makes two Fist attacks." },
+      { name: "Fist", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "14 (2d10 + 4) bludgeoning damage." },
+      { name: "Shield (Recharge 6)", description: "The guardian grants its bonded wearer a +5 bonus to AC until the start of the guardian's next turn." }
+    ]
+  },
+  {
+    id: "cm-mind-flayer",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Mind Flayer",
+    size: "medium",
+    type: "aberration",
+    alignment: "Lawful Evil",
+    speed: "30 ft.",
+    challengeRating: 7,
+    experiencePoints: 2900,
+    ac: 15,
+    acNote: "breastplate",
+    hp: 71,
+    maxHp: 71,
+    abilityScores: {
+      strength: 11, dexterity: 12, constitution: 12,
+      intelligence: 19, wisdom: 17, charisma: 17
+    },
+    savingThrows: { intelligence: 8, wisdom: 7 },
+    skills: { Arcana: 7, Deception: 5, Insight: 7, Perception: 7, Persuasion: 5, Stealth: 4 },
+    senses: { darkvision: "120 ft.", "passive Perception": "17" },
+    languages: ["Deep Speech", "Undercommon"],
+    description: "A psionic aberration that feeds on brains.",
+    traits: [
+      { name: "Magic Resistance", description: "The mind flayer has advantage on saving throws against spells and other magical effects." },
+      { name: "Innate Spellcasting (Psionics)", description: "The mind flayer's innate spellcasting ability is Intelligence (spell save DC 16, +8 to hit with spell attacks). At will: detect thoughts, levitate. 1/day each: dominate monster, plane shift." }
+    ],
+    actions: [
+      { name: "Tentacles", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "15 (2d10 + 4) psychic damage. If the target is Large or smaller, it is grappled (escape DC 15). Until this grapple ends, the target takes 15 (2d10 + 4) psychic damage at the start of each of the mind flayer's turns, and the mind flayer can't use its tentacles on another target." },
+      { name: "Extract Brain", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "The mind flayer kills a creature grappled by its tentacles, absorbing its brain." }
+    ]
+  },
+  {
+    id: "cm-kuo-toa",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Kuo-Toa",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Neutral Evil",
+    speed: "30 ft., swim 30 ft.",
+    challengeRating: 1,
+    experiencePoints: 200,
+    ac: 13,
+    acNote: "shield",
+    hp: 18,
+    maxHp: 18,
+    abilityScores: {
+      strength: 13, dexterity: 10, constitution: 14,
+      intelligence: 11, wisdom: 12, charisma: 10
+    },
+    skills: { Perception: 3 },
+    senses: { darkvision: "120 ft.", "passive Perception": "13" },
+    languages: ["Undercommon"],
+    traits: [
+      { name: "Amphibious", description: "The kuo-toa can breathe air and water." },
+      { name: "Otherworldly Perception", description: "The kuo-toa can sense the presence of any creature within 30 ft. that has an Intelligence of 5 or higher." }
+    ],
+    actions: [
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 3, damageDescription: "4 (1d6 + 1) piercing damage." },
+      { name: "Spear", description: "Melee or Ranged Weapon Attack", attackBonus: 3, damageDescription: "5 (1d6 + 2) piercing damage, or 4 (1d8) if used two-handed in melee." },
+      { name: "Net", description: "Ranged Weapon Attack", attackBonus: 3, damageDescription: "no damage; target is restrained." }
+    ]
+  },
+  {
+    id: "cm-kuo-toa-whip",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Kuo-Toa Whip",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Neutral Evil",
+    speed: "30 ft., swim 30 ft.",
+    challengeRating: 3,
+    experiencePoints: 700,
+    ac: 15,
+    acNote: "chain shirt, shield",
+    hp: 65,
+    maxHp: 65,
+    abilityScores: {
+      strength: 13, dexterity: 10, constitution: 16,
+      intelligence: 14, wisdom: 14, charisma: 12
+    },
+    savingThrows: { wisdom: 5 },
+    skills: { Perception: 5 },
+    senses: { darkvision: "120 ft.", "passive Perception": "15" },
+    languages: ["Undercommon"],
+    traits: [
+      { name: "Amphibious", description: "The whip can breathe air and water." },
+      { name: "Innate Spellcasting (Psionics)", description: "Innate spellcasting ability is Wisdom (spell save DC 13, +5 to hit with spell attacks). At will: dancing lights. 1/day each: bless, command, faerie fire, hold person." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The whip makes two Pincer Staff attacks." },
+      { name: "Pincer Staff", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "7 (1d8 + 3) piercing damage, and the target is grappled (escape DC 13)." }
+    ]
+  },
+  {
+    id: "cm-hook-horror",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Hook Horror",
+    size: "large",
+    type: "monstrosity",
+    alignment: "Unaligned",
+    speed: "30 ft., climb 30 ft.",
+    challengeRating: 3,
+    experiencePoints: 700,
+    ac: 15,
+    acNote: "natural armor",
+    hp: 75,
+    maxHp: 75,
+    abilityScores: {
+      strength: 18, dexterity: 10, constitution: 18,
+      intelligence: 3, wisdom: 12, charisma: 7
+    },
+    skills: { Perception: 4 },
+    senses: { blindsight: "30 ft.", darkvision: "60 ft.", "passive Perception": "14" },
+    languages: ["understands Undercommon but can't speak"],
+    description: "A carapaced predator of the deep Underdark with chitinous hook arms.",
+    traits: [],
+    actions: [
+      { name: "Multiattack", description: "The horror makes three attacks: one with its bite and two with its hooks." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "11 (2d6 + 4) piercing damage." },
+      { name: "Hook", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "11 (2d6 + 4) slashing damage." }
+    ]
+  },
+  {
+    id: "cm-piercer",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Piercer",
+    size: "medium",
+    type: "monstrosity",
+    alignment: "Unaligned",
+    speed: "0 ft., climb 30 ft.",
+    challengeRating: 1,
+    experiencePoints: 100,
+    ac: 15,
+    acNote: "natural armor",
+    hp: 22,
+    maxHp: 22,
+    abilityScores: {
+      strength: 10, dexterity: 15, constitution: 10,
+      intelligence: 1, wisdom: 10, charisma: 3
+    },
+    skills: { Stealth: 6 },
+    senses: { darkvision: "60 ft.", tremorsense: "60 ft.", "passive Perception": "10" },
+    languages: ["understands Undercommon but can't speak"],
+    description: "A stalactite-shaped predator that drops from ceilings onto prey.",
+    traits: [
+      { name: "False Appearance", description: "While motionless, the piercer is indistinguishable from a normal stalactite or stalagmite." }
+    ],
+    actions: [
+      { name: "Drop", description: "Melee Weapon Attack", attackBonus: 6, damageDescription: "11 (2d6 + 4) bludgeoning damage." }
+    ]
+  },
+  {
+    id: "cm-young-red-dragon",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Young Red Dragon",
+    size: "large",
+    type: "dragon",
+    alignment: "Chaotic Evil",
+    speed: "40 ft., climb 40 ft., fly 80 ft.",
+    challengeRating: 10,
+    experiencePoints: 5900,
+    ac: 18,
+    acNote: "natural armor",
+    hp: 178,
+    maxHp: 178,
+    abilityScores: {
+      strength: 23, dexterity: 10, constitution: 21,
+      intelligence: 14, wisdom: 11, charisma: 19
+    },
+    savingThrows: { dexterity: 6, constitution: 9, wisdom: 4, charisma: 7 },
+    skills: { Perception: 8, Stealth: 6 },
+    damageImmunities: ["fire"],
+    senses: { blindsight: "30 ft.", darkvision: "120 ft.", "passive Perception": "18" },
+    languages: ["Common", "Draconic"],
+    description: "A young red dragon, such as Ashvaxar who serves Themberchaud.",
+    traits: [],
+    actions: [
+      { name: "Multiattack", description: "The dragon makes three attacks: one Bite and two Claws." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 10, damageDescription: "17 (2d10 + 6) piercing damage plus 3 (1d6) fire damage." },
+      { name: "Claw", description: "Melee Weapon Attack", attackBonus: 10, damageDescription: "13 (2d6 + 6) slashing damage." },
+      { name: "Fire Breath (Recharge 5-6)", description: "The dragon exhales fire in a 30-foot cone. Each creature makes a DC 17 Dexterity save, taking 56 (16d6) fire damage on a failure, or half on a success." }
+    ]
+  },
+  {
+    id: "cm-troglodyte",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Troglodyte",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Chaotic Evil",
+    speed: "30 ft.",
+    challengeRating: 0.25,
+    experiencePoints: 50,
+    ac: 11,
+    hp: 13,
+    maxHp: 13,
+    abilityScores: {
+      strength: 13, dexterity: 10, constitution: 13,
+      intelligence: 5, wisdom: 8, charisma: 6
+    },
+    senses: { darkvision: "60 ft.", "passive Perception": "9" },
+    languages: ["Troglodyte"],
+    description: "A subterranean reptilian humanoid of the Wormwrithings.",
+    traits: [
+      { name: "Chameleon Skin", description: "The troglodyte has advantage on Dexterity (Stealth) checks." },
+      { name: "Stench of Death", description: "Any creature other than a troglodyte that starts its turn within 5 ft. makes a DC 13 Constitution save or is poisoned until the start of its next turn." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The troglodyte makes two attacks: one Bite and one Claw." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 3, damageDescription: "4 (1d4 + 2) piercing damage." },
+      { name: "Claw", description: "Melee Weapon Attack", attackBonus: 3, damageDescription: "4 (1d4 + 2) slashing damage." }
+    ]
+  },
+  {
+    id: "cm-balor",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Balor",
+    size: "huge",
+    type: "fiend",
+    alignment: "Chaotic Evil",
+    speed: "40 ft., fly 80 ft.",
+    challengeRating: 19,
+    experiencePoints: 22000,
+    ac: 19,
+    acNote: "natural armor",
+    hp: 500,
+    maxHp: 500,
+    abilityScores: {
+      strength: 26, dexterity: 15, constitution: 24,
+      intelligence: 20, wisdom: 16, charisma: 22
+    },
+    savingThrows: { strength: 15, constitution: 14, wisdom: 10, charisma: 13 },
+    skills: { Intimidation: 13 },
+    damageImmunities: ["fire", "poison"],
+    conditionImmunities: ["poisoned"],
+    senses: { truesight: "120 ft.", "passive Perception": "13" },
+    languages: ["Abyssal", "all", "telepathy 120 ft."],
+    description: "A massive demon general of the Blood War.",
+    traits: [
+      { name: "Damage Resistance (Nonmagical)", description: "The balor takes no damage from bludgeoning, piercing, and slashing attacks that are nonmagical." },
+      { name: "Magic Resistance", description: "The balor has advantage on saving throws against spells and other magical effects." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The balor makes two attacks: one with its longsword and one with its whip. It can use its Death Throes in place of one attack." },
+      { name: "Longsword", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "21 (3d8 + 9) slashing damage plus 14 (4d6) fire damage." },
+      { name: "Whip", description: "Melee Weapon Attack", attackBonus: 14, damageDescription: "15 (2d8 + 9) slashing damage plus 14 (4d6) fire damage, and the target makes a DC 20 Strength save or is pulled up to 25 ft. toward the balor." },
+      { name: "Death Throes", description: "When the balor dies, it explodes. Each creature within 30 ft. makes a DC 20 Dexterity save, taking 21 (6d6) fire damage and 21 (6d6) force damage on a failure, or half on a success." }
+    ],
+    legendaryActions: [
+      { name: "Attack", description: "The balor makes one attack." },
+      { name: "Teleport", description: "The balor teleports up to 120 ft. to an unoccupied space it can see." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-gnoll-fang-of-yeenoghu",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Gnoll Fang of Yeenoghu",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Chaotic Evil",
+    speed: "30 ft.",
+    challengeRating: 4,
+    experiencePoints: 1100,
+    ac: 14,
+    acNote: "hide armor, shield",
+    hp: 65,
+    maxHp: 65,
+    abilityScores: {
+      strength: 16, dexterity: 13, constitution: 14,
+      intelligence: 7, wisdom: 9, charisma: 9
+    },
+    skills: { Survival: 2 },
+    senses: { darkvision: "60 ft.", "passive Perception": "9" },
+    languages: ["Common", "Gnoll"],
+    description: "An elite gnoll warrior who serves Yeenoghu, the demon prince of gnolls.",
+    traits: [
+      { name: "Rampage", description: "When the fang reduces a creature to 0 hit points with a melee attack on its turn, it can use a bonus action to move up to half its speed and make a bite attack." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The fang makes two Bite attacks. If it has a spear drawn, it can make one Bite and one Spear attack." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "5 (1d4 + 3) piercing damage." },
+      { name: "Spear", description: "Melee or Ranged Weapon Attack", attackBonus: 5, damageDescription: "6 (1d6 + 3) piercing damage, or 7 (1d8 + 3) if used two-handed." }
+    ]
+  },
+  {
+    id: "cm-death-slaad",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Death Slaad",
+    size: "large",
+    type: "aberration",
+    alignment: "Chaotic Neutral",
+    speed: "40 ft.",
+    challengeRating: 10,
+    experiencePoints: 5900,
+    ac: 17,
+    acNote: "natural armor",
+    hp: 161,
+    maxHp: 161,
+    abilityScores: {
+      strength: 20, dexterity: 14, constitution: 19,
+      intelligence: 12, wisdom: 14, charisma: 16
+    },
+    savingThrows: { constitution: 8, wisdom: 6, charisma: 7 },
+    skills: { Intimidation: 7 },
+    damageImmunities: ["acid"],
+    senses: { darkvision: "60 ft.", "passive Perception": "12" },
+    languages: ["Common", "Slaad"],
+    description: "A slaad advanced beyond its prime form, deadlier and more cunning than its lesser kin.",
+    traits: [
+      { name: "Magic Resistance", description: "The death slaad has advantage on saving throws against spells and other magical effects." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The slaad makes two Claw attacks and one Bite attack." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 9, damageDescription: "21 (3d8 + 8) piercing damage." },
+      { name: "Claw", description: "Melee Weapon Attack", attackBonus: 9, damageDescription: "13 (2d6 + 8) slashing damage." },
+      { name: "Implant Egg", description: "The death slaad implants an egg in a creature it has grappled. After 1d4 hours, the egg hatches into a red slaad." }
+    ],
+    legendaryActions: [
+      { name: "Bite", description: "The slaad makes one Bite attack." },
+      { name: "Claw", description: "The slaad makes one Claw attack." },
+      { name: "Acid Breath (Costs 2 Actions)", description: "The slaad exhales acid in a 30-foot cone. Each creature makes a DC 16 Dexterity save, taking 28 (8d6) acid damage on a failure, or half on a success." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-erinyes",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Erinyes",
+    size: "medium",
+    type: "fiend",
+    alignment: "Lawful Evil",
+    speed: "30 ft., fly 60 ft.",
+    challengeRating: 12,
+    experiencePoints: 8400,
+    ac: 18,
+    acNote: "plate armor",
+    hp: 153,
+    maxHp: 153,
+    abilityScores: {
+      strength: 18, dexterity: 16, constitution: 18,
+      intelligence: 14, wisdom: 14, charisma: 18
+    },
+    savingThrows: { strength: 8, dexterity: 7, constitution: 8, wisdom: 6, charisma: 8 },
+    skills: { Deception: 8, Perception: 6, Persuasion: 8 },
+    damageImmunities: ["fire", "poison"],
+    conditionImmunities: ["poisoned"],
+    senses: { truesight: "120 ft.", "passive Perception": "16" },
+    languages: ["Common", "Infernal"],
+    description: "A fiendish devil in service to the archdevils.",
+    traits: [
+      { name: "Hellish Weapons", description: "The erinyes's weapon attacks deal an extra 13 (3d8) poison damage on a hit (included)." },
+      { name: "Magic Resistance", description: "The erinyes has advantage on saving throws against spells and other magical effects." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The erinyes makes three attacks: one with its longsword, one with its longbow, and one with its barbed tail." },
+      { name: "Longsword", description: "Melee Weapon Attack", attackBonus: 8, damageDescription: "14 (2d10 + 4) slashing damage plus 13 (3d8) poison damage." },
+      { name: "Longbow", description: "Ranged Weapon Attack", attackBonus: 8, damageDescription: "13 (2d8 + 4) piercing damage plus 13 (3d8) poison damage." },
+      { name: "Barbed Tail", description: "Melee Weapon Attack", attackBonus: 8, damageDescription: "10 (2d4 + 4) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-hell-hound",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Hell Hound",
+    size: "medium",
+    type: "fiend",
+    alignment: "Lawful Evil",
+    speed: "40 ft.",
+    challengeRating: 3,
+    experiencePoints: 700,
+    ac: 15,
+    acNote: "natural armor",
+    hp: 45,
+    maxHp: 45,
+    abilityScores: {
+      strength: 17, dexterity: 10, constitution: 14,
+      intelligence: 6, wisdom: 11, charisma: 8
+    },
+    skills: { Perception: 5 },
+    damageImmunities: ["fire"],
+    senses: { darkvision: "60 ft.", "passive Perception": "15" },
+    languages: ["understands Infernal but can't speak"],
+    description: "A fire-breathing hound of the lower planes.",
+    traits: [
+      { name: "Keen Hearing and Smell", description: "The hound has advantage on Wisdom (Perception) checks that rely on hearing or smell." },
+      { name: "Pack Tactics", description: "The hound has advantage on an attack roll against a creature if at least one of the hound's allies is within 5 ft. of the creature and the ally isn't incapacitated." }
+    ],
+    actions: [
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "7 (1d8 + 3) piercing damage plus 3 (1d6) fire damage." },
+      { name: "Fire Breath (Recharge 5-6)", description: "The hound exhales fire in a 15-foot cone. Each creature makes a DC 13 Dexterity save, taking 14 (4d6) fire damage on a failure, or half on a success." }
+    ]
+  },
+  {
+    id: "cm-gelatinous-cube",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Gelatinous Cube",
+    size: "large",
+    type: "ooze",
+    alignment: "Unaligned",
+    speed: "15 ft.",
+    challengeRating: 2,
+    experiencePoints: 450,
+    ac: 6,
+    hp: 84,
+    maxHp: 84,
+    abilityScores: {
+      strength: 14, dexterity: 3, constitution: 20,
+      intelligence: 1, wisdom: 6, charisma: 1
+    },
+    conditionImmunities: ["blinded", "charmed", "deafened", "exhaustion", "frightened", "prone"],
+    senses: { blindsight: "60 ft.", "passive Perception": "8" },
+    languages: ["understands Common but can't speak"],
+    description: "A translucent cube of acidic jelly that fills dungeon corridors.",
+    traits: [
+      { name: "Ooze Cube", description: "The cube can occupy the same space as another creature. If a creature ends its turn in the cube's space, it makes a DC 14 Dexterity save or takes 10 (3d6) acid damage." },
+      { name: "Transparent", description: "Even when in plain sight, it takes a successful DC 15 Wisdom (Perception) check to spot a cube that has neither moved nor attacked." }
+    ],
+    actions: [
+      { name: "Pseudopod", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "10 (3d6) acid damage. The target is grappled (escape DC 14)." }
+    ]
+  },
+  {
+    id: "cm-modron-quadrone",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Quadrone (Modron)",
+    size: "medium",
+    type: "construct",
+    alignment: "Lawful Neutral",
+    speed: "30 ft., fly 30 ft.",
+    challengeRating: 1,
+    experiencePoints: 200,
+    ac: 16,
+    acNote: "natural armor",
+    hp: 22,
+    maxHp: 22,
+    abilityScores: {
+      strength: 13, dexterity: 12, constitution: 12,
+      intelligence: 10, wisdom: 10, charisma: 10
+    },
+    skills: { Perception: 2 },
+    senses: { truesight: "120 ft.", "passive Perception": "12" },
+    languages: ["Modron"],
+    traits: [
+      { name: "Axiomatic Mind", description: "The quadrone can't be compelled to act against its directives." },
+      { name: "Disassembly", description: "When the quadrone drops to 0 HP, it disassembles into a pile of cubes. It can't be restored to function except by a fabricate spell or similar magic." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The quadrone makes two Fist attacks." },
+      { name: "Fist", description: "Melee Weapon Attack", attackBonus: 3, damageDescription: "4 (1d4 + 2) bludgeoning damage." }
+    ]
+  },
+  {
+    id: "cm-modron-monodrone",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Out of the Abyss",
+    name: "Monodrone (Modron)",
+    size: "tiny",
+    type: "construct",
+    alignment: "Lawful Neutral",
+    speed: "30 ft.",
+    challengeRating: 0.125,
+    ac: 13,
+    hp: 5,
+    maxHp: 5,
+    abilityScores: {
+      strength: 10, dexterity: 12, constitution: 10,
+      intelligence: 8, wisdom: 10, charisma: 8
+    },
+    senses: { truesight: "120 ft.", "passive Perception": "10" },
+    languages: ["Modron"],
+    traits: [
+      { name: "Axiomatic Mind", description: "The monodrone can't be compelled to act against its directives." }
+    ],
+    actions: [
+      { name: "Fist", description: "Melee Weapon Attack", attackBonus: 3, damageDescription: "3 (1d4 + 1) bludgeoning damage." }
+    ]
+  },
+  // ─── Dragon of Icespire Peak ──────────────────────────────────────────
+  {
+    id: "cm-storm-giant-awakened",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Dragon of Icespire Peak",
+    name: "Storm Giant Awakened",
+    size: "huge",
+    type: "giant",
+    alignment: "Chaotic Good",
+    speed: "40 ft., swim 40 ft.",
+    challengeRating: 9,
+    experiencePoints: 5000,
+    ac: 16,
+    acNote: "natural armor",
+    hp: 168,
+    maxHp: 168,
+    abilityScores: {
+      strength: 25, dexterity: 14, constitution: 20,
+      intelligence: 14, wisdom: 18, charisma: 18
+    },
+    savingThrows: { strength: 11, dexterity: 7, constitution: 10, wisdom: 9, charisma: 9 },
+    skills: { Athletics: 11, Insight: 9, Perception: 9 },
+    senses: { "passive Perception": "19" },
+    languages: ["Common", "Giant", "Primordial"],
+    description: "A storm giant who recovered his sanity after being imprisoned as a statue in the Tower of Storms. Reduced statblock from the SRD storm giant to fit Tier 2 quest pacing.",
+    traits: [
+      { name: "Amphibious", description: "The storm giant can breathe air and water." },
+      { name: "Innate Spellcasting", description: "The storm giant's innate spellcasting ability is Charisma (spell save DC 16). At will: detect magic, fog cloud, light. 1/day each: control weather, water breathing." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The storm giant makes two Trident attacks." },
+      { name: "Trident", description: "Melee or Ranged Weapon Attack", attackBonus: 11, damageDescription: "19 (3d8 + 7) piercing damage, or 21 (3d10 + 7) if used two-handed." },
+      { name: "Lightning Strike (Recharge 4-6)", description: "The storm giant hurls a magical lightning bolt at a point it can see within 500 ft. Each creature within 10 ft. of the point makes a DC 17 Dexterity save, taking 35 (10d6) lightning damage on a failure, or half on a success." }
+    ]
+  },
+  {
+    id: "cm-cryovain",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Dragon of Icespire Peak",
+    name: "Cryovain the White Dragon",
+    size: "large",
+    type: "dragon",
+    alignment: "Chaotic Evil",
+    speed: "40 ft., burrow 20 ft., fly 80 ft.",
+    challengeRating: 6,
+    experiencePoints: 2300,
+    ac: 17,
+    acNote: "natural armor",
+    hp: 200,
+    maxHp: 200,
+    abilityScores: {
+      strength: 18, dexterity: 10, constitution: 18,
+      intelligence: 11, wisdom: 11, charisma: 12
+    },
+    savingThrows: { dexterity: 3, constitution: 7, wisdom: 3, charisma: 4 },
+    skills: { Perception: 6, Stealth: 3 },
+    damageImmunities: ["cold"],
+    senses: { blindsight: "30 ft.", darkvision: "120 ft.", "passive Perception": "16" },
+    languages: ["Common", "Draconic"],
+    description: "A young white dragon who has claimed Icespire Hold as his lair and drives the monsters of the Sword Mountains into Phandalin.",
+    traits: [
+      { name: "Ice Walk", description: "The dragon can move across and climb icy surfaces without needing to make an ability check." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The dragon makes three attacks: one Bite and two Claws." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "11 (2d6 + 4) piercing damage plus 4 (1d8) cold damage." },
+      { name: "Claw", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "7 (1d6 + 4) slashing damage." },
+      { name: "Frost Breath (Recharge 5-6)", description: "The dragon exhales an icy blast in a 30-foot cone. Each creature makes a DC 15 Constitution save, taking 54 (12d8) cold damage on a failure, or half on a success." }
+    ]
+  },
+  // SRD-faithful mirrors used in Dragon of Icespire Peak encounters
+  {
+    id: "cm-manticore",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Dragon of Icespire Peak",
+    name: "Manticore",
+    size: "large",
+    type: "monstrosity",
+    alignment: "Lawful Evil",
+    speed: "30 ft., fly 50 ft.",
+    challengeRating: 3,
+    experiencePoints: 700,
+    ac: 14,
+    acNote: "natural armor",
+    hp: 68,
+    maxHp: 68,
+    abilityScores: {
+      strength: 17, dexterity: 16, constitution: 17,
+      intelligence: 7, wisdom: 12, charisma: 8
+    },
+    skills: { Perception: 3 },
+    senses: { darkvision: "60 ft.", "passive Perception": "13" },
+    languages: ["understands Common but can't speak"],
+    description: "A lion-bodied monster with bat wings and a tail of iron spikes.",
+    traits: [],
+    actions: [
+      { name: "Multiattack", description: "The manticore makes three attacks: one with its bite and two with its claws or two with its tail spikes." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "7 (1d8 + 3) piercing damage." },
+      { name: "Claw", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "6 (1d6 + 3) slashing damage." },
+      { name: "Tail Spike", description: "Ranged Weapon Attack", attackBonus: 5, damageDescription: "7 (1d8 + 3) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-orog",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Dragon of Icespire Peak",
+    name: "Orog",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Chaotic Evil",
+    speed: "30 ft.",
+    challengeRating: 2,
+    experiencePoints: 450,
+    ac: 18,
+    acNote: "chain shirt, shield",
+    hp: 42,
+    maxHp: 42,
+    abilityScores: {
+      strength: 16, dexterity: 12, constitution: 16,
+      intelligence: 12, wisdom: 12, charisma: 10
+    },
+    skills: { Intimidation: 2 },
+    senses: { darkvision: "60 ft.", "passive Perception": "11" },
+    languages: ["Common", "Orc"],
+    description: "A disciplined orc commander, often leading warbands in the Sword Mountains.",
+    traits: [
+      { name: "Aggressive", description: "As a bonus action, the orog can move up to its speed toward a hostile creature it can see." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The orog makes two attacks with its Scimitar or its Javelin." },
+      { name: "Scimitar", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "6 (1d6 + 3) slashing damage." },
+      { name: "Javelin", description: "Melee or Ranged Weapon Attack", attackBonus: 5, damageDescription: "6 (1d6 + 3) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-hobgoblin-captain",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Dragon of Icespire Peak",
+    name: "Hobgoblin Captain",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Lawful Evil",
+    speed: "30 ft.",
+    challengeRating: 3,
+    experiencePoints: 700,
+    ac: 17,
+    acNote: "chain shirt, shield",
+    hp: 39,
+    maxHp: 39,
+    abilityScores: {
+      strength: 13, dexterity: 14, constitution: 12,
+      intelligence: 12, wisdom: 10, charisma: 13
+    },
+    savingThrows: { constitution: 3, wisdom: 2 },
+    skills: { Athletics: 3, Perception: 2 },
+    senses: { darkvision: "60 ft.", "passive Perception": "12" },
+    languages: ["Common", "Goblin"],
+    description: "A hobgoblin officer commanding a warband in the Sword Mountains.",
+    traits: [
+      { name: "Martial Advantage", description: "Once per turn, the captain can deal an extra 7 (2d6) damage to a creature it hits with a weapon attack if that creature is within 5 ft. of an ally of the captain that isn't incapacitated." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The captain makes two attacks with its Scimitar. It can replace one attack with a use of Leadership if available." },
+      { name: "Scimitar", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) slashing damage." },
+      { name: "Javelin", description: "Melee or Ranged Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) piercing damage." },
+      { name: "Leadership (Recharge 4-6)", description: "For 1 minute, the captain can utter a special command or warning whenever a nonhostile creature that it can see within 30 ft. of it makes an attack roll or saving throw. The creature adds 4 (1d8) to the roll." }
+    ],
+    reactions: [
+      { name: "Parry", description: "The captain adds 2 to its AC against one melee attack that would hit it. To do so, it must see the attacker and be wielding a melee weapon." }
+    ]
+  },
+  {
+    id: "cm-half-ogre",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Dragon of Icespire Peak",
+    name: "Half-Ogre",
+    size: "large",
+    type: "giant",
+    alignment: "Chaotic Evil",
+    speed: "30 ft.",
+    challengeRating: 1,
+    experiencePoints: 200,
+    ac: 12,
+    acNote: "hide armor",
+    hp: 30,
+    maxHp: 30,
+    abilityScores: {
+      strength: 16, dexterity: 10, constitution: 14,
+      intelligence: 6, wisdom: 7, charisma: 6
+    },
+    skills: { Intimidation: 2 },
+    senses: { darkvision: "60 ft.", "passive Perception": "8" },
+    languages: ["Common", "Giant"],
+    description: "A half-ogre cultist serving in Icespire Hold.",
+    traits: [
+      { name: "Brute", description: "A melee weapon deals one extra die of damage on a hit (included)." }
+    ],
+    actions: [
+      { name: "Greatclub", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "11 (2d8 + 3) bludgeoning damage." }
+    ]
+  },
+  // ─── Phandelver and Below: The Shattered Obelisk ─────────────────────
+  {
+    id: "cm-psionic-goblin",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Psionic Goblin",
+    size: "small",
+    type: "humanoid",
+    alignment: "Neutral Evil",
+    speed: "30 ft.",
+    challengeRating: 0.5,
+    experiencePoints: 100,
+    ac: 13,
+    acNote: "leather armor, shield",
+    hp: 16,
+    maxHp: 16,
+    abilityScores: {
+      strength: 8, dexterity: 14, constitution: 10,
+      intelligence: 10, wisdom: 8, charisma: 8
+    },
+    skills: { Stealth: 6 },
+    senses: { darkvision: "60 ft.", "passive Perception": "9" },
+    languages: ["Common", "Goblin"],
+    description: "A goblin whose mind has been touched by the Far Realm, granting it minor psionic powers. Often found in Psionic Goblin raiding parties.",
+    traits: [
+      { name: "Nimble Escape", description: "The goblin can disengage or hide as a bonus action on each of its turns." },
+      { name: "Mind Link", description: "The goblin can telepathically communicate with any creature within 30 ft. that understands at least one language." },
+      { name: "Telekinetic Shove", description: "As a bonus action, the goblin can target one creature it can see within 30 ft. The target makes a DC 10 Strength save or is moved 5 ft. in any direction the goblin chooses." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The goblin makes two Scimitar attacks. It can use its Mind Spike attack in place of one melee attack." },
+      { name: "Scimitar", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) slashing damage." },
+      { name: "Shortbow", description: "Ranged Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) piercing damage." },
+      { name: "Mind Spike", description: "Ranged Spell Attack", attackBonus: 3, damageDescription: "5 (2d4) psychic damage." }
+    ]
+  },
+  {
+    id: "cm-psionic-goblin-boss",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Psionic Goblin Boss",
+    size: "small",
+    type: "humanoid",
+    alignment: "Neutral Evil",
+    speed: "30 ft.",
+    challengeRating: 2,
+    experiencePoints: 450,
+    ac: 15,
+    acNote: "chain shirt, shield",
+    hp: 45,
+    maxHp: 45,
+    abilityScores: {
+      strength: 10, dexterity: 14, constitution: 12,
+      intelligence: 14, wisdom: 11, charisma: 10
+    },
+    skills: { Stealth: 6 },
+    senses: { darkvision: "60 ft.", "passive Perception": "10" },
+    languages: ["Common", "Goblin", "Undercommon"],
+    description: "A psionic goblin who has led a raiding band to success. Possesses more developed Far Realm mind powers.",
+    traits: [
+      { name: "Nimble Escape", description: "The boss can disengage or hide as a bonus action on each of its turns." },
+      { name: "Innate Spellcasting (Psionics)", description: "The boss's innate spellcasting ability is Intelligence (spell save DC 12, +4 to hit with spell attacks). At will: friends, mage hand. 1/day each: charm person, detect thoughts, hold person, suggestion." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The boss makes two Scimitar attacks. It can use Mind Blast in place of one attack." },
+      { name: "Scimitar", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) slashing damage." },
+      { name: "Mind Blast (Recharge 4-6)", description: "Each creature of the boss's choice within 20 ft. makes a DC 12 Wisdom save, taking 9 (2d8) psychic damage on a failure, or half on a success. Targets that fail are pushed 10 ft. away." }
+    ]
+  },
+  {
+    id: "cm-cloaker-mutate",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Cloaker Mutate",
+    size: "large",
+    type: "aberration",
+    alignment: "Chaotic Evil",
+    speed: "10 ft., fly 60 ft. (hover)",
+    challengeRating: 8,
+    experiencePoints: 3900,
+    ac: 14,
+    acNote: "natural armor",
+    hp: 161,
+    maxHp: 161,
+    abilityScores: {
+      strength: 19, dexterity: 15, constitution: 16,
+      intelligence: 16, wisdom: 14, charisma: 14
+    },
+    skills: { Perception: 4, Stealth: 7 },
+    damageImmunities: ["psychic"],
+    senses: { darkvision: "60 ft.", "passive Perception": "14" },
+    languages: ["Deep Speech", "Undercommon", "telepathy 60 ft."],
+    description: "A cloaker twisted by illithid psionic experimentation. Its bite now delivers a psychic drain rather than a tail attack.",
+    traits: [
+      { name: "False Appearance", description: "While motionless, the mutate is indistinguishable from a tattered cloak." },
+      { name: "Magic Resistance", description: "The mutate has advantage on saving throws against spells and other magical effects." },
+      { name: "Mind Echo", description: "Each creature within 30 ft. of the mutate at the start of its turn makes a DC 14 Wisdom save or is frightened until the end of the creature's next turn." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The mutate makes two Bite attacks and one Tail attacks." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "11 (2d6 + 4) piercing damage. The target makes a DC 14 Wisdom save or is afflicted with psychic feedback for 1 minute, taking 7 (2d6) psychic damage each time it deals damage to the mutate." },
+      { name: "Tail", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "8 (1d8 + 4) slashing damage." },
+      { name: "Phantasmal Embrace", description: "The mutate wraps itself around one creature within 5 ft. The target makes a DC 14 Dexterity save or is grappled (escape DC 16) and takes 11 (2d10) psychic damage at the start of each of the mutate's turns." },
+      { name: "Horrific Moan (Recharge 5-6)", description: "Each creature within 30 ft. of the mutate that can hear it makes a DC 14 Wisdom save or is frightened for 1 minute. A frightened target can repeat the save at the end of each of its turns." }
+    ]
+  },
+  {
+    id: "cm-nezznar",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Nezznar the Black Spider",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Neutral Evil",
+    speed: "30 ft.",
+    challengeRating: 8,
+    experiencePoints: 3900,
+    ac: 15,
+    acNote: "studded leather",
+    hp: 120,
+    maxHp: 120,
+    abilityScores: {
+      strength: 10, dexterity: 18, constitution: 14,
+      intelligence: 20, wisdom: 13, charisma: 11
+    },
+    savingThrows: { intelligence: 9, wisdom: 5 },
+    skills: { Arcana: 9, Deception: 4, Perception: 6, Stealth: 9 },
+    damageImmunities: ["poison"],
+    conditionImmunities: ["poisoned"],
+    senses: { darkvision: "120 ft.", truesight: "30 ft.", "passive Perception": "16" },
+    languages: ["Common", "Elvish", "Undercommon"],
+    description: "A drow mage in disguise (as a human wizard) who seeks the Forge of Spells in Wave Echo Cave.",
+    traits: [
+      { name: "Fey Ancestry", description: "Nezznar has advantage on saving throws against being charmed, and magic can't put him to sleep." },
+      { name: "Innate Spellcasting", description: "Innate spellcasting ability is Charisma (spell save DC 12). At will: dancing lights. 1/day each: darkness, faerie fire." },
+      { name: "Spellcasting", description: "Nezznar is a 10th-level spellcaster. His spellcasting ability is Intelligence (spell save DC 17, +9 to hit with spell attacks). At will: light, mage hand, ray of frost. 3/day each: counterspell, dispel magic, fireball. 1/day each: confusion, detect magic, shield, web." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "Nezznar makes two Dagger attacks and one Spider Staff attack." },
+      { name: "Dagger", description: "Melee or Ranged Weapon Attack", attackBonus: 7, damageDescription: "5 (1d4 + 3) piercing damage plus 10 (3d6) poison damage." },
+      { name: "Spider Staff", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "6 (1d6 + 3) bludgeoning damage plus 10 (3d6) poison damage." }
+    ],
+    legendaryActions: [
+      { name: "Spellcasting", description: "Nezznar casts one of his prepared spells." },
+      { name: "Web Spray (Costs 2 Actions)", description: "Nezznar casts web centered on a point he can see within 60 ft." }
+    ],
+    legendaryActionCount: 3
+  },
+  {
+    id: "cm-mind-flayer-cultist",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Mind Flayer Cultist",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Lawful Evil",
+    speed: "30 ft.",
+    challengeRating: 3,
+    experiencePoints: 700,
+    ac: 14,
+    acNote: "leather armor",
+    hp: 38,
+    maxHp: 38,
+    abilityScores: {
+      strength: 9, dexterity: 14, constitution: 12,
+      intelligence: 15, wisdom: 14, charisma: 11
+    },
+    skills: { Arcana: 4, Deception: 3, Perception: 4 },
+    senses: { darkvision: "60 ft.", "passive Perception": "14" },
+    languages: ["Common", "Deep Speech", "Undercommon"],
+    description: "A human cultist sworn to the mind flayer cause, granted minor psionic gifts in exchange for service.",
+    traits: [
+      { name: "Innate Spellcasting (Psionics)", description: "Innate spellcasting ability is Intelligence (spell save DC 12, +4 to hit with spell attacks). At will: friends, mage hand. 1/day each: detect thoughts, sleep." },
+      { name: "Devoted Will", description: "The cultist has advantage on saving throws against being charmed by non-illithid creatures." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The cultist makes two Scimitar attacks." },
+      { name: "Scimitar", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) slashing damage." },
+      { name: "Mind Bolt", description: "Ranged Spell Attack", attackBonus: 4, damageDescription: "9 (2d8) psychic damage." }
+    ]
+  },
+  {
+    id: "cm-obelisk-sentinel",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Obelisk Sentinel",
+    size: "large",
+    type: "construct",
+    alignment: "Neutral Evil",
+    speed: "0 ft., fly 30 ft. (hover)",
+    challengeRating: 5,
+    experiencePoints: 1800,
+    ac: 16,
+    acNote: "natural armor",
+    hp: 110,
+    maxHp: 110,
+    abilityScores: {
+      strength: 18, dexterity: 14, constitution: 18,
+      intelligence: 8, wisdom: 11, charisma: 1
+    },
+    damageImmunities: ["force", "poison", "psychic"],
+    conditionImmunities: ["charmed", "exhaustion", "frightened", "paralyzed", "poisoned", "stunned"],
+    senses: { blindsight: "60 ft.", darkvision: "120 ft.", "passive Perception": "10" },
+    languages: ["understands Deep Speech but can't speak"],
+    description: "A Far-Realm-tinged construct that hovers over the Netherese obelisks, pulsing with psionic energy.",
+    traits: [
+      { name: "Antimagic Susceptibility", description: "The sentinel is incapacitated while in the area of an antimagic field. If targeted by dispel magic, it is suppressed for 1 minute." },
+      { name: "Damage Resistance (Nonmagical)", description: "The sentinel takes no damage from bludgeoning, piercing, and slashing attacks that are nonmagical." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The sentinel makes two Slam attacks." },
+      { name: "Slam", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "13 (2d8 + 4) bludgeoning damage plus 4 (1d8) force damage." },
+      { name: "Psychic Beam", description: "Ranged Spell Attack", attackBonus: 5, damageDescription: "16 (3d8 + 2) psychic damage. The target makes a DC 13 Wisdom save or is stunned until the end of its next turn." }
+    ]
+  },
+  {
+    id: "cm-elder-brain-dragon",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Elder Brain Dragon",
+    size: "large",
+    type: "aberration",
+    alignment: "Lawful Evil",
+    speed: "0 ft., fly 30 ft. (hover)",
+    challengeRating: 12,
+    experiencePoints: 8400,
+    ac: 17,
+    acNote: "natural armor",
+    hp: 210,
+    maxHp: 210,
+    abilityScores: {
+      strength: 18, dexterity: 14, constitution: 18,
+      intelligence: 20, wisdom: 18, charisma: 18
+    },
+    savingThrows: { intelligence: 9, wisdom: 8, charisma: 8 },
+    skills: { Arcana: 9, Insight: 8, Perception: 8 },
+    damageImmunities: ["psychic"],
+    conditionImmunities: ["charmed", "frightened"],
+    senses: { blindsight: "120 ft.", truesight: "60 ft.", "passive Perception": "18" },
+    languages: ["Deep Speech", "Undercommon", "telepathy 120 ft."],
+    description: "An elder brain that has fused with the remains of an aboleth, gained flight and a draconic form.",
+    traits: [
+      { name: "Magic Resistance", description: "The elder brain dragon has advantage on saving throws against spells and other magical effects." },
+      { name: "Telepathic Hub", description: "The elder brain dragon can telepathically communicate with any creature it has enslaved within 1 mile. It can use any ally's senses and can read any ally's thoughts." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The elder brain dragon makes one Bite attack and uses Psychic Drain." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 9, damageDescription: "12 (2d8 + 4) piercing damage." },
+      { name: "Psychic Drain", description: "The elder brain dragon targets one creature within 120 ft. The target makes a DC 16 Intelligence save, taking 27 (6d8) psychic damage on a failure, or half on a success. If the target fails, the elder brain dragon learns one fact or memory of its choice." },
+      { name: "Mind Blast (Recharge 5-6)", description: "The elder brain dragon emits psychic energy in a 60-foot cone. Each creature makes a DC 16 Intelligence save, taking 22 (4d10) psychic damage on a failure, or half on a success. On a failure, the target is also stunned for 1 minute." }
+    ],
+    legendaryActions: [
+      { name: "Psychic Drain", description: "The elder brain dragon uses Psychic Drain." },
+      { name: "Command Thrall", description: "The elder brain dragon commands one enslaved creature to take an action immediately." }
+    ],
+    legendaryActionCount: 2
+  },
+  {
+    id: "cm-netherese-obelisk-boss",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Netherese Obelisk Boss",
+    size: "huge",
+    type: "aberration",
+    alignment: "Lawful Evil",
+    speed: "0 ft., fly 40 ft. (hover)",
+    challengeRating: 18,
+    experiencePoints: 20000,
+    ac: 19,
+    acNote: "natural armor",
+    hp: 350,
+    maxHp: 350,
+    abilityScores: {
+      strength: 20, dexterity: 14, constitution: 22,
+      intelligence: 24, wisdom: 20, charisma: 22
+    },
+    savingThrows: { intelligence: 13, wisdom: 11, charisma: 11 },
+    skills: { Arcana: 13, Insight: 11, Perception: 11, Persuasion: 11 },
+    damageImmunities: ["force", "psychic"],
+    conditionImmunities: ["charmed", "exhaustion", "frightened", "paralyzed", "poisoned", "stunned"],
+    senses: { truesight: "240 ft.", "passive Perception": "21" },
+    languages: ["Deep Speech", "Undercommon", "telepathy 240 ft."],
+    description: "An illithilich formed from the Netherese obelisk's psionic core. Final boss of the campaign.",
+    traits: [
+      { name: "Legendary Resistance (3/Day)", description: "If the obelisk fails a saving throw, it can choose to succeed instead." },
+      { name: "Magic Resistance", description: "The obelisk has advantage on saving throws against spells and other magical effects." },
+      { name: "Rejuvenation", description: "If the obelisk is destroyed, it reforms within 1d10 days in the Netherese Obelisk unless a psychic link to it is severed." },
+      { name: "Spellcasting", description: "The obelisk is a 17th-level spellcaster. Its spellcasting ability is Intelligence (spell save DC 21, +13 to hit with spell attacks). At will: detect magic, mage hand, minor illusion. 3/day each: counterspell, dispel magic, hold monster. 1/day each: feeblemind, prismatic wall, psychic crush, teleport." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The obelisk makes two Tendril attacks and one Psychic Lance attack." },
+      { name: "Tendril", description: "Melee Weapon Attack", attackBonus: 12, damageDescription: "17 (2d10 + 6) force damage, and the target is grappled (escape DC 19)." },
+      { name: "Psychic Lance", description: "Ranged Spell Attack", attackBonus: 13, damageDescription: "28 (8d6) psychic damage. The target makes a DC 21 Intelligence save or is stunned for 1 minute." },
+      { name: "Mind Storm (Recharge 5-6)", description: "The obelisk emits a 120-foot cone of psychic force. Each creature makes a DC 21 Intelligence save, taking 45 (10d8) psychic damage and 21 (6d6) force damage on a failure, or half on a success. Targets that fail are also knocked prone." }
+    ],
+    legendaryActions: [
+      { name: "Psychic Lance", description: "The obelisk makes one Psychic Lance attack." },
+      { name: "Tendril", description: "The obelisk makes one Tendril attack." },
+      { name: "Cast a Spell", description: "The obelisk casts one of its prepared spells." }
+    ],
+    legendaryActionCount: 3
+  },
+  // SRD-faithful mirrors used in Phandelver and Below encounters
+  {
+    id: "cm-goblin-boss",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Goblin Boss",
+    size: "small",
+    type: "humanoid",
+    alignment: "Neutral Evil",
+    speed: "30 ft.",
+    challengeRating: 1,
+    experiencePoints: 200,
+    ac: 17,
+    acNote: "chain shirt, shield",
+    hp: 21,
+    maxHp: 21,
+    abilityScores: {
+      strength: 10, dexterity: 14, constitution: 10,
+      intelligence: 10, wisdom: 8, charisma: 10
+    },
+    skills: { Stealth: 6 },
+    senses: { darkvision: "60 ft.", "passive Perception": "9" },
+    languages: ["Common", "Goblin"],
+    description: "The biggest, meanest goblin in a raiding party.",
+    traits: [
+      { name: "Nimble Escape", description: "The goblin can disengage or hide as a bonus action on each of its turns." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The goblin makes two attacks with its Scimitar. It can use its Shortbow in place of one melee attack." },
+      { name: "Scimitar", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) slashing damage." },
+      { name: "Shortbow", description: "Ranged Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) piercing damage." },
+      { name: "Javelin", description: "Melee or Ranged Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-bugbear",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Bugbear",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Chaotic Evil",
+    speed: "30 ft.",
+    challengeRating: 1,
+    experiencePoints: 200,
+    ac: 16,
+    acNote: "hide armor, shield",
+    hp: 27,
+    maxHp: 27,
+    abilityScores: {
+      strength: 15, dexterity: 14, constitution: 13,
+      intelligence: 8, wisdom: 11, charisma: 9
+    },
+    skills: { Stealth: 6, Survival: 2 },
+    senses: { darkvision: "60 ft.", "passive Perception": "10" },
+    languages: ["Common", "Goblin"],
+    description: "A stealthy, hairy goblinoid raider.",
+    traits: [
+      { name: "Brute", description: "A melee weapon deals one extra die of damage on a hit (included)." },
+      { name: "Heart of Hruggek", description: "The bugbear has advantage on saving throws against being charmed, frightened, paralyzed, poisoned, stunned, or put to sleep." },
+      { name: "Surprise Attack", description: "If the bugbear surprises a creature and hits it with a melee attack during the first round of combat, the attack deals an extra 7 (2d6) damage." }
+    ],
+    actions: [
+      { name: "Morningstar", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "11 (2d8 + 2) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-hobgoblin",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Hobgoblin",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Lawful Evil",
+    speed: "30 ft.",
+    challengeRating: 0.5,
+    experiencePoints: 100,
+    ac: 18,
+    acNote: "chain shirt, shield",
+    hp: 11,
+    maxHp: 11,
+    abilityScores: {
+      strength: 13, dexterity: 12, constitution: 12,
+      intelligence: 10, wisdom: 10, charisma: 9
+    },
+    skills: { Athletics: 3 },
+    senses: { darkvision: "60 ft.", "passive Perception": "10" },
+    languages: ["Common", "Goblin"],
+    description: "A disciplined goblinoid soldier.",
+    traits: [
+      { name: "Martial Advantage", description: "Once per turn, the hobgoblin can deal an extra 7 (2d6) damage to a creature it hits with a weapon attack if that creature is within 5 ft. of an ally of the hobgoblin that isn't incapacitated." }
+    ],
+    actions: [
+      { name: "Longsword", description: "Melee Weapon Attack", attackBonus: 3, damageDescription: "5 (1d8 + 1) slashing damage, or 6 (1d10 + 1) if used two-handed." },
+      { name: "Longbow", description: "Ranged Weapon Attack", attackBonus: 3, damageDescription: "5 (1d8 + 1) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-owlbear",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Owlbear",
+    size: "large",
+    type: "monstrosity",
+    alignment: "Unaligned",
+    speed: "40 ft.",
+    challengeRating: 3,
+    experiencePoints: 700,
+    ac: 13,
+    acNote: "natural armor",
+    hp: 59,
+    maxHp: 59,
+    abilityScores: {
+      strength: 20, dexterity: 12, constitution: 17,
+      intelligence: 3, wisdom: 12, charisma: 7
+    },
+    skills: { Perception: 3 },
+    senses: { darkvision: "60 ft.", "passive Perception": "13" },
+    languages: ["understands Common but can't speak"],
+    description: "A monstrous cross between an owl and a bear. Territorial and ferocious.",
+    traits: [
+      { name: "Keen Sight and Smell", description: "The owlbear has advantage on Wisdom (Perception) checks that rely on sight or smell." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The owlbear makes two attacks: one with its beak and one with its claws." },
+      { name: "Beak", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "10 (1d10 + 4) piercing damage." },
+      { name: "Claws", description: "Melee Weapon Attack", attackBonus: 7, damageDescription: "14 (2d8 + 4) slashing damage." }
+    ]
+  },
+  {
+    id: "cm-banshee",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Banshee",
+    size: "medium",
+    type: "undead",
+    alignment: "Chaotic Evil",
+    speed: "0 ft., fly 40 ft. (hover)",
+    challengeRating: 4,
+    experiencePoints: 1100,
+    ac: 12,
+    hp: 58,
+    maxHp: 58,
+    abilityScores: {
+      strength: 1, dexterity: 14, constitution: 10,
+      intelligence: 12, wisdom: 11, charisma: 17
+    },
+    skills: { Perception: 4 },
+    damageResistances: ["acid", "fire", "lightning", "thunder"],
+    damageImmunities: ["cold", "necrotic", "poison"],
+    conditionImmunities: ["charmed", "exhaustion", "frightened", "grappled", "paralyzed", "petrified", "poisoned", "prone", "restrained"],
+    senses: { darkvision: "60 ft.", "passive Perception": "14" },
+    languages: ["Common", "Sylvan"],
+    description: "The wailing spirit of a wronged woman, endlessly mourning.",
+    traits: [
+      { name: "Detect Life", description: "The banshee can magically sense the presence of living creatures up to 5 miles away." },
+      { name: "Incorporeal Movement", description: "The banshee can move through other creatures and objects as if they were difficult terrain." }
+    ],
+    actions: [
+      { name: "Corrupting Touch", description: "Melee Spell Attack", attackBonus: 4, damageDescription: "12 (3d6 + 2) necrotic damage." },
+      { name: "Horrifying Visage (Recharge 4-6)", description: "Each non-undead creature within 60 ft. that can see the banshee makes a DC 13 Wisdom save or is frightened for 1 minute." },
+      { name: "Wail (1/Day)", description: "The banshee wails loudly. Each creature within 30 ft. makes a DC 13 Constitution save, taking 21 (6d6) thunder damage on a failure, or half on a success. A creature that fails is reduced to 0 hit points." }
+    ]
+  },
+  {
+    id: "cm-shadow",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Shadow",
+    size: "medium",
+    type: "undead",
+    alignment: "Chaotic Evil",
+    speed: "40 ft.",
+    challengeRating: 1,
+    experiencePoints: 200,
+    ac: 12,
+    hp: 16,
+    maxHp: 16,
+    abilityScores: {
+      strength: 6, dexterity: 14, constitution: 10,
+      intelligence: 6, wisdom: 8, charisma: 8
+    },
+    skills: { Stealth: 4 },
+    damageResistances: ["acid", "cold", "fire", "lightning", "thunder"],
+    damageImmunities: ["necrotic", "poison"],
+    conditionImmunities: ["exhaustion", "frightened", "grappled", "paralyzed", "petrified", "poisoned", "prone", "restrained"],
+    senses: { darkvision: "60 ft.", "passive Perception": "9" },
+    languages: ["understands Common but can't speak"],
+    description: "A gloomy, incorporeal undead born from dark magic.",
+    traits: [
+      { name: "Amorphous", description: "The shadow can move through a space as narrow as 1 inch wide without squeezing." },
+      { name: "Incorporeal Movement", description: "The shadow can move through other creatures and objects as if they were difficult terrain." },
+      { name: "Sunlight Weakness", description: "While in sunlight, the shadow has disadvantage on attack rolls, ability checks, and saving throws." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The shadow makes two Shadow Touch attacks." },
+      { name: "Shadow Touch", description: "Melee Spell Attack", attackBonus: 4, damageDescription: "9 (2d6 + 2) necrotic damage. The target's Strength is reduced by 2 (minimum 0). The target dies if its Strength is reduced to 0. If a non-evil humanoid dies this way, it rises as a shadow under the control of its killer." }
+    ]
+  },
+  {
+    id: "cm-spy",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Spy",
+    size: "medium",
+    type: "humanoid",
+    alignment: "Any Non-Good Alignment",
+    speed: "30 ft.",
+    challengeRating: 1,
+    experiencePoints: 200,
+    ac: 12,
+    hp: 27,
+    maxHp: 27,
+    abilityScores: {
+      strength: 10, dexterity: 15, constitution: 10,
+      intelligence: 12, wisdom: 12, charisma: 13
+    },
+    skills: { Deception: 5, Insight: 3, Investigation: 4, Perception: 3, Persuasion: 3, Stealth: 6 },
+    senses: { "passive Perception": "13" },
+    languages: ["any two languages"],
+    description: "An infiltrator trained in deception and stealth.",
+    traits: [
+      { name: "Cunning Action", description: "The spy can take the Dash, Disengage, or Hide action as a bonus action on each of its turns." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The spy makes two attacks with its shortsword. It can replace one attack with a use of Hand Crossbow." },
+      { name: "Shortsword", description: "Melee Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) piercing damage." },
+      { name: "Hand Crossbow", description: "Ranged Weapon Attack", attackBonus: 4, damageDescription: "5 (1d6 + 2) piercing damage." }
+    ]
+  },
+  {
+    id: "cm-stirges",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Stirges",
+    size: "tiny",
+    type: "beast",
+    alignment: "Unaligned",
+    speed: "10 ft., fly 40 ft.",
+    challengeRating: 0.125,
+    ac: 14,
+    hp: 2,
+    maxHp: 2,
+    abilityScores: {
+      strength: 4, dexterity: 16, constitution: 8,
+      intelligence: 2, wisdom: 8, charisma: 6
+    },
+    senses: { darkvision: "60 ft.", "passive Perception": "9" },
+    languages: ["understands Common but can't speak"],
+    description: "Tiny, mosquito-like pests that suck blood.",
+    traits: [],
+    actions: [
+      { name: "Blood Drain", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "5 (1d4 + 3) piercing damage, and the stirge attaches to the target. While attached, the stirge doesn't attack, but it drains 5 (1d4 + 3) hit points of blood from the target at the start of each of its turns. The stirge can detach itself by spending 5 ft. of movement." }
+    ]
+  },
+  {
+    id: "cm-giant-spider",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Giant Spider",
+    size: "large",
+    type: "beast",
+    alignment: "Unaligned",
+    speed: "30 ft., climb 30 ft.",
+    challengeRating: 1,
+    experiencePoints: 200,
+    ac: 14,
+    acNote: "natural armor",
+    hp: 26,
+    maxHp: 26,
+    abilityScores: {
+      strength: 14, dexterity: 16, constitution: 12,
+      intelligence: 2, wisdom: 11, charisma: 4
+    },
+    skills: { Perception: 3, Stealth: 7 },
+    senses: { blindsight: "10 ft.", darkvision: "60 ft.", tremorsense: "60 ft.", "passive Perception": "13" },
+    languages: ["understands Common but can't speak"],
+    description: "A massive spider that hunts in caverns and ruins.",
+    traits: [
+      { name: "Spider Climb", description: "The spider can climb difficult surfaces, including upside down on ceilings, without making an ability check." }
+    ],
+    actions: [
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 5, damageDescription: "7 (1d8 + 3) piercing damage, and the target makes a DC 11 Constitution save, taking 9 (2d8) poison damage on a failure, or half on a success. If the poison damage reduces the target to 0 hit points, the target is stable but poisoned for 1 hour." },
+      { name: "Web", description: "Ranged Weapon Attack", attackBonus: 5, damageDescription: "no damage; target is restrained by webbing." }
+    ]
+  },
+  {
+    id: "cm-wraith",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Wraith",
+    size: "medium",
+    type: "undead",
+    alignment: "Neutral Evil",
+    speed: "0 ft., fly 60 ft. (hover)",
+    challengeRating: 5,
+    experiencePoints: 1800,
+    ac: 13,
+    hp: 67,
+    maxHp: 67,
+    abilityScores: {
+      strength: 6, dexterity: 16, constitution: 16,
+      intelligence: 12, wisdom: 14, charisma: 15
+    },
+    damageResistances: ["acid", "cold", "fire", "lightning", "thunder"],
+    damageImmunities: ["necrotic", "poison"],
+    conditionImmunities: ["charmed", "exhaustion", "frightened", "grappled", "paralyzed", "petrified", "poisoned", "prone", "restrained"],
+    senses: { darkvision: "60 ft.", "passive Perception": "12" },
+    languages: ["the languages it knew in life"],
+    description: "The malevolent spirit of a person who refused to rest in death.",
+    traits: [
+      { name: "Incorporeal Movement", description: "The wraith can move through other creatures and objects as if they were difficult terrain." },
+      { name: "Sunlight Sensitivity", description: "While in sunlight, the wraith has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The wraith makes two Life Drain attacks." },
+      { name: "Life Drain", description: "Melee Spell Attack", attackBonus: 6, damageDescription: "21 (4d8 + 3) necrotic damage. The target must succeed on a DC 14 Constitution save or its hit point maximum is reduced by an amount equal to the damage taken. This reduction lasts until the target finishes a long rest. The target dies if its hit point maximum is reduced to 0." },
+      { name: "Create Specter", description: "The wraith targets a humanoid within 10 ft. that has been dead for no longer than 1 minute and died violently. The target's spirit rises as a specter under the wraith's command." }
+    ],
+    legendaryActions: [
+      { name: "Life Drain", description: "The wraith makes one Life Drain attack." }
+    ],
+    legendaryActionCount: 1
+  },
+  {
+    id: "cm-cloaker",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Cloaker",
+    size: "large",
+    type: "aberration",
+    alignment: "Chaotic Neutral",
+    speed: "10 ft., fly 60 ft.",
+    challengeRating: 8,
+    experiencePoints: 3900,
+    ac: 14,
+    acNote: "natural armor",
+    hp: 78,
+    maxHp: 78,
+    abilityScores: {
+      strength: 15, dexterity: 14, constitution: 14,
+      intelligence: 13, wisdom: 12, charisma: 11
+    },
+    skills: { Perception: 5, Stealth: 4 },
+    senses: { darkvision: "60 ft.", "passive Perception": "15" },
+    languages: ["understands Deep Speech but can't speak"],
+    description: "A carnivorous aberration that resembles a tattered cloak.",
+    traits: [
+      { name: "Damage Resistance (Nonmagical)", description: "The cloaker takes no damage from bludgeoning, piercing, and slashing attacks that are nonmagical." },
+      { name: "False Appearance", description: "While motionless, the cloaker is indistinguishable from a dark cloak." },
+      { name: "Light Sensitivity", description: "While in bright light, the cloaker has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The cloaker makes two attacks: one with its bite and one with its tail." },
+      { name: "Bite", description: "Melee Weapon Attack", attackBonus: 6, damageDescription: "10 (2d6 + 3) piercing damage. If the target is a Medium or smaller creature, it is grappled (escape DC 13)." },
+      { name: "Tail", description: "Melee Weapon Attack", attackBonus: 6, damageDescription: "8 (1d8 + 4) slashing damage." },
+      { name: "Engulf", description: "The cloaker moves up to its speed. While doing so, it can enter a Medium or smaller creature's space. When it does so, the cloaker can make a bite attack against that creature." },
+      { name: "Phantasms (Recharge 4-6)", description: "The cloaker magically creates illusions that cause one creature within 30 ft. to see the cloaker as a dead relative, friend, or loved one. The target makes a DC 13 Wisdom save. On a failure, it is paralyzed for 1 minute." }
+    ]
+  },
+  {
+    id: "cm-elder-brain",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Elder Brain",
+    size: "large",
+    type: "aberration",
+    alignment: "Lawful Evil",
+    speed: "0 ft., swim 10 ft.",
+    challengeRating: 14,
+    experiencePoints: 11500,
+    ac: 17,
+    acNote: "natural armor",
+    hp: 210,
+    maxHp: 210,
+    abilityScores: {
+      strength: 14, dexterity: 12, constitution: 18,
+      intelligence: 21, wisdom: 19, charisma: 21
+    },
+    savingThrows: { intelligence: 9, wisdom: 8, charisma: 9 },
+    skills: { Arcana: 9, Insight: 8, Perception: 8, Persuasion: 9 },
+    damageImmunities: ["psychic"],
+    conditionImmunities: ["charmed", "frightened"],
+    senses: { blindsight: "120 ft.", truesight: "60 ft.", "passive Perception": "18" },
+    languages: ["Deep Speech", "Undercommon", "telepathy 120 ft."],
+    description: "A massive, sentient brain that dominates an entire mind flayer colony.",
+    traits: [
+      { name: "Legendary Resistance (3/Day)", description: "If the elder brain fails a saving throw, it can choose to succeed instead." },
+      { name: "Magic Resistance", description: "The elder brain has advantage on saving throws against spells and other magical effects." },
+      { name: "Telepathic Hub", description: "The elder brain can telepathically communicate with any creature it has enslaved within 5 miles." }
+    ],
+    actions: [
+      { name: "Multiattack", description: "The elder brain makes one Tentacle attack and casts one spell." },
+      { name: "Tentacle", description: "Melee Weapon Attack", attackBonus: 8, damageDescription: "13 (3d6 + 3) bludgeoning damage. If the target is a creature, it is grappled (escape DC 15) and pulled up to 5 ft. toward the elder brain." },
+      { name: "Psychic Drain", description: "The elder brain targets one creature within 120 ft. that it can see. The target makes a DC 16 Intelligence save, taking 55 (10d10) psychic damage on a failure, or half on a success. On a failure, the elder brain learns one fact or memory of its choice." },
+      { name: "Mind Blast (Recharge 5-6)", description: "The elder brain emits psychic energy in a 60-foot cone. Each creature in the area makes a DC 16 Intelligence save, taking 22 (4d10) psychic damage on a failure, or half on a success. On a failure, a creature also becomes stunned for 1 minute." },
+      { name: "Spellcasting", description: "The elder brain is a 14th-level spellcaster. Its spellcasting ability is Intelligence (spell save DC 17, +9 to hit with spell attacks). At will: detect magic, levitate, mage hand. 3/day each: dispel magic, fear, hold monster, telekinesis. 1/day each: dominate monster, feeblemind, plane shift, psychic crush." }
+    ],
+    legendaryActions: [
+      { name: "Tentacle Attack", description: "The elder brain makes one Tentacle attack." },
+      { name: "Psychic Drain (Costs 2 Actions)", description: "The elder brain uses Psychic Drain." },
+      { name: "Command Thrall", description: "The elder brain commands one enslaved creature within 120 ft. to take an action immediately." }
+    ],
+    legendaryActionCount: 2
+  },
+  {
+    id: "cm-zombie",
+    userId: GLOBAL_USER_ID,
+    isGlobal: true,
+    source: "Phandelver and Below: The Shattered Obelisk",
+    name: "Zombie",
+    size: "medium",
+    type: "undead",
+    alignment: "Neutral Evil",
+    speed: "20 ft.",
+    challengeRating: 0.25,
+    experiencePoints: 50,
+    ac: 8,
+    hp: 22,
+    maxHp: 22,
+    abilityScores: {
+      strength: 13, dexterity: 6, constitution: 16,
+      intelligence: 3, wisdom: 6, charisma: 5
+    },
+    savingThrows: { wisdom: 0 },
+    damageImmunities: ["poison"],
+    conditionImmunities: ["poisoned"],
+    senses: { darkvision: "60 ft.", "passive Perception": "8" },
+    languages: ["understands the languages it knew in life but can't speak"],
+    description: "A reanimated corpse that lurches forward seeking flesh.",
+    traits: [
+      { name: "Undead Fortitude", description: "If damage reduces the zombie to 0 hit points, it makes a Constitution saving throw with a +5 bonus. On a success, it drops to 1 hit point instead." }
+    ],
+    actions: [
+      { name: "Slam", description: "Melee Weapon Attack", attackBonus: 3, damageDescription: "4 (1d6 + 1) bludgeoning damage." }
+    ]
+  },
 ];
 
 /**
