@@ -19,7 +19,8 @@ device.
 
 #### Scenario: Only non-default values are stored
 
-- **Given** a user whose only non-default preference is `chat.size = 480`
+- **Given** a user whose only non-default preference is `chat.size` (a dock-size object
+  `{ height, screenWidth, screenHeight }`)
 - **When** the stored preference document is inspected
 - **Then** `preferences.values` contains `chat.size` and does not contain any key
   whose value equals the schema default
@@ -99,15 +100,16 @@ values, and stripping unknown keys, so that no invalid or unknown data is persis
 #### Scenario: Wrongly-typed value is rejected
 
 - **Given** an authenticated user
-- **When** the client sends `PATCH` with `chat.size` set to `"large"` or `dice.sendToChat`
-  set to `1`
+- **When** the client sends `PATCH` with `chat.size` set to `"large"` (not a dock-size
+  object) or `dice.sendToChat` set to `1`
 - **Then** the response is HTTP 400 and no field is written
 
 #### Scenario: Out-of-range value is rejected
 
-- **Given** an authenticated user and a dock size range with a defined minimum and
-  maximum
-- **When** the client sends `PATCH` with `chat.size` outside that range
+- **Given** an authenticated user and a bounded dock height range (`DOCK_MIN_HEIGHT`..
+  `DOCK_MAX_HEIGHT`)
+- **When** the client sends `PATCH` with a `chat.size` whose `height` is outside that
+  range, or whose shape is not `{ height, screenWidth, screenHeight }`
 - **Then** the response is HTTP 400 and no field is written
 
 #### Scenario: Unknown keys are stripped

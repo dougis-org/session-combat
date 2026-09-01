@@ -183,7 +183,9 @@ All four questions raised during exploration were resolved by the requester (@do
   `users` collection**; a dedicated `userPreferences` collection was rejected for v1.
 - Resolved: v1 preference keys are exactly `dice.sendToChat`, `dice.disableAnimation`,
   `chat.pinned`, `chat.size`, plus a reserved `dice.color` slot. Nothing else is
-  migrated now.
+  migrated now. `chat.size` keeps the dock's existing
+  `{ height, screenWidth, screenHeight } | null` shape (not a bare number) so
+  `useDockState` retains its viewport-change invalidation guard (@doug, 2026-08-31).
 
 ## Non-Goals
 

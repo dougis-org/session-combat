@@ -4,47 +4,47 @@ Change: `add-user-preference-persistence` · Issue-driven: **#619** · Default b
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** from the primary checkout, `git checkout main` and `git pull --ff-only`
-- [ ] **Step 2 — Create and publish working branch:** the worktree branch `add-user-preference-persistence` was created during propose; confirm it exists on remote. If not: `git push -u origin add-user-preference-persistence` from inside `.worktrees/add-user-preference-persistence`
+- [x] **Step 1 — Sync default branch:** from the primary checkout, `git checkout main` and `git pull --ff-only`
+- [x] **Step 2 — Create and publish working branch:** the worktree branch `add-user-preference-persistence` was created during propose; confirm it exists on remote. If not: `git push -u origin add-user-preference-persistence` from inside `.worktrees/add-user-preference-persistence`
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance (`/plugin` → install `pr-review-toolkit`), and do not proceed until the user confirms it is installed.
-- [ ] Confirm the dedicated worktree `.worktrees/add-user-preference-persistence` exists and the `.github/openspec-shared` submodule is checked out inside it (needed for the `sdd-with-feedback-loop` schema). If missing: `git -C .worktrees/add-user-preference-persistence submodule update --init --force .github/openspec-shared`.
-- [ ] Confirm `openspec validate add-user-preference-persistence` passes.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance (`/plugin` → install `pr-review-toolkit`), and do not proceed until the user confirms it is installed.
+- [x] Confirm the dedicated worktree `.worktrees/add-user-preference-persistence` exists and the `.github/openspec-shared` submodule is checked out inside it (needed for the `sdd-with-feedback-loop` schema). If missing: `git -C .worktrees/add-user-preference-persistence submodule update --init --force .github/openspec-shared`.
+- [x] Confirm `openspec validate add-user-preference-persistence` passes.
 
 ## Execution
 
 All implementation runs inside `.worktrees/add-user-preference-persistence`.
 
-- [ ] **Step 1 — Confirm worktree:** ensure `.worktrees/add-user-preference-persistence` exists (created during propose) and `cd` into it. If absent, from the primary checkout: `git fetch origin main` then `git worktree add .worktrees/add-user-preference-persistence -b add-user-preference-persistence origin/main`. Never checkout the working branch inside the primary checkout.
-- [ ] **Step 2 — Confirm branch pushed:** `git rev-parse --abbrev-ref --symbolic-full-name @{u}` resolves to `origin/add-user-preference-persistence`; if not, `git push -u origin add-user-preference-persistence`.
-- [ ] **Issue lifecycle: mark in-progress** _(issue-driven)_: run `gh issue edit 619 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, tell the user to run `gh auth refresh -s project` and skip only the project-item update (the label update still proceeds).
+- [x] **Step 1 — Confirm worktree:** ensure `.worktrees/add-user-preference-persistence` exists (created during propose) and `cd` into it. If absent, from the primary checkout: `git fetch origin main` then `git worktree add .worktrees/add-user-preference-persistence -b add-user-preference-persistence origin/main`. Never checkout the working branch inside the primary checkout.
+- [x] **Step 2 — Confirm branch pushed:** `git rev-parse --abbrev-ref --symbolic-full-name @{u}` resolves to `origin/add-user-preference-persistence`; if not, `git push -u origin add-user-preference-persistence`.
+- [x] **Issue lifecycle: mark in-progress** _(issue-driven)_: run `gh issue edit 619 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, tell the user to run `gh auth refresh -s project` and skip only the project-item update (the label update still proceeds).
 
 ### Follow strict BDD/TDD — write the failing test from the spec scenario first, then implement.
 
-- [ ] **T1 — Preference schema module** (`lib/preferences/schema.ts`)
-  - [ ] Tests first (`lib/preferences/__tests__/schema.test.ts`): defaults shape; `resolvePreferences` merges deltas onto defaults, drops unknown keys, repairs wrong types, handles older `schemaVersion`; `validatePreferencePatch` rejects non-object/array/null/malformed, rejects wrong types, rejects out-of-range `chat.size`, strips unknown keys, validates `dice.color` as a short hex or `null`.
-  - [ ] Implement `PreferenceValues` type, `DEFAULT_PREFERENCES`, `PREFERENCES_SCHEMA_VERSION`, `resolvePreferences(stored)`, `validatePreferencePatch(body)`.
-  - [ ] v1 keys only: `dice.sendToChat: boolean`, `dice.disableAnimation: boolean | null`, `chat.pinned: boolean`, `chat.size: number` (clamp to the dock's existing min/max — reuse the constant from `lib/components/CampaignChat/useDockState.ts`), reserved `dice.color: string | null` (default `null`).
+- [x] **T1 — Preference schema module** (`lib/preferences/schema.ts`)
+  - [x] Tests first (`lib/preferences/__tests__/schema.test.ts`): defaults shape; `resolvePreferences` merges deltas onto defaults, drops unknown keys, repairs wrong types, handles older `schemaVersion`; `validatePreferencePatch` rejects non-object/array/null/malformed, rejects wrong types, rejects out-of-range `chat.size`, strips unknown keys, validates `dice.color` as a short hex or `null`.
+  - [x] Implement `PreferenceValues` type, `DEFAULT_PREFERENCES`, `PREFERENCES_SCHEMA_VERSION`, `resolvePreferences(stored)`, `validatePreferencePatch(body)`.
+  - [x] v1 keys only: `dice.sendToChat: boolean`, `dice.disableAnimation: boolean | null`, `chat.pinned: boolean`, `chat.size: { height, screenWidth, screenHeight } | null` (the dock's existing persisted-size shape; `height` bounded by `DOCK_MIN_HEIGHT`/`DOCK_MAX_HEIGHT`), reserved `dice.color: string | null` (default `null`).
   - Covers: spec "Invalid preference updates are rejected", "User model carries optional preferences", NFAC "Corrupt or stale-version stored data".
   - Verify: `npx jest lib/preferences/__tests__/schema.test.ts`
-- [ ] **T2 — User type** (`lib/types.ts`)
-  - [ ] Add `preferences?: { schemaVersion: number; values: Partial<PreferenceValues>; updatedAt: Date }` to the `User` interface (import the value type from `lib/preferences/schema.ts` or co-locate).
+- [x] **T2 — User type** (`lib/types.ts`)
+  - [x] Add `preferences?: { schemaVersion: number; values: Partial<PreferenceValues>; updatedAt: Date }` to the `User` interface (import the value type from `lib/preferences/schema.ts` or co-locate).
   - Covers: spec MODIFIED "User model carries optional preferences".
   - Verify: `npm run typecheck`
-- [ ] **T3 — Server storage helpers** (`lib/storage.ts` or a new `lib/storage/userPreferencesRepo.ts`)
-  - [ ] Tests first (integration, `jest.integration.config.js`): `getUserPreferences(userId)` returns resolved defaults for a user with no `preferences`; `updateUserPreferences(userId, patchValues)` `$set`s only the provided nested keys plus `preferences.updatedAt` and `preferences.schemaVersion`; round-trip persist→read; both run through the storage-op/telemetry seam (spy on `runStorageOp`).
-  - [ ] Implement both helpers, keyed by `_id`, executing through `runStorageOp` (decision n020). Reuse `getDatabase()` and existing `ObjectId` validation patterns (`InvalidUserIdError`).
+- [x] **T3 — Server storage helpers** (`lib/storage.ts` or a new `lib/storage/userPreferencesRepo.ts`)
+  - [x] Tests first (integration, `jest.integration.config.js`): `getUserPreferences(userId)` returns resolved defaults for a user with no `preferences`; `updateUserPreferences(userId, patchValues)` `$set`s only the provided nested keys plus `preferences.updatedAt` and `preferences.schemaVersion`; round-trip persist→read; both run through the storage-op/telemetry seam (spy on `runStorageOp`).
+  - [x] Implement both helpers, keyed by `_id`, executing through `runStorageOp` (decision n020). Reuse `getDatabase()` and existing `ObjectId` validation patterns (`InvalidUserIdError`).
   - Covers: spec "Preferences persist across sessions and devices", NFAC "Preference storage operations are observable".
   - Verify: `npm run test:integration -- userPreferences`
-- [ ] **T4 — API route** (`app/api/me/preferences/route.ts`)
-  - [ ] Tests first: 401 when unauthenticated; `GET` returns resolved defaults + `schemaVersion` for a new user; `GET` returns merged deltas for a user with stored values; `PATCH` valid partial persists and echoes the resolved result; `PATCH` non-object/array/null/malformed body → 400 with no write; `PATCH` wrong type / out-of-range → 400 no write; `PATCH` unknown keys stripped, known keys persisted; user A's `PATCH` never touches user B's document.
-  - [ ] Implement `GET` and `PATCH` handlers wrapped in `withAuth` (`lib/middleware.ts`). Parse JSON with a null fallback; reject non-object before field access (decisions n021). `GET` sets `Cache-Control: no-store`. Update is `_id`-scoped from `auth.userId`; body carries no user identifier.
+- [x] **T4 — API route** (`app/api/me/preferences/route.ts`)
+  - [x] Tests first: 401 when unauthenticated; `GET` returns resolved defaults + `schemaVersion` for a new user; `GET` returns merged deltas for a user with stored values; `PATCH` valid partial persists and echoes the resolved result; `PATCH` non-object/array/null/malformed body → 400 with no write; `PATCH` wrong type / out-of-range → 400 no write; `PATCH` unknown keys stripped, known keys persisted; user A's `PATCH` never touches user B's document.
+  - [x] Implement `GET` and `PATCH` handlers wrapped in `withAuth` (`lib/middleware.ts`). Parse JSON with a null fallback; reject non-object before field access (decisions n021). `GET` sets `Cache-Control: no-store`. Update is `_id`-scoped from `auth.userId`; body carries no user identifier.
   - Covers: spec "Preferences load on authentication", "Changing a preference persists it" (server side), "Invalid preference updates are rejected", NFAC "Preferences are scoped to the authenticated user", "Stored preference values cannot inject markup downstream".
   - Verify: `npm run test:integration -- me/preferences` (or unit route test per repo convention)
-- [ ] **T5 — Client preferences provider** (`lib/preferences/usePreferences.tsx`)
-  - [ ] Tests first (`lib/preferences/__tests__/usePreferences.test.tsx`) with mocked `fetch` and `localStorage`:
+- [x] **T5 — Client preferences provider** (`lib/preferences/usePreferences.tsx`)
+  - [x] Tests first (`lib/preferences/__tests__/usePreferences.test.tsx`) with mocked `fetch` and `localStorage`:
     - hydration order: mirror read → `GET /api/me/preferences` → reconcile → mirror write;
     - exactly one `GET` per auth transition; none on route change;
     - `setPreference` → optimistic state + mirror write + single debounced `PATCH` (fake timers); rapid changes coalesce to one `PATCH` with the final value;
@@ -52,35 +52,35 @@ All implementation runs inside `.worktrees/add-user-preference-persistence`.
     - cross-tab: synthetic `storage` event updates context, no `PATCH`;
     - logged-out: no `GET`/`PATCH`, mirror still read/written;
     - degradation: `localStorage` throws → in-memory update, warning logged, no throw; `PATCH` rejects → values still update, logged, retried on next `setPreference`/hydration.
-  - [ ] Implement `PreferencesProvider`, `usePreferences()` returning `{ preferences, setPreference, ready }`. Reuse `LocalStore` + `safeGet`/`safeSet` semantics; single mirror key (e.g. `preferences`). Debounced PATCH; diff-before-dispatch on `storage`; never re-PATCH values received via `storage`. Read the four legacy keys (`dice-fab-send-to-chat`, `dice-fab-disable-animation`, `campaign-chat-pin`, `campaign-chat-size`) once during adoption only.
+  - [x] Implement `PreferencesProvider`, `usePreferences()` returning `{ preferences, setPreference, ready }`. Reuse `LocalStore` + `safeGet`/`safeSet` semantics; single mirror key (e.g. `preferences`). Debounced PATCH; diff-before-dispatch on `storage`; never re-PATCH values received via `storage`. Read the four legacy keys (`dice-fab-send-to-chat`, `dice-fab-disable-animation`, `campaign-chat-pin`, `campaign-chat-size`) once during adoption only.
   - Covers: spec "Preferences load on authentication", "Changing a preference persists it", "Existing local preferences are adopted on first login", "Preferences sync across tabs", "Anonymous users use local-only preferences", "Preference persistence degrades gracefully", NFAC "First paint does not wait on the network", "Recovery behavior after a failed sync".
   - Verify: `npx jest lib/preferences/__tests__/usePreferences.test.tsx`
-- [ ] **T6 — Mount the provider** in the App Router provider tree under the auth boundary so it hydrates once per authenticated session (locate the existing client provider wrapper via `.wolf/anatomy.md`; likely `app/` layout/providers).
-  - [ ] Test: preference-bound UI renders from the mirror before the fetch resolves.
+- [x] **T6 — Mount the provider** in the App Router provider tree under the auth boundary so it hydrates once per authenticated session (locate the existing client provider wrapper via `.wolf/anatomy.md`; likely `app/` layout/providers).
+  - [x] Test: preference-bound UI renders from the mirror before the fetch resolves.
   - Covers: NFAC "Startup preference load cost" (fires concurrently with other bootstrap fetches), "First paint does not wait on the network".
   - Verify: `npm run build` + affected component tests
-- [ ] **T7 — Refactor `useDiceFabPreferences`** (`lib/dice/useDiceFabPreferences.ts`)
-  - [ ] Keep the exported `DiceFabPreferences` shape and the `disableAnimation` tri-state/`prefers-reduced-motion` fallback exactly as today.
-  - [ ] Re-point the backing store at `usePreferences()` (`dice.sendToChat`, `dice.disableAnimation`); updates call `setPreference`.
-  - [ ] Update `lib/dice/__tests__/useDiceFabPreferences*.test.ts(x)` to render within a `PreferencesProvider` test wrapper; assert existing behavior unchanged and that updates route through `setPreference`.
+- [x] **T7 — Refactor `useDiceFabPreferences`** (`lib/dice/useDiceFabPreferences.ts`)
+  - [x] Keep the exported `DiceFabPreferences` shape and the `disableAnimation` tri-state/`prefers-reduced-motion` fallback exactly as today.
+  - [x] Re-point the backing store at `usePreferences()` (`dice.sendToChat`, `dice.disableAnimation`); updates call `setPreference`.
+  - [x] Update `lib/dice/__tests__/useDiceFabPreferences*.test.ts(x)` to render within a `PreferencesProvider` test wrapper; assert existing behavior unchanged and that updates route through `setPreference`.
   - Covers: spec "Existing preference hooks keep their contract".
   - Verify: `npx jest useDiceFabPreferences`
-- [ ] **T8 — Refactor `useDockState`** (`lib/components/CampaignChat/useDockState.ts`)
-  - [ ] Keep the exported hook shape and pin/size semantics unchanged; map to `chat.pinned` / `chat.size` via `usePreferences()`; updates call `setPreference`.
-  - [ ] Update the hook's existing test suite to use the provider wrapper.
+- [x] **T8 — Refactor `useDockState`** (`lib/components/CampaignChat/useDockState.ts`)
+  - [x] Keep the exported hook shape and pin/size semantics unchanged; map to `chat.pinned` / `chat.size` via `usePreferences()`; updates call `setPreference`.
+  - [x] Update the hook's existing test suite to use the provider wrapper.
   - Covers: spec "Existing preference hooks keep their contract".
   - Verify: `npx jest useDockState`
-- [ ] **T9 — Verify `/api/auth/me` unchanged**
-  - [ ] Add/confirm a test asserting the `GET /api/auth/me` body contains only `authenticated`, `userId`, `email`, `isAdmin`, `username` (no preference fields).
+- [x] **T9 — Verify `/api/auth/me` unchanged**
+  - [x] Add/confirm a test asserting the `GET /api/auth/me` body contains only `authenticated`, `userId`, `email`, `isAdmin`, `username` (no preference fields).
   - Covers: spec scenario "auth/me payload unchanged".
   - Verify: `npm run test:integration -- auth/me`
-- [ ] **T10 — Docs & housekeeping**
-  - [ ] Update `.wolf/anatomy.md` with the new files (`lib/preferences/schema.ts`, `lib/preferences/usePreferences.tsx`, `app/api/me/preferences/route.ts`, any new repo file) and token estimates.
-  - [ ] Append implementation entries to `.wolf/memory.md`.
-  - [ ] Add a `.wolf/cerebrum.md` Key Learnings entry for the preferences persistence pattern (schema + provider + mirror + storage seam).
-  - [ ] Log any bug/rework to `.wolf/buglog.json` per project rules.
-  - [ ] Update `README.md` / `docs/` only if a user-facing behavior description changes (no new UI expected).
-- [ ] Look for existing tooling or functions to reuse before writing new logic (`LocalStore`, `runStorageOp`, `withAuth`, `getUserById`, dock size constants, `safeGet`/`safeSet` patterns).
+- [x] **T10 — Docs & housekeeping**
+  - [x] Update `.wolf/anatomy.md` with the new files (`lib/preferences/schema.ts`, `lib/preferences/usePreferences.tsx`, `app/api/me/preferences/route.ts`, any new repo file) and token estimates.
+  - [x] Append implementation entries to `.wolf/memory.md`.
+  - [x] Add a `.wolf/cerebrum.md` Key Learnings entry for the preferences persistence pattern (schema + provider + mirror + storage seam).
+  - [x] Log any bug/rework to `.wolf/buglog.json` per project rules.
+  - [x] Update `README.md` / `docs/` only if a user-facing behavior description changes (no new UI expected).
+- [x] Look for existing tooling or functions to reuse before writing new logic (`LocalStore`, `runStorageOp`, `withAuth`, `getUserById`, dock size constants, `safeGet`/`safeSet` patterns).
 - [ ] Confirm every acceptance scenario in `specs/user-preferences/spec.md` maps to at least one passing test.
 
 ## Pre-Commit Code Review

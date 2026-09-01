@@ -1,11 +1,8 @@
 'use client'
 
 import { useEffect, useReducer, useRef } from 'react'
-import { LocalStore } from '@/lib/offline/LocalStore'
+import { usePreferences } from '@/lib/preferences/usePreferences'
 
-// localStorage key names (not secrets) for the chat dock's persisted UI state
-const PIN_KEY = 'campaign-chat-pin' // nosemgrep
-const CHAT_SIZE_KEY = 'campaign-chat-size' // nosemgrep
 // Navbar height baked into full-height calculation; update if navbar changes
 const NAVBAR_HEIGHT = 60
 
@@ -19,18 +16,6 @@ function isValidPersistedSize(val: unknown): val is PersistedSize {
     typeof v.screenWidth === 'number' && Number.isFinite(v.screenWidth) &&
     typeof v.screenHeight === 'number' && Number.isFinite(v.screenHeight)
   )
-}
-
-function safeGet<T>(key: string): T | null {
-  try { return LocalStore.get<T>(key) } catch { return null }
-}
-
-function safeSet(key: string, val: unknown): boolean {
-  try { LocalStore.set(key, val); return true } catch { return false }
-}
-
-function safeRemove(key: string) {
-  try { LocalStore.remove(key) } catch { /* storage unavailable */ }
 }
 
 type DockState = { isExpanded: boolean; isPinned: boolean; isLarge: boolean; customHeight: number | null }
@@ -71,6 +56,9 @@ interface UseDockStateArgs {
 }
 
 export function useDockState({ triggerRef, drawerRef, onSizeChange }: UseDockStateArgs) {
+  const { preferences, setPreference } = usePreferences()
+  const prefsRef = useRef(preferences)
+  prefsRef.current = preferences
   const [{ isExpanded, isPinned, isLarge, customHeight }, dispatch] = useReducer(dockReducer, {
     isExpanded: false,
     isPinned: false,
@@ -80,11 +68,11 @@ export function useDockState({ triggerRef, drawerRef, onSizeChange }: UseDockSta
   const isMounted = useRef(false)
   const dragListenersRef = useRef<{ move: (e: MouseEvent) => void; up: (e: MouseEvent) => void } | null>(null)
 
-  // ── Init: pin state + persisted size ──
+  // ── Init: pin state + persisted size (from the preferences mirror) ──
   useEffect(() => {
-    dispatch({ type: 'INIT', pinned: !!safeGet<boolean>(PIN_KEY) })
+    dispatch({ type: 'INIT', pinned: !!prefsRef.current.chat.pinned })
 
-    const rawSize = safeGet<unknown>(CHAT_SIZE_KEY)
+    const rawSize = prefsRef.current.chat.size
     const savedSize = isValidPersistedSize(rawSize) ? rawSize : null
     if (savedSize) {
       const screenMatch =
@@ -138,7 +126,11 @@ export function useDockState({ triggerRef, drawerRef, onSizeChange }: UseDockSta
       document.removeEventListener('mouseup', onUp)
       dragListenersRef.current = null
       dispatch({ type: 'SET_HEIGHT', payload: latestHeight })
-      safeSet(CHAT_SIZE_KEY, { height: latestHeight, screenWidth: window.innerWidth, screenHeight: window.innerHeight })
+      setPreference('chat.size', {
+        height: latestHeight,
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+      })
     }
     dragListenersRef.current = { move: onMove, up: onUp }
     document.addEventListener('mousemove', onMove)
@@ -158,9 +150,10 @@ export function useDockState({ triggerRef, drawerRef, onSizeChange }: UseDockSta
 
   function handlePinToggle() {
     if (isPinned) {
-      safeRemove(PIN_KEY)
+      setPreference('chat.pinned', false)
       dispatch({ type: 'UNPIN' })
-    } else if (safeSet(PIN_KEY, true)) {
+    } else {
+      setPreference('chat.pinned', true)
       dispatch({ type: 'PIN' })
     }
   }

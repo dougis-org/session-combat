@@ -3,6 +3,11 @@ import userEvent from '@testing-library/user-event'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDock } from './helpers'
+import {
+  setPreferenceMock,
+  __setPreferences,
+  __resetPreferences,
+} from '@/tests/unit/helpers/preferencesTestDouble'
 
 jest.mock('@/lib/offline/LocalStore', () => ({
   LocalStore: {
@@ -11,6 +16,10 @@ jest.mock('@/lib/offline/LocalStore', () => ({
     remove: jest.fn(),
   },
 }))
+
+jest.mock('@/lib/preferences/usePreferences', () =>
+  require('@/tests/unit/helpers/preferencesTestDouble'),
+)
 
 jest.mock('@/lib/hooks/useCampaignStream', () => ({
   useCampaignStream: jest.fn((_, onEvent) => {
@@ -32,6 +41,7 @@ const mockedLocalStore = LocalStore as jest.Mocked<typeof LocalStore>
 describe('CampaignChat — drawer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    __resetPreferences()
     mockedLocalStore.get.mockReturnValue(null)
     sharedTestState.capturedOnEvent = null
     setupFetchMock()
@@ -55,7 +65,7 @@ describe('CampaignChat — drawer', () => {
 
   // TC-03
   it('drawer is present on mount when pin is stored', async () => {
-    mockedLocalStore.get.mockReturnValue(true)
+    __setPreferences({ chat: { pinned: true } })
     render(<CampaignChat campaignId={CAMPAIGN_ID} />)
     expect(screen.getByRole('complementary', { name: /campaign chat/i })).toBeInTheDocument()
   })
@@ -100,7 +110,7 @@ describe('CampaignChat — drawer', () => {
     const pinButton = screen.getByRole('button', { name: /pin/i })
     await user.click(pinButton)
     expect(pinButton).toHaveAttribute('aria-pressed', 'true')
-    expect(mockedLocalStore.set).toHaveBeenCalledWith('campaign-chat-pin', true)
+    expect(setPreferenceMock).toHaveBeenCalledWith('chat.pinned', true)
   })
 
   // TC-10
@@ -110,7 +120,7 @@ describe('CampaignChat — drawer', () => {
     await user.click(pinButton)
     await user.click(pinButton)
     expect(pinButton).toHaveAttribute('aria-pressed', 'false')
-    expect(mockedLocalStore.remove).toHaveBeenCalledWith('campaign-chat-pin')
+    expect(setPreferenceMock).toHaveBeenCalledWith('chat.pinned', false)
   })
 
   // TC-11

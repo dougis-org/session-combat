@@ -1,5 +1,11 @@
 import { renderHook, act } from '@testing-library/react'
 import { LocalStore } from '@/lib/offline/LocalStore'
+import { makePreferencesWrapper } from '@/tests/unit/helpers/preferences'
+import {
+  PREFERENCES_MIRROR_KEY,
+  __resetFallbackPreferencesForTests,
+} from '@/lib/preferences/usePreferences'
+import { DEFAULT_PREFERENCES } from '@/lib/preferences/schema'
 import { useDiceFabPreferences } from '@/lib/dice/useDiceFabPreferences'
 
 function mockMatchMedia(reduceMotion: boolean) {
@@ -19,8 +25,17 @@ function mockMatchMedia(reduceMotion: boolean) {
   })
 }
 
+const mirror = (over: Partial<typeof DEFAULT_PREFERENCES.dice>) =>
+  LocalStore.set(PREFERENCES_MIRROR_KEY, {
+    ...DEFAULT_PREFERENCES,
+    dice: { ...DEFAULT_PREFERENCES.dice, ...over },
+  })
+
+const wrapper = makePreferencesWrapper(null)
+
 beforeEach(() => {
   LocalStore.clear()
+  __resetFallbackPreferencesForTests()
   jest.clearAllMocks()
 })
 
@@ -38,23 +53,25 @@ describe('useDiceFabPreferences — disableAnimation resolution', () => {
 
   it.each(table)('stored=$stored + reduceMotion=$reduce → resolved=$resolved', ({ stored, reduce, resolved }) => {
     mockMatchMedia(reduce)
-    if (stored !== null) LocalStore.set('dice-fab-disable-animation', stored)
-    const { result } = renderHook(() => useDiceFabPreferences())
+    if (stored !== null) mirror({ disableAnimation: stored })
+    __resetFallbackPreferencesForTests()
+    const { result } = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(result.current.disableAnimation).toBe(resolved)
   })
 })
 
 describe('useDiceFabPreferences — explicit choice overrides the media query', () => {
-  it('first toggle writes an explicit boolean and wins over a later media-query change', () => {
+  it('first toggle wins over a later media-query change and routes through setPreference', () => {
     mockMatchMedia(true)
-    const { result, rerender } = renderHook(() => useDiceFabPreferences())
+    const { result, rerender } = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(result.current.disableAnimation).toBe(true) // from reduced-motion
 
     act(() => result.current.setDisableAnimation(false))
     expect(result.current.disableAnimation).toBe(false)
-    expect(LocalStore.get<boolean>('dice-fab-disable-animation')).toBe(false)
+    expect(
+      LocalStore.get<typeof DEFAULT_PREFERENCES>(PREFERENCES_MIRROR_KEY)!.dice.disableAnimation,
+    ).toBe(false)
 
-    // media query flips to "no reduce" — resolved value must stay the explicit choice
     mockMatchMedia(false)
     rerender()
     expect(result.current.disableAnimation).toBe(false)
@@ -64,17 +81,17 @@ describe('useDiceFabPreferences — explicit choice overrides the media query', 
 describe('useDiceFabPreferences — sendToChat', () => {
   it('defaults to false with no stored value', () => {
     mockMatchMedia(false)
-    const { result } = renderHook(() => useDiceFabPreferences())
+    const { result } = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(result.current.sendToChat).toBe(false)
   })
 
-  it('persists across remount', () => {
+  it('a set value survives an unmount/remount via the mirror', () => {
     mockMatchMedia(false)
-    const first = renderHook(() => useDiceFabPreferences())
+    const first = renderHook(() => useDiceFabPreferences(), { wrapper })
     act(() => first.result.current.setSendToChat(true))
     first.unmount()
 
-    const second = renderHook(() => useDiceFabPreferences())
+    const second = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(second.result.current.sendToChat).toBe(true)
   })
 })
@@ -82,11 +99,11 @@ describe('useDiceFabPreferences — sendToChat', () => {
 describe('useDiceFabPreferences — disableAnimation persists across remount', () => {
   it('a checked choice survives unmount/remount', () => {
     mockMatchMedia(false)
-    const first = renderHook(() => useDiceFabPreferences())
+    const first = renderHook(() => useDiceFabPreferences(), { wrapper })
     act(() => first.result.current.setDisableAnimation(true))
     first.unmount()
 
-    const second = renderHook(() => useDiceFabPreferences())
+    const second = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(second.result.current.disableAnimation).toBe(true)
     expect(second.result.current.disableAnimationChoice).toBe(true)
   })
@@ -96,39 +113,39 @@ describe('useDiceFabPreferences — dice appearance (tasks 3.1 / 3.2)', () => {
   beforeEach(() => mockMatchMedia(false))
 
   it('3.2-a defaults to white / glass with empty storage', () => {
-    const { result } = renderHook(() => useDiceFabPreferences())
+    const { result } = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(result.current.diceColorset).toBe('white')
     expect(result.current.diceMaterial).toBe('glass')
   })
 
   it('3.2-b setDiceColorset persists under dice-fab-colorset and survives remount', () => {
     const setSpy = jest.spyOn(LocalStore, 'set')
-    const first = renderHook(() => useDiceFabPreferences())
+    const first = renderHook(() => useDiceFabPreferences(), { wrapper })
     act(() => first.result.current.setDiceColorset('bloodmoon'))
     expect(first.result.current.diceColorset).toBe('bloodmoon')
     expect(setSpy).toHaveBeenCalledWith('dice-fab-colorset', 'bloodmoon')
     first.unmount()
 
-    const second = renderHook(() => useDiceFabPreferences())
+    const second = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(second.result.current.diceColorset).toBe('bloodmoon')
   })
 
   it('3.2-c setDiceMaterial persists under dice-fab-material and survives remount', () => {
     const setSpy = jest.spyOn(LocalStore, 'set')
-    const first = renderHook(() => useDiceFabPreferences())
+    const first = renderHook(() => useDiceFabPreferences(), { wrapper })
     act(() => first.result.current.setDiceMaterial('metal'))
     expect(first.result.current.diceMaterial).toBe('metal')
     expect(setSpy).toHaveBeenCalledWith('dice-fab-material', 'metal')
     first.unmount()
 
-    const second = renderHook(() => useDiceFabPreferences())
+    const second = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(second.result.current.diceMaterial).toBe('metal')
   })
 
   it('3.2-d junk in storage resolves to the defaults without throwing', () => {
     LocalStore.set('dice-fab-colorset', 'bogus')
     LocalStore.set('dice-fab-material', 7)
-    const { result } = renderHook(() => useDiceFabPreferences())
+    const { result } = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(result.current.diceColorset).toBe('white')
     expect(result.current.diceMaterial).toBe('glass')
   })
@@ -138,7 +155,7 @@ describe('useDiceFabPreferences — dice appearance (tasks 3.1 / 3.2)', () => {
     jest.spyOn(LocalStore, 'get').mockImplementation(() => {
       throw new Error('nope')
     })
-    const { result } = renderHook(() => useDiceFabPreferences())
+    const { result } = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(result.current.diceColorset).toBe('white')
     expect(result.current.diceMaterial).toBe('glass')
     expect(warnSpy.mock.calls.filter(c => String(c[0]).includes('dice-fab-colorset'))).toHaveLength(1)
@@ -148,7 +165,7 @@ describe('useDiceFabPreferences — dice appearance (tasks 3.1 / 3.2)', () => {
 
   it('3.2-f a throwing LocalStore.set does not throw and keeps the in-session value', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
-    const { result } = renderHook(() => useDiceFabPreferences())
+    const { result } = renderHook(() => useDiceFabPreferences(), { wrapper })
     jest.spyOn(LocalStore, 'set').mockImplementation(() => {
       throw new Error('nope')
     })
@@ -159,7 +176,7 @@ describe('useDiceFabPreferences — dice appearance (tasks 3.1 / 3.2)', () => {
   })
 
   it('3.2-g existing sendToChat / disableAnimation behavior is unchanged', () => {
-    const { result } = renderHook(() => useDiceFabPreferences())
+    const { result } = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(result.current.sendToChat).toBe(false)
     act(() => result.current.setSendToChat(true))
     expect(result.current.sendToChat).toBe(true)
@@ -169,18 +186,17 @@ describe('useDiceFabPreferences — dice appearance (tasks 3.1 / 3.2)', () => {
 })
 
 describe('useDiceFabPreferences — storage unavailable', () => {
-  it('returns defaults and does not throw when LocalStore throws', () => {
+  it('does not throw when LocalStore.set throws', () => {
     mockMatchMedia(false)
-    const getSpy = jest.spyOn(LocalStore, 'get').mockImplementation(() => { throw new Error('nope') })
-    const setSpy = jest.spyOn(LocalStore, 'set').mockImplementation(() => { throw new Error('nope') })
+    const setSpy = jest.spyOn(LocalStore, 'set').mockImplementation(() => {
+      throw new Error('nope')
+    })
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
 
-    const { result } = renderHook(() => useDiceFabPreferences())
-    expect(result.current.sendToChat).toBe(false)
-    expect(result.current.disableAnimation).toBe(false)
+    const { result } = renderHook(() => useDiceFabPreferences(), { wrapper })
     expect(() => act(() => result.current.setSendToChat(true))).not.toThrow()
     expect(() => act(() => result.current.setDisableAnimation(true))).not.toThrow()
-
-    getSpy.mockRestore()
+    expect(result.current.sendToChat).toBe(true)
     setSpy.mockRestore()
   })
 })

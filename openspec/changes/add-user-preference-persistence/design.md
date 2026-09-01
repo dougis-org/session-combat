@@ -100,9 +100,17 @@
   return `{ ok, values } | { ok: false, error }`). v1 keys:
   `dice.sendToChat: boolean`, `dice.disableAnimation: boolean | null` (tri-state,
   `null` = follow `prefers-reduced-motion`), `chat.pinned: boolean`,
-  `chat.size: number` (clamped to the dock's allowed range), and a reserved
+  `chat.size` (the dock's `{ height, screenWidth, screenHeight } | null` shape, with
+  `height` bounded), and a reserved
   `dice.color: string | null` (default `null`, validated as a short hex string when
   present; no UI yet).
+
+  Note: `chat.size` is stored as the dock's existing
+  `{ height: number, screenWidth: number, screenHeight: number } | null` shape, not a
+  bare number. `height` is bounded (`DOCK_MIN_HEIGHT`..`DOCK_MAX_HEIGHT`); the screen
+  dimensions are retained so `useDockState` keeps its rule of ignoring a restored
+  height when the current viewport differs materially (decision: "Invalidate persisted
+  dock height when the viewport changes materially"). Resolved with @doug 2026-08-31.
 - Alternatives considered: free-form `Record<string, JSONValue>` bag.
 - Rationale: Typed schema gives validation, bounded size, and an explicit migration
   story. Matches the repo's typed-interface conventions and the feedback-API input
@@ -344,4 +352,5 @@ for v1.
 - Resolved — Storage location: **embedded `preferences` sub-document on `users`**
   (Decision 1); dedicated collection rejected for v1.
 - Resolved — v1 key set: `dice.sendToChat`, `dice.disableAnimation`, `chat.pinned`,
-  `chat.size`, reserved `dice.color`; nothing else migrated (Decision 4).
+  `chat.size` (dock `{ height, screenWidth, screenHeight } | null` shape), reserved
+  `dice.color`; nothing else migrated (Decision 4).

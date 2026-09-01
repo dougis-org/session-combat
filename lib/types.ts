@@ -290,6 +290,14 @@ export interface User {
   username?: string;
   createdAt: Date;
   updatedAt: Date;
+  /** Sparse, server-persisted user preference deltas. Absent until the user changes a preference. */
+  preferences?: {
+    schemaVersion: number;
+    values: import("./preferences/schema").DeepPartial<
+      import("./preferences/schema").PreferenceValues
+    >;
+    updatedAt: Date;
+  };
 }
 
 export interface PublicUser {
