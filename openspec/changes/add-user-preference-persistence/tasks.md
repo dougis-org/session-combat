@@ -81,22 +81,22 @@ All implementation runs inside `.worktrees/add-user-preference-persistence`.
   - [x] Log any bug/rework to `.wolf/buglog.json` per project rules.
   - [x] Update `README.md` / `docs/` only if a user-facing behavior description changes (no new UI expected).
 - [x] Look for existing tooling or functions to reuse before writing new logic (`LocalStore`, `runStorageOp`, `withAuth`, `getUserById`, dock size constants, `safeGet`/`safeSet` patterns).
-- [ ] Confirm every acceptance scenario in `specs/user-preferences/spec.md` maps to at least one passing test.
+- [x] Confirm every acceptance scenario in `specs/user-preferences/spec.md` maps to at least one passing test.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run the affected tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run the affected tests to confirm they pass, then proceed to commit. _(Review run against the rebase resolution; no blocking findings.)_
 
 ## Validation
 
-- [ ] Run unit tests: `npm run test:unit`
-- [ ] Run integration tests: `npm run test:integration`
-- [ ] Run E2E/regression tests: `npm run test:e2e` (or `npm run test:regression`) — required (non-`.md` changes)
-- [ ] Run type checks: `npm run typecheck`
-- [ ] Run lint: `npm run lint`
-- [ ] Run build: `npm run build`
+- [x] Run unit tests: `npm run test:unit` — 261 suites / 3279 tests pass
+- [x] Run integration tests: `npm run test:integration` — 39 suites pass (1 skipped)
+- [x] Run E2E/regression tests: `npm run test:e2e` (or `npm run test:regression`) — 245 pass in CI mode (`next start`); dev-mode runs show the known Next.js dev-overlay pointer-interception flake
+- [x] Run type checks: `npm run typecheck`
+- [x] Run lint: `npm run lint` — 0 errors (2 pre-existing warnings in `SceneFeedItem.tsx`)
+- [x] Run build: `npm run build`
 - [ ] Run security/code-quality checks required by project standards (Codacy analysis on changed files — see `codacy` MCP / `.codacy.yml`)
-- [ ] `openspec validate add-user-preference-persistence` passes
+- [x] `openspec validate add-user-preference-persistence` passes
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
 
