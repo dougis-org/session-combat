@@ -80,54 +80,81 @@ The system SHALL provide a form with a type toggle (Bug Report / Feature Request
 
 ---
 
-### Requirement: ADDED POST /api/feedback — creates GitHub issue
+### Requirement: POST /api/feedback — sends feedback email
 
-The system SHALL create a GitHub issue via the GitHub REST API when a valid authenticated request is received.
+The system SHALL send exactly one email via the Mailtrap live sending API when a valid authenticated `POST /api/feedback` request passes validation and the IP rate limit, and SHALL return HTTP 201 with body `{ "ok": true }`.
+
+The email SHALL:
+
+- be sent to the address configured in the `FEEDBACK_TO_EMAIL` environment variable;
+- use the same sender as other transactional email — `MAILTRAP_FROM_EMAIL`, or `noreply@session-combat.app` when that variable is unset;
+- set `reply_to` to the authenticated submitter's email address;
+- use a subject of `[Bug] <title>` when `type` is `"bug"` and `[Feature] <title>` when `type` is `"feature"`, with the subject sanitized (control characters and newlines removed) and truncated to 200 characters;
+- carry the submitter context and the description in the message body (see "Auto-context in feedback email").
 
 #### Scenario: Successful bug report submission
 
-- **Given** an authenticated user submits the form with type "bug", a title, and a description
+- **Given** an authenticated user submits the form with type `"bug"`, a title, and a description
+- **And** `FEEDBACK_TO_EMAIL` and `MAILTRAP_TOKEN` are configured
 - **When** `POST /api/feedback` is called
-- **Then** a GitHub issue is created with label `bug`, title from the form, and a body containing the description and auto-attached context (username, email, page URL, user-agent)
-- **And** the API returns HTTP 201
+- **Then** one email is sent to `FEEDBACK_TO_EMAIL` with subject `[Bug] <title>`, `reply_to` equal to the submitter's email, and a body containing the description and auto-context
+- **And** no request is made to `api.github.com`
+- **And** the API returns HTTP 201 with body `{ "ok": true }`
 
 #### Scenario: Successful feature request submission
 
-- **Given** an authenticated user submits the form with type "feature" and a title
+- **Given** an authenticated user submits the form with type `"feature"` and a title
 - **When** `POST /api/feedback` is called
-- **Then** a GitHub issue is created with label `enhancement`
-- **And** the API returns HTTP 201
+- **Then** one email is sent with subject `[Feature] <title>`
+- **And** the API returns HTTP 201 with body `{ "ok": true }`
+
+#### Scenario: Subject line is sanitized and truncated
+
+- **Given** an authenticated user submits type `"bug"` with a title containing newline characters, Markdown control characters (`> @ # [ ] * _`), and more than 200 characters total
+- **When** `POST /api/feedback` is called
+- **Then** the email subject is `[Bug] ` followed by the title with newlines and control characters removed, truncated so the full subject is at most 200 characters
+
+#### Scenario: Feedback unavailable when email is not configured
+
+- **Given** either `FEEDBACK_TO_EMAIL` or `MAILTRAP_TOKEN` is not set
+- **When** `POST /api/feedback` is called with an otherwise valid submission
+- **Then** no email is sent
+- **And** the route logs a server-side error
+- **And** the API returns HTTP 503 with a user-readable "Feedback is not available." message
+
+#### Scenario: Modal shows error state on send failure
+
+- **Given** the Mailtrap send call rejects (network error, API error, or unverified sender)
+- **When** `POST /api/feedback` processes the failure
+- **Then** the route catches the error, logs it server-side, and returns HTTP 502 with a user-readable "Failed to send feedback. Please try again later." message — no unhandled exception occurs
+- **And** the modal displays the returned error message with a retry affordance
 
 #### Scenario: Modal shows success state after submission
 
-- **Given** `POST /api/feedback` returns 201
+- **Given** `POST /api/feedback` returns HTTP 201
 - **When** the submit response is received
-- **Then** the modal displays a success message and the form is no longer editable
-
-#### Scenario: Modal shows error state on GitHub API failure
-
-- **Given** the GitHub API returns a non-2xx response
-- **When** the submit response is received
-- **Then** the API route returns HTTP 502 and the modal displays a user-visible error message
+- **Then** the modal displays a success message confirming the feedback was sent
+- **And** the success message does not mention GitHub or a created issue
+- **And** the form is no longer editable
 
 ---
 
 ### Requirement: ADDED IP rate limiting — 12 submissions per hour
 
-The system SHALL reject feedback submissions from an IP address that has exceeded 12 submissions in the current one-hour window.
+The system SHALL reject feedback submissions from an IP address that has exceeded 12 submissions in the current one-hour window, and SHALL NOT send a feedback email for a rejected submission.
 
 #### Scenario: Submission accepted within rate limit
 
 - **Given** an IP address has submitted fewer than 12 times in the current hour
 - **When** `POST /api/feedback` is called
-- **Then** the submission is processed normally
+- **Then** the submission is processed normally and a feedback email is sent
 
 #### Scenario: Submission rejected at rate limit
 
 - **Given** an IP address has submitted 12 times in the current hour
 - **When** `POST /api/feedback` is called a 13th time
 - **Then** the API returns HTTP 429 with a rate limit error message
-- **And** no GitHub issue is created
+- **And** no feedback email is sent
 
 #### Scenario: Rate limit window resets after one hour
 
@@ -137,19 +164,31 @@ The system SHALL reject feedback submissions from an IP address that has exceede
 
 ---
 
-### Requirement: ADDED Auto-context in GitHub issue body
+### Requirement: Auto-context in feedback email
 
-The system SHALL append submitter context to every created GitHub issue body.
+The system SHALL include submitter context in the body of every feedback email.
 
-#### Scenario: Issue body includes username, email, page URL, user-agent
+#### Scenario: Email body includes submitter, page URL, user-agent, description
 
-- **Given** an authenticated user submits feedback from page `/combat/abc123`
-- **When** the GitHub issue is created
-- **Then** the issue body contains:
+- **Given** an authenticated user with GitHub username `username` and email `email@example.com` submits feedback from page `/combat/abc123` with a description
+- **When** the feedback email is sent
+- **Then** the email text body contains, before the description:
   - `**Submitted by:** @username (email@example.com)`
   - `**Page:** https://…/combat/abc123`
-  - `**User-Agent:** <request User-Agent header value>`
-  - The user's description text
+  - `**User-Agent:** <sanitized request User-Agent header value>`
+- **And** the description text follows, separated by a `---` line
+
+#### Scenario: Email body with no description is context-only
+
+- **Given** an authenticated user submits feedback with a title but an empty description
+- **When** the feedback email is sent
+- **Then** the email body contains only the `Submitted by` / `Page` / `User-Agent` context block and no trailing separator or description
+
+#### Scenario: Non-https, non-same-origin page URL is excluded
+
+- **Given** a submission whose `pageUrl` is `//evil.example`, `http://evil.example`, or `javascript:alert(1)`
+- **When** the feedback email is built
+- **Then** the `**Page:**` line is empty (the untrusted URL is not included)
 
 ---
 
@@ -169,7 +208,13 @@ The NavBar SHALL include a `?` button (help/feedback trigger) as a new authentic
 
 ## REMOVED Requirements
 
-None. This change only adds new capabilities and modifies the NavBar element set.
+### Requirement: REMOVED ADDED POST /api/feedback — creates GitHub issue
+
+Reason for removal: The feedback backend no longer creates a GitHub issue. Replaced by "POST /api/feedback — sends feedback email". The `GITHUB_FEEDBACK_TOKEN` dependency and the call to `https://api.github.com/repos/dougis-org/session-combat/issues` are removed; the API response no longer contains `issueUrl`.
+
+### Requirement: REMOVED ADDED Auto-context in GitHub issue body
+
+Reason for removal: There is no GitHub issue body. Replaced by "Auto-context in feedback email", which carries the same submitter/page/user-agent context in the email text body.
 
 ---
 
@@ -177,16 +222,15 @@ None. This change only adds new capabilities and modifies the NavBar element set
 
 - Proposal: auth-gated `?` button → Requirement: ADDED NavBar help button — auth-gated
 - Proposal: FeedbackModal + FeedbackForm with toggle → Requirement: ADDED FeedbackModal opens; ADDED FeedbackForm
-- Proposal: Server-side GitHub API call → Requirement: ADDED POST /api/feedback
+- Proposal: Server-side email delivery → Requirement: POST /api/feedback — sends feedback email
 - Proposal: IP rate limit 12/hr → Requirement: ADDED IP rate limiting
-- Proposal: Auto-attach context → Requirement: ADDED Auto-context in GitHub issue body
-- Design Decision 1 (standalone FeedbackForm) → Requirement: ADDED FeedbackModal; ADDED FeedbackForm
-- Design Decision 2 (server-side API route) → Requirement: ADDED POST /api/feedback
-- Design Decision 3 (MongoDB TTL rate limit) → Requirement: ADDED IP rate limiting
-- Design Decision 4 (auto-context body) → Requirement: ADDED Auto-context in GitHub issue body
+- Proposal: Auto-attach context → Requirement: Auto-context in feedback email
 - Design Decision 5 (NavBar placement) → Requirement: MODIFIED NavBar; ADDED NavBar help button
-- Design Decision 6 (label mapping) → Requirement: ADDED POST /api/feedback (bug/feature scenarios)
-- Requirements → Tasks: all requirements map to tasks in `tasks.md`
+- switch-feedback-to-email Decision 1 (sendFeedbackEmail) → Requirement: POST /api/feedback — sends feedback email
+- switch-feedback-to-email Decision 3 (FEEDBACK_TO_EMAIL, missing → 503) → scenario "Feedback unavailable when email is not configured"
+- switch-feedback-to-email Decision 4 (catch → 502/503) → Requirement: MODIFIED Reliability
+- switch-feedback-to-email Decision 5 (response `{ ok: true }`, modal copy) → scenario "Modal shows success state after submission"
+- Requirements → Tasks: all requirements map to tasks in the corresponding change's `tasks.md`
 
 ---
 
@@ -196,27 +240,55 @@ None. This change only adds new capabilities and modifies the NavBar element set
 
 ### Requirement: Security
 
-See functional scenarios: "Help button absent when unauthenticated", "Submission rejected at rate limit".
+See functional scenarios: "Help button absent when unauthenticated", "Submission rejected at rate limit", "Feedback unavailable when email is not configured", "Subject line is sanitized and truncated", "Non-https, non-same-origin page URL is excluded".
 
-#### Scenario: GitHub token not present in client bundle
+#### Scenario: Mailtrap token not present in client bundle
 
 - **Given** the Next.js production build is generated
 - **When** the client-side JavaScript bundle is inspected
-- **Then** the string `GITHUB_FEEDBACK_TOKEN` and its value do not appear in any client bundle file
+- **Then** the strings `MAILTRAP_TOKEN` and `FEEDBACK_TO_EMAIL` and their values do not appear in any client bundle file
 
 #### Scenario: Unauthenticated POST rejected
 
 - **Given** a request is made to `POST /api/feedback` without a valid session
 - **When** the route handler executes
-- **Then** the route returns HTTP 401 before any rate limit check or GitHub API call
+- **Then** the route returns HTTP 401 before any rate limit check or email send
 
-### Requirement: Reliability
+#### Scenario: Untrusted submission text does not reach email headers
 
-#### Scenario: GitHub API error does not cause unhandled exception
+- **Given** a submission whose title and description contain newline and control characters
+- **When** the feedback email is constructed
+- **Then** the only header derived from user input is the subject, which is sanitized and length-clamped; all other user text appears only in the message body and `reply_to` is a validated email address
 
-- **Given** the GitHub API returns a 500 error
-- **When** `POST /api/feedback` processes the response
+### Requirement: Performance
+
+#### Scenario: One outbound email per accepted submission
+
+- **Given** an accepted feedback submission
+- **When** `POST /api/feedback` completes
+- **Then** exactly one Mailtrap send call is made and the handler performs no other outbound network request
+
+### Requirement: MODIFIED Reliability
+
+The feedback route SHALL map every failure mode to a defined HTTP status and SHALL never raise an unhandled exception or promise rejection.
+
+#### Scenario: Email send error does not cause unhandled exception
+
+- **Given** the Mailtrap send call throws or rejects
+- **When** `POST /api/feedback` processes the failure
 - **Then** the route catches the error, logs it server-side, and returns HTTP 502 with a user-readable message — no unhandled promise rejection occurs
+
+#### Scenario: Missing email configuration does not cause unhandled exception
+
+- **Given** `MAILTRAP_TOKEN` is unset so the Mailtrap client cannot be constructed
+- **When** `POST /api/feedback` is called
+- **Then** the route returns HTTP 503 with a user-readable message — the client-construction error does not propagate as an unhandled exception
+
+#### Scenario: Recovery after a transient send failure
+
+- **Given** a submission that received HTTP 502 because the Mailtrap send failed transiently
+- **When** the user retries from the modal and the send succeeds
+- **Then** the retry returns HTTP 201 and one email is delivered
 
 ### Requirement: Operability
 
@@ -225,3 +297,10 @@ See functional scenarios: "Help button absent when unauthenticated", "Submission
 - **Given** the `feedbackRateLimits` collection is initialized
 - **When** the MongoDB index list for that collection is inspected
 - **Then** a TTL index on `windowResetAt` with `expireAfterSeconds: 0` is present
+
+#### Scenario: Misconfiguration is diagnosable from server logs
+
+- **Given** `FEEDBACK_TO_EMAIL` or `MAILTRAP_TOKEN` is unset in the deployed environment
+- **When** a feedback submission is attempted
+- **Then** the server logs an error naming the missing configuration
+- **And** `.env.example` documents `FEEDBACK_TO_EMAIL` as required for the feedback form
