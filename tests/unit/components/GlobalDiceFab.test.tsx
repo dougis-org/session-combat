@@ -322,7 +322,10 @@ describe('GlobalDiceFab — roll overlay + total modal', () => {
     await waitFor(() => expect(box).toBeChecked())
     await user.click(box)
     expect(box).not.toBeChecked()
-    expect(LocalStore.get<boolean>('dice-fab-disable-animation')).toBe(false)
+    expect(
+      LocalStore.get<{ dice: { disableAnimation: boolean | null } }>('preferences')!.dice
+        .disableAnimation,
+    ).toBe(false)
   })
 })
 
@@ -440,7 +443,7 @@ describe('GlobalDiceFab — send to session chat (persisted checkbox)', () => {
 
   it('checked + no presence + Roll → no network request; animation runs immediately', async () => {
     mockAuthed()
-    LocalStore.set('dice-fab-send-to-chat', true)
+    LocalStore.set('preferences', { dice: { sendToChat: true } })
     const fetchSpy = jest.fn()
     global.fetch = fetchSpy as unknown as typeof global.fetch
     const user = userEvent.setup()

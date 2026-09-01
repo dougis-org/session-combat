@@ -2,6 +2,11 @@ import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import { LocalStore } from '@/lib/offline/LocalStore'
+import {
+  setPreferenceMock,
+  __setPreferences,
+  __resetPreferences,
+} from '@/tests/unit/helpers/preferencesTestDouble'
 
 const CAMPAIGN_ID = 'cccccccc-cccc-cccc-cccc-cccccccccccc'
 
@@ -12,6 +17,10 @@ jest.mock('@/lib/offline/LocalStore', () => ({
     remove: jest.fn(),
   },
 }))
+
+jest.mock('@/lib/preferences/usePreferences', () =>
+  require('@/tests/unit/helpers/preferencesTestDouble'),
+)
 
 jest.mock('@/lib/hooks/useCampaignStream', () => ({
   useCampaignStream: jest.fn((_, onEvent) => {
@@ -32,6 +41,7 @@ const originalFetch = global.fetch
 
 beforeEach(() => {
   jest.clearAllMocks()
+  __resetPreferences()
   mockedLocalStore.get.mockReturnValue(null)
   global.fetch = jest.fn().mockImplementation((url: string) => {
     if (url.includes('/members')) {
@@ -193,8 +203,8 @@ describe('persistence save logic', () => {
       fireEvent.mouseUp(document)
     })
 
-    expect(mockedLocalStore.set).toHaveBeenCalledWith(
-      'campaign-chat-size',
+    expect(setPreferenceMock).toHaveBeenCalledWith(
+      'chat.size',
       expect.objectContaining({
         height: expect.any(Number),
         screenWidth: 1920,
@@ -206,12 +216,7 @@ describe('persistence save logic', () => {
 
 describe('persistence load logic', () => {
   it('restores saved height when screen dimensions match', async () => {
-    mockedLocalStore.get.mockImplementation((key: string) => {
-      if (key === 'campaign-chat-size') {
-        return { height: 450, screenWidth: 1920, screenHeight: 1080 }
-      }
-      return null
-    })
+    __setPreferences({ chat: { size: { height: 450, screenWidth: 1920, screenHeight: 1080 } } })
 
     const user = userEvent.setup()
     render(<CampaignChat campaignId={CAMPAIGN_ID} />)
@@ -222,12 +227,7 @@ describe('persistence load logic', () => {
   })
 
   it('ignores saved height when screen dimensions differ by more than 100px', async () => {
-    mockedLocalStore.get.mockImplementation((key: string) => {
-      if (key === 'campaign-chat-size') {
-        return { height: 450, screenWidth: 1280, screenHeight: 800 }
-      }
-      return null
-    })
+    __setPreferences({ chat: { size: { height: 450, screenWidth: 1280, screenHeight: 800 } } })
 
     const user = userEvent.setup()
     render(<CampaignChat campaignId={CAMPAIGN_ID} />)
@@ -237,11 +237,8 @@ describe('persistence load logic', () => {
     expect(panel).toHaveStyle({ height: '33vh' })
   })
 
-  it('does not crash when localStorage throws on read', () => {
-    mockedLocalStore.get.mockImplementation((key: string) => {
-      if (key === 'campaign-chat-size') throw new Error('storage unavailable')
-      return null
-    })
+  it('does not crash when the stored size is unusable', () => {
+    __setPreferences({ chat: { size: { bogus: true } as any } })
 
     expect(() => {
       render(<CampaignChat campaignId={CAMPAIGN_ID} />)
@@ -249,10 +246,7 @@ describe('persistence load logic', () => {
   })
 
   it('ignores malformed persisted payload and uses default height', async () => {
-    mockedLocalStore.get.mockImplementation((key: string) => {
-      if (key === 'campaign-chat-size') return { height: 'not-a-number', screenWidth: 1920 }
-      return null
-    })
+    __setPreferences({ chat: { size: { height: 'not-a-number', screenWidth: 1920 } as any } })
 
     const user = userEvent.setup()
     render(<CampaignChat campaignId={CAMPAIGN_ID} />)

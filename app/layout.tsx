@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import { IBM_Plex_Sans, IBM_Plex_Mono, IBM_Plex_Serif } from 'next/font/google'
 import { NavBar } from '@/lib/components/NavBar'
 import { GlobalDiceFab } from '@/lib/components/GlobalDiceFab'
+import { AppProviders } from './providers'
 import './globals.css'
 
 const plexSans = IBM_Plex_Sans({
@@ -80,9 +81,11 @@ export default async function RootLayout({
   return (
     <html lang="en" className={fontVars}>
       <body className="flex flex-col h-screen overflow-hidden font-sans">
-        <NavBar />
-        <GlobalDiceFab />
-        <div className="flex-1 overflow-auto">{children}</div>
+        <AppProviders>
+          <NavBar />
+          <GlobalDiceFab />
+          <div className="flex-1 overflow-auto">{children}</div>
+        </AppProviders>
         <footer className="flex-shrink-0 bg-gray-950 border-t border-gray-800 py-2 px-4 text-center text-xs text-gray-500">
           <div className="flex justify-center items-center gap-3 font-mono">
             <span>v{versionData.version}</span>

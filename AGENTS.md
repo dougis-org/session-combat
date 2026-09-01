@@ -41,3 +41,13 @@ The contribution process is structured as follows:
 - Use the most efficient and robust tool for the task at hand.
 - **File & Search Operations**: Prefer high-fidelity, dedicated filesystem and search tools (like `view_file`, `replace_file_content`, `write_to_file`, and `grep_search`) over raw shell commands (such as `cat`, `sed`, `grep`, or redirection) to ensure precise, structured editing and viewing.
 - **System Commands & CLIs**: Run shell commands and utilize system CLIs via terminal tools where it makes sense (e.g., executing the `openspec` CLI, performing `git` version control operations, running build/lint commands like `npm run lint`, and running tests).
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

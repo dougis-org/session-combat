@@ -31,6 +31,10 @@ import { runStorageOp } from "@/lib/storage/runOp";
 import { ObjectId, Filter, Document } from "mongodb";
 
 import { buildEntityQuery, normalizeStoredEntityId, QueryableEntity } from "./storage/helpers";
+import {
+  getUserPreferences as getUserPreferencesRepo,
+  updateUserPreferences as updateUserPreferencesRepo,
+} from "./storage/userPreferencesRepo";
 
 function normalizeCampaign(campaign: Campaign): Campaign {
   return {
@@ -1042,6 +1046,9 @@ export const storage = {
 
     return { rolls, ...(nextCursor ? { nextCursor } : {}) };
   },
+
+  getUserPreferences: getUserPreferencesRepo,
+  updateUserPreferences: updateUserPreferencesRepo,
 
   // Clear all data for a user
   async clear(userId: string): Promise<void> {
