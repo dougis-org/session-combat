@@ -25,12 +25,15 @@ function escapeHtml(value: string): string {
 
 /**
  * Accept only an absolute https URL or a site-relative path; anything else
- * (other schemes, protocol-relative `//host`, garbage) collapses to '#'.
+ * (other schemes, protocol-relative `//host` or `/\host`, backslashes,
+ * garbage) collapses to '#'.
  */
 function safeLinkHref(url: string): string {
+  if (url.includes("\\")) return "#";
   if (url.startsWith("/") && !url.startsWith("//")) return url;
   try {
-    return new URL(url).protocol === "https:" ? url : "#";
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" ? parsed.toString() : "#";
   } catch {
     return "#";
   }
@@ -75,7 +78,8 @@ export async function sendPasswordResetEmail(
 ): Promise<void> {
   const client = getClient();
   const fromEmail = resolveFromEmail();
-  const safeUrl = escapeHtml(safeLinkHref(resetUrl));
+  const safeHref = safeLinkHref(resetUrl);
+  const safeUrl = escapeHtml(safeHref);
 
   await client.send({
     from: { email: fromEmail, name: "Session Combat" },
@@ -85,6 +89,6 @@ export async function sendPasswordResetEmail(
     html: `<p>You requested a password reset.</p>
 <p><a href="${safeUrl}">Click here to reset your password</a></p>
 <p>This link expires in 15 minutes. If you did not request a reset, ignore this email.</p>`,
-    text: `You requested a password reset.\n\nReset your password: ${resetUrl}\n\nThis link expires in 15 minutes. If you did not request a reset, ignore this email.`,
+    text: `You requested a password reset.\n\nReset your password: ${safeHref}\n\nThis link expires in 15 minutes. If you did not request a reset, ignore this email.`,
   });
 }

@@ -39,6 +39,32 @@ describe("lib/email.ts", () => {
       expect(mockSend).not.toHaveBeenCalled();
     });
 
+    it.each([
+      "http://evil.example/reset",
+      "javascript:alert(1)",
+      "//evil.example/reset",
+      "/\\evil.example/reset",
+      "/reset\\..\\admin",
+    ])("neutralizes an unsafe reset link href (%s)", async (badUrl) => {
+      process.env.MAILTRAP_TOKEN = "test-token";
+      const { sendPasswordResetEmail } = await import("@/lib/email");
+
+      await sendPasswordResetEmail(RECIPIENT, badUrl);
+
+      const call = mockSend.mock.calls[0][0];
+      expect(call.html).toContain('href="#"');
+      expect(call.html).not.toContain(`href="${badUrl}"`);
+    });
+
+    it("keeps a valid https reset link", async () => {
+      process.env.MAILTRAP_TOKEN = "test-token";
+      const { sendPasswordResetEmail } = await import("@/lib/email");
+
+      await sendPasswordResetEmail(RECIPIENT, RESET_URL);
+
+      expect(mockSend.mock.calls[0][0].html).toContain(RESET_URL);
+    });
+
     it("sends with category password-reset", async () => {
       process.env.MAILTRAP_TOKEN = "test-token";
       const { sendPasswordResetEmail } = await import("@/lib/email");

@@ -6,11 +6,29 @@ import { extractIp } from '@/lib/utils/http';
 import { sendFeedbackEmail } from '@/lib/email';
 import { validateFeedbackInput } from '@/lib/validation/feedback';
 
+/**
+ * Strict single-line sanitizer for header-derived text (the email subject) and
+ * short context fields: flattens newlines, drops control chars, and removes
+ * markdown/@-mention/#-ref characters. Clamps to `maxLen`.
+ */
 function sanitizePlainText(value: string, maxLen = 200): string {
   return value
     .replace(/[\r\n]/g, ' ')
     .replace(/[\x00-\x1f\x7f]/g, '')
     .replace(/[[\]*_`>@#]/g, '')
+    .trim()
+    .slice(0, maxLen);
+}
+
+/**
+ * Body-grade sanitizer for the free-text description: strips control characters
+ * but preserves newlines and ordinary punctuation so a multi-line report (repro
+ * steps, stack traces) survives intact. Clamps to `maxLen`.
+ */
+function sanitizeMultilineText(value: string, maxLen: number): string {
+  return value
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\x00-\x09\x0b\x0c\x0e-\x1f\x7f]/g, '')
     .trim()
     .slice(0, maxLen);
 }
@@ -40,6 +58,16 @@ export const POST = withAuth(async (request: NextRequest, auth) => {
   }
   const { type, title, description, pageUrl } = validation.value;
 
+  const to = process.env.FEEDBACK_TO_EMAIL;
+  if (!to || !process.env.MAILTRAP_TOKEN) {
+    const missing = [
+      !to && 'FEEDBACK_TO_EMAIL',
+      !process.env.MAILTRAP_TOKEN && 'MAILTRAP_TOKEN',
+    ].filter(Boolean).join(', ');
+    console.error(`Feedback email is not configured: ${missing} is not set`);
+    return NextResponse.json({ error: 'Feedback is not available.' }, { status: 503 });
+  }
+
   const ip = extractIp(request);
   const { allowed } = await checkAndIncrementRateLimit(ip);
   if (!allowed) {
@@ -49,20 +77,14 @@ export const POST = withAuth(async (request: NextRequest, auth) => {
     );
   }
 
-  const to = process.env.FEEDBACK_TO_EMAIL;
-  if (!to || !process.env.MAILTRAP_TOKEN) {
-    console.error(
-      `Feedback email is not configured: ${!to ? 'FEEDBACK_TO_EMAIL' : 'MAILTRAP_TOKEN'} is not set`
-    );
-    return NextResponse.json({ error: 'Feedback is not available.' }, { status: 503 });
-  }
-
   const user = await getUserById(auth.userId);
   const githubHandle = user?.['username'] as string | undefined;
   const email = auth.email;
-  const submittedBy = githubHandle ? `@${githubHandle} (${email})` : email;
+  const submittedBy = githubHandle
+    ? `@${sanitizePlainText(githubHandle, 100)} (${email})`
+    : email;
   const userAgent = sanitizePlainText(request.headers.get('user-agent') ?? '');
-  const descriptionStr = sanitizePlainText(description, 2000);
+  const descriptionStr = sanitizeMultilineText(description, 2000);
 
   const subjectPrefix = type === 'bug' ? '[Bug] ' : '[Feature] ';
   const subject = (subjectPrefix + sanitizePlainText(title, 200)).slice(0, 200);

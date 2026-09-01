@@ -238,6 +238,34 @@ describe('POST /api/feedback', () => {
     );
   });
 
+  it('preserves newlines in a multi-line description', async () => {
+    const description = 'Steps:\n1. open modal\n2. submit\n\nExpected: success';
+    await POST(makeRequest({ ...VALID_BODY, description }));
+    const { text } = mockedSendFeedbackEmail.mock.calls[0][0];
+    expect(text).toContain('1. open modal\n2. submit');
+    expect(text.split('---\n\n')[1]).toBe(description);
+  });
+
+  it('strips control characters from the submitter handle', async () => {
+    mockedGetUserById.mockResolvedValue({ username: 'evil\nhandle\x00' });
+    await POST(makeRequest(VALID_BODY));
+    const text = mockedSendFeedbackEmail.mock.calls[0][0].text;
+    expect(text.split('\n')[0]).toBe('**Submitted by:** @evil handle (user@example.com)');
+    expect(text).not.toMatch(/\x00/);
+  });
+
+  it('names both missing vars when neither is configured', async () => {
+    delete process.env.FEEDBACK_TO_EMAIL;
+    delete process.env.MAILTRAP_TOKEN;
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const res = await POST(makeRequest(VALID_BODY));
+    expect(res.status).toBe(503);
+    expect(errSpy).toHaveBeenCalledWith(
+      expect.stringContaining('FEEDBACK_TO_EMAIL, MAILTRAP_TOKEN')
+    );
+    errSpy.mockRestore();
+  });
+
   it('builds a context-only body when the description is empty', async () => {
     await POST(makeRequest({ ...VALID_BODY, description: '' }));
     const { text } = mockedSendFeedbackEmail.mock.calls[0][0];

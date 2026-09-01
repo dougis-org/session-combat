@@ -44,12 +44,16 @@ export type FeedbackValidation =
  * Validate the raw parsed JSON body of `POST /api/feedback`. Runs immediately
  * after JSON parsing, before rate limiting or any datastore access.
  */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 export function validateFeedbackInput(body: unknown): FeedbackValidation {
-  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+  if (!isRecord(body)) {
     return { valid: false, error: 'Invalid request body' };
   }
 
-  const { type, title, description, pageUrl } = body as Record<string, unknown>;
+  const { type, title, description, pageUrl } = body;
 
   if (type !== 'bug' && type !== 'feature') {
     return { valid: false, error: 'type must be "bug" or "feature"' };
