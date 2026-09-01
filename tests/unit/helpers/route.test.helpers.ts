@@ -70,11 +70,16 @@ export function mockDbCollection(
 export function makeRouteRequest(
   url: string,
   method: string,
-  body?: unknown
+  body?: unknown,
+  extraHeaders?: Record<string, string>
 ): NextRequest {
   return new NextRequest(url, {
     method,
-    headers: { "Content-Type": "application/json", cookie: "auth-token=t" },
+    headers: {
+      "Content-Type": "application/json",
+      cookie: "auth-token=t",
+      ...extraHeaders,
+    },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 }

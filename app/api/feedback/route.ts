@@ -3,8 +3,15 @@ import { withAuth } from '@/lib/middleware';
 import { checkAndIncrementRateLimit } from '@/lib/db/feedbackRateLimit';
 import { getUserById } from '@/lib/permissions';
 import { extractIp } from '@/lib/utils/http';
+import { sendFeedbackEmail } from '@/lib/email';
+import { validateFeedbackInput } from '@/lib/validation/feedback';
 
-function sanitizeIssueText(value: string, maxLen = 200): string {
+/**
+ * Strict single-line sanitizer for header-derived text (the email subject) and
+ * short context fields: flattens newlines, drops control chars, and removes
+ * markdown/@-mention/#-ref characters. Clamps to `maxLen`.
+ */
+function sanitizePlainText(value: string, maxLen = 200): string {
   return value
     .replace(/[\r\n]/g, ' ')
     .replace(/[\x00-\x1f\x7f]/g, '')
@@ -13,7 +20,20 @@ function sanitizeIssueText(value: string, maxLen = 200): string {
     .slice(0, maxLen);
 }
 
-function buildIssueBody(
+/**
+ * Body-grade sanitizer for the free-text description: strips control characters
+ * but preserves newlines and ordinary punctuation so a multi-line report (repro
+ * steps, stack traces) survives intact. Clamps to `maxLen`.
+ */
+function sanitizeMultilineText(value: string, maxLen: number): string {
+  return value
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\x00-\x09\x0b\x0c\x0e-\x1f\x7f]/g, '')
+    .trim()
+    .slice(0, maxLen);
+}
+
+function buildFeedbackBody(
   submittedBy: string,
   pageUrl: string,
   userAgent: string,
@@ -32,23 +52,20 @@ function buildIssueBody(
 
 export const POST = withAuth(async (request: NextRequest, auth) => {
   const parsed = await request.json().catch(() => null);
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  const validation = validateFeedbackInput(parsed);
+  if (!validation.valid) {
+    return NextResponse.json({ error: validation.error }, { status: 400 });
   }
+  const { type, title, description, pageUrl } = validation.value;
 
-  const { type, title, description, pageUrl } = parsed as Record<string, unknown>;
-
-  if (type !== 'bug' && type !== 'feature') {
-    return NextResponse.json({ error: 'type must be "bug" or "feature"' }, { status: 400 });
-  }
-  if (typeof title !== 'string' || title.trim() === '') {
-    return NextResponse.json({ error: 'title is required' }, { status: 400 });
-  }
-  if (title.trim().length > 200) {
-    return NextResponse.json({ error: 'title must be 200 characters or fewer' }, { status: 400 });
-  }
-  if (typeof description === 'string' && description.length > 2000) {
-    return NextResponse.json({ error: 'description must be 2000 characters or fewer' }, { status: 400 });
+  const to = process.env.FEEDBACK_TO_EMAIL;
+  if (!to || !process.env.MAILTRAP_TOKEN) {
+    const missing = [
+      !to && 'FEEDBACK_TO_EMAIL',
+      !process.env.MAILTRAP_TOKEN && 'MAILTRAP_TOKEN',
+    ].filter(Boolean).join(', ');
+    console.error(`Feedback email is not configured: ${missing} is not set`);
+    return NextResponse.json({ error: 'Feedback is not available.' }, { status: 503 });
   }
 
   const ip = extractIp(request);
@@ -60,51 +77,28 @@ export const POST = withAuth(async (request: NextRequest, auth) => {
     );
   }
 
-  const githubToken = process.env.GITHUB_FEEDBACK_TOKEN;
-  if (!githubToken) {
-    console.error('GITHUB_FEEDBACK_TOKEN is not configured');
-    return NextResponse.json({ error: 'Feedback is not available.' }, { status: 503 });
-  }
-
   const user = await getUserById(auth.userId);
   const githubHandle = user?.['username'] as string | undefined;
   const email = auth.email;
-  const submittedBy = githubHandle ? `@${githubHandle} (${email})` : email;
-  const userAgent = sanitizeIssueText(request.headers.get('user-agent') ?? '');
-  const rawPageUrl = typeof pageUrl === 'string' ? pageUrl.replace(/[\r\n]/g, '') : '';
-  const pageUrlStr =
-    rawPageUrl.startsWith('https://') ||
-    (rawPageUrl.startsWith('/') && !rawPageUrl.startsWith('//'))
-      ? rawPageUrl
-      : '';
-  const descriptionStr = typeof description === 'string' ? sanitizeIssueText(description, 2000) : '';
+  const submittedBy = githubHandle
+    ? `@${sanitizePlainText(githubHandle, 100)} (${email})`
+    : email;
+  const userAgent = sanitizePlainText(request.headers.get('user-agent') ?? '');
+  const descriptionStr = sanitizeMultilineText(description, 2000);
 
-  const issueBody = buildIssueBody(submittedBy, pageUrlStr, userAgent, descriptionStr);
-  const labels = type === 'bug' ? ['bug'] : ['enhancement'];
+  const subjectPrefix = type === 'bug' ? '[Bug] ' : '[Feature] ';
+  const subject = (subjectPrefix + sanitizePlainText(title, 200)).slice(0, 200);
+  const text = buildFeedbackBody(submittedBy, pageUrl, userAgent, descriptionStr);
 
-  const githubResponse = await fetch(
-    'https://api.github.com/repos/dougis-org/session-combat/issues',
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${githubToken}`,
-        Accept: 'application/vnd.github+json',
-        'Content-Type': 'application/json',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-      body: JSON.stringify({ title: title.trim(), body: issueBody, labels }),
-    }
-  );
-
-  if (!githubResponse.ok) {
-    const errorText = await githubResponse.text().catch(() => '');
-    console.error('GitHub API error:', githubResponse.status, errorText);
+  try {
+    await sendFeedbackEmail({ to, replyTo: email, subject, text });
+  } catch (err) {
+    console.error('Feedback email send failed:', err);
     return NextResponse.json(
-      { error: 'Failed to create feedback issue. Please try again later.' },
+      { error: 'Failed to send feedback. Please try again later.' },
       { status: 502 }
     );
   }
 
-  const issue = await githubResponse.json() as { html_url: string };
-  return NextResponse.json({ issueUrl: issue.html_url }, { status: 201 });
+  return NextResponse.json({ ok: true }, { status: 201 });
 });

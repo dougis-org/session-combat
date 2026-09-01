@@ -7,7 +7,6 @@ import {
   makeRouteRequest,
   mockAuthState,
 } from '@/tests/unit/helpers/route.test.helpers';
-import { MockFetchResponse } from '@/tests/unit/helpers/mockFetchResponse';
 
 jest.mock('@/lib/middleware', () =>
   require('@/tests/unit/helpers/route.test.helpers').createMockMiddleware()
@@ -21,11 +20,17 @@ jest.mock('@/lib/permissions', () => ({
   getUserById: jest.fn(),
 }));
 
+jest.mock('@/lib/email', () => ({
+  sendFeedbackEmail: jest.fn(),
+}));
+
 import { checkAndIncrementRateLimit } from '@/lib/db/feedbackRateLimit';
 import { getUserById } from '@/lib/permissions';
+import { sendFeedbackEmail } from '@/lib/email';
 
 const mockedRateLimit = jest.mocked(checkAndIncrementRateLimit);
 const mockedGetUserById = jest.mocked(getUserById);
+const mockedSendFeedbackEmail = jest.mocked(sendFeedbackEmail);
 
 const VALID_BODY = {
   type: 'bug' as const,
@@ -34,77 +39,79 @@ const VALID_BODY = {
   pageUrl: '/combat',
 };
 
-function makeRequest(body: unknown) {
-  return makeRouteRequest('http://localhost/api/feedback', 'POST', body);
-}
-
-function mockFetchSuccess(issueUrl = 'https://github.com/issues/1') {
-  global.fetch = jest.fn(() =>
-    Promise.resolve(
-      new MockFetchResponse(JSON.stringify({ html_url: issueUrl }), {
-        status: 201,
-        headers: { 'Content-Type': 'application/json' },
-      }) as unknown as Response
-    )
-  ) as unknown as jest.MockedFunction<typeof fetch>;
-}
-
-function mockFetchFailure(status = 500) {
-  global.fetch = jest.fn(() =>
-    Promise.resolve(
-      new MockFetchResponse(JSON.stringify({ message: 'GitHub error' }), {
-        status,
-        headers: { 'Content-Type': 'application/json' },
-      }) as unknown as Response
-    )
-  ) as unknown as jest.MockedFunction<typeof fetch>;
+function makeRequest(body: unknown, headers?: Record<string, string>) {
+  return makeRouteRequest('http://localhost/api/feedback', 'POST', body, headers);
 }
 
 describe('POST /api/feedback', () => {
   let originalFetch: typeof global.fetch;
-  const originalToken = process.env.GITHUB_FEEDBACK_TOKEN;
+  const originalTo = process.env.FEEDBACK_TO_EMAIL;
+  const originalToken = process.env.MAILTRAP_TOKEN;
+  const originalGithub = process.env.GITHUB_FEEDBACK_TOKEN;
 
   beforeEach(() => {
     jest.clearAllMocks();
     originalFetch = global.fetch;
+    global.fetch = jest.fn() as unknown as typeof fetch;
     mockAuthState.payload = MOCK_AUTH;
     mockedRateLimit.mockResolvedValue({ allowed: true });
     mockedGetUserById.mockResolvedValue({ username: 'testuser' });
-    process.env.GITHUB_FEEDBACK_TOKEN = 'test-token-123';
+    mockedSendFeedbackEmail.mockResolvedValue(undefined);
+    process.env.FEEDBACK_TO_EMAIL = 'dnd@dougis.com';
+    process.env.MAILTRAP_TOKEN = 'test-token-123';
+    delete process.env.GITHUB_FEEDBACK_TOKEN;
   });
 
   afterEach(() => {
     global.fetch = originalFetch;
     mockAuthState.payload = MOCK_AUTH;
-    if (originalToken === undefined) {
-      delete process.env.GITHUB_FEEDBACK_TOKEN;
-    } else {
-      process.env.GITHUB_FEEDBACK_TOKEN = originalToken;
-    }
+    restoreEnv('FEEDBACK_TO_EMAIL', originalTo);
+    restoreEnv('MAILTRAP_TOKEN', originalToken);
+    restoreEnv('GITHUB_FEEDBACK_TOKEN', originalGithub);
   });
+
+  function restoreEnv(key: string, value: string | undefined) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
 
   it('returns 401 when unauthenticated', async () => {
     mockAuthState.payload = null;
-    const mockFetch = jest.fn();
-    global.fetch = mockFetch as unknown as typeof fetch;
     const res = await POST(makeRequest(VALID_BODY));
     expect(res.status).toBe(401);
-    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockedSendFeedbackEmail).not.toHaveBeenCalled();
   });
 
-  it('returns 429 when rate limit exceeded', async () => {
+  it('returns 429 when rate limit exceeded and sends no email', async () => {
     mockedRateLimit.mockResolvedValue({ allowed: false });
     const res = await POST(makeRequest(VALID_BODY));
     expect(res.status).toBe(429);
     const body = await res.json() as { error: string };
     expect(body.error).toMatch(/rate limit/i);
+    expect(mockedSendFeedbackEmail).not.toHaveBeenCalled();
   });
 
-  it('returns 400 when body is not an object', async () => {
-    const req = makeRouteRequest('http://localhost/api/feedback', 'POST', null);
+  it.each([
+    ['null', null],
+    ['an array', []],
+    ['a primitive', 42],
+  ])('returns 400 when the body is %s', async (_label, body) => {
+    const res = await POST(makeRouteRequest('http://localhost/api/feedback', 'POST', body));
+    expect(res.status).toBe(400);
+    expect(mockedRateLimit).not.toHaveBeenCalled();
+    expect(mockedSendFeedbackEmail).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when the body is syntactically invalid JSON', async () => {
+    const req = new (require('next/server').NextRequest)('http://localhost/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', cookie: 'auth-token=t' },
+      body: '{ not json',
+    });
     const res = await POST(req);
     expect(res.status).toBe(400);
     expect(mockedRateLimit).not.toHaveBeenCalled();
+    expect(mockedSendFeedbackEmail).not.toHaveBeenCalled();
   });
 
   it('returns 400 when title is empty', async () => {
@@ -113,61 +120,162 @@ describe('POST /api/feedback', () => {
     expect(mockedRateLimit).not.toHaveBeenCalled();
   });
 
+  it('returns 400 when title exceeds 200 characters', async () => {
+    const res = await POST(makeRequest({ ...VALID_BODY, title: 'x'.repeat(201) }));
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when description exceeds 2000 characters', async () => {
+    const res = await POST(makeRequest({ ...VALID_BODY, description: 'x'.repeat(2001) }));
+    expect(res.status).toBe(400);
+  });
+
   it('returns 400 when type is invalid', async () => {
     const res = await POST(makeRequest({ ...VALID_BODY, type: 'other' }));
     expect(res.status).toBe(400);
     expect(mockedRateLimit).not.toHaveBeenCalled();
   });
 
-  it('creates GitHub issue for bug report and returns 201', async () => {
-    mockFetchSuccess();
+  it('sends a bug feedback email and returns 201 { ok: true }', async () => {
     const res = await POST(makeRequest(VALID_BODY));
     expect(res.status).toBe(201);
-    const body = await res.json() as { issueUrl: string };
-    expect(body.issueUrl).toBe('https://github.com/issues/1');
+    expect(await res.json()).toEqual({ ok: true });
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      'https://api.github.com/repos/dougis-org/session-combat/issues',
-      expect.objectContaining({
-        method: 'POST',
-        headers: expect.objectContaining({
-          Authorization: 'Bearer test-token-123',
-        }),
-        body: expect.stringContaining('"bug"'),
-      })
-    );
-    const callBody = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
-    expect(callBody.labels).toContain('bug');
-    expect(callBody.title).toBe('Something broke');
-    expect(callBody.body).toContain('/combat');
+    expect(mockedSendFeedbackEmail).toHaveBeenCalledTimes(1);
+    const arg = mockedSendFeedbackEmail.mock.calls[0][0];
+    expect(arg.to).toBe('dnd@dougis.com');
+    expect(arg.replyTo).toBe(MOCK_AUTH.email);
+    expect(arg.subject).toBe('[Bug] Something broke');
+    expect(arg.text).toContain('Details here');
+    expect(arg.text).toContain('**Page:** /combat');
+
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it('creates GitHub issue for feature request with label enhancement', async () => {
-    mockFetchSuccess();
-    const res = await POST(makeRequest({ ...VALID_BODY, type: 'feature' }));
-    expect(res.status).toBe(201);
-    const callBody = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
-    expect(callBody.labels).toContain('enhancement');
+  it('uses a [Feature] subject prefix for feature requests', async () => {
+    await POST(makeRequest({ ...VALID_BODY, type: 'feature' }));
+    expect(mockedSendFeedbackEmail.mock.calls[0][0].subject).toBe('[Feature] Something broke');
   });
 
-  it('returns 502 on GitHub API failure', async () => {
-    mockFetchFailure(500);
-    const res = await POST(makeRequest(VALID_BODY));
-    expect(res.status).toBe(502);
-    const body = await res.json() as { error: string };
-    expect(body.error).toMatch(/failed to create/i);
+  it('truncates the subject to 200 characters', async () => {
+    await POST(makeRequest({ ...VALID_BODY, title: 'y'.repeat(200) }));
+    expect(mockedSendFeedbackEmail.mock.calls[0][0].subject).toHaveLength(200);
   });
 
-  it('returns 503 when GITHUB_FEEDBACK_TOKEN is not set', async () => {
-    delete process.env.GITHUB_FEEDBACK_TOKEN;
+  it('strips markdown/control characters from the subject title', async () => {
+    await POST(makeRequest({ ...VALID_BODY, title: 'bad > @ # [x] *_* title' }));
+    const subject = mockedSendFeedbackEmail.mock.calls[0][0].subject;
+    expect(subject).toMatch(/^\[Bug\] /);
+    const titlePart = subject.slice('[Bug] '.length);
+    expect(titlePart).not.toMatch(/[\r\n>@#[\]*_]/);
+    expect(titlePart).toContain('bad');
+    expect(titlePart).toContain('title');
+  });
+
+  it('returns 503 when FEEDBACK_TO_EMAIL is not set', async () => {
+    delete process.env.FEEDBACK_TO_EMAIL;
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const res = await POST(makeRequest(VALID_BODY));
     expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: 'Feedback is not available.' });
+    expect(mockedSendFeedbackEmail).not.toHaveBeenCalled();
+    expect(errSpy).toHaveBeenCalledWith(expect.stringContaining('FEEDBACK_TO_EMAIL'));
+    errSpy.mockRestore();
   });
 
-  it('response body does not contain token value', async () => {
-    mockFetchFailure(500);
+  it('returns 503 when MAILTRAP_TOKEN is not set', async () => {
+    delete process.env.MAILTRAP_TOKEN;
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     const res = await POST(makeRequest(VALID_BODY));
-    const text = await res.text();
-    expect(text).not.toContain('test-token-123');
+    expect(res.status).toBe(503);
+    expect(mockedSendFeedbackEmail).not.toHaveBeenCalled();
+  });
+
+  it('returns 502 when sending the feedback email fails', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockedSendFeedbackEmail.mockRejectedValueOnce(new Error('mailtrap down'));
+    const res = await POST(makeRequest(VALID_BODY));
+    expect(res.status).toBe(502);
+    expect(await res.json()).toEqual({
+      error: 'Failed to send feedback. Please try again later.',
+    });
+  });
+
+  it('recovers on retry after a transient send failure', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockedSendFeedbackEmail.mockRejectedValueOnce(new Error('transient'));
+    expect((await POST(makeRequest(VALID_BODY))).status).toBe(502);
+    const res = await POST(makeRequest(VALID_BODY));
+    expect(res.status).toBe(201);
+    expect(await res.json()).toEqual({ ok: true });
+  });
+
+  it.each([
+    ['//evil.example', ''],
+    ['http://evil.example', ''],
+    ['javascript:alert(1)', ''],
+    ['https://app.example/combat/abc', 'https://app.example/combat/abc'],
+    ['/relative/path', '/relative/path'],
+  ])('clamps pageUrl %s in the email body', async (pageUrl, expected) => {
+    await POST(makeRequest({ ...VALID_BODY, pageUrl }));
+    expect(mockedSendFeedbackEmail.mock.calls[0][0].text).toContain(`**Page:** ${expected}`);
+  });
+
+  it('sanitizes the User-Agent header in the email body', async () => {
+    await POST(makeRequest(VALID_BODY, { 'user-agent': 'Mozilla/5.0 > @evil # [x] *_*' }));
+    const uaLine = mockedSendFeedbackEmail.mock.calls[0][0].text
+      .split('\n')
+      .find((l: string) => l.startsWith('**User-Agent:**'))!;
+    expect(uaLine).toContain('Mozilla/5.0');
+    expect(uaLine.slice('**User-Agent:** '.length)).not.toMatch(/[>@#[\]*_]/);
+  });
+
+  it('falls back to the email only when the user has no username', async () => {
+    mockedGetUserById.mockResolvedValue({});
+    await POST(makeRequest(VALID_BODY));
+    expect(mockedSendFeedbackEmail.mock.calls[0][0].text).toContain(
+      `**Submitted by:** ${MOCK_AUTH.email}`
+    );
+  });
+
+  it('preserves newlines in a multi-line description', async () => {
+    const description = 'Steps:\n1. open modal\n2. submit\n\nExpected: success';
+    await POST(makeRequest({ ...VALID_BODY, description }));
+    const { text } = mockedSendFeedbackEmail.mock.calls[0][0];
+    expect(text).toContain('1. open modal\n2. submit');
+    expect(text.split('---\n\n')[1]).toBe(description);
+  });
+
+  it('strips control characters from the submitter handle', async () => {
+    mockedGetUserById.mockResolvedValue({ username: 'evil\nhandle\x00' });
+    await POST(makeRequest(VALID_BODY));
+    const text = mockedSendFeedbackEmail.mock.calls[0][0].text;
+    expect(text.split('\n')[0]).toBe('**Submitted by:** @evil handle (user@example.com)');
+    expect(text).not.toMatch(/\x00/);
+  });
+
+  it('names both missing vars when neither is configured', async () => {
+    delete process.env.FEEDBACK_TO_EMAIL;
+    delete process.env.MAILTRAP_TOKEN;
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const res = await POST(makeRequest(VALID_BODY));
+    expect(res.status).toBe(503);
+    expect(errSpy).toHaveBeenCalledWith(
+      expect.stringContaining('FEEDBACK_TO_EMAIL, MAILTRAP_TOKEN')
+    );
+    errSpy.mockRestore();
+  });
+
+  it('builds a context-only body when the description is empty', async () => {
+    await POST(makeRequest({ ...VALID_BODY, description: '' }));
+    const { text } = mockedSendFeedbackEmail.mock.calls[0][0];
+    expect(text).not.toContain('---');
+  });
+
+  it('never contains the Mailtrap token in the response', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockedSendFeedbackEmail.mockRejectedValueOnce(new Error('boom'));
+    const res = await POST(makeRequest(VALID_BODY));
+    expect(await res.text()).not.toContain('test-token-123');
   });
 });
