@@ -119,3 +119,69 @@ See functional scenarios: "Non-DM member does not see the control", "DM starts a
 - **Given** `activeSessionId` is stuck non-null due to a crashed DM session and normal `DELETE` (without `force`) would otherwise be blocked by the route's precondition semantics for a stale state
 - **When** the DM uses the force reset action described in "DM can recover from a stale/stuck active session"
 - **Then** the system recovers to a clean `activeSessionId: null` state without requiring server-side manual intervention (e.g. a direct database edit)
+
+---
+
+## ADDED Requirements (surface-start-session-button — 2026-08-31)
+
+This section is additive to the [`design.md`](../../changes/archive/2026-08-31-surface-start-session-button/design.md) document.
+
+### Requirement: ADDED Start Session Button in Session Journal
+
+The system SHALL display a "Start Session" button on the Session Journal page when there is no currently active session.
+
+#### Scenario: No active session
+
+- **Given** a DM viewing the Session Journal page
+- **When** the campaign has no active session (`activeSessionId` is null)
+- **Then** the "Start Session" button is visible at the top of the main content area.
+
+#### Scenario: Session is active
+
+- **Given** a DM viewing the Session Journal page
+- **When** the campaign has an active session
+- **Then** the "Start Session" button is hidden from the main content area (relying on the global nav).
+
+### Requirement: ADDED Real-time Sync of Session Controls
+
+The system SHALL synchronize the state of all `SessionControl` instances on the page automatically via SSE.
+
+#### Scenario: Starting a session updates all buttons
+
+- **Given** a DM viewing the Session Journal page with no active session (seeing two "Start Session" buttons: one in global nav, one in main content)
+- **When** the DM clicks "Start Session" on one of the buttons
+- **Then** both buttons update to their "End Session" state immediately (once the backend confirms the start and emits the SSE event).
+
+## MODIFIED Requirements (surface-start-session-button — 2026-08-31)
+
+### Requirement: MODIFIED SessionControl State Management
+
+The system SHALL manage the active session state of `SessionControl` internally via SSE instead of relying on props passed from a parent layout.
+
+#### Scenario: Component initialization
+
+- **Given** the `SessionControl` component is rendered with an `initialSessionId` prop
+- **When** the component mounts
+- **Then** it initializes its state from the prop and begins listening to `session` events on the `useCampaignStream` to keep its internal state updated.
+
+## Non-Functional Acceptance Criteria (surface-start-session-button — 2026-08-31)
+
+### Requirement: Performance
+
+#### Scenario: SSE Event processing overhead
+
+- **Given** a client viewing a page with multiple `<SessionControl>` instances
+- **When** a `session` SSE event is received
+- **Then** all instances update their local state without triggering a full page re-render or excessive React layout thrashing.
+
+### Requirement: Security
+
+> See functional scenarios: The visibility rules for DMs vs players are unaffected; the component still relies on `useIsDM(campaignId)`.
+
+### Requirement: Reliability
+
+#### Scenario: Recovery behavior
+
+- **Given** a temporarily dropped SSE connection
+- **When** the browser automatically reconnects and receives the latest session state (or the user manually refreshes)
+- **Then** the `<SessionControl>` buttons recover correct state.
