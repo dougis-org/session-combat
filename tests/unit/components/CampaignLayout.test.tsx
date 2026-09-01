@@ -11,22 +11,20 @@ jest.mock('next/navigation', () => ({
 }));
 
 // Mock CampaignChat to capture the onSessionChange and onSizeChange props
-let capturedOnSessionChange: ((id: string | null) => void) | undefined
 let capturedOnSizeChange: ((isLarge: boolean) => void) | undefined
 jest.mock('@/lib/components/CampaignChat', () => ({
-  CampaignChat: ({ activeSessionId, onSessionChange, onSizeChange }: { activeSessionId?: string | null; onSessionChange?: (id: string | null) => void; onSizeChange?: (isLarge: boolean) => void }) => {
-    capturedOnSessionChange = onSessionChange
-    capturedOnSizeChange = onSizeChange
+  CampaignChat: ({ activeSessionId, onSessionChange, onSizeChange }: { activeSessionId?: string | null; onSessionChange?: any; onSizeChange?: (isLarge: boolean) => void }) => {
+        capturedOnSizeChange = onSizeChange
     return <div data-testid="campaign-chat" data-active-session={activeSessionId ?? ''} />
   },
 }));
 
 // Mock SessionControl to capture the props CampaignLayout wires it with
-let capturedSessionControlProps: { campaignId?: string; activeSessionId?: string | null; onSessionChange?: (id: string | null) => void } = {}
+let capturedSessionControlProps: { campaignId?: string; initialSessionId?: string | null } = {}
 jest.mock('@/lib/components/SessionControl', () => ({
-  SessionControl: ({ campaignId, activeSessionId, onSessionChange }: { campaignId?: string; activeSessionId?: string | null; onSessionChange?: (id: string | null) => void }) => {
-    capturedSessionControlProps = { campaignId, activeSessionId, onSessionChange }
-    return <div data-testid="session-control" data-active-session={activeSessionId ?? ''} />
+  SessionControl: ({ campaignId, initialSessionId }: { campaignId?: string; initialSessionId?: string | null }) => {
+    capturedSessionControlProps = { campaignId, initialSessionId }
+    return <div data-testid="session-control" data-initial-session={initialSessionId ?? ''} />
   },
 }));
 
@@ -42,7 +40,6 @@ jest.mock('next/link', () => {
 
 describe('CampaignLayout', () => {
   beforeEach(() => {
-    capturedOnSessionChange = undefined;
     capturedOnSizeChange = undefined;
     capturedSessionControlProps = {};
     mockPathname = '/campaigns/test-id';
@@ -227,35 +224,7 @@ describe('CampaignLayout', () => {
     expect(global.fetch).toHaveBeenCalledWith('/api/campaigns/test-id');
   });
 
-  test('TC-3.11: onSessionChange updates activeSessionId passed to CampaignChat', async () => {
-    render(
-      <CampaignLayout>
-        <div>Children content</div>
-      </CampaignLayout>
-    );
-    await waitFor(() => screen.getByRole('heading'));
-    const chat = screen.getByTestId('campaign-chat');
-    expect(chat).toHaveAttribute('data-active-session', 'session-123');
 
-    act(() => {
-      capturedOnSessionChange?.('new-session-456');
-    });
-    await waitFor(() => expect(screen.getByTestId('campaign-chat')).toHaveAttribute('data-active-session', 'new-session-456'));
-  });
-
-  test('TC-3.12: onSessionChange with null clears activeSessionId in CampaignChat', async () => {
-    render(
-      <CampaignLayout>
-        <div>Children content</div>
-      </CampaignLayout>
-    );
-    await waitFor(() => screen.getByRole('heading'));
-
-    act(() => {
-      capturedOnSessionChange?.(null);
-    });
-    await waitFor(() => expect(screen.getByTestId('campaign-chat')).toHaveAttribute('data-active-session', ''));
-  });
 
   test('T3-1: SessionControl renders in the header for the compact (non-isLarge) branch', async () => {
     render(
@@ -268,7 +237,7 @@ describe('CampaignLayout', () => {
     const header = screen.getByRole('heading', { level: 1 }).closest('header');
     expect(header).toContainElement(screen.getByTestId('session-control'));
     expect(capturedSessionControlProps.campaignId).toBe('test-id');
-    expect(capturedSessionControlProps.activeSessionId).toBe('session-123');
+    expect(capturedSessionControlProps.initialSessionId).toBe('session-123');
   });
 
   test('T3-2: SessionControl renders in the header for the isLarge branch', async () => {
@@ -289,21 +258,4 @@ describe('CampaignLayout', () => {
     });
   });
 
-  test('T3-3: SessionControl onSessionChange updates activeSessionId propagated to CampaignChat', async () => {
-    render(
-      <CampaignLayout>
-        <div>Children content</div>
-      </CampaignLayout>
-    );
-    await waitFor(() => screen.getByRole('heading'));
-
-    act(() => {
-      capturedSessionControlProps.onSessionChange?.('log-999');
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('campaign-chat')).toHaveAttribute('data-active-session', 'log-999');
-      expect(screen.getByTestId('session-control')).toHaveAttribute('data-active-session', 'log-999');
-    });
-  });
 });

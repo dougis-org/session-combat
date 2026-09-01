@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState, FormField, textInputClass } from '@/lib/components/ui';
+import { SessionControl } from '@/lib/components/SessionControl';
 import { SessionLog, SessionEvent, PartyMember } from '@/lib/types';
 import { useCampaignContext } from '@/lib/hooks/useCampaignContext';
 import { buildNpcEventsFromMemberChanges } from '@/lib/utils/sessionEvents';
@@ -386,9 +387,14 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Session Journal</h1>
-        <Link href="/campaigns" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
-          Back to Campaigns
-        </Link>
+        <div className="flex gap-4 items-center">
+          {context?.campaign && !context.campaign.activeSessionId && (
+            <SessionControl campaignId={campaignId} initialSessionId={null} />
+          )}
+          <Link href="/campaigns" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+            Back to Campaigns
+          </Link>
+        </div>
       </div>
 
       <ErrorBanner message={error} />
