@@ -712,7 +712,6 @@ function ootEncounters(): EncounterTemplate[] {
   const rockblight = findCustomMonsterById("cm-rockblight");
   const puddingKing = findCustomMonsterById("cm-pudding-king");
   const troglodyte = findCustomMonsterById("cm-troglodyte");
-  const troglodyteChampion = findCustomMonsterById("cm-troglodyte-champion");
   const darkHunter = findCustomMonsterById("cm-dark-hunter");
   const elderPurpleWorm = findCustomMonsterById("cm-elder-purple-worm");
   const mazeEngine = findCustomMonsterById("cm-maze-engine");
@@ -841,7 +840,6 @@ function dipEncounters(): EncounterTemplate[] {
   const stirges = findCustomMonsterById("cm-stirges");
   const owlbear = findCustomMonsterById("cm-owlbear");
   const gnoll = findCustomMonsterById("cm-gnoll-fang-of-yeenoghu");
-  const ankheg = findCustomMonsterById("cm-giant-spider");
   const giantSpider = findCustomMonsterById("cm-giant-spider");
   const bugbear = findCustomMonsterById("cm-bugbear");
   const polarBear = findCustomMonsterById("cm-polar-bear");
