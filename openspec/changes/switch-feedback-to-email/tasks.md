@@ -22,7 +22,7 @@ Ownership metadata:
 
 - [x] **Step 1 — Worktree:** confirm `.worktrees/switch-feedback-to-email` exists and `cd` into it. If missing, from the primary checkout: `git fetch origin main` then `git worktree add .worktrees/switch-feedback-to-email switch-feedback-to-email`. Never checkout the feature branch in the primary checkout.
 - [x] **Step 2 — Remote branch:** confirm `switch-feedback-to-email` is on origin; if not, `git push -u origin switch-feedback-to-email` from inside the worktree.
-- [ ] **Step 3 — Issue lifecycle: mark in-progress:** run `gh issue edit 650 --add-label "in-progress"`. Discover the repo's GitHub Project via `gh project list --owner dougis-org --format json`, resolve the status field option matching "In Progress" via `gh project field-list <project-number> --owner dougis-org --format json`, and move the item with `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item move (the label edit still proceeds).
+- [x] **Step 3 — Issue lifecycle: mark in-progress:** run `gh issue edit 650 --add-label "in-progress"`. Discover the repo's GitHub Project via `gh project list --owner dougis-org --format json`, resolve the status field option matching "In Progress" via `gh project field-list <project-number> --owner dougis-org --format json`, and move the item with `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item move (the label edit still proceeds).
 
 ### Implementation (strict TDD — write the failing test first, then the code)
 
@@ -50,7 +50,7 @@ Ownership metadata:
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent automatically applies all clearly-correct findings to the code — without stopping, without presenting the findings list to the user, without asking for confirmation. Apply fixes, re-run `npm run test:unit`, then commit. Mandatory, never skipped.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent automatically applies all clearly-correct findings to the code — without stopping, without presenting the findings list to the user, without asking for confirmation. Apply fixes, re-run `npm run test:unit`, then commit. Mandatory, never skipped.
 
 ## Validation
 
@@ -61,8 +61,8 @@ Ownership metadata:
 - [ ] `npm run test:integration` — all pass (non-`.md` code changed → full path)
 - [ ] `npm run test:e2e` — feedback-related specs pass (use a free port, not 3000 — other threads occupy 3000)
 - [x] `openspec validate switch-feedback-to-email` — valid
-- [ ] Verity pre-commit / pre-push gate — PASS (fix findings; do not waive)
-- [ ] All completed tasks marked `- [x]`
+- [x] Verity pre-commit / pre-push gate — PASS (fix findings; do not waive)
+- [x] All completed tasks marked `- [x]`
 - [ ] All steps in [Remote push validation]
 
 ## Remote push validation
@@ -78,10 +78,10 @@ If ANY step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Confirm the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
-- [ ] Commit all changes to `switch-feedback-to-email` and push
-- [ ] Open PR `switch-feedback-to-email` → `main`. **PR body MUST include `Closes #650`.** Summarize: feedback backend switched from GitHub issue to Mailtrap live email; new `FEEDBACK_TO_EMAIL` env var (must be set in Fly secrets before/with deploy); `MAILTRAP_FROM_EMAIL` domain must be verified for live sending.
-- [ ] **Issue lifecycle: mark in-review:** `gh issue edit 650 --add-label "in-review" --remove-label "in-progress"`; move the project item to "In Review" (same discovery pattern as in-progress; warn and skip if not found).
+- [x] Confirm the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
+- [x] Commit all changes to `switch-feedback-to-email` and push
+- [x] Open PR `switch-feedback-to-email` → `main`. **PR body MUST include `Closes #650`.** Summarize: feedback backend switched from GitHub issue to Mailtrap live email; new `FEEDBACK_TO_EMAIL` env var (must be set in Fly secrets before/with deploy); `MAILTRAP_FROM_EMAIL` domain must be verified for live sending.
+- [x] **Issue lifecycle: mark in-review:** `gh issue edit 650 --add-label "in-review" --remove-label "in-progress"`; move the project item to "In Review" (same discovery pattern as in-progress; warn and skip if not found).
 - [ ] Wait 60 seconds for CI to start
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit → [Remote push validation] → push → re-run) until zero remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
 - [ ] **After the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (repo ruleset is squash-only; NEVER `--admin`)
