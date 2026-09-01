@@ -1,6 +1,6 @@
 # Campaign Encounter & Monster Rollout
 
-**Status:** in progress (Vecna first rollout complete via PR #615; G1 complete via PR #647; G2 pending review)
+**Status:** in progress (Vecna first rollout complete via PR #615; G1 complete via PR #647; G2 in review via PR #661)
 
 This document is the source of truth for the work described in
 [`openspec/specs/campaign-monsters/spec.md`](../openspec/specs/campaign-monsters/spec.md)
@@ -209,11 +209,11 @@ encounter is self-contained.
 > | Lost Mine of Phandelver | 4 | 3 placeholder | 0 new | — | 🚧 G1 |
 > | Tyranny of Dragons | 13 | 0 | 0 new | — | 🚧 G1 |
 > | Baldur's Gate: Descent into Avernus | 5 | 2 placeholder | 0 new | — | 🚧 G1 |
-> | Waterdeep: Dragon Heist | 9 | 3 | ~12 new | PR #TBD (this PR) | 🚧 G2 |
-> | Storm King's Thunder | 10 | 10 | ~18 new | PR #TBD (this PR) | 🚧 G2 |
-> | Out of the Abyss | 17 | 16 | ~22 new | PR #TBD (this PR) | 🚧 G2 |
-> | Dragon of Icespire Peak | 4 | 15 | ~14 new | PR #TBD (this PR) | 🚧 G2 |
-> | Phandelver and Below: The Shattered Obelisk | 8 | 9 | ~19 new | PR #TBD (this PR) | 🚧 G2 |
+> | Waterdeep: Dragon Heist | 9 | 3 | ~12 new | PR #661 | 🚧 G2 |
+> | Storm King's Thunder | 10 | 10 | ~18 new | PR #661 | 🚧 G2 |
+> | Out of the Abyss | 17 | 16 | ~22 new | PR #661 | 🚧 G2 |
+> | Dragon of Icespire Peak | 4 | 15 | ~14 new | PR #661 | 🚧 G2 |
+> | Phandelver and Below: The Shattered Obelisk | 8 | 9 | ~19 new | PR #661 | 🚧 G2 |
 > | Icewind Dale: Rime of the Frostmaiden | 7 | 2 placeholder | 0 new | — | 🚧 G3 |
 > | The Wild Beyond the Witchlight | 5 | 2 placeholder | 0 new | — | 🚧 G3 |
 > | Princes of the Apocalypse | 5 | 0 | 0 new | — | 🚧 G3 |
