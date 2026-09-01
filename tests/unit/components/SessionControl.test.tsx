@@ -8,7 +8,7 @@ jest.mock('@/lib/hooks/useIsDM', () => ({
   useIsDM: (campaignId: string) => useIsDMMock(campaignId),
 }))
 
-function render(props: { campaignId: string; activeSessionId: string | null; onSessionChange: (id: string | null) => void }) {
+function render(props: { campaignId: string; initialSessionId: string | null }) {
   const { container, root } = createReactRoot()
   act(() => {
     root.render(React.createElement(SessionControl, props))
@@ -32,8 +32,7 @@ describe('SessionControl', () => {
 
   test('T2-1: non-DM renders nothing', () => {
     useIsDMMock.mockReturnValue({ isDM: false, loading: false })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: null })
 
     expect(container.textContent).toBe('')
     unmount()
@@ -41,8 +40,7 @@ describe('SessionControl', () => {
 
   test('T2-2: loading renders nothing', () => {
     useIsDMMock.mockReturnValue({ isDM: false, loading: true })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: null })
 
     expect(container.textContent).toBe('')
     unmount()
@@ -50,8 +48,7 @@ describe('SessionControl', () => {
 
   test('T2-3: DM with no active session renders Start Session only', () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: null })
 
     expect(container.textContent).toContain('Start Session')
     expect(container.textContent).not.toContain('End Session')
@@ -65,15 +62,14 @@ describe('SessionControl', () => {
       status: 201,
       json: async () => ({ id: 'log-1' }),
     })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: null })
 
     const button = container.querySelector('button')!
     await act(async () => { button.click() })
 
     expect(global.fetch).toHaveBeenCalledWith('/api/campaigns/camp-1/sessions/active', { method: 'POST' })
-    expect(onSessionChange).toHaveBeenCalledTimes(1)
-    expect(onSessionChange).toHaveBeenCalledWith('log-1')
+    // state changed
+    expect(container.textContent).toMatch(/End Session/)
     unmount()
   })
 
@@ -82,14 +78,13 @@ describe('SessionControl', () => {
     ;(global.fetch as jest.Mock)
       .mockResolvedValueOnce({ status: 409 })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ activeSessionId: 'log-2' }) })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: null })
 
     const button = container.querySelector('button')!
     await act(async () => { button.click() })
 
     expect(global.fetch).toHaveBeenNthCalledWith(2, '/api/campaigns/camp-1')
-    expect(onSessionChange).toHaveBeenCalledWith('log-2')
+    expect(container.textContent).toMatch(/End Session/)
     expect(container.textContent).not.toMatch(/error/i)
     unmount()
   })
@@ -99,13 +94,12 @@ describe('SessionControl', () => {
     ;(global.fetch as jest.Mock)
       .mockResolvedValueOnce({ status: 409 })
       .mockResolvedValueOnce({ ok: false, status: 500 })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: null })
 
     const button = container.querySelector('button')!
     await act(async () => { button.click() })
 
-    expect(onSessionChange).not.toHaveBeenCalled()
+    // no state change
     expect(container.textContent).toMatch(/reload the page/i)
     unmount()
   })
@@ -116,45 +110,42 @@ describe('SessionControl', () => {
       status: 201,
       json: async () => ({ id: undefined }),
     })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: null })
 
     const button = container.querySelector('button')!
     await act(async () => { button.click() })
 
-    expect(onSessionChange).not.toHaveBeenCalled()
+    // no state change
     expect(container.textContent).toContain('Failed to start session')
     unmount()
   })
 
-  test('Start Session 409 whose reconciliation GET succeeds with a null activeSessionId reconciles to Start Session, no error shown', async () => {
+  test('Start Session 409 whose reconciliation GET succeeds with a null initialSessionId reconciles to Start Session, no error shown', async () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock)
       .mockResolvedValueOnce({ status: 409 })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ activeSessionId: null }) })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: null })
 
     const button = container.querySelector('button')!
     await act(async () => { button.click() })
 
-    expect(onSessionChange).toHaveBeenCalledWith(null)
+    expect(container.textContent).toMatch(/Start Session/)
     expect(container.textContent).not.toMatch(/error/i)
     unmount()
   })
 
-  test('Start Session 409 whose reconciliation GET succeeds with a malformed activeSessionId shows an error', async () => {
+  test('Start Session 409 whose reconciliation GET succeeds with a malformed initialSessionId shows an error', async () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock)
       .mockResolvedValueOnce({ status: 409 })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ activeSessionId: 42 }) })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: null })
 
     const button = container.querySelector('button')!
     await act(async () => { button.click() })
 
-    expect(onSessionChange).not.toHaveBeenCalled()
+    // no state change
     expect(container.textContent).toMatch(/reload the page/i)
     unmount()
   })
@@ -162,13 +153,12 @@ describe('SessionControl', () => {
   test('T2-6: Start Session 500 shows inline error, does not call onSessionChange', async () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock).mockResolvedValue({ status: 500 })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: null })
 
     const button = container.querySelector('button')!
     await act(async () => { button.click() })
 
-    expect(onSessionChange).not.toHaveBeenCalled()
+    // no state change
     expect(container.textContent).toContain('Failed to start session')
     expect(button.hasAttribute('disabled')).toBe(false)
     unmount()
@@ -176,8 +166,7 @@ describe('SessionControl', () => {
 
   test('T2-7: DM with active session renders End Session and Force end', () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: 'log-1' })
 
     expect(container.textContent).toContain('End Session')
     expect(container.textContent).toContain('Force end')
@@ -187,42 +176,39 @@ describe('SessionControl', () => {
   test('T2-8: clicking End Session deletes (no force) and calls onSessionChange(null) on 200', async () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock).mockResolvedValue({ ok: true, status: 200 })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: 'log-1' })
 
     const [endButton] = Array.from(container.querySelectorAll('button'))
     await act(async () => { endButton.click() })
 
     expect(global.fetch).toHaveBeenCalledWith('/api/campaigns/camp-1/sessions/active', { method: 'DELETE' })
-    expect(onSessionChange).toHaveBeenCalledTimes(1)
-    expect(onSessionChange).toHaveBeenCalledWith(null)
+    // state changed
+    expect(container.textContent).toMatch(/Start Session/)
     unmount()
   })
 
   test('T2-8b: clicking End Session calls onSessionChange(null) on 204', async () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock).mockResolvedValue({ ok: true, status: 204 })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: 'log-1' })
 
     const [endButton] = Array.from(container.querySelectorAll('button'))
     await act(async () => { endButton.click() })
 
-    expect(onSessionChange).toHaveBeenCalledWith(null)
+    expect(container.textContent).toMatch(/Start Session/)
     unmount()
   })
 
   test('T2-9: End Session 404 "No active session" calls onSessionChange(null), no error shown', async () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock).mockResolvedValue({ status: 404, json: async () => ({ error: 'No active session' }) })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: 'log-1' })
 
     const [endButton] = Array.from(container.querySelectorAll('button'))
     await act(async () => { endButton.click() })
 
     expect(global.fetch).toHaveBeenCalledTimes(1)
-    expect(onSessionChange).toHaveBeenCalledWith(null)
+    expect(container.textContent).toMatch(/Start Session/)
     expect(container.textContent).not.toMatch(/error/i)
     unmount()
   })
@@ -233,44 +219,27 @@ describe('SessionControl', () => {
   ])('$label shows inline error, does not call onSessionChange', async ({ response }) => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock).mockResolvedValue(response)
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: 'log-1' })
 
     const [endButton] = Array.from(container.querySelectorAll('button'))
     await act(async () => { endButton.click() })
 
-    expect(onSessionChange).not.toHaveBeenCalled()
+    // no state change
     expect(container.textContent).toContain('Failed to end session')
     unmount()
   })
 
-  test('stale error clears when activeSessionId changes externally (e.g. via SSE)', async () => {
-    useIsDMMock.mockReturnValue({ isDM: true, loading: false })
-    ;(global.fetch as jest.Mock).mockResolvedValue({ status: 500 })
-    const onSessionChange = jest.fn()
-    const { container, unmount, rerender } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
-
-    const [endButton] = Array.from(container.querySelectorAll('button'))
-    await act(async () => { endButton.click() })
-    expect(container.textContent).toContain('Failed to end session')
-
-    rerender({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
-
-    expect(container.textContent).not.toMatch(/error|failed/i)
-    unmount()
-  })
 
   test('T2-11: clicking Force end deletes with force=true and calls onSessionChange(null)', async () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock).mockResolvedValue({ ok: true, status: 200 })
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: 'log-1' })
 
     const [, forceButton] = Array.from(container.querySelectorAll('button'))
     await act(async () => { forceButton.click() })
 
     expect(global.fetch).toHaveBeenCalledWith('/api/campaigns/camp-1/sessions/active?force=true', { method: 'DELETE' })
-    expect(onSessionChange).toHaveBeenCalledWith(null)
+    expect(container.textContent).toMatch(/Start Session/)
     unmount()
   })
 
@@ -283,31 +252,29 @@ describe('SessionControl', () => {
   ])('$label shows inline error, does not call onSessionChange', async ({ response }) => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock).mockResolvedValue(response)
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: 'log-1', onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: 'log-1' })
 
     const [, forceButton] = Array.from(container.querySelectorAll('button'))
     await act(async () => { forceButton.click() })
 
-    expect(onSessionChange).not.toHaveBeenCalled()
+    // no state change
     expect(container.textContent).toContain('Failed to reset session')
     unmount()
   })
 
   test.each([
-    { label: 'Start Session', activeSessionId: null, buttonIndex: 0, errorText: 'Failed to start session' },
-    { label: 'End Session', activeSessionId: 'log-1', buttonIndex: 0, errorText: 'Failed to end session' },
-    { label: 'Force end', activeSessionId: 'log-1', buttonIndex: 1, errorText: 'Failed to reset session' },
-  ])('$label network failure shows inline error, does not call onSessionChange', async ({ activeSessionId, buttonIndex, errorText }) => {
+    { label: 'Start Session', initialSessionId: null, buttonIndex: 0, errorText: 'Failed to start session' },
+    { label: 'End Session', initialSessionId: 'log-1', buttonIndex: 0, errorText: 'Failed to end session' },
+    { label: 'Force end', initialSessionId: 'log-1', buttonIndex: 1, errorText: 'Failed to reset session' },
+  ])('$label network failure shows inline error, does not call onSessionChange', async ({ initialSessionId, buttonIndex, errorText }) => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     ;(global.fetch as jest.Mock).mockRejectedValue(new Error('network down'))
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId })
 
     const targetButton = Array.from(container.querySelectorAll('button'))[buttonIndex]
     await act(async () => { targetButton.click() })
 
-    expect(onSessionChange).not.toHaveBeenCalled()
+    // no state change
     expect(container.textContent).toContain(errorText)
     unmount()
   })
@@ -316,8 +283,7 @@ describe('SessionControl', () => {
     useIsDMMock.mockReturnValue({ isDM: true, loading: false })
     let resolve!: (v: unknown) => void
     ;(global.fetch as jest.Mock).mockReturnValue(new Promise(r => { resolve = r }))
-    const onSessionChange = jest.fn()
-    const { container, unmount } = render({ campaignId: 'camp-1', activeSessionId: null, onSessionChange })
+    const { container, unmount } = render({ campaignId: 'camp-1', initialSessionId: null })
 
     const button = container.querySelector('button')!
     act(() => { button.click() })

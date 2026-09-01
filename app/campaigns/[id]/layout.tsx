@@ -9,7 +9,7 @@ import Link from 'next/link'
 export default function CampaignLayout({ children }: { children: React.ReactNode }) {
   const { id } = useParams<{ id: string }>()
   const pathname = usePathname()
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
+  const [initialSessionId, setInitialSessionId] = useState<string | null | undefined>(undefined)
   const [campaignName, setCampaignName] = useState<string | null>(null)
   const [isChatLarge, setIsChatLarge] = useState(false)
 
@@ -20,7 +20,7 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
       .then(r => (r.ok ? r.json() : null))
       .then(data => {
         if (!cancelled) {
-          setActiveSessionId(data?.activeSessionId ?? null)
+          setInitialSessionId(data?.activeSessionId ?? null)
           setCampaignName(data?.name ?? null)
         }
       })
@@ -31,7 +31,7 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
   const header = campaignName && (
     <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
       <h1 className="text-3xl font-bold text-white">{campaignName}</h1>
-      <SessionControl campaignId={id} activeSessionId={activeSessionId} onSessionChange={setActiveSessionId} />
+      {initialSessionId !== undefined && <SessionControl campaignId={id} initialSessionId={initialSessionId} />}
     </header>
   )
 
@@ -66,8 +66,6 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
     <CampaignChat
       key={id}
       campaignId={id}
-      activeSessionId={activeSessionId}
-      onSessionChange={setActiveSessionId}
       onSizeChange={setIsChatLarge}
     />
   )

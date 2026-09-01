@@ -1,26 +1,34 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useIsDM } from '@/lib/hooks/useIsDM'
+import { useCampaignStream } from '@/lib/hooks/useCampaignStream'
+import type { CampaignStreamEvent } from '@/lib/types'
 
 interface SessionControlProps {
   campaignId: string
-  activeSessionId: string | null
-  onSessionChange: (id: string | null) => void
+  initialSessionId: string | null
 }
 
-export function SessionControl({ campaignId, activeSessionId, onSessionChange }: SessionControlProps) {
+export function SessionControl({ campaignId, initialSessionId }: SessionControlProps) {
   const { isDM, loading } = useIsDM(campaignId)
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(initialSessionId)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const safeCampaignId = encodeURIComponent(campaignId)
 
-  // activeSessionId is canonical state from CampaignLayout (e.g. driven by the
-  // session SSE event); once it changes, any stale error from a prior local
-  // action is no longer relevant.
+  // clear stale error when active session changes
   useEffect(() => {
     setError(null)
   }, [activeSessionId])
+
+  const handleEvent = useCallback((event: CampaignStreamEvent) => {
+    if (event.type === 'session') {
+      setActiveSessionId(event.data.activeSessionId)
+    }
+  }, [])
+
+  useCampaignStream(campaignId, handleEvent)
 
   if (loading || !isDM) return null
 
@@ -40,7 +48,7 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
     if (fetchedId !== null && fetchedId !== undefined && typeof fetchedId !== 'string') {
       throw new Error('reconcile response returned a malformed activeSessionId')
     }
-    onSessionChange(fetchedId === undefined ? null : fetchedId)
+    setActiveSessionId(fetchedId === undefined ? null : fetchedId)
   }
 
   async function handleStart() {
@@ -54,7 +62,7 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
           console.error(`SessionControl.handleStart: malformed session id in 201 response for campaign ${campaignId}`, log)
           setError('Failed to start session, try again')
         } else {
-          onSessionChange(log.id)
+          setActiveSessionId(log.id)
         }
       } else if (res.status === 409) {
         try {
@@ -92,7 +100,7 @@ export function SessionControl({ campaignId, activeSessionId, onSessionChange }:
     try {
       const res = await fetch(url, { method: 'DELETE' })
       if (res.ok || await isBenign404(res)) {
-        onSessionChange(null)
+        setActiveSessionId(null)
       } else {
         console.error(`SessionControl.${label}: unexpected status ${res.status} for campaign ${campaignId}`)
         setError(errorMessage)

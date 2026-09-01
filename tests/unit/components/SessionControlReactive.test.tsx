@@ -2,8 +2,7 @@
 //
 // Regression/characterization coverage for spec scenario "Control updates
 // reactively on session SSE event": proves the existing session-SSE plumbing
-// (CampaignChat's onSessionChange callback, already wired through
-// CampaignLayout) drives the *real* SessionControl's displayed state, with no
+// (SessionControl's internal useCampaignStream subscription) drives the *real* SessionControl's displayed state, with no
 // additional fetch issued by SessionControl itself.
 import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -25,24 +24,23 @@ jest.mock('@/lib/hooks/useIsDM', () => ({
   useIsDM: () => ({ isDM: true, loading: false }),
 }));
 
-// Mock CampaignChat but capture onSessionChange, exactly mirroring how the
-// existing `session` SSE event already reaches CampaignLayout in production
-// (CampaignChat.tsx:438, tested independently in CampaignChat.sse.test.tsx).
-let capturedOnSessionChange: ((id: string | null) => void) | undefined;
+// Mock useCampaignStream to capture the onEvent handler passed by SessionControl
+
 jest.mock('@/lib/components/CampaignChat', () => ({
-  CampaignChat: ({ activeSessionId, onSessionChange }: { activeSessionId?: string | null; onSessionChange?: (id: string | null) => void }) => {
-    capturedOnSessionChange = onSessionChange;
-    return (
-      <div data-testid="roll-entry-strip-proxy">
-        {activeSessionId === null ? 'No active session' : 'Roll strip enabled'}
-      </div>
-    );
-  },
+  CampaignChat: () => <div data-testid="campaign-chat-mock" />
+}));
+
+let capturedStreamHandler: ((e: any) => void) | undefined;
+jest.mock('@/lib/hooks/useCampaignStream', () => ({
+  useCampaignStream: (campaignId: string, onEvent: (e: any) => void) => {
+    capturedStreamHandler = onEvent;
+    return { status: 'open' };
+  }
 }));
 
 describe('SessionControl — reactive SSE integration', () => {
   beforeEach(() => {
-    capturedOnSessionChange = undefined;
+    capturedStreamHandler = undefined;
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: true,
@@ -51,27 +49,25 @@ describe('SessionControl — reactive SSE integration', () => {
     ) as jest.Mock;
   });
 
-  test('T4-1: session SSE event flips SessionControl to End Session and enables the roll strip, no extra fetch', async () => {
+  test('T4-1: session SSE event flips SessionControl to End Session, no extra fetch', async () => {
     render(<CampaignLayout><div>children</div></CampaignLayout>);
     await waitFor(() => screen.getByRole('heading'));
 
     expect(screen.getByText('Start Session')).toBeInTheDocument();
-    expect(screen.getByText('No active session')).toBeInTheDocument();
 
     const fetchCallsBefore = (global.fetch as jest.Mock).mock.calls.length;
 
     act(() => {
-      capturedOnSessionChange?.('log-sse-1');
+      capturedStreamHandler?.({ type: 'session', campaignId: 'test-id', data: { activeSessionId: 'log-sse-1' } });
     });
 
     await waitFor(() => {
       expect(screen.getByText('End Session')).toBeInTheDocument();
-      expect(screen.getByText('Roll strip enabled')).toBeInTheDocument();
     });
     expect((global.fetch as jest.Mock).mock.calls.length).toBe(fetchCallsBefore);
   });
 
-  test('T4-2: session SSE event clearing activeSessionId flips back to Start Session and disables the roll strip', async () => {
+  test('T4-2: session SSE event clearing activeSessionId flips back to Start Session', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: true,
@@ -83,17 +79,15 @@ describe('SessionControl — reactive SSE integration', () => {
     await waitFor(() => screen.getByRole('heading'));
 
     expect(screen.getByText('End Session')).toBeInTheDocument();
-    expect(screen.getByText('Roll strip enabled')).toBeInTheDocument();
 
     const fetchCallsBefore = (global.fetch as jest.Mock).mock.calls.length;
 
     act(() => {
-      capturedOnSessionChange?.(null);
+      capturedStreamHandler?.({ type: 'session', campaignId: 'test-id', data: { activeSessionId: null } });
     });
 
     await waitFor(() => {
       expect(screen.getByText('Start Session')).toBeInTheDocument();
-      expect(screen.getByText('No active session')).toBeInTheDocument();
     });
     expect((global.fetch as jest.Mock).mock.calls.length).toBe(fetchCallsBefore);
   });

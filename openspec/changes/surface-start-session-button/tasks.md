@@ -13,11 +13,11 @@
 
 - [ ] **Issue lifecycle: mark in-progress** _(skip if change is not issue-driven)_: run `gh issue edit #602 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner <owner> --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner <owner> --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
 - [ ] Implement sub-tasks in small, testable increments
-  - [ ] **Task 1: Update `SessionControl` state management:** Refactor `SessionControl.tsx` to use `useCampaignStream` internally. Remove `onSessionChange` from props. Keep an internal `activeSessionId` state initialized from an `initialSessionId` prop, and update it upon receiving `session` SSE events.
-  - [ ] **Task 2: Update `CampaignLayout`:** Remove `activeSessionId` state from `CampaignLayout.tsx` and stop passing `onSessionChange`. Pass `activeSessionId` from initial fetch as `initialSessionId` to `<SessionControl>`.
-  - [ ] **Task 3: Display `SessionControl` in `SessionsContent`:** In `app/campaigns/[id]/sessions/page.tsx`, read `context.campaign?.activeSessionId` as `initialSessionId` and render `<SessionControl>` in the main content area conditionally when `initialSessionId === null`.
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch
-- [ ] Confirm acceptance criteria are covered
+  - [x] **Task 1: Update `SessionControl` state management:** Refactor `SessionControl.tsx` to use `useCampaignStream` internally. Remove `onSessionChange` from props. Keep an internal `activeSessionId` state initialized from an `initialSessionId` prop, and update it upon receiving `session` SSE events.
+  - [x] **Task 2: Update `CampaignLayout`:** Remove `activeSessionId` state from `CampaignLayout.tsx` and stop passing `onSessionChange`. Pass `activeSessionId` from initial fetch as `initialSessionId` to `<SessionControl>`.
+  - [x] **Task 3: Display `SessionControl` in `SessionsContent`:** In `app/campaigns/[id]/sessions/page.tsx`, read `context.campaign?.activeSessionId` as `initialSessionId` and render `<SessionControl>` in the main content area conditionally when `initialSessionId === null`.
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch
+- [x] Confirm acceptance criteria are covered
 
 ## Pre-Commit Code Review
 
