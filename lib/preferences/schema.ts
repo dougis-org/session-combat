@@ -131,8 +131,8 @@ export function sparseKnownValues(source: unknown): DeepPartial<PreferenceValues
     const candidate = getPath(source, path);
     if (candidate === undefined || !KEY_VALIDATORS[path](candidate)) continue;
     const [domain, key] = path.split(".") as [keyof PreferenceValues, string];
-    const bucket = (out[domain] ??= {} as Record<string, unknown>) as Record<string, unknown>;
-    bucket[key] = candidate;
+    if (out[domain] === undefined) out[domain] = {} as Record<string, unknown>;
+    (out[domain] as Record<string, unknown>)[key] = candidate;
   }
   return out;
 }
@@ -168,11 +168,8 @@ export function validatePreferencePatch(body: unknown): PreferencePatchResult {
       return { ok: false, error: `Invalid value for preference "${path}"` };
     }
     const [domain, key] = path.split(".") as [keyof PreferenceValues, string];
-    const bucket = (values[domain] ??= {} as Record<string, unknown>) as Record<
-      string,
-      unknown
-    >;
-    bucket[key] = candidate;
+    if (values[domain] === undefined) values[domain] = {} as Record<string, unknown>;
+    (values[domain] as Record<string, unknown>)[key] = candidate;
     touched = true;
   }
 

@@ -73,11 +73,8 @@ function mergeDelta(
   value: unknown,
 ): void {
   const [domain, key] = splitPath(path)
-  const bucket = (target[domain] ??= {} as Record<string, unknown>) as Record<
-    string,
-    unknown
-  >
-  bucket[key] = value
+  if (target[domain] === undefined) target[domain] = {} as Record<string, unknown>
+  ;(target[domain] as Record<string, unknown>)[key] = value
 }
 
 function getAt(source: DeepPartial<PreferenceValues>, path: PreferencePath): unknown {
