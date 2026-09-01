@@ -59,6 +59,9 @@ function OptionRadioGroup<T extends RadioOption>({
     const delta = forward ? 1 : -1
     const next = (selectedIndex + delta + options.length) % options.length
     onChange(options[next].id)
+    // Keep DOM focus with the newly selected option (roving-tabindex convention).
+    const radios = e.currentTarget.querySelectorAll<HTMLElement>('[role="radio"]')
+    radios[next]?.focus()
   }
 
   return (

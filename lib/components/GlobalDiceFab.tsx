@@ -52,6 +52,13 @@ export function GlobalDiceFab() {
 
   useEffect(() => onPresenceChange(setPresence), [])
 
+  // The appearance modal only exists while the panel is open — if the panel closes
+  // underneath it (roll shortcut, navigation), drop the flag so it does not flash back
+  // on the next open.
+  useEffect(() => {
+    if (!dp.isOpen) setAppearanceOpen(false)
+  }, [dp.isOpen])
+
   // Outside-click/Escape-to-close is already handled by useDicePoolState;
   // this effect only layers in focus management on top of its isOpen state.
   useEffect(() => {

@@ -573,6 +573,19 @@ describe('GlobalDiceFab — dice appearance (task 4.3 / 5.1-d)', () => {
     expect(setSpy).toHaveBeenCalledWith('dice-fab-material', 'metal')
   })
 
+  it('closing then re-opening the panel does not re-show the appearance modal', async () => {
+    const user = await openPanel()
+    await user.click(screen.getByRole('button', { name: /dice appearance/i }))
+    expect(screen.getByRole('dialog', { name: /dice appearance/i })).toBeInTheDocument()
+    // Close the modal, then close the panel, then re-open the panel.
+    await user.keyboard('{Escape}')
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    await open(user)
+    expect(screen.queryByRole('dialog', { name: /dice appearance/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Roll dice' })).toBeInTheDocument()
+  })
+
   it('5.1-d passes the persisted appearance into useDiceAnimation', async () => {
     LocalStore.set('dice-fab-colorset', 'fire')
     LocalStore.set('dice-fab-material', 'wood')
