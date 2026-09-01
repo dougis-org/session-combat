@@ -134,9 +134,9 @@ export function PreferencesProvider({
   userId?: string | null
   children: React.ReactNode
 }) {
-  const [preferences, setPreferences] = useState<PreferenceValues>(() =>
-    resolvePreferences(safeGet(PREFERENCES_MIRROR_KEY)),
-  )
+  // Start from defaults so the server-rendered and first client-rendered markup
+  // match; the mount effect below adopts the localStorage mirror before paint.
+  const [preferences, setPreferences] = useState<PreferenceValues>(DEFAULT_PREFERENCES)
   const [ready, setReady] = useState(false)
 
   // Unsynced deltas awaiting a PATCH; survives failed requests so they retry.
@@ -144,6 +144,8 @@ export function PreferencesProvider({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Kept in sync by every code path that calls setPreferences below (never during render).
   const prefsRef = useRef(preferences)
+  // Previous authenticated user id, to detect a user switch on this browser.
+  const prevUserIdRef = useRef<string | null>(null)
 
   const flush = useCallback(async () => {
     if (!userId || isEmptyDelta(pendingRef.current)) return
@@ -174,6 +176,11 @@ export function PreferencesProvider({
     }
   }, [userId])
 
+  // Always points at the latest `flush` so the unmount effect can stay `[]`-deps
+  // (fire on real unmount only, not on every `flush` identity change / user switch).
+  const flushRef = useRef(flush)
+  flushRef.current = flush
+
   const scheduleFlush = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
@@ -198,6 +205,26 @@ export function PreferencesProvider({
   // ── Hydrate once per authenticated session ──
   useEffect(() => {
     let cancelled = false
+
+    const prevUserId = prevUserIdRef.current
+    prevUserIdRef.current = userId
+    // A different authenticated user on this browser (e.g. a silent session
+    // expiry, where logout's LocalStore.clear() never ran) — discard the previous
+    // user's mirror so it cannot be adopted onto this account.
+    const switchedUser = prevUserId !== null && prevUserId !== userId
+    if (switchedUser) {
+      safeSet(PREFERENCES_MIRROR_KEY, resolvePreferences(null))
+      pendingRef.current = {}
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+
+    // Client-only: adopt the mirror now that localStorage is readable. The first
+    // render used DEFAULT_PREFERENCES so SSR and hydration markup agree.
+    const mirrored = switchedUser
+      ? resolvePreferences(null)
+      : resolvePreferences(safeGet(PREFERENCES_MIRROR_KEY))
+    setPreferences(mirrored)
+    prefsRef.current = mirrored
 
     if (!userId) {
       setReady(true)
@@ -302,13 +329,13 @@ export function PreferencesProvider({
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  // Flush any pending delta on unmount.
+  // Flush any pending delta on unmount (real unmount only — see flushRef).
   useEffect(
     () => () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
-      void flush()
+      void flushRef.current()
     },
-    [flush],
+    [],
   )
 
   return (

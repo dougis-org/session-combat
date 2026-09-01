@@ -1,8 +1,13 @@
+import type { ReactNode } from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import { MockFetchResponse } from '@/tests/unit/helpers/mockFetchResponse'
 import { makePreferencesWrapper } from '@/tests/unit/helpers/preferences'
-import { usePreferences, PREFERENCES_MIRROR_KEY } from '@/lib/preferences/usePreferences'
+import {
+  PreferencesProvider,
+  usePreferences,
+  PREFERENCES_MIRROR_KEY,
+} from '@/lib/preferences/usePreferences'
 import { DEFAULT_PREFERENCES } from '@/lib/preferences/schema'
 
 const realFetch = global.fetch
@@ -99,6 +104,34 @@ describe('usePreferences — authenticated hydration', () => {
     await waitFor(() => expect(result.current.preferences.dice.sendToChat).toBe(false))
     expect(LocalStore.get<Record<string, { sendToChat: boolean }>>(PREFERENCES_MIRROR_KEY)!.dice.sendToChat).toBe(false)
     expect(patchCalls(spy)).toHaveLength(0)
+  })
+})
+
+let switchTestUid: string | null = null
+function SwitchWrapper({ children }: { children: ReactNode }) {
+  return <PreferencesProvider userId={switchTestUid}>{children}</PreferencesProvider>
+}
+
+describe('usePreferences — user switch on the same browser', () => {
+  it('discards the previous user’s mirror when userId changes (silent session expiry)', async () => {
+    const spy = okServer() // server has no stored deltas for either user
+    switchTestUid = 'userA'
+    const { result, rerender } = renderHook(() => usePreferences(), { wrapper: SwitchWrapper })
+    await waitFor(() => expect(result.current.ready).toBe(true))
+    await act(async () => { result.current.setPreference('dice.sendToChat', true) })
+    expect(LocalStore.get(PREFERENCES_MIRROR_KEY)).toMatchObject({ dice: { sendToChat: true } })
+
+    // Cookie lapses, a different user is now authenticated — no explicit logout ran.
+    const before = patchCalls(spy).length
+    switchTestUid = 'userB'
+    rerender()
+    await waitFor(() => expect(result.current.ready).toBe(true))
+
+    expect(result.current.preferences.dice.sendToChat).toBe(false)
+    const adopted = patchCalls(spy)
+      .slice(before)
+      .some(([, init]) => JSON.parse((init as RequestInit).body as string).dice?.sendToChat === true)
+    expect(adopted).toBe(false)
   })
 })
 

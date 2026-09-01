@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useReducer, useState } from 'react'
+import { useCallback, useEffect, useReducer, useSyncExternalStore } from 'react'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import {
   DEFAULT_COLORSET,
@@ -34,14 +34,24 @@ function safeSet(key: string, val: unknown): void {
   }
 }
 
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
+
 /** Reads `prefers-reduced-motion` defensively; false when unavailable (SSR / no matchMedia). */
 function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false
   try {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    return window.matchMedia(REDUCED_MOTION_QUERY).matches
   } catch {
     return false
   }
+}
+
+/** `useSyncExternalStore` subscribe fn for the reduced-motion media query. */
+function subscribeReducedMotion(onChange: () => void): () => void {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return () => {}
+  const mq = window.matchMedia(REDUCED_MOTION_QUERY)
+  mq.addEventListener('change', onChange)
+  return () => mq.removeEventListener('change', onChange)
 }
 
 interface AppearanceState {
@@ -105,8 +115,14 @@ export interface DiceFabPreferences {
 export function useDiceFabPreferences(): DiceFabPreferences {
   const { preferences, setPreference } = usePreferences()
 
-  // Captured once at first render; an explicit stored choice overrides it anyway.
-  const [reducedMotion] = useState(prefersReducedMotion)
+  // Server snapshot is `false` so SSR and the first client render agree; the client
+  // then reflects the real media query (and live changes to it). An explicit stored
+  // choice overrides this anyway.
+  const reducedMotion = useSyncExternalStore(
+    subscribeReducedMotion,
+    prefersReducedMotion,
+    () => false,
+  )
 
   const [appearance, dispatch] = useReducer(appearanceReducer, {
     diceColorset: DEFAULT_COLORSET,
