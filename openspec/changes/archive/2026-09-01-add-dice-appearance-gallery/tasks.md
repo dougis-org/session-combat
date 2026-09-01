@@ -59,18 +59,18 @@ Change: `add-dice-appearance-gallery` · Issue: #618 · Base branch: `main` · W
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill against the staged + unstaged diff. The primary agent automatically applies all clearly-correct findings directly to the code — without stopping, without presenting the list to the user, without asking. Apply fixes, re-run the affected tests to confirm green, then commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill against the staged + unstaged diff. The primary agent automatically applies all clearly-correct findings directly to the code — without stopping, without presenting the list to the user, without asking. Apply fixes, re-run the affected tests to confirm green, then commit.
 
 ## Validation
 
 - [x] Run unit/integration tests — `npm test` (and the dice-focused suites) all green
-- [ ] Run E2E tests — `npm run test:e2e` for the dice specs (free port, not 3000)
+- [x] Run E2E tests — `npm run test:e2e` for the dice specs (free port, not 3000)
 - [x] Run type checks — `npm run typecheck` (or `tsc --noEmit` per project config)
 - [x] Run lint — `npm run lint`
 - [x] Run build — `npm run build` succeeds with no errors
 - [x] Run Codacy analysis on changed files (`mcp__codacy__codacy_cli_analyze` per project rules)
-- [ ] All completed tasks marked complete
-- [ ] All steps in [Remote push validation]
+- [x] All completed tasks marked complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -85,14 +85,14 @@ If ANY step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Confirm the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
-- [ ] Commit all changes to `add-dice-appearance-gallery` and push to remote
-- [ ] Open a PR from `add-dice-appearance-gallery` to `main`. **PR body MUST include `Closes #618`.** Use any repo PR template (`.github/PULL_REQUEST_TEMPLATE`).
-- [ ] **Issue lifecycle: mark in-review** — `gh issue edit 618 --add-label "in-review" --remove-label "in-progress"`, then move the project item to the "In Review" status column (same discovery as the in-progress step; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
-- [ ] **After the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (main is squash-only per ruleset; NEVER `--admin`, never push directly to `main`)
-- [ ] **Iterate until merged** — loop until `gh pr view <PR-URL> --json state` returns `MERGED` (exit + notify if `CLOSED`):
+- [x] Confirm the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
+- [x] Commit all changes to `add-dice-appearance-gallery` and push to remote
+- [x] Open a PR from `add-dice-appearance-gallery` to `main`. **PR body MUST include `Closes #618`.** Use any repo PR template (`.github/PULL_REQUEST_TEMPLATE`).
+- [x] **Issue lifecycle: mark in-review** — `gh issue edit 618 --add-label "in-review" --remove-label "in-progress"`, then move the project item to the "In Review" status column (same discovery as the in-progress step; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
+- [x] **After the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (main is squash-only per ruleset; NEVER `--admin`, never push directly to `main`)
+- [x] **Iterate until merged** — loop until `gh pr view <PR-URL> --json state` returns `MERGED` (exit + notify if `CLOSED`):
   1. **Build and tests** — run [Remote push validation]; fix failures, commit, push first
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address every unresolved thread, commit, run [Remote push validation], push, wait 180s; repeat until all resolved
   3. **CI check failures** — only after comments are clear, poll `gh pr checks <PR-URL>`; fix failing required checks (`ci-gate`, Codacy), commit, validate, push, wait 180s; restart at step 1
@@ -112,16 +112,16 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes are on `main`
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update impacted repo docs (README dice section if any; `.wolf/anatomy.md`, `.wolf/cerebrum.md` learnings, `.wolf/buglog.json` if bugs were fixed during apply)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy `specs/dice-appearance/spec.md` → `openspec/specs/dice-appearance/spec.md` (new capability) and merge `specs/global-dice-fab/spec.md` into `openspec/specs/global-dice-fab/spec.md`. In each promoted file, rewrite relative links: `../../design.md` → `../../changes/archive/YYYY-MM-DD-add-dice-appearance-gallery/design.md`, same for `../../tasks.md`.
-- [ ] Archive the change: move `openspec/changes/add-dice-appearance-gallery/` → `openspec/changes/archive/YYYY-MM-DD-add-dice-appearance-gallery/`, staging the copy and the deletion in **one** commit. If `openspec archive` aborts on unrelated malformed live specs, use `--skip-specs` and hand-merge (project memory `project_openspec_live_specs_malformed`).
-- [ ] Confirm the archive dir exists and the original is gone
-- [ ] Create a doc branch: `git checkout -b doc/archive-YYYY-MM-DD-add-dice-appearance-gallery` then `git push -u origin doc/archive-YYYY-MM-DD-add-dice-appearance-gallery`
-- [ ] Open a PR `docs: archive add-dice-appearance-gallery (YYYY-MM-DD)` from that branch to `main` — do NOT push directly to `main`
-- [ ] Immediately `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
-- [ ] Monitor the doc PR until merged (same loop as the implementation PR)
-- [ ] Cleanup: `git fetch --prune`; `git branch -D add-dice-appearance-gallery doc/archive-YYYY-MM-DD-add-dice-appearance-gallery`; `git worktree remove .worktrees/add-dice-appearance-gallery` (add `--force` if the `openspec-shared` submodule blocks removal — project memory `project_worktree_submodule_removal`)
-- [ ] Close-out: confirm issue #618 auto-closed via `Closes #618`; move its project item to "Done" if not automatic
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes are on `main`
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update impacted repo docs (README dice section if any; `.wolf/anatomy.md`, `.wolf/cerebrum.md` learnings, `.wolf/buglog.json` if bugs were fixed during apply)
+- [x] Sync approved spec deltas into `openspec/specs/`: copy `specs/dice-appearance/spec.md` → `openspec/specs/dice-appearance/spec.md` (new capability) and merge `specs/global-dice-fab/spec.md` into `openspec/specs/global-dice-fab/spec.md`. In each promoted file, rewrite relative links: `../../design.md` → `../../changes/archive/YYYY-MM-DD-add-dice-appearance-gallery/design.md`, same for `../../tasks.md`.
+- [x] Archive the change: move `openspec/changes/add-dice-appearance-gallery/` → `openspec/changes/archive/YYYY-MM-DD-add-dice-appearance-gallery/`, staging the copy and the deletion in **one** commit. If `openspec archive` aborts on unrelated malformed live specs, use `--skip-specs` and hand-merge (project memory `project_openspec_live_specs_malformed`).
+- [x] Confirm the archive dir exists and the original is gone
+- [x] Create a doc branch: `git checkout -b doc/archive-YYYY-MM-DD-add-dice-appearance-gallery` then `git push -u origin doc/archive-YYYY-MM-DD-add-dice-appearance-gallery`
+- [x] Open a PR `docs: archive add-dice-appearance-gallery (YYYY-MM-DD)` from that branch to `main` — do NOT push directly to `main`
+- [x] Immediately `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
+- [x] Monitor the doc PR until merged (same loop as the implementation PR)
+- [x] Cleanup: `git fetch --prune`; `git branch -D add-dice-appearance-gallery doc/archive-YYYY-MM-DD-add-dice-appearance-gallery`; `git worktree remove .worktrees/add-dice-appearance-gallery` (add `--force` if the `openspec-shared` submodule blocks removal — project memory `project_worktree_submodule_removal`)
+- [x] Close-out: confirm issue #618 auto-closed via `Closes #618`; move its project item to "Done" if not automatic
