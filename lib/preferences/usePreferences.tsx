@@ -13,6 +13,7 @@ import {
   DEFAULT_PREFERENCES,
   DeepPartial,
   PreferenceValues,
+  isValidPreferenceValue,
   resolvePreferences,
   sparseKnownValues,
 } from '@/lib/preferences/schema'
@@ -190,6 +191,10 @@ export function PreferencesProvider({
 
   const setPreference = useCallback(
     (path: PreferencePath, value: unknown) => {
+      if (!isValidPreferenceValue(path, value)) {
+        console.warn(`[preferences] ignoring invalid value for "${path}"`, value)
+        return
+      }
       const next = withPath(prefsRef.current, path, value)
       prefsRef.current = next
       setPreferences(next)
@@ -375,6 +380,10 @@ function useFallbackPreferences(): PreferencesContextValue {
   }, [])
 
   const setPreference = useCallback((path: PreferencePath, value: unknown) => {
+    if (!isValidPreferenceValue(path, value)) {
+      console.warn(`[preferences] ignoring invalid value for "${path}"`, value)
+      return
+    }
     const next = withPath(ref.current, path, value)
     ref.current = next
     setPreferencesState(next)

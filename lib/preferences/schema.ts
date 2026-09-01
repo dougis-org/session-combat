@@ -84,6 +84,16 @@ type KnownPath = keyof typeof KEY_VALIDATORS;
 
 const KNOWN_PATHS = Object.keys(KEY_VALIDATORS) as KnownPath[];
 
+/**
+ * Validate a single preference value against its path's schema. Used by the client
+ * provider before writing an individual `setPreference` value to state / the mirror,
+ * so an unknown path or a wrongly-typed value is never persisted locally.
+ */
+export function isValidPreferenceValue(path: string, value: unknown): boolean {
+  const validator = (KEY_VALIDATORS as Record<string, (v: unknown) => boolean>)[path];
+  return validator ? validator(value) : false;
+}
+
 const cloneDefaults = (): PreferenceValues => ({
   dice: { ...DEFAULT_PREFERENCES.dice },
   chat: { ...DEFAULT_PREFERENCES.chat },

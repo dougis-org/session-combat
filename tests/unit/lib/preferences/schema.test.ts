@@ -2,6 +2,7 @@ import {
   DEFAULT_PREFERENCES,
   DOCK_MIN_HEIGHT,
   PREFERENCES_SCHEMA_VERSION,
+  isValidPreferenceValue,
   resolvePreferences,
   partitionPreferenceDelta,
   validatePreferencePatch,
@@ -12,6 +13,22 @@ const dockSize = (over: Partial<{ height: number; screenWidth: number; screenHei
   screenWidth: 1280,
   screenHeight: 800,
   ...over,
+})
+
+describe('isValidPreferenceValue', () => {
+  it('accepts a correctly-typed value for a known path', () => {
+    expect(isValidPreferenceValue('dice.sendToChat', true)).toBe(true)
+    expect(isValidPreferenceValue('dice.disableAnimation', null)).toBe(true)
+    expect(isValidPreferenceValue('chat.size', dockSize())).toBe(true)
+    expect(isValidPreferenceValue('dice.color', '#a1b')).toBe(true)
+  })
+
+  it('rejects wrong types, out-of-range sizes, and unknown paths', () => {
+    expect(isValidPreferenceValue('dice.sendToChat', 1)).toBe(false)
+    expect(isValidPreferenceValue('chat.size', dockSize({ height: DOCK_MIN_HEIGHT - 1 }))).toBe(false)
+    expect(isValidPreferenceValue('dice.color', '<script>')).toBe(false)
+    expect(isValidPreferenceValue('totally.unknown', 'x')).toBe(false)
+  })
 })
 
 describe('DEFAULT_PREFERENCES', () => {
