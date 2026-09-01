@@ -38,10 +38,10 @@ export interface PreferenceValues {
   };
 }
 
-export const DEFAULT_PREFERENCES: PreferenceValues = {
-  dice: { sendToChat: false, disableAnimation: null, color: null },
-  chat: { pinned: false, size: null },
-};
+export const DEFAULT_PREFERENCES: PreferenceValues = Object.freeze({
+  dice: Object.freeze({ sendToChat: false, disableAnimation: null, color: null }),
+  chat: Object.freeze({ pinned: false, size: null }),
+}) as PreferenceValues;
 
 const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 

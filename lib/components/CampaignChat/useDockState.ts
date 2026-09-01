@@ -57,8 +57,6 @@ interface UseDockStateArgs {
 
 export function useDockState({ triggerRef, drawerRef, onSizeChange }: UseDockStateArgs) {
   const { preferences, setPreference } = usePreferences()
-  const prefsRef = useRef(preferences)
-  prefsRef.current = preferences
   const [{ isExpanded, isPinned, isLarge, customHeight }, dispatch] = useReducer(dockReducer, {
     isExpanded: false,
     isPinned: false,
@@ -67,12 +65,18 @@ export function useDockState({ triggerRef, drawerRef, onSizeChange }: UseDockSta
   })
   const isMounted = useRef(false)
   const dragListenersRef = useRef<{ move: (e: MouseEvent) => void; up: (e: MouseEvent) => void } | null>(null)
+  // Set once the user interacts with pin/size, after which we stop re-applying
+  // server-hydrated preference values (so we never yank the dock out from under them).
+  const userTouchedRef = useRef(false)
 
-  // ── Init: pin state + persisted size (from the preferences mirror) ──
+  // ── Init / reconcile: pin state + persisted size from the preferences provider.
+  //    Re-runs when `chat.pinned` / `chat.size` change identity (e.g. the authenticated
+  //    GET resolves after mount), but only until the user has touched the dock. ──
   useEffect(() => {
-    dispatch({ type: 'INIT', pinned: !!prefsRef.current.chat.pinned })
+    if (userTouchedRef.current) return
+    dispatch({ type: 'INIT', pinned: !!preferences.chat.pinned })
 
-    const rawSize = prefsRef.current.chat.size
+    const rawSize = preferences.chat.size
     const savedSize = isValidPersistedSize(rawSize) ? rawSize : null
     if (savedSize) {
       const screenMatch =
@@ -80,7 +84,7 @@ export function useDockState({ triggerRef, drawerRef, onSizeChange }: UseDockSta
         Math.abs(savedSize.screenHeight - window.innerHeight) <= 100
       if (screenMatch) dispatch({ type: 'SET_HEIGHT', payload: savedSize.height })
     }
-  }, [])
+  }, [preferences.chat.pinned, preferences.chat.size])
 
   // ── Cleanup lingering drag listeners on unmount ──
   useEffect(() => {
@@ -125,6 +129,7 @@ export function useDockState({ triggerRef, drawerRef, onSizeChange }: UseDockSta
       document.removeEventListener('mousemove', onMove)
       document.removeEventListener('mouseup', onUp)
       dragListenersRef.current = null
+      userTouchedRef.current = true
       dispatch({ type: 'SET_HEIGHT', payload: latestHeight })
       setPreference('chat.size', {
         height: latestHeight,
@@ -138,17 +143,20 @@ export function useDockState({ triggerRef, drawerRef, onSizeChange }: UseDockSta
   }
 
   function handleToggleSize() {
+    userTouchedRef.current = true
     const nextIsLarge = !isLarge
     dispatch({ type: 'TOGGLE_SIZE' })
     onSizeChange?.(nextIsLarge)
   }
 
   function handleCollapse() {
+    userTouchedRef.current = true
     if (isLarge) onSizeChange?.(false)
     dispatch({ type: 'COLLAPSE' })
   }
 
   function handlePinToggle() {
+    userTouchedRef.current = true
     if (isPinned) {
       setPreference('chat.pinned', false)
       dispatch({ type: 'UNPIN' })
@@ -159,6 +167,7 @@ export function useDockState({ triggerRef, drawerRef, onSizeChange }: UseDockSta
   }
 
   function handleExpand() {
+    userTouchedRef.current = true
     dispatch({ type: 'EXPAND' })
   }
 

@@ -74,7 +74,12 @@ export async function updateUserPreferences(
         },
       };
       if (Object.keys(unset).length > 0) update["$unset"] = unset;
-      await col.updateOne({ _id: { $eq: id } }, update);
+      const result = await col.updateOne({ _id: { $eq: id } }, update);
+      if (result.matchedCount === 0) {
+        // No user document — deleted account or a race. Fail loudly rather than
+        // return default preferences that the client would treat as authoritative.
+        throw new Error(`updateUserPreferences: no user matched _id ${userId}`);
+      }
       return readResolved(id);
     },
   );

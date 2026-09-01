@@ -178,6 +178,70 @@ describe('usePreferences — graceful degradation', () => {
     setSpy.mockRestore()
   })
 
+  it('re-sends a failed delta on the next change, without dropping either key', async () => {
+    let failNextPatch = true
+    const spy = installFetch((url, init) => {
+      if (url.includes('/api/me/preferences') && (!init || init.method === undefined)) {
+        return resolved(DEFAULT_PREFERENCES as unknown as Record<string, unknown>)
+      }
+      if (init?.method === 'PATCH') {
+        if (failNextPatch) {
+          failNextPatch = false
+          return new MockFetchResponse('{}', { status: 500 })
+        }
+        return resolved(DEFAULT_PREFERENCES as unknown as Record<string, unknown>)
+      }
+      return new MockFetchResponse('{}', { status: 404 })
+    })
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    const { result } = renderHook(() => usePreferences(), {
+      wrapper: makePreferencesWrapper('u1'),
+    })
+    await waitFor(() => expect(result.current.ready).toBe(true))
+    await act(async () => { await Promise.resolve() })
+    const before = patchCalls(spy).length
+
+    jest.useFakeTimers()
+    act(() => result.current.setPreference('dice.sendToChat', true))
+    await act(async () => { jest.runOnlyPendingTimers() }) // PATCH #1 → 500, re-queued
+    act(() => result.current.setPreference('dice.disableAnimation', true))
+    await act(async () => { jest.runOnlyPendingTimers() }) // PATCH #2 → carries both
+    jest.useRealTimers()
+    await act(async () => { await Promise.resolve() })
+
+    const sent = patchCalls(spy).slice(before)
+    const last = JSON.parse((sent[sent.length - 1][1] as RequestInit).body as string)
+    expect(last).toMatchObject({
+      dice: { sendToChat: true, disableAnimation: true },
+    })
+  })
+
+  it('renders preference-bound state from the mirror before the GET resolves', async () => {
+    let releaseGet: () => void = () => {}
+    const gate = new Promise<void>((r) => { releaseGet = r })
+    installFetch((url, init) => {
+      if (url.includes('/api/me/preferences') && (!init || init.method === undefined)) {
+        return gate.then(() => resolved(DEFAULT_PREFERENCES as unknown as Record<string, unknown>))
+      }
+      return resolved(DEFAULT_PREFERENCES as unknown as Record<string, unknown>)
+    })
+    LocalStore.set(PREFERENCES_MIRROR_KEY, {
+      ...DEFAULT_PREFERENCES,
+      dice: { ...DEFAULT_PREFERENCES.dice, sendToChat: true },
+    })
+
+    const { result } = renderHook(() => usePreferences(), {
+      wrapper: makePreferencesWrapper('u1'),
+    })
+
+    // First paint: mirror value is visible, network has not resolved yet.
+    expect(result.current.ready).toBe(false)
+    expect(result.current.preferences.dice.sendToChat).toBe(true)
+
+    await act(async () => { releaseGet(); await Promise.resolve() })
+    await waitFor(() => expect(result.current.ready).toBe(true))
+  })
+
   it('keeps the value and logs when the PATCH fails', async () => {
     const spy = installFetch((url, init) => {
       if (url.includes('/api/me/preferences') && (!init || init.method === undefined)) {

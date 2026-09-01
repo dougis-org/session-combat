@@ -77,6 +77,38 @@ function mergeDelta(
   ;(target[domain] as Record<string, unknown>)[key] = value
 }
 
+/** Every known preference path — used to fold one sparse delta over another per-key. */
+const ALL_PATHS: readonly PreferencePath[] = [
+  'dice.sendToChat',
+  'dice.disableAnimation',
+  'dice.color',
+  'chat.pinned',
+  'chat.size',
+]
+
+/**
+ * Deep-merge `incoming` onto `base`, key by key. A shallow `{ ...base, ...incoming }`
+ * would replace a whole domain object (`dice`, `chat`) and silently drop sibling keys —
+ * e.g. re-queuing a failed `dice.color` write would wipe a pending `dice.sendToChat`.
+ * `base` wins only where `incoming` has no value for that exact path.
+ */
+function foldDelta(
+  base: DeepPartial<PreferenceValues>,
+  incoming: DeepPartial<PreferenceValues>,
+): DeepPartial<PreferenceValues> {
+  const out: DeepPartial<PreferenceValues> = {}
+  for (const path of ALL_PATHS) {
+    const fromIncoming = getAt(incoming, path)
+    if (fromIncoming !== undefined) {
+      mergeDelta(out, path, fromIncoming)
+      continue
+    }
+    const fromBase = getAt(base, path)
+    if (fromBase !== undefined) mergeDelta(out, path, fromBase)
+  }
+  return out
+}
+
 function getAt(source: DeepPartial<PreferenceValues>, path: PreferencePath): unknown {
   const [domain, key] = splitPath(path)
   const sub = source[domain] as Record<string, unknown> | undefined
@@ -123,11 +155,22 @@ export function PreferencesProvider({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!res.ok) throw new Error(`PATCH ${ENDPOINT} → ${res.status}`)
+      if (res.ok) return
+      if (res.status >= 400 && res.status < 500) {
+        // Permanent: this body will never be accepted. Drop it rather than
+        // re-queue forever (which would also poison every later flush).
+        console.error(
+          `[preferences] server rejected preference update (${res.status}); discarding`,
+          body,
+        )
+        return
+      }
+      throw new Error(`PATCH ${ENDPOINT} → ${res.status}`)
     } catch (err) {
       console.warn('[preferences] failed to persist preference change; will retry', err)
-      // Re-queue so the next setPreference / hydration retries.
-      pendingRef.current = { ...body, ...pendingRef.current }
+      // Re-queue (deep, per-key) so the next setPreference / hydration retries
+      // without clobbering deltas queued while this request was in flight.
+      pendingRef.current = foldDelta(body, pendingRef.current)
     }
   }, [userId])
 
@@ -221,13 +264,21 @@ export function PreferencesProvider({
         mergeDelta(adoption, path, local)
       }
 
-      safeSet(PREFERENCES_MIRROR_KEY, reconciled)
-      setPreferences(reconciled)
-      prefsRef.current = reconciled
+      // Anything the user changed while the GET was in flight is newer than the
+      // server snapshot — re-apply it on top of the reconciled result.
+      let applied = reconciled
+      for (const path of ALL_PATHS) {
+        const pending = getAt(pendingRef.current, path)
+        if (pending !== undefined) applied = withPath(applied, path, pending)
+      }
+
+      safeSet(PREFERENCES_MIRROR_KEY, applied)
+      setPreferences(applied)
+      prefsRef.current = applied
       setReady(true)
 
       if (!isEmptyDelta(adoption)) {
-        pendingRef.current = { ...adoption, ...pendingRef.current }
+        pendingRef.current = foldDelta(adoption, pendingRef.current)
       }
       void flush()
     })()
