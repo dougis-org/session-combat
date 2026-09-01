@@ -6,6 +6,18 @@ import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { animatedDiceCount, toDiceBoxNotation } from '@/lib/dice/toDiceBoxNotation'
 import { diceAnimationScale } from '@/lib/dice/diceAnimationScale'
 import { reconcileDiceFaces, type SettledDie } from '@/lib/dice/reconcileDiceFaces'
+import { DEFAULT_COLORSET, DEFAULT_MATERIAL } from '@/lib/dice/diceAppearance'
+
+/** Resolved 3D dice appearance passed through to the engine's `theme_*` options. */
+export interface DiceAppearanceOptions {
+  colorset: string
+  material: string
+}
+
+const DEFAULT_APPEARANCE: DiceAppearanceOptions = {
+  colorset: DEFAULT_COLORSET,
+  material: DEFAULT_MATERIAL,
+}
 
 /** `'idle'` while the 3D path is (or may be) usable; `'unsupported'` once it has failed. */
 export type DiceAnimationStatus = 'idle' | 'unsupported'
@@ -99,9 +111,16 @@ export interface DiceAnimation {
   teardown: () => void
 }
 
-export function useDiceAnimation(): DiceAnimation {
+export function useDiceAnimation(
+  appearance: DiceAppearanceOptions = DEFAULT_APPEARANCE,
+): DiceAnimation {
   const [status, setStatus] = useState<DiceAnimationStatus>('idle')
   const boxRef = useRef<DiceBoxLike | null>(null)
+  // Kept in a ref so `run()` reads the latest choice without changing its identity — the
+  // next roll always builds a fresh `DiceBox` (per-run teardown), so a mid-open change just
+  // takes effect on the following roll.
+  const appearanceRef = useRef(appearance)
+  appearanceRef.current = appearance
   const unsupportedRef = useRef(false)
   const loggedRef = useRef(false)
   const mismatchLoggedRef = useRef(false)
@@ -167,6 +186,9 @@ export function useDiceAnimation(): DiceAnimation {
           sounds: false,
           shadows: false,
           iterationLimit: ITERATION_LIMIT,
+          theme_colorset: appearanceRef.current.colorset,
+          theme_customColorset: null,
+          theme_material: appearanceRef.current.material,
         }) as unknown as DiceBoxLike
         await withTimeout(box.initialize(), INIT_TIMEOUT_MS)
       } catch (err) {

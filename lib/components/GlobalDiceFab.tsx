@@ -7,6 +7,7 @@ import { DiceD20Icon } from '@/lib/components/icons/dice'
 import { DiePoolButton } from '@/lib/components/dice/DiePoolButton'
 import { PercentileButton } from '@/lib/components/dice/PercentileButton'
 import { DiceRollOverlay } from '@/lib/components/dice/DiceRollOverlay'
+import { DiceAppearanceModal } from '@/lib/components/dice/DiceAppearanceModal'
 import { onPresenceChange, type DicePresence } from '@/lib/dice/diceSessionBridge'
 import { useDicePoolState, type BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { useRollSubmission } from '@/lib/dice/useRollSubmission'
@@ -25,9 +26,11 @@ export function GlobalDiceFab() {
   const [presence, setPresence] = useState<DicePresence | null>(null)
   const [sendState, setSendState] = useState<SendState>('idle')
   const [triggerTooltip, setTriggerTooltip] = useState(false)
+  const [appearanceOpen, setAppearanceOpen] = useState(false)
 
   const triggerRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const appearanceTriggerRef = useRef<HTMLButtonElement>(null)
   // Guards against a second Roll/percentile click landing while `performRoll` is still
   // mid-flight — `sendState === 'pending'` only covers the shared-submit path, not a
   // local roll, so without this two overlays / animations could stack.
@@ -36,7 +39,16 @@ export function GlobalDiceFab() {
   const dp = useDicePoolState({ triggerRef, panelRef })
   const { submitRoll } = useRollSubmission(presence?.campaignId ?? '')
   const prefs = useDiceFabPreferences()
-  const animation = useDiceAnimation()
+  const animation = useDiceAnimation({
+    colorset: prefs.diceColorset,
+    material: prefs.diceMaterial,
+  })
+
+  // Restore focus to the appearance trigger when the appearance modal closes.
+  const closeAppearance = useCallback(() => {
+    setAppearanceOpen(false)
+    appearanceTriggerRef.current?.focus()
+  }, [])
 
   useEffect(() => onPresenceChange(setPresence), [])
 
@@ -194,6 +206,14 @@ export function GlobalDiceFab() {
               Disable animation
             </label>
             <button
+              ref={appearanceTriggerRef}
+              type="button"
+              onClick={() => setAppearanceOpen(true)}
+              className="text-xs text-gray-300 hover:text-white underline self-start"
+            >
+              Dice appearance
+            </button>
+            <button
               type="button"
               onClick={handleRoll}
               disabled={dp.poolTotal === 0 || sendState === 'pending'}
@@ -226,6 +246,15 @@ export function GlobalDiceFab() {
             )}
           </div>
         </div>
+      )}
+      {dp.isOpen && appearanceOpen && (
+        <DiceAppearanceModal
+          colorset={prefs.diceColorset}
+          material={prefs.diceMaterial}
+          onColorsetChange={prefs.setDiceColorset}
+          onMaterialChange={prefs.setDiceMaterial}
+          onClose={closeAppearance}
+        />
       )}
       {overlayRoll && (
         <DiceRollOverlay

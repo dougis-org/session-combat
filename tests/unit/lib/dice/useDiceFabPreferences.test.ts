@@ -24,6 +24,10 @@ beforeEach(() => {
   jest.clearAllMocks()
 })
 
+afterEach(() => {
+  jest.restoreAllMocks()
+})
+
 describe('useDiceFabPreferences — disableAnimation resolution', () => {
   const table: Array<{ stored: boolean | null; reduce: boolean; resolved: boolean }> = [
     { stored: null, reduce: true, resolved: true },
@@ -85,6 +89,82 @@ describe('useDiceFabPreferences — disableAnimation persists across remount', (
     const second = renderHook(() => useDiceFabPreferences())
     expect(second.result.current.disableAnimation).toBe(true)
     expect(second.result.current.disableAnimationChoice).toBe(true)
+  })
+})
+
+describe('useDiceFabPreferences — dice appearance (tasks 3.1 / 3.2)', () => {
+  beforeEach(() => mockMatchMedia(false))
+
+  it('3.2-a defaults to white / glass with empty storage', () => {
+    const { result } = renderHook(() => useDiceFabPreferences())
+    expect(result.current.diceColorset).toBe('white')
+    expect(result.current.diceMaterial).toBe('glass')
+  })
+
+  it('3.2-b setDiceColorset persists under dice-fab-colorset and survives remount', () => {
+    const setSpy = jest.spyOn(LocalStore, 'set')
+    const first = renderHook(() => useDiceFabPreferences())
+    act(() => first.result.current.setDiceColorset('bloodmoon'))
+    expect(first.result.current.diceColorset).toBe('bloodmoon')
+    expect(setSpy).toHaveBeenCalledWith('dice-fab-colorset', 'bloodmoon')
+    first.unmount()
+
+    const second = renderHook(() => useDiceFabPreferences())
+    expect(second.result.current.diceColorset).toBe('bloodmoon')
+  })
+
+  it('3.2-c setDiceMaterial persists under dice-fab-material and survives remount', () => {
+    const setSpy = jest.spyOn(LocalStore, 'set')
+    const first = renderHook(() => useDiceFabPreferences())
+    act(() => first.result.current.setDiceMaterial('metal'))
+    expect(first.result.current.diceMaterial).toBe('metal')
+    expect(setSpy).toHaveBeenCalledWith('dice-fab-material', 'metal')
+    first.unmount()
+
+    const second = renderHook(() => useDiceFabPreferences())
+    expect(second.result.current.diceMaterial).toBe('metal')
+  })
+
+  it('3.2-d junk in storage resolves to the defaults without throwing', () => {
+    LocalStore.set('dice-fab-colorset', 'bogus')
+    LocalStore.set('dice-fab-material', 7)
+    const { result } = renderHook(() => useDiceFabPreferences())
+    expect(result.current.diceColorset).toBe('white')
+    expect(result.current.diceMaterial).toBe('glass')
+  })
+
+  it('3.2-e a throwing LocalStore.get still initializes to defaults with one warn per key', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    jest.spyOn(LocalStore, 'get').mockImplementation(() => {
+      throw new Error('nope')
+    })
+    const { result } = renderHook(() => useDiceFabPreferences())
+    expect(result.current.diceColorset).toBe('white')
+    expect(result.current.diceMaterial).toBe('glass')
+    expect(warnSpy.mock.calls.filter(c => String(c[0]).includes('dice-fab-colorset'))).toHaveLength(1)
+    expect(warnSpy.mock.calls.filter(c => String(c[0]).includes('dice-fab-material'))).toHaveLength(1)
+    warnSpy.mockRestore()
+  })
+
+  it('3.2-f a throwing LocalStore.set does not throw and keeps the in-session value', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    const { result } = renderHook(() => useDiceFabPreferences())
+    jest.spyOn(LocalStore, 'set').mockImplementation(() => {
+      throw new Error('nope')
+    })
+    expect(() => act(() => result.current.setDiceColorset('fire'))).not.toThrow()
+    expect(result.current.diceColorset).toBe('fire')
+    expect(warnSpy.mock.calls.filter(c => String(c[0]).includes('dice-fab-colorset'))).toHaveLength(1)
+    warnSpy.mockRestore()
+  })
+
+  it('3.2-g existing sendToChat / disableAnimation behavior is unchanged', () => {
+    const { result } = renderHook(() => useDiceFabPreferences())
+    expect(result.current.sendToChat).toBe(false)
+    act(() => result.current.setSendToChat(true))
+    expect(result.current.sendToChat).toBe(true)
+    act(() => result.current.setDisableAnimation(true))
+    expect(result.current.disableAnimation).toBe(true)
   })
 })
 
