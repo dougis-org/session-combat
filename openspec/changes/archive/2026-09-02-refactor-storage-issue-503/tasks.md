@@ -33,7 +33,7 @@
   All subsequent steps run here. Never checkout a branch in the primary checkout.
 - [x] **Step 2 — Confirm branch pushed:** `git status` shows the branch tracking
   `origin/refactor-storage-issue-503`; if not, `git push -u origin refactor-storage-issue-503`.
-- [ ] **Issue lifecycle: mark in-progress:** run
+- [x] **Issue lifecycle: mark in-progress:** run
   `gh issue edit 503 --add-label "in-progress"`. Then discover the linked
   GitHub Project (`gh project list --owner dougis-org --format json`), resolve
   the status field option matching "In Progress"
@@ -192,12 +192,12 @@
       (campaign access, member management) — otherwise note why skipped
 - [x] Run type checks (`tsc --noEmit` / project typecheck script)
 - [x] Run build
-- [ ] Run security / code-quality checks required by project standards
+- [x] Run security / code-quality checks required by project standards
       (Verity pre-commit/pre-push gate, Codacy). Fix findings — do not `verity
       waive` on agent judgment; waive only to relay a human-accepted risk with
       `--reason` citing the source.
-- [ ] All completed tasks marked complete
-- [ ] All steps in [Remote push validation]
+- [x] All completed tasks marked complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -222,23 +222,23 @@ If **ANY** required step fails, iterate and fix before pushing.
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings
   addressed before the final commit
-- [ ] Commit all changes to `refactor-storage-issue-503` and push
-- [ ] Open PR from `refactor-storage-issue-503` to `main`. **PR body MUST include
+- [x] Commit all changes to `refactor-storage-issue-503` and push
+- [x] Open PR from `refactor-storage-issue-503` to `main`. **PR body MUST include
   `Closes #503`.** Include a "Behavior changes" section listing every
   swallow→rethrow conversion and any inventory drift found in Sub-task A.
-- [ ] **Issue lifecycle: mark in-review:** run
+- [x] **Issue lifecycle: mark in-review:** run
   `gh issue edit 503 --add-label "in-review" --remove-label "in-progress"`, then
   move the project item to the "In Review" column (same discovery pattern; warn
   and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
   findings (commit, push, re-run) until zero remain. If findings persist after
   3+ iterations with no progress, report the stall with remaining findings and
   wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):**
+- [x] **Enable auto-merge only after the review gate passes (zero findings):**
   `gh pr merge <PR-URL> --auto --squash` (squash-only ruleset; NEVER `--admin`,
   NEVER bypass branch protection)
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state`
+- [x] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state`
   returns `MERGED`; if `CLOSED`, exit and notify the user. Never wait for a
   human to report the merge; never force-merge:
   1. **Build and tests** — run [Remote push validation]; fix failures, commit,
@@ -264,14 +264,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git fetch origin main` and confirm the squash
+- [x] From the primary checkout: `git fetch origin main` and confirm the squash
   commit for #503 is on `origin/main`
-- [ ] Verify the merged changes appear on `main` (`git log origin/main`)
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change
+- [x] Verify the merged changes appear on `main` (`git log origin/main`)
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update repository documentation impacted by the change
   (`docs/storage-refactor/` notes; any storage-layer doc referencing the god
   object)
-- [ ] Sync approved spec deltas into `openspec/specs/`: merge
+- [x] Sync approved spec deltas into `openspec/specs/`: merge
   `specs/storage-domain-decomposition/spec.md` to
   `openspec/specs/storage-domain-decomposition/spec.md` (new capability), and
   merge `specs/storage-op-telemetry-foundation/spec.md`'s ADDED/MODIFIED
@@ -281,20 +281,20 @@ Blocking resolution flow:
   `../../tasks.md` likewise. (Known gotcha: several
   `openspec/specs/*/spec.md` are malformed and `openspec archive` may abort —
   use `--skip-specs` and hand-merge if needed.)
-- [ ] Archive: move `openspec/changes/refactor-storage-issue-503/` to
+- [x] Archive: move `openspec/changes/refactor-storage-issue-503/` to
   `openspec/changes/archive/YYYY-MM-DD-refactor-storage-issue-503/` and stage
   both the new location and the deletion in a **single** commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-refactor-storage-issue-503/`
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-refactor-storage-issue-503/`
   exists and `openspec/changes/refactor-storage-issue-503/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-refactor-storage-issue-503`
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-refactor-storage-issue-503`
   then `git push -u origin doc/archive-YYYY-MM-DD-refactor-storage-issue-503`
   (do NOT push directly to `main`)
-- [ ] Open a PR from the doc branch to `main` titled
+- [x] Open a PR from the doc branch to `main` titled
   `docs: archive refactor-storage-issue-503 (YYYY-MM-DD)`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR:
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR:
   `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
-- [ ] Monitor the doc PR until merged (same loop as the implementation PR)
-- [ ] Remove the worktree and prune branches:
+- [x] Monitor the doc PR until merged (same loop as the implementation PR)
+- [x] Remove the worktree and prune branches:
   `git worktree remove .worktrees/refactor-storage-issue-503 --force` (the
   `--force` is required — the `openspec-shared` submodule blocks a plain
   removal), then `git fetch --prune` and
