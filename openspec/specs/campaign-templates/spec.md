@@ -30,6 +30,13 @@ The system SHALL support storing `EncounterTemplate` definitions directly within
 - **When** the seed script executes
 - **Then** the `campaignTemplates` collection in MongoDB contains the updated template including the `encounters` array.
 
+#### Scenario: G2 catalog entries ship with full encounter arrays
+
+- **Given** the `CAMPAIGN_CATALOG` in `lib/scripts/seedCampaignTemplates.ts` defines entries for the 5 G2 campaigns (WDH, SKT, OotA, DIP, PaBtSO)
+- **When** the seed script is executed
+- **Then** each G2 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output (`wdhEncounters()`, `sktEncounters()`, `ootEncounters()`, `dipEncounters()`, `pabtsoEncounters()`)
+- **Then** every encounter's `monsters` array contains full `Monster` stat blocks built via `findCustomMonsterById` + `toEncounterMonster(s)`
+
 ## REMOVED Requirements
 
 ### Requirement: REMOVED None
