@@ -672,6 +672,75 @@ describe("populate-campaigns-g4 custom monster invariants", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// populate-campaigns-g5a — Classic & modern setting campaigns (sub-group A)
+// Maps to openspec/changes/populate-campaigns-g5/specs/populate-campaigns-g5/spec.md
+// ---------------------------------------------------------------------------
+
+describe("populate-campaigns-g5a encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  const G5A_CHAPTERS: Record<string, number> = {
+    "Planescape: Turn of Fortune's Wheel": 14,
+    "Dragonlance: Shadow of the Dragon Queen": 7,
+    "Spelljammer: Light of Xaryxis": 4,
+    "The Temple of Elemental Evil": 6,
+    "Keep on the Borderlands": 3,
+    "Queen of the Spiders": 7,
+    "Return to the Tomb of Horrors": 3,
+    "Against the Cult of the Reptile God": 3,
+  };
+
+  it("every G5a campaign meets the shared encounter-quality contract", async () => {
+    for (const [name, chapters] of Object.entries(G5A_CHAPTERS)) {
+      const seeded = await captureTemplate(name);
+      assertCampaignEncounterContract(seeded, name, chapters);
+    }
+  });
+
+  it("each G5a campaign has at least one encounter per chapter", async () => {
+    for (const [name, chapters] of Object.entries(G5A_CHAPTERS)) {
+      const seeded = await captureTemplate(name);
+      expect(seeded.encounters.length).toBeGreaterThanOrEqual(chapters);
+      for (const enc of seeded.encounters) expect(enc.monsters.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("G5a campaign BBEGs are present in their encounters", async () => {
+    const bbeg: Record<string, string> = {
+      "Planescape: Turn of Fortune's Wheel": "Tulpa Puppet Master",
+      "Dragonlance: Shadow of the Dragon Queen": "The Blue Lady, Aspect of Takhisis",
+      "Spelljammer: Light of Xaryxis": "Xhalcaraz, Emperor of Xaryxis",
+      "The Temple of Elemental Evil": "Zuggtmoy, Lady of Fungi",
+      "Keep on the Borderlands": "Zargon, the One-Eyed Evil",
+      "Queen of the Spiders": "Lolth, the Spider Queen",
+      "Return to the Tomb of Horrors": "Acererak, True Demilich Ascendant",
+      "Against the Cult of the Reptile God": "Explictica Defilus, the Reptile God",
+    };
+    for (const [campaign, monsterName] of Object.entries(bbeg)) {
+      const seeded = await captureTemplate(campaign);
+      expect(allMonsters(seeded).map((m) => m.name)).toContain(monsterName);
+    }
+  });
+
+  it("Dragonlance reuses the shared Lord Soth stat block", async () => {
+    const seeded = await captureTemplate("Dragonlance: Shadow of the Dragon Queen");
+    expect(hasTemplate(seeded, "cm-lord-soth")).toBe(true);
+  });
+
+  it("every monster in a G5a encounter uses only canonical damage types", async () => {
+    for (const name of Object.keys(G5A_CHAPTERS)) {
+      const seeded = await captureTemplate(name);
+      for (const mon of allMonsters(seeded)) {
+        for (const arr of [mon.damageResistances, mon.damageImmunities, mon.damageVulnerabilities]) {
+          for (const v of arr || []) expect(CANONICAL_DAMAGE_TYPES.has(v)).toBe(true);
+        }
+      }
+    }
+  });
+});
+
 describe("runCli", () => {
   let exitSpy: jest.SpyInstance;
   let logSpy: jest.SpyInstance;

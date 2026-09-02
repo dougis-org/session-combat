@@ -143,6 +143,72 @@ describe('populate-campaigns-g3 monsters', () => {
   });
 });
 
+describe('populate-campaigns-g5a monsters', () => {
+  const G5A_SOURCES = [
+    "Planescape: Turn of Fortune's Wheel",
+    'Dragonlance: Shadow of the Dragon Queen',
+    'Spelljammer: Light of Xaryxis',
+    'The Temple of Elemental Evil',
+    'Keep on the Borderlands',
+    'Queen of the Spiders',
+    'Return to the Tomb of Horrors',
+    'Against the Cult of the Reptile God',
+  ];
+  const g5a = CUSTOM_MONSTERS.filter((m) => G5A_SOURCES.includes(m.source ?? ''));
+
+  it('adds 30-60 new G5a entries, all cm- prefixed with a G5a source', () => {
+    expect(g5a.length).toBeGreaterThanOrEqual(30);
+    expect(g5a.length).toBeLessThanOrEqual(60);
+    for (const m of g5a) {
+      expect(m.id).toMatch(/^cm-/);
+      expect(G5A_SOURCES).toContain(m.source);
+    }
+  });
+
+  it('includes the campaign BBEGs', () => {
+    const ids = CUSTOM_MONSTERS.map((m) => m.id);
+    for (const id of [
+      'cm-totfw-dispater',
+      'cm-totfw-tulpa-puppet-master',
+      'cm-dsotdq-blue-lady',
+      'cm-lox-xhalcaraz',
+      'cm-toee-iuz',
+      'cm-b2-zargon',
+      'cm-qots-lolth',
+      'cm-qots-eclavdra',
+      'cm-rtoh-acererak-true-demilich',
+      'cm-n1-explictica-defilus',
+    ]) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  it('every G5a monster has passive Perception as a string when senses are defined', () => {
+    for (const m of g5a) {
+      if (!m.senses) continue;
+      expect(typeof m.senses['passive Perception']).toBe('string');
+    }
+  });
+
+  it('every G5a monster damage array uses only canonical DamageType values', () => {
+    const canonical: DamageType[] = [
+      'acid', 'bludgeoning', 'cold', 'fire', 'force',
+      'lightning', 'necrotic', 'piercing', 'poison',
+      'psychic', 'radiant', 'slashing', 'thunder',
+    ];
+    for (const m of g5a) {
+      for (const arr of [m.damageResistances, m.damageImmunities, m.damageVulnerabilities]) {
+        for (const v of arr ?? []) expect(canonical).toContain(v);
+      }
+    }
+  });
+
+  it('every G5a monster id is unique and collision-free with existing custom monsters', () => {
+    const g5aIds = g5a.map((m) => m.id);
+    expect(new Set(g5aIds).size).toBe(g5aIds.length);
+  });
+});
+
 describe('findCustomMonsterById', () => {
   it('returns the template when id matches', () => {
     const found = findCustomMonsterById('cm-vecna');
