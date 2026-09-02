@@ -1,6 +1,7 @@
 'use client';
 
 import { DropdownMenu } from 'radix-ui';
+import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { deriveUserMenuDisplay } from './userMenuDisplay';
 
@@ -16,6 +17,8 @@ export function UserMenu() {
   if (!isAuthenticated || loading) return null;
 
   const { label, accessibleName } = deriveUserMenuDisplay(user?.username);
+
+  const menuItemClass = "cursor-pointer rounded px-3 py-2 outline-none block w-full hover:bg-gray-800 hover:text-white focus:bg-gray-800 focus:text-white data-[highlighted]:bg-gray-800 data-[highlighted]:text-white";
 
   return (
     <DropdownMenu.Root>
@@ -34,6 +37,10 @@ export function UserMenu() {
           collisionPadding={8}
           className="z-50 min-w-[10rem] rounded-md border border-gray-800 bg-gray-950 p-1 text-sm text-gray-300 shadow-lg"
         >
+          <DropdownMenu.Item asChild className={menuItemClass}>
+            <Link href="/profile">Profile & Settings</Link>
+          </DropdownMenu.Item>
+          <DropdownMenu.Separator className="my-1 h-px bg-gray-800" />
           <DropdownMenu.Item
             data-testid="logout-button"
             // useAuth().logout() already swallows and logs its own failures;
@@ -42,7 +49,7 @@ export function UserMenu() {
             onSelect={() => {
               void logout().catch(() => {});
             }}
-            className="cursor-pointer rounded px-3 py-2 outline-none hover:bg-gray-800 hover:text-white focus:bg-gray-800 focus:text-white data-[highlighted]:bg-gray-800 data-[highlighted]:text-white"
+            className={menuItemClass}
           >
             Logout
           </DropdownMenu.Item>

@@ -21,12 +21,15 @@ describe('isValidPreferenceValue', () => {
     expect(isValidPreferenceValue('dice.disableAnimation', null)).toBe(true)
     expect(isValidPreferenceValue('chat.size', dockSize())).toBe(true)
     expect(isValidPreferenceValue('dice.color', '#a1b')).toBe(true)
+    expect(isValidPreferenceValue('dice.surface', 'wood')).toBe(true)
+    expect(isValidPreferenceValue('dice.surface', null)).toBe(true)
   })
 
   it('rejects wrong types, out-of-range sizes, and unknown paths', () => {
     expect(isValidPreferenceValue('dice.sendToChat', 1)).toBe(false)
     expect(isValidPreferenceValue('chat.size', dockSize({ height: DOCK_MIN_HEIGHT - 1 }))).toBe(false)
     expect(isValidPreferenceValue('dice.color', '<script>')).toBe(false)
+    expect(isValidPreferenceValue('dice.surface', 123)).toBe(false)
     expect(isValidPreferenceValue('totally.unknown', 'x')).toBe(false)
   })
 })
@@ -34,7 +37,7 @@ describe('isValidPreferenceValue', () => {
 describe('DEFAULT_PREFERENCES', () => {
   it('has exactly the v1 keys with expected defaults', () => {
     expect(DEFAULT_PREFERENCES).toEqual({
-      dice: { sendToChat: false, disableAnimation: null, color: null },
+      dice: { sendToChat: false, disableAnimation: null, color: null, surface: null },
       chat: { pinned: false, size: null },
     })
     expect(PREFERENCES_SCHEMA_VERSION).toBe(1)
@@ -109,10 +112,12 @@ describe('validatePreferencePatch — acceptances', () => {
     }
   })
 
-  it('accepts dice.color null and a valid short hex', () => {
+  it('accepts dice.color and dice.surface null and valid strings', () => {
     expect(validatePreferencePatch({ dice: { color: null } }).ok).toBe(true)
     expect(validatePreferencePatch({ dice: { color: '#a1b' } }).ok).toBe(true)
     expect(validatePreferencePatch({ dice: { color: '#aabbcc' } }).ok).toBe(true)
+    expect(validatePreferencePatch({ dice: { surface: null } }).ok).toBe(true)
+    expect(validatePreferencePatch({ dice: { surface: 'wood' } }).ok).toBe(true)
   })
 
   it('accepts a valid DockSize and chat.size null', () => {

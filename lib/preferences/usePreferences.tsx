@@ -28,6 +28,7 @@ export type PreferencePath =
   | 'dice.sendToChat'
   | 'dice.disableAnimation'
   | 'dice.color'
+  | 'dice.surface'
   | 'chat.pinned'
   | 'chat.size'
 
@@ -83,6 +84,7 @@ const ALL_PATHS: readonly PreferencePath[] = [
   'dice.sendToChat',
   'dice.disableAnimation',
   'dice.color',
+  'dice.surface',
   'chat.pinned',
   'chat.size',
 ]
