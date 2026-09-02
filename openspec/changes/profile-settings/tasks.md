@@ -115,3 +115,10 @@ Captured during explore review of PR #674 / this branch:
   an invalid state while the text fails `HEX_COLOR` and only call `setPreference` once the
   value is valid or empty (or switch to a swatch / `<input type="color">`). Today an invalid
   entry is dropped with only a `console.warn` and no user feedback. (design.md Risks)
+- [ ] FU-4: Close the `ProfilePage` test-coverage gap — `page.test.tsx` currently asserts
+  only the `dice.sendToChat` checkbox out of the five controls it renders. Add tests for the
+  `dice.disableAnimation` select, `dice.surface` select, `dice.color` input (valid / clear /
+  invalid-not-saved), and `chat.pinned` checkbox, plus a "renders stored non-default values"
+  case. Also add an integration test for `PATCH /api/me/preferences` with `dice.surface`
+  (spec Scenario "Save valid surface preference" is only covered at the validator unit level).
+  Full list in `tests.md`. (This is the coverage gap noted on PR #674.)
