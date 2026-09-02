@@ -8,6 +8,10 @@ import { DAMAGE_TYPE_GROUPS, DAMAGE_EFFECT_PRESETS, DamageType } from '@/lib/con
 import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import { TargetActionModal } from '@/lib/components/TargetActionModal';
+import { usesDeathSaves, enterDying, clearDeathState, applyDamageWhileDowned, applyDeathSaveRoll, toggleDeathSaveSlot, lifeStateDisplay } from '@/lib/combat/deathSaves';
+import type { DeathSaveKind, DeathSaveSlotIndex } from '@/lib/combat/deathSaves';
+import { DeathSaveTracker } from '@/lib/components/DeathSaveTracker';
+import { rollDie } from '@/lib/utils/dice';
 
 export interface CombatantCardProps {
   combatId: string;
@@ -241,6 +245,7 @@ export function CombatantCard(props: CombatantCardProps) {
 
   const [showConditions, setShowConditions] = useState(false);
   const [hpAdjustment, setHpAdjustment] = useState('');
+  const [deathSaveNote, setDeathSaveNote] = useState<string | null>(null);
   const [showTargeting, setShowTargeting] = useState(false);
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
@@ -268,14 +273,30 @@ export function CombatantCard(props: CombatantCardProps) {
         concentrationUpdates.pendingConSaveDC = dc;
         onConSaveRequired?.(dc);
       }
-      onUpdate({ hp: resultHp, tempHp: resultTempHp, ...concentrationUpdates });
+      let deathSaveUpdates: Partial<CombatantState> = {};
+      if (usesDeathSaves(combatant)) {
+        if ((combatant.lifeState === 'dying' || combatant.lifeState === 'stable') && rawDamage > 0) {
+          // Damage while downed: T7 — the damage-entry UI has no critical-hit
+          // control, so critical is always false; the `damage >= maxHp`
+          // instant-death rule still applies.
+          deathSaveUpdates = applyDamageWhileDowned(combatant, { critical: false, damage: rawDamage });
+        } else if (resultHp === 0 && !combatant.lifeState && effectiveDamage > 0) {
+          deathSaveUpdates = enterDying();
+          setDeathSaveNote(null);
+        }
+      }
+      onUpdate({ hp: resultHp, tempHp: resultTempHp, ...concentrationUpdates, ...deathSaveUpdates });
     } else {
       const result = calcApplyHealing(prevHp, combatant.maxHp, amount);
       if (result.hp !== prevHp) {
         pushHpHistory(combatId, combatant.id, { hp: prevHp, tempHp: prevTempHp, type: 'healing', amount, timestamp: Date.now() });
         setHistoryLength(getHpHistoryStack(combatId, combatant.id).length);
       }
-      onUpdate({ hp: result.hp });
+      const reviveUpdates: Partial<CombatantState> =
+        usesDeathSaves(combatant) && combatant.lifeState && result.hp >= 1
+          ? clearDeathState()
+          : {};
+      onUpdate({ hp: result.hp, ...reviveUpdates });
     }
   };
 
@@ -284,25 +305,49 @@ export function CombatantCard(props: CombatantCardProps) {
     setHpAdjustment(value);
   };
 
+  const handleDeathSaveToggle = (kind: DeathSaveKind, index: DeathSaveSlotIndex) => {
+    setDeathSaveNote(null);
+    onUpdate(toggleDeathSaveSlot(combatant, kind, index));
+  };
+
+  const handleDeathSaveRoll = (): number => {
+    const d20 = rollDie(20)[0];
+    const { note, ...updates } = applyDeathSaveRoll(combatant, d20);
+    setDeathSaveNote(note ?? null);
+    onUpdate(updates);
+    return d20;
+  };
+
+  // Combat HP adjustments are entered as free text; only accept a plain positive
+  // integer within a sane range before applying it to persisted combat state.
+  const MAX_HP_ADJUSTMENT = 1_000_000;
+  const parseHpAdjustment = (): number | null => {
+    const raw = hpAdjustment.trim();
+    if (!/^\d+$/.test(raw)) return null;
+    const amount = Number(raw);
+    if (!Number.isSafeInteger(amount) || amount < 1 || amount > MAX_HP_ADJUSTMENT) return null;
+    return amount;
+  };
+
   const applyDamage = () => {
-    const amount = parseInt(hpAdjustment) || 0;
-    if (amount > 0) {
+    const amount = parseHpAdjustment();
+    if (amount !== null) {
       adjustHp(-amount);
       setHpAdjustment('');
     }
   };
 
   const applyHeal = () => {
-    const amount = parseInt(hpAdjustment) || 0;
-    if (amount > 0) {
+    const amount = parseHpAdjustment();
+    if (amount !== null) {
       adjustHp(amount);
       setHpAdjustment('');
     }
   };
 
   const applySetTemp = () => {
-    const amount = parseInt(hpAdjustment) || 0;
-    if (amount > 0) {
+    const amount = parseHpAdjustment();
+    if (amount !== null) {
       const currentTempHp = combatant.tempHp ?? 0;
       const result = calcSetTempHp(currentTempHp, amount);
       if (result.tempHp === currentTempHp) {
@@ -329,12 +374,19 @@ export function CombatantCard(props: CombatantCardProps) {
     onUpdate({ hp: entry.hp, tempHp: entry.tempHp });
   };
 
+  const MAX_CONDITION_NAME_LENGTH = 100;
+  const MAX_CONDITION_DURATION = 10_000;
   const addCondition = () => {
-    const name = prompt('Condition name:');
-    if (!name) return;
+    const name = prompt('Condition name:')?.trim();
+    if (!name || name.length > MAX_CONDITION_NAME_LENGTH) return;
 
-    const durationStr = prompt('Duration in rounds (leave empty for permanent):');
-    const duration = durationStr ? parseInt(durationStr) : undefined;
+    const durationStr = prompt('Duration in rounds (leave empty for permanent):')?.trim() ?? '';
+    let duration: number | undefined;
+    if (durationStr) {
+      if (!/^\d+$/.test(durationStr)) return;
+      duration = Number(durationStr);
+      if (!Number.isSafeInteger(duration) || duration < 1 || duration > MAX_CONDITION_DURATION) return;
+    }
 
     const newCondition: StatusCondition = {
       id: crypto.randomUUID(),
@@ -407,8 +459,16 @@ export function CombatantCard(props: CombatantCardProps) {
     ? { backgroundImage: 'linear-gradient(to right, rgba(96, 165, 250, 0.18), rgba(96, 165, 250, 0.02))' }
     : { backgroundImage: 'linear-gradient(to right, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.02))' };
 
+  const life = lifeStateDisplay(combatant);
+  const lifeBadgeClass =
+    combatant.lifeState === 'dying'
+      ? 'bg-amber-800 text-amber-200'
+      : combatant.lifeState === 'stable'
+        ? 'bg-slate-700 text-slate-200'
+        : 'bg-gray-700 text-gray-300';
+
   return (
-    <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'}`} aria-current={isActive ? 'step' : undefined}>
+    <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'} ${life.greyed ? 'opacity-50' : ''}`} data-testid="combatant-card" data-life-state={combatant.lifeState ?? 'active'} aria-current={isActive ? 'step' : undefined}>
       <div className="flex justify-between items-start">
         <div className="flex-1">
           <div className="flex items-center gap-4 mb-2">
@@ -438,7 +498,18 @@ export function CombatantCard(props: CombatantCardProps) {
                   />
                 </svg>
               </button>
-              <h3 className="text-xl font-semibold">{combatant.name} {combatant.hp <= 0 && '☠️'}</h3>
+              <h3 className="text-xl font-semibold">
+                {combatant.name}
+                {life.badge && (
+                  combatant.lifeState ? (
+                    <span className={`ml-2 align-middle text-xs px-2 py-0.5 rounded-full font-semibold ${lifeBadgeClass}`} data-testid="life-state-badge">
+                      {life.badge}
+                    </span>
+                  ) : (
+                    <span className="ml-1"> {life.badge}</span>
+                  )
+                )}
+              </h3>
               <button
                 onClick={(e) => {
                   const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
@@ -594,6 +665,24 @@ export function CombatantCard(props: CombatantCardProps) {
             onUpdate={onUpdate}
           />
 
+          {usesDeathSaves(combatant) && life.showTracker && (
+            <DeathSaveTracker
+              successes={combatant.deathSaves?.successes ?? 0}
+              failures={combatant.deathSaves?.failures ?? 0}
+              onToggle={handleDeathSaveToggle}
+              onRoll={handleDeathSaveRoll}
+            />
+          )}
+
+          {deathSaveNote && (
+            <div
+              className="mt-1 text-xs text-green-300 font-semibold"
+              data-testid="death-save-note"
+            >
+              {deathSaveNote}
+            </div>
+          )}
+
           {combatant.concentratingOn && (
             <span
               className="inline-block text-xs bg-indigo-800 text-indigo-200 px-2 py-0.5 rounded-full font-semibold mt-1 mr-1"
@@ -652,6 +741,7 @@ export function CombatantCard(props: CombatantCardProps) {
                 <span className="text-sm text-purple-400 font-semibold">Targets:</span>
                 {combatant.targetIds.map(targetId => {
                   const target = combatantMap.get(targetId);
+                  const targetLife = target ? lifeStateDisplay(target) : null;
                   return target ? (
                     <div key={targetId} className="relative inline-block">
                       <button
@@ -671,7 +761,14 @@ export function CombatantCard(props: CombatantCardProps) {
                               <div>AC: {target.ac}</div>
                               <div className="flex items-center gap-1">
                                 HP: <span className={target.hp === 0 ? 'text-red-400' : 'text-gray-300'}>{target.hp}/{target.maxHp}</span>
-                                {target.hp === 0 && <span className="text-red-400 text-lg">☠</span>}
+                                {targetLife?.badge && (
+                                  <span
+                                    className={`text-xs font-semibold ${target.lifeState === 'dead' || !target.lifeState ? 'text-red-400' : 'text-gray-300'}`}
+                                    data-testid="target-life-state"
+                                  >
+                                    {targetLife.badge}
+                                  </span>
+                                )}
                               </div>
                             </div>
                             {target.conditions.length > 0 && (

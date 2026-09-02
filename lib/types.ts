@@ -565,6 +565,9 @@ export interface CombatantState extends CreatureStats {
   pendingConSaveDC?: number;
   initiativeAdvantage?: boolean;
   initiativeFlatBonus?: number;
+  // Death saving throws (player-only; absent = active/conscious)
+  deathSaves?: { successes: number; failures: number };
+  lifeState?: "dying" | "stable" | "dead";
 }
 
 export interface HpHistoryEntry {
