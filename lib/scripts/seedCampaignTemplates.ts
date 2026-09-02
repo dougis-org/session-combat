@@ -2847,6 +2847,235 @@ function wrathOfTheRighteousEncounters(): EncounterTemplate[] {
   ];
 }
 
+// ===========================================================================
+// populate-campaigns-g5a — encounter helpers
+// ===========================================================================
+
+/** Shared encounter-builder locals used by the G5a helpers below. */
+function g5aBuilders() {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+  const m = (
+    template: ReturnType<typeof requireCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof requireCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+  return { encounter, m, many, compact };
+}
+
+/** Planescape: Turn of Fortune's Wheel — 14-plane planar adventure path. */
+function totfwEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const rogue = requireCustomMonsterById("cm-totfw-tulpa-reform-rogue");
+  const ordinator = requireCustomMonsterById("cm-totfw-modron-ordinator");
+  const courier = requireCustomMonsterById("cm-totfw-devil-courier");
+  const beastLord = requireCustomMonsterById("cm-totfw-beast-lord-guardian");
+  const balor = requireCustomMonsterById("cm-totfw-balor-sergeant");
+  const puppetMaster = requireCustomMonsterById("cm-totfw-tulpa-puppet-master");
+  const sentinel = requireCustomMonsterById("cm-totfw-vault-sentinel");
+  const dispater = requireCustomMonsterById("cm-totfw-dispater");
+  const bandit = requireCustomMonsterById("cm-bandit");
+  const shadow = requireCustomMonsterById("cm-shadow");
+
+  return [
+    encounter("Hirelings & Heroes", "Ch 1 (Sigil) — The Heroes of Sigil vet the party by throwing a rogue tulpa raid at them in the Hive Ward.", compact([m(rogue), many(bandit, 3)])),
+    encounter("Keys to the Vault", "Ch 2 (Vault of the Planes entrance) — Tulpa raiders try to seize the party's key before they can enter.", compact([many(rogue, 3), many(bandit, 2)])),
+    encounter("Sigil Patrol", "Ch 3 (Sigil) — A Fated tax collector's infernal courier and hired blades corner the party over an unpaid planar toll.", compact([m(courier), many(rogue, 2), many(bandit, 2)])),
+    encounter("Mechanus — Modron Cube Patrol", "Ch 4 (Mechanus) — A marching cube of modrons registers the party as unlicensed variables and moves to correct them.", compact([m(ordinator), many(bandit, 4)])),
+    encounter("Arborea — Bacchanal Gone Wrong", "Ch 5 (Arborea) — Revelers turned raiders under a tulpa's sway ambush the party on Olympus's slopes.", compact([many(rogue, 4), m(courier)])),
+    encounter("Elysium — The Oinoloth's Blight", "Ch 6 (Elysium) — A pocket of the plane has been corrupted; a devil courier smuggles the contagion in a warded case.", compact([m(courier), many(shadow, 4)])),
+    encounter("The Beastlands — The Hunt", "Ch 7 (Beastlands) — A Beast Lord's guardian judges the party as trespassers and tests them in single combat.", compact([m(beastLord), many(rogue, 2)])),
+    encounter("Gehenna — Slag Ambush", "Ch 8 (Gehenna) — A balor sergeant collecting the volcano's toll in souls blocks the party's climb.", compact([m(balor), many(courier, 2)])),
+    encounter("The Nine Hells — Dispater's Fortress", "Ch 9 (Dis) — Dispater, Archdevil of Dis, receives the party in the Iron Tower and decides they know too much.", compact([m(dispater), many(courier, 2), m(balor)])),
+    encounter("The Gray Waste — Hopeless Siege", "Ch 10 (Hades) — Larvae-herding fiends and a balor overseer wear the party down in the plane of despair.", compact([m(balor), many(shadow, 6)])),
+    encounter("Carceri — The Prisoner Exchange", "Ch 11 (Carceri) — Escaped tulpa raiders and their devil fixer try to trade the party for their own freedom.", compact([many(rogue, 5), m(courier)])),
+    encounter("The Abyss — Demonweb Approach", "Ch 12 (Abyss) — A balor sergeant leads a warband guarding a demon lord's layer entrance.", compact([m(balor), many(rogue, 4)])),
+    encounter("The Outlands — Spire's Shadow", "Ch 13 (Outlands) — Near the Spire magic falters; the party must beat the puppet master's construct escort with steel.", compact([m(sentinel), many(ordinator, 2)])),
+    encounter("Behind the Wheel", "Ch 13-14 — The Tulpa Puppet Master reveals himself as the war's architect and turns the party's own doubts against them.", compact([m(puppetMaster), many(rogue, 4), m(sentinel)])),
+    encounter("Echoes of Delusion", "Ch 14 (final vault) — The Spindle of Sinbad wakes its sentinel and the puppet master makes his last stand.", compact([m(sentinel), m(puppetMaster), many(ordinator, 2)])),
+  ];
+}
+
+/** Dragonlance: Shadow of the Dragon Queen — the War of the Lance. */
+function dsotdqEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const baaz = requireCustomMonsterById("cm-dsotdq-draconian-baaz");
+  const kapak = requireCustomMonsterById("cm-dsotdq-draconian-kapak");
+  const sivak = requireCustomMonsterById("cm-dsotdq-draconian-sivak");
+  const aurak = requireCustomMonsterById("cm-dsotdq-draconian-aurak");
+  const officer = requireCustomMonsterById("cm-dsotdq-dragon-army-officer");
+  const blueDragon = requireCustomMonsterById("cm-dsotdq-young-blue-dragon");
+  const highlord = requireCustomMonsterById("cm-dsotdq-dragonarmy-highlord");
+  const blueLady = requireCustomMonsterById("cm-dsotdq-blue-lady");
+  const soth = requireCustomMonsterById("cm-lord-soth");
+  const skeleton = requireCustomMonsterById("cm-skeleton");
+
+  return [
+    encounter("Termination Dust", "Ch 1 (Vogler) — The first draconian raiders reach the village as the harvest festival ends.", compact([many(baaz, 4), m(officer)])),
+    encounter("The Northern Wastes", "Ch 2 (Solamnia front) — A kapak patrol poisons the well at a way-station on the road to Kalaman.", compact([many(kapak, 3), many(baaz, 3)])),
+    encounter("Sanction's Warning", "Ch 3 (road to Sanction) — A sivak infiltrator wearing a dead scout's face leads an ambush.", compact([m(sivak), many(baaz, 4), m(officer)])),
+    encounter("On the Road", "Ch 4 (Solamnic countryside) — An aurak draconian and dragonarmy troops hold a burned bridge.", compact([m(aurak), many(kapak, 2), many(baaz, 2)])),
+    encounter("The Blue Lady's Vanguard", "Ch 4-5 (Plains of Solamnia) — A young blue dragon of the Dragonarmy strafes the marching column.", compact([m(blueDragon), many(officer, 2), many(baaz, 4)])),
+    encounter("Soth's Advance", "Ch 5 (Battle of the Plains) — Lord Soth, Death Knight of the Rose, commands the center of the enemy host.", compact([m(soth), many(skeleton, 8), m(aurak)])),
+    encounter("The Flying Citadels", "Ch 6 (High Skies of Krynn) — Heroes board a floating citadel defended by a Dragonarmy Highlord.", compact([m(highlord), many(sivak, 2), many(kapak, 3)])),
+    encounter("Flames of War", "Ch 7 (Kalaman) — The Highlord and the last draconian companies make a stand in the burning streets.", compact([m(highlord), many(aurak, 2), many(baaz, 6)])),
+    encounter("Shadow of the Dragon Queen", "Ch 7 (finale) — The Blue Lady, an aspect of Takhisis, joins Lord Soth for the final confrontation over Kalaman.", compact([m(blueLady), m(soth), many(skeleton, 6)])),
+  ];
+}
+
+/** Spelljammer: Light of Xaryxis — Flash-Gordon space opera. */
+function loxEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const captain = requireCustomMonsterById("cm-lox-brallish-pirate-captain");
+  const thrall = requireCustomMonsterById("cm-lox-mind-controlled-paladin");
+  const vampirate = requireCustomMonsterById("cm-lox-vampirate");
+  const xhalcaraz = requireCustomMonsterById("cm-lox-xhalcaraz");
+  const mindFlayer = requireCustomMonsterById("cm-mind-flayer");
+  const shadow = requireCustomMonsterById("cm-shadow");
+  const bandit = requireCustomMonsterById("cm-bandit");
+
+  return [
+    encounter("Message in a Bottle", "Part 1 (Rock of Bral) — A rival pirate captain jumps the party the moment they inherit a spelljamming ship.", compact([m(captain), many(bandit, 4)])),
+    encounter("Below the Rock", "Part 2 (Underdark gateway) — Mind-controlled githyanki thralls try to stop the party activating the astral gate.", compact([many(thrall, 2), many(bandit, 3)])),
+    encounter("Wildspace Encounter", "Part 3 (Xaryxis approaches) — Hallothere Lazybower's vampirate crew grapple the hull and board.", compact([many(vampirate, 3), many(shadow, 3)])),
+    encounter("The Vampirate Captain", "Part 3 (Wildspace) — Lazybower himself fights on the open deck as the ships drift toward a dead sun.", compact([m(vampirate), m(captain), many(shadow, 4)])),
+    encounter("The Xaryxian Empire", "Part 4 (Xaryxis) — Mind flayers and paladin thralls guard the beacon aimed at the party's homeworld.", compact([many(mindFlayer, 2), many(thrall, 2)])),
+    encounter("Light of Xaryxis", "Part 4 (finale) — Xhalcaraz, Emperor of Xaryxis, bonds with the cosmic beacon for the final battle.", compact([m(xhalcaraz), many(mindFlayer, 2), m(thrall)])),
+  ];
+}
+
+/** The Temple of Elemental Evil — the prototypical mega-dungeon. */
+function toeeEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const acolyte = requireCustomMonsterById("cm-toee-elemental-cult-acolyte");
+  const priest = requireCustomMonsterById("cm-toee-temple-priest");
+  const iuz = requireCustomMonsterById("cm-toee-iuz");
+  const zuggtmoy = requireCustomMonsterById("cm-zuggtmoy");
+  const bandit = requireCustomMonsterById("cm-bandit");
+  const goblin = requireCustomMonsterById("cm-goblin");
+  const bugbear = requireCustomMonsterById("cm-bugbear");
+  const ogre = requireCustomMonsterById("cm-ogre");
+  const skeleton = requireCustomMonsterById("cm-skeleton");
+  const fireGiant = requireCustomMonsterById("cm-fire-giant");
+  const magmin = requireCustomMonsterById("cm-magmin");
+  const hellHound = requireCustomMonsterById("cm-hell-hound");
+  const troglodyte = requireCustomMonsterById("cm-troglodyte");
+
+  return [
+    encounter("The Moathouse", "Ch 1 (Hommlet) — Agents of the Hidden Shrine meet at the ruined moathouse; bandits and a bugbear enforcer guard the cellar.", compact([m(bugbear), many(bandit, 4), many(goblin, 3)])),
+    encounter("Temple Approach Patrol", "Ch 2 (above ground) — Humanoid raiders and an Elemental Cult acolyte scout the temple perimeter.", compact([m(acolyte), many(goblin, 4), many(bandit, 2)])),
+    encounter("The Earth Node Crypts", "Ch 3 (Temple Level 1) — Ogres and animated dead of past victims guard the hidden node entrance.", compact([many(ogre, 2), many(skeleton, 6)])),
+    encounter("The Water Node", "Ch 4 (Temple Level 2) — Water cultists and troglodyte slaves defend a flooded shrine.", compact([m(acolyte), many(troglodyte, 4), many(bandit, 2)])),
+    encounter("The Fire Node", "Ch 5 (Temple Level 3) — Fire giants, magmin, and a hound of the fire cult hold the burning bridge.", compact([m(fireGiant), many(magmin, 4), many(hellHound, 2)])),
+    encounter("Priest of the Elder Elemental Eye", "Ch 5-6 (Temple Level 3-4) — A high priest bars the stair to the air node with node-fueled magic.", compact([m(priest), many(acolyte, 2), many(troglodyte, 2)])),
+    encounter("Zuggtmoy, Demoness Queen of Fungi", "Ch 6 (Temple Level 4) — The bound demoness makes her play for freedom in the heart of the temple.", compact([m(zuggtmoy), many(acolyte, 3), many(troglodyte, 2)])),
+    encounter("Old Wicked's Cameo", "Ch 6 (optional finale) — Iuz the Evil arrives to claim the temple's power for himself if the party lingers.", compact([m(iuz), m(priest), many(acolyte, 2)])),
+  ];
+}
+
+/** The Keep on the Borderlands — the foundational sandbox. */
+function b2Encounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const priest = requireCustomMonsterById("cm-b2-priest-of-chaos");
+  const zargon = requireCustomMonsterById("cm-b2-zargon");
+  const goblin = requireCustomMonsterById("cm-goblin");
+  const orc = requireCustomMonsterById("cm-orc");
+  const hobgoblin = requireCustomMonsterById("cm-hobgoblin");
+  const bugbear = requireCustomMonsterById("cm-bugbear");
+  const ogre = requireCustomMonsterById("cm-ogre");
+  const bandit = requireCustomMonsterById("cm-bandit");
+
+  return [
+    encounter("The Treacherous Priest", "Ch 1 (The Keep) — The Keep's guest chaplain is a spy for the Caves; cornered, he calls in hired blades.", compact([m(priest), many(bandit, 4)])),
+    encounter("Ambush on the Trail", "Ch 2 (Wilderness) — A mixed goblin-and-orc raiding party hits the road between the Keep and the ravine.", compact([many(goblin, 6), many(orc, 3)])),
+    encounter("Caves of Chaos: The Goblin Warren", "Ch 2 (Caves of Chaos) — The goblin and hobgoblin caves rally to repel intruders in the central ravine.", compact([many(hobgoblin, 5), many(goblin, 6)])),
+    encounter("Caves of Chaos: The Ogre's Cave", "Ch 2-3 (Caves of Chaos) — A bought ogre and bugbear guards hold the approach to the inner caves.", compact([many(ogre, 2), many(bugbear, 3)])),
+    encounter("The Shrine of Evil Chaos", "Ch 3 (Inner Caves) — The treacherous priest, unmasked, defends the shrine with undead-tainted acolytes.", compact([m(priest), many(hobgoblin, 4), many(bandit, 2)])),
+    encounter("Zargon, the One-Eyed Evil", "Ch 3 (Inner Caves) — The immortal horror behind the Caves of Chaos rises from its pit.", compact([m(zargon), many(bugbear, 3), many(ogre, 1)])),
+  ];
+}
+
+/** Queen of the Spiders — the GDQ1-7 supermodule. */
+function qotsEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const patrolCaptain = requireCustomMonsterById("cm-qots-drow-patrol-captain");
+  const eclavdra = requireCustomMonsterById("cm-qots-eclavdra");
+  const priestess = requireCustomMonsterById("cm-qots-drow-priestess-of-lolth");
+  const lolth = requireCustomMonsterById("cm-qots-lolth");
+  const hillGiant = requireCustomMonsterById("cm-hill-giant");
+  const frostGiant = requireCustomMonsterById("cm-frost-giant");
+  const fireGiant = requireCustomMonsterById("cm-fire-giant");
+  const ogre = requireCustomMonsterById("cm-ogre");
+  const hellHound = requireCustomMonsterById("cm-hell-hound");
+  const kuoToa = requireCustomMonsterById("cm-kuo-toa");
+  const drider = requireCustomMonsterById("cm-drider");
+  const giantSpider = requireCustomMonsterById("cm-giant-spider");
+  const drowWarrior = requireCustomMonsterById("cm-drow-elite-warrior");
+  const drowMage = requireCustomMonsterById("cm-drow-mage");
+
+  return [
+    encounter("Steading of the Hill Giant Chief", "Ch 1 (G1) — The great hall erupts as the party is discovered among the drunken hill giants and their ogre mercenaries.", compact([many(hillGiant, 2), many(ogre, 4)])),
+    encounter("Glacial Rift of the Frost Giant Jarl", "Ch 2 (G2) — Frost giants and their winter-wolf pack hold the icy ledges above the rift.", compact([many(frostGiant, 2), many(ogre, 2)])),
+    encounter("Hall of the Fire Giant King", "Ch 3 (G3) — King Snurre's fire giants and hell hounds guard the way to the hidden Underdark stair.", compact([many(fireGiant, 2), many(hellHound, 3)])),
+    encounter("Descent into the Depths", "Ch 4 (D1) — The first drow patrol shadows the party through the vast caverns and springs its trap.", compact([m(patrolCaptain), many(drowWarrior, 3), m(drowMage)])),
+    encounter("Shrine of the Kuo-Toa", "Ch 5 (D2) — Blind priests of Blibdoolpoolp and their giant guards ambush the party at the pilgrim bridge.", compact([many(kuoToa, 6), many(ogre, 1)])),
+    encounter("Erelhei-Cinlu Intrigue", "Ch 6 (D3 / Vault of the Drow) — Eclavdra, priestess of the House of Eilservs, tests the party in the streets of the drow city.", compact([m(eclavdra), many(drowWarrior, 4), many(drider, 2)])),
+    encounter("The Fane of Lolth", "Ch 6 (D3) — A drow priestess of Lolth defends the temple with drider guards and swarming spiders.", compact([m(priestess), many(drider, 3), many(giantSpider, 4)])),
+    encounter("Gate to the Demonweb Pits", "Ch 7 (Q1) — Eclavdra makes her last stand at the astral gate, backed by a priestess of Lolth.", compact([m(eclavdra), m(priestess), many(drowWarrior, 4)])),
+    encounter("Lolth, the Spider Queen", "Ch 7 (Q1 finale) — In the heart of the Demonweb, Lolth herself descends on her spider-throne.", compact([m(lolth), many(drider, 4), many(giantSpider, 6)])),
+  ];
+}
+
+/** Return to the Tomb of Horrors — Acererak's bid for godhood. */
+function rtohEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const acolyte = requireCustomMonsterById("cm-rtoh-acolyte-of-acererak");
+  const nightProwler = requireCustomMonsterById("cm-rtoh-night-prowler");
+  const moilianWraith = requireCustomMonsterById("cm-rtoh-cursed-moilian-wraith");
+  const soulMonger = requireCustomMonsterById("cm-rtoh-soul-monger-construct");
+  const decoyDemilich = requireCustomMonsterById("cm-rtoh-acererak-decoy-demilich");
+  const trueDemilich = requireCustomMonsterById("cm-rtoh-acererak-true-demilich");
+  const acererakLich = requireCustomMonsterById("cm-acererak-lich");
+  const banshee = requireCustomMonsterById("cm-banshee");
+  const shadow = requireCustomMonsterById("cm-shadow");
+  const skeleton = requireCustomMonsterById("cm-skeleton");
+
+  return [
+    encounter("The Original Tomb", "Ch 1 (Tomb of Horrors) — The death-trap corridors still bite; guardian shadows and skeletons harry the re-entry.", compact([many(shadow, 4), many(skeleton, 6)])),
+    encounter("The Decoy Demilich", "Ch 1 (Tomb of Horrors) — The jade skull rises as a decoy demilich to devour the souls of the overconfident.", compact([m(decoyDemilich), many(shadow, 3)])),
+    encounter("The City of Moil", "Ch 2 (Moil, the City That Waits) — In the eternal dark, cursed Moilian wraiths and a night prowler drift between the frozen towers.", compact([many(moilianWraith, 2), m(nightProwler)])),
+    encounter("The Wailing Cathedral", "Ch 2 (Moil) — A banshee choir and Acererak's cultists work the soul-harvest apparatus.", compact([many(banshee, 2), many(acolyte, 3)])),
+    encounter("Fortress of Conclusion: The Vestibule", "Ch 3 (Fortress of Conclusion) — Soul-monger constructs and an acererak-lich lieutenant guard the ritual chamber doors.", compact([many(soulMonger, 2), m(acererakLich), many(acolyte, 2)])),
+    encounter("Acererak, True Demilich Ascendant", "Ch 3 (Fortress of Conclusion) — On the verge of godhood, Acererak turns the millennia of harvested souls against the party.", compact([m(trueDemilich), m(soulMonger), many(acolyte, 3)])),
+  ];
+}
+
+/** Against the Cult of the Reptile God — a low-level mystery. */
+function n1Encounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const villager = requireCustomMonsterById("cm-n1-charmed-villager");
+  const scout = requireCustomMonsterById("cm-n1-reptile-cult-scout");
+  const yuanTi = requireCustomMonsterById("cm-n1-yuan-ti-servitor");
+  const explictica = requireCustomMonsterById("cm-n1-explictica-defilus");
+  const troglodyte = requireCustomMonsterById("cm-troglodyte");
+  const giantSpider = requireCustomMonsterById("cm-giant-spider");
+
+  return [
+    encounter("The Stalked Village", "Ch 1 (Orlane) — Charmed villagers turn on the party after dark once the cult marks them as a threat.", compact([many(villager, 5), m(scout)])),
+    encounter("The Golden Grain Inn", "Ch 1 (Orlane) — Cult scouts posing as patrons try to drug the party's drinks and take them quietly.", compact([many(scout, 3), many(villager, 3)])),
+    encounter("The Troglodyte Maze", "Ch 2 (Wastelands) — Troglodytes ambush the party in the reeking tunnels that lead toward the cult's lair.", compact([many(troglodyte, 4), m(scout)])),
+    encounter("The Cult's Antechamber", "Ch 3 (Cave Lair) — Yuan-ti servitors and giant spiders guard the approach to the inner shrine.", compact([many(yuanTi, 3), many(giantSpider, 3)])),
+    encounter("Explictica Defilus, the Reptile God", "Ch 3 (Cave Lair) — The self-styled Reptile God and her servitors make their stand in the flooded shrine cavern.", compact([m(explictica), many(yuanTi, 2), many(troglodyte, 2)])),
+  ];
+}
+
 const CAMPAIGN_CATALOG: CampaignTemplate[] = [
   makeTemplate(
     "Curse of Strahd",
@@ -3241,7 +3470,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Secrets of the Spire", order: 12, levelRange: "10", location: "Spire of the Outlands" },
       { title: "Behind the Wheel", order: 13, levelRange: "10", location: "Beyond the Spire" },
       { title: "Echoes of Delusion", order: 14, levelRange: "17", location: "Multiverse" },
-    ]
+    ],
+    totfwEncounters()
   ),
 
   makeTemplate(
@@ -3256,7 +3486,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Seeking the Starfall", order: 5, levelRange: "7-9", location: "Dread Marsh" },
       { title: "Shadow of the Dragon Queen", order: 6, levelRange: "9-10", location: "Kalaman Surrounds" },
       { title: "Flames of War", order: 7, levelRange: "10-11", location: "Kalaman" },
-    ]
+    ],
+    dsotdqEncounters()
   ),
 
   makeTemplate(
@@ -3301,7 +3532,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Temple First Level", order: 4, levelRange: "5-6", location: "Temple of Elemental Evil" },
       { title: "The Temple Dungeon Levels", order: 5, levelRange: "6-9", location: "Temple Dungeons" },
       { title: "The Elemental Nodes", order: 6, levelRange: "9-11", location: "Elemental Nodes" },
-    ]
+    ],
+    toeeEncounters()
   ),
 
   makeTemplate(
@@ -3312,7 +3544,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Keep", order: 1, levelRange: "1", location: "Keep on the Borderlands" },
       { title: "The Wilderness", order: 2, levelRange: "1-2", location: "Borderlands" },
       { title: "Caves of Chaos", order: 3, levelRange: "1-3", location: "Caves of Chaos" },
-    ]
+    ],
+    b2Encounters()
   ),
 
   makeTemplate(
@@ -3461,7 +3694,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Shrine of the Kuo-Toa", order: 5, levelRange: "11-12", location: "Underdark" },
       { title: "Vault of the Drow", order: 6, levelRange: "12-13", location: "Erelhei-Cinlu" },
       { title: "Queen of the Demonweb Pits", order: 7, levelRange: "13-14", location: "Demonweb Pits, Abyss" },
-    ]
+    ],
+    qotsEncounters()
   ),
 
   makeTemplate(
@@ -3472,7 +3706,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Orlane Village Investigation", order: 1, levelRange: "1-2", location: "Orlane" },
       { title: "Trail to the Lair", order: 2, levelRange: "2-3", location: "Wilderness" },
       { title: "Lair of the Reptile God", order: 3, levelRange: "3", location: "Dungeon Lair" },
-    ]
+    ],
+    n1Encounters()
   ),
 
   makeTemplate(
@@ -3484,7 +3719,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Part 2: The Astral Sea", order: 2, levelRange: "6", location: "Astral Sea" },
       { title: "Part 3: The Xaryxian Empire", order: 3, levelRange: "6-7", location: "Xaryxian Empire" },
       { title: "Part 4: The Light of Xaryxis", order: 4, levelRange: "7-8", location: "Xaryxis" },
-    ]
+    ],
+    loxEncounters()
   ),
 
   makeTemplate(
@@ -3571,7 +3807,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Tomb of Horrors", order: 1, levelRange: "13-14", location: "Tomb of Horrors" },
       { title: "The City That Waits", order: 2, levelRange: "14-15", location: "Moil, the City That Waits" },
       { title: "Fortress of Conclusion", order: 3, levelRange: "15-16", location: "Fortress of Conclusion" },
-    ]
+    ],
+    rtohEncounters()
   ),
 
   makeTemplate(

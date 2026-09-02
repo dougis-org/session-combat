@@ -238,20 +238,20 @@ encounter is self-contained.
 > | Shackled City | 12 | 0 | 0 new | research/shackled-city.md | 🚧 G5 |
 > | Reavers of Harkenwold | 5 | 0 | 0 new | research/reavers-of-harkenwold.md | 🚧 G5 |
 > | The Lost City | 4 | 0 | 0 new | research/lost-city.md | 🚧 G5 |
-> | Turn of Fortune's Wheel | 14 | 0 | 0 new | research/turn-of-fortunes-wheel.md | 🚧 G5 |
-> | Dragonlance: Shadow of the Dragon Queen | 7 | 0 | 0 new | research/dragonlance-shadow-of-the-dragon-queen.md | 🚧 G5 |
+> | Turn of Fortune's Wheel | 14 | 15 | 8 new | research/turn-of-fortunes-wheel.md | ✅ G5a |
+> | Dragonlance: Shadow of the Dragon Queen | 7 | 9 | 8 new | research/dragonlance-shadow-of-the-dragon-queen.md | ✅ G5a |
 > | Empire of the Ghouls | 6 | 0 | 0 new | research/empire-of-the-ghouls.md | 🚧 G5 |
-> | Temple of Elemental Evil | 6 | 0 | 0 new | research/temple-of-elemental-evil.md | 🚧 G5 |
-> | Keep on the Borderlands | 3 | 0 | 0 new | research/keep-on-the-borderlands.md | 🚧 G5 |
+> | Temple of Elemental Evil | 6 | 8 | 3 new | research/temple-of-elemental-evil.md | ✅ G5a |
+> | Keep on the Borderlands | 3 | 6 | 2 new | research/keep-on-the-borderlands.md | ✅ G5a |
 > | Points of Light | 3 | 0 | 0 new | research/points-of-light.md | 🚧 G5 |
 > | Night Below | 3 | 0 | 0 new | research/night-below.md | 🚧 G5 |
 > | Return to Temple of Elemental Evil | 4 | 0 | 0 new | research/return-to-temple-of-elemental-evil.md | 🚧 G5 |
 > | Desert of Desolation | 3 | 0 | 0 new | research/desert-of-desolation.md | 🚧 G5 |
-> | Queen of the Spiders | 7 | 0 | 0 new | research/queen-of-the-spiders.md | 🚧 G5 |
-> | Against the Cult of the Reptile God | 3 | 0 | 0 new | research/against-the-cult-of-the-reptile-god.md | 🚧 G5 |
-> | Spelljammer: Light of Xaryxis | 4 | 0 | 0 new | research/spelljammer-light-of-xaryxis.md | 🚧 G5 |
+> | Queen of the Spiders | 7 | 9 | 4 new | research/queen-of-the-spiders.md | ✅ G5a |
+> | Against the Cult of the Reptile God | 3 | 5 | 4 new | research/against-the-cult-of-the-reptile-god.md | ✅ G5a |
+> | Spelljammer: Light of Xaryxis | 4 | 6 | 4 new | research/spelljammer-light-of-xaryxis.md | ✅ G5a |
 > | Expedition to the Barrier Peaks | 6 | 0 | 0 new | research/expedition-to-the-barrier-peaks.md | 🚧 G5 |
-> | Return to the Tomb of Horrors | 3 | 0 | 0 new | research/return-to-the-tomb-of-horrors.md | 🚧 G5 |
+> | Return to the Tomb of Horrors | 3 | 6 | 6 new | research/return-to-the-tomb-of-horrors.md | ✅ G5a |
 > | Savage Tide | 12 | 0 | 0 new | research/savage-tide.md | 🚧 G5 |
 
 **Legend:** ✅ merged · 🚧 authoring · 🔍 researching · ⏳ queued · ❌ blocked
