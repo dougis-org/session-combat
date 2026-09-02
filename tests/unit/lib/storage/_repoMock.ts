@@ -1,11 +1,14 @@
 /**
- * Shared MongoDB mock for per-domain storage repo unit tests (#503).
- * Provides a chainable cursor and a collection whose operations can be told
- * to resolve with a value or reject with an Error.
+ * Shared test helpers for the per-domain storage repo unit tests (#503):
+ * a chainable MongoDB mock plus assertion helpers for the StorageError /
+ * telemetry contract every migrated method follows.
  */
 import { getDatabase } from "@/lib/db";
+import { StorageError } from "@/lib/storage/errors";
+import * as logger from "@/lib/telemetry/logger";
 
 type OrError<T> = T | Error;
+type Outcome = "success" | "not_found" | "error";
 
 export interface RepoMockOptions {
   findResult?: OrError<unknown[]>;
@@ -48,4 +51,54 @@ export function mockCollection(opts: RepoMockOptions = {}) {
   const db = { collection: jest.fn(() => collection) };
   jest.mocked(getDatabase).mockResolvedValue(db as never);
   return collection;
+}
+
+/**
+ * Registers `beforeEach`/`afterEach` that stub `logStorageEvent` and reset
+ * mocks. Returns a getter for the spy so tests can assert on emitted events.
+ */
+export function useStorageLogSpy() {
+  let spy: jest.SpyInstance;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    spy = jest.spyOn(logger, "logStorageEvent").mockImplementation();
+  });
+  afterEach(() => spy.mockRestore());
+  return () => spy;
+}
+
+/** Assert a promise rejects with a StorageError, optionally checking op/collection. */
+export async function expectStorageError(
+  promise: Promise<unknown>,
+  fields?: { op?: string; collection?: string },
+): Promise<StorageError> {
+  const err = await promise.then(
+    () => {
+      throw new Error("expected the promise to reject with a StorageError");
+    },
+    (e) => e,
+  );
+  expect(err).toBeInstanceOf(StorageError);
+  if (fields?.op) expect((err as StorageError).op).toBe(fields.op);
+  if (fields?.collection) expect((err as StorageError).collection).toBe(fields.collection);
+  return err as StorageError;
+}
+
+/** Assert exactly one telemetry event with the given outcome was emitted. */
+export function expectLoggedOutcome(spy: jest.SpyInstance, outcome: Outcome) {
+  expect(spy).toHaveBeenCalledWith(expect.objectContaining({ outcome }));
+}
+
+export function expectNotLoggedOutcome(spy: jest.SpyInstance, outcome: Outcome) {
+  expect(spy).not.toHaveBeenCalledWith(expect.objectContaining({ outcome }));
+}
+
+/** Assert every listed method is reachable as a function on the storage facade. */
+export function expectFacadeMethods(
+  storage: Record<string, unknown>,
+  names: readonly string[],
+) {
+  for (const name of names) {
+    expect(typeof storage[name]).toBe("function");
+  }
 }

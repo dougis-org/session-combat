@@ -3,18 +3,20 @@
  */
 import * as repo from "@/lib/storage/campaignRepo";
 import { storage } from "@/lib/storage";
-import { StorageError } from "@/lib/storage/errors";
-import * as logger from "@/lib/telemetry/logger";
 
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
-import { mockCollection } from "./_repoMock";
+import {
+  mockCollection,
+  useStorageLogSpy,
+  expectStorageError,
+  expectLoggedOutcome,
+  expectNotLoggedOutcome,
+  expectFacadeMethods,
+} from "./_repoMock";
 
-let logSpy: jest.SpyInstance;
-beforeEach(() => {
-  jest.clearAllMocks();
-  logSpy = jest.spyOn(logger, "logStorageEvent").mockImplementation();
-});
-afterEach(() => logSpy.mockRestore());
+const getLogSpy = useStorageLogSpy();
+const DB_DOWN = () => new Error("db down");
+const CAMPAIGN = { id: "c1", userId: "u1" } as never;
 
 describe("campaignRepo", () => {
   describe("normalizeCampaign", () => {
@@ -33,108 +35,89 @@ describe("campaignRepo", () => {
   });
 
   describe("loadCampaigns", () => {
-    it("success → Campaign[]; empty → []; DB failure → StorageError (was: [])", async () => {
+    it("resolves the list, and logs not_found on an empty result", async () => {
       mockCollection({ findResult: [{ id: "c1", name: "x" }] });
       await expect(repo.loadCampaigns("u1")).resolves.toHaveLength(1);
 
       mockCollection({ findResult: [] });
       await expect(repo.loadCampaigns("u1")).resolves.toEqual([]);
-      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "not_found" }));
-
-      mockCollection({ findResult: new Error("db down") });
-      await expect(repo.loadCampaigns("u1")).rejects.toBeInstanceOf(StorageError);
+      expectLoggedOutcome(getLogSpy(), "not_found");
     });
   });
 
-  describe.each([
-    ["loadCampaignById", (r: typeof repo) => r.loadCampaignById("c1", "u1")],
-    ["loadCampaignByIdAny", (r: typeof repo) => r.loadCampaignByIdAny("c1")],
+  describe.each<[string, () => Promise<unknown>]>([
+    ["loadCampaignById", () => repo.loadCampaignById("c1", "u1")],
+    ["loadCampaignByIdAny", () => repo.loadCampaignByIdAny("c1")],
   ])("%s", (_name, call) => {
-    it("hit / miss (null) / DB failure (StorageError)", async () => {
+    it("resolves the doc on a hit and null on a miss", async () => {
       mockCollection({ findOne: { id: "c1", name: "x" } });
-      await expect(call(repo)).resolves.toMatchObject({ id: "c1" });
+      await expect(call()).resolves.toMatchObject({ id: "c1" });
 
       mockCollection({ findOne: null });
-      await expect(call(repo)).resolves.toBeNull();
-
-      mockCollection({ findOne: new Error("db down") });
-      await expect(call(repo)).rejects.toBeInstanceOf(StorageError);
+      await expect(call()).resolves.toBeNull();
     });
   });
 
-  describe("saveCampaign / deleteCampaign / setActiveCampaignSession", () => {
-    it("saveCampaign DB failure → StorageError", async () => {
-      mockCollection({ updateOne: new Error("db down") });
-      await expect(repo.saveCampaign({ id: "c1", userId: "u1" } as never)).rejects.toBeInstanceOf(StorageError);
-    });
-
-    it("deleteCampaign returns early when campaign not found (no cascade)", async () => {
+  describe("deleteCampaign", () => {
+    it("returns early without cascading when the campaign is not found", async () => {
       const col = mockCollection({ findOne: null });
       await repo.deleteCampaign("c1", "u1");
       expect(col.deleteMany).not.toHaveBeenCalled();
     });
 
-    it("deleteCampaign cascades then deletes parent on hit", async () => {
+    it("cascades children then deletes the parent on a hit", async () => {
       const col = mockCollection({ findOne: { id: "c1" } });
       await repo.deleteCampaign("c1", "u1");
       expect(col.deleteMany).toHaveBeenCalled();
       expect(col.deleteOne).toHaveBeenCalledWith({ id: "c1", userId: "u1" });
     });
-
-    it("deleteCampaign DB failure → StorageError", async () => {
-      mockCollection({ findOne: new Error("db down") });
-      await expect(repo.deleteCampaign("c1", "u1")).rejects.toBeInstanceOf(StorageError);
-    });
-
-    it("setActiveCampaignSession DB failure → StorageError", async () => {
-      mockCollection({ updateOne: new Error("db down") });
-      await expect(
-        repo.setActiveCampaignSession("c1", "u1", "s1"),
-      ).rejects.toBeInstanceOf(StorageError);
-    });
   });
 
   describe("claimActiveCampaignSession", () => {
-    it("true on modifiedCount 1, false otherwise; false never logged not_found; DB failure → StorageError", async () => {
+    it("returns modifiedCount === 1 as a boolean, never logged as not_found", async () => {
       mockCollection({ updateOne: { modifiedCount: 1 } });
       await expect(repo.claimActiveCampaignSession("c1", "u1", "s1")).resolves.toBe(true);
 
       mockCollection({ updateOne: { modifiedCount: 0 } });
       await expect(repo.claimActiveCampaignSession("c1", "u1", "s1")).resolves.toBe(false);
-      expect(logSpy).not.toHaveBeenCalledWith(expect.objectContaining({ outcome: "not_found" }));
-
-      mockCollection({ updateOne: new Error("db down") });
-      await expect(repo.claimActiveCampaignSession("c1", "u1", "s1")).rejects.toBeInstanceOf(StorageError);
+      expectNotLoggedOutcome(getLogSpy(), "not_found");
     });
   });
 
-  describe("listCampaignsForMember", () => {
-    it("no memberships → [] (non-throwing early return preserved)", async () => {
+  describe("early-return paths (no DB call)", () => {
+    it("listCampaignsForMember → [] when the member has no memberships", async () => {
       mockCollection({ findResult: [] });
       await expect(repo.listCampaignsForMember("u1")).resolves.toEqual([]);
     });
 
-    it("DB failure → StorageError (was: [])", async () => {
-      mockCollection({ findResult: new Error("db down") });
-      await expect(repo.listCampaignsForMember("u1")).rejects.toBeInstanceOf(StorageError);
-    });
-  });
-
-  describe("getCampaignsByIds", () => {
-    it("empty input → [] without touching the DB", async () => {
+    it("getCampaignsByIds → [] for empty input, without touching the DB", async () => {
       const col = mockCollection();
       await expect(repo.getCampaignsByIds([])).resolves.toEqual([]);
       expect(col.find).not.toHaveBeenCalled();
     });
+  });
 
-    it("DB failure → StorageError", async () => {
-      mockCollection({ findResult: new Error("db down") });
-      await expect(repo.getCampaignsByIds(["c1"])).rejects.toBeInstanceOf(StorageError);
+  // Previously-swallowing (load*, list*) and raw-rethrowing (save/delete/set/claim)
+  // methods now reject with StorageError on a driver failure.
+  describe.each<[string, () => Promise<unknown>]>([
+    ["loadCampaigns", () => repo.loadCampaigns("u1")],
+    ["loadCampaignById", () => repo.loadCampaignById("c1", "u1")],
+    ["loadCampaignByIdAny", () => repo.loadCampaignByIdAny("c1")],
+    ["saveCampaign", () => repo.saveCampaign(CAMPAIGN)],
+    ["deleteCampaign", () => repo.deleteCampaign("c1", "u1")],
+    ["setActiveCampaignSession", () => repo.setActiveCampaignSession("c1", "u1", "s1")],
+    ["claimActiveCampaignSession", () => repo.claimActiveCampaignSession("c1", "u1", "s1")],
+    ["listCampaignsForMember", () => repo.listCampaignsForMember("u1")],
+    ["getCampaignsByIds", () => repo.getCampaignsByIds(["c1"])],
+  ])("%s on driver failure", (_name, call) => {
+    it("rejects with StorageError", async () => {
+      mockCollection({ findResult: DB_DOWN(), findOne: DB_DOWN(), updateOne: DB_DOWN() });
+      await expectStorageError(call());
     });
   });
 
-  it("facade exposes all 9 campaign methods", () => {
-    for (const n of [
+  it("exposes all 9 campaign methods on the storage facade", () => {
+    expectFacadeMethods(storage as Record<string, unknown>, [
       "loadCampaigns",
       "loadCampaignById",
       "saveCampaign",
@@ -144,8 +127,6 @@ describe("campaignRepo", () => {
       "loadCampaignByIdAny",
       "listCampaignsForMember",
       "getCampaignsByIds",
-    ]) {
-      expect(typeof (storage as Record<string, unknown>)[n]).toBe("function");
-    }
+    ]);
   });
 });

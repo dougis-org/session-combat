@@ -3,77 +3,44 @@
  */
 import * as repo from "@/lib/storage/monsterTemplateRepo";
 import { storage } from "@/lib/storage";
-import { StorageError } from "@/lib/storage/errors";
 import { GLOBAL_USER_ID } from "@/lib/constants";
-import * as logger from "@/lib/telemetry/logger";
 
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
-import { getDatabase } from "@/lib/db";
+import {
+  mockCollection,
+  useStorageLogSpy,
+  expectStorageError,
+  expectLoggedOutcome,
+  expectNotLoggedOutcome,
+  expectFacadeMethods,
+} from "./_repoMock";
 
-function makeCursor(result: unknown) {
-  const cursor: Record<string, jest.Mock> = {};
-  for (const m of ["find", "sort", "collation", "limit", "project"]) {
-    cursor[m] = jest.fn(() => cursor);
-  }
-  cursor.toArray = jest.fn(() => (result instanceof Error ? Promise.reject(result) : Promise.resolve(result)));
-  return cursor;
-}
-
-function mockCollection(overrides: Record<string, unknown> = {}) {
-  const cursor = makeCursor(overrides.findResult ?? []);
-  const collection = {
-    find: jest.fn(() => cursor),
-    findOne: jest.fn(() =>
-      overrides.findOne instanceof Error
-        ? Promise.reject(overrides.findOne)
-        : Promise.resolve(overrides.findOne ?? null),
-    ),
-    countDocuments: jest.fn(() =>
-      overrides.count instanceof Error
-        ? Promise.reject(overrides.count)
-        : Promise.resolve(overrides.count ?? 0),
-    ),
-    updateOne: jest.fn(() =>
-      overrides.updateOne instanceof Error ? Promise.reject(overrides.updateOne) : Promise.resolve({}),
-    ),
-    deleteOne: jest.fn(() =>
-      overrides.deleteOne instanceof Error ? Promise.reject(overrides.deleteOne) : Promise.resolve({ deletedCount: 1 }),
-    ),
-    _cursor: cursor,
-  };
-  jest.mocked(getDatabase).mockResolvedValue({ collection: jest.fn(() => collection) } as never);
-  return collection;
-}
-
-let logSpy: jest.SpyInstance;
-beforeEach(() => {
-  jest.clearAllMocks();
-  logSpy = jest.spyOn(logger, "logStorageEvent").mockImplementation();
-});
-afterEach(() => logSpy.mockRestore());
+const getLogSpy = useStorageLogSpy();
+const DB_DOWN = () => new Error("db down");
+const TEMPLATE = { id: "m1", userId: "u1", name: "Orc" } as never;
 
 describe("monsterTemplateRepo", () => {
   describe("loadMonsterTemplates", () => {
-    it("returns normalized templates on success", async () => {
+    it("returns id-normalized templates and logs success", async () => {
       mockCollection({ findResult: [{ _id: "507f1f77bcf86cd799439011", name: "Goblin", userId: "u1" }] });
       const res = await repo.loadMonsterTemplates("u1");
       expect(res[0].id).toBe("507f1f77bcf86cd799439011");
-      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "success" }));
+      expectLoggedOutcome(getLogSpy(), "success");
     });
 
     it("empty collection resolves to [] and logs not_found", async () => {
       mockCollection({ findResult: [] });
       await expect(repo.loadMonsterTemplates("u1")).resolves.toEqual([]);
-      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "not_found" }));
+      expectLoggedOutcome(getLogSpy(), "not_found");
     });
 
     it("DB failure rejects with StorageError and logs error (was: [])", async () => {
-      mockCollection({ findResult: new Error("db down") });
-      await expect(repo.loadMonsterTemplates("u1")).rejects.toMatchObject({
+      mockCollection({ findResult: DB_DOWN() });
+      await expectStorageError(repo.loadMonsterTemplates("u1"), {
         op: "loadMonsterTemplates",
         collection: "monsterTemplates",
       });
-      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "error" }));
+      expectLoggedOutcome(getLogSpy(), "error");
     });
   });
 
@@ -83,51 +50,15 @@ describe("monsterTemplateRepo", () => {
       await repo.loadGlobalMonsterTemplates();
       expect(col.find).toHaveBeenCalledWith({ userId: GLOBAL_USER_ID });
     });
-
-    it("DB failure rejects with StorageError", async () => {
-      mockCollection({ findResult: new Error("db down") });
-      await expect(repo.loadGlobalMonsterTemplates()).rejects.toBeInstanceOf(StorageError);
-    });
   });
 
   describe("loadAllMonsterTemplates", () => {
     // 2 callers: app/api/monsters/route.ts, app/api/monsters/[id]/duplicate/route.ts
     it("merges user + global templates (shape identical to pre-migration)", async () => {
+      // both the user read and the global read hit the same mocked collection
       mockCollection({ findResult: [{ id: "m1", userId: "u1" }] });
       const res = await repo.loadAllMonsterTemplates("u1");
-      // user call + global call each return the same mocked array
       expect(res.map((m) => m.id)).toEqual(["m1", "m1"]);
-    });
-
-    it("DB failure in an underlying call rejects with StorageError (was: [])", async () => {
-      mockCollection({ findResult: new Error("db down") });
-      await expect(repo.loadAllMonsterTemplates("u1")).rejects.toBeInstanceOf(StorageError);
-    });
-  });
-
-  describe("saveMonsterTemplate", () => {
-    it("issues an upsert", async () => {
-      const col = mockCollection();
-      await repo.saveMonsterTemplate({ id: "m1", userId: "u1", name: "Orc" } as never);
-      expect(col.updateOne).toHaveBeenCalledWith(
-        { userId: "u1", id: "m1" },
-        expect.anything(),
-        { upsert: true },
-      );
-    });
-
-    it("DB failure rejects with StorageError (was: rethrew raw)", async () => {
-      mockCollection({ updateOne: new Error("db down") });
-      await expect(
-        repo.saveMonsterTemplate({ id: "m1", userId: "u1", name: "Orc" } as never),
-      ).rejects.toBeInstanceOf(StorageError);
-    });
-  });
-
-  describe("deleteMonsterTemplate", () => {
-    it("DB failure rejects with StorageError", async () => {
-      mockCollection({ deleteOne: new Error("db down") });
-      await expect(repo.deleteMonsterTemplate("m1", "u1")).rejects.toBeInstanceOf(StorageError);
     });
   });
 
@@ -139,47 +70,68 @@ describe("monsterTemplateRepo", () => {
       await expect(repo.monsterExistsByNameAndSource("Nope", "srd")).resolves.toBe(false);
     });
 
-    it("false result is never logged as not_found (no isEmpty)", async () => {
+    it("a false result is a normal success, never logged as not_found", async () => {
       mockCollection({ count: 0 });
       await repo.monsterExistsByNameAndSource("Nope", "srd");
-      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "success" }));
-      expect(logSpy).not.toHaveBeenCalledWith(expect.objectContaining({ outcome: "not_found" }));
-    });
-
-    it("DB failure rejects with StorageError (was: false)", async () => {
-      mockCollection({ count: new Error("db down") });
-      await expect(repo.monsterExistsByNameAndSource("Dragon", "srd")).rejects.toBeInstanceOf(StorageError);
+      expectLoggedOutcome(getLogSpy(), "success");
+      expectNotLoggedOutcome(getLogSpy(), "not_found");
     });
   });
 
   describe("findMonsterByNameAndSource", () => {
-    it("returns doc or null; null logs not_found", async () => {
+    it("returns the doc, or null (logged not_found) when absent", async () => {
       mockCollection({ findOne: { id: "m1" } });
       await expect(repo.findMonsterByNameAndSource("Dragon", "srd")).resolves.toMatchObject({ id: "m1" });
       mockCollection({ findOne: null });
       await expect(repo.findMonsterByNameAndSource("Nope", "srd")).resolves.toBeNull();
-      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "not_found" }));
-    });
-
-    it("DB failure rejects with StorageError (was: null)", async () => {
-      mockCollection({ findOne: new Error("db down") });
-      await expect(repo.findMonsterByNameAndSource("Dragon", "srd")).rejects.toBeInstanceOf(StorageError);
+      expectLoggedOutcome(getLogSpy(), "not_found");
     });
   });
 
-  describe("facade delegation", () => {
-    it("every method is reachable via storage.<name>", () => {
-      for (const name of [
-        "loadMonsterTemplates",
-        "loadGlobalMonsterTemplates",
-        "loadAllMonsterTemplates",
-        "saveMonsterTemplate",
-        "deleteMonsterTemplate",
-        "monsterExistsByNameAndSource",
-        "findMonsterByNameAndSource",
-      ]) {
-        expect(typeof (storage as Record<string, unknown>)[name]).toBe("function");
-      }
+  describe("saveMonsterTemplate", () => {
+    it("issues an upsert keyed by userId + id", async () => {
+      const col = mockCollection();
+      await repo.saveMonsterTemplate(TEMPLATE);
+      expect(col.updateOne).toHaveBeenCalledWith(
+        { userId: "u1", id: "m1" },
+        expect.anything(),
+        { upsert: true },
+      );
     });
+  });
+
+  // Every previously-swallowing or raw-rethrowing method now rejects with
+  // StorageError on a driver failure.
+  describe.each<[string, () => Promise<unknown>]>([
+    ["loadMonsterTemplates", () => repo.loadMonsterTemplates("u1")],
+    ["loadGlobalMonsterTemplates", () => repo.loadGlobalMonsterTemplates()],
+    ["loadAllMonsterTemplates", () => repo.loadAllMonsterTemplates("u1")],
+    ["saveMonsterTemplate", () => repo.saveMonsterTemplate(TEMPLATE)],
+    ["deleteMonsterTemplate", () => repo.deleteMonsterTemplate("m1", "u1")],
+    ["monsterExistsByNameAndSource", () => repo.monsterExistsByNameAndSource("Dragon", "srd")],
+    ["findMonsterByNameAndSource", () => repo.findMonsterByNameAndSource("Dragon", "srd")],
+  ])("%s on driver failure", (_name, call) => {
+    it("rejects with StorageError", async () => {
+      mockCollection({
+        findResult: DB_DOWN(),
+        findOne: DB_DOWN(),
+        count: DB_DOWN(),
+        updateOne: DB_DOWN(),
+        deleteOne: DB_DOWN(),
+      });
+      await expectStorageError(call());
+    });
+  });
+
+  it("exposes all 7 methods on the storage facade", () => {
+    expectFacadeMethods(storage as Record<string, unknown>, [
+      "loadMonsterTemplates",
+      "loadGlobalMonsterTemplates",
+      "loadAllMonsterTemplates",
+      "saveMonsterTemplate",
+      "deleteMonsterTemplate",
+      "monsterExistsByNameAndSource",
+      "findMonsterByNameAndSource",
+    ]);
   });
 });

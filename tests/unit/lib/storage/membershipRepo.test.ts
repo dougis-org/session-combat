@@ -11,138 +11,105 @@ import * as repo from "@/lib/storage/membershipRepo";
 import { storage } from "@/lib/storage";
 import { StorageError } from "@/lib/storage/errors";
 import { DuplicateMemberError } from "@/lib/errors";
-import * as logger from "@/lib/telemetry/logger";
 
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
-import { mockCollection } from "./_repoMock";
+import {
+  mockCollection,
+  useStorageLogSpy,
+  expectStorageError,
+  expectLoggedOutcome,
+  expectFacadeMethods,
+} from "./_repoMock";
 
+const getLogSpy = useStorageLogSpy();
+const DB_DOWN = () => new Error("db down");
 const dupKeyError = () => Object.assign(new Error("E11000 duplicate key"), { code: 11000 });
 
-let logSpy: jest.SpyInstance;
-beforeEach(() => {
-  jest.clearAllMocks();
-  logSpy = jest.spyOn(logger, "logStorageEvent").mockImplementation();
-});
-afterEach(() => logSpy.mockRestore());
-
+const OID = "507f1f77bcf86cd799439011";
 const member = { campaignId: "c1", userId: "u1", role: "player", status: "active" } as never;
 
 describe("membershipRepo", () => {
   describe("addMember", () => {
-    it("success inserts data stripped of _id", async () => {
+    it("inserts the member with _id stripped", async () => {
       const col = mockCollection();
-      await repo.addMember({ ...(member as object), _id: "507f1f77bcf86cd799439011" } as never);
-      expect(col.insertOne).toHaveBeenCalledWith(
-        expect.not.objectContaining({ _id: expect.anything() }),
-      );
+      await repo.addMember({ ...(member as object), _id: OID } as never);
+      expect(col.insertOne).toHaveBeenCalledWith(expect.not.objectContaining({ _id: expect.anything() }));
     });
 
-    it("11000 insert error → DuplicateMemberError, NOT StorageError", async () => {
+    it("maps an 11000 insert error to DuplicateMemberError, not StorageError", async () => {
       mockCollection({ insertOne: dupKeyError() });
       const err = await repo.addMember(member).catch((e) => e);
       expect(err).toBeInstanceOf(DuplicateMemberError);
       expect(err).not.toBeInstanceOf(StorageError);
     });
 
-    it("non-11000 insert error → StorageError", async () => {
+    it("wraps a non-11000 insert error in StorageError", async () => {
       mockCollection({ insertOne: new Error("network") });
-      await expect(repo.addMember(member)).rejects.toBeInstanceOf(StorageError);
+      await expectStorageError(repo.addMember(member));
     });
 
-    it("logs one error event on both failure paths", async () => {
-      mockCollection({ insertOne: dupKeyError() });
-      await repo.addMember(member).catch(() => {});
-      expect(logSpy).toHaveBeenCalledTimes(1);
-      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "error" }));
-
-      logSpy.mockClear();
-      mockCollection({ insertOne: new Error("network") });
-      await repo.addMember(member).catch(() => {});
-      expect(logSpy).toHaveBeenCalledTimes(1);
-      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "error" }));
+    it("logs exactly one error event on either failure path", async () => {
+      for (const insertOne of [dupKeyError(), new Error("network")]) {
+        getLogSpy().mockClear();
+        mockCollection({ insertOne });
+        await repo.addMember(member).catch(() => {});
+        expect(getLogSpy()).toHaveBeenCalledTimes(1);
+        expectLoggedOutcome(getLogSpy(), "error");
+      }
     });
   });
 
   describe("updateMemberStatus", () => {
-    it("success pushes a history entry; DB failure → StorageError", async () => {
+    it("pushes a history entry on the member row", async () => {
       const col = mockCollection();
       await repo.updateMemberStatus("c1", "u1", "active" as never, "actor1");
       expect(col.updateOne).toHaveBeenCalledWith(
         { campaignId: "c1", userId: "u1" },
         expect.objectContaining({ $push: expect.anything() }),
       );
-
-      mockCollection({ updateOne: new Error("db down") });
-      await expect(
-        repo.updateMemberStatus("c1", "u1", "active" as never, "actor1"),
-      ).rejects.toBeInstanceOf(StorageError);
     });
   });
 
   describe("listMembersForCampaign", () => {
-    it("members present → mapped without _id", async () => {
-      mockCollection({ findResult: [{ _id: "507f1f77bcf86cd799439011", campaignId: "c1", userId: "u1" }] });
-      const res = await repo.listMembersForCampaign("c1");
-      expect(res[0]).not.toHaveProperty("_id");
-    });
+    it("maps members without _id, and logs not_found for a member-less campaign", async () => {
+      mockCollection({ findResult: [{ _id: OID, campaignId: "c1", userId: "u1" }] });
+      expect((await repo.listMembersForCampaign("c1"))[0]).not.toHaveProperty("_id");
 
-    it("member-less campaign → [] no throw, outcome not_found", async () => {
       mockCollection({ findResult: [] });
       await expect(repo.listMembersForCampaign("c1")).resolves.toEqual([]);
-      expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "not_found" }));
-    });
-
-    it("DB failure → StorageError (was: [])", async () => {
-      mockCollection({ findResult: new Error("db down") });
-      await expect(repo.listMembersForCampaign("c1")).rejects.toMatchObject({
-        op: "listMembersForCampaign",
-        collection: "campaignMembers",
-      });
+      expectLoggedOutcome(getLogSpy(), "not_found");
     });
   });
 
   describe("getMember", () => {
-    it("present → member without _id; absent → null; DB failure → StorageError (not null, not raw)", async () => {
-      mockCollection({ findOne: { _id: "507f1f77bcf86cd799439011", campaignId: "c1", userId: "u1", status: "active" } });
+    it("returns the member without _id on a hit, null on a miss", async () => {
+      mockCollection({ findOne: { _id: OID, campaignId: "c1", userId: "u1", status: "active" } });
       await expect(repo.getMember("c1", "u1")).resolves.not.toHaveProperty("_id");
 
       mockCollection({ findOne: null });
       await expect(repo.getMember("c1", "u1")).resolves.toBeNull();
+    });
 
+    it("wraps a driver error in StorageError without leaking the raw message", async () => {
       mockCollection({ findOne: new Error("connection reset") });
-      const err = await repo.getMember("c1", "u1").catch((e) => e);
-      expect(err).toBeInstanceOf(StorageError);
+      const err = await expectStorageError(repo.getMember("c1", "u1"), {
+        op: "getMember",
+        collection: "campaignMembers",
+      });
       expect(err.message).not.toContain("connection reset");
     });
   });
 
-  describe("listInvitationsForUser", () => {
-    it("success / empty ([]) / DB failure (StorageError)", async () => {
-      mockCollection({ findResult: [{ campaignId: "c1", userId: "u1", status: "invited" }] });
-      await expect(repo.listInvitationsForUser("u1")).resolves.toHaveLength(1);
-
-      mockCollection({ findResult: [] });
-      await expect(repo.listInvitationsForUser("u1")).resolves.toEqual([]);
-
-      mockCollection({ findResult: new Error("db down") });
-      await expect(repo.listInvitationsForUser("u1")).rejects.toBeInstanceOf(StorageError);
-    });
-  });
-
   describe("getUserById", () => {
-    const OID = "507f1f77bcf86cd799439011";
-    it("hit / miss (null) / DB failure (StorageError)", async () => {
+    it("returns the public user on a hit, null on a miss", async () => {
       mockCollection({ findOne: { _id: OID, username: "alice" } });
       await expect(repo.getUserById(OID)).resolves.toEqual({ id: OID, username: "alice" });
 
       mockCollection({ findOne: null });
       await expect(repo.getUserById(OID)).resolves.toBeNull();
-
-      mockCollection({ findOne: new Error("db down") });
-      await expect(repo.getUserById(OID)).rejects.toBeInstanceOf(StorageError);
     });
 
-    it("invalid id throws InvalidUserIdError before touching the DB", async () => {
+    it("throws InvalidUserIdError for a malformed id before touching the DB", async () => {
       const col = mockCollection();
       await expect(repo.getUserById("not-an-oid")).rejects.toThrow();
       expect(col.findOne).not.toHaveBeenCalled();
@@ -150,22 +117,34 @@ describe("membershipRepo", () => {
   });
 
   describe("getUsersByIds", () => {
-    const OID = "507f1f77bcf86cd799439011";
-    it("empty input → {} without DB; partial match returns found subset; DB failure → StorageError", async () => {
+    it("short-circuits to {} for empty input and returns the found subset otherwise", async () => {
       const col = mockCollection();
       await expect(repo.getUsersByIds([])).resolves.toEqual({});
       expect(col.find).not.toHaveBeenCalled();
 
       mockCollection({ findResult: [{ _id: { toString: () => OID }, username: "alice" }] });
       await expect(repo.getUsersByIds([OID])).resolves.toEqual({ [OID]: "alice" });
-
-      mockCollection({ findResult: new Error("db down") });
-      await expect(repo.getUsersByIds([OID])).rejects.toBeInstanceOf(StorageError);
     });
   });
 
-  it("facade exposes all 7 membership methods", () => {
-    for (const n of [
+  // Every read/write below now rejects with StorageError on a driver failure
+  // (was: swallow to [] / null, or raw rethrow).
+  describe.each<[string, () => Promise<unknown>]>([
+    ["updateMemberStatus", () => repo.updateMemberStatus("c1", "u1", "active" as never, "a1")],
+    ["listMembersForCampaign", () => repo.listMembersForCampaign("c1")],
+    ["getMember", () => repo.getMember("c1", "u1")],
+    ["listInvitationsForUser", () => repo.listInvitationsForUser("u1")],
+    ["getUserById", () => repo.getUserById(OID)],
+    ["getUsersByIds", () => repo.getUsersByIds([OID])],
+  ])("%s on driver failure", (_name, call) => {
+    it("rejects with StorageError", async () => {
+      mockCollection({ findResult: DB_DOWN(), findOne: DB_DOWN(), updateOne: DB_DOWN() });
+      await expectStorageError(call());
+    });
+  });
+
+  it("exposes all 7 membership methods on the storage facade", () => {
+    expectFacadeMethods(storage as Record<string, unknown>, [
       "addMember",
       "updateMemberStatus",
       "listMembersForCampaign",
@@ -173,8 +152,6 @@ describe("membershipRepo", () => {
       "listInvitationsForUser",
       "getUserById",
       "getUsersByIds",
-    ]) {
-      expect(typeof (storage as Record<string, unknown>)[n]).toBe("function");
-    }
+    ]);
   });
 });
