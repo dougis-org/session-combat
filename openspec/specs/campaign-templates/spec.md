@@ -24,7 +24,7 @@ The system SHALL read default encounters from a CampaignTemplate and instantiate
 
 ### Requirement: CampaignTemplate data structure
 
-The system SHALL support storing `EncounterTemplate` definitions directly within a `CampaignTemplate`, including for the 6 G3 campaigns.
+The system SHALL support storing `EncounterTemplate` definitions directly within a `CampaignTemplate`, including for the 6 G3 and 9 G4 campaigns.
 
 #### Scenario: Seeding templates with encounters
 
@@ -38,6 +38,13 @@ The system SHALL support storing `EncounterTemplate` definitions directly within
 - **When** the seed script is executed
 - **Then** each G3 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output (`rimeEncounters()`, `wbtwEncounters()`, `potaEncounters()`, `cotctEncounters()`, `hrEncounters()`, `rhodEncounters()`)
 - **Then** every encounter's `monsters` array contains full `Monster` stat blocks built via `findCustomMonsterById` + `toEncounterMonster(s)`
+
+#### Scenario: G4 catalog entries ship with full encounter arrays
+
+- **Given** the `CAMPAIGN_CATALOG` defines entries for the 9 G4 campaigns (Candlekeep, Radiant Citadel, Golden Vault, Yawning Portal, Saltmarsh, Mad Mage, Runelords, Kingmaker, WotR)
+- **When** the seed script is executed
+- **Then** each G4 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output (`candlekeepEncounters()`, `radiantCitadelEncounters()`, `goldenVaultEncounters()`, `yawningPortalEncounters()`, `saltmarshEncounters()`, `madMageEncounters()`, `runelordsEncounters()`, `kingmakerEncounters()`, `wrathOfTheRighteousEncounters()`)
+- **Then** every encounter's `monsters` array contains full `Monster` stat blocks built via `requireCustomMonsterById` + `toEncounterMonster(s)`
 
 ### Requirement: Encounter insertion performance
 

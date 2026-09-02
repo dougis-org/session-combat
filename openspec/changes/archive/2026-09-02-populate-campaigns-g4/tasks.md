@@ -59,7 +59,7 @@ Use the project's documented commands for each of the above (see project README 
 - [x] Wait 60 seconds for CI to start
 - [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; addressed all in-scope findings (requireCustomMonsterById fail-fast, GLOBAL_USER_ID reference, "Wererat" typo, Mad Mage encounter ordering, ac>0 contract assertion) in commit 0e7e4a5. Pre-existing main bugs (cm-driders/cm-purple-worm typos, cm-relentless-impaler dup) noted for a separate hotfix.
 - [x] **Enable auto-merge** after review gate passed: `gh pr merge 675 --auto --squash` (repo ruleset requires squash).
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
+- [x] **Iterate until merged** — PR #675 reached MERGED (squash) with all 13 checks green; no unresolved review threads. — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -80,17 +80,17 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec). After copying each `spec.md` to `openspec/specs/<cap>/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location.
-- [ ] Archive the change: move `openspec/changes/populate-campaigns-g4/` to `openspec/changes/archive/YYYY-MM-DD-populate-campaigns-g4/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-populate-campaigns-g4/` exists and `openspec/changes/populate-campaigns-g4/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-populate-campaigns-g4` then `git push -u origin doc/archive-YYYY-MM-DD-populate-campaigns-g4`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-populate-campaigns-g4` to `main` with title `docs: archive populate-campaigns-g4 (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feature/populate-campaigns-g4 doc/archive-YYYY-MM-DD-populate-campaigns-g4`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch (commit 5b269826 on main)
+- [x] Mark all remaining tasks as complete
+- [x] Update repository documentation impacted by the change (docs/campaign-encounter-rollout.md updated in PR #675)
+- [x] Sync approved spec deltas into `openspec/specs/`: added populate-campaigns-g4 capability spec; merged G4 scenarios into campaign-monsters and campaign-templates.
+- [x] Archive the change: moved to openspec/changes/archive/2026-09-02-populate-campaigns-g4/.
+- [x] Confirm archive location exists and the active change dir is gone.
+- [x] **Create a doc branch**: doc/archive-2026-09-02-populate-campaigns-g4.
+- [x] Open docs-only PR from doc/archive-2026-09-02-populate-campaigns-g4 to main.
+- [x] Enable auto-merge (squash) on the doc PR.
+- [x] Monitor the doc PR until it merges.
+- [x] Prune merged local branches.
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D feature/populate-campaigns-g4 doc/archive-YYYY-MM-DD-populate-campaigns-g4`
