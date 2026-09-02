@@ -43,14 +43,25 @@ async function importSingle<T extends MonsterTemplate | SpellTemplate>(
 ): Promise<{ inserted: boolean; skipped: boolean; error: boolean }> {
   const result = transform(raw);
   if (!result.valid) {
+    console.warn(`Invalid ${collection} skipped:`, result.errors);
     return { inserted: false, skipped: false, error: true };
   }
 
-  const { should } = await shouldImport(
-    collection,
-    result.entity.name,
-    result.entity.source || ""
-  );
+  // A thrown existence check (e.g. storage.spellExistsByNameAndSource now
+  // rejects with StorageError on a DB failure instead of swallowing to
+  // `false`) must fail this item cleanly — never fall through and insert it as
+  // though it were confirmed not-a-duplicate.
+  let should: boolean;
+  try {
+    ({ should } = await shouldImport(
+      collection,
+      result.entity.name,
+      result.entity.source || ""
+    ));
+  } catch (error) {
+    console.error(`Dedupe check failed for ${collection} "${result.entity.name}":`, error);
+    return { inserted: false, skipped: false, error: true };
+  }
   if (!should) {
     return { inserted: false, skipped: true, error: false };
   }
@@ -62,10 +73,20 @@ async function importSingle<T extends MonsterTemplate | SpellTemplate>(
 async function importMonsterSingle(
   raw: Open5ECreature
 ): Promise<{ inserted: boolean; skipped: boolean; error: boolean }> {
-  if (raw.name) {
-    const { should } = await shouldImport("monsters", raw.name, "open5e");
-    if (!should) {
-      return { inserted: false, skipped: true, error: false };
+  // Only run the duplicate lookup for a real, non-blank name (equivalent to
+  // the prior `if (raw.name)` but type-safe about the value handed to Mongo).
+  // A nameless creature falls through to transformMonster, which rejects it.
+  if (typeof raw.name === "string" && raw.name.trim() !== "") {
+    try {
+      const { should } = await shouldImport("monsters", raw.name, "open5e");
+      if (!should) {
+        return { inserted: false, skipped: true, error: false };
+      }
+    } catch (error) {
+      // A thrown existence check must fail this item cleanly rather than
+      // falling through and inserting a possible duplicate.
+      console.error(`Dedupe check failed for monster "${raw.name}":`, error);
+      return { inserted: false, skipped: false, error: true };
     }
   }
 

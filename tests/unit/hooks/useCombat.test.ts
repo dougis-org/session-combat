@@ -416,6 +416,30 @@ describe('useCombat', () => {
     });
   });
 
+  test('nextTurn does not skip stable or dead combatants (they keep their turn slot)', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          makeCombatant('c1', 'Fighter', 'player'),
+          { ...makeCombatant('c2', 'Cleric', 'player'), hp: 0, lifeState: 'stable' },
+          { ...makeCombatant('c3', 'Rogue', 'player'), hp: 0, lifeState: 'dead' },
+        ]));
+      });
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+      expect(getLastPutBody(fetchMock).currentTurnIndex).toBe(1); // stops on the stable combatant
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+      expect(getLastPutBody(fetchMock).currentTurnIndex).toBe(2); // stops on the dead combatant
+    });
+  });
+
   test('nextTurn wraps to index 0 and increments round at end of round', async () => {
     await testHook(async (result, fetchMock) => {
       await act(async () => {

@@ -1,8 +1,12 @@
-## ADDED Requirements
+# campaign-templates Specification
 
-This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-08-30-campaign-encounter-templates/design.md) document, not a replacement.
+## Purpose
 
-### Requirement: ADDED Encounter generation upon campaign template copy
+Define how global `CampaignTemplate` records store default encounter content
+and how copying a template instantiates real `Encounter` objects for a user.
+Additive to the [`campaign-encounter-templates` design](../../changes/archive/2026-08-30-campaign-encounter-templates/design.md).
+## Requirements
+### Requirement: Encounter generation upon campaign template copy
 
 The system SHALL read default encounters from a CampaignTemplate and instantiate real `Encounter` objects for the user.
 
@@ -18,43 +22,33 @@ The system SHALL read default encounters from a CampaignTemplate and instantiate
 - **When** the database fails to save one of the new `Encounter` records
 - **Then** the system catches the error, deletes the partially created `Campaign` record, and returns an HTTP 500 status to the client.
 
-## MODIFIED Requirements
+### Requirement: CampaignTemplate data structure
 
-### Requirement: MODIFIED CampaignTemplate data structure
-
-The system SHALL support storing `EncounterTemplate` definitions directly within a `CampaignTemplate`.
+The system SHALL support storing `EncounterTemplate` definitions directly within a `CampaignTemplate`, including for the 6 G3 and 9 G4 campaigns.
 
 #### Scenario: Seeding templates with encounters
 
-- **Given** the seed script `seedCampaignTemplates.ts` defines an `EncounterTemplate` block for "Dragon of Icespire Peak"
+- **Given** the seed script `seedCampaignTemplates.ts` defines an `EncounterTemplate` block for any G3 campaign (Rime, WBtW, PotA, CotCT, HR, RHoD)
 - **When** the seed script executes
-- **Then** the `campaignTemplates` collection in MongoDB contains the updated template including the `encounters` array.
+- **Then** the `campaignTemplates` collection in MongoDB contains the updated template including the `encounters` array
 
-#### Scenario: G2 catalog entries ship with full encounter arrays
+#### Scenario: G3 catalog entries ship with full encounter arrays
 
-- **Given** the `CAMPAIGN_CATALOG` in `lib/scripts/seedCampaignTemplates.ts` defines entries for the 5 G2 campaigns (WDH, SKT, OotA, DIP, PaBtSO)
+- **Given** the `CAMPAIGN_CATALOG` in `lib/scripts/seedCampaignTemplates.ts` defines entries for the 6 G3 campaigns
 - **When** the seed script is executed
-- **Then** each G2 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output (`wdhEncounters()`, `sktEncounters()`, `ootEncounters()`, `dipEncounters()`, `pabtsoEncounters()`)
+- **Then** each G3 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output (`rimeEncounters()`, `wbtwEncounters()`, `potaEncounters()`, `cotctEncounters()`, `hrEncounters()`, `rhodEncounters()`)
 - **Then** every encounter's `monsters` array contains full `Monster` stat blocks built via `findCustomMonsterById` + `toEncounterMonster(s)`
 
-## REMOVED Requirements
+#### Scenario: G4 catalog entries ship with full encounter arrays
 
-### Requirement: REMOVED None
+- **Given** the `CAMPAIGN_CATALOG` defines entries for the 9 G4 campaigns (Candlekeep, Radiant Citadel, Golden Vault, Yawning Portal, Saltmarsh, Mad Mage, Runelords, Kingmaker, WotR)
+- **When** the seed script is executed
+- **Then** each G4 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output (`candlekeepEncounters()`, `radiantCitadelEncounters()`, `goldenVaultEncounters()`, `yawningPortalEncounters()`, `saltmarshEncounters()`, `madMageEncounters()`, `runelordsEncounters()`, `kingmakerEncounters()`, `wrathOfTheRighteousEncounters()`)
+- **Then** every encounter's `monsters` array contains full `Monster` stat blocks built via `requireCustomMonsterById` + `toEncounterMonster(s)`
 
-Reason for removal: N/A
+### Requirement: Encounter insertion performance
 
-## Traceability
-
-- Proposal element -> Requirement: Generate real objects upon copy -> ADDED Encounter generation upon campaign template copy
-- Design decision -> Requirement: Decision 1 (Embedded Encounter Templates) -> MODIFIED CampaignTemplate data structure
-- Design decision -> Requirement: Decision 2 (API Route Iteration) -> ADDED Encounter generation upon campaign template copy
-- Requirement -> Task(s): Will map to API route updates and type modifications in [`tasks.md`](../../changes/archive/2026-08-30-campaign-encounter-templates/tasks.md).
-
-## Non-Functional Acceptance Criteria
-
-> **Important:** NFAC scenarios MUST NOT duplicate scenarios already expressed in the functional requirements sections above (ADDED/MODIFIED/REMOVED). If a functional scenario already covers a given behavior (e.g., access-control rejection, error handling), cross-reference it here instead of repeating it. Only include NFAC scenarios that express genuinely new, non-functional behaviors (latency budgets, throughput limits, recovery SLOs, audit logging, etc.).
-
-### Requirement: Performance
+Iterative insertion of a template's encounters during the copy route SHALL stay within the API latency budget.
 
 #### Scenario: Iterative insertion latency
 
@@ -62,14 +56,18 @@ Reason for removal: N/A
 - **When** the encounters are sequentially inserted into the DB during the copy route
 - **Then** the total overhead of encounter insertion must not exceed 500ms, ensuring the copy route still returns within acceptable API latency limits.
 
-### Requirement: Security
+### Requirement: Encounter insertion reliability
 
-> See functional scenarios: Access-control rejections for campaign copying are handled by existing middleware (`withAuthAndParams`). No new security properties introduced.
-
-### Requirement: Reliability
+Partial failure while inserting a template's encounters SHALL leave the database in a clean state.
 
 #### Scenario: Recovery behavior
 
 - **Given** a network hiccup during database insertion of encounters
 - **When** the encounter insertion throws an error
 - **Then** the system executes the rollback procedure (deleting the campaign) and leaves the DB in a clean state, ready for a retry.
+
+## Traceability
+
+- Proposal element -> Requirement: Generate real objects upon copy -> Encounter generation upon campaign template copy
+- Design decision -> Requirement: Decision 1 (Embedded Encounter Templates) -> CampaignTemplate data structure
+- Design decision -> Requirement: Decision 2 (API Route Iteration) -> Encounter generation upon campaign template copy

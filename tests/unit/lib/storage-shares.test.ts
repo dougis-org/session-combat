@@ -80,11 +80,17 @@ describe("storage.addShare", () => {
     await expect(storage.addShare(BASE_SHARE)).rejects.toThrow(DuplicateShareError);
   });
 
-  it("T3-3: re-throws non-11000 errors", async () => {
+  it("T3-3: wraps non-11000 errors in StorageError (original as cause)", async () => {
     const generic = new Error("network failure");
     mockedInsertCollection.insertOne.mockRejectedValue(generic);
 
-    await expect(storage.addShare(BASE_SHARE)).rejects.toThrow("network failure");
+    // #504: addShare now runs inside runStorageOp — a non-duplicate driver
+    // failure is wrapped in StorageError; only DuplicateShareError passes
+    // through unchanged (rethrowAsIs).
+    await expect(storage.addShare(BASE_SHARE)).rejects.toMatchObject({
+      name: "StorageError",
+      cause: generic,
+    });
   });
 });
 

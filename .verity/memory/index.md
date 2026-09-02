@@ -4,7 +4,7 @@
 
 > If you are an AI coding agent reading this via CLAUDE.md: scan the catalog below for any node whose title, kind, or file scope is relevant to the task the user just asked you to do. Open the matching files via the Read tool before writing code. Most projects accumulate dozens to hundreds of nodes — do not read them all; pick the few that fit the current change.
 
-## decisions/ (33)
+## decisions/ (43)
 
 - [[n015-model-session-lifecycle-as-its-own-campaign-stream]] — **Model session lifecycle as its own campaign stream event variant**
   *decision* · 84%
@@ -72,6 +72,26 @@
   *decision* · 86% · scope: `**/dice/**`, `**/rolls/**`
 - [[n051-centralize-unbiased-dice-generation-behind-a-rejec]] — **Centralize unbiased dice generation behind a rejection-sampling utility**
   *decision* · 86%
+- [[n163-apply-vendor-fixes-with-exact-version-patch-packag]] — **Apply vendor fixes with exact-version patch-package patches**
+  *decision* · 88% · scope: `patches/**`, `package.json`
+- [[n164-generate-an-isolated-jwt-secret-for-each-integrati]] — **Generate an isolated JWT secret for each integration-test run**
+  *decision* · 88% · scope: `tests/integration/global.setup.ts`
+- [[n165-use-a-shared-numeric-chip-readout-for-pool-and-per]] — **Use a shared numeric-chip readout for pool and percentile dice**
+  *decision* · 90%
+- [[n166-cap-displayed-dice-at-15-while-preserving-the-full]] — **Cap displayed dice at 15 while preserving the full-pool total**
+  *decision* · 83%
+- [[n167-keep-the-dice-canvas-host-mounted-when-hiding-comp]] — **Keep the dice canvas host mounted when hiding completed or fallback animations**
+  *decision* · 84% · scope: `**/dice/**`
+- [[n168-pin-patched-dependencies-to-the-exact-version-targ]] — **Pin patched dependencies to the exact version targeted by the patch**
+  *decision* · 90% · scope: `package.json`
+- [[n169-keep-dice-box-threejs-pinned-while-its-patch-packa]] — **Keep dice-box-threejs pinned while its patch-package patch applies**
+  *decision* · 91% · scope: `package.json`
+- [[n170-keep-repository-ci-workflows-thin-and-delegate-exe]] — **Keep repository CI workflows thin and delegate execution to shared tooling**
+  *decision* · 87% · scope: `.github/workflows/**`
+- [[n171-provide-manual-dispatch-for-synchronization-workfl]] — **Provide manual dispatch for synchronization workflows**
+  *decision* · 87%
+- [[n172-persist-dice-appearance-preferences-as-validated-s]] — **Persist dice appearance preferences as validated scalar IDs**
+  *decision* · 88%
 
 ## domain/ (4)
 

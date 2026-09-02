@@ -188,7 +188,7 @@ encounter is self-contained.
 | **G1 — Classic Forgotten Realms** | Curse of Strahd, Tomb of Annihilation, Lost Mine of Phandelver, Tyranny of Dragons, Baldur's Gate: Descent into Avernus | All published 5e hardcover adventures, Forgotten Realms flavor, heavy use of undead/Fiend/Cult | #TBD |
 | **G2 — Sword Coast & Savage Frontier** | Waterdeep: Dragon Heist, Storm King's Thunder, Out of the Abyss, Dragon of Icespire Peak, Phandelver and Below: The Shattered Obelisk | Geographic cluster (Sword Coast), mix of urban/heavy wilderness/Underdark | #TBD |
 | **G3 — Planar & Crossover** | Icewind Dale: Rime of the Frostmaiden, The Wild Beyond the Witchlight, Princes of the Apocalypse, Curse of the Crimson Throne, Hell's Rebels, Red Hand of Doom | Elemental Evil / non-Realms / Planescape-adjacent | #TBD |
-| **G4 — Anthologies & OSR/3.5e conversions** | Candlekeep Mysteries, Journeys Through the Radiant Citadel, Keys from the Golden Vault, Tales from the Yawning Portal, Ghosts of Saltmarsh, Waterdeep: Dungeon of the Mad Mage, Rise of the Runelords, Kingmaker, Wrath of the Righteous | Anthology / adventure path / OSR-to-5e conversions | #TBD |
+| **G4 — Anthologies & OSR/3.5e conversions** | Candlekeep Mysteries, Journeys Through the Radiant Citadel, Keys from the Golden Vault, Tales from the Yawning Portal, Ghosts of Saltmarsh, Waterdeep: Dungeon of the Mad Mage, Rise of the Runelords, Kingmaker, Wrath of the Righteous | Anthology / adventure path / OSR-to-5e conversions | #675 |
 | **G5 — Classic Adventures & Settings** | Age of Worms, Dungeon of the Mad Mage (already in G4), Drakkenheim, Hot Springs Island, Scarlet Citadel, Courts of Shadow Fey, Vault of the Drow, Shackled City, Reavers of Harkenwold, Lost City, Planescape: Turn of Fortune's Wheel, Dragonlance, Empire of the Ghouls, Temple of Elemental Evil, Keep on the Borderlands, Points of Light, Night Below, Return to Temple, Desert of Desolation, Queen of the Spiders, Reptile God, Spelljammer, Barrier Peaks, Return to Tomb of Horrors, Savage Tide, Expedition | All other 5e and 3.5e modules — mix of low/mid/high level | #TBD |
 
 > Final grouping will be tuned after research lands. Some campaigns are
@@ -214,21 +214,21 @@ encounter is self-contained.
 > | Out of the Abyss | 17 | 16 | 37 new | PR #661 | ✅ merged |
 > | Dragon of Icespire Peak | 4 | 15 | 6 new | PR #661 | ✅ merged |
 > | Phandelver and Below: The Shattered Obelisk | 8 | 9 | 21 new | PR #661 | ✅ merged |
-> | Icewind Dale: Rime of the Frostmaiden | 7 | 2 placeholder | 0 new | — | 🚧 G3 |
-> | The Wild Beyond the Witchlight | 5 | 2 placeholder | 0 new | — | 🚧 G3 |
-> | Princes of the Apocalypse | 5 | 0 | 0 new | — | 🚧 G3 |
-> | Curse of the Crimson Throne | 6 | 0 | 0 new | — | 🚧 G3 |
-> | Hell's Rebels | 6 | 0 | 0 new | — | 🚧 G3 |
-> | Red Hand of Doom | 5 | 0 | 0 new | — | 🚧 G3 |
-> | Candlekeep Mysteries | 17 | 0 | TBD | docs/research/candlekeep-mysteries.md | 🚧 G4 |
-> | Journeys Through the Radiant Citadel | 13 | 0 | TBD | docs/research/radiant-citadel.md | 🚧 G4 |
-> | Keys from the Golden Vault | 13 | 0 | TBD | docs/research/golden-vault.md | 🚧 G4 |
-> | Tales from the Yawning Portal | 7 | 0 | TBD | docs/research/yawning-portal.md | 🚧 G4 |
-> | Ghosts of Saltmarsh | 8 | 0 | TBD | docs/research/ghosts-of-saltmarsh.md | 🚧 G4 |
-> | Waterdeep: Dungeon of the Mad Mage | 13 | 0 | TBD | docs/research/mad-mage.md | 🚧 G4 |
-> | Rise of the Runelords | 6 | 0 | TBD | docs/research/rise-of-the-runelords.md | 🚧 G4 |
-> | Kingmaker | 6 | 0 | TBD | docs/research/kingmaker.md | 🚧 G4 |
-> | Wrath of the Righteous | 6 | 0 | TBD | docs/research/wrath-of-the-righteous.md | 🚧 G4 |
+> | Icewind Dale: Rime of the Frostmaiden | 7 | 12 | 14 new | PR #581 | ✅ merged |
+> | The Wild Beyond the Witchlight | 5 | 8 | 14 new | PR #581 | ✅ merged |
+> | Princes of the Apocalypse | 5 | 22 | 16 new | PR #581 | ✅ merged |
+> | Curse of the Crimson Throne | 6 | 13 | 15 new | PR #581 | ✅ merged |
+> | Hell's Rebels | 6 | 13 | 14 new | PR #581 | ✅ merged |
+> | Red Hand of Doom | 5 | 15 | 14 new | PR #581 | ✅ merged |
+> | Candlekeep Mysteries | 17 | 17 | 17 new | docs/research/candlekeep-mysteries.md | PR #675 🔜 |
+> | Journeys Through the Radiant Citadel | 13 | 13 | 15 new | docs/research/radiant-citadel.md | PR #675 🔜 |
+> | Keys from the Golden Vault | 13 | 13 | 15 new | docs/research/golden-vault.md | PR #675 🔜 |
+> | Tales from the Yawning Portal | 7 | 7 | 15 new | docs/research/yawning-portal.md | PR #675 🔜 |
+> | Ghosts of Saltmarsh | 8 | 9 | 14 new | docs/research/ghosts-of-saltmarsh.md | PR #675 🔜 |
+> | Waterdeep: Dungeon of the Mad Mage | 13 | 82 | 41 new | docs/research/mad-mage.md | PR #675 🔜 |
+> | Rise of the Runelords | 6 | 8 | 14 new | docs/research/rise-of-the-runelords.md | PR #675 🔜 |
+> | Kingmaker | 6 | 7 | 14 new | docs/research/kingmaker.md | PR #675 🔜 |
+> | Wrath of the Righteous | 6 | 8 | 15 new | docs/research/wrath-of-the-righteous.md | PR #675 🔜 |
 > | Age of Worms | 12 | 0 | 0 new | research/age-of-worms.md | 🚧 G5 |
 > | Dungeons of Drakkenheim | 7 | 0 | 0 new | research/drakkenheim.md | 🚧 G5 |
 > | Dark of Hot Springs Island | 4 | 0 | 0 new | research/hot-springs-island.md | 🚧 G5 |

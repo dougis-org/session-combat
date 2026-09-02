@@ -1,6 +1,7 @@
 import { runCli, handleCliError, seedCampaignTemplates } from "../../../../lib/scripts/seedCampaignTemplates";
 import { getDatabase } from "../../../../lib/db";
 import { GLOBAL_USER_ID } from "../../../../lib/constants";
+import { CUSTOM_MONSTERS, requireCustomMonsterById } from "../../../../lib/data/customMonsters";
 
 jest.mock("../../../../lib/db", () => ({
   getDatabase: jest.fn(),
@@ -184,6 +185,7 @@ function assertCampaignEncounterContract(seeded: any, campaignName: string, expe
       expect(monster.challengeRating).toBeDefined();
       expect(monster.abilityScores).toBeDefined();
       expect(monster.hp).toBeGreaterThan(0);
+      expect(monster.ac).toBeGreaterThan(0);
     }
   }
   expect(emptyEncounterCount).toBe(0);
@@ -358,6 +360,315 @@ describe("Phandelver and Below: The Shattered Obelisk encounters", () => {
   it("PaBtSO has 8 chapters and encounters with full Monster stat blocks", async () => {
     const seeded = await captureTemplate("Phandelver and Below: The Shattered Obelisk");
     assertCampaignEncounterContract(seeded, "Phandelver and Below: The Shattered Obelisk", 8);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// populate-campaigns-g3 — per-campaign contract tests (Planar & non-Realms)
+// Maps to openspec/changes/populate-campaigns-g3/specs/populate-campaigns-g3/spec.md
+// ---------------------------------------------------------------------------
+
+function allMonsters(seeded: any): any[] {
+  return seeded.encounters.flatMap((e: any) => e.monsters || []);
+}
+
+describe("Icewind Dale: Rime of the Frostmaiden encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("Rime has 7 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Icewind Dale: Rime of the Frostmaiden");
+    assertCampaignEncounterContract(seeded, "Icewind Dale: Rime of the Frostmaiden", 7);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(10);
+    const auril = allMonsters(seeded).find((m) => m.name === "Auril, the Frostmaiden");
+    expect(auril).toBeDefined();
+    expect(auril.damageImmunities).toContain("cold");
+    expect((auril.traits || []).some((t: any) => t.name === "Frost Aura")).toBe(true);
+  });
+});
+
+describe("The Wild Beyond the Witchlight encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("WBtW has 5 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("The Wild Beyond the Witchlight");
+    assertCampaignEncounterContract(seeded, "The Wild Beyond the Witchlight", 5);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(8);
+    const coven = ["Brigid Morningglow", "Mungoj Reyhorn", "Endelyn Moongrave", "Sister Gala"];
+    const names = allMonsters(seeded).map((m) => m.name);
+    for (const c of coven) expect(names).toContain(c);
+    for (const c of coven) {
+      const member = allMonsters(seeded).find((m) => m.name === c);
+      expect(Array.isArray(member.legendaryActions)).toBe(true);
+      expect(member.legendaryActions.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("Princes of the Apocalypse encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("PotA has 5 chapters and 20+ encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Princes of the Apocalypse");
+    assertCampaignEncounterContract(seeded, "Princes of the Apocalypse", 5);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(20);
+    const names = allMonsters(seeded).map((m) => m.name);
+    for (const prince of ["Imix", "Ogrémoch", "Yuan-Tin", "Bane"]) {
+      expect(names.some((n: string) => n.startsWith(prince))).toBe(true);
+    }
+    for (const ele of ["Air Elemental", "Earth Elemental", "Fire Elemental", "Water Elemental"]) {
+      expect(names).toContain(ele);
+    }
+  });
+});
+
+describe("Curse of the Crimson Throne encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("CotCT has 6 chapters, encounters populated, 5e-conversion notes present", async () => {
+    const seeded = await captureTemplate("Curse of the Crimson Throne");
+    assertCampaignEncounterContract(seeded, "Curse of the Crimson Throne", 6);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(12);
+    expect(allMonsters(seeded).map((m) => m.name)).toContain("Queen Ileosa Arabasti");
+    expect(seeded.encounters.some((e: any) => e.description.includes("(5e conversion)"))).toBe(true);
+  });
+});
+
+describe("Hell's Rebels encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("HR has 6 chapters, encounters populated, devil damage types canonical", async () => {
+    const seeded = await captureTemplate("Hell's Rebels");
+    assertCampaignEncounterContract(seeded, "Hell's Rebels", 6);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(12);
+    expect(allMonsters(seeded).map((m) => m.name)).toContain("Barbaroscia Thrune");
+    const canonical = new Set(["acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic", "piercing", "poison", "psychic", "radiant", "slashing", "thunder"]);
+    for (const mon of allMonsters(seeded)) {
+      for (const arr of [mon.damageResistances, mon.damageImmunities, mon.damageVulnerabilities]) {
+        for (const v of arr || []) expect(canonical.has(v)).toBe(true);
+      }
+    }
+  });
+});
+
+describe("Red Hand of Doom encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("RHoD has 5 chapters and 15+ encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Red Hand of Doom");
+    assertCampaignEncounterContract(seeded, "Red Hand of Doom", 5);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(15);
+    const names = allMonsters(seeded).map((m) => m.name);
+    expect(names).toContain("Hurog Manthex");
+    expect(names.some((n: string) => n.startsWith("Wyrmlord"))).toBe(true);
+  });
+});
+
+describe("populate-campaigns-g3 failure mode", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("seeding does not silently produce empty encounter monster arrays for any G3 campaign", async () => {
+    for (const name of [
+      "Icewind Dale: Rime of the Frostmaiden",
+      "The Wild Beyond the Witchlight",
+      "Princes of the Apocalypse",
+      "Curse of the Crimson Throne",
+      "Hell's Rebels",
+      "Red Hand of Doom",
+    ]) {
+      const seeded = await captureTemplate(name);
+      for (const enc of seeded.encounters) expect(enc.monsters.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// populate-campaigns-g4 — Anthologies & Adventure Paths
+// Maps to openspec/changes/populate-campaigns-g4/specs/populate-campaigns-g4/spec.md
+// ---------------------------------------------------------------------------
+
+const CANONICAL_DAMAGE_TYPES = new Set([
+  "acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic",
+  "piercing", "poison", "psychic", "radiant", "slashing", "thunder",
+]);
+
+function hasTemplate(seeded: any, templateId: string): boolean {
+  return allMonsters(seeded).some((m) => m.templateId === templateId);
+}
+
+describe("populate-campaigns-g4 encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("Candlekeep Mysteries: 17 chapters, one encounter per anthology adventure", async () => {
+    const seeded = await captureTemplate("Candlekeep Mysteries");
+    assertCampaignEncounterContract(seeded, "Candlekeep Mysteries", 17);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(17);
+  });
+
+  it("Journeys Through the Radiant Citadel: 13 chapters, encounters populated with canonical damage types", async () => {
+    const seeded = await captureTemplate("Journeys Through the Radiant Citadel");
+    assertCampaignEncounterContract(seeded, "Journeys Through the Radiant Citadel", 13);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(13);
+    for (const mon of allMonsters(seeded)) {
+      for (const arr of [mon.damageResistances, mon.damageImmunities, mon.damageVulnerabilities]) {
+        for (const v of arr || []) expect(CANONICAL_DAMAGE_TYPES.has(v)).toBe(true);
+      }
+    }
+  });
+
+  it("Keys from the Golden Vault: 13 heist encounters, no empty monster arrays", async () => {
+    const seeded = await captureTemplate("Keys from the Golden Vault");
+    assertCampaignEncounterContract(seeded, "Keys from the Golden Vault", 13);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(13);
+  });
+
+  it("Tales from the Yawning Portal: 7 chapters, classic antagonists use original stat blocks", async () => {
+    const seeded = await captureTemplate("Tales from the Yawning Portal");
+    assertCampaignEncounterContract(seeded, "Tales from the Yawning Portal", 7);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(7);
+    expect(hasTemplate(seeded, "cm-acererak-lich")).toBe(true);
+    expect(hasTemplate(seeded, "cm-vecna-robes")).toBe(true);
+  });
+
+  it("Ghosts of Saltmarsh: 8 sea-themed encounters, sahuagin baron present with canonical damage types", async () => {
+    const seeded = await captureTemplate("Ghosts of Saltmarsh");
+    assertCampaignEncounterContract(seeded, "Ghosts of Saltmarsh", 8);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(8);
+    expect(hasTemplate(seeded, "cm-sahuagin-baron")).toBe(true);
+    for (const mon of allMonsters(seeded)) {
+      for (const arr of [mon.damageResistances, mon.damageImmunities, mon.damageVulnerabilities]) {
+        for (const v of arr || []) expect(CANONICAL_DAMAGE_TYPES.has(v)).toBe(true);
+      }
+    }
+  });
+
+  it("Waterdeep: Dungeon of the Mad Mage: 13 chapters, 80+ encounters, Halaster and apprentices present", async () => {
+    const seeded = await captureTemplate("Waterdeep: Dungeon of the Mad Mage");
+    assertCampaignEncounterContract(seeded, "Waterdeep: Dungeon of the Mad Mage", 13);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(80);
+    for (const enc of seeded.encounters) expect(enc.monsters.length).toBeGreaterThan(0);
+    const names = allMonsters(seeded).map((m) => m.name);
+    expect(names.some((n: string) => n.includes("Halaster"))).toBe(true);
+    for (const apprentice of ["Arcturia", "Trobriand", "Muiral"]) {
+      expect(names.some((n: string) => n.includes(apprentice))).toBe(true);
+    }
+  });
+
+  it("Rise of the Runelords: 6 chapters, Karzoug present, Pathfinder encounters flagged (5e conversion)", async () => {
+    const seeded = await captureTemplate("Rise of the Runelords");
+    assertCampaignEncounterContract(seeded, "Rise of the Runelords", 6);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(6);
+    expect(hasTemplate(seeded, "cm-karzoug-demon-skin")).toBe(true);
+    expect(seeded.encounters.some((e: any) => e.description.includes("(5e conversion)"))).toBe(true);
+  });
+
+  it("Kingmaker: 6 chapters, the Lantern King present, Pathfinder encounters flagged (5e conversion)", async () => {
+    const seeded = await captureTemplate("Kingmaker");
+    assertCampaignEncounterContract(seeded, "Kingmaker", 6);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(6);
+    expect(hasTemplate(seeded, "cm-lantern-king")).toBe(true);
+    expect(seeded.encounters.some((e: any) => e.description.includes("(5e conversion)"))).toBe(true);
+  });
+
+  it("Wrath of the Righteous: 6 chapters, demon lords present, demon damage types canonical", async () => {
+    const seeded = await captureTemplate("Wrath of the Righteous");
+    assertCampaignEncounterContract(seeded, "Wrath of the Righteous", 6);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(6);
+    const names = allMonsters(seeded).map((m) => m.name);
+    for (const lord of ["Deskari", "Baphomet", "Nocticula"]) {
+      expect(names.some((n: string) => n.includes(lord))).toBe(true);
+    }
+    for (const mon of allMonsters(seeded)) {
+      for (const arr of [mon.damageResistances, mon.damageImmunities, mon.damageVulnerabilities]) {
+        for (const v of arr || []) expect(CANONICAL_DAMAGE_TYPES.has(v)).toBe(true);
+      }
+    }
+  });
+
+  it("does not silently produce empty or truncated encounters for any G4 campaign", async () => {
+    // Exact counts: because the G4 helpers resolve monsters via
+    // requireCustomMonsterById, a mistyped id throws at build time rather than
+    // shipping a thinner encounter — these counts lock the authored totals.
+    const expectedCounts: Record<string, number> = {
+      "Candlekeep Mysteries": 17,
+      "Journeys Through the Radiant Citadel": 13,
+      "Keys from the Golden Vault": 13,
+      "Tales from the Yawning Portal": 7,
+      "Ghosts of Saltmarsh": 9,
+      "Waterdeep: Dungeon of the Mad Mage": 82,
+      "Rise of the Runelords": 8,
+      "Kingmaker": 7,
+      "Wrath of the Righteous": 8,
+    };
+    for (const [name, count] of Object.entries(expectedCounts)) {
+      const seeded = await captureTemplate(name);
+      expect(seeded.encounters).toHaveLength(count);
+      for (const enc of seeded.encounters) expect(enc.monsters.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("populate-campaigns-g4 custom monster invariants", () => {
+  const G4_SOURCES = new Set([
+    "Candlekeep Mysteries",
+    "Journeys Through the Radiant Citadel",
+    "Keys from the Golden Vault",
+    "Tales from the Yawning Portal",
+    "Ghosts of Saltmarsh",
+    "Waterdeep: Dungeon of the Mad Mage",
+    "Rise of the Runelords",
+    "Kingmaker",
+    "Wrath of the Righteous",
+  ]);
+  const g4Monsters = CUSTOM_MONSTERS.filter((m) => G4_SOURCES.has(m.source ?? ""));
+
+  it("adds 150-200 new G4 monsters, all cm- prefixed", () => {
+    expect(g4Monsters.length).toBeGreaterThanOrEqual(150);
+    expect(g4Monsters.length).toBeLessThanOrEqual(200);
+    for (const m of g4Monsters) expect(m.id.startsWith("cm-")).toBe(true);
+  });
+
+  it("every G4 monster damage array contains only canonical DamageType values", () => {
+    for (const m of g4Monsters) {
+      for (const arr of [m.damageResistances, m.damageImmunities, m.damageVulnerabilities]) {
+        for (const v of arr || []) expect(CANONICAL_DAMAGE_TYPES.has(v)).toBe(true);
+      }
+    }
+  });
+
+  it("every G4 monster exposes passive Perception as a string", () => {
+    for (const m of g4Monsters) {
+      const pp = m.senses?.["passive Perception"];
+      expect(typeof pp).toBe("string");
+    }
+  });
+
+  it("requireCustomMonsterById throws with the offending id for an unknown reference", () => {
+    expect(() => requireCustomMonsterById("cm-does-not-exist-xyz")).toThrow(
+      /unknown custom monster id "cm-does-not-exist-xyz"/
+    );
+  });
+
+  it("requireCustomMonsterById returns the template for a known G4 reference", () => {
+    for (const id of ["cm-acererak-lich", "cm-sahuagin-baron", "cm-lantern-king", "cm-wdmm-halaster-blackcloak"]) {
+      expect(requireCustomMonsterById(id).id).toBe(id);
+    }
+  });
+
+  it("every G4 monster id is unique and does not collide with existing custom monsters", () => {
+    const g4Ids = g4Monsters.map((m) => m.id);
+    expect(new Set(g4Ids).size).toBe(g4Ids.length);
+    const nonG4Ids = new Set(
+      CUSTOM_MONSTERS.filter((m) => !G4_SOURCES.has(m.source ?? "")).map((m) => m.id)
+    );
+    for (const id of g4Ids) expect(nonG4Ids.has(id)).toBe(false);
   });
 });
 
