@@ -361,6 +361,131 @@ describe("Phandelver and Below: The Shattered Obelisk encounters", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// populate-campaigns-g3 — per-campaign contract tests (Planar & non-Realms)
+// Maps to openspec/changes/populate-campaigns-g3/specs/populate-campaigns-g3/spec.md
+// ---------------------------------------------------------------------------
+
+function allMonsters(seeded: any): any[] {
+  return seeded.encounters.flatMap((e: any) => e.monsters || []);
+}
+
+describe("Icewind Dale: Rime of the Frostmaiden encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("Rime has 7 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Icewind Dale: Rime of the Frostmaiden");
+    assertCampaignEncounterContract(seeded, "Icewind Dale: Rime of the Frostmaiden", 7);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(10);
+    const auril = allMonsters(seeded).find((m) => m.name === "Auril, the Frostmaiden");
+    expect(auril).toBeDefined();
+    expect(auril.damageImmunities).toContain("cold");
+    expect((auril.traits || []).some((t: any) => t.name === "Frost Aura")).toBe(true);
+  });
+});
+
+describe("The Wild Beyond the Witchlight encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("WBtW has 5 chapters and encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("The Wild Beyond the Witchlight");
+    assertCampaignEncounterContract(seeded, "The Wild Beyond the Witchlight", 5);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(8);
+    const coven = ["Brigid Morningglow", "Mungoj Reyhorn", "Endelyn Moongrave", "Sister Gala"];
+    const names = allMonsters(seeded).map((m) => m.name);
+    for (const c of coven) expect(names).toContain(c);
+    for (const c of coven) {
+      const member = allMonsters(seeded).find((m) => m.name === c);
+      expect(Array.isArray(member.legendaryActions)).toBe(true);
+      expect(member.legendaryActions.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("Princes of the Apocalypse encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("PotA has 5 chapters and 20+ encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Princes of the Apocalypse");
+    assertCampaignEncounterContract(seeded, "Princes of the Apocalypse", 5);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(20);
+    const names = allMonsters(seeded).map((m) => m.name);
+    for (const prince of ["Imix", "Ogrémoch", "Yuan-Tin", "Bane"]) {
+      expect(names.some((n: string) => n.startsWith(prince))).toBe(true);
+    }
+    for (const ele of ["Air Elemental", "Earth Elemental", "Fire Elemental", "Water Elemental"]) {
+      expect(names).toContain(ele);
+    }
+  });
+});
+
+describe("Curse of the Crimson Throne encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("CotCT has 6 chapters, encounters populated, 5e-conversion notes present", async () => {
+    const seeded = await captureTemplate("Curse of the Crimson Throne");
+    assertCampaignEncounterContract(seeded, "Curse of the Crimson Throne", 6);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(12);
+    expect(allMonsters(seeded).map((m) => m.name)).toContain("Queen Ileosa Arabasti");
+    expect(seeded.encounters.some((e: any) => e.description.includes("(5e conversion)"))).toBe(true);
+  });
+});
+
+describe("Hell's Rebels encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("HR has 6 chapters, encounters populated, devil damage types canonical", async () => {
+    const seeded = await captureTemplate("Hell's Rebels");
+    assertCampaignEncounterContract(seeded, "Hell's Rebels", 6);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(12);
+    expect(allMonsters(seeded).map((m) => m.name)).toContain("Barbaroscia Thrune");
+    const canonical = new Set(["acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic", "piercing", "poison", "psychic", "radiant", "slashing", "thunder"]);
+    for (const mon of allMonsters(seeded)) {
+      for (const arr of [mon.damageResistances, mon.damageImmunities, mon.damageVulnerabilities]) {
+        for (const v of arr || []) expect(canonical.has(v)).toBe(true);
+      }
+    }
+  });
+});
+
+describe("Red Hand of Doom encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("RHoD has 5 chapters and 15+ encounters with full Monster stat blocks", async () => {
+    const seeded = await captureTemplate("Red Hand of Doom");
+    assertCampaignEncounterContract(seeded, "Red Hand of Doom", 5);
+    expect(seeded.encounters.length).toBeGreaterThanOrEqual(15);
+    const names = allMonsters(seeded).map((m) => m.name);
+    expect(names).toContain("Hurog Manthex");
+    expect(names.some((n: string) => n.startsWith("Wyrmlord"))).toBe(true);
+  });
+});
+
+describe("populate-campaigns-g3 failure mode", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("seeding does not silently produce empty encounter monster arrays for any G3 campaign", async () => {
+    for (const name of [
+      "Icewind Dale: Rime of the Frostmaiden",
+      "The Wild Beyond the Witchlight",
+      "Princes of the Apocalypse",
+      "Curse of the Crimson Throne",
+      "Hell's Rebels",
+      "Red Hand of Doom",
+    ]) {
+      const seeded = await captureTemplate(name);
+      for (const enc of seeded.encounters) expect(enc.monsters.length).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("runCli", () => {
   let exitSpy: jest.SpyInstance;
   let logSpy: jest.SpyInstance;
