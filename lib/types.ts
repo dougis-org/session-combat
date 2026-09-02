@@ -541,6 +541,15 @@ export interface InitiativeRoll {
   flatBonus?: number;
 }
 
+/** Running death-save tally; each count is constrained to 0–3 at runtime by the death-save reducers. */
+export interface DeathSaveTally {
+  successes: number;
+  failures: number;
+}
+
+/** Life state for a combatant using death saves; absent means active/conscious. */
+export type LifeState = "dying" | "stable" | "dead";
+
 export interface CombatantState extends CreatureStats {
   id: string;
   name: string;
@@ -565,6 +574,9 @@ export interface CombatantState extends CreatureStats {
   pendingConSaveDC?: number;
   initiativeAdvantage?: boolean;
   initiativeFlatBonus?: number;
+  // Death saving throws (player-only; absent = active/conscious)
+  deathSaves?: DeathSaveTally;
+  lifeState?: LifeState;
 }
 
 export interface HpHistoryEntry {
