@@ -93,6 +93,20 @@ their `characterizationTest` field is `null`. This is a known, accepted gap,
 not an oversight; a later change can extend characterization coverage using
 this inventory as its worklist.
 
+## Migration progress
+
+- `#501` — `runStorageOp` / `StorageError` / `logStorageEvent` foundation.
+- `#502`, `#503` — monster-template, campaign-template, campaign, and
+  campaign-membership clusters → per-domain repos.
+- `#504` — session-log, campaign-character-share, spell-template, campaign-roll
+  clusters → `lib/storage/{sessionLogRepo,shareRepo,spellRepo,rollRepo}.ts`;
+  `clear` → `storageMisc.ts`; `storage.load()` removed. Spec:
+  [`openspec/specs/storage-content-reference-domains/spec.md`](../../openspec/specs/storage-content-reference-domains/spec.md).
+  Inventory drift found: `getNextSessionNumber` was already on `runStorageOp`
+  (inventory still lists it `behavior=swallow, ret=1`).
+- Remaining inline in `lib/storage.ts`: `savedContent.*`, a few encounter/
+  campaign-party helpers, and `loadEncountersByIds`.
+
 ## References
 
 - Parent tracking issue: `#499` (storage layer decomposition into per-domain

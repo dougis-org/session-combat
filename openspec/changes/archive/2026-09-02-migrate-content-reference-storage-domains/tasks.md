@@ -193,11 +193,11 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
   `loadSpellById` in try/catch → 500).
 - [x] Run type checks (`npm run typecheck` / `tsc --noEmit`) — clean.
 - [x] Run build (`npm run build`) — compiled successfully, 42/42 pages.
-- [ ] Run security / code-quality checks required by project standards
+- [x] Run security / code-quality checks required by project standards
   (Codacy CLI; Verity pre-commit/pre-push gate — fix findings, do not waive on
   agent judgment)
-- [ ] All completed tasks marked complete
-- [ ] All steps in [Remote push validation]
+- [x] All completed tasks marked complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -216,27 +216,27 @@ If ANY step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent ran and all findings were
+- [x] Ensure the `openspec-review-code` sub-agent ran and all findings were
   addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `migrate-content-reference-storage-domains` to `main`. PR
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `migrate-content-reference-storage-domains` to `main`. PR
   body MUST include `Closes #504`. Call out the intentional behavior changes:
   the six swallow→throw methods, the two no-try roll methods now wrapped, the
   `loadSpellById` characterization-test flip, the `dedupeEngine` behavior
   change, the removal of `storage.load()`, and `clear` moving to
   `storageMisc.ts`. Note any `inventory.json` drift
   found in Step 3.
-- [ ] **Issue lifecycle: mark in-review** — `gh issue edit 504 --add-label "in-review" --remove-label "in-progress"`,
+- [x] **Issue lifecycle: mark in-review** — `gh issue edit 504 --add-label "in-review" --remove-label "in-progress"`,
   then move the #504 project item to the "In Review" column (same discovery as
   the in-progress step; warn and skip if not found)
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
   findings (commit, push, re-run) until zero remain. If findings persist after
   ≥3 iterations with no progress, report the stall with remaining findings and
   wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):**
+- [x] **Enable auto-merge only after the review gate passes (zero findings):**
   `gh pr merge <PR-URL> --auto --squash` (squash-only ruleset; NEVER `--admin`)
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state`
+- [x] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state`
   is `MERGED` (if `CLOSED`, exit and notify the user); never wait for a human
   to report the merge, never force-merge:
   1. **Build and tests** — run [Remote push validation]; fix failures, commit,
@@ -267,38 +267,38 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git fetch origin main` and confirm the
+- [x] From the primary checkout: `git fetch origin main` and confirm the
   squash-merge commit is on `main` (do not `git checkout main` there while
   another branch is active — inspect via `git log origin/main`)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (note the cluster
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (note the cluster
   as migrated in any `docs/storage-refactor/` tracking doc; update
   `.wolf/anatomy.md` / `.wolf/memory.md` per project instructions)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy
+- [x] Sync approved spec deltas into `openspec/specs/`: copy
   `openspec/changes/migrate-content-reference-storage-domains/specs/storage-content-reference-domains/spec.md`
   to `openspec/specs/storage-content-reference-domains/spec.md`, then rewrite
   relative links — `../../design.md` →
   `../../changes/archive/YYYY-MM-DD-migrate-content-reference-storage-domains/design.md`,
   same for `../../tasks.md`
-- [ ] Archive the change: move
+- [x] Archive the change: move
   `openspec/changes/migrate-content-reference-storage-domains/` to
   `openspec/changes/archive/YYYY-MM-DD-migrate-content-reference-storage-domains/`
   and stage the new location + deletion of the old in a **single** commit
-- [ ] Confirm the archive directory exists and the original is gone
-- [ ] **Create a doc branch:**
+- [x] Confirm the archive directory exists and the original is gone
+- [x] **Create a doc branch:**
   `git checkout -b doc/archive-YYYY-MM-DD-migrate-content-reference-storage-domains`
   then `git push -u origin doc/archive-YYYY-MM-DD-migrate-content-reference-storage-domains`
-- [ ] Open a PR from the doc branch to `main` titled
+- [x] Open a PR from the doc branch to `main` titled
   `docs: archive migrate-content-reference-storage-domains (YYYY-MM-DD)` — do
   NOT push directly to `main`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR:
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR:
   `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
-- [ ] Monitor the doc PR until merged (same loop as the implementation PR)
+- [x] Monitor the doc PR until merged (same loop as the implementation PR)
 - [ ] Remove the change's worktree:
   `git worktree remove .worktrees/migrate-content-reference-storage-domains`
   (use `--force` if the `openspec-shared` submodule blocks removal)
 - [ ] Prune merged local branches: `git fetch --prune` and
   `git branch -D migrate-content-reference-storage-domains doc/archive-YYYY-MM-DD-migrate-content-reference-storage-domains`
-- [ ] Close #504 (auto-closed by `Closes #504` on merge; verify), and move the
+- [x] Close #504 (auto-closed by `Closes #504` on merge; verify), and move the
   project item to "Done"
