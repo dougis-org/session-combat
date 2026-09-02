@@ -34,18 +34,22 @@ function applyTypedDamage(
   damage: number,
   damageType: DamageType | '',
   combatant: Pick<CombatantState, 'damageResistances' | 'damageImmunities' | 'damageVulnerabilities' | 'activeDamageEffects'>
-): { hp: number; tempHp: number; effectiveDamage: number } {
+): { hp: number; tempHp: number; effectiveDamage: number; incomingDamage: number } {
   if (damageType) {
-    return calcApplyDamageWithType(hp, tempHp, damage, damageType, {
+    const typed = calcApplyDamageWithType(hp, tempHp, damage, damageType, {
       damageResistances: combatant.damageResistances,
       damageImmunities: combatant.damageImmunities,
       damageVulnerabilities: combatant.damageVulnerabilities,
       activeDamageEffects: combatant.activeDamageEffects,
     });
+    // `effectiveDamage` here is the post-resistance incoming amount (0 if immune),
+    // independent of current HP — exactly what the death-save rules need.
+    return { ...typed, incomingDamage: typed.effectiveDamage };
   }
   const result = calcApplyDamage(hp, tempHp, damage);
   const effectiveDamage = (hp + tempHp) - (result.hp + result.tempHp);
-  return { ...result, effectiveDamage };
+  // Untyped damage has no resistance/immunity, so the full amount lands.
+  return { ...result, effectiveDamage, incomingDamage: damage };
 }
 
 function DamageEffectsPanel({
@@ -259,7 +263,7 @@ export function CombatantCard(props: CombatantCardProps) {
     const prevTempHp = combatant.tempHp ?? 0;
     if (amount < 0) {
       const rawDamage = -amount;
-      const { hp: resultHp, tempHp: resultTempHp, effectiveDamage } = applyTypedDamage(prevHp, prevTempHp, rawDamage, selectedDamageType, combatant);
+      const { hp: resultHp, tempHp: resultTempHp, effectiveDamage, incomingDamage } = applyTypedDamage(prevHp, prevTempHp, rawDamage, selectedDamageType, combatant);
       if (resultHp !== prevHp || resultTempHp !== prevTempHp) {
         pushHpHistory(combatId, combatant.id, { hp: prevHp, tempHp: prevTempHp, type: 'damage', amount: rawDamage, timestamp: Date.now() });
         setHistoryLength(getHpHistoryStack(combatId, combatant.id).length);
@@ -275,11 +279,12 @@ export function CombatantCard(props: CombatantCardProps) {
       }
       let deathSaveUpdates: Partial<CombatantState> = {};
       if (usesDeathSaves(combatant)) {
-        if ((combatant.lifeState === 'dying' || combatant.lifeState === 'stable') && rawDamage > 0) {
+        if ((combatant.lifeState === 'dying' || combatant.lifeState === 'stable') && incomingDamage > 0) {
           // Damage while downed: T7 — the damage-entry UI has no critical-hit
           // control, so critical is always false; the `damage >= maxHp`
-          // instant-death rule still applies.
-          deathSaveUpdates = applyDamageWhileDowned(combatant, { critical: false, damage: rawDamage });
+          // instant-death rule still applies. Use post-resistance/immunity
+          // damage so a fully-mitigated "hit" neither adds a failure nor kills.
+          deathSaveUpdates = applyDamageWhileDowned(combatant, { critical: false, damage: incomingDamage });
         } else if (resultHp === 0 && !combatant.lifeState && effectiveDamage > 0) {
           deathSaveUpdates = enterDying();
           setDeathSaveNote(null);
@@ -465,7 +470,9 @@ export function CombatantCard(props: CombatantCardProps) {
       ? 'bg-amber-800 text-amber-200'
       : combatant.lifeState === 'stable'
         ? 'bg-slate-700 text-slate-200'
-        : 'bg-gray-700 text-gray-300';
+        : combatant.lifeState === 'dead'
+          ? 'bg-red-900 text-red-200'
+          : 'bg-gray-700 text-gray-300';
 
   return (
     <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'} ${life.greyed ? 'opacity-50' : ''}`} data-testid="combatant-card" data-life-state={combatant.lifeState ?? 'active'} aria-current={isActive ? 'step' : undefined}>

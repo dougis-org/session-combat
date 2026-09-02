@@ -108,6 +108,32 @@ describe('CombatantCard — death-save HP wiring', () => {
     }
   });
 
+  test('fully-mitigated (immune) damage to a dying player adds no failure', async () => {
+    const user = userEvent.setup();
+    const onUpdate = renderCard(
+      {
+        type: 'player',
+        hp: 0,
+        maxHp: 20,
+        lifeState: 'dying',
+        deathSaves: { successes: 0, failures: 0 },
+        damageImmunities: ['fire'],
+      },
+      jest.fn(),
+    );
+    await user.selectOptions(
+      screen.getByLabelText('Damage type (for resistance/immunity/vulnerability)'),
+      'fire',
+    );
+    const input = screen.getByRole('spinbutton');
+    await user.clear(input);
+    await user.type(input, '30');
+    await user.click(screen.getByRole('button', { name: 'Damage' }));
+    const call = onUpdate.mock.calls[0][0];
+    expect(call).not.toHaveProperty('lifeState');
+    expect(call).not.toHaveProperty('deathSaves');
+  });
+
   test('healing a dying player above 0 clears death-save state', async () => {
     const onUpdate = await adjust('Heal', '6', {
       type: 'player',
