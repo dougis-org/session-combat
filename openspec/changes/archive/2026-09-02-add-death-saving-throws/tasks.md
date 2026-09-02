@@ -74,7 +74,7 @@ Ownership metadata:
 - [x] Security / code-quality checks required by project standards pass (Codacy; verity pre-commit/pre-push gate — fix findings, do not waive on agent judgment)
 - [x] `openspec validate add-death-saving-throws --strict` passes
 - [x] All completed tasks marked complete
-- [ ] All steps in [Remote push validation]
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -91,14 +91,14 @@ If ANY required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
-- [ ] Commit all changes to `add-death-saving-throws` and push to remote
-- [ ] Open PR from `add-death-saving-throws` to `main`. **PR body MUST include `Closes #92`.** Include a summary, the "critical-hit flag" investigation result (T7), and the follow-up issue number from T13.
-- [ ] **Issue lifecycle: mark in-review** — `gh issue edit 92 --add-label "in-review" --remove-label "in-progress"`, then move the project item to the "In Review" status column (same discovery pattern as in-progress; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (per `main` squash-only ruleset; NEVER `--admin`)
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and notify the user); never wait for a human to report the merge, never force-merge:
+- [x] Ensure the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
+- [x] Commit all changes to `add-death-saving-throws` and push to remote
+- [x] Open PR from `add-death-saving-throws` to `main`. **PR body MUST include `Closes #92`.** Include a summary, the "critical-hit flag" investigation result (T7), and the follow-up issue number from T13.
+- [x] **Issue lifecycle: mark in-review** — `gh issue edit 92 --add-label "in-review" --remove-label "in-progress"`, then move the project item to the "In Review" status column (same discovery pattern as in-progress; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (per `main` squash-only ruleset; NEVER `--admin`)
+- [x] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and notify the user); never wait for a human to report the merge, never force-merge:
   1. **Build and tests** — run all [Remote push validation] steps; fix failures, commit, push first
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address every unresolved thread, commit, validate, push, wait 180s; repeat until all resolved
   3. **CI check failures** — after comments are clear, poll `gh pr checks <PR-URL>`; fix failing required checks (`ci-gate`, Codacy), commit, validate, push, wait 180s; restart from step 1
@@ -111,16 +111,16 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout, `git fetch origin main` and confirm the merge commit is on `main`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (combat/HP docs, `.wolf/anatomy.md` for new files, `.wolf/cerebrum.md` learnings, `.wolf/buglog.json` if any bug was fixed during apply)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy `openspec/changes/add-death-saving-throws/specs/death-saving-throws/spec.md` to `openspec/specs/death-saving-throws/spec.md`, updating relative links — `../../design.md` → `../../changes/archive/YYYY-MM-DD-add-death-saving-throws/design.md` (and similarly for `../../tasks.md`)
-- [ ] Archive the change: move `openspec/changes/add-death-saving-throws/` to `openspec/changes/archive/YYYY-MM-DD-add-death-saving-throws/` and stage both the new location and the deletion in a **single** commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-add-death-saving-throws/` exists and `openspec/changes/add-death-saving-throws/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-add-death-saving-throws` then `git push -u origin doc/archive-YYYY-MM-DD-add-death-saving-throws`
-- [ ] Open a PR from that doc branch to `main` titled `docs: archive add-death-saving-throws (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] **Immediately** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
-- [ ] Monitor the doc PR until merged (same loop as the implementation PR)
-- [ ] Prune merged local branches and worktree: `git worktree remove .worktrees/add-death-saving-throws --force` (submodule present), `git fetch --prune`, `git branch -D add-death-saving-throws doc/archive-YYYY-MM-DD-add-death-saving-throws`
-- [ ] Close the loop on issue #92 (auto-closed by `Closes #92`); move its project item to "Done"; confirm the T13 follow-up issue is filed
+- [x] From the primary checkout, `git fetch origin main` and confirm the merge commit is on `main`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (combat/HP docs, `.wolf/anatomy.md` for new files, `.wolf/cerebrum.md` learnings, `.wolf/buglog.json` if any bug was fixed during apply)
+- [x] Sync approved spec deltas into `openspec/specs/`: copy `openspec/changes/add-death-saving-throws/specs/death-saving-throws/spec.md` to `openspec/specs/death-saving-throws/spec.md`, updating relative links — `../../design.md` → `../../changes/archive/YYYY-MM-DD-add-death-saving-throws/design.md` (and similarly for `../../tasks.md`)
+- [x] Archive the change: move `openspec/changes/add-death-saving-throws/` to `openspec/changes/archive/YYYY-MM-DD-add-death-saving-throws/` and stage both the new location and the deletion in a **single** commit
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-add-death-saving-throws/` exists and `openspec/changes/add-death-saving-throws/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-add-death-saving-throws` then `git push -u origin doc/archive-YYYY-MM-DD-add-death-saving-throws`
+- [x] Open a PR from that doc branch to `main` titled `docs: archive add-death-saving-throws (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] **Immediately** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
+- [x] Monitor the doc PR until merged (same loop as the implementation PR)
+- [x] Prune merged local branches and worktree: `git worktree remove .worktrees/add-death-saving-throws --force` (submodule present), `git fetch --prune`, `git branch -D add-death-saving-throws doc/archive-YYYY-MM-DD-add-death-saving-throws`
+- [x] Close the loop on issue #92 (auto-closed by `Closes #92`); move its project item to "Done"; confirm the T13 follow-up issue is filed
