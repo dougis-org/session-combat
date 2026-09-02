@@ -103,7 +103,9 @@
   the two newly-wrapped no-try roll methods.
 - Add a route-level test for `app/api/spells/[id]/route.ts`: DB outage → `500`
   with a logged `StorageError`, distinct from not-found → `404`.
-- Decide and document the fate of `load` (see Open Questions).
+- Remove `storage.load()` and update `facadeShape.test.ts` / any test
+  referencing it.
+- Add `lib/storage/storageMisc.ts` housing `clear` on `runStorageOp`.
 - Re-verify every `inventory.json` entry for this cluster against current
   source before coding (`docs/storage-refactor/plan.md` §Staleness;
   `tasks.md §6.4` method-count check).
@@ -123,8 +125,10 @@
 ## What Changes
 
 - New files: `lib/storage/sessionLogRepo.ts`, `lib/storage/shareRepo.ts`,
-  `lib/storage/spellRepo.ts`, `lib/storage/rollRepo.ts`.
-- `lib/storage.ts`: 18 inline bodies → delegations; `load`/`clear` resolved.
+  `lib/storage/spellRepo.ts`, `lib/storage/rollRepo.ts`,
+  `lib/storage/storageMisc.ts`.
+- `lib/storage.ts`: 16 inline bodies → delegations; `clear` → delegates to
+  `storageMisc.clear`; `load` removed.
 - Behavior change (intentional): `loadSessionLogs`, `listSharesForCampaign`,
   `listAllSharesForCampaign`, `loadSpells`, `loadSpellById`,
   `spellExistsByNameAndSource` now throw `StorageError` on DB failure instead
@@ -163,29 +167,30 @@
   - Impact: Wrong `isEmpty`/`rethrowAsIs`/sentinel decisions.
   - Mitigation: Mandatory re-verification pass against current source as the
     first task.
-- Risk: `load`'s already-dead partial-empty catch masks an intent decision.
-  - Impact: Ambiguity about whether `load` should throw or degrade.
-  - Mitigation: Resolve via Open Questions before specs are finalized.
+- Risk: removing `storage.load()` breaks a test or a caller the audit missed.
+  - Impact: Compile/test failure, or a runtime `undefined is not a function`.
+  - Mitigation: `git grep "storage.load\b"` / `\.load(` across `app/`, `lib/`,
+    `tests/`, `scripts/` in Step 4; confirmed zero non-test callers in the
+    inventory. Update `facadeShape.test.ts` expectations in the same commit.
 
 ## Open Questions
 
-- Question: What should happen to `storage.load()`? It has zero non-test
-  callers and its error-degradation path is already dead post-#502/#503.
-  Options: (a) wrap in `runStorageOp`, let it throw; (b) delete it entirely;
-  (c) keep it as a plain facade orchestration method with no `runStorageOp`.
-  - Needed from: @dougis
-  - Blocker for apply: yes
-- Question: Same question for `storage.clear()` — zero non-test callers, used
-  only as a test utility. Wrap in `runStorageOp` (default), or leave as-is?
-  - Needed from: @dougis
-  - Blocker for apply: no (default: wrap)
-- Question: For the list-returning reads (`loadSessionLogs`, `loadSpells`,
-  `listSharesForCampaign`, `listAllSharesForCampaign`), set
-  `isEmpty: (r) => r.length === 0` to mirror `partyRepo` convention (emits a
-  `not_found` telemetry outcome for an empty result), or omit it since an
-  empty collection query is a legitimate `success`?
-  - Needed from: @dougis
-  - Blocker for apply: no (default: follow `partyRepo` convention — set it)
+All open questions were resolved by @dougis on 2026-09-02:
+
+- **`storage.load()`** → **remove it entirely.** Zero non-test callers; its
+  error-degradation path is already dead post-#502/#503. `lib/storage.ts` drops
+  the method and `tests/unit/lib/storage/facadeShape.test.ts` (and any test
+  referencing `storage.load`) is updated to expect its absence.
+- **`storage.clear()`** → **wrap in `runStorageOp`** (in
+  `lib/storage/storageMisc.ts`, `collection: "storageMisc"` /
+  `name: "clear"`).
+- **`isEmpty` on the four list reads** (`loadSessionLogs`, `loadSpells`,
+  `listSharesForCampaign`, `listAllSharesForCampaign`) → **set**
+  `isEmpty: (r) => r.length === 0`, mirroring the `partyRepo` convention (an
+  empty result records a `not_found` telemetry outcome).
+
+No unresolved ambiguity remains; the change is ready to proceed to apply once
+`tasks.md` exists and is ready.
 
 ## Non-Goals
 

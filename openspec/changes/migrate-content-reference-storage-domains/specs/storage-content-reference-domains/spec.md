@@ -8,8 +8,12 @@ This document details *changes* to requirements and is additive to the
 The system SHALL implement the session-log, campaign-character-share,
 spell-template, and campaign-roll storage methods in dedicated modules
 `lib/storage/sessionLogRepo.ts`, `lib/storage/shareRepo.ts`,
-`lib/storage/spellRepo.ts`, and `lib/storage/rollRepo.ts`, with each database
-operation wrapped in a single `runStorageOp` call.
+`lib/storage/spellRepo.ts`, and `lib/storage/rollRepo.ts`, and SHALL implement
+`clear` in `lib/storage/storageMisc.ts`, with each database operation wrapped
+in a single `runStorageOp` call. The four list reads (`loadSessionLogs`,
+`loadSpells`, `listSharesForCampaign`, `listAllSharesForCampaign`) SHALL pass
+`isEmpty: (result) => result.length === 0` so an empty result records a
+`not_found` telemetry outcome.
 
 #### Scenario: Method resolves through its domain repo
 
@@ -74,6 +78,14 @@ sentinel value.
 - **Then** each rejects with a `StorageError` whose `collection` is
   `"campaignRolls"` and emits exactly one `logStorageEvent` with
   `outcome: "error"`
+
+#### Scenario: clear surfaces a failed multi-collection delete
+
+- **Given** `storageMisc.clear` and one of its seven `deleteMany` calls
+  rejecting
+- **When** `storage.clear(userId)` is awaited
+- **Then** it rejects with a `StorageError` whose `op` is `"clear"`, and emits
+  exactly one `logStorageEvent` with `outcome: "error"`
 
 ### Requirement: ADDED Not-found and input-guard paths remain non-throwing
 
@@ -187,11 +199,12 @@ statements SHALL change.
 - **When** the migration is complete and those suites run unmodified
 - **Then** every suite passes
 
-#### Scenario: Facade method count and types unchanged
+#### Scenario: Facade method count drops by exactly one (load removed)
 
 - **Given** the count of own-enumerable methods on `storage` before the change
 - **When** the same count is taken after the change
-- **Then** the two counts are equal and `tsc --noEmit` reports no errors
+- **Then** the count has decreased by exactly one — accounting for the removal
+  of `storage.load()` and nothing else — and `tsc --noEmit` reports no errors
 
 ### Requirement: ADDED Characterization coverage remains green
 
@@ -228,7 +241,23 @@ id-shape guard, and rejecting with `StorageError` on a database failure.
 
 ## REMOVED Requirements
 
-_None._
+### Requirement: REMOVED storage.load aggregate session loader
+
+Reason for removal: `storage.load(userId)` has zero non-test callers and its
+partial-empty error-degradation path became dead code once #502/#503 migrated
+its five sub-loaders to throw `StorageError`. The method is removed from
+`lib/storage.ts`; consumers that need aggregate session data compose the
+per-domain loaders (`loadEncounters`, `loadCharacters`, `loadParties`,
+`loadCampaigns`, `loadCombatState`) directly. `tests/unit/lib/storage/facadeShape.test.ts`
+and any test referencing `storage.load` are updated in the same change to
+expect its absence.
+
+#### Scenario: load is no longer part of the facade
+
+- **Given** the migrated `storage` object
+- **When** `storage.load` is accessed
+- **Then** it is `undefined`, and no source file under `app/`, `lib/`, or
+  `scripts/` references `storage.load`
 
 ## Traceability
 
@@ -265,8 +294,9 @@ _None._
   DuplicateShareError contract.
 - Design Decision 5 -> Requirement scenario: The two no-try roll methods gain a
   wrapped failure path.
-- Design Decision 6 -> Requirement: ADDED Content and reference domain methods
-  live in per-domain repos (the `load`/`clear` disposition).
+- Design Decision 6 -> Requirements: REMOVED storage.load aggregate session
+  loader; ADDED Content and reference domain methods live in per-domain repos
+  (the `clear` → `storageMisc.ts` relocation).
 - Design Decision 7 -> Requirement: ADDED Characterization coverage remains
   green.
 - Requirement "per-domain repos" -> Tasks: "Re-verify inventory", "Create repo

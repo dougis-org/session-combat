@@ -134,18 +134,19 @@ scoping unchanged)
 - [ ] Existing `listCampaignRolls` assertions ported from
   `tests/unit/lib/storage.test.ts` still hold
 
-### Task Step 9 — `load` / `clear`
+### Task Step 9 — Remove `load`; migrate `clear` (spec: REMOVED storage.load;
+per-domain repos)
 
-- [ ] `clear`: one collection `deleteMany` rejects → `rejects.toThrow(StorageError)`
-  (`op === "clear"`), one error event (per Preflight decision; default = wrap)
-- [ ] `clear`: success → all seven collections receive `deleteMany({ userId })`
-- [ ] `load`: per the agreed disposition — if orchestration-only, a sub-loader
-  rejecting propagates the `StorageError` (no partial-empty object); if wrapped,
-  `rejects.toThrow(StorageError)`; if deleted, `facadeShape` test updated and
-  `storage.load` absent
-- [ ] `load` (if retained): success → aggregates
-  `{ encounters, characters, parties, campaigns, combatState? }` from the
-  per-domain loaders
+- [ ] `storage.load` is `undefined` after the change; `facadeShape.test.ts`
+  method-count expectation decremented by exactly one and passing
+- [ ] `git grep "storage\.load\b" app/ lib/ scripts/` returns nothing
+- [ ] `storageMisc.clear`: one collection `deleteMany` rejects →
+  `rejects.toThrow(StorageError)` (`op === "clear"`,
+  `collection === "storageMisc"`), one `logStorageEvent({ outcome: "error" })`
+- [ ] `storageMisc.clear`: success → all seven collections receive
+  `deleteMany({ userId })`, one success event
+- [ ] `storage.clear` still delegates (facade shape: `storage.clear` present
+  with unchanged signature)
 
 ### Task Step 10 — `loadSpellById` characterization test rewrite (spec:
 characterization coverage remains green)
@@ -216,7 +217,7 @@ existence check)
 | `shareRepo` | Step 6 | addShare preserves the DuplicateShareError contract; failures surface as StorageError |
 | `spellRepo` | Step 7 | failures surface as StorageError; not-found and input-guard paths; MODIFIED loadSpellById error contract |
 | `rollRepo` | Step 8 | the two no-try roll methods gain a wrapped failure path; NFAC Performance / Security |
-| `load` / `clear` | Step 9 | Content and reference domain methods live in per-domain repos |
+| Remove `load` / migrate `clear` | Step 9 | REMOVED storage.load aggregate session loader; Content and reference domain methods live in per-domain repos |
 | Characterization rewrite | Step 10 | Characterization coverage remains green |
 | Spell route | Step 11 | Spell-by-id route distinguishes outage from not-found |
 | `dedupeEngine` | Step 12 | Spell dedupe tolerates a thrown existence check |

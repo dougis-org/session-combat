@@ -24,9 +24,9 @@
 
 ### Goals
 
-- Move all 18 cluster methods into `sessionLogRepo.ts`, `shareRepo.ts`,
-  `spellRepo.ts`, `rollRepo.ts` (+ `load`/`clear`), each built on
-  `runStorageOp`.
+- Move the 16 domain cluster methods into `sessionLogRepo.ts`, `shareRepo.ts`,
+  `spellRepo.ts`, `rollRepo.ts`, each built on `runStorageOp`; move `clear`
+  into `storageMisc.ts` on `runStorageOp`; remove `storage.load()`.
 - Every real DB failure in the cluster produces a typed `StorageError` and one
   telemetry error event; genuine not-found stays non-throwing.
 - `lib/storage.ts` public shape byte-compatible with existing mocks; zero
@@ -112,20 +112,26 @@
 - Trade-offs: `listCampaignRolls` never returns an empty-sentinel, so no
   `isEmpty` needed; an empty page is a legitimate `success`.
 
-### Decision 6: `load` and `clear` — pending Open Question, default = wrap
+### Decision 6: Remove `load`; wrap `clear` in `storageMisc.ts`
 
-- Chosen (default, pending @dougis): `clear` → `runStorageOp` wrap in a
-  `miscRepo.ts` (or `sessionLogRepo`-adjacent `storageMisc.ts`). `load` →
-  keep as a plain facade orchestration method calling the already-wrapped
-  per-domain loaders via `this.*`, with **no** outer `try/catch` (its old
-  partial-empty degradation path is already dead code post-#502/#503).
-- Alternatives considered: delete `load` (zero non-test callers) — viable but
-  widens scope and touches `facadeShape.test.ts` expectations; defer to the
-  Open Question.
-- Rationale: `load` has no DB call of its own, so wrapping it in
-  `runStorageOp` would double-emit telemetry; orchestration-only is cleaner.
-- Trade-offs: `load` diverges slightly from "everything on `runStorageOp`";
-  documented and gated on the Open Question answer.
+- Chosen (resolved by @dougis 2026-09-02):
+  - `storage.load()` is **removed entirely.** Zero non-test callers; its
+    partial-empty degradation path is already dead code post-#502/#503.
+    `lib/storage.ts` drops the method; `tests/unit/lib/storage/facadeShape.test.ts`
+    and any test referencing `storage.load` are updated to expect its absence
+    in the same commit.
+  - `storage.clear()` moves to `lib/storage/storageMisc.ts` as
+    `clear(userId)` on `runStorageOp` with `name: "clear"`,
+    `collection: "storageMisc"`. `lib/storage.ts` delegates.
+- Alternatives considered: keep `load` as a facade orchestration method (no
+  `runStorageOp`) — rejected, dead code with no callers is worth deleting
+  while the file is already open. Leave `clear` unwrapped — rejected, it would
+  be the only cluster method with no telemetry.
+- Rationale: smaller facade, no ambiguous half-migrated method; `clear`'s one
+  real multi-collection delete gets the same observability as everything else.
+- Trade-offs: removing a public method is a facade-shape change — mitigated by
+  the method-count guardrail being updated deliberately (expected count drops
+  by exactly one) and the caller grep in Step 4.
 
 ### Decision 7: Rewrite the `loadSpellById` characterization test
 
@@ -180,15 +186,16 @@
   - Design decision: first task; `tasks.md §6.4` method-count check.
   - Validation approach: documented diff note in the PR if any entry drifted
     (as `getNextSessionNumber` already did).
-- Proposal element: "Resolve `load`/`clear` fate."
-  - Design decision: Decision 6 (default) + Open Questions.
-  - Validation approach: whichever path is chosen, `facadeShape.test.ts` and
-    any `load`/`clear` tests stay green.
+- Proposal element: "Remove `storage.load()`; move `clear` to `storageMisc.ts`."
+  - Design decision: Decision 6.
+  - Validation approach: `git grep` shows no non-test `storage.load` caller;
+    `facadeShape.test.ts` updated to expect the method absent and the count
+    down by one; `storageMisc.test.ts` covers `clear`'s wrapped failure path.
 
 ## Functional Requirements Mapping
 
-- Requirement: All 18 methods relocated and built on `runStorageOp` (except
-  `load` per Decision 6).
+- Requirement: The 16 domain methods relocated and built on `runStorageOp`;
+  `clear` relocated to `storageMisc.ts` on `runStorageOp`; `load` removed.
   - Design element: Decisions 1, 5, 6.
   - Acceptance criteria reference: spec "Storage repo module boundaries",
     "Centralized error handling for content/reference domains".
@@ -255,9 +262,12 @@
 - Risk/trade-off: `inventory.json` drift causes a wrong wrap decision.
   - Impact: incorrect `isEmpty`/sentinel/`rethrowAsIs`.
   - Mitigation: mandatory re-verification task as step 1.
-- Risk/trade-off: `load` left off `runStorageOp` looks inconsistent.
-  - Impact: reviewer confusion.
-  - Mitigation: Decision 6 rationale documented; gated on Open Question.
+- Risk/trade-off: removing `storage.load()` is a facade-shape change.
+  - Impact: method-count guardrail and `facadeShape.test.ts` must move
+    deliberately; a missed caller would fail at runtime.
+  - Mitigation: `git grep` for `storage.load`/`\.load(` in Step 4 (inventory
+    already shows zero non-test callers); update the count expectation and the
+    facade test in the same commit as the removal.
 - Risk/trade-off: moving `listCampaignRolls`'s cursor logic introduces a
   transcription bug.
   - Impact: broken pagination.
@@ -297,11 +307,13 @@
 
 ## Open Questions
 
-- `load`: wrap / delete / orchestration-only? (blocks apply — Decision 6
-  default is orchestration-only.)
-- `clear`: wrap in `runStorageOp` or leave as-is? (default: wrap.)
-- `isEmpty` on the four list reads: set it (mirror `partyRepo`) or omit?
-  (default: set it.)
-- Where do `load`/`clear` physically live if not deleted — a new
-  `lib/storage/storageMisc.ts`, or inline in the facade? (default: `clear` in
-  `storageMisc.ts`, `load` inline in the facade.)
+All resolved by @dougis on 2026-09-02:
+
+- `storage.load()` → **removed entirely** (zero non-test callers).
+- `storage.clear()` → **wrapped in `runStorageOp`**, relocated to
+  `lib/storage/storageMisc.ts`.
+- `isEmpty` on the four list reads (`loadSessionLogs`, `loadSpells`,
+  `listSharesForCampaign`, `listAllSharesForCampaign`) → **set**
+  `isEmpty: (r) => r.length === 0` (mirror `partyRepo`).
+
+No unresolved ambiguity remains.

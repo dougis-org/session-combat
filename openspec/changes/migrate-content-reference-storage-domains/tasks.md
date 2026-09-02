@@ -29,12 +29,12 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
   not proceed until the user confirms installation.
 - [ ] **Verify `openspec-review-code` is available** — required before every
   commit. Halt and prompt if missing.
-- [ ] **Resolve blocking Open Questions** — confirm with @dougis the
-  disposition of `storage.load()` (blocks apply). Record the decision in
-  `proposal.md` / `design.md` before implementation. Non-blocking defaults
-  (`clear` → wrap; `isEmpty` on list reads → set; `load` → orchestration-only
-  in the facade, `clear` → `lib/storage/storageMisc.ts`) stand unless the user
-  overrides.
+- [ ] **Open Questions resolved (@dougis, 2026-09-02)** — no Preflight action
+  needed; recorded in `proposal.md` / `design.md`:
+  - `storage.load()` → **remove entirely**.
+  - `storage.clear()` → **wrap in `runStorageOp`**, relocate to
+    `lib/storage/storageMisc.ts`.
+  - Four list reads → **set** `isEmpty: (r) => r.length === 0`.
 
 ## Execution
 
@@ -125,13 +125,20 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
     No `isEmpty` (an empty page is `success`).
   - [ ] Point `lib/storage.ts` at `rollRepo.*`. Tests green.
 
-- [ ] **Step 9 — Resolve `load` / `clear` (spec: per-domain repos).**
-  - [ ] Per the Preflight decision: implement `clear` in
-    `lib/storage/storageMisc.ts` on `runStorageOp` (or the agreed alternative);
-    add a reject-path test. Implement `load` per the agreed disposition
-    (default: keep as a facade orchestration method calling the wrapped
-    per-domain loaders via `this.*`, no outer `try/catch`).
-  - [ ] Update `lib/storage.ts` accordingly.
+- [ ] **Step 9 — Remove `load`; migrate `clear` (spec: REMOVED storage.load;
+  per-domain repos).**
+  - [ ] `git grep -n "storage\.load\b\|\.load(" app/ lib/ scripts/` — confirm
+    zero non-test callers before deleting.
+  - [ ] Delete `storage.load()` from `lib/storage.ts`. Update
+    `tests/unit/lib/storage/facadeShape.test.ts` and any test referencing
+    `storage.load` to expect the method absent / the count down by one.
+  - [ ] TDD `tests/unit/lib/storage/storageMisc.test.ts`: `clear` — one
+    `deleteMany` rejects → `rejects.toThrow(StorageError)` (`op === "clear"`)
+    + one error event; success → all seven collections get
+    `deleteMany({ userId })`. Confirm failing.
+  - [ ] Create `lib/storage/storageMisc.ts` with `clear(userId)` on
+    `runStorageOp` (`name: "clear"`, `collection: "storageMisc"`). Point
+    `lib/storage.ts` at `storageMisc.clear`. Tests green.
 
 - [ ] **Step 10 — Rewrite `loadSpellById` characterization test (spec:
   characterization coverage).** In
@@ -154,9 +161,10 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
   path). Add/extend a dedupe-engine unit test for the rejecting case.
 
 - [ ] **Step 13 — Facade guardrails (spec: facade shape preserved).** Confirm
-  no cluster method body in `lib/storage.ts` still calls `getDatabase(`. Run
-  `tests/unit/lib/storage/facadeShape.test.ts`. Run the full existing
-  `storage`-mocking suites unmodified (`storage.test.ts`,
+  no cluster method body in `lib/storage.ts` still calls `getDatabase(`. Update
+  the method-count expectation in `tests/unit/lib/storage/facadeShape.test.ts`
+  to reflect exactly one removed method (`load`) and run it. Run the full
+  existing `storage`-mocking suites unmodified (`storage.test.ts`,
   `storage-shares.test.ts`, `storage.characters.test.ts`,
   `storage.campaignEncounters.test.ts`, `storage.characterization.test.ts`,
   spell/session route tests).
@@ -210,7 +218,8 @@ If ANY step fails, iterate and fix before pushing.
   body MUST include `Closes #504`. Call out the intentional behavior changes:
   the six swallow→throw methods, the two no-try roll methods now wrapped, the
   `loadSpellById` characterization-test flip, the `dedupeEngine` behavior
-  change, and the `load`/`clear` disposition. Note any `inventory.json` drift
+  change, the removal of `storage.load()`, and `clear` moving to
+  `storageMisc.ts`. Note any `inventory.json` drift
   found in Step 3.
 - [ ] **Issue lifecycle: mark in-review** — `gh issue edit 504 --add-label "in-review" --remove-label "in-progress"`,
   then move the #504 project item to the "In Review" column (same discovery as
