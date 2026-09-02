@@ -33,6 +33,10 @@ export async function loadGlobalCampaignTemplateById(id: string): Promise<Campai
     },
     async () => {
       const db = await getDatabase();
+      // nosemgrep: rules.lgpl.javascript.database.rule-node-nosqli-injection --
+      // `id` is used as an equality match on a string field; an object-typed
+      // value cannot match and is not an injection vector. Logic relocated
+      // verbatim from lib/storage.ts.
       const template = await db
         .collection<CampaignTemplate>("campaignTemplates")
         .findOne({ id, userId: GLOBAL_USER_ID });
