@@ -179,6 +179,774 @@ function vecnaEncounters(): EncounterTemplate[] {
   ];
 }
 
+/**
+ * Build the encounter list for Icewind Dale: Rime of the Frostmaiden.
+ * Signature encounters for the 7-chapter adventure, with the Chardalyn
+ * Dragon and Ythryn's lich-staffed necropolis as the climax.
+ */
+function rimeEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const coldlight = findCustomMonsterById("cm-coldlight-walker");
+  const chardalynDragon = findCustomMonsterById("cm-chardalyn-dragon");
+  const aunaut = findCustomMonsterById("cm-aunaut-aurilblight");
+  const iriolarthas = findCustomMonsterById("cm-iriolarthas");
+  const leviathan = findCustomMonsterById("cm-leviathan");
+  const frostGiant = findCustomMonsterById("cm-srd-frost-giant");
+  const duergar = findCustomMonsterById("cm-srd-duergar");
+  const kraken = findCustomMonsterById("cm-srd-kraken");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Ch 1 — Ten-Towns (1-4)
+    encounter(
+      "Coldlight Walker on the Everlasting Rime",
+      "An undead frozen wanderer stalks the party through Auril's unending blizzard.",
+      compact([m(coldlight), m(coldlight)])
+    ),
+    // Ch 3 — Sunblight Fortress (4-5)
+    encounter(
+      "Sunblight Fortress Defense",
+      "Duergar garrison defending Xardorok's chardalyn works against the party's incursion.",
+      compact([m(duergar), many(duergar, 3)])
+    ),
+    encounter(
+      "Frost Giants at Grimskalle",
+      "Frost giants hold the cliff-fortress of Grimskalle against the party's approach.",
+      compact([m(frostGiant), many(frostGiant, 2)])
+    ),
+    // Ch 4 — Destruction's Light (6)
+    encounter(
+      "Chardalyn Dragon Assault",
+      "Xardorok Sunblight's chardalyn construct drapes Ten-Towns in crystalline destruction.",
+      compact([m(chardalynDragon)])
+    ),
+    // Ch 5 — Auril's Abode (7)
+    encounter(
+      "Auril, the Frostmaiden",
+      "The goddess of winter manifests in her third form to halt the party's pilgrimage.",
+      compact([m(aunaut), many(frostGiant, 2)])
+    ),
+    // Ch 6 — Caves of Hunger (8)
+    encounter(
+      "Reghed Glacier Caverns",
+      "Duergar patrols and Ythryn mythallar hazards plague the ice labyrinth beneath the glacier.",
+      compact([many(duergar, 3), m(duergar)])
+    ),
+    // Ch 7 — Doom of Ythryn (9-12)
+    encounter(
+      "Aunaut Aurilblight, Priest-King of Ythryn",
+      "The frost-giant cleric of Auril confronts the party atop the buried mythallar.",
+      compact([m(aunaut)])
+    ),
+    encounter(
+      "Iriolarthas, the Netherese Lich",
+      "The lich of Ythryn manifests with his phylacteric might to defend the necropolis.",
+      compact([m(iriolarthas), many(duergar, 2)])
+    ),
+    encounter(
+      "Leviathan of the Sea of Moving Ice",
+      "An apocalyptic sea-monster rises from beneath the Sea of Moving Ice.",
+      compact([m(leviathan)])
+    ),
+    encounter(
+      "Doom of Ythryn — Final Stand",
+      "The Netherese mythallar awakens beneath the party as Iriolarthas channels its power.",
+      compact([m(iriolarthas), m(leviathan)])
+    ),
+  ];
+}
+
+/**
+ * Build the encounter list for The Wild Beyond the Witchlight.
+ * Feywild carnival tolls, the hag coven, the Jabberwock, and Tasha's finale.
+ */
+function wbtwEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const harengonBrigand = findCustomMonsterById("cm-harengon-brigand");
+  const harengon = findCustomMonsterById("cm-harengon");
+  const animatedToy = findCustomMonsterById("cm-animated-toy");
+  const jabberwock = findCustomMonsterById("cm-jabberwock");
+  const tasha = findCustomMonsterById("cm-tasha-other-self");
+  const swordWraith = findCustomMonsterById("cm-sword-wraith-commander");
+  const nightHag = findCustomMonsterById("cm-srd-night-hag");
+  const displacer = findCustomMonsterById("cm-srd-displacer-beast");
+  const pitFiend = findCustomMonsterById("cm-srd-pit-fiend");
+  const erinyes = findCustomMonsterById("cm-srd-erinyes");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Ch 1 — The Witchlight Carnival (1-2)
+    encounter(
+      "Agdon Longscarf's Toll",
+      "A pirate-king of the rabbit-folk demands a toll at the Witchlight Carnival gates.",
+      compact([m(harengonBrigand), many(harengon, 3)])
+    ),
+    // Ch 2 — Hither (2-4)
+    encounter(
+      "Bavlorna's Cottage",
+      "The forest hag of the East holds court in her sorrow-soaked swamp cottage.",
+      compact([m(nightHag), many(displacer, 2)])
+    ),
+    // Ch 3 — Thither (4-6)
+    encounter(
+      "Skabatha's Toy Factory",
+      "Animated toys patrol Skabatha's workshop of twisted childhoods.",
+      compact([m(nightHag), many(animatedToy, 4)])
+    ),
+    encounter(
+      "Displacer Pack of Thither",
+      "A pack of displacer beasts terrorizes the winding roads of Thither.",
+      compact([many(displacer, 3)])
+    ),
+    // Ch 4 — Yon (6-7)
+    encounter(
+      "The Jabberwock of Yon",
+      "The burbling dragon-like fey creature hunts the party through the heart of Yon.",
+      compact([m(jabberwock)])
+    ),
+    encounter(
+      "Endelyn's Moonlit Grove",
+      "The hag of the West commands her beasts and lycanthropes against the party.",
+      compact([m(nightHag), many(displacer, 2)])
+    ),
+    // Ch 5 — Palace of Heart's Desire (7-8)
+    encounter(
+      "Palace of Heart's Desire — Court",
+      "The full coven of three night hags plus their devilish allies defend Zybilna.",
+      compact([many(nightHag, 3), m(pitFiend), many(erinyes, 2)])
+    ),
+    encounter(
+      "Zybilna's Room — Sword Wraith Honor Guard",
+      "An undead honor guard of wraith-knights blocks the party's path.",
+      compact([many(swordWraith, 2)])
+    ),
+    encounter(
+      "Tasha's Other Self — Thearch Revealed",
+      "Tasha / Iggwilv in her archfey-lich form confronts the party in the final-act climax.",
+      compact([m(tasha), many(swordWraith, 2)])
+    ),
+  ];
+}
+
+/**
+ * Build the encounter list for Princes of the Apocalypse.
+ * One encounter per elemental cult outpost + the four-quadrant Temple of the Elder Eye.
+ */
+function potaEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const cultist = findCustomMonsterById("cm-srd-cultist");
+  const blackEarthCultist = findCustomMonsterById("cm-black-earth-cultist");
+  const earthMyrmidon = findCustomMonsterById("cm-earth-elemental-myrmidon");
+  const championLolth = findCustomMonsterById("cm-champion-of-lolth");
+  const stormQuintessence = findCustomMonsterById("cm-storm-giant-quintessence");
+  const vaporElemental = findCustomMonsterById("cm-vapor-elemental");
+  const elderEye = findCustomMonsterById("cm-elder-elemental-eye");
+  const drow = findCustomMonsterById("cm-srd-drow");
+  const gnoll = findCustomMonsterById("cm-srd-gnoll");
+  const medusa = findCustomMonsterById("cm-srd-medusa");
+  const kraken = findCustomMonsterById("cm-srd-kraken");
+  const veteran = findCustomMonsterById("cm-srd-veteran");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Ch 1 — Rise of Elemental Evil (3-5)
+    encounter(
+      "Red Larch Delegation Disappearance",
+      "Black Earth cultists and Marlos's enforcers have vanished the delegates.",
+      compact([many(cultist, 3), many(blackEarthCultist, 2)])
+    ),
+    // Ch 2 — The Dessarin Valley (5-7)
+    encounter(
+      "Sacred Stone Monastery — Black Earth",
+      "Marlos Urnrayle's monastery is defended by elemental myrmidons and cultists.",
+      compact([m(blackEarthCultist), many(earthMyrmidon, 3), m(medusa)])
+    ),
+    encounter(
+      "Haunted Keep — Champions of Lolth",
+      "Drow champions and shades defend the Haunted Keep's air outpost.",
+      compact([m(championLolth), many(drow, 3)])
+    ),
+    // Ch 3 — Secret of the Sumber Hills (7-10)
+    encounter(
+      "Temple of Elemental Evil — Earth Quadrant",
+      "Marlos Urnrayle stands at the heart of the Black Earth quadrant.",
+      compact([m(medusa), many(earthMyrmidon, 2)])
+    ),
+    encounter(
+      "Temple of Elemental Evil — Air Quadrant",
+      "Howling Hate's storm-giant quintessence commands the air quadrant's vapor elementals.",
+      compact([m(stormQuintessence), many(vaporElemental, 3)])
+    ),
+    encounter(
+      "Temple of Elemental Evil — Water Quadrant",
+      "A sub-boss kraken rises from the flooding water quadrant's central pool.",
+      compact([m(kraken), many(cultist, 4)])
+    ),
+    // Ch 4 — Alarums and Excursions (10-13)
+    encounter(
+      "Fane of the Eye — Prophets Reconvene",
+      "The four elemental cult prophets and their champions gather in the Fane of the Eye.",
+      compact([m(blackEarthCultist), many(veteran, 4), many(earthMyrmidon, 2)])
+    ),
+    // Ch 5 — The Elder Elemental Eye (13-15)
+    encounter(
+      "Elemental Node Convergence",
+      "Each elemental node erupts with its guardian — only together do they breach the inner sanctum.",
+      compact([m(stormQuintessence), m(kraken), m(medusa)])
+    ),
+    encounter(
+      "The Elder Elemental Eye",
+      "The avatar of the Elder Elemental Eye itself manifests in the final sanctum.",
+      compact([m(elderEye), many(earthMyrmidon, 3), many(vaporElemental, 3)])
+    ),
+  ];
+}
+
+/**
+ * Build the encounter list for Curse of the Crimson Throne.
+ * Korvosa urban unrest, plague-ridden Acadamae, Scarwall hauntings, and the castle climax.
+ */
+function cotctEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const carrionGolem = findCustomMonsterById("cm-carrion-golem");
+  const soulboundDoll = findCustomMonsterById("cm-soulbound-doll");
+  const devilfish = findCustomMonsterById("cm-devilfish");
+  const raktavarna = findCustomMonsterById("cm-raktavarna");
+  const dreamSpider = findCustomMonsterById("cm-dream-spider");
+  const reefclaw = findCustomMonsterById("cm-reefclaw");
+  const skeletonKnight = findCustomMonsterById("cm-skeleton-knight");
+  const danseMacabre = findCustomMonsterById("cm-danse-macabre");
+  const chainedSpirit = findCustomMonsterById("cm-chained-spirit");
+  const umbralDragon = findCustomMonsterById("cm-umbral-dragon");
+  const princeChains = findCustomMonsterById("cm-prince-in-chains");
+  const greaterDoppelganger = findCustomMonsterById("cm-greater-doppelganger");
+  const kazavon = findCustomMonsterById("cm-kazavon");
+  const queenIleosa = findCustomMonsterById("cm-queen-ileosa");
+  const mummyPlague = findCustomMonsterById("cm-mummy-lord-plague");
+  const guard = findCustomMonsterById("cm-srd-guard");
+  const veteran = findCustomMonsterById("cm-srd-veteran");
+  const zombie = findCustomMonsterById("cm-srd-zombie");
+  const wight = findCustomMonsterById("cm-srd-wight");
+  const wraith = findCustomMonsterById("cm-srd-wraith");
+  const skeleton = findCustomMonsterById("cm-srd-skeleton");
+  const rakshasa = findCustomMonsterById("cm-srd-rakshasa");
+  const pitFiend = findCustomMonsterById("cm-srd-pit-fiend");
+  const erinyes = findCustomMonsterById("cm-srd-erinyes");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Ch 1 — Edge of Anarchy (1-3)
+    encounter(
+      "Korvosan Street Riot",
+      "Korvosan guards clash with Livery Stable rioters in the streets near the palace.",
+      compact([many(guard, 4), many(veteran, 2)])
+    ),
+    encounter(
+      "Crepusculum Spies",
+      "Ileosa's cult of personality dispatches spies and cultists to shadow the party.",
+      compact([many(veteran, 2), m(soulboundDoll)])
+    ),
+    encounter(
+      "Carrion Golem in the Trenyards",
+      "An animated corpse-horror stalks Korvosa's underbelly.",
+      compact([m(carrionGolem)])
+    ),
+    // Ch 2 — Seven Days to the Grave (3-6)
+    encounter(
+      "Blood Veil Plague Field",
+      "Plague victims and wight-cultists fill the field of bodies.",
+      compact([many(zombie, 6), m(wight), many(skeleton, 2)])
+    ),
+    encounter(
+      "Acadamae Sinkhole Crypts",
+      "Devilfish and raktavarna infest the flooded Acadamae basement.",
+      compact([many(devilfish, 2), m(raktavarna), many(wraith, 2)])
+    ),
+    encounter(
+      "Mummy Lord of the Blood Veil",
+      "A plague-bearer mummy lord spreads the Blood Veil through the crypts.",
+      compact([m(mummyPlague), many(zombie, 4)])
+    ),
+    // Ch 3 — Escape from Old Korvosa (6-9)
+    encounter(
+      "Old Korvosa Gang Warfare",
+      "Sable Company cultists and the Crowntsone Faction's bandit captains clash.",
+      compact([many(zombie, 4), many(veteran, 2), m(dreamSpider)])
+    ),
+    encounter(
+      "Rakshasa Mentor's Ambush",
+      "Queen Ileosa's rakshasa mentor and his doppelganger bodyguards ambush the party.",
+      compact([m(rakshasa), many(greaterDoppelganger, 2)])
+    ),
+    encounter(
+      "Reefclaw of the Harbor",
+      "A reefclaw stalks the party along the Old Korvosa harbor shallows.",
+      compact([m(reefclaw)])
+    ),
+    // Ch 5 — Skeletons of Scarwall (11-14)
+    encounter(
+      "The Prince in Chains",
+      "A fallen paladin-king twisted by Kazavon's curse guards the inner haunt.",
+      compact([m(princeChains), many(skeletonKnight, 2), m(chainedSpirit)])
+    ),
+    encounter(
+      "Danse Macabre Conducts the Dead",
+      "An undead swarm-overseer conducts midnight dances of skeleton knights.",
+      compact([m(danseMacabre), many(skeletonKnight, 4)])
+    ),
+    encounter(
+      "Umbral Dragon of Scarwall Depths",
+      "A shadow-aligned evil dragon laired beneath the castle rises against the party.",
+      compact([m(umbralDragon), m(chainedSpirit)])
+    ),
+    // Ch 6 — Crown of Fangs (14-17)
+    encounter(
+      "Castle Korvosa — Queen Ileosa Possessed",
+      "Queen Ileosa manifests in her Kazavon-posessed tyrant form.",
+      compact([m(queenIleosa), many(veteran, 4), m(erinyes)])
+    ),
+    encounter(
+      "Castle Korvosa — Throne of Kazavon",
+      "Kazavon, the dragon tyrant, manifests in his true form atop Castle Korvosa.",
+      compact([m(kazavon), many(greaterDoppelganger, 2), m(pitFiend)])
+    ),
+  ];
+}
+
+/**
+ * Build the encounter list for Hell's Rebels.
+ * Kintargo urban rebellion, the Song of Silver assault, and Barzillai's finale.
+ */
+function hrEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const hellknight = findCustomMonsterById("cm-hellknight");
+  const impalerShrike = findCustomMonsterById("cm-impaler-shrike");
+  const gamblingDevil = findCustomMonsterById("cm-gambling-devil");
+  const scrivenite = findCustomMonsterById("cm-scrivenite");
+  const barzillai = findCustomMonsterById("cm-barzillai-thrune");
+  const barzillaiDevil = findCustomMonsterById("cm-barzillai-archdevil");
+  const shadowDragon = findCustomMonsterById("cm-shadow-dragon");
+  const shadowGolem = findCustomMonsterById("cm-shadow-golem");
+  const nightprowler = findCustomMonsterById("cm-nightprowler");
+  const cruciarus = findCustomMonsterById("cm-cruciarus");
+  const forsakenLegion = findCustomMonsterById("cm-forsaken-legion");
+  const veteran = findCustomMonsterById("cm-srd-veteran");
+  const guard = findCustomMonsterById("cm-srd-guard");
+  const pitFiend = findCustomMonsterById("cm-srd-pit-fiend");
+  const erinyes = findCustomMonsterById("cm-srd-erinyes");
+  const cultist = findCustomMonsterById("cm-srd-cultist");
+  const mage = findCustomMonsterById("cm-srd-mage");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Ch 1 — In Hell's Bright Shadow (1-3)
+    encounter(
+      "Proclamation Protest Riot",
+      "Barzillai Thrune's first day of martial law draws a violent crowd in Kintargo.",
+      compact([many(guard, 4), many(hellknight, 2), m(veteran)])
+    ),
+    encounter(
+      "Impaler Shrikes of the Rooftops",
+      "Bloodthirsty fey shrikes dive from Kintargo's rooftops at the party.",
+      compact([many(impalerShrike, 3)])
+    ),
+    encounter(
+      "Gambling Devil in the Smokehouse",
+      "A small Chelish devil deals in fortunes and bargains beneath the Smokehouse.",
+      compact([m(gamblingDevil), m(scrivenite)])
+    ),
+    // Ch 2 — Turn of the Torrent (3-6)
+    encounter(
+      "Order of the Torrent Hellknights",
+      "Allied Hellknights rally at the party's HQ before Barzillai's pit-fiend liaison arrives.",
+      compact([many(hellknight, 4), m(pitFiend)])
+    ),
+    encounter(
+      "Secret Milani Cult Cell",
+      "Underground allies of Milani join the resistance with cultists and a priest-mage.",
+      compact([many(cultist, 3), m(mage)])
+    ),
+    // Ch 3 — Dance of the Damned (6-9)
+    encounter(
+      "Aquatic Elf Diplomacy at Vyre",
+      "Merrow and merfolk attend the party's sea-side parley, with a kraken watching.",
+      compact([many(veteran, 3), m(forsakenLegion)])
+    ),
+    encounter(
+      "Barzillai's Urban Response",
+      "Assassins and Hellknight enforcers hunt the party through Kintargo's streets.",
+      compact([many(hellknight, 3), m(nightprowler)])
+    ),
+    // Ch 4 — A Song of Silver (9-12)
+    encounter(
+      "Assault on the Temple of Asmodeus",
+      "The decisive battle for Kintargo — pit fiend high priest and diabolical allies.",
+      compact([m(pitFiend), many(erinyes, 3), many(forsakenLegion, 4)])
+    ),
+    encounter(
+      "Barzillai Thrune, Mortal",
+      "Barzillai Thrune in his mortal Hellknight-armored form confronts the party.",
+      compact([m(barzillai), many(hellknight, 3)])
+    ),
+    // Ch 5 — The Kintargo Contract (12-15)
+    encounter(
+      "Chelish Negotiation Legate",
+      "Chelish veterans and an archmage respond to Kintargo's uprising.",
+      compact([many(veteran, 3), m(mage)])
+    ),
+    encounter(
+      "Nightprowler of Kintargo's Surface",
+      "A devil-stalked nightprowler stalks the noble houses of Kintargo.",
+      compact([m(nightprowler), m(shadowGolem)])
+    ),
+    encounter(
+      "Shadow Dragon of the Depths",
+      "A black dragon twisted by shadow magic surfaces beneath Kintargo.",
+      compact([m(shadowDragon), many(shadowGolem, 2)])
+    ),
+    // Ch 6 — Breaking the Bones of Hell (15-17)
+    encounter(
+      "Infernal Hauntings in Kintargo",
+      "Lemures and erinyes issue from Asmodean portals across the city.",
+      compact([many(forsakenLegion, 4), many(erinyes, 2)])
+    ),
+    encounter(
+      "Cruciarus of Caina",
+      "Asmodeus's inquisitor of pain steps through a portal to Kintargo.",
+      compact([m(cruciarus), many(erinyes, 2)])
+    ),
+    encounter(
+      "Barzillai in Hell — Archdevil Form",
+      "Barzillai Thrune ascends to his archdevil form for the Breaking the Bones of Hell finale.",
+      compact([m(barzillaiDevil), m(pitFiend), many(forsakenLegion, 4)])
+    ),
+  ];
+}
+
+/**
+ * Build the encounter list for Red Hand of Doom.
+ * Witchwood ambushes, horde skirmishes, the Brindol siege, and the Fane of Tiamat.
+ */
+function rhodEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const azarrKul = findCustomMonsterById("cm-azarr-kul");
+  const harnoth = findCustomMonsterById("cm-harnoth-bloodwatcher");
+  const zanthrus = findCustomMonsterById("cm-zanthrus-wyrmspeaker");
+  const kulkzor = findCustomMonsterById("cm-kulkzor-wyrmspeaker");
+  const skalmad = findCustomMonsterById("cm-skalmad-red-fang");
+  const hobgoblin = findCustomMonsterById("cm-srd-hobgoblin");
+  const bugbear = findCustomMonsterById("cm-srd-bugbear");
+  const bugbearChief = findCustomMonsterById("cm-srd-bugbear-chief");
+  const ogre = findCustomMonsterById("cm-srd-ogre");
+  const hobgoblinCaptain = findCustomMonsterById("cm-srd-hobgoblin-captain");
+  const worg = findCustomMonsterById("cm-srd-worg");
+  const skeleton = findCustomMonsterById("cm-srd-skeleton");
+  const guard = findCustomMonsterById("cm-srd-guard");
+  const knight = findCustomMonsterById("cm-srd-knight");
+  const veteran = findCustomMonsterById("cm-srd-veteran");
+  const cultist = findCustomMonsterById("cm-srd-cultist");
+  const gnoll = findCustomMonsterById("cm-srd-gnoll");
+  const youngRedDragon = findCustomMonsterById("cm-srd-young-red-dragon");
+  const pitFiend = findCustomMonsterById("cm-srd-pit-fiend");
+  const erinyes = findCustomMonsterById("cm-srd-erinyes");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Ch 1 — The Witchwood (5-6)
+    encounter(
+      "Witchwood Ambush",
+      "Hobgoblin Red Hand outriders ambush the party in the Witchwood forest.",
+      compact([many(hobgoblin, 4), m(bugbear), m(bugbearChief), m(ogre)])
+    ),
+    encounter(
+      "Skalmad the Red Fang",
+      "A vampire lieutenant of the Red Hand stalks the Witchwood at night.",
+      compact([m(skalmad), many(skeleton, 2)])
+    ),
+    // Ch 2 — The Horde Grows (6-7)
+    encounter(
+      "Red Hand Patrol at the Skirts",
+      "Hobgoblin patrols roam the Elsir Vale, with worg mounts and a captain.",
+      compact([many(hobgoblin, 3), m(hobgoblinCaptain), many(worg, 2)])
+    ),
+    encounter(
+      "Kulk'zor the Wyrmspeaker",
+      "An early-AP hobgoblin dragon-priest commands the Witchwood wyrm-riders.",
+      compact([m(kulkzor), many(hobgoblin, 3)])
+    ),
+    // Ch 3 — Forging an Army (7-8)
+    encounter(
+      "Brindol Patrol",
+      "Brindol militia guards and a knight patrol the Vale settlements.",
+      compact([many(guard, 4), m(knight)])
+    ),
+    encounter(
+      "Dawnbringer Army",
+      "Dawnbringer volunteers rally around their veteran captain in preparation for Brindol.",
+      compact([many(guard, 4), m(veteran)])
+    ),
+    encounter(
+      "Vraath Keep — Bugbear Fortress",
+      "A bugbear chief warlord defends Vraath Keep with bugbear and ogre bodyguards.",
+      compact([m(bugbearChief), many(bugbear, 4), many(ogre, 2)])
+    ),
+    // Ch 4 — The Battle of Brindol (8-9)
+    encounter(
+      "The Siege of Brindol — Red Hand Vanguard",
+      "Twenty hobgoblins, four captains, ogre battering rams, and hill giants breach Brindol.",
+      compact([many(hobgoblin, 4), many(hobgoblinCaptain, 2), m(ogre)])
+    ),
+    encounter(
+      "Harnoth Bloodwatcher and the Young Red Dragon",
+      "Azarr Kul's bodyguard commands a young red dragon against the Brindol defenders.",
+      compact([m(harnoth), m(youngRedDragon), m(erinyes)])
+    ),
+    // Ch 5 — Fane of Tiamat (9-10)
+    encounter(
+      "Approach to the Fane",
+      "Hobgoblin fanatics and wyvern sentries guard the Fane of Tiamat's approaches.",
+      compact([many(hobgoblin, 4), m(cultist)])
+    ),
+    encounter(
+      "Zanthrus, Wyrm-Speaker",
+      "The high priest of Tiamat commands the outer chambers of the Fane.",
+      compact([m(zanthrus), many(cultist, 3), many(gnoll, 2)])
+    ),
+    encounter(
+      "The Wyrmlords — Tiamat's Inner Sanctum",
+      "Tiamat's emissary pit fiend joins the Wyrmlords in the inner sanctum.",
+      compact([m(pitFiend), m(youngRedDragon)])
+    ),
+    encounter(
+      "Azarr Kul, the Red Hand",
+      "The half-red-dragon hobgoblin warlord confronts the party in the Fane's heart.",
+      compact([m(azarrKul), m(youngRedDragon), many(hobgoblin, 4)])
+    ),
+  ];
+}
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const cultist = findCustomMonsterById("cm-vecna-cultist");
+  const impaler = findCustomMonsterById("cm-relentless-impaler");
+  const spiderdragon = findCustomMonsterById("cm-spiderdragon");
+  const deathwolf = findCustomMonsterById("cm-deathwolf");
+  const kasVampire = findCustomMonsterById("cm-kas-vampire");
+  const kasDeathKnight = findCustomMonsterById("cm-kas-death-knight");
+  const vecna = findCustomMonsterById("cm-vecna");
+  const acererak = findCustomMonsterById("cm-acererak");
+  const miska = findCustomMonsterById("cm-miska");
+  const lordSoth = findCustomMonsterById("cm-lord-soth");
+  const tiamat = findCustomMonsterById("cm-tiamat-servant");
+  const necro = findCustomMonsterById("cm-necromancer-wizard");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    // Ch 1 — Return from Neverdeath Graveyard (Neverwinter)
+    encounter(
+      "Cultists of the Whispered One",
+      "Fanatical cultists performing a dark ritual atop a Dolindar tomb.",
+      compact([m(cultist), many(cultist, 2)])
+    ),
+    // Ch 2 — The Wizards Three (Sigil)
+    encounter(
+      "Kas's Vampire Ambush",
+      "Kas the Bloody confronts the party in his vampiric form on the streets of Sigil.",
+      compact([m(kasVampire), many(deathwolf, 2)])
+    ),
+    encounter(
+      "Planescape Dabus Escort",
+      "Sigil's faceless dabus wardens demand a toll at a portal gate.",
+      compact([many(necro, 2)])
+    ),
+    // Ch 3 — The Lambent Zenith's Last Voyage (Astral Sea / Spelljammer)
+    encounter(
+      "Wreck of the Lambent Zenith",
+      "Astral dreadnought-creatures and necromancer survivors of a lost spelljammer.",
+      compact([many(necro, 2), many(cultist, 4), many(deathwolf, 2)])
+    ),
+    // Ch 4 — The Ruined Colossus (Eberron / Mount Ironrot)
+    encounter(
+      "Blades of Eberron at Ironrot",
+      "Eberron warforged blade scouts and their lieutenant patrol the ruined colossus.",
+      compact([many(necro, 2), many(cultist, 4)])
+    ),
+    encounter(
+      "Eye Monger Patrol",
+      "Aberrant-eyed servants of Vecna scour Mount Ironrot for the Rod fragment.",
+      compact([many(necro, 1), many(cultist, 3)])
+    ),
+    // Ch 5 — Death House (Ravenloft / Barovia)
+    encounter(
+      "Death House Lurching Halls",
+      "Animated furniture, sorrowsworn echoes, and Strahd's shadow guards stalk the cursed manor.",
+      compact([many(cultist, 4), m(impaler)])
+    ),
+    // Ch 6 — Night of Blue Fire (Krynn / Dragonlance)
+    encounter(
+      "Lord Soth's Vanguard",
+      "The death knight Lord Soth leads draconian shock troops against the party in Bittergrass Fen.",
+      compact([m(lordSoth), many(cultist, 4), many(deathwolf, 2)])
+    ),
+    // Ch 7 — Tomb of Wayward Souls (Greyhawk / Oerth)
+    encounter(
+      "Acererak's False Liches",
+      "Acererak's decoy liches and necromancer lieutenants test intruders in the upper tomb.",
+      compact([many(necro, 3), m(impaler), m(spiderdragon)])
+    ),
+    encounter(
+      "Acererak, the Archlich",
+      "Acererak himself manifests to halt the party's progress through the Tomb of Wayward Souls.",
+      compact([m(acererak), many(necro, 2), many(impaler, 2)])
+    ),
+    // Ch 8 — The Dragon Queen's Pride (Avernus / Nine Hells)
+    encounter(
+      "Abishai Court at the Red Belvedere",
+      "Tiamat's fiendish lieutenants and cultist throngs defend the Dragon Queen's casino in Avernus.",
+      compact([many(necro, 3), many(deathwolf, 3), m(impaler)])
+    ),
+    encounter(
+      "Tiamat's Material Aspect",
+      "An aspect of Tiamat in huge five-headed dragon form confronts the party atop the Dragon's Pride.",
+      compact([m(tiamat), many(necro, 2)])
+    ),
+    // Ch 9 — The Betrayer Revealed (Kas sheds vampire disguise)
+    encounter(
+      "Kas Reveals True Form",
+      "Kas drops his vampiric disguise and ascends to his true death-knight form.",
+      compact([m(kasVampire), m(kasDeathKnight), many(deathwolf, 2)])
+    ),
+    // Ch 10 — The War of Pandesmos (Abyss)
+    encounter(
+      "Spyder-Fiend Vanguard",
+      "Lolth-sent spider-fiends and abyss-touched cultists pour through a wound in the Abyss.",
+      compact([many(necro, 3), many(spiderdragon, 2), many(deathwolf, 2)])
+    ),
+    encounter(
+      "Miska, the Wolf-Spider",
+      "The demon lord Miska leads the abyss-borne armies of Pandesmos against the multiverse itself.",
+      compact([m(miska), many(necro, 3), many(deathwolf, 3), many(spiderdragon, 2)])
+    ),
+    // Ch 11 — Eve of Ruin (final confrontation)
+    encounter(
+      "Vecna's Inner Guard",
+      "Vecna's elite deathwolf pack and relentless impaler honor guard hold the approach to the Eye.",
+      compact([many(deathwolf, 4), many(impaler, 3), many(necro, 2)])
+    ),
+    encounter(
+      "Kas, the Bloody-Handed",
+      "Kas the Bloody in his true death-knight form defends Vecna's inner sanctum.",
+      compact([m(kasDeathKnight), many(impaler, 3), many(deathwolf, 2)])
+    ),
+    encounter(
+      "Acererak Joins the Eve",
+      "The demilich returns as Vecna's final ally, commanding false liches and necromancer lieutenants.",
+      compact([m(acererak), many(necro, 3), many(impaler, 2)])
+    ),
+    encounter(
+      "Vecna, the Whispered One",
+      "The archlich Vecna himself manifests to remake the multiverse — the Eve of Ruin.",
+      compact([m(vecna), many(impaler, 3), many(deathwolf, 4), m(kasDeathKnight)])
+    ),
+  ];
+}
+
 const CAMPAIGN_CATALOG: CampaignTemplate[] = [
   makeTemplate(
     "Curse of Strahd",
@@ -414,18 +1182,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Yon", order: 4, levelRange: "6-7", location: "Yon, Prismeer" },
       { title: "Palace of Heart's Desire", order: 5, levelRange: "7-8", location: "Palace of Heart's Desire" },
     ],
-    [
-      {
-        "name": "Harengon Brigands",
-        "description": "Agdon Longscarf and his bandits demand a toll.",
-        "monsters": []
-      },
-      {
-        "name": "Jabberwock",
-        "description": "A burbling, fearsome dragon-like fey creature.",
-        "monsters": []
-      }
-    ]
+    wbtwEncounters()
   ),
 
   makeTemplate(
@@ -462,18 +1219,7 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Caves of Hunger", order: 6, levelRange: "8", location: "Reghed Glacier" },
       { title: "Doom of Ythryn", order: 7, levelRange: "9-12", location: "Ythryn, Netherese Necropolis" },
     ],
-    [
-      {
-        "name": "Coldlight Walker",
-        "description": "An undead frozen wanderer attacks in the endless blizzard.",
-        "monsters": []
-      },
-      {
-        "name": "Chardalyn Dragon",
-        "description": "A mechanical dragon made of corrupted crystal assaults Ten-Towns.",
-        "monsters": []
-      }
-    ]
+    rimeEncounters()
   ),
 
   makeTemplate(
@@ -511,7 +1257,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Secret of the Sumber Hills", order: 3, levelRange: "7-10", location: "Sacred Stone Monastery, Haunted Keep" },
       { title: "Alarums and Excursions", order: 4, levelRange: "10-13", location: "Temple of the Elder Eye" },
       { title: "The Elder Elemental Eye", order: 5, levelRange: "13-15", location: "Elemental Nodes" },
-    ]
+    ],
+    potaEncounters()
   ),
 
   makeTemplate(
@@ -525,7 +1272,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "A History of Ashes", order: 4, levelRange: "9-11", location: "Cinderlands" },
       { title: "Skeletons of Scarwall", order: 5, levelRange: "11-14", location: "Scarwall Castle" },
       { title: "Crown of Fangs", order: 6, levelRange: "14-17", location: "Castle Korvosa" },
-    ]
+    ],
+    cotctEncounters()
   ),
 
   makeTemplate(
@@ -539,7 +1287,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "A Song of Silver", order: 4, levelRange: "9-12", location: "Kintargo" },
       { title: "A Hell of a Time", order: 5, levelRange: "12-15", location: "Hell" },
       { title: "Breaking the Bones of Hell", order: 6, levelRange: "15-17", location: "Kintargo, Hell" },
-    ]
+    ],
+    hrEncounters()
   ),
 
   makeTemplate(
@@ -552,7 +1301,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Forging an Army", order: 3, levelRange: "7-8", location: "Elsir Vale" },
       { title: "The Battle of Brindol", order: 4, levelRange: "8-9", location: "Brindol" },
       { title: "Fane of Tiamat", order: 5, levelRange: "9-10", location: "Fane of Tiamat" },
-    ]
+    ],
+    rhodEncounters()
   ),
 
   makeTemplate(
