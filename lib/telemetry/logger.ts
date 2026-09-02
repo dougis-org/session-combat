@@ -2,13 +2,22 @@ import { metrics, trace, SpanStatusCode } from "@opentelemetry/api";
 
 export type StorageEventOutcome = "success" | "not_found" | "error";
 
-export interface StorageEvent {
+interface BaseStorageEvent {
   name: string;
   collection: string;
-  outcome: StorageEventOutcome;
   durationMs: number;
-  error?: unknown;
 }
+
+export interface SuccessStorageEvent extends BaseStorageEvent {
+  outcome: "success" | "not_found";
+}
+
+export interface ErrorStorageEvent extends BaseStorageEvent {
+  outcome: "error";
+  error: unknown;
+}
+
+export type StorageEvent = SuccessStorageEvent | ErrorStorageEvent;
 
 const meter = metrics.getMeter("session-combat");
 const tracer = trace.getTracer("session-combat");
@@ -34,6 +43,8 @@ export function logStorageEvent(event: StorageEvent): void {
     span.setStatus({ code: SpanStatusCode.ERROR });
     if (event.error instanceof Error) {
       span.recordException(event.error);
+    } else if (event.error !== undefined) {
+      span.recordException(new Error(String(event.error)));
     }
   }
 

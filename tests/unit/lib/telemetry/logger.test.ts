@@ -82,6 +82,7 @@ describe("logStorageEvent", () => {
       collection: "campaigns",
       outcome: "error",
       durationMs: 12,
+      error: new Error("Test error"),
     });
 
     const meter = metrics.getMeter("session-combat");
@@ -172,6 +173,7 @@ describe("logStorageEvent", () => {
     });
 
     expect(consoleSpy).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
   test("console.error is called when (process.env as any).NODE_ENV = 'development' for an error event", () => {
@@ -181,9 +183,11 @@ describe("logStorageEvent", () => {
       collection: "campaigns",
       outcome: "error",
       durationMs: 12,
+      error: new Error("Test error"),
     });
 
     expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(consoleSpy).not.toHaveBeenCalled();
   });
 
   test("NO console methods are called when (process.env as any).NODE_ENV = 'production'", () => {
@@ -199,6 +203,7 @@ describe("logStorageEvent", () => {
       collection: "campaigns",
       outcome: "error",
       durationMs: 12,
+      error: new Error("Test error"),
     });
 
     expect(consoleSpy).not.toHaveBeenCalled();
