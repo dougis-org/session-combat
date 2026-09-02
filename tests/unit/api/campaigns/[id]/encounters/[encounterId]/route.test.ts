@@ -18,16 +18,22 @@ jest.mock("@/lib/middleware", () =>
 jest.mock("@/lib/storage", () => ({
   storage: {
     getMember: jest.fn(),
-    loadCampaignByIdAny: jest.fn(),
     removeEncounterFromCampaign: jest.fn(),
   },
 }));
 
+jest.mock("@/lib/storage/campaignRepo", () => ({
+  loadCampaignByIdAny: jest.fn(),
+}));
+
+import * as campaignRepo from "@/lib/storage/campaignRepo";
+
 const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
-  loadCampaignByIdAny: jest.MockedFunction<typeof storage.loadCampaignByIdAny>;
   removeEncounterFromCampaign: jest.MockedFunction<typeof storage.removeEncounterFromCampaign>;
 };
+
+const mockedCampaignRepo = jest.mocked(campaignRepo);
 
 const CAMPAIGN_ID = "camp-1";
 const DM_ID = "dm-user";
@@ -82,7 +88,7 @@ describe("DELETE /api/campaigns/[id]/encounters/[encounterId]", () => {
   it("DM unlinks a linked encounter", async () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
     mockedStorage.removeEncounterFromCampaign.mockResolvedValue(undefined);
 
     const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
@@ -94,7 +100,7 @@ describe("DELETE /api/campaigns/[id]/encounters/[encounterId]", () => {
   it("Unlinking an encounter that isn't linked is a no-op success", async () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue({ ...CAMPAIGN, encounterIds: ["e1"] });
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue({ ...CAMPAIGN, encounterIds: ["e1"] });
     mockedStorage.removeEncounterFromCampaign.mockResolvedValue(undefined);
 
     const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
@@ -104,7 +110,7 @@ describe("DELETE /api/campaigns/[id]/encounters/[encounterId]", () => {
 
   it("Player member cannot unlink", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
 
     const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
 
@@ -115,7 +121,7 @@ describe("DELETE /api/campaigns/[id]/encounters/[encounterId]", () => {
   it("returns 500 when removeEncounterFromCampaign throws", async () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
     mockedStorage.removeEncounterFromCampaign.mockRejectedValue(new Error("Storage error"));
 
     const response = await DELETE(makeDeleteRequest(), { params: PARAMS });

@@ -20,14 +20,19 @@ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.hel
 
 jest.mock("@/lib/storage", () => ({
   storage: {
-    loadCampaigns: jest.fn(),
-    saveCampaign: jest.fn(),
-    deleteCampaign: jest.fn(),
     addMember: jest.fn().mockResolvedValue(undefined),
     saveParty: jest.fn().mockResolvedValue(undefined),
     deleteParty: jest.fn().mockResolvedValue(undefined),
   },
 }));
+
+jest.mock("@/lib/storage/campaignRepo", () => ({
+  loadCampaigns: jest.fn(),
+  saveCampaign: jest.fn(),
+  deleteCampaign: jest.fn(),
+}));
+
+import * as campaignRepo from "@/lib/storage/campaignRepo";
 
 jest.mock("@/lib/utils/campaign", () => ({
   ...jest.requireActual("@/lib/utils/campaign"),
@@ -36,6 +41,7 @@ jest.mock("@/lib/utils/campaign", () => ({
 
 const mockedAssertCampaignAccess = jest.mocked(assertCampaignAccess);
 const mockedStorage = jest.mocked(storage);
+const mockedCampaignRepo = jest.mocked(campaignRepo);
 
 const MOCK_CAMPAIGN = {
   id: "campaign-1",
@@ -65,7 +71,7 @@ describe("GET /api/campaigns", () => {
   itReturns401(GET, makeGetRequest);
 
   it("returns list of campaigns", async () => {
-    mockedStorage.loadCampaigns.mockResolvedValue([MOCK_CAMPAIGN] as any);
+    mockedCampaignRepo.loadCampaigns.mockResolvedValue([MOCK_CAMPAIGN] as any);
 
     const response = await GET(makeGetRequest());
     expect(response.status).toBe(200);
@@ -75,7 +81,7 @@ describe("GET /api/campaigns", () => {
   });
 
   it("returns empty array when no campaigns", async () => {
-    mockedStorage.loadCampaigns.mockResolvedValue([]);
+    mockedCampaignRepo.loadCampaigns.mockResolvedValue([]);
 
     const response = await GET(makeGetRequest());
     expect(response.status).toBe(200);
@@ -85,7 +91,7 @@ describe("GET /api/campaigns", () => {
   itReturns500(
     GET,
     makeGetRequest,
-    () => mockedStorage.loadCampaigns.mockRejectedValue(new Error("DB error"))
+    () => mockedCampaignRepo.loadCampaigns.mockRejectedValue(new Error("DB error"))
   );
 });
 
@@ -94,7 +100,7 @@ describe("GET /api/campaigns", () => {
 describe("POST /api/campaigns", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
+    mockedCampaignRepo.saveCampaign.mockResolvedValue(undefined as any);
     mockedStorage.saveParty.mockResolvedValue(undefined as any);
     mockedStorage.deleteParty.mockResolvedValue(undefined as any);
     mockedStorage.addMember.mockResolvedValue(undefined as any);
@@ -250,7 +256,7 @@ describe("POST /api/campaigns", () => {
 
   it("saves the party after the campaign and before the member", async () => {
     const calls: string[] = [];
-    mockedStorage.saveCampaign.mockImplementation(async () => {
+    mockedCampaignRepo.saveCampaign.mockImplementation(async () => {
       calls.push("saveCampaign");
     });
     mockedStorage.saveParty.mockImplementation(async () => {
@@ -277,7 +283,7 @@ describe("POST /api/campaigns", () => {
     const response = await POST(makePostRequest({ name: "Doomed" }));
 
     expect(response.status).toBe(500);
-    expect(mockedStorage.deleteCampaign).toHaveBeenCalledWith(
+    expect(mockedCampaignRepo.deleteCampaign).toHaveBeenCalledWith(
       expect.any(String),
       "user-123"
     );
@@ -286,12 +292,12 @@ describe("POST /api/campaigns", () => {
 
   it("still returns 500 for the original error when deleteCampaign rollback itself fails after saveParty fails", async () => {
     mockedStorage.saveParty.mockRejectedValue(new Error("party save failed"));
-    mockedStorage.deleteCampaign.mockRejectedValue(new Error("delete campaign failed"));
+    mockedCampaignRepo.deleteCampaign.mockRejectedValue(new Error("delete campaign failed"));
 
     const response = await POST(makePostRequest({ name: "Doomed" }));
 
     expect(response.status).toBe(500);
-    expect(mockedStorage.deleteCampaign).toHaveBeenCalled();
+    expect(mockedCampaignRepo.deleteCampaign).toHaveBeenCalled();
     expect(mockedStorage.addMember).not.toHaveBeenCalled();
   });
 
@@ -305,7 +311,7 @@ describe("POST /api/campaigns", () => {
       expect.any(String),
       "user-123"
     );
-    expect(mockedStorage.deleteCampaign).toHaveBeenCalledWith(
+    expect(mockedCampaignRepo.deleteCampaign).toHaveBeenCalledWith(
       expect.any(String),
       "user-123"
     );
@@ -319,7 +325,7 @@ describe("POST /api/campaigns", () => {
 
     expect(response.status).toBe(500);
     expect(mockedStorage.deleteParty).toHaveBeenCalled();
-    expect(mockedStorage.deleteCampaign).toHaveBeenCalledWith(
+    expect(mockedCampaignRepo.deleteCampaign).toHaveBeenCalledWith(
       expect.any(String),
       "user-123"
     );
@@ -328,7 +334,7 @@ describe("POST /api/campaigns", () => {
   itReturns500(
     POST,
     () => makePostRequest({ name: "Doomed" }),
-    () => mockedStorage.saveCampaign.mockRejectedValue(new Error("DB error"))
+    () => mockedCampaignRepo.saveCampaign.mockRejectedValue(new Error("DB error"))
   );
 });
 
@@ -381,7 +387,7 @@ describe("PATCH /api/campaigns/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN } as any, role: "dm" });
-    mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
+    mockedCampaignRepo.saveCampaign.mockResolvedValue(undefined as any);
   });
 
   itReturns401WithParams(PATCH, () => makeIdRequest("PATCH", {}), PARAMS);
@@ -566,7 +572,7 @@ describe("DELETE /api/campaigns/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedAssertCampaignAccess.mockResolvedValue({ campaign: { ...MOCK_CAMPAIGN } as any, role: "dm" });
-    mockedStorage.deleteCampaign.mockResolvedValue(undefined as any);
+    mockedCampaignRepo.deleteCampaign.mockResolvedValue(undefined as any);
   });
 
   itReturns401WithParams(DELETE, () => makeIdRequest("DELETE"), PARAMS);
@@ -574,7 +580,7 @@ describe("DELETE /api/campaigns/[id]", () => {
   it("deletes campaign and returns 200 for DM", async () => {
     const response = await DELETE(makeIdRequest("DELETE"), { params: PARAMS });
     expect(response.status).toBe(200);
-    expect(mockedStorage.deleteCampaign).toHaveBeenCalledWith("campaign-1", "user-123");
+    expect(mockedCampaignRepo.deleteCampaign).toHaveBeenCalledWith("campaign-1", "user-123");
   });
 
   it("returns 404 when active player attempts DELETE", async () => {

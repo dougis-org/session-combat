@@ -9,14 +9,20 @@ import { StorageError } from "@/lib/storage/errors";
 jest.mock("@/lib/storage", () => ({
   storage: {
     getMember: jest.fn(),
-    loadCampaignByIdAny: jest.fn(),
   },
 }));
 
+jest.mock("@/lib/storage/campaignRepo", () => ({
+  loadCampaignByIdAny: jest.fn(),
+}));
+
+import * as campaignRepo from "@/lib/storage/campaignRepo";
+
 const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
-  loadCampaignByIdAny: jest.MockedFunction<typeof storage.loadCampaignByIdAny>;
 };
+
+const mockedCampaignRepo = jest.mocked(campaignRepo);
 
 const MOCK_CAMPAIGN = {
   id: "camp-1",
@@ -47,7 +53,7 @@ beforeEach(() => {
 describe("assertCampaignAccess", () => {
   it("returns { campaign, role: 'dm' } for active DM member", async () => {
     mockedStorage.getMember.mockResolvedValue(makeMember("dm", "active"));
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(MOCK_CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(MOCK_CAMPAIGN);
 
     const result = await assertCampaignAccess("camp-1", "user-1");
 
@@ -59,7 +65,7 @@ describe("assertCampaignAccess", () => {
 
   it("returns { campaign, role: 'player' } for active player member", async () => {
     mockedStorage.getMember.mockResolvedValue(makeMember("player", "active"));
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(MOCK_CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(MOCK_CAMPAIGN);
 
     const result = await assertCampaignAccess("camp-1", "user-1");
 
@@ -100,7 +106,7 @@ describe("assertCampaignAccess", () => {
 
   it("returns 404 NextResponse when active member but campaign document is missing", async () => {
     mockedStorage.getMember.mockResolvedValue(makeMember("dm", "active"));
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(null);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(null);
 
     const result = await assertCampaignAccess("camp-1", "user-1");
 
@@ -115,7 +121,7 @@ describe("assertCampaignAccess", () => {
 
     await assertCampaignAccess("camp-1", "user-1");
 
-    expect(mockedStorage.loadCampaignByIdAny).not.toHaveBeenCalled();
+    expect(mockedCampaignRepo.loadCampaignByIdAny).not.toHaveBeenCalled();
   });
 
   // AC (#503): a storage failure during the access check must NOT be masked as
@@ -125,6 +131,6 @@ describe("assertCampaignAccess", () => {
     mockedStorage.getMember.mockRejectedValue(dbErr);
 
     await expect(assertCampaignAccess("camp-1", "user-1")).rejects.toBe(dbErr);
-    expect(mockedStorage.loadCampaignByIdAny).not.toHaveBeenCalled();
+    expect(mockedCampaignRepo.loadCampaignByIdAny).not.toHaveBeenCalled();
   });
 });

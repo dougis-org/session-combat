@@ -6,6 +6,8 @@ import { storage } from "@/lib/storage";
 
 jest.mock("@/lib/db");
 jest.mock("@/lib/storage");
+jest.mock("@/lib/storage/campaignRepo");
+import * as campaignRepo from "@/lib/storage/campaignRepo";
 
 describe("backfillCampaignEncounters", () => {
   let mockDb: any;
@@ -88,7 +90,7 @@ describe("backfillCampaignEncounters", () => {
     expect(result.migrated).toBe(1);
     expect(result.encountersAdded).toBe(1);
     expect(storage.saveEncounter).toHaveBeenCalledTimes(1);
-    expect(storage.saveCampaign).toHaveBeenCalledTimes(1);
+    expect(campaignRepo.saveCampaign).toHaveBeenCalledTimes(1);
   });
 
   test("handles failures gracefully", async () => {
