@@ -214,12 +214,12 @@ encounter is self-contained.
 > | Out of the Abyss | 17 | 16 | 37 new | PR #661 | ✅ merged |
 > | Dragon of Icespire Peak | 4 | 15 | 6 new | PR #661 | ✅ merged |
 > | Phandelver and Below: The Shattered Obelisk | 8 | 9 | 21 new | PR #661 | ✅ merged |
-> | Icewind Dale: Rime of the Frostmaiden | 7 | 2 placeholder | 0 new | — | 🚧 G3 |
-> | The Wild Beyond the Witchlight | 5 | 2 placeholder | 0 new | — | 🚧 G3 |
-> | Princes of the Apocalypse | 5 | 0 | 0 new | — | 🚧 G3 |
-> | Curse of the Crimson Throne | 6 | 0 | 0 new | — | 🚧 G3 |
-> | Hell's Rebels | 6 | 0 | 0 new | — | 🚧 G3 |
-> | Red Hand of Doom | 5 | 0 | 0 new | — | 🚧 G3 |
+> | Icewind Dale: Rime of the Frostmaiden | 7 | 12 | 14 new | PR #581 | ✅ merged |
+> | The Wild Beyond the Witchlight | 5 | 8 | 14 new | PR #581 | ✅ merged |
+> | Princes of the Apocalypse | 5 | 22 | 16 new | PR #581 | ✅ merged |
+> | Curse of the Crimson Throne | 6 | 13 | 15 new | PR #581 | ✅ merged |
+> | Hell's Rebels | 6 | 13 | 14 new | PR #581 | ✅ merged |
+> | Red Hand of Doom | 5 | 15 | 14 new | PR #581 | ✅ merged |
 > | Candlekeep Mysteries | 17 | 0 | TBD | docs/research/candlekeep-mysteries.md | 🚧 G4 |
 > | Journeys Through the Radiant Citadel | 13 | 0 | TBD | docs/research/radiant-citadel.md | 🚧 G4 |
 > | Keys from the Golden Vault | 13 | 0 | TBD | docs/research/golden-vault.md | 🚧 G4 |

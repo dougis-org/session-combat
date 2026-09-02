@@ -7465,6 +7465,6451 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
       { name: "Slam", description: "Melee Weapon Attack", attackBonus: 3, damageDescription: "4 (1d6 + 1) bludgeoning damage." }
     ]
   },
+  {
+    "id": "cm-auril-frostmaiden",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Auril, the Frostmaiden",
+    "size": "medium",
+    "type": "fiend (deity)",
+    "alignment": "Neutral Evil",
+    "speed": "40 ft., fly 40 ft.",
+    "challengeRating": 12,
+    "ac": 19,
+    "acNote": "natural armor",
+    "hp": 202,
+    "maxHp": 202,
+    "abilityScores": {
+      "strength": 18,
+      "dexterity": 22,
+      "constitution": 20,
+      "intelligence": 16,
+      "wisdom": 20,
+      "charisma": 18
+    },
+    "savingThrows": {
+      "dexterity": 11,
+      "constitution": 10,
+      "wisdom": 10,
+      "charisma": 9
+    },
+    "skills": {
+      "Perception": 10,
+      "Stealth": 11
+    },
+    "damageImmunities": [
+      "cold"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "paralyzed"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "19"
+    },
+    "languages": [
+      "Common",
+      "Giant",
+      "Primordial"
+    ],
+    "description": "The cruel goddess of winter, cast in the form of a ten-foot woman of blue-white ice (\"Lady Icekiss\").",
+    "traits": [
+      {
+        "name": "Frost Aura",
+        "description": "At the start of each of its turns, each creature within 10 feet of Auril takes 11 (2d10) cold damage. A creature that touches Auril or hits her with a melee attack while within 5 feet of her takes 11 (2d10) cold damage."
+      },
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If Auril fails a saving throw, she can choose to succeed instead."
+      },
+      {
+        "name": "Icewalk",
+        "description": "Auril can move across and climb icy surfaces without needing to make an ability check. Difficult terrain composed of ice or snow does not cost her extra movement."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Auril makes three Frostbite Touch attacks."
+      },
+      {
+        "name": "Frostbite Touch",
+        "description": "Melee Spell Attack",
+        "attackBonus": 11,
+        "damageDescription": "18 (4d6 + 4) cold damage, and the target must succeed on a DC 19 Constitution saving throw or its speed is halved until the end of its next turn."
+      },
+      {
+        "name": "Cone of Cold (Recharge 5-6)",
+        "description": "Auril unleashes a 60-foot cone of frost. Each creature in that area must make a DC 19 Constitution saving throw, taking 36 (8d8) cold damage on a failed save, or half as much on a success."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Move",
+        "description": "Auril moves up to her speed without provoking opportunity attacks."
+      },
+      {
+        "name": "Frostbite Touch",
+        "description": "Auril makes one Frostbite Touch attack."
+      },
+      {
+        "name": "Blizzard (Costs 2 Actions)",
+        "description": "Auril conjures a 20-foot-radius sphere of howling wind and snow centered on a point she can see within 60 feet. Each creature in the area must succeed on a DC 19 Strength saving throw or be knocked prone and take 14 (4d6) cold damage.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-coldlight-walker",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Coldlight Walker",
+    "size": "medium",
+    "type": "undead",
+    "alignment": "Chaotic Evil",
+    "speed": "30 ft.",
+    "challengeRating": 5,
+    "ac": 12,
+    "acNote": "natural armor",
+    "hp": 97,
+    "maxHp": 97,
+    "abilityScores": {
+      "strength": 18,
+      "dexterity": 10,
+      "constitution": 18,
+      "intelligence": 6,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "savingThrows": {
+      "constitution": 6
+    },
+    "damageImmunities": [
+      "cold",
+      "necrotic",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [
+      "understands Common but can't speak"
+    ],
+    "description": "A frozen wanderer that died in the everlasting blizzard, now hollow and radiating unnatural cold.",
+    "traits": [
+      {
+        "name": "Cold Radiance",
+        "description": "At the start of each of the walker's turns, each creature within 20 feet of it takes 5 (1d10) cold damage. A creature reduced to 0 hit points by this damage dies and rises as a coldlight walker after 1 minute."
+      },
+      {
+        "name": "Frozen Fortitude",
+        "description": "If damage reduces the walker to 0 hit points, it makes a DC 10 Constitution saving throw, dropping to 1 hit point instead on a success unless the damage was fire or radiant."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The coldlight walker makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "13 (2d8 + 4) bludgeoning damage plus 9 (2d8) cold damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-chardalyn-dragon",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Chardalyn Dragon",
+    "size": "huge",
+    "type": "construct",
+    "alignment": "Chaotic Evil",
+    "speed": "40 ft., fly 80 ft.",
+    "challengeRating": 14,
+    "ac": 19,
+    "acNote": "natural armor",
+    "hp": 195,
+    "maxHp": 195,
+    "abilityScores": {
+      "strength": 23,
+      "dexterity": 10,
+      "constitution": 22,
+      "intelligence": 14,
+      "wisdom": 11,
+      "charisma": 19
+    },
+    "savingThrows": {
+      "dexterity": 5,
+      "constitution": 11,
+      "wisdom": 5,
+      "charisma": 9
+    },
+    "skills": {
+      "Perception": 10
+    },
+    "damageImmunities": [
+      "poison",
+      "psychic"
+    ],
+    "conditionImmunities": [
+      "blinded",
+      "charmed",
+      "deafened",
+      "exhaustion",
+      "frightened",
+      "paralyzed",
+      "petrified",
+      "poisoned"
+    ],
+    "senses": {
+      "blindsight": "60 ft.",
+      "darkvision": "120 ft.",
+      "passive Perception": "15"
+    },
+    "languages": [
+      "understands Common and Draconic but can't speak"
+    ],
+    "description": "A dragon-shaped automaton forged from black chardalyn crystal by the duergar of Sunblight, driven by a bound elemental hatred.",
+    "traits": [
+      {
+        "name": "Magic Absorption",
+        "description": "Whenever the dragon is targeted by a spell of 5th level or lower, the spell has no effect on it and it regains hit points equal to 5 times the spell's level."
+      },
+      {
+        "name": "Unusual Nature",
+        "description": "The dragon doesn't require air, food, drink, or sleep."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The dragon makes one Bite attack and two Claw attacks."
+      },
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 11,
+        "damageDescription": "17 (2d10 + 6) piercing damage."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 11,
+        "damageDescription": "13 (2d6 + 6) slashing damage."
+      },
+      {
+        "name": "Shard Breath (Recharge 5-6)",
+        "description": "The dragon exhales a 60-foot cone of razor crystal shards. Each creature in that area must make a DC 19 Dexterity saving throw, taking 45 (10d8) slashing damage on a failed save, or half as much on a success."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Detect",
+        "description": "The dragon makes a Wisdom (Perception) check."
+      },
+      {
+        "name": "Claw Attack",
+        "description": "The dragon makes one Claw attack."
+      },
+      {
+        "name": "Wing Attack (Costs 2 Actions)",
+        "description": "The dragon beats its metal wings. Each creature within 10 feet must succeed on a DC 19 Dexterity saving throw or take 13 (2d6 + 6) bludgeoning damage and be knocked prone. The dragon can then fly up to half its speed.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-aunaut-aurilblight",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Aunaut Aurilblight",
+    "size": "huge",
+    "type": "giant",
+    "alignment": "Neutral Evil",
+    "speed": "40 ft.",
+    "challengeRating": 11,
+    "ac": 16,
+    "acNote": "natural armor",
+    "hp": 172,
+    "maxHp": 172,
+    "abilityScores": {
+      "strength": 23,
+      "dexterity": 9,
+      "constitution": 21,
+      "intelligence": 12,
+      "wisdom": 18,
+      "charisma": 13
+    },
+    "savingThrows": {
+      "constitution": 9,
+      "wisdom": 8
+    },
+    "skills": {
+      "Perception": 8,
+      "Religion": 5
+    },
+    "damageImmunities": [
+      "cold"
+    ],
+    "senses": {
+      "passive Perception": "18"
+    },
+    "languages": [
+      "Giant",
+      "Common"
+    ],
+    "description": "A frost giant priest-king of fallen Ythryn who survived the city's plunge into the glacier, now a fanatical cleric of Auril.",
+    "traits": [
+      {
+        "name": "Frozen Devotion",
+        "description": "Aunaut has advantage on saving throws against being charmed or frightened, and creatures within 10 feet of him have their speed reduced by 10 feet from the ambient cold."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Aunaut makes two Greataxe attacks or two Ice Bolt attacks."
+      },
+      {
+        "name": "Greataxe",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 10,
+        "damageDescription": "19 (3d8 + 6) slashing damage plus 7 (2d6) cold damage."
+      },
+      {
+        "name": "Ice Bolt",
+        "description": "Ranged Spell Attack",
+        "attackBonus": 8,
+        "damageDescription": "21 (6d6) cold damage, and the target's speed is reduced by 10 feet until the end of its next turn."
+      },
+      {
+        "name": "Sleet Storm (1/Day)",
+        "description": "Aunaut conjures freezing rain and sleet in a 20-foot-tall, 40-foot-radius cylinder centered on a point within 150 feet. The area is heavily obscured and difficult terrain, and creatures that enter for the first time on a turn or start there must succeed on a DC 16 Dexterity saving throw or fall prone."
+      }
+    ]
+  },
+  {
+    "id": "cm-iriolarthas",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Iriolarthas, the Netherese Necromancer",
+    "size": "medium",
+    "type": "undead",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 12,
+    "ac": 17,
+    "acNote": "natural armor",
+    "hp": 150,
+    "maxHp": 150,
+    "abilityScores": {
+      "strength": 11,
+      "dexterity": 16,
+      "constitution": 16,
+      "intelligence": 21,
+      "wisdom": 15,
+      "charisma": 17
+    },
+    "savingThrows": {
+      "constitution": 8,
+      "intelligence": 10,
+      "wisdom": 7
+    },
+    "skills": {
+      "Arcana": 15,
+      "History": 15,
+      "Perception": 7
+    },
+    "damageResistances": [
+      "cold",
+      "lightning"
+    ],
+    "damageImmunities": [
+      "necrotic",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "paralyzed",
+      "poisoned"
+    ],
+    "senses": {
+      "truesight": "120 ft.",
+      "passive Perception": "16"
+    },
+    "languages": [
+      "Common",
+      "Netherese",
+      "Draconic",
+      "Abyssal"
+    ],
+    "description": "The last archwizard of Ythryn, sustained past death by the city's mythallar, obsessed with restarting the engine that doomed his people.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If Iriolarthas fails a saving throw, he can choose to succeed instead."
+      },
+      {
+        "name": "Rejuvenation",
+        "description": "If destroyed while the Ythryn mythallar functions, Iriolarthas reforms in 1d10 days within the necropolis."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "Iriolarthas casts spells as a 17th-level wizard (spell save DC 18). He has prepared blight, cloudkill, cone of cold, finger of death, and wall of ice."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Iriolarthas makes three Chill Touch attacks."
+      },
+      {
+        "name": "Chill Touch",
+        "description": "Ranged Spell Attack",
+        "attackBonus": 10,
+        "damageDescription": "16 (3d8 + 3) necrotic damage, and the target can't regain hit points until the start of Iriolarthas's next turn."
+      },
+      {
+        "name": "Finger of Death (1/Day)",
+        "description": "One creature within 60 feet must make a DC 18 Constitution saving throw, taking 62 (7d8 + 30) necrotic damage on a failed save, or half as much on a success. A humanoid killed by this attack rises as a zombie under Iriolarthas's control."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Chill Touch",
+        "description": "Iriolarthas makes one Chill Touch attack."
+      },
+      {
+        "name": "Frozen Step",
+        "description": "Iriolarthas teleports up to 30 feet to an unoccupied space he can see."
+      },
+      {
+        "name": "Withering Word (Costs 2 Actions)",
+        "description": "Each creature of Iriolarthas's choice within 30 feet must succeed on a DC 18 Wisdom saving throw or take 18 (4d8) psychic damage.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-leviathan",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Leviathan (Netherese)",
+    "size": "gargantuan",
+    "type": "elemental",
+    "alignment": "Neutral",
+    "speed": "0 ft., swim 60 ft., fly 60 ft. (hover)",
+    "challengeRating": 20,
+    "ac": 17,
+    "hp": 310,
+    "maxHp": 310,
+    "abilityScores": {
+      "strength": 29,
+      "dexterity": 14,
+      "constitution": 26,
+      "intelligence": 5,
+      "wisdom": 12,
+      "charisma": 14
+    },
+    "savingThrows": {
+      "strength": 16,
+      "constitution": 15,
+      "wisdom": 7
+    },
+    "skills": {
+      "Perception": 7
+    },
+    "damageResistances": [
+      "acid",
+      "fire",
+      "lightning"
+    ],
+    "damageImmunities": [
+      "cold",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "grappled",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "prone",
+      "restrained",
+      "unconscious"
+    ],
+    "senses": {
+      "blindsight": "120 ft.",
+      "passive Perception": "17"
+    },
+    "languages": [
+      "understands Primordial"
+    ],
+    "description": "A colossal wave-serpent of living water summoned from Realms myth, released as a last resort against Auril.",
+    "traits": [
+      {
+        "name": "Water Form",
+        "description": "The leviathan can enter a hostile creature's space and stop there. It can move through a space as narrow as 1 inch wide without squeezing."
+      },
+      {
+        "name": "Freeze",
+        "description": "If the leviathan takes cold damage, it partly freezes: its speed is reduced by 20 feet until the end of its next turn."
+      },
+      {
+        "name": "Siege Monster",
+        "description": "The leviathan deals double damage to objects and structures."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The leviathan makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 16,
+        "damageDescription": "30 (4d10 + 8) bludgeoning damage, and the target must succeed on a DC 24 Strength saving throw or be knocked prone."
+      },
+      {
+        "name": "Tidal Crush (Recharge 5-6)",
+        "description": "The leviathan slams a 90-foot-long, 30-foot-wide line of water down. Each creature in that line must make a DC 24 Dexterity saving throw, taking 55 (10d10) bludgeoning damage and being swept 30 feet away and knocked prone on a failed save, or half as much damage on a success."
+      }
+    ]
+  },
+  {
+    "id": "cm-chardalyn-berserker",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Chardalyn Berserker",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Chaotic Neutral",
+    "speed": "30 ft.",
+    "challengeRating": 2,
+    "ac": 12,
+    "acNote": "hide armor",
+    "hp": 45,
+    "maxHp": 45,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 12,
+      "constitution": 16,
+      "intelligence": 8,
+      "wisdom": 10,
+      "charisma": 10
+    },
+    "senses": {
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Common"
+    ],
+    "description": "A Reghed nomad driven murderously insane by exposure to raw chardalyn crystal.",
+    "traits": [
+      {
+        "name": "Reckless",
+        "description": "At the start of its turn, the berserker can gain advantage on all melee weapon attack rolls it makes during that turn, but attack rolls against it have advantage until the start of its next turn."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The berserker makes two Greataxe attacks."
+      },
+      {
+        "name": "Greataxe",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "9 (1d12 + 3) slashing damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-white-dragon-wyrmling-rime",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "White Dragon Wyrmling",
+    "size": "medium",
+    "type": "dragon",
+    "alignment": "Chaotic Evil",
+    "speed": "30 ft., burrow 15 ft., fly 60 ft., swim 30 ft.",
+    "challengeRating": 2,
+    "ac": 16,
+    "acNote": "natural armor",
+    "hp": 32,
+    "maxHp": 32,
+    "abilityScores": {
+      "strength": 14,
+      "dexterity": 10,
+      "constitution": 14,
+      "intelligence": 5,
+      "wisdom": 10,
+      "charisma": 11
+    },
+    "savingThrows": {
+      "dexterity": 2,
+      "constitution": 4,
+      "wisdom": 2,
+      "charisma": 2
+    },
+    "skills": {
+      "Perception": 4,
+      "Stealth": 2
+    },
+    "damageImmunities": [
+      "cold"
+    ],
+    "senses": {
+      "blindsight": "10 ft.",
+      "darkvision": "60 ft.",
+      "passive Perception": "12"
+    },
+    "languages": [
+      "Draconic"
+    ],
+    "description": "A young white dragon serving as a mount or guardian in the frozen reaches.",
+    "actions": [
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "5 (1d10) piercing damage plus 2 (1d4) cold damage."
+      },
+      {
+        "name": "Cold Breath (Recharge 5-6)",
+        "description": "The wyrmling exhales an icy blast in a 15-foot cone. Each creature in that area must make a DC 12 Constitution saving throw, taking 22 (5d8) cold damage on a failed save, or half as much on a success."
+      }
+    ]
+  },
+  {
+    "id": "cm-xardorok-sunblight",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Xardorok Sunblight",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "25 ft.",
+    "challengeRating": 6,
+    "ac": 20,
+    "acNote": "plate armor, shield",
+    "hp": 102,
+    "maxHp": 102,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 11,
+      "constitution": 18,
+      "intelligence": 15,
+      "wisdom": 12,
+      "charisma": 16
+    },
+    "savingThrows": {
+      "constitution": 7,
+      "wisdom": 4
+    },
+    "skills": {
+      "Perception": 4
+    },
+    "damageResistances": [
+      "fire"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "14"
+    },
+    "languages": [
+      "Common",
+      "Dwarvish",
+      "Undercommon"
+    ],
+    "description": "The paranoid duergar warlord of Sunblight, architect of the chardalyn dragon.",
+    "traits": [
+      {
+        "name": "Duergar Resilience",
+        "description": "Xardorok has advantage on saving throws against poison, illusions, and being charmed, paralyzed, or stunned."
+      },
+      {
+        "name": "Sunlight Sensitivity",
+        "description": "While in sunlight, Xardorok has disadvantage on attack rolls and Wisdom (Perception) checks that rely on sight."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Xardorok makes two attacks with his enlarged flail."
+      },
+      {
+        "name": "Chardalyn Flail",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "13 (2d8 + 4) bludgeoning damage plus 10 (3d6) necrotic damage."
+      },
+      {
+        "name": "Enlarge (Recharges after a Short or Long Rest)",
+        "description": "For 1 minute, Xardorok magically increases in size along with anything he is wearing or carrying. His melee attacks deal an extra 4 (1d8) damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-duergar-soldier-rime",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Duergar Soldier",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "25 ft.",
+    "challengeRating": 1,
+    "ac": 16,
+    "acNote": "scale mail, shield",
+    "hp": 26,
+    "maxHp": 26,
+    "abilityScores": {
+      "strength": 14,
+      "dexterity": 11,
+      "constitution": 14,
+      "intelligence": 11,
+      "wisdom": 10,
+      "charisma": 9
+    },
+    "damageResistances": [
+      "poison"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Dwarvish",
+      "Undercommon"
+    ],
+    "description": "A gray dwarf warrior of Clan Sunblight.",
+    "traits": [
+      {
+        "name": "Duergar Resilience",
+        "description": "Advantage on saves against poison, illusions, and being charmed, paralyzed, or stunned."
+      }
+    ],
+    "actions": [
+      {
+        "name": "War Pick",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "6 (1d8 + 2) piercing damage."
+      },
+      {
+        "name": "Invisibility (Recharges after a Short or Long Rest)",
+        "description": "The duergar magically turns invisible for up to 1 hour or until it attacks, casts a spell, or uses Enlarge."
+      }
+    ]
+  },
+  {
+    "id": "cm-frost-druid",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Frost Druid of Auril",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 3,
+    "ac": 13,
+    "acNote": "hide armor",
+    "hp": 44,
+    "maxHp": 44,
+    "abilityScores": {
+      "strength": 10,
+      "dexterity": 14,
+      "constitution": 14,
+      "intelligence": 12,
+      "wisdom": 17,
+      "charisma": 11
+    },
+    "skills": {
+      "Nature": 3,
+      "Perception": 5
+    },
+    "senses": {
+      "passive Perception": "15"
+    },
+    "languages": [
+      "Common",
+      "Druidic"
+    ],
+    "description": "A hermit priest of the Frostmaiden who calls the blizzard down on trespassers.",
+    "traits": [
+      {
+        "name": "Spellcasting",
+        "description": "The druid casts spells as a 5th-level druid (save DC 13): ice knife, sleet storm, and gust of wind."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Icicle Staff",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "6 (1d8 + 2) bludgeoning damage plus 4 (1d8) cold damage."
+      },
+      {
+        "name": "Ice Knife",
+        "description": "Ranged Spell Attack",
+        "attackBonus": 5,
+        "damageDescription": "10 (3d6) piercing damage, and the target and each creature within 5 feet of it must make a DC 13 Dexterity save or take 5 (2d4) cold damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-crag-cat",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Crag Cat",
+    "size": "medium",
+    "type": "monstrosity",
+    "alignment": "Unaligned",
+    "speed": "40 ft., climb 40 ft.",
+    "challengeRating": 2,
+    "ac": 12,
+    "hp": 34,
+    "maxHp": 34,
+    "abilityScores": {
+      "strength": 15,
+      "dexterity": 15,
+      "constitution": 12,
+      "intelligence": 6,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "skills": {
+      "Perception": 3,
+      "Stealth": 4
+    },
+    "damageResistances": [
+      "cold"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "13"
+    },
+    "languages": [],
+    "description": "A pale, magic-sensing predator of the Icewind Dale tundra.",
+    "traits": [
+      {
+        "name": "Detect Magic",
+        "description": "The crag cat senses the presence of magic within 30 feet as if it had the detect magic spell."
+      },
+      {
+        "name": "Keen Smell",
+        "description": "The crag cat has advantage on Wisdom (Perception) checks that rely on smell."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The crag cat makes one Bite attack and one Claws attack."
+      },
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "7 (1d10 + 2) piercing damage."
+      },
+      {
+        "name": "Claws",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "9 (2d6 + 2) slashing damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-gerti-orelsdottr",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Gerti Orelsdottr",
+    "size": "huge",
+    "type": "giant",
+    "alignment": "Neutral Evil",
+    "speed": "40 ft.",
+    "challengeRating": 9,
+    "ac": 17,
+    "acNote": "patchwork plate",
+    "hp": 175,
+    "maxHp": 175,
+    "abilityScores": {
+      "strength": 23,
+      "dexterity": 9,
+      "constitution": 21,
+      "intelligence": 10,
+      "wisdom": 12,
+      "charisma": 12
+    },
+    "savingThrows": {
+      "constitution": 8,
+      "wisdom": 3,
+      "charisma": 3
+    },
+    "skills": {
+      "Athletics": 9,
+      "Perception": 3
+    },
+    "damageImmunities": [
+      "cold"
+    ],
+    "senses": {
+      "passive Perception": "15"
+    },
+    "languages": [
+      "Giant"
+    ],
+    "description": "The exiled frost giant jarl of the Reghed Glacier, seeking a white dragon ally to reclaim her throne.",
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Gerti makes two Greataxe attacks."
+      },
+      {
+        "name": "Greataxe",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 9,
+        "damageDescription": "23 (3d12 + 6) slashing damage."
+      },
+      {
+        "name": "Rock",
+        "description": "Ranged Weapon Attack",
+        "attackBonus": 9,
+        "damageDescription": "28 (4d10 + 6) bludgeoning damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-ythryn-mind-flayer",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Icewind Dale: Rime of the Frostmaiden",
+    "name": "Ythryn Mind Flayer",
+    "size": "medium",
+    "type": "aberration",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 7,
+    "ac": 15,
+    "acNote": "breastplate",
+    "hp": 71,
+    "maxHp": 71,
+    "abilityScores": {
+      "strength": 11,
+      "dexterity": 12,
+      "constitution": 12,
+      "intelligence": 19,
+      "wisdom": 17,
+      "charisma": 17
+    },
+    "savingThrows": {
+      "intelligence": 7,
+      "wisdom": 6,
+      "charisma": 6
+    },
+    "skills": {
+      "Arcana": 7,
+      "Deception": 6,
+      "Insight": 6,
+      "Perception": 6,
+      "Persuasion": 6,
+      "Stealth": 4
+    },
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "16"
+    },
+    "languages": [
+      "Deep Speech",
+      "Undercommon",
+      "telepathy 120 ft."
+    ],
+    "description": "An illithid survivor entombed with the necropolis for two thousand years, still scheming.",
+    "traits": [
+      {
+        "name": "Magic Resistance",
+        "description": "The mind flayer has advantage on saving throws against spells and other magical effects."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The mind flayer casts spells as an 8th-level caster (save DC 15): detect thoughts, levitate, dominate monster (1/day), plane shift (self only, 1/day)."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Tentacles",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "15 (2d10 + 4) psychic damage, and the target is grappled (escape DC 15). While grappled, the target is restrained and takes 10 (3d6) psychic damage at the start of each of the mind flayer's turns."
+      },
+      {
+        "name": "Mind Blast (Recharge 5-6)",
+        "description": "The mind flayer emanates psychic energy in a 60-foot cone. Each creature in that area must succeed on a DC 15 Intelligence saving throw or take 22 (4d8 + 4) psychic damage and be stunned for 1 minute (repeat save at end of each turn)."
+      },
+      {
+        "name": "Extract Brain",
+        "description": "Melee Weapon Attack against an incapacitated humanoid grappled by the mind flayer: 55 (10d10) piercing damage. If this reduces the target to 0 hit points, the mind flayer kills it by extracting and devouring its brain."
+      }
+    ]
+  },
+  {
+    "id": "cm-brigid-morningglow",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Brigid Morningglow",
+    "size": "medium",
+    "type": "fey",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 7,
+    "ac": 17,
+    "acNote": "natural armor",
+    "hp": 105,
+    "maxHp": 105,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 14,
+      "constitution": 16,
+      "intelligence": 13,
+      "wisdom": 14,
+      "charisma": 16
+    },
+    "savingThrows": {
+      "wisdom": 5,
+      "charisma": 6
+    },
+    "skills": {
+      "Deception": 6,
+      "Insight": 5,
+      "Perception": 5
+    },
+    "conditionImmunities": [
+      "charmed"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "15"
+    },
+    "languages": [
+      "Common",
+      "Sylvan"
+    ],
+    "description": "The dawn-faced first sister of the Hourglass Coven, keeper of stolen mornings.",
+    "traits": [
+      {
+        "name": "Coven Spellcasting",
+        "description": "While within 30 feet of at least one coven ally, this hag can cast shared coven spells (save DC 15): counterspell, lightning bolt, phantasmal killer, polymorph."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "The hag has advantage on saving throws against spells and other magical effects."
+      },
+      {
+        "name": "Legendary Resistance (2/Day)",
+        "description": "If the hag fails a saving throw, she can choose to succeed instead."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Brigid makes two Claw attacks."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "12 (2d8 + 3) slashing damage plus 7 (2d6) radiant damage."
+      },
+      {
+        "name": "Dawnsteal (Recharge 5-6)",
+        "description": "Brigid targets one creature within 60 feet. It must succeed on a DC 15 Charisma saving throw or lose all benefits of its most recent long rest and gain one level of exhaustion."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Claw",
+        "description": "The hag makes one Claw attack."
+      },
+      {
+        "name": "Vanish",
+        "description": "The hag magically turns invisible until the start of her next turn or until she attacks."
+      },
+      {
+        "name": "Fey Curse (Costs 2 Actions)",
+        "description": "The hag targets one creature within 30 feet. It must succeed on a DC 15 Wisdom saving throw or be cursed with disadvantage on saving throws for 1 minute.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-mungoj-reyhorn",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Mungoj Reyhorn",
+    "size": "medium",
+    "type": "fey",
+    "alignment": "Chaotic Evil",
+    "speed": "40 ft.",
+    "challengeRating": 6,
+    "ac": 16,
+    "acNote": "natural armor",
+    "hp": 95,
+    "maxHp": 95,
+    "abilityScores": {
+      "strength": 18,
+      "dexterity": 15,
+      "constitution": 15,
+      "intelligence": 12,
+      "wisdom": 13,
+      "charisma": 14
+    },
+    "savingThrows": {
+      "strength": 7,
+      "constitution": 5
+    },
+    "skills": {
+      "Athletics": 7,
+      "Perception": 4,
+      "Stealth": 5
+    },
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "14"
+    },
+    "languages": [
+      "Common",
+      "Sylvan"
+    ],
+    "description": "The horned brother-consort of the Hourglass Coven, a satyr twisted by hag magic.",
+    "traits": [
+      {
+        "name": "Coven Spellcasting",
+        "description": "While within 30 feet of at least one coven ally, this hag can cast shared coven spells (save DC 15): counterspell, lightning bolt, phantasmal killer, polymorph."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "The hag has advantage on saving throws against spells and other magical effects."
+      },
+      {
+        "name": "Legendary Resistance (2/Day)",
+        "description": "If the hag fails a saving throw, she can choose to succeed instead."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Mungoj makes two attacks: one with his Ram and one with his Goring Horns."
+      },
+      {
+        "name": "Ram",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "13 (2d8 + 4) bludgeoning damage, and the target must succeed on a DC 15 Strength saving throw or be pushed 10 feet and knocked prone."
+      },
+      {
+        "name": "Goring Horns",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "11 (2d6 + 4) piercing damage."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Claw",
+        "description": "The hag makes one Claw attack."
+      },
+      {
+        "name": "Vanish",
+        "description": "The hag magically turns invisible until the start of her next turn or until she attacks."
+      },
+      {
+        "name": "Fey Curse (Costs 2 Actions)",
+        "description": "The hag targets one creature within 30 feet. It must succeed on a DC 15 Wisdom saving throw or be cursed with disadvantage on saving throws for 1 minute.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-endelyn-moongrave",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Endelyn Moongrave",
+    "size": "medium",
+    "type": "fey",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft., fly 30 ft.",
+    "challengeRating": 8,
+    "ac": 18,
+    "acNote": "natural armor",
+    "hp": 133,
+    "maxHp": 133,
+    "abilityScores": {
+      "strength": 15,
+      "dexterity": 16,
+      "constitution": 17,
+      "intelligence": 15,
+      "wisdom": 16,
+      "charisma": 18
+    },
+    "savingThrows": {
+      "dexterity": 6,
+      "wisdom": 6,
+      "charisma": 7
+    },
+    "skills": {
+      "Arcana": 5,
+      "Deception": 7,
+      "Perception": 6,
+      "Stealth": 6
+    },
+    "damageResistances": [
+      "necrotic"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "frightened"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "16"
+    },
+    "languages": [
+      "Common",
+      "Elvish",
+      "Sylvan"
+    ],
+    "description": "The eldest sister of the Hourglass Coven, the Hag of the West who rules beasts and moonlight from her theater of shadows.",
+    "traits": [
+      {
+        "name": "Coven Spellcasting",
+        "description": "While within 30 feet of at least one coven ally, this hag can cast shared coven spells (save DC 16): counterspell, lightning bolt, phantasmal killer, polymorph."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "The hag has advantage on saving throws against spells and other magical effects."
+      },
+      {
+        "name": "Legendary Resistance (2/Day)",
+        "description": "If the hag fails a saving throw, she can choose to succeed instead."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Endelyn makes three Moonfire Bolt attacks or two Claw attacks."
+      },
+      {
+        "name": "Moonfire Bolt",
+        "description": "Ranged Spell Attack",
+        "attackBonus": 7,
+        "damageDescription": "14 (3d6 + 4) radiant damage, and the target sheds dim light in a 10-foot radius until the end of its next turn and can't benefit from being invisible."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "11 (2d6 + 4) slashing damage plus 7 (2d6) necrotic damage."
+      },
+      {
+        "name": "Final Act (Recharge 6)",
+        "description": "Endelyn forces each creature of her choice within 30 feet to make a DC 16 Wisdom saving throw. On a failure, a creature is stunned until the end of its next turn as it relives its worst memory."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Claw",
+        "description": "Endelyn makes one Claw attack."
+      },
+      {
+        "name": "Moonstep",
+        "description": "Endelyn teleports up to 40 feet to a space in dim light or darkness that she can see."
+      },
+      {
+        "name": "Curtain Call (Costs 2 Actions)",
+        "description": "Endelyn conjures grasping shadow puppets in a 15-foot cube within 30 feet. Each creature there must succeed on a DC 16 Strength saving throw or be restrained until the end of Endelyn's next turn.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-sister-gala",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Sister Gala",
+    "size": "medium",
+    "type": "fey",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 7,
+    "ac": 17,
+    "acNote": "natural armor",
+    "hp": 112,
+    "maxHp": 112,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 15,
+      "constitution": 16,
+      "intelligence": 14,
+      "wisdom": 13,
+      "charisma": 15
+    },
+    "savingThrows": {
+      "constitution": 6,
+      "charisma": 5
+    },
+    "skills": {
+      "Deception": 5,
+      "Perception": 4,
+      "Sleight of Hand": 5
+    },
+    "conditionImmunities": [
+      "charmed"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "14"
+    },
+    "languages": [
+      "Common",
+      "Sylvan",
+      "Infernal"
+    ],
+    "description": "The youngest sister of the Hourglass Coven, mistress of bargains and the sand that never runs out.",
+    "traits": [
+      {
+        "name": "Coven Spellcasting",
+        "description": "While within 30 feet of at least one coven ally, this hag can cast shared coven spells (save DC 15): counterspell, lightning bolt, phantasmal killer, polymorph."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "The hag has advantage on saving throws against spells and other magical effects."
+      },
+      {
+        "name": "Legendary Resistance (2/Day)",
+        "description": "If the hag fails a saving throw, she can choose to succeed instead."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Sister Gala makes two Claw attacks."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "12 (2d8 + 3) slashing damage."
+      },
+      {
+        "name": "Sands of Debt (Recharge 5-6)",
+        "description": "Sister Gala targets one creature within 30 feet that has made a bargain with any hag. It must succeed on a DC 15 Wisdom saving throw or be paralyzed until the end of its next turn as the hourglass empties."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Claw",
+        "description": "The hag makes one Claw attack."
+      },
+      {
+        "name": "Vanish",
+        "description": "The hag magically turns invisible until the start of her next turn or until she attacks."
+      },
+      {
+        "name": "Fey Curse (Costs 2 Actions)",
+        "description": "The hag targets one creature within 30 feet. It must succeed on a DC 15 Wisdom saving throw or be cursed with disadvantage on saving throws for 1 minute.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-wendigo",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Wendigo",
+    "size": "large",
+    "type": "fey",
+    "alignment": "Chaotic Evil",
+    "speed": "50 ft., climb 30 ft.",
+    "challengeRating": 9,
+    "ac": 15,
+    "acNote": "natural armor",
+    "hp": 138,
+    "maxHp": 138,
+    "abilityScores": {
+      "strength": 20,
+      "dexterity": 17,
+      "constitution": 18,
+      "intelligence": 8,
+      "wisdom": 15,
+      "charisma": 10
+    },
+    "savingThrows": {
+      "dexterity": 7,
+      "constitution": 8,
+      "wisdom": 6
+    },
+    "skills": {
+      "Perception": 6,
+      "Stealth": 7,
+      "Survival": 6
+    },
+    "damageResistances": [
+      "cold"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "frightened"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "16"
+    },
+    "languages": [
+      "Sylvan",
+      "understands Common"
+    ],
+    "description": "A starving winter-spirit of the fractured Feywild, the hunger of a frozen forest given a gaunt and antlered shape.",
+    "traits": [
+      {
+        "name": "Cold Wake",
+        "description": "A creature that ends its turn within 10 feet of the wendigo takes 5 (1d10) cold damage."
+      },
+      {
+        "name": "Unnerving Howl",
+        "description": "When the wendigo howls (no action), each creature within 60 feet that can hear it must succeed on a DC 16 Wisdom saving throw or be frightened until the end of its next turn."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The wendigo makes one Bite attack and two Claw attacks."
+      },
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 8,
+        "damageDescription": "15 (2d10 + 5) piercing damage plus 7 (2d6) cold damage."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 8,
+        "damageDescription": "12 (2d6 + 5) slashing damage."
+      },
+      {
+        "name": "Windwalk (Recharge 5-6)",
+        "description": "The wendigo becomes a howling gale and moves up to 100 feet in a straight line. Each creature in its path must make a DC 16 Dexterity saving throw, taking 21 (6d6) cold damage on a failed save, or half as much on a success."
+      }
+    ]
+  },
+  {
+    "id": "cm-harengon-brigand",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Harengon Brigand",
+    "size": "small",
+    "type": "fey",
+    "alignment": "Chaotic Neutral",
+    "speed": "35 ft.",
+    "challengeRating": 2,
+    "ac": 14,
+    "acNote": "studded leather",
+    "hp": 33,
+    "maxHp": 33,
+    "abilityScores": {
+      "strength": 11,
+      "dexterity": 17,
+      "constitution": 12,
+      "intelligence": 11,
+      "wisdom": 13,
+      "charisma": 12
+    },
+    "skills": {
+      "Acrobatics": 5,
+      "Stealth": 5
+    },
+    "senses": {
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Common",
+      "Sylvan"
+    ],
+    "description": "One of Agdon Longscarf's rabbit-folk bandits working the road to the Witchlight Carnival.",
+    "traits": [
+      {
+        "name": "Lucky Footwork",
+        "description": "When the brigand fails a Dexterity saving throw, it can use its reaction to gain a +4 bonus to the roll if it isn't incapacitated."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The brigand makes two Shortsword attacks."
+      },
+      {
+        "name": "Shortsword",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "6 (1d6 + 3) piercing damage."
+      },
+      {
+        "name": "Sling",
+        "description": "Ranged Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "5 (1d4 + 3) bludgeoning damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-agdon-longscarf",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Agdon Longscarf",
+    "size": "small",
+    "type": "fey",
+    "alignment": "Chaotic Neutral",
+    "speed": "35 ft.",
+    "challengeRating": 3,
+    "ac": 15,
+    "acNote": "studded leather",
+    "hp": 52,
+    "maxHp": 52,
+    "abilityScores": {
+      "strength": 11,
+      "dexterity": 18,
+      "constitution": 13,
+      "intelligence": 12,
+      "wisdom": 13,
+      "charisma": 15
+    },
+    "savingThrows": {
+      "dexterity": 6
+    },
+    "skills": {
+      "Acrobatics": 6,
+      "Deception": 4,
+      "Performance": 4,
+      "Stealth": 6
+    },
+    "senses": {
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Common",
+      "Sylvan"
+    ],
+    "description": "The vain harengon leader of a band of toll-collecting brigands, humiliated by a lost hat.",
+    "traits": [
+      {
+        "name": "Lucky Footwork",
+        "description": "When Agdon fails a Dexterity saving throw, he can use his reaction to gain a +4 bonus if not incapacitated."
+      },
+      {
+        "name": "Rabbit Hop",
+        "description": "As a bonus action, Agdon jumps up to 15 feet without provoking opportunity attacks."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Agdon makes two Rapier attacks."
+      },
+      {
+        "name": "Rapier",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "8 (1d8 + 4) piercing damage."
+      },
+      {
+        "name": "Beguiling Wink (Recharge 6)",
+        "description": "Agdon winks at a creature within 30 feet. It must succeed on a DC 13 Wisdom saving throw or be charmed until the end of its next turn."
+      }
+    ]
+  },
+  {
+    "id": "cm-animated-toy",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Animated Toy",
+    "size": "small",
+    "type": "construct",
+    "alignment": "Unaligned",
+    "speed": "25 ft.",
+    "challengeRating": 1,
+    "ac": 13,
+    "acNote": "natural armor",
+    "hp": 22,
+    "maxHp": 22,
+    "abilityScores": {
+      "strength": 12,
+      "dexterity": 14,
+      "constitution": 12,
+      "intelligence": 3,
+      "wisdom": 8,
+      "charisma": 5
+    },
+    "damageImmunities": [
+      "poison",
+      "psychic"
+    ],
+    "conditionImmunities": [
+      "blinded",
+      "charmed",
+      "deafened",
+      "exhaustion",
+      "frightened",
+      "paralyzed",
+      "petrified",
+      "poisoned"
+    ],
+    "senses": {
+      "blindsight": "60 ft.",
+      "passive Perception": "9"
+    },
+    "languages": [],
+    "description": "A clockwork doll or stuffed beast brought to malevolent life in Skabatha's toy factory.",
+    "traits": [
+      {
+        "name": "False Appearance",
+        "description": "While motionless, the toy is indistinguishable from an ordinary toy."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The toy makes two Rake attacks."
+      },
+      {
+        "name": "Rake",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "7 (2d4 + 2) slashing damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-jabberwock",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Jabberwock",
+    "size": "huge",
+    "type": "dragon",
+    "alignment": "Chaotic Evil",
+    "speed": "40 ft., fly 60 ft.",
+    "challengeRating": 13,
+    "ac": 18,
+    "acNote": "natural armor",
+    "hp": 210,
+    "maxHp": 210,
+    "abilityScores": {
+      "strength": 24,
+      "dexterity": 14,
+      "constitution": 22,
+      "intelligence": 10,
+      "wisdom": 14,
+      "charisma": 16
+    },
+    "savingThrows": {
+      "dexterity": 7,
+      "constitution": 11,
+      "wisdom": 7
+    },
+    "skills": {
+      "Perception": 7
+    },
+    "damageResistances": [
+      "thunder"
+    ],
+    "conditionImmunities": [
+      "frightened"
+    ],
+    "senses": {
+      "blindsight": "30 ft.",
+      "darkvision": "120 ft.",
+      "passive Perception": "17"
+    },
+    "languages": [
+      "Draconic",
+      "Sylvan"
+    ],
+    "description": "The burbling terror of Yon: eyes of flame, jaws that bite, claws that catch.",
+    "traits": [
+      {
+        "name": "Frumious Presence",
+        "description": "Each creature that starts its turn within 30 feet of the Jabberwock and can see it must succeed on a DC 16 Wisdom saving throw or be frightened until the start of its next turn."
+      },
+      {
+        "name": "Vorpal Bite",
+        "description": "On a critical hit with its Bite, the Jabberwock deals an extra 27 (6d8) slashing damage."
+      },
+      {
+        "name": "Regeneration",
+        "description": "The Jabberwock regains 10 hit points at the start of its turn if it has at least 1 hit point and did not take slashing damage from a vorpal or magical weapon since its last turn."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The Jabberwock makes one Bite attack and two Claw attacks."
+      },
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 12,
+        "damageDescription": "19 (2d12 + 6) piercing damage."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 12,
+        "damageDescription": "15 (2d8 + 6) slashing damage."
+      },
+      {
+        "name": "Eyes of Flame (Recharge 5-6)",
+        "description": "The Jabberwock's eyes blaze in a 60-foot cone. Each creature there must make a DC 18 Dexterity saving throw, taking 45 (13d6) fire damage on a failed save, or half as much on a success."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Claw",
+        "description": "The Jabberwock makes one Claw attack."
+      },
+      {
+        "name": "Burble",
+        "description": "Each creature within 20 feet must succeed on a DC 16 Constitution saving throw or take 9 (2d8) thunder damage."
+      },
+      {
+        "name": "Wing Buffet (Costs 2 Actions)",
+        "description": "The Jabberwock beats its wings; each creature within 15 feet must succeed on a DC 18 Strength saving throw or be knocked prone. The Jabberwock then flies up to half its speed.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-bavlorna-blightstraw",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Bavlorna Blightstraw",
+    "size": "small",
+    "type": "fey",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft., swim 30 ft.",
+    "challengeRating": 6,
+    "ac": 17,
+    "acNote": "natural armor",
+    "hp": 97,
+    "maxHp": 97,
+    "abilityScores": {
+      "strength": 15,
+      "dexterity": 13,
+      "constitution": 16,
+      "intelligence": 16,
+      "wisdom": 14,
+      "charisma": 16
+    },
+    "savingThrows": {
+      "wisdom": 5,
+      "charisma": 6
+    },
+    "skills": {
+      "Deception": 6,
+      "Perception": 5
+    },
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "15"
+    },
+    "languages": [
+      "Common",
+      "Aquan",
+      "Sylvan"
+    ],
+    "description": "The bog-dwelling Hag of the East in Hither, hoarder of sorrows and signed contracts.",
+    "traits": [
+      {
+        "name": "Coven Magic",
+        "description": "Bavlorna casts spells as a 9th-level caster (save DC 14): bane, geas (1/day), major image, phantasmal force."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Bavlorna makes two Sludge Ladle attacks."
+      },
+      {
+        "name": "Sludge Ladle",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "9 (2d6 + 2) bludgeoning damage plus 7 (2d6) poison damage."
+      },
+      {
+        "name": "Cauldron Draught (Recharge 6)",
+        "description": "Bavlorna flings boiling brew at a creature within 30 feet. It must make a DC 14 Dexterity saving throw, taking 21 (6d6) poison damage on a failure, or half as much on a success."
+      }
+    ]
+  },
+  {
+    "id": "cm-skabatha-nightshade",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Skabatha Nightshade",
+    "size": "small",
+    "type": "fey",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 7,
+    "ac": 18,
+    "acNote": "natural armor",
+    "hp": 110,
+    "maxHp": 110,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 14,
+      "constitution": 16,
+      "intelligence": 15,
+      "wisdom": 14,
+      "charisma": 17
+    },
+    "savingThrows": {
+      "strength": 6,
+      "wisdom": 5,
+      "charisma": 6
+    },
+    "skills": {
+      "Deception": 6,
+      "Perception": 5,
+      "Sleight of Hand": 5
+    },
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "15"
+    },
+    "languages": [
+      "Common",
+      "Sylvan"
+    ],
+    "description": "The Hag of the South in Thither, who turns children into toys and toys into soldiers.",
+    "traits": [
+      {
+        "name": "Coven Magic",
+        "description": "Skabatha casts spells as a 9th-level caster (save DC 14): animate objects (1/day), fabricate, hold person, mirror image."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Skabatha makes two attacks with her Walking Stick."
+      },
+      {
+        "name": "Walking Stick",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "13 (3d6 + 3) bludgeoning damage."
+      },
+      {
+        "name": "Toymaker's Touch (Recharge 5-6)",
+        "description": "Skabatha touches or targets a creature within 15 feet. It must succeed on a DC 14 Charisma saving throw or be polymorphed into a Tiny toy for 1 minute (repeat save at end of each turn)."
+      }
+    ]
+  },
+  {
+    "id": "cm-darkling-elder",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Darkling Elder",
+    "size": "medium",
+    "type": "fey",
+    "alignment": "Chaotic Neutral",
+    "speed": "30 ft.",
+    "challengeRating": 2,
+    "ac": 15,
+    "acNote": "natural armor",
+    "hp": 27,
+    "maxHp": 27,
+    "abilityScores": {
+      "strength": 11,
+      "dexterity": 17,
+      "constitution": 12,
+      "intelligence": 12,
+      "wisdom": 15,
+      "charisma": 15
+    },
+    "skills": {
+      "Acrobatics": 5,
+      "Deception": 4,
+      "Perception": 4,
+      "Stealth": 7
+    },
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "14"
+    },
+    "languages": [
+      "Common",
+      "Elvish",
+      "Sylvan"
+    ],
+    "description": "A shadow-cloaked fey exile serving the coven for scraps of twilight.",
+    "traits": [
+      {
+        "name": "Death Flash",
+        "description": "When the darkling elder dies, nonmagical light within 10 feet is extinguished and each creature within 10 feet must succeed on a DC 12 Constitution saving throw or be blinded until the end of its next turn."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The darkling makes two Dagger attacks."
+      },
+      {
+        "name": "Dagger",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "5 (1d4 + 3) piercing damage plus 7 (2d6) necrotic damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-displacer-beast-pack-lord",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Displacer Beast Pack Lord",
+    "size": "large",
+    "type": "monstrosity",
+    "alignment": "Lawful Evil",
+    "speed": "45 ft.",
+    "challengeRating": 4,
+    "ac": 14,
+    "hp": 91,
+    "maxHp": 91,
+    "abilityScores": {
+      "strength": 18,
+      "dexterity": 16,
+      "constitution": 16,
+      "intelligence": 6,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "skills": {
+      "Perception": 3,
+      "Stealth": 5
+    },
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "13"
+    },
+    "languages": [],
+    "description": "The dominant matriarch of a displacer beast pack that roams Thither hunting Witchlight thieves.",
+    "traits": [
+      {
+        "name": "Displacement",
+        "description": "The creature projects a magical illusion making it appear to be near its actual location, granting attack rolls against it disadvantage. This trait is disrupted while the creature is incapacitated or has speed 0."
+      },
+      {
+        "name": "Avoidance",
+        "description": "If the pack lord is subjected to an effect that allows a saving throw for half damage, it instead takes no damage on a success and half on a failure."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The pack lord makes three Tentacle attacks."
+      },
+      {
+        "name": "Tentacle",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "9 (1d10 + 4) bludgeoning damage plus 5 (1d10) piercing damage from spiky protrusions."
+      }
+    ]
+  },
+  {
+    "id": "cm-corrupted-unicorn",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "The Wild Beyond the Witchlight",
+    "name": "Corrupted Unicorn",
+    "size": "large",
+    "type": "celestial",
+    "alignment": "Neutral",
+    "speed": "50 ft.",
+    "challengeRating": 5,
+    "ac": 12,
+    "hp": 82,
+    "maxHp": 82,
+    "abilityScores": {
+      "strength": 18,
+      "dexterity": 14,
+      "constitution": 15,
+      "intelligence": 11,
+      "wisdom": 17,
+      "charisma": 16
+    },
+    "damageResistances": [
+      "necrotic"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "paralyzed",
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "13"
+    },
+    "languages": [
+      "Celestial",
+      "Elvish",
+      "Sylvan"
+    ],
+    "description": "A unicorn bound and defiled by Endelyn Moongrave, its horn dripping with tainted moonlight.",
+    "traits": [
+      {
+        "name": "Magic Resistance",
+        "description": "Advantage on saving throws against spells and other magical effects."
+      },
+      {
+        "name": "Bound Servitude",
+        "description": "While Endelyn is within 120 feet, the unicorn must obey her commands and has disadvantage on saving throws against her effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The unicorn makes one Hooves attack and one Horn attack."
+      },
+      {
+        "name": "Hooves",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "11 (2d6 + 4) bludgeoning damage."
+      },
+      {
+        "name": "Horn",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "9 (1d8 + 4) piercing damage plus 7 (2d6) necrotic damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-imix",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Imix, Prince of Evil Fire",
+    "size": "huge",
+    "type": "elemental",
+    "alignment": "Neutral Evil",
+    "speed": "50 ft., fly 60 ft. (hover)",
+    "challengeRating": 18,
+    "ac": 19,
+    "acNote": "natural armor",
+    "hp": 275,
+    "maxHp": 275,
+    "abilityScores": {
+      "strength": 24,
+      "dexterity": 20,
+      "constitution": 24,
+      "intelligence": 18,
+      "wisdom": 18,
+      "charisma": 22
+    },
+    "savingThrows": {
+      "dexterity": 12,
+      "constitution": 14,
+      "wisdom": 11,
+      "charisma": 13
+    },
+    "skills": {
+      "Perception": 11
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "fire",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "grappled",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "prone",
+      "restrained",
+      "unconscious"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "20"
+    },
+    "languages": [
+      "Primordial"
+    ],
+    "description": "The Elemental Prince of Evil Fire, a towering column of living flame with a fanged, grinning face.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If Imix fails a saving throw, it can choose to succeed instead."
+      },
+      {
+        "name": "Fire Aura",
+        "description": "At the start of each of Imix's turns, each creature within 15 feet takes 16 (3d10) fire damage. A creature that touches Imix or hits it with a melee attack while within 5 feet takes 11 (2d10) fire damage."
+      },
+      {
+        "name": "Water Susceptibility",
+        "description": "For every 5 feet Imix moves in water, or for every gallon of water splashed on it, it takes 3 cold damage."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Imix makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 13,
+        "damageDescription": "20 (3d8 + 7) bludgeoning damage plus 22 (4d10) fire damage."
+      },
+      {
+        "name": "Fire Storm (Recharge 5-6)",
+        "description": "Imix erupts. Each creature within 30 feet must make a DC 21 Dexterity saving throw, taking 55 (10d10) fire damage on a failed save, or half as much on a success. Flammable objects that aren't worn or carried ignite."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Attack",
+        "description": "Imix makes one weapon or slam attack."
+      },
+      {
+        "name": "Elemental Stride",
+        "description": "Imix teleports up to 60 feet to an unoccupied space it can see."
+      },
+      {
+        "name": "Elemental Surge (Costs 2 Actions)",
+        "description": "Each creature within 15 feet of Imix must make a DC 21 Dexterity saving throw, taking 18 (4d8) elemental damage of Imix's type on a failed save, or half as much on a success.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-ogremoch",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Ogrémoch, Prince of Evil Earth",
+    "size": "huge",
+    "type": "elemental",
+    "alignment": "Neutral Evil",
+    "speed": "40 ft., burrow 40 ft.",
+    "challengeRating": 18,
+    "ac": 19,
+    "acNote": "natural armor",
+    "hp": 275,
+    "maxHp": 275,
+    "abilityScores": {
+      "strength": 28,
+      "dexterity": 12,
+      "constitution": 26,
+      "intelligence": 15,
+      "wisdom": 18,
+      "charisma": 20
+    },
+    "savingThrows": {
+      "strength": 15,
+      "constitution": 14,
+      "wisdom": 11
+    },
+    "skills": {
+      "Perception": 11
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "poison"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "grappled",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "prone",
+      "restrained",
+      "unconscious"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "20"
+    },
+    "languages": [
+      "Primordial"
+    ],
+    "description": "The Elemental Prince of Evil Earth, a colossal moving mountain of jagged black stone.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If Ogrémoch fails a saving throw, it can choose to succeed instead."
+      },
+      {
+        "name": "Siege Monster",
+        "description": "Ogrémoch deals double damage to objects and structures."
+      },
+      {
+        "name": "Earth Glide",
+        "description": "Ogrémoch can burrow through nonmagical, unworked earth and stone without disturbing it."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Ogrémoch makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 15,
+        "damageDescription": "26 (4d8 + 9) bludgeoning damage, and the target must succeed on a DC 23 Strength saving throw or be knocked prone."
+      },
+      {
+        "name": "Rock Avalanche (Recharge 5-6)",
+        "description": "Ogrémoch hurls a storm of boulders in a 40-foot cube within 90 feet. Each creature there must make a DC 21 Dexterity saving throw, taking 45 (10d8) bludgeoning damage and being buried (restrained) on a failed save, or half as much on a success."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Attack",
+        "description": "Ogrémoch makes one weapon or slam attack."
+      },
+      {
+        "name": "Elemental Stride",
+        "description": "Ogrémoch teleports up to 60 feet to an unoccupied space it can see."
+      },
+      {
+        "name": "Elemental Surge (Costs 2 Actions)",
+        "description": "Each creature within 15 feet of Ogrémoch must make a DC 21 Dexterity saving throw, taking 18 (4d8) elemental damage of Ogrémoch's type on a failed save, or half as much on a success.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-yuan-tin",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Yuan-Tin, Prince of Evil Water",
+    "size": "huge",
+    "type": "elemental",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft., swim 90 ft.",
+    "challengeRating": 18,
+    "ac": 19,
+    "acNote": "natural armor",
+    "hp": 275,
+    "maxHp": 275,
+    "abilityScores": {
+      "strength": 22,
+      "dexterity": 22,
+      "constitution": 24,
+      "intelligence": 16,
+      "wisdom": 18,
+      "charisma": 20
+    },
+    "savingThrows": {
+      "dexterity": 13,
+      "constitution": 14,
+      "wisdom": 11
+    },
+    "skills": {
+      "Perception": 11
+    },
+    "damageResistances": [
+      "cold",
+      "fire",
+      "lightning",
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "acid",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "grappled",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "prone",
+      "restrained",
+      "unconscious"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "20"
+    },
+    "languages": [
+      "Primordial"
+    ],
+    "description": "The Elemental Princess of Evil Water (Olhydra), a churning wave crowned in foam and lightning.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If Yuan-Tin fails a saving throw, it can choose to succeed instead."
+      },
+      {
+        "name": "Freeze",
+        "description": "If Yuan-Tin takes cold damage, its speed is reduced by 20 feet until the end of its next turn."
+      },
+      {
+        "name": "Water Form",
+        "description": "Yuan-Tin can enter a hostile creature's space and stop there, and move through a space as narrow as 1 inch wide without squeezing."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Yuan-Tin makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 12,
+        "damageDescription": "18 (3d8 + 6) bludgeoning damage plus 18 (4d8) cold damage."
+      },
+      {
+        "name": "Drowning Grasp (Recharge 5-6)",
+        "description": "Yuan-Tin engulfs a 20-foot-radius area within 60 feet in a crushing waterspout. Each creature there must make a DC 21 Strength saving throw, taking 45 (10d8) bludgeoning damage and being pulled 20 feet toward Yuan-Tin and knocked prone on a failed save, or half as much on a success."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Attack",
+        "description": "Yuan-Tin makes one weapon or slam attack."
+      },
+      {
+        "name": "Elemental Stride",
+        "description": "Yuan-Tin teleports up to 60 feet to an unoccupied space it can see."
+      },
+      {
+        "name": "Elemental Surge (Costs 2 Actions)",
+        "description": "Each creature within 15 feet of Yuan-Tin must make a DC 21 Dexterity saving throw, taking 18 (4d8) elemental damage of Yuan-Tin's type on a failed save, or half as much on a success.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-bane",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Bane, Prince of Evil Air",
+    "size": "huge",
+    "type": "elemental",
+    "alignment": "Neutral Evil",
+    "speed": "0 ft., fly 90 ft. (hover)",
+    "challengeRating": 18,
+    "ac": 19,
+    "acNote": "natural armor",
+    "hp": 275,
+    "maxHp": 275,
+    "abilityScores": {
+      "strength": 18,
+      "dexterity": 26,
+      "constitution": 22,
+      "intelligence": 16,
+      "wisdom": 18,
+      "charisma": 20
+    },
+    "savingThrows": {
+      "dexterity": 15,
+      "constitution": 13,
+      "wisdom": 11
+    },
+    "skills": {
+      "Perception": 11,
+      "Stealth": 15
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "lightning",
+      "poison",
+      "thunder"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "grappled",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "prone",
+      "restrained",
+      "unconscious"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "20"
+    },
+    "languages": [
+      "Primordial"
+    ],
+    "description": "The Elemental Prince of Evil Air (Yan-C-Bin), a howling near-invisible storm with the face of a screaming man.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If Bane fails a saving throw, it can choose to succeed instead."
+      },
+      {
+        "name": "Air Form",
+        "description": "Bane can enter a hostile creature's space and stop there, and move through a space as narrow as 1 inch wide without squeezing."
+      },
+      {
+        "name": "Whirlwind Body",
+        "description": "A creature that starts its turn within 10 feet of Bane must succeed on a DC 21 Strength saving throw or be pushed 15 feet away."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Bane makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 15,
+        "damageDescription": "17 (3d6 + 8) bludgeoning damage plus 18 (4d8) lightning damage."
+      },
+      {
+        "name": "Cyclone (Recharge 5-6)",
+        "description": "Bane becomes a 20-foot-radius, 60-foot-tall cyclone for 1 minute. Each creature that enters the area for the first time on a turn or starts there must make a DC 21 Strength saving throw, taking 36 (8d8) bludgeoning damage and being flung 20 feet on a failed save, or half as much on a success."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Attack",
+        "description": "Bane makes one weapon or slam attack."
+      },
+      {
+        "name": "Elemental Stride",
+        "description": "Bane teleports up to 60 feet to an unoccupied space it can see."
+      },
+      {
+        "name": "Elemental Surge (Costs 2 Actions)",
+        "description": "Each creature within 15 feet of Bane must make a DC 21 Dexterity saving throw, taking 18 (4d8) elemental damage of Bane's type on a failed save, or half as much on a success.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-air-elemental",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Air Elemental",
+    "size": "large",
+    "type": "elemental",
+    "alignment": "Neutral",
+    "speed": "0 ft., fly 90 ft. (hover)",
+    "challengeRating": 5,
+    "ac": 15,
+    "hp": 90,
+    "maxHp": 90,
+    "abilityScores": {
+      "strength": 14,
+      "dexterity": 20,
+      "constitution": 14,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 6
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "lightning",
+      "poison",
+      "thunder"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "grappled",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "prone",
+      "restrained",
+      "unconscious"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Auran"
+    ],
+    "description": "A whistling vortex of wind called to serve the Cult of the Howling Hate.",
+    "traits": [
+      {
+        "name": "Air Form",
+        "description": "The elemental can enter a hostile creature's space and stop there, and move through a space as narrow as 1 inch wide without squeezing."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The elemental makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 8,
+        "damageDescription": "14 (2d8 + 5) bludgeoning damage."
+      },
+      {
+        "name": "Whirlwind (Recharge 4-6)",
+        "description": "Each creature in the elemental's space must make a DC 13 Strength saving throw, taking 15 (3d8 + 2) bludgeoning damage and being flung up to 20 feet and knocked prone on a failed save, or half as much on a success."
+      }
+    ]
+  },
+  {
+    "id": "cm-earth-elemental",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Earth Elemental",
+    "size": "large",
+    "type": "elemental",
+    "alignment": "Neutral",
+    "speed": "30 ft., burrow 30 ft.",
+    "challengeRating": 5,
+    "ac": 17,
+    "acNote": "natural armor",
+    "hp": 126,
+    "maxHp": 126,
+    "abilityScores": {
+      "strength": 20,
+      "dexterity": 8,
+      "constitution": 20,
+      "intelligence": 5,
+      "wisdom": 10,
+      "charisma": 5
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "poison"
+    ],
+    "damageVulnerabilities": [
+      "thunder"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "unconscious"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "tremorsense": "60 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Terran"
+    ],
+    "description": "A rumbling mass of stone and soil bound by the Cult of the Black Earth.",
+    "traits": [
+      {
+        "name": "Earth Glide",
+        "description": "The elemental can burrow through nonmagical, unworked earth and stone without disturbing it."
+      },
+      {
+        "name": "Siege Monster",
+        "description": "The elemental deals double damage to objects and structures."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The elemental makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 8,
+        "damageDescription": "14 (2d8 + 5) bludgeoning damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-fire-elemental",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Fire Elemental",
+    "size": "large",
+    "type": "elemental",
+    "alignment": "Neutral",
+    "speed": "50 ft.",
+    "challengeRating": 5,
+    "ac": 13,
+    "hp": 102,
+    "maxHp": 102,
+    "abilityScores": {
+      "strength": 10,
+      "dexterity": 17,
+      "constitution": 16,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 7
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "fire",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "grappled",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "prone",
+      "restrained",
+      "unconscious"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Ignan"
+    ],
+    "description": "A roaring humanoid bonfire summoned by the Cult of the Eternal Flame.",
+    "traits": [
+      {
+        "name": "Fire Form",
+        "description": "The elemental can move through a space as narrow as 1 inch wide without squeezing. A creature that touches it or hits it with a melee attack while within 5 feet takes 5 (1d10) fire damage. It can enter a hostile creature's space and stop there."
+      },
+      {
+        "name": "Water Susceptibility",
+        "description": "For every 5 feet the elemental moves in water, or for every gallon splashed on it, it takes 1 cold damage."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The elemental makes two Touch attacks."
+      },
+      {
+        "name": "Touch",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "10 (2d6 + 3) fire damage. If the target is a creature or flammable object, it ignites and takes 5 (1d10) fire damage at the start of each of its turns."
+      }
+    ]
+  },
+  {
+    "id": "cm-water-elemental",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Water Elemental",
+    "size": "large",
+    "type": "elemental",
+    "alignment": "Neutral",
+    "speed": "30 ft., swim 90 ft.",
+    "challengeRating": 5,
+    "ac": 14,
+    "hp": 114,
+    "maxHp": 114,
+    "abilityScores": {
+      "strength": 18,
+      "dexterity": 14,
+      "constitution": 18,
+      "intelligence": 5,
+      "wisdom": 10,
+      "charisma": 8
+    },
+    "damageResistances": [
+      "acid",
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "poison"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "grappled",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "prone",
+      "restrained",
+      "unconscious"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Aquan"
+    ],
+    "description": "A surging fist of dark water raised by the Cult of the Crushing Wave.",
+    "traits": [
+      {
+        "name": "Water Form",
+        "description": "The elemental can enter a hostile creature's space and stop there, and move through a space as narrow as 1 inch wide without squeezing."
+      },
+      {
+        "name": "Freeze",
+        "description": "If the elemental takes cold damage, its speed is reduced by 20 feet until the end of its next turn."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The elemental makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "13 (2d8 + 4) bludgeoning damage."
+      },
+      {
+        "name": "Whelm (Recharge 4-6)",
+        "description": "Each creature in the elemental's space must make a DC 15 Strength saving throw. On a failure, a target takes 13 (2d8 + 4) bludgeoning damage, is grappled (escape DC 14), and is pulled into the elemental's space and begins to suffocate; on a success, a target is pushed out."
+      }
+    ]
+  },
+  {
+    "id": "cm-aerisi-kalinoth",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Aerisi Kalinoth",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 7,
+    "ac": 15,
+    "hp": 66,
+    "maxHp": 66,
+    "abilityScores": {
+      "strength": 9,
+      "dexterity": 18,
+      "constitution": 12,
+      "intelligence": 14,
+      "wisdom": 12,
+      "charisma": 17
+    },
+    "savingThrows": {
+      "dexterity": 7,
+      "charisma": 6
+    },
+    "skills": {
+      "Arcana": 5,
+      "Perception": 4
+    },
+    "senses": {
+      "passive Perception": "14"
+    },
+    "languages": [
+      "Auran",
+      "Common",
+      "Elvish"
+    ],
+    "description": "The delusional elf prophet of the Cult of the Howling Hate, wielder of the spear Windvane.",
+    "traits": [
+      {
+        "name": "Spellcasting",
+        "description": "Aerisi casts spells as a 9th-level sorcerer (save DC 14): chain lightning (1/day), fly, gust of wind, lightning bolt, misty step, shocking grasp, thunderwave."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Windvane (Spear)",
+        "description": "Melee or Ranged Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "7 (1d8 + 3) piercing damage plus 7 (2d6) lightning damage."
+      },
+      {
+        "name": "Invoke the Howling Hate (Recharge 6)",
+        "description": "Aerisi calls a 20-foot-radius screaming wind at a point within 120 feet. Each creature there must make a DC 14 Constitution saving throw, taking 21 (6d6) thunder damage and being deafened for 1 minute on a failed save, or half damage on a success."
+      }
+    ]
+  },
+  {
+    "id": "cm-gar-shatterkeel",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Gar Shatterkeel",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft., swim 30 ft.",
+    "challengeRating": 8,
+    "ac": 16,
+    "acNote": "breastplate",
+    "hp": 97,
+    "maxHp": 97,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 13,
+      "constitution": 16,
+      "intelligence": 11,
+      "wisdom": 16,
+      "charisma": 13
+    },
+    "savingThrows": {
+      "constitution": 6,
+      "wisdom": 6
+    },
+    "skills": {
+      "Nature": 3,
+      "Perception": 6
+    },
+    "damageResistances": [
+      "cold"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "16"
+    },
+    "languages": [
+      "Aquan",
+      "Common"
+    ],
+    "description": "The one-handed prophet of the Cult of the Crushing Wave, his missing hand replaced by a crab claw, bonded to the water weird Drown.",
+    "traits": [
+      {
+        "name": "Amphibious",
+        "description": "Gar can breathe air and water."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "Gar casts spells as a 9th-level druid (save DC 14): control water, ice storm, tidal wave, water walk, wall of water."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Gar makes two attacks: one with Pincer Staff and one with Crab Claw."
+      },
+      {
+        "name": "Pincer Staff",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "9 (1d10 + 4) bludgeoning damage, and a Large or smaller target is grappled (escape DC 14)."
+      },
+      {
+        "name": "Crab Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "11 (2d6 + 4) bludgeoning damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-marlos-urnrayle",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Marlos Urnrayle",
+    "size": "medium",
+    "type": "monstrosity",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 7,
+    "ac": 16,
+    "acNote": "natural armor, shield",
+    "hp": 90,
+    "maxHp": 90,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 12,
+      "constitution": 16,
+      "intelligence": 12,
+      "wisdom": 13,
+      "charisma": 16
+    },
+    "savingThrows": {
+      "wisdom": 4
+    },
+    "skills": {
+      "Deception": 6,
+      "Stealth": 4
+    },
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Common",
+      "Terran"
+    ],
+    "description": "A cruel male medusa, prophet of the Cult of the Black Earth, wielder of the maul Ironfang.",
+    "traits": [
+      {
+        "name": "Petrifying Gaze",
+        "description": "When a creature that can see Marlos's eyes starts its turn within 30 feet, Marlos can force it to make a DC 14 Constitution saving throw if he isn't incapacitated and can see the creature. On a failure the creature is restrained as it begins to turn to stone, then petrified on a failed save at the end of its next turn."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Marlos makes two Ironfang (Maul) attacks."
+      },
+      {
+        "name": "Ironfang (Maul)",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "11 (2d6 + 4) bludgeoning damage plus 7 (2d6) poison damage."
+      },
+      {
+        "name": "Snake Hair",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "5 (1d4 + 3) piercing damage plus 10 (3d6) poison damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-vanifer",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Vanifer",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 7,
+    "ac": 13,
+    "hp": 67,
+    "maxHp": 67,
+    "abilityScores": {
+      "strength": 9,
+      "dexterity": 17,
+      "constitution": 12,
+      "intelligence": 14,
+      "wisdom": 11,
+      "charisma": 18
+    },
+    "savingThrows": {
+      "charisma": 7
+    },
+    "skills": {
+      "Deception": 7,
+      "Persuasion": 7
+    },
+    "damageResistances": [
+      "fire"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Common",
+      "Ignan",
+      "Infernal"
+    ],
+    "description": "The tiefling prophet of the Cult of the Eternal Flame, wielder of the dagger Tinderstrike.",
+    "traits": [
+      {
+        "name": "Spellcasting",
+        "description": "Vanifer casts spells as a 9th-level warlock (save DC 15): burning hands, fireball, hellish rebuke, immolation (1/day), scorching ray, wall of fire."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Vanifer makes two attacks with Tinderstrike."
+      },
+      {
+        "name": "Tinderstrike (Dagger)",
+        "description": "Melee or Ranged Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "5 (1d4 + 3) piercing damage plus 10 (3d6) fire damage."
+      },
+      {
+        "name": "Fire Ray",
+        "description": "Ranged Spell Attack",
+        "attackBonus": 7,
+        "damageDescription": "18 (4d8) fire damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-black-earth-cultist",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Black Earth Cultist",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 2,
+    "ac": 15,
+    "acNote": "stone-plated robes",
+    "hp": 32,
+    "maxHp": 32,
+    "abilityScores": {
+      "strength": 14,
+      "dexterity": 11,
+      "constitution": 14,
+      "intelligence": 10,
+      "wisdom": 13,
+      "charisma": 11
+    },
+    "skills": {
+      "Religion": 2
+    },
+    "damageResistances": [
+      "bludgeoning"
+    ],
+    "senses": {
+      "darkvision": "30 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Common",
+      "Terran"
+    ],
+    "description": "A cultist of the Black Earth in heavy stone-scale vestments.",
+    "traits": [
+      {
+        "name": "Stone Skin",
+        "description": "While not incapacitated, the cultist has resistance to nonmagical bludgeoning damage."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The cultist makes two Warhammer attacks."
+      },
+      {
+        "name": "Warhammer",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "7 (1d10 + 2) bludgeoning damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-earth-elemental-myrmidon",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Earth Elemental Myrmidon",
+    "size": "medium",
+    "type": "elemental",
+    "alignment": "Neutral",
+    "speed": "30 ft., burrow 20 ft.",
+    "challengeRating": 7,
+    "ac": 18,
+    "acNote": "plate armor",
+    "hp": 127,
+    "maxHp": 127,
+    "abilityScores": {
+      "strength": 18,
+      "dexterity": 10,
+      "constitution": 18,
+      "intelligence": 10,
+      "wisdom": 12,
+      "charisma": 10
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "poison"
+    ],
+    "damageVulnerabilities": [
+      "thunder"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "paralyzed",
+      "petrified",
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "tremorsense": "60 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Terran"
+    ],
+    "description": "An elite elemental soldier of the Black Earth, armored and disciplined.",
+    "traits": [
+      {
+        "name": "Elemental Weapons",
+        "description": "The myrmidon's weapon attacks are magical. On a hit, the weapon deals an extra 2d6 bludgeoning damage (included below)."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The myrmidon makes three Maul attacks."
+      },
+      {
+        "name": "Maul",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "11 (2d6 + 4) bludgeoning damage plus 7 (2d6) bludgeoning damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-vapor-elemental",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Vapor Elemental",
+    "size": "medium",
+    "type": "elemental",
+    "alignment": "Neutral",
+    "speed": "0 ft., fly 60 ft. (hover)",
+    "challengeRating": 5,
+    "ac": 14,
+    "hp": 76,
+    "maxHp": 76,
+    "abilityScores": {
+      "strength": 12,
+      "dexterity": 18,
+      "constitution": 14,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 6
+    },
+    "damageResistances": [
+      "lightning",
+      "thunder",
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "poison"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "grappled",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "prone",
+      "restrained",
+      "unconscious"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Auran"
+    ],
+    "description": "A pale mist-elemental unique to the Howling Hate, choking and blinding those it engulfs.",
+    "traits": [
+      {
+        "name": "Vapor Form",
+        "description": "The elemental can occupy another creature's space. A creature that starts its turn in the elemental's space must succeed on a DC 13 Constitution saving throw or be blinded until the start of its next turn."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The elemental makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "10 (2d6 + 3) bludgeoning damage plus 4 (1d8) lightning damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-elder-elemental-eye",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Princes of the Apocalypse",
+    "name": "Elder Elemental Eye",
+    "size": "gargantuan",
+    "type": "aberration",
+    "alignment": "Chaotic Evil",
+    "speed": "40 ft., fly 40 ft. (hover)",
+    "challengeRating": 21,
+    "ac": 20,
+    "acNote": "natural armor",
+    "hp": 350,
+    "maxHp": 350,
+    "abilityScores": {
+      "strength": 26,
+      "dexterity": 16,
+      "constitution": 26,
+      "intelligence": 22,
+      "wisdom": 20,
+      "charisma": 24
+    },
+    "savingThrows": {
+      "strength": 15,
+      "dexterity": 10,
+      "constitution": 15,
+      "wisdom": 12
+    },
+    "skills": {
+      "Perception": 12
+    },
+    "damageImmunities": [
+      "acid",
+      "cold",
+      "fire",
+      "lightning",
+      "poison",
+      "thunder"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "prone"
+    ],
+    "senses": {
+      "truesight": "120 ft.",
+      "passive Perception": "21"
+    },
+    "languages": [
+      "Deep Speech",
+      "Primordial",
+      "telepathy 120 ft."
+    ],
+    "description": "The maddening god-shard behind all four elemental cults: a mountain of black flesh, ringed by burning, freezing, howling, grinding eyes.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If the Eye fails a saving throw, it can choose to succeed instead."
+      },
+      {
+        "name": "Elemental Chaos",
+        "description": "At the start of each of the Eye's turns, roll a d4 to determine its active element (1 fire, 2 earth, 3 water, 4 air). Its Elemental Blast and aura deal that damage type this turn."
+      },
+      {
+        "name": "Warping Aura",
+        "description": "A creature that starts its turn within 20 feet of the Eye takes 16 (3d10) damage of the Eye's active element."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The Eye makes two Tendril attacks and uses Elemental Blast."
+      },
+      {
+        "name": "Tendril",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 15,
+        "damageDescription": "22 (3d10 + 8) bludgeoning damage, and the target is grappled (escape DC 23)."
+      },
+      {
+        "name": "Elemental Blast",
+        "description": "Ranged Spell Attack",
+        "attackBonus": 13,
+        "damageDescription": "45 (10d8) damage of the Eye's active element."
+      },
+      {
+        "name": "Cataclysm (Recharge 5-6)",
+        "description": "Every creature within 60 feet must make a DC 23 Constitution saving throw, taking 55 (10d10) damage of the Eye's active element on a failed save, or half as much on a success."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Tendril",
+        "description": "The Eye makes one Tendril attack."
+      },
+      {
+        "name": "Shift Element",
+        "description": "The Eye changes its active element to one of its choice."
+      },
+      {
+        "name": "Elemental Blast (Costs 2 Actions)",
+        "description": "The Eye uses Elemental Blast.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-ileosa-arabasti",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Queen Ileosa Arabasti",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 15,
+    "ac": 19,
+    "acNote": "crimson full plate",
+    "hp": 217,
+    "maxHp": 217,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 20,
+      "constitution": 18,
+      "intelligence": 16,
+      "wisdom": 14,
+      "charisma": 24
+    },
+    "savingThrows": {
+      "dexterity": 11,
+      "constitution": 10,
+      "charisma": 13
+    },
+    "skills": {
+      "Deception": 13,
+      "Intimidation": 13,
+      "Perception": 8
+    },
+    "damageResistances": [
+      "necrotic"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "frightened"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "17"
+    },
+    "languages": [
+      "Common",
+      "Draconic",
+      "Infernal"
+    ],
+    "description": "The widowed queen of Korvosa, wearing the Crown of Fangs and animated by the dragon-spirit Kazavon.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If Ileosa fails a saving throw, she can choose to succeed instead."
+      },
+      {
+        "name": "Crown of Fangs",
+        "description": "While she wears the crown, Ileosa regains 15 hit points at the start of her turn if she has at least 1 hit point, and any creature that hits her with a melee attack takes 7 (2d6) necrotic damage."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "Ileosa casts spells as a 12th-level caster (save DC 18): blight, dominate person, fear, hold monster, vampiric touch."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Ileosa makes three Serithtial (Longsword) attacks."
+      },
+      {
+        "name": "Serithtial (Longsword)",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 11,
+        "damageDescription": "12 (1d8 + 8) slashing damage plus 10 (3d6) necrotic damage."
+      },
+      {
+        "name": "Kazavon's Wail (Recharge 5-6)",
+        "description": "Ileosa unleashes the dragon-spirit's scream in a 30-foot cone. Each creature there must make a DC 18 Constitution saving throw, taking 42 (12d6) cold damage and being frightened for 1 minute on a failed save, or half damage on a success."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Attack",
+        "description": "Ileosa makes one Serithtial attack."
+      },
+      {
+        "name": "Command",
+        "description": "Ileosa targets one creature charmed by or frightened of her within 60 feet; it must use its reaction to move up to its speed as she directs."
+      },
+      {
+        "name": "Draining Word (Costs 2 Actions)",
+        "description": "One creature within 60 feet must succeed on a DC 18 Constitution saving throw or take 18 (4d8) necrotic damage, and Ileosa regains that many hit points.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-kazavon",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Kazavon, the Dragon Tyrant",
+    "size": "gargantuan",
+    "type": "dragon",
+    "alignment": "Lawful Evil",
+    "speed": "40 ft., fly 80 ft.",
+    "challengeRating": 18,
+    "ac": 21,
+    "acNote": "natural armor",
+    "hp": 296,
+    "maxHp": 296,
+    "abilityScores": {
+      "strength": 28,
+      "dexterity": 12,
+      "constitution": 25,
+      "intelligence": 18,
+      "wisdom": 15,
+      "charisma": 22
+    },
+    "savingThrows": {
+      "dexterity": 8,
+      "constitution": 14,
+      "wisdom": 9,
+      "charisma": 13
+    },
+    "skills": {
+      "Perception": 16,
+      "Stealth": 8
+    },
+    "damageImmunities": [
+      "cold"
+    ],
+    "conditionImmunities": [
+      "frightened"
+    ],
+    "senses": {
+      "blindsight": "60 ft.",
+      "truesight": "120 ft.",
+      "passive Perception": "18"
+    },
+    "languages": [
+      "Common",
+      "Draconic",
+      "Infernal"
+    ],
+    "description": "An ancient blue-white dragon of Zon-Kuthon, slain centuries ago but persisting as a curse bound into six relics — the true evil behind the Crimson Throne.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If Kazavon fails a saving throw, he can choose to succeed instead."
+      },
+      {
+        "name": "Frightful Presence Aura",
+        "description": "Each creature that starts its turn within 30 feet and can see Kazavon must succeed on a DC 19 Wisdom saving throw or be frightened for 1 minute."
+      },
+      {
+        "name": "Relic Rejuvenation",
+        "description": "If Kazavon's body is destroyed while any of his six relics remains intact, he reforms in 1d10 days near the nearest relic."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Kazavon makes one Bite attack and two Claw attacks."
+      },
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 16,
+        "damageDescription": "19 (2d10 + 8) piercing damage plus 9 (2d8) cold damage."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 16,
+        "damageDescription": "15 (2d6 + 8) slashing damage."
+      },
+      {
+        "name": "Frost Lightning Breath (Recharge 5-6)",
+        "description": "Kazavon exhales a 90-foot line of freezing lightning. Each creature there must make a DC 22 Dexterity saving throw, taking 33 (6d10) cold damage and 33 (6d10) lightning damage on a failed save, or half as much on a success."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Detect",
+        "description": "Kazavon makes a Wisdom (Perception) check."
+      },
+      {
+        "name": "Claw",
+        "description": "Kazavon makes one Claw attack."
+      },
+      {
+        "name": "Wing Attack (Costs 2 Actions)",
+        "description": "Each creature within 15 feet must succeed on a DC 24 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. Kazavon then flies up to half his speed.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-carrion-golem",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Carrion Golem",
+    "size": "medium",
+    "type": "construct",
+    "alignment": "Unaligned",
+    "speed": "30 ft.",
+    "challengeRating": 9,
+    "ac": 12,
+    "acNote": "natural armor",
+    "hp": 133,
+    "maxHp": 133,
+    "abilityScores": {
+      "strength": 20,
+      "dexterity": 9,
+      "constitution": 18,
+      "intelligence": 3,
+      "wisdom": 8,
+      "charisma": 1
+    },
+    "damageImmunities": [
+      "poison",
+      "necrotic",
+      "psychic"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "paralyzed",
+      "petrified",
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "9"
+    },
+    "languages": [
+      "understands its creator's commands but can't speak"
+    ],
+    "description": "A golem stitched from the corpses of plague victims, reeking of the grave.",
+    "traits": [
+      {
+        "name": "Disease Cloud",
+        "description": "A creature that starts its turn within 5 feet of the golem must succeed on a DC 15 Constitution saving throw or be poisoned until the start of its next turn."
+      },
+      {
+        "name": "Immutable Form",
+        "description": "The golem is immune to any spell or effect that would alter its form."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The golem makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 8,
+        "damageDescription": "17 (3d8 + 4) bludgeoning damage plus 7 (2d6) necrotic damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-soulbound-doll",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Soulbound Doll",
+    "size": "tiny",
+    "type": "construct",
+    "alignment": "Neutral",
+    "speed": "20 ft., climb 20 ft.",
+    "challengeRating": 1,
+    "ac": 14,
+    "acNote": "natural armor",
+    "hp": 18,
+    "maxHp": 18,
+    "abilityScores": {
+      "strength": 4,
+      "dexterity": 17,
+      "constitution": 12,
+      "intelligence": 10,
+      "wisdom": 13,
+      "charisma": 12
+    },
+    "damageImmunities": [
+      "poison"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "paralyzed",
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Common"
+    ],
+    "description": "A porcelain doll housing a fragment of a departed soul, its intent unknowable.",
+    "traits": [
+      {
+        "name": "False Appearance",
+        "description": "While motionless, the doll is indistinguishable from an ordinary doll."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Pin",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "6 (1d4 + 3) piercing damage plus 3 (1d6) psychic damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-devilfish",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Devilfish",
+    "size": "large",
+    "type": "aberration",
+    "alignment": "Chaotic Evil",
+    "speed": "10 ft., swim 60 ft.",
+    "challengeRating": 2,
+    "ac": 13,
+    "hp": 45,
+    "maxHp": 45,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 15,
+      "constitution": 14,
+      "intelligence": 6,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "skills": {
+      "Stealth": 4
+    },
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [],
+    "description": "A malevolent squid-thing that drags sailors beneath the docks of Korvosa.",
+    "traits": [
+      {
+        "name": "Ink Cloud (Recharge 6)",
+        "description": "A 20-foot-radius cloud of ink extends underwater. The area is heavily obscured for 1 minute. The devilfish can then use the Dash action as a bonus action."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The devilfish makes one Bite attack and two Tentacle attacks."
+      },
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "9 (2d6 + 2) piercing damage."
+      },
+      {
+        "name": "Tentacle",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "6 (1d6 + 2) bludgeoning damage, and the target is grappled (escape DC 13)."
+      }
+    ]
+  },
+  {
+    "id": "cm-raktavarna",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Raktavarna",
+    "size": "tiny",
+    "type": "fiend",
+    "alignment": "Lawful Evil",
+    "speed": "20 ft., climb 20 ft.",
+    "challengeRating": 3,
+    "ac": 14,
+    "hp": 27,
+    "maxHp": 27,
+    "abilityScores": {
+      "strength": 7,
+      "dexterity": 18,
+      "constitution": 12,
+      "intelligence": 12,
+      "wisdom": 12,
+      "charisma": 10
+    },
+    "skills": {
+      "Deception": 4,
+      "Stealth": 6
+    },
+    "damageResistances": [
+      "cold",
+      "fire",
+      "lightning"
+    ],
+    "damageImmunities": [
+      "poison"
+    ],
+    "conditionImmunities": [
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Infernal",
+      "telepathy 120 ft."
+    ],
+    "description": "A tiny serpentine devil that binds itself into a weapon or ring to spy for its master.",
+    "traits": [
+      {
+        "name": "Weapon Bond",
+        "description": "The raktavarna can transform into a nonmagical weapon or piece of jewelry and back as an action, retaining its statistics."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "6 (1d4 + 4) piercing damage plus 7 (2d6) poison damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-dream-spider",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Dream Spider",
+    "size": "small",
+    "type": "beast",
+    "alignment": "Unaligned",
+    "speed": "30 ft., climb 30 ft.",
+    "challengeRating": 3,
+    "ac": 14,
+    "hp": 39,
+    "maxHp": 39,
+    "abilityScores": {
+      "strength": 12,
+      "dexterity": 16,
+      "constitution": 13,
+      "intelligence": 3,
+      "wisdom": 11,
+      "charisma": 4
+    },
+    "skills": {
+      "Perception": 2,
+      "Stealth": 6
+    },
+    "senses": {
+      "blindsight": "10 ft.",
+      "darkvision": "60 ft.",
+      "passive Perception": "12"
+    },
+    "languages": [],
+    "description": "A vividly patterned spider whose venom induces hallucinations, cultivated in Old Korvosa's shiver dens.",
+    "traits": [
+      {
+        "name": "Spider Climb",
+        "description": "The spider can climb difficult surfaces, including upside down, without an ability check."
+      },
+      {
+        "name": "Web Sense",
+        "description": "While in contact with a web, the spider knows the location of any other creature in contact with the same web."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "6 (1d6 + 3) piercing damage, and the target must make a DC 13 Constitution saving throw or take 10 (3d6) psychic damage and be incapacitated by vivid hallucinations until the end of its next turn."
+      }
+    ]
+  },
+  {
+    "id": "cm-reefclaw",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Reefclaw",
+    "size": "medium",
+    "type": "aberration",
+    "alignment": "Neutral Evil",
+    "speed": "5 ft., swim 40 ft.",
+    "challengeRating": 4,
+    "ac": 15,
+    "acNote": "natural armor",
+    "hp": 52,
+    "maxHp": 52,
+    "abilityScores": {
+      "strength": 15,
+      "dexterity": 17,
+      "constitution": 15,
+      "intelligence": 3,
+      "wisdom": 12,
+      "charisma": 6
+    },
+    "skills": {
+      "Stealth": 5
+    },
+    "damageResistances": [
+      "cold"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [],
+    "description": "A vicious lobster-tailed predator that thrashes even in death throes.",
+    "traits": [
+      {
+        "name": "Death Frenzy",
+        "description": "When the reefclaw drops to 0 hit points, it doesn't die until the end of its next turn, during which it can still take a turn."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The reefclaw makes two Claw attacks."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "8 (1d10 + 3) bludgeoning damage, and the target is grappled (escape DC 13). The reefclaw can constrict a grappled target for 8 (1d10 + 3) bludgeoning damage plus 3 (1d6) poison damage at the start of its turn."
+      }
+    ]
+  },
+  {
+    "id": "cm-skeleton-knight-scarwall",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Skeleton Knight of Scarwall",
+    "size": "medium",
+    "type": "undead",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 5,
+    "ac": 18,
+    "acNote": "plate armor",
+    "hp": 78,
+    "maxHp": 78,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 12,
+      "constitution": 16,
+      "intelligence": 8,
+      "wisdom": 10,
+      "charisma": 8
+    },
+    "damageResistances": [
+      "necrotic"
+    ],
+    "damageImmunities": [
+      "poison"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "frightened",
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "understands Common but can't speak"
+    ],
+    "description": "An armored dead knight bound to the walls of Castle Scarwall by Kazavon's curse.",
+    "traits": [
+      {
+        "name": "Undying Duty",
+        "description": "While within Castle Scarwall, the knight has advantage on death saving throws against being turned and reassembles in 1 hour if destroyed."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The knight makes two Greatsword attacks."
+      },
+      {
+        "name": "Greatsword",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "10 (2d6 + 3) slashing damage plus 7 (2d6) necrotic damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-danse-macabre",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Danse Macabre",
+    "size": "large",
+    "type": "undead",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft., fly 30 ft. (hover)",
+    "challengeRating": 11,
+    "ac": 15,
+    "hp": 149,
+    "maxHp": 149,
+    "abilityScores": {
+      "strength": 10,
+      "dexterity": 18,
+      "constitution": 16,
+      "intelligence": 14,
+      "wisdom": 15,
+      "charisma": 18
+    },
+    "savingThrows": {
+      "dexterity": 8,
+      "wisdom": 6,
+      "charisma": 8
+    },
+    "damageResistances": [
+      "cold",
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "necrotic",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "grappled",
+      "paralyzed",
+      "poisoned",
+      "prone",
+      "restrained"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "12"
+    },
+    "languages": [
+      "Common"
+    ],
+    "description": "A whirling chorus of ghostly dancers, animating the bones of Scarwall in a grim waltz.",
+    "traits": [
+      {
+        "name": "Incorporeal Movement",
+        "description": "The danse macabre can move through creatures and objects as difficult terrain, taking 5 (1d10) force damage if it ends its turn inside an object."
+      },
+      {
+        "name": "Compelling Waltz",
+        "description": "A creature that starts its turn within 20 feet must succeed on a DC 16 Wisdom saving throw or be forced to use its movement to dance toward the danse macabre."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The danse macabre makes three Grave Touch attacks."
+      },
+      {
+        "name": "Grave Touch",
+        "description": "Melee Spell Attack",
+        "attackBonus": 8,
+        "damageDescription": "14 (3d6 + 4) necrotic damage, and the target can't regain hit points until the start of its next turn."
+      },
+      {
+        "name": "Final Waltz (Recharge 6)",
+        "description": "Each creature within 30 feet must make a DC 16 Constitution saving throw, taking 27 (6d8) necrotic damage on a failed save, or half as much on a success. The danse macabre regains hit points equal to half the total damage dealt."
+      }
+    ]
+  },
+  {
+    "id": "cm-chained-spirit",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Chained Spirit",
+    "size": "medium",
+    "type": "undead",
+    "alignment": "Chaotic Evil",
+    "speed": "0 ft., fly 40 ft. (hover)",
+    "challengeRating": 6,
+    "ac": 13,
+    "hp": 82,
+    "maxHp": 82,
+    "abilityScores": {
+      "strength": 7,
+      "dexterity": 16,
+      "constitution": 14,
+      "intelligence": 10,
+      "wisdom": 12,
+      "charisma": 15
+    },
+    "damageResistances": [
+      "acid",
+      "fire",
+      "lightning",
+      "thunder",
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "cold",
+      "necrotic",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "grappled",
+      "paralyzed",
+      "petrified",
+      "poisoned",
+      "prone",
+      "restrained"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Common"
+    ],
+    "description": "A soul shackled to Castle Scarwall in unbreakable spectral chains, lashing out at the living.",
+    "traits": [
+      {
+        "name": "Incorporeal Movement",
+        "description": "The spirit can move through creatures and objects as difficult terrain, taking 5 (1d10) force damage if it ends its turn inside an object."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The spirit makes two Chain Lash attacks."
+      },
+      {
+        "name": "Chain Lash",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "13 (3d6 + 3) necrotic damage, and the target must succeed on a DC 14 Strength saving throw or be restrained by ghostly chains until the end of its next turn."
+      }
+    ]
+  },
+  {
+    "id": "cm-umbral-dragon",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Umbral Dragon",
+    "size": "huge",
+    "type": "dragon",
+    "alignment": "Chaotic Evil",
+    "speed": "40 ft., fly 80 ft.",
+    "challengeRating": 14,
+    "ac": 19,
+    "acNote": "natural armor",
+    "hp": 218,
+    "maxHp": 218,
+    "abilityScores": {
+      "strength": 24,
+      "dexterity": 14,
+      "constitution": 22,
+      "intelligence": 16,
+      "wisdom": 15,
+      "charisma": 19
+    },
+    "savingThrows": {
+      "dexterity": 7,
+      "constitution": 11,
+      "wisdom": 7,
+      "charisma": 9
+    },
+    "skills": {
+      "Perception": 13,
+      "Stealth": 7
+    },
+    "damageImmunities": [
+      "cold",
+      "necrotic",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "poisoned"
+    ],
+    "senses": {
+      "blindsight": "60 ft.",
+      "darkvision": "120 ft.",
+      "passive Perception": "17"
+    },
+    "languages": [
+      "Common",
+      "Draconic",
+      "Void Speech"
+    ],
+    "description": "A gaunt, shadow-winged dragon that haunts the deep vaults beneath Scarwall.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If the dragon fails a saving throw, it can choose to succeed instead."
+      },
+      {
+        "name": "Shadow Stealth",
+        "description": "While in dim light or darkness, the dragon can take the Hide action as a bonus action."
+      },
+      {
+        "name": "Light Sensitivity",
+        "description": "While in bright light, the dragon has disadvantage on attack rolls and Perception checks relying on sight."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The dragon makes one Bite attack and two Claw attacks."
+      },
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 12,
+        "damageDescription": "18 (2d10 + 7) piercing damage plus 9 (2d8) necrotic damage."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 12,
+        "damageDescription": "14 (2d6 + 7) slashing damage."
+      },
+      {
+        "name": "Shadow Breath (Recharge 5-6)",
+        "description": "The dragon exhales a 60-foot cone of freezing shadow. Each creature there must make a DC 19 Constitution saving throw, taking 27 (6d8) cold damage and 27 (6d8) necrotic damage on a failed save, or half as much on a success. A creature that fails also has its hit point maximum reduced by the necrotic damage taken."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Detect",
+        "description": "The dragon makes a Wisdom (Perception) check."
+      },
+      {
+        "name": "Tail",
+        "description": "The dragon makes a Tail attack: +12 to hit, 16 (2d8 + 7) bludgeoning damage."
+      },
+      {
+        "name": "Shadow Pounce (Costs 2 Actions)",
+        "description": "The dragon moves up to its fly speed through dim light or darkness and makes one Claw attack.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-prince-in-chains",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "The Prince in Chains",
+    "size": "medium",
+    "type": "undead",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 12,
+    "ac": 20,
+    "acNote": "blackened plate",
+    "hp": 168,
+    "maxHp": 168,
+    "abilityScores": {
+      "strength": 20,
+      "dexterity": 12,
+      "constitution": 18,
+      "intelligence": 14,
+      "wisdom": 16,
+      "charisma": 18
+    },
+    "savingThrows": {
+      "constitution": 9,
+      "wisdom": 8,
+      "charisma": 9
+    },
+    "skills": {
+      "Intimidation": 9,
+      "Religion": 7
+    },
+    "damageResistances": [
+      "necrotic"
+    ],
+    "damageImmunities": [
+      "poison"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "13"
+    },
+    "languages": [
+      "Common",
+      "Infernal"
+    ],
+    "description": "A fallen paladin of Scarwall who broke his oath to Kazavon and was cursed to guard the castle forever, wrapped in the chains he once wore as penance.",
+    "traits": [
+      {
+        "name": "Aura of Despair",
+        "description": "Enemies within 10 feet have disadvantage on saving throws against being frightened."
+      },
+      {
+        "name": "Oathbreaker's Vigor",
+        "description": "The first time each turn the Prince reduces a creature to 0 hit points, he regains 15 hit points."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The Prince makes two Cursed Greatsword attacks and one Chain attack."
+      },
+      {
+        "name": "Cursed Greatsword",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 10,
+        "damageDescription": "13 (2d6 + 6) slashing damage plus 10 (3d6) necrotic damage."
+      },
+      {
+        "name": "Chain",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 10,
+        "damageDescription": "11 (2d6 + 4) bludgeoning damage, and the target is grappled (escape DC 17)."
+      }
+    ]
+  },
+  {
+    "id": "cm-greater-doppelganger",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Greater Doppelganger",
+    "size": "medium",
+    "type": "monstrosity",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 6,
+    "ac": 15,
+    "hp": 91,
+    "maxHp": 91,
+    "abilityScores": {
+      "strength": 13,
+      "dexterity": 18,
+      "constitution": 15,
+      "intelligence": 14,
+      "wisdom": 12,
+      "charisma": 16
+    },
+    "skills": {
+      "Deception": 8,
+      "Insight": 4
+    },
+    "conditionImmunities": [
+      "charmed"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Common",
+      "thieves' cant"
+    ],
+    "description": "A doppelganger of unusual power that has consumed and mastered dozens of identities.",
+    "traits": [
+      {
+        "name": "Shapechanger",
+        "description": "The doppelganger can use its action to polymorph into a Small or Medium humanoid it has seen, or back to its true form. Its statistics are the same in each form."
+      },
+      {
+        "name": "Ambusher",
+        "description": "In the first round of combat, the doppelganger has advantage on attack rolls against any surprised creature."
+      },
+      {
+        "name": "Perfect Mimicry",
+        "description": "The doppelganger can flawlessly mimic the voice and mannerisms of a creature it has studied; other creatures have disadvantage on checks to detect the ruse."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The doppelganger makes three Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "11 (2d6 + 4) bludgeoning damage."
+      },
+      {
+        "name": "Read Thoughts",
+        "description": "The doppelganger magically reads the surface thoughts of one creature within 60 feet (no save) and has advantage on Wisdom (Insight) and Charisma checks against it for 1 minute."
+      }
+    ]
+  },
+  {
+    "id": "cm-red-mantis-assassin",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Curse of the Crimson Throne",
+    "name": "Red Mantis Assassin",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 8,
+    "ac": 16,
+    "acNote": "studded leather",
+    "hp": 97,
+    "maxHp": 97,
+    "abilityScores": {
+      "strength": 12,
+      "dexterity": 18,
+      "constitution": 14,
+      "intelligence": 13,
+      "wisdom": 14,
+      "charisma": 11
+    },
+    "savingThrows": {
+      "dexterity": 7,
+      "intelligence": 5
+    },
+    "skills": {
+      "Acrobatics": 7,
+      "Perception": 5,
+      "Stealth": 10
+    },
+    "senses": {
+      "passive Perception": "15"
+    },
+    "languages": [
+      "Common",
+      "thieves' cant"
+    ],
+    "description": "A sawtooth-blade killer of the Red Mantis order, sworn to see a contract through to death.",
+    "traits": [
+      {
+        "name": "Assassinate",
+        "description": "During the first round of combat, the assassin has advantage on attack rolls against creatures that haven't acted. Any hit against a surprised creature is a critical hit."
+      },
+      {
+        "name": "Sneak Attack (1/Turn)",
+        "description": "The assassin deals an extra 14 (4d6) damage when it hits with a weapon attack and has advantage, or when the target is within 5 feet of an ally of the assassin."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The assassin makes two Sawtooth Sabre attacks."
+      },
+      {
+        "name": "Sawtooth Sabre",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "8 (1d8 + 4) slashing damage plus 7 (2d6) poison damage."
+      },
+      {
+        "name": "Light Crossbow",
+        "description": "Ranged Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "7 (1d8 + 3) piercing damage plus 7 (2d6) poison damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-barbaroscia-thrune",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Barbaroscia Thrune",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 12,
+    "ac": 18,
+    "acNote": "infernal half-plate",
+    "hp": 161,
+    "maxHp": 161,
+    "abilityScores": {
+      "strength": 14,
+      "dexterity": 16,
+      "constitution": 16,
+      "intelligence": 18,
+      "wisdom": 17,
+      "charisma": 20
+    },
+    "savingThrows": {
+      "intelligence": 8,
+      "wisdom": 7,
+      "charisma": 9
+    },
+    "skills": {
+      "Deception": 9,
+      "Intimidation": 9,
+      "Religion": 8
+    },
+    "damageResistances": [
+      "fire"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "frightened"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "13"
+    },
+    "languages": [
+      "Common",
+      "Infernal"
+    ],
+    "description": "The tyrant-inquisitor of House Thrune sent to break Kintargo, wearing the paracountess's seal and Asmodeus's favor.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (2/Day)",
+        "description": "If Barbaroscia fails a saving throw, she can choose to succeed instead."
+      },
+      {
+        "name": "Infernal Writ",
+        "description": "When Barbaroscia speaks a creature's true name (she knows the names of every named NPC in Kintargo), that creature has disadvantage on saving throws against her spells until the end of her next turn."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "Barbaroscia casts spells as a 12th-level cleric (save DC 17): bestow curse, dominate person, flame strike, hold person, spirit guardians, wall of fire."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Barbaroscia makes two Scourge attacks."
+      },
+      {
+        "name": "Infernal Scourge",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 8,
+        "damageDescription": "10 (2d6 + 3) slashing damage plus 10 (3d6) fire damage."
+      },
+      {
+        "name": "Word of Chains (Recharge 5-6)",
+        "description": "Barbaroscia points at a creature within 60 feet; it must succeed on a DC 17 Wisdom saving throw or be restrained by infernal chains and take 22 (5d8) fire damage. It repeats the save at the end of each of its turns, taking 11 (2d10) fire damage on each failure."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Scourge",
+        "description": "Barbaroscia makes one Infernal Scourge attack."
+      },
+      {
+        "name": "Condemn",
+        "description": "One creature within 60 feet must succeed on a DC 17 Charisma saving throw or be marked; the next attack against it before the start of Barbaroscia's next turn has advantage."
+      },
+      {
+        "name": "Hellfire Nova (Costs 2 Actions)",
+        "description": "Each creature within 15 feet of Barbaroscia must make a DC 17 Dexterity saving throw, taking 18 (4d8) fire damage on a failed save, or half as much on a success.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-barbaroscia-archdevil",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Barbaroscia Thrune, Ascended",
+    "size": "large",
+    "type": "fiend",
+    "alignment": "Lawful Evil",
+    "speed": "40 ft., fly 60 ft.",
+    "challengeRating": 17,
+    "ac": 20,
+    "acNote": "natural armor",
+    "hp": 279,
+    "maxHp": 279,
+    "abilityScores": {
+      "strength": 22,
+      "dexterity": 18,
+      "constitution": 22,
+      "intelligence": 20,
+      "wisdom": 18,
+      "charisma": 24
+    },
+    "savingThrows": {
+      "dexterity": 10,
+      "constitution": 12,
+      "wisdom": 10,
+      "charisma": 13
+    },
+    "skills": {
+      "Deception": 13,
+      "Intimidation": 13,
+      "Perception": 10
+    },
+    "damageResistances": [
+      "cold",
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "fire",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "poisoned"
+    ],
+    "senses": {
+      "truesight": "120 ft.",
+      "passive Perception": "20"
+    },
+    "languages": [
+      "Common",
+      "Infernal",
+      "telepathy 120 ft."
+    ],
+    "description": "Barbaroscia remade by Asmodeus into a horned archdevil, wreathed in the burning chains of Kintargo's despair.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If Barbaroscia fails a saving throw, she can choose to succeed instead."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "Advantage on saving throws against spells and other magical effects."
+      },
+      {
+        "name": "Chain Aura",
+        "description": "A creature that starts its turn within 15 feet must succeed on a DC 20 Wisdom saving throw or take 10 (3d6) psychic damage and be unable to take reactions until the start of its next turn."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Barbaroscia makes three Burning Chain attacks."
+      },
+      {
+        "name": "Burning Chain",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 12,
+        "damageDescription": "16 (2d10 + 5) slashing damage plus 14 (4d6) fire damage, and a Large or smaller target is pulled 10 feet toward Barbaroscia."
+      },
+      {
+        "name": "Damnation (Recharge 5-6)",
+        "description": "A 30-foot-radius area within 120 feet erupts in hellfire. Each creature there must make a DC 20 Dexterity saving throw, taking 45 (10d8) fire damage on a failed save, or half as much on a success."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Chain",
+        "description": "Barbaroscia makes one Burning Chain attack."
+      },
+      {
+        "name": "Teleport",
+        "description": "Barbaroscia magically teleports up to 60 feet to an unoccupied space she can see."
+      },
+      {
+        "name": "Infernal Command (Costs 2 Actions)",
+        "description": "Barbaroscia targets one devil she can see within 60 feet; it can immediately use its reaction to make one melee attack.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-hellknight",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Hellknight of the Torrent",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Neutral",
+    "speed": "30 ft.",
+    "challengeRating": 5,
+    "ac": 20,
+    "acNote": "hellknight plate, shield",
+    "hp": 65,
+    "maxHp": 65,
+    "abilityScores": {
+      "strength": 17,
+      "dexterity": 11,
+      "constitution": 15,
+      "intelligence": 12,
+      "wisdom": 13,
+      "charisma": 12
+    },
+    "savingThrows": {
+      "strength": 6,
+      "constitution": 4
+    },
+    "skills": {
+      "Athletics": 6,
+      "Intimidation": 4
+    },
+    "damageResistances": [
+      "fire"
+    ],
+    "conditionImmunities": [
+      "frightened"
+    ],
+    "senses": {
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Common",
+      "Infernal"
+    ],
+    "description": "A disciplined devil-binding knight of the Order of the Torrent, holding the line with brutal order.",
+    "traits": [
+      {
+        "name": "Discipline of the Chain",
+        "description": "The hellknight has advantage on saving throws against being charmed or frightened, and against illusions."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The hellknight makes two Longsword attacks."
+      },
+      {
+        "name": "Longsword",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "8 (1d8 + 4) slashing damage, or 9 (1d10 + 4) if wielded in two hands."
+      },
+      {
+        "name": "Heavy Crossbow",
+        "description": "Ranged Weapon Attack",
+        "attackBonus": 3,
+        "damageDescription": "6 (1d10 + 1) piercing damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-impaler-shrike",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Impaler Shrike",
+    "size": "small",
+    "type": "fey",
+    "alignment": "Neutral Evil",
+    "speed": "10 ft., fly 60 ft.",
+    "challengeRating": 2,
+    "ac": 14,
+    "hp": 33,
+    "maxHp": 33,
+    "abilityScores": {
+      "strength": 10,
+      "dexterity": 17,
+      "constitution": 12,
+      "intelligence": 5,
+      "wisdom": 13,
+      "charisma": 8
+    },
+    "skills": {
+      "Perception": 3,
+      "Stealth": 5
+    },
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "13"
+    },
+    "languages": [],
+    "description": "A shrike-fey the size of a hawk that impales prey — and warnings — on thorns and railings across Kintargo.",
+    "traits": [
+      {
+        "name": "Larder Strike",
+        "description": "If the shrike hits a Small or smaller creature with its Beak while flying, it can carry the creature up to 20 feet and impale it on a fixed spike for an extra 7 (2d6) piercing damage."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The shrike makes two Beak attacks."
+      },
+      {
+        "name": "Beak",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "7 (1d8 + 3) piercing damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-gambling-devil",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Gambling Devil",
+    "size": "small",
+    "type": "fiend",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 4,
+    "ac": 15,
+    "acNote": "natural armor",
+    "hp": 66,
+    "maxHp": 66,
+    "abilityScores": {
+      "strength": 11,
+      "dexterity": 16,
+      "constitution": 14,
+      "intelligence": 15,
+      "wisdom": 12,
+      "charisma": 17
+    },
+    "savingThrows": {
+      "dexterity": 5,
+      "charisma": 5
+    },
+    "skills": {
+      "Deception": 7,
+      "Insight": 3,
+      "Sleight of Hand": 5
+    },
+    "damageResistances": [
+      "cold",
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "fire",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Common",
+      "Infernal",
+      "telepathy 60 ft."
+    ],
+    "description": "A dapper minor devil that trades in ruinous wagers, feeding on the desperation of losers.",
+    "traits": [
+      {
+        "name": "Magic Resistance",
+        "description": "Advantage on saving throws against spells and other magical effects."
+      },
+      {
+        "name": "Devil's Bargain",
+        "description": "When a creature within 30 feet makes an attack roll or saving throw, the devil can offer a bargain (no action): the creature adds 1d6 to the roll, but takes 7 (2d6) psychic damage after the roll is resolved."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The devil makes two Bladed Card attacks."
+      },
+      {
+        "name": "Bladed Card",
+        "description": "Melee or Ranged Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "7 (1d6 + 4) slashing damage plus 3 (1d6) fire damage."
+      },
+      {
+        "name": "Losing Streak (Recharge 6)",
+        "description": "One creature within 30 feet must make a DC 13 Wisdom saving throw or be cursed for 1 minute; while cursed, whenever it rolls a d20 it must take the lower of two rolls."
+      }
+    ]
+  },
+  {
+    "id": "cm-scrivenite",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Scrivenite",
+    "size": "medium",
+    "type": "construct",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 3,
+    "ac": 15,
+    "acNote": "natural armor",
+    "hp": 45,
+    "maxHp": 45,
+    "abilityScores": {
+      "strength": 13,
+      "dexterity": 15,
+      "constitution": 14,
+      "intelligence": 10,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "damageImmunities": [
+      "poison",
+      "psychic"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "paralyzed",
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Common",
+      "Infernal"
+    ],
+    "description": "A paper-and-ink homunculus of House Thrune's bureaucracy, animated to record confessions and enforce edicts.",
+    "traits": [
+      {
+        "name": "Paper Body",
+        "description": "The scrivenite is vulnerable to fire damage (included in its low hit points) and takes an extra 3 (1d6) fire damage whenever it takes fire damage."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The scrivenite makes two Quill attacks."
+      },
+      {
+        "name": "Razor Quill",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "6 (1d6 + 2) piercing damage plus 3 (1d6) acid damage from ink."
+      }
+    ]
+  },
+  {
+    "id": "cm-shadow-dragon-hr",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Shadow Dragon",
+    "size": "large",
+    "type": "dragon",
+    "alignment": "Chaotic Evil",
+    "speed": "40 ft., fly 80 ft.",
+    "challengeRating": 13,
+    "ac": 18,
+    "acNote": "natural armor",
+    "hp": 195,
+    "maxHp": 195,
+    "abilityScores": {
+      "strength": 19,
+      "dexterity": 14,
+      "constitution": 17,
+      "intelligence": 16,
+      "wisdom": 13,
+      "charisma": 19
+    },
+    "savingThrows": {
+      "dexterity": 8,
+      "constitution": 9,
+      "wisdom": 7,
+      "charisma": 10
+    },
+    "skills": {
+      "Perception": 12,
+      "Stealth": 8
+    },
+    "damageResistances": [
+      "acid",
+      "cold",
+      "fire",
+      "lightning",
+      "thunder"
+    ],
+    "damageImmunities": [
+      "necrotic",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "exhaustion",
+      "frightened",
+      "poisoned"
+    ],
+    "senses": {
+      "blindsight": "30 ft.",
+      "darkvision": "120 ft.",
+      "passive Perception": "16"
+    },
+    "languages": [
+      "Common",
+      "Draconic"
+    ],
+    "description": "A dragon consumed by the Shadowfell, its scales a rippling void — the ancient predator stalking Kintargo's undercity.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If the dragon fails a saving throw, it can choose to succeed instead."
+      },
+      {
+        "name": "Living Shadow",
+        "description": "While in dim light or darkness, the dragon has resistance to all damage except force, psychic, and radiant."
+      },
+      {
+        "name": "Sunlight Weakness",
+        "description": "While in sunlight, the dragon has disadvantage on attack rolls, ability checks, and saving throws."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The dragon makes one Bite attack and two Claw attacks."
+      },
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 9,
+        "damageDescription": "15 (2d10 + 4) piercing damage plus 9 (2d8) necrotic damage."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 9,
+        "damageDescription": "11 (2d6 + 4) slashing damage."
+      },
+      {
+        "name": "Shadow Breath (Recharge 5-6)",
+        "description": "The dragon exhales draining shadow in a 60-foot cone. Each creature there must make a DC 17 Constitution saving throw, taking 45 (10d8) necrotic damage on a failed save, or half as much on a success. A humanoid reduced to 0 hit points this way dies and rises as a shadow."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Detect",
+        "description": "The dragon makes a Wisdom (Perception) check."
+      },
+      {
+        "name": "Claw",
+        "description": "The dragon makes one Claw attack."
+      },
+      {
+        "name": "Shadow Meld (Costs 2 Actions)",
+        "description": "In dim light or darkness, the dragon becomes invisible until it attacks or until the end of its next turn.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-shadow-golem",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Shadow Golem",
+    "size": "large",
+    "type": "construct",
+    "alignment": "Neutral Evil",
+    "speed": "40 ft.",
+    "challengeRating": 10,
+    "ac": 16,
+    "acNote": "natural armor",
+    "hp": 142,
+    "maxHp": 142,
+    "abilityScores": {
+      "strength": 20,
+      "dexterity": 15,
+      "constitution": 18,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 5
+    },
+    "damageResistances": [
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "cold",
+      "necrotic",
+      "poison",
+      "psychic"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "paralyzed",
+      "petrified",
+      "poisoned"
+    ],
+    "senses": {
+      "blindsight": "60 ft.",
+      "darkvision": "120 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "understands its creator's orders"
+    ],
+    "description": "A golem forged from solidified shadow and the ash of Kintargo's burned dissidents.",
+    "traits": [
+      {
+        "name": "Immutable Form",
+        "description": "The golem is immune to any spell or effect that would alter its form."
+      },
+      {
+        "name": "Shadow Blend",
+        "description": "In dim light or darkness, the golem is invisible."
+      },
+      {
+        "name": "Chill Aura",
+        "description": "A creature that starts its turn within 10 feet takes 7 (2d6) cold damage."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The golem makes two Slam attacks."
+      },
+      {
+        "name": "Slam",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 9,
+        "damageDescription": "17 (3d8 + 4) bludgeoning damage plus 10 (3d6) necrotic damage, and the target's speed is reduced by 10 feet until the end of its next turn."
+      }
+    ]
+  },
+  {
+    "id": "cm-nightprowler",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Nightprowler",
+    "size": "medium",
+    "type": "aberration",
+    "alignment": "Neutral Evil",
+    "speed": "40 ft., climb 40 ft.",
+    "challengeRating": 9,
+    "ac": 16,
+    "hp": 123,
+    "maxHp": 123,
+    "abilityScores": {
+      "strength": 18,
+      "dexterity": 20,
+      "constitution": 16,
+      "intelligence": 12,
+      "wisdom": 15,
+      "charisma": 14
+    },
+    "savingThrows": {
+      "dexterity": 9,
+      "wisdom": 6
+    },
+    "skills": {
+      "Perception": 6,
+      "Stealth": 13
+    },
+    "damageResistances": [
+      "necrotic"
+    ],
+    "senses": {
+      "blindsight": "30 ft.",
+      "darkvision": "120 ft.",
+      "passive Perception": "16"
+    },
+    "languages": [
+      "Common",
+      "Undercommon"
+    ],
+    "description": "A shadow-cloaked assassin-beast that emerged from Kintargo's own dark heart — \"the monster of its own making.\"",
+    "traits": [
+      {
+        "name": "Shadow Cloak",
+        "description": "While in dim light or darkness, the nightprowler is invisible and attacks against it have disadvantage."
+      },
+      {
+        "name": "Sneak Attack (1/Turn)",
+        "description": "The nightprowler deals an extra 21 (6d6) damage when it hits with advantage or against a creature that hasn't taken a turn yet."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The nightprowler makes two Shadow Claw attacks."
+      },
+      {
+        "name": "Shadow Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 9,
+        "damageDescription": "13 (2d8 + 4) slashing damage plus 7 (2d6) necrotic damage."
+      },
+      {
+        "name": "Umbral Lunge (Recharge 5-6)",
+        "description": "The nightprowler teleports through shadow up to 60 feet and makes one Shadow Claw attack with advantage."
+      }
+    ]
+  },
+  {
+    "id": "cm-cruciarus",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Cruciarus",
+    "size": "large",
+    "type": "fiend",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft., fly 40 ft.",
+    "challengeRating": 11,
+    "ac": 18,
+    "acNote": "natural armor",
+    "hp": 161,
+    "maxHp": 161,
+    "abilityScores": {
+      "strength": 20,
+      "dexterity": 15,
+      "constitution": 19,
+      "intelligence": 14,
+      "wisdom": 16,
+      "charisma": 17
+    },
+    "savingThrows": {
+      "constitution": 9,
+      "wisdom": 8,
+      "charisma": 8
+    },
+    "damageResistances": [
+      "cold",
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "fire",
+      "poison"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "frightened",
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "13"
+    },
+    "languages": [
+      "Infernal",
+      "telepathy 120 ft."
+    ],
+    "description": "A greater devil of punishment, its body a rack of hooks and its many arms ending in torturer's implements.",
+    "traits": [
+      {
+        "name": "Magic Resistance",
+        "description": "Advantage on saving throws against spells and other magical effects."
+      },
+      {
+        "name": "Aura of Torment",
+        "description": "A creature that starts its turn within 10 feet must succeed on a DC 16 Constitution saving throw or take 10 (3d6) psychic damage."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The cruciarus makes three Hook attacks."
+      },
+      {
+        "name": "Hook",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 9,
+        "damageDescription": "14 (2d8 + 5) piercing damage, and a Large or smaller target is grappled (escape DC 17) and pulled 5 feet toward the cruciarus."
+      },
+      {
+        "name": "Rack (Recharge 5-6)",
+        "description": "Each creature grappled by the cruciarus takes 33 (6d10) piercing damage, or half as much with a successful DC 17 Constitution saving throw."
+      }
+    ]
+  },
+  {
+    "id": "cm-forsaken-legion",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Forsaken Legion",
+    "size": "large",
+    "type": "undead",
+    "alignment": "Neutral Evil",
+    "speed": "30 ft.",
+    "challengeRating": 6,
+    "ac": 14,
+    "acNote": "tattered mail",
+    "hp": 104,
+    "maxHp": 104,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 12,
+      "constitution": 17,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 8
+    },
+    "damageResistances": [
+      "necrotic",
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "damageImmunities": [
+      "poison"
+    ],
+    "conditionImmunities": [
+      "charmed",
+      "exhaustion",
+      "frightened",
+      "grappled",
+      "poisoned",
+      "prone",
+      "restrained"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "understands Common but can't speak"
+    ],
+    "description": "A shambling composite of a dozen dead Chelish soldiers, moving and striking as one damned company.",
+    "traits": [
+      {
+        "name": "Legion",
+        "description": "The forsaken legion counts as a swarm. It can occupy another creature's space and vice versa, and it can move through any opening large enough for a Medium creature."
+      },
+      {
+        "name": "Overwhelm",
+        "description": "The legion has advantage on attack rolls against a creature if at least one other enemy of the target is within 5 feet of it."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The legion makes two Rusted Blades attacks."
+      },
+      {
+        "name": "Rusted Blades",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "18 (4d6 + 4) slashing damage, or 10 (2d6 + 3) if the legion is at half hit points or fewer."
+      }
+    ]
+  },
+  {
+    "id": "cm-thrune-agent",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Thrune Agent",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 4,
+    "ac": 15,
+    "acNote": "studded leather",
+    "hp": 58,
+    "maxHp": 58,
+    "abilityScores": {
+      "strength": 11,
+      "dexterity": 16,
+      "constitution": 13,
+      "intelligence": 14,
+      "wisdom": 12,
+      "charisma": 13
+    },
+    "savingThrows": {
+      "dexterity": 5
+    },
+    "skills": {
+      "Deception": 5,
+      "Perception": 3,
+      "Stealth": 7
+    },
+    "senses": {
+      "passive Perception": "13"
+    },
+    "languages": [
+      "Common",
+      "Infernal"
+    ],
+    "description": "A dottari secret-police operative rooting out Silver Raven sympathizers.",
+    "traits": [
+      {
+        "name": "Cunning Action",
+        "description": "On each of its turns, the agent can use a bonus action to Dash, Disengage, or Hide."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The agent makes two Rapier attacks or two Hand Crossbow attacks."
+      },
+      {
+        "name": "Rapier",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "7 (1d8 + 3) piercing damage."
+      },
+      {
+        "name": "Hand Crossbow",
+        "description": "Ranged Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "6 (1d6 + 3) piercing damage plus 7 (2d6) poison damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-dottari-guard",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Dottari Guard",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Neutral",
+    "speed": "30 ft.",
+    "challengeRating": 1,
+    "ac": 16,
+    "acNote": "chain shirt, shield",
+    "hp": 22,
+    "maxHp": 22,
+    "abilityScores": {
+      "strength": 14,
+      "dexterity": 12,
+      "constitution": 13,
+      "intelligence": 10,
+      "wisdom": 11,
+      "charisma": 10
+    },
+    "senses": {
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Common"
+    ],
+    "description": "A Kintargan city watchman, now enforcing House Thrune's martial law.",
+    "actions": [
+      {
+        "name": "Spear",
+        "description": "Melee or Ranged Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "5 (1d6 + 2) piercing damage, or 6 (1d8 + 2) if used with two hands to make a melee attack."
+      }
+    ]
+  },
+  {
+    "id": "cm-diabolic-chorister",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Hell's Rebels",
+    "name": "Diabolic Chorister",
+    "size": "medium",
+    "type": "fiend",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft., fly 30 ft.",
+    "challengeRating": 3,
+    "ac": 13,
+    "hp": 40,
+    "maxHp": 40,
+    "abilityScores": {
+      "strength": 8,
+      "dexterity": 15,
+      "constitution": 12,
+      "intelligence": 11,
+      "wisdom": 13,
+      "charisma": 16
+    },
+    "damageResistances": [
+      "cold",
+      "poison"
+    ],
+    "damageImmunities": [
+      "fire"
+    ],
+    "conditionImmunities": [
+      "poisoned"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "11"
+    },
+    "languages": [
+      "Common",
+      "Infernal"
+    ],
+    "description": "A lesser devil that sings the liturgy of Asmodeus, its hymn twisting the minds of the faithful.",
+    "traits": [
+      {
+        "name": "Hymn of Submission",
+        "description": "A creature that starts its turn within 20 feet and can hear the chorister must succeed on a DC 13 Wisdom saving throw or have disadvantage on attack rolls against the chorister until the start of its next turn."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The chorister makes two Claw attacks."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "6 (1d6 + 2) slashing damage plus 3 (1d6) fire damage."
+      },
+      {
+        "name": "Dissonant Verse",
+        "description": "Ranged Spell Attack",
+        "attackBonus": 5,
+        "damageDescription": "13 (3d6 + 3) psychic damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-azarr-kul",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Azarr Kul, the Red Hand",
+    "size": "large",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft., fly 40 ft.",
+    "challengeRating": 15,
+    "ac": 20,
+    "acNote": "red dragonscale plate",
+    "hp": 230,
+    "maxHp": 230,
+    "abilityScores": {
+      "strength": 22,
+      "dexterity": 12,
+      "constitution": 20,
+      "intelligence": 16,
+      "wisdom": 16,
+      "charisma": 20
+    },
+    "savingThrows": {
+      "strength": 11,
+      "constitution": 10,
+      "wisdom": 8,
+      "charisma": 10
+    },
+    "skills": {
+      "Intimidation": 10,
+      "Religion": 8
+    },
+    "damageImmunities": [
+      "fire"
+    ],
+    "conditionImmunities": [
+      "frightened"
+    ],
+    "senses": {
+      "darkvision": "120 ft.",
+      "passive Perception": "13"
+    },
+    "languages": [
+      "Common",
+      "Draconic",
+      "Goblin"
+    ],
+    "description": "The half-red-dragon hobgoblin high cleric of Tiamat, warlord of the Red Hand horde marching on the Elsir Vale.",
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day)",
+        "description": "If Azarr Kul fails a saving throw, he can choose to succeed instead."
+      },
+      {
+        "name": "Horde Commander",
+        "description": "Allied creatures of the Red Hand within 30 feet of Azarr Kul have advantage on saving throws against being frightened and deal an extra 3 (1d6) damage on their weapon attacks."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "Azarr Kul casts spells as a 12th-level cleric (save DC 18): command, hold person, insect plague, spirit guardians, flame strike, guardian of faith."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Azarr Kul makes two Draconic Halberd attacks and one Claw attack."
+      },
+      {
+        "name": "Draconic Halberd",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 11,
+        "damageDescription": "17 (2d10 + 6) slashing damage plus 10 (3d6) fire damage."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 11,
+        "damageDescription": "13 (2d6 + 6) slashing damage."
+      },
+      {
+        "name": "Fire Breath (Recharge 5-6)",
+        "description": "Azarr Kul exhales fire in a 30-foot cone. Each creature there must make a DC 18 Dexterity saving throw, taking 45 (10d8) fire damage on a failed save, or half as much on a success."
+      }
+    ],
+    "legendaryActionCount": 3,
+    "legendaryActions": [
+      {
+        "name": "Halberd",
+        "description": "Azarr Kul makes one Draconic Halberd attack."
+      },
+      {
+        "name": "Command the Horde",
+        "description": "One allied Red Hand creature within 60 feet can use its reaction to move up to its speed or make one weapon attack."
+      },
+      {
+        "name": "Wings of Tiamat (Costs 2 Actions)",
+        "description": "Azarr Kul flies up to his fly speed. Each creature within 10 feet of his path must succeed on a DC 19 Dexterity saving throw or take 14 (4d6) fire damage.",
+        "cost": 2
+      }
+    ]
+  },
+  {
+    "id": "cm-wyrmlord",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Wyrmlord Koth",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 11,
+    "ac": 18,
+    "acNote": "half-plate",
+    "hp": 138,
+    "maxHp": 138,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 13,
+      "constitution": 16,
+      "intelligence": 17,
+      "wisdom": 18,
+      "charisma": 15
+    },
+    "savingThrows": {
+      "wisdom": 8,
+      "intelligence": 7
+    },
+    "skills": {
+      "Arcana": 7,
+      "Perception": 8,
+      "Religion": 7
+    },
+    "damageResistances": [
+      "fire"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "18"
+    },
+    "languages": [
+      "Common",
+      "Draconic",
+      "Goblin"
+    ],
+    "description": "One of the six Wyrmlords of the Red Hand — a hobgoblin dragon-priest who speaks for Tiamat and carries a shard of the Ghostlord's power.",
+    "traits": [
+      {
+        "name": "Dragon Speaker",
+        "description": "Dragons and dragonspawn allied with the Red Hand within 60 feet of the Wyrmlord have advantage on the first attack roll they make each turn."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The Wyrmlord casts spells as a 10th-level caster (save DC 15): fireball, fly, lightning bolt, scorching ray, shield, wall of fire."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The Wyrmlord makes two Wyrmscale Staff attacks."
+      },
+      {
+        "name": "Wyrmscale Staff",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "8 (1d8 + 3) bludgeoning damage plus 10 (3d6) fire damage."
+      },
+      {
+        "name": "Draconic Bolt",
+        "description": "Ranged Spell Attack",
+        "attackBonus": 7,
+        "damageDescription": "21 (6d6) fire damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-harnoth-bloodwatcher",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Harnoth Bloodwatcher",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 8,
+    "ac": 19,
+    "acNote": "splint armor, shield",
+    "hp": 127,
+    "maxHp": 127,
+    "abilityScores": {
+      "strength": 19,
+      "dexterity": 13,
+      "constitution": 17,
+      "intelligence": 12,
+      "wisdom": 14,
+      "charisma": 13
+    },
+    "savingThrows": {
+      "strength": 7,
+      "constitution": 6
+    },
+    "skills": {
+      "Athletics": 7,
+      "Intimidation": 4
+    },
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "12"
+    },
+    "languages": [
+      "Common",
+      "Goblin"
+    ],
+    "description": "A champion hobgoblin warlord of the Red Hand, leading the assault companies at the Battle of Brindol.",
+    "traits": [
+      {
+        "name": "Martial Advantage (1/Turn)",
+        "description": "The warlord deals an extra 14 (4d6) damage when it hits a creature that is within 5 feet of an ally of the warlord."
+      },
+      {
+        "name": "Relentless (Recharges after a Short or Long Rest)",
+        "description": "If the warlord takes 20 damage or less that would reduce it to 0 hit points, it drops to 1 hit point instead."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Harnoth makes three Flail attacks."
+      },
+      {
+        "name": "Spiked Flail",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 7,
+        "damageDescription": "10 (1d10 + 5) bludgeoning damage plus 3 (1d6) piercing damage."
+      },
+      {
+        "name": "Battle Standard (Recharge 6)",
+        "description": "Harnoth plants the Red Hand standard. Allied Red Hand creatures within 30 feet gain 10 temporary hit points and can immediately move up to their speed."
+      }
+    ]
+  },
+  {
+    "id": "cm-zanthrus-wyrmspeaker",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Zanthrus, Wyrm-Speaker",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 11,
+    "ac": 17,
+    "acNote": "breastplate",
+    "hp": 133,
+    "maxHp": 133,
+    "abilityScores": {
+      "strength": 14,
+      "dexterity": 14,
+      "constitution": 16,
+      "intelligence": 15,
+      "wisdom": 18,
+      "charisma": 16
+    },
+    "savingThrows": {
+      "constitution": 7,
+      "wisdom": 8
+    },
+    "skills": {
+      "Perception": 8,
+      "Religion": 6
+    },
+    "damageResistances": [
+      "fire"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "18"
+    },
+    "languages": [
+      "Common",
+      "Draconic",
+      "Goblin"
+    ],
+    "description": "The senior priest of the Fane of Tiamat, keeper of the outer chambers and voice of the five-headed queen.",
+    "traits": [
+      {
+        "name": "Spellcasting",
+        "description": "Zanthrus casts spells as an 11th-level cleric (save DC 16): banishment, blindness/deafness, contagion, flame strike, guardian of faith, insect plague, mass cure wounds."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Zanthrus makes two Chromatic Mace attacks."
+      },
+      {
+        "name": "Chromatic Mace",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "7 (1d6 + 2) bludgeoning damage plus 10 (3d6) damage of a type chosen from acid, cold, fire, lightning, or poison."
+      },
+      {
+        "name": "Breath of Tiamat (Recharge 5-6)",
+        "description": "Zanthrus channels the Dragon Queen in a 30-foot cone. Each creature there must make a DC 16 Dexterity saving throw, taking 36 (8d8) damage split evenly between fire and cold on a failed save, or half as much on a success."
+      }
+    ]
+  },
+  {
+    "id": "cm-kulkzor-wyrmspeaker",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Kulk'zor the Wyrmspeaker",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 8,
+    "ac": 16,
+    "acNote": "scale mail",
+    "hp": 104,
+    "maxHp": 104,
+    "abilityScores": {
+      "strength": 15,
+      "dexterity": 12,
+      "constitution": 15,
+      "intelligence": 14,
+      "wisdom": 16,
+      "charisma": 13
+    },
+    "savingThrows": {
+      "wisdom": 6
+    },
+    "skills": {
+      "Perception": 6,
+      "Religion": 5
+    },
+    "damageResistances": [
+      "fire"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "16"
+    },
+    "languages": [
+      "Common",
+      "Draconic",
+      "Goblin"
+    ],
+    "description": "A rising dragon-priest of the Red Hand entrusted with a Wyrmlord's token in the Vale skirmishes.",
+    "traits": [
+      {
+        "name": "Spellcasting",
+        "description": "Kulk'zor casts spells as an 8th-level cleric (save DC 14): bane, hold person, spirit guardians, fireball, protection from energy."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Kulk'zor makes two Serpent Rod attacks."
+      },
+      {
+        "name": "Serpent Rod",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "6 (1d8 + 2) bludgeoning damage plus 7 (2d6) fire damage."
+      },
+      {
+        "name": "Scorching Ray",
+        "description": "Ranged Spell Attack",
+        "attackBonus": 6,
+        "damageDescription": "three rays, 7 (2d6) fire damage each."
+      }
+    ]
+  },
+  {
+    "id": "cm-skalmad-red-fang",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Skalmad the Red Fang",
+    "size": "medium",
+    "type": "undead",
+    "alignment": "Chaotic Evil",
+    "speed": "30 ft.",
+    "challengeRating": 7,
+    "ac": 16,
+    "acNote": "natural armor",
+    "hp": 97,
+    "maxHp": 97,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 16,
+      "constitution": 16,
+      "intelligence": 11,
+      "wisdom": 12,
+      "charisma": 14
+    },
+    "savingThrows": {
+      "dexterity": 6,
+      "wisdom": 4
+    },
+    "skills": {
+      "Perception": 4,
+      "Stealth": 6
+    },
+    "damageResistances": [
+      "necrotic",
+      "bludgeoning",
+      "piercing",
+      "slashing"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "14"
+    },
+    "languages": [
+      "Common",
+      "Goblin"
+    ],
+    "description": "A hobgoblin lieutenant of the Red Hand raised as a vampiric horror, hunting the Witchwood by night.",
+    "traits": [
+      {
+        "name": "Regeneration",
+        "description": "Skalmad regains 10 hit points at the start of its turn if it has at least 1 hit point and hasn't taken radiant damage or damage from holy water since its last turn."
+      },
+      {
+        "name": "Spider Climb",
+        "description": "Skalmad can climb difficult surfaces, including upside down, without an ability check."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Skalmad makes two attacks, only one of which can be a Bite."
+      },
+      {
+        "name": "Claws",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "9 (2d4 + 4) slashing damage, and the target is grappled (escape DC 14)."
+      },
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 6,
+        "damageDescription": "7 (1d6 + 4) piercing damage plus 10 (3d6) necrotic damage. The target's hit point maximum is reduced by that amount and Skalmad regains that many hit points."
+      }
+    ]
+  },
+  {
+    "id": "cm-hurog-manthex",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Hurog Manthex",
+    "size": "large",
+    "type": "giant",
+    "alignment": "Chaotic Evil",
+    "speed": "40 ft.",
+    "challengeRating": 8,
+    "ac": 15,
+    "acNote": "hide armor, shield",
+    "hp": 138,
+    "maxHp": 138,
+    "abilityScores": {
+      "strength": 21,
+      "dexterity": 10,
+      "constitution": 19,
+      "intelligence": 8,
+      "wisdom": 10,
+      "charisma": 11
+    },
+    "savingThrows": {
+      "strength": 8,
+      "constitution": 7
+    },
+    "skills": {
+      "Athletics": 8,
+      "Intimidation": 3
+    },
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Common",
+      "Giant",
+      "Goblin"
+    ],
+    "description": "A monstrous ogre-blooded champion of the Red Hand, driving the horde's siege beasts and battering rams against Brindol.",
+    "traits": [
+      {
+        "name": "Siege Monster",
+        "description": "Hurog deals double damage to objects and structures."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Hurog makes two Great Maul attacks."
+      },
+      {
+        "name": "Great Maul",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 8,
+        "damageDescription": "19 (3d8 + 6) bludgeoning damage, and a Medium or smaller target must succeed on a DC 16 Strength saving throw or be knocked prone."
+      },
+      {
+        "name": "Hurl Debris",
+        "description": "Ranged Weapon Attack",
+        "attackBonus": 8,
+        "damageDescription": "22 (3d10 + 6) bludgeoning damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-hobgoblin-hand",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Hobgoblin of the Red Hand",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 1,
+    "ac": 18,
+    "acNote": "chain mail, shield",
+    "hp": 22,
+    "maxHp": 22,
+    "abilityScores": {
+      "strength": 13,
+      "dexterity": 12,
+      "constitution": 12,
+      "intelligence": 10,
+      "wisdom": 10,
+      "charisma": 9
+    },
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Common",
+      "Goblin"
+    ],
+    "description": "A disciplined infantry soldier of the Red Hand horde, marked with the bloody hand sigil.",
+    "traits": [
+      {
+        "name": "Martial Advantage (1/Turn)",
+        "description": "The hobgoblin deals an extra 7 (2d6) damage to a creature it hits with a weapon attack if that creature is within 5 feet of an ally of the hobgoblin."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Longsword",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 3,
+        "damageDescription": "5 (1d8 + 1) slashing damage."
+      },
+      {
+        "name": "Longbow",
+        "description": "Ranged Weapon Attack",
+        "attackBonus": 3,
+        "damageDescription": "5 (1d8 + 1) piercing damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-hobgoblin-hand-captain",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Red Hand Hobgoblin Captain",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Lawful Evil",
+    "speed": "30 ft.",
+    "challengeRating": 3,
+    "ac": 17,
+    "acNote": "half-plate",
+    "hp": 58,
+    "maxHp": 58,
+    "abilityScores": {
+      "strength": 15,
+      "dexterity": 14,
+      "constitution": 14,
+      "intelligence": 12,
+      "wisdom": 10,
+      "charisma": 13
+    },
+    "skills": {
+      "Intimidation": 3
+    },
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Common",
+      "Goblin"
+    ],
+    "description": "A veteran field officer of a Red Hand company.",
+    "traits": [
+      {
+        "name": "Martial Advantage (1/Turn)",
+        "description": "The captain deals an extra 10 (3d6) damage to a creature it hits with a weapon attack if that creature is within 5 feet of an ally of the captain."
+      },
+      {
+        "name": "Leadership (Recharges after a Short or Long Rest)",
+        "description": "For 1 minute, allies within 30 feet of the captain add a d4 to their attack rolls and saving throws while the captain isn't incapacitated."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The captain makes two Greatsword attacks."
+      },
+      {
+        "name": "Greatsword",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "10 (2d6 + 3) slashing damage."
+      },
+      {
+        "name": "Longbow",
+        "description": "Ranged Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "6 (1d8 + 2) piercing damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-bugbear-red-hand",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Red Hand Bugbear Raider",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Chaotic Evil",
+    "speed": "30 ft.",
+    "challengeRating": 1,
+    "ac": 15,
+    "acNote": "hide armor, shield",
+    "hp": 32,
+    "maxHp": 32,
+    "abilityScores": {
+      "strength": 15,
+      "dexterity": 14,
+      "constitution": 13,
+      "intelligence": 8,
+      "wisdom": 11,
+      "charisma": 9
+    },
+    "skills": {
+      "Stealth": 6,
+      "Survival": 2
+    },
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "10"
+    },
+    "languages": [
+      "Common",
+      "Goblin"
+    ],
+    "description": "A brutal bugbear irregular attached to the Red Hand for raiding and terror.",
+    "traits": [
+      {
+        "name": "Brute",
+        "description": "A melee weapon deals one extra die of its damage when the bugbear hits with it (included below)."
+      },
+      {
+        "name": "Surprise Attack",
+        "description": "If the bugbear surprises a creature and hits it with an attack during the first round of combat, the target takes an extra 7 (2d6) damage."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Morningstar",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "11 (2d8 + 2) piercing damage."
+      },
+      {
+        "name": "Javelin",
+        "description": "Ranged Weapon Attack",
+        "attackBonus": 4,
+        "damageDescription": "9 (2d6 + 2) piercing damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-red-hand-veteran",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Elsir Vale Defender",
+    "size": "medium",
+    "type": "humanoid",
+    "alignment": "Neutral Good",
+    "speed": "30 ft.",
+    "challengeRating": 3,
+    "ac": 17,
+    "acNote": "splint armor",
+    "hp": 58,
+    "maxHp": 58,
+    "abilityScores": {
+      "strength": 16,
+      "dexterity": 13,
+      "constitution": 14,
+      "intelligence": 10,
+      "wisdom": 11,
+      "charisma": 10
+    },
+    "skills": {
+      "Athletics": 5,
+      "Perception": 2
+    },
+    "senses": {
+      "passive Perception": "12"
+    },
+    "languages": [
+      "Common"
+    ],
+    "description": "A militia veteran of Brindol or Dawn Way standing against the horde.",
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The defender makes two Longsword attacks. If it has a shortsword drawn, it can also make a Shortsword attack."
+      },
+      {
+        "name": "Longsword",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "7 (1d8 + 3) slashing damage."
+      },
+      {
+        "name": "Shortsword",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "6 (1d6 + 3) piercing damage."
+      },
+      {
+        "name": "Heavy Crossbow",
+        "description": "Ranged Weapon Attack",
+        "attackBonus": 3,
+        "damageDescription": "6 (1d10 + 1) piercing damage."
+      }
+    ]
+  },
+  {
+    "id": "cm-tiamat-dragonspawn",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Dragonspawn of Tiamat",
+    "size": "medium",
+    "type": "dragon",
+    "alignment": "Chaotic Evil",
+    "speed": "30 ft., fly 30 ft.",
+    "challengeRating": 5,
+    "ac": 16,
+    "acNote": "natural armor",
+    "hp": 76,
+    "maxHp": 76,
+    "abilityScores": {
+      "strength": 17,
+      "dexterity": 13,
+      "constitution": 16,
+      "intelligence": 8,
+      "wisdom": 11,
+      "charisma": 12
+    },
+    "skills": {
+      "Perception": 3
+    },
+    "damageResistances": [
+      "fire"
+    ],
+    "senses": {
+      "blindsight": "10 ft.",
+      "darkvision": "60 ft.",
+      "passive Perception": "13"
+    },
+    "languages": [
+      "Draconic"
+    ],
+    "description": "A malformed lesser dragon bred in the Fane of Tiamat to serve the Red Hand.",
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The dragonspawn makes one Bite attack and two Claw attacks."
+      },
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "10 (2d6 + 3) piercing damage."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "7 (1d6 + 3) slashing damage."
+      },
+      {
+        "name": "Ember Breath (Recharge 5-6)",
+        "description": "The dragonspawn exhales embers in a 15-foot cone. Each creature there must make a DC 13 Dexterity saving throw, taking 24 (7d6) fire damage on a failed save, or half as much on a success."
+      }
+    ]
+  },
+  {
+    "id": "cm-hell-hound-tiamat",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Fanged Hound of Tiamat",
+    "size": "medium",
+    "type": "fiend",
+    "alignment": "Lawful Evil",
+    "speed": "50 ft.",
+    "challengeRating": 3,
+    "ac": 15,
+    "acNote": "natural armor",
+    "hp": 45,
+    "maxHp": 45,
+    "abilityScores": {
+      "strength": 17,
+      "dexterity": 12,
+      "constitution": 14,
+      "intelligence": 6,
+      "wisdom": 13,
+      "charisma": 6
+    },
+    "skills": {
+      "Perception": 5
+    },
+    "damageImmunities": [
+      "fire"
+    ],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive Perception": "13"
+    },
+    "languages": [
+      "understands Infernal but can't speak"
+    ],
+    "description": "A fire-blooded war hound loosed ahead of the Red Hand's columns.",
+    "traits": [
+      {
+        "name": "Pack Tactics",
+        "description": "The hound has advantage on an attack roll against a creature if at least one of the hound's allies is within 5 feet of the creature and isn't incapacitated."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 5,
+        "damageDescription": "7 (1d8 + 3) piercing damage plus 7 (2d6) fire damage."
+      },
+      {
+        "name": "Fire Breath (Recharge 5-6)",
+        "description": "The hound exhales fire in a 15-foot cone. Each creature there must make a DC 12 Dexterity saving throw, taking 21 (6d6) fire damage on a failed save, or half as much on a success."
+      }
+    ]
+  },
+  {
+    "id": "cm-abithriax",
+    "userId": GLOBAL_USER_ID,
+    "isGlobal": true,
+    "source": "Red Hand of Doom",
+    "name": "Abithriax, Young Red Dragon",
+    "size": "large",
+    "type": "dragon",
+    "alignment": "Chaotic Evil",
+    "speed": "40 ft., climb 40 ft., fly 80 ft.",
+    "challengeRating": 10,
+    "ac": 18,
+    "acNote": "natural armor",
+    "hp": 178,
+    "maxHp": 178,
+    "abilityScores": {
+      "strength": 23,
+      "dexterity": 10,
+      "constitution": 21,
+      "intelligence": 14,
+      "wisdom": 11,
+      "charisma": 19
+    },
+    "savingThrows": {
+      "dexterity": 4,
+      "constitution": 9,
+      "wisdom": 4,
+      "charisma": 8
+    },
+    "skills": {
+      "Perception": 8,
+      "Stealth": 4
+    },
+    "damageImmunities": [
+      "fire"
+    ],
+    "senses": {
+      "blindsight": "30 ft.",
+      "darkvision": "120 ft.",
+      "passive Perception": "14"
+    },
+    "languages": [
+      "Common",
+      "Draconic"
+    ],
+    "description": "The young red dragon bound to Azarr Kul's cause, torching villages ahead of the horde.",
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Abithriax makes one Bite attack and two Claw attacks."
+      },
+      {
+        "name": "Bite",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 10,
+        "damageDescription": "17 (2d10 + 6) piercing damage plus 3 (1d6) fire damage."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Weapon Attack",
+        "attackBonus": 10,
+        "damageDescription": "13 (2d6 + 6) slashing damage."
+      },
+      {
+        "name": "Fire Breath (Recharge 5-6)",
+        "description": "Abithriax exhales fire in a 30-foot cone. Each creature there must make a DC 17 Dexterity saving throw, taking 56 (16d6) fire damage on a failed save, or half as much on a success."
+      }
+    ]
+  },
 ];
 
 /**
