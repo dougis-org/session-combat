@@ -75,6 +75,80 @@ and `collection` fields identifying which storage operation failed.
 - **When** a caller catches the thrown `StorageError`
 - **Then** `error.op` and `error.collection` match the `name` and `collection` fields of the corresponding `logStorageEvent` call, allowing the two to be correlated
 
+### Requirement: ADDED Domain errors bypass StorageError wrapping
+
+The system SHALL allow a `runStorageOp` caller to declare, via an optional
+`rethrowAsIs` predicate on `RunStorageOpMeta`, that certain errors thrown by the
+wrapped function are meaningful domain errors and MUST be re-thrown unchanged
+rather than replaced with a `StorageError`.
+
+#### Scenario: Predicate matches the thrown error
+
+- **Given** `runStorageOp({ name, collection, rethrowAsIs: (e) => e instanceof DuplicateMemberError }, fn)` where `fn()` rejects with a `DuplicateMemberError`
+- **When** `runStorageOp` handles the rejection
+- **Then** it logs one `logStorageEvent` with `outcome: "error"`, then re-throws
+  the original `DuplicateMemberError` instance unchanged (not a `StorageError`)
+
+#### Scenario: Predicate does not match the thrown error
+
+- **Given** the same call where `fn()` rejects with a generic driver error that
+  is not a `DuplicateMemberError`
+- **When** `runStorageOp` handles the rejection
+- **Then** it re-throws a `StorageError` (`cause` set to the original error), as
+  it does when no `rethrowAsIs` is supplied
+
+#### Scenario: No predicate supplied
+
+- **Given** a `runStorageOp` call whose `meta` omits `rethrowAsIs` (every
+  pre-existing call site)
+- **When** `fn()` rejects
+- **Then** behavior is byte-identical to before this change: a `StorageError` is
+  always thrown
+
+### Requirement: ADDED addMember preserves its duplicate-member contract
+
+The system SHALL have `storage.addMember` throw `DuplicateMemberError` (not
+`StorageError`) when the `campaignMembers` insert fails with a MongoDB
+duplicate-key error (code `11000`), so the route handler that branches on
+`error instanceof DuplicateMemberError` continues to work.
+
+#### Scenario: Duplicate membership insert
+
+- **Given** `membershipRepo.addMember` and a `campaignMembers` insert that
+  rejects with `{ code: 11000 }`
+- **When** `storage.addMember(member)` is awaited
+- **Then** it rejects with a `DuplicateMemberError` for `member.campaignId` /
+  `member.userId`, and `app/api/campaigns/[id]/members/route.ts`'s
+  `error instanceof DuplicateMemberError` branch is taken (not the generic
+  500 path)
+
+#### Scenario: Non-duplicate insert failure
+
+- **Given** the same method and an insert that rejects with a non-`11000` driver
+  error
+- **When** `storage.addMember(member)` is awaited
+- **Then** it rejects with a `StorageError` (`op: "addMember"`,
+  `collection: "campaignMembers"`)
+
+## MODIFIED Requirements
+
+### Requirement: MODIFIED runStorageOp error handling
+
+The system SHALL, on a rejection from the wrapped function, always emit one
+`logStorageEvent` with `outcome: "error"` and then decide how to propagate:
+re-throw the original error unchanged when `meta.rethrowAsIs` is present and
+returns `true` for that error; otherwise throw a `StorageError` wrapping it as
+`cause`.
+
+#### Scenario: Error logging is unconditional
+
+- **Given** any rejection from the wrapped function, with or without
+  `rethrowAsIs`
+- **When** `runStorageOp` handles it
+- **Then** exactly one `logStorageEvent` call is made with `outcome: "error"`,
+  the operation `name`, `collection`, and elapsed `durationMs`, before any error
+  is propagated
+
 ## Traceability
 
 - Proposal element: "a missing document is a normal return value... decided
@@ -143,3 +217,25 @@ distinct security scenario applies at this stage of the epic.
   36 caller files and 11 mock files) is run
 - **Then** every existing test passes unmodified, since none of the new files
   are imported by any existing file
+
+#### Scenario: rethrowAsIs does not regress migrated cluster-1 repos
+
+- **Given** the cluster-1 repos (`encounterRepo`, `characterRepo`,
+  `combatStateRepo`, `partyRepo`) that call `runStorageOp` without `rethrowAsIs`
+- **When** their existing unit/integration suites run after the `rethrowAsIs`
+  addition
+- **Then** all pass unchanged, confirming the default error-wrapping path is
+  untouched
+
+<!-- storage-op-telemetry-foundation delta from
+     changes/archive/2026-09-02-refactor-storage-issue-503 merged 2026-09-02:
+     added "Domain errors bypass StorageError wrapping",
+     "addMember preserves its duplicate-member contract", and
+     modified "runStorageOp error handling". -->
+- Design decision (#503): `rethrowAsIs` predicate on `RunStorageOpMeta` ->
+  Requirement: ADDED Domain errors bypass StorageError wrapping; Requirement:
+  MODIFIED runStorageOp error handling; implemented in `lib/storage/runOp.ts`,
+  tests in `tests/unit/lib/storage/runOp.test.ts`.
+- Requirement: ADDED addMember preserves its duplicate-member contract ->
+  `lib/storage/membershipRepo.ts`, tests in
+  `tests/unit/lib/storage/membershipRepo.test.ts`.
