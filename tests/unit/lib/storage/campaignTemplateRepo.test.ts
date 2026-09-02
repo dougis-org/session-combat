@@ -37,6 +37,15 @@ describe("campaignTemplateRepo", () => {
   });
 
   describe("loadGlobalCampaignTemplateById", () => {
+    it("returns null for a non-string / oversized id without querying", async () => {
+      const col = mockCollection();
+      await expect(repo.loadGlobalCampaignTemplateById("")).resolves.toBeNull();
+      await expect(
+        repo.loadGlobalCampaignTemplateById("x".repeat(65)),
+      ).resolves.toBeNull();
+      expect(col.findOne).not.toHaveBeenCalled();
+    });
+
     it("hit → normalized doc; miss → null (not_found); DB failure → StorageError (was: null)", async () => {
       mockCollection({ findOne: { id: "t1", name: "A" } });
       await expect(repo.loadGlobalCampaignTemplateById("t1")).resolves.toMatchObject({ id: "t1" });

@@ -25,6 +25,12 @@ export async function loadGlobalCampaignTemplates(): Promise<CampaignTemplate[]>
 }
 
 export async function loadGlobalCampaignTemplateById(id: string): Promise<CampaignTemplate | null> {
+  // Guard the by-id lookup against non-string / oversized input before it
+  // reaches the query, mirroring `storage.loadSpellById` (the equivalent
+  // global-template-by-id read). A bad id is "not found", not an error.
+  if (!id || typeof id !== "string" || id.length > 64) {
+    return null;
+  }
   return runStorageOp(
     {
       name: "loadGlobalCampaignTemplateById",
@@ -33,10 +39,6 @@ export async function loadGlobalCampaignTemplateById(id: string): Promise<Campai
     },
     async () => {
       const db = await getDatabase();
-      // nosemgrep: rules.lgpl.javascript.database.rule-node-nosqli-injection --
-      // `id` is used as an equality match on a string field; an object-typed
-      // value cannot match and is not an injection vector. Logic relocated
-      // verbatim from lib/storage.ts.
       const template = await db
         .collection<CampaignTemplate>("campaignTemplates")
         .findOne({ id, userId: GLOBAL_USER_ID });
