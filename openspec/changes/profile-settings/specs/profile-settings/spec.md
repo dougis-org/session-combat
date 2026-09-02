@@ -21,12 +21,31 @@ The system SHALL provide a profile settings page that allows authenticated users
 ### Requirement: ADDED schema settings
 
 The system SHALL support `color` and `surface` settings for the dice preference domain.
+`dice.surface` is `string | null`, where `null` is the default surface and the supported
+non-null values are `wood`, `metal`, `stone`, and `felt`. `dice.color` is a short hex
+string (`#rgb` / `#rrggbb`) or `null`.
 
 #### Scenario: Save valid surface preference
 
-- **Given** a PATCH request to `/api/me/preferences` containing a new valid `dice.surface` string
+- **Given** a PATCH request to `/api/me/preferences` containing `dice.surface` set to one of
+  the supported values (`wood`, `metal`, `stone`, `felt`) or `null`
 - **When** the server processes the request
 - **Then** the preference is validated by `schema.ts`, accepted, and saved to the user's profile.
+
+#### Scenario: Reject unsupported surface value
+
+- **Given** a PATCH request to `/api/me/preferences` containing a `dice.surface` string that
+  is not one of the supported values
+- **When** the server processes the request
+- **Then** `validatePreferencePatch` rejects the body and no write occurs, and
+  `resolvePreferences` repairs a stored out-of-range value back to `null`.
+
+#### Scenario: Invalid dice colour input gives feedback and is not saved
+
+- **Given** an authenticated user editing the "Dice Color" field on `/profile`
+- **When** the current text is not a valid `#rgb` / `#rrggbb` hex string and is non-empty
+- **Then** the field shows an invalid state (visible indicator + helper text) and
+  `setPreference('dice.color', …)` is not called until the value is valid or cleared.
 
 ## MODIFIED Requirements
 
@@ -49,6 +68,9 @@ None.
 - Proposal element -> Requirement: Add "Profile & Settings" link -> MODIFIED User Menu
 - Design decision -> Requirement: Flat page at `app/profile/page.tsx` -> ADDED Profile Page
 - Requirement -> Task(s): Update `schema.ts` to include `surface` -> ADDED schema settings
+- Design Decision 3 -> Requirement: `dice.surface` enum (`wood`/`metal`/`stone`/`felt`/`null`) -> ADDED schema settings (follow-up: schema enum enforcement)
+- Design Decision 4 -> Note: `dice.color` / `dice.surface` persisted only, not consumed by the dice engine in this change
+- Design Risk -> Requirement: invalid `dice.color` input feedback -> ADDED schema settings (follow-up: inline colour-field validation)
 
 ## Non-Functional Acceptance Criteria
 

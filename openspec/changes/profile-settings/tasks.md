@@ -98,3 +98,20 @@ Blocking resolution flow:
 - [ ] Prune merged local branches: `git fetch --prune` and `git branch -D <feature-branch> doc/archive-YYYY-MM-DD-profile-settings`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D <feature-branch> doc/archive-YYYY-MM-DD-profile-settings`
+
+## Follow-ups (separate changes — not blockers for this PR)
+
+Captured during explore review of PR #674 / this branch:
+
+- [ ] FU-1: Tighten `KEY_VALIDATORS["dice.surface"]` in `lib/preferences/schema.ts` from
+  `string | null` to an enum (`SURFACE_VALUES = ['wood','metal','stone','felt']`), exported
+  and imported by `app/profile/page.tsx` so the `<select>` options and the validator share
+  one source. Add unit tests: `validatePreferencePatch` rejects an unknown surface;
+  `resolvePreferences` repairs a stored unknown surface to `null`. (design.md Decision 3)
+- [ ] FU-2: Consume `preferences.dice.color` and `preferences.dice.surface` in the
+  dice-rendering path (apply at DiceBox construction, alongside the existing dice-appearance
+  work). Currently both values are persisted but unused. (design.md Decision 4)
+- [ ] FU-3: Add inline validation to the "Dice Color" field on `app/profile/page.tsx` — show
+  an invalid state while the text fails `HEX_COLOR` and only call `setPreference` once the
+  value is valid or empty (or switch to a swatch / `<input type="color">`). Today an invalid
+  entry is dropped with only a `console.warn` and no user feedback. (design.md Risks)

@@ -34,6 +34,10 @@
 
 - Multi-tab sidebar navigation.
 - Modifying account credentials (email/password) on this page.
+- Consuming `dice.color` / `dice.surface` in the dice-rendering path — this change only
+  persists them and exposes the controls (see design.md Decision 4).
+- Enum enforcement of `dice.surface` in the schema validator — shipped as an unconstrained
+  `string | null`; tightening is a tracked follow-up (design.md Decision 3).
 
 ## What Changes
 
@@ -49,9 +53,10 @@
 
 ## Open Questions
 
-- Question: Does `dice.surface` need to be a string or a boolean, and what are the valid options?
-  - Needed from: Product / Designer (User)
-  - Blocker for apply: yes
+- ~~Question: Does `dice.surface` need to be a string or a boolean, and what are the valid options?~~
+  - Resolved: `string | null`. `null` = default surface; UI options are `wood` / `metal` /
+    `stone` / `felt`. See design.md Decision 3. Schema-level enum enforcement is a tracked
+    follow-up, not a blocker for this change.
 
 ## Non-Goals
 

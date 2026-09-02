@@ -33,6 +33,31 @@
 - Rationale: All dice preferences should be under the `dice` domain for consistency.
 - Trade-offs: Requires a migration or default fallback for existing users (handled cleanly by `resolvePreferences`).
 
+### Decision 3: `dice.surface` valid values (resolves Open Question)
+
+- Chosen: `dice.surface` is `string | null`, where `null` means "default surface" and the
+  UI offers a fixed set of options — `wood`, `metal`, `stone`, `felt`. The stored type
+  stays `string | null` for forward compatibility.
+- Status of first implementation: shipped as an unconstrained `string | null` — the schema
+  validator (`KEY_VALIDATORS["dice.surface"]`) accepts any string, and the fixed list lives
+  only in the `<select>` on `app/profile/page.tsx`.
+- Follow-up (tracked in tasks.md): tighten `KEY_VALIDATORS["dice.surface"]` to an enum
+  (`SURFACE_VALUES`) shared between the schema and the page so an out-of-range value is
+  rejected by `validatePreferencePatch` and repaired by `resolvePreferences`, instead of
+  being silently persisted.
+- Rationale: an enum keeps the persisted value meaningful for the eventual dice-engine
+  consumer (Decision 4) and matches how `dice.color` is already validated.
+
+### Decision 4: `dice.color` and `dice.surface` are persistence-only for now
+
+- Chosen: this change wires `dice.color` and `dice.surface` through the schema, the
+  preferences API, and the `/profile` UI, but nothing in the dice engine reads them yet.
+- Rationale: keeps this change scoped to "give users a place to set preferences"; the
+  dice-appearance integration (applying colour/surface at DiceBox construction) is separate
+  work with its own testing surface.
+- Follow-up (tracked in tasks.md): a separate change consumes `preferences.dice.color` /
+  `preferences.dice.surface` in the dice-rendering path.
+
 ## Proposal to Design Mapping
 
 - Proposal element: Add "Profile & Settings" link
@@ -63,6 +88,17 @@
   - Impact: Low, `resolvePreferences` handles fallback.
   - Mitigation: Ensure `DEFAULT_PREFERENCES` is updated correctly for new fields.
 
+- Risk/trade-off: `dice.color` text input silently discards invalid entries.
+  - Detail: the field is a free-text `<input>`; `setPreference('dice.color', …)` runs the
+    value through `isValidPreferenceValue`, which requires a strict `#rgb` / `#rrggbb` hex.
+    A partial or malformed entry (`#ff`, `red`) is dropped with only a `console.warn` — the
+    user sees the text they typed but no error, and nothing is saved.
+  - Impact: Low (no data corruption), but confusing UX.
+  - Mitigation (follow-up, tracked in tasks.md): show inline validation state on the colour
+    field — e.g. a red border + helper text while the current value fails `HEX_COLOR`, and
+    only call `setPreference` once it is valid or empty. A native `<input type="color">` or a
+    swatch picker would also remove the free-text failure mode.
+
 ## Rollback / Mitigation
 
 - Rollback trigger: User settings break on load.
@@ -79,4 +115,6 @@
 
 ## Open Questions
 
-- What are the valid values for `dice.surface`? (Assuming string for now).
+- ~~What are the valid values for `dice.surface`?~~ Resolved — see Decision 3.
+  `null` (default) plus `wood` / `metal` / `stone` / `felt`; enum enforcement in the schema
+  is a tracked follow-up.
