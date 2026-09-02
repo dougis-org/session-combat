@@ -160,12 +160,14 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
     expect(predicate()).toBe(true);
   });
 
-  itReturns500WithParams(
-    POST,
-    makePostReq,
-    PARAMS,
-    () => mockedStorage.saveSessionLog.mockRejectedValue(new Error("DB error"))
-  );
+  it("returns 500 and rolls back the active session claim when saveSessionLog throws", async () => {
+    mockedStorage.saveSessionLog.mockRejectedValue(new Error("DB error"));
+    const res = await POST(makePostReq(), { params: PARAMS });
+    expect(res.status).toBe(500);
+    expect((await res.json()).error).toBe("Failed to create session log");
+    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
+    expect(emitFiltered).not.toHaveBeenCalled();
+  });
 
   it("returns 503 with SESSION_NUMBER_UNAVAILABLE when getNextSessionNumber throws", async () => {
     mockedStorage.getNextSessionNumber.mockRejectedValue(new Error("DB error"));
