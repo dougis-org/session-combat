@@ -20,33 +20,19 @@ import {
   CampaignRoll,
   MemberRole,
   MemberStatus,
-  MemberHistoryEntry,
   PublicUser,
   SharedCharacterEntry,
 } from "./types";
-import { DuplicateMemberError, DuplicateShareError } from "./errors";
+import { DuplicateShareError } from "./errors";
 import { GLOBAL_USER_ID } from "./constants";
-import { InvalidUserIdError } from "./permissions";
 import { runStorageOp } from "@/lib/storage/runOp";
-import { ObjectId, Filter, Document } from "mongodb";
+import { Filter, Document } from "mongodb";
 
 import { buildEntityQuery, normalizeStoredEntityId, QueryableEntity } from "./storage/helpers";
 import {
   getUserPreferences as getUserPreferencesRepo,
   updateUserPreferences as updateUserPreferencesRepo,
 } from "./storage/userPreferencesRepo";
-
-function normalizeCampaign(campaign: Campaign): Campaign {
-  return {
-    ...campaign,
-    chapters: Array.isArray(campaign.chapters) ? campaign.chapters : [],
-    encounterIds: Array.isArray(campaign.encounterIds) ? campaign.encounterIds : [],
-    partyIds: Array.isArray(campaign.partyIds) ? campaign.partyIds : [],
-    status: campaign.status ?? 'active',
-    notes: campaign.notes ?? '',
-  };
-}
-
 
 /**
  * Server-side storage functions for MongoDB
@@ -57,6 +43,10 @@ import * as encounterRepo from "./storage/encounterRepo";
 import * as characterRepo from "./storage/characterRepo";
 import * as combatStateRepo from "./storage/combatStateRepo";
 import * as partyRepo from "./storage/partyRepo";
+import * as monsterTemplateRepo from "./storage/monsterTemplateRepo";
+import * as campaignTemplateRepo from "./storage/campaignTemplateRepo";
+import * as campaignRepo from "./storage/campaignRepo";
+import * as membershipRepo from "./storage/membershipRepo";
 
 export const storage = {
   // Load encounters for a user
@@ -87,148 +77,34 @@ export const storage = {
   async loadParties(userId: string): Promise<Party[]> { return partyRepo.loadParties(userId); },
 
   // Load monster templates for a user
-  async loadMonsterTemplates(userId: string): Promise<MonsterTemplate[]> {
-    try {
-      const db = await getDatabase();
-      const templates = await db
-        .collection<MonsterTemplate>("monsterTemplates")
-        .find({ userId })
-        .toArray();
-      return templates.map(normalizeStoredEntityId);
-    } catch (error) {
-      console.error("Error loading monster templates:", error);
-      return [];
-    }
-  },
+  async loadMonsterTemplates(userId: string): Promise<MonsterTemplate[]> { return monsterTemplateRepo.loadMonsterTemplates(userId); },
 
   // Load global monster templates (admin-controlled)
-  async loadGlobalMonsterTemplates(): Promise<MonsterTemplate[]> {
-    return this.loadMonsterTemplates(GLOBAL_USER_ID);
-  },
+  async loadGlobalMonsterTemplates(): Promise<MonsterTemplate[]> { return monsterTemplateRepo.loadGlobalMonsterTemplates(); },
 
   // Load all monster templates (user + global)
-  async loadAllMonsterTemplates(userId: string): Promise<MonsterTemplate[]> {
-    try {
-      const [userTemplates, globalTemplates] = await Promise.all([
-        this.loadMonsterTemplates(userId),
-        this.loadGlobalMonsterTemplates(),
-      ]);
-      return [...userTemplates, globalTemplates].flat();
-    } catch (error) {
-      console.error("Error loading all monster templates:", error);
-      return [];
-    }
-  },
+  async loadAllMonsterTemplates(userId: string): Promise<MonsterTemplate[]> { return monsterTemplateRepo.loadAllMonsterTemplates(userId); },
 
   // Load global campaign templates (admin-controlled)
-  async loadGlobalCampaignTemplates(): Promise<CampaignTemplate[]> {
-    try {
-      const db = await getDatabase();
-      const templates = await db
-        .collection<CampaignTemplate>("campaignTemplates")
-        .find({ userId: GLOBAL_USER_ID })
-        .sort({ name: 1 })
-        .collation({ locale: 'en', strength: 2 })
-        .toArray();
-      return templates.map(normalizeStoredEntityId);
-    } catch (error) {
-      console.error("Error loading global campaign templates:", error);
-      return [];
-    }
-  },
+  async loadGlobalCampaignTemplates(): Promise<CampaignTemplate[]> { return campaignTemplateRepo.loadGlobalCampaignTemplates(); },
 
   // Load a single global campaign template by id
-  async loadGlobalCampaignTemplateById(id: string): Promise<CampaignTemplate | null> {
-    try {
-      const db = await getDatabase();
-      const template = await db
-        .collection<CampaignTemplate>("campaignTemplates")
-        .findOne({ id, userId: GLOBAL_USER_ID });
-      return template ? normalizeStoredEntityId(template) : null;
-    } catch (error) {
-      console.error("Error loading global campaign template by id:", error);
-      return null;
-    }
-  },
+  async loadGlobalCampaignTemplateById(id: string): Promise<CampaignTemplate | null> { return campaignTemplateRepo.loadGlobalCampaignTemplateById(id); },
 
   // Save campaign template (upsert)
-  async saveCampaignTemplate(template: CampaignTemplate): Promise<void> {
-    try {
-      const db = await getDatabase();
-      const { _id, ...templateData } = template;
-      await db
-        .collection<CampaignTemplate>("campaignTemplates")
-        .updateOne(
-          { id: template.id, userId: template.userId },
-          { $set: templateData },
-          { upsert: true }
-        );
-    } catch (error) {
-      console.error("Error saving campaign template:", error);
-      throw error;
-    }
-  },
+  async saveCampaignTemplate(template: CampaignTemplate): Promise<void> { return campaignTemplateRepo.saveCampaignTemplate(template); },
 
   // Delete campaign template — returns true if deleted, false if not found
-  async deleteCampaignTemplate(id: string): Promise<boolean> {
-    try {
-      const db = await getDatabase();
-      const result = await db
-        .collection<CampaignTemplate>("campaignTemplates")
-        .deleteOne({ id, userId: GLOBAL_USER_ID });
-      return result.deletedCount > 0;
-    } catch (error) {
-      console.error("Error deleting campaign template:", error);
-      throw error;
-    }
-  },
+  async deleteCampaignTemplate(id: string): Promise<boolean> { return campaignTemplateRepo.deleteCampaignTemplate(id); },
 
   // Load campaigns for a user
-  async loadCampaigns(userId: string): Promise<Campaign[]> {
-    try {
-      const db = await getDatabase();
-      const campaigns = await db
-        .collection<Campaign>("campaigns")
-        .find({ userId })
-        .toArray();
-      return campaigns.map(normalizeStoredEntityId).map(normalizeCampaign);
-    } catch (error) {
-      console.error("Error loading campaigns:", error);
-      return [];
-    }
-  },
+  async loadCampaigns(userId: string): Promise<Campaign[]> { return campaignRepo.loadCampaigns(userId); },
 
   // Load single campaign by ID
-  async loadCampaignById(id: string, userId: string): Promise<Campaign | null> {
-    try {
-      const db = await getDatabase();
-      const campaign = await db
-        .collection<Campaign>("campaigns")
-        .findOne({ id, userId });
-      return campaign ? normalizeCampaign(normalizeStoredEntityId(campaign)) : null;
-    } catch (error) {
-      console.error("Error loading campaign by ID:", error);
-      return null;
-    }
-  },
+  async loadCampaignById(id: string, userId: string): Promise<Campaign | null> { return campaignRepo.loadCampaignById(id, userId); },
 
   // Save campaign (upsert)
-  async saveCampaign(campaign: Campaign): Promise<void> {
-    try {
-      const db = await getDatabase();
-      const { _id, ...campaignData } = campaign;
-      await db
-        .collection<Campaign>("campaigns")
-        .updateOne(
-          { id: campaign.id, userId: campaign.userId },
-          { $set: campaignData },
-          { upsert: true }
-        );
-    } catch (error) {
-      console.error("Error saving campaign:", error);
-      throw error;
-    }
-  },
+  async saveCampaign(campaign: Campaign): Promise<void> { return campaignRepo.saveCampaign(campaign); },
 
   async addPartyToCampaign(campaignId: string, partyId: string): Promise<void> {
     return runStorageOp({ name: "addPartyToCampaign", collection: "campaigns" }, async () => {
@@ -282,66 +158,11 @@ export const storage = {
   },
 
   // Delete campaign
-  async deleteCampaign(id: string, userId: string): Promise<void> {
-    try {
-      const db = await getDatabase();
+  async deleteCampaign(id: string, userId: string): Promise<void> { return campaignRepo.deleteCampaign(id, userId); },
 
-      // Verify campaign exists and belongs to the user before deleting anything
-      const campaign = await db
-        .collection<Campaign>("campaigns")
-        .findOne({ id, userId }, { projection: { id: 1 } });
-      if (!campaign) {
-        return;
-      }
+  async setActiveCampaignSession(campaignId: string, userId: string, sessionId: string | null): Promise<void> { return campaignRepo.setActiveCampaignSession(campaignId, userId, sessionId); },
 
-      // Cascade delete children first
-      await Promise.all([
-        db.collection("campaignMembers").deleteMany({ campaignId: id }),
-        db.collection<SessionLog>("sessionLogs").deleteMany({ campaignId: id }),
-        db.collection("campaignRolls").deleteMany({ campaignId: id }),
-        db.collection<CampaignCharacterShare>("campaignCharacterShares").deleteMany({ campaignId: id }),
-        db.collection<SavedContent>("savedContent").deleteMany({ campaignId: id }),
-        db.collection("campaignMessages").deleteMany({ campaignId: id }),
-      ]);
-
-      // Delete the parent campaign document last
-      await db.collection<Campaign>("campaigns").deleteOne({ id, userId });
-    } catch (error) {
-      console.error("Error deleting campaign:", error);
-      throw error;
-    }
-  },
-
-  async setActiveCampaignSession(campaignId: string, userId: string, sessionId: string | null): Promise<void> {
-    try {
-      const db = await getDatabase();
-      await db
-        .collection<Campaign>("campaigns")
-        .updateOne(
-          { id: campaignId, userId },
-          { $set: { activeSessionId: sessionId, updatedAt: new Date() } }
-        );
-    } catch (error) {
-      console.error("Error setting active campaign session:", error);
-      throw error;
-    }
-  },
-
-  async claimActiveCampaignSession(campaignId: string, userId: string, sessionId: string): Promise<boolean> {
-    try {
-      const db = await getDatabase();
-      const result = await db
-        .collection<Campaign>("campaigns")
-        .updateOne(
-          { id: campaignId, userId, $or: [{ activeSessionId: null }, { activeSessionId: { $exists: false } }] },
-          { $set: { activeSessionId: sessionId, updatedAt: new Date() } }
-        );
-      return result.modifiedCount === 1;
-    } catch (error) {
-      console.error("Error claiming active campaign session:", error);
-      throw error;
-    }
-  },
+  async claimActiveCampaignSession(campaignId: string, userId: string, sessionId: string): Promise<boolean> { return campaignRepo.claimActiveCampaignSession(campaignId, userId, sessionId); },
 
   // Load all session data for a user
   async load(userId: string): Promise<SessionData> {
@@ -464,33 +285,10 @@ export const storage = {
   async deleteParty(id: string, userId: string): Promise<void> { return partyRepo.deleteParty(id, userId); },
 
   // Save monster template
-  async saveMonsterTemplate(template: MonsterTemplate): Promise<void> {
-    try {
-      const db = await getDatabase();
-      const { _id, ...templateData } = template;
-
-      const query = buildEntityQuery(template);
-      await db
-        .collection<MonsterTemplate>("monsterTemplates")
-        .updateOne(query, { $set: templateData }, { upsert: true });
-    } catch (error) {
-      console.error("Error saving monster template:", error);
-      throw error;
-    }
-  },
+  async saveMonsterTemplate(template: MonsterTemplate): Promise<void> { return monsterTemplateRepo.saveMonsterTemplate(template); },
 
   // Delete monster template
-  async deleteMonsterTemplate(id: string, userId: string): Promise<void> {
-    try {
-      const db = await getDatabase();
-      await db
-        .collection<MonsterTemplate>("monsterTemplates")
-        .deleteOne({ id, userId });
-    } catch (error) {
-      console.error("Error deleting monster template:", error);
-      throw error;
-    }
-  },
+  async deleteMonsterTemplate(id: string, userId: string): Promise<void> { return monsterTemplateRepo.deleteMonsterTemplate(id, userId); },
 
   // Load spells - load all global spells if no userId, or load user spells
   async loadSpells(userId?: string, concentration?: boolean): Promise<SpellTemplate[]> {
@@ -580,36 +378,9 @@ export const storage = {
   },
 
   // Check if monster exists by name and source (for dedupe)
-  async monsterExistsByNameAndSource(
-    name: string,
-    source: string
-  ): Promise<boolean> {
-    try {
-      const db = await getDatabase();
-      const count = await db
-        .collection<MonsterTemplate>("monsterTemplates")
-        .countDocuments({ name, source: source || "" });
-      return count > 0;
-    } catch (error) {
-      console.error("Error checking monster existence:", error);
-      return false;
-    }
-  },
+  async monsterExistsByNameAndSource(name: string, source: string): Promise<boolean> { return monsterTemplateRepo.monsterExistsByNameAndSource(name, source); },
 
-  async findMonsterByNameAndSource(
-    name: string,
-    source: string
-  ): Promise<MonsterTemplate | null> {
-    try {
-      const db = await getDatabase();
-      return await db
-        .collection<MonsterTemplate>("monsterTemplates")
-        .findOne({ name, source: source || "" }) as MonsterTemplate | null;
-    } catch (error) {
-      console.error("Error finding monster:", error);
-      return null;
-    }
-  },
+  async findMonsterByNameAndSource(name: string, source: string): Promise<MonsterTemplate | null> { return monsterTemplateRepo.findMonsterByNameAndSource(name, source); },
 
   // Load session logs for a campaign, sorted by sessionNumber descending
   async loadSessionLogs(userId: string, campaignId: string): Promise<SessionLog[]> {
@@ -760,21 +531,7 @@ export const storage = {
     },
   },
 
-  async addMember(member: CampaignMember): Promise<void> {
-    try {
-      const db = await getDatabase();
-      const { _id, ...insertData } = member;
-      await db
-        .collection<CampaignMember>("campaignMembers")
-        .insertOne(insertData as CampaignMember);
-    } catch (error) {
-      if (error && typeof error === "object" && "code" in error && error.code === 11000) {
-        throw new DuplicateMemberError(member.campaignId, member.userId);
-      }
-      console.error("Error adding campaign member:", error);
-      throw error;
-    }
-  },
+  async addMember(member: CampaignMember): Promise<void> { return membershipRepo.addMember(member); },
 
   async updateMemberStatus(
     campaignId: string,
@@ -782,147 +539,23 @@ export const storage = {
     status: MemberStatus,
     actorId: string,
     role?: MemberRole,
-  ): Promise<void> {
-    try {
-      const db = await getDatabase();
-      const historyEntry: MemberHistoryEntry = { action: status, by: actorId, at: new Date() };
-      const setFields = role !== undefined ? { status, role } : { status };
-      await db
-        .collection<CampaignMember>("campaignMembers")
-        .updateOne(
-          { campaignId, userId },
-          { $set: setFields, $push: { history: historyEntry } as any },
-        );
-    } catch (error) {
-      console.error("Error updating campaign member status:", error);
-      throw error;
-    }
-  },
+  ): Promise<void> { return membershipRepo.updateMemberStatus(campaignId, userId, status, actorId, role); },
 
-  async listMembersForCampaign(campaignId: string): Promise<CampaignMember[]> {
-    try {
-      const db = await getDatabase();
-      const members = await db
-        .collection<CampaignMember>("campaignMembers")
-        .find({ campaignId })
-        .toArray();
-      return members.map((m) => {
-        const normalized = normalizeStoredEntityId(m);
-        const { _id, ...rest } = normalized;
-        return rest as CampaignMember;
-      });
-    } catch (error) {
-      console.error("Error listing campaign members:", error);
-      return [];
-    }
-  },
+  async listMembersForCampaign(campaignId: string): Promise<CampaignMember[]> { return membershipRepo.listMembersForCampaign(campaignId); },
 
-  async getMember(campaignId: string, userId: string): Promise<CampaignMember | null> {
-    try {
-      const db = await getDatabase();
-      const doc = await db
-        .collection<CampaignMember>("campaignMembers")
-        .findOne({ campaignId, userId });
-      if (!doc) return null;
-      const normalized = normalizeStoredEntityId(doc);
-      const { _id, ...rest } = normalized;
-      return rest as CampaignMember;
-    } catch (error) {
-      console.error("Error getting campaign member:", error);
-      throw error;
-    }
-  },
+  async getMember(campaignId: string, userId: string): Promise<CampaignMember | null> { return membershipRepo.getMember(campaignId, userId); },
 
-  async loadCampaignByIdAny(id: string): Promise<Campaign | null> {
-    try {
-      const db = await getDatabase();
-      const campaign = await db
-        .collection<Campaign>("campaigns")
-        .findOne({ id });
-      return campaign ? normalizeCampaign(normalizeStoredEntityId(campaign)) : null;
-    } catch (error) {
-      console.error("Error loading campaign by ID (any):", error);
-      throw error;
-    }
-  },
+  async loadCampaignByIdAny(id: string): Promise<Campaign | null> { return campaignRepo.loadCampaignByIdAny(id); },
 
-  async listCampaignsForMember(userId: string): Promise<CampaignMemberSummary[]> {
-    try {
-      const db = await getDatabase();
-      const memberships = await db
-        .collection<{ campaignId: string }>("campaignMembers")
-        .find({ userId })
-        .toArray();
-      if (memberships.length === 0) {
-        return [];
-      }
-      const campaignIds = memberships.map((m) => m.campaignId);
-      const campaigns = await db
-        .collection<Campaign>("campaigns")
-        .find({ id: { $in: campaignIds } }, { projection: { id: 1, name: 1 } })
-        .toArray();
-      return campaigns.map((c) => ({
-        id: c.id,
-        name: c.name,
-      }));
-    } catch (error) {
-      console.error("Error listing campaigns for member:", error);
-      return [];
-    }
-  },
+  async listCampaignsForMember(userId: string): Promise<CampaignMemberSummary[]> { return campaignRepo.listCampaignsForMember(userId); },
 
-  async getUserById(userId: string): Promise<PublicUser | null> {
-    if (!ObjectId.isValid(userId)) throw new InvalidUserIdError(userId);
-    const db = await getDatabase();
-    const doc = await db
-      .collection("users")
-      .findOne({ _id: { $eq: new ObjectId(userId) } }, { projection: { username: 1 } });
-    if (!doc || !doc['username']) return null;
-    return { id: userId, username: doc['username'] as string };
-  },
+  async getUserById(userId: string): Promise<PublicUser | null> { return membershipRepo.getUserById(userId); },
 
-  async getUsersByIds(userIds: string[]): Promise<Record<string, string>> {
-    if (userIds.length === 0) return {};
-    const validObjectIds = userIds
-      .filter((id) => ObjectId.isValid(id))
-      .map((id) => new ObjectId(id));
-    if (validObjectIds.length === 0) return {};
-    const db = await getDatabase();
-    const docs = await db
-      .collection("users")
-      .find({ _id: { $in: validObjectIds } }, { projection: { username: 1 } })
-      .toArray();
-    const result: Record<string, string> = {};
-    for (const doc of docs) {
-      if (doc['username']) {
-        result[doc._id.toString()] = doc['username'] as string;
-      }
-    }
-    return result;
-  },
+  async getUsersByIds(userIds: string[]): Promise<Record<string, string>> { return membershipRepo.getUsersByIds(userIds); },
 
-  async listInvitationsForUser(userId: string): Promise<CampaignMember[]> {
-    const db = await getDatabase();
-    const members = await db
-      .collection<CampaignMember>("campaignMembers")
-      .find({ userId, status: "invited" })
-      .toArray();
-    return members.map((m) => {
-      const normalized = normalizeStoredEntityId(m);
-      const { _id, ...rest } = normalized;
-      return rest as CampaignMember;
-    });
-  },
+  async listInvitationsForUser(userId: string): Promise<CampaignMember[]> { return membershipRepo.listInvitationsForUser(userId); },
 
-  async getCampaignsByIds(campaignIds: string[]): Promise<Pick<Campaign, "id" | "name">[]> {
-    if (campaignIds.length === 0) return [];
-    const db = await getDatabase();
-    const docs = await db
-      .collection<Campaign>("campaigns")
-      .find({ id: { $in: campaignIds } }, { projection: { id: 1, name: 1, _id: 0 } })
-      .toArray();
-    return docs as Pick<Campaign, "id" | "name">[];
-  },
+  async getCampaignsByIds(campaignIds: string[]): Promise<Pick<Campaign, "id" | "name">[]> { return campaignRepo.getCampaignsByIds(campaignIds); },
 
   async addShare(share: CampaignCharacterShare): Promise<void> {
     try {

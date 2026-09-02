@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { storage } from "@/lib/storage";
+import { StorageError } from "@/lib/storage/errors";
 import { getDatabase } from "@/lib/db";
 import type { Campaign, CampaignTemplate } from "@/lib/types";
 
@@ -67,12 +68,10 @@ describe("Campaign storage functions", () => {
       expect(result).toEqual([]);
     });
 
-    test("returns empty array when getDatabase fails", async () => {
+    test("rejects with StorageError when getDatabase fails (#503: was swallowed to [])", async () => {
       mockedGetDatabase.mockRejectedValue(new Error("connection failed") as never);
 
-      const result = await storage.loadCampaigns("user-1");
-
-      expect(result).toEqual([]);
+      await expect(storage.loadCampaigns("user-1")).rejects.toBeInstanceOf(StorageError);
     });
   });
 
@@ -102,12 +101,10 @@ describe("Campaign storage functions", () => {
       expect(result).toBeNull();
     });
 
-    test("returns null when getDatabase fails", async () => {
+    test("rejects with StorageError when getDatabase fails (#503: was swallowed to null)", async () => {
       mockedGetDatabase.mockRejectedValue(new Error("connection failed") as never);
 
-      const result = await storage.loadCampaignById("campaign-1", "user-1");
-
-      expect(result).toBeNull();
+      await expect(storage.loadCampaignById("campaign-1", "user-1")).rejects.toBeInstanceOf(StorageError);
     });
   });
 
@@ -130,7 +127,7 @@ describe("Campaign storage functions", () => {
     test("throws when database operation fails", async () => {
       campaignsMock.updateOne.mockRejectedValue(new Error("write failed") as never);
 
-      await expect(storage.saveCampaign(baseCampaign)).rejects.toThrow("write failed");
+      await expect(storage.saveCampaign(baseCampaign)).rejects.toBeInstanceOf(StorageError);
     });
   });
 
@@ -252,7 +249,7 @@ describe("Campaign storage functions", () => {
     test("throws when database operation fails", async () => {
       campaignsMock.deleteOne.mockRejectedValue(new Error("delete failed") as never);
 
-      await expect(storage.deleteCampaign("campaign-1", "user-1")).rejects.toThrow("delete failed");
+      await expect(storage.deleteCampaign("campaign-1", "user-1")).rejects.toBeInstanceOf(StorageError);
     });
   });
 
@@ -318,12 +315,10 @@ describe("Campaign template storage functions", () => {
       expect(result).toEqual([]);
     });
 
-    test("returns empty array when getDatabase fails", async () => {
+    test("rejects with StorageError when getDatabase fails (#503: was swallowed to [])", async () => {
       mockedGetDatabase.mockRejectedValue(new Error("connection failed") as never);
 
-      const result = await storage.loadGlobalCampaignTemplates();
-
-      expect(result).toEqual([]);
+      await expect(storage.loadGlobalCampaignTemplates()).rejects.toBeInstanceOf(StorageError);
     });
   });
 
@@ -345,12 +340,10 @@ describe("Campaign template storage functions", () => {
       expect(result).toBeNull();
     });
 
-    test("returns null when getDatabase fails", async () => {
+    test("rejects with StorageError when getDatabase fails (#503: was swallowed to null)", async () => {
       mockedGetDatabase.mockRejectedValue(new Error("connection failed") as never);
 
-      const result = await storage.loadGlobalCampaignTemplateById("template-1");
-
-      expect(result).toBeNull();
+      await expect(storage.loadGlobalCampaignTemplateById("template-1")).rejects.toBeInstanceOf(StorageError);
     });
   });
 
@@ -373,7 +366,7 @@ describe("Campaign template storage functions", () => {
     test("throws when database operation fails", async () => {
       templatesMock.updateOne.mockRejectedValue(new Error("write failed") as never);
 
-      await expect(storage.saveCampaignTemplate(baseTemplate)).rejects.toThrow("write failed");
+      await expect(storage.saveCampaignTemplate(baseTemplate)).rejects.toBeInstanceOf(StorageError);
     });
   });
 
@@ -399,7 +392,7 @@ describe("Campaign template storage functions", () => {
     test("throws when database operation fails", async () => {
       templatesMock.deleteOne.mockRejectedValue(new Error("delete failed") as never);
 
-      await expect(storage.deleteCampaignTemplate("template-1")).rejects.toThrow("delete failed");
+      await expect(storage.deleteCampaignTemplate("template-1")).rejects.toBeInstanceOf(StorageError);
     });
   });
 });
