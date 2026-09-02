@@ -8,10 +8,10 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** from the primary checkout,
+- [x] **Step 1 — Sync default branch:** from the primary checkout,
   `git fetch origin main`. (Do NOT `git checkout main` in the primary checkout —
   another agent's branch is checked out there. All work happens in the worktree.)
-- [ ] **Step 2 — Confirm working branch published:** in
+- [x] **Step 2 — Confirm working branch published:** in
   `.worktrees/migrate-content-reference-storage-domains`, run
   `git status` and `git rev-parse --abbrev-ref --symbolic-full-name @{u}` to
   confirm the branch tracks `origin/migrate-content-reference-storage-domains`.
@@ -23,13 +23,13 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the
   available skills list for `pr-review-toolkit:review-pr`. If not listed, halt,
   inform the user the plugin is required, provide installation guidance, and do
   not proceed until the user confirms installation.
-- [ ] **Verify `openspec-review-code` is available** — required before every
+- [x] **Verify `openspec-review-code` is available** — required before every
   commit. Halt and prompt if missing.
-- [ ] **Open Questions resolved (@dougis, 2026-09-02)** — no Preflight action
+- [x] **Open Questions resolved (@dougis, 2026-09-02)** — no Preflight action
   needed; recorded in `proposal.md` / `design.md`:
   - `storage.load()` → **remove entirely**.
   - `storage.clear()` → **wrap in `runStorageOp`**, relocate to
@@ -38,11 +38,11 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
 
 ## Execution
 
-- [ ] **Step 1 — Enter worktree:** `cd .worktrees/migrate-content-reference-storage-domains`.
+- [x] **Step 1 — Enter worktree:** `cd .worktrees/migrate-content-reference-storage-domains`.
   All subsequent work happens here.
-- [ ] **Step 2 — Confirm branch pushed:** `git push -u origin migrate-content-reference-storage-domains`
+- [x] **Step 2 — Confirm branch pushed:** `git push -u origin migrate-content-reference-storage-domains`
   if not already tracking remote.
-- [ ] **Issue lifecycle: mark in-progress** — `gh issue edit 504 --add-label "in-progress"`.
+- [x] **Issue lifecycle: mark in-progress** — `gh issue edit 504 --add-label "in-progress"`.
   Then `gh project list --owner dougis-org --format json`, resolve the status
   field option matching "In Progress" via
   `gh project field-list <n> --owner dougis-org --format json`, and move the
@@ -50,7 +50,7 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
   scope: warn, tell the user to run `gh auth refresh -s project`, skip the
   project move (label edit still applies).
 
-- [ ] **Step 3 — Re-verify the inventory (spec: per-domain repos).**
+- [x] **Step 3 — Re-verify the inventory (spec: per-domain repos).**
   Cross-check every cluster entry in `docs/storage-refactor/inventory.json`
   against the current `lib/storage.ts` source: behavior, sentinel, line,
   callers. Run the method-count check (compare `inventory.json` entry count to
@@ -58,7 +58,7 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
   `getNextSessionNumber` is already on `runStorageOp`) in a scratch note for
   the PR description.
 
-- [ ] **Step 4 — Caller audit (spec: failures surface as StorageError).**
+- [x] **Step 4 — Caller audit (spec: failures surface as StorageError).**
   Enumerate every non-test call site of the six swallow methods
   (`loadSessionLogs`, `listSharesForCampaign`, `listAllSharesForCampaign`,
   `loadSpells`, `loadSpellById`, `spellExistsByNameAndSource`) and the two
@@ -71,83 +71,83 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
   `app/api/campaigns/[id]/rolls/route.ts`, `lib/import/dedupeEngine.ts`.
   List any unguarded caller as a sub-task to fix in this change.
 
-- [ ] **Step 5 — TDD: `sessionLogRepo.ts`.**
-  - [ ] Write `tests/unit/lib/storage/sessionLogRepo.test.ts` first: for each of
+- [x] **Step 5 — TDD: `sessionLogRepo.ts`.**
+  - [x] Write `tests/unit/lib/storage/sessionLogRepo.test.ts` first: for each of
     `loadSessionLogs`, `getNextSessionNumber`, `saveSessionLog`,
     `updateSessionLog`, `deleteSessionLog` — a reject-path test
     (`rejects.toThrow(StorageError)` with `op`/`collection`, one
     `logStorageEvent` error) and a not-found/empty-path test
     (`loadSessionLogs` → `[]` / `not_found`; `updateSessionLog` → `null`;
     `deleteSessionLog` → `false`). Confirm tests fail.
-  - [ ] Create `lib/storage/sessionLogRepo.ts` with the five functions on
+  - [x] Create `lib/storage/sessionLogRepo.ts` with the five functions on
     `runStorageOp` (`collection: "sessionLogs"`, `isEmpty` on `loadSessionLogs`).
     Move `getNextSessionNumber` verbatim from its current `runStorageOp` form.
-  - [ ] Point `lib/storage.ts` at `sessionLogRepo.*`. Tests green.
+  - [x] Point `lib/storage.ts` at `sessionLogRepo.*`. Tests green.
 
-- [ ] **Step 6 — TDD: `shareRepo.ts`.**
-  - [ ] Write `tests/unit/lib/storage/shareRepo.test.ts` first: `addShare`
+- [x] **Step 6 — TDD: `shareRepo.ts`.**
+  - [x] Write `tests/unit/lib/storage/shareRepo.test.ts` first: `addShare`
     duplicate-key (`{ code: 11000 }` → `rejects.toThrow(DuplicateShareError)`)
     and generic failure (→ `StorageError`); `removeShare` reject → `StorageError`,
     missing row → `false`; `listSharesForCampaign` /
     `listAllSharesForCampaign` reject → `StorageError`, empty → `[]` /
     `not_found`. Confirm failing.
-  - [ ] Create `lib/storage/shareRepo.ts`: four functions on `runStorageOp`
+  - [x] Create `lib/storage/shareRepo.ts`: four functions on `runStorageOp`
     (`collection: "campaignCharacterShares"`), `addShare` with
     `rethrowAsIs: (e) => e instanceof DuplicateShareError` and the inner
     `code === 11000` translation preserved, list methods with `isEmpty`.
-  - [ ] Point `lib/storage.ts` at `shareRepo.*`. Tests green.
-  - [ ] Confirm `tests/unit/lib/storage-shares.test.ts` passes unmodified.
+  - [x] Point `lib/storage.ts` at `shareRepo.*`. Tests green.
+  - [x] Confirm `tests/unit/lib/storage-shares.test.ts` passes unmodified.
 
-- [ ] **Step 7 — TDD: `spellRepo.ts`.**
-  - [ ] Write `tests/unit/lib/storage/spellRepo.test.ts` first: `loadSpells`
+- [x] **Step 7 — TDD: `spellRepo.ts`.**
+  - [x] Write `tests/unit/lib/storage/spellRepo.test.ts` first: `loadSpells`
     reject → `StorageError`, empty → `[]`; `loadSpellById` reject →
     `StorageError`, missing doc → `null` / `not_found`, bad-shape id → `null`
     with **no** `getDatabase`/`logStorageEvent` call; `saveSpellTemplate` /
     `deleteSpellTemplate` reject → `StorageError`, `deleteSpellTemplate`
     bad-shape id → no-op no-DB; `spellExistsByNameAndSource` reject →
     `StorageError`, no match → `false`. Confirm failing.
-  - [ ] Create `lib/storage/spellRepo.ts`: functions on `runStorageOp`
+  - [x] Create `lib/storage/spellRepo.ts`: functions on `runStorageOp`
     (`collection: "spellTemplates"`). Keep the pre-DB id-shape guard in
     `loadSpellById` and `deleteSpellTemplate` **outside** `runStorageOp`.
     `isEmpty` on `loadSpells` and `loadSpellById` (`(r) => !r`).
-  - [ ] Point `lib/storage.ts` at `spellRepo.*`. Tests green.
+  - [x] Point `lib/storage.ts` at `spellRepo.*`. Tests green.
 
-- [ ] **Step 8 — TDD: `rollRepo.ts`.**
-  - [ ] Write `tests/unit/lib/storage/rollRepo.test.ts` first: `saveCampaignRoll`
+- [x] **Step 8 — TDD: `rollRepo.ts`.**
+  - [x] Write `tests/unit/lib/storage/rollRepo.test.ts` first: `saveCampaignRoll`
     reject → `StorageError` (`collection: "campaignRolls"`) + one error event;
     `listCampaignRolls` reject → `StorageError`; happy path → identical
     `{ rolls, nextCursor? }` shape; a cursor round-trip test (limit+1 → `pop()`
     → `nextCursor`); a non-DM visibility-filter test asserting the `$or` clause
     is unchanged. Port any existing `listCampaignRolls` assertions from
     `tests/unit/lib/storage.test.ts`. Confirm failing.
-  - [ ] Create `lib/storage/rollRepo.ts`: both functions on `runStorageOp`,
+  - [x] Create `lib/storage/rollRepo.ts`: both functions on `runStorageOp`,
     moving all pagination/visibility/cursor logic verbatim into the callback.
     No `isEmpty` (an empty page is `success`).
-  - [ ] Point `lib/storage.ts` at `rollRepo.*`. Tests green.
+  - [x] Point `lib/storage.ts` at `rollRepo.*`. Tests green.
 
-- [ ] **Step 9 — Remove `load`; migrate `clear` (spec: REMOVED storage.load;
+- [x] **Step 9 — Remove `load`; migrate `clear` (spec: REMOVED storage.load;
   per-domain repos).**
-  - [ ] `git grep -n "storage\.load\b\|\.load(" app/ lib/ scripts/` — confirm
+  - [x] `git grep -n "storage\.load\b\|\.load(" app/ lib/ scripts/` — confirm
     zero non-test callers before deleting.
-  - [ ] Delete `storage.load()` from `lib/storage.ts`. Update
+  - [x] Delete `storage.load()` from `lib/storage.ts`. Update
     `tests/unit/lib/storage/facadeShape.test.ts` and any test referencing
     `storage.load` to expect the method absent / the count down by one.
-  - [ ] TDD `tests/unit/lib/storage/storageMisc.test.ts`: `clear` — one
+  - [x] TDD `tests/unit/lib/storage/storageMisc.test.ts`: `clear` — one
     `deleteMany` rejects → `rejects.toThrow(StorageError)` (`op === "clear"`)
     + one error event; success → all seven collections get
     `deleteMany({ userId })`. Confirm failing.
-  - [ ] Create `lib/storage/storageMisc.ts` with `clear(userId)` on
+  - [x] Create `lib/storage/storageMisc.ts` with `clear(userId)` on
     `runStorageOp` (`name: "clear"`, `collection: "storageMisc"`). Point
     `lib/storage.ts` at `storageMisc.clear`. Tests green.
 
-- [ ] **Step 10 — Rewrite `loadSpellById` characterization test (spec:
+- [x] **Step 10 — Rewrite `loadSpellById` characterization test (spec:
   characterization coverage).** In
   `tests/unit/lib/storage.characterization.test.ts`, change the DB-error case
   from `resolves.toBeNull()` to `rejects.toThrow(StorageError)`; keep
   genuine-not-found and bad-id cases asserting `null`. Update the section
   header comment to note the intentional `#504` behavior flip.
 
-- [ ] **Step 11 — Spell route test (spec: spell-by-id route distinguishes
+- [x] **Step 11 — Spell route test (spec: spell-by-id route distinguishes
   outage from not-found).** In `tests/unit/api/spells/[id].route.test.ts`
   (create if absent): mock `storage.loadSpellById` to reject with a
   `StorageError` → assert `500` + `"Failed to load spell"` + `console.error`;
@@ -155,12 +155,12 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
   route handler needs **no logic change**; if the audit found otherwise, make
   the minimal change and note it.
 
-- [ ] **Step 12 — `dedupeEngine.ts` caller fix (spec: dedupe tolerates a thrown
+- [x] **Step 12 — `dedupeEngine.ts` caller fix (spec: dedupe tolerates a thrown
   existence check).** Make `lib/import/dedupeEngine.ts` fail the import cleanly
   when `spellExistsByNameAndSource` rejects (no silent "not a duplicate"
   path). Add/extend a dedupe-engine unit test for the rejecting case.
 
-- [ ] **Step 13 — Facade guardrails (spec: facade shape preserved).** Confirm
+- [x] **Step 13 — Facade guardrails (spec: facade shape preserved).** Confirm
   no cluster method body in `lib/storage.ts` still calls `getDatabase(`. Update
   the method-count expectation in `tests/unit/lib/storage/facadeShape.test.ts`
   to reflect exactly one removed method (`load`) and run it. Run the full
@@ -169,13 +169,13 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
   `storage.campaignEncounters.test.ts`, `storage.characterization.test.ts`,
   spell/session route tests).
 
-- [ ] Confirm every acceptance scenario in
+- [x] Confirm every acceptance scenario in
   `openspec/changes/migrate-content-reference-storage-domains/specs/storage-content-reference-domains/spec.md`
   has corresponding coverage.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the
   `openspec-review-code` skill. The primary agent automatically applies all
   clearly-correct findings directly to the code — without stopping, without
   presenting the list, without asking for confirmation. Apply fixes, re-run
@@ -183,11 +183,16 @@ Default branch: `main` (squash-only ruleset; required checks `ci-gate` + Codacy;
 
 ## Validation
 
-- [ ] Run unit/integration tests (project command, e.g. `npm test`)
-- [ ] Run E2E tests if the caller audit touched any route behavior; otherwise
-  note "not applicable — storage-layer refactor, no UI/route logic change"
-- [ ] Run type checks (`npm run typecheck` / `tsc --noEmit`)
-- [ ] Run build (`npm run build`)
+- [x] Run unit/integration tests (project command, e.g. `npm test`) — full unit
+  suite green (3467 tests) after `npm ci` in the worktree; the sole prior
+  failure (`d4EnginePatch`) was a missing dice-box patch, fixed by the install
+  and unrelated to this change.
+- [x] Run E2E tests if the caller audit touched any route behavior; otherwise
+  note "not applicable — storage-layer refactor, no UI/route logic change".
+  Not applicable: no route handler logic changed (spell route already wrapped
+  `loadSpellById` in try/catch → 500).
+- [x] Run type checks (`npm run typecheck` / `tsc --noEmit`) — clean.
+- [x] Run build (`npm run build`) — compiled successfully, 42/42 pages.
 - [ ] Run security / code-quality checks required by project standards
   (Codacy CLI; Verity pre-commit/pre-push gate — fix findings, do not waive on
   agent judgment)

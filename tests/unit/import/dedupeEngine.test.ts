@@ -151,6 +151,23 @@ describe("dedupeEngine", () => {
       expect(mockedStorage.saveMonsterTemplate).not.toHaveBeenCalled();
     });
 
+    it("counts one error, saves nothing, and keeps processing when the dup check rejects", async () => {
+      mockedStorage.findMonsterByNameAndSource
+        .mockRejectedValueOnce(new Error("Storage operation \"findMonsterByNameAndSource\" failed"))
+        .mockResolvedValueOnce(null);
+      mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
+
+      const failing = createTestCreature({ key: "goblin", name: "Goblin" });
+      const ok = createTestCreature({ key: "orc", name: "Orc" });
+      const client = createMockClient([failing, ok], []);
+
+      const result = await importMonstersFromOpen5E(client);
+
+      expect(result.errors).toBe(1);
+      expect(result.inserted).toBe(1);
+      expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(1);
+    });
+
     it("processes multiple monsters", async () => {
       mockedStorage.findMonsterByNameAndSource.mockResolvedValue(null);
       mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
@@ -221,6 +238,25 @@ describe("dedupeEngine", () => {
       expect(result.inserted).toBe(0);
       expect(result.skipped).toBe(1);
       expect(result.errors).toBe(0);
+      expect(mockedStorage.saveSpellTemplate).not.toHaveBeenCalled();
+    });
+
+    it("counts the spell as an error (never inserts it) when the existence check rejects", async () => {
+      // #504: storage.spellExistsByNameAndSource now rejects with StorageError
+      // on a DB failure instead of swallowing to `false`. The import must not
+      // fall through and treat the spell as confirmed not-a-duplicate.
+      mockedStorage.spellExistsByNameAndSource.mockRejectedValue(
+        new Error("Storage operation \"spellExistsByNameAndSource\" failed"),
+      );
+      mockedStorage.saveSpellTemplate.mockResolvedValue(undefined);
+
+      const spell = createTestSpell({ key: "fireball", name: "Fireball", level: 3 });
+      const client = createMockClient([], [spell]);
+
+      const result = await importSpellsFromOpen5E(client);
+
+      expect(result.inserted).toBe(0);
+      expect(result.errors).toBe(1);
       expect(mockedStorage.saveSpellTemplate).not.toHaveBeenCalled();
     });
 

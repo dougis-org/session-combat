@@ -46,11 +46,20 @@ async function importSingle<T extends MonsterTemplate | SpellTemplate>(
     return { inserted: false, skipped: false, error: true };
   }
 
-  const { should } = await shouldImport(
-    collection,
-    result.entity.name,
-    result.entity.source || ""
-  );
+  // A thrown existence check (e.g. storage.spellExistsByNameAndSource now
+  // rejects with StorageError on a DB failure instead of swallowing to
+  // `false`) must fail this item cleanly — never fall through and insert it as
+  // though it were confirmed not-a-duplicate.
+  let should: boolean;
+  try {
+    ({ should } = await shouldImport(
+      collection,
+      result.entity.name,
+      result.entity.source || ""
+    ));
+  } catch {
+    return { inserted: false, skipped: false, error: true };
+  }
   if (!should) {
     return { inserted: false, skipped: true, error: false };
   }
@@ -59,14 +68,25 @@ async function importSingle<T extends MonsterTemplate | SpellTemplate>(
   return { inserted: true, skipped: false, error: false };
 }
 
+function isImportableName(name: unknown): name is string {
+  return typeof name === "string" && name.trim().length > 0 && name.length <= 200;
+}
+
 async function importMonsterSingle(
   raw: Open5ECreature
 ): Promise<{ inserted: boolean; skipped: boolean; error: boolean }> {
-  if (raw.name) {
+  if (!isImportableName(raw.name)) {
+    return { inserted: false, skipped: false, error: true };
+  }
+  try {
     const { should } = await shouldImport("monsters", raw.name, "open5e");
     if (!should) {
       return { inserted: false, skipped: true, error: false };
     }
+  } catch {
+    // A thrown existence check must fail this item cleanly rather than
+    // falling through and inserting a possible duplicate.
+    return { inserted: false, skipped: false, error: true };
   }
 
   const { monster, valid, errors } = transformMonster(raw);

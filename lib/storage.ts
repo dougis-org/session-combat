@@ -1,7 +1,6 @@
 // MongoDB persistence utilities
 import { getDatabase } from "./db";
 import {
-  SessionData,
   Encounter,
   Character,
   CombatState,
@@ -23,12 +22,9 @@ import {
   PublicUser,
   SharedCharacterEntry,
 } from "./types";
-import { DuplicateShareError } from "./errors";
-import { GLOBAL_USER_ID } from "./constants";
 import { runStorageOp } from "@/lib/storage/runOp";
-import { Filter, Document } from "mongodb";
 
-import { buildEntityQuery, normalizeStoredEntityId, QueryableEntity } from "./storage/helpers";
+import { normalizeStoredEntityId } from "./storage/helpers";
 import {
   getUserPreferences as getUserPreferencesRepo,
   updateUserPreferences as updateUserPreferencesRepo,
@@ -47,6 +43,11 @@ import * as monsterTemplateRepo from "./storage/monsterTemplateRepo";
 import * as campaignTemplateRepo from "./storage/campaignTemplateRepo";
 import * as campaignRepo from "./storage/campaignRepo";
 import * as membershipRepo from "./storage/membershipRepo";
+import * as sessionLogRepo from "./storage/sessionLogRepo";
+import * as shareRepo from "./storage/shareRepo";
+import * as spellRepo from "./storage/spellRepo";
+import * as rollRepo from "./storage/rollRepo";
+import * as storageMisc from "./storage/storageMisc";
 
 export const storage = {
   // Load encounters for a user
@@ -164,30 +165,6 @@ export const storage = {
 
   async claimActiveCampaignSession(campaignId: string, userId: string, sessionId: string): Promise<boolean> { return campaignRepo.claimActiveCampaignSession(campaignId, userId, sessionId); },
 
-  // Load all session data for a user
-  async load(userId: string): Promise<SessionData> {
-    try {
-      const [encounters, characters, parties, campaigns, combatState] = await Promise.all([
-        this.loadEncounters(userId),
-        this.loadCharacters(userId),
-        this.loadParties(userId),
-        this.loadCampaigns(userId),
-        this.loadCombatState(userId),
-      ]);
-
-      return {
-        encounters,
-        characters,
-        parties,
-        campaigns,
-        combatState: combatState || undefined,
-      };
-    } catch (error) {
-      console.error("Error loading session data:", error);
-      return { encounters: [], characters: [], parties: [], campaigns: [] };
-    }
-  },
-
   // Load encounters by id, scoped to their owner
   async loadEncountersByIds(ids: string[], ownerUserId: string): Promise<Encounter[]> {
     if (ids.length === 0) return [];
@@ -291,91 +268,19 @@ export const storage = {
   async deleteMonsterTemplate(id: string, userId: string): Promise<void> { return monsterTemplateRepo.deleteMonsterTemplate(id, userId); },
 
   // Load spells - load all global spells if no userId, or load user spells
-  async loadSpells(userId?: string, concentration?: boolean): Promise<SpellTemplate[]> {
-    try {
-      const db = await getDatabase();
-      const query: Record<string, unknown> = userId
-        ? { userId }
-        : { userId: GLOBAL_USER_ID };
-      if (concentration !== undefined) {
-        query.concentration = concentration;
-      }
-      const spells = await db
-        .collection<SpellTemplate>("spellTemplates")
-        .find(query)
-        .toArray();
-      return spells.map(normalizeStoredEntityId);
-    } catch (error) {
-      console.error("Error loading spells:", error);
-      return [];
-    }
-  },
+  async loadSpells(userId?: string, concentration?: boolean): Promise<SpellTemplate[]> { return spellRepo.loadSpells(userId, concentration); },
 
   // Load single spell by ID
-  async loadSpellById(id: string): Promise<SpellTemplate | null> {
-    if (!id || typeof id !== "string" || id.length > 64) {
-      return null;
-    }
-    try {
-      const db = await getDatabase();
-      const spell = await db
-        .collection<SpellTemplate>("spellTemplates")
-        .findOne({ id, userId: GLOBAL_USER_ID });
-      return spell ? normalizeStoredEntityId(spell) : null;
-    } catch (error) {
-      console.error("Error loading spell by ID:", error);
-      return null;
-    }
-  },
+  async loadSpellById(id: string): Promise<SpellTemplate | null> { return spellRepo.loadSpellById(id); },
 
   // Save spell template (upsert)
-  async saveSpellTemplate(spell: SpellTemplate): Promise<void> {
-    try {
-      const db = await getDatabase();
-      const { _id, ...spellData } = spell;
-
-      const query = buildEntityQuery(spell);
-      await db
-        .collection<SpellTemplate>("spellTemplates")
-        .updateOne(query, { $set: spellData }, { upsert: true });
-    } catch (error) {
-      console.error("Error saving spell template:", error);
-      throw error;
-    }
-  },
+  async saveSpellTemplate(spell: SpellTemplate): Promise<void> { return spellRepo.saveSpellTemplate(spell); },
 
   // Delete spell template
-  async deleteSpellTemplate(id: string): Promise<void> {
-    if (!id || typeof id !== "string" || id.length > 64) {
-      return;
-    }
-    try {
-      const db = await getDatabase();
-      await db
-        .collection<SpellTemplate>("spellTemplates")
-        .deleteOne({ id, userId: GLOBAL_USER_ID });
-    } catch (error) {
-      console.error("Error deleting spell template:", error);
-      throw error;
-    }
-  },
+  async deleteSpellTemplate(id: string): Promise<void> { return spellRepo.deleteSpellTemplate(id); },
 
   // Check if spell exists by name and source (for dedupe)
-  async spellExistsByNameAndSource(
-    name: string,
-    source: string
-  ): Promise<boolean> {
-    try {
-      const db = await getDatabase();
-      const count = await db
-        .collection<SpellTemplate>("spellTemplates")
-        .countDocuments({ name, source });
-      return count > 0;
-    } catch (error) {
-      console.error("Error checking spell existence:", error);
-      return false;
-    }
-  },
+  async spellExistsByNameAndSource(name: string, source: string): Promise<boolean> { return spellRepo.spellExistsByNameAndSource(name, source); },
 
   // Check if monster exists by name and source (for dedupe)
   async monsterExistsByNameAndSource(name: string, source: string): Promise<boolean> { return monsterTemplateRepo.monsterExistsByNameAndSource(name, source); },
@@ -383,43 +288,13 @@ export const storage = {
   async findMonsterByNameAndSource(name: string, source: string): Promise<MonsterTemplate | null> { return monsterTemplateRepo.findMonsterByNameAndSource(name, source); },
 
   // Load session logs for a campaign, sorted by sessionNumber descending
-  async loadSessionLogs(userId: string, campaignId: string): Promise<SessionLog[]> {
-    try {
-      const db = await getDatabase();
-      const logs = await db
-        .collection<SessionLog>("sessionLogs")
-        .find({ userId, campaignId })
-        .sort({ sessionNumber: -1 })
-        .toArray();
-      return logs.map(normalizeStoredEntityId);
-    } catch (error) {
-      console.error("Error loading session logs:", error);
-      return [];
-    }
-  },
+  async loadSessionLogs(userId: string, campaignId: string): Promise<SessionLog[]> { return sessionLogRepo.loadSessionLogs(userId, campaignId); },
 
   // Get the next session number (MAX + 1, or 1 if none exist)
-  async getNextSessionNumber(userId: string, campaignId: string): Promise<number> {
-    return runStorageOp({ name: "getNextSessionNumber", collection: "sessionLogs" }, async () => {
-      const db = await getDatabase();
-      const latest = await db
-        .collection<SessionLog>("sessionLogs")
-        .findOne({ userId, campaignId }, { sort: { sessionNumber: -1 } });
-      return latest ? latest.sessionNumber + 1 : 1;
-    });
-  },
+  async getNextSessionNumber(userId: string, campaignId: string): Promise<number> { return sessionLogRepo.getNextSessionNumber(userId, campaignId); },
 
   // Save a new session log (insert)
-  async saveSessionLog(log: SessionLog): Promise<void> {
-    try {
-      const db = await getDatabase();
-      const { _id, ...logData } = log;
-      await db.collection<SessionLog>("sessionLogs").insertOne(logData as SessionLog);
-    } catch (error) {
-      console.error("Error saving session log:", error);
-      throw error;
-    }
-  },
+  async saveSessionLog(log: SessionLog): Promise<void> { return sessionLogRepo.saveSessionLog(log); },
 
   // Update an existing session log (partial update)
   async updateSessionLog(
@@ -427,44 +302,10 @@ export const storage = {
     userId: string,
     campaignId: string,
     patch: Partial<SessionLogInput>
-  ): Promise<SessionLog | null> {
-    try {
-      const db = await getDatabase();
-      const { datePlayed, campaignId: _ignored, ...restPatch } = patch;
-      const updateData: Record<string, unknown> = { updatedAt: new Date() };
-      for (const [key, value] of Object.entries(restPatch)) {
-        if (value !== undefined) updateData[key] = value;
-      }
-      if (typeof datePlayed !== 'undefined') {
-        updateData.datePlayed = new Date(datePlayed);
-      }
-      const result = await db
-        .collection<SessionLog>("sessionLogs")
-        .findOneAndUpdate(
-          { id, userId, campaignId },
-          { $set: updateData },
-          { returnDocument: "after" }
-        );
-      return result ? normalizeStoredEntityId(result as SessionLog) : null;
-    } catch (error) {
-      console.error("Error updating session log:", error);
-      throw error;
-    }
-  },
+  ): Promise<SessionLog | null> { return sessionLogRepo.updateSessionLog(id, userId, campaignId, patch); },
 
   // Delete a session log
-  async deleteSessionLog(id: string, userId: string, campaignId: string): Promise<boolean> {
-    try {
-      const db = await getDatabase();
-      const result = await db
-        .collection<SessionLog>("sessionLogs")
-        .deleteOne({ id, userId, campaignId });
-      return result.deletedCount > 0;
-    } catch (error) {
-      console.error("Error deleting session log:", error);
-      throw error;
-    }
-  },
+  async deleteSessionLog(id: string, userId: string, campaignId: string): Promise<boolean> { return sessionLogRepo.deleteSessionLog(id, userId, campaignId); },
 
   savedContent: {
     async list(campaignId: string, userId: string): Promise<SavedContent[]> {
@@ -557,70 +398,13 @@ export const storage = {
 
   async getCampaignsByIds(campaignIds: string[]): Promise<Pick<Campaign, "id" | "name">[]> { return campaignRepo.getCampaignsByIds(campaignIds); },
 
-  async addShare(share: CampaignCharacterShare): Promise<void> {
-    try {
-      const db = await getDatabase();
-      const { _id, ...insertData } = share;
-      await db
-        .collection<CampaignCharacterShare>("campaignCharacterShares")
-        .insertOne(insertData as CampaignCharacterShare);
-    } catch (error) {
-      if (error && typeof error === "object" && "code" in error && error.code === 11000) {
-        throw new DuplicateShareError(share.campaignId, share.characterId);
-      }
-      console.error("Error adding campaign character share:", error);
-      throw error;
-    }
-  },
+  async addShare(share: CampaignCharacterShare): Promise<void> { return shareRepo.addShare(share); },
 
-  async removeShare(campaignId: string, characterId: string, userId: string): Promise<boolean> {
-    try {
-      const db = await getDatabase();
-      const result = await db
-        .collection<CampaignCharacterShare>("campaignCharacterShares")
-        .deleteOne({ campaignId, characterId, userId });
-      return result.deletedCount > 0;
-    } catch (error) {
-      console.error("Error removing campaign character share:", error);
-      throw error;
-    }
-  },
+  async removeShare(campaignId: string, characterId: string, userId: string): Promise<boolean> { return shareRepo.removeShare(campaignId, characterId, userId); },
 
-  async listSharesForCampaign(campaignId: string, userId: string): Promise<CampaignCharacterShare[]> {
-    try {
-      const db = await getDatabase();
-      const shares = await db
-        .collection<CampaignCharacterShare>("campaignCharacterShares")
-        .find({ campaignId, userId })
-        .toArray();
-      return shares.map((s) => {
-        const normalized = normalizeStoredEntityId(s);
-        const { _id, ...rest } = normalized;
-        return rest as CampaignCharacterShare;
-      });
-    } catch (error) {
-      console.error("Error listing campaign character shares:", error);
-      return [];
-    }
-  },
+  async listSharesForCampaign(campaignId: string, userId: string): Promise<CampaignCharacterShare[]> { return shareRepo.listSharesForCampaign(campaignId, userId); },
 
-  async listAllSharesForCampaign(campaignId: string): Promise<CampaignCharacterShare[]> {
-    try {
-      const db = await getDatabase();
-      const shares = await db
-        .collection<CampaignCharacterShare>("campaignCharacterShares")
-        .find({ campaignId })
-        .toArray();
-      return shares.map((s) => {
-        const normalized = normalizeStoredEntityId(s);
-        const { _id, ...rest } = normalized;
-        return rest as CampaignCharacterShare;
-      });
-    } catch (error) {
-      console.error("Error listing all campaign character shares:", error);
-      return [];
-    }
-  },
+  async listAllSharesForCampaign(campaignId: string): Promise<CampaignCharacterShare[]> { return shareRepo.listAllSharesForCampaign(campaignId); },
 
   async loadPartiesByCampaign(campaignId: string): Promise<Party[]> { return partyRepo.loadPartiesByCampaign(campaignId); },
 
@@ -632,12 +416,7 @@ export const storage = {
 
   async loadCharacterById(id: string): Promise<Character | null> { return characterRepo.loadCharacterById(id); },
 
-  async saveCampaignRoll(roll: CampaignRoll): Promise<void> {
-    const db = await getDatabase();
-    const { _id: _ignored, ...doc } = roll;
-    void _ignored;
-    await db.collection('campaignRolls').insertOne(doc);
-  },
+  async saveCampaignRoll(roll: CampaignRoll): Promise<void> { return rollRepo.saveCampaignRoll(roll); },
 
   async listCampaignRolls(
     campaignId: string,
@@ -645,60 +424,11 @@ export const storage = {
     userId: string,
     role: MemberRole,
     opts: { limit: number; before?: Date }
-  ): Promise<{ rolls: CampaignRoll[]; nextCursor?: string }> {
-    const db = await getDatabase();
-    const query: Record<string, unknown> = {
-      campaignId,
-      sessionId,
-      ...(opts.before ? { createdAt: { $lt: opts.before } } : {}),
-      $or: [
-        { 'visibility.scope': 'group' },
-        { rollerId: userId },
-        ...(role === 'dm' ? [{ 'visibility.scope': 'dm-only' }] : []),
-      ],
-    };
-
-    const docs = await db
-      .collection('campaignRolls')
-      .find(query)
-      .sort({ createdAt: -1 })
-      .limit(opts.limit + 1)
-      .toArray();
-
-    let nextCursor: string | undefined;
-    if (docs.length > opts.limit) {
-      docs.pop();
-      nextCursor = (docs[docs.length - 1]['createdAt'] as Date).toISOString();
-    }
-
-    const rolls = docs.map((doc) => {
-      const { _id, ...rest } = doc;
-      void _id;
-      return rest as unknown as CampaignRoll;
-    });
-
-    return { rolls, ...(nextCursor ? { nextCursor } : {}) };
-  },
+  ): Promise<{ rolls: CampaignRoll[]; nextCursor?: string }> { return rollRepo.listCampaignRolls(campaignId, sessionId, userId, role, opts); },
 
   getUserPreferences: getUserPreferencesRepo,
   updateUserPreferences: updateUserPreferencesRepo,
 
   // Clear all data for a user
-  async clear(userId: string): Promise<void> {
-    try {
-      const db = await getDatabase();
-      await Promise.all([
-        db.collection<Encounter>("encounters").deleteMany({ userId }),
-        db.collection<Character>("characters").deleteMany({ userId }),
-        db.collection<Party>("parties").deleteMany({ userId }),
-        db.collection<CombatState>("combatStates").deleteMany({ userId }),
-        db.collection<SavedContent>("savedContent").deleteMany({ userId }),
-        db.collection("campaignMembers").deleteMany({ userId }),
-        db.collection("campaignCharacterShares").deleteMany({ userId }),
-      ]);
-    } catch (error) {
-      console.error("Error clearing data:", error);
-      throw error;
-    }
-  },
+  async clear(userId: string): Promise<void> { return storageMisc.clear(userId); },
 };

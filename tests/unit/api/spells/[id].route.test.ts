@@ -4,6 +4,7 @@
 import { NextResponse } from "next/server";
 import { GET, PUT, DELETE } from "@/app/api/spells/[id]/route";
 import { storage } from "@/lib/storage";
+import { StorageError } from "@/lib/storage/errors";
 import { requireAdmin } from "@/lib/api-helpers";
 import {
   makeRouteRequest,
@@ -75,8 +76,11 @@ describe("GET /api/spells/[id]", () => {
     expect(res.status).toBe(404);
   });
 
-  it("returns 500 when storage throws", async () => {
-    mockedStorage.loadSpellById.mockRejectedValue(new Error("connection refused"));
+  it("returns 500 (not 404) and logs the failure when loadSpellById rejects with a StorageError", async () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
+    mockedStorage.loadSpellById.mockRejectedValue(
+      new StorageError("loadSpellById", "spellTemplates", { cause: new Error("connection refused") }),
+    );
 
     const req = makeRouteRequest("http://localhost/api/spells/spell-123", "GET");
     const res = await GET(req, { params });
@@ -84,6 +88,8 @@ describe("GET /api/spells/[id]", () => {
     expect(res.status).toBe(500);
     const body = await res.json();
     expect(body.error).toBe("Failed to load spell");
+    expect(consoleError).toHaveBeenCalled();
+    consoleError.mockRestore();
   });
 });
 

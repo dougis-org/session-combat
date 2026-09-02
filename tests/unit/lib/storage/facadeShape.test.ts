@@ -5,16 +5,25 @@
  * shape of the `storage` facade. The count below was snapshotted from
  * `origin/main` before the migration (72 flat methods + the `savedContent`
  * namespace object = 73 own-enumerable keys).
+ *
+ * #504 intentionally removes exactly one method — `storage.load()` (zero
+ * non-test callers; its partial-empty degradation path became dead code once
+ * #502/#503 migrated its five sub-loaders to throw). The count therefore drops
+ * by one, to 72.
  */
 import { storage } from "@/lib/storage";
 
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 
-const PRE_MIGRATION_OWN_KEY_COUNT = 73;
+const POST_504_OWN_KEY_COUNT = 72;
 
 describe("storage facade shape", () => {
-  it("has the same number of own-enumerable keys as before the migration", () => {
-    expect(Object.keys(storage)).toHaveLength(PRE_MIGRATION_OWN_KEY_COUNT);
+  it("has one fewer own-enumerable key than before the migration (load removed)", () => {
+    expect(Object.keys(storage)).toHaveLength(POST_504_OWN_KEY_COUNT);
+  });
+
+  it("no longer exposes storage.load", () => {
+    expect((storage as Record<string, unknown>).load).toBeUndefined();
   });
 
   it("keeps savedContent nested with its 4 methods", () => {
