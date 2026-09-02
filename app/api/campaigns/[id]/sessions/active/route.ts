@@ -51,7 +51,13 @@ export const POST = withAuthAndParams<Params>(async (_request, _auth, { id: camp
       updatedAt: now,
     };
 
-    await storage.saveSessionLog(log);
+    try {
+      await storage.saveSessionLog(log);
+    } catch (error) {
+      console.error('Error saving session log:', error);
+      await storage.setActiveCampaignSession(campaignId, campaign.userId, null);
+      return NextResponse.json({ error: 'Failed to create session log' }, { status: 500 });
+    }
 
     emitFiltered(campaignId, { type: 'session', campaignId, data: { activeSessionId: logId } }, () => true);
 
