@@ -5,6 +5,13 @@ export interface RunStorageOpMeta<T> {
   name: string;
   collection: string;
   isEmpty?: (result: T) => boolean;
+  /**
+   * Optional predicate identifying meaningful domain errors (e.g.
+   * `DuplicateMemberError`) that MUST be re-thrown unchanged rather than
+   * replaced with a `StorageError`. When absent, every rejection is wrapped
+   * in `StorageError` exactly as before.
+   */
+  rethrowAsIs?: (error: unknown) => boolean;
 }
 
 export async function runStorageOp<T>(
@@ -23,6 +30,9 @@ export async function runStorageOp<T>(
       durationMs: Date.now() - start,
       error,
     });
+    if (meta.rethrowAsIs?.(error)) {
+      throw error;
+    }
     throw new StorageError(meta.name, meta.collection, { cause: error });
   }
 

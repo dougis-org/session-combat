@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { storage } from "@/lib/storage";
+import { StorageError } from "@/lib/storage/errors";
 import { getDatabase } from "@/lib/db";
 import { CampaignMember } from "@/lib/types";
 
@@ -64,10 +65,10 @@ describe("getMember", () => {
     expect(result).toBeNull();
   });
 
-  it("rethrows on unexpected error", async () => {
+  it("rejects with StorageError on unexpected error (#503: was raw rethrow)", async () => {
     mockCollection.findOne.mockRejectedValue(new Error("DB failure") as never);
 
-    await expect(storage.getMember("camp-1", "user-1")).rejects.toThrow("DB failure");
+    await expect(storage.getMember("camp-1", "user-1")).rejects.toBeInstanceOf(StorageError);
   });
 });
 
@@ -168,9 +169,9 @@ describe("loadCampaignByIdAny", () => {
     expect(result).toBeNull();
   });
 
-  it("rethrows on unexpected error", async () => {
+  it("rejects with StorageError on unexpected error (#503: was raw rethrow)", async () => {
     mockCollection.findOne.mockRejectedValue(new Error("DB failure") as never);
 
-    await expect(storage.loadCampaignByIdAny("camp-1")).rejects.toThrow("DB failure");
+    await expect(storage.loadCampaignByIdAny("camp-1")).rejects.toBeInstanceOf(StorageError);
   });
 });

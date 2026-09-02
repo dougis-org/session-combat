@@ -4,6 +4,7 @@
 import { NextResponse } from "next/server";
 import { assertCampaignAccess } from "@/lib/utils/campaign";
 import { storage } from "@/lib/storage";
+import { StorageError } from "@/lib/storage/errors";
 
 jest.mock("@/lib/storage", () => ({
   storage: {
@@ -114,6 +115,16 @@ describe("assertCampaignAccess", () => {
 
     await assertCampaignAccess("camp-1", "user-1");
 
+    expect(mockedStorage.loadCampaignByIdAny).not.toHaveBeenCalled();
+  });
+
+  // AC (#503): a storage failure during the access check must NOT be masked as
+  // a 404 "Campaign not found" — it propagates so the route responds 500.
+  it("propagates a StorageError from getMember instead of returning 404", async () => {
+    const dbErr = new StorageError("getMember", "campaignMembers", { cause: new Error("db down") });
+    mockedStorage.getMember.mockRejectedValue(dbErr);
+
+    await expect(assertCampaignAccess("camp-1", "user-1")).rejects.toBe(dbErr);
     expect(mockedStorage.loadCampaignByIdAny).not.toHaveBeenCalled();
   });
 });

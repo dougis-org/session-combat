@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { storage } from "@/lib/storage";
+import { StorageError } from "@/lib/storage/errors";
 import { Character, CombatState, Encounter, SpellTemplate } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";
 
@@ -454,12 +455,14 @@ describe("storage", () => {
       expect(result).toBe(false);
     });
 
-    it("returns false on database error", async () => {
+    // Behavior change (#503): a DB failure now rejects with StorageError
+    // instead of being swallowed and returning false.
+    it("rejects with StorageError on database error", async () => {
       mockedCollection.countDocuments.mockRejectedValue(new Error("DB error"));
 
-      const result = await storage.monsterExistsByNameAndSource("Dragon", "open5e");
-
-      expect(result).toBe(false);
+      await expect(
+        storage.monsterExistsByNameAndSource("Dragon", "open5e"),
+      ).rejects.toBeInstanceOf(StorageError);
     });
   });
 
@@ -509,10 +512,13 @@ describe("storage", () => {
       expect(callArgs[2]).toBeUndefined();
     });
 
-    it("throws on database error", async () => {
+    // Behavior change (#503): raw driver errors are now wrapped in StorageError.
+    it("rejects with StorageError on database error", async () => {
       mockedCollection.updateOne.mockRejectedValue(new Error("DB error"));
 
-      await expect(storage.setActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID)).rejects.toThrow("DB error");
+      await expect(
+        storage.setActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID),
+      ).rejects.toBeInstanceOf(StorageError);
     });
   });
 
@@ -563,10 +569,13 @@ describe("storage", () => {
       expect(update.$set.updatedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
     });
 
-    it("throws on database error", async () => {
+    // Behavior change (#503): raw driver errors are now wrapped in StorageError.
+    it("rejects with StorageError on database error", async () => {
       mockedCollection.updateOne.mockRejectedValue(new Error("DB error"));
 
-      await expect(storage.claimActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID)).rejects.toThrow("DB error");
+      await expect(
+        storage.claimActiveCampaignSession(CAMPAIGN_ID, USER_ID, SESSION_ID),
+      ).rejects.toBeInstanceOf(StorageError);
     });
   });
 });

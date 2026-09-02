@@ -3,6 +3,7 @@
  */
 import { NextRequest } from "next/server";
 import { storage } from "@/lib/storage";
+import { StorageError } from "@/lib/storage/errors";
 import { getDatabase } from "@/lib/db";
 import { DuplicateMemberError } from "@/lib/errors";
 import { MEMBER_ROLES, MemberRole, CampaignMember } from "@/lib/types";
@@ -100,7 +101,7 @@ describe("Campaign members storage and types", () => {
       await expect(storage.addMember(member)).rejects.toThrow(DuplicateMemberError);
     });
 
-    test("other DB error — throws original error", async () => {
+    test("other DB error — rejects with StorageError (#503: was raw rethrow)", async () => {
       mockCollection.insertOne.mockRejectedValue(new Error("DB failure") as never);
       const member: CampaignMember = {
         id: "mem-1",
@@ -110,7 +111,7 @@ describe("Campaign members storage and types", () => {
         status: "active",
         history: [{ action: "active", by: "user-1", at: new Date() }],
       };
-      await expect(storage.addMember(member)).rejects.toThrow("DB failure");
+      await expect(storage.addMember(member)).rejects.toBeInstanceOf(StorageError);
     });
   });
 
@@ -153,11 +154,11 @@ describe("Campaign members storage and types", () => {
       ).resolves.not.toThrow();
     });
 
-    test("DB error — rethrows", async () => {
+    test("DB error — rejects with StorageError (#503: was raw rethrow)", async () => {
       mockCollection.updateOne.mockRejectedValue(new Error("DB failure") as never);
       await expect(
         storage.updateMemberStatus("camp-1", "user-1", "invited", "dm-user")
-      ).rejects.toThrow("DB failure");
+      ).rejects.toBeInstanceOf(StorageError);
     });
 
     test("role reset — includes role in $set when provided", async () => {

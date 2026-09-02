@@ -413,5 +413,18 @@ describe("GET /api/campaigns/[id]/members", () => {
       const response = await GET(makeGetRequest(), { params: PARAMS });
       expect(response.status).toBe(403);
     });
+
+    // AC (#503): a storage outage during the access check surfaces as HTTP 500,
+    // not a masked 403/404 and not an unhandled crash.
+    it("returns 500 (not 403/404) when getMember rejects with StorageError", async () => {
+      const { StorageError } = await import("@/lib/storage/errors");
+      mockedStorage.getMember.mockRejectedValueOnce(
+        new StorageError("getMember", "campaignMembers", { cause: new Error("db down") }),
+      );
+      const response = await GET(makeGetRequest(), { params: PARAMS });
+      expect(response.status).toBe(500);
+      const body = await response.json();
+      expect(body.error).toBe("Internal server error");
+    });
   });
 });

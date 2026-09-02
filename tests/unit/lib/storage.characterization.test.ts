@@ -61,7 +61,7 @@ describe("storage.loadSpellById (behavior: swallow)", () => {
   });
 });
 
-describe("storage.getMember (behavior: rethrow)", () => {
+describe("storage.getMember (behavior: rethrow → StorageError after #503)", () => {
   let mockCollection: ReturnType<typeof makeMockCollection>;
   let mockDb: { collection: jest.Mock };
 
@@ -72,11 +72,19 @@ describe("storage.getMember (behavior: rethrow)", () => {
     mockedGetDatabase.mockResolvedValue(mockDb as never);
   });
 
-  it("rejects with the original error when the underlying DB call rejects", async () => {
+  // Behavior change (#503): getMember previously re-threw the raw driver
+  // error. It now rejects with a StorageError wrapping it as `cause`, so
+  // assertCampaignAccess surfaces a DB outage as a 500 rather than masking it.
+  it("rejects with StorageError (original error as cause) when the DB call rejects", async () => {
     const dbError = new Error("connection reset");
     mockCollection.findOne.mockRejectedValue(dbError);
 
-    await expect(storage.getMember("camp-1", "user-1")).rejects.toBe(dbError);
+    await expect(storage.getMember("camp-1", "user-1")).rejects.toThrow(
+      'Storage operation "getMember" failed',
+    );
+    await expect(storage.getMember("camp-1", "user-1")).rejects.toMatchObject({
+      cause: dbError,
+    });
   });
 });
 
