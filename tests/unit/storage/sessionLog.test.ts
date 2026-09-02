@@ -117,10 +117,10 @@ describe("storage.loadSessionLogs", () => {
     expect(result[0].sessionNumber).toBe(3);
   });
 
-  test("returns empty array on error", async () => {
+  // #504: previously swallowed to []; a DB failure now rejects with StorageError.
+  test("rejects with StorageError on error", async () => {
     mockedGetDatabase.mockRejectedValue(new Error("connection failed") as never);
-    const result = await storage.loadSessionLogs("user-1", "campaign-1");
-    expect(result).toEqual([]);
+    await expect(storage.loadSessionLogs("user-1", "campaign-1")).rejects.toBeInstanceOf(StorageError);
   });
 });
 
@@ -142,7 +142,7 @@ describe("storage.saveSessionLog", () => {
     const insertOne = jest.fn<Promise<unknown>, []>().mockRejectedValue(new Error("DB error"));
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ insertOne }) as never);
 
-    await expect(storage.saveSessionLog(baseLog)).rejects.toThrow("DB error");
+    await expect(storage.saveSessionLog(baseLog)).rejects.toBeInstanceOf(StorageError); // #504: wrapped
   });
 });
 
@@ -184,7 +184,7 @@ describe("storage.updateSessionLog", () => {
     const findOneAndUpdate = jest.fn<Promise<never>, []>().mockRejectedValue(new Error("DB error"));
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ findOneAndUpdate }) as never);
 
-    await expect(storage.updateSessionLog("log-1", "user-1", "campaign-1", {})).rejects.toThrow("DB error");
+    await expect(storage.updateSessionLog("log-1", "user-1", "campaign-1", {})).rejects.toBeInstanceOf(StorageError); // #504: wrapped
   });
 });
 
@@ -213,6 +213,6 @@ describe("storage.deleteSessionLog", () => {
     const deleteOne = jest.fn<Promise<never>, []>().mockRejectedValue(new Error("DB error") as never);
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ deleteOne }) as never);
 
-    await expect(storage.deleteSessionLog("log-1", "user-1", "campaign-1")).rejects.toThrow("DB error");
+    await expect(storage.deleteSessionLog("log-1", "user-1", "campaign-1")).rejects.toBeInstanceOf(StorageError); // #504: wrapped
   });
 });

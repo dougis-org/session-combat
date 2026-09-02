@@ -1,20 +1,20 @@
 /**
  * @jest-environment node
  *
- * Characterization tests pinning current, observable error-handling behavior
- * for three `storage.*` methods identified in #500 as inconsistent-by-design:
- * `loadSpellById` (swallow), `getMember` (rethrow), and `loadCharacters`
+ * Characterization tests for three `storage.*` methods identified in #500 as
+ * inconsistent-by-design: `loadSpellById`, `getMember`, and `loadCharacters`
  * (mixed, two-tier view+fallback). See docs/storage-refactor/plan.md and
- * docs/storage-refactor/inventory.json for the full taxonomy and inventory
- * these tests support.
+ * docs/storage-refactor/inventory.json for the full taxonomy.
  *
- * IMPORTANT: these tests pin CURRENT behavior, including known
- * inconsistencies (e.g. loadSpellById's DB-error/not-found ambiguity). They
- * are not an assertion that this behavior is correct or desirable. #499's
- * `runStorageOp` milestone is where that behavior may be intentionally
- * changed — do not "fix" these tests without updating that epic's scope.
+ * BEHAVIOR CHANGE (#504): `loadSpellById` no longer swallows a DB error to
+ * `null`. A failed `findOne` now rejects with `StorageError`, so a real outage
+ * is distinguishable from a genuine not-found at
+ * `app/api/spells/[id]/route.ts` (outage → 500, missing → 404). The
+ * genuine-not-found and malformed-id paths still resolve to `null`. This is an
+ * intentional contract flip, called out in the #504 PR description.
  */
 import { storage } from "@/lib/storage";
+import { StorageError } from "@/lib/storage/errors";
 
 jest.mock("@/lib/db", () => ({
   getDatabase: jest.fn(),
@@ -31,7 +31,7 @@ function makeMockCollection() {
   return { find, toArray, findOne };
 }
 
-describe("storage.loadSpellById (behavior: swallow)", () => {
+describe("storage.loadSpellById (behavior: throw on DB error — changed by #504)", () => {
   let mockCollection: ReturnType<typeof makeMockCollection>;
   let mockDb: { collection: jest.Mock };
 
@@ -42,22 +42,24 @@ describe("storage.loadSpellById (behavior: swallow)", () => {
     mockedGetDatabase.mockResolvedValue(mockDb as never);
   });
 
-  // These two tests pin the current DB-error/not-found ambiguity as a known
-  // characteristic of loadSpellById, not a design goal: a rejected findOne
-  // (DB error) and a resolved-null findOne (genuine not-found) are currently
-  // indistinguishable to callers, both producing `null`. See #499, which is
-  // where this ambiguity may eventually be resolved by giving these two
-  // cases distinct observable outcomes.
-  it("resolves to null when the underlying DB call rejects", async () => {
+  // #504: a rejected findOne (DB error) and a resolved-null findOne (genuine
+  // not-found) now have distinct observable outcomes — the outage rejects with
+  // StorageError, the not-found still resolves to null.
+  it("rejects with StorageError when the underlying DB call rejects", async () => {
     mockCollection.findOne.mockRejectedValue(new Error("connection reset"));
 
-    await expect(storage.loadSpellById("spell-123")).resolves.toBeNull();
+    await expect(storage.loadSpellById("spell-123")).rejects.toThrow(StorageError);
   });
 
   it("resolves to null when the underlying DB call finds no matching document", async () => {
     mockCollection.findOne.mockResolvedValue(null);
 
     await expect(storage.loadSpellById("spell-123")).resolves.toBeNull();
+  });
+
+  it("resolves to null for a malformed id without any DB call", async () => {
+    await expect(storage.loadSpellById("x".repeat(65))).resolves.toBeNull();
+    expect(mockedGetDatabase).not.toHaveBeenCalled();
   });
 });
 

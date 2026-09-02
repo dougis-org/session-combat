@@ -252,12 +252,12 @@ describe("storage", () => {
       expect(result).toBeNull();
     });
 
-    it("returns null on database error", async () => {
+    // #504: a DB error is no longer swallowed to null — it rejects with
+    // StorageError so an outage is distinguishable from a genuine not-found.
+    it("rejects with StorageError on database error", async () => {
       mockedCollection.findOne.mockRejectedValue(new Error("DB error"));
 
-      const result = await storage.loadSpellById("spell-123");
-
-      expect(result).toBeNull();
+      await expect(storage.loadSpellById("spell-123")).rejects.toThrow(StorageError);
     });
   });
 
@@ -286,12 +286,11 @@ describe("storage", () => {
       expect(result).toHaveLength(1);
     });
 
-    it("returns empty array on error", async () => {
+    // #504: previously swallowed to [].
+    it("rejects with StorageError on error", async () => {
       mockedCollection.find.mockReturnValue({ toArray: jest.fn().mockRejectedValue(new Error("DB error")) } as any);
 
-      const result = await storage.loadSpells();
-
-      expect(result).toEqual([]);
+      await expect(storage.loadSpells()).rejects.toThrow(StorageError);
     });
   });
 
@@ -390,7 +389,8 @@ describe("storage", () => {
         updatedAt: new Date(),
       };
 
-      await expect(storage.saveSpellTemplate(spell)).rejects.toThrow("DB error");
+      // #504: the raw driver error is now wrapped in StorageError.
+      await expect(storage.saveSpellTemplate(spell)).rejects.toThrow(StorageError);
     });
   });
 
@@ -406,7 +406,8 @@ describe("storage", () => {
     it("throws on database error", async () => {
       mockedCollection.deleteOne.mockRejectedValue(new Error("DB error"));
 
-      await expect(storage.deleteSpellTemplate("spell-fail")).rejects.toThrow("DB error");
+      // #504: wrapped in StorageError.
+      await expect(storage.deleteSpellTemplate("spell-fail")).rejects.toThrow(StorageError);
     });
   });
 
@@ -428,12 +429,12 @@ describe("storage", () => {
       expect(result).toBe(false);
     });
 
-    it("returns false on database error", async () => {
+    // #504: previously swallowed to false; dedupeEngine now fails the item
+    // cleanly instead of importing it as a non-duplicate.
+    it("rejects with StorageError on database error", async () => {
       mockedCollection.countDocuments.mockRejectedValue(new Error("DB error"));
 
-      const result = await storage.spellExistsByNameAndSource("Fireball", "open5e");
-
-      expect(result).toBe(false);
+      await expect(storage.spellExistsByNameAndSource("Fireball", "open5e")).rejects.toThrow(StorageError);
     });
   });
 
