@@ -1,6 +1,6 @@
 ## MODIFIED Requirements
 
-### Requirement: MODIFIED CampaignTemplate data structure
+### Requirement: CampaignTemplate data structure
 
 The system SHALL support storing `EncounterTemplate` definitions directly within a `CampaignTemplate`, including for the 6 G3 campaigns.
 
@@ -16,20 +16,6 @@ The system SHALL support storing `EncounterTemplate` definitions directly within
 - **When** the seed script is executed
 - **Then** each G3 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output (`rimeEncounters()`, `wbtwEncounters()`, `potaEncounters()`, `cotctEncounters()`, `hrEncounters()`, `rhodEncounters()`)
 - **Then** every encounter's `monsters` array contains full `Monster` stat blocks built via `findCustomMonsterById` + `toEncounterMonster(s)`
-
-## REMOVED Requirements
-
-### Requirement: REMOVED None
-
-The system SHALL NOT remove any existing `CampaignTemplate` data structures as part of this change.
-
-#### Scenario: No REMOVED requirements
-
-- **Given** the G3 rollout is purely additive (new encounters and monsters)
-- **When** the change is applied
-- **Then** no existing requirement from prior capability versions is removed
-
-Reason for removal: N/A
 
 ## Traceability
 
