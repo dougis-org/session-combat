@@ -153,7 +153,11 @@ export async function getUsersByIds(userIds: string[]): Promise<Record<string, s
     .map((id) => new ObjectId(id));
   if (validObjectIds.length === 0) return {};
   return runStorageOp(
-    { name: "getUsersByIds", collection: "users" },
+    {
+      name: "getUsersByIds",
+      collection: "users",
+      isEmpty: (res) => Object.keys(res).length === 0,
+    },
     async () => {
       const db = await getDatabase();
       const docs = await db

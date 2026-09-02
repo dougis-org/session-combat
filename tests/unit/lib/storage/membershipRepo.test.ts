@@ -1,13 +1,11 @@
 /**
  * @jest-environment node
  *
- * `listMembersForCampaign` non-test callers and their post-change behavior
- * (a driver failure now rejects with StorageError instead of returning []):
- *  - app/api/campaigns/[id]/members/route.ts:17   — maps members → response list
- *  - app/api/campaigns/[id]/rolls/route.ts:83     — filters to active members
- *  - app/api/campaigns/[id]/messages/route.ts:137 — filters to active members
- *  - lib/server/transport.ts:66                   — filters to active members
- * None treats `members.length === 0` as anything but "no members".
+ * Post-change contract for the reads below: a driver failure now rejects with
+ * StorageError instead of returning [] / null. Every `listMembersForCampaign`
+ * caller (the members, rolls and messages campaign routes, plus
+ * `lib/server/transport`) treats an empty result purely as "no members", so the
+ * only observable change is that a real outage becomes an honest 500.
  */
 import * as repo from "@/lib/storage/membershipRepo";
 import { storage } from "@/lib/storage";

@@ -79,10 +79,8 @@ describe("storage.getMember (behavior: rethrow → StorageError after #503)", ()
     const dbError = new Error("connection reset");
     mockCollection.findOne.mockRejectedValue(dbError);
 
-    await expect(storage.getMember("camp-1", "user-1")).rejects.toThrow(
-      'Storage operation "getMember" failed',
-    );
     await expect(storage.getMember("camp-1", "user-1")).rejects.toMatchObject({
+      message: expect.stringContaining('Storage operation "getMember" failed'),
       cause: dbError,
     });
   });
