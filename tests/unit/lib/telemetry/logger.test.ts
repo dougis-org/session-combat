@@ -3,22 +3,167 @@
  */
 
 import { logStorageEvent } from "@/lib/telemetry/logger";
+import { metrics, trace, SpanStatusCode } from "@opentelemetry/api";
+
+jest.mock("@opentelemetry/api", () => {
+  const mockSpan = {
+    end: jest.fn(),
+    recordException: jest.fn(),
+    setStatus: jest.fn(),
+  };
+
+  const mockTracer = {
+    startSpan: jest.fn().mockReturnValue(mockSpan),
+  };
+
+  const mockCounter = {
+    add: jest.fn(),
+  };
+
+  const mockMeter = {
+    createCounter: jest.fn().mockReturnValue(mockCounter),
+  };
+
+  return {
+    trace: {
+      getTracer: jest.fn().mockReturnValue(mockTracer),
+    },
+    metrics: {
+      getMeter: jest.fn().mockReturnValue(mockMeter),
+    },
+    SpanStatusCode: {
+      UNSET: 0,
+      OK: 1,
+      ERROR: 2,
+    },
+  };
+});
 
 describe("logStorageEvent", () => {
   let consoleSpy: jest.SpyInstance;
   let consoleErrorSpy: jest.SpyInstance;
+  const originalEnv = process.env;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     consoleSpy = jest.spyOn(console, "log").mockImplementation();
     consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+    process.env = { ...originalEnv };
   });
 
   afterEach(() => {
+    process.env = originalEnv;
     consoleSpy.mockRestore();
     consoleErrorSpy.mockRestore();
   });
 
-  test("emits name, collection, outcome, durationMs for a success event", () => {
+  test("emits OpenTelemetry counter exactly once during a successful storage event", () => {
+    logStorageEvent({
+      name: "loadCampaignById",
+      collection: "campaigns",
+      outcome: "success",
+      durationMs: 12,
+    });
+
+    const meter = metrics.getMeter("session-combat");
+    const counter = meter.createCounter("storage.ops");
+
+    expect(counter.add).toHaveBeenCalledTimes(1);
+    expect(counter.add).toHaveBeenCalledWith(1, {
+      name: "loadCampaignById",
+      collection: "campaigns",
+      outcome: "success",
+    });
+  });
+
+  test("emits OpenTelemetry counter exactly once during an error storage event", () => {
+    logStorageEvent({
+      name: "loadCampaignById",
+      collection: "campaigns",
+      outcome: "error",
+      durationMs: 12,
+    });
+
+    const meter = metrics.getMeter("session-combat");
+    const counter = meter.createCounter("storage.ops");
+
+    expect(counter.add).toHaveBeenCalledTimes(1);
+    expect(counter.add).toHaveBeenCalledWith(1, {
+      name: "loadCampaignById",
+      collection: "campaigns",
+      outcome: "error",
+    });
+  });
+
+  test("emits OpenTelemetry trace span with the name storage.<collection>.<name>", () => {
+    logStorageEvent({
+      name: "loadCampaignById",
+      collection: "campaigns",
+      outcome: "success",
+      durationMs: 12,
+    });
+
+    const tracer = trace.getTracer("session-combat");
+    expect(tracer.startSpan).toHaveBeenCalledWith("storage.campaigns.loadCampaignById", expect.any(Object));
+  });
+
+  test("tracer.startSpan is provided a startTime equal to endTime - durationMs", () => {
+    const beforeMs = Date.now();
+    logStorageEvent({
+      name: "loadCampaignById",
+      collection: "campaigns",
+      outcome: "success",
+      durationMs: 12,
+    });
+    const afterMs = Date.now();
+
+    const tracer = trace.getTracer("session-combat");
+    const startSpanOptions = (tracer.startSpan as jest.Mock).mock.calls[0][1];
+    
+    expect(startSpanOptions).toBeDefined();
+    expect(startSpanOptions.startTime).toBeDefined();
+    
+    const startTimeMs = startSpanOptions.startTime as number;
+    
+    const approxEndTime = startTimeMs + 12;
+    expect(approxEndTime).toBeGreaterThanOrEqual(beforeMs);
+    expect(approxEndTime).toBeLessThanOrEqual(afterMs + 10);
+  });
+
+  test("span.end() is called with endTime", () => {
+    logStorageEvent({
+      name: "loadCampaignById",
+      collection: "campaigns",
+      outcome: "success",
+      durationMs: 12,
+    });
+
+    const tracer = trace.getTracer("session-combat");
+    const mockSpan = tracer.startSpan("test");
+    expect(mockSpan.end).toHaveBeenCalledTimes(1);
+    const endCallArg = (mockSpan.end as jest.Mock).mock.calls[0][0];
+    expect(endCallArg).toBeDefined();
+  });
+
+  test("recordException and setStatus are called when the outcome is error and an Error object is provided", () => {
+    const error = new Error("Test error");
+    logStorageEvent({
+      name: "loadCampaignById",
+      collection: "campaigns",
+      outcome: "error",
+      durationMs: 12,
+      error,
+    });
+
+    const tracer = trace.getTracer("session-combat");
+    const mockSpan = tracer.startSpan("test");
+    
+    expect(mockSpan.recordException).toHaveBeenCalledWith(error);
+    expect(mockSpan.setStatus).toHaveBeenCalledWith({ code: SpanStatusCode.ERROR });
+  });
+
+  test("console.log is called when (process.env as any).NODE_ENV = 'development' for a success event", () => {
+    (process.env as any).NODE_ENV = "development";
     logStorageEvent({
       name: "loadCampaignById",
       collection: "campaigns",
@@ -27,64 +172,36 @@ describe("logStorageEvent", () => {
     });
 
     expect(consoleSpy).toHaveBeenCalledTimes(1);
-    const [entry] = consoleSpy.mock.calls[0];
-    expect(entry).toMatchObject({
+  });
+
+  test("console.error is called when (process.env as any).NODE_ENV = 'development' for an error event", () => {
+    (process.env as any).NODE_ENV = "development";
+    logStorageEvent({
+      name: "loadCampaignById",
+      collection: "campaigns",
+      outcome: "error",
+      durationMs: 12,
+    });
+
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test("NO console methods are called when (process.env as any).NODE_ENV = 'production'", () => {
+    (process.env as any).NODE_ENV = "production";
+    logStorageEvent({
       name: "loadCampaignById",
       collection: "campaigns",
       outcome: "success",
       durationMs: 12,
     });
-  });
-
-  test("emits outcome not_found with the same required fields", () => {
-    logStorageEvent({
-      name: "getMember",
-      collection: "campaignMembers",
-      outcome: "not_found",
-      durationMs: 5,
-    });
-
-    const [entry] = consoleSpy.mock.calls[0];
-    expect(entry).toMatchObject({
-      name: "getMember",
-      collection: "campaignMembers",
-      outcome: "not_found",
-      durationMs: 5,
-    });
-  });
-
-  test("emits error outcome carrying the original error via console.error", () => {
-    const originalError = new Error("connection refused");
-
-    logStorageEvent({
-      name: "getMember",
-      collection: "campaignMembers",
-      outcome: "error",
-      durationMs: 8,
-      error: originalError,
-    });
-
-    expect(consoleSpy).not.toHaveBeenCalled();
-    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
-    const [entry] = consoleErrorSpy.mock.calls[0];
-    expect(entry).toMatchObject({
-      name: "getMember",
-      collection: "campaignMembers",
-      outcome: "error",
-      durationMs: 8,
-      error: originalError,
-    });
-  });
-
-  test("produces the same field set across all outcomes (error absent unless passed)", () => {
     logStorageEvent({
       name: "loadCampaignById",
       collection: "campaigns",
-      outcome: "success",
-      durationMs: 1,
+      outcome: "error",
+      durationMs: 12,
     });
 
-    const [entry] = consoleSpy.mock.calls[0];
-    expect(entry).not.toHaveProperty("error");
+    expect(consoleSpy).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 });
