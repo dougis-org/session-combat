@@ -1,5 +1,8 @@
-## ADDED Requirements
+# populate-campaigns-g3 Specification
 
+## Purpose
+TBD - created by archiving change populate-campaigns-g3. Update Purpose after archive.
+## Requirements
 ### Requirement: G3 Encounter Population
 The system MUST populate every G3 (Planar & non-Realms) campaign's `CAMPAIGN_CATALOG` entry with full `EncounterTemplate` definitions containing complete `Monster` stat blocks (non-empty `monsters` arrays), and each encounter SHALL be assembled from `findCustomMonsterById` + `toEncounterMonster(s)` so every monster instance has a unique `id`.
 
@@ -39,7 +42,7 @@ The system MUST populate every G3 (Planar & non-Realms) campaign's `CAMPAIGN_CAT
 - **THEN** `cm-hurog-manthex` and `cm-wyrmlord` are present in `CUSTOM_MONSTERS` with full stat blocks
 
 ### Requirement: G3 Custom Monster Constraints
-Every new `cm-` monster added for the G3 group SHALL satisfy the invariants already established by [`openspec/specs/campaign-monsters/spec.md`](../../../specs/campaign-monsters/spec.md): canonical `DamageType` values only, string `passive Perception`, no `as any` casts, no `eslint-disable` comments.
+Every new `cm-` monster added for the G3 group SHALL satisfy the invariants already established by [the campaign-monsters spec](../campaign-monsters/spec.md): canonical `DamageType` values only, string `passive Perception`, no `as any` casts, no `eslint-disable` comments.
 
 #### Scenario: No descriptive damage type strings
 - **WHEN** a new `cm-` monster is authored for G3
@@ -50,55 +53,3 @@ Every new `cm-` monster added for the G3 group SHALL satisfy the invariants alre
 - **WHEN** a new `cm-` monster is authored for G3
 - **THEN** the `senses["passive Perception"]` value is a string (e.g. `"12"`), not a number
 
-## MODIFIED Requirements
-
-### Requirement: MODIFIED CampaignTemplate data structure (G3 catalog entries)
-The system SHALL support storing `EncounterTemplate` definitions directly within a `CampaignTemplate`, including for the 6 G3 campaigns.
-
-#### Scenario: G3 catalog entries ship with full encounter arrays
-- **Given** the `CAMPAIGN_CATALOG` in `lib/scripts/seedCampaignTemplates.ts` defines entries for the 6 G3 campaigns (Rime, WBtW, PotA, CotCT, HR, RHoD)
-- **When** the seed script is executed
-- **Then** each G3 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output (`rimeEncounters()`, `wbtwEncounters()`, `potaEncounters()`, `cotctEncounters()`, `hrEncounters()`, `rhodEncounters()`)
-- **Then** every encounter's `monsters` array contains full `Monster` stat blocks built via `findCustomMonsterById` + `toEncounterMonster(s)`
-
-## REMOVED Requirements
-
-### Requirement: REMOVED None
-The system SHALL NOT remove any existing `CampaignTemplate` data structures as part of this change.
-
-#### Scenario: No REMOVED requirements
-- **Given** the G3 rollout is purely additive (new encounters and monsters)
-- **When** the change is applied
-- **Then** no existing requirement from prior capability versions is removed
-
-Reason for removal: N/A
-
-## Traceability
-
-- Proposal element -> Requirement: Populate G3 encounters -> ADDED G3 Encounter Population
-- Proposal element -> Requirement: G3 monster invariants -> ADDED G3 Custom Monster Constraints
-- Proposal element -> Requirement: Wire G3 catalog to encounter helpers -> MODIFIED CampaignTemplate data structure (G3 catalog entries)
-- Design decision -> Requirement: Per-campaign encounter helpers -> ADDED G3 Encounter Population
-- Design decision -> Requirement: SRD mirrors re-inlined -> MODIFIED CampaignTemplate data structure (G3 catalog entries)
-- Requirement -> Task(s): Will map to `customMonsters.ts` additions and `seedCampaignTemplates.ts` per-campaign helpers in `tasks.md`.
-
-## Non-Functional Acceptance Criteria
-
-### Requirement: Performance
-
-#### Scenario: Latency budget
-- **Given** a G3 campaign template with 20 encounters (PotA maximum)
-- **When** the encounters are sequentially inserted into the DB during the seed script
-- **Then** the total overhead of encounter insertion must not exceed the existing 500ms baseline (no regression vs G1/G2)
-
-### Requirement: Security
-
-> See functional scenarios: All access-control rejections for the seed script are handled by existing middleware. No new security properties introduced by this change.
-
-### Requirement: Reliability
-
-#### Scenario: Missing monster reference fails fast
-- **Given** a G3 helper references a `cm-` monster id that doesn't exist in `CUSTOM_MONSTERS`
-- **When** the seed script runs
-- **Then** the script throws immediately with a clear error message identifying the missing id
-- **Then** CI catches the failure during `npm run test:unit` before merge
