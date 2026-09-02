@@ -57,7 +57,7 @@ export function mockCollection(opts: RepoMockOptions = {}) {
  * Registers `beforeEach`/`afterEach` that stub `logStorageEvent` and reset
  * mocks. Returns a getter for the spy so tests can assert on emitted events.
  */
-export function useStorageLogSpy() {
+export function installStorageLogSpy() {
   let spy: jest.SpyInstance;
   beforeEach(() => {
     jest.clearAllMocks();

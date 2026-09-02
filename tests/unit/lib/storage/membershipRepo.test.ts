@@ -15,13 +15,13 @@ import { DuplicateMemberError } from "@/lib/errors";
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 import {
   mockCollection,
-  useStorageLogSpy,
+  installStorageLogSpy,
   expectStorageError,
   expectLoggedOutcome,
   expectFacadeMethods,
 } from "./_repoMock";
 
-const getLogSpy = useStorageLogSpy();
+const getLogSpy = installStorageLogSpy();
 const DB_DOWN = () => new Error("db down");
 const dupKeyError = () => Object.assign(new Error("E11000 duplicate key"), { code: 11000 });
 

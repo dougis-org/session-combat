@@ -8,14 +8,14 @@ import { GLOBAL_USER_ID } from "@/lib/constants";
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 import {
   mockCollection,
-  useStorageLogSpy,
+  installStorageLogSpy,
   expectStorageError,
   expectLoggedOutcome,
   expectNotLoggedOutcome,
   expectFacadeMethods,
 } from "./_repoMock";
 
-const getLogSpy = useStorageLogSpy();
+const getLogSpy = installStorageLogSpy();
 const DB_DOWN = () => new Error("db down");
 const TEMPLATE = { id: "m1", userId: "u1", name: "Orc" } as never;
 
