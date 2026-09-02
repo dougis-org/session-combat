@@ -13918,7 +13918,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   // ---------------------------------------------------------------------------
   {
     "id": "cm-ck-flying-book-swarm",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Swarm of Animated Books",
@@ -13972,7 +13972,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-mazfroth",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Mazfroth, the Mimic Tome",
@@ -14029,7 +14029,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-shadow-raven-flock",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Shadow-Touched Raven Flock",
@@ -14083,7 +14083,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-dolina-nightcaller",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Dolina, the Raven Queen's Herald",
@@ -14153,7 +14153,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-derro-mine-warden",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Derro Mine Warden",
@@ -14207,7 +14207,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-flameskull-archivist",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Flameskull Archivist",
@@ -14277,7 +14277,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-lorehold-scrivener",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Lorehold Scrivener",
@@ -14322,7 +14322,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-canopic-golem",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Canopic Golem",
@@ -14389,7 +14389,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-wisteria-arcanaloth",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Vane, the Wisteria Warden",
@@ -14484,7 +14484,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-alchemy-devotee",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Devotee of Inner Alchemy",
@@ -14544,7 +14544,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-yellowcrest-poltergeist",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Yellowcrest Manor Poltergeist",
@@ -14610,7 +14610,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-lurue-corrupted-unicorn",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Corrupted Servant of Lurue",
@@ -14675,7 +14675,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-price-of-beauty-hag",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Sylvan Mirror Hag",
@@ -14737,7 +14737,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-shemshime",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Shemshime",
@@ -14799,7 +14799,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-alkazaar-mummy-lord",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Alkazaar, Djinn-Bound Mummy",
@@ -14894,7 +14894,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-xanthoria",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Xanthoria, the Lichen Horror",
@@ -14964,7 +14964,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-ck-extradimensional-thief",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Candlekeep Mysteries",
     "name": "Extradimensional Cutpurse",
@@ -15017,7 +15017,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-night-market-thief",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Night Market Cutthroat",
@@ -15070,7 +15070,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-hollow-mine-fiend",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Fiend of the Hollow Mine",
@@ -15137,7 +15137,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-vice-lord",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Vice-Lord of Zinda",
@@ -15199,7 +15199,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-spirit-of-the-sun-trials",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Sun-Trial Warden",
@@ -15273,7 +15273,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-buried-dynasty-revenant",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Buried Dynasty Revenant",
@@ -15338,7 +15338,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-manivarsha-naga",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Naga of the Tangled Waters",
@@ -15405,7 +15405,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-invisible-mountain-orchid",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Orchid Wraith of the Invisible Mountain",
@@ -15471,7 +15471,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-siabsungkoh-elder",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Elder of Siabsungkoh",
@@ -15526,7 +15526,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-tletepec-warlock",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Tletepec Coil Warlock",
@@ -15574,7 +15574,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-wandering-emporium-guard",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Concordant Express Marshal",
@@ -15631,7 +15631,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-moonrise-lycanthrope",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Song of Moonrise Werebeast",
@@ -15693,7 +15693,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-djaynai-storm-herald",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Storm Herald of Djaynai",
@@ -15766,7 +15766,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-gold-guardian",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Guardian of Fools and Princes",
@@ -15832,7 +15832,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-hollow-mine-cult-leader",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Nightmare of the Hollow Mine",
@@ -15928,7 +15928,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rc-akharin-sangar-champion",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Journeys Through the Radiant Citadel",
     "name": "Champion of Akharin Sangar",
@@ -15984,7 +15984,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-museum-guard",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Murkveil Museum Guard",
@@ -16028,7 +16028,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-clockwork-sentinel",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Tockworth Clockwork Sentinel",
@@ -16083,7 +16083,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-stygian-imp-dealer",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Stygian Casino Croupier",
@@ -16147,7 +16147,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-vault-golem",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Vidorant's Vault Golem",
@@ -16213,7 +16213,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-astral-express-marauder",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Concordant Express Marauder",
@@ -16275,7 +16275,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-accursed-shard-elemental",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Shard of the Accursed",
@@ -16345,7 +16345,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-efreeti-fortress-warden",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Efreeti Fortress Warden",
@@ -16406,7 +16406,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-golden-vault-inside-agent",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Turncoat Vault Agent",
@@ -16472,7 +16472,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-heart-of-ashes-cultist",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Cinder Cult Zealot",
@@ -16519,7 +16519,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-observatory-star-spawn",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Observatory Star Spawn",
@@ -16582,7 +16582,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-masterpiece-mimic",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Masterpiece Frame Mimic",
@@ -16636,7 +16636,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-prisoner-13",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Prisoner 13",
@@ -16702,7 +16702,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-golden-vault-mastermind",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Rival Heist Mastermind",
@@ -16789,7 +16789,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-fire-and-darkness-salamander",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Fortress Salamander Guard",
@@ -16850,7 +16850,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gv-murkmire-relic-guardian",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Keys from the Golden Vault",
     "name": "Murkmire Relic Guardian",
@@ -16913,7 +16913,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-twig-blight-swarm",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Twig Blight Cluster",
@@ -16961,7 +16961,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-belak-druid",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Belak the Outcast",
@@ -17022,7 +17022,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-duergar-forgemaster",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Forge of Fury Duergar Smith",
@@ -17087,7 +17087,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-mountain-troll",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Stone Tooth Mountain Troll",
@@ -17142,7 +17142,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-tamoachan-couatl-guardian",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Hidden Shrine Couatl Guardian",
@@ -17211,7 +17211,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-white-plume-guardian",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Keraptis's Vault Golem",
@@ -17273,7 +17273,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-sir-bluto",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Sir Bluto Sans Pite",
@@ -17327,7 +17327,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-dead-in-thay-thayan-apprentice",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Thayan Blood Apprentice",
@@ -17380,7 +17380,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-fire-giant-against-the-giants",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Snurre's Hall Fire Giant",
@@ -17436,7 +17436,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-hill-giant-against-the-giants",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Nosnra's Steading Hill Giant",
@@ -17484,7 +17484,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-frost-giant-against-the-giants",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Glacial Rift Frost Giant",
@@ -17540,7 +17540,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-juiblex-spawn",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Doomvault Ooze Aberration",
@@ -17597,7 +17597,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-vecna-robes",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Vecna, the Undying (Robes of Vecna)",
@@ -17694,7 +17694,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-acererak-lich",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Acererak the Devourer (Archlich)",
@@ -17792,7 +17792,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-yp-tomb-of-horrors-gargoyle",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Tales from the Yawning Portal",
     "name": "Tomb of Horrors Sentinel Gargoyle",
@@ -17860,7 +17860,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-smuggler-thug",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Saltmarsh Smuggler",
@@ -17913,7 +17913,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-lizardfolk-scale-shield",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Lizardfolk Scale-Shield",
@@ -17972,7 +17972,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-sahuagin-raider",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Sahuagin Raider",
@@ -18033,7 +18033,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-sahuagin-priestess",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Sahuagin Wave Priestess",
@@ -18089,7 +18089,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-sahuagin-baron",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Sahuagin Baron",
@@ -18167,7 +18167,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-giant-sea-eel",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Giant Sea Eel",
@@ -18208,7 +18208,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-merrow-brute",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Merrow Deep Brute",
@@ -18270,7 +18270,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-ghost-of-the-emperor",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Drowned Officer of the Emperor of the Waves",
@@ -18343,7 +18343,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-abbey-lycanthrope",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Isle of the Abbey Wererat Marauder",
@@ -18405,7 +18405,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-tammeraut-lacedon",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Tammeraut Lacedon Pack",
@@ -18461,7 +18461,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-styes-aberration",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Skum of the Styes",
@@ -18520,7 +18520,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-final-enemy-fortress-guard",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Sahuagin Fortress Shark-Warden",
@@ -18578,7 +18578,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-bullywug-croaker",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Dunwater Bullywug Croaker",
@@ -18639,7 +18639,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-gos-kraken-priest-styes",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Ghosts of Saltmarsh",
     "name": "Kraken Priest of the Styes",
@@ -18699,7 +18699,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-goblin-pyro",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Sandpoint Goblin Pyro",
@@ -18751,7 +18751,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-nualia",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Nualia Tobyn, the Fallen",
@@ -18822,7 +18822,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-sinspawn-wrath",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Wrath Sinspawn",
@@ -18883,7 +18883,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-lucrecia",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Lucrecia, Lamia Handmaiden",
@@ -18946,7 +18946,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-stone-giant-elder",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Jorgenfist Stone Giant Elder",
@@ -19004,7 +19004,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-mokmurian",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Mokmurian, the Stone Lord",
@@ -19070,7 +19070,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-karzoug-demon-skin",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Karzoug, the Runelord of Greed",
@@ -19174,7 +19174,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-hill-giant-raider",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Hook Mountain Hill Giant Raider",
@@ -19222,7 +19222,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-ogrekin-hillbilly",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Foxglove Ogrekin",
@@ -19259,7 +19259,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-scarecrow-golem",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Foxglove Manor Scarecrow",
@@ -19312,7 +19312,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-clockwork-reaper",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Thassilonian Clockwork Reaper",
@@ -19375,7 +19375,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-shadow-of-runeforge",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Runeforge Shadow-Wizard",
@@ -19445,7 +19445,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-lamia-matriarch-guard",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Xin-Shalast Concubine Devil",
@@ -19512,7 +19512,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-rotr-denizen-of-leng",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Rise of the Runelords",
     "name": "Denizen of Leng (Xin-Shalast)",
@@ -19587,7 +19587,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-stag-lord-bandit",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "Stag Lord's Bandit",
@@ -19635,7 +19635,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-stag-lord",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "The Stag Lord",
@@ -19698,7 +19698,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-tatzlwyrm",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "Tatzlwyrm",
@@ -19750,7 +19750,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-owlbear-alpha",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "Stolen Lands Owlbear Alpha",
@@ -19804,7 +19804,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-hodag",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "Hodag of the Narlmarches",
@@ -19856,7 +19856,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-nyrissa",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "Nyrissa, the Cruel Nymph Queen",
@@ -19957,7 +19957,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-lantern-king",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "The Lantern King (Eldest Avatar)",
@@ -20059,7 +20059,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-troll-king-hargulka",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "Hargulka, the Troll King",
@@ -20114,7 +20114,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-spriggan-raider",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "Spriggan Kingdom-Raider",
@@ -20162,7 +20162,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-boggard-swamp-priest",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "Hooktongue Boggard Priest",
@@ -20223,7 +20223,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-first-world-scythe-tree",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "First World Scythe Tree",
@@ -20286,7 +20286,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-will-o-wisp-swarm",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "Candlemere Wisp Cluster",
@@ -20350,7 +20350,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-armag-twice-born",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "Armag the Twice-Born",
@@ -20413,7 +20413,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-km-linnorm-fen",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Kingmaker",
     "name": "Fen Linnorm",
@@ -20484,7 +20484,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-cultist-of-baphomet",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Cultist of Baphomet",
@@ -20538,7 +20538,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-dretch-swarm",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Dretch Rabble",
@@ -20597,7 +20597,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-vrock-shrieker",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Worldwound Vrock",
@@ -20673,7 +20673,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-babau-skirmisher",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Babau Crusade-Slayer",
@@ -20744,7 +20744,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-ravener-hunter",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Ravener Hunter of Deskari",
@@ -20808,7 +20808,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-hezrou-frontline",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Herald's Hezrou",
@@ -20884,7 +20884,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-shield-archon",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Sword of Valor Shield Archon",
@@ -20958,7 +20958,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-nabasu-glutton",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Nabasu Soul-Glutton",
@@ -21033,7 +21033,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-baphomet",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Baphomet, the Prince of Beasts",
@@ -21147,7 +21147,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-deskari",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Deskari, the Usher of the Apocalypse",
@@ -21269,7 +21269,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-nocticula",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Nocticula, the Redeemer Queen (Demon Lord Aspect)",
@@ -21377,7 +21377,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-brimorak",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Brimorak Firestarter",
@@ -21440,7 +21440,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-schir-brute",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Schir Warband Brute",
@@ -21506,7 +21506,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-gray-garrison-cultist-lord",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Staunton Vhane, the Fallen Warpriest",
@@ -21571,7 +21571,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wotr-crusader-marshal-ally",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Wrath of the Righteous",
     "name": "Queen's Crusade Marshal",
@@ -21632,7 +21632,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-halaster-blackcloak",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Halaster Blackcloak, the Mad Mage",
@@ -21734,7 +21734,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-halaster-apprentice-arcturia",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Arcturia, Apprentice of Halaster",
@@ -21822,7 +21822,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-halaster-apprentice-trobriand",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Trobriand, the Metal Mage (Apprentice)",
@@ -21909,7 +21909,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-halaster-apprentice-muiral",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Muiral the Misshapen (Apprentice)",
@@ -21979,7 +21979,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-flumph-scout",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Sargauth Flumph",
@@ -22027,7 +22027,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-undermountain-goblin",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Undermountain Goblin",
@@ -22082,7 +22082,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-kenku-scavenger",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Kenku Scavenger",
@@ -22139,7 +22139,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-drow-house-guard",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Drow House Guard",
@@ -22199,7 +22199,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-drow-mage-sargauth",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Drow Enclave Mage",
@@ -22259,7 +22259,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-mind-flayer-arcanist",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Sargauth Mind Flayer Arcanist",
@@ -22325,7 +22325,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-grell-hunter",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Grell Hunter",
@@ -22386,7 +22386,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-hook-horror-pack",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Undermountain Hook Horror",
@@ -22435,7 +22435,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-gray-ooze-crawler",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Gray Ooze Crawler",
@@ -22493,7 +22493,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-wererat-skulk",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Skullport Wererat",
@@ -22556,7 +22556,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-quaggoth-thonot",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Quaggoth Thonot",
@@ -22614,7 +22614,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-wood-woad-wyllowwood",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Wyllowwood Wood Woad",
@@ -22678,7 +22678,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-nimblewright-maddgoth",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Maddgoth's Nimblewright",
@@ -22742,7 +22742,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-flind-slaver",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Slitherswamp Flind Slaver",
@@ -22791,7 +22791,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-troglodyte-slitherswamp",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Slitherswamp Troglodyte",
@@ -22846,7 +22846,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-dweomercore-apprentice",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Dweomercore Student-Wizard",
@@ -22904,7 +22904,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-death-tyrant-muiwood",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Muiwood Death Tyrant",
@@ -22979,7 +22979,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-wraith-terminus",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Terminus Level Wraith",
@@ -23052,7 +23052,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-shadowdusk-cultist",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Shadowdusk Hold Cultist",
@@ -23104,7 +23104,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-shadowdusk-aberrant-hulk",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Shadowdusk Aberrant Hulk",
@@ -23167,7 +23167,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-flameskull-lost-level",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Lost Level Flameskull",
@@ -23230,7 +23230,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-otyugh-warren",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Undermountain Otyugh",
@@ -23279,7 +23279,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-neogi-slaver",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Neogi Slaver",
@@ -23332,7 +23332,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-stone-golem-arcane-chambers",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Arcane Chambers Stone Golem",
@@ -23401,7 +23401,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-intellect-devourer",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Intellect Devourer",
@@ -23452,7 +23452,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-vampire-spawn-wraith-haunts",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Wraith Haunts Vampire Spawn",
@@ -23516,7 +23516,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-mimic-treasure",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Undermountain Chest Mimic",
@@ -23576,7 +23576,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-cranium-rat-swarm",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Swarm of Cranium Rats",
@@ -23645,7 +23645,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-sorlyn-priest",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Sorlyn Sun-Cult Priest",
@@ -23704,7 +23704,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-lava-child",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Undermountain Lava Child",
@@ -23756,7 +23756,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-derro-savant-lost",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Undermountain Derro Savant",
@@ -23812,7 +23812,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-carrion-crawler-tunnels",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Undermountain Carrion Crawler",
@@ -23867,7 +23867,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-nothic-hoarder",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Undermountain Nothic",
@@ -23925,7 +23925,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-gauth-eye",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Gauth (Lesser Beholder-Kin)",
@@ -23976,7 +23976,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-spectator-vault",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Undermountain Spectator",
@@ -24028,7 +24028,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-shield-guardian-halaster",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Halaster's Shield Guardian",
@@ -24092,7 +24092,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
   },
   {
     "id": "cm-wdmm-mad-mage-simulacrum",
-    "userId": "GLOBAL",
+    "userId": GLOBAL_USER_ID,
     "isGlobal": true,
     "source": "Waterdeep: Dungeon of the Mad Mage",
     "name": "Halaster's Chaos Simulacrum",
@@ -24158,6 +24158,20 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
  */
 export function findCustomMonsterById(id: string): Omit<MonsterTemplate, 'createdAt' | 'updatedAt'> | undefined {
   return CUSTOM_MONSTERS.find((m) => m.id === id);
+}
+
+/**
+ * Like `findCustomMonsterById`, but throws immediately if the id is unknown so a
+ * mistyped or renamed `cm-` reference in a campaign encounter helper fails fast
+ * (at module load / `npm run test:unit`) instead of silently producing a thinner
+ * encounter.
+ */
+export function requireCustomMonsterById(id: string): Omit<MonsterTemplate, 'createdAt' | 'updatedAt'> {
+  const template = findCustomMonsterById(id);
+  if (!template) {
+    throw new Error(`requireCustomMonsterById: unknown custom monster id "${id}"`);
+  }
+  return template;
 }
 
 /**

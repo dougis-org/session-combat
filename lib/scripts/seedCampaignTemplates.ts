@@ -5,6 +5,7 @@ import { randomUUID } from "crypto";
 import {
   CUSTOM_MONSTERS,
   findCustomMonsterById,
+  requireCustomMonsterById,
   toEncounterMonster,
   toEncounterMonsters,
 } from "../data/customMonsters";
@@ -1680,29 +1681,29 @@ function candlekeepEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const ckExtradimensionalThief = findCustomMonsterById("cm-ck-extradimensional-thief");
-  const ckFlyingBookSwarm = findCustomMonsterById("cm-ck-flying-book-swarm");
-  const ckMazfroth = findCustomMonsterById("cm-ck-mazfroth");
-  const ckDolinaNightcaller = findCustomMonsterById("cm-ck-dolina-nightcaller");
-  const ckShadowRavenFlock = findCustomMonsterById("cm-ck-shadow-raven-flock");
-  const ckDerroMineWarden = findCustomMonsterById("cm-ck-derro-mine-warden");
-  const ckShemshime = findCustomMonsterById("cm-ck-shemshime");
-  const ckPriceOfBeautyHag = findCustomMonsterById("cm-ck-price-of-beauty-hag");
-  const ckAlchemyDevotee = findCustomMonsterById("cm-ck-alchemy-devotee");
-  const ckCanopicGolem = findCustomMonsterById("cm-ck-canopic-golem");
-  const ckYellowcrestPoltergeist = findCustomMonsterById("cm-ck-yellowcrest-poltergeist");
-  const ckLurueCorruptedUnicorn = findCustomMonsterById("cm-ck-lurue-corrupted-unicorn");
-  const ckFlameskullArchivist = findCustomMonsterById("cm-ck-flameskull-archivist");
-  const ckAlkazaarMummyLord = findCustomMonsterById("cm-ck-alkazaar-mummy-lord");
-  const ckWisteriaArcanaloth = findCustomMonsterById("cm-ck-wisteria-arcanaloth");
-  const ckLoreholdScrivener = findCustomMonsterById("cm-ck-lorehold-scrivener");
-  const ckXanthoria = findCustomMonsterById("cm-ck-xanthoria");
+  const ckExtradimensionalThief = requireCustomMonsterById("cm-ck-extradimensional-thief");
+  const ckFlyingBookSwarm = requireCustomMonsterById("cm-ck-flying-book-swarm");
+  const ckMazfroth = requireCustomMonsterById("cm-ck-mazfroth");
+  const ckDolinaNightcaller = requireCustomMonsterById("cm-ck-dolina-nightcaller");
+  const ckShadowRavenFlock = requireCustomMonsterById("cm-ck-shadow-raven-flock");
+  const ckDerroMineWarden = requireCustomMonsterById("cm-ck-derro-mine-warden");
+  const ckShemshime = requireCustomMonsterById("cm-ck-shemshime");
+  const ckPriceOfBeautyHag = requireCustomMonsterById("cm-ck-price-of-beauty-hag");
+  const ckAlchemyDevotee = requireCustomMonsterById("cm-ck-alchemy-devotee");
+  const ckCanopicGolem = requireCustomMonsterById("cm-ck-canopic-golem");
+  const ckYellowcrestPoltergeist = requireCustomMonsterById("cm-ck-yellowcrest-poltergeist");
+  const ckLurueCorruptedUnicorn = requireCustomMonsterById("cm-ck-lurue-corrupted-unicorn");
+  const ckFlameskullArchivist = requireCustomMonsterById("cm-ck-flameskull-archivist");
+  const ckAlkazaarMummyLord = requireCustomMonsterById("cm-ck-alkazaar-mummy-lord");
+  const ckWisteriaArcanaloth = requireCustomMonsterById("cm-ck-wisteria-arcanaloth");
+  const ckLoreholdScrivener = requireCustomMonsterById("cm-ck-lorehold-scrivener");
+  const ckXanthoria = requireCustomMonsterById("cm-ck-xanthoria");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -1804,25 +1805,25 @@ function radiantCitadelEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const rcNightMarketThief = findCustomMonsterById("cm-rc-night-market-thief");
-  const rcMoonriseLycanthrope = findCustomMonsterById("cm-rc-moonrise-lycanthrope");
-  const rcHollowMineFiend = findCustomMonsterById("cm-rc-hollow-mine-fiend");
-  const rcTletepecWarlock = findCustomMonsterById("cm-rc-tletepec-warlock");
-  const rcViceLord = findCustomMonsterById("cm-rc-vice-lord");
-  const rcSiabsungkohElder = findCustomMonsterById("cm-rc-siabsungkoh-elder");
-  const rcInvisibleMountainOrchid = findCustomMonsterById("cm-rc-invisible-mountain-orchid");
-  const rcGoldGuardian = findCustomMonsterById("cm-rc-gold-guardian");
-  const rcManivarshaNaga = findCustomMonsterById("cm-rc-manivarsha-naga");
-  const rcAkharinSangarChampion = findCustomMonsterById("cm-rc-akharin-sangar-champion");
-  const rcSpiritOfTheSunTrials = findCustomMonsterById("cm-rc-spirit-of-the-sun-trials");
-  const rcBuriedDynastyRevenant = findCustomMonsterById("cm-rc-buried-dynasty-revenant");
-  const rcDjaynaiStormHerald = findCustomMonsterById("cm-rc-djaynai-storm-herald");
+  const rcNightMarketThief = requireCustomMonsterById("cm-rc-night-market-thief");
+  const rcMoonriseLycanthrope = requireCustomMonsterById("cm-rc-moonrise-lycanthrope");
+  const rcHollowMineFiend = requireCustomMonsterById("cm-rc-hollow-mine-fiend");
+  const rcTletepecWarlock = requireCustomMonsterById("cm-rc-tletepec-warlock");
+  const rcViceLord = requireCustomMonsterById("cm-rc-vice-lord");
+  const rcSiabsungkohElder = requireCustomMonsterById("cm-rc-siabsungkoh-elder");
+  const rcInvisibleMountainOrchid = requireCustomMonsterById("cm-rc-invisible-mountain-orchid");
+  const rcGoldGuardian = requireCustomMonsterById("cm-rc-gold-guardian");
+  const rcManivarshaNaga = requireCustomMonsterById("cm-rc-manivarsha-naga");
+  const rcAkharinSangarChampion = requireCustomMonsterById("cm-rc-akharin-sangar-champion");
+  const rcSpiritOfTheSunTrials = requireCustomMonsterById("cm-rc-spirit-of-the-sun-trials");
+  const rcBuriedDynastyRevenant = requireCustomMonsterById("cm-rc-buried-dynasty-revenant");
+  const rcDjaynaiStormHerald = requireCustomMonsterById("cm-rc-djaynai-storm-herald");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -1904,27 +1905,27 @@ function goldenVaultEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const gvMuseumGuard = findCustomMonsterById("cm-gv-museum-guard");
-  const gvMurkmireRelicGuardian = findCustomMonsterById("cm-gv-murkmire-relic-guardian");
-  const gvStygianImpDealer = findCustomMonsterById("cm-gv-stygian-imp-dealer");
-  const gvObservatoryStarSpawn = findCustomMonsterById("cm-gv-observatory-star-spawn");
-  const gvClockworkSentinel = findCustomMonsterById("cm-gv-clockwork-sentinel");
-  const gvPrisoner13 = findCustomMonsterById("cm-gv-prisoner-13");
-  const gvMasterpieceMimic = findCustomMonsterById("cm-gv-masterpiece-mimic");
-  const gvAstralExpressMarauder = findCustomMonsterById("cm-gv-astral-express-marauder");
-  const gvGoldenVaultInsideAgent = findCustomMonsterById("cm-gv-golden-vault-inside-agent");
-  const gvVaultGolem = findCustomMonsterById("cm-gv-vault-golem");
-  const gvGoldenVaultMastermind = findCustomMonsterById("cm-gv-golden-vault-mastermind");
-  const gvAccursedShardElemental = findCustomMonsterById("cm-gv-accursed-shard-elemental");
-  const gvHeartOfAshesCultist = findCustomMonsterById("cm-gv-heart-of-ashes-cultist");
-  const gvFireAndDarknessSalamander = findCustomMonsterById("cm-gv-fire-and-darkness-salamander");
-  const gvEfreetiFortressWarden = findCustomMonsterById("cm-gv-efreeti-fortress-warden");
+  const gvMuseumGuard = requireCustomMonsterById("cm-gv-museum-guard");
+  const gvMurkmireRelicGuardian = requireCustomMonsterById("cm-gv-murkmire-relic-guardian");
+  const gvStygianImpDealer = requireCustomMonsterById("cm-gv-stygian-imp-dealer");
+  const gvObservatoryStarSpawn = requireCustomMonsterById("cm-gv-observatory-star-spawn");
+  const gvClockworkSentinel = requireCustomMonsterById("cm-gv-clockwork-sentinel");
+  const gvPrisoner13 = requireCustomMonsterById("cm-gv-prisoner-13");
+  const gvMasterpieceMimic = requireCustomMonsterById("cm-gv-masterpiece-mimic");
+  const gvAstralExpressMarauder = requireCustomMonsterById("cm-gv-astral-express-marauder");
+  const gvGoldenVaultInsideAgent = requireCustomMonsterById("cm-gv-golden-vault-inside-agent");
+  const gvVaultGolem = requireCustomMonsterById("cm-gv-vault-golem");
+  const gvGoldenVaultMastermind = requireCustomMonsterById("cm-gv-golden-vault-mastermind");
+  const gvAccursedShardElemental = requireCustomMonsterById("cm-gv-accursed-shard-elemental");
+  const gvHeartOfAshesCultist = requireCustomMonsterById("cm-gv-heart-of-ashes-cultist");
+  const gvFireAndDarknessSalamander = requireCustomMonsterById("cm-gv-fire-and-darkness-salamander");
+  const gvEfreetiFortressWarden = requireCustomMonsterById("cm-gv-efreeti-fortress-warden");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -2006,27 +2007,27 @@ function yawningPortalEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const ypBelakDruid = findCustomMonsterById("cm-yp-belak-druid");
-  const ypTwigBlightSwarm = findCustomMonsterById("cm-yp-twig-blight-swarm");
-  const ypDuergarForgemaster = findCustomMonsterById("cm-yp-duergar-forgemaster");
-  const ypMountainTroll = findCustomMonsterById("cm-yp-mountain-troll");
-  const ypTamoachanCouatlGuardian = findCustomMonsterById("cm-yp-tamoachan-couatl-guardian");
-  const ypTombOfHorrorsGargoyle = findCustomMonsterById("cm-yp-tomb-of-horrors-gargoyle");
-  const ypSirBluto = findCustomMonsterById("cm-yp-sir-bluto");
-  const ypWhitePlumeGuardian = findCustomMonsterById("cm-yp-white-plume-guardian");
-  const ypDeadInThayThayanApprentice = findCustomMonsterById("cm-yp-dead-in-thay-thayan-apprentice");
-  const ypJuiblexSpawn = findCustomMonsterById("cm-yp-juiblex-spawn");
-  const ypHillGiantAgainstTheGiants = findCustomMonsterById("cm-yp-hill-giant-against-the-giants");
-  const ypFrostGiantAgainstTheGiants = findCustomMonsterById("cm-yp-frost-giant-against-the-giants");
-  const ypFireGiantAgainstTheGiants = findCustomMonsterById("cm-yp-fire-giant-against-the-giants");
-  const acererakLich = findCustomMonsterById("cm-acererak-lich");
-  const vecnaRobes = findCustomMonsterById("cm-vecna-robes");
+  const ypBelakDruid = requireCustomMonsterById("cm-yp-belak-druid");
+  const ypTwigBlightSwarm = requireCustomMonsterById("cm-yp-twig-blight-swarm");
+  const ypDuergarForgemaster = requireCustomMonsterById("cm-yp-duergar-forgemaster");
+  const ypMountainTroll = requireCustomMonsterById("cm-yp-mountain-troll");
+  const ypTamoachanCouatlGuardian = requireCustomMonsterById("cm-yp-tamoachan-couatl-guardian");
+  const ypTombOfHorrorsGargoyle = requireCustomMonsterById("cm-yp-tomb-of-horrors-gargoyle");
+  const ypSirBluto = requireCustomMonsterById("cm-yp-sir-bluto");
+  const ypWhitePlumeGuardian = requireCustomMonsterById("cm-yp-white-plume-guardian");
+  const ypDeadInThayThayanApprentice = requireCustomMonsterById("cm-yp-dead-in-thay-thayan-apprentice");
+  const ypJuiblexSpawn = requireCustomMonsterById("cm-yp-juiblex-spawn");
+  const ypHillGiantAgainstTheGiants = requireCustomMonsterById("cm-yp-hill-giant-against-the-giants");
+  const ypFrostGiantAgainstTheGiants = requireCustomMonsterById("cm-yp-frost-giant-against-the-giants");
+  const ypFireGiantAgainstTheGiants = requireCustomMonsterById("cm-yp-fire-giant-against-the-giants");
+  const acererakLich = requireCustomMonsterById("cm-acererak-lich");
+  const vecnaRobes = requireCustomMonsterById("cm-vecna-robes");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -2078,26 +2079,26 @@ function saltmarshEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const gosSmugglerThug = findCustomMonsterById("cm-gos-smuggler-thug");
-  const gosLizardfolkScaleShield = findCustomMonsterById("cm-gos-lizardfolk-scale-shield");
-  const gosBullywugCroaker = findCustomMonsterById("cm-gos-bullywug-croaker");
-  const gosGhostOfTheEmperor = findCustomMonsterById("cm-gos-ghost-of-the-emperor");
-  const gosTammerautLacedon = findCustomMonsterById("cm-gos-tammeraut-lacedon");
-  const gosAbbeyLycanthrope = findCustomMonsterById("cm-gos-abbey-lycanthrope");
-  const gosGiantSeaEel = findCustomMonsterById("cm-gos-giant-sea-eel");
-  const gosFinalEnemyFortressGuard = findCustomMonsterById("cm-gos-final-enemy-fortress-guard");
-  const gosSahuaginPriestess = findCustomMonsterById("cm-gos-sahuagin-priestess");
-  const gosMerrowBrute = findCustomMonsterById("cm-gos-merrow-brute");
-  const sahuaginBaron = findCustomMonsterById("cm-sahuagin-baron");
-  const gosSahuaginRaider = findCustomMonsterById("cm-gos-sahuagin-raider");
-  const gosKrakenPriestStyes = findCustomMonsterById("cm-gos-kraken-priest-styes");
-  const gosStyesAberration = findCustomMonsterById("cm-gos-styes-aberration");
+  const gosSmugglerThug = requireCustomMonsterById("cm-gos-smuggler-thug");
+  const gosLizardfolkScaleShield = requireCustomMonsterById("cm-gos-lizardfolk-scale-shield");
+  const gosBullywugCroaker = requireCustomMonsterById("cm-gos-bullywug-croaker");
+  const gosGhostOfTheEmperor = requireCustomMonsterById("cm-gos-ghost-of-the-emperor");
+  const gosTammerautLacedon = requireCustomMonsterById("cm-gos-tammeraut-lacedon");
+  const gosAbbeyLycanthrope = requireCustomMonsterById("cm-gos-abbey-lycanthrope");
+  const gosGiantSeaEel = requireCustomMonsterById("cm-gos-giant-sea-eel");
+  const gosFinalEnemyFortressGuard = requireCustomMonsterById("cm-gos-final-enemy-fortress-guard");
+  const gosSahuaginPriestess = requireCustomMonsterById("cm-gos-sahuagin-priestess");
+  const gosMerrowBrute = requireCustomMonsterById("cm-gos-merrow-brute");
+  const sahuaginBaron = requireCustomMonsterById("cm-sahuagin-baron");
+  const gosSahuaginRaider = requireCustomMonsterById("cm-gos-sahuagin-raider");
+  const gosKrakenPriestStyes = requireCustomMonsterById("cm-gos-kraken-priest-styes");
+  const gosStyesAberration = requireCustomMonsterById("cm-gos-styes-aberration");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -2159,52 +2160,52 @@ function madMageEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const wdmmUndermountainGoblin = findCustomMonsterById("cm-wdmm-undermountain-goblin");
-  const wdmmKenkuScavenger = findCustomMonsterById("cm-wdmm-kenku-scavenger");
-  const wdmmCarrionCrawlerTunnels = findCustomMonsterById("cm-wdmm-carrion-crawler-tunnels");
-  const wdmmMimicTreasure = findCustomMonsterById("cm-wdmm-mimic-treasure");
-  const wdmmGrayOozeCrawler = findCustomMonsterById("cm-wdmm-gray-ooze-crawler");
-  const wdmmSpectatorVault = findCustomMonsterById("cm-wdmm-spectator-vault");
-  const wdmmNothicHoarder = findCustomMonsterById("cm-wdmm-nothic-hoarder");
-  const wdmmFlameskullLostLevel = findCustomMonsterById("cm-wdmm-flameskull-lost-level");
-  const wdmmStoneGolemArcaneChambers = findCustomMonsterById("cm-wdmm-stone-golem-arcane-chambers");
-  const wdmmIntellectDevourer = findCustomMonsterById("cm-wdmm-intellect-devourer");
-  const wdmmNimblewrightMaddgoth = findCustomMonsterById("cm-wdmm-nimblewright-maddgoth");
-  const wdmmCraniumRatSwarm = findCustomMonsterById("cm-wdmm-cranium-rat-swarm");
-  const wdmmShieldGuardianHalaster = findCustomMonsterById("cm-wdmm-shield-guardian-halaster");
-  const wdmmDrowHouseGuard = findCustomMonsterById("cm-wdmm-drow-house-guard");
-  const wdmmDrowMageSargauth = findCustomMonsterById("cm-wdmm-drow-mage-sargauth");
-  const wdmmMindFlayerArcanist = findCustomMonsterById("cm-wdmm-mind-flayer-arcanist");
-  const wdmmFlumphScout = findCustomMonsterById("cm-wdmm-flumph-scout");
-  const wdmmQuaggothThonot = findCustomMonsterById("cm-wdmm-quaggoth-thonot");
-  const wdmmGrellHunter = findCustomMonsterById("cm-wdmm-grell-hunter");
-  const wdmmWraithTerminus = findCustomMonsterById("cm-wdmm-wraith-terminus");
-  const wdmmWereratSkulk = findCustomMonsterById("cm-wdmm-wererat-skulk");
-  const wdmmNeogiSlaver = findCustomMonsterById("cm-wdmm-neogi-slaver");
-  const wdmmTroglodyteSlitherswamp = findCustomMonsterById("cm-wdmm-troglodyte-slitherswamp");
-  const wdmmSorlynPriest = findCustomMonsterById("cm-wdmm-sorlyn-priest");
-  const wdmmOtyughWarren = findCustomMonsterById("cm-wdmm-otyugh-warren");
-  const wdmmWoodWoadWyllowwood = findCustomMonsterById("cm-wdmm-wood-woad-wyllowwood");
-  const wdmmFlindSlaver = findCustomMonsterById("cm-wdmm-flind-slaver");
-  const wdmmLavaChild = findCustomMonsterById("cm-wdmm-lava-child");
-  const wdmmDweomercoreApprentice = findCustomMonsterById("cm-wdmm-dweomercore-apprentice");
-  const wdmmHalasterApprenticeMuiral = findCustomMonsterById("cm-wdmm-halaster-apprentice-muiral");
-  const wdmmHalasterApprenticeTrobriand = findCustomMonsterById("cm-wdmm-halaster-apprentice-trobriand");
-  const wdmmDeathTyrantMuiwood = findCustomMonsterById("cm-wdmm-death-tyrant-muiwood");
-  const wdmmVampireSpawnWraithHaunts = findCustomMonsterById("cm-wdmm-vampire-spawn-wraith-haunts");
-  const wdmmGauthEye = findCustomMonsterById("cm-wdmm-gauth-eye");
-  const wdmmHalasterApprenticeArcturia = findCustomMonsterById("cm-wdmm-halaster-apprentice-arcturia");
-  const wdmmShadowduskAberrantHulk = findCustomMonsterById("cm-wdmm-shadowdusk-aberrant-hulk");
-  const wdmmMadMageSimulacrum = findCustomMonsterById("cm-wdmm-mad-mage-simulacrum");
-  const wdmmShadowduskCultist = findCustomMonsterById("cm-wdmm-shadowdusk-cultist");
-  const wdmmHalasterBlackcloak = findCustomMonsterById("cm-wdmm-halaster-blackcloak");
-  const wdmmDerroSavantLost = findCustomMonsterById("cm-wdmm-derro-savant-lost");
+  const wdmmUndermountainGoblin = requireCustomMonsterById("cm-wdmm-undermountain-goblin");
+  const wdmmKenkuScavenger = requireCustomMonsterById("cm-wdmm-kenku-scavenger");
+  const wdmmCarrionCrawlerTunnels = requireCustomMonsterById("cm-wdmm-carrion-crawler-tunnels");
+  const wdmmMimicTreasure = requireCustomMonsterById("cm-wdmm-mimic-treasure");
+  const wdmmGrayOozeCrawler = requireCustomMonsterById("cm-wdmm-gray-ooze-crawler");
+  const wdmmSpectatorVault = requireCustomMonsterById("cm-wdmm-spectator-vault");
+  const wdmmNothicHoarder = requireCustomMonsterById("cm-wdmm-nothic-hoarder");
+  const wdmmFlameskullLostLevel = requireCustomMonsterById("cm-wdmm-flameskull-lost-level");
+  const wdmmLavaChild = requireCustomMonsterById("cm-wdmm-lava-child");
+  const wdmmStoneGolemArcaneChambers = requireCustomMonsterById("cm-wdmm-stone-golem-arcane-chambers");
+  const wdmmIntellectDevourer = requireCustomMonsterById("cm-wdmm-intellect-devourer");
+  const wdmmNimblewrightMaddgoth = requireCustomMonsterById("cm-wdmm-nimblewright-maddgoth");
+  const wdmmCraniumRatSwarm = requireCustomMonsterById("cm-wdmm-cranium-rat-swarm");
+  const wdmmShieldGuardianHalaster = requireCustomMonsterById("cm-wdmm-shield-guardian-halaster");
+  const wdmmDerroSavantLost = requireCustomMonsterById("cm-wdmm-derro-savant-lost");
+  const wdmmDrowHouseGuard = requireCustomMonsterById("cm-wdmm-drow-house-guard");
+  const wdmmDrowMageSargauth = requireCustomMonsterById("cm-wdmm-drow-mage-sargauth");
+  const wdmmMindFlayerArcanist = requireCustomMonsterById("cm-wdmm-mind-flayer-arcanist");
+  const wdmmFlumphScout = requireCustomMonsterById("cm-wdmm-flumph-scout");
+  const wdmmQuaggothThonot = requireCustomMonsterById("cm-wdmm-quaggoth-thonot");
+  const wdmmGrellHunter = requireCustomMonsterById("cm-wdmm-grell-hunter");
+  const wdmmWraithTerminus = requireCustomMonsterById("cm-wdmm-wraith-terminus");
+  const wdmmWereratSkulk = requireCustomMonsterById("cm-wdmm-wererat-skulk");
+  const wdmmNeogiSlaver = requireCustomMonsterById("cm-wdmm-neogi-slaver");
+  const wdmmTroglodyteSlitherswamp = requireCustomMonsterById("cm-wdmm-troglodyte-slitherswamp");
+  const wdmmSorlynPriest = requireCustomMonsterById("cm-wdmm-sorlyn-priest");
+  const wdmmOtyughWarren = requireCustomMonsterById("cm-wdmm-otyugh-warren");
+  const wdmmShadowduskCultist = requireCustomMonsterById("cm-wdmm-shadowdusk-cultist");
+  const wdmmWoodWoadWyllowwood = requireCustomMonsterById("cm-wdmm-wood-woad-wyllowwood");
+  const wdmmFlindSlaver = requireCustomMonsterById("cm-wdmm-flind-slaver");
+  const wdmmDweomercoreApprentice = requireCustomMonsterById("cm-wdmm-dweomercore-apprentice");
+  const wdmmHalasterApprenticeMuiral = requireCustomMonsterById("cm-wdmm-halaster-apprentice-muiral");
+  const wdmmHalasterApprenticeTrobriand = requireCustomMonsterById("cm-wdmm-halaster-apprentice-trobriand");
+  const wdmmDeathTyrantMuiwood = requireCustomMonsterById("cm-wdmm-death-tyrant-muiwood");
+  const wdmmVampireSpawnWraithHaunts = requireCustomMonsterById("cm-wdmm-vampire-spawn-wraith-haunts");
+  const wdmmGauthEye = requireCustomMonsterById("cm-wdmm-gauth-eye");
+  const wdmmHalasterApprenticeArcturia = requireCustomMonsterById("cm-wdmm-halaster-apprentice-arcturia");
+  const wdmmShadowduskAberrantHulk = requireCustomMonsterById("cm-wdmm-shadowdusk-aberrant-hulk");
+  const wdmmMadMageSimulacrum = requireCustomMonsterById("cm-wdmm-mad-mage-simulacrum");
+  const wdmmHalasterBlackcloak = requireCustomMonsterById("cm-wdmm-halaster-blackcloak");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -2247,6 +2248,11 @@ function madMageEncounters(): EncounterTemplate[] {
       compact([m(wdmmFlameskullLostLevel), many(wdmmUndermountainGoblin, 5)])
     ),
     encounter(
+      "Dungeon Level — Lava Child Forge Raiders",
+      "Ch. 1 (Level 1) — Lava children raid an old smithy for metal to melt.",
+      compact([many(wdmmLavaChild, 3), many(wdmmUndermountainGoblin, 3)])
+    ),
+    encounter(
       "Arcane Chambers — Stone Golem Ward",
       "Ch. 2 (Level 2) — A stone golem enforces the silence of an abandoned laboratory.",
       compact([m(wdmmStoneGolemArcaneChambers)])
@@ -2275,6 +2281,11 @@ function madMageEncounters(): EncounterTemplate[] {
       "Arcane Chambers — Gray Ooze Cistern",
       "Ch. 2 (Level 2) — Gray ooze crawlers drip from corroded pipes over a flooded chamber.",
       compact([many(wdmmGrayOozeCrawler, 4)])
+    ),
+    encounter(
+      "Arcane Chambers — Derro Savant Experiment",
+      "Ch. 2 (Level 2) — A derro savant tests a maddening sonic device on captured goblins.",
+      compact([many(wdmmDerroSavantLost, 3), many(wdmmUndermountainGoblin, 3)])
     ),
     encounter(
       "Sargauth Level — Drow Enclave Checkpoint",
@@ -2327,7 +2338,7 @@ function madMageEncounters(): EncounterTemplate[] {
       compact([many(wdmmKenkuScavenger, 6)])
     ),
     encounter(
-      "Skullport — Wereat Nest Assault",
+      "Skullport — Wererat Nest Assault",
       "Ch. 4 (Skullport) — The party pushes into the wererat nest under the docks.",
       compact([many(wdmmWereratSkulk, 4), m(wdmmOtyughWarren)])
     ),
@@ -2335,6 +2346,11 @@ function madMageEncounters(): EncounterTemplate[] {
       "Skullport — Cranium Rat Broker",
       "Ch. 4 (Skullport) — An information broker fronted by a cranium rat swarm demands a steep price.",
       compact([many(wdmmCraniumRatSwarm, 2), many(wdmmWereratSkulk, 2)])
+    ),
+    encounter(
+      "Skullport — Sorlyn vs. Shadow Cult Crossfire",
+      "Ch. 4 (Skullport) — The party is caught between Sorlyn crusaders and a hidden Shadowdusk cell.",
+      compact([many(wdmmSorlynPriest, 2), many(wdmmShadowduskCultist, 3)])
     ),
     encounter(
       "Wyllowwood — Wood Woad Wardens",
@@ -2542,6 +2558,11 @@ function madMageEncounters(): EncounterTemplate[] {
       compact([m(wdmmSpectatorVault), many(wdmmWraithTerminus, 2)])
     ),
     encounter(
+      "Wraith Haunts — Gauth Grave-Robbers",
+      "Ch. 11 (Wraith Haunts) — Gauths pry open sarcophagi looking for magic to devour.",
+      compact([many(wdmmGauthEye, 2), m(wdmmCraniumRatSwarm)])
+    ),
+    encounter(
       "Terminus Level — Arcturia's Flesh Gardens",
       "Ch. 12 (Terminus Level) — Arcturia, apprentice of Halaster, reshapes intruders among her flesh-warped horrors.",
       compact([m(wdmmHalasterApprenticeArcturia), m(wdmmShadowduskAberrantHulk)])
@@ -2601,26 +2622,6 @@ function madMageEncounters(): EncounterTemplate[] {
       "Ch. 13 (Shadowdusk Hold) — Halaster Blackcloak, backed by his shield guardian and a simulacrum, settles accounts in the deepest hall of Undermountain.",
       compact([m(wdmmHalasterBlackcloak), m(wdmmShieldGuardianHalaster), m(wdmmMadMageSimulacrum)])
     ),
-    encounter(
-      "Dungeon Level — Lava Child Forge Raiders",
-      "Ch. 1 (Level 1) — Lava children raid an old smithy for metal to melt.",
-      compact([many(wdmmLavaChild, 3), many(wdmmUndermountainGoblin, 3)])
-    ),
-    encounter(
-      "Arcane Chambers — Derro Savant Experiment",
-      "Ch. 2 (Level 2) — A derro savant tests a maddening sonic device on captured goblins.",
-      compact([many(wdmmDerroSavantLost, 3), many(wdmmUndermountainGoblin, 3)])
-    ),
-    encounter(
-      "Skullport — Sorlyn vs. Shadow Cult Crossfire",
-      "Ch. 4 (Skullport) — The party is caught between Sorlyn crusaders and a hidden Shadowdusk cell.",
-      compact([many(wdmmSorlynPriest, 2), many(wdmmShadowduskCultist, 3)])
-    ),
-    encounter(
-      "Wraith Haunts — Gauth Grave-Robbers",
-      "Ch. 11 (Wraith Haunts) — Gauths pry open sarcophagi looking for magic to devour.",
-      compact([many(wdmmGauthEye, 2), m(wdmmCraniumRatSwarm)])
-    ),
   ];
 }
 
@@ -2631,26 +2632,26 @@ function runelordsEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const rotrGoblinPyro = findCustomMonsterById("cm-rotr-goblin-pyro");
-  const rotrSinspawnWrath = findCustomMonsterById("cm-rotr-sinspawn-wrath");
-  const rotrNualia = findCustomMonsterById("cm-rotr-nualia");
-  const rotrScarecrowGolem = findCustomMonsterById("cm-rotr-scarecrow-golem");
-  const rotrOgrekinHillbilly = findCustomMonsterById("cm-rotr-ogrekin-hillbilly");
-  const rotrLucrecia = findCustomMonsterById("cm-rotr-lucrecia");
-  const rotrHillGiantRaider = findCustomMonsterById("cm-rotr-hill-giant-raider");
-  const rotrMokmurian = findCustomMonsterById("cm-rotr-mokmurian");
-  const rotrStoneGiantElder = findCustomMonsterById("cm-rotr-stone-giant-elder");
-  const rotrClockworkReaper = findCustomMonsterById("cm-rotr-clockwork-reaper");
-  const rotrShadowOfRuneforge = findCustomMonsterById("cm-rotr-shadow-of-runeforge");
-  const rotrDenizenOfLeng = findCustomMonsterById("cm-rotr-denizen-of-leng");
-  const rotrLamiaMatriarchGuard = findCustomMonsterById("cm-rotr-lamia-matriarch-guard");
-  const karzougDemonSkin = findCustomMonsterById("cm-karzoug-demon-skin");
+  const rotrGoblinPyro = requireCustomMonsterById("cm-rotr-goblin-pyro");
+  const rotrSinspawnWrath = requireCustomMonsterById("cm-rotr-sinspawn-wrath");
+  const rotrNualia = requireCustomMonsterById("cm-rotr-nualia");
+  const rotrScarecrowGolem = requireCustomMonsterById("cm-rotr-scarecrow-golem");
+  const rotrOgrekinHillbilly = requireCustomMonsterById("cm-rotr-ogrekin-hillbilly");
+  const rotrLucrecia = requireCustomMonsterById("cm-rotr-lucrecia");
+  const rotrHillGiantRaider = requireCustomMonsterById("cm-rotr-hill-giant-raider");
+  const rotrMokmurian = requireCustomMonsterById("cm-rotr-mokmurian");
+  const rotrStoneGiantElder = requireCustomMonsterById("cm-rotr-stone-giant-elder");
+  const rotrClockworkReaper = requireCustomMonsterById("cm-rotr-clockwork-reaper");
+  const rotrShadowOfRuneforge = requireCustomMonsterById("cm-rotr-shadow-of-runeforge");
+  const rotrDenizenOfLeng = requireCustomMonsterById("cm-rotr-denizen-of-leng");
+  const rotrLamiaMatriarchGuard = requireCustomMonsterById("cm-rotr-lamia-matriarch-guard");
+  const karzougDemonSkin = requireCustomMonsterById("cm-karzoug-demon-skin");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -2707,26 +2708,26 @@ function kingmakerEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const kmStagLord = findCustomMonsterById("cm-km-stag-lord");
-  const kmStagLordBandit = findCustomMonsterById("cm-km-stag-lord-bandit");
-  const kmTatzlwyrm = findCustomMonsterById("cm-km-tatzlwyrm");
-  const kmOwlbearAlpha = findCustomMonsterById("cm-km-owlbear-alpha");
-  const kmSprigganRaider = findCustomMonsterById("cm-km-spriggan-raider");
-  const kmLinnormFen = findCustomMonsterById("cm-km-linnorm-fen");
-  const kmArmagTwiceBorn = findCustomMonsterById("cm-km-armag-twice-born");
-  const kmTrollKingHargulka = findCustomMonsterById("cm-km-troll-king-hargulka");
-  const kmHodag = findCustomMonsterById("cm-km-hodag");
-  const kmBoggardSwampPriest = findCustomMonsterById("cm-km-boggard-swamp-priest");
-  const kmFirstWorldScytheTree = findCustomMonsterById("cm-km-first-world-scythe-tree");
-  const kmNyrissa = findCustomMonsterById("cm-km-nyrissa");
-  const kmWillOWispSwarm = findCustomMonsterById("cm-km-will-o-wisp-swarm");
-  const lanternKing = findCustomMonsterById("cm-lantern-king");
+  const kmStagLord = requireCustomMonsterById("cm-km-stag-lord");
+  const kmStagLordBandit = requireCustomMonsterById("cm-km-stag-lord-bandit");
+  const kmTatzlwyrm = requireCustomMonsterById("cm-km-tatzlwyrm");
+  const kmOwlbearAlpha = requireCustomMonsterById("cm-km-owlbear-alpha");
+  const kmSprigganRaider = requireCustomMonsterById("cm-km-spriggan-raider");
+  const kmLinnormFen = requireCustomMonsterById("cm-km-linnorm-fen");
+  const kmArmagTwiceBorn = requireCustomMonsterById("cm-km-armag-twice-born");
+  const kmTrollKingHargulka = requireCustomMonsterById("cm-km-troll-king-hargulka");
+  const kmHodag = requireCustomMonsterById("cm-km-hodag");
+  const kmBoggardSwampPriest = requireCustomMonsterById("cm-km-boggard-swamp-priest");
+  const kmFirstWorldScytheTree = requireCustomMonsterById("cm-km-first-world-scythe-tree");
+  const kmNyrissa = requireCustomMonsterById("cm-km-nyrissa");
+  const kmWillOWispSwarm = requireCustomMonsterById("cm-km-will-o-wisp-swarm");
+  const lanternKing = requireCustomMonsterById("cm-lantern-king");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -2778,27 +2779,27 @@ function wrathOfTheRighteousEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const wotrCultistOfBaphomet = findCustomMonsterById("cm-wotr-cultist-of-baphomet");
-  const wotrDretchSwarm = findCustomMonsterById("cm-wotr-dretch-swarm");
-  const wotrVrockShrieker = findCustomMonsterById("cm-wotr-vrock-shrieker");
-  const wotrBrimorak = findCustomMonsterById("cm-wotr-brimorak");
-  const wotrShieldArchon = findCustomMonsterById("cm-wotr-shield-archon");
-  const wotrGrayGarrisonCultistLord = findCustomMonsterById("cm-wotr-gray-garrison-cultist-lord");
-  const wotrBabauSkirmisher = findCustomMonsterById("cm-wotr-babau-skirmisher");
-  const wotrSchirBrute = findCustomMonsterById("cm-wotr-schir-brute");
-  const wotrHezrouFrontline = findCustomMonsterById("cm-wotr-hezrou-frontline");
-  const wotrNabasuGlutton = findCustomMonsterById("cm-wotr-nabasu-glutton");
-  const wotrRavenerHunter = findCustomMonsterById("cm-wotr-ravener-hunter");
-  const wotrNocticula = findCustomMonsterById("cm-wotr-nocticula");
-  const wotrBaphomet = findCustomMonsterById("cm-wotr-baphomet");
-  const wotrDeskari = findCustomMonsterById("cm-wotr-deskari");
-  const wotrCrusaderMarshalAlly = findCustomMonsterById("cm-wotr-crusader-marshal-ally");
+  const wotrCultistOfBaphomet = requireCustomMonsterById("cm-wotr-cultist-of-baphomet");
+  const wotrDretchSwarm = requireCustomMonsterById("cm-wotr-dretch-swarm");
+  const wotrVrockShrieker = requireCustomMonsterById("cm-wotr-vrock-shrieker");
+  const wotrBrimorak = requireCustomMonsterById("cm-wotr-brimorak");
+  const wotrShieldArchon = requireCustomMonsterById("cm-wotr-shield-archon");
+  const wotrGrayGarrisonCultistLord = requireCustomMonsterById("cm-wotr-gray-garrison-cultist-lord");
+  const wotrBabauSkirmisher = requireCustomMonsterById("cm-wotr-babau-skirmisher");
+  const wotrSchirBrute = requireCustomMonsterById("cm-wotr-schir-brute");
+  const wotrHezrouFrontline = requireCustomMonsterById("cm-wotr-hezrou-frontline");
+  const wotrNabasuGlutton = requireCustomMonsterById("cm-wotr-nabasu-glutton");
+  const wotrRavenerHunter = requireCustomMonsterById("cm-wotr-ravener-hunter");
+  const wotrNocticula = requireCustomMonsterById("cm-wotr-nocticula");
+  const wotrBaphomet = requireCustomMonsterById("cm-wotr-baphomet");
+  const wotrDeskari = requireCustomMonsterById("cm-wotr-deskari");
+  const wotrCrusaderMarshalAlly = requireCustomMonsterById("cm-wotr-crusader-marshal-ally");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>

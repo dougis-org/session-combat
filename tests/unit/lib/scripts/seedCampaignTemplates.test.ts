@@ -1,7 +1,7 @@
 import { runCli, handleCliError, seedCampaignTemplates } from "../../../../lib/scripts/seedCampaignTemplates";
 import { getDatabase } from "../../../../lib/db";
 import { GLOBAL_USER_ID } from "../../../../lib/constants";
-import { CUSTOM_MONSTERS } from "../../../../lib/data/customMonsters";
+import { CUSTOM_MONSTERS, requireCustomMonsterById } from "../../../../lib/data/customMonsters";
 
 jest.mock("../../../../lib/db", () => ({
   getDatabase: jest.fn(),
@@ -185,6 +185,7 @@ function assertCampaignEncounterContract(seeded: any, campaignName: string, expe
       expect(monster.challengeRating).toBeDefined();
       expect(monster.abilityScores).toBeDefined();
       expect(monster.hp).toBeGreaterThan(0);
+      expect(monster.ac).toBeGreaterThan(0);
     }
   }
   expect(emptyEncounterCount).toBe(0);
@@ -591,19 +592,24 @@ describe("populate-campaigns-g4 encounters", () => {
     }
   });
 
-  it("does not silently produce empty encounter monster arrays for any G4 campaign", async () => {
-    for (const name of [
-      "Candlekeep Mysteries",
-      "Journeys Through the Radiant Citadel",
-      "Keys from the Golden Vault",
-      "Tales from the Yawning Portal",
-      "Ghosts of Saltmarsh",
-      "Waterdeep: Dungeon of the Mad Mage",
-      "Rise of the Runelords",
-      "Kingmaker",
-      "Wrath of the Righteous",
-    ]) {
+  it("does not silently produce empty or truncated encounters for any G4 campaign", async () => {
+    // Exact counts: because the G4 helpers resolve monsters via
+    // requireCustomMonsterById, a mistyped id throws at build time rather than
+    // shipping a thinner encounter — these counts lock the authored totals.
+    const expectedCounts: Record<string, number> = {
+      "Candlekeep Mysteries": 17,
+      "Journeys Through the Radiant Citadel": 13,
+      "Keys from the Golden Vault": 13,
+      "Tales from the Yawning Portal": 7,
+      "Ghosts of Saltmarsh": 9,
+      "Waterdeep: Dungeon of the Mad Mage": 82,
+      "Rise of the Runelords": 8,
+      "Kingmaker": 7,
+      "Wrath of the Righteous": 8,
+    };
+    for (const [name, count] of Object.entries(expectedCounts)) {
       const seeded = await captureTemplate(name);
+      expect(seeded.encounters).toHaveLength(count);
       for (const enc of seeded.encounters) expect(enc.monsters.length).toBeGreaterThan(0);
     }
   });
@@ -641,6 +647,18 @@ describe("populate-campaigns-g4 custom monster invariants", () => {
     for (const m of g4Monsters) {
       const pp = m.senses?.["passive Perception"];
       expect(typeof pp).toBe("string");
+    }
+  });
+
+  it("requireCustomMonsterById throws with the offending id for an unknown reference", () => {
+    expect(() => requireCustomMonsterById("cm-does-not-exist-xyz")).toThrow(
+      /unknown custom monster id "cm-does-not-exist-xyz"/
+    );
+  });
+
+  it("requireCustomMonsterById returns the template for a known G4 reference", () => {
+    for (const id of ["cm-acererak-lich", "cm-sahuagin-baron", "cm-lantern-king", "cm-wdmm-halaster-blackcloak"]) {
+      expect(requireCustomMonsterById(id).id).toBe(id);
     }
   });
 
