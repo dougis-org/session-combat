@@ -57,8 +57,8 @@ Use the project's documented commands for each of the above (see project README 
 - [x] Open PR from working branch to `main`. This change carries no issue link (not issue-driven), so the PR body does NOT include a `Closes #` line. (PR #675)
 - [x] **Issue lifecycle: mark in-review** — SKIPPED: not issue-driven (see in-progress step above).
 - [x] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; addressed all in-scope findings (requireCustomMonsterById fail-fast, GLOBAL_USER_ID reference, "Wererat" typo, Mad Mage encounter ordering, ac>0 contract assertion) in commit 0e7e4a5. Pre-existing main bugs (cm-driders/cm-purple-worm typos, cm-relentless-impaler dup) noted for a separate hotfix.
+- [x] **Enable auto-merge** after review gate passed: `gh pr merge 675 --auto --squash` (repo ruleset requires squash).
 - [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
