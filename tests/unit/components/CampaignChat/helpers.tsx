@@ -1,7 +1,7 @@
 import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CampaignChat } from '@/lib/components/CampaignChat'
-import type { CampaignStreamEvent, CampaignMessage, MessageVisibility } from '@/lib/types'
+import type { CampaignStreamEvent, CampaignMessage, CampaignRoll, MessageVisibility } from '@/lib/types'
 
 export const CAMPAIGN_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
 
@@ -20,6 +20,7 @@ export function setupFetchMock(overrides?: Record<string, unknown>) {
   const routes: Array<[string, Handler]> = [
     ['/attachments', () => overrides?.attachments ?? { attachmentId: 'att-test' }],
     ['/members', () => overrides?.members ?? { members: [] }],
+    ['/rolls', () => overrides?.rolls ?? { rolls: [] }],
     ['/messages', (options) =>
       options?.method === 'POST'
         ? (overrides?.sceneMessage ?? {
@@ -134,6 +135,22 @@ export function mockRollPostPending() {
   let resolvePost!: (value: unknown) => void
   rollPostRoute(() => new Promise(resolve => { resolvePost = resolve }))
   return { resolve: (body: unknown) => resolvePost(body) }
+}
+
+export function makeRoll(overrides: Partial<CampaignRoll> = {}): CampaignRoll {
+  return {
+    id: 'roll-1',
+    campaignId: CAMPAIGN_ID,
+    sessionId: 'session-1',
+    rollerId: 'user-1',
+    rollerName: 'thegm',
+    formula: '1d20+3',
+    rolls: [17],
+    total: 20,
+    visibility: { scope: 'group' },
+    createdAt: new Date('2026-01-01T12:00:00Z'),
+    ...overrides,
+  }
 }
 
 export function withMembers(
