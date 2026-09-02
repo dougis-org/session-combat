@@ -10,6 +10,7 @@ import {
   installStorageLogSpy,
   expectStorageError,
   expectLoggedOutcome,
+  expectNotLoggedOutcome,
   expectFacadeMethods,
 } from "./_repoMock";
 
@@ -35,6 +36,26 @@ describe("rollRepo", () => {
       expect(res.rolls.map((r) => (r as { id: string }).id)).toEqual(["r0", "r1"]);
       expect(res.nextCursor).toBeUndefined();
       expect(res.rolls[0]).not.toHaveProperty("_id");
+    });
+
+    it("logs success (not not_found) for an empty page", async () => {
+      mockCollection({ findResult: [] });
+      await repo.listCampaignRolls("c1", "s1", "u1", "player", { limit: 5 });
+      expectLoggedOutcome(getLogSpy(), "success");
+      expectNotLoggedOutcome(getLogSpy(), "not_found");
+    });
+
+    it("scopes the query by campaignId/sessionId/before and the base $or clauses", async () => {
+      const before = new Date(2026, 5, 1);
+      const col = mockCollection({ findResult: [] });
+      await repo.listCampaignRolls("c1", "s1", "u1", "player", { limit: 5, before });
+      const q = (col.find.mock.calls[0] as unknown[])[0] as Record<string, unknown> & { $or: unknown[] };
+      expect(q.campaignId).toBe("c1");
+      expect(q.sessionId).toBe("s1");
+      expect(q.createdAt).toEqual({ $lt: before });
+      expect(q.$or).toEqual(
+        expect.arrayContaining([{ "visibility.scope": "group" }, { rollerId: "u1" }]),
+      );
     });
 
     it("pops the extra row and returns nextCursor when limit+1 rows come back", async () => {

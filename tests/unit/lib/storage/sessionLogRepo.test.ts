@@ -51,6 +51,24 @@ describe("sessionLogRepo", () => {
       mockCollection({ findOneAndUpdate: null });
       await expect(repo.updateSessionLog("s1", "u1", "c1", {})).resolves.toBeNull();
     });
+
+    it("builds $set only from the mutable-field allowlist, dropping unknown/immutable keys", async () => {
+      const col = mockCollection({ findOneAndUpdate: { id: "s1" } });
+      await repo.updateSessionLog("s1", "u1", "c1", {
+        title: "New",
+        milestone: true,
+        campaignId: "hijack",
+        userId: "hijack",
+        id: "hijack",
+        _id: "hijack",
+        bogus: "x",
+      } as never);
+      const set = (col.findOneAndUpdate.mock.calls[0] as unknown[])[1] as { $set: Record<string, unknown> };
+      expect(set.$set).toMatchObject({ title: "New", milestone: true });
+      for (const k of ["campaignId", "userId", "id", "_id", "bogus"]) {
+        expect(set.$set).not.toHaveProperty(k);
+      }
+    });
   });
 
   describe("deleteSessionLog", () => {

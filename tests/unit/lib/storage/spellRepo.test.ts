@@ -18,7 +18,7 @@ import {
 const getLogSpy = installStorageLogSpy();
 const DB_DOWN = () => new Error("db down");
 const SPELL = { id: "sp1", userId: "global", name: "Fireball", source: "open5e" } as never;
-const BAD_IDS = ["", "x".repeat(65)];
+const BAD_IDS = ["", "x".repeat(65), null as unknown as string];
 
 describe("spellRepo", () => {
   describe("loadSpells", () => {
@@ -54,11 +54,13 @@ describe("spellRepo", () => {
   });
 
   describe("deleteSpellTemplate", () => {
-    it("is a no-op with no DB call for a malformed id", async () => {
-      jest.clearAllMocks();
-      await expect(repo.deleteSpellTemplate("x".repeat(65))).resolves.toBeUndefined();
-      expect(getDatabase).not.toHaveBeenCalled();
-      expect(getLogSpy()).not.toHaveBeenCalled();
+    it("is a no-op with no DB call for every malformed id", async () => {
+      for (const id of ["", "x".repeat(65), null as unknown as string]) {
+        jest.clearAllMocks();
+        await expect(repo.deleteSpellTemplate(id)).resolves.toBeUndefined();
+        expect(getDatabase).not.toHaveBeenCalled();
+        expect(getLogSpy()).not.toHaveBeenCalled();
+      }
     });
   });
 
@@ -88,7 +90,8 @@ describe("spellRepo", () => {
         deleteOne: DB_DOWN(),
         count: DB_DOWN(),
       });
-      await expectStorageError(call(), { op: name, collection: "spellTemplates" });
+      const err = await expectStorageError(call(), { op: name, collection: "spellTemplates" });
+      expect((err as unknown as { cause: unknown }).cause).toBeInstanceOf(Error);
       expectLoggedOutcome(getLogSpy(), "error");
     });
   });

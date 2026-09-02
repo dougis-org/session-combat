@@ -87,6 +87,10 @@ export async function expectStorageError(
 /** Assert exactly one telemetry event with the given outcome was emitted. */
 export function expectLoggedOutcome(spy: jest.SpyInstance, outcome: Outcome) {
   expect(spy).toHaveBeenCalledWith(expect.objectContaining({ outcome }));
+  const matching = spy.mock.calls.filter(
+    (c) => (c[0] as { outcome?: string } | undefined)?.outcome === outcome,
+  );
+  expect(matching).toHaveLength(1);
 }
 
 export function expectNotLoggedOutcome(spy: jest.SpyInstance, outcome: Outcome) {
