@@ -937,7 +937,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
     ],
     senses: {
       darkvision: "120 ft.",
-      passivePerception: "13"
+      "passive Perception": "13"
     },
     languages: ["any three languages"],
     traits: [
@@ -973,97 +973,6 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
         name: "Soul Tattoo",
         recharge: "Recharge 5-6",
         description: "The priest touches one of the Soul Tattoos on its body. The tattoo manifests as a shadow (obeying mental commands, acts after priest) within 30 feet. If within 5 ft, it can take an action to return to the flesh, regaining all HP."
-      }
-    ]
-  },
-  {
-    id: "cm-relentless-impaler",
-    userId: GLOBAL_USER_ID,
-    isGlobal: true,
-    source: "Vecna: Eve of Ruin - Chapter 5: Death House",
-    name: "Relentless Impaler",
-    size: "large",
-    type: "fiend",
-    alignment: "Neutral Evil",
-    speed: "30 ft.",
-    challengeRating: 15,
-    experiencePoints: 11500,
-    ac: 16,
-    acNote: "natural armor",
-    hp: 184,
-    maxHp: 184,
-    abilityScores: {
-      strength: 23,
-      dexterity: 16,
-      constitution: 22,
-      intelligence: 12,
-      wisdom: 15,
-      charisma: 18
-    },
-    savingThrows: {
-      strength: 11,
-      dexterity: 8,
-      charisma: 9
-    },
-    skills: {
-      Athletics: 11,
-      Perception: 7,
-      Survival: 7
-    },
-    conditionImmunities: [
-      "charmed",
-      "exhaustion",
-      "frightened"
-    ],
-    senses: {
-      darkvision: "120 ft.",
-      passivePerception: "17"
-    },
-    languages: ["understands all languages but can't speak"],
-    traits: [
-      {
-        name: "Bloodheart Stake",
-        description: "Magically bound to ceremonial stake & corpse. If reduced to 0 HP, disappears and re-forms 1d8 hours later near the stake at full HP. Dies permanently only if reduced to 0 HP while stake is removed from corpse or impaler is on a different plane."
-      },
-      {
-        name: "Legendary Resistance (3/Day)",
-        description: "If the impaler fails a saving throw, it can choose to succeed instead."
-      }
-    ],
-    actions: [
-      {
-        name: "Multiattack",
-        description: "The impaler makes one Spike attack and two Wicked Spear attacks."
-      },
-      {
-        name: "Spike",
-        description: "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 15 (2d8 + 6) piercing damage. The target's speed is halved until the start of the impaler's next turn.",
-        attackBonus: 11,
-        damageDescription: "15 (2d8 + 6) piercing damage"
-      },
-      {
-        name: "Wicked Spear",
-        description: "Melee or Ranged Weapon Attack: +11 to hit, reach 10 ft. or range 20/40 ft., one target. Hit: 13 (2d6 + 6) piercing damage plus 13 (3d8) necrotic damage.",
-        attackBonus: 11,
-        damageDescription: "13 (2d6 + 6) piercing + 13 (3d8) necrotic"
-      },
-      {
-        name: "Spike Burst",
-        recharge: "Recharge 5-6",
-        description: "Twisted spectral spikes shoot out. Each creature within 30 feet must make a DC 19 Dexterity saving throw, taking 40 (9d8) force damage on a failed save or half as much on a successful one."
-      }
-    ],
-    legendaryActionCount: 3,
-    legendaryActions: [
-      {
-        name: "Speed Spike",
-        cost: 1,
-        description: "The impaler teleports up to 30 feet to an unoccupied space it can see, then makes a Spike attack."
-      },
-      {
-        name: "Deepen Wounds",
-        cost: 2,
-        description: "Each creature whose speed is currently reduced by the impaler's Spike attack takes 18 (4d8) necrotic damage."
       }
     ]
   },
@@ -1109,7 +1018,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
     ],
     senses: {
       truesight: "30 ft.",
-      passivePerception: "13"
+      "passive Perception": "13"
     },
     languages: ["any four languages", "telepathy 120 ft."],
     traits: [
@@ -1191,7 +1100,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
     ],
     senses: {
       blindsight: "60 ft. (blind beyond this radius)",
-      passivePerception: "7"
+      "passive Perception": "7"
     },
     languages: ["understands Common but can't speak"],
     traits: [
@@ -1269,7 +1178,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
     ],
     senses: {
       darkvision: "120 ft.",
-      passivePerception: "22"
+      "passive Perception": "22"
     },
     languages: ["Abyssal", "Common", "Draconic", "Elvish", "Giant", "Infernal"],
     traits: [
@@ -1391,7 +1300,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
     ],
     senses: {
       darkvision: "60 ft.",
-      passivePerception: "12"
+      "passive Perception": "12"
     },
     languages: ["Common"],
     traits: [
@@ -1469,7 +1378,7 @@ export const CUSTOM_MONSTERS: Omit<MonsterTemplate, 'createdAt' | 'updatedAt'>[]
     ],
     senses: {
       blindsight: "60 ft. (blind beyond this radius)",
-      passivePerception: "14"
+      "passive Perception": "14"
     },
     languages: ["understands the languages of its creator but can't speak"],
     traits: [

@@ -4,7 +4,6 @@ import { GLOBAL_USER_ID } from "../constants";
 import { randomUUID } from "crypto";
 import {
   CUSTOM_MONSTERS,
-  findCustomMonsterById,
   requireCustomMonsterById,
   toEncounterMonster,
   toEncounterMonsters,
@@ -47,24 +46,24 @@ function vecnaEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const cultist = findCustomMonsterById("cm-vecna-cultist");
-  const impaler = findCustomMonsterById("cm-relentless-impaler");
-  const spiderdragon = findCustomMonsterById("cm-spiderdragon");
-  const deathwolf = findCustomMonsterById("cm-deathwolf");
-  const kasVampire = findCustomMonsterById("cm-kas-vampire");
-  const kasDeathKnight = findCustomMonsterById("cm-kas-death-knight");
-  const vecna = findCustomMonsterById("cm-vecna");
-  const acererak = findCustomMonsterById("cm-acererak");
-  const miska = findCustomMonsterById("cm-miska");
-  const lordSoth = findCustomMonsterById("cm-lord-soth");
-  const tiamat = findCustomMonsterById("cm-tiamat-servant");
-  const necro = findCustomMonsterById("cm-necromancer-wizard");
+  const cultist = requireCustomMonsterById("cm-vecna-cultist");
+  const impaler = requireCustomMonsterById("cm-relentless-impaler");
+  const spiderdragon = requireCustomMonsterById("cm-spiderdragon");
+  const deathwolf = requireCustomMonsterById("cm-deathwolf");
+  const kasVampire = requireCustomMonsterById("cm-kas-vampire");
+  const kasDeathKnight = requireCustomMonsterById("cm-kas-death-knight");
+  const vecna = requireCustomMonsterById("cm-vecna");
+  const acererak = requireCustomMonsterById("cm-acererak");
+  const miska = requireCustomMonsterById("cm-miska");
+  const lordSoth = requireCustomMonsterById("cm-lord-soth");
+  const tiamat = requireCustomMonsterById("cm-tiamat-servant");
+  const necro = requireCustomMonsterById("cm-necromancer-wizard");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -191,23 +190,23 @@ function cosEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const animatedArmor = findCustomMonsterById("cm-animated-armor");
-  const ghoul = findCustomMonsterById("cm-ghoul");
-  const shamblingMound = findCustomMonsterById("cm-shambling-mound");
-  const vampireSpawn = findCustomMonsterById("cm-vampire-spawn");
-  const nightHag = findCustomMonsterById("cm-night-hag");
-  const wight = findCustomMonsterById("cm-wight");
-  const vampire = findCustomMonsterById("cm-vampire");
-  const wintersplinter = findCustomMonsterById("cm-wintersplinter");
-  const babaLysaga = findCustomMonsterById("cm-baba-lysaga");
-  const creepingHut = findCustomMonsterById("cm-creeping-hut");
-  const strahd = findCustomMonsterById("cm-strahd-von-zarovich");
+  const animatedArmor = requireCustomMonsterById("cm-animated-armor");
+  const ghoul = requireCustomMonsterById("cm-ghoul");
+  const shamblingMound = requireCustomMonsterById("cm-shambling-mound");
+  const vampireSpawn = requireCustomMonsterById("cm-vampire-spawn");
+  const nightHag = requireCustomMonsterById("cm-night-hag");
+  const wight = requireCustomMonsterById("cm-wight");
+  const vampire = requireCustomMonsterById("cm-vampire");
+  const wintersplinter = requireCustomMonsterById("cm-wintersplinter");
+  const babaLysaga = requireCustomMonsterById("cm-baba-lysaga");
+  const creepingHut = requireCustomMonsterById("cm-creeping-hut");
+  const strahd = requireCustomMonsterById("cm-strahd-von-zarovich");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -264,22 +263,22 @@ function toaEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const tyrannoZombie = findCustomMonsterById("cm-tyrannosaurus-zombie");
-  const firenewtWarlock = findCustomMonsterById("cm-firenewt-warlock");
-  const firenewtWarrior = findCustomMonsterById("cm-firenewt-warrior");
-  const broodguard = findCustomMonsterById("cm-yuan-ti-broodguard");
-  const nightmare = findCustomMonsterById("cm-yuan-ti-nightmare-speaker");
-  const rasNsi = findCustomMonsterById("cm-ras-nsi");
-  const acererak = findCustomMonsterById("cm-acererak");
-  const atropal = findCustomMonsterById("cm-atropal");
-  const bodak = findCustomMonsterById("cm-bodak");
-  const skeleton = findCustomMonsterById("cm-skeleton");
+  const tyrannoZombie = requireCustomMonsterById("cm-tyrannosaurus-zombie");
+  const firenewtWarlock = requireCustomMonsterById("cm-firenewt-warlock");
+  const firenewtWarrior = requireCustomMonsterById("cm-firenewt-warrior");
+  const broodguard = requireCustomMonsterById("cm-yuan-ti-broodguard");
+  const nightmare = requireCustomMonsterById("cm-yuan-ti-nightmare-speaker");
+  const rasNsi = requireCustomMonsterById("cm-ras-nsi");
+  const acererak = requireCustomMonsterById("cm-acererak");
+  const atropal = requireCustomMonsterById("cm-atropal");
+  const bodak = requireCustomMonsterById("cm-bodak");
+  const skeleton = requireCustomMonsterById("cm-skeleton");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -328,24 +327,24 @@ function lmopEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const goblin = findCustomMonsterById("cm-goblin");
-  const bugbearChief = findCustomMonsterById("cm-bugbear-chief");
-  const bandit = findCustomMonsterById("cm-bandit");
-  const banditCaptain = findCustomMonsterById("cm-bandit-captain");
-  const mage = findCustomMonsterById("cm-mage");
-  const doppelganger = findCustomMonsterById("cm-doppelganger");
-  const greenHag = findCustomMonsterById("cm-green-hag");
-  const wyvern = findCustomMonsterById("cm-wyvern");
-  const orc = findCustomMonsterById("cm-orc");
-  const drowMage = findCustomMonsterById("cm-drow-mage");
-  const spectator = findCustomMonsterById("cm-spectator");
-  const venomfang = findCustomMonsterById("cm-young-green-dragon");
+  const goblin = requireCustomMonsterById("cm-goblin");
+  const bugbearChief = requireCustomMonsterById("cm-bugbear-chief");
+  const bandit = requireCustomMonsterById("cm-bandit");
+  const banditCaptain = requireCustomMonsterById("cm-bandit-captain");
+  const mage = requireCustomMonsterById("cm-mage");
+  const doppelganger = requireCustomMonsterById("cm-doppelganger");
+  const greenHag = requireCustomMonsterById("cm-green-hag");
+  const wyvern = requireCustomMonsterById("cm-wyvern");
+  const orc = requireCustomMonsterById("cm-orc");
+  const drowMage = requireCustomMonsterById("cm-drow-mage");
+  const spectator = requireCustomMonsterById("cm-spectator");
+  const venomfang = requireCustomMonsterById("cm-young-green-dragon");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -410,30 +409,30 @@ function todEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const cyanwrath = findCustomMonsterById("cm-langdedrosa-cyanwrath");
-  const guardDrake = findCustomMonsterById("cm-guard-drake");
-  const koboldInventor = findCustomMonsterById("cm-kobold-inventor");
-  const koboldScale = findCustomMonsterById("cm-kobold-scale-sorcerer");
-  const mondath = findCustomMonsterById("cm-frulam-mondath");
-  const rezmir = findCustomMonsterById("cm-rezmir");
-  const dragonclaw = findCustomMonsterById("cm-dragonclaw");
-  const dragonfang = findCustomMonsterById("cm-dragonfang");
-  const dragonsoul = findCustomMonsterById("cm-dragonsoul");
-  const dragonwing = findCustomMonsterById("cm-dragonwing");
-  const blagothkus = findCustomMonsterById("cm-blagothkus");
-  const iceToad = findCustomMonsterById("cm-ice-toad");
-  const talis = findCustomMonsterById("cm-talis-the-white");
-  const tiamat = findCustomMonsterById("cm-tiamat");
-  const severin = findCustomMonsterById("cm-severin");
-  const rathModar = findCustomMonsterById("cm-rath-modar");
-  const ambushDrake = findCustomMonsterById("cm-ambush-drake");
-  const halfDragon = findCustomMonsterById("cm-half-dragon-veteran");
+  const cyanwrath = requireCustomMonsterById("cm-langdedrosa-cyanwrath");
+  const guardDrake = requireCustomMonsterById("cm-guard-drake");
+  const koboldInventor = requireCustomMonsterById("cm-kobold-inventor");
+  const koboldScale = requireCustomMonsterById("cm-kobold-scale-sorcerer");
+  const mondath = requireCustomMonsterById("cm-frulam-mondath");
+  const rezmir = requireCustomMonsterById("cm-rezmir");
+  const dragonclaw = requireCustomMonsterById("cm-dragonclaw");
+  const dragonfang = requireCustomMonsterById("cm-dragonfang");
+  const dragonsoul = requireCustomMonsterById("cm-dragonsoul");
+  const dragonwing = requireCustomMonsterById("cm-dragonwing");
+  const blagothkus = requireCustomMonsterById("cm-blagothkus");
+  const iceToad = requireCustomMonsterById("cm-ice-toad");
+  const talis = requireCustomMonsterById("cm-talis-the-white");
+  const tiamat = requireCustomMonsterById("cm-tiamat");
+  const severin = requireCustomMonsterById("cm-severin");
+  const rathModar = requireCustomMonsterById("cm-rath-modar");
+  const ambushDrake = requireCustomMonsterById("cm-ambush-drake");
+  const halfDragon = requireCustomMonsterById("cm-half-dragon-veteran");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -502,24 +501,24 @@ function bgdiaEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const cultist = findCustomMonsterById("cm-cultist-dead-three");
-  const merregon = findCustomMonsterById("cm-merregon");
-  const narzugon = findCustomMonsterById("cm-narzugon");
-  const hellwasp = findCustomMonsterById("cm-hellwasp");
-  const hellwaspSwarm = findCustomMonsterById("cm-hellwasp-swarm");
-  const swordWraith = findCustomMonsterById("cm-sword-wraith-commander");
-  const bulezau = findCustomMonsterById("cm-bulezau");
-  const whiteAbishai = findCustomMonsterById("cm-white-abishai");
-  const zariel = findCustomMonsterById("cm-zariel");
-  const yeenoghu = findCustomMonsterById("cm-yeenoghu");
-  const hollyphant = findCustomMonsterById("cm-hollyphant");
-  const fleshGolem = findCustomMonsterById("cm-fiendish-flesh-golem");
+  const cultist = requireCustomMonsterById("cm-cultist-dead-three");
+  const merregon = requireCustomMonsterById("cm-merregon");
+  const narzugon = requireCustomMonsterById("cm-narzugon");
+  const hellwasp = requireCustomMonsterById("cm-hellwasp");
+  const hellwaspSwarm = requireCustomMonsterById("cm-hellwasp-swarm");
+  const swordWraith = requireCustomMonsterById("cm-sword-wraith-commander");
+  const bulezau = requireCustomMonsterById("cm-bulezau");
+  const whiteAbishai = requireCustomMonsterById("cm-white-abishai");
+  const zariel = requireCustomMonsterById("cm-zariel");
+  const yeenoghu = requireCustomMonsterById("cm-yeenoghu");
+  const hollyphant = requireCustomMonsterById("cm-hollyphant");
+  const fleshGolem = requireCustomMonsterById("cm-fiendish-flesh-golem");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -578,16 +577,16 @@ function wdhEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const zhentarim = findCustomMonsterById("cm-zhentarim-thug");
-  const manshoon = findCustomMonsterById("cm-manshoon-manyfaced");
-  const jarlaxle = findCustomMonsterById("cm-jarlaxle-baenre");
-  const veteran = findCustomMonsterById("cm-veteran");
+  const zhentarim = requireCustomMonsterById("cm-zhentarim-thug");
+  const manshoon = requireCustomMonsterById("cm-manshoon-manyfaced");
+  const jarlaxle = requireCustomMonsterById("cm-jarlaxle-baenre");
+  const veteran = requireCustomMonsterById("cm-veteran");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -619,27 +618,27 @@ function sktEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const chiefGuh = findCustomMonsterById("cm-chief-guh");
-  const jarlStorvald = findCustomMonsterById("cm-jarl-storvald");
-  const dukeZalto = findCustomMonsterById("cm-duke-zalto");
-  const yikaria = findCustomMonsterById("cm-yikaria");
-  const uthgardtShaman = findCustomMonsterById("cm-uthgardt-shaman");
-  const slarkrethel = findCustomMonsterById("cm-slarkrethel");
-  const kingHekaton = findCustomMonsterById("cm-king-hekaton");
-  const iymrithDisguised = findCustomMonsterById("cm-iymrith-disguised");
-  const iymrithAncientBlue = findCustomMonsterById("cm-iymrith-ancient-blue");
-  const maegera = findCustomMonsterById("cm-maegera-dawn-titan");
-  const hillGiant = findCustomMonsterById("cm-hill-giant");
-  const fireGiant = findCustomMonsterById("cm-fire-giant");
-  const frostGiant = findCustomMonsterById("cm-frost-giant");
-  const cloudGiant = findCustomMonsterById("cm-cloud-giant");
-  const ogre = findCustomMonsterById("cm-ogre");
+  const chiefGuh = requireCustomMonsterById("cm-chief-guh");
+  const jarlStorvald = requireCustomMonsterById("cm-jarl-storvald");
+  const dukeZalto = requireCustomMonsterById("cm-duke-zalto");
+  const yikaria = requireCustomMonsterById("cm-yikaria");
+  const uthgardtShaman = requireCustomMonsterById("cm-uthgardt-shaman");
+  const slarkrethel = requireCustomMonsterById("cm-slarkrethel");
+  const kingHekaton = requireCustomMonsterById("cm-king-hekaton");
+  const iymrithDisguised = requireCustomMonsterById("cm-iymrith-disguised");
+  const iymrithAncientBlue = requireCustomMonsterById("cm-iymrith-ancient-blue");
+  const maegera = requireCustomMonsterById("cm-maegera-dawn-titan");
+  const hillGiant = requireCustomMonsterById("cm-hill-giant");
+  const fireGiant = requireCustomMonsterById("cm-fire-giant");
+  const frostGiant = requireCustomMonsterById("cm-frost-giant");
+  const cloudGiant = requireCustomMonsterById("cm-cloud-giant");
+  const ogre = requireCustomMonsterById("cm-ogre");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -706,36 +705,35 @@ function ootEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const drowEliteWarrior = findCustomMonsterById("cm-drow-elite-warrior");
-  const drider = findCustomMonsterById("cm-driders");
-  const ilvara = findCustomMonsterById("cm-ilvara-mizzrym");
-  const themberchaud = findCustomMonsterById("cm-themberchaud");
-  const rockblight = findCustomMonsterById("cm-rockblight");
-  const puddingKing = findCustomMonsterById("cm-pudding-king");
-  const troglodyte = findCustomMonsterById("cm-troglodyte");
-  const darkHunter = findCustomMonsterById("cm-dark-hunter");
-  const elderPurpleWorm = findCustomMonsterById("cm-elder-purple-worm");
-  const mazeEngine = findCustomMonsterById("cm-maze-engine");
-  const sporeServantBrute = findCustomMonsterById("cm-spore-servant-brute");
-  const demogorgon = findCustomMonsterById("cm-demogorgon");
-  const orcus = findCustomMonsterById("cm-orcus");
-  const zuggtmoy = findCustomMonsterById("cm-zuggtmoy");
-  const juiblex = findCustomMonsterById("cm-juiblex");
-  const frazUrbluu = findCustomMonsterById("cm-fraz-urbluu");
-  const yeenoghu = findCustomMonsterById("cm-gnoll-fang-of-yeenoghu");
-  const derroSavant = findCustomMonsterById("cm-derro-savant");
-  const ixitxachitl = findCustomMonsterById("cm-ixitxachitl");
-  const duergar = findCustomMonsterById("cm-duergar");
-  const deathSlaad = findCustomMonsterById("cm-death-slaad");
-  const grick = findCustomMonsterById("cm-grimlock");
-  const beholder = findCustomMonsterById("cm-beholder");
-  const purpleWorm = findCustomMonsterById("cm-purple-worm");
+  const drowEliteWarrior = requireCustomMonsterById("cm-drow-elite-warrior");
+  const drider = requireCustomMonsterById("cm-drider");
+  const ilvara = requireCustomMonsterById("cm-ilvara-mizzrym");
+  const themberchaud = requireCustomMonsterById("cm-themberchaud");
+  const rockblight = requireCustomMonsterById("cm-rockblight");
+  const puddingKing = requireCustomMonsterById("cm-pudding-king");
+  const troglodyte = requireCustomMonsterById("cm-troglodyte");
+  const darkHunter = requireCustomMonsterById("cm-dark-hunter");
+  const elderPurpleWorm = requireCustomMonsterById("cm-elder-purple-worm");
+  const mazeEngine = requireCustomMonsterById("cm-maze-engine");
+  const sporeServantBrute = requireCustomMonsterById("cm-spore-servant-brute");
+  const demogorgon = requireCustomMonsterById("cm-demogorgon");
+  const orcus = requireCustomMonsterById("cm-orcus");
+  const zuggtmoy = requireCustomMonsterById("cm-zuggtmoy");
+  const juiblex = requireCustomMonsterById("cm-juiblex");
+  const frazUrbluu = requireCustomMonsterById("cm-fraz-urbluu");
+  const yeenoghu = requireCustomMonsterById("cm-gnoll-fang-of-yeenoghu");
+  const derroSavant = requireCustomMonsterById("cm-derro-savant");
+  const ixitxachitl = requireCustomMonsterById("cm-ixitxachitl");
+  const duergar = requireCustomMonsterById("cm-duergar");
+  const deathSlaad = requireCustomMonsterById("cm-death-slaad");
+  const grick = requireCustomMonsterById("cm-grimlock");
+  const beholder = requireCustomMonsterById("cm-beholder");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -785,7 +783,7 @@ function ootEncounters(): EncounterTemplate[] {
     encounter(
       "Demon Lord Encounter — Zuggtmoy",
       "The demon queen of rot claims a festering grotto for her fungal court.",
-      compact([m(zuggtmoy), many(purpleWorm, 2)])
+      compact([m(zuggtmoy), many(elderPurpleWorm, 2)])
     ),
     encounter(
       "Demon Lord Encounter — Juiblex",
@@ -832,30 +830,30 @@ function dipEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const manticore = findCustomMonsterById("cm-manticore");
-  const cryovain = findCustomMonsterById("cm-cryovain");
-  const orc = findCustomMonsterById("cm-orc");
-  const orog = findCustomMonsterById("cm-orog");
-  const hobgoblin = findCustomMonsterById("cm-hobgoblin");
-  const hobgoblinCaptain = findCustomMonsterById("cm-hobgoblin-captain");
-  const stirges = findCustomMonsterById("cm-stirges");
-  const owlbear = findCustomMonsterById("cm-owlbear");
-  const gnoll = findCustomMonsterById("cm-gnoll-fang-of-yeenoghu");
-  const giantSpider = findCustomMonsterById("cm-giant-spider");
-  const bugbear = findCustomMonsterById("cm-bugbear");
-  const polarBear = findCustomMonsterById("cm-polar-bear");
-  const yeti = findCustomMonsterById("cm-yeti");
-  const piercer = findCustomMonsterById("cm-piercer");
-  const ogre = findCustomMonsterById("cm-ogre");
-  const youngRedDragon = findCustomMonsterById("cm-young-red-dragon");
-  const veteran = findCustomMonsterById("cm-veteran");
-  const stormGiant = findCustomMonsterById("cm-storm-giant-awakened");
+  const manticore = requireCustomMonsterById("cm-manticore");
+  const cryovain = requireCustomMonsterById("cm-cryovain");
+  const orc = requireCustomMonsterById("cm-orc");
+  const orog = requireCustomMonsterById("cm-orog");
+  const hobgoblin = requireCustomMonsterById("cm-hobgoblin");
+  const hobgoblinCaptain = requireCustomMonsterById("cm-hobgoblin-captain");
+  const stirges = requireCustomMonsterById("cm-stirges");
+  const owlbear = requireCustomMonsterById("cm-owlbear");
+  const gnoll = requireCustomMonsterById("cm-gnoll-fang-of-yeenoghu");
+  const giantSpider = requireCustomMonsterById("cm-giant-spider");
+  const bugbear = requireCustomMonsterById("cm-bugbear");
+  const polarBear = requireCustomMonsterById("cm-polar-bear");
+  const yeti = requireCustomMonsterById("cm-yeti");
+  const piercer = requireCustomMonsterById("cm-piercer");
+  const ogre = requireCustomMonsterById("cm-ogre");
+  const youngRedDragon = requireCustomMonsterById("cm-young-red-dragon");
+  const veteran = requireCustomMonsterById("cm-veteran");
+  const stormGiant = requireCustomMonsterById("cm-storm-giant-awakened");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -947,27 +945,27 @@ function pabtsoEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const psionicGoblin = findCustomMonsterById("cm-psionic-goblin");
-  const psionicGoblinBoss = findCustomMonsterById("cm-psionic-goblin-boss");
-  const cloaker = findCustomMonsterById("cm-cloaker");
-  const nezznar = findCustomMonsterById("cm-nezznar");
-  const mindFlayerCultist = findCustomMonsterById("cm-mind-flayer-cultist");
-  const obeliskSentinel = findCustomMonsterById("cm-obelisk-sentinel");
-  const elderBrainDragon = findCustomMonsterById("cm-elder-brain-dragon");
-  const nethereseObeliskBoss = findCustomMonsterById("cm-netherese-obelisk-boss");
-  const shadow = findCustomMonsterById("cm-shadow");
-  const hookHorror = findCustomMonsterById("cm-hook-horror");
-  const drider = findCustomMonsterById("cm-driders");
-  const hobgoblin = findCustomMonsterById("cm-hobgoblin");
-  const mindFlayer = findCustomMonsterById("cm-mind-flayer");
-  const veteran = findCustomMonsterById("cm-veteran");
-  const giantSpider = findCustomMonsterById("cm-giant-spider");
+  const psionicGoblin = requireCustomMonsterById("cm-psionic-goblin");
+  const psionicGoblinBoss = requireCustomMonsterById("cm-psionic-goblin-boss");
+  const cloaker = requireCustomMonsterById("cm-cloaker");
+  const nezznar = requireCustomMonsterById("cm-nezznar");
+  const mindFlayerCultist = requireCustomMonsterById("cm-mind-flayer-cultist");
+  const obeliskSentinel = requireCustomMonsterById("cm-obelisk-sentinel");
+  const elderBrainDragon = requireCustomMonsterById("cm-elder-brain-dragon");
+  const nethereseObeliskBoss = requireCustomMonsterById("cm-netherese-obelisk-boss");
+  const shadow = requireCustomMonsterById("cm-shadow");
+  const hookHorror = requireCustomMonsterById("cm-hook-horror");
+  const drider = requireCustomMonsterById("cm-drider");
+  const hobgoblin = requireCustomMonsterById("cm-hobgoblin");
+  const mindFlayer = requireCustomMonsterById("cm-mind-flayer");
+  const veteran = requireCustomMonsterById("cm-veteran");
+  const giantSpider = requireCustomMonsterById("cm-giant-spider");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -1032,26 +1030,26 @@ function rimeEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const coldlight = findCustomMonsterById("cm-coldlight-walker");
-  const berserker = findCustomMonsterById("cm-chardalyn-berserker");
-  const wyrmling = findCustomMonsterById("cm-white-dragon-wyrmling-rime");
-  const cragCat = findCustomMonsterById("cm-crag-cat");
-  const duergar = findCustomMonsterById("cm-duergar-soldier-rime");
-  const xardorok = findCustomMonsterById("cm-xardorok-sunblight");
-  const chardalynDragon = findCustomMonsterById("cm-chardalyn-dragon");
-  const frostDruid = findCustomMonsterById("cm-frost-druid");
-  const gerti = findCustomMonsterById("cm-gerti-orelsdottr");
-  const auril = findCustomMonsterById("cm-auril-frostmaiden");
-  const aunaut = findCustomMonsterById("cm-aunaut-aurilblight");
-  const mindFlayer = findCustomMonsterById("cm-ythryn-mind-flayer");
-  const iriolarthas = findCustomMonsterById("cm-iriolarthas");
-  const leviathan = findCustomMonsterById("cm-leviathan");
+  const coldlight = requireCustomMonsterById("cm-coldlight-walker");
+  const berserker = requireCustomMonsterById("cm-chardalyn-berserker");
+  const wyrmling = requireCustomMonsterById("cm-white-dragon-wyrmling-rime");
+  const cragCat = requireCustomMonsterById("cm-crag-cat");
+  const duergar = requireCustomMonsterById("cm-duergar-soldier-rime");
+  const xardorok = requireCustomMonsterById("cm-xardorok-sunblight");
+  const chardalynDragon = requireCustomMonsterById("cm-chardalyn-dragon");
+  const frostDruid = requireCustomMonsterById("cm-frost-druid");
+  const gerti = requireCustomMonsterById("cm-gerti-orelsdottr");
+  const auril = requireCustomMonsterById("cm-auril-frostmaiden");
+  const aunaut = requireCustomMonsterById("cm-aunaut-aurilblight");
+  const mindFlayer = requireCustomMonsterById("cm-ythryn-mind-flayer");
+  const iriolarthas = requireCustomMonsterById("cm-iriolarthas");
+  const leviathan = requireCustomMonsterById("cm-leviathan");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -1131,26 +1129,26 @@ function wbtwEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const brigand = findCustomMonsterById("cm-harengon-brigand");
-  const agdon = findCustomMonsterById("cm-agdon-longscarf");
-  const toy = findCustomMonsterById("cm-animated-toy");
-  const darkling = findCustomMonsterById("cm-darkling-elder");
-  const displacer = findCustomMonsterById("cm-displacer-beast-pack-lord");
-  const bavlorna = findCustomMonsterById("cm-bavlorna-blightstraw");
-  const skabatha = findCustomMonsterById("cm-skabatha-nightshade");
-  const unicorn = findCustomMonsterById("cm-corrupted-unicorn");
-  const wendigo = findCustomMonsterById("cm-wendigo");
-  const jabberwock = findCustomMonsterById("cm-jabberwock");
-  const brigid = findCustomMonsterById("cm-brigid-morningglow");
-  const mungoj = findCustomMonsterById("cm-mungoj-reyhorn");
-  const endelyn = findCustomMonsterById("cm-endelyn-moongrave");
-  const gala = findCustomMonsterById("cm-sister-gala");
+  const brigand = requireCustomMonsterById("cm-harengon-brigand");
+  const agdon = requireCustomMonsterById("cm-agdon-longscarf");
+  const toy = requireCustomMonsterById("cm-animated-toy");
+  const darkling = requireCustomMonsterById("cm-darkling-elder");
+  const displacer = requireCustomMonsterById("cm-displacer-beast-pack-lord");
+  const bavlorna = requireCustomMonsterById("cm-bavlorna-blightstraw");
+  const skabatha = requireCustomMonsterById("cm-skabatha-nightshade");
+  const unicorn = requireCustomMonsterById("cm-corrupted-unicorn");
+  const wendigo = requireCustomMonsterById("cm-wendigo");
+  const jabberwock = requireCustomMonsterById("cm-jabberwock");
+  const brigid = requireCustomMonsterById("cm-brigid-morningglow");
+  const mungoj = requireCustomMonsterById("cm-mungoj-reyhorn");
+  const endelyn = requireCustomMonsterById("cm-endelyn-moongrave");
+  const gala = requireCustomMonsterById("cm-sister-gala");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -1210,28 +1208,28 @@ function potaEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const cultist = findCustomMonsterById("cm-black-earth-cultist");
-  const airEle = findCustomMonsterById("cm-air-elemental");
-  const earthEle = findCustomMonsterById("cm-earth-elemental");
-  const fireEle = findCustomMonsterById("cm-fire-elemental");
-  const waterEle = findCustomMonsterById("cm-water-elemental");
-  const vaporEle = findCustomMonsterById("cm-vapor-elemental");
-  const myrmidon = findCustomMonsterById("cm-earth-elemental-myrmidon");
-  const aerisi = findCustomMonsterById("cm-aerisi-kalinoth");
-  const gar = findCustomMonsterById("cm-gar-shatterkeel");
-  const marlos = findCustomMonsterById("cm-marlos-urnrayle");
-  const vanifer = findCustomMonsterById("cm-vanifer");
-  const imix = findCustomMonsterById("cm-imix");
-  const ogremoch = findCustomMonsterById("cm-ogremoch");
-  const yuanTin = findCustomMonsterById("cm-yuan-tin");
-  const bane = findCustomMonsterById("cm-bane");
-  const eye = findCustomMonsterById("cm-elder-elemental-eye");
+  const cultist = requireCustomMonsterById("cm-black-earth-cultist");
+  const airEle = requireCustomMonsterById("cm-air-elemental");
+  const earthEle = requireCustomMonsterById("cm-earth-elemental");
+  const fireEle = requireCustomMonsterById("cm-fire-elemental");
+  const waterEle = requireCustomMonsterById("cm-water-elemental");
+  const vaporEle = requireCustomMonsterById("cm-vapor-elemental");
+  const myrmidon = requireCustomMonsterById("cm-earth-elemental-myrmidon");
+  const aerisi = requireCustomMonsterById("cm-aerisi-kalinoth");
+  const gar = requireCustomMonsterById("cm-gar-shatterkeel");
+  const marlos = requireCustomMonsterById("cm-marlos-urnrayle");
+  const vanifer = requireCustomMonsterById("cm-vanifer");
+  const imix = requireCustomMonsterById("cm-imix");
+  const ogremoch = requireCustomMonsterById("cm-ogremoch");
+  const yuanTin = requireCustomMonsterById("cm-yuan-tin");
+  const bane = requireCustomMonsterById("cm-bane");
+  const eye = requireCustomMonsterById("cm-elder-elemental-eye");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -1361,27 +1359,27 @@ function cotctEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const carrionGolem = findCustomMonsterById("cm-carrion-golem");
-  const doll = findCustomMonsterById("cm-soulbound-doll");
-  const devilfish = findCustomMonsterById("cm-devilfish");
-  const raktavarna = findCustomMonsterById("cm-raktavarna");
-  const dreamSpider = findCustomMonsterById("cm-dream-spider");
-  const reefclaw = findCustomMonsterById("cm-reefclaw");
-  const skeletonKnight = findCustomMonsterById("cm-skeleton-knight-scarwall");
-  const danseMacabre = findCustomMonsterById("cm-danse-macabre");
-  const chainedSpirit = findCustomMonsterById("cm-chained-spirit");
-  const umbralDragon = findCustomMonsterById("cm-umbral-dragon");
-  const princeInChains = findCustomMonsterById("cm-prince-in-chains");
-  const greaterDoppelganger = findCustomMonsterById("cm-greater-doppelganger");
-  const redMantis = findCustomMonsterById("cm-red-mantis-assassin");
-  const ileosa = findCustomMonsterById("cm-ileosa-arabasti");
-  const kazavon = findCustomMonsterById("cm-kazavon");
+  const carrionGolem = requireCustomMonsterById("cm-carrion-golem");
+  const doll = requireCustomMonsterById("cm-soulbound-doll");
+  const devilfish = requireCustomMonsterById("cm-devilfish");
+  const raktavarna = requireCustomMonsterById("cm-raktavarna");
+  const dreamSpider = requireCustomMonsterById("cm-dream-spider");
+  const reefclaw = requireCustomMonsterById("cm-reefclaw");
+  const skeletonKnight = requireCustomMonsterById("cm-skeleton-knight-scarwall");
+  const danseMacabre = requireCustomMonsterById("cm-danse-macabre");
+  const chainedSpirit = requireCustomMonsterById("cm-chained-spirit");
+  const umbralDragon = requireCustomMonsterById("cm-umbral-dragon");
+  const princeInChains = requireCustomMonsterById("cm-prince-in-chains");
+  const greaterDoppelganger = requireCustomMonsterById("cm-greater-doppelganger");
+  const redMantis = requireCustomMonsterById("cm-red-mantis-assassin");
+  const ileosa = requireCustomMonsterById("cm-ileosa-arabasti");
+  const kazavon = requireCustomMonsterById("cm-kazavon");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -1466,26 +1464,26 @@ function hrEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const dottari = findCustomMonsterById("cm-dottari-guard");
-  const hellknight = findCustomMonsterById("cm-hellknight");
-  const shrike = findCustomMonsterById("cm-impaler-shrike");
-  const gambler = findCustomMonsterById("cm-gambling-devil");
-  const scrivenite = findCustomMonsterById("cm-scrivenite");
-  const agent = findCustomMonsterById("cm-thrune-agent");
-  const chorister = findCustomMonsterById("cm-diabolic-chorister");
-  const forsaken = findCustomMonsterById("cm-forsaken-legion");
-  const nightprowler = findCustomMonsterById("cm-nightprowler");
-  const shadowDragon = findCustomMonsterById("cm-shadow-dragon-hr");
-  const shadowGolem = findCustomMonsterById("cm-shadow-golem");
-  const cruciarus = findCustomMonsterById("cm-cruciarus");
-  const barzillai = findCustomMonsterById("cm-barbaroscia-thrune");
-  const archdevil = findCustomMonsterById("cm-barbaroscia-archdevil");
+  const dottari = requireCustomMonsterById("cm-dottari-guard");
+  const hellknight = requireCustomMonsterById("cm-hellknight");
+  const shrike = requireCustomMonsterById("cm-impaler-shrike");
+  const gambler = requireCustomMonsterById("cm-gambling-devil");
+  const scrivenite = requireCustomMonsterById("cm-scrivenite");
+  const agent = requireCustomMonsterById("cm-thrune-agent");
+  const chorister = requireCustomMonsterById("cm-diabolic-chorister");
+  const forsaken = requireCustomMonsterById("cm-forsaken-legion");
+  const nightprowler = requireCustomMonsterById("cm-nightprowler");
+  const shadowDragon = requireCustomMonsterById("cm-shadow-dragon-hr");
+  const shadowGolem = requireCustomMonsterById("cm-shadow-golem");
+  const cruciarus = requireCustomMonsterById("cm-cruciarus");
+  const barzillai = requireCustomMonsterById("cm-barbaroscia-thrune");
+  const archdevil = requireCustomMonsterById("cm-barbaroscia-archdevil");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
@@ -1570,26 +1568,26 @@ function rhodEncounters(): EncounterTemplate[] {
     monsters: Monster[]
   ): EncounterTemplate => ({ name, description, monsters });
 
-  const hob = findCustomMonsterById("cm-hobgoblin-hand");
-  const hobCaptain = findCustomMonsterById("cm-hobgoblin-hand-captain");
-  const bugbear = findCustomMonsterById("cm-bugbear-red-hand");
-  const hound = findCustomMonsterById("cm-hell-hound-tiamat");
-  const dragonspawn = findCustomMonsterById("cm-tiamat-dragonspawn");
-  const defender = findCustomMonsterById("cm-red-hand-veteran");
-  const skalmad = findCustomMonsterById("cm-skalmad-red-fang");
-  const kulkzor = findCustomMonsterById("cm-kulkzor-wyrmspeaker");
-  const hurog = findCustomMonsterById("cm-hurog-manthex");
-  const harnoth = findCustomMonsterById("cm-harnoth-bloodwatcher");
-  const abithriax = findCustomMonsterById("cm-abithriax");
-  const zanthrus = findCustomMonsterById("cm-zanthrus-wyrmspeaker");
-  const wyrmlord = findCustomMonsterById("cm-wyrmlord");
-  const azarrKul = findCustomMonsterById("cm-azarr-kul");
+  const hob = requireCustomMonsterById("cm-hobgoblin-hand");
+  const hobCaptain = requireCustomMonsterById("cm-hobgoblin-hand-captain");
+  const bugbear = requireCustomMonsterById("cm-bugbear-red-hand");
+  const hound = requireCustomMonsterById("cm-hell-hound-tiamat");
+  const dragonspawn = requireCustomMonsterById("cm-tiamat-dragonspawn");
+  const defender = requireCustomMonsterById("cm-red-hand-veteran");
+  const skalmad = requireCustomMonsterById("cm-skalmad-red-fang");
+  const kulkzor = requireCustomMonsterById("cm-kulkzor-wyrmspeaker");
+  const hurog = requireCustomMonsterById("cm-hurog-manthex");
+  const harnoth = requireCustomMonsterById("cm-harnoth-bloodwatcher");
+  const abithriax = requireCustomMonsterById("cm-abithriax");
+  const zanthrus = requireCustomMonsterById("cm-zanthrus-wyrmspeaker");
+  const wyrmlord = requireCustomMonsterById("cm-wyrmlord");
+  const azarrKul = requireCustomMonsterById("cm-azarr-kul");
 
   const m = (
-    template: ReturnType<typeof findCustomMonsterById>
+    template: ReturnType<typeof requireCustomMonsterById>
   ): Monster | undefined => toEncounterMonster(template);
   const many = (
-    template: ReturnType<typeof findCustomMonsterById>,
+    template: ReturnType<typeof requireCustomMonsterById>,
     n: number
   ): Monster[] => toEncounterMonsters(template, n);
   const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>

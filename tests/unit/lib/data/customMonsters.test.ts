@@ -1,6 +1,7 @@
 import {
   CUSTOM_MONSTERS,
   findCustomMonsterById,
+  requireCustomMonsterById,
   toEncounterMonster,
   toEncounterMonsters,
 } from '../../../../lib/data/customMonsters';
@@ -11,6 +12,20 @@ describe('customMonsters', () => {
   it('should have custom monsters exported', () => {
     expect(Array.isArray(CUSTOM_MONSTERS)).toBe(true);
     expect(CUSTOM_MONSTERS.length).toBeGreaterThan(0);
+  });
+
+  it('has no duplicate monster ids', () => {
+    const ids = CUSTOM_MONSTERS.map((m) => m.id);
+    const seen = new Set<string>();
+    const dupes = ids.filter((id) => (seen.has(id) ? true : (seen.add(id), false)));
+    expect(dupes).toEqual([]);
+  });
+
+  it('exposes passive Perception under the canonical "passive Perception" key when senses are defined', () => {
+    for (const monster of CUSTOM_MONSTERS) {
+      if (!monster.senses) continue;
+      expect(monster.senses).not.toHaveProperty('passivePerception');
+    }
   });
 
   it('all monsters should have GLOBAL_USER_ID and be global', () => {
