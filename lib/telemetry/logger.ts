@@ -1,3 +1,5 @@
+import { metrics, trace, SpanStatusCode } from "@opentelemetry/api";
+
 export type StorageEventOutcome = "success" | "not_found" | "error";
 
 export interface StorageEvent {
@@ -8,10 +10,41 @@ export interface StorageEvent {
   error?: unknown;
 }
 
+const meter = metrics.getMeter("session-combat");
+const tracer = trace.getTracer("session-combat");
+const storageOpsCounter = meter.createCounter("storage.ops");
+
 export function logStorageEvent(event: StorageEvent): void {
+  // Emit counter
+  storageOpsCounter.add(1, {
+    name: event.name,
+    collection: event.collection,
+    outcome: event.outcome,
+  });
+
+  // Emit span retroactively
+  const endTime = Date.now();
+  const startTime = endTime - event.durationMs;
+
+  const span = tracer.startSpan(`storage.${event.collection}.${event.name}`, {
+    startTime,
+  });
+
   if (event.outcome === "error") {
-    console.error(event);
-    return;
+    span.setStatus({ code: SpanStatusCode.ERROR });
+    if (event.error instanceof Error) {
+      span.recordException(event.error);
+    }
   }
-  console.log(event);
+
+  span.end(endTime);
+
+  // Console logging fallback
+  if (process.env.NODE_ENV === "development") {
+    if (event.outcome === "error") {
+      console.error(event);
+    } else {
+      console.log(event);
+    }
+  }
 }
