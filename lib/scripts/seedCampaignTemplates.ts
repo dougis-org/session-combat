@@ -1673,6 +1673,1181 @@ function rhodEncounters(): EncounterTemplate[] {
   ];
 }
 
+function candlekeepEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const ckExtradimensionalThief = findCustomMonsterById("cm-ck-extradimensional-thief");
+  const ckFlyingBookSwarm = findCustomMonsterById("cm-ck-flying-book-swarm");
+  const ckMazfroth = findCustomMonsterById("cm-ck-mazfroth");
+  const ckDolinaNightcaller = findCustomMonsterById("cm-ck-dolina-nightcaller");
+  const ckShadowRavenFlock = findCustomMonsterById("cm-ck-shadow-raven-flock");
+  const ckDerroMineWarden = findCustomMonsterById("cm-ck-derro-mine-warden");
+  const ckShemshime = findCustomMonsterById("cm-ck-shemshime");
+  const ckPriceOfBeautyHag = findCustomMonsterById("cm-ck-price-of-beauty-hag");
+  const ckAlchemyDevotee = findCustomMonsterById("cm-ck-alchemy-devotee");
+  const ckCanopicGolem = findCustomMonsterById("cm-ck-canopic-golem");
+  const ckYellowcrestPoltergeist = findCustomMonsterById("cm-ck-yellowcrest-poltergeist");
+  const ckLurueCorruptedUnicorn = findCustomMonsterById("cm-ck-lurue-corrupted-unicorn");
+  const ckFlameskullArchivist = findCustomMonsterById("cm-ck-flameskull-archivist");
+  const ckAlkazaarMummyLord = findCustomMonsterById("cm-ck-alkazaar-mummy-lord");
+  const ckWisteriaArcanaloth = findCustomMonsterById("cm-ck-wisteria-arcanaloth");
+  const ckLoreholdScrivener = findCustomMonsterById("cm-ck-lorehold-scrivener");
+  const ckXanthoria = findCustomMonsterById("cm-ck-xanthoria");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "The Joy of Extradimensional Spaces",
+      "Adv. 1 — A cutpurse who has learned to fold space raids the demiplane vault, aided by animated library defenses.",
+      compact([many(ckExtradimensionalThief, 2), many(ckFlyingBookSwarm, 2)])
+    ),
+    encounter(
+      "Mazfroth's Mighty Digressions",
+      "Adv. 2 — The mimic tome Mazfroth wakes in the reading room, its book-swarm spawn scattering across the shelves.",
+      compact([m(ckMazfroth), many(ckFlyingBookSwarm, 3)])
+    ),
+    encounter(
+      "Book of the Raven",
+      "Adv. 3 — Shadowfell ravens and the Raven Queen's herald Dolina contest the party's claim on the Book of the Raven.",
+      compact([m(ckDolinaNightcaller), many(ckShadowRavenFlock, 3)])
+    ),
+    encounter(
+      "A Deep and Creeping Darkness",
+      "Adv. 4 — Derro mine wardens ambush the party in the flooded lift shafts of Dhol Kuldhir.",
+      compact([many(ckDerroMineWarden, 6), m(ckShadowRavenFlock)])
+    ),
+    encounter(
+      "Shemshime's Bedtime Rhyme",
+      "Adv. 5 — The bookborne fiend Shemshime spreads its maddening curse through a sealed wing of Candlekeep.",
+      compact([m(ckShemshime), many(ckFlyingBookSwarm, 2)])
+    ),
+    encounter(
+      "The Price of Beauty",
+      "Adv. 6 — The Sylvan Mirror Hag defends the Temple of the All-Seeing Mirror with vanity-cursed thralls.",
+      compact([m(ckPriceOfBeautyHag), many(ckAlchemyDevotee, 3)])
+    ),
+    encounter(
+      "Book of Cylinders",
+      "Adv. 7 — A canopic golem stitched from ancient organs guards the cylinder archive.",
+      compact([m(ckCanopicGolem)])
+    ),
+    encounter(
+      "Sarah of Yellowcrest Manor",
+      "Adv. 8 — The poltergeist of murdered Sarah tears Yellowcrest Manor apart around the investigators.",
+      compact([many(ckYellowcrestPoltergeist, 2), m(ckShadowRavenFlock)])
+    ),
+    encounter(
+      "Lore of Lurue",
+      "Adv. 9 — A unicorn servant of Lurue, corrupted by the villain of Ilinvur, charges the party in the sacred glade.",
+      compact([m(ckLurueCorruptedUnicorn), many(ckShadowRavenFlock, 2)])
+    ),
+    encounter(
+      "Kandlekeep Dekonstruktion",
+      "Adv. 10 — Flameskull archivists animate as the library's wards misfire during the sabotage.",
+      compact([many(ckFlameskullArchivist, 3), many(ckFlyingBookSwarm, 2)])
+    ),
+    encounter(
+      "Zikran's Zephyrean Tome",
+      "Adv. 11 — Alkazaar's djinn-bound guardian and a whirl of elemental servants defend the trapped tome.",
+      compact([m(ckAlkazaarMummyLord), many(ckAlchemyDevotee, 2)])
+    ),
+    encounter(
+      "The Curious Tale of Wisteria Vale",
+      "Adv. 12 — Vane, the arcanaloth warden of the demiplane prison, springs the trap on the party.",
+      compact([m(ckWisteriaArcanaloth), m(ckCanopicGolem)])
+    ),
+    encounter(
+      "The Canopic Being",
+      "Adv. 13 — A canopic golem and a Lorehold scrivener attempt to add the party's memories to the archive.",
+      compact([m(ckCanopicGolem), many(ckLoreholdScrivener, 2)])
+    ),
+    encounter(
+      "The Book of Inner Alchemy",
+      "Adv. 14 — Devotees of Inner Alchemy fight to keep the party from the transmutation manual.",
+      compact([many(ckAlchemyDevotee, 5)])
+    ),
+    encounter(
+      "The Scrivener's Tale",
+      "Adv. 15 — Lorehold scriveners bind the party into the endless book, page by page.",
+      compact([many(ckLoreholdScrivener, 4), m(ckExtradimensionalThief)])
+    ),
+    encounter(
+      "Alkazaar's Appendix",
+      "Adv. 16 — Alkazaar the djinn-bound mummy rises fully in his Calimshan tomb, sandstorm at his back.",
+      compact([m(ckAlkazaarMummyLord), many(ckDerroMineWarden, 2)])
+    ),
+    encounter(
+      "Xanthoria",
+      "Adv. 17 — The lichen horror Xanthoria erupts through the library floor, choking the stacks with spores.",
+      compact([m(ckXanthoria), many(ckFlameskullArchivist, 2)])
+    ),
+  ];
+}
+
+function radiantCitadelEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const rcNightMarketThief = findCustomMonsterById("cm-rc-night-market-thief");
+  const rcMoonriseLycanthrope = findCustomMonsterById("cm-rc-moonrise-lycanthrope");
+  const rcHollowMineFiend = findCustomMonsterById("cm-rc-hollow-mine-fiend");
+  const rcTletepecWarlock = findCustomMonsterById("cm-rc-tletepec-warlock");
+  const rcViceLord = findCustomMonsterById("cm-rc-vice-lord");
+  const rcSiabsungkohElder = findCustomMonsterById("cm-rc-siabsungkoh-elder");
+  const rcInvisibleMountainOrchid = findCustomMonsterById("cm-rc-invisible-mountain-orchid");
+  const rcGoldGuardian = findCustomMonsterById("cm-rc-gold-guardian");
+  const rcManivarshaNaga = findCustomMonsterById("cm-rc-manivarsha-naga");
+  const rcAkharinSangarChampion = findCustomMonsterById("cm-rc-akharin-sangar-champion");
+  const rcSpiritOfTheSunTrials = findCustomMonsterById("cm-rc-spirit-of-the-sun-trials");
+  const rcBuriedDynastyRevenant = findCustomMonsterById("cm-rc-buried-dynasty-revenant");
+  const rcDjaynaiStormHerald = findCustomMonsterById("cm-rc-djaynai-storm-herald");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "Salted Legacy",
+      "Adv. 1 (Kuwayba) — A market feud turns violent as night-market cutthroats sabotage rival stalls.",
+      compact([many(rcNightMarketThief, 5)])
+    ),
+    encounter(
+      "Written in Blood",
+      "Adv. 2 (Atagua) — A werebeast bound to the Song of Moonrise stalks the plantation by night.",
+      compact([many(rcMoonriseLycanthrope, 2), many(rcNightMarketThief, 2)])
+    ),
+    encounter(
+      "The Fiend of Hollow Mine",
+      "Adv. 3 (Tletepec) — The fiend beneath the mine surfaces, its coil-warlock cultists chanting it upward.",
+      compact([m(rcHollowMineFiend), many(rcTletepecWarlock, 3)])
+    ),
+    encounter(
+      "Wages of Vice",
+      "Adv. 4 (Zinda) — The Vice-Lord of Zinda calls in the party's debts at swordpoint in the pleasure-house.",
+      compact([m(rcViceLord), many(rcNightMarketThief, 4)])
+    ),
+    encounter(
+      "Sins of Our Elders",
+      "Adv. 5 (Siabsungkoh) — An Elder of Siabsungkoh binds the party in ancestral roots to settle an old debt.",
+      compact([many(rcSiabsungkohElder, 3), m(rcInvisibleMountainOrchid)])
+    ),
+    encounter(
+      "Gold for Fools and Princes",
+      "Adv. 6 (Iber) — The gilded Guardian of Fools and Princes wakes when the party lifts the treasure.",
+      compact([m(rcGoldGuardian)])
+    ),
+    encounter(
+      "Between Tangled Roots",
+      "Adv. 7 (Murann) — The Naga of the Tangled Waters tests the party at the flooded crossing.",
+      compact([m(rcManivarshaNaga), many(rcSiabsungkohElder, 2)])
+    ),
+    encounter(
+      "Shadow of the Sun",
+      "Adv. 8 (Akharin Sangar) — A duel-bound Champion of Akharin Sangar bars the way with the town's honor at stake.",
+      compact([many(rcAkharinSangarChampion, 2), m(rcSpiritOfTheSunTrials)])
+    ),
+    encounter(
+      "The Sun Trials",
+      "Adv. 9 (Atagua) — Sun-Trial Wardens judge the party in a blinding trial of light.",
+      compact([many(rcSpiritOfTheSunTrials, 2)])
+    ),
+    encounter(
+      "Buried Dynasty",
+      "Adv. 10 (Yeonido) — Revenants of the Buried Dynasty rise to defend the tomb they were sworn to.",
+      compact([many(rcBuriedDynastyRevenant, 4)])
+    ),
+    encounter(
+      "Song of Moonrise",
+      "Adv. 11 (Atagua) — Under the rising moon, cursed werebeasts of the Song descend on the village.",
+      compact([many(rcMoonriseLycanthrope, 5)])
+    ),
+    encounter(
+      "In the Mists of Manivarsha",
+      "Adv. 12 (Manivarsha) — The Naga of the Tangled Waters and a storm herald guard the contested delta.",
+      compact([m(rcManivarshaNaga), m(rcDjaynaiStormHerald)])
+    ),
+    encounter(
+      "Orchids of the Invisible Mountain",
+      "Adv. 13 (Djaynai) — Orchid wraiths and a storm herald of Djaynai defend the mountain's hidden heart.",
+      compact([many(rcInvisibleMountainOrchid, 3), m(rcDjaynaiStormHerald)])
+    ),
+  ];
+}
+
+function goldenVaultEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const gvMuseumGuard = findCustomMonsterById("cm-gv-museum-guard");
+  const gvMurkmireRelicGuardian = findCustomMonsterById("cm-gv-murkmire-relic-guardian");
+  const gvStygianImpDealer = findCustomMonsterById("cm-gv-stygian-imp-dealer");
+  const gvObservatoryStarSpawn = findCustomMonsterById("cm-gv-observatory-star-spawn");
+  const gvClockworkSentinel = findCustomMonsterById("cm-gv-clockwork-sentinel");
+  const gvPrisoner13 = findCustomMonsterById("cm-gv-prisoner-13");
+  const gvMasterpieceMimic = findCustomMonsterById("cm-gv-masterpiece-mimic");
+  const gvAstralExpressMarauder = findCustomMonsterById("cm-gv-astral-express-marauder");
+  const gvGoldenVaultInsideAgent = findCustomMonsterById("cm-gv-golden-vault-inside-agent");
+  const gvVaultGolem = findCustomMonsterById("cm-gv-vault-golem");
+  const gvGoldenVaultMastermind = findCustomMonsterById("cm-gv-golden-vault-mastermind");
+  const gvAccursedShardElemental = findCustomMonsterById("cm-gv-accursed-shard-elemental");
+  const gvHeartOfAshesCultist = findCustomMonsterById("cm-gv-heart-of-ashes-cultist");
+  const gvFireAndDarknessSalamander = findCustomMonsterById("cm-gv-fire-and-darkness-salamander");
+  const gvEfreetiFortressWarden = findCustomMonsterById("cm-gv-efreeti-fortress-warden");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "The Murkmire Malevolence",
+      "Adv. 1 — Museum guards and the Murkmire relic guardian catch the party mid-heist over the fossil.",
+      compact([many(gvMuseumGuard, 4), m(gvMurkmireRelicGuardian)])
+    ),
+    encounter(
+      "The Stygian Gambit",
+      "Adv. 2 — A stygian croupier and imp dealers rig the casino floor against the crew.",
+      compact([many(gvStygianImpDealer, 3), many(gvMuseumGuard, 2)])
+    ),
+    encounter(
+      "Reach for the Stars",
+      "Adv. 3 — A star spawn stirs in the observatory dome as the party lifts the meteorite.",
+      compact([many(gvObservatoryStarSpawn, 2), many(gvClockworkSentinel, 2)])
+    ),
+    encounter(
+      "Prisoner 13",
+      "Adv. 4 — The ghostly Prisoner 13 hunts the corridors of Revel's End as the alarm sounds.",
+      compact([m(gvPrisoner13), many(gvMuseumGuard, 4)])
+    ),
+    encounter(
+      "Masterpiece Imbroglio",
+      "Adv. 5 — A frame mimic and clockwork sentinels defend the art museum's prize gallery.",
+      compact([many(gvMasterpieceMimic, 2), many(gvClockworkSentinel, 3)])
+    ),
+    encounter(
+      "Affair on the Concordant Express",
+      "Adv. 6 — Marauders board the astral train car-by-car as it races through the Astral Sea.",
+      compact([many(gvAstralExpressMarauder, 5)])
+    ),
+    encounter(
+      "The Murkmire Malevolence, Act II",
+      "Adv. 7 — The turncoat vault agent doubles back with hired guards to reclaim the relic.",
+      compact([m(gvGoldenVaultInsideAgent), many(gvMuseumGuard, 5)])
+    ),
+    encounter(
+      "Vidorant's Vault",
+      "Adv. 8 — The vault golem and a rival mastermind converge on the same prize.",
+      compact([m(gvVaultGolem), m(gvGoldenVaultMastermind)])
+    ),
+    encounter(
+      "Tockworth's Clockworks",
+      "Adv. 9 — The gnomish workshop turns hostile, sentinels pouring off every bench.",
+      compact([many(gvClockworkSentinel, 6)])
+    ),
+    encounter(
+      "Shard of the Accursed",
+      "Adv. 10 — The Shard of the Accursed floats free of its case, curse-light filling the arena.",
+      compact([m(gvAccursedShardElemental), many(gvClockworkSentinel, 2)])
+    ),
+    encounter(
+      "Heart of Ashes",
+      "Adv. 11 — Cinder cult zealots and a salamander guard the burning relic in the cult temple.",
+      compact([many(gvHeartOfAshesCultist, 5), m(gvFireAndDarknessSalamander)])
+    ),
+    encounter(
+      "The Stygian Gambit, Act II",
+      "Adv. 12 — The croupier calls in infernal muscle when the crew tries to cash out.",
+      compact([many(gvStygianImpDealer, 2), many(gvFireAndDarknessSalamander, 2)])
+    ),
+    encounter(
+      "Fire and Darkness",
+      "Adv. 13 — The Efreeti Fortress Warden and salamander guards defend the brass vault.",
+      compact([m(gvEfreetiFortressWarden), many(gvFireAndDarknessSalamander, 3)])
+    ),
+  ];
+}
+
+function yawningPortalEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const ypBelakDruid = findCustomMonsterById("cm-yp-belak-druid");
+  const ypTwigBlightSwarm = findCustomMonsterById("cm-yp-twig-blight-swarm");
+  const ypDuergarForgemaster = findCustomMonsterById("cm-yp-duergar-forgemaster");
+  const ypMountainTroll = findCustomMonsterById("cm-yp-mountain-troll");
+  const ypTamoachanCouatlGuardian = findCustomMonsterById("cm-yp-tamoachan-couatl-guardian");
+  const ypTombOfHorrorsGargoyle = findCustomMonsterById("cm-yp-tomb-of-horrors-gargoyle");
+  const ypSirBluto = findCustomMonsterById("cm-yp-sir-bluto");
+  const ypWhitePlumeGuardian = findCustomMonsterById("cm-yp-white-plume-guardian");
+  const ypDeadInThayThayanApprentice = findCustomMonsterById("cm-yp-dead-in-thay-thayan-apprentice");
+  const ypJuiblexSpawn = findCustomMonsterById("cm-yp-juiblex-spawn");
+  const ypHillGiantAgainstTheGiants = findCustomMonsterById("cm-yp-hill-giant-against-the-giants");
+  const ypFrostGiantAgainstTheGiants = findCustomMonsterById("cm-yp-frost-giant-against-the-giants");
+  const ypFireGiantAgainstTheGiants = findCustomMonsterById("cm-yp-fire-giant-against-the-giants");
+  const acererakLich = findCustomMonsterById("cm-acererak-lich");
+  const vecnaRobes = findCustomMonsterById("cm-vecna-robes");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "The Sunless Citadel",
+      "Adv. 1 — Belak the Outcast defends the Gulthias Tree with waves of twig blight clusters.",
+      compact([m(ypBelakDruid), many(ypTwigBlightSwarm, 4)])
+    ),
+    encounter(
+      "The Forge of Fury",
+      "Adv. 2 — Duergar smiths and a mountain troll hold the lower forges of Stone Tooth.",
+      compact([many(ypDuergarForgemaster, 3), m(ypMountainTroll)])
+    ),
+    encounter(
+      "The Hidden Shrine of Tamoachan",
+      "Adv. 3 — A couatl guardian tests the party in the gas-flooded upper shrine.",
+      compact([m(ypTamoachanCouatlGuardian), many(ypTombOfHorrorsGargoyle, 2)])
+    ),
+    encounter(
+      "White Plume Mountain",
+      "Adv. 4 — Sir Bluto's bandits and Keraptis's vault golem guard the three legendary weapons.",
+      compact([m(ypSirBluto), m(ypWhitePlumeGuardian)])
+    ),
+    encounter(
+      "Dead in Thay",
+      "Adv. 5 — Thayan blood apprentices and a Doomvault ooze defend the Halls of Corruption.",
+      compact([many(ypDeadInThayThayanApprentice, 4), m(ypJuiblexSpawn)])
+    ),
+    encounter(
+      "Against the Giants",
+      "Adv. 6 — Hill, frost, and fire giants of the allied steadings converge on the party in Snurre's hall.",
+      compact([many(ypHillGiantAgainstTheGiants, 2), many(ypFrostGiantAgainstTheGiants, 2), m(ypFireGiantAgainstTheGiants)])
+    ),
+    encounter(
+      "Tomb of Horrors",
+      "Adv. 7 — In the final chamber, Acererak the archlich manifests beside the Robes-clad shade of Vecna.",
+      compact([m(acererakLich), m(vecnaRobes), many(ypTombOfHorrorsGargoyle, 2)])
+    ),
+  ];
+}
+
+function saltmarshEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const gosSmugglerThug = findCustomMonsterById("cm-gos-smuggler-thug");
+  const gosLizardfolkScaleShield = findCustomMonsterById("cm-gos-lizardfolk-scale-shield");
+  const gosBullywugCroaker = findCustomMonsterById("cm-gos-bullywug-croaker");
+  const gosGhostOfTheEmperor = findCustomMonsterById("cm-gos-ghost-of-the-emperor");
+  const gosTammerautLacedon = findCustomMonsterById("cm-gos-tammeraut-lacedon");
+  const gosAbbeyLycanthrope = findCustomMonsterById("cm-gos-abbey-lycanthrope");
+  const gosGiantSeaEel = findCustomMonsterById("cm-gos-giant-sea-eel");
+  const gosFinalEnemyFortressGuard = findCustomMonsterById("cm-gos-final-enemy-fortress-guard");
+  const gosSahuaginPriestess = findCustomMonsterById("cm-gos-sahuagin-priestess");
+  const gosMerrowBrute = findCustomMonsterById("cm-gos-merrow-brute");
+  const sahuaginBaron = findCustomMonsterById("cm-sahuagin-baron");
+  const gosSahuaginRaider = findCustomMonsterById("cm-gos-sahuagin-raider");
+  const gosKrakenPriestStyes = findCustomMonsterById("cm-gos-kraken-priest-styes");
+  const gosStyesAberration = findCustomMonsterById("cm-gos-styes-aberration");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "Saltmarsh",
+      "Adv. 1 — Smugglers running contraband through the docks turn on the party when discovered.",
+      compact([many(gosSmugglerThug, 5)])
+    ),
+    encounter(
+      "The Sinister Secret of Saltmarsh",
+      "Adv. 2 — The haunted house's smuggler crew and their lizardfolk hirelings spring the trap in the cellar.",
+      compact([many(gosSmugglerThug, 4), many(gosLizardfolkScaleShield, 3)])
+    ),
+    encounter(
+      "Danger at Dunwater",
+      "Adv. 3 — Lizardfolk scale-shields and bullywug croakers defend the river lair against a feared invasion.",
+      compact([many(gosLizardfolkScaleShield, 4), many(gosBullywugCroaker, 4)])
+    ),
+    encounter(
+      "Salvage Operation",
+      "Adv. 4 — Drowned officers of the Emperor of the Waves and lacedons rise as the party boards the derelict.",
+      compact([m(gosGhostOfTheEmperor), many(gosTammerautLacedon, 4)])
+    ),
+    encounter(
+      "Isle of the Abbey",
+      "Adv. 5 — Wererat marauders and a giant sea eel guard the ruined abbey and its lighthouse.",
+      compact([many(gosAbbeyLycanthrope, 4), m(gosGiantSeaEel)])
+    ),
+    encounter(
+      "The Final Enemy",
+      "Adv. 6 — Shark-wardens, wave priestesses, and merrow brutes hold the outer wall of the sahuagin fortress.",
+      compact([many(gosFinalEnemyFortressGuard, 4), many(gosSahuaginPriestess, 2), m(gosMerrowBrute)])
+    ),
+    encounter(
+      "The Final Enemy: The Baron's Throne",
+      "Adv. 6 — The Sahuagin Baron and his raider elite make their stand in the inner sanctum.",
+      compact([m(sahuaginBaron), many(gosSahuaginRaider, 6)])
+    ),
+    encounter(
+      "Tammeraut's Fate",
+      "Adv. 7 — Lacedon packs and a drowned officer besiege the Firewatch lighthouse night after night.",
+      compact([many(gosTammerautLacedon, 6), m(gosGhostOfTheEmperor)])
+    ),
+    encounter(
+      "The Styes",
+      "Adv. 8 — The Kraken Priest of the Styes and skum aberrations drag the party down into the rotting canals.",
+      compact([m(gosKrakenPriestStyes), many(gosStyesAberration, 4)])
+    ),
+  ];
+}
+
+function madMageEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const wdmmUndermountainGoblin = findCustomMonsterById("cm-wdmm-undermountain-goblin");
+  const wdmmKenkuScavenger = findCustomMonsterById("cm-wdmm-kenku-scavenger");
+  const wdmmCarrionCrawlerTunnels = findCustomMonsterById("cm-wdmm-carrion-crawler-tunnels");
+  const wdmmMimicTreasure = findCustomMonsterById("cm-wdmm-mimic-treasure");
+  const wdmmGrayOozeCrawler = findCustomMonsterById("cm-wdmm-gray-ooze-crawler");
+  const wdmmSpectatorVault = findCustomMonsterById("cm-wdmm-spectator-vault");
+  const wdmmNothicHoarder = findCustomMonsterById("cm-wdmm-nothic-hoarder");
+  const wdmmFlameskullLostLevel = findCustomMonsterById("cm-wdmm-flameskull-lost-level");
+  const wdmmStoneGolemArcaneChambers = findCustomMonsterById("cm-wdmm-stone-golem-arcane-chambers");
+  const wdmmIntellectDevourer = findCustomMonsterById("cm-wdmm-intellect-devourer");
+  const wdmmNimblewrightMaddgoth = findCustomMonsterById("cm-wdmm-nimblewright-maddgoth");
+  const wdmmCraniumRatSwarm = findCustomMonsterById("cm-wdmm-cranium-rat-swarm");
+  const wdmmShieldGuardianHalaster = findCustomMonsterById("cm-wdmm-shield-guardian-halaster");
+  const wdmmDrowHouseGuard = findCustomMonsterById("cm-wdmm-drow-house-guard");
+  const wdmmDrowMageSargauth = findCustomMonsterById("cm-wdmm-drow-mage-sargauth");
+  const wdmmMindFlayerArcanist = findCustomMonsterById("cm-wdmm-mind-flayer-arcanist");
+  const wdmmFlumphScout = findCustomMonsterById("cm-wdmm-flumph-scout");
+  const wdmmQuaggothThonot = findCustomMonsterById("cm-wdmm-quaggoth-thonot");
+  const wdmmGrellHunter = findCustomMonsterById("cm-wdmm-grell-hunter");
+  const wdmmWraithTerminus = findCustomMonsterById("cm-wdmm-wraith-terminus");
+  const wdmmWereratSkulk = findCustomMonsterById("cm-wdmm-wererat-skulk");
+  const wdmmNeogiSlaver = findCustomMonsterById("cm-wdmm-neogi-slaver");
+  const wdmmTroglodyteSlitherswamp = findCustomMonsterById("cm-wdmm-troglodyte-slitherswamp");
+  const wdmmSorlynPriest = findCustomMonsterById("cm-wdmm-sorlyn-priest");
+  const wdmmOtyughWarren = findCustomMonsterById("cm-wdmm-otyugh-warren");
+  const wdmmWoodWoadWyllowwood = findCustomMonsterById("cm-wdmm-wood-woad-wyllowwood");
+  const wdmmFlindSlaver = findCustomMonsterById("cm-wdmm-flind-slaver");
+  const wdmmLavaChild = findCustomMonsterById("cm-wdmm-lava-child");
+  const wdmmDweomercoreApprentice = findCustomMonsterById("cm-wdmm-dweomercore-apprentice");
+  const wdmmHalasterApprenticeMuiral = findCustomMonsterById("cm-wdmm-halaster-apprentice-muiral");
+  const wdmmHalasterApprenticeTrobriand = findCustomMonsterById("cm-wdmm-halaster-apprentice-trobriand");
+  const wdmmDeathTyrantMuiwood = findCustomMonsterById("cm-wdmm-death-tyrant-muiwood");
+  const wdmmVampireSpawnWraithHaunts = findCustomMonsterById("cm-wdmm-vampire-spawn-wraith-haunts");
+  const wdmmGauthEye = findCustomMonsterById("cm-wdmm-gauth-eye");
+  const wdmmHalasterApprenticeArcturia = findCustomMonsterById("cm-wdmm-halaster-apprentice-arcturia");
+  const wdmmShadowduskAberrantHulk = findCustomMonsterById("cm-wdmm-shadowdusk-aberrant-hulk");
+  const wdmmMadMageSimulacrum = findCustomMonsterById("cm-wdmm-mad-mage-simulacrum");
+  const wdmmShadowduskCultist = findCustomMonsterById("cm-wdmm-shadowdusk-cultist");
+  const wdmmHalasterBlackcloak = findCustomMonsterById("cm-wdmm-halaster-blackcloak");
+  const wdmmDerroSavantLost = findCustomMonsterById("cm-wdmm-derro-savant-lost");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "Dungeon Level — Goblin Bazaar Ambush",
+      "Ch. 1 (Level 1) — Undermountain goblins swarm the party from the collapsed bazaar stalls.",
+      compact([many(wdmmUndermountainGoblin, 8)])
+    ),
+    encounter(
+      "Dungeon Level — Kenku Scavengers",
+      "Ch. 1 (Level 1) — Kenku scavengers pick over the dead in the entry halls and turn on the living.",
+      compact([many(wdmmKenkuScavenger, 5), many(wdmmUndermountainGoblin, 3)])
+    ),
+    encounter(
+      "Dungeon Level — Carrion Crawler Nest",
+      "Ch. 1 (Level 1) — Carrion crawlers drop from the ceiling of a refuse-choked corridor.",
+      compact([many(wdmmCarrionCrawlerTunnels, 3)])
+    ),
+    encounter(
+      "Dungeon Level — The Chest That Bites",
+      "Ch. 1 (Level 1) — A treasure mimic and a gray ooze crawler guard a false vault.",
+      compact([many(wdmmMimicTreasure, 2), many(wdmmGrayOozeCrawler, 2)])
+    ),
+    encounter(
+      "Dungeon Level — Bound Spectator",
+      "Ch. 1 (Level 1) — A spectator bound a century ago attacks anyone reaching for its charge.",
+      compact([m(wdmmSpectatorVault), many(wdmmUndermountainGoblin, 4)])
+    ),
+    encounter(
+      "Dungeon Level — Nothic in the Dark",
+      "Ch. 1 (Level 1) — A hoarding nothic ambushes the party from a rubble pile, rotting gaze first.",
+      compact([many(wdmmNothicHoarder, 2)])
+    ),
+    encounter(
+      "Dungeon Level — Flameskull Watchpost",
+      "Ch. 1 (Level 1) — A flameskull left as a sentry lights up the stair to Level 2.",
+      compact([m(wdmmFlameskullLostLevel), many(wdmmUndermountainGoblin, 5)])
+    ),
+    encounter(
+      "Arcane Chambers — Stone Golem Ward",
+      "Ch. 2 (Level 2) — A stone golem enforces the silence of an abandoned laboratory.",
+      compact([m(wdmmStoneGolemArcaneChambers)])
+    ),
+    encounter(
+      "Arcane Chambers — Intellect Devourers",
+      "Ch. 2 (Level 2) — Intellect devourers scuttle out of a cracked specimen jar.",
+      compact([many(wdmmIntellectDevourer, 4)])
+    ),
+    encounter(
+      "Arcane Chambers — Nimblewright Patrol",
+      "Ch. 2 (Level 2) — Maddgoth-built nimblewrights sweep the corridors on a fixed circuit.",
+      compact([many(wdmmNimblewrightMaddgoth, 3)])
+    ),
+    encounter(
+      "Arcane Chambers — Cranium Rat Hivemind",
+      "Ch. 2 (Level 2) — A swarm of cranium rats coalesces into a single scheming mind.",
+      compact([many(wdmmCraniumRatSwarm, 2)])
+    ),
+    encounter(
+      "Arcane Chambers — Shield Guardian Vault",
+      "Ch. 2 (Level 2) — Halaster's shield guardian defends an amulet-locked door.",
+      compact([m(wdmmShieldGuardianHalaster), m(wdmmFlameskullLostLevel)])
+    ),
+    encounter(
+      "Arcane Chambers — Gray Ooze Cistern",
+      "Ch. 2 (Level 2) — Gray ooze crawlers drip from corroded pipes over a flooded chamber.",
+      compact([many(wdmmGrayOozeCrawler, 4)])
+    ),
+    encounter(
+      "Sargauth Level — Drow Enclave Checkpoint",
+      "Ch. 3 (Level 3) — Drow house guards and an enclave mage hold the bridge over the Sargauth.",
+      compact([many(wdmmDrowHouseGuard, 5), m(wdmmDrowMageSargauth)])
+    ),
+    encounter(
+      "Sargauth Level — Mind Flayer Arcanist",
+      "Ch. 3 (Level 3) — A mind flayer arcanist of the ruined enclave probes the party's thoughts, then attacks.",
+      compact([m(wdmmMindFlayerArcanist), m(wdmmCraniumRatSwarm)])
+    ),
+    encounter(
+      "Sargauth Level — Flumph Refuge",
+      "Ch. 3 (Level 3) — Flumphs beg the party for aid, and the illithid patrol hunting them arrives.",
+      compact([many(wdmmFlumphScout, 4), m(wdmmMindFlayerArcanist)])
+    ),
+    encounter(
+      "Sargauth Level — Quaggoth Warren",
+      "Ch. 3 (Level 3) — Enslaved quaggoths and a thonot break loose in the tunnels.",
+      compact([many(wdmmQuaggothThonot, 4)])
+    ),
+    encounter(
+      "Sargauth Level — Grell Hunting Party",
+      "Ch. 3 (Level 3) — Grell hunters drift down out of a vertical shaft, tentacles first.",
+      compact([many(wdmmGrellHunter, 3)])
+    ),
+    encounter(
+      "Sargauth Level — Wraith of the Old Enclave",
+      "Ch. 3 (Level 3) — A wraith bound to the drowned enclave drains anyone who lingers on the shore.",
+      compact([many(wdmmWraithTerminus, 2)])
+    ),
+    encounter(
+      "Skullport — Wererat Extortion",
+      "Ch. 4 (Skullport) — Skullport wererats corner the party in a dead-end alley of the Port of Shadow.",
+      compact([many(wdmmWereratSkulk, 5)])
+    ),
+    encounter(
+      "Skullport — Neogi Slave Coffle",
+      "Ch. 4 (Skullport) — Neogi slavers try to add the party to their coffle at the flesh market.",
+      compact([many(wdmmNeogiSlaver, 3), many(wdmmTroglodyteSlitherswamp, 3)])
+    ),
+    encounter(
+      "Skullport — Sorlyn Sun-Cult Raid",
+      "Ch. 4 (Skullport) — Sorlyn priests torch a shadow shrine and fight anyone in their way.",
+      compact([many(wdmmSorlynPriest, 3), many(wdmmKenkuScavenger, 4)])
+    ),
+    encounter(
+      "Skullport — Kenku Fence Double-Cross",
+      "Ch. 4 (Skullport) — A kenku fencing ring turns on the party mid-deal.",
+      compact([many(wdmmKenkuScavenger, 6)])
+    ),
+    encounter(
+      "Skullport — Wereat Nest Assault",
+      "Ch. 4 (Skullport) — The party pushes into the wererat nest under the docks.",
+      compact([many(wdmmWereratSkulk, 4), m(wdmmOtyughWarren)])
+    ),
+    encounter(
+      "Skullport — Cranium Rat Broker",
+      "Ch. 4 (Skullport) — An information broker fronted by a cranium rat swarm demands a steep price.",
+      compact([many(wdmmCraniumRatSwarm, 2), many(wdmmWereratSkulk, 2)])
+    ),
+    encounter(
+      "Wyllowwood — Wood Woad Wardens",
+      "Ch. 5 (Level 5) — Wyllow's wood woads challenge trespassers among the underground trees.",
+      compact([many(wdmmWoodWoadWyllowwood, 3)])
+    ),
+    encounter(
+      "Wyllowwood — Carrion Crawler Grove",
+      "Ch. 5 (Level 5) — Carrion crawlers infest the rotting northern grove.",
+      compact([many(wdmmCarrionCrawlerTunnels, 4)])
+    ),
+    encounter(
+      "Wyllowwood — Otyugh Compost Pit",
+      "Ch. 5 (Level 5) — An otyugh has made its home in Wyllow's compost sink.",
+      compact([many(wdmmOtyughWarren, 2)])
+    ),
+    encounter(
+      "Wyllowwood — Wraith Among the Roots",
+      "Ch. 5 (Level 5) — A wraith haunts the graves at the wood's edge.",
+      compact([many(wdmmWraithTerminus, 2), m(wdmmWoodWoadWyllowwood)])
+    ),
+    encounter(
+      "Wyllowwood — Nothic Thicket",
+      "Ch. 5 (Level 5) — Nothics stalk the party through the false forest.",
+      compact([many(wdmmNothicHoarder, 3)])
+    ),
+    encounter(
+      "Wyllowwood — Flameskull Beacon",
+      "Ch. 5 (Level 5) — A flameskull marks the path to the dryad Wyllow's glade.",
+      compact([many(wdmmFlameskullLostLevel, 2), m(wdmmWoodWoadWyllowwood)])
+    ),
+    encounter(
+      "Lost Level — Flameskull Sentinels",
+      "Ch. 6 (Lost Level) — Multiple flameskulls guard the Netherese vault stairs.",
+      compact([many(wdmmFlameskullLostLevel, 4)])
+    ),
+    encounter(
+      "Lost Level — Stone Golem Archive",
+      "Ch. 6 (Lost Level) — A stone golem defends a shelf of pre-Netheril tomes.",
+      compact([m(wdmmStoneGolemArcaneChambers), m(wdmmFlameskullLostLevel)])
+    ),
+    encounter(
+      "Lost Level — Wraith Vault",
+      "Ch. 6 (Lost Level) — Wraiths of the vault's original guardians rise as the seals break.",
+      compact([many(wdmmWraithTerminus, 3)])
+    ),
+    encounter(
+      "Lost Level — Gray Ooze Flood",
+      "Ch. 6 (Lost Level) — Gray ooze crawlers pour through a breached wall.",
+      compact([many(wdmmGrayOozeCrawler, 5)])
+    ),
+    encounter(
+      "Lost Level — Nimblewright Cache Guards",
+      "Ch. 6 (Lost Level) — Nimblewrights reactivate to protect a spell cache.",
+      compact([many(wdmmNimblewrightMaddgoth, 2), m(wdmmFlameskullLostLevel)])
+    ),
+    encounter(
+      "Lost Level — Intellect Devourer Swarm",
+      "Ch. 6 (Lost Level) — Intellect devourers spill from a broken stasis vault.",
+      compact([many(wdmmIntellectDevourer, 5)])
+    ),
+    encounter(
+      "Maddgoth's Castle — Nimblewright Honor Guard",
+      "Ch. 7 (Level 7) — Maddgoth's nimblewrights form a wall of whirling rapiers at the gate.",
+      compact([many(wdmmNimblewrightMaddgoth, 4)])
+    ),
+    encounter(
+      "Maddgoth's Castle — Shrunken Halls",
+      "Ch. 7 (Level 7) — Shield guardians and mimics fill the miniature castle's corridors.",
+      compact([m(wdmmShieldGuardianHalaster), many(wdmmMimicTreasure, 2)])
+    ),
+    encounter(
+      "Maddgoth's Castle — The Torturer's Lab",
+      "Ch. 7 (Level 7) — Nothics and a carrion crawler infest Maddgoth's abandoned workshop.",
+      compact([many(wdmmNothicHoarder, 2), many(wdmmCarrionCrawlerTunnels, 2)])
+    ),
+    encounter(
+      "Maddgoth's Castle — Flameskull Rafters",
+      "Ch. 7 (Level 7) — Flameskulls patrol the rafters of the great hall.",
+      compact([many(wdmmFlameskullLostLevel, 3)])
+    ),
+    encounter(
+      "Maddgoth's Castle — Gray Slime Moat",
+      "Ch. 7 (Level 7) — Gray ooze crawlers fill the castle's inner moat.",
+      compact([many(wdmmGrayOozeCrawler, 4), m(wdmmNimblewrightMaddgoth)])
+    ),
+    encounter(
+      "Slitherswamp — Troglodyte Ambush",
+      "Ch. 8 (Level 8) — Troglodytes rise from the fungal muck, stench rolling ahead of them.",
+      compact([many(wdmmTroglodyteSlitherswamp, 8)])
+    ),
+    encounter(
+      "Slitherswamp — Flind Slavers",
+      "Ch. 8 (Level 8) — Flind slavers drive a troglodyte work-gang and turn the chains on the party.",
+      compact([many(wdmmFlindSlaver, 3), many(wdmmTroglodyteSlitherswamp, 4)])
+    ),
+    encounter(
+      "Slitherswamp — Otyugh Bog",
+      "Ch. 8 (Level 8) — Otyughs wallow in the deepest sink of the swamp level.",
+      compact([many(wdmmOtyughWarren, 2), many(wdmmCarrionCrawlerTunnels, 2)])
+    ),
+    encounter(
+      "Slitherswamp — Lava Child Crossing",
+      "Ch. 8 (Level 8) — Lava children guard a magma vent that bridges two islands.",
+      compact([many(wdmmLavaChild, 4)])
+    ),
+    encounter(
+      "Slitherswamp — Grell Mud-Fishers",
+      "Ch. 8 (Level 8) — Grell hunters hover over the mire, hauling prey up into the dark.",
+      compact([many(wdmmGrellHunter, 3)])
+    ),
+    encounter(
+      "Slitherswamp — Carrion Crawler Reeds",
+      "Ch. 8 (Level 8) — Carrion crawlers hide among the giant reeds along a narrow causeway.",
+      compact([many(wdmmCarrionCrawlerTunnels, 4)])
+    ),
+    encounter(
+      "Dweomercore — Entrance Exam",
+      "Ch. 9 (Level 9) — Student-wizards of the mage school test the party with an ambush 'lesson.'",
+      compact([many(wdmmDweomercoreApprentice, 5)])
+    ),
+    encounter(
+      "Dweomercore — Muiral's Laboratory",
+      "Ch. 9 (Level 9) — Muiral the Misshapen, apprentice of Halaster, defends his tunnels with student-wizards.",
+      compact([m(wdmmHalasterApprenticeMuiral), many(wdmmDweomercoreApprentice, 3)])
+    ),
+    encounter(
+      "Dweomercore — Trobriand's Foundry",
+      "Ch. 9 (Level 9) — Trobriand the Metal Mage, apprentice of Halaster, unleashes constructs on the intruders.",
+      compact([m(wdmmHalasterApprenticeTrobriand), m(wdmmStoneGolemArcaneChambers), many(wdmmNimblewrightMaddgoth, 2)])
+    ),
+    encounter(
+      "Dweomercore — Summoning Seminar Gone Wrong",
+      "Ch. 9 (Level 9) — A botched student summoning fills the lecture hall with grells and flameskulls.",
+      compact([many(wdmmGrellHunter, 2), many(wdmmFlameskullLostLevel, 2)])
+    ),
+    encounter(
+      "Dweomercore — Cranium Rat Study Hall",
+      "Ch. 9 (Level 9) — A swarm of cranium rats has infested the library and reads over the party's shoulder.",
+      compact([many(wdmmCraniumRatSwarm, 2), many(wdmmDweomercoreApprentice, 2)])
+    ),
+    encounter(
+      "Dweomercore — Golem Proving Ground",
+      "Ch. 9 (Level 9) — Stone golems and student-wizards run combat drills the party interrupts.",
+      compact([m(wdmmStoneGolemArcaneChambers), many(wdmmDweomercoreApprentice, 4)])
+    ),
+    encounter(
+      "Muiwood — Death Tyrant's Grove",
+      "Ch. 10 (Muiwood) — A death tyrant floats above a blighted underground wood, raising the fallen as zombies.",
+      compact([m(wdmmDeathTyrantMuiwood)])
+    ),
+    encounter(
+      "Muiwood — Wood Woad Last Stand",
+      "Ch. 10 (Muiwood) — The last wood woads of the corrupted wood fight the beholder's undead.",
+      compact([many(wdmmWoodWoadWyllowwood, 3), m(wdmmVampireSpawnWraithHaunts)])
+    ),
+    encounter(
+      "Muiwood — Carrion Blight",
+      "Ch. 10 (Muiwood) — Carrion crawlers and otyughs thrive in the death tyrant's negative-energy shadow.",
+      compact([many(wdmmCarrionCrawlerTunnels, 3), m(wdmmOtyughWarren)])
+    ),
+    encounter(
+      "Muiwood — Wraith Thornwall",
+      "Ch. 10 (Muiwood) — Wraiths drift through a wall of dead brambles ringing the tyrant's grove.",
+      compact([many(wdmmWraithTerminus, 3)])
+    ),
+    encounter(
+      "Muiwood — Nothic Carrion Feast",
+      "Ch. 10 (Muiwood) — Nothics squabble over corpses at the wood's edge and turn on the newcomers.",
+      compact([many(wdmmNothicHoarder, 4)])
+    ),
+    encounter(
+      "Muiwood — Gauth Scavengers",
+      "Ch. 10 (Muiwood) — Gauths trail the death tyrant, feeding on the magic of anything it kills.",
+      compact([many(wdmmGauthEye, 2)])
+    ),
+    encounter(
+      "Wraith Haunts — Vampire Spawn Warren",
+      "Ch. 11 (Wraith Haunts) — Vampire spawn boil out of a sealed crypt as the party breaks the ward.",
+      compact([many(wdmmVampireSpawnWraithHaunts, 4)])
+    ),
+    encounter(
+      "Wraith Haunts — Wraith Choir",
+      "Ch. 11 (Wraith Haunts) — A knot of wraiths drains the warmth from an entire gallery.",
+      compact([many(wdmmWraithTerminus, 4)])
+    ),
+    encounter(
+      "Wraith Haunts — Flameskull Ossuary",
+      "Ch. 11 (Wraith Haunts) — Flameskulls light every alcove of a bone-lined hall.",
+      compact([many(wdmmFlameskullLostLevel, 3), m(wdmmVampireSpawnWraithHaunts)])
+    ),
+    encounter(
+      "Wraith Haunts — Death Tyrant Reprise",
+      "Ch. 11 (Wraith Haunts) — The Muiwood death tyrant, if it survived, pursues the party into the haunts.",
+      compact([m(wdmmDeathTyrantMuiwood), many(wdmmWraithTerminus, 2)])
+    ),
+    encounter(
+      "Wraith Haunts — Cranium Rat Reliquary",
+      "Ch. 11 (Wraith Haunts) — A cranium rat swarm nests in a sarcophagus, whispering the dead's secrets.",
+      compact([many(wdmmCraniumRatSwarm, 2), m(wdmmVampireSpawnWraithHaunts)])
+    ),
+    encounter(
+      "Wraith Haunts — Spectator Tomb Guard",
+      "Ch. 11 (Wraith Haunts) — A spectator has guarded one noble's tomb for a century and won't stop now.",
+      compact([m(wdmmSpectatorVault), many(wdmmWraithTerminus, 2)])
+    ),
+    encounter(
+      "Terminus Level — Arcturia's Flesh Gardens",
+      "Ch. 12 (Terminus Level) — Arcturia, apprentice of Halaster, reshapes intruders among her flesh-warped horrors.",
+      compact([m(wdmmHalasterApprenticeArcturia), m(wdmmShadowduskAberrantHulk)])
+    ),
+    encounter(
+      "Terminus Level — Aberrant Hulk Pen",
+      "Ch. 12 (Terminus Level) — Aberrant hulks break their bindings in a warped holding chamber.",
+      compact([many(wdmmShadowduskAberrantHulk, 2)])
+    ),
+    encounter(
+      "Terminus Level — Gauth Overseers",
+      "Ch. 12 (Terminus Level) — Gauths patrol the antimagic-warded approach to Halaster's sanctum.",
+      compact([many(wdmmGauthEye, 3)])
+    ),
+    encounter(
+      "Terminus Level — Chaos Simulacrum",
+      "Ch. 12 (Terminus Level) — A snow-bodied simulacrum of Halaster tests the party with wild magic.",
+      compact([m(wdmmMadMageSimulacrum), many(wdmmFlameskullLostLevel, 2)])
+    ),
+    encounter(
+      "Terminus Level — Shield Guardian Gauntlet",
+      "Ch. 12 (Terminus Level) — Two shield guardians hold the final corridor to the terminus stair.",
+      compact([many(wdmmShieldGuardianHalaster, 2)])
+    ),
+    encounter(
+      "Terminus Level — Wraith Terminus",
+      "Ch. 12 (Terminus Level) — Wraiths guard the threshold between Undermountain and the deepest hold.",
+      compact([many(wdmmWraithTerminus, 3), m(wdmmMadMageSimulacrum)])
+    ),
+    encounter(
+      "Shadowdusk Hold — Cultist Outer Ward",
+      "Ch. 13 (Shadowdusk Hold) — Shadowdusk cultists chant the party into a Far Realm haze at the gate.",
+      compact([many(wdmmShadowduskCultist, 6)])
+    ),
+    encounter(
+      "Shadowdusk Hold — Aberrant Hulk Vanguard",
+      "Ch. 13 (Shadowdusk Hold) — Aberrant hulks and cultists hold the reality-warped great hall.",
+      compact([many(wdmmShadowduskAberrantHulk, 2), many(wdmmShadowduskCultist, 4)])
+    ),
+    encounter(
+      "Shadowdusk Hold — Arcturia's Return",
+      "Ch. 13 (Shadowdusk Hold) — Arcturia allies with the Shadowdusks, flesh-warping the party's front line.",
+      compact([m(wdmmHalasterApprenticeArcturia), many(wdmmShadowduskCultist, 4)])
+    ),
+    encounter(
+      "Shadowdusk Hold — Elder Rune Chamber",
+      "Ch. 13 (Shadowdusk Hold) — Aberrant hulks and cranium rats defend the rune Halaster needs.",
+      compact([m(wdmmShadowduskAberrantHulk), many(wdmmCraniumRatSwarm, 2)])
+    ),
+    encounter(
+      "Shadowdusk Hold — Halaster's Intervention",
+      "Ch. 13 (Shadowdusk Hold) — Halaster Blackcloak appears mid-battle, blinking through the fight on his own agenda.",
+      compact([m(wdmmHalasterBlackcloak), many(wdmmShadowduskCultist, 4)])
+    ),
+    encounter(
+      "Shadowdusk Hold — The Mad Mage Unbound",
+      "Ch. 13 (Shadowdusk Hold) — Halaster Blackcloak, backed by his shield guardian and a simulacrum, settles accounts in the deepest hall of Undermountain.",
+      compact([m(wdmmHalasterBlackcloak), m(wdmmShieldGuardianHalaster), m(wdmmMadMageSimulacrum)])
+    ),
+    encounter(
+      "Dungeon Level — Lava Child Forge Raiders",
+      "Ch. 1 (Level 1) — Lava children raid an old smithy for metal to melt.",
+      compact([many(wdmmLavaChild, 3), many(wdmmUndermountainGoblin, 3)])
+    ),
+    encounter(
+      "Arcane Chambers — Derro Savant Experiment",
+      "Ch. 2 (Level 2) — A derro savant tests a maddening sonic device on captured goblins.",
+      compact([many(wdmmDerroSavantLost, 3), many(wdmmUndermountainGoblin, 3)])
+    ),
+    encounter(
+      "Skullport — Sorlyn vs. Shadow Cult Crossfire",
+      "Ch. 4 (Skullport) — The party is caught between Sorlyn crusaders and a hidden Shadowdusk cell.",
+      compact([many(wdmmSorlynPriest, 2), many(wdmmShadowduskCultist, 3)])
+    ),
+    encounter(
+      "Wraith Haunts — Gauth Grave-Robbers",
+      "Ch. 11 (Wraith Haunts) — Gauths pry open sarcophagi looking for magic to devour.",
+      compact([many(wdmmGauthEye, 2), m(wdmmCraniumRatSwarm)])
+    ),
+  ];
+}
+
+function runelordsEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const rotrGoblinPyro = findCustomMonsterById("cm-rotr-goblin-pyro");
+  const rotrSinspawnWrath = findCustomMonsterById("cm-rotr-sinspawn-wrath");
+  const rotrNualia = findCustomMonsterById("cm-rotr-nualia");
+  const rotrScarecrowGolem = findCustomMonsterById("cm-rotr-scarecrow-golem");
+  const rotrOgrekinHillbilly = findCustomMonsterById("cm-rotr-ogrekin-hillbilly");
+  const rotrLucrecia = findCustomMonsterById("cm-rotr-lucrecia");
+  const rotrHillGiantRaider = findCustomMonsterById("cm-rotr-hill-giant-raider");
+  const rotrMokmurian = findCustomMonsterById("cm-rotr-mokmurian");
+  const rotrStoneGiantElder = findCustomMonsterById("cm-rotr-stone-giant-elder");
+  const rotrClockworkReaper = findCustomMonsterById("cm-rotr-clockwork-reaper");
+  const rotrShadowOfRuneforge = findCustomMonsterById("cm-rotr-shadow-of-runeforge");
+  const rotrDenizenOfLeng = findCustomMonsterById("cm-rotr-denizen-of-leng");
+  const rotrLamiaMatriarchGuard = findCustomMonsterById("cm-rotr-lamia-matriarch-guard");
+  const karzougDemonSkin = findCustomMonsterById("cm-karzoug-demon-skin");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "Burnt Offerings",
+      "Ch. 1 (Sandpoint) — Goblin pyros raid the Swallowtail Festival, then Nualia's sinspawn hold Thistletop. (5e conversion)",
+      compact([many(rotrGoblinPyro, 6), many(rotrSinspawnWrath, 2)])
+    ),
+    encounter(
+      "Thistletop: Nualia the Fallen",
+      "Ch. 1 (Thistletop) — Nualia Tobyn, remade by Lamashtu, makes her stand over the runewell. (5e conversion)",
+      compact([m(rotrNualia), many(rotrSinspawnWrath, 3)])
+    ),
+    encounter(
+      "The Skinsaw Murders",
+      "Ch. 2 (Foxglove Manor) — The scarecrow golems and Foxglove ogrekin guard the rotting manor as Lucrecia watches. (5e conversion)",
+      compact([many(rotrScarecrowGolem, 3), many(rotrOgrekinHillbilly, 2), m(rotrLucrecia)])
+    ),
+    encounter(
+      "The Hook Mountain Massacre",
+      "Ch. 3 (Fort Rannick) — Hook Mountain hill giant raiders and ogrekin storm the fort's walls. (5e conversion)",
+      compact([many(rotrHillGiantRaider, 3), many(rotrOgrekinHillbilly, 4)])
+    ),
+    encounter(
+      "Fortress of the Stone Giants",
+      "Ch. 4 (Jorgenfist) — Mokmurian the Stone Lord and a stone giant elder command the runecarved fortress. (5e conversion)",
+      compact([m(rotrMokmurian), many(rotrStoneGiantElder, 2), m(rotrClockworkReaper)])
+    ),
+    encounter(
+      "Sins of the Saviors",
+      "Ch. 5 (Runeforge) — Runeforge shadow-wizards and clockwork reapers guard the seven wings of the forge. (5e conversion)",
+      compact([many(rotrShadowOfRuneforge, 4), many(rotrClockworkReaper, 2)])
+    ),
+    encounter(
+      "The Spires of Xin-Shalast",
+      "Ch. 6 (Xin-Shalast) — Denizens of Leng and concubine devils bar the road to the Pinnacle of Avarice. (5e conversion)",
+      compact([many(rotrDenizenOfLeng, 2), many(rotrLamiaMatriarchGuard, 3)])
+    ),
+    encounter(
+      "Karzoug, the Runelord of Greed",
+      "Ch. 6 (Pinnacle of Avarice) — Karzoug awakens from ten thousand years of stasis to reclaim Thassilon. (5e conversion)",
+      compact([m(karzougDemonSkin), many(rotrDenizenOfLeng, 2)])
+    ),
+  ];
+}
+
+function kingmakerEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const kmStagLord = findCustomMonsterById("cm-km-stag-lord");
+  const kmStagLordBandit = findCustomMonsterById("cm-km-stag-lord-bandit");
+  const kmTatzlwyrm = findCustomMonsterById("cm-km-tatzlwyrm");
+  const kmOwlbearAlpha = findCustomMonsterById("cm-km-owlbear-alpha");
+  const kmSprigganRaider = findCustomMonsterById("cm-km-spriggan-raider");
+  const kmLinnormFen = findCustomMonsterById("cm-km-linnorm-fen");
+  const kmArmagTwiceBorn = findCustomMonsterById("cm-km-armag-twice-born");
+  const kmTrollKingHargulka = findCustomMonsterById("cm-km-troll-king-hargulka");
+  const kmHodag = findCustomMonsterById("cm-km-hodag");
+  const kmBoggardSwampPriest = findCustomMonsterById("cm-km-boggard-swamp-priest");
+  const kmFirstWorldScytheTree = findCustomMonsterById("cm-km-first-world-scythe-tree");
+  const kmNyrissa = findCustomMonsterById("cm-km-nyrissa");
+  const kmWillOWispSwarm = findCustomMonsterById("cm-km-will-o-wisp-swarm");
+  const lanternKing = findCustomMonsterById("cm-lantern-king");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "Stolen Land",
+      "Ch. 1 (Stolen Lands) — The Stag Lord and his bandits ambush the party from the Thorn River fort's palisade. (5e conversion)",
+      compact([m(kmStagLord), many(kmStagLordBandit, 6)])
+    ),
+    encounter(
+      "Rivers Run Red",
+      "Ch. 2 (Kingdom) — Tatzlwyrms and an owlbear alpha threaten the young kingdom's first settlements. (5e conversion)",
+      compact([many(kmTatzlwyrm, 4), m(kmOwlbearAlpha)])
+    ),
+    encounter(
+      "The Varnhold Vanishing",
+      "Ch. 3 (Varnhold) — Spriggan raiders and the Fen Linnorm cross over from the First World to swallow the town. (5e conversion)",
+      compact([many(kmSprigganRaider, 5), m(kmLinnormFen)])
+    ),
+    encounter(
+      "Blood for Blood",
+      "Ch. 4 (Tiger Lords) — Armag the Twice-Born leads a Tiger Lord warband and troll mercenaries against the kingdom. (5e conversion)",
+      compact([m(kmArmagTwiceBorn), m(kmTrollKingHargulka), many(kmHodag, 2)])
+    ),
+    encounter(
+      "War of the River Kings",
+      "Ch. 5 (River Kingdoms) — Hooktongue boggard priests and First World scythe trees hold the Hooktongue Slough. (5e conversion)",
+      compact([many(kmBoggardSwampPriest, 4), many(kmFirstWorldScytheTree, 2)])
+    ),
+    encounter(
+      "Sound of a Thousand Screams: Nyrissa",
+      "Ch. 6 (First World) — Nyrissa the nymph queen tends her rose garden Briar as the party arrives. (5e conversion)",
+      compact([m(kmNyrissa), many(kmWillOWispSwarm, 3)])
+    ),
+    encounter(
+      "Sound of a Thousand Screams: The Lantern King",
+      "Ch. 6 (First World) — The Lantern King, Eldest of the First World, reveals himself as the true architect of the curse. (5e conversion)",
+      compact([m(lanternKing), many(kmWillOWispSwarm, 4)])
+    ),
+  ];
+}
+
+function wrathOfTheRighteousEncounters(): EncounterTemplate[] {
+  const encounter = (
+    name: string,
+    description: string,
+    monsters: Monster[]
+  ): EncounterTemplate => ({ name, description, monsters });
+
+  const wotrCultistOfBaphomet = findCustomMonsterById("cm-wotr-cultist-of-baphomet");
+  const wotrDretchSwarm = findCustomMonsterById("cm-wotr-dretch-swarm");
+  const wotrVrockShrieker = findCustomMonsterById("cm-wotr-vrock-shrieker");
+  const wotrBrimorak = findCustomMonsterById("cm-wotr-brimorak");
+  const wotrShieldArchon = findCustomMonsterById("cm-wotr-shield-archon");
+  const wotrGrayGarrisonCultistLord = findCustomMonsterById("cm-wotr-gray-garrison-cultist-lord");
+  const wotrBabauSkirmisher = findCustomMonsterById("cm-wotr-babau-skirmisher");
+  const wotrSchirBrute = findCustomMonsterById("cm-wotr-schir-brute");
+  const wotrHezrouFrontline = findCustomMonsterById("cm-wotr-hezrou-frontline");
+  const wotrNabasuGlutton = findCustomMonsterById("cm-wotr-nabasu-glutton");
+  const wotrRavenerHunter = findCustomMonsterById("cm-wotr-ravener-hunter");
+  const wotrNocticula = findCustomMonsterById("cm-wotr-nocticula");
+  const wotrBaphomet = findCustomMonsterById("cm-wotr-baphomet");
+  const wotrDeskari = findCustomMonsterById("cm-wotr-deskari");
+  const wotrCrusaderMarshalAlly = findCustomMonsterById("cm-wotr-crusader-marshal-ally");
+
+  const m = (
+    template: ReturnType<typeof findCustomMonsterById>
+  ): Monster | undefined => toEncounterMonster(template);
+  const many = (
+    template: ReturnType<typeof findCustomMonsterById>,
+    n: number
+  ): Monster[] => toEncounterMonsters(template, n);
+  const compact = (arr: (Monster | Monster[] | undefined)[]): Monster[] =>
+    arr.flatMap((x) => (Array.isArray(x) ? x : x ? [x] : []));
+
+  return [
+    encounter(
+      "The Worldwound Incursion",
+      "Ch. 1 (Kenabres) — Cultists of Baphomet and dretch rabble pour through a fresh rift as the city burns.",
+      compact([many(wotrCultistOfBaphomet, 5), many(wotrDretchSwarm, 3)])
+    ),
+    encounter(
+      "Sword of Valor",
+      "Ch. 2 (Drezen) — Vrock shriekers and a brimorak firestarter hold the citadel's shattered gate; a shield archon fights beside the party.",
+      compact([many(wotrVrockShrieker, 2), many(wotrBrimorak, 3), m(wotrShieldArchon)])
+    ),
+    encounter(
+      "Sword of Valor: Staunton Vhane",
+      "Ch. 2 (Gray Garrison) — Staunton Vhane, the fallen warpriest, defends the wardstone chamber with babau slayers.",
+      compact([m(wotrGrayGarrisonCultistLord), many(wotrBabauSkirmisher, 3)])
+    ),
+    encounter(
+      "Demon's Heresy",
+      "Ch. 3 (Worldwound) — Schir warband brutes and a hezrou screen the approach to the Ivory Sanctum.",
+      compact([many(wotrSchirBrute, 4), many(wotrHezrouFrontline, 2)])
+    ),
+    encounter(
+      "The Midnight Isles",
+      "Ch. 4 (Abyss) — Nabasu soul-gluttons and ravener hunters of Deskari harvest the crusaders' dead on Nocticula's islands.",
+      compact([many(wotrNabasuGlutton, 2), many(wotrRavenerHunter, 3)])
+    ),
+    encounter(
+      "The Midnight Isles: Nocticula",
+      "Ch. 4 (Abyss) — An aspect of Nocticula, the Redeemer Queen, receives the party in her shadow-garden palace.",
+      compact([m(wotrNocticula), many(wotrBabauSkirmisher, 4)])
+    ),
+    encounter(
+      "Herald of the Ivory Labyrinth",
+      "Ch. 5 (Abyss) — Baphomet, the Prince of Beasts, hunts the party through his endless maze for the stolen Herald.",
+      compact([m(wotrBaphomet), many(wotrHezrouFrontline, 2)])
+    ),
+    encounter(
+      "City of Locusts",
+      "Ch. 6 (Iz) — Deskari, the Usher of the Apocalypse, rises from the Worldwound's heart as the crusade marshals rally the last charge.",
+      compact([m(wotrDeskari), many(wotrRavenerHunter, 3), many(wotrCrusaderMarshalAlly, 2)])
+    ),
+  ];
+}
+
 const CAMPAIGN_CATALOG: CampaignTemplate[] = [
   makeTemplate(
     "Curse of Strahd",
@@ -1734,7 +2909,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Fortress of the Stone Giants", order: 4, levelRange: "11-13", location: "Sandpoint, Jorgenfist" },
       { title: "Sins of the Saviors", order: 5, levelRange: "13-15", location: "Runeforge" },
       { title: "The Spires of Xin-Shalast", order: 6, levelRange: "15-17", location: "Xin-Shalast, Pinnacle of Avarice" },
-    ]
+    ],
+    runelordsEncounters()
   ),
 
   makeTemplate(
@@ -1813,7 +2989,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Final Enemy", order: 6, levelRange: "7-9", location: "Sahuagin Fortress" },
       { title: "Tammeraut's Fate", order: 7, levelRange: "9-11", location: "Firewatch Island" },
       { title: "The Styes", order: 8, levelRange: "11-12", location: "The Styes" },
-    ]
+    ],
+    saltmarshEncounters()
   ),
 
   makeTemplate(
@@ -1848,7 +3025,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Wraith Haunts", order: 11, levelRange: "15-16", location: "Undermountain Level 13-16" },
       { title: "The Terminus Level", order: 12, levelRange: "16-18", location: "Undermountain Level 17-20" },
       { title: "Shadowdusk Hold", order: 13, levelRange: "18-20", location: "Undermountain Level 21-23" },
-    ]
+    ],
+    madMageEncounters()
   ),
 
   makeTemplate(
@@ -1961,7 +3139,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Scrivener's Tale", order: 15, levelRange: "14", location: "Candlekeep" },
       { title: "Alkazaar's Appendix", order: 16, levelRange: "15", location: "Calimshan" },
       { title: "Xanthoria", order: 17, levelRange: "16", location: "Candlekeep" },
-    ]
+    ],
+    candlekeepEncounters()
   ),
 
   makeTemplate(
@@ -1982,7 +3161,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Song of Moonrise", order: 11, levelRange: "12", location: "Atagua" },
       { title: "In the Mists of Manivarsha", order: 12, levelRange: "13", location: "Manivarsha" },
       { title: "Orchids of the Invisible Mountain", order: 13, levelRange: "14", location: "Djaynai" },
-    ]
+    ],
+    radiantCitadelEncounters()
   ),
 
   makeTemplate(
@@ -2003,7 +3183,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Heart of Ashes", order: 11, levelRange: "9", location: "Cult Temple" },
       { title: "The Stygian Gambit Act II", order: 12, levelRange: "10", location: "Infernal" },
       { title: "Fire and Darkness", order: 13, levelRange: "11", location: "Efreeti Fortress" },
-    ]
+    ],
+    goldenVaultEncounters()
   ),
 
   makeTemplate(
@@ -2018,7 +3199,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Dead in Thay", order: 5, levelRange: "9-11", location: "Doomvault, Thay" },
       { title: "Against the Giants", order: 6, levelRange: "11-13", location: "Giant Strongholds" },
       { title: "Tomb of Horrors", order: 7, levelRange: "13+", location: "Tomb of Horrors" },
-    ]
+    ],
+    yawningPortalEncounters()
   ),
 
   makeTemplate(
@@ -2145,7 +3327,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Blood for Blood", order: 4, levelRange: "10-12", location: "Tiger Lords Territory" },
       { title: "War of the River Kings", order: 5, levelRange: "12-15", location: "River Kingdoms" },
       { title: "Sound of a Thousand Screams", order: 6, levelRange: "15-20", location: "First World" },
-    ]
+    ],
+    kingmakerEncounters()
   ),
 
   makeTemplate(
@@ -2159,7 +3342,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Midnight Isles", order: 4, levelRange: "11-14", location: "Midnight Isles, Abyss" },
       { title: "Herald of the Ivory Labyrinth", order: 5, levelRange: "14-17", location: "Abyss" },
       { title: "City of Locusts", order: 6, levelRange: "17-20", location: "Iz, Worldwound" },
-    ]
+    ],
+    wrathOfTheRighteousEncounters()
   ),
 
   makeTemplate(

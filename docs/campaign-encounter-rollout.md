@@ -220,15 +220,15 @@ encounter is self-contained.
 > | Curse of the Crimson Throne | 6 | 13 | 15 new | PR #581 | ✅ merged |
 > | Hell's Rebels | 6 | 13 | 14 new | PR #581 | ✅ merged |
 > | Red Hand of Doom | 5 | 15 | 14 new | PR #581 | ✅ merged |
-> | Candlekeep Mysteries | 17 | 0 | TBD | docs/research/candlekeep-mysteries.md | 🚧 G4 |
-> | Journeys Through the Radiant Citadel | 13 | 0 | TBD | docs/research/radiant-citadel.md | 🚧 G4 |
-> | Keys from the Golden Vault | 13 | 0 | TBD | docs/research/golden-vault.md | 🚧 G4 |
-> | Tales from the Yawning Portal | 7 | 0 | TBD | docs/research/yawning-portal.md | 🚧 G4 |
-> | Ghosts of Saltmarsh | 8 | 0 | TBD | docs/research/ghosts-of-saltmarsh.md | 🚧 G4 |
-> | Waterdeep: Dungeon of the Mad Mage | 13 | 0 | TBD | docs/research/mad-mage.md | 🚧 G4 |
-> | Rise of the Runelords | 6 | 0 | TBD | docs/research/rise-of-the-runelords.md | 🚧 G4 |
-> | Kingmaker | 6 | 0 | TBD | docs/research/kingmaker.md | 🚧 G4 |
-> | Wrath of the Righteous | 6 | 0 | TBD | docs/research/wrath-of-the-righteous.md | 🚧 G4 |
+> | Candlekeep Mysteries | 17 | 17 | 17 new | docs/research/candlekeep-mysteries.md | 🔜 G4 PR |
+> | Journeys Through the Radiant Citadel | 13 | 13 | 15 new | docs/research/radiant-citadel.md | 🔜 G4 PR |
+> | Keys from the Golden Vault | 13 | 13 | 15 new | docs/research/golden-vault.md | 🔜 G4 PR |
+> | Tales from the Yawning Portal | 7 | 7 | 15 new | docs/research/yawning-portal.md | 🔜 G4 PR |
+> | Ghosts of Saltmarsh | 8 | 9 | 14 new | docs/research/ghosts-of-saltmarsh.md | 🔜 G4 PR |
+> | Waterdeep: Dungeon of the Mad Mage | 13 | 82 | 41 new | docs/research/mad-mage.md | 🔜 G4 PR |
+> | Rise of the Runelords | 6 | 8 | 14 new | docs/research/rise-of-the-runelords.md | 🔜 G4 PR |
+> | Kingmaker | 6 | 7 | 14 new | docs/research/kingmaker.md | 🔜 G4 PR |
+> | Wrath of the Righteous | 6 | 8 | 15 new | docs/research/wrath-of-the-righteous.md | 🔜 G4 PR |
 > | Age of Worms | 12 | 0 | 0 new | research/age-of-worms.md | 🚧 G5 |
 > | Dungeons of Drakkenheim | 7 | 0 | 0 new | research/drakkenheim.md | 🚧 G5 |
 > | Dark of Hot Springs Island | 4 | 0 | 0 new | research/hot-springs-island.md | 🚧 G5 |
