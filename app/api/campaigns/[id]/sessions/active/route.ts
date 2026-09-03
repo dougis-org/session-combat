@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import * as campaignRepo from '@/lib/storage/campaignRepo';
 import { SessionLog } from '@/lib/types';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
 import { emitFiltered } from '@/lib/server/transport';
@@ -31,7 +32,7 @@ export const POST = withAuthAndParams<Params>(async (_request, _auth, { id: camp
     }
 
     const logId = crypto.randomUUID();
-    const claimed = await storage.claimActiveCampaignSession(campaignId, campaign.userId, logId);
+    const claimed = await campaignRepo.claimActiveCampaignSession(campaignId, campaign.userId, logId);
     if (!claimed) {
       return NextResponse.json({ error: 'A session is already active' }, { status: 409 });
     }
@@ -55,7 +56,7 @@ export const POST = withAuthAndParams<Params>(async (_request, _auth, { id: camp
       await storage.saveSessionLog(log);
     } catch (error) {
       console.error('Error saving session log:', error);
-      await storage.setActiveCampaignSession(campaignId, campaign.userId, null);
+      await campaignRepo.setActiveCampaignSession(campaignId, campaign.userId, null);
       return NextResponse.json({ error: 'Failed to create session log' }, { status: 500 });
     }
 
@@ -84,7 +85,7 @@ export const DELETE = withAuthAndParams<Params>(async (request, _auth, { id: cam
 
     const closedSessionId = campaign.activeSessionId ?? null;
     if (force || campaign.activeSessionId) {
-      await storage.setActiveCampaignSession(campaignId, campaign.userId, null);
+      await campaignRepo.setActiveCampaignSession(campaignId, campaign.userId, null);
     }
 
     emitFiltered(campaignId, { type: 'session', campaignId, data: { activeSessionId: null } }, () => true);

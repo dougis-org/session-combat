@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import * as campaignRepo from '@/lib/storage/campaignRepo';
 import { CAMPAIGN_STATUSES } from '@/lib/types';
 import type { Campaign, Party } from '@/lib/types';
 import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
 
 export const GET = withAuth(async (_request, auth) => {
   try {
-    const campaigns = await storage.loadCampaigns(auth.userId);
+    const campaigns = await campaignRepo.loadCampaigns(auth.userId);
     return NextResponse.json(campaigns);
   } catch (error) {
     console.error('Error fetching campaigns:', error);
@@ -62,7 +63,7 @@ export const POST = withAuth(async (request, auth) => {
       updatedAt: new Date(),
     };
 
-    await storage.saveCampaign(campaign);
+    await campaignRepo.saveCampaign(campaign);
 
     const party: Party = {
       id: partyId,
@@ -78,7 +79,7 @@ export const POST = withAuth(async (request, auth) => {
       await storage.saveParty(party);
     } catch (partyError) {
       try {
-        await storage.deleteCampaign(campaign.id, auth.userId);
+        await campaignRepo.deleteCampaign(campaign.id, auth.userId);
       } catch (rollbackError) {
         console.error('Failed to rollback campaign creation:', rollbackError);
       }
@@ -101,7 +102,7 @@ export const POST = withAuth(async (request, auth) => {
         console.error('Failed to rollback party creation:', rollbackError);
       }
       try {
-        await storage.deleteCampaign(campaign.id, auth.userId);
+        await campaignRepo.deleteCampaign(campaign.id, auth.userId);
       } catch (rollbackError) {
         console.error('Failed to rollback campaign creation:', rollbackError);
       }

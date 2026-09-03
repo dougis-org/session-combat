@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 import { NextRequest, NextResponse } from 'next/server';
 import { storage } from '@/lib/storage';
+import * as campaignRepo from '@/lib/storage/campaignRepo';
 import { withAuthAndParams } from '@/lib/middleware';
 import { Campaign, CampaignChapter } from '@/lib/types';
 import { randomUUID } from 'crypto';
@@ -33,7 +34,7 @@ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id
       updatedAt: new Date(),
     };
 
-    await storage.saveCampaign(campaign);
+    await campaignRepo.saveCampaign(campaign);
 
     try {
       await storage.addMember({
@@ -62,11 +63,11 @@ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id
           })
         );
         campaign.encounterIds = encounterIds;
-        await storage.saveCampaign(campaign);
+        await campaignRepo.saveCampaign(campaign);
       }
     } catch (creationError) {
       try {
-        await storage.deleteCampaign(campaign.id, auth.userId);
+        await campaignRepo.deleteCampaign(campaign.id, auth.userId);
       } catch (rollbackError) {
         // istanbul ignore next
         console.error('Failed to rollback campaign creation after error:', rollbackError);

@@ -2,6 +2,7 @@ import { storage } from "@/lib/storage";
 import { connectToDatabase, closeDatabase, getDatabase } from "@/lib/db";
 import { DuplicateMemberError } from "@/lib/errors";
 import { CampaignMember, Campaign } from "@/lib/types";
+import * as campaignRepo from "@/lib/storage/campaignRepo";
 import { registerTestUser } from "./helpers/users";
 
 describe("Campaign Members Integration Tests", () => {
@@ -258,7 +259,7 @@ describe("Campaign Members Integration Tests", () => {
         await storage.addMember(member1);
         await storage.addMember(member2);
 
-        const list = await storage.listCampaignsForMember("user-alice");
+        const list = await campaignRepo.listCampaignsForMember("user-alice");
         expect(list).toHaveLength(2);
         const sorted = list.sort((a, b) => a.id.localeCompare(b.id));
         expect(sorted).toEqual([
@@ -268,7 +269,7 @@ describe("Campaign Members Integration Tests", () => {
       });
 
       test("returns empty for user with no memberships", async () => {
-        const list = await storage.listCampaignsForMember("user-none");
+        const list = await campaignRepo.listCampaignsForMember("user-none");
         expect(list).toEqual([]);
       });
     });
