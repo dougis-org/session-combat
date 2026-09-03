@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import * as campaignRepo from '@/lib/storage/campaignRepo';
 import { CAMPAIGN_STATUSES } from '@/lib/types';
 import { sanitizeChapters, sanitizeCurrentChapterId, assertCampaignAccess } from '@/lib/utils/campaign';
 
@@ -74,7 +75,7 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id }) => 
     };
     delete (updated as Record<string, unknown>).active;
 
-    await storage.saveCampaign(updated);
+    await campaignRepo.saveCampaign(updated);
 
     return NextResponse.json(updated);
   } catch (error) {
@@ -91,7 +92,7 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id }) =
 
     if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
-    await storage.deleteCampaign(id, campaign.userId);
+    await campaignRepo.deleteCampaign(id, campaign.userId);
     return NextResponse.json({ message: 'Campaign deleted successfully' });
   } catch (error) {
     console.error('Error deleting campaign:', error);

@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { storage } from "@/lib/storage";
+import * as campaignRepo from "@/lib/storage/campaignRepo";
 import { StorageError } from "@/lib/storage/errors";
 import { getDatabase } from "@/lib/db";
 import { CampaignMember } from "@/lib/types";
@@ -152,7 +153,7 @@ describe("loadCampaignByIdAny", () => {
   it("returns normalized Campaign when campaign exists (no userId filter)", async () => {
     mockCollection.findOne.mockResolvedValue(MOCK_CAMPAIGN_DOC as never);
 
-    const result = await storage.loadCampaignByIdAny("camp-1");
+    const result = await campaignRepo.loadCampaignByIdAny("camp-1");
 
     expect(mockDb.collection).toHaveBeenCalledWith("campaigns");
     expect(mockCollection.findOne).toHaveBeenCalledWith({ id: "camp-1" });
@@ -164,7 +165,7 @@ describe("loadCampaignByIdAny", () => {
   it("returns null when campaign does not exist", async () => {
     mockCollection.findOne.mockResolvedValue(null as never);
 
-    const result = await storage.loadCampaignByIdAny("nonexistent");
+    const result = await campaignRepo.loadCampaignByIdAny("nonexistent");
 
     expect(result).toBeNull();
   });
@@ -172,6 +173,6 @@ describe("loadCampaignByIdAny", () => {
   it("rejects with StorageError on unexpected error (#503: was raw rethrow)", async () => {
     mockCollection.findOne.mockRejectedValue(new Error("DB failure") as never);
 
-    await expect(storage.loadCampaignByIdAny("camp-1")).rejects.toBeInstanceOf(StorageError);
+    await expect(campaignRepo.loadCampaignByIdAny("camp-1")).rejects.toBeInstanceOf(StorageError);
   });
 });

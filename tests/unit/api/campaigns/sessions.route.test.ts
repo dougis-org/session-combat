@@ -15,6 +15,7 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
+jest.mock("@/lib/db");
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadSessionLogs: jest.fn(),
@@ -23,7 +24,6 @@ jest.mock("@/lib/storage", () => ({
   },
 }));
 jest.mock("@/lib/utils/campaign", () => ({
-  ...jest.requireActual("@/lib/utils/campaign"),
   assertCampaignAccess: jest.fn(),
 }));
 jest.mock("crypto", () => ({ randomUUID: jest.fn(() => "test-uuid") }));

@@ -1,5 +1,6 @@
 import { getDatabase } from "../db";
 import { storage } from "../storage";
+import * as campaignRepo from "../storage/campaignRepo";
 import { Campaign, CampaignTemplate, Encounter } from "../types";
 import { randomUUID } from "node:crypto";
 
@@ -83,7 +84,7 @@ export async function backfillCampaignEncounters(): Promise<{
 
       // 1.7 Save the updated campaign
       campaign.encounterIds = [...(campaign.encounterIds || []), ...newEncounterIds];
-      await storage.saveCampaign(campaign);
+      await campaignRepo.saveCampaign(campaign);
       
       console.log(`  Migrated: ${campaign.name} (${campaign.id}) - Added ${newEncounterIds.length} encounter(s).`);
       migrated++;

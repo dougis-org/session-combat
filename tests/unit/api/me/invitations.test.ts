@@ -13,16 +13,22 @@ jest.mock("@/lib/storage", () => ({
   storage: {
     listInvitationsForUser: jest.fn(),
     getUsersByIds: jest.fn(),
-    getCampaignsByIds: jest.fn(),
   },
 }));
+
+jest.mock("@/lib/storage/campaignRepo", () => ({
+  getCampaignsByIds: jest.fn(),
+}));
+
+import * as campaignRepo from "@/lib/storage/campaignRepo";
 
 const mockedRequireAuth = jest.mocked(requireAuth);
 const mockedStorage = jest.mocked(storage) as {
   listInvitationsForUser: jest.MockedFunction<typeof storage.listInvitationsForUser>;
   getUsersByIds: jest.MockedFunction<typeof storage.getUsersByIds>;
-  getCampaignsByIds: jest.MockedFunction<typeof storage.getCampaignsByIds>;
 };
+
+const mockedCampaignRepo = jest.mocked(campaignRepo);
 
 const makeGetRequest = () =>
   makeRouteRequest("http://localhost/api/me/invitations", "GET");
@@ -62,7 +68,7 @@ describe("GET /api/me/invitations — empty list", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toEqual({ invitations: [] });
-    expect(mockedStorage.getCampaignsByIds).not.toHaveBeenCalled();
+    expect(mockedCampaignRepo.getCampaignsByIds).not.toHaveBeenCalled();
   });
 });
 
@@ -75,7 +81,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
       makeInvitation({ history: [{ action: "invited", by: DM_ID, at: invAt }] }),
     ]);
     mockedStorage.getUsersByIds.mockResolvedValue({ [DM_ID]: "theDM" });
-    mockedStorage.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
+    mockedCampaignRepo.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
 
     const response = await GET(makeGetRequest());
 
@@ -103,7 +109,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
       }),
     ]);
     mockedStorage.getUsersByIds.mockResolvedValue({ [DM_ID_2]: "anotherDM" });
-    mockedStorage.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
+    mockedCampaignRepo.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
 
     const response = await GET(makeGetRequest());
 
@@ -118,7 +124,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
       makeInvitation({ history: [{ action: "invited", by: DM_ID, at: new Date() }] }),
     ]);
     mockedStorage.getUsersByIds.mockResolvedValue({});
-    mockedStorage.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
+    mockedCampaignRepo.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
 
     const response = await GET(makeGetRequest());
 
@@ -131,7 +137,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
       makeInvitation({ history: [] }),
     ]);
     mockedStorage.getUsersByIds.mockResolvedValue({});
-    mockedStorage.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
+    mockedCampaignRepo.getCampaignsByIds.mockResolvedValue([{ id: "camp-1", name: "Dragon Campaign" }]);
 
     const response = await GET(makeGetRequest());
 
@@ -145,7 +151,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
       makeInvitation({ history: [{ action: "invited", by: DM_ID, at: new Date() }] }),
     ]);
     mockedStorage.getUsersByIds.mockResolvedValue({ [DM_ID]: "theDM" });
-    mockedStorage.getCampaignsByIds.mockResolvedValue([]);
+    mockedCampaignRepo.getCampaignsByIds.mockResolvedValue([]);
 
     const response = await GET(makeGetRequest());
 
@@ -159,7 +165,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
       makeInvitation({ id: "mem-2", campaignId: "camp-2", history: [{ action: "invited", by: DM_ID_2, at: new Date() }] }),
     ]);
     mockedStorage.getUsersByIds.mockResolvedValue({ [DM_ID]: "dm1", [DM_ID_2]: "dm2" });
-    mockedStorage.getCampaignsByIds.mockResolvedValue([
+    mockedCampaignRepo.getCampaignsByIds.mockResolvedValue([
       { id: "camp-1", name: "Campaign 1" },
       { id: "camp-2", name: "Campaign 2" },
     ]);
@@ -167,7 +173,7 @@ describe("GET /api/me/invitations — pending invitations", () => {
     await GET(makeGetRequest());
 
     expect(mockedStorage.getUsersByIds).toHaveBeenCalledTimes(1);
-    expect(mockedStorage.getCampaignsByIds).toHaveBeenCalledTimes(1);
+    expect(mockedCampaignRepo.getCampaignsByIds).toHaveBeenCalledTimes(1);
     expect(mockedStorage.getUsersByIds).toHaveBeenCalledWith(
       expect.arrayContaining([DM_ID, DM_ID_2])
     );

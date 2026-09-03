@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { storage } from "@/lib/storage";
+import * as campaignRepo from "@/lib/storage/campaignRepo";
 import { StorageError } from "@/lib/storage/errors";
 import { getDatabase } from "@/lib/db";
 import type { Campaign, CampaignTemplate } from "@/lib/types";
@@ -48,12 +49,12 @@ describe("Campaign storage functions", () => {
     mockedGetDatabase.mockResolvedValue(mockDb as never);
   });
 
-  describe("storage.loadCampaigns", () => {
+  describe("campaignRepo.loadCampaigns", () => {
     test("returns all campaigns for the given userId", async () => {
       const campaigns = [baseCampaign];
       campaignsMock.toArray.mockResolvedValue(campaigns as never);
 
-      const result = await storage.loadCampaigns("user-1");
+      const result = await campaignRepo.loadCampaigns("user-1");
 
       expect(mockDb.collection).toHaveBeenCalledWith("campaigns");
       expect(campaignsMock.find).toHaveBeenCalledWith({ userId: "user-1" });
@@ -63,7 +64,7 @@ describe("Campaign storage functions", () => {
     test("returns empty array when no campaigns exist for user", async () => {
       campaignsMock.toArray.mockResolvedValue([] as never);
 
-      const result = await storage.loadCampaigns("user-1");
+      const result = await campaignRepo.loadCampaigns("user-1");
 
       expect(result).toEqual([]);
     });
@@ -71,15 +72,15 @@ describe("Campaign storage functions", () => {
     test("rejects with StorageError when getDatabase fails (#503: was swallowed to [])", async () => {
       mockedGetDatabase.mockRejectedValue(new Error("connection failed") as never);
 
-      await expect(storage.loadCampaigns("user-1")).rejects.toBeInstanceOf(StorageError);
+      await expect(campaignRepo.loadCampaigns("user-1")).rejects.toBeInstanceOf(StorageError);
     });
   });
 
-  describe("storage.loadCampaignById", () => {
+  describe("campaignRepo.loadCampaignById", () => {
     test("returns campaign when id and userId match", async () => {
       campaignsMock.findOne.mockResolvedValue(baseCampaign as never);
 
-      const result = await storage.loadCampaignById("campaign-1", "user-1");
+      const result = await campaignRepo.loadCampaignById("campaign-1", "user-1");
 
       expect(campaignsMock.findOne).toHaveBeenCalledWith({ id: "campaign-1", userId: "user-1" });
       expect(result).toEqual(baseCampaign);
@@ -88,7 +89,7 @@ describe("Campaign storage functions", () => {
     test("returns null when id exists but userId does not match", async () => {
       campaignsMock.findOne.mockResolvedValue(null as never);
 
-      const result = await storage.loadCampaignById("campaign-1", "other-user");
+      const result = await campaignRepo.loadCampaignById("campaign-1", "other-user");
 
       expect(result).toBeNull();
     });
@@ -96,7 +97,7 @@ describe("Campaign storage functions", () => {
     test("returns null when id does not exist", async () => {
       campaignsMock.findOne.mockResolvedValue(null as never);
 
-      const result = await storage.loadCampaignById("nonexistent", "user-1");
+      const result = await campaignRepo.loadCampaignById("nonexistent", "user-1");
 
       expect(result).toBeNull();
     });
@@ -104,17 +105,17 @@ describe("Campaign storage functions", () => {
     test("rejects with StorageError when getDatabase fails (#503: was swallowed to null)", async () => {
       mockedGetDatabase.mockRejectedValue(new Error("connection failed") as never);
 
-      await expect(storage.loadCampaignById("campaign-1", "user-1")).rejects.toBeInstanceOf(StorageError);
+      await expect(campaignRepo.loadCampaignById("campaign-1", "user-1")).rejects.toBeInstanceOf(StorageError);
     });
   });
 
-  describe("storage.saveCampaign", () => {
+  describe("campaignRepo.saveCampaign", () => {
     beforeEach(() => {
       campaignsMock.updateOne.mockResolvedValue({} as never);
     });
 
     test("persists campaign with upsert by id and userId", async () => {
-      await storage.saveCampaign(baseCampaign);
+      await campaignRepo.saveCampaign(baseCampaign);
 
       expect(mockDb.collection).toHaveBeenCalledWith("campaigns");
       expect(campaignsMock.updateOne).toHaveBeenCalledWith(
@@ -127,11 +128,11 @@ describe("Campaign storage functions", () => {
     test("throws when database operation fails", async () => {
       campaignsMock.updateOne.mockRejectedValue(new Error("write failed") as never);
 
-      await expect(storage.saveCampaign(baseCampaign)).rejects.toBeInstanceOf(StorageError);
+      await expect(campaignRepo.saveCampaign(baseCampaign)).rejects.toBeInstanceOf(StorageError);
     });
   });
 
-  describe("storage.deleteCampaign", () => {
+  describe("campaignRepo.deleteCampaign", () => {
     let partiesMock: ReturnType<typeof makeMockCollection>;
     let campaignMembersMock: ReturnType<typeof makeMockCollection>;
     let sessionLogsMock: ReturnType<typeof makeMockCollection>;
@@ -166,26 +167,26 @@ describe("Campaign storage functions", () => {
     });
 
     test("deletes campaign by id and userId", async () => {
-      await storage.deleteCampaign("campaign-1", "user-1");
+      await campaignRepo.deleteCampaign("campaign-1", "user-1");
 
       expect(mockDb.collection).toHaveBeenCalledWith("campaigns");
       expect(campaignsMock.deleteOne).toHaveBeenCalledWith({ id: "campaign-1", userId: "user-1" });
     });
 
     test("does not cascade delete parties", async () => {
-      await storage.deleteCampaign("campaign-1", "user-1");
+      await campaignRepo.deleteCampaign("campaign-1", "user-1");
       expect(partiesMock.deleteMany).not.toHaveBeenCalled();
     });
 
     test("cascade deletes CampaignMember rows for the campaign", async () => {
-      await storage.deleteCampaign("campaign-1", "user-1");
+      await campaignRepo.deleteCampaign("campaign-1", "user-1");
 
       expect(mockDb.collection).toHaveBeenCalledWith("campaignMembers");
       expect(campaignMembersMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
     });
 
     test("cascade deletes session logs, rolls, character shares, saved content, and messages", async () => {
-      await storage.deleteCampaign("campaign-1", "user-1");
+      await campaignRepo.deleteCampaign("campaign-1", "user-1");
 
       expect(mockDb.collection).toHaveBeenCalledWith("sessionLogs");
       expect(sessionLogsMock.deleteMany).toHaveBeenCalledWith({ campaignId: "campaign-1" });
@@ -213,7 +214,7 @@ describe("Campaign storage functions", () => {
       campaignMessagesMock.deleteMany.mockImplementation(async () => { callSequence.push("campaignMessages"); return { deletedCount: 0 }; });
       campaignsMock.deleteOne.mockImplementation(async () => { callSequence.push("campaigns"); return { deletedCount: 1 }; });
 
-      await storage.deleteCampaign("campaign-1", "user-1");
+      await campaignRepo.deleteCampaign("campaign-1", "user-1");
 
       expect(callSequence).toHaveLength(7);
       expect(callSequence[6]).toBe("campaigns");
@@ -227,7 +228,7 @@ describe("Campaign storage functions", () => {
 
     test("does not cascade delete if campaign does not exist or does not belong to user", async () => {
       campaignsMock.findOne.mockResolvedValue(null as never);
-      await storage.deleteCampaign("campaign-1", "user-1");
+      await campaignRepo.deleteCampaign("campaign-1", "user-1");
 
       expect(partiesMock.deleteMany).not.toHaveBeenCalled();
       expect(campaignMembersMock.deleteMany).not.toHaveBeenCalled();
@@ -243,22 +244,22 @@ describe("Campaign storage functions", () => {
       campaignsMock.findOne.mockResolvedValue(null as never);
       campaignsMock.deleteOne.mockResolvedValue({ deletedCount: 0 } as never);
 
-      await expect(storage.deleteCampaign("nonexistent", "user-1")).resolves.not.toThrow();
+      await expect(campaignRepo.deleteCampaign("nonexistent", "user-1")).resolves.not.toThrow();
     });
 
     test("throws when database operation fails", async () => {
       campaignsMock.deleteOne.mockRejectedValue(new Error("delete failed") as never);
 
-      await expect(storage.deleteCampaign("campaign-1", "user-1")).rejects.toBeInstanceOf(StorageError);
+      await expect(campaignRepo.deleteCampaign("campaign-1", "user-1")).rejects.toBeInstanceOf(StorageError);
     });
   });
 
-  describe("storage.loadCampaigns normalizes legacy chapters", () => {
+  describe("campaignRepo.loadCampaigns normalizes legacy chapters", () => {
     test("defaults missing chapters to empty array", async () => {
       const legacyCampaign = { ...baseCampaign, chapters: undefined };
       campaignsMock.toArray.mockResolvedValue([legacyCampaign] as never);
 
-      const result = await storage.loadCampaigns("user-1");
+      const result = await campaignRepo.loadCampaigns("user-1");
 
       expect(result[0].chapters).toEqual([]);
     });

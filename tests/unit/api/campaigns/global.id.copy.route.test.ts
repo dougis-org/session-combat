@@ -13,11 +13,16 @@ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.hel
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadGlobalCampaignTemplateById: jest.fn(),
-    saveCampaign: jest.fn(),
     addMember: jest.fn(),
-    deleteCampaign: jest.fn(),
   },
 }));
+
+jest.mock("@/lib/storage/campaignRepo", () => ({
+  saveCampaign: jest.fn(),
+  deleteCampaign: jest.fn(),
+}));
+
+import * as campaignRepo from "@/lib/storage/campaignRepo";
 
 let uuidCounter = 0;
 jest.mock("crypto", () => ({
@@ -25,6 +30,7 @@ jest.mock("crypto", () => ({
 }));
 
 const mockedStorage = jest.mocked(storage);
+const mockedCampaignRepo = jest.mocked(campaignRepo);
 
 const TEMPLATE_ID = "tpl-1";
 const BASE_URL = `http://localhost/api/campaigns/global/${TEMPLATE_ID}/copy`;
@@ -48,9 +54,9 @@ beforeEach(() => {
   jest.clearAllMocks();
   uuidCounter = 0;
   mockAuthState.payload = MOCK_AUTH;
-  mockedStorage.saveCampaign.mockResolvedValue(undefined as any);
+  mockedCampaignRepo.saveCampaign.mockResolvedValue(undefined as any);
   mockedStorage.addMember.mockResolvedValue(undefined as any);
-  mockedStorage.deleteCampaign.mockResolvedValue(undefined as any);
+  mockedCampaignRepo.deleteCampaign.mockResolvedValue(undefined as any);
 });
 
 describe("POST /api/campaigns/global/[id]/copy — auth", () => {
@@ -142,7 +148,7 @@ describe("POST /api/campaigns/global/[id]/copy — error handling", () => {
 
   it("returns 500 when saveCampaign throws", async () => {
     mockedStorage.loadGlobalCampaignTemplateById.mockResolvedValue(MOCK_TEMPLATE as any);
-    mockedStorage.saveCampaign.mockRejectedValue(new Error("write failed"));
+    mockedCampaignRepo.saveCampaign.mockRejectedValue(new Error("write failed"));
     const res = await POST(makeRouteRequest(BASE_URL, "POST"), { params: PARAMS });
     expect(res.status).toBe(500);
   });
@@ -152,14 +158,14 @@ describe("POST /api/campaigns/global/[id]/copy — error handling", () => {
     mockedStorage.addMember.mockRejectedValue(new Error("member insert failed"));
     const res = await POST(makeRouteRequest(BASE_URL, "POST"), { params: PARAMS });
     expect(res.status).toBe(500);
-    expect(mockedStorage.deleteCampaign).toHaveBeenCalledTimes(1);
+    expect(mockedCampaignRepo.deleteCampaign).toHaveBeenCalledTimes(1);
   });
 
   it("does not call deleteCampaign when saveCampaign fails", async () => {
     mockedStorage.loadGlobalCampaignTemplateById.mockResolvedValue(MOCK_TEMPLATE as any);
-    mockedStorage.saveCampaign.mockRejectedValue(new Error("write failed"));
+    mockedCampaignRepo.saveCampaign.mockRejectedValue(new Error("write failed"));
     const res = await POST(makeRouteRequest(BASE_URL, "POST"), { params: PARAMS });
     expect(res.status).toBe(500);
-    expect(mockedStorage.deleteCampaign).not.toHaveBeenCalled();
+    expect(mockedCampaignRepo.deleteCampaign).not.toHaveBeenCalled();
   });
 });

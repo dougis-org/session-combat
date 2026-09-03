@@ -18,10 +18,13 @@ jest.mock("@/lib/storage", () => ({
   storage: {
     getNextSessionNumber: jest.fn(),
     saveSessionLog: jest.fn(),
-    setActiveCampaignSession: jest.fn(),
-    claimActiveCampaignSession: jest.fn(),
   },
 }));
+jest.mock("@/lib/storage/campaignRepo", () => ({
+  setActiveCampaignSession: jest.fn(),
+  claimActiveCampaignSession: jest.fn(),
+}));
+import * as campaignRepo from "@/lib/storage/campaignRepo";
 jest.mock("@/lib/utils/campaign", () => ({
   ...jest.requireActual("@/lib/utils/campaign"),
   assertCampaignAccess: jest.fn(),
@@ -49,6 +52,7 @@ afterAll(() => {
 });
 
 const mockedStorage = jest.mocked(storage);
+const mockedCampaignRepo = jest.mocked(campaignRepo);
 const mockedAssertCampaignAccess = jest.mocked(assertCampaignAccess);
 
 const CAMPAIGN_ID = "campaign-1";
@@ -77,8 +81,8 @@ beforeEach(() => {
   mockedAssertCampaignAccess.mockResolvedValue({ campaign: MOCK_CAMPAIGN as any, role: "dm" });
   mockedStorage.getNextSessionNumber.mockResolvedValue(1);
   mockedStorage.saveSessionLog.mockResolvedValue(undefined as any);
-  mockedStorage.setActiveCampaignSession.mockResolvedValue(undefined as any);
-  mockedStorage.claimActiveCampaignSession.mockResolvedValue(true as any);
+  mockedCampaignRepo.setActiveCampaignSession.mockResolvedValue(undefined as any);
+  mockedCampaignRepo.claimActiveCampaignSession.mockResolvedValue(true as any);
 });
 
 // ─── POST /api/campaigns/[id]/sessions/active ────────────────────────────────
@@ -106,13 +110,13 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
 
   it("claims the session atomically before saving the log — avoids orphan on concurrent open", async () => {
     await POST(makePostReq(), { params: PARAMS });
-    expect(mockedStorage.claimActiveCampaignSession).toHaveBeenCalledWith(
+    expect(mockedCampaignRepo.claimActiveCampaignSession).toHaveBeenCalledWith(
       CAMPAIGN_ID,
       "user-123",
       "new-session-uuid"
     );
     expect(mockedStorage.saveSessionLog).toHaveBeenCalledTimes(1);
-    const claimOrder = mockedStorage.claimActiveCampaignSession.mock.invocationCallOrder[0];
+    const claimOrder = mockedCampaignRepo.claimActiveCampaignSession.mock.invocationCallOrder[0];
     const saveOrder = mockedStorage.saveSessionLog.mock.invocationCallOrder[0];
     expect(claimOrder).toBeLessThan(saveOrder);
   });
@@ -129,7 +133,7 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
   });
 
   it("returns 409 when atomic claim fails (concurrent session opened)", async () => {
-    mockedStorage.claimActiveCampaignSession.mockResolvedValue(false as any);
+    mockedCampaignRepo.claimActiveCampaignSession.mockResolvedValue(false as any);
     const res = await POST(makePostReq(), { params: PARAMS });
     expect(res.status).toBe(409);
     expect((await res.json()).error).toBe("A session is already active");
@@ -165,7 +169,7 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
     const res = await POST(makePostReq(), { params: PARAMS });
     expect(res.status).toBe(500);
     expect((await res.json()).error).toBe("Failed to create session log");
-    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
+    expect(mockedCampaignRepo.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
     expect(emitFiltered).not.toHaveBeenCalled();
   });
 
@@ -186,7 +190,7 @@ describe("POST /api/campaigns/[id]/sessions/active", () => {
   it("does not call claimActiveCampaignSession when getNextSessionNumber throws — closes the dangling-claim window", async () => {
     mockedStorage.getNextSessionNumber.mockRejectedValue(new Error("DB error"));
     await POST(makePostReq(), { params: PARAMS });
-    expect(mockedStorage.claimActiveCampaignSession).not.toHaveBeenCalled();
+    expect(mockedCampaignRepo.claimActiveCampaignSession).not.toHaveBeenCalled();
   });
 
   it("short-circuits with 409 before calling getNextSessionNumber when a session is already active", async () => {
@@ -213,13 +217,13 @@ describe("DELETE /api/campaigns/[id]/sessions/active", () => {
     const res = await DELETE(makeDeleteReq(), { params: PARAMS });
     expect(res.status).toBe(200);
     expect((await res.json()).sessionId).toBe("active-session-id");
-    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
+    expect(mockedCampaignRepo.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
   });
 
   it("returns 404 when no active session and force is not set", async () => {
     const res = await DELETE(makeDeleteReq(), { params: PARAMS });
     expect(res.status).toBe(404);
-    expect(mockedStorage.setActiveCampaignSession).not.toHaveBeenCalled();
+    expect(mockedCampaignRepo.setActiveCampaignSession).not.toHaveBeenCalled();
   });
 
   it("returns 200 with the stale sessionId when force=true and stale session exists", async () => {
@@ -230,14 +234,14 @@ describe("DELETE /api/campaigns/[id]/sessions/active", () => {
     const res = await DELETE(makeDeleteReq(true), { params: PARAMS });
     expect(res.status).toBe(200);
     expect((await res.json()).sessionId).toBe("stale-session-id");
-    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
+    expect(mockedCampaignRepo.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
   });
 
   it("returns 200 with null sessionId when force=true and no active session — writes null to ensure field is explicit", async () => {
     const res = await DELETE(makeDeleteReq(true), { params: PARAMS });
     expect(res.status).toBe(200);
     expect((await res.json()).sessionId).toBeNull();
-    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
+    expect(mockedCampaignRepo.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
   });
 
   it("does not call saveSessionLog when closing — only clears activeSessionId pointer", async () => {
@@ -247,7 +251,7 @@ describe("DELETE /api/campaigns/[id]/sessions/active", () => {
     });
     await DELETE(makeDeleteReq(), { params: PARAMS });
     expect(mockedStorage.saveSessionLog).not.toHaveBeenCalled();
-    expect(mockedStorage.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
+    expect(mockedCampaignRepo.setActiveCampaignSession).toHaveBeenCalledWith(CAMPAIGN_ID, "user-123", null);
   });
 
   it("emits session event with activeSessionId: null after DELETE succeeds", async () => {
@@ -289,6 +293,6 @@ describe("DELETE /api/campaigns/[id]/sessions/active", () => {
       return makeDeleteReq();
     },
     PARAMS,
-    () => mockedStorage.setActiveCampaignSession.mockRejectedValue(new Error("DB error"))
+    () => mockedCampaignRepo.setActiveCampaignSession.mockRejectedValue(new Error("DB error"))
   );
 });

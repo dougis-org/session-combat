@@ -18,18 +18,24 @@ jest.mock("@/lib/middleware", () =>
 jest.mock("@/lib/storage", () => ({
   storage: {
     getMember: jest.fn(),
-    loadCampaignByIdAny: jest.fn(),
     loadEncountersByIds: jest.fn(),
     addEncounterToCampaign: jest.fn(),
   },
 }));
 
+jest.mock("@/lib/storage/campaignRepo", () => ({
+  loadCampaignByIdAny: jest.fn(),
+}));
+
+import * as campaignRepo from "@/lib/storage/campaignRepo";
+
 const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
-  loadCampaignByIdAny: jest.MockedFunction<typeof storage.loadCampaignByIdAny>;
   loadEncountersByIds: jest.MockedFunction<typeof storage.loadEncountersByIds>;
   addEncounterToCampaign: jest.MockedFunction<typeof storage.addEncounterToCampaign>;
 };
+
+const mockedCampaignRepo = jest.mocked(campaignRepo);
 
 const CAMPAIGN_ID = "camp-1";
 const DM_ID = "dm-user";
@@ -90,7 +96,7 @@ describe("GET /api/campaigns/[id]/encounters", () => {
 
   it("DM fetches linked encounters", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
     mockedStorage.loadEncountersByIds.mockResolvedValue(ENCOUNTERS);
 
     const response = await GET(makeGetRequest(), { params: PARAMS });
@@ -103,7 +109,7 @@ describe("GET /api/campaigns/[id]/encounters", () => {
 
   it("Player member fetches the same linked encounters, not filtered by their own userId", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
     mockedStorage.loadEncountersByIds.mockResolvedValue(ENCOUNTERS);
 
     const response = await GET(makeGetRequest(), { params: PARAMS });
@@ -124,7 +130,7 @@ describe("GET /api/campaigns/[id]/encounters", () => {
 
   it("Empty encounterIds returns empty list", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue({ ...CAMPAIGN, encounterIds: [] });
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue({ ...CAMPAIGN, encounterIds: [] });
     mockedStorage.loadEncountersByIds.mockResolvedValue([]);
 
     const response = await GET(makeGetRequest(), { params: PARAMS });
@@ -136,7 +142,7 @@ describe("GET /api/campaigns/[id]/encounters", () => {
 
   it("returns 500 when loadEncountersByIds throws", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
     mockedStorage.loadEncountersByIds.mockRejectedValue(new Error("Storage error"));
 
     const response = await GET(makeGetRequest(), { params: PARAMS });
@@ -160,7 +166,7 @@ describe("POST /api/campaigns/[id]/encounters", () => {
   it("DM links an owned encounter", async () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
     mockedStorage.loadEncountersByIds.mockResolvedValue([
       { id: "e3", userId: DM_ID, name: "Owlbear", description: "", monsters: [], createdAt: new Date(), updatedAt: new Date() },
     ]);
@@ -175,7 +181,7 @@ describe("POST /api/campaigns/[id]/encounters", () => {
   it("Linking the same encounter twice is idempotent", async () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
     mockedStorage.loadEncountersByIds.mockResolvedValue([ENCOUNTERS[0]]);
     mockedStorage.addEncounterToCampaign.mockResolvedValue(undefined);
 
@@ -187,7 +193,7 @@ describe("POST /api/campaigns/[id]/encounters", () => {
   it("Linking an encounter you don't own is rejected", async () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
     mockedStorage.loadEncountersByIds.mockResolvedValue([]);
 
     const response = await POST(makePostRequest({ encounterId: "e9" }), { params: PARAMS });
@@ -198,7 +204,7 @@ describe("POST /api/campaigns/[id]/encounters", () => {
 
   it("Player member cannot link", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
 
     const response = await POST(makePostRequest({ encounterId: "e3" }), { params: PARAMS });
 
@@ -209,7 +215,7 @@ describe("POST /api/campaigns/[id]/encounters", () => {
   it("returns 400 for malformed JSON body", async () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
 
     const request = new (require("next/server").NextRequest)(
       `http://localhost/api/campaigns/${CAMPAIGN_ID}/encounters`,
@@ -229,7 +235,7 @@ describe("POST /api/campaigns/[id]/encounters", () => {
   it("returns 400 when body is not an object", async () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
 
     const response = await POST(makePostRequest(["not", "an", "object"]), { params: PARAMS });
 
@@ -258,7 +264,7 @@ describe("POST /api/campaigns/[id]/encounters", () => {
   it("returns 500 when addEncounterToCampaign throws", async () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
     mockedStorage.loadEncountersByIds.mockResolvedValue([
       { id: "e3", userId: DM_ID, name: "Owlbear", description: "", monsters: [], createdAt: new Date(), updatedAt: new Date() },
     ]);

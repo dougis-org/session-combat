@@ -17,12 +17,18 @@ jest.mock("@/lib/storage", () => ({
     loadEncounters: jest.fn(),
     saveEncounter: jest.fn(),
     getMember: jest.fn(),
-    loadCampaignByIdAny: jest.fn(),
     addEncounterToCampaign: jest.fn(),
   },
 }));
 
+jest.mock("@/lib/storage/campaignRepo", () => ({
+  loadCampaignByIdAny: jest.fn(),
+}));
+
+import * as campaignRepo from "@/lib/storage/campaignRepo";
+
 const mockedStorage = jest.mocked(storage);
+const mockedCampaignRepo = jest.mocked(campaignRepo);
 
 const MOCK_ENCOUNTERS = [
   { id: "enc-1", userId: "user-123", name: "Goblin Ambush", monsters: [] },
@@ -153,7 +159,7 @@ describe("POST /api/encounters with campaignId", () => {
 
   it("Create and link succeeds", async () => {
     mockedStorage.getMember.mockResolvedValue(DM_MEMBER);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
     mockedStorage.saveEncounter.mockResolvedValue(undefined as any);
     mockedStorage.addEncounterToCampaign.mockResolvedValue(undefined);
 
@@ -189,7 +195,7 @@ describe("POST /api/encounters with campaignId", () => {
 
   it("Requester is not the campaign's DM", async () => {
     mockedStorage.getMember.mockResolvedValue(PLAYER_MEMBER);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
 
     const response = await POST(makeRequest({ name: "Trap Room", campaignId: CAMPAIGN_ID }));
 
@@ -199,7 +205,7 @@ describe("POST /api/encounters with campaignId", () => {
 
   it("Encounter creation succeeds but linking fails", async () => {
     mockedStorage.getMember.mockResolvedValue(DM_MEMBER);
-    mockedStorage.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
+    mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
     mockedStorage.saveEncounter.mockResolvedValue(undefined as any);
     mockedStorage.addEncounterToCampaign.mockRejectedValue(new Error("link failed"));
 
