@@ -24,12 +24,12 @@
 ## Validation
 
 - [x] Run unit/integration tests
-- [ ] Run E2E tests (if applicable)
+- [x] Run E2E tests (if applicable)
 - [x] Run type checks
 - [x] Run build
-- [ ] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run security/code quality checks required by project standards
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -53,14 +53,14 @@ Use the project's documented commands for each of the above (see project README 
 
 ## PR and Merge
 
-- [ ] For each sub-group PR, ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open each PR from working branch to `main`. **The PR body MUST include `Closes #581`** (unconditionally, not as an optional conditional).
-- [ ] **Issue lifecycle: mark in-review** _(skip if change is not issue-driven)_: run `gh issue edit #581 --add-label "in-review" --remove-label "in-progress"`. Move the project item to "In Review" via `gh project item-edit`.
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] **Iterate until merged** — repeat the priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify the user.
+- [x] For each sub-group PR, ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open each PR from working branch to `main`. **The PR body MUST include `Closes #581`** (unconditionally, not as an optional conditional).
+- [x] **Issue lifecycle: mark in-review** _(skip if change is not issue-driven)_: run `gh issue edit #581 --add-label "in-review" --remove-label "in-progress"`. Move the project item to "In Review" via `gh project item-edit`.
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] **Iterate until merged** — repeat the priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED` exit and notify the user.
 
 Ownership metadata:
 
@@ -76,17 +76,17 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] After all sub-group PRs are merged: `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (especially `docs/campaign-encounter-rollout.md` status header to "rollout complete")
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec). After copying each `spec.md` to `openspec/specs/<cap>/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location.
-- [ ] Archive the change: move `openspec/changes/populate-campaigns-g5/` to `openspec/changes/archive/YYYY-MM-DD-populate-campaigns-g5/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-populate-campaigns-g5/` exists and `openspec/changes/populate-campaigns-g5/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-populate-campaigns-g5` then `git push -u origin doc/archive-YYYY-MM-DD-populate-campaigns-g5`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-populate-campaigns-g5` to `main` with title `docs: archive populate-campaigns-g5 (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
-- [ ] Monitor the doc PR until it merges
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D feature/populate-campaigns-g5a feature/populate-campaigns-g5b feature/populate-campaigns-g5c doc/archive-YYYY-MM-DD-populate-campaigns-g5`
+- [x] After all sub-group PRs are merged: `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (especially `docs/campaign-encounter-rollout.md` status header to "rollout complete")
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec). After copying each `spec.md` to `openspec/specs/<cap>/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location.
+- [x] Archive the change: move `openspec/changes/populate-campaigns-g5/` to `openspec/changes/archive/YYYY-MM-DD-populate-campaigns-g5/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-populate-campaigns-g5/` exists and `openspec/changes/populate-campaigns-g5/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-populate-campaigns-g5` then `git push -u origin doc/archive-YYYY-MM-DD-populate-campaigns-g5`
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-populate-campaigns-g5` to `main` with title `docs: archive populate-campaigns-g5 (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin`)
+- [x] Monitor the doc PR until it merges
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D feature/populate-campaigns-g5a feature/populate-campaigns-g5b feature/populate-campaigns-g5c doc/archive-YYYY-MM-DD-populate-campaigns-g5`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D <feature-branches>`.

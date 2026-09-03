@@ -15,20 +15,12 @@ The system SHALL provide a mechanism to seed custom, campaign-specific monsters 
 - **WHEN** the `seedGlobalMonsters.ts` script is executed
 - **THEN** it reads the custom monster definitions from `lib/data/customMonsters.ts` and upserts them into the global `monsterTemplates` collection with `userId: 'GLOBAL'`, avoiding duplicates.
 
-#### Scenario: G3 monsters present in the registry
+#### Scenario: G5 monsters present in the registry
 
 - **WHEN** the `CUSTOM_MONSTERS` array is imported
-- **THEN** it contains 80-120 new entries covering the 6 G3 campaigns (Rime, WBtW, PotA, CotCT, HR, RHoD), each with `id` prefixed `cm-` and `source` equal to the campaign title
+- **THEN** it contains 250-350 new entries covering the 25 G5 campaigns (Age of Worms, Drakkenheim, Hot Springs Island, Scarlet Citadel, Courts of the Shadow Fey, Vault of the Drow, Shackled City, Reavers of Harkenwold, Lost City, Turn of Fortune's Wheel, Dragonlance, Empire of the Ghouls, Temple of Elemental Evil, Keep on the Borderlands, Points of Light, Night Below, Return to Temple, Desert of Desolation, Queen of the Spiders, Reptile God, Spelljammer, Barrier Peaks, Return to Tomb of Horrors, Savage Tide, Expedition), each with `id` prefixed `cm-` and `source` equal to the campaign title
 - **THEN** every entry satisfies the canonical `DamageType` invariant (no descriptive strings in damage arrays)
 - **THEN** every entry has `senses["passive Perception"]` as a string
-
-#### Scenario: G4 monsters present in the registry
-
-- **WHEN** the `CUSTOM_MONSTERS` array is imported
-- **THEN** it contains 150-200 new entries covering the 9 G4 campaigns (Candlekeep, Radiant Citadel, Golden Vault, Yawning Portal, Saltmarsh, Mad Mage, Runelords, Kingmaker, WotR), each with `id` prefixed `cm-` and `source` equal to the campaign title
-- **THEN** every entry satisfies the canonical `DamageType` invariant (no descriptive strings in damage arrays)
-- **THEN** every entry has `senses["passive Perception"]` as a string
-- **THEN** every entry's `userId` references `GLOBAL_USER_ID`
 
 ### Requirement: Fully Populated Campaign Encounters
 
@@ -37,18 +29,12 @@ The system SHALL ensure that seeded campaign encounters contain full `Monster` r
 #### Scenario: Seeding campaign templates with encounters
 
 - **WHEN** the `seedCampaignTemplates.ts` script is executed
-- **THEN** it imports the custom monster definitions from `lib/data/customMonsters.ts` and injects them into the `monsters` array of the appropriate encounters (e.g., adding the Cultist stat block to the Cultists of the Whispered One encounter).
+- **THEN** it imports the custom monster definitions from `lib/data/customMonsters.ts` and injects them into the `monsters` array of the appropriate encounters.
 
-#### Scenario: G3 catalog encounters are non-empty
+#### Scenario: G5 catalog encounters are non-empty
 
-- **WHEN** the catalog entry for any G3 campaign (Rime, WBtW, PotA, CotCT, HR, RHoD) is read
-- **THEN** its `encounters` array contains at least the minimum encounter count per campaign documented in [the archived populate-campaigns-g3 change](../../changes/archive/2026-09-02-populate-campaigns-g3/specs/populate-campaigns-g3/spec.md)
-- **THEN** every encounter's `monsters` array has at least one full `Monster` stat block (no empty arrays)
-
-#### Scenario: G4 catalog encounters are non-empty
-
-- **WHEN** the catalog entry for any G4 campaign (Candlekeep, Radiant Citadel, Golden Vault, Yawning Portal, Saltmarsh, Mad Mage, Runelords, Kingmaker, WotR) is read
-- **THEN** its `encounters` array contains at least the minimum encounter count per campaign documented in the [`populate-campaigns-g4` spec](../populate-campaigns-g4/spec.md)
+- **WHEN** the catalog entry for any G5 campaign is read
+- **THEN** its `encounters` array contains at least the minimum encounter count per campaign documented in [`populate-campaigns-g5/spec.md`](./populate-campaigns-g5/spec.md)
 - **THEN** every encounter's `monsters` array has at least one full `Monster` stat block (no empty arrays)
 
 ### Requirement: G3 Custom Monster Constraints
