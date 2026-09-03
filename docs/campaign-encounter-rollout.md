@@ -1,6 +1,6 @@
 # Campaign Encounter & Monster Rollout
 
-**Status:** in progress (Vecna first rollout complete via PR #615; G1 complete via PR #647; G2 complete via PR #661)
+**Status:** rollout complete (Vecna via PR #615; G1 PR #647; G2 PR #661; G3/G4 merged; G5a PR #693, G5b PR #696, G5c completes the 49-campaign bulk pass)
 
 This document is the source of truth for the work described in
 [`openspec/specs/campaign-monsters/spec.md`](../openspec/specs/campaign-monsters/spec.md)
@@ -231,28 +231,28 @@ encounter is self-contained.
 > | Wrath of the Righteous | 6 | 8 | 15 new | docs/research/wrath-of-the-righteous.md | PR #675 🔜 |
 > | Age of Worms | 12 | 14 | 6 new | research/age-of-worms.md | ✅ G5b |
 > | Dungeons of Drakkenheim | 7 | 9 | 7 new | research/drakkenheim.md | ✅ G5b |
-> | Dark of Hot Springs Island | 4 | 0 | 0 new | research/hot-springs-island.md | 🚧 G5 |
+> | Dark of Hot Springs Island | 4 | 6 | 5 new | research/hot-springs-island.md | ✅ G5c |
 > | Scarlet Citadel | 8 | 9 | 5 new | research/scarlet-citadel.md | ✅ G5b |
 > | Courts of the Shadow Fey | 4 | 6 | 6 new | research/courts-of-the-shadow-fey.md | ✅ G5b |
 > | Vault of the Drow | 4 | 6 | 3 new | research/vault-of-the-drow.md | ✅ G5b |
 > | Shackled City | 12 | 14 | 5 new | research/shackled-city.md | ✅ G5b |
-> | Reavers of Harkenwold | 5 | 0 | 0 new | research/reavers-of-harkenwold.md | 🚧 G5 |
-> | The Lost City | 4 | 0 | 0 new | research/lost-city.md | 🚧 G5 |
+> | Reavers of Harkenwold | 5 | 7 | 4 new | research/reavers-of-harkenwold.md | ✅ G5c |
+> | The Lost City | 4 | 6 | 4 new | research/lost-city.md | ✅ G5c |
 > | Turn of Fortune's Wheel | 14 | 15 | 8 new | research/turn-of-fortunes-wheel.md | ✅ G5a |
 > | Dragonlance: Shadow of the Dragon Queen | 7 | 9 | 8 new | research/dragonlance-shadow-of-the-dragon-queen.md | ✅ G5a |
 > | Empire of the Ghouls | 6 | 8 | 6 new | research/empire-of-the-ghouls.md | ✅ G5b |
 > | Temple of Elemental Evil | 6 | 8 | 3 new | research/temple-of-elemental-evil.md | ✅ G5a |
 > | Keep on the Borderlands | 3 | 6 | 2 new | research/keep-on-the-borderlands.md | ✅ G5a |
-> | Points of Light | 3 | 0 | 0 new | research/points-of-light.md | 🚧 G5 |
-> | Night Below | 3 | 0 | 0 new | research/night-below.md | 🚧 G5 |
+> | Points of Light | 3 | 5 | 3 new | research/points-of-light.md | ✅ G5c |
+> | Night Below | 3 | 6 | 6 new | research/night-below.md | ✅ G5c |
 > | Return to Temple of Elemental Evil | 4 | 7 | 5 new | research/return-to-temple-of-elemental-evil.md | ✅ G5b |
-> | Desert of Desolation | 3 | 0 | 0 new | research/desert-of-desolation.md | 🚧 G5 |
+> | Desert of Desolation | 3 | 6 | 5 new | research/desert-of-desolation.md | ✅ G5c |
 > | Queen of the Spiders | 7 | 9 | 4 new | research/queen-of-the-spiders.md | ✅ G5a |
 > | Against the Cult of the Reptile God | 3 | 5 | 4 new | research/against-the-cult-of-the-reptile-god.md | ✅ G5a |
 > | Spelljammer: Light of Xaryxis | 4 | 6 | 4 new | research/spelljammer-light-of-xaryxis.md | ✅ G5a |
-> | Expedition to the Barrier Peaks | 6 | 0 | 0 new | research/expedition-to-the-barrier-peaks.md | 🚧 G5 |
+> | Expedition to the Barrier Peaks | 6 | 8 | 6 new | research/expedition-to-the-barrier-peaks.md | ✅ G5c |
 > | Return to the Tomb of Horrors | 3 | 6 | 6 new | research/return-to-the-tomb-of-horrors.md | ✅ G5a |
-> | Savage Tide | 12 | 0 | 0 new | research/savage-tide.md | 🚧 G5 |
+> | Savage Tide | 12 | 14 | 4 new | research/savage-tide.md | ✅ G5c |
 
 **Legend:** ✅ merged · 🚧 authoring · 🔍 researching · ⏳ queued · ❌ blocked
 
