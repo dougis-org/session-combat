@@ -209,6 +209,71 @@ describe('populate-campaigns-g5a monsters', () => {
   });
 });
 
+describe('populate-campaigns-g5b monsters', () => {
+  const G5B_SOURCES = [
+    'Age of Worms',
+    'Dungeons of Drakkenheim',
+    'Scarlet Citadel',
+    'Courts of the Shadow Fey',
+    'Empire of the Ghouls',
+    'The Shackled City',
+    'Vault of the Drow',
+    'Return to the Temple of Elemental Evil',
+  ];
+  const g5b = CUSTOM_MONSTERS.filter((m) => G5B_SOURCES.includes(m.source ?? ''));
+
+  it('adds 30-60 new G5b entries, all cm- prefixed with a G5b source', () => {
+    expect(g5b.length).toBeGreaterThanOrEqual(30);
+    expect(g5b.length).toBeLessThanOrEqual(60);
+    for (const m of g5b) {
+      expect(m.id).toMatch(/^cm-/);
+      expect(G5B_SOURCES).toContain(m.source);
+    }
+  });
+
+  it('includes the campaign BBEGs', () => {
+    const ids = CUSTOM_MONSTERS.map((m) => m.id);
+    for (const id of [
+      'cm-aow-dragotha',
+      'cm-aow-kyuss-avatar',
+      'cm-dodrak-hollow-sovereign',
+      'cm-sc-twilight-princess',
+      'cm-cotsf-archfey-monarch',
+      'cm-eotg-doresain',
+      'cm-scap-adimarchus',
+      'cm-rtee-olhydra',
+      'cm-rtee-yan-c-bin',
+    ]) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  it('every G5b monster has passive Perception as a string when senses are defined', () => {
+    for (const m of g5b) {
+      if (!m.senses) continue;
+      expect(typeof m.senses['passive Perception']).toBe('string');
+    }
+  });
+
+  it('every G5b monster damage array uses only canonical DamageType values', () => {
+    const canonical: DamageType[] = [
+      'acid', 'bludgeoning', 'cold', 'fire', 'force',
+      'lightning', 'necrotic', 'piercing', 'poison',
+      'psychic', 'radiant', 'slashing', 'thunder',
+    ];
+    for (const m of g5b) {
+      for (const arr of [m.damageResistances, m.damageImmunities, m.damageVulnerabilities]) {
+        for (const v of arr ?? []) expect(canonical).toContain(v);
+      }
+    }
+  });
+
+  it('every G5b monster id is unique', () => {
+    const g5bIds = g5b.map((m) => m.id);
+    expect(new Set(g5bIds).size).toBe(g5bIds.length);
+  });
+});
+
 describe('findCustomMonsterById', () => {
   it('returns the template when id matches', () => {
     const found = findCustomMonsterById('cm-vecna');
