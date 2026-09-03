@@ -70,7 +70,7 @@ None.
 - Requirement -> Task(s): Update `schema.ts` to include `surface` -> ADDED schema settings
 - Design Decision 3 -> Requirement: `dice.surface` enum (`wood`/`metal`/`stone`/`felt`/`null`) -> ADDED schema settings (follow-up: schema enum enforcement)
 - Design Decision 4 -> Note: `dice.color` / `dice.surface` persisted only, not consumed by the dice engine in this change
-- Design Risk -> Requirement: invalid `dice.color` input feedback -> ADDED schema settings (follow-up: inline colour-field validation)
+- Design Risk -> Requirement: invalid `dice.color` input feedback -> ADDED schema settings (implemented: inline colour-field validation, FU-3)
 
 ## Non-Functional Acceptance Criteria
 

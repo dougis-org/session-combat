@@ -111,14 +111,16 @@ Captured during explore review of PR #674 / this branch:
 - [ ] FU-2: Consume `preferences.dice.color` and `preferences.dice.surface` in the
   dice-rendering path (apply at DiceBox construction, alongside the existing dice-appearance
   work). Currently both values are persisted but unused. (design.md Decision 4)
-- [ ] FU-3: Add inline validation to the "Dice Color" field on `app/profile/page.tsx` — show
-  an invalid state while the text fails `HEX_COLOR` and only call `setPreference` once the
-  value is valid or empty (or switch to a swatch / `<input type="color">`). Today an invalid
-  entry is dropped with only a `console.warn` and no user feedback. (design.md Risks)
-- [ ] FU-4: Close the `ProfilePage` test-coverage gap — `page.test.tsx` currently asserts
-  only the `dice.sendToChat` checkbox out of the five controls it renders. Add tests for the
-  `dice.disableAnimation` select, `dice.surface` select, `dice.color` input (valid / clear /
-  invalid-not-saved), and `chat.pinned` checkbox, plus a "renders stored non-default values"
-  case. Also add an integration test for `PATCH /api/me/preferences` with `dice.surface`
-  (spec Scenario "Save valid surface preference" is only covered at the validator unit level).
-  Full list in `tests.md`. (This is the coverage gap noted on PR #674.)
+- [x] FU-3: Inline validation on the "Dice Color" field — `app/profile/page.tsx` now holds a
+  local draft, only pushes a valid short hex (or empty → `null`) to `setPreference`, and
+  shows `aria-invalid` + a `role="alert"` helper while the entry is malformed instead of
+  silently dropping it. Covered by `page.test.tsx` "does not persist an invalid entry…" and
+  "persists once a previously-invalid entry becomes valid". (design.md Risks)
+- [x] FU-4: Close the `ProfilePage` test-coverage gap — `page.test.tsx` now covers all five
+  controls (21 cases): `dice.disableAnimation` / `dice.surface` selects (both directions),
+  `dice.color` input (enter / clear / render), `dice.sendToChat` + `chat.pinned` checkboxes,
+  and stored-value rendering. Added `htmlFor`/`id` to the three selects + the colour input so
+  controls resolve by accessible name (also fixes the orphan "Dice Color (Hex)" `<label>`).
+  Added `PATCH /api/me/preferences` `dice.surface` persist / clear / reject integration tests.
+  Deferred: the optional navigate-to-`/profile` E2E and the `dice.color` invalid-state
+  assertions (bundled with FU-3). Full status in `tests.md`.

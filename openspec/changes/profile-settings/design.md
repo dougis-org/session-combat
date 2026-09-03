@@ -88,16 +88,14 @@
   - Impact: Low, `resolvePreferences` handles fallback.
   - Mitigation: Ensure `DEFAULT_PREFERENCES` is updated correctly for new fields.
 
-- Risk/trade-off: `dice.color` text input silently discards invalid entries.
-  - Detail: the field is a free-text `<input>`; `setPreference('dice.color', …)` runs the
-    value through `isValidPreferenceValue`, which requires a strict `#rgb` / `#rrggbb` hex.
-    A partial or malformed entry (`#ff`, `red`) is dropped with only a `console.warn` — the
-    user sees the text they typed but no error, and nothing is saved.
-  - Impact: Low (no data corruption), but confusing UX.
-  - Mitigation (follow-up, tracked in tasks.md): show inline validation state on the colour
-    field — e.g. a red border + helper text while the current value fails `HEX_COLOR`, and
-    only call `setPreference` once it is valid or empty. A native `<input type="color">` or a
-    swatch picker would also remove the free-text failure mode.
+- Risk/trade-off: `dice.color` free-text input could silently discard invalid entries.
+  - Detail: `isValidPreferenceValue('dice.color', …)` requires a strict `#rgb` / `#rrggbb`
+    hex; a partial or malformed entry would otherwise be dropped with only a `console.warn`.
+  - Resolved (FU-3, shipped in this branch): the field holds a local draft, only pushes a
+    valid short hex (or empty → `null`) to `setPreference`, and renders `aria-invalid` plus
+    a `role="alert"` helper while the entry is malformed.
+  - Possible future refinement: a native `<input type="color">` / swatch picker would remove
+    the free-text failure mode entirely.
 
 ## Rollback / Mitigation
 

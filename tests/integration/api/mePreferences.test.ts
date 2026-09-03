@@ -50,6 +50,33 @@ describe("/api/me/preferences Integration Tests", () => {
     expect(after.values.dice.sendToChat).toBe(true);
   });
 
+  it("PATCH dice.surface persists a string and round-trips via GET", async () => {
+    const user = (await registerTestUser(baseUrl, "meprefs-surface")).cookie;
+    const res = await patch({ dice: { surface: "wood" } }, user);
+    expect(res.status).toBe(200);
+    expect((await res.json()).values.dice.surface).toBe("wood");
+    const after = await (await get(user)).json();
+    expect(after.values.dice.surface).toBe("wood");
+    expect(after.stored.dice.surface).toBe("wood");
+  });
+
+  it("PATCH dice.surface null clears a stored value", async () => {
+    const user = (await registerTestUser(baseUrl, "meprefs-surface-clear")).cookie;
+    await patch({ dice: { surface: "felt" } }, user);
+    const res = await patch({ dice: { surface: null } }, user);
+    expect(res.status).toBe(200);
+    const after = await (await get(user)).json();
+    expect(after.values.dice.surface).toBeNull();
+    expect(after.stored).toEqual({});
+  });
+
+  it("PATCH wrongly-typed dice.surface → 400, no write", async () => {
+    const user = (await registerTestUser(baseUrl, "meprefs-surface-bad")).cookie;
+    expect((await patch({ dice: { surface: 123 } }, user)).status).toBe(400);
+    const after = await (await get(user)).json();
+    expect(after.stored).toEqual({});
+  });
+
   it.each([
     ["array", "[]"],
     ["null", "null"],

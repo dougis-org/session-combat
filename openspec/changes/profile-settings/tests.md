@@ -30,27 +30,32 @@ For each task in `tasks.md`:
 - [x] Test case: `ProfilePage.test.tsx` binds `dice.sendToChat` checkbox to `setPreference`
 - [x] Test case: `ProfilePage.test.tsx` redirects unauthenticated user via `<ProtectedRoute>`
 
-### Coverage gaps identified in explore review (tracked as FU-4 in tasks.md)
+### Coverage gap close-out (FU-4 — done in this branch)
 
-`ProfilePage.test.tsx` exercises only one of the five controls it renders. Missing:
+`ProfilePage.test.tsx` previously exercised only one of the five controls. Now covered
+(21 cases in `tests/unit/app/profile/page.test.tsx`):
 
-- [ ] Test case: `dice.disableAnimation` select — `system`/`enabled`/`disabled` map to
-  `setPreference('dice.disableAnimation', null | false | true)`, and the current value
-  renders the right option selected.
-- [ ] Test case: `dice.surface` select — choosing `Wood` calls
-  `setPreference('dice.surface', 'wood')`; choosing `Default` calls it with `null`;
-  a stored `'metal'` renders `Metal` selected. (Directly covers spec Scenario "Edit dice
-  preferences → change the Dice Surface setting", currently untested at the UI layer.)
-- [ ] Test case: `dice.color` text input — a valid hex calls
-  `setPreference('dice.color', '#ff0000')`; clearing calls it with `null`; an invalid
-  partial entry does **not** call `setPreference` (and, once FU-3 lands, shows the invalid
-  state).
-- [ ] Test case: `chat.pinned` checkbox binds to `setPreference('chat.pinned', …)` and
-  reflects the stored value.
-- [ ] Test case: non-default preferences render with the correct checked/selected state
-  (currently every assertion uses `DEFAULT_PREFERENCES`, so a "read" regression would pass).
-- [ ] Test case (integration): `PATCH /api/me/preferences` with `{ dice: { surface: 'wood' } }`
-  persists and round-trips via `GET` — spec Scenario "Save valid surface preference" is only
-  covered at the `validatePreferencePatch` unit level, not through the route.
+- [x] Every control resolves by accessible name (added `htmlFor`/`id` to the three selects
+  / colour input; the "Dice Color (Hex)" `<label>` is now a real label, not orphan text).
+- [x] `dice.disableAnimation` select — `System Default` / `Enabled` / `Disabled` map to
+  `setPreference('dice.disableAnimation', null | false | true)`; each stored value renders
+  the matching option selected.
+- [x] `dice.surface` select — `Wood` → `setPreference('dice.surface', 'wood')`; `Default` →
+  `null`; stored `'stone'` renders selected; null renders `Default`; options are exactly
+  `default/wood/metal/stone/felt`. (Covers spec Scenario "Edit dice preferences".)
+- [x] `dice.color` input — a valid hex calls `setPreference('dice.color', '#f00')`; clearing
+  calls it with `null`; a stored colour renders as the field value; an invalid entry is
+  **not** persisted and surfaces `aria-invalid` + a `role="alert"` message; fixing it to a
+  valid value then persists and clears the alert. (FU-3 landed alongside these tests.)
+- [x] `dice.sendToChat` and `chat.pinned` checkboxes — bind to `setPreference` and reflect a
+  stored `true` as checked.
+- [x] Integration (`tests/integration/api/mePreferences.test.ts`): `PATCH /api/me/preferences`
+  with `dice.surface` persists + round-trips via `GET`; `surface: null` clears the stored
+  value; a wrongly-typed `surface` → 400 with no write. (Covers spec Scenario "Save valid
+  surface preference".)
+
+Deferred:
+
 - [ ] Test case (E2E, optional): open User Menu → click "Profile & Settings" → land on
-  `/profile` with controls visible — spec Scenario "Navigate to profile page".
+  `/profile` with controls visible — spec Scenario "Navigate to profile page". Link + route
+  are covered at the `UserMenu` unit level; a full-navigation E2E is nice-to-have.
