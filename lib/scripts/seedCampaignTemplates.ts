@@ -3076,6 +3076,224 @@ function n1Encounters(): EncounterTemplate[] {
   ];
 }
 
+// ===========================================================================
+// populate-campaigns-g5b — encounter helpers
+// ===========================================================================
+
+/** Age of Worms — the Kyuss / Dragotha adventure path. */
+function aowEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const faceless = requireCustomMonsterById("cm-aow-faceless-one");
+  const kyussSpawn = requireCustomMonsterById("cm-aow-kyuss-spawn");
+  const wtw = requireCustomMonsterById("cm-aow-worm-that-walks");
+  const apostle = requireCustomMonsterById("cm-aow-apostle-of-kyuss");
+  const dragotha = requireCustomMonsterById("cm-aow-dragotha");
+  const kyuss = requireCustomMonsterById("cm-aow-kyuss-avatar");
+  const cultist = requireCustomMonsterById("cm-vecna-cultist");
+  const necro = requireCustomMonsterById("cm-necromancer-wizard");
+  const mindFlayer = requireCustomMonsterById("cm-mind-flayer");
+  const beholder = requireCustomMonsterById("cm-beholder");
+  const skeleton = requireCustomMonsterById("cm-skeleton");
+
+  return [
+    encounter("The Whispering Cairn", "Ch 1 (Diamond Lake) — Worm-cult acolytes finish a rite in the necromancer Eravan's tomb.", compact([many(cultist, 4), m(kyussSpawn)])),
+    encounter("The Three Faces of Evil", "Ch 2 (Dourstone Mine) — The Ebon Triad's faceless leader oversees the shrine of the worm god.", compact([m(faceless), many(cultist, 4)])),
+    encounter("Encounter at Blackwall Keep", "Ch 3 (Blackwall Keep) — Lizardfolk raiders and a worm-cult infiltrator besiege the border fort.", compact([many(skeleton, 6), m(kyussSpawn), m(cultist)])),
+    encounter("The Hall of Harsh Reflections", "Ch 4 (Free City of Greyhawk) — Doppelganger assassins and their mind flayer handler stalk the party.", compact([many(mindFlayer, 1), many(cultist, 4), m(necro)])),
+    encounter("The Champion's Belt", "Ch 5 (Greyhawk arena) — A rigged gladiatorial match pits the party against worm-touched beasts and a Spawn of Kyuss.", compact([many(kyussSpawn, 2), many(cultist, 4)])),
+    encounter("A Gathering of Winds", "Ch 6 (Diamond Lake, return) — Ilthane's cult warband assaults Allustan's rebuilt tower.", compact([many(cultist, 6), m(faceless), many(skeleton, 4)])),
+    encounter("The Spire of Long Shadows", "Ch 7 (Spire of Long Shadows) — The alien architecture warps the mind; a Worm That Walks guards Balakarde's shattered spirit.", compact([m(wtw), many(kyussSpawn, 2)])),
+    encounter("The Prince of Redhand", "Ch 8 (Redhand) — A masquerade turns deadly as the Apostle of Kyuss reveals himself at court.", compact([m(apostle), many(cultist, 4), m(necro)])),
+    encounter("The Library of Last Resort", "Ch 9 (Isle of Last Resort) — A cleric of Vecna's warband races the party for Dragotha's phylactery.", compact([m(necro), many(cultist, 5), m(wtw)])),
+    encounter("Kings of the Rift", "Ch 10 (Riftcrown) — Worm-cult siege engines and an Apostle assault the besieged city.", compact([m(apostle), many(kyussSpawn, 3), many(skeleton, 6)])),
+    encounter("Into the Wormcrawl Fissure", "Ch 11 (Wormcrawl Fissure) — Dragotha, the undead dragon, defends the fissure that leads to Kyuss.", compact([m(dragotha), many(kyussSpawn, 3)])),
+    encounter("Dawn of a New Age: The Apostles", "Ch 12 (Alhaster) — The Ebon Triad's surviving apostles hold the ritual circle open.", compact([many(apostle, 2), many(wtw, 1), many(cultist, 6)])),
+    encounter("Dawn of a New Age: Dragotha Returns", "Ch 12 (Alhaster) — Dragotha rejoins the fray as Kyuss begins to manifest.", compact([m(dragotha), m(apostle), many(kyussSpawn, 4)])),
+    encounter("Kyuss, the Worm That Walks Divine", "Ch 12 (Alhaster) — The worm god manifests over Alhaster to usher in the Age of Worms.", compact([m(kyuss), many(kyussSpawn, 4), m(wtw)])),
+  ];
+}
+
+/** Dungeons of Drakkenheim — the Haze-contaminated city. */
+function dodrakEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const thug = requireCustomMonsterById("cm-dodrak-crimson-thug");
+  const knight = requireCustomMonsterById("cm-dodrak-silver-order-knight");
+  const marauder = requireCustomMonsterById("cm-dodrak-haze-marauder");
+  const hazeElemental = requireCustomMonsterById("cm-dodrak-haze-elemental");
+  const otyugh = requireCustomMonsterById("cm-dodrak-plague-otyugh");
+  const vorn = requireCustomMonsterById("cm-dodrak-king-odius-vorn");
+  const sovereign = requireCustomMonsterById("cm-dodrak-hollow-sovereign");
+  const bandit = requireCustomMonsterById("cm-bandit");
+
+  return [
+    encounter("Arrival in Drakkenheim", "Ch 1 (Outskirts) — Haze-touched marauders fall on a refugee caravan at the ruined gate.", compact([many(marauder, 3), many(bandit, 3)])),
+    encounter("The Outer City", "Ch 2 (Outer Drakkenheim) — A Crimson Society ambush in the market quarter turns into a three-way brawl with Silver Order patrols.", compact([many(thug, 4), many(knight, 2)])),
+    encounter("Faction Intrigue", "Ch 3 (Drakkenheim) — A Silver Order strike team and Crimson Society thugs both want the party's delerium sample.", compact([many(knight, 3), many(thug, 3)])),
+    encounter("The Underbelly", "Ch 3-4 (Sewers) — A Haze-mutated plague otyugh nests in the slime channels beneath the city.", compact([m(otyugh), many(marauder, 2)])),
+    encounter("Inside the Walls", "Ch 4 (Inner Drakkenheim) — Haze elementals drift through the contaminated inner streets.", compact([many(hazeElemental, 2), many(marauder, 3)])),
+    encounter("Heart of Chaos", "Ch 5 (Crater District) — The Haze is thickest here; elementals and mutated marauders swarm the crater's edge.", compact([many(hazeElemental, 2), m(otyugh), many(marauder, 2)])),
+    encounter("The Cathedral", "Ch 6 (Cathedral of Saint Vitruvio) — King Odius Vorn, the spellweaver-lich, works his ritual in the ruined nave.", compact([m(vorn), many(hazeElemental, 2), many(marauder, 3)])),
+    encounter("The Cosmos Shrine: Vorn's Last Stand", "Ch 7 (Cosmos Shrine) — Vorn expends his phylactery's power to hold the shrine.", compact([m(vorn), m(hazeElemental), many(knight, 2)])),
+    encounter("The Hollow Sovereign", "Ch 7 (Cosmos Shrine) — The will inside the fallen meteor rises to remake the world in the Haze's image.", compact([m(sovereign), many(hazeElemental, 3)])),
+  ];
+}
+
+/** Scarlet Citadel — the Twilight Princess's giant stronghold. */
+function scEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const apostle = requireCustomMonsterById("cm-sc-twilight-apostle");
+  const picket = requireCustomMonsterById("cm-sc-stone-giant-picket");
+  const frostChampion = requireCustomMonsterById("cm-sc-frost-giant-champion");
+  const wrathguard = requireCustomMonsterById("cm-sc-fire-giant-wrathguard");
+  const princess = requireCustomMonsterById("cm-sc-twilight-princess");
+  const hillGiant = requireCustomMonsterById("cm-hill-giant");
+  const ogre = requireCustomMonsterById("cm-ogre");
+  const goblin = requireCustomMonsterById("cm-goblin");
+  const airElemental = requireCustomMonsterById("cm-air-elemental");
+
+  return [
+    encounter("The Approach & Outer Bailey", "Ch 1 — Hill giants and ogre thralls hold the mountain trail up to the citadel gate.", compact([many(hillGiant, 2), many(ogre, 3)])),
+    encounter("The Garrison", "Ch 2 — Stone giant pickets and their goblin servitors patrol the barracks level.", compact([m(picket), many(goblin, 6), many(ogre, 1)])),
+    encounter("The Lower Citadel", "Ch 3 — Twilight apostles conduct a rite in the slave-quarter temple.", compact([many(apostle, 2), many(goblin, 4)])),
+    encounter("The Twisting Halls", "Ch 4 — The labyrinth shifts around a fire giant patrol and its stone giant guide.", compact([m(picket), many(ogre, 2), many(goblin, 4)])),
+    encounter("The Great Hall", "Ch 5 — The stone giant court, with a frost giant champion standing honor guard over the throne.", compact([m(frostChampion), many(picket, 1), many(apostle, 2)])),
+    encounter("The Twilight Tower", "Ch 6 — Twilight apostles and a bound air elemental defend the mage tower's stair.", compact([many(apostle, 3), m(airElemental)])),
+    encounter("The Heart Vault", "Ch 7 — Fire giant wrathguards seal the treasure vault against intruders.", compact([m(wrathguard), many(apostle, 2)])),
+    encounter("The Twilight Princess: Wrathguard", "Ch 8 — The Princess's fire giant bodyguard and apostle circle meet the party at the lair doors.", compact([m(wrathguard), m(frostChampion), many(apostle, 2)])),
+    encounter("The Twilight Princess", "Ch 8 — The stone giant evoker archmage unleashes the citadel's stored evocation power.", compact([m(princess), m(wrathguard), many(apostle, 2)])),
+  ];
+}
+
+/** Courts of the Shadow Fey — the Queen of Night and Magic's court. */
+function cotsfEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const courtier = requireCustomMonsterById("cm-cotsf-shadow-fey-courtier");
+  const warrior = requireCustomMonsterById("cm-cotsf-shadow-fey-warrior");
+  const shadowElemental = requireCustomMonsterById("cm-cotsf-shadow-elemental");
+  const guardian = requireCustomMonsterById("cm-cotsf-shadow-portal-guardian");
+  const champion = requireCustomMonsterById("cm-cotsf-shadow-fey-champion");
+  const queen = requireCustomMonsterById("cm-cotsf-archfey-monarch");
+  const shadow = requireCustomMonsterById("cm-shadow");
+
+  return [
+    encounter("Arrival in the Shadow Realm", "Ch 1 (Shadow Roads) — Portal guardians challenge the party the moment they cross into the Shadow Realm.", compact([m(guardian), many(shadow, 4)])),
+    encounter("The Descent", "Ch 1 (Shadow Roads) — Shadow fey warriors shadow the party along the twisting roads and strike from the gloom.", compact([many(warrior, 3), many(shadow, 3)])),
+    encounter("The Outer Courts", "Ch 2 — Courtiers test the party with a deadly game of riddles and enchanted blades.", compact([many(courtier, 3), many(warrior, 2)])),
+    encounter("The Twisting Halls", "Ch 3 — The court physically rearranges around shadow elementals and fey warriors.", compact([many(shadowElemental, 2), many(warrior, 3)])),
+    encounter("The Queen's Gambit: Champion", "Ch 4 (Palace of the Queen of Night) — The Queen's champion and courtiers bar the throne room.", compact([m(champion), many(courtier, 2), many(warrior, 2)])),
+    encounter("The Queen of Night and Magic", "Ch 4 — The corrupted archfey monarch fights from her throne of endless night.", compact([m(queen), m(champion), many(shadowElemental, 2)])),
+  ];
+}
+
+/** Empire of the Ghouls — from the Radiant Citadel to Doresain's court. */
+function eotgEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const cultist = requireCustomMonsterById("cm-eotg-ghoul-cultist");
+  const guard = requireCustomMonsterById("cm-eotg-radiant-citadel-guard");
+  const ghastDevourer = requireCustomMonsterById("cm-eotg-ghast-devourer");
+  const construct = requireCustomMonsterById("cm-eotg-merciful-construct");
+  const revenant = requireCustomMonsterById("cm-eotg-hidden-founder-revenant");
+  const doresain = requireCustomMonsterById("cm-eotg-doresain");
+  const ghoul = requireCustomMonsterById("cm-ghoul");
+  const bodak = requireCustomMonsterById("cm-bodak");
+  const shadow = requireCustomMonsterById("cm-shadow");
+
+  return [
+    encounter("Arrival at the Radiant Citadel", "Ch 1 — A ghoul-cult cell is unmasked in the hub city; the Citadel guard rallies with the party.", compact([many(cultist, 4), m(guard), m(construct)])),
+    encounter("The Spite House", "Ch 1-2 — Ghoul cultists defend a townhouse that hides a tunnel to the Underworld.", compact([many(cultist, 4), many(ghoul, 3)])),
+    encounter("Desert Bones", "Ch 3 (Siwal) — Ghast devourers rise from a desert necropolis the cult has been mining for corpses.", compact([many(ghastDevourer, 2), many(ghoul, 4)])),
+    encounter("Into the Underworld", "Ch 4 — The party crosses into the Ghoul Imperium past darakhul patrols and shadow-things.", compact([many(ghastDevourer, 2), many(shadow, 3), many(ghoul, 3)])),
+    encounter("The Ghoul City", "Ch 5 (Vendekhul) — Doresain's bodaks and ghast devourers guard the approach to the throne.", compact([many(bodak, 2), many(ghastDevourer, 2), many(ghoul, 4)])),
+    encounter("Doresain's Court", "Ch 5 — Doresain, the Ghoul King, holds court in his palace of bone.", compact([m(doresain), many(ghastDevourer, 2), many(ghoul, 4)])),
+    encounter("The Hidden Truth", "Ch 6 (Radiant Citadel) — A hidden founder's revenant reveals the traitor within the Citadel's council.", compact([m(revenant), many(cultist, 3), m(construct)])),
+    encounter("Heart of the Empire", "Ch 6 — Doresain makes his final bid at the Concord Vault as the founders' revenant fights beside the party.", compact([m(doresain), m(revenant), many(bodak, 2)])),
+  ];
+}
+
+/** The Shackled City — the Cauldron adventure path. */
+function scapEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const skum = requireCustomMonsterById("cm-scap-skum-raider");
+  const drakthar = requireCustomMonsterById("cm-scap-drakthar");
+  const cagewright = requireCustomMonsterById("cm-scap-cagewright-mage");
+  const assassin = requireCustomMonsterById("cm-scap-shackled-assassin");
+  const adimarchus = requireCustomMonsterById("cm-scap-adimarchus");
+  const goblin = requireCustomMonsterById("cm-goblin");
+  const bugbear = requireCustomMonsterById("cm-bugbear");
+  const beholder = requireCustomMonsterById("cm-beholder");
+  const fireElemental = requireCustomMonsterById("cm-fire-elemental");
+  const skeleton = requireCustomMonsterById("cm-skeleton");
+
+  return [
+    encounter("Life's Bazaar", "Ch 1 (Cauldron Underdark) — Skum raiders drag captives through the flooded caverns beneath the slave market.", compact([many(skum, 5)])),
+    encounter("Drakthar's Way", "Ch 2 (Cauldron Undercity) — The vampire bugbear Drakthar leads goblin raids from a cave complex.", compact([m(drakthar), many(goblin, 6)])),
+    encounter("Flood Season", "Ch 3 (Cauldron) — Kidnapper cultists and skum use the rising floodwaters to move through the city unseen.", compact([many(skum, 4), many(bugbear, 2)])),
+    encounter("The Demonskar Legacy", "Ch 4 (Cauldron Surrounds) — A Cagewright mage binds a fire elemental at the old Demonskar shrine.", compact([m(cagewright), m(fireElemental), many(bugbear, 2)])),
+    encounter("Test of the Smoking Eye", "Ch 5 (Abyss) — Occipitus's fiendish trials pit the party against summoned horrors.", compact([many(fireElemental, 2), many(skeleton, 6)])),
+    encounter("Secrets of the Soul Pillars", "Ch 6 (Cauldron) — Wee Jas temple assassins ambush the party in the frozen spellweaver complex.", compact([many(assassin, 2), many(skeleton, 4)])),
+    encounter("Lords of Oblivion", "Ch 7 (Cauldron) — A beholder crime-lord conducts unholy rituals beneath the city with Cagewright backing.", compact([m(beholder), m(cagewright), many(assassin, 1)])),
+    encounter("Foundations of Flame", "Ch 8 (Undercauldron) — Cagewright mages open a planar rift as the volcano beneath Cauldron wakes.", compact([many(cagewright, 2), many(fireElemental, 2)])),
+    encounter("Thirteen Cages", "Ch 9 (Plague Lands) — The Cagewright inner circle guards the ritual cages in the volcano's heart.", compact([many(cagewright, 2), many(assassin, 2), many(fireElemental, 1)])),
+    encounter("Strike on Shatterhorn", "Ch 10 (Shatterhorn) — The last Cagewright remnants make their stand in a ruined yuan-ti temple.", compact([m(cagewright), many(assassin, 2), many(skum, 3)])),
+    encounter("Zenith Trajectory", "Ch 11 (Occipitus) — Demodand jailers and a Cagewright warden hold the gate to Skullrot.", compact([many(assassin, 2), m(cagewright), many(fireElemental, 2)])),
+    encounter("Asylum: The Cagewright Wardens", "Ch 12 (Skullrot) — The final Cagewrights spend their lives to keep Adimarchus's cell sealed to all but themselves.", compact([many(cagewright, 3), many(assassin, 2)])),
+    encounter("Asylum: Adimarchus Wakes", "Ch 12 (Skullrot) — The Demon Prince of Madness stirs, and reality frays around the asylum.", compact([m(adimarchus), many(assassin, 2), many(fireElemental, 2)])),
+    encounter("Adimarchus, Demon Prince of Madness", "Ch 12 (Skullrot) — The freed demon prince turns the party's own minds against them.", compact([m(adimarchus), many(fireElemental, 3), m(assassin)])),
+  ];
+}
+
+/** Vault of the Drow — the D-series descent to Erelhei-Cinlu. */
+function d3Encounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const quaggoth = requireCustomMonsterById("cm-d3-quaggoth-slave");
+  const guardCaptain = requireCustomMonsterById("cm-d3-drow-house-guard-captain");
+  const vaGuulgh = requireCustomMonsterById("cm-d3-va-guulgh");
+  const patrolCaptain = requireCustomMonsterById("cm-qots-drow-patrol-captain");
+  const eclavdra = requireCustomMonsterById("cm-qots-eclavdra");
+  const priestess = requireCustomMonsterById("cm-qots-drow-priestess-of-lolth");
+  const lolth = requireCustomMonsterById("cm-qots-lolth");
+  const drowWarrior = requireCustomMonsterById("cm-drow-elite-warrior");
+  const drowMage = requireCustomMonsterById("cm-drow-mage");
+  const drider = requireCustomMonsterById("cm-drider");
+  const kuoToa = requireCustomMonsterById("cm-kuo-toa");
+  const mindFlayer = requireCustomMonsterById("cm-mind-flayer");
+
+  return [
+    encounter("Descent into the Depths of the Earth", "Ch 1 (D1) — A drow patrol fleeing the fire giant hall is being hunted through the caverns by mind flayers.", compact([m(patrolCaptain), many(drowWarrior, 3), m(mindFlayer)])),
+    encounter("The Vast Caverns", "Ch 1 (D1) — Quaggoth slaves, driven mad, ambush the party at a fungal chokepoint.", compact([many(quaggoth, 5)])),
+    encounter("Shrine of the Kuo-Toa", "Ch 2 (D2) — Va-Guulgh, Priest-Prince of Blibdoolpoolp, springs his trap at the pilgrim bridge.", compact([m(vaGuulgh), many(kuoToa, 6)])),
+    encounter("Erelhei-Cinlu", "Ch 3 (D3) — A drow house guard captain and Eclavdra's retinue test the party in the streets of the drow city.", compact([m(guardCaptain), m(eclavdra), many(drowWarrior, 3)])),
+    encounter("The Fane of Lolth", "Ch 3 (D3) — A priestess of Lolth defends the temple with drider guards and a drow war-mage.", compact([m(priestess), many(drider, 3), m(drowMage)])),
+    encounter("Beyond the Vault: Lolth", "Ch 4 (astral gate) — The hidden portal opens on the Demonweb, and Lolth descends to greet the intruders.", compact([m(lolth), many(drider, 4), m(priestess)])),
+  ];
+}
+
+/** Return to the Temple of Elemental Evil — the Tharizdun cult reborn. */
+function rtteeEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const spy = requireCustomMonsterById("cm-rtee-cult-spy");
+  const earthAcolyte = requireCustomMonsterById("cm-rtee-earth-cult-acolyte");
+  const lieutenant = requireCustomMonsterById("cm-rtee-tharizdun-lieutenant");
+  const olhydra = requireCustomMonsterById("cm-rtee-olhydra");
+  const yanCBin = requireCustomMonsterById("cm-rtee-yan-c-bin");
+  const imix = requireCustomMonsterById("cm-imix");
+  const ogremoch = requireCustomMonsterById("cm-ogremoch");
+  const zuggtmoy = requireCustomMonsterById("cm-zuggtmoy");
+  const earthElemental = requireCustomMonsterById("cm-earth-elemental");
+  const beholder = requireCustomMonsterById("cm-beholder");
+  const bugbear = requireCustomMonsterById("cm-bugbear");
+
+  return [
+    encounter("Hommlet and Surrounds", "Ch 1 — Elder Eye cult spies have infiltrated the rebuilt town; unmasked, they call in bugbear muscle.", compact([many(spy, 2), many(bugbear, 3)])),
+    encounter("The Moathouse, Excavated", "Ch 1 — The cult has dug out the old moathouse; earth acolytes and a bound elemental guard the new shaft.", compact([many(earthAcolyte, 3), m(earthElemental)])),
+    encounter("Rastor and the Crater Ridge Mines", "Ch 2 — Earth-cult conscripts work the node mine under the lash of their acolytes.", compact([many(earthAcolyte, 4), many(earthElemental, 2)])),
+    encounter("The Outer Fane", "Ch 3 (Temple of All-Consumption) — A Tharizdun lieutenant marshals the perimeter defense.", compact([m(lieutenant), many(earthAcolyte, 3), many(bugbear, 2)])),
+    encounter("The Inner Fane", "Ch 3 — A bound beholder and the cult's inner circle guard the sanctum of the Elder Elemental Eye.", compact([m(beholder), m(lieutenant), many(earthAcolyte, 2)])),
+    encounter("The Fire Node: Princes Rising", "Ch 4 (Fire Node) — Imix and Ogrémoch manifest as the summoning nears completion; Zuggtmoy is dragged half-free.", compact([m(imix), m(ogremoch), many(earthAcolyte, 3)])),
+    encounter("The Temple of All-Consumption", "Ch 4 (finale) — Olhydra and Yan-C-Bin complete the archomental convergence over the restored temple.", compact([m(olhydra), m(yanCBin), m(zuggtmoy)])),
+  ];
+}
+
 const CAMPAIGN_CATALOG: CampaignTemplate[] = [
   makeTemplate(
     "Curse of Strahd",
@@ -3448,7 +3666,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Kings of the Rift", order: 10, levelRange: "18-19", location: "The Rift" },
       { title: "Into the Wormcrawl Fissure", order: 11, levelRange: "19-20", location: "Wormcrawl Fissure" },
       { title: "Dawn of a New Age", order: 12, levelRange: "20+", location: "Alhaster" },
-    ]
+    ],
+    aowEncounters()
   ),
 
   makeTemplate(
@@ -3501,7 +3720,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Into the Underdark", order: 4, levelRange: "7-9", location: "Underworld" },
       { title: "The Ghoul City", order: 5, levelRange: "9-11", location: "Vendekhul" },
       { title: "Heart of the Empire", order: 6, levelRange: "11-13", location: "Ghoul Imperium" },
-    ]
+    ],
+    eotgEncounters()
   ),
 
   makeTemplate(
@@ -3625,7 +3845,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Heart of Chaos", order: 5, levelRange: "8-10", location: "Crater District" },
       { title: "The Cathedral", order: 6, levelRange: "10-11", location: "Cathedral of Saint Vitruvio" },
       { title: "The Cosmos Shrine", order: 7, levelRange: "11-13", location: "Cosmos Shrine" },
-    ]
+    ],
+    dodrakEncounters()
   ),
 
   makeTemplate(
@@ -3668,7 +3889,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Rastor and the Crater Ridge Mines", order: 2, levelRange: "6-9", location: "Crater Ridge Mines" },
       { title: "The Inner Temple", order: 3, levelRange: "9-11", location: "Temple of All-Consumption" },
       { title: "The Fire Node", order: 4, levelRange: "11-14", location: "Fire Node" },
-    ]
+    ],
+    rtteeEncounters()
   ),
 
   makeTemplate(
@@ -3736,7 +3958,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Deep Dungeons", order: 6, levelRange: "7-8", location: "Scarlet Citadel" },
       { title: "The Prison Warrens", order: 7, levelRange: "8-9", location: "Scarlet Citadel" },
       { title: "The Sunken Vaults", order: 8, levelRange: "9-10", location: "Scarlet Citadel" },
-    ]
+    ],
+    scEncounters()
   ),
 
   makeTemplate(
@@ -3748,7 +3971,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Outer Courts", order: 2, levelRange: "8-9", location: "Courts of the Shadow Fey" },
       { title: "The Inner Sanctum", order: 3, levelRange: "9-10", location: "Courts of the Shadow Fey" },
       { title: "The Queen's Gambit", order: 4, levelRange: "10-11", location: "Palace of the Queen of Night" },
-    ]
+    ],
+    cotsfEncounters()
   ),
 
   makeTemplate(
@@ -3760,7 +3984,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Fungi Forest", order: 2, levelRange: "11-12", location: "Vault of the Drow" },
       { title: "Erelhei-Cinlu", order: 3, levelRange: "12-13", location: "Erelhei-Cinlu" },
       { title: "The Fane of Lolth", order: 4, levelRange: "13-14", location: "Temple of Lolth" },
-    ]
+    ],
+    d3Encounters()
   ),
 
   makeTemplate(
@@ -3828,7 +4053,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Strike on Shatterhorn", order: 10, levelRange: "16-17", location: "Shatterhorn" },
       { title: "Zenith Trajectory", order: 11, levelRange: "17-19", location: "Occipitus, Abyss" },
       { title: "Asylum", order: 12, levelRange: "19-20", location: "Cauldron" },
-    ]
+    ],
+    scapEncounters()
   ),
 
   makeTemplate(

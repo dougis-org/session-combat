@@ -741,6 +741,82 @@ describe("populate-campaigns-g5a encounters", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// populate-campaigns-g5b — Classic APs & 3PP mega-dungeons (sub-group B)
+// ---------------------------------------------------------------------------
+
+describe("populate-campaigns-g5b encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  const G5B_CHAPTERS: Record<string, number> = {
+    "Age of Worms": 12,
+    "Dungeons of Drakkenheim": 7,
+    "Scarlet Citadel": 8,
+    "Courts of the Shadow Fey": 4,
+    "Empire of the Ghouls": 6,
+    "The Shackled City": 12,
+    "Vault of the Drow": 4,
+    "Return to the Temple of Elemental Evil": 4,
+  };
+
+  it("every G5b campaign meets the shared encounter-quality contract", async () => {
+    for (const [name, chapters] of Object.entries(G5B_CHAPTERS)) {
+      const seeded = await captureTemplate(name);
+      assertCampaignEncounterContract(seeded, name, chapters);
+    }
+  });
+
+  it("each G5b campaign has at least one encounter per chapter", async () => {
+    for (const [name, chapters] of Object.entries(G5B_CHAPTERS)) {
+      const seeded = await captureTemplate(name);
+      expect(seeded.encounters.length).toBeGreaterThanOrEqual(chapters);
+      for (const enc of seeded.encounters) expect(enc.monsters.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("G5b campaign BBEGs are present in their encounters", async () => {
+    const bbeg: Record<string, string> = {
+      "Age of Worms": "Kyuss, the Worm That Walks Divine",
+      "Dungeons of Drakkenheim": "The Hollow Sovereign",
+      "Scarlet Citadel": "The Twilight Princess",
+      "Courts of the Shadow Fey": "The Queen of Night and Magic",
+      "Empire of the Ghouls": "Doresain, the Ghoul King",
+      "The Shackled City": "Adimarchus, Demon Prince of Madness",
+      "Vault of the Drow": "Lolth, the Spider Queen",
+      "Return to the Temple of Elemental Evil": "Yan-C-Bin, Prince of Evil Air Creatures",
+    };
+    for (const [campaign, monsterName] of Object.entries(bbeg)) {
+      const seeded = await captureTemplate(campaign);
+      expect(allMonsters(seeded).map((m) => m.name)).toContain(monsterName);
+    }
+  });
+
+  it("Vault of the Drow reuses the Queen of the Spiders drow hierarchy stat blocks", async () => {
+    const seeded = await captureTemplate("Vault of the Drow");
+    expect(hasTemplate(seeded, "cm-qots-lolth")).toBe(true);
+    expect(hasTemplate(seeded, "cm-qots-eclavdra")).toBe(true);
+  });
+
+  it("Return to the Temple of Elemental Evil reuses the shared archomental and Zuggtmoy stat blocks", async () => {
+    const seeded = await captureTemplate("Return to the Temple of Elemental Evil");
+    for (const id of ["cm-imix", "cm-ogremoch", "cm-zuggtmoy"]) {
+      expect(hasTemplate(seeded, id)).toBe(true);
+    }
+  });
+
+  it("every monster in a G5b encounter uses only canonical damage types", async () => {
+    for (const name of Object.keys(G5B_CHAPTERS)) {
+      const seeded = await captureTemplate(name);
+      for (const mon of allMonsters(seeded)) {
+        for (const arr of [mon.damageResistances, mon.damageImmunities, mon.damageVulnerabilities]) {
+          for (const v of arr || []) expect(CANONICAL_DAMAGE_TYPES.has(v)).toBe(true);
+        }
+      }
+    }
+  });
+});
+
 describe("runCli", () => {
   let exitSpy: jest.SpyInstance;
   let logSpy: jest.SpyInstance;
