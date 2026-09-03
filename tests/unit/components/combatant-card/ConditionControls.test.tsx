@@ -16,25 +16,32 @@ const BASE: CombatantState = {
   abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
 };
 
-function setup(overrides: Partial<CombatantState> = {}) {
+function setup(overrides: Partial<CombatantState> = {}, extra: Partial<React.ComponentProps<typeof ConditionControls>> = {}) {
   const onUpdate = jest.fn();
-  render(<ConditionControls combatant={{ ...BASE, ...overrides }} onUpdate={onUpdate} />);
-  return { onUpdate, user: userEvent.setup() };
+  const onModalClose = jest.fn();
+  render(
+    <ConditionControls
+      combatant={{ ...BASE, ...overrides }}
+      onUpdate={onUpdate}
+      modalOpen={false}
+      onModalClose={onModalClose}
+      {...extra}
+    />
+  );
+  return { onUpdate, onModalClose, user: userEvent.setup() };
 }
 
 describe('ConditionControls', () => {
-  test('Add Condition opens a modal and does not call window.prompt', async () => {
+  test('renders the ConditionFormModal (not window.prompt) when modalOpen is true', () => {
     const promptSpy = jest.spyOn(window, 'prompt');
-    const { user } = setup();
-    await user.click(screen.getByRole('button', { name: 'Add Condition' }));
+    setup({}, { modalOpen: true });
     expect(screen.getByTestId('condition-form-modal')).toBeInTheDocument();
     expect(promptSpy).not.toHaveBeenCalled();
     promptSpy.mockRestore();
   });
 
   test('submitting the modal adds a validated condition', async () => {
-    const { onUpdate, user } = setup();
-    await user.click(screen.getByRole('button', { name: 'Add Condition' }));
+    const { onUpdate, user } = setup({}, { modalOpen: true });
     await user.type(screen.getByTestId('condition-name-input'), 'Prone');
     await user.click(screen.getByTestId('condition-form-add'));
     expect(onUpdate).toHaveBeenCalledWith({
@@ -53,5 +60,11 @@ describe('ConditionControls', () => {
     const removeButtons = screen.getAllByRole('button', { name: 'Remove' });
     await user.click(removeButtons[0]);
     expect(onUpdate).toHaveBeenCalledWith({ conditions: [{ id: 'x2', name: 'Prone', description: '' }] });
+  });
+
+  test('nothing renders when there are no conditions and the modal is closed', () => {
+    setup();
+    expect(screen.queryByTestId('condition-form-modal')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Conditions/ })).not.toBeInTheDocument();
   });
 });

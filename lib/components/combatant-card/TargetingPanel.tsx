@@ -17,6 +17,9 @@ interface TargetingPanelProps {
   allCombatants?: CombatantState[];
   onUpdate: (updates: Partial<CombatantState>) => void;
   onUpdateCombatant?: (combatantId: string, updates: Partial<CombatantState>) => void;
+  /** Whether the target-selection panel is open (trigger lives in the card action column). */
+  showTargeting: boolean;
+  onCloseTargeting: () => void;
 }
 
 /**
@@ -31,8 +34,9 @@ export function TargetingPanel({
   allCombatants,
   onUpdate,
   onUpdateCombatant,
+  showTargeting,
+  onCloseTargeting,
 }: TargetingPanelProps) {
-  const [showTargeting, setShowTargeting] = useState(false);
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
 
@@ -50,11 +54,10 @@ export function TargetingPanel({
   };
 
   const applyDamageToTarget = (damage: number, damageType: DamageType | '') => {
-    if (!selectedTargetId || !onUpdateCombatant || !isValidHpAmount(damage)) return;
-    const target = combatantMap.get(selectedTargetId);
-    if (target) {
+    const target = selectedTargetId ? combatantMap.get(selectedTargetId) : undefined;
+    if (target && onUpdateCombatant && isValidHpAmount(damage)) {
       const result = applyHpChange(target, { kind: 'damage', amount: damage, damageType });
-      onUpdateCombatant(selectedTargetId, result.updates);
+      onUpdateCombatant(target.id, result.updates);
       if (result.history) {
         pushHpHistory(combatId, target.id, { ...result.history, timestamp: Date.now() });
       }
@@ -63,17 +66,22 @@ export function TargetingPanel({
   };
 
   const addConditionToTarget = (name: string, duration?: number) => {
-    if (!selectedTargetId || !onUpdateCombatant) return;
-    const target = combatantMap.get(selectedTargetId);
-    const parsed = parseConditionForm(name, duration != null ? String(duration) : '');
-    if (target && parsed) {
+    const target = selectedTargetId ? combatantMap.get(selectedTargetId) : undefined;
+    // Validate the name strictly; keep the condition but drop an out-of-range
+    // duration rather than discarding the whole thing.
+    const parsedName = parseConditionForm(name, '');
+    if (target && onUpdateCombatant && parsedName) {
+      const validDuration =
+        duration != null && Number.isSafeInteger(duration) && duration >= 1 && duration <= 10_000
+          ? duration
+          : undefined;
       const condition: StatusCondition = {
         id: crypto.randomUUID(),
-        name: parsed.name,
+        name: parsedName.name,
         description: '',
-        duration: parsed.duration,
+        duration: validDuration,
       };
-      onUpdateCombatant(selectedTargetId, { conditions: [...target.conditions, condition] });
+      onUpdateCombatant(target.id, { conditions: [...target.conditions, condition] });
     }
     setSelectedTargetId(null);
   };
@@ -84,14 +92,6 @@ export function TargetingPanel({
 
   return (
     <>
-      <button
-        onClick={() => setShowTargeting(!showTargeting)}
-        className="bg-orange-600 hover:bg-orange-700 px-2 py-1 rounded text-xs self-start"
-        title="Set targets for this combatant"
-      >
-        Add Target(s)
-      </button>
-
       {combatant.targetIds && combatant.targetIds.length > 0 && (
         <div className="mb-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -154,7 +154,7 @@ export function TargetingPanel({
           <div className="flex justify-between items-center mb-3">
             <h4 className="text-sm font-semibold text-purple-300">Select targets for {combatant.name}</h4>
             <button
-              onClick={() => setShowTargeting(false)}
+              onClick={onCloseTargeting}
               className="text-gray-400 hover:text-gray-300 text-lg"
             >
               ✕

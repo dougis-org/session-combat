@@ -7,7 +7,6 @@ import { healthBarColor } from '@/lib/components/combatant-card/healthBarColor';
 interface CombatantCardHeaderProps {
   combatant: CombatantState;
   isActive: boolean;
-  onRemove: () => void;
   onNextTurn?: () => void;
   onShowDetails?: (combatantId: string, position: { top: number; left: number }, options?: { focusSection?: 'legendary' }) => void;
   onShowRemoveConfirm?: (combatantId: string, position: { top: number; left: number }) => void;
@@ -21,7 +20,6 @@ interface CombatantCardHeaderProps {
 export function CombatantCardHeader({
   combatant,
   isActive,
-  onRemove,
   onNextTurn,
   onShowDetails,
   onShowRemoveConfirm,
@@ -74,15 +72,11 @@ export function CombatantCardHeader({
         </h3>
         <button
           onClick={(e) => {
-            if (onShowRemoveConfirm) {
-              const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
-              onShowRemoveConfirm(combatant.id, {
-                top: rect.bottom + window.scrollY,
-                left: rect.left + window.scrollX,
-              });
-            } else {
-              onRemove();
-            }
+            const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+            onShowRemoveConfirm?.(combatant.id, {
+              top: rect.bottom + window.scrollY,
+              left: rect.left + window.scrollX,
+            });
           }}
           className="text-red-500 hover:text-red-400 text-xl leading-none"
           title="Remove combatant"

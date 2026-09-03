@@ -37,6 +37,8 @@ export interface HpChangeResult {
   history?: HpHistoryDescriptor;
   /** CON-save DC the caller should surface; only for the self path. */
   conSaveRequired?: number;
+  /** True when this action transitioned the combatant fresh into `dying`. */
+  enteredDying?: boolean;
 }
 
 /**
@@ -76,6 +78,7 @@ export function applyHpChange(
     }
 
     let deathSaveUpdates: Partial<CombatantState> = {};
+    let enteredDying = false;
     if (usesDeathSaves(combatant)) {
       if (
         (combatant.lifeState === 'dying' || combatant.lifeState === 'stable') &&
@@ -91,6 +94,7 @@ export function applyHpChange(
         });
       } else if (resultHp === 0 && !combatant.lifeState && effectiveDamage > 0) {
         deathSaveUpdates = enterDying();
+        enteredDying = true;
       }
     }
 
@@ -105,6 +109,7 @@ export function applyHpChange(
         ? { hp: prevHp, tempHp: prevTempHp, type: 'damage', amount: rawDamage }
         : undefined,
       conSaveRequired,
+      enteredDying,
     };
   }
 

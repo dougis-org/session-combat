@@ -30,6 +30,8 @@ async function applyDamageToTarget(target: CombatantState, amount: string) {
       allCombatants={[SELF, target]}
       onUpdate={jest.fn()}
       onUpdateCombatant={onUpdateCombatant}
+      showTargeting={false}
+      onCloseTargeting={jest.fn()}
     />
   );
   const user = userEvent.setup();
@@ -56,6 +58,15 @@ describe('TargetingPanel — cross-combatant damage through applyHpChange', () =
       lifeState: 'dying',
       deathSaves: { successes: 0, failures: 1 },
     }));
+  });
+
+  test('massive damage to a downed target is instant death', async () => {
+    const target = mk({
+      id: 'tm', name: 'Paladin', type: 'player', hp: 0, maxHp: 20,
+      lifeState: 'dying', deathSaves: { successes: 0, failures: 0 },
+    });
+    const onUpdateCombatant = await applyDamageToTarget(target, '25');
+    expect(onUpdateCombatant).toHaveBeenCalledWith('tm', expect.objectContaining({ lifeState: 'dead' }));
   });
 
   test('damaging a concentrating target to 0 clears its concentration', async () => {
@@ -102,6 +113,8 @@ describe('TargetingPanel — cross-combatant damage through applyHpChange', () =
         allCombatants={[SELF, target]}
         onUpdate={jest.fn()}
         onUpdateCombatant={onUpdateCombatant}
+        showTargeting={false}
+        onCloseTargeting={jest.fn()}
       />
     );
     const user = userEvent.setup();

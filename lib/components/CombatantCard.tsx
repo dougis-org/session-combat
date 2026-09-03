@@ -32,7 +32,8 @@ export interface CombatantCardProps {
  * Composition layer for one combatant in an active combat. Holds no HP, damage,
  * condition, or targeting business logic of its own: transition logic lives in
  * `lib/combat/`, HP-adjustment UI state in `useCombatantHp`, and the sub-panels
- * in `lib/components/combatant-card/`.
+ * in `lib/components/combatant-card/`. It owns only the two "open panel" toggles
+ * whose trigger buttons sit in the top-right action column.
  */
 export function CombatantCard(props: CombatantCardProps) {
   const {
@@ -40,7 +41,6 @@ export function CombatantCard(props: CombatantCardProps) {
     combatant,
     isActive,
     onUpdate,
-    onRemove,
     onNextTurn,
     onShowDetails,
     onSetInitiative,
@@ -50,8 +50,17 @@ export function CombatantCard(props: CombatantCardProps) {
     onConSaveRequired,
   } = props;
 
-  const hp = useCombatantHp({ combatId, combatant, onUpdate, onConSaveRequired });
   const [deathSaveNote, setDeathSaveNote] = useState<string | null>(null);
+  const [showTargeting, setShowTargeting] = useState(false);
+  const [addConditionOpen, setAddConditionOpen] = useState(false);
+
+  const hp = useCombatantHp({
+    combatId,
+    combatant,
+    onUpdate,
+    onConSaveRequired,
+    onEnteredDying: () => setDeathSaveNote(null),
+  });
 
   const handleDeathSaveToggle = (kind: DeathSaveKind, index: DeathSaveSlotIndex) => {
     setDeathSaveNote(null);
@@ -80,7 +89,6 @@ export function CombatantCard(props: CombatantCardProps) {
             <CombatantCardHeader
               combatant={combatant}
               isActive={isActive}
-              onRemove={onRemove}
               onNextTurn={onNextTurn}
               onShowDetails={onShowDetails}
               onShowRemoveConfirm={onShowRemoveConfirm}
@@ -150,7 +158,12 @@ export function CombatantCard(props: CombatantCardProps) {
             </div>
           )}
 
-          <ConditionControls combatant={combatant} onUpdate={onUpdate} />
+          <ConditionControls
+            combatant={combatant}
+            onUpdate={onUpdate}
+            modalOpen={addConditionOpen}
+            onModalClose={() => setAddConditionOpen(false)}
+          />
 
           <TargetingPanel
             combatId={combatId}
@@ -158,11 +171,29 @@ export function CombatantCard(props: CombatantCardProps) {
             allCombatants={allCombatants}
             onUpdate={onUpdate}
             onUpdateCombatant={onUpdateCombatant}
+            showTargeting={showTargeting}
+            onCloseTargeting={() => setShowTargeting(false)}
           />
 
           {combatant.notes && (
             <p className="text-sm text-gray-400 italic">{combatant.notes}</p>
           )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => setShowTargeting(v => !v)}
+            className="bg-orange-600 hover:bg-orange-700 px-2 py-1 rounded text-xs"
+            title="Set targets for this combatant"
+          >
+            Add Target(s)
+          </button>
+          <button
+            onClick={() => setAddConditionOpen(true)}
+            className="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs"
+          >
+            Add Condition
+          </button>
         </div>
       </div>
     </div>

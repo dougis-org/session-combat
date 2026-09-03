@@ -18,7 +18,7 @@ const BASE: CombatantState = {
 
 const renderHeader = (overrides: Partial<CombatantState> = {}, props: Record<string, unknown> = {}) =>
   render(
-    <CombatantCardHeader combatant={{ ...BASE, ...overrides }} isActive={false} onRemove={jest.fn()} {...props} />
+    <CombatantCardHeader combatant={{ ...BASE, ...overrides }} isActive={false} {...props} />
   );
 
 describe('CombatantCardHeader', () => {
@@ -34,20 +34,11 @@ describe('CombatantCardHeader', () => {
     expect(onShowDetails).toHaveBeenCalledWith('c1', expect.objectContaining({ top: expect.any(Number), left: expect.any(Number) }));
   });
 
-  test('remove button falls back to onRemove when onShowRemoveConfirm is absent', async () => {
-    const onRemove = jest.fn();
-    render(<CombatantCardHeader combatant={BASE} isActive={false} onRemove={onRemove} />);
-    await userEvent.setup().click(screen.getByTitle('Remove combatant'));
-    expect(onRemove).toHaveBeenCalledTimes(1);
-  });
-
-  test('remove button prefers onShowRemoveConfirm when provided', async () => {
-    const onRemove = jest.fn();
+  test('remove button calls onShowRemoveConfirm with id and a position', async () => {
     const onShowRemoveConfirm = jest.fn();
-    render(<CombatantCardHeader combatant={BASE} isActive={false} onRemove={onRemove} onShowRemoveConfirm={onShowRemoveConfirm} />);
+    render(<CombatantCardHeader combatant={BASE} isActive={false} onShowRemoveConfirm={onShowRemoveConfirm} />);
     await userEvent.setup().click(screen.getByTitle('Remove combatant'));
-    expect(onShowRemoveConfirm).toHaveBeenCalledTimes(1);
-    expect(onRemove).not.toHaveBeenCalled();
+    expect(onShowRemoveConfirm).toHaveBeenCalledWith('c1', expect.objectContaining({ top: expect.any(Number), left: expect.any(Number) }));
   });
 
   test('renders the legendary-action badge when the pool is set', () => {

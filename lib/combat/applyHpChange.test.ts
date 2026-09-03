@@ -56,6 +56,48 @@ describe('applyHpChange — damage', () => {
     expect(result.updates.deathSaves).toEqual({ successes: 0, failures: 2 });
   });
 
+  test('massive damage to a downed combatant is instant death', () => {
+    const combatant = makeCombatant({
+      hp: 0,
+      maxHp: 20,
+      lifeState: 'dying',
+      deathSaves: { successes: 0, failures: 1 },
+    });
+    const result = applyHpChange(combatant, { kind: 'damage', amount: 25, damageType: '' });
+    expect(result.updates.lifeState).toBe('dead');
+    expect(result.updates.deathSaves).toBeUndefined();
+  });
+
+  test('a monster taken to 0 HP gets no life-state keys but still clears concentration', () => {
+    const result = applyHpChange(
+      makeCombatant({ type: 'monster', hp: 6, maxHp: 6, concentratingOn: 'Web' }),
+      { kind: 'damage', amount: 9, damageType: '' }
+    );
+    expect(result.updates.hp).toBe(0);
+    expect(result.updates).not.toHaveProperty('lifeState');
+    expect(result.updates).not.toHaveProperty('deathSaves');
+    expect(result.updates.concentratingOn).toBeUndefined();
+  });
+
+  test('a concentrating combatant hit for fully-mitigated damage raises no CON save', () => {
+    const result = applyHpChange(
+      makeCombatant({ hp: 20, maxHp: 20, concentratingOn: 'Bless', damageImmunities: ['fire'] }),
+      { kind: 'damage', amount: 12, damageType: 'fire' }
+    );
+    expect(result.updates).not.toHaveProperty('pendingConSaveDC');
+    expect(result.updates).not.toHaveProperty('concentratingOn');
+    expect(result.conSaveRequired).toBeUndefined();
+  });
+
+  test('damage on an already-dead combatant adds no death-save failure', () => {
+    const result = applyHpChange(
+      makeCombatant({ hp: 0, maxHp: 20, lifeState: 'dead' }),
+      { kind: 'damage', amount: 5, damageType: '' }
+    );
+    expect(result.updates.lifeState).not.toBe('dead');
+    expect(result.updates).not.toHaveProperty('deathSaves');
+  });
+
   test('fully-mitigated damage while downed is inert', () => {
     const combatant = makeCombatant({
       hp: 0,
@@ -127,6 +169,16 @@ describe('applyHpChange — setTemp', () => {
     const result = applyHpChange(makeCombatant({ tempHp: 3 }), {
       kind: 'setTemp',
       amount: 2,
+      damageType: '',
+    });
+    expect(result.updates).toEqual({});
+    expect(result.history).toBeUndefined();
+  });
+
+  test('a value equal to the current tempHp is a no-op', () => {
+    const result = applyHpChange(makeCombatant({ tempHp: 5 }), {
+      kind: 'setTemp',
+      amount: 5,
       damageType: '',
     });
     expect(result.updates).toEqual({});

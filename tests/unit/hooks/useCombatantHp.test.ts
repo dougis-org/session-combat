@@ -122,4 +122,19 @@ describe('useCombatantHp — undo', () => {
     expect(onUpdate).toHaveBeenCalledWith({ hp: 20, tempHp: 0 });
     expect(result.current.canUndo).toBe(false);
   });
+
+  test('undo restores hp/tempHp only — it does NOT revert life-state entered by the damage (documented limitation)', () => {
+    const { result, onUpdate } = setup({
+      combatant: makeCombatant({ hp: 3, maxHp: 20, type: 'player' }),
+    });
+    act(() => result.current.setHpAdjustment('9'));
+    act(() => result.current.applyDamage());
+    // the damage drove the combatant into 'dying'
+    expect(onUpdate).toHaveBeenLastCalledWith(expect.objectContaining({ lifeState: 'dying' }));
+    onUpdate.mockClear();
+    act(() => result.current.undoHpChange());
+    const undoPayload = onUpdate.mock.calls[0][0];
+    expect(undoPayload).toEqual({ hp: 3, tempHp: 0 });
+    expect(undoPayload).not.toHaveProperty('lifeState');
+  });
 });

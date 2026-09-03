@@ -7,16 +7,18 @@ import { ConditionFormModal } from '@/lib/components/combatant-card/ConditionFor
 interface ConditionControlsProps {
   combatant: CombatantState;
   onUpdate: (updates: Partial<CombatantState>) => void;
+  /** Whether the "Add Condition" modal is open (trigger lives in the card header column). */
+  modalOpen: boolean;
+  onModalClose: () => void;
 }
 
 /**
- * The "Add Condition" trigger (opening `ConditionFormModal` — no `window.prompt`),
- * the conditions list with its expand/collapse toggle, and per-condition remove
- * buttons for the current combatant.
+ * The conditions list with its expand/collapse toggle and per-condition remove
+ * buttons, plus the `ConditionFormModal` (opened from the card's action column —
+ * no `window.prompt`).
  */
-export function ConditionControls({ combatant, onUpdate }: ConditionControlsProps) {
+export function ConditionControls({ combatant, onUpdate, modalOpen, onModalClose }: ConditionControlsProps) {
   const [showConditions, setShowConditions] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
 
   const addCondition = (condition: StatusCondition) => {
     onUpdate({ conditions: [...combatant.conditions, condition] });
@@ -28,13 +30,6 @@ export function ConditionControls({ combatant, onUpdate }: ConditionControlsProp
 
   return (
     <>
-      <button
-        onClick={() => setModalOpen(true)}
-        className="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs self-start"
-      >
-        Add Condition
-      </button>
-
       {combatant.conditions.length > 0 && (
         <div className="mb-2">
           <button
@@ -68,7 +63,7 @@ export function ConditionControls({ combatant, onUpdate }: ConditionControlsProp
         <ConditionFormModal
           combatantName={combatant.name}
           onSubmit={addCondition}
-          onClose={() => setModalOpen(false)}
+          onClose={onModalClose}
         />
       )}
     </>

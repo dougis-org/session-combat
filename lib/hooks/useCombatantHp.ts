@@ -12,6 +12,8 @@ export interface UseCombatantHpArgs {
   combatant: CombatantState;
   onUpdate: (updates: Partial<CombatantState>) => void;
   onConSaveRequired?: (dc: number) => void;
+  /** Called when a damage action transitions the combatant fresh into `dying`. */
+  onEnteredDying?: () => void;
 }
 
 export interface UseCombatantHpResult {
@@ -39,6 +41,7 @@ export function useCombatantHp({
   combatant,
   onUpdate,
   onConSaveRequired,
+  onEnteredDying,
 }: UseCombatantHpArgs): UseCombatantHpResult {
   const [hpAdjustment, setHpAdjustment] = useState('');
   const [isTempMode, setIsTempMode] = useState(false);
@@ -75,9 +78,13 @@ export function useCombatantHp({
         onConSaveRequired?.(result.conSaveRequired);
       }
 
+      if (result.enteredDying) {
+        onEnteredDying?.();
+      }
+
       setHpAdjustment('');
     },
-    [combatId, combatant, hpAdjustment, selectedDamageType, onUpdate, onConSaveRequired]
+    [combatId, combatant, hpAdjustment, selectedDamageType, onUpdate, onConSaveRequired, onEnteredDying]
   );
 
   const applyDamage = useCallback(() => run('damage'), [run]);
