@@ -50,4 +50,22 @@ describe('HpControls (through CombatantCard)', () => {
     await user.click(screen.getByRole('checkbox', { name: /Temp/ }));
     expect(screen.getByRole('button', { name: 'Set Temp' })).toBeInTheDocument();
   });
+
+  test('Enter in the HP field applies damage; Shift+Enter heals', async () => {
+    const { onUpdate, user } = renderCard({ hp: 20, maxHp: 30 });
+    const input = screen.getByRole('spinbutton');
+    await user.type(input, '5{Enter}');
+    expect(onUpdate).toHaveBeenLastCalledWith(expect.objectContaining({ hp: 15 }));
+    // combatant prop is static (onUpdate is a mock), so heal is applied to hp 20
+    await user.type(input, '3{Shift>}{Enter}{/Shift}');
+    expect(onUpdate).toHaveBeenLastCalledWith(expect.objectContaining({ hp: 23 }));
+  });
+
+  test('Shift+Enter in Temp mode sets temporary HP', async () => {
+    const { onUpdate, user } = renderCard({ hp: 20, tempHp: 0 });
+    await user.click(screen.getByRole('checkbox', { name: /Temp/ }));
+    const input = screen.getByRole('spinbutton');
+    await user.type(input, '7{Shift>}{Enter}{/Shift}');
+    expect(onUpdate).toHaveBeenLastCalledWith(expect.objectContaining({ tempHp: 7 }));
+  });
 });

@@ -52,4 +52,38 @@ describe('CombatantCardHeader', () => {
     await userEvent.setup().click(screen.getByRole('button'));
     expect(onSetInitiative).toHaveBeenCalledWith('c1');
   });
+
+  test('InitiativeControl renders a rolled roll with advantage and a dropped die', () => {
+    render(
+      <InitiativeControl
+        combatant={{
+          ...BASE,
+          initiative: 18,
+          initiativeRoll: { method: 'rolled', roll: 17, altRoll: 4, advantage: true, bonus: 1, flatBonus: 2, total: 20 },
+        }}
+      />
+    );
+    expect(screen.getByText(/d20:17↑/)).toBeInTheDocument();
+    expect(screen.getByText(/dropped:4/)).toBeInTheDocument();
+  });
+
+  test('InitiativeControl renders a plain rolled roll and a manual roll', () => {
+    const { rerender } = render(
+      <InitiativeControl
+        combatant={{ ...BASE, initiativeRoll: { method: 'rolled', roll: 12, advantage: false, bonus: 3, total: 15 } }}
+      />
+    );
+    expect(screen.getByText(/d20:12\+3/)).toBeInTheDocument();
+    rerender(
+      <InitiativeControl
+        combatant={{ ...BASE, initiativeRoll: { method: 'manual', roll: 9, bonus: 2, flatBonus: 1, total: 12 } }}
+      />
+    );
+    expect(screen.getByText(/9\+2\+1/)).toBeInTheDocument();
+  });
+
+  test('header HP readout shows temp HP and the low-HP red tint', () => {
+    render(<CombatantCardHeader combatant={{ ...BASE, hp: 3, maxHp: 20, tempHp: 4 }} isActive={false} />);
+    expect(screen.getByText(/\+4 tmp/)).toBeInTheDocument();
+  });
 });
