@@ -482,8 +482,12 @@ test.describe("Auth", () => {
     await menuTrigger.focus();
     await page.keyboard.press("Enter");
 
+    // Opening via keyboard focuses the first item ("Profile & Settings"); step
+    // down to "Logout" before activating it.
     const logoutItem = page.locator('[data-testid="logout-button"]');
     await expect(logoutItem).toBeVisible();
+    await page.keyboard.press("ArrowDown");
+    await expect(logoutItem).toBeFocused();
     await page.keyboard.press("Enter");
 
     await page.waitForURL("**/login", { timeout: 5000 });
