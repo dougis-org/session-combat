@@ -274,6 +274,72 @@ describe('populate-campaigns-g5b monsters', () => {
   });
 });
 
+describe('populate-campaigns-g5c monsters', () => {
+  const G5C_SOURCES = [
+    'The Dark of Hot Springs Island',
+    'Reavers of Harkenwold',
+    'The Lost City',
+    'Points of Light',
+    'Night Below',
+    'Desert of Desolation',
+    'Savage Tide',
+    'Expedition to the Barrier Peaks',
+  ];
+  const g5c = CUSTOM_MONSTERS.filter((m) => G5C_SOURCES.includes(m.source ?? ''));
+
+  it('adds 25-55 new G5c entries, all cm- prefixed with a G5c source', () => {
+    expect(g5c.length).toBeGreaterThanOrEqual(25);
+    expect(g5c.length).toBeLessThanOrEqual(55);
+    for (const m of g5c) {
+      expect(m.id).toMatch(/^cm-/);
+      expect(G5C_SOURCES).toContain(m.source);
+    }
+  });
+
+  it('includes the campaign BBEGs', () => {
+    const ids = CUSTOM_MONSTERS.map((m) => m.id);
+    for (const id of [
+      'cm-hsi-sunless-leviathan',
+      'cm-roh-twigsplitter',
+      'cm-b4-zargon-avatar',
+      'cm-pol-bandit-king',
+      'cm-nb-savant-aboleth',
+      'cm-i35-martek',
+      'cm-i35-amun-re',
+      'cm-st-demogorgon',
+      'cm-st-shami-amourae',
+      'cm-s3-froghemoth',
+    ]) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  it('every G5c monster has passive Perception as a string when senses are defined', () => {
+    for (const m of g5c) {
+      if (!m.senses) continue;
+      expect(typeof m.senses['passive Perception']).toBe('string');
+    }
+  });
+
+  it('every G5c monster damage array uses only canonical DamageType values', () => {
+    const canonical: DamageType[] = [
+      'acid', 'bludgeoning', 'cold', 'fire', 'force',
+      'lightning', 'necrotic', 'piercing', 'poison',
+      'psychic', 'radiant', 'slashing', 'thunder',
+    ];
+    for (const m of g5c) {
+      for (const arr of [m.damageResistances, m.damageImmunities, m.damageVulnerabilities]) {
+        for (const v of arr ?? []) expect(canonical).toContain(v);
+      }
+    }
+  });
+
+  it('every G5c monster id is unique', () => {
+    const g5cIds = g5c.map((m) => m.id);
+    expect(new Set(g5cIds).size).toBe(g5cIds.length);
+  });
+});
+
 describe('findCustomMonsterById', () => {
   it('returns the template when id matches', () => {
     const found = findCustomMonsterById('cm-vecna');

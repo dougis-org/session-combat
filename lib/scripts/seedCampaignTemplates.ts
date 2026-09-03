@@ -3294,6 +3294,187 @@ function rtteeEncounters(): EncounterTemplate[] {
   ];
 }
 
+// ===========================================================================
+// populate-campaigns-g5c — encounter helpers
+// ===========================================================================
+
+/** The Dark of Hot Springs Island — volcanic sandbox hexcrawl. */
+function hsiEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const raider = requireCustomMonsterById("cm-hsi-hex-scarred-raider");
+  const sharkMan = requireCustomMonsterById("cm-hsi-shark-man");
+  const volcanoTroll = requireCustomMonsterById("cm-hsi-volcano-troll");
+  const guardianRobot = requireCustomMonsterById("cm-hsi-arcology-guardian-robot");
+  const leviathan = requireCustomMonsterById("cm-hsi-sunless-leviathan");
+  const bandit = requireCustomMonsterById("cm-bandit");
+
+  return [
+    encounter("Raiders from the Hex", "Ch 1 (Coastal North) — Hex-scarred raiders fall on a fishing camp at dusk.", compact([many(raider, 4), many(bandit, 2)])),
+    encounter("The Shark-Men of the Reef", "Ch 1 (Coastal North) — Shark-man jaguar warriors drag swimmers from the shallows.", compact([many(sharkMan, 3), many(raider, 2)])),
+    encounter("Slag Fields", "Ch 2 (Volcanic Center) — A volcano troll rules a fumarole field, flanked by raider scavengers.", compact([m(volcanoTroll), many(raider, 3)])),
+    encounter("The Black City", "Ch 3 (Far South) — An arcology guardian robot still enforces a perimeter around the ruined ancient city.", compact([m(guardianRobot), many(sharkMan, 2)])),
+    encounter("The Sea Caves", "Ch 4 (Sunless Reach) — Shark-men and a wounded volcano troll guard the tunnel to the sunless water.", compact([m(volcanoTroll), many(sharkMan, 4)])),
+    encounter("The Sunless Leviathan", "Ch 4 (Sunless Reach) — The elder beast of the under-island rises from the black lagoon.", compact([m(leviathan), many(sharkMan, 3)])),
+  ];
+}
+
+/** Reavers of Harkenwold — the Iron Circle occupation. */
+function rohEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const officer = requireCustomMonsterById("cm-roh-iron-circle-officer");
+  const bogunTroll = requireCustomMonsterById("cm-roh-bogun-troll");
+  const marshChieftain = requireCustomMonsterById("cm-roh-marsh-troll-chieftain");
+  const twigsplitter = requireCustomMonsterById("cm-roh-twigsplitter");
+  const hobgoblin = requireCustomMonsterById("cm-hobgoblin");
+  const ogre = requireCustomMonsterById("cm-ogre");
+  const bandit = requireCustomMonsterById("cm-bandit");
+
+  return [
+    encounter("Into Harkenwold", "Ch 1 (Talwod) — An Iron Circle press-gang holds the village square; an officer leads the raiders.", compact([m(officer), many(hobgoblin, 4), many(bandit, 2)])),
+    encounter("The Iron Circle Patrol", "Ch 2 (Harkenwold road) — A mixed patrol of hobgoblins and a bogun troll sweeps the farm lanes.", compact([m(bogunTroll), many(hobgoblin, 5)])),
+    encounter("Ambush at the Ford", "Ch 2 (Harkenwold) — Two Iron Circle officers spring a crossbow ambush from the treeline.", compact([many(officer, 2), many(bandit, 4)])),
+    encounter("The Doom Marsh", "Ch 3 (marsh) — A marsh troll chieftain and its bogun kin lair in the reeking bog.", compact([m(marshChieftain), many(bogunTroll, 2)])),
+    encounter("Ironfang Keep: The Outer Ward", "Ch 4 (Ironfang Keep) — Ogre gate guards and hobgoblin crossbowmen hold the curtain wall.", compact([many(ogre, 2), many(hobgoblin, 4), m(officer)])),
+    encounter("Ironfang Keep: The Inner Hall", "Ch 4 (Ironfang Keep) — The Iron Circle command makes a stand around Twigsplitter's throne.", compact([m(bogunTroll), many(officer, 2), many(hobgoblin, 3)])),
+    encounter("Twigsplitter, Ettin Chieftain", "Ch 5 (Ironfang Keep) — The two-headed warlord of the Iron Circle army meets the party axe in hand.", compact([m(twigsplitter), m(bogunTroll), many(hobgoblin, 4)])),
+  ];
+}
+
+/** The Lost City — the buried pyramid of Cynidicea. */
+function b4Encounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const cultist = requireCustomMonsterById("cm-b4-cynidicean-cultist");
+  const priestess = requireCustomMonsterById("cm-b4-cynidicean-priestess");
+  const mummyLord = requireCustomMonsterById("cm-b4-pyramid-mummy-lord");
+  const zargon = requireCustomMonsterById("cm-b4-zargon-avatar");
+  const giantSpider = requireCustomMonsterById("cm-giant-spider");
+  const skeleton = requireCustomMonsterById("cm-skeleton");
+
+  return [
+    encounter("The Upper Pyramid: Guardian Dead", "Ch 1 — Animated dead and giant spiders infest the sand-choked upper tiers.", compact([many(skeleton, 6), many(giantSpider, 3)])),
+    encounter("The Upper Pyramid: The Mummy Lord", "Ch 1 — A Zargon-cult mummy lord wakes in the burial vault at the pyramid's apex.", compact([m(mummyLord), many(skeleton, 4)])),
+    encounter("The Lower Pyramid", "Ch 2 — Masked Cynidicean cultists ambush the party in the drug-hazed lower halls.", compact([many(cultist, 6), m(priestess)])),
+    encounter("The Lost City of Cynidicea", "Ch 3 — Rival Cynidicean factions clash in the streets; the party is caught between two priestesses.", compact([many(priestess, 2), many(cultist, 4)])),
+    encounter("Zargon's Lair: The Priesthood", "Ch 4 — Zargon's priestess and her fanatics guard the pool at the base of the idol.", compact([m(priestess), many(cultist, 6)])),
+    encounter("Zargon, the One-Eyed God", "Ch 4 — The one-eyed horror rises from its sacred pool to defend Cynidicea.", compact([m(zargon), many(cultist, 4)])),
+  ];
+}
+
+/** Points of Light — the 4e Nentir Vale heroic tier. */
+function polEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const warlord = requireCustomMonsterById("cm-pol-bandit-warlord");
+  const archmage = requireCustomMonsterById("cm-pol-bandit-archmage");
+  const king = requireCustomMonsterById("cm-pol-bandit-king");
+  const goblin = requireCustomMonsterById("cm-goblin");
+  const hobgoblin = requireCustomMonsterById("cm-hobgoblin");
+  const bandit = requireCustomMonsterById("cm-bandit");
+  const ogre = requireCustomMonsterById("cm-ogre");
+
+  return [
+    encounter("Goblin Ambush on the King's Road", "Ch 1 (Fallcrest) — The classic Nentir Vale opener: goblins spring from the roadside brush.", compact([many(goblin, 6), many(hobgoblin, 2)])),
+    encounter("Winterhaven Defense", "Ch 1 — A bandit warlord's raiders test the palisade of a point of light.", compact([m(warlord), many(bandit, 4)])),
+    encounter("The Threatening Wilds", "Ch 2 — A bandit patrol backed by a hedge archmage holds the wilderness road.", compact([m(archmage), many(bandit, 4), many(hobgoblin, 2)])),
+    encounter("The Warlord's Camp", "Ch 2-3 — Two bandit warlords and their ogre muscle rally the raiders' main camp.", compact([many(warlord, 2), many(ogre, 2), many(bandit, 3)])),
+    encounter("The Intruder Lair", "Ch 3 — The Bandit King holds court with his archmage and warlord lieutenants.", compact([m(king), m(archmage), m(warlord)])),
+  ];
+}
+
+/** Night Below — the descent to Great Shaboath. */
+function nbEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const rockseer = requireCustomMonsterById("cm-nb-rockseer-elf");
+  const ixzan = requireCustomMonsterById("cm-nb-ixzan-ixitxachitl");
+  const derro = requireCustomMonsterById("cm-nb-derro-slaver");
+  const gnarleyDruid = requireCustomMonsterById("cm-nb-gnarley-druid");
+  const golem = requireCustomMonsterById("cm-nb-shaboath-golem");
+  const aboleth = requireCustomMonsterById("cm-nb-savant-aboleth");
+  const mindFlayer = requireCustomMonsterById("cm-mind-flayer");
+  const goblin = requireCustomMonsterById("cm-goblin");
+  const bandit = requireCustomMonsterById("cm-bandit");
+
+  return [
+    encounter("The Evils of Haranshire", "Book 1 — A slaving ring's brigands try to snatch the party's spellcasters for the Underdark trade.", compact([many(bandit, 5), many(goblin, 3)])),
+    encounter("The False Ally", "Book 1 — The Druid of the Gnarley reveals himself, calling on the forest and a hidden green-dragon patron.", compact([m(gnarleyDruid), many(goblin, 4)])),
+    encounter("Derro Slaver Caravan", "Book 2 — Mad derro slave-catchers, allied with an illithid, ambush the party on the Underdark road.", compact([m(derro), many(mindFlayer, 1), many(goblin, 4)])),
+    encounter("The Rockseer Enclave", "Book 2 — Reclusive rockseer elves test the party before offering alliance against the aboleths.", compact([many(rockseer, 3), many(goblin, 2)])),
+    encounter("The Sunless Sea: Shaboath Approach", "Book 3 — Ixzan ixitxachitl and an obsidian golem guard the causeway into Great Shaboath.", compact([many(ixzan, 3), m(golem)])),
+    encounter("The Savant Aboleth of Great Shaboath", "Book 3 — An elder aboleth of the sunken city meets the party mind-first.", compact([m(aboleth), m(golem), many(ixzan, 2)])),
+  ];
+}
+
+/** Desert of Desolation — the Hickman Arabian-nights trilogy. */
+function i35Encounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const jackalwere = requireCustomMonsterById("cm-i35-jackalwere-raider");
+  const tombMummy = requireCustomMonsterById("cm-i35-tomb-mummy");
+  const setPriest = requireCustomMonsterById("cm-i35-set-priest");
+  const amunRe = requireCustomMonsterById("cm-i35-amun-re");
+  const martek = requireCustomMonsterById("cm-i35-martek");
+  const skeleton = requireCustomMonsterById("cm-skeleton");
+
+  return [
+    encounter("Pharaoh: The Trapped Corridors", "Ch 1 (Pyramid of Amun-Re) — Bound tomb mummies and skeletal servants patrol the maze of the pyramid.", compact([many(tombMummy, 3), many(skeleton, 4)])),
+    encounter("Pharaoh: The Ghost Pharaoh", "Ch 1 — Amun-Re, the wronged ghost pharaoh, confronts the tomb-robbers in his burial chamber.", compact([m(amunRe), many(tombMummy, 2)])),
+    encounter("Oasis of the White Palm: The Dune Raiders", "Ch 2 (Oasis) — Jackalwere raiders in human guise ambush the caravan at the wells.", compact([many(jackalwere, 5)])),
+    encounter("Oasis of the White Palm: Temple of Set", "Ch 2 (Crypt of Badr al-Mosak) — The High Priest of Set and his jackalwere servitors defend the snake-god's shrine.", compact([m(setPriest), many(jackalwere, 3)])),
+    encounter("Lost Tomb of Martek: The Sea of Glass", "Ch 3 (Crystal Prism) — Failed guardians and tomb mummies drift the glass sea aboard a wrecked skate-ship.", compact([many(tombMummy, 3), many(jackalwere, 2)])),
+    encounter("Lost Tomb of Martek: The Citadel", "Ch 3 (Citadel of Martek) — The millennium-dead wizard Martek wakes for the prophesied hour.", compact([m(martek), many(tombMummy, 2)])),
+  ];
+}
+
+/** Savage Tide — from Sasserine to Demogorgon's realm. */
+function stEncounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const bullywugPriest = requireCustomMonsterById("cm-st-bullywug-tide-priest");
+  const zombieCaptain = requireCustomMonsterById("cm-st-pirate-zombie-captain");
+  const shami = requireCustomMonsterById("cm-st-shami-amourae");
+  const demogorgon = requireCustomMonsterById("cm-st-demogorgon");
+  const aboleth = requireCustomMonsterById("cm-nb-savant-aboleth");
+  const skeleton = requireCustomMonsterById("cm-skeleton");
+  const shadow = requireCustomMonsterById("cm-shadow");
+  const bandit = requireCustomMonsterById("cm-bandit");
+
+  return [
+    encounter("There Is No Honor", "Ch 1 (Sasserine) — Undead pirates and thieves'-guild blades tear at the noble houses by night.", compact([m(zombieCaptain), many(skeleton, 5)])),
+    encounter("The Bullywug Gambit", "Ch 2 (Sasserine outskirts) — Bullywug tide-priests raise a shrine to the coming Savage Tide beneath the city.", compact([many(bullywugPriest, 2), many(skeleton, 4)])),
+    encounter("The Sea Wyvern's Wake", "Ch 3 (Trackless Sea) — Undead pirates board the Sea Wyvern in the open ocean.", compact([m(zombieCaptain), many(skeleton, 6)])),
+    encounter("Here There Be Monsters", "Ch 4 (Isle of Dread) — Shipwrecked and hunted, the party fights bullywug scouts on the black beach.", compact([many(bullywugPriest, 2), many(bandit, 4)])),
+    encounter("Tides of Dread", "Ch 5 (Farshore) — The colony's palisade is stormed by a bullywug war-band during a storm.", compact([many(bullywugPriest, 3), many(skeleton, 4)])),
+    encounter("The Lightless Depths", "Ch 6 (aboleth city) — A savant aboleth of the sunken city guards the Star Gems.", compact([m(aboleth), many(bullywugPriest, 2)])),
+    encounter("City of Broken Idols", "Ch 7 (taboo plateau) — Undead temple guardians and a risen pirate lord hold the idol plaza.", compact([m(zombieCaptain), many(skeleton, 6), many(shadow, 3)])),
+    encounter("Serpents of Scuttlecove", "Ch 8 (Scuttlecove) — Cannibal cultists and a zombie captain's crew corner the party in the pirate city.", compact([m(zombieCaptain), many(bandit, 5), many(shadow, 2)])),
+    encounter("Into the Maw", "Ch 9 (Abyss) — Shadows and risen dead swarm the approaches to the prison-fortress of the Wells of Darkness.", compact([many(shadow, 6), many(skeleton, 6)])),
+    encounter("Wells of Darkness: Shami-Amourae", "Ch 10 (Wells of Darkness) — The imprisoned Lady of Delights bargains, then strikes.", compact([m(shami), many(shadow, 4)])),
+    encounter("Enemies of My Enemy", "Ch 11 (planar courts) — Shami-Amourae, now freed and vengeful, tries to stop the party recruiting allies.", compact([m(shami), many(shadow, 4), many(skeleton, 4)])),
+    encounter("Prince of Demons: The Gaping Maw", "Ch 12 (Abyss) — Demogorgon's honor guard of shadows and risen dead holds the approach to his throne.", compact([many(shadow, 8), m(zombieCaptain)])),
+    encounter("Prince of Demons: Aameul and Hethradiah", "Ch 12 — Demogorgon's two heads turn their gazes on the party in the outer sanctum.", compact([m(demogorgon), many(shadow, 4)])),
+    encounter("Demogorgon, Prince of Demons", "Ch 12 (Gaping Maw) — The two-headed demon lord fights to complete the Savage Tide and drown the world in madness.", compact([m(demogorgon), m(shami), many(shadow, 4)])),
+  ];
+}
+
+/** Expedition to the Barrier Peaks — the crashed spaceship. */
+function s3Encounters(): EncounterTemplate[] {
+  const { encounter, m, many, compact } = g5aBuilders();
+  const vegepygmyChief = requireCustomMonsterById("cm-s3-vegepygmy-chief");
+  const servoRobot = requireCustomMonsterById("cm-s3-dining-servo-robot");
+  const boxingRobot = requireCustomMonsterById("cm-s3-boxing-robot");
+  const karateRobot = requireCustomMonsterById("cm-s3-karate-robot");
+  const interceptor = requireCustomMonsterById("cm-s3-fighter-interceptor-droid");
+  const froghemoth = requireCustomMonsterById("cm-s3-froghemoth");
+
+  return [
+    encounter("The Crew's Quarters", "Sect 1 — A vegepygmy commune has overgrown the dormitory; the chief leads the defense.", compact([m(vegepygmyChief), many(vegepygmyChief, 2)])),
+    encounter("The Lounge Area", "Sect 2 — A malfunctioning dining servo robot insists on serving the party toxic rations, then attacks.", compact([many(servoRobot, 2), m(vegepygmyChief)])),
+    encounter("The Gardens & Menagerie", "Sect 3 — Alien flora and a lurking predator; the bunnyoid's stump is not what it seems.", compact([m(vegepygmyChief), many(servoRobot, 1)])),
+    encounter("Activity Deck: Boxing vs. Karate", "Sect 4 — A boxing robot and a karate robot master will fight the party, or each other, depending on how it's played.", compact([m(boxingRobot), m(karateRobot)])),
+    encounter("The Loading Area", "Sect 5 — A fighter-interceptor droid guards the cargo bay and the way off the ship.", compact([m(interceptor), many(servoRobot, 2)])),
+    encounter("The Robot Barracks", "Sect 5 — Boxing and karate robots power up together when the intruder alarm finally trips.", compact([many(boxingRobot, 2), many(karateRobot, 2)])),
+    encounter("The Central Chamber", "Sect 6 — Interceptor droids make a last strafing pass before the party reaches the arena.", compact([many(interceptor, 2), m(karateRobot)])),
+    encounter("The Froghemoth", "Sect 6 — The three-eyed alien horror waits in the flooded reactor pit at the heart of the ship.", compact([m(froghemoth), many(vegepygmyChief, 2)])),
+  ];
+}
+
 const CAMPAIGN_CATALOG: CampaignTemplate[] = [
   makeTemplate(
     "Curse of Strahd",
@@ -3807,7 +3988,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Elemental Factions", order: 2, levelRange: "4-6", location: "Hot Springs Island" },
       { title: "The Ancient Ruins", order: 3, levelRange: "5-7", location: "Shasarazade Ruins" },
       { title: "The Efreeti Stronghold", order: 4, levelRange: "6-8", location: "Sulfur Springs Fortress" },
-    ]
+    ],
+    hsiEncounters()
   ),
 
   makeTemplate(
@@ -3818,7 +4000,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Keep on the Shadowfell", order: 1, levelRange: "1-3", location: "Winterhaven, Shadowfell Keep" },
       { title: "Thunderspire Labyrinth", order: 2, levelRange: "4-6", location: "Thunderspire Mountain" },
       { title: "Pyramid of Shadows", order: 3, levelRange: "7-10", location: "Pyramid of Shadows" },
-    ]
+    ],
+    polEncounters()
   ),
 
   makeTemplate(
@@ -3830,7 +4013,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Pyramid Exterior", order: 2, levelRange: "1-2", location: "Lost City Pyramid" },
       { title: "The Upper Pyramid Levels", order: 3, levelRange: "2-3", location: "Pyramid Interior" },
       { title: "The Lower City of Cynidicea", order: 4, levelRange: "3", location: "Cynidicea" },
-    ]
+    ],
+    b4Encounters()
   ),
 
   makeTemplate(
@@ -3866,7 +4050,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Wells of Darkness", order: 10, levelRange: "18-19", location: "Wells of Darkness, Abyss" },
       { title: "Enemies of My Enemy", order: 11, levelRange: "19-20", location: "Abyss" },
       { title: "Prince of Demons", order: 12, levelRange: "20", location: "Gaping Maw, Abyss" },
-    ]
+    ],
+    stEncounters()
   ),
 
   makeTemplate(
@@ -3877,7 +4062,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "The Evils of Haranshire", order: 1, levelRange: "1-5", location: "Haranshire" },
       { title: "Perils of the Underdark", order: 2, levelRange: "5-10", location: "Underdark" },
       { title: "The Sunless Sea", order: 3, levelRange: "10-14", location: "Sunless Sea, Underdark" },
-    ]
+    ],
+    nbEncounters()
   ),
 
   makeTemplate(
@@ -3901,7 +4087,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Pharaoh", order: 1, levelRange: "5-7", location: "Desert of Desolation" },
       { title: "Oasis of the White Palm", order: 2, levelRange: "7-9", location: "Desert Oasis" },
       { title: "Lost Tomb of Martek", order: 3, levelRange: "9-10", location: "Tomb of Martek" },
-    ]
+    ],
+    i35Encounters()
   ),
 
   makeTemplate(
@@ -4021,7 +4208,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Activity Deck", order: 4, levelRange: "10-11", location: "Spaceship Interior" },
       { title: "Lower Engineering", order: 5, levelRange: "11", location: "Spaceship Interior" },
       { title: "The Bridge", order: 6, levelRange: "11-12", location: "Spaceship Bridge" },
-    ]
+    ],
+    s3Encounters()
   ),
 
   makeTemplate(
@@ -4067,7 +4255,8 @@ const CAMPAIGN_CATALOG: CampaignTemplate[] = [
       { title: "Gathering Allies", order: 3, levelRange: "3", location: "Harkenwold" },
       { title: "Battle of Albridge", order: 4, levelRange: "3-4", location: "Albridge" },
       { title: "Iron Keep", order: 5, levelRange: "4", location: "Iron Keep" },
-    ]
+    ],
+    rohEncounters()
   ),
 
   makeTemplate(

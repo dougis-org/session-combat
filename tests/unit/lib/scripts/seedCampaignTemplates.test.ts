@@ -817,6 +817,74 @@ describe("populate-campaigns-g5b encounters", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// populate-campaigns-g5c — Sandbox, classic & sci-fantasy modules (sub-group C)
+// ---------------------------------------------------------------------------
+
+describe("populate-campaigns-g5c encounters", () => {
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}));
+  afterEach(() => jest.restoreAllMocks());
+
+  const G5C_CHAPTERS: Record<string, number> = {
+    "The Dark of Hot Springs Island": 4,
+    "Reavers of Harkenwold": 5,
+    "The Lost City": 4,
+    "Points of Light": 3,
+    "Night Below: An Underdark Campaign": 3,
+    "Desert of Desolation": 3,
+    "Savage Tide": 12,
+    "Expedition to the Barrier Peaks": 6,
+  };
+
+  it("every G5c campaign meets the shared encounter-quality contract", async () => {
+    for (const [name, chapters] of Object.entries(G5C_CHAPTERS)) {
+      const seeded = await captureTemplate(name);
+      assertCampaignEncounterContract(seeded, name, chapters);
+    }
+  });
+
+  it("each G5c campaign has at least one encounter per chapter", async () => {
+    for (const [name, chapters] of Object.entries(G5C_CHAPTERS)) {
+      const seeded = await captureTemplate(name);
+      expect(seeded.encounters.length).toBeGreaterThanOrEqual(chapters);
+      for (const enc of seeded.encounters) expect(enc.monsters.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("G5c campaign BBEGs are present in their encounters", async () => {
+    const bbeg: Record<string, string> = {
+      "The Dark of Hot Springs Island": "Sunless Leviathan",
+      "Reavers of Harkenwold": "Twigsplitter, Ettin Chieftain of the Iron Circle",
+      "The Lost City": "Zargon, the One-Eyed God of Cynidicea",
+      "Points of Light": "The Bandit King",
+      "Night Below: An Underdark Campaign": "Savant Aboleth of Great Shaboath",
+      "Desert of Desolation": "Martek, the Millennium-Dead Wizard",
+      "Savage Tide": "Demogorgon, Prince of Demons",
+      "Expedition to the Barrier Peaks": "Froghemoth",
+    };
+    for (const [campaign, monsterName] of Object.entries(bbeg)) {
+      const seeded = await captureTemplate(campaign);
+      expect(allMonsters(seeded).map((m) => m.name)).toContain(monsterName);
+    }
+  });
+
+  it("Savage Tide reuses the Night Below savant aboleth stat block", async () => {
+    const seeded = await captureTemplate("Savage Tide");
+    expect(hasTemplate(seeded, "cm-nb-savant-aboleth")).toBe(true);
+  });
+
+  it("every monster in a G5c encounter uses only canonical damage types", async () => {
+    for (const name of Object.keys(G5C_CHAPTERS)) {
+      const seeded = await captureTemplate(name);
+      for (const mon of allMonsters(seeded)) {
+        for (const arr of [mon.damageResistances, mon.damageImmunities, mon.damageVulnerabilities]) {
+          for (const v of arr || []) expect(CANONICAL_DAMAGE_TYPES.has(v)).toBe(true);
+        }
+      }
+    }
+  });
+});
+
 describe("runCli", () => {
   let exitSpy: jest.SpyInstance;
   let logSpy: jest.SpyInstance;
