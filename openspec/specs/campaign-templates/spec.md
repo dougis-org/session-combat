@@ -23,28 +23,20 @@ The system SHALL read default encounters from a CampaignTemplate and instantiate
 - **Then** the system catches the error, deletes the partially created `Campaign` record, and returns an HTTP 500 status to the client.
 
 ### Requirement: CampaignTemplate data structure
-
-The system SHALL support storing `EncounterTemplate` definitions directly within a `CampaignTemplate`, including for the 6 G3 and 9 G4 campaigns.
+The system SHALL support storing `EncounterTemplate` definitions directly within a `CampaignTemplate`, including for the 6 G3, 9 G4, and 24 G5 campaigns.
 
 #### Scenario: Seeding templates with encounters
 
-- **Given** the seed script `seedCampaignTemplates.ts` defines an `EncounterTemplate` block for any G3 campaign (Rime, WBtW, PotA, CotCT, HR, RHoD)
+- **Given** the seed script `seedCampaignTemplates.ts` defines an `EncounterTemplate` block for any G5 campaign
 - **When** the seed script executes
 - **Then** the `campaignTemplates` collection in MongoDB contains the updated template including the `encounters` array
 
-#### Scenario: G3 catalog entries ship with full encounter arrays
+#### Scenario: G5 catalog entries ship with full encounter arrays
 
-- **Given** the `CAMPAIGN_CATALOG` in `lib/scripts/seedCampaignTemplates.ts` defines entries for the 6 G3 campaigns
+- **Given** the `CAMPAIGN_CATALOG` in `lib/scripts/seedCampaignTemplates.ts` defines entries for the 25 G5 campaigns
 - **When** the seed script is executed
-- **Then** each G3 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output (`rimeEncounters()`, `wbtwEncounters()`, `potaEncounters()`, `cotctEncounters()`, `hrEncounters()`, `rhodEncounters()`)
+- **Then** each G5 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output
 - **Then** every encounter's `monsters` array contains full `Monster` stat blocks built via `findCustomMonsterById` + `toEncounterMonster(s)`
-
-#### Scenario: G4 catalog entries ship with full encounter arrays
-
-- **Given** the `CAMPAIGN_CATALOG` defines entries for the 9 G4 campaigns (Candlekeep, Radiant Citadel, Golden Vault, Yawning Portal, Saltmarsh, Mad Mage, Runelords, Kingmaker, WotR)
-- **When** the seed script is executed
-- **Then** each G4 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output (`candlekeepEncounters()`, `radiantCitadelEncounters()`, `goldenVaultEncounters()`, `yawningPortalEncounters()`, `saltmarshEncounters()`, `madMageEncounters()`, `runelordsEncounters()`, `kingmakerEncounters()`, `wrathOfTheRighteousEncounters()`)
-- **Then** every encounter's `monsters` array contains full `Monster` stat blocks built via `requireCustomMonsterById` + `toEncounterMonster(s)`
 
 ### Requirement: Encounter insertion performance
 

@@ -1,5 +1,12 @@
-## ADDED Requirements
+# populate-campaigns-g5 Specification
 
+## Purpose
+Populate encounter and campaign-specific monster content for the 24 G5
+(Classic & 3PP / legacy) campaigns, completing the bulk-pass encounter
+rollout so every `CAMPAIGN_CATALOG` entry ships immediately playable.
+Shipped in three sub-group PRs: G5a (#693), G5b (#696), G5c (#697).
+
+## Requirements
 ### Requirement: G5 Encounter Population
 The system MUST populate every G5 (Classic & 3PP / legacy) campaign's `CAMPAIGN_CATALOG` entry with full `EncounterTemplate` definitions containing complete `Monster` stat blocks (non-empty `monsters` arrays), and each encounter SHALL be assembled from `findCustomMonsterById` + `toEncounterMonster(s)` so every monster instance has a unique `id`.
 
@@ -132,58 +139,12 @@ Every new `cm-` monster added for the G5 group SHALL satisfy the invariants alre
 - **WHEN** a 3PP monster stat block contains non-5e fields
 - **THEN** those fields are encoded as `traits[]` entries with descriptive text, not added to the schema
 
-## MODIFIED Requirements
-
-### Requirement: MODIFIED CampaignTemplate data structure (G5 catalog entries)
-The system SHALL support storing `EncounterTemplate` definitions directly within a `CampaignTemplate`, including for the 25 G5 campaigns.
+### Requirement: G5 catalog wiring
+The system SHALL wire every G5 `CAMPAIGN_CATALOG` entry to its per-campaign encounter helper so the seeded `CampaignTemplate` ships a populated `encounters` array.
 
 #### Scenario: G5 catalog entries ship with full encounter arrays
-- **Given** the `CAMPAIGN_CATALOG` in `lib/scripts/seedCampaignTemplates.ts` defines entries for the 25 G5 campaigns
+- **Given** the `CAMPAIGN_CATALOG` in `lib/scripts/seedCampaignTemplates.ts` defines entries for the 24 G5 campaigns
 - **When** the seed script is executed
 - **Then** each G5 catalog entry's `encounters` array is non-empty and contains the per-campaign encounter helper output
-- **Then** every encounter's `monsters` array contains full `Monster` stat blocks built via `findCustomMonsterById` + `toEncounterMonster(s)`
+- **Then** every encounter's `monsters` array contains full `Monster` stat blocks built via `requireCustomMonsterById` + `toEncounterMonster(s)`
 
-## REMOVED Requirements
-
-### Requirement: REMOVED None
-The system SHALL NOT remove any existing `CampaignTemplate` data structures as part of this change.
-
-#### Scenario: No REMOVED requirements
-
-- **Given** the G5 rollout is purely additive (new encounters and monsters)
-- **When** the change is applied
-- **Then** no existing requirement from prior capability versions is removed
-
-Reason for removal: N/A
-
-## Traceability
-
-- Proposal element -> Requirement: Populate G5 encounters -> ADDED G5 Encounter Population
-- Proposal element -> Requirement: G5 monster invariants -> ADDED G5 Custom Monster Constraints
-- Proposal element -> Requirement: 3PP stat block handling -> ADDED G5 3PP Stat Block Constraints
-- Proposal element -> Requirement: Wire G5 catalog to encounter helpers -> MODIFIED CampaignTemplate data structure (G5 catalog entries)
-- Design decision -> Requirement: Per-campaign encounter helpers -> ADDED G5 Encounter Population
-- Design decision -> Requirement: 3PP stat blocks fit MonsterTemplate -> ADDED G5 3PP Stat Block Constraints
-- Design decision -> Requirement: Pathfinder-to-5e conversion -> MODIFIED CampaignTemplate data structure (G5 catalog entries)
-- Requirement -> Task(s): Will map to `customMonsters.ts` additions and `seedCampaignTemplates.ts` per-campaign helpers in `tasks.md`.
-
-## Non-Functional Acceptance Criteria
-
-### Requirement: Performance
-
-#### Scenario: Latency budget
-- **Given** a G5 campaign template with 12 encounters (Shackled City / Savage Tide)
-- **When** the encounters are sequentially inserted into the DB during the seed script
-- **Then** the total overhead of encounter insertion must not exceed the existing 500ms baseline (no regression vs G1-G4)
-
-### Requirement: Security
-
-> See functional scenarios: All access-control rejections for the seed script are handled by existing middleware. No new security properties introduced by this change.
-
-### Requirement: Reliability
-
-#### Scenario: Missing monster reference fails fast
-- **Given** a G5 helper references a `cm-` monster id that doesn't exist in `CUSTOM_MONSTERS`
-- **When** the seed script runs
-- **Then** the script throws immediately with a clear error message identifying the missing id
-- **Then** CI catches the failure during `npm run test:unit` before merge
