@@ -3,6 +3,7 @@
 import type { CombatantState } from '@/lib/types';
 import { lifeStateDisplay } from '@/lib/combat/deathSaves';
 import { healthBarColor } from '@/lib/components/combatant-card/healthBarColor';
+import { formatInitiativeRoll } from '@/lib/components/combatant-card/formatInitiativeRoll';
 
 interface CombatantCardHeaderProps {
   combatant: CombatantState;
@@ -145,27 +146,7 @@ export function InitiativeControl({
         <p className="text-lg font-bold">{combatant.initiative}</p>
         {combatant.initiativeRoll && (
           <p className="text-xs text-gray-500 whitespace-nowrap">
-            {combatant.initiativeRoll.method === 'rolled'
-              ? [
-                  combatant.initiativeRoll.advantage
-                    ? `d20:${combatant.initiativeRoll.roll}↑${combatant.initiativeRoll.altRoll != null ? ` (dropped:${combatant.initiativeRoll.altRoll})` : ''}`
-                    : `d20:${combatant.initiativeRoll.roll}`,
-                  `+${combatant.initiativeRoll.bonus}`,
-                  combatant.initiativeRoll.flatBonus
-                    ? `${combatant.initiativeRoll.flatBonus > 0 ? '+' : ''}${combatant.initiativeRoll.flatBonus}`
-                    : null,
-                ].filter(Boolean).join('')
-              : [
-                  combatant.initiativeRoll.roll != null
-                    ? String(combatant.initiativeRoll.roll)
-                    : null,
-                  combatant.initiativeRoll.bonus !== 0
-                    ? `${combatant.initiativeRoll.bonus > 0 ? '+' : ''}${combatant.initiativeRoll.bonus}`
-                    : null,
-                  combatant.initiativeRoll.flatBonus
-                    ? `${combatant.initiativeRoll.flatBonus > 0 ? '+' : ''}${combatant.initiativeRoll.flatBonus}`
-                    : null,
-                ].filter((part): part is string => part != null).join('') || 'Manual'}
+            {formatInitiativeRoll(combatant.initiativeRoll)}
           </p>
         )}
       </button>
