@@ -30,6 +30,8 @@ export interface PreferenceValues {
     disableAnimation: boolean | null;
     /** Reserved slot for a future dice colour picker. Short hex string or `null`. */
     color: string | null;
+    /** Surface material for dice rolls. String or `null`. */
+    surface: string | null;
   };
   chat: {
     pinned: boolean;
@@ -39,7 +41,7 @@ export interface PreferenceValues {
 }
 
 export const DEFAULT_PREFERENCES: PreferenceValues = Object.freeze({
-  dice: Object.freeze({ sendToChat: false, disableAnimation: null, color: null }),
+  dice: Object.freeze({ sendToChat: false, disableAnimation: null, color: null, surface: null }),
   chat: Object.freeze({ pinned: false, size: null }),
 }) as PreferenceValues;
 
@@ -76,6 +78,8 @@ const KEY_VALIDATORS = {
   "dice.disableAnimation": (v: unknown): v is boolean | null =>
     v === null || typeof v === "boolean",
   "dice.color": isValidColor,
+  "dice.surface": (v: unknown): v is string | null =>
+    v === null || typeof v === "string",
   "chat.pinned": (v: unknown): v is boolean => typeof v === "boolean",
   "chat.size": isValidDockSizeOrNull,
 } as const;

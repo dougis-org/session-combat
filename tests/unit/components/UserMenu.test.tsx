@@ -91,7 +91,7 @@ describe('UserMenu', () => {
     const item = screen.getByRole('menuitem', { name: 'Logout' });
     expect(item).toHaveAttribute('data-testid', 'logout-button');
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getAllByRole('menuitem')).toHaveLength(1);
+    expect(screen.getAllByRole('menuitem')).toHaveLength(2);
   });
 
   it.each(['{ArrowDown}', '{Enter}', '{ }'])(
@@ -105,7 +105,7 @@ describe('UserMenu', () => {
       await user.keyboard(key);
       expect(await screen.findByRole('menu')).toBeInTheDocument();
       await waitFor(() =>
-        expect(screen.getByRole('menuitem', { name: 'Logout' })).toHaveFocus(),
+        expect(screen.getByRole('menuitem', { name: 'Profile & Settings' })).toHaveFocus(),
       );
     },
   );
@@ -140,6 +140,15 @@ describe('UserMenu', () => {
     await user.click(outside);
     await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
     expect(logout).not.toHaveBeenCalled();
+  });
+
+  it('renders Profile & Settings link', async () => {
+    const user = userEvent.setup();
+    mockAuth({});
+    render(<UserMenu />);
+    await user.click(screen.getByTestId('user-menu-trigger'));
+    const link = await screen.findByRole('menuitem', { name: 'Profile & Settings' });
+    expect(link).toHaveAttribute('href', '/profile');
   });
 
   it('calls logout exactly once when the Logout item is activated', async () => {
