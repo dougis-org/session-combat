@@ -1,25 +1,34 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import type { MonsterTemplate } from '@/lib/types';
-import { GLOBAL_USER_ID } from '@/lib/constants';
 import { filterMonsters, getAvailableTypes } from './filterUtils';
 import { MonsterTemplateCard } from './MonsterTemplateCard';
 import { MonsterTemplateEditor } from './MonsterTemplateEditor';
 import { ImportMonstersModal } from './ImportMonstersModal';
+import { useMonsterTemplates } from './useMonsterTemplates';
 
 export function MonstersContent() {
-  const [userTemplates, setUserTemplates] = useState<MonsterTemplate[]>([]);
-  const [globalTemplates, setGlobalTemplates] = useState<MonsterTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isAddingTemplate, setIsAddingTemplate] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<MonsterTemplate | null>(null);
-  const [editingMode, setEditingMode] = useState<'user' | 'global'>('user');
-  const [copyingId, setCopyingId] = useState<string | null>(null);
+  const {
+    userTemplates,
+    globalTemplates,
+    loading,
+    error,
+    isAdmin,
+    copyingId,
+    editingTemplate,
+    editingMode,
+    isAddingTemplate,
+    fetchTemplates,
+    addTemplate,
+    startEdit,
+    saveTemplate,
+    deleteTemplate,
+    copyTemplate,
+    cancelEdit,
+  } = useMonsterTemplates();
+
   const [isImporting, setIsImporting] = useState(false);
   const [filterText, setFilterText] = useState('');
   const [filterType, setFilterType] = useState('');
@@ -28,172 +37,14 @@ export function MonstersContent() {
     () => getAvailableTypes(userTemplates, globalTemplates),
     [userTemplates, globalTemplates],
   );
-
   const filteredUserTemplates = useMemo(
     () => filterMonsters(userTemplates, filterText, filterType),
     [userTemplates, filterText, filterType],
   );
-
   const filteredGlobalTemplates = useMemo(
     () => filterMonsters(globalTemplates, filterText, filterType),
     [globalTemplates, filterText, filterType],
   );
-
-  useEffect(() => {
-    fetchTemplates();
-    checkAdminStatus();
-  }, []);
-
-
-  const checkAdminStatus = async () => {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        const data = await response.json();
-        setIsAdmin(data.isAdmin === true);
-      }
-    } catch (err) {
-      console.error('Error checking admin status:', err);
-    }
-  };
-
-  const fetchTemplates = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Fetch user templates
-      const userResponse = await fetch('/api/monsters');
-      if (!userResponse.ok) throw new Error('Failed to fetch user templates');
-      const userData = await userResponse.json();
-      
-      // Separate user and global templates
-      const userOnly = userData.filter((t: MonsterTemplate) => t.userId !== GLOBAL_USER_ID);
-      const global = userData.filter((t: MonsterTemplate) => t.userId === GLOBAL_USER_ID);
-      
-      setUserTemplates(userOnly || []);
-      setGlobalTemplates(global || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addTemplate = (mode: 'user' | 'global') => {
-    if (mode === 'global' && !isAdmin) {
-      setError('Only administrators can create global monster templates');
-      return;
-    }
-
-    const newTemplate: MonsterTemplate = {
-      id: '',
-      userId: mode === 'global' ? GLOBAL_USER_ID : '',
-      name: 'New Monster',
-      size: 'medium',
-      type: 'humanoid',
-      ac: 10,
-      hp: 10,
-      maxHp: 10,
-      speed: '30 ft.',
-      challengeRating: 0,
-      abilityScores: {
-        strength: 10,
-        dexterity: 10,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 10,
-        charisma: 10,
-      },
-      isGlobal: mode === 'global',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setEditingTemplate(newTemplate);
-    setEditingMode(mode);
-    setIsAddingTemplate(true);
-  };
-
-  const saveTemplate = async (template: MonsterTemplate) => {
-    try {
-      setError(null);
-      const endpoint = editingMode === 'global' ? '/api/monsters/global' : '/api/monsters';
-      const url = isAddingTemplate ? endpoint : `${endpoint}/${template.id}`;
-      const method = isAddingTemplate ? 'POST' : 'PUT';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(template),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to save monster template');
-      }
-
-      await fetchTemplates();
-      setIsAddingTemplate(false);
-      setEditingTemplate(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save monster template');
-    }
-  };
-
-  const deleteTemplate = async (id: string, mode: 'user' | 'global') => {
-    if (!confirm('Are you sure you want to delete this monster template?')) return;
-    try {
-      setError(null);
-      // Use safe hardcoded endpoints only
-      const endpoint = mode === 'global' ? '/api/monsters/global' : '/api/monsters';
-      const url = `${endpoint}/${id}`;
-      const response = await fetch(url, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete monster template');
-      await fetchTemplates();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete monster template');
-    }
-  };
-
-  const copyTemplate = async (id: string) => {
-    // Prevent concurrent copy requests to avoid race condition with copyingId state
-    if (copyingId) return;
-    try {
-      setError(null);
-      setCopyingId(id);
-      const response = await fetch(`/api/monsters/${id}/duplicate`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to copy monster');
-      }
-      await fetchTemplates();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to copy monster');
-    } finally {
-      setCopyingId(null);
-    }
-  };
-
-  const cancelEdit = useCallback(() => {
-    setIsAddingTemplate(false);
-    setEditingTemplate(null);
-  }, []);
-
-  useEffect(() => {
-    if (!editingTemplate) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') cancelEdit();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [editingTemplate, cancelEdit]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -279,11 +130,7 @@ export function MonstersContent() {
                     key={template.id}
                     template={template}
                     isGlobal={false}
-                    onEdit={() => {
-                      setEditingTemplate(template);
-                      setEditingMode('user');
-                      setIsAddingTemplate(false);
-                    }}
+                    onEdit={() => startEdit(template, 'user')}
                     onDelete={() => deleteTemplate(template.id, 'user')}
                   />
                 ))
@@ -322,11 +169,7 @@ export function MonstersContent() {
                     template={template}
                     isGlobal={true}
                     canEdit={isAdmin}
-                    onEdit={() => {
-                      setEditingTemplate(template);
-                      setEditingMode('global');
-                      setIsAddingTemplate(false);
-                    }}
+                    onEdit={() => startEdit(template, 'global')}
                     onDelete={() => deleteTemplate(template.id, 'global')}
                     onCopy={() => copyTemplate(template.id)}
                     isCopying={copyingId === template.id}

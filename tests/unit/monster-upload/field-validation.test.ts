@@ -199,6 +199,38 @@ describe("validateMonsterData", () => {
         "languages",
       );
     });
+
+    const oversizedRecord = (count: number, value: unknown) =>
+      Object.fromEntries(
+        Array.from({ length: count }, (_, i) => [`k${i}`, value]),
+      );
+
+    it("rejects a savingThrows object with too many entries", () => {
+      expectInvalidField(
+        createRawMonster({ savingThrows: oversizedRecord(501, 1) as never }),
+        "savingThrows",
+      );
+    });
+
+    it("rejects a skills object with too many entries", () => {
+      expectInvalidField(
+        createRawMonster({ skills: oversizedRecord(501, 1) as never }),
+        "skills",
+      );
+    });
+
+    it("rejects a senses object with too many entries", () => {
+      expectInvalidField(
+        createRawMonster({ senses: oversizedRecord(501, "60 ft.") as never }),
+        "senses",
+      );
+    });
+
+    it("rejects an over-long record key", () => {
+      expectInvalid(
+        createRawMonster({ senses: { ["x".repeat(101)]: "60 ft." } as never }),
+      );
+    });
   });
 
   describe("legendaryActionCount validation", () => {
