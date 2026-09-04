@@ -17,7 +17,7 @@ Ownership metadata:
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If not listed, halt immediately, tell the user the `pr-review-toolkit` plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If not listed, halt immediately, tell the user the `pr-review-toolkit` plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 - [x] **OQ-1/OQ-2/OQ-3 resolved 2026-09-03** — `speed` required, `hp` defaults to `maxHp`; structure doc = inline field table + downloadable example; in-file duplicates = skipped (first wins). No open blockers for apply.
 - [x] Confirm `.worktrees/` is in `.gitignore` and all work happens inside `.worktrees/monster-json-import-modal`.
 
@@ -27,7 +27,7 @@ All steps run inside `.worktrees/monster-json-import-modal`. Follow strict TDD: 
 
 - [x] **Step 1 — Confirm worktree:** `cd` into `.worktrees/monster-json-import-modal`; confirm it exists (created during propose). If missing, from the primary checkout run `git fetch origin main` then `git worktree add .worktrees/monster-json-import-modal -b monster-json-import-modal origin/main`.
 - [x] **Step 2 — Confirm branch pushed:** `git push -u origin monster-json-import-modal` if not already on remote.
-- [ ] **Step 3 — Issue lifecycle: mark in-progress** _(issue-driven)_: run `gh issue edit 626 --add-label "in-progress"`. Then discover the linked GitHub Project via `gh project list --owner dougis-org --format json`, resolve the status field option matching "In Progress" via `gh project field-list <project-number> --owner dougis-org --format json`, and move the item with `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item update (the label update still proceeds).
+- [x] **Step 3 — Issue lifecycle: mark in-progress** _(issue-driven)_: run `gh issue edit 626 --add-label "in-progress"`. Then discover the linked GitHub Project via `gh project list --owner dougis-org --format json`, resolve the status field option matching "In Progress" via `gh project field-list <project-number> --owner dougis-org --format json`, and move the item with `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item update (the label update still proceeds).
 
 ### Execution: schema and validation (single source of truth)
 
