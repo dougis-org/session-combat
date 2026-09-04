@@ -30,6 +30,7 @@ export function useCombat(options: UseCombatOptions = {}) {
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [selectedDetailCombatantId, setSelectedDetailCombatantId] = useState<string | null>(null);
   const [detailPosition, setDetailPosition] = useState<{top: number, left: number} | null>(null);
+  const [detailFocusSection, setDetailFocusSection] = useState<'legendary' | undefined>(undefined);
   const [removeConfirmId, setRemoveConfirmId] = useState<string | null>(null);
   const [removeConfirmPosition, setRemoveConfirmPosition] = useState<{top: number, left: number} | null>(null);
   const [showEncounterDescription, setShowEncounterDescription] = useState(false);
@@ -90,6 +91,7 @@ export function useCombat(options: UseCombatOptions = {}) {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setSelectedDetailCombatantId(null);
+        setDetailFocusSection(undefined);
       }
     };
     if (selectedDetailCombatantId) {
@@ -472,6 +474,7 @@ export function useCombat(options: UseCombatOptions = {}) {
     loadingTemplates,
     selectedDetailCombatantId,
     detailPosition,
+    detailFocusSection,
     removeConfirmId,
     removeConfirmPosition,
     showEncounterDescription,
@@ -489,6 +492,7 @@ export function useCombat(options: UseCombatOptions = {}) {
     setShowCombatantModal,
     setSelectedDetailCombatantId,
     setDetailPosition,
+    setDetailFocusSection,
     setRemoveConfirmId,
     setRemoveConfirmPosition,
     setShowEncounterDescription,
@@ -538,6 +542,7 @@ export interface UseCombatReturn {
   loadingTemplates: boolean;
   selectedDetailCombatantId: string | null;
   detailPosition: {top: number, left: number} | null;
+  detailFocusSection: 'legendary' | undefined;
   removeConfirmId: string | null;
   removeConfirmPosition: {top: number, left: number} | null;
   showEncounterDescription: boolean;
@@ -555,6 +560,7 @@ export interface UseCombatReturn {
   setShowCombatantModal: (show: boolean) => void;
   setSelectedDetailCombatantId: (id: string | null) => void;
   setDetailPosition: (pos: {top: number, left: number} | null) => void;
+  setDetailFocusSection: (section: 'legendary' | undefined) => void;
   setRemoveConfirmId: (id: string | null) => void;
   setRemoveConfirmPosition: (pos: {top: number, left: number} | null) => void;
   setShowEncounterDescription: (show: boolean) => void;

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { CombatantState } from '@/lib/types';
 import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
 
@@ -8,6 +9,7 @@ export interface CombatantDetailPanelProps {
   detailPosition: { top: number; left: number };
   onClose: () => void;
   onUpdate: (id: string, updates: Partial<CombatantState>) => void;
+  focusSection?: 'legendary';
 }
 
 function ActionList({ label, actions }: { label: string; actions: { name: string; description: string }[] }) {
@@ -30,8 +32,24 @@ export function CombatantDetailPanel({
   combatant,
   detailPosition,
   onClose,
-  onUpdate
+  onUpdate,
+  focusSection
 }: CombatantDetailPanelProps) {
+  const legendaryRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (focusSection !== 'legendary') return;
+    const section = legendaryRef.current;
+    if (!section) return;
+
+    section.scrollIntoView?.({ block: 'start' });
+
+    const focusable = section.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    (focusable ?? section).focus();
+  }, [combatant.id, focusSection]);
+
   return (
     <>
       <div
@@ -92,10 +110,12 @@ export function CombatantDetailPanel({
             <ActionList label="Reactions" actions={combatant.reactions} />
           )}
 
-          <LegendaryActionsPanel
-            combatant={combatant}
-            onUpdate={(updates) => onUpdate(combatant.id, updates)}
-          />
+          <div ref={legendaryRef} data-testid="detail-legendary-section" tabIndex={-1}>
+            <LegendaryActionsPanel
+              combatant={combatant}
+              onUpdate={(updates) => onUpdate(combatant.id, updates)}
+            />
+          </div>
 
           {combatant.lairActions && combatant.lairActions.length > 0 && (
             <ActionList label="Lair Actions" actions={combatant.lairActions} />

@@ -557,4 +557,24 @@ describe('useCombat', () => {
     expect(result.current.combatState?.currentRound).toBe(2);
     unmount();
   });
+
+  test('Escape clears both selectedDetailCombatantId and detailFocusSection', async () => {
+    const { result, unmount } = renderHook();
+    await act(async () => { await Promise.resolve(); });
+
+    act(() => {
+      result.current.setSelectedDetailCombatantId('c1');
+      result.current.setDetailFocusSection('legendary');
+    });
+    expect(result.current.selectedDetailCombatantId).toBe('c1');
+    expect(result.current.detailFocusSection).toBe('legendary');
+
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+
+    expect(result.current.selectedDetailCombatantId).toBeNull();
+    expect(result.current.detailFocusSection).toBeUndefined();
+    unmount();
+  });
 });

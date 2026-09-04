@@ -93,6 +93,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     removeConfirmPosition,
     selectedDetailCombatantId,
     detailPosition,
+    detailFocusSection,
     initiativeFilter,
     zeroInitiative,
     filteredZeroInitiative,
@@ -106,6 +107,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     setLairFormSeedMonster,
     setShowEncounterDescription,
     setDetailPosition,
+    setDetailFocusSection,
     setRemoveConfirmId,
     setRemoveConfirmPosition,
     setSelectedDetailCombatantId,
@@ -170,9 +172,10 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
       onUpdate={(updates) => updateCombatant(combatant.id, updates)}
       onRemove={() => removeCombatant(combatant.id)}
       onNextTurn={nextTurn}
-      onShowDetails={(id, pos) => {
+      onShowDetails={(id, pos, options) => {
         setSelectedDetailCombatantId(id);
         setDetailPosition(pos);
+        setDetailFocusSection(options?.focusSection);
       }}
       onSetInitiative={setInitiativeEditId}
       onShowRemoveConfirm={(id, pos) => {
@@ -397,8 +400,12 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
             <CombatantDetailPanel
               combatant={combatant}
               detailPosition={detailPosition}
-              onClose={() => setSelectedDetailCombatantId(null)}
+              onClose={() => {
+                setSelectedDetailCombatantId(null);
+                setDetailFocusSection(undefined);
+              }}
               onUpdate={updateCombatant}
+              focusSection={detailFocusSection}
             />
           );
         })()}
