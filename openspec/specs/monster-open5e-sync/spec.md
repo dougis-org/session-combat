@@ -20,18 +20,18 @@ The system SHALL allow syncing monsters from open5e API via admin import.
 - **Then** "Goblin" from open5e SHALL be skipped (exists with different source)
 - **And** existing "Goblin" SHALL remain unchanged
 
-#### Scenario: File upload still works
+## MODIFIED Requirements
 
-- **Given** a user has a JSON monster file
-- **When** they upload via /monsters/import file upload
-- **Then** the system SHALL process as before (existing behavior preserved)
+### Requirement: Monster import page scope
 
-#### Scenario: Combined sync options
+The system SHALL limit the `/monsters/import` page to the administrative open5e sync function and SHALL NOT provide a JSON-file upload form on that page. User-facing JSON import is a separate capability: the `Import Monster(s)` modal on `/monsters` (see the `monster-import` capability).
 
-- **Given** an admin on /monsters/import
-- **When** they select both file upload and open5e sync
-- **Then** both SHALL be processed
-- **And** dedupe SHALL apply across both sources
+#### Scenario: Import page has no file upload form
+
+- **Given** a user navigates to `/monsters/import`
+- **When** the page renders
+- **Then** the open5e sync panel is present
+- **And** no "Upload Monster JSON File" form is present
 
 ## Traceability
 

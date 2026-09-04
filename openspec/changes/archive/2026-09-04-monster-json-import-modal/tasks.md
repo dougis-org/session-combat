@@ -11,7 +11,7 @@ Ownership metadata:
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** from the primary checkout, `git checkout main` and `git pull --ff-only`
+- [x] **Step 1 — Sync default branch:** from the primary checkout, `git checkout main` and `git pull --ff-only`
 - [x] **Step 2 — Confirm working branch is published:** the branch `monster-json-import-modal` and worktree `.worktrees/monster-json-import-modal` were created during propose. Verify with `git worktree list` and `git ls-remote --heads origin monster-json-import-modal`. If the branch is not on remote, from inside the worktree run `git push -u origin monster-json-import-modal`.
 - [x] **Step 3 — Confirm `zod` availability:** check `package.json` / `node_modules` for `zod`. If absent, plan to add it (`npm install zod`) as the first Execution step.
 
@@ -34,7 +34,7 @@ All steps run inside `.worktrees/monster-json-import-modal`. Follow strict TDD: 
 - [x] **Step 4 — Port existing `monsterUpload` tests:** copy the current `lib/validation/__tests__/monsterUpload*.test.ts` (or wherever they live) expectations into the new test file unchanged, so the Zod rewrite must preserve behavior. Grep every importer of `@/lib/validation/monsterUpload` first and record call sites.
 - [x] **Step 5 — Implement `rawMonsterSchema` + `monsterUploadSchema` (Zod)** in `lib/validation/monsterUpload.ts` per design Decision 2. Accept both a bare top-level array and `{ monsters: [...] }`; strip unknown keys; bound string lengths; enforce `hp <= maxHp` with `hp` defaulting to `maxHp`.
 - [x] **Step 6 — Reimplement `validateMonsterUploadDocument`** over `safeParse`, mapping `ZodError.issues` to the existing `ValidationError { field: 'monsters[i].path', message, index }` and `ValidationResult { valid, errors }` shape. Keep exported signatures stable.
-- [ ] **Step 7 — Reimplement `transformMonsterData(raw, { userId, isGlobal })`** to consume parsed+defaulted output, keep `normalizeAlignment` / `filterToDamageTypes` post-processing, and set `userId`/`isGlobal` from the argument (no more hardcoded `isGlobal: false`).
+- [x] **Step 7 — Reimplement `transformMonsterData(raw, { userId, isGlobal })`** to consume parsed+defaulted output, keep `normalizeAlignment` / `filterToDamageTypes` post-processing, and set `userId`/`isGlobal` from the argument (no more hardcoded `isGlobal: false`).
 - [x] **Step 8 — Add `describeMonsterUploadSchema()`** returning `FieldDescriptor[]` (name, type, required, description). Exclude calculated fields.
 - [x] **Step 9 — Update all call sites** found in Step 4 to the new `transformMonsterData` signature.
 
@@ -71,9 +71,9 @@ All steps run inside `.worktrees/monster-json-import-modal`. Follow strict TDD: 
 - [x] Run E2E / Playwright tests for the monster import flow — all pass (use a free port, not 3000, for the E2E server)
 - [x] Run type checks (`npm run typecheck` or documented equivalent) — clean
 - [x] Run the build (`npm run build`) — succeeds with no errors
-- [ ] Run security / code-quality checks required by project standards (Verity pre-push gate, Codacy). Fix findings — do not waive except to relay a human-accepted risk per `CLAUDE.md`.
-- [ ] All completed tasks marked `- [x]`
-- [ ] All steps in [Remote push validation] pass
+- [x] Run security / code-quality checks required by project standards (Verity pre-push gate, Codacy). Fix findings — do not waive except to relay a human-accepted risk per `CLAUDE.md`.
+- [x] All completed tasks marked `- [x]`
+- [x] All steps in [Remote push validation] pass
 
 ## Remote push validation
 
@@ -96,13 +96,13 @@ If **ANY** required step fails, iterate and fix before pushing. Use the project'
 ## PR and Merge
 
 - [x] Confirm the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
-- [ ] Commit all changes to `monster-json-import-modal` and push to remote
+- [x] Commit all changes to `monster-json-import-modal` and push to remote
 - [x] Open PR from `monster-json-import-modal` to `main`. **PR body MUST include `Closes #626`** (unconditional). Search for a PR template (`.github/PULL_REQUEST_TEMPLATE*`) and follow it.
 - [x] **Issue lifecycle: mark in-review** _(issue-driven)_: `gh issue edit 626 --add-label "in-review" --remove-label "in-progress"`, then move the project item to the "In Review" status column (same project/field/option discovery as the in-progress step; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, run [Remote push validation], push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings and wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (main is squash-only; NEVER use `--admin`)
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and notify the user); never wait for a human to report the merge; never force-merge:
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, run [Remote push validation], push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings and wait for human guidance.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (main is squash-only; NEVER use `--admin`)
+- [x] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and notify the user); never wait for a human to report the merge; never force-merge:
   1. **Build and tests** — run all [Remote push validation] steps; fix failures, commit, push first
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address every unresolved thread, commit, run [Remote push validation], push, wait 180s; repeat until all resolved
   3. **CI check failures** — after comments are resolved, poll `gh pr checks <PR-URL>`; fix failing required checks (`ci-gate`, Codacy), commit, run [Remote push validation], push, wait 180s; restart from step 1
@@ -116,26 +116,26 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
 - [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (README / any monster-import docs, `.wolf/anatomy.md` for new files, `.wolf/memory.md`)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy `specs/monster-import/spec.md` to `openspec/specs/monster-import/spec.md` and update relative links — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-monster-json-import-modal/design.md` (and similarly for `tasks.md` / any other path into the change directory). Reconcile MODIFIED/REMOVED requirements against existing capabilities (`import-sync`, `monster-open5e-sync`, `modal`).
-- [ ] Archive the change: move `openspec/changes/monster-json-import-modal/` to `openspec/changes/archive/YYYY-MM-DD-monster-json-import-modal/` and stage both the new location and the deletion of the old in a **single** commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-monster-json-import-modal/` exists and `openspec/changes/monster-json-import-modal/` is gone
-- [ ] Create a doc branch: `git checkout -b doc/archive-YYYY-MM-DD-monster-json-import-modal` then `git push -u origin doc/archive-YYYY-MM-DD-monster-json-import-modal`
-- [ ] Open a PR from that doc branch to `main`, title `docs: archive monster-json-import-modal (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
-- [ ] Monitor the doc PR until merged (same loop as the implementation PR)
-- [ ] Remove the worktree: `git worktree remove .worktrees/monster-json-import-modal --force` (`--force` needed due to the openspec-shared submodule)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D monster-json-import-modal doc/archive-YYYY-MM-DD-monster-json-import-modal`
+- [x] Update repository documentation impacted by the change (README / any monster-import docs, `.wolf/anatomy.md` for new files, `.wolf/memory.md`)
+- [x] Sync approved spec deltas into `openspec/specs/`: copy `specs/monster-import/spec.md` to `openspec/specs/monster-import/spec.md` and update relative links — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-monster-json-import-modal/design.md` (and similarly for `tasks.md` / any other path into the change directory). Reconcile MODIFIED/REMOVED requirements against existing capabilities (`import-sync`, `monster-open5e-sync`, `modal`).
+- [x] Archive the change: move `openspec/changes/monster-json-import-modal/` to `openspec/changes/archive/YYYY-MM-DD-monster-json-import-modal/` and stage both the new location and the deletion of the old in a **single** commit
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-monster-json-import-modal/` exists and `openspec/changes/monster-json-import-modal/` is gone
+- [x] Create a doc branch: `git checkout -b doc/archive-YYYY-MM-DD-monster-json-import-modal` then `git push -u origin doc/archive-YYYY-MM-DD-monster-json-import-modal`
+- [x] Open a PR from that doc branch to `main`, title `docs: archive monster-json-import-modal (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
+- [x] Monitor the doc PR until merged (same loop as the implementation PR)
+- [x] Remove the worktree: `git worktree remove .worktrees/monster-json-import-modal --force` (`--force` needed due to the openspec-shared submodule)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D monster-json-import-modal doc/archive-YYYY-MM-DD-monster-json-import-modal`
 - [ ] Post-task reflection: ask the user the one-question reflection from `CLAUDE.md` and run `verity reflect --user-input "<response>"` if they answer.
 
 ## Completion checklist
 
-- [ ] All acceptance scenarios in `specs/monster-import/spec.md` implemented and tested
-- [ ] Docs updated (README / anatomy / memory)
-- [ ] Approved spec deltas synced to `openspec/specs/`
-- [ ] Change archived in a single atomic commit
-- [ ] Dedicated worktree removed and merged local branches pruned
-- [ ] Issue #626 closed by the merged PR
+- [x] All acceptance scenarios in `specs/monster-import/spec.md` implemented and tested
+- [x] Docs updated (README / anatomy / memory)
+- [x] Approved spec deltas synced to `openspec/specs/`
+- [x] Change archived in a single atomic commit
+- [x] Dedicated worktree removed and merged local branches pruned
+- [x] Issue #626 closed by the merged PR
