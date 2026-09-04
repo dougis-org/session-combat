@@ -18,9 +18,12 @@ const oversizeResponse = () =>
 /**
  * Read the request body up to `maxBytes`, aborting the read as soon as that
  * many bytes have arrived — the body is never buffered past the cap, so an
- * over-large or Content-Length-lying request cannot exhaust memory. Falls
- * back to a plain `request.text()` read (checked after the fact) only when
- * the runtime provides no readable stream at all.
+ * over-large or Content-Length-lying request cannot exhaust memory.
+ *
+ * If the runtime provides no readable stream at all, the request is rejected
+ * outright rather than falling back to a full `request.text()` read: an
+ * unbounded fallback would reopen exactly the memory-exhaustion gap this
+ * function exists to close.
  */
 type BoundedReadResult =
   | { ok: true; text: string }
@@ -32,17 +35,8 @@ async function readBoundedText(
 ): Promise<BoundedReadResult> {
   const reader = request.body?.getReader();
   if (!reader) {
-    let text: string;
-    try {
-      text = await request.text();
-    } catch (error) {
-      console.error('readBoundedText: request.text() failed', error);
-      return { ok: false, reason: 'error' };
-    }
-    if (Buffer.byteLength(text, 'utf8') > maxBytes) {
-      return { ok: false, reason: 'oversize' };
-    }
-    return { ok: true, text };
+    console.error('readBoundedText: request has no readable body stream');
+    return { ok: false, reason: 'error' };
   }
 
   const chunks: Uint8Array[] = [];
