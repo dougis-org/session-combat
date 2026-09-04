@@ -1,14 +1,3 @@
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({ children, href, ...rest }: { children: React.ReactNode; href: string; [k: string]: unknown }) =>
-    React.createElement('a', { href, ...rest }, children),
-}));
-jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
-  usePathname: () => '/',
-  useSearchParams: () => new URLSearchParams(),
-}));
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CombatantDetailPanel } from '@/lib/components/CombatantDetailPanel';

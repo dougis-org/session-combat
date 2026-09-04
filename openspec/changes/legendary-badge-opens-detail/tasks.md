@@ -107,10 +107,10 @@ If any required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Confirm the `openspec-review-code` sub-agent ran and findings were addressed before the final commit
-- [ ] Commit all changes in the worktree and push to `origin/legendary-badge-opens-detail`
-- [ ] Open PR → `main`. PR body **must** include `Closes #695`. Summarize: legendary-action badge → button that opens the existing detail panel scrolled to + focused on the Legendary Actions section (option C from #695, with auto-scroll/focus per requester); `onShowDetails` widened additively with an optional `{ focusSection }`; `CombatantDetailPanel` gains an optional `focusSection` prop; dead imports removed; name-button open path unchanged.
-- [ ] **Issue lifecycle: mark in-review** — `gh issue edit 695 --add-label "in-review" --remove-label "in-progress"`; move the project item to the "In Review" column (same discovery pattern; warn and skip if not found).
+- [x] Confirm the `openspec-review-code` sub-agent ran and findings were addressed before the final commit
+- [x] Commit all changes in the worktree and push to `origin/legendary-badge-opens-detail`
+- [x] Open PR → `main`. PR body **must** include `Closes #695`. Summarize: legendary-action badge → button that opens the existing detail panel scrolled to + focused on the Legendary Actions section (option C from #695, with auto-scroll/focus per requester); `onShowDetails` widened additively with an optional `{ focusSection }`; `CombatantDetailPanel` gains an optional `focusSection` prop; dead imports removed; name-button open path unchanged. → PR #704.
+- [x] **Issue lifecycle: mark in-review** — `gh issue edit 695 --add-label "in-review" --remove-label "in-progress"`; move the project item to the "In Review" column (same discovery pattern; warn and skip if not found).
 - [ ] Wait 60s for CI to start
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If no progress after 3+ iterations, report the stall with remaining findings and wait for human guidance.
 - [ ] **Enable auto-merge only after the review gate passes:** `gh pr merge <PR-URL> --auto --squash` (repo ruleset allows squash only; NEVER `--merge`, NEVER `--admin`)

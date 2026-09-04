@@ -558,7 +558,7 @@ export function CombatantCard(props: CombatantCardProps) {
                 }}
                 className="text-sm font-semibold text-amber-400 whitespace-nowrap p-0 border-0 bg-transparent leading-none cursor-pointer hover:opacity-80 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
                 data-testid="legendary-action-badge"
-                aria-label={`Open ${combatant.name} details — legendary actions`}
+                aria-label={`${combatant.name} legendary actions: ${combatant.legendaryActionsRemaining ?? combatant.legendaryActionCount} of ${combatant.legendaryActionCount} remaining — open details`}
                 title="Legendary actions — open details"
               >
                 ⚡ {combatant.legendaryActionsRemaining ?? combatant.legendaryActionCount}/{combatant.legendaryActionCount}

@@ -93,4 +93,25 @@ describe('ActiveCombatView — legendary badge wiring', () => {
     expect(setDetailFocusSection).toHaveBeenCalledWith(undefined);
     expect(scrollIntoViewSpy).not.toHaveBeenCalled();
   });
+
+  it('closing the panel clears detailFocusSection so a later badge-open re-triggers scroll/focus', async () => {
+    const user = userEvent.setup();
+    const setSelectedDetailCombatantId = jest.fn();
+    const setDetailFocusSection = jest.fn();
+    const combat = makeCombat(
+      {
+        combatState: makeCombatState({ combatants: [dragon] }),
+        selectedDetailCombatantId: 'dragon-1',
+        detailPosition: { top: 10, left: 20 },
+        detailFocusSection: 'legendary',
+        setSelectedDetailCombatantId,
+        setDetailFocusSection,
+      },
+      [dragon],
+    );
+    render(<ActiveCombatView combat={combat} user={null} />);
+    await user.click(screen.getByRole('button', { name: '×' }));
+    expect(setSelectedDetailCombatantId).toHaveBeenCalledWith(null);
+    expect(setDetailFocusSection).toHaveBeenCalledWith(undefined);
+  });
 });
