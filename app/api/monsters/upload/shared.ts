@@ -35,7 +35,8 @@ async function readBoundedText(
     let text: string;
     try {
       text = await request.text();
-    } catch {
+    } catch (error) {
+      console.error('readBoundedText: request.text() failed', error);
       return { ok: false, reason: 'error' };
     }
     if (Buffer.byteLength(text, 'utf8') > maxBytes) {
@@ -53,13 +54,18 @@ async function readBoundedText(
       if (value) {
         total += value.byteLength;
         if (total > maxBytes) {
-          await reader.cancel().catch(() => {});
+          await reader
+            .cancel()
+            .catch((cancelError) =>
+              console.warn('readBoundedText: reader.cancel() failed', cancelError),
+            );
           return { ok: false, reason: 'oversize' };
         }
         chunks.push(value);
       }
     }
-  } catch {
+  } catch (error) {
+    console.error('readBoundedText: stream read failed', error);
     return { ok: false, reason: 'error' };
   }
 

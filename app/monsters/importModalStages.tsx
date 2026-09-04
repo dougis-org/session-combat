@@ -29,7 +29,9 @@ export function downloadMonsterExample(): void {
   a.href = url;
   a.download = 'monster-import-template.json';
   a.click();
-  URL.revokeObjectURL(url);
+  // Defer revocation — some browsers (notably Firefox) start the download
+  // asynchronously and can fail if the object URL is revoked immediately.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export function ImportError({ messages }: { messages: string[] }) {

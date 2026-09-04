@@ -234,6 +234,143 @@ describe("ImportMonstersModal — done + revert", () => {
   });
 });
 
+describe("ImportMonstersModal — network failures", () => {
+  it("a rejected validate request shows a reach-the-server error and logs it", async () => {
+    const user = userEvent.setup();
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+    global.fetch = jest.fn().mockRejectedValue(new Error("network down")) as typeof fetch;
+    renderModal();
+    await selectFile(user, jsonFile([VALID_MONSTER]));
+
+    expect(await screen.findByTestId("import-modal-error")).toHaveTextContent(
+      /could not reach the server to validate/i,
+    );
+    expect(consoleError).toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
+  it("a non-JSON validate response shows an unexpected-response error", async () => {
+    const user = userEvent.setup();
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.reject(new SyntaxError("bad json")),
+    }) as unknown as typeof fetch;
+    renderModal();
+    await selectFile(user, jsonFile([VALID_MONSTER]));
+
+    expect(await screen.findByTestId("import-modal-error")).toHaveTextContent(
+      /unexpected response/i,
+    );
+    consoleError.mockRestore();
+  });
+
+  it("a rejected ingest request shows a reach-the-server error", async () => {
+    const user = userEvent.setup();
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ valid: true, count: 1, names: ["Goblin"], isAdmin: false }))
+      .mockRejectedValueOnce(new Error("network down"));
+    global.fetch = fetchMock as typeof fetch;
+    renderModal();
+    await selectFile(user, jsonFile([VALID_MONSTER]));
+    await screen.findByText("1");
+    await user.click(screen.getByRole("button", { name: /^confirm$/i }));
+
+    expect(await screen.findByTestId("import-modal-error")).toHaveTextContent(
+      /could not reach the server to complete/i,
+    );
+  });
+
+  it("a reverted response with orphaned ids surfaces the ids to the user", async () => {
+    const user = userEvent.setup();
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ valid: true, count: 1, names: ["Goblin"], isAdmin: false }))
+      .mockResolvedValueOnce(
+        jsonResponse({ reverted: true, errors: [{ message: "boom" }], orphanedMonsterIds: ["m1", "m2"] }, 500),
+      );
+    global.fetch = fetchMock as typeof fetch;
+    renderModal();
+    await selectFile(user, jsonFile([VALID_MONSTER]));
+    await screen.findByText("1");
+    await user.click(screen.getByRole("button", { name: /^confirm$/i }));
+
+    const region = await screen.findByTestId("import-modal-error");
+    expect(region).toHaveTextContent("m1");
+    expect(region).toHaveTextContent("m2");
+  });
+});
+
+describe("ImportMonstersModal — onImported gating", () => {
+  it("calls onImported after a close following an import that inserted monsters", async () => {
+    const user = userEvent.setup();
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ valid: true, count: 1, names: ["Goblin"], isAdmin: false }))
+      .mockResolvedValueOnce(jsonResponse({ inserted: ["Goblin"], skippedDuplicates: [], reverted: false }));
+    global.fetch = fetchMock as typeof fetch;
+    renderModal();
+    await selectFile(user, jsonFile([VALID_MONSTER]));
+    await screen.findByText("1");
+    await user.click(screen.getByRole("button", { name: /^confirm$/i }));
+    await screen.findByText(/imported/i);
+
+    onImported.mockClear();
+    await user.click(screen.getByRole("button", { name: /^close$/i }));
+    expect(onImported).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not call onImported after an all-duplicates result (nothing inserted)", async () => {
+    const user = userEvent.setup();
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ valid: true, count: 1, names: ["Goblin"], isAdmin: false }))
+      .mockResolvedValueOnce(jsonResponse({ inserted: [], skippedDuplicates: ["Goblin"], reverted: false }));
+    global.fetch = fetchMock as typeof fetch;
+    renderModal();
+    await selectFile(user, jsonFile([VALID_MONSTER]));
+    await screen.findByText("1");
+    await user.click(screen.getByRole("button", { name: /^confirm$/i }));
+    await screen.findByText(/imported/i);
+
+    onImported.mockClear();
+    await user.click(screen.getByRole("button", { name: /^close$/i }));
+    expect(onImported).not.toHaveBeenCalled();
+  });
+});
+
+describe("ImportMonstersModal — in-flight request protection", () => {
+  it("ignores Escape while validation is in flight", async () => {
+    const user = userEvent.setup();
+    let resolveFetch!: (r: Response) => void;
+    global.fetch = jest.fn(
+      () => new Promise<Response>((resolve) => { resolveFetch = resolve; }),
+    ) as unknown as typeof fetch;
+    renderModal();
+    await selectFile(user, jsonFile([VALID_MONSTER]));
+    await screen.findByText(/validating/i);
+
+    onClose.mockClear();
+    await user.keyboard("{Escape}");
+    expect(onClose).not.toHaveBeenCalled();
+
+    resolveFetch(jsonResponse({ valid: true, count: 1, names: ["Goblin"], isAdmin: false }));
+    await screen.findByText("1");
+  });
+
+  it("resets the file input after a failed selection so re-selecting the same file works", async () => {
+    const user = userEvent.setup();
+    global.fetch = jest.fn() as typeof fetch;
+    renderModal();
+    const input = screen.getByLabelText(/select json file/i) as HTMLInputElement;
+    await selectFile(user, new File(["not json {{{"], "bad.json", { type: "application/json" }));
+    await screen.findByTestId("import-modal-error");
+    expect(input.value).toBe("");
+  });
+});
+
 describe("ImportMonstersModal — closing", () => {
   it("Cancel closes and reopening shows the idle state with no file", async () => {
     const user = userEvent.setup();

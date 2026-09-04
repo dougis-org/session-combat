@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ValidationError } from '@/lib/validation/monsterUpload';
 import {
   DoneStage,
   IdleStage,
@@ -46,9 +47,12 @@ export function ImportMonstersModal({
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const handleClose = useCallback(() => {
+    // A request is in flight — closing now would discard its result with no
+    // way to reconcile the library afterward. Let the request settle first.
+    if (stage === 'validating' || stage === 'confirming') return;
     if (insertedRef.current) onImported();
     onClose();
-  }, [onClose, onImported]);
+  }, [stage, onClose, onImported]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -74,6 +78,9 @@ export function ImportMonstersModal({
 
   const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    // Reset immediately so re-selecting the same filename (after fixing the
+    // file and retrying) still fires a change event.
+    e.target.value = '';
     if (!file) return;
 
     if (file.size > MAX_UPLOAD_BYTES) {
@@ -97,64 +104,96 @@ export function ImportMonstersModal({
 
     setStage('validating');
     setErrors([]);
+
+    let res: Response;
     try {
-      const res = await fetch('/api/monsters/upload/validate', {
+      res = await fetch('/api/monsters/upload/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ monsters: list }),
       });
-      const data = await res.json();
-      setIsAdmin(data.isAdmin === true);
-      if (!res.ok || data.valid !== true) {
-        fail(
-          Array.isArray(data.errors) && data.errors.length > 0
-            ? toErrorLines(data.errors)
-            : [data.error ?? 'Validation failed.'],
-        );
-        return;
-      }
-      setMonsters(list);
-      setNames(data.names ?? []);
-      setStage('preview');
-    } catch {
+    } catch (err) {
+      console.error('ImportMonstersModal: validate request failed', err);
       fail(['Could not reach the server to validate the file.']);
+      return;
     }
+
+    let data: Record<string, unknown>;
+    try {
+      data = await res.json();
+    } catch (err) {
+      console.error('ImportMonstersModal: validate response was not JSON', err);
+      fail(['The server returned an unexpected response. Please try again.']);
+      return;
+    }
+
+    setIsAdmin(data.isAdmin === true);
+    if (!res.ok || data.valid !== true) {
+      fail(
+        Array.isArray(data.errors) && data.errors.length > 0
+          ? toErrorLines(data.errors as ValidationError[])
+          : [String(data.error ?? 'Validation failed.')],
+      );
+      return;
+    }
+    setMonsters(list);
+    setNames((data.names as string[] | undefined) ?? []);
+    setStage('preview');
   };
 
   const confirmImport = async () => {
     setStage('confirming');
     setErrors([]);
+
+    let res: Response;
     try {
-      const res = await fetch('/api/monsters/upload', {
+      res = await fetch('/api/monsters/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ monsters, scope }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        const imported: ImportResult = {
-          inserted: data.inserted ?? [],
-          skippedDuplicates: data.skippedDuplicates ?? [],
-          reverted: false,
-        };
-        setResult(imported);
-        if (imported.inserted.length > 0) insertedRef.current = true;
-        setStage('done');
-        return;
-      }
-      if (data.reverted) {
-        fail([
-          'The import failed and was rolled back. No monsters were added. If the failure happened mid-write, a few monsters may need manual cleanup.',
-        ]);
-      } else {
-        fail(
-          Array.isArray(data.errors) && data.errors.length > 0
-            ? toErrorLines(data.errors)
-            : [data.error ?? 'The import failed.'],
-        );
-      }
-    } catch {
+    } catch (err) {
+      console.error('ImportMonstersModal: ingest request failed', err);
       fail(['Could not reach the server to complete the import.']);
+      return;
+    }
+
+    let data: Record<string, unknown>;
+    try {
+      data = await res.json();
+    } catch (err) {
+      console.error('ImportMonstersModal: ingest response was not JSON', err);
+      fail(['The server returned an unexpected response. Please try again.']);
+      return;
+    }
+
+    if (res.ok) {
+      const imported: ImportResult = {
+        inserted: (data.inserted as string[] | undefined) ?? [],
+        skippedDuplicates: (data.skippedDuplicates as string[] | undefined) ?? [],
+        reverted: false,
+      };
+      setResult(imported);
+      if (imported.inserted.length > 0) insertedRef.current = true;
+      setStage('done');
+      return;
+    }
+
+    if (data.reverted) {
+      const orphaned = Array.isArray(data.orphanedMonsterIds)
+        ? (data.orphanedMonsterIds as string[])
+        : [];
+      const cleanupNote =
+        orphaned.length > 0
+          ? ` ${orphaned.length} monster${orphaned.length === 1 ? '' : 's'} may need manual cleanup (ids: ${orphaned.join(', ')}).`
+          : ' Some monsters may need manual cleanup.';
+      fail([`The import failed and was rolled back. No monsters were added.${cleanupNote}`]);
+    } else {
+      fail(
+        Array.isArray(data.errors) && data.errors.length > 0
+          ? toErrorLines(data.errors as ValidationError[])
+          : [String(data.error ?? 'The import failed.')],
+      );
     }
   };
 

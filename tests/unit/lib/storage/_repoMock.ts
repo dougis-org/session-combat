@@ -19,6 +19,7 @@ export interface RepoMockOptions {
   deleteMany?: OrError<Record<string, unknown>>;
   updateMany?: OrError<Record<string, unknown>>;
   insertOne?: OrError<Record<string, unknown>>;
+  insertMany?: OrError<Record<string, unknown>>;
   findOneAndUpdate?: OrError<unknown>;
 }
 
@@ -45,6 +46,7 @@ export function mockCollection(opts: RepoMockOptions = {}) {
     deleteOne: jest.fn(() => settle(opts.deleteOne, { deletedCount: 1 })),
     deleteMany: jest.fn(() => settle(opts.deleteMany, { deletedCount: 1 })),
     insertOne: jest.fn(() => settle(opts.insertOne, { insertedId: "x" })),
+    insertMany: jest.fn(() => settle(opts.insertMany, { insertedCount: 0, insertedIds: {} })),
     findOneAndUpdate: jest.fn(() => settle(opts.findOneAndUpdate, null)),
     _cursor: cursor,
   };
