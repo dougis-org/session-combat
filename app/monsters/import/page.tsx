@@ -1,89 +1,13 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 import { ProtectedRoute } from "@/lib/components/ProtectedRoute";
 
 function MonsterImportContent() {
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    const file = fileInputRef.current?.files?.[0];
-    if (!file) {
-      setError("Please select a file");
-      return;
-    }
-
-    const MAX_FILE_SIZE = 5 * 1024 * 1024;
-    if (file.size > MAX_FILE_SIZE) {
-      setError("File is too large. Please upload a JSON file under 5 MB.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if (!data || !Array.isArray(data.monsters)) {
-        setError('Invalid file format. The JSON must have a "monsters" array.');
-        return;
-      }
-
-      const response = await fetch("/api/monsters/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (response.status === 207) {
-        const count = result && typeof result.count === "number" ? result.count : 0;
-        const errorsArray = Array.isArray(result?.errors) ? result.errors : [];
-        const total =
-          result && typeof result.total === "number"
-            ? result.total
-            : count + errorsArray.length;
-        const errorDetails =
-          errorsArray.length > 0
-            ? errorsArray
-                .map((e: unknown) =>
-                  typeof e === "string"
-                    ? e
-                    : `[index ${(e as { index?: number })?.index ?? "unknown"}]: ${(e as { message?: string })?.message ?? "Unknown error"}`
-                )
-                .join("; ")
-            : result?.error != null
-            ? String(result.error)
-            : undefined;
-        let message = `Successfully imported ${count} of ${total} monsters.`;
-        if (errorDetails)
-          message += ` Some monsters could not be imported: ${errorDetails}`;
-        setError(message);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to import monsters");
-      }
-
-      router.push("/monsters");
-      return;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to import monsters");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSync = async () => {
     setSyncLoading(true);
@@ -116,9 +40,7 @@ function MonsterImportContent() {
         `Sync complete: ${monsters.inserted} inserted, ${monsters.skipped} skipped, ${monsters.errors} errors`
       );
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to sync monsters"
-      );
+      setError(err instanceof Error ? err.message : "Failed to sync monsters");
     } finally {
       setSyncLoading(false);
     }
@@ -169,40 +91,13 @@ function MonsterImportContent() {
           </button>
         </div>
 
-        <div className="bg-gray-800 rounded-lg p-6 max-w-lg">
-          <h2 className="text-xl font-semibold mb-4">Upload Monster JSON File</h2>
-          <p className="text-gray-400 text-sm mb-6">
-            Upload a JSON file containing monster data. The file should have a
-            &quot;monsters&quot; array.
-          </p>
-
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label
-                htmlFor="monster-file"
-                className="block text-sm font-medium mb-2"
-              >
-                Select JSON File
-              </label>
-              <input
-                id="monster-file"
-                type="file"
-                accept=".json,application/json"
-                ref={fileInputRef}
-                className="w-full bg-gray-700 rounded px-3 py-2 text-white"
-                disabled={loading}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded font-semibold"
-            >
-              {loading ? "Importing..." : "Import Monsters"}
-            </button>
-          </form>
-        </div>
+        <p className="text-gray-400 text-sm max-w-lg">
+          Looking to upload a JSON file of monsters? Use the{" "}
+          <Link href="/monsters" className="text-purple-400 underline">
+            Import Monster(s)
+          </Link>{" "}
+          button on the Monster Library page.
+        </p>
       </div>
     </div>
   );

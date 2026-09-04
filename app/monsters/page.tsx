@@ -8,6 +8,7 @@ import { GLOBAL_USER_ID } from '@/lib/constants';
 import { filterMonsters, getAvailableTypes } from './filterUtils';
 import { MonsterTemplateCard } from './MonsterTemplateCard';
 import { MonsterTemplateEditor } from './MonsterTemplateEditor';
+import { ImportMonstersModal } from './ImportMonstersModal';
 
 export function MonstersContent() {
   const [userTemplates, setUserTemplates] = useState<MonsterTemplate[]>([]);
@@ -19,6 +20,7 @@ export function MonstersContent() {
   const [editingTemplate, setEditingTemplate] = useState<MonsterTemplate | null>(null);
   const [editingMode, setEditingMode] = useState<'user' | 'global'>('user');
   const [copyingId, setCopyingId] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
   const [filterText, setFilterText] = useState('');
   const [filterType, setFilterType] = useState('');
 
@@ -242,13 +244,21 @@ export function MonstersContent() {
         <div className="mb-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Your Monster Library</h2>
-            <button
-              onClick={() => addTemplate('user')}
-              disabled={loading}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded"
-            >
-              Add New Monster
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsImporting(true)}
+                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
+              >
+                Import Monster(s)
+              </button>
+              <button
+                onClick={() => addTemplate('user')}
+                disabled={loading}
+                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded"
+              >
+                Add New Monster
+              </button>
+            </div>
           </div>
 
           {loading ? (
@@ -327,6 +337,13 @@ export function MonstersContent() {
           </div>
         )}
       </div>
+
+      <ImportMonstersModal
+        key={isImporting ? 'import-open' : 'import-closed'}
+        isOpen={isImporting}
+        onClose={() => setIsImporting(false)}
+        onImported={fetchTemplates}
+      />
 
       {editingTemplate && (
         <div

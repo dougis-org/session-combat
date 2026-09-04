@@ -198,16 +198,15 @@ export async function importMonster(
   page: Page,
   filePath: string,
 ): Promise<void> {
-  await page.goto("/monsters/import");
+  await page.goto("/monsters");
 
-  const fileInput = await page.locator('input[type="file"]');
-  await fileInput.setInputFiles(filePath);
+  await page.getByRole("button", { name: /import monster/i }).click();
+  const dialog = page.getByRole("dialog", { name: /import monsters/i });
+  await dialog.locator('input[type="file"]').setInputFiles(filePath);
 
-  await page.click('button[type="submit"]');
-
-  await page.waitForURL((url) => !url.pathname.includes("/import"), {
-    timeout: 10000,
-  });
+  await dialog.getByRole("button", { name: /^confirm$/i }).click();
+  await dialog.getByText(/^Imported/i).waitFor({ timeout: 10000 });
+  await dialog.getByRole("button", { name: /^close$/i }).click();
 }
 
 /**

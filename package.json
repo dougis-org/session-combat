@@ -45,7 +45,8 @@
     "patch-package": "^8.0.1",
     "radix-ui": "1.6.7",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@bgotink/playwright-coverage": "^0.3.2",

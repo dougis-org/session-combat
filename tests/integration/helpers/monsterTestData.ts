@@ -7,7 +7,20 @@ import { RawMonsterData, MonsterUploadDocument } from '../../../lib/validation/m
 
 export const createRawMonster = (overrides?: Partial<RawMonsterData>): RawMonsterData => ({
   name: 'Test Monster',
+  size: 'medium',
+  type: 'humanoid',
+  ac: 12,
   maxHp: 10,
+  speed: '30 ft.',
+  challengeRating: 1,
+  abilityScores: {
+    strength: 10,
+    dexterity: 10,
+    constitution: 10,
+    intelligence: 10,
+    wisdom: 10,
+    charisma: 10,
+  },
   ...overrides,
 });
 

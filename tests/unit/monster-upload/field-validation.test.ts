@@ -24,7 +24,13 @@ const VALID_TRAIT = {
 
 const createRawMonster = (overrides?: Partial<RawMonsterData>): RawMonsterData => ({
   name: "Test Monster",
+  size: "medium",
+  type: "humanoid",
+  ac: 12,
   maxHp: 10,
+  speed: "30 ft.",
+  challengeRating: 1,
+  abilityScores: { ...VALID_ABILITY_SCORES },
   ...overrides,
 });
 
@@ -102,12 +108,12 @@ describe("validateMonsterData", () => {
   describe("optional fields with validation", () => {
     it("should accept valid size values", () => {
       for (const size of VALID_SIZES) {
-        expectValid(createRawMonster({ size }));
+        expectValid(createRawMonster({ size } as Partial<RawMonsterData>));
       }
     });
 
     it("should reject invalid size values", () => {
-      const result = validateMonsterData(createRawMonster({ size: INVALID_SIZE }));
+      const result = validateMonsterData(createRawMonster({ size: INVALID_SIZE } as unknown as Partial<RawMonsterData>));
       expect(result.valid).toBe(false);
       expect(result.errors).toContainEqual(
         expect.objectContaining({ field: expect.stringContaining("size") }),
@@ -168,6 +174,30 @@ describe("validateMonsterData", () => {
 
     it("should reject traits without required fields", () => {
       expectInvalid(createRawMonster({ traits: [{ name: "Keen Smell" }] as any }));
+    });
+  });
+
+  describe("string length bounds", () => {
+    it("rejects a name longer than 200 characters", () => {
+      expectInvalidField(createRawMonster({ name: "x".repeat(201) }), "name");
+    });
+
+    it("trims and accepts a name at the boundary", () => {
+      expectValid(createRawMonster({ name: `  ${"x".repeat(200)}  ` }));
+    });
+
+    it("rejects an over-long description", () => {
+      expectInvalidField(
+        createRawMonster({ description: "d".repeat(5001) }),
+        "description",
+      );
+    });
+
+    it("rejects a collection field with too many entries", () => {
+      expectInvalidField(
+        createRawMonster({ languages: Array.from({ length: 501 }, () => "Common") }),
+        "languages",
+      );
     });
   });
 
