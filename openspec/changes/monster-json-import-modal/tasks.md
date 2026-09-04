@@ -95,7 +95,7 @@ If **ANY** required step fails, iterate and fix before pushing. Use the project'
 
 ## PR and Merge
 
-- [ ] Confirm the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
+- [x] Confirm the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
 - [ ] Commit all changes to `monster-json-import-modal` and push to remote
 - [x] Open PR from `monster-json-import-modal` to `main`. **PR body MUST include `Closes #626`** (unconditional). Search for a PR template (`.github/PULL_REQUEST_TEMPLATE*`) and follow it.
 - [x] **Issue lifecycle: mark in-review** _(issue-driven)_: `gh issue edit 626 --add-label "in-review" --remove-label "in-progress"`, then move the project item to the "In Review" status column (same project/field/option discovery as the in-progress step; warn and skip if not found).
