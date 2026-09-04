@@ -38,11 +38,11 @@ const expectValid = (data: RawMonsterData) => {
   expect(validateMonsterData(data).valid).toBe(true);
 };
 
-const expectInvalid = (data: any) => {
+const expectInvalid = (data: unknown) => {
   expect(validateMonsterData(data).valid).toBe(false);
 };
 
-const expectInvalidField = (data: any, field: string) => {
+const expectInvalidField = (data: unknown, field: string) => {
   const result = validateMonsterData(data);
   expect(result.valid).toBe(false);
   expect(result.errors[0].field).toContain(field);
