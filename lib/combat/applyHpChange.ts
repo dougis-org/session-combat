@@ -41,6 +41,115 @@ export interface HpChangeResult {
   enteredDying?: boolean;
 }
 
+/** Concentration-badge updates plus the DC to surface, for a damage action. */
+function resolveConcentration(
+  combatant: CombatantState,
+  resultHp: number,
+  effectiveDamage: number
+): { updates: Partial<CombatantState>; conSaveRequired?: number } {
+  if (resultHp === 0) {
+    return { updates: { concentratingOn: undefined, pendingConSaveDC: undefined } };
+  }
+  if (combatant.concentratingOn && effectiveDamage > 0) {
+    const dc = calcConSaveDC(effectiveDamage);
+    return { updates: { pendingConSaveDC: dc }, conSaveRequired: dc };
+  }
+  return { updates: {} };
+}
+
+/** Death-save-tracker updates for a damage action, and whether it started dying fresh. */
+function resolveDeathSaves(
+  combatant: CombatantState,
+  resultHp: number,
+  effectiveDamage: number,
+  incomingDamage: number
+): { updates: Partial<CombatantState>; enteredDying: boolean } {
+  if (!usesDeathSaves(combatant)) {
+    return { updates: {}, enteredDying: false };
+  }
+  if (
+    (combatant.lifeState === 'dying' || combatant.lifeState === 'stable') &&
+    incomingDamage > 0
+  ) {
+    // Damage while downed: the damage-entry UI has no critical-hit control,
+    // so critical is always false; the `damage >= maxHp` instant-death rule
+    // still applies. Use post-resistance/immunity damage so a fully-mitigated
+    // "hit" neither adds a failure nor kills.
+    return {
+      updates: applyDamageWhileDowned(combatant, { critical: false, damage: incomingDamage }),
+      enteredDying: false,
+    };
+  }
+  if (resultHp === 0 && !combatant.lifeState && effectiveDamage > 0) {
+    return { updates: enterDying(), enteredDying: true };
+  }
+  return { updates: {}, enteredDying: false };
+}
+
+function applyDamageIntent(
+  combatant: CombatantState,
+  prevHp: number,
+  prevTempHp: number,
+  rawDamage: number,
+  damageType: HpChangeIntent['damageType']
+): HpChangeResult {
+  const {
+    hp: resultHp,
+    tempHp: resultTempHp,
+    effectiveDamage,
+    incomingDamage,
+  } = applyTypedDamage(prevHp, prevTempHp, rawDamage, damageType, combatant);
+
+  const changed = resultHp !== prevHp || resultTempHp !== prevTempHp;
+  const concentration = resolveConcentration(combatant, resultHp, effectiveDamage);
+  const deathSaves = resolveDeathSaves(combatant, resultHp, effectiveDamage, incomingDamage);
+
+  return {
+    updates: {
+      hp: resultHp,
+      tempHp: resultTempHp,
+      ...concentration.updates,
+      ...deathSaves.updates,
+    },
+    history: changed
+      ? { hp: prevHp, tempHp: prevTempHp, type: 'damage', amount: rawDamage }
+      : undefined,
+    conSaveRequired: concentration.conSaveRequired,
+    enteredDying: deathSaves.enteredDying,
+  };
+}
+
+function applyHealIntent(
+  combatant: CombatantState,
+  prevHp: number,
+  prevTempHp: number,
+  amount: number
+): HpChangeResult {
+  const result = calcApplyHealing(prevHp, combatant.maxHp, amount);
+  const reviveUpdates: Partial<CombatantState> =
+    usesDeathSaves(combatant) && combatant.lifeState && result.hp >= 1
+      ? clearDeathState()
+      : {};
+  return {
+    updates: { hp: result.hp, ...reviveUpdates },
+    history:
+      result.hp !== prevHp
+        ? { hp: prevHp, tempHp: prevTempHp, type: 'healing', amount }
+        : undefined,
+  };
+}
+
+function applySetTempIntent(prevHp: number, prevTempHp: number, amount: number): HpChangeResult {
+  const result = calcSetTempHp(prevTempHp, amount);
+  if (result.tempHp === prevTempHp) {
+    return { updates: {} };
+  }
+  return {
+    updates: { tempHp: result.tempHp },
+    history: { hp: prevHp, tempHp: prevTempHp, type: 'tempHp', amount },
+  };
+}
+
 /**
  * Compute every HP, temp-HP, concentration, and life-state transition for one
  * damage / heal / set-temp action. Pure: no React, no storage, no callbacks.
@@ -56,85 +165,10 @@ export function applyHpChange(
   const prevTempHp = combatant.tempHp ?? 0;
 
   if (intent.kind === 'damage') {
-    const rawDamage = intent.amount;
-    const {
-      hp: resultHp,
-      tempHp: resultTempHp,
-      effectiveDamage,
-      incomingDamage,
-    } = applyTypedDamage(prevHp, prevTempHp, rawDamage, intent.damageType, combatant);
-
-    const changed = resultHp !== prevHp || resultTempHp !== prevTempHp;
-
-    const concentrationUpdates: Partial<CombatantState> = {};
-    let conSaveRequired: number | undefined;
-    if (resultHp === 0) {
-      concentrationUpdates.concentratingOn = undefined;
-      concentrationUpdates.pendingConSaveDC = undefined;
-    } else if (combatant.concentratingOn && effectiveDamage > 0) {
-      const dc = calcConSaveDC(effectiveDamage);
-      concentrationUpdates.pendingConSaveDC = dc;
-      conSaveRequired = dc;
-    }
-
-    let deathSaveUpdates: Partial<CombatantState> = {};
-    let enteredDying = false;
-    if (usesDeathSaves(combatant)) {
-      if (
-        (combatant.lifeState === 'dying' || combatant.lifeState === 'stable') &&
-        incomingDamage > 0
-      ) {
-        // Damage while downed: the damage-entry UI has no critical-hit control,
-        // so critical is always false; the `damage >= maxHp` instant-death rule
-        // still applies. Use post-resistance/immunity damage so a fully-mitigated
-        // "hit" neither adds a failure nor kills.
-        deathSaveUpdates = applyDamageWhileDowned(combatant, {
-          critical: false,
-          damage: incomingDamage,
-        });
-      } else if (resultHp === 0 && !combatant.lifeState && effectiveDamage > 0) {
-        deathSaveUpdates = enterDying();
-        enteredDying = true;
-      }
-    }
-
-    return {
-      updates: {
-        hp: resultHp,
-        tempHp: resultTempHp,
-        ...concentrationUpdates,
-        ...deathSaveUpdates,
-      },
-      history: changed
-        ? { hp: prevHp, tempHp: prevTempHp, type: 'damage', amount: rawDamage }
-        : undefined,
-      conSaveRequired,
-      enteredDying,
-    };
+    return applyDamageIntent(combatant, prevHp, prevTempHp, intent.amount, intent.damageType);
   }
-
   if (intent.kind === 'heal') {
-    const result = calcApplyHealing(prevHp, combatant.maxHp, intent.amount);
-    const reviveUpdates: Partial<CombatantState> =
-      usesDeathSaves(combatant) && combatant.lifeState && result.hp >= 1
-        ? clearDeathState()
-        : {};
-    return {
-      updates: { hp: result.hp, ...reviveUpdates },
-      history:
-        result.hp !== prevHp
-          ? { hp: prevHp, tempHp: prevTempHp, type: 'healing', amount: intent.amount }
-          : undefined,
-    };
+    return applyHealIntent(combatant, prevHp, prevTempHp, intent.amount);
   }
-
-  // kind === 'setTemp'
-  const result = calcSetTempHp(prevTempHp, intent.amount);
-  if (result.tempHp === prevTempHp) {
-    return { updates: {} };
-  }
-  return {
-    updates: { tempHp: result.tempHp },
-    history: { hp: prevHp, tempHp: prevTempHp, type: 'tempHp', amount: intent.amount },
-  };
+  return applySetTempIntent(prevHp, prevTempHp, intent.amount);
 }
