@@ -18,7 +18,7 @@ Ownership metadata:
 ## Preflight
 
 - [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If not listed, halt immediately, tell the user the `pr-review-toolkit` plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
-- [ ] **Verify OQ-1 is resolved** — the design's required-field set (is `speed` required? does `hp` default to `maxHp`?) is a blocker for apply. If the requester (Doug) has not confirmed, halt and ask before implementing the Zod schema.
+- [x] **OQ-1/OQ-2/OQ-3 resolved 2026-09-03** — `speed` required, `hp` defaults to `maxHp`; structure doc = inline field table + downloadable example; in-file duplicates = skipped (first wins). No open blockers for apply.
 - [ ] Confirm `.worktrees/` is in `.gitignore` and all work happens inside `.worktrees/monster-json-import-modal`.
 
 ## Execution

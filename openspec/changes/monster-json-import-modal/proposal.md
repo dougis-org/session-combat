@@ -201,19 +201,14 @@
 
 ## Open Questions
 
-- Question: Confirm the exact required-field set for the Zod schema. Proposed
-  required: `name`, `size`, `type`, `ac`, `hp`, `maxHp`, `speed`,
-  `abilityScores` (all six scores), `challengeRating`. Everything else optional.
-  Is `speed` really required (open5e monsters sometimes omit it)? Is `hp`
-  required separately from `maxHp`, or should `hp` default to `maxHp`?
-  - Needed from: requester (Doug)
-  - Blocker for apply: yes
-- Question: Downloadable structure document format — a `.json` example file, a
-  JSON Schema document, or a human-readable field table (Markdown/HTML)? The
-  issue says "list all fields ... and define which are required", which a JSON
-  Schema or a table both satisfy.
-  - Needed from: requester (Doug)
-  - Blocker for apply: no (design will pick a default: JSON Schema + example)
+- RESOLVED 2026-09-03 (requester): Required-field set — `name`, `size`, `type`,
+  `ac`, `maxHp`, `speed`, `abilityScores` (all six scores), `challengeRating`
+  are required; `hp` is optional and defaults to `maxHp`. `speed` is required.
+- RESOLVED 2026-09-03 (requester): Structure document — inline human-readable
+  field table (required flagged) plus a downloadable example JSON file, both
+  generated from the Zod schema.
+- RESOLVED 2026-09-03 (requester): In-file duplicate name+source entries are
+  reported as skipped duplicates (first occurrence wins), not a validation error.
 - Question: Validate phase — reuse `/api/monsters/upload` with a `phase` field,
   or add a dedicated `/api/monsters/upload/validate` route?
   - Needed from: design decision, no external input required

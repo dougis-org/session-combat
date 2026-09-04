@@ -406,14 +406,14 @@
 
 ## Open Questions
 
-- OQ-1 (blocks apply): Confirm required-field set, specifically whether `speed`
-  is required and whether `hp` must be provided separately from `maxHp` or
-  defaults to it. Default assumed in Decision 2: `speed` required, `hp` optional
-  defaulting to `maxHp`.
-- OQ-2: Structure document delivery — inline field table + downloadable example
-  (Decision 5 default) vs a formal JSON Schema file download. Not a blocker.
-- OQ-3: Should in-file duplicate names be "skipped duplicates" (Decision 4
-  default) or a hard validation error? Not a blocker.
+- OQ-1: RESOLVED 2026-09-03 (requester) — Decision 2 default stands: `speed`
+  required, `hp` optional and defaults to `maxHp`.
+- OQ-2: RESOLVED 2026-09-03 (requester) — Decision 5 default stands: inline field
+  table + downloadable example file (no separate formal JSON Schema download
+  required, though the route may still expose `jsonSchema` for convenience).
+- OQ-3: RESOLVED 2026-09-03 (requester) — Decision 4 default stands: in-file
+  duplicate name+source entries are reported as skipped duplicates (first wins),
+  not a hard validation error.
 - OQ-4: Is leaving `/monsters/import` as an effectively admin-only page
   acceptable, or should the open5e sync move behind an admin settings area in a
   later change? Not a blocker for this change.
