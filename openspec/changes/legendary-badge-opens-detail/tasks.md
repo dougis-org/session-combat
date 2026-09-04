@@ -10,73 +10,73 @@ Ownership metadata:
 
 ## Preparation
 
-- [ ] **Step 1 — Confirm the dedicated worktree exists:** verify `.worktrees/legendary-badge-opens-detail` exists (created during propose) and `cd` into it. If missing, from the primary checkout run `git fetch origin main` then `git worktree add .worktrees/legendary-badge-opens-detail -b legendary-badge-opens-detail origin/main`. Never checkout this branch inside the primary checkout.
-- [ ] **Step 2 — Confirm the branch is published:** `git -C .worktrees/legendary-badge-opens-detail rev-parse --abbrev-ref --symbolic-full-name @{u}` resolves to `origin/legendary-badge-opens-detail`. If not, `git push -u origin legendary-badge-opens-detail` from inside the worktree. (Already done during propose — verify only.)
-- [ ] **Step 3 — Restore local OpenSpec tooling in the worktree:** ensure `.github/openspec-shared` submodule is initialized (`git submodule update --init .github/openspec-shared`) so `openspec/config.yaml`, `openspec/schemas`, and `openspec/templates` symlinks resolve.
-- [ ] **Step 4 — Install deps in the worktree:** `npm ci` (worktree has its own `node_modules`; if `next build` later fails on a symlinked `node_modules`, use the hardlink-copy workaround noted in project memory).
+- [x] **Step 1 — Confirm the dedicated worktree exists:** verify `.worktrees/legendary-badge-opens-detail` exists (created during propose) and `cd` into it. If missing, from the primary checkout run `git fetch origin main` then `git worktree add .worktrees/legendary-badge-opens-detail -b legendary-badge-opens-detail origin/main`. Never checkout this branch inside the primary checkout.
+- [x] **Step 2 — Confirm the branch is published:** `git -C .worktrees/legendary-badge-opens-detail rev-parse --abbrev-ref --symbolic-full-name @{u}` resolves to `origin/legendary-badge-opens-detail`. If not, `git push -u origin legendary-badge-opens-detail` from inside the worktree. (Already done during propose — verify only.)
+- [x] **Step 3 — Restore local OpenSpec tooling in the worktree:** ensure `.github/openspec-shared` submodule is initialized (`git submodule update --init .github/openspec-shared`) so `openspec/config.yaml`, `openspec/schemas`, and `openspec/templates` symlinks resolve.
+- [x] **Step 4 — Install deps in the worktree:** `npm ci` (worktree has its own `node_modules`; if `next build` later fails on a symlinked `node_modules`, use the hardlink-copy workaround noted in project memory).
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list. If not listed, halt, tell the user the plugin is required, provide installation guidance, and do not proceed until confirmed installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list. If not listed, halt, tell the user the plugin is required, provide installation guidance, and do not proceed until confirmed installed.
 
 ## Execution
 
 All work happens inside `.worktrees/legendary-badge-opens-detail`.
 
-- [ ] **Issue lifecycle: mark in-progress** — `gh issue edit 695 --add-label "in-progress"`. Then discover the repo's GitHub Project (`gh project list --owner dougis-org --format json`), resolve the status option matching "In Progress" (`gh project field-list <n> --owner dougis-org --format json`), and move the item via `gh project item-edit`. If no project item, warn and continue. If the token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project move (label still applied).
-- [ ] **Audit existing badge assertions** — `grep -rn "legendary-action-badge" tests/` and inspect `tests/unit/components/CombatantCard*.test.tsx`, `tests/unit/components/CombatantCard.hp.test.tsx:263-264`, `tests/e2e/combat.spec.ts` (lines ~391-461), and any `ActiveCombatView` / `CombatantDetailPanel` test. Note assertions that hard-code the `span` tag or exact markup. (Prior audit: current tests query by `data-testid` / text only — expected no changes needed, re-verify.)
+- [x] **Issue lifecycle: mark in-progress** — `gh issue edit 695 --add-label "in-progress"`. Then discover the repo's GitHub Project (`gh project list --owner dougis-org --format json`), resolve the status option matching "In Progress" (`gh project field-list <n> --owner dougis-org --format json`), and move the item via `gh project item-edit`. If no project item, warn and continue. If the token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project move (label still applied).
+- [x] **Audit existing badge assertions** — `grep -rn "legendary-action-badge" tests/` and inspect `tests/unit/components/CombatantCard*.test.tsx`, `tests/unit/components/CombatantCard.hp.test.tsx:263-264`, `tests/e2e/combat.spec.ts` (lines ~391-461), and any `ActiveCombatView` / `CombatantDetailPanel` test. Note assertions that hard-code the `span` tag or exact markup. (Prior audit: current tests query by `data-testid` / text only — expected no changes needed, re-verify.)
 
 **`lib/components/CombatantCard.tsx`:**
 
-- [ ] **Widen the `onShowDetails` prop type** (`CombatantCard.tsx:23`) to `onShowDetails?: (combatantId: string, position: { top: number; left: number }, options?: { focusSection?: 'legendary' }) => void`. Additive only — do not touch the existing name-button call site (`:483-486`).
-- [ ] **Convert badge to a button** — replace the `<span data-testid="legendary-action-badge">` (`:551-558`) with `<button type="button" data-testid="legendary-action-badge" aria-label={`Open ${combatant.name} details — legendary actions`} title="Legendary actions — open details">`. Preserve the `⚡ {combatant.legendaryActionsRemaining ?? combatant.legendaryActionCount}/{combatant.legendaryActionCount}` content and `text-sm font-semibold text-amber-400 whitespace-nowrap`; add Tailwind resets (`p-0 border-0 bg-transparent leading-none`) and an affordance (`cursor-pointer hover:opacity-80 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400`). Keep the `(combatant.legendaryActionCount ?? 0) > 0` guard.
-- [ ] **Wire the badge onClick** — mirror the name button's `getBoundingClientRect()` pattern but pass the focus option:
+- [x] **Widen the `onShowDetails` prop type** (`CombatantCard.tsx:23`) to `onShowDetails?: (combatantId: string, position: { top: number; left: number }, options?: { focusSection?: 'legendary' }) => void`. Additive only — do not touch the existing name-button call site (`:483-486`).
+- [x] **Convert badge to a button** — replace the `<span data-testid="legendary-action-badge">` (`:551-558`) with `<button type="button" data-testid="legendary-action-badge" aria-label={`Open ${combatant.name} details — legendary actions`} title="Legendary actions — open details">`. Preserve the `⚡ {combatant.legendaryActionsRemaining ?? combatant.legendaryActionCount}/{combatant.legendaryActionCount}` content and `text-sm font-semibold text-amber-400 whitespace-nowrap`; add Tailwind resets (`p-0 border-0 bg-transparent leading-none`) and an affordance (`cursor-pointer hover:opacity-80 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400`). Keep the `(combatant.legendaryActionCount ?? 0) > 0` guard.
+- [x] **Wire the badge onClick** — mirror the name button's `getBoundingClientRect()` pattern but pass the focus option:
   ```tsx
   onClick={(e) => {
     const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
     onShowDetails?.(combatant.id, { top: rect.bottom, left: rect.left }, { focusSection: 'legendary' });
   }}
   ```
-- [ ] **Remove dead imports** — delete the `LegendaryActionsPanel` and `LairActionsSlot` import lines (`:8-9`). Confirm `grep -n "LegendaryActionsPanel\|LairActionsSlot" lib/components/CombatantCard.tsx` returns nothing.
+- [x] **Remove dead imports** — delete the `LegendaryActionsPanel` and `LairActionsSlot` import lines (`:8-9`). Confirm `grep -n "LegendaryActionsPanel\|LairActionsSlot" lib/components/CombatantCard.tsx` returns nothing.
 
 **`lib/components/ActiveCombatView.tsx`:**
 
-- [ ] Add `const [detailFocusSection, setDetailFocusSection] = useState<'legendary' | undefined>(undefined)` alongside the existing `detailPosition` state.
-- [ ] In the `onShowDetails` handler (`:173-176`), add `setDetailFocusSection(options?.focusSection)` (accept the third arg).
-- [ ] On the panel's `onClose` (`:400`), also call `setDetailFocusSection(undefined)`.
-- [ ] Pass `focusSection={detailFocusSection}` to `<CombatantDetailPanel>` (`:393-400`).
+- [x] Add `const [detailFocusSection, setDetailFocusSection] = useState<'legendary' | undefined>(undefined)` alongside the existing `detailPosition` state. (Implemented in `useCombat.ts`, the hook that actually owns this state — `ActiveCombatView` consumes it via the hook, not local `useState`.)
+- [x] In the `onShowDetails` handler (`:173-176`), add `setDetailFocusSection(options?.focusSection)` (accept the third arg).
+- [x] On the panel's `onClose` (`:400`), also call `setDetailFocusSection(undefined)`.
+- [x] Pass `focusSection={detailFocusSection}` to `<CombatantDetailPanel>` (`:393-400`).
 
 **`lib/components/CombatantDetailPanel.tsx`:**
 
-- [ ] Add optional prop `focusSection?: 'legendary'` to `CombatantDetailPanelProps`.
-- [ ] Wrap the existing `<LegendaryActionsPanel .../>` (`:95-98`) in `<div ref={legendaryRef} data-testid="detail-legendary-section" tabIndex={-1}>`.
-- [ ] Add a `useEffect` keyed on `[combatant.id, focusSection]`: when `focusSection === 'legendary'` and `legendaryRef.current` has a focusable descendant, call `legendaryRef.current.scrollIntoView?.({ block: 'start' })` (guarded), then focus the first focusable control inside (`querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')`), falling back to `legendaryRef.current.focus()`. Do nothing when `focusSection` is undefined.
-- [ ] Do **not** modify `LegendaryActionsPanel.tsx` or `LairActionsSlot.tsx`.
+- [x] Add optional prop `focusSection?: 'legendary'` to `CombatantDetailPanelProps`.
+- [x] Wrap the existing `<LegendaryActionsPanel .../>` (`:95-98`) in `<div ref={legendaryRef} data-testid="detail-legendary-section" tabIndex={-1}>`.
+- [x] Add a `useEffect` keyed on `[combatant.id, focusSection]`: when `focusSection === 'legendary'` and `legendaryRef.current` has a focusable descendant, call `legendaryRef.current.scrollIntoView?.({ block: 'start' })` (guarded), then focus the first focusable control inside (`querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')`), falling back to `legendaryRef.current.focus()`. Do nothing when `focusSection` is undefined.
+- [x] Do **not** modify `LegendaryActionsPanel.tsx` or `LairActionsSlot.tsx`.
 
 **Cross-cutting:**
 
-- [ ] **Reuse check** — if the badge and name-button onClick now share the rect→handler shape, extract a small local closure `openDetail(e, options?)` in `CombatantCard`'s body (no new file).
-- [ ] **Update `.wolf/anatomy.md`** entries for the three changed components and append a line to `.wolf/memory.md`.
-- [ ] **Confirm every scenario** in `openspec/changes/legendary-badge-opens-detail/specs/legendary-action-tracking/spec.md` is covered by code + a test before moving on.
+- [x] **Reuse check** — if the badge and name-button onClick now share the rect→handler shape, extract a small local closure `openDetail(e, options?)` in `CombatantCard`'s body (no new file). (Kept as two small independent onClick handlers — the shapes diverge slightly (third-arg literal vs none) and extracting a closure would not shrink the diff meaningfully; declined per "small, low-value extraction" judgment call.)
+- [x] **Update `.wolf/anatomy.md`** entries for the three changed components and append a line to `.wolf/memory.md`.
+- [x] **Confirm every scenario** in `openspec/changes/legendary-badge-opens-detail/specs/legendary-action-tracking/spec.md` is covered by code + a test before moving on.
 
 ### Test tasks
 
-- [ ] **Update any pre-existing assertions** flagged in the audit (expected: none).
-- [ ] **`CombatantCard` badge tests** (`tests/unit/components/CombatantCard.legendary-badge.test.tsx`, reuse `renderCard` helper):
+- [x] **Update any pre-existing assertions** flagged in the audit (expected: none — confirmed).
+- [x] **`CombatantCard` badge tests** (`tests/unit/components/CombatantCard.legendary-badge.test.tsx`, reuse `renderCard` helper):
   - Badge is `getByRole('button', { name: /legendary actions/i })` for `{ legendaryActionCount: 3, legendaryActionsRemaining: 2 }` and shows `2/3`; the element is a `BUTTON` with `type="button"`.
   - Click calls a mocked `onShowDetails` with `(combatant.id, { top, left }, { focusSection: 'legendary' })`.
   - `userEvent.keyboard('{Enter}')` and `' '` while focused each call `onShowDetails`.
   - No `onShowDetails` prop → activating the badge does not throw.
   - Badge absent for `legendaryActionCount` `0` and `undefined`, including when `lairActions` is non-empty.
-- [ ] **`CombatantDetailPanel` scroll/focus tests** (`tests/unit/components/CombatantDetailPanel.focusSection.test.tsx`):
+- [x] **`CombatantDetailPanel` scroll/focus tests** (`tests/unit/components/CombatantDetailPanel.focusSection.test.tsx`):
   - Before each: `Element.prototype.scrollIntoView = jest.fn()`.
   - `focusSection="legendary"` + populated `legendaryActions` → `scrollIntoView` called on the section wrapper; `document.activeElement` is within `getByTestId('detail-legendary-section')`.
   - No `focusSection` → `scrollIntoView` not called; focus not inside the section.
   - `focusSection="legendary"` + empty `legendaryActions` (panel renders null) → no throw, panel still renders.
-- [ ] **`ActiveCombatView` wiring test** (extend an existing `ActiveCombatView` test file):
+- [x] **`ActiveCombatView` wiring test** (`tests/unit/components/ActiveCombatView.legendaryFocus.test.tsx`, new file — extends the `combat` prop mock rather than an existing file, since `detailFocusSection` lives in the `useCombat` hook, not local `ActiveCombatView` state):
   - Mock `scrollIntoView`; render active combat with a legendary combatant; click the badge; assert the detail panel appears and `scrollIntoView` was called.
   - Open the same panel via the combatant-name control; assert `scrollIntoView` not called.
-- [ ] **Static check** — `grep` for the removed imports returns nothing; `npm run lint` clean for `CombatantCard.tsx`.
+- [x] **Static check** — `grep` for the removed imports returns nothing; `npm run lint` clean for `CombatantCard.tsx`.
 
 ## Pre-Commit Code Review
 

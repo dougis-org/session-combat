@@ -5,8 +5,6 @@ import type { CombatantState, ActiveDamageEffect, StatusCondition } from '@/lib/
 import { applyDamage as calcApplyDamage, applyHealing as calcApplyHealing, setTempHp as calcSetTempHp, applyDamageWithType as calcApplyDamageWithType, mergeActiveDamageEffects, removeActiveDamageEffects, calcConSaveDC } from '@/lib/utils/combat';
 import { pushHpHistory, popHpHistory, getHpHistoryStack } from '@/lib/utils/hpHistory';
 import { DAMAGE_TYPE_GROUPS, DAMAGE_EFFECT_PRESETS, DamageType } from '@/lib/constants';
-import { LegendaryActionsPanel } from '@/lib/components/LegendaryActionsPanel';
-import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import { TargetActionModal } from '@/lib/components/TargetActionModal';
 import { usesDeathSaves, enterDying, clearDeathState, applyDamageWhileDowned, applyDeathSaveRoll, toggleDeathSaveSlot, lifeStateDisplay } from '@/lib/combat/deathSaves';
 import type { DeathSaveKind, DeathSaveSlotIndex } from '@/lib/combat/deathSaves';
@@ -20,7 +18,7 @@ export interface CombatantCardProps {
   onUpdate: (updates: Partial<CombatantState>) => void;
   onRemove: () => void;
   onNextTurn?: () => void;
-  onShowDetails?: (combatantId: string, position: { top: number; left: number }) => void;
+  onShowDetails?: (combatantId: string, position: { top: number; left: number }, options?: { focusSection?: 'legendary' }) => void;
   onSetInitiative?: (combatantId: string) => void;
   onShowRemoveConfirm?: (combatantId: string, position: { top: number; left: number }) => void;
   allCombatants?: CombatantState[];
@@ -549,12 +547,22 @@ export function CombatantCard(props: CombatantCardProps) {
               Current: <span className={hpColor === 'bg-green-500' ? 'text-green-500' : hpColor === 'bg-yellow-500' ? 'text-yellow-500' : 'text-red-500'}>{combatant.hp}</span> Max: {combatant.maxHp}{tempHp > 0 && <span className="text-blue-400"> +{tempHp} tmp</span>}
             </span>
             {(combatant.legendaryActionCount ?? 0) > 0 && (
-              <span
-                className="text-sm font-semibold text-amber-400 whitespace-nowrap"
+              <button
+                type="button"
+                onClick={(e) => {
+                  const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                  onShowDetails?.(combatant.id, {
+                    top: rect.bottom,
+                    left: rect.left,
+                  }, { focusSection: 'legendary' });
+                }}
+                className="text-sm font-semibold text-amber-400 whitespace-nowrap p-0 border-0 bg-transparent leading-none cursor-pointer hover:opacity-80 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
                 data-testid="legendary-action-badge"
+                aria-label={`Open ${combatant.name} details — legendary actions`}
+                title="Legendary actions — open details"
               >
                 ⚡ {combatant.legendaryActionsRemaining ?? combatant.legendaryActionCount}/{combatant.legendaryActionCount}
-              </span>
+              </button>
             )}
             <input
               type="number"
