@@ -34,7 +34,7 @@ export const UPLOAD_LIMITS = {
   maxMonsters: 1000, // max monsters accepted in a single upload document
 } as const;
 
-const shortString = () => z.string().max(UPLOAD_LIMITS.shortText);
+const shortString = () => z.string().trim().max(UPLOAD_LIMITS.shortText);
 const stringList = () =>
   z.array(z.string().max(UPLOAD_LIMITS.listItem)).max(UPLOAD_LIMITS.listLength);
 

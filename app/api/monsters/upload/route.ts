@@ -20,13 +20,15 @@ import { storage } from '@/lib/storage';
 import { GLOBAL_USER_ID } from '@/lib/constants';
 import {
   validateMonsterUploadDocument,
+  monstersArraySchema,
   transformMonsterData,
+  type ParsedMonster,
 } from '@/lib/validation/monsterUpload';
 import type { MonsterTemplate } from '@/lib/types';
 import { readMonstersBody } from './shared';
 
-function keyOf(monster: { name?: unknown; source?: unknown }): string {
-  return `${String(monster.name ?? '')}|${String(monster.source ?? '')}`;
+function keyOf(monster: ParsedMonster): string {
+  return `${monster.name}|${monster.source ?? ''}`;
 }
 
 export const POST = withAuth(async (request, auth) => {
@@ -54,16 +56,19 @@ export const POST = withAuth(async (request, auth) => {
   const isGlobal = body.scope === 'global';
   const targetUserId = isGlobal ? GLOBAL_USER_ID : auth.userId;
 
-  const rows = body.monsters as { name?: unknown; source?: unknown }[];
+  // Parse once through the canonical schema (already known-valid) so dedupe
+  // keys are computed from the same trimmed/defaulted values that get stored
+  // — not the raw, pre-parse input.
+  const rows: ParsedMonster[] = monstersArraySchema.parse(body.monsters);
 
   // Step 3 — in-file dedupe (first occurrence wins).
   const seen = new Set<string>();
   const skippedDuplicates: string[] = [];
-  const unique: typeof rows = [];
+  const unique: ParsedMonster[] = [];
   for (const row of rows) {
     const k = keyOf(row);
     if (seen.has(k)) {
-      skippedDuplicates.push(String(row.name ?? ''));
+      skippedDuplicates.push(row.name);
       continue;
     }
     seen.add(k);
@@ -72,12 +77,12 @@ export const POST = withAuth(async (request, auth) => {
 
   // Step 4 — DB dedupe against the target library.
   const existingKeys = await storage.findExistingMonsterKeys(
-    unique.map((r) => ({ name: String(r.name ?? ''), source: String(r.source ?? '') })),
+    unique.map((r) => ({ name: r.name, source: r.source ?? '' })),
     targetUserId,
   );
   const survivors = unique.filter((row) => {
     if (existingKeys.has(keyOf(row))) {
-      skippedDuplicates.push(String(row.name ?? ''));
+      skippedDuplicates.push(row.name);
       return false;
     }
     return true;
