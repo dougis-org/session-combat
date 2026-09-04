@@ -77,6 +77,20 @@ describe("validateMonsterUploadDocument", () => {
     expect(result.errors.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("accepts a document at the maximum monster count (1000)", () => {
+    const monsters = Array.from({ length: 1000 }, (_, i) =>
+      validMonster({ name: `Monster ${i}` }),
+    );
+    expectDocumentValid({ monsters });
+  });
+
+  it("rejects a document over the maximum monster count (1001)", () => {
+    const monsters = Array.from({ length: 1001 }, (_, i) =>
+      validMonster({ name: `Monster ${i}` }),
+    );
+    expectDocumentInvalid({ monsters }, "at most 1000");
+  });
+
   it("should report a missing required field by monsters[i].field path", () => {
     const monsters = [
       validMonster(),

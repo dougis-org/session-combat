@@ -31,6 +31,7 @@ export const UPLOAD_LIMITS = {
   listLength: 500, // max entries in any collection field (arrays and records)
   recordKey: 100,
   recordValue: 200,
+  maxMonsters: 1000, // max monsters accepted in a single upload document
 } as const;
 
 const shortString = () => z.string().max(UPLOAD_LIMITS.shortText);
@@ -126,10 +127,18 @@ export type ParsedMonster = z.infer<typeof rawMonsterSchema>;
 /** Raw monster data from JSON upload (schema input — before defaults). */
 export type RawMonsterData = z.input<typeof rawMonsterSchema>;
 
-/** The array of monsters, requiring at least one entry. */
+/**
+ * The array of monsters — at least one, at most `UPLOAD_LIMITS.maxMonsters`.
+ * The upper bound protects the validation and ingestion boundary from an
+ * oversized document even when it fits under the 5 MB file cap.
+ */
 export const monstersArraySchema = z
   .array(rawMonsterSchema)
-  .min(1, 'The monsters array must contain at least one monster');
+  .min(1, 'The monsters array must contain at least one monster')
+  .max(
+    UPLOAD_LIMITS.maxMonsters,
+    `The monsters array must contain at most ${UPLOAD_LIMITS.maxMonsters} monsters`,
+  );
 
 /** Uploaded monster document format — a bare array or `{ monsters: [...] }`. */
 export interface MonsterUploadDocument {
