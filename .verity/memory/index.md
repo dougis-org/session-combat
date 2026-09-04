@@ -4,7 +4,7 @@
 
 > If you are an AI coding agent reading this via CLAUDE.md: scan the catalog below for any node whose title, kind, or file scope is relevant to the task the user just asked you to do. Open the matching files via the Read tool before writing code. Most projects accumulate dozens to hundreds of nodes — do not read them all; pick the few that fit the current change.
 
-## decisions/ (43)
+## decisions/ (53)
 
 - [[n015-model-session-lifecycle-as-its-own-campaign-stream]] — **Model session lifecycle as its own campaign stream event variant**
   *decision* · 84%
@@ -92,6 +92,26 @@
   *decision* · 87%
 - [[n172-persist-dice-appearance-preferences-as-validated-s]] — **Persist dice appearance preferences as validated scalar IDs**
   *decision* · 88%
+- [[n173-lazy-load-the-dice-engine-only-when-a-roll-begins]] — **Lazy-load the dice engine only when a roll begins**
+  *decision* · 90%
+- [[n174-keep-dice-appearance-registry-data-independent-of]] — **Keep dice appearance registry data independent of the dice engine bundle**
+  *decision* · 88%
+- [[n175-use-an-engine-independent-registry-to-validate-dic]] — **Use an engine-independent registry to validate dice appearance IDs**
+  *decision* · 90%
+- [[n176-keep-dom-focus-aligned-with-the-selected-radio-dur]] — **Keep DOM focus aligned with the selected radio during arrow navigation**
+  *decision* · 88%
+- [[n177-apply-dice-appearance-at-per-roll-dicebox-construc]] — **Apply dice appearance at per-roll DiceBox construction**
+  *decision* · 78%
+- [[n178-apply-dice-appearance-changes-only-when-creating-t]] — **Apply dice appearance changes only when creating the next roll engine**
+  *decision* · 84%
+- [[n179-expose-user-preferences-through-a-dedicated-authen]] — **Expose user preferences through a dedicated authenticated endpoint**
+  *decision* · 86% · scope: `**/preferences/**`, `**/api/**`
+- [[n180-use-an-offline-first-preference-provider-with-serv]] — **Use an offline-first preference provider with server reconciliation**
+  *decision* · 90% · scope: `**/preferences/**`
+- [[n181-store-account-preferences-as-sparse-deltas-on-the]] — **Store account preferences as sparse deltas on the user document**
+  *decision* · 86%
+- [[n182-expose-user-preferences-through-a-dedicated-authen]] — **Expose user preferences through a dedicated authenticated endpoint**
+  *decision* · 84%
 
 ## domain/ (4)
 

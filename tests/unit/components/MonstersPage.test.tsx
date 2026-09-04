@@ -124,6 +124,35 @@ async function setTypeFilter(value: string) {
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
+describe('MonstersContent import entry point', () => {
+  beforeEach(() => {
+    global.fetch = makeFetchMock(false);
+  });
+
+  function getImportButton(): HTMLButtonElement | undefined {
+    return Array.from(container.querySelectorAll('button')).find(
+      (b) => /import monster/i.test(b.textContent ?? ''),
+    ) as HTMLButtonElement | undefined;
+  }
+
+  it('renders an Import Monster(s) button for a non-admin user', async () => {
+    await renderPage();
+    expect(getImportButton()).toBeDefined();
+  });
+
+  it('opens the import modal when the button is clicked, URL unchanged', async () => {
+    await renderPage();
+    const before = window.location.href;
+    await act(async () => {
+      getImportButton()?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(
+      container.ownerDocument.querySelector('[role="dialog"][aria-label="Import monsters"]'),
+    ).not.toBeNull();
+    expect(window.location.href).toBe(before);
+  });
+});
+
 describe('MonstersContent filter bar', () => {
   beforeEach(() => {
     global.fetch = makeFetchMock(false);

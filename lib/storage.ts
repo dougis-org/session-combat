@@ -267,6 +267,15 @@ export const storage = {
   // Delete monster template
   async deleteMonsterTemplate(id: string, userId: string): Promise<void> { return monsterTemplateRepo.deleteMonsterTemplate(id, userId); },
 
+  // Bulk-insert monster templates (single insertMany)
+  async saveManyMonsterTemplates(templates: MonsterTemplate[]): Promise<void> { return monsterTemplateRepo.saveManyMonsterTemplates(templates); },
+
+  // Compensating delete for a bulk import, scoped to a userId
+  async deleteMonsterTemplatesByIds(ids: string[], userId: string): Promise<void> { return monsterTemplateRepo.deleteMonsterTemplatesByIds(ids, userId); },
+
+  // Duplicate detection: which name|source keys already exist for a userId
+  async findExistingMonsterKeys(keys: { name: string; source: string }[], userId: string): Promise<Set<string>> { return monsterTemplateRepo.findExistingMonsterKeys(keys, userId); },
+
   // Load spells - load all global spells if no userId, or load user spells
   async loadSpells(userId?: string, concentration?: boolean): Promise<SpellTemplate[]> { return spellRepo.loadSpells(userId, concentration); },
 

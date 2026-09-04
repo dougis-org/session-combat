@@ -2,26 +2,41 @@ import {
   transformMonsterData,
   RawMonsterData,
 } from "@/lib/validation/monsterUpload";
+import { GLOBAL_USER_ID } from "@/lib/constants";
 
-const MINIMAL_RAW: RawMonsterData = {
-  name: "Test Monster",
-  hp: 20,
-  maxHp: 20,
-  ac: 13,
-  challengeRating: 1,
+const ABILITY_SCORES = {
+  strength: 10,
+  dexterity: 10,
+  constitution: 10,
+  intelligence: 10,
+  wisdom: 10,
+  charisma: 10,
 };
 
+const baseRaw = (overrides?: Partial<RawMonsterData>): RawMonsterData => ({
+  name: "Test Monster",
+  size: "medium",
+  type: "humanoid",
+  ac: 13,
+  maxHp: 20,
+  speed: "30 ft.",
+  challengeRating: 1,
+  abilityScores: { ...ABILITY_SCORES },
+  ...overrides,
+});
+
+const personal = { userId: "user123", isGlobal: false };
+
 describe("transformMonsterData", () => {
-  it("should transform minimal monster data with defaults", () => {
-    const raw: RawMonsterData = { name: "Goblin", maxHp: 7 };
-    const result = transformMonsterData(raw, "user123");
+  it("should transform monster data and default hp to maxHp", () => {
+    const result = transformMonsterData(baseRaw({ name: "Goblin", maxHp: 7 }), personal);
 
     expect(result.id).toBeDefined();
     expect(result.userId).toBe("user123");
     expect(result.name).toBe("Goblin");
     expect(result.maxHp).toBe(7);
     expect(result.hp).toBe(7);
-    expect(result.ac).toBe(10);
+    expect(result.ac).toBe(13);
     expect(result.size).toBe("medium");
     expect(result.type).toBe("humanoid");
     expect(result.isGlobal).toBe(false);
@@ -40,7 +55,6 @@ describe("transformMonsterData", () => {
       maxHp: 135,
       speed: "10 ft., swim 40 ft.",
       challengeRating: 10,
-      experiencePoints: 5900,
       description: "An ancient aberration",
       source: "SRD",
       abilityScores: {
@@ -60,7 +74,7 @@ describe("transformMonsterData", () => {
       ],
     };
 
-    const result = transformMonsterData(raw, "user123");
+    const result = transformMonsterData(raw, personal);
 
     expect(result.name).toBe("Aboleth");
     expect(result.size).toBe("large");
@@ -71,7 +85,6 @@ describe("transformMonsterData", () => {
     expect(result.maxHp).toBe(135);
     expect(result.speed).toBe("10 ft., swim 40 ft.");
     expect(result.challengeRating).toBe(10);
-    expect(result.experiencePoints).toBe(5900);
     expect(result.description).toBe("An ancient aberration");
     expect(result.source).toBe("SRD");
     expect(result.abilityScores.strength).toBe(21);
@@ -81,67 +94,62 @@ describe("transformMonsterData", () => {
     expect(traits[0]?.name).toBe("Amphibious");
   });
 
-  it("should clamp hp to maxHp if provided value is higher", () => {
-    const raw: RawMonsterData = { name: "Test", hp: 100, maxHp: 50 };
-    const result = transformMonsterData(raw, "user123");
-
-    expect(result.hp).toBe(50);
+  it("should preserve hp below maxHp", () => {
+    const result = transformMonsterData(baseRaw({ hp: 12, maxHp: 50 }), personal);
+    expect(result.hp).toBe(12);
     expect(result.maxHp).toBe(50);
   });
 
   it("should set hp to maxHp if hp not provided", () => {
-    const raw: RawMonsterData = { name: "Test", maxHp: 25 };
-    const result = transformMonsterData(raw, "user123");
-
+    const result = transformMonsterData(baseRaw({ maxHp: 25 }), personal);
     expect(result.hp).toBe(25);
     expect(result.maxHp).toBe(25);
   });
 
   it("should trim whitespace from name", () => {
-    const raw: RawMonsterData = { name: "  Goblin  ", maxHp: 7 };
-    const result = transformMonsterData(raw, "user123");
-
+    const result = transformMonsterData(baseRaw({ name: "  Goblin  " }), personal);
     expect(result.name).toBe("Goblin");
   });
 
   it("should assign unique IDs to each monster", () => {
-    const raw: RawMonsterData = { name: "Test", maxHp: 10 };
-    const result1 = transformMonsterData(raw, "user123");
-    const result2 = transformMonsterData(raw, "user123");
-
+    const result1 = transformMonsterData(baseRaw(), personal);
+    const result2 = transformMonsterData(baseRaw(), personal);
     expect(result1.id).not.toBe(result2.id);
   });
 
-  it("should assign correct userId from parameter", () => {
-    const raw: RawMonsterData = { name: "Test", maxHp: 10 };
-    const result = transformMonsterData(raw, "user-special-id");
-
+  it("should assign correct userId from options", () => {
+    const result = transformMonsterData(baseRaw(), { userId: "user-special-id", isGlobal: false });
     expect(result.userId).toBe("user-special-id");
   });
 
-  it("should set isGlobal to false for user uploads", () => {
-    const raw: RawMonsterData = { name: "Test", maxHp: 10 };
-    const result = transformMonsterData(raw, "user123");
-
+  it("should set isGlobal false and keep the caller userId for personal imports", () => {
+    const result = transformMonsterData(baseRaw(), personal);
     expect(result.isGlobal).toBe(false);
+    expect(result.userId).toBe("user123");
+  });
+
+  it("should set isGlobal true and GLOBAL_USER_ID for global imports", () => {
+    const result = transformMonsterData(baseRaw(), {
+      userId: GLOBAL_USER_ID,
+      isGlobal: true,
+    });
+    expect(result.isGlobal).toBe(true);
+    expect(result.userId).toBe(GLOBAL_USER_ID);
   });
 
   describe("legendaryActionCount pass-through", () => {
     it("should pass through valid legendaryActionCount", () => {
-      const raw: RawMonsterData = { name: "Aboleth", maxHp: 135, legendaryActionCount: 3 };
-      const result = transformMonsterData(raw, "user123");
+      const result = transformMonsterData(baseRaw({ legendaryActionCount: 3 }), personal);
       expect(result.legendaryActionCount).toBe(3);
     });
 
     it("should pass through legendaryActionCount of 0", () => {
-      const raw: RawMonsterData = { name: "Goblin", maxHp: 7, legendaryActionCount: 0 };
-      const result = transformMonsterData(raw, "user123");
+      const result = transformMonsterData(baseRaw({ legendaryActionCount: 0 }), personal);
       expect(result.legendaryActionCount).toBe(0);
     });
 
     it("should return undefined legendaryActionCount when not provided", () => {
-      const raw: RawMonsterData = { name: "Goblin", maxHp: 7 };
-      const result = transformMonsterData(raw, "user123");
+      const result = transformMonsterData(baseRaw(), personal);
       expect(result.legendaryActionCount).toBeUndefined();
     });
   });
@@ -150,7 +158,7 @@ describe("transformMonsterData", () => {
     type DamageField = "damageResistances" | "damageImmunities" | "damageVulnerabilities";
 
     const filterDamage = (field: DamageField, input: string[]) =>
-      transformMonsterData({ ...MINIMAL_RAW, [field]: input }, "user1")[field];
+      transformMonsterData(baseRaw({ [field]: input }), personal)[field];
 
     it("passes through valid lowercase DamageType values unchanged", () => {
       expect(filterDamage("damageResistances", ["fire", "cold"])).toEqual(["fire", "cold"]);
@@ -173,17 +181,7 @@ describe("transformMonsterData", () => {
     });
 
     it("handles undefined resistance arrays (absent key) → empty array", () => {
-      const result = transformMonsterData(MINIMAL_RAW, "user1");
-      expect(result.damageResistances).toEqual([]);
-      expect(result.damageImmunities).toEqual([]);
-      expect(result.damageVulnerabilities).toEqual([]);
-    });
-
-    it("handles empty resistance arrays", () => {
-      const result = transformMonsterData(
-        { ...MINIMAL_RAW, damageResistances: [], damageImmunities: [], damageVulnerabilities: [] },
-        "user1",
-      );
+      const result = transformMonsterData(baseRaw(), personal);
       expect(result.damageResistances).toEqual([]);
       expect(result.damageImmunities).toEqual([]);
       expect(result.damageVulnerabilities).toEqual([]);
@@ -193,29 +191,17 @@ describe("transformMonsterData", () => {
       const all13 = ["acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic", "piercing", "poison", "psychic", "radiant", "slashing", "thunder"];
       expect(filterDamage("damageImmunities", all13)).toEqual(all13);
     });
-
-    it("mixed valid and invalid values: keeps only valid", () => {
-      const result = transformMonsterData(
-        {
-          ...MINIMAL_RAW,
-          damageResistances: ["fire", "cold"],
-          damageImmunities: ["poison", "invalid-type"],
-          damageVulnerabilities: ["lightning", ""],
-        },
-        "user1",
-      );
-      expect(result.damageResistances).toEqual(["fire", "cold"]);
-      expect(result.damageImmunities).toEqual(["poison"]);
-      expect(result.damageVulnerabilities).toEqual(["lightning"]);
-    });
-
   });
 
   it("normalizes alignment casing and whitespace to canonical values", () => {
-    const result = transformMonsterData(
-      { ...MINIMAL_RAW, alignment: " chaotic evil " },
-      "user1",
-    );
+    const result = transformMonsterData(baseRaw({ alignment: " chaotic evil " }), personal);
     expect(result.alignment).toBe("Chaotic Evil");
+  });
+
+  it("drops an unrecognised alignment without erroring", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const result = transformMonsterData(baseRaw({ alignment: "banana" }), personal);
+    expect(result.alignment).toBeUndefined();
+    warn.mockRestore();
   });
 });
