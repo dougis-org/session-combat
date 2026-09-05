@@ -43,6 +43,7 @@ import * as monsterTemplateRepo from "./storage/monsterTemplateRepo";
 import * as campaignTemplateRepo from "./storage/campaignTemplateRepo";
 import * as campaignRepo from "./storage/campaignRepo";
 import * as membershipRepo from "./storage/membershipRepo";
+import * as savedContentRepo from "./storage/savedContentRepo";
 import * as sessionLogRepo from "./storage/sessionLogRepo";
 import * as shareRepo from "./storage/shareRepo";
 import * as spellRepo from "./storage/spellRepo";
@@ -166,46 +167,13 @@ export const storage = {
   async claimActiveCampaignSession(campaignId: string, userId: string, sessionId: string): Promise<boolean> { return campaignRepo.claimActiveCampaignSession(campaignId, userId, sessionId); },
 
   // Load encounters by id, scoped to their owner
-  async loadEncountersByIds(ids: string[], ownerUserId: string): Promise<Encounter[]> {
-    if (ids.length === 0) return [];
-    try {
-      const db = await getDatabase();
-      const encounters = await db
-        .collection<Encounter>("encounters")
-        .find({ id: { $in: ids }, userId: ownerUserId })
-        .toArray();
-      return encounters.map(normalizeStoredEntityId);
-    } catch (error) {
-      console.error("Error loading encounters by ids:", error);
-      throw error;
-    }
-  },
+  async loadEncountersByIds(ids: string[], ownerUserId: string): Promise<Encounter[]> { return encounterRepo.loadEncountersByIds(ids, ownerUserId); },
 
   // Link an encounter to a campaign (idempotent)
-  async addEncounterToCampaign(campaignId: string, encounterId: string, dmUserId: string): Promise<void> {
-    try {
-      const db = await getDatabase();
-      await db
-        .collection<Campaign>("campaigns")
-        .updateOne({ id: campaignId, userId: dmUserId }, { $addToSet: { encounterIds: encounterId } });
-    } catch (error) {
-      console.error("Error adding encounter to campaign:", error);
-      throw error;
-    }
-  },
+  async addEncounterToCampaign(campaignId: string, encounterId: string, dmUserId: string): Promise<void> { return encounterRepo.addEncounterToCampaign(campaignId, encounterId, dmUserId); },
 
   // Unlink an encounter from a campaign (idempotent)
-  async removeEncounterFromCampaign(campaignId: string, encounterId: string, dmUserId: string): Promise<void> {
-    try {
-      const db = await getDatabase();
-      await db
-        .collection<Campaign>("campaigns")
-        .updateOne({ id: campaignId, userId: dmUserId }, { $pull: { encounterIds: encounterId } });
-    } catch (error) {
-      console.error("Error removing encounter from campaign:", error);
-      throw error;
-    }
-  },
+  async removeEncounterFromCampaign(campaignId: string, encounterId: string, dmUserId: string): Promise<void> { return encounterRepo.removeEncounterFromCampaign(campaignId, encounterId, dmUserId); },
 
   // Save encounter
   async saveEncounter(encounter: Encounter): Promise<void> { return encounterRepo.saveEncounter(encounter); },
@@ -317,68 +285,13 @@ export const storage = {
   async deleteSessionLog(id: string, userId: string, campaignId: string): Promise<boolean> { return sessionLogRepo.deleteSessionLog(id, userId, campaignId); },
 
   savedContent: {
-    async list(campaignId: string, userId: string): Promise<SavedContent[]> {
-      try {
-        const db = await getDatabase();
-        const items = await db
-          .collection<SavedContent>("savedContent")
-          .find({ campaignId, userId })
-          .sort({ createdAt: -1 })
-          .toArray();
-        return items.map(normalizeStoredEntityId);
-      } catch (error) {
-        console.error("Error listing saved content:", error);
-        return [];
-      }
-    },
+    async list(campaignId: string, userId: string): Promise<SavedContent[]> { return savedContentRepo.list(campaignId, userId); },
 
-    async create(item: Omit<SavedContent, 'id' | '_id' | 'createdAt' | 'updatedAt'>): Promise<SavedContent> {
-      try {
-        const db = await getDatabase();
-        const now = new Date();
-        const doc: SavedContent = {
-          ...item,
-          id: crypto.randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        };
-        const { _id, ...insertData } = doc;
-        await db.collection<SavedContent>("savedContent").insertOne(insertData as SavedContent);
-        return doc;
-      } catch (error) {
-        console.error("Error creating saved content:", error);
-        throw error;
-      }
-    },
+    async create(item: Omit<SavedContent, 'id' | '_id' | 'createdAt' | 'updatedAt'>): Promise<SavedContent> { return savedContentRepo.create(item); },
 
-    async update(id: string, userId: string, patch: Pick<SavedContent, 'result' | 'notes'>): Promise<boolean> {
-      try {
-        const db = await getDatabase();
-        const updateData: Record<string, unknown> = { updatedAt: new Date() };
-        if (patch.result !== undefined) updateData.result = patch.result;
-        if (patch.notes !== undefined) updateData.notes = patch.notes;
-        const result = await db
-          .collection<SavedContent>("savedContent")
-          .updateOne({ id, userId }, { $set: updateData });
-        return result.matchedCount > 0;
-      } catch (error) {
-        console.error("Error updating saved content:", error);
-        throw error;
-      }
-    },
+    async update(id: string, userId: string, patch: Pick<SavedContent, 'result' | 'notes'>): Promise<boolean> { return savedContentRepo.update(id, userId, patch); },
 
-    async remove(id: string, userId: string): Promise<boolean> {
-      try {
-        const db = await getDatabase();
-        const result = await db
-          .collection<SavedContent>("savedContent")
-          .deleteOne({ id, userId });
-        return result.deletedCount > 0;
-      } catch (error) {
-        console.error("Error removing saved content:", error);
-        throw error;
-      }
-    },
+    async remove(id: string, userId: string): Promise<boolean> { return savedContentRepo.remove(id, userId); },
   },
 
   async addMember(member: CampaignMember): Promise<void> { return membershipRepo.addMember(member); },
