@@ -73,10 +73,13 @@ describe("storage.loadEncountersByIds", () => {
     expect(mockedCollection.find).toHaveBeenCalledTimes(1);
   });
 
-  it("rethrows when the underlying query fails, rather than returning []", async () => {
+  it("rejects with a StorageError wrapping the failure, rather than returning []", async () => {
     mockedCollection.toArray.mockRejectedValue(new Error("connection reset"));
 
-    await expect(storage.loadEncountersByIds(["e1"], OWNER)).rejects.toThrow("connection reset");
+    await expect(storage.loadEncountersByIds(["e1"], OWNER)).rejects.toMatchObject({
+      name: "StorageError",
+      cause: new Error("connection reset"),
+    });
   });
 });
 
@@ -92,12 +95,13 @@ describe("storage.addEncounterToCampaign", () => {
     );
   });
 
-  it("rethrows when the underlying update fails", async () => {
+  it("rejects with a StorageError wrapping the failure", async () => {
     mockedCollection.updateOne.mockRejectedValue(new Error("connection reset"));
 
-    await expect(storage.addEncounterToCampaign("camp-1", "e3", "dm-user")).rejects.toThrow(
-      "connection reset"
-    );
+    await expect(storage.addEncounterToCampaign("camp-1", "e3", "dm-user")).rejects.toMatchObject({
+      name: "StorageError",
+      cause: new Error("connection reset"),
+    });
   });
 });
 
@@ -121,11 +125,12 @@ describe("storage.removeEncounterFromCampaign", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("rethrows when the underlying update fails", async () => {
+  it("rejects with a StorageError wrapping the failure", async () => {
     mockedCollection.updateOne.mockRejectedValue(new Error("connection reset"));
 
-    await expect(storage.removeEncounterFromCampaign("camp-1", "e3", "dm-user")).rejects.toThrow(
-      "connection reset"
-    );
+    await expect(storage.removeEncounterFromCampaign("camp-1", "e3", "dm-user")).rejects.toMatchObject({
+      name: "StorageError",
+      cause: new Error("connection reset"),
+    });
   });
 });
