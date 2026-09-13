@@ -72,10 +72,10 @@ If any step fails, iterate and fix before pushing. Use the commands documented i
 
 ## PR and Merge
 
-- [ ] Ensure `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
-- [ ] Commit all changes to `bound-rolls-api-validation` and push
-- [ ] Open PR → `main`. **PR body MUST include `Closes #577`** (and note "Follow-up tracked in #712 — client-side defense-in-depth, out of scope here"). Use the repo PR template if present.
-- [ ] **Issue lifecycle: mark in-review** — `gh issue edit 577 --add-label "in-review" --remove-label "in-progress"`, then move the project item to the "In Review" column (same discovery as in-progress; warn and skip if not found)
+- [x] Ensure `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
+- [x] Commit all changes to `bound-rolls-api-validation` and push
+- [x] Open PR → `main`. **PR body MUST include `Closes #577`** (and note "Follow-up tracked in #712 — client-side defense-in-depth, out of scope here"). Use the repo PR template if present.
+- [x] **Issue lifecycle: mark in-review** — `gh issue edit 577 --add-label "in-review" --remove-label "in-progress"`, then move the project item to the "In Review" column (same discovery as in-progress; warn and skip if not found)
 - [ ] Wait 60 seconds for CI to start
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, run [Remote push validation], push, re-run) until zero findings remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
 - [ ] **After the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (main is squash-only; NEVER `--admin`)
