@@ -154,6 +154,30 @@ description.
 - **Then** it passes, and every assertion that changed meaning is listed in the
   PR body with its rationale
 
+### Requirement: Storage God Object Callers for Campaign methods
+
+The system SHALL decouple callers from the god-object storage facade by
+enforcing direct imports of the `campaignRepo` module for campaign data
+access.
+
+#### Scenario: Verify application paths function correctly with narrow imports
+
+- **Given** an API route or script that requires campaign data (e.g.
+  `/api/campaigns`)
+- **When** the application attempts to load, save, or delete campaign data
+- **Then** the application succeeds in processing data via the
+  `campaignRepo` methods without error, proving the code paths remain fully
+  functional post-refactoring.
+
+#### Scenario: Verify test suites run with updated isolated campaign mocks
+
+- **Given** the application's test suites
+- **When** test suites testing files that utilize Campaign methods are
+  executed
+- **Then** the tests pass and no "method not found" or "undefined" errors
+  are thrown, confirming `jest.mock("@/lib/storage/campaignRepo")` correctly
+  stubs out interactions.
+
 ### Requirement: Performance
 
 The migration SHALL NOT add any `await` beyond `runStorageOp`'s existing
@@ -207,6 +231,18 @@ exactly one event per terminal path with the matching `outcome`
 - **Then** each path emits exactly one `logStorageEvent` with the matching
   `outcome` (`success` / `not_found` / `error`) and stable `name` + `collection`
 
+### Requirement: Operability (Code Coupling)
+
+#### Scenario: Decrease code coupling
+
+- **Given** the application source code
+- **When** analyzed using search utilities (e.g., `grep`)
+- **Then** `storage.loadCampaigns`, `storage.loadCampaignById`,
+  `storage.saveCampaign`, `storage.deleteCampaign`,
+  `storage.setActiveCampaignSession`, `storage.claimActiveCampaignSession`,
+  `storage.loadCampaignByIdAny`, `storage.listCampaignsForMember`, and
+  `storage.getCampaignsByIds` are no longer present in the codebase.
+
 ## Traceability
 
 - Proposal element "Move 27 methods into 4 repos on `runStorageOp`" -> Requirement:
@@ -238,3 +274,13 @@ exactly one event per terminal path with the matching `outcome`
   Tasks: "per-repo unit tests".
 - Requirement "access checks do not mask failures" -> Tasks: "getMember /
   assertCampaignAccess verification test".
+- Proposal element "Migrate 9 campaign methods" (migrate-campaign-callers) ->
+  Requirement: Storage God Object Callers for Campaign methods.
+- Design decision "Direct File Imports, Mocking Strategy"
+  (migrate-campaign-callers) -> Requirement: Storage God Object Callers for
+  Campaign methods.
+- Requirement "Storage God Object Callers for Campaign methods" -> Tasks:
+  Update API routes, Utils, Scripts, Test Files (migrate-campaign-callers).
+- Requirement "Storage God Object Callers for Campaign methods" -> Requirement
+  scenario: Operability (Code Coupling) / Decrease code coupling
+  (migrate-campaign-callers).

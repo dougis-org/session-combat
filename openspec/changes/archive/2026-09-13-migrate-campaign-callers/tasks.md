@@ -30,5 +30,5 @@
 
 - [x] Run full test suite (`npm test`).
 - [x] Perform a global search (`grep`) to ensure no usages of `storage.loadCampaigns`, `storage.saveCampaign`, etc. remain.
-- [ ] Address any PR review feedback.
-- [ ] Merge the PR.
+- [x] Address any PR review feedback.
+- [x] Merge the PR.
