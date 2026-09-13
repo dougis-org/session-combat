@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { NextRequest } from "next/server";
-import { POST, GET } from "@/app/api/campaigns/[id]/rolls/route";
+import { POST, GET, ROLL_BODY_MAX_BYTES } from "@/app/api/campaigns/[id]/rolls/route";
 import { storage } from "@/lib/storage";
 import { emitFiltered } from "@/lib/server/transport";
 import { MAX_DICE_IN_ROLL, MAX_FORMULA_LENGTH, MAX_LABEL_LENGTH, MAX_TOTAL_MAGNITUDE } from "@/lib/validation/rollSubmission";
@@ -112,19 +112,23 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     mockAuthState.payload = MOCK_AUTH;
   });
 
-  it("returns 403 when caller is not an active member (null)", async () => {
+  it("returns 403 when caller is not an active member (null), no persist/broadcast", async () => {
     mockedStorage.getMember.mockResolvedValue(null);
     const res = await POST(makePost(VALID_ROLL_BODY), { params: PARAMS });
     expect(res.status).toBe(403);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
   });
 
-  it("returns 403 when caller status is pending", async () => {
+  it("returns 403 when caller status is pending, no persist/broadcast", async () => {
     mockedStorage.getMember.mockResolvedValue({ ...ACTIVE_PLAYER, status: "pending" as any });
     const res = await POST(makePost(VALID_ROLL_BODY), { params: PARAMS });
     expect(res.status).toBe(403);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
   });
 
-  it("returns 409 when no active session", async () => {
+  it("returns 409 when no active session, no persist/broadcast", async () => {
     mockedAssertCampaignAccess.mockResolvedValue({
       campaign: { id: CAMPAIGN_ID, activeSessionId: undefined } as any,
       role: "player",
@@ -133,6 +137,8 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     expect(res.status).toBe(409);
     const body = await res.json();
     expect(body.error).toBe("No active session");
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
   });
 
   it("returns 400 when formula is missing", async () => {
@@ -184,12 +190,14 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns 400 when visibility.scope is invalid (direct)", async () => {
+  it("returns 400 when visibility.scope is invalid (direct), no persist/broadcast", async () => {
     const res = await POST(
       makePost({ ...VALID_ROLL_BODY, visibility: { scope: "direct", toUserId: "x" } }),
       { params: PARAMS }
     );
     expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
   });
 
   it("returns 201 with valid group roll and calls emitFiltered", async () => {
@@ -223,9 +231,38 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     expect(body.visibility).toEqual({ scope: "dm-only" });
   });
 
-  it("returns 400 when body is null", async () => {
+  it("returns 400 when body is null, no persist/broadcast", async () => {
     const res = await POST(makePost(null), { params: PARAMS });
     expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when body is a JSON array, no persist/broadcast", async () => {
+    const res = await POST(makePost([1, 2, 3]), { params: PARAMS });
+    expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when body is a JSON primitive (string), no persist/broadcast", async () => {
+    const res = await POST(makePost("x"), { params: PARAMS });
+    expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 (not 500) when the request has no body at all, no persist/broadcast", async () => {
+    const request = new NextRequest(BASE_URL, {
+      method: "POST",
+      headers: { cookie: "auth-token=t" },
+    });
+    const res = await POST(request, { params: PARAMS });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("Invalid JSON");
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
   });
 
   it("emitFiltered predicate uses canSeeRoll — DM sees dm-only roll", async () => {
@@ -278,6 +315,20 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     expect(res.status).toBe(413);
     expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
     expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("T3.2b body exactly at ROLL_BODY_MAX_BYTES passes to the schema stage (not 413)", async () => {
+    // Extra keys are ignored by the schema, so padding the body with a junk
+    // field of exactly the right length keeps the roll itself valid.
+    const base = { ...VALID_ROLL_BODY, padding: "" };
+    const baseBytes = Buffer.byteLength(JSON.stringify(base), "utf8");
+    const padLength = ROLL_BODY_MAX_BYTES - baseBytes;
+    const bodyString = JSON.stringify({ ...VALID_ROLL_BODY, padding: "x".repeat(padLength) });
+    expect(Buffer.byteLength(bodyString, "utf8")).toBe(ROLL_BODY_MAX_BYTES);
+
+    const res = await POST(makeRawPost(bodyString), { params: PARAMS });
+    expect(res.status).toBe(201);
+    expect(mockedStorage.saveCampaignRoll).toHaveBeenCalledTimes(1);
   });
 
   it("T3.3 returns 400 for oversized formula, no persist/broadcast", async () => {
@@ -392,6 +443,16 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     const accepted = await POST(makePost(VALID_ROLL_BODY), { params: PARAMS });
     expect(accepted.status).toBe(201);
     expect(mockedEmitFiltered).toHaveBeenCalledTimes(1);
+  });
+
+  it("T3.20 does not import rollSubmissionSchema — client-side wiring is out of scope for this change (tracked in #712)", () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const fs = require("fs");
+    const source = fs.readFileSync(
+      require.resolve("@/lib/dice/useRollSubmission"),
+      "utf8"
+    );
+    expect(source).not.toMatch(/rollSubmissionSchema|from ['"]@\/lib\/validation\/rollSubmission['"]/);
   });
 });
 

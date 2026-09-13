@@ -50,10 +50,43 @@ describe('readBoundedJson', () => {
     expect(result).toEqual({ ok: false, reason: 'invalid-json' });
   });
 
-  it('T2.5 missing body stream → { ok: false, reason: "error" }', async () => {
+  it('T2.5 missing body stream (e.g. bodyless request) → { ok: false, reason: "invalid-json" }, not a 500-mapped error', async () => {
     const request = makeRequest(JSON.stringify({ a: 1 }));
     jest.spyOn(request, 'body', 'get').mockReturnValue(null);
     const result = await readBoundedJson(request, 1024);
+    expect(result).toEqual({ ok: false, reason: 'invalid-json' });
+  });
+
+  it('T2.6 stream read throws → { ok: false, reason: "error" }', async () => {
+    const request = makeRequest(JSON.stringify({ a: 1 }));
+    const realReader = request.body!.getReader();
+    jest.spyOn(realReader, 'read').mockRejectedValue(new Error('boom'));
+    jest.spyOn(request, 'body', 'get').mockReturnValue({
+      getReader: () => realReader,
+    } as unknown as NextRequest['body']);
+
+    const result = await readBoundedJson(request, 1024);
     expect(result).toEqual({ ok: false, reason: 'error' });
+  });
+
+  it('T2.7 body exactly at the byte cap → { ok: true, value }, not rejected as oversize', async () => {
+    // Build a JSON payload whose UTF-8 byte length is exactly `maxBytes`.
+    const padding = 'x'.repeat(100);
+    const base = JSON.stringify({ pad: padding });
+    const maxBytes = Buffer.byteLength(base, 'utf8');
+    const request = makeRequest(base);
+
+    const result = await readBoundedJson(request, maxBytes);
+    expect(result).toEqual({ ok: true, value: { pad: padding } });
+  });
+
+  it('T2.8 body one byte over the cap → { ok: false, reason: "oversize" }', async () => {
+    const padding = 'x'.repeat(100);
+    const base = JSON.stringify({ pad: padding });
+    const maxBytes = Buffer.byteLength(base, 'utf8') - 1;
+    const request = makeRequest(base);
+
+    const result = await readBoundedJson(request, maxBytes);
+    expect(result).toEqual({ ok: false, reason: 'oversize' });
   });
 });

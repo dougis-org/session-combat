@@ -6,12 +6,12 @@ import { canSeeRoll } from '@/lib/utils/campaignRolls';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
 import { readBoundedJson } from '@/lib/server/readBoundedJson';
 import { rollSubmissionSchema } from '@/lib/validation/rollSubmission';
-import type { CampaignRoll, RollVisibility } from '@/lib/types';
+import type { CampaignRoll } from '@/lib/types';
 
 type Params = { id: string };
 
 /** JSON-only endpoint; a well-formed roll payload is well under 2 KiB, so 16 KiB gives large headroom. */
-const ROLL_BODY_MAX_BYTES = 16 * 1024;
+export const ROLL_BODY_MAX_BYTES = 16 * 1024;
 
 export const POST = withAuthAndParams<Params>(async (request, auth, { id: campaignId }) => {
   try {
@@ -34,7 +34,6 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     }
 
     const { formula, rolls, total, label, visibility } = parsed.data;
-    const rollVisibility: RollVisibility = visibility;
 
     const caller = await storage.getMember(campaignId, auth.userId);
     if (!caller || caller.status !== 'active') {
@@ -59,10 +58,10 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       rollerId: auth.userId,
       rollerName,
       formula,
-      rolls: rolls as number[],
+      rolls,
       total,
-      ...(typeof label === 'string' && label.trim() ? { label: label.trim() } : {}),
-      visibility: rollVisibility,
+      ...(label?.trim() ? { label: label.trim() } : {}),
+      visibility,
       createdAt: new Date(),
     };
 

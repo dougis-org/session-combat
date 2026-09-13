@@ -16,7 +16,9 @@ export type BoundedJsonResult =
  * the stream at all. Otherwise the body is streamed via `getReader()` and
  * the read is aborted (`reader.cancel()`) the moment cumulative bytes exceed
  * `maxBytes`, so the body is never buffered past the cap regardless of the
- * sender's actual payload size.
+ * sender's actual payload size. A missing body or unparseable JSON resolves
+ * to `reason: 'invalid-json'`; `reason: 'error'` is reserved for an
+ * unexpected failure while reading the stream itself.
  */
 export async function readBoundedJson(
   request: NextRequest,
@@ -27,10 +29,14 @@ export async function readBoundedJson(
     return { ok: false, reason: 'oversize' };
   }
 
+  // A request sent with no body at all (e.g. `fetch(url, { method: 'POST' })`)
+  // has `request.body === null` in the Next.js runtime — this is an ordinary
+  // malformed client request, not a server fault, so it maps to the same
+  // `invalid-json` (400) outcome as an empty/unparseable body rather than
+  // `error` (500).
   const reader = request.body?.getReader();
   if (!reader) {
-    console.error('readBoundedJson: request has no readable body stream');
-    return { ok: false, reason: 'error' };
+    return { ok: false, reason: 'invalid-json' };
   }
 
   const chunks: Uint8Array[] = [];
