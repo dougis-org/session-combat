@@ -45,10 +45,16 @@ export async function loadCampaigns(userId: string): Promise<CampaignWithMembers
         .collection<Campaign>("campaigns")
         .find({ id: { $in: [...membershipByCampaignId.keys()] } })
         .toArray();
-      return campaigns.map((campaign) => {
+      return campaigns.flatMap((campaign) => {
         const normalized = normalizeCampaign(normalizeStoredEntityId(campaign));
-        const membership = membershipByCampaignId.get(normalized.id)!;
-        return { ...normalized, memberRole: membership.role, memberStatus: membership.status };
+        const membership = membershipByCampaignId.get(normalized.id);
+        if (!membership) {
+          // Should be unreachable: `campaigns` was queried by the exact ids in
+          // this map. Skip rather than crash the whole list on a mismatch.
+          console.warn(`loadCampaigns: no membership row found for campaign ${normalized.id}`);
+          return [];
+        }
+        return [{ ...normalized, memberRole: membership.role, memberStatus: membership.status }];
       });
     },
   );

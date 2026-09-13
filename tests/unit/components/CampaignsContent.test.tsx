@@ -31,6 +31,8 @@ const mockCampaign = {
   chapters: [],
   updatedAt: new Date().toISOString(),
   createdAt: new Date().toISOString(),
+  memberRole: 'dm',
+  memberStatus: 'active',
 };
 
 describe('CampaignsContent - Session section rendering', () => {
@@ -157,7 +159,7 @@ describe('CampaignsContent - membership-based grouping', () => {
     render(<CampaignsContent />);
     await screen.findByText('Invited Campaign');
 
-    await user.click(screen.getByRole('button', { name: 'Accept' }));
+    await user.click(screen.getByRole('button', { name: /^Accept invitation/ }));
 
     await waitFor(() => {
       const fetchMock = global.fetch as jest.Mock;
@@ -175,7 +177,7 @@ describe('CampaignsContent - membership-based grouping', () => {
     render(<CampaignsContent />);
     await screen.findByText('Invited Campaign');
 
-    await user.click(screen.getByRole('button', { name: 'Decline' }));
+    await user.click(screen.getByRole('button', { name: /^Decline invitation/ }));
 
     await waitFor(() => {
       const fetchMock = global.fetch as jest.Mock;
@@ -185,6 +187,28 @@ describe('CampaignsContent - membership-based grouping', () => {
       expect(patchCall).toBeDefined();
       expect(JSON.parse(patchCall![1].body)).toEqual({ action: 'decline' });
     });
+  });
+
+  it('shows an error banner and keeps the invited card when the accept PATCH fails', async () => {
+    const user = userEvent.setup();
+    (global.fetch as jest.Mock).mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = input.toString();
+      if (url === '/api/campaigns') return { ok: true, json: async () => [invitedCampaign] };
+      if (url === '/api/parties') return { ok: true, json: async () => [] };
+      if (url === '/api/characters') return { ok: true, json: async () => [] };
+      if (url === '/api/campaigns/global') return { ok: true, json: async () => [] };
+      if (url.includes('/members/me') && init?.method === 'PATCH') {
+        return { ok: false, json: async () => ({ error: 'You have already declined this invitation' }) };
+      }
+      return { ok: false, json: async () => ({ error: 'not found' }) };
+    });
+    render(<CampaignsContent />);
+    await screen.findByText('Invited Campaign');
+
+    await user.click(screen.getByRole('button', { name: /^Accept invitation/ }));
+
+    expect(await screen.findByText('You have already declined this invitation')).toBeInTheDocument();
+    expect(screen.getByText('Invited Campaign')).toBeInTheDocument();
   });
 
   test('TC-1.4: session fetch failure degrades to empty state', async () => {

@@ -35,8 +35,8 @@ describe('PlayerCampaignCard', () => {
     expect(screen.queryByText('Edit')).not.toBeInTheDocument();
     expect(screen.queryByText('Delete')).not.toBeInTheDocument();
     expect(screen.queryByText('Members')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Accept' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Decline' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Accept invitation/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Decline invitation/ })).not.toBeInTheDocument();
   });
 
   it('invited: renders an "Invited" badge and Accept/Decline buttons, no navigation links', () => {
@@ -50,8 +50,8 @@ describe('PlayerCampaignCard', () => {
     );
 
     expect(screen.getByText('Invited')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Accept' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Decline' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Accept invitation/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Decline invitation/ })).toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
@@ -68,10 +68,10 @@ describe('PlayerCampaignCard', () => {
       />
     );
 
-    await user.click(screen.getByRole('button', { name: 'Accept' }));
+    await user.click(screen.getByRole('button', { name: /^Accept invitation/ }));
     expect(onAccept).toHaveBeenCalledWith('camp-1');
 
-    await user.click(screen.getByRole('button', { name: 'Decline' }));
+    await user.click(screen.getByRole('button', { name: /^Decline invitation/ }));
     expect(onDecline).toHaveBeenCalledWith('camp-1');
   });
 });

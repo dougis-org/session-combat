@@ -32,6 +32,8 @@ const BASE_CAMPAIGN = {
   notes: '',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+  memberRole: 'dm',
+  memberStatus: 'active',
 };
 
 const INACTIVE_CAMPAIGN = { ...BASE_CAMPAIGN, id: 'camp-inactive', name: 'Inactive Campaign', status: 'planning' };

@@ -11,9 +11,8 @@ import { CharacterRosterCard } from '@/lib/components/CharacterRosterCard';
 import { CampaignCardHeader } from '@/lib/components/CampaignCardHeader';
 import { PlayerCampaignCard } from '@/lib/components/PlayerCampaignCard';
 
-// The GET /api/campaigns response annotates each campaign with the caller's
-// membership, but older/partial data may omit it — treat those fields as optional.
-type CampaignListItem = Campaign & Partial<Pick<CampaignWithMembership, 'memberRole' | 'memberStatus'>>;
+// GET /api/campaigns always annotates each campaign with the caller's membership.
+type CampaignListItem = CampaignWithMembership;
 
 function ManagementChapterInfo({ campaign }: { campaign: Campaign }) {
   const currentCh = campaign.currentChapterId
@@ -52,11 +51,9 @@ export function CampaignsContent() {
   const [copyError, setCopyError] = useState<Record<string, string>>({});
   const [catalogSearch, setCatalogSearch] = useState('');
 
-  // Every campaign already carries a `dm` membership row for its creator, so
-  // an item with no memberRole (e.g. a not-yet-migrated caller) defaults to dm.
-  const dmCampaigns = campaigns.filter(c => (c.memberRole ?? 'dm') === 'dm');
+  const dmCampaigns = campaigns.filter(c => c.memberRole === 'dm');
   const playerCampaigns = campaigns.filter(
-    c => c.memberRole === 'player' && (c.memberStatus ?? 'active') === 'active'
+    c => c.memberRole === 'player' && c.memberStatus === 'active'
   );
   const invitedCampaigns = campaigns.filter(
     c => c.memberRole === 'player' && c.memberStatus === 'invited'
@@ -208,8 +205,8 @@ export function CampaignsContent() {
         body: JSON.stringify({ action }),
       });
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || `Failed to ${action} invitation`);
+        const message = await response.json().then((data) => data.error, () => undefined);
+        throw new Error(message || `Failed to ${action} invitation`);
       }
       await loadAll();
     } catch (err) {
@@ -451,7 +448,7 @@ export function CampaignsContent() {
             <LoadingState label="Loading campaigns..." />
           ) : dmCampaigns.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-gray-400 text-lg mb-4">No campaigns yet.</p>
+              <p className="text-gray-400 text-lg mb-4">You haven&apos;t created any campaigns yet.</p>
               <button
                 onClick={addCampaign}
                 className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded text-lg font-semibold"
