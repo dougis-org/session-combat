@@ -25,25 +25,25 @@ Ownership metadata:
 
 ### Slice 1 — Shared validator (`lib/validation/rollSubmission.ts`)  _(spec: "Shared roll-submission validator with dice-derived bounds")_
 
-- [ ] **1a (test first):** add `tests/unit/lib/validation/rollSubmission.test.ts`. Failing cases: exported bounds `>=` computed maxima from `@/lib/utils/dice` (`MAX_DICE_IN_ROLL >= MAX_PER_DIE * DIE_SIDES.length`; `MAX_DIE_VALUE >= Math.max(...SUPPORTED_SIDES)`; `MAX_TOTAL_MAGNITUDE >= MAX_DICE_IN_ROLL * MAX_DIE_VALUE + MAX_MODIFIER`); `MAX_LABEL_LENGTH === 128`; schema accepts a standard pool roll, a `d%` roll, the 120-dice + 999-modifier max pool, an empty `rolls` array, and a roll whose `total` != sum(`rolls`); schema rejects oversized `formula`, oversized `rolls` length, non-integer / `<1` / `>MAX_DIE_VALUE` entry, non-finite / over-magnitude `total`, 129-char `label`, and bad `visibility.scope`.
-- [ ] **1b:** implement `lib/validation/rollSubmission.ts` per design Decision 1 & 2 — `rollSubmissionSchema` + exported constants, each constant commented with its `lib/utils/dice.ts` derivation. Import only `zod` and `@/lib/utils/dice`.
-- [ ] **1c:** add an assertion (test or lint) that the module's imports are limited to `zod` and `@/lib/utils/dice` (no `next/*`, no `@/lib/storage`) — supports future issue #712.
-- [ ] **1d:** run `npx vitest run tests/unit/lib/validation/rollSubmission.test.ts` (or project test runner) — green.
+- [x] **1a (test first):** add `tests/unit/lib/validation/rollSubmission.test.ts`. Failing cases: exported bounds `>=` computed maxima from `@/lib/utils/dice` (`MAX_DICE_IN_ROLL >= MAX_PER_DIE * DIE_SIDES.length`; `MAX_DIE_VALUE >= Math.max(...SUPPORTED_SIDES)`; `MAX_TOTAL_MAGNITUDE >= MAX_DICE_IN_ROLL * MAX_DIE_VALUE + MAX_MODIFIER`); `MAX_LABEL_LENGTH === 128`; schema accepts a standard pool roll, a `d%` roll, the 120-dice + 999-modifier max pool, an empty `rolls` array, and a roll whose `total` != sum(`rolls`); schema rejects oversized `formula`, oversized `rolls` length, non-integer / `<1` / `>MAX_DIE_VALUE` entry, non-finite / over-magnitude `total`, 129-char `label`, and bad `visibility.scope`.
+- [x] **1b:** implement `lib/validation/rollSubmission.ts` per design Decision 1 & 2 — `rollSubmissionSchema` + exported constants, each constant commented with its `lib/utils/dice.ts` derivation. Import only `zod` and `@/lib/utils/dice`.
+- [x] **1c:** add an assertion (test or lint) that the module's imports are limited to `zod` and `@/lib/utils/dice` (no `next/*`, no `@/lib/storage`) — supports future issue #712.
+- [x] **1d:** run `npx vitest run tests/unit/lib/validation/rollSubmission.test.ts` (or project test runner) — green.
 
 ### Slice 2 — Bounded JSON body read (`lib/server/readBoundedJson.ts`)  _(spec: "Rolls API caps the request body size")_
 
-- [ ] **2a (test first):** add `tests/unit/lib/server/readBoundedJson.test.ts`. Cases: body under cap → `{ ok: true, value }`; body over cap → `{ ok: false, reason: 'oversize' }` and the mock reader's `cancel()` was called; oversized `Content-Length` header → `{ ok: false, reason: 'oversize' }` with the stream never read; invalid JSON under cap → `{ ok: false, reason: 'invalid-json' }`; missing body stream → `{ ok: false, reason: 'error' }`.
-- [ ] **2b:** implement `lib/server/readBoundedJson.ts` modeled on `readBoundedText` in `app/api/monsters/upload/shared.ts` (stream via `request.body.getReader()`, abort once `total > maxBytes`, `Content-Length` short-circuit), then `JSON.parse`. Export `readBoundedJson`.
-- [ ] **2c:** run the new unit test — green.
+- [x] **2a (test first):** add `tests/unit/lib/server/readBoundedJson.test.ts`. Cases: body under cap → `{ ok: true, value }`; body over cap → `{ ok: false, reason: 'oversize' }` and the mock reader's `cancel()` was called; oversized `Content-Length` header → `{ ok: false, reason: 'oversize' }` with the stream never read; invalid JSON under cap → `{ ok: false, reason: 'invalid-json' }`; missing body stream → `{ ok: false, reason: 'error' }`.
+- [x] **2b:** implement `lib/server/readBoundedJson.ts` modeled on `readBoundedText` in `app/api/monsters/upload/shared.ts` (stream via `request.body.getReader()`, abort once `total > maxBytes`, `Content-Length` short-circuit), then `JSON.parse`. Export `readBoundedJson`.
+- [x] **2c:** run the new unit test — green.
 
 ### Slice 3 — Wire into the rolls route (`app/api/campaigns/[id]/rolls/route.ts`)  _(specs: "rejects out-of-bounds", "caps the request body size", "accepts well-formed rolls unchanged", "preserves existing auth and session errors")_
 
-- [ ] **3a (test first):** in the route's test file (`tests/**/campaigns*rolls*` — locate existing; create if absent), add/adjust cases: body > `ROLL_BODY_MAX_BYTES` → `413`, `storage.saveCampaignRoll` and `emitFiltered` not called; oversized `Content-Length` → `413`; each invalid field (formula/rolls length/die value/total/label/scope) → `400`, no persist/broadcast; `400` body is a single concise `error` string (no raw zod dump); malformed JSON → `400` `Invalid JSON`; non-object body → `400`; non-member → `403`; no active session → `409`; normal pool roll → `201` (persist + broadcast once); `d%` roll → `201`; `total` != sum(`rolls`) → `201` stored verbatim; empty `rolls` → `201`.
-- [ ] **3b:** define `ROLL_BODY_MAX_BYTES = 16 * 1024` (in the route or alongside `readBoundedJson` — design leaves it in the route). Replace `await request.json()` + inline `typeof`/`Array.isArray`/`Number.isFinite`/`scope` checks with: `readBoundedJson(request, ROLL_BODY_MAX_BYTES)` → `413` / `400 Invalid JSON` / `500` per design Decision 4 step 1; then `rollSubmissionSchema.safeParse(value)` → `400` with concise message per Decision 4 step 2; then use `parsed.data` downstream (Decision 4 step 3). Keep the `403`/`409`/build/`saveCampaignRoll`/`emitFiltered`/`201` flow unchanged.
-- [ ] **3c:** run the route test file — green.
-- [ ] **3d:** confirm no other caller relied on the removed inline behavior (`rg "saveCampaignRoll|/rolls'" --type ts`); the client hook `lib/dice/useRollSubmission.ts` is untouched (that is #712).
+- [x] **3a (test first):** in the route's test file (`tests/**/campaigns*rolls*` — locate existing; create if absent), add/adjust cases: body > `ROLL_BODY_MAX_BYTES` → `413`, `storage.saveCampaignRoll` and `emitFiltered` not called; oversized `Content-Length` → `413`; each invalid field (formula/rolls length/die value/total/label/scope) → `400`, no persist/broadcast; `400` body is a single concise `error` string (no raw zod dump); malformed JSON → `400` `Invalid JSON`; non-object body → `400`; non-member → `403`; no active session → `409`; normal pool roll → `201` (persist + broadcast once); `d%` roll → `201`; `total` != sum(`rolls`) → `201` stored verbatim; empty `rolls` → `201`.
+- [x] **3b:** define `ROLL_BODY_MAX_BYTES = 16 * 1024` (in the route or alongside `readBoundedJson` — design leaves it in the route). Replace `await request.json()` + inline `typeof`/`Array.isArray`/`Number.isFinite`/`scope` checks with: `readBoundedJson(request, ROLL_BODY_MAX_BYTES)` → `413` / `400 Invalid JSON` / `500` per design Decision 4 step 1; then `rollSubmissionSchema.safeParse(value)` → `400` with concise message per Decision 4 step 2; then use `parsed.data` downstream (Decision 4 step 3). Keep the `403`/`409`/build/`saveCampaignRoll`/`emitFiltered`/`201` flow unchanged.
+- [x] **3c:** run the route test file — green.
+- [x] **3d:** confirm no other caller relied on the removed inline behavior (`rg "saveCampaignRoll|/rolls'" --type ts`); the client hook `lib/dice/useRollSubmission.ts` is untouched (that is #712).
 
-- [ ] **Confirm acceptance criteria covered** — every scenario in `specs/roll-submission-validation/spec.md` maps to a passing test (see `tests.md`).
+- [x] **Confirm acceptance criteria covered** — every scenario in `specs/roll-submission-validation/spec.md` maps to a passing test (see `tests.md`).
 
 ## Pre-Commit Code Review
 
@@ -51,10 +51,10 @@ Ownership metadata:
 
 ## Validation
 
-- [ ] Unit/integration tests: run the project unit suite (`npm test` / `npx vitest run`) — all pass
+- [x] Unit/integration tests: run the project unit suite (`npm test` / `npx vitest run`) — all pass
 - [ ] E2E tests: run project E2E suite if the route is covered — all pass (use a free port, not 3000)
-- [ ] Type checks: `npm run typecheck` (or `tsc --noEmit`) — clean
-- [ ] Build: `npm run build` — succeeds
+- [x] Type checks: `npm run typecheck` (or `tsc --noEmit`) — clean
+- [x] Build: `npm run build` — succeeds
 - [ ] Security / code quality: Codacy + Verity pre-commit/pre-push gate — pass; fix findings, do **not** waive (waive only for a human-accepted, cited risk)
 - [ ] All completed tasks marked complete
 - [ ] All steps in [Remote push validation]

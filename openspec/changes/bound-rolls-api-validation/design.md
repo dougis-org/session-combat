@@ -45,15 +45,15 @@
 
 ### Decision 2: Bounds constants and their derivation
 
-- Chosen (in `lib/validation/rollSubmission.ts`, each with a comment citing its `lib/utils/dice.ts` basis and headroom):
-  - `MAX_DIE_VALUE = 100` — largest face in `SUPPORTED_SIDES` (the `d%` percentile die). No headroom needed; it is an exact ceiling for a single die result.
-  - `MAX_DICE_IN_ROLL = 200` — legitimate max is `MAX_PER_DIE (20) × DIE_SIDES.length (6) = 120`; round up to 200 for headroom (future die groups, multi-pool commits).
-  - `MAX_TOTAL_MAGNITUDE = 100_000` — legitimate max ≈ `MAX_DICE_IN_ROLL (200) × MAX_DIE_VALUE (100) + MAX_MODIFIER (999)` ≈ 21_000; 100_000 gives generous headroom while still blocking `Number.MAX_VALUE`-style payloads. Absolute-value bound so negative totals (penalties) pass.
-  - `MAX_FORMULA_LENGTH = 256` — a fully-expanded pool formula (`20d20 + 20d12 + … + 999`) is well under 100 chars; 256 is comfortable headroom and far below abuse size.
+- Chosen (in `lib/validation/rollSubmission.ts`, each with a comment citing its `lib/utils/dice.ts` basis): **tight** bounds, matched exactly to today's real ceilings rather than rounded up with generous headroom — an explicit requester decision (over the alternative of loose headroom for hypothetical future growth).
+  - `MAX_DIE_VALUE = 100` — largest face in `SUPPORTED_SIDES` (the `d%` percentile die). Exact ceiling for a single die result.
+  - `MAX_DICE_IN_ROLL = 120` — exact ceiling: `MAX_PER_DIE (20) × DIE_SIDES.length (6) = 120`, the real pool-builder maximum. No rounding up.
+  - `MAX_TOTAL_MAGNITUDE = 13_000` — exact ceiling: `MAX_DICE_IN_ROLL (120) × MAX_DIE_VALUE (100) + MAX_MODIFIER (999) = 12_999`, rounded up slightly to a round number. Absolute-value bound so negative totals (penalties) pass.
+  - `MAX_FORMULA_LENGTH = 64` — a fully-expanded max pool formula (`20d4+20d6+20d8+20d10+20d12+20d20+999`) is ~36 chars; 64 is tight headroom, not loose padding.
   - `MAX_LABEL_LENGTH = 128` — explicit requester decision.
-- Alternatives considered: Tighter values matched exactly to current maxima — rejected: brittle against legitimate feature growth and would need a spec change for any new die group.
-- Rationale: Derive-with-headroom keeps the guard honest (blocks abuse by orders of magnitude) without turning normal play into a source of `400`s.
-- Trade-offs: The guard is deliberately loose; it is a resource-exhaustion backstop, not a correctness check (that is what n050's "recompute" half would be, explicitly out of scope).
+- Alternatives considered: Loose headroom (e.g. `MAX_DICE_IN_ROLL = 200`, `MAX_TOTAL_MAGNITUDE = 100_000`, `MAX_FORMULA_LENGTH = 256`) to absorb hypothetical future die groups without a follow-up spec change — rejected: the point of this change is a meaningful trust boundary, and any real feature growth (a new die size, a bigger pool cap) already requires touching `lib/utils/dice.ts` and can bump these constants in the same PR.
+- Rationale: A bound that sits far above the real maximum isn't much of a bound. Tight-but-derived values still never reject a legitimate roll (verified by the max-pool and `d%` test cases) while making the boundary actually meaningful.
+- Trade-offs: Any future increase to `MAX_PER_DIE`, `DIE_SIDES`, or `MAX_MODIFIER` must be accompanied by an update here — acceptable since both live under `lib/utils/dice.ts` and a change to one is a deliberate, reviewed edit, not organic drift. It is still a resource-exhaustion backstop, not a correctness check (that is what n050's "recompute" half would be, explicitly out of scope).
 
 ### Decision 3: Bounded JSON body read via new `lib/server/readBoundedJson.ts`
 
