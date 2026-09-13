@@ -50,23 +50,29 @@ describe("Campaign storage functions", () => {
   });
 
   describe("campaignRepo.loadCampaigns", () => {
-    test("returns all campaigns for the given userId", async () => {
-      const campaigns = [baseCampaign];
-      campaignsMock.toArray.mockResolvedValue(campaigns as never);
+    test("returns campaigns for the user's active/invited memberships, annotated with role/status", async () => {
+      campaignsMock.toArray
+        .mockResolvedValueOnce([{ campaignId: "campaign-1", role: "dm", status: "active" }] as never)
+        .mockResolvedValueOnce([baseCampaign] as never);
 
       const result = await campaignRepo.loadCampaigns("user-1");
 
+      expect(mockDb.collection).toHaveBeenCalledWith("campaignMembers");
+      expect(campaignsMock.find).toHaveBeenNthCalledWith(1, {
+        userId: "user-1",
+        status: { $in: ["active", "invited"] },
+      });
       expect(mockDb.collection).toHaveBeenCalledWith("campaigns");
-      expect(campaignsMock.find).toHaveBeenCalledWith({ userId: "user-1" });
-      expect(result).toEqual(campaigns);
+      expect(result).toEqual([{ ...baseCampaign, memberRole: "dm", memberStatus: "active" }]);
     });
 
-    test("returns empty array when no campaigns exist for user", async () => {
-      campaignsMock.toArray.mockResolvedValue([] as never);
+    test("returns empty array without querying campaigns when user has no memberships", async () => {
+      campaignsMock.toArray.mockResolvedValueOnce([] as never);
 
       const result = await campaignRepo.loadCampaigns("user-1");
 
       expect(result).toEqual([]);
+      expect(mockDb.collection).not.toHaveBeenCalledWith("campaigns");
     });
 
     test("rejects with StorageError when getDatabase fails (#503: was swallowed to [])", async () => {
@@ -257,7 +263,9 @@ describe("Campaign storage functions", () => {
   describe("campaignRepo.loadCampaigns normalizes legacy chapters", () => {
     test("defaults missing chapters to empty array", async () => {
       const legacyCampaign = { ...baseCampaign, chapters: undefined };
-      campaignsMock.toArray.mockResolvedValue([legacyCampaign] as never);
+      campaignsMock.toArray
+        .mockResolvedValueOnce([{ campaignId: "campaign-1", role: "dm", status: "active" }] as never)
+        .mockResolvedValueOnce([legacyCampaign] as never);
 
       const result = await campaignRepo.loadCampaigns("user-1");
 

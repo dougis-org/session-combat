@@ -823,11 +823,6 @@ export interface CampaignMember {
   history: MemberHistoryEntry[];
 }
 
-export interface CampaignMemberSummary {
-  id: string;
-  name: string;
-}
-
 export interface CampaignCharacterShare {
   _id?: string;
   id: string;

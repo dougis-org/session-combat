@@ -1,13 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState } from '@/lib/components/ui';
 import { Campaign, CampaignTemplate, Party, Character, SessionLog, getCharacterType } from '@/lib/types';
+import type { CampaignWithMembership } from '@/lib/storage/campaignRepo';
 import { CampaignEditor } from './CampaignEditor';
 import { CharacterRosterCard } from '@/lib/components/CharacterRosterCard';
-import { CampaignChapterInfo } from '@/lib/components/CampaignChapterInfo';
+import { CampaignCardHeader } from '@/lib/components/CampaignCardHeader';
+import { PlayerCampaignCard } from '@/lib/components/PlayerCampaignCard';
+
+// GET /api/campaigns always annotates each campaign with the caller's membership.
+type CampaignListItem = CampaignWithMembership;
 
 function ManagementChapterInfo({ campaign }: { campaign: Campaign }) {
   const currentCh = campaign.currentChapterId
@@ -30,28 +35,8 @@ function ManagementChapterInfo({ campaign }: { campaign: Campaign }) {
   return null;
 }
 
-function statusBadgeClass(status: Campaign['status'] | undefined): string {
-  switch (status) {
-    case 'planning': return 'bg-slate-600';
-    case 'active': return 'bg-green-700';
-    case 'on-hold': return 'bg-yellow-600';
-    case 'completed': return 'bg-gray-600';
-    default: return 'bg-green-700';
-  }
-}
-
-function statusLabel(status: Campaign['status'] | undefined): string {
-  switch (status) {
-    case 'planning': return 'Planning';
-    case 'active': return 'Active';
-    case 'on-hold': return 'On Hold';
-    case 'completed': return 'Completed';
-    default: return 'Active';
-  }
-}
-
 export function CampaignsContent() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [campaigns, setCampaigns] = useState<CampaignListItem[]>([]);
   const [parties, setParties] = useState<Party[]>([]);
   const [characters, setCharacters] = useState<Character[]>([]);
   const [sessionsByCampaign, setSessionsByCampaign] = useState<Record<string, SessionLog | null>>({});
@@ -65,6 +50,20 @@ export function CampaignsContent() {
   const [copyingIds, setCopyingIds] = useState<Set<string>>(new Set());
   const [copyError, setCopyError] = useState<Record<string, string>>({});
   const [catalogSearch, setCatalogSearch] = useState('');
+
+  const dmCampaigns = useMemo(() => campaigns.filter(c => c.memberRole === 'dm'), [campaigns]);
+  const playerCampaigns = useMemo(
+    () => campaigns.filter(c => c.memberRole === 'player' && c.memberStatus === 'active'),
+    [campaigns]
+  );
+  const invitedCampaigns = useMemo(
+    () => campaigns.filter(c => c.memberRole === 'player' && c.memberStatus === 'invited'),
+    [campaigns]
+  );
+  const activeCampaigns = useMemo(
+    () => dmCampaigns.filter(c => (c.status ?? 'active') === 'active'),
+    [dmCampaigns]
+  );
 
   const loadAll = async () => {
     try {
@@ -104,7 +103,6 @@ export function CampaignsContent() {
   }, []);
 
   useEffect(() => {
-    const activeCampaigns = campaigns.filter(c => (c.status ?? 'active') === 'active');
     if (activeCampaigns.length === 0) return;
 
     const controller = new AbortController();
@@ -129,7 +127,7 @@ export function CampaignsContent() {
 
     fetchSessions();
     return () => controller.abort();
-  }, [campaigns]);
+  }, [activeCampaigns]);
 
   const copyTemplate = async (templateId: string) => {
     setCopyingIds((prev) => new Set(prev).add(templateId));
@@ -203,7 +201,24 @@ export function CampaignsContent() {
     setEditingCampaign(null);
   };
 
-  const activeCampaigns = campaigns.filter(c => c.status === 'active');
+  const respondToInvitation = async (campaignId: string, action: 'accept' | 'decline') => {
+    try {
+      setError(null);
+      const response = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/members/me`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      if (!response.ok) {
+        const message = await response.json().then((data) => data.error, () => undefined);
+        throw new Error(message || `Failed to ${action} invitation`);
+      }
+      await loadAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `Failed to ${action} invitation`);
+    }
+  };
+
   const filteredTemplates = templates.filter(t => t.name.toLowerCase().includes(catalogSearch.trim().toLowerCase()));
 
   return (
@@ -235,19 +250,7 @@ export function CampaignsContent() {
 
                 return (
                   <div key={campaign.id} className="bg-gray-800 rounded-lg p-6">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h3 className="text-xl font-bold min-w-0 truncate">{campaign.name}</h3>
-                      <span className={`px-2 py-0.5 text-xs rounded text-white flex-shrink-0 ${statusBadgeClass(campaign.status)}`}>
-                        {statusLabel(campaign.status)}
-                      </span>
-                    </div>
-                    {campaign.moduleName && (
-                      <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
-                    )}
-                    <CampaignChapterInfo
-                      chapters={campaign.chapters || []}
-                      currentChapterId={campaign.currentChapterId}
-                    />
+                    <CampaignCardHeader campaign={campaign} />
                     <div className="flex flex-wrap gap-2 mt-3 mb-4">
                       <Link
                         href={`/campaigns/${campaign.id}`}
@@ -399,6 +402,34 @@ export function CampaignsContent() {
           )}
         </div>
 
+        {invitedCampaigns.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold mb-4">Invitations</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              {invitedCampaigns.map(campaign => (
+                <PlayerCampaignCard
+                  key={campaign.id}
+                  campaign={campaign}
+                  memberStatus="invited"
+                  onAccept={(id) => respondToInvitation(id, 'accept')}
+                  onDecline={(id) => respondToInvitation(id, 'decline')}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {playerCampaigns.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold mb-4">Your Campaigns (Player)</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              {playerCampaigns.map(campaign => (
+                <PlayerCampaignCard key={campaign.id} campaign={campaign} memberStatus="active" />
+              ))}
+            </div>
+          </div>
+        )}
+
         <button
           onClick={addCampaign}
           disabled={loading}
@@ -420,9 +451,9 @@ export function CampaignsContent() {
         <div id="campaigns-list">
           {loading ? (
             <LoadingState label="Loading campaigns..." />
-          ) : campaigns.length === 0 ? (
+          ) : dmCampaigns.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-gray-400 text-lg mb-4">No campaigns yet.</p>
+              <p className="text-gray-400 text-lg mb-4">You haven&apos;t created any campaigns yet.</p>
               <button
                 onClick={addCampaign}
                 className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded text-lg font-semibold"
@@ -432,18 +463,12 @@ export function CampaignsContent() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
-              {campaigns.map(campaign => (
+              {dmCampaigns.map(campaign => (
                 <div key={campaign.id} className="bg-gray-800 rounded-lg p-4">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h3 className="text-xl font-bold min-w-0 truncate">{campaign.name}</h3>
-                    <span className={`px-2 py-0.5 text-xs rounded text-white flex-shrink-0 ${statusBadgeClass(campaign.status)}`}>
-                      {statusLabel(campaign.status)}
-                    </span>
-                  </div>
-                  {campaign.moduleName && (
-                    <p className="text-gray-400 text-sm">{campaign.moduleName}</p>
-                  )}
-                  <ManagementChapterInfo campaign={campaign} />
+                  <CampaignCardHeader
+                    campaign={campaign}
+                    renderChapterInfo={(c) => <ManagementChapterInfo campaign={c} />}
+                  />
                   <div className="flex flex-wrap gap-2 mt-3">
                     <Link
                       href={`/campaigns/${campaign.id}`}

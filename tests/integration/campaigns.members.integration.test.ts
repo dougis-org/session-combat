@@ -2,7 +2,6 @@ import { storage } from "@/lib/storage";
 import { connectToDatabase, closeDatabase, getDatabase } from "@/lib/db";
 import { DuplicateMemberError } from "@/lib/errors";
 import { CampaignMember, Campaign } from "@/lib/types";
-import * as campaignRepo from "@/lib/storage/campaignRepo";
 import { registerTestUser } from "./helpers/users";
 
 describe("Campaign Members Integration Tests", () => {
@@ -186,92 +185,86 @@ describe("Campaign Members Integration Tests", () => {
       expect(list).toEqual([]);
     });
 
-    describe("listCampaignsForMember", () => {
-      const TEST_CAMPAIGN_IDS = ["camp-1", "camp-2", "camp-3"];
+  });
 
-      afterEach(async () => {
-        const db = await getDatabase();
-        await db.collection("campaigns").deleteMany({ id: { $in: TEST_CAMPAIGN_IDS } });
+  describe("GET /api/campaigns — membership-based visibility", () => {
+    let listUserCookie: string;
+    let listUserId: string;
+    let dmUserId: string;
+    const seededCampaignIds: string[] = [];
+
+    beforeAll(async () => {
+      const listUser = await registerTestUser(baseUrl, "campaigns-list-test");
+      listUserCookie = listUser.cookie;
+      listUserId = listUser.userId;
+      const dmUser = await registerTestUser(baseUrl, "campaigns-list-dm-test");
+      dmUserId = dmUser.userId;
+    }, 30000);
+
+    afterEach(async () => {
+      if (seededCampaignIds.length === 0) return;
+      const db = await getDatabase();
+      await db.collection("campaigns").deleteMany({ id: { $in: seededCampaignIds } });
+      await db.collection("campaignMembers").deleteMany({ campaignId: { $in: seededCampaignIds } });
+      seededCampaignIds.length = 0;
+    });
+
+    async function seedCampaign(label: string, ownerId: string): Promise<string> {
+      const id = `camp-list-${label}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+      const db = await getDatabase();
+      await db.collection("campaigns").insertOne({
+        id,
+        name: `List test — ${label}`,
+        userId: ownerId,
+        status: "active",
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
+      seededCampaignIds.push(id);
+      return id;
+    }
 
-      test("returns correct { id, name } for each campaign", async () => {
-        const db = await getDatabase();
+    test("returns DM-owned, active-player, and invited campaigns; excludes declined, removed, and unrelated ones", async () => {
+      const dmOwnedId = await seedCampaign("dm-owned", listUserId);
+      const activePlayerId = await seedCampaign("active-player", dmUserId);
+      const invitedId = await seedCampaign("invited", dmUserId);
+      const declinedId = await seedCampaign("declined", dmUserId);
+      const removedId = await seedCampaign("removed", dmUserId);
+      const unrelatedId = await seedCampaign("unrelated", dmUserId);
 
-        const campaign1: Campaign = {
-          id: "camp-1",
-          userId: "user-dm",
-          name: "Lost Mine",
-          moduleName: "LMoP",
-          chapters: [],
-          partyIds: [],
-          status: "active",
-          notes: "",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        const campaign2: Campaign = {
-          id: "camp-2",
-          userId: "user-dm",
-          name: "Dragon Heist",
-          moduleName: "DH",
-          chapters: [],
-          partyIds: [],
-          status: "active",
-          notes: "",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        const campaign3: Campaign = {
-          id: "camp-3",
-          userId: "user-dm",
-          name: "Out of the Abyss",
-          moduleName: "OotA",
-          chapters: [],
-          partyIds: [],
-          status: "active",
-          notes: "",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        await db.collection<Campaign>("campaigns").insertMany([campaign1, campaign2, campaign3]);
-
-        const member1: CampaignMember = {
-          id: "mem-1",
-          campaignId: "camp-1",
-          userId: "user-alice",
-          role: "player",
-          status: "active",
-          history: [{ action: "active", by: "user-dm", at: new Date() }],
-        };
-
-        const member2: CampaignMember = {
-          id: "mem-2",
-          campaignId: "camp-3",
-          userId: "user-alice",
-          role: "player",
-          status: "invited",
-          history: [{ action: "invited", by: "user-dm", at: new Date() }],
-        };
-
-        await storage.addMember(member1);
-        await storage.addMember(member2);
-
-        const list = await campaignRepo.listCampaignsForMember("user-alice");
-        expect(list).toHaveLength(2);
-        const sorted = list.sort((a, b) => a.id.localeCompare(b.id));
-        expect(sorted).toEqual([
-          { id: "camp-1", name: "Lost Mine" },
-          { id: "camp-3", name: "Out of the Abyss" },
-        ]);
+      await storage.addMember({
+        id: `mem-${dmOwnedId}`, campaignId: dmOwnedId, userId: listUserId,
+        role: "dm", status: "active", history: [],
       });
-
-      test("returns empty for user with no memberships", async () => {
-        const list = await campaignRepo.listCampaignsForMember("user-none");
-        expect(list).toEqual([]);
+      await storage.addMember({
+        id: `mem-${activePlayerId}`, campaignId: activePlayerId, userId: listUserId,
+        role: "player", status: "active", history: [],
       });
+      await storage.addMember({
+        id: `mem-${invitedId}`, campaignId: invitedId, userId: listUserId,
+        role: "player", status: "invited", history: [],
+      });
+      await storage.addMember({
+        id: `mem-${declinedId}`, campaignId: declinedId, userId: listUserId,
+        role: "player", status: "declined", history: [],
+      });
+      await storage.addMember({
+        id: `mem-${removedId}`, campaignId: removedId, userId: listUserId,
+        role: "player", status: "removed", history: [],
+      });
+      // unrelatedId: listUserId has no CampaignMember row for it at all.
+
+      const res = await fetch(`${baseUrl}/api/campaigns`, { headers: { Cookie: listUserCookie } });
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as Array<Campaign & { memberRole: string; memberStatus: string }>;
+      const byId = Object.fromEntries(body.map((c) => [c.id, c]));
+
+      expect(byId[dmOwnedId]).toMatchObject({ memberRole: "dm", memberStatus: "active" });
+      expect(byId[activePlayerId]).toMatchObject({ memberRole: "player", memberStatus: "active" });
+      expect(byId[invitedId]).toMatchObject({ memberRole: "player", memberStatus: "invited" });
+      expect(byId[declinedId]).toBeUndefined();
+      expect(byId[removedId]).toBeUndefined();
+      expect(byId[unrelatedId]).toBeUndefined();
     });
   });
 

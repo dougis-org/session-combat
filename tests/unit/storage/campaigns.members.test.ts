@@ -205,53 +205,6 @@ describe("Campaign members storage and types", () => {
     });
   });
 
-  describe("listCampaignsForMember (mocked DB)", () => {
-    let mockCollection: ReturnType<typeof makeMockCollection>;
-    let mockDb: { collection: ReturnType<typeof jest.fn> };
-
-    beforeEach(() => {
-      mockCollection = makeMockCollection();
-      mockDb = { collection: jest.fn(() => mockCollection) };
-      mockedGetDatabase.mockResolvedValue(mockDb as never);
-    });
-
-    test("returns CampaignMemberSummary[] when user has memberships", async () => {
-      const rawMemberships = [
-        { id: "m-1", campaignId: "camp-1", userId: "user-1" },
-        { id: "m-2", campaignId: "camp-2", userId: "user-1" },
-      ];
-      mockCollection.toArray.mockResolvedValueOnce(rawMemberships);
-
-      const mockCampaigns = [
-        { id: "camp-1", name: "Campaign One" },
-        { id: "camp-2", name: "Campaign Two" },
-      ];
-      mockCollection.toArray.mockResolvedValueOnce(mockCampaigns);
-
-      const result = await campaignRepo.listCampaignsForMember("user-1");
-      expect(mockDb.collection).toHaveBeenCalledWith("campaignMembers");
-      expect(mockCollection.find).toHaveBeenNthCalledWith(1, { userId: "user-1" });
-
-      expect(mockDb.collection).toHaveBeenCalledWith("campaigns");
-      expect(mockCollection.find).toHaveBeenNthCalledWith(
-        2,
-        { id: { $in: ["camp-1", "camp-2"] } },
-        { projection: { id: 1, name: 1 } }
-      );
-
-      expect(result).toEqual([
-        { id: "camp-1", name: "Campaign One" },
-        { id: "camp-2", name: "Campaign Two" },
-      ]);
-    });
-
-    test("returns [] without querying campaigns when user has no memberships", async () => {
-      mockCollection.toArray.mockResolvedValueOnce([]);
-      const result = await campaignRepo.listCampaignsForMember("user-1");
-      expect(result).toEqual([]);
-      expect(mockDb.collection).not.toHaveBeenCalledWith("campaigns");
-    });
-  });
 });
 
 describe("Route POST seeding (mocked storage)", () => {

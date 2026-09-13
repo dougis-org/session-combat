@@ -88,6 +88,19 @@ describe("GET /api/campaigns", () => {
     expect(await response.json()).toEqual([]);
   });
 
+  it("passes through the repo's memberRole/memberStatus annotations as a flat array", async () => {
+    mockedCampaignRepo.loadCampaigns.mockResolvedValue([
+      { ...MOCK_CAMPAIGN, memberRole: "player", memberStatus: "invited" },
+    ] as any);
+
+    const response = await GET(makeGetRequest());
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(Array.isArray(body)).toBe(true);
+    expect(body[0].memberRole).toBe("player");
+    expect(body[0].memberStatus).toBe("invited");
+  });
+
   itReturns500(
     GET,
     makeGetRequest,

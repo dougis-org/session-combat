@@ -25,6 +25,8 @@ const MOCK_CAMPAIGN = {
   notes: '',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+  memberRole: 'dm',
+  memberStatus: 'active',
 };
 
 const MOCK_TEMPLATE = {

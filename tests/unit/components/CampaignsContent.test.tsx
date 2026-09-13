@@ -1,5 +1,6 @@
 // tests/unit/components/CampaignsContent.test.tsx
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { CampaignsContent } from '@/app/campaigns/page';
 
@@ -30,6 +31,8 @@ const mockCampaign = {
   chapters: [],
   updatedAt: new Date().toISOString(),
   createdAt: new Date().toISOString(),
+  memberRole: 'dm',
+  memberStatus: 'active',
 };
 
 describe('CampaignsContent - Session section rendering', () => {
@@ -91,6 +94,121 @@ describe('CampaignsContent - Session section rendering', () => {
 
     render(<CampaignsContent />);
     expect(await screen.findByText('Milestone')).toBeInTheDocument();
+  });
+});
+
+describe('CampaignsContent - membership-based grouping', () => {
+  beforeEach(() => {
+    (global.fetch as jest.Mock).mockReset();
+  });
+
+  const dmCampaign = { ...mockCampaign, id: 'camp-dm', name: 'DM Campaign', memberRole: 'dm', memberStatus: 'active' };
+  const playerCampaign = { ...mockCampaign, id: 'camp-player', name: 'Player Campaign', memberRole: 'player', memberStatus: 'active' };
+  const invitedCampaign = { ...mockCampaign, id: 'camp-invited', name: 'Invited Campaign', memberRole: 'player', memberStatus: 'invited' };
+
+  function mockCampaignsResponse(campaigns: unknown[]) {
+    (global.fetch as jest.Mock).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = input.toString();
+      if (url === '/api/campaigns') return { ok: true, json: async () => campaigns };
+      if (url === '/api/parties') return { ok: true, json: async () => [] };
+      if (url === '/api/characters') return { ok: true, json: async () => [] };
+      if (url === '/api/campaigns/global') return { ok: true, json: async () => [] };
+      if (url.includes('/members/me')) return { ok: true, json: async () => ({ status: 'active' }) };
+      if (url.includes('/sessions')) return { ok: true, json: async () => [] };
+      return { ok: false, json: async () => ({ error: 'not found' }) };
+    });
+  }
+
+  it('renders DM, Player, and Invited groupings from a single mixed response', async () => {
+    mockCampaignsResponse([dmCampaign, playerCampaign, invitedCampaign]);
+    render(<CampaignsContent />);
+
+    expect((await screen.findAllByText('DM Campaign')).length).toBeGreaterThan(0);
+    expect(screen.getByText('Player Campaign')).toBeInTheDocument();
+    expect(screen.getByText('Invited Campaign')).toBeInTheDocument();
+    expect(screen.getByText('Invitations')).toBeInTheDocument();
+    expect(screen.getByText('Your Campaigns (Player)')).toBeInTheDocument();
+  });
+
+  it('DM section remains visually first, ahead of Invitations and Player groupings', async () => {
+    mockCampaignsResponse([dmCampaign, playerCampaign, invitedCampaign]);
+    render(<CampaignsContent />);
+    await screen.findAllByText('DM Campaign');
+
+    const headings = screen.getAllByRole('heading', { level: 2 }).map(h => h.textContent);
+    const activeIdx = headings.indexOf('Active Campaigns');
+    const invitationsIdx = headings.indexOf('Invitations');
+    const playerIdx = headings.indexOf('Your Campaigns (Player)');
+    expect(activeIdx).toBeGreaterThanOrEqual(0);
+    expect(activeIdx).toBeLessThan(invitationsIdx);
+    expect(activeIdx).toBeLessThan(playerIdx);
+  });
+
+  it('renders no Player/Invited sections when the response has none', async () => {
+    mockCampaignsResponse([dmCampaign]);
+    render(<CampaignsContent />);
+    await screen.findAllByText('DM Campaign');
+
+    expect(screen.queryByText('Invitations')).not.toBeInTheDocument();
+    expect(screen.queryByText('Your Campaigns (Player)')).not.toBeInTheDocument();
+  });
+
+  it('clicking Accept on an invited card PATCHes members/me with {action: "accept"} and refreshes the list', async () => {
+    const user = userEvent.setup();
+    mockCampaignsResponse([invitedCampaign]);
+    render(<CampaignsContent />);
+    await screen.findByText('Invited Campaign');
+
+    await user.click(screen.getByRole('button', { name: /^Accept invitation/ }));
+
+    await waitFor(() => {
+      const fetchMock = global.fetch as jest.Mock;
+      const patchCall = fetchMock.mock.calls.find(
+        ([url, opts]) => url === `/api/campaigns/${invitedCampaign.id}/members/me` && opts?.method === 'PATCH'
+      );
+      expect(patchCall).toBeDefined();
+      expect(JSON.parse(patchCall![1].body)).toEqual({ action: 'accept' });
+    });
+  });
+
+  it('clicking Decline on an invited card PATCHes members/me with {action: "decline"} and refreshes the list', async () => {
+    const user = userEvent.setup();
+    mockCampaignsResponse([invitedCampaign]);
+    render(<CampaignsContent />);
+    await screen.findByText('Invited Campaign');
+
+    await user.click(screen.getByRole('button', { name: /^Decline invitation/ }));
+
+    await waitFor(() => {
+      const fetchMock = global.fetch as jest.Mock;
+      const patchCall = fetchMock.mock.calls.find(
+        ([url, opts]) => url === `/api/campaigns/${invitedCampaign.id}/members/me` && opts?.method === 'PATCH'
+      );
+      expect(patchCall).toBeDefined();
+      expect(JSON.parse(patchCall![1].body)).toEqual({ action: 'decline' });
+    });
+  });
+
+  it('shows an error banner and keeps the invited card when the accept PATCH fails', async () => {
+    const user = userEvent.setup();
+    (global.fetch as jest.Mock).mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = input.toString();
+      if (url === '/api/campaigns') return { ok: true, json: async () => [invitedCampaign] };
+      if (url === '/api/parties') return { ok: true, json: async () => [] };
+      if (url === '/api/characters') return { ok: true, json: async () => [] };
+      if (url === '/api/campaigns/global') return { ok: true, json: async () => [] };
+      if (url.includes('/members/me') && init?.method === 'PATCH') {
+        return { ok: false, json: async () => ({ error: 'You have already declined this invitation' }) };
+      }
+      return { ok: false, json: async () => ({ error: 'not found' }) };
+    });
+    render(<CampaignsContent />);
+    await screen.findByText('Invited Campaign');
+
+    await user.click(screen.getByRole('button', { name: /^Accept invitation/ }));
+
+    expect(await screen.findByText('You have already declined this invitation')).toBeInTheDocument();
+    expect(screen.getByText('Invited Campaign')).toBeInTheDocument();
   });
 
   test('TC-1.4: session fetch failure degrades to empty state', async () => {

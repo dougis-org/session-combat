@@ -28,19 +28,47 @@ describe("campaignRepo", () => {
         status: "active",
         notes: "",
       });
-      mockCollection({ findResult: [{ id: "c1", name: "x" }] });
+      const col = mockCollection();
+      col._cursor.toArray
+        .mockResolvedValueOnce([{ campaignId: "c1", role: "dm", status: "active" }])
+        .mockResolvedValueOnce([{ id: "c1", name: "x" }]);
       const [c] = await repo.loadCampaigns("u1");
       expect(c.chapters).toEqual([]);
     });
   });
 
   describe("loadCampaigns", () => {
-    it("resolves the list, and logs not_found on an empty result", async () => {
-      mockCollection({ findResult: [{ id: "c1", name: "x" }] });
-      await expect(repo.loadCampaigns("u1")).resolves.toHaveLength(1);
+    it("annotates each campaign with the caller's role/status from its membership row", async () => {
+      const col = mockCollection();
+      col._cursor.toArray
+        .mockResolvedValueOnce([
+          { campaignId: "c1", role: "dm", status: "active" },
+          { campaignId: "c2", role: "player", status: "invited" },
+        ])
+        .mockResolvedValueOnce([
+          { id: "c1", name: "Dragon Heist" },
+          { id: "c2", name: "Lost Mine" },
+        ]);
 
-      mockCollection({ findResult: [] });
+      await expect(repo.loadCampaigns("u1")).resolves.toEqual([
+        expect.objectContaining({ id: "c1", memberRole: "dm", memberStatus: "active" }),
+        expect.objectContaining({ id: "c2", memberRole: "player", memberStatus: "invited" }),
+      ]);
+    });
+
+    it("queries memberships filtered to active/invited statuses only", async () => {
+      const col = mockCollection({ findResult: [] });
+      await repo.loadCampaigns("u1");
+      expect(col.find).toHaveBeenCalledWith({
+        userId: "u1",
+        status: { $in: ["active", "invited"] },
+      });
+    });
+
+    it("resolves [] without querying campaigns, and logs not_found, when the user has no memberships", async () => {
+      const col = mockCollection({ findResult: [] });
       await expect(repo.loadCampaigns("u1")).resolves.toEqual([]);
+      expect(col.find).toHaveBeenCalledTimes(1);
       expectLoggedOutcome(getLogSpy(), "not_found");
     });
   });
@@ -85,11 +113,6 @@ describe("campaignRepo", () => {
   });
 
   describe("early-return paths (no DB call)", () => {
-    it("listCampaignsForMember → [] when the member has no memberships", async () => {
-      mockCollection({ findResult: [] });
-      await expect(repo.listCampaignsForMember("u1")).resolves.toEqual([]);
-    });
-
     it("getCampaignsByIds → [] for empty input, without touching the DB", async () => {
       const col = mockCollection();
       await expect(repo.getCampaignsByIds([])).resolves.toEqual([]);
@@ -107,7 +130,6 @@ describe("campaignRepo", () => {
     ["deleteCampaign", () => repo.deleteCampaign("c1", "u1")],
     ["setActiveCampaignSession", () => repo.setActiveCampaignSession("c1", "u1", "s1")],
     ["claimActiveCampaignSession", () => repo.claimActiveCampaignSession("c1", "u1", "s1")],
-    ["listCampaignsForMember", () => repo.listCampaignsForMember("u1")],
     ["getCampaignsByIds", () => repo.getCampaignsByIds(["c1"])],
   ])("%s on driver failure", (_name, call) => {
     it("rejects with StorageError", async () => {
@@ -116,7 +138,7 @@ describe("campaignRepo", () => {
     });
   });
 
-  it("exposes all 9 campaign methods on the storage facade", () => {
+  it("exposes all 8 campaign methods on the storage facade", () => {
     expectFacadeMethods(storage as Record<string, unknown>, [
       "loadCampaigns",
       "loadCampaignById",
@@ -125,7 +147,6 @@ describe("campaignRepo", () => {
       "setActiveCampaignSession",
       "claimActiveCampaignSession",
       "loadCampaignByIdAny",
-      "listCampaignsForMember",
       "getCampaignsByIds",
     ]);
   });
