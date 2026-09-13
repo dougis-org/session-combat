@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { ErrorBanner, LoadingState } from '@/lib/components/ui';
@@ -51,14 +51,19 @@ export function CampaignsContent() {
   const [copyError, setCopyError] = useState<Record<string, string>>({});
   const [catalogSearch, setCatalogSearch] = useState('');
 
-  const dmCampaigns = campaigns.filter(c => c.memberRole === 'dm');
-  const playerCampaigns = campaigns.filter(
-    c => c.memberRole === 'player' && c.memberStatus === 'active'
+  const dmCampaigns = useMemo(() => campaigns.filter(c => c.memberRole === 'dm'), [campaigns]);
+  const playerCampaigns = useMemo(
+    () => campaigns.filter(c => c.memberRole === 'player' && c.memberStatus === 'active'),
+    [campaigns]
   );
-  const invitedCampaigns = campaigns.filter(
-    c => c.memberRole === 'player' && c.memberStatus === 'invited'
+  const invitedCampaigns = useMemo(
+    () => campaigns.filter(c => c.memberRole === 'player' && c.memberStatus === 'invited'),
+    [campaigns]
   );
-  const activeCampaigns = dmCampaigns.filter(c => (c.status ?? 'active') === 'active');
+  const activeCampaigns = useMemo(
+    () => dmCampaigns.filter(c => (c.status ?? 'active') === 'active'),
+    [dmCampaigns]
+  );
 
   const loadAll = async () => {
     try {
@@ -122,7 +127,7 @@ export function CampaignsContent() {
 
     fetchSessions();
     return () => controller.abort();
-  }, [campaigns]);
+  }, [activeCampaigns]);
 
   const copyTemplate = async (templateId: string) => {
     setCopyingIds((prev) => new Set(prev).add(templateId));
