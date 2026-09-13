@@ -495,6 +495,20 @@ describe("GET /api/campaigns/[id]/rolls", () => {
     expect(res.status).toBe(400);
   });
 
+  it("returns 400 for an oversized sessionId, before checking membership", async () => {
+    mockedStorage.getMember.mockResolvedValue(null);
+    const res = await GET(makeGet(`?sessionId=${"x".repeat(200)}`), { params: PARAMS });
+    expect(res.status).toBe(400);
+    expect(mockedStorage.getMember).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for an invalid before cursor", async () => {
+    const res = await GET(makeGet(`?sessionId=${SESSION_ID}&before=not-a-date`), { params: PARAMS });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("Invalid before cursor");
+  });
+
   it("returns 200 with rolls from listCampaignRolls", async () => {
     const mockRolls = [
       { id: "r1", formula: "1d20", rolls: [15], total: 15, visibility: { scope: "group" } },

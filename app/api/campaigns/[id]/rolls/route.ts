@@ -6,6 +6,7 @@ import { canSeeRoll } from '@/lib/utils/campaignRolls';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
 import { readBoundedJson } from '@/lib/server/readBoundedJson';
 import { rollSubmissionSchema } from '@/lib/validation/rollSubmission';
+import { listRollsQuerySchema } from '@/lib/validation/rollQuery';
 import type { CampaignRoll } from '@/lib/types';
 
 type Params = { id: string };
@@ -88,23 +89,18 @@ export const GET = withAuthAndParams<Params>(async (request, auth, { id: campaig
     // Validate query input before any database lookup — malformed requests
     // are rejected without spending a `getMember` round-trip.
     const { searchParams } = new URL(request.url);
-    const sessionId = searchParams.get('sessionId');
-    if (!sessionId || sessionId.trim() === '') {
-      return NextResponse.json({ error: 'sessionId is required' }, { status: 400 });
+    const parsedQuery = listRollsQuerySchema.safeParse({
+      sessionId: searchParams.get('sessionId'),
+      limit: searchParams.get('limit'),
+      before: searchParams.get('before'),
+    });
+    if (!parsedQuery.success) {
+      const firstIssue = parsedQuery.error.issues[0];
+      const message =
+        firstIssue?.path[0] === 'before' ? 'Invalid before cursor' : 'sessionId is required';
+      return NextResponse.json({ error: message }, { status: 400 });
     }
-
-    const rawLimit = parseInt(searchParams.get('limit') ?? '50', 10);
-    const limit = Math.min(isNaN(rawLimit) || rawLimit < 1 ? 50 : rawLimit, 100);
-
-    const beforeParam = searchParams.get('before');
-    let before: Date | undefined;
-    if (beforeParam) {
-      const parsed = new Date(beforeParam);
-      if (isNaN(parsed.getTime())) {
-        return NextResponse.json({ error: 'Invalid before cursor' }, { status: 400 });
-      }
-      before = parsed;
-    }
+    const { sessionId, limit, before } = parsedQuery.data;
 
     const caller = await storage.getMember(campaignId, auth.userId);
     if (!caller || caller.status !== 'active') {
@@ -113,7 +109,7 @@ export const GET = withAuthAndParams<Params>(async (request, auth, { id: campaig
 
     const result = await storage.listCampaignRolls(
       campaignId,
-      sessionId.trim(),
+      sessionId,
       auth.userId,
       caller.role,
       { limit, before }
