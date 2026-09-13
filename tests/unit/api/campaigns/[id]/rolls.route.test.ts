@@ -1,9 +1,12 @@
 /**
  * @jest-environment node
  */
-import { POST, GET } from "@/app/api/campaigns/[id]/rolls/route";
+import { NextRequest } from "next/server";
+import { POST, GET, ROLL_BODY_MAX_BYTES } from "@/app/api/campaigns/[id]/rolls/route";
 import { storage } from "@/lib/storage";
 import { emitFiltered } from "@/lib/server/transport";
+import { MAX_DICE_IN_ROLL, MAX_FORMULA_LENGTH, MAX_LABEL_LENGTH, MAX_TOTAL_MAGNITUDE } from "@/lib/validation/rollSubmission";
+import { PERCENTILE_FORMULA, MAX_PER_DIE, DIE_SIDES, MAX_MODIFIER } from "@/lib/utils/dice";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -69,6 +72,19 @@ function makeGet(qs = "") {
   return makeRouteRequest(`${BASE_URL}${qs}`, "GET");
 }
 
+/** Build a POST request with a raw (non-JSON.stringify'd) body, for malformed-JSON and size-cap tests. */
+function makeRawPost(rawBody: string, extraHeaders?: Record<string, string>) {
+  return new NextRequest(BASE_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      cookie: "auth-token=t",
+      ...extraHeaders,
+    },
+    body: rawBody,
+  });
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
 
@@ -96,19 +112,23 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     mockAuthState.payload = MOCK_AUTH;
   });
 
-  it("returns 403 when caller is not an active member (null)", async () => {
+  it("returns 403 when caller is not an active member (null), no persist/broadcast", async () => {
     mockedStorage.getMember.mockResolvedValue(null);
     const res = await POST(makePost(VALID_ROLL_BODY), { params: PARAMS });
     expect(res.status).toBe(403);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
   });
 
-  it("returns 403 when caller status is pending", async () => {
+  it("returns 403 when caller status is pending, no persist/broadcast", async () => {
     mockedStorage.getMember.mockResolvedValue({ ...ACTIVE_PLAYER, status: "pending" as any });
     const res = await POST(makePost(VALID_ROLL_BODY), { params: PARAMS });
     expect(res.status).toBe(403);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
   });
 
-  it("returns 409 when no active session", async () => {
+  it("returns 409 when no active session, no persist/broadcast", async () => {
     mockedAssertCampaignAccess.mockResolvedValue({
       campaign: { id: CAMPAIGN_ID, activeSessionId: undefined } as any,
       role: "player",
@@ -117,6 +137,8 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     expect(res.status).toBe(409);
     const body = await res.json();
     expect(body.error).toBe("No active session");
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
   });
 
   it("returns 400 when formula is missing", async () => {
@@ -168,12 +190,14 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns 400 when visibility.scope is invalid (direct)", async () => {
+  it("returns 400 when visibility.scope is invalid (direct), no persist/broadcast", async () => {
     const res = await POST(
       makePost({ ...VALID_ROLL_BODY, visibility: { scope: "direct", toUserId: "x" } }),
       { params: PARAMS }
     );
     expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
   });
 
   it("returns 201 with valid group roll and calls emitFiltered", async () => {
@@ -207,9 +231,38 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     expect(body.visibility).toEqual({ scope: "dm-only" });
   });
 
-  it("returns 400 when body is null", async () => {
+  it("returns 400 when body is null, no persist/broadcast", async () => {
     const res = await POST(makePost(null), { params: PARAMS });
     expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when body is a JSON array, no persist/broadcast", async () => {
+    const res = await POST(makePost([1, 2, 3]), { params: PARAMS });
+    expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when body is a JSON primitive (string), no persist/broadcast", async () => {
+    const res = await POST(makePost("x"), { params: PARAMS });
+    expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 (not 500) when the request has no body at all, no persist/broadcast", async () => {
+    const request = new NextRequest(BASE_URL, {
+      method: "POST",
+      headers: { cookie: "auth-token=t" },
+    });
+    const res = await POST(request, { params: PARAMS });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("Invalid JSON");
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
   });
 
   it("emitFiltered predicate uses canSeeRoll — DM sees dm-only roll", async () => {
@@ -243,6 +296,164 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     const res = await POST(makePost(VALID_ROLL_BODY), { params: PARAMS });
     expect(res.status).toBe(500);
   });
+
+  // ─── Slice 3: body-size cap + shared schema validation ────────────────────
+
+  it("T3.1 returns 413 when body exceeds ROLL_BODY_MAX_BYTES, no persist/broadcast", async () => {
+    const bigBody = JSON.stringify({ ...VALID_ROLL_BODY, formula: "1d20 " + "x".repeat(20 * 1024) });
+    const res = await POST(makeRawPost(bigBody), { params: PARAMS });
+    expect(res.status).toBe(413);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("T3.2 returns 413 for an oversized Content-Length header without reading the body", async () => {
+    const res = await POST(
+      makeRawPost(JSON.stringify(VALID_ROLL_BODY), { "content-length": "999999" }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(413);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("T3.2b body exactly at ROLL_BODY_MAX_BYTES passes to the schema stage (not 413)", async () => {
+    // Extra keys are ignored by the schema, so padding the body with a junk
+    // field of exactly the right length keeps the roll itself valid.
+    const base = { ...VALID_ROLL_BODY, padding: "" };
+    const baseBytes = Buffer.byteLength(JSON.stringify(base), "utf8");
+    const padLength = ROLL_BODY_MAX_BYTES - baseBytes;
+    const bodyString = JSON.stringify({ ...VALID_ROLL_BODY, padding: "x".repeat(padLength) });
+    expect(Buffer.byteLength(bodyString, "utf8")).toBe(ROLL_BODY_MAX_BYTES);
+
+    const res = await POST(makeRawPost(bodyString), { params: PARAMS });
+    expect(res.status).toBe(201);
+    expect(mockedStorage.saveCampaignRoll).toHaveBeenCalledTimes(1);
+  });
+
+  it("T3.3 returns 400 for oversized formula, no persist/broadcast", async () => {
+    const res = await POST(
+      makePost({ ...VALID_ROLL_BODY, formula: "d".repeat(MAX_FORMULA_LENGTH + 1) }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("T3.4 returns 400 for oversized rolls array, no persist/broadcast", async () => {
+    const rolls = Array.from({ length: MAX_DICE_IN_ROLL + 1 }, () => 1);
+    const res = await POST(POSTBody(rolls), { params: PARAMS });
+    expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+
+    function POSTBody(rolls: number[]) {
+      return makePost({ ...VALID_ROLL_BODY, rolls, total: rolls.length });
+    }
+  });
+
+  it("T3.5 returns 400 for an out-of-range die value, no persist/broadcast", async () => {
+    const res = await POST(makePost({ ...VALID_ROLL_BODY, rolls: [0] }), { params: PARAMS });
+    expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("T3.6 returns 400 for an over-magnitude total, no persist/broadcast", async () => {
+    const res = await POST(
+      makePost({ ...VALID_ROLL_BODY, total: MAX_TOTAL_MAGNITUDE + 1 }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("T3.7 returns 400 for a 129-char label, no persist/broadcast", async () => {
+    const res = await POST(
+      makePost({ ...VALID_ROLL_BODY, label: "x".repeat(MAX_LABEL_LENGTH + 1) }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(400);
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("T3.9 400 schema-failure body is a single concise error string, not a raw zod dump", async () => {
+    const res = await POST(makePost({ ...VALID_ROLL_BODY, formula: "" }), { params: PARAMS });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(typeof body.error).toBe("string");
+    expect(Object.keys(body)).toEqual(["error"]);
+  });
+
+  it("T3.10 malformed JSON returns 400 Invalid JSON, no persist/broadcast", async () => {
+    const res = await POST(makeRawPost("not json {{{"), { params: PARAMS });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("Invalid JSON");
+    expect(mockedStorage.saveCampaignRoll).not.toHaveBeenCalled();
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+  });
+
+  it("T3.15 d% roll succeeds with 201, persisted and broadcast", async () => {
+    const res = await POST(
+      makePost({ formula: PERCENTILE_FORMULA, rolls: [87], total: 87, visibility: { scope: "group" } }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(201);
+    expect(mockedStorage.saveCampaignRoll).toHaveBeenCalledTimes(1);
+    expect(mockedEmitFiltered).toHaveBeenCalledTimes(1);
+  });
+
+  it("T3.16 maximum legitimate pool (120 dice + 999 modifier) succeeds with 201", async () => {
+    const rolls = Array.from({ length: MAX_PER_DIE * DIE_SIDES.length }, () => 20);
+    const total = rolls.reduce((a, b) => a + b, 0) + MAX_MODIFIER;
+    const res = await POST(
+      makePost({ formula: "max pool", rolls, total, visibility: { scope: "group" } }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(201);
+  });
+
+  it("T3.17 total that disagrees with sum(rolls) is stored verbatim, 201", async () => {
+    const res = await POST(
+      makePost({ ...VALID_ROLL_BODY, rolls: [4, 2, 5], total: 999 }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.total).toBe(999);
+  });
+
+  it("T3.18 empty rolls array, otherwise valid, still returns 201", async () => {
+    const res = await POST(
+      makePost({ ...VALID_ROLL_BODY, rolls: [], total: 0 }),
+      { params: PARAMS }
+    );
+    expect(res.status).toBe(201);
+  });
+
+  it("T3.19 a rejected submission leaves no partial state; a subsequent valid one still succeeds", async () => {
+    const rejected = await POST(makePost({ ...VALID_ROLL_BODY, formula: "" }), { params: PARAMS });
+    expect(rejected.status).toBe(400);
+    expect(mockedEmitFiltered).not.toHaveBeenCalled();
+
+    const accepted = await POST(makePost(VALID_ROLL_BODY), { params: PARAMS });
+    expect(accepted.status).toBe(201);
+    expect(mockedEmitFiltered).toHaveBeenCalledTimes(1);
+  });
+
+  it("T3.20 does not import rollSubmissionSchema — client-side wiring is out of scope for this change (tracked in #712)", () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const fs = require("fs");
+    const source = fs.readFileSync(
+      require.resolve("@/lib/dice/useRollSubmission"),
+      "utf8"
+    );
+    expect(source).not.toMatch(/rollSubmissionSchema|from ['"]@\/lib\/validation\/rollSubmission['"]/);
+  });
 });
 
 // ─── GET tests ────────────────────────────────────────────────────────────────
@@ -272,9 +483,30 @@ describe("GET /api/campaigns/[id]/rolls", () => {
     expect(res.status).toBe(400);
   });
 
+  it("validates query input before checking membership — missing sessionId short-circuits before getMember", async () => {
+    mockedStorage.getMember.mockResolvedValue(null);
+    const res = await GET(makeGet(), { params: PARAMS });
+    expect(res.status).toBe(400);
+    expect(mockedStorage.getMember).not.toHaveBeenCalled();
+  });
+
   it("returns 400 when sessionId is empty", async () => {
     const res = await GET(makeGet("?sessionId="), { params: PARAMS });
     expect(res.status).toBe(400);
+  });
+
+  it("returns 400 for an oversized sessionId, before checking membership", async () => {
+    mockedStorage.getMember.mockResolvedValue(null);
+    const res = await GET(makeGet(`?sessionId=${"x".repeat(200)}`), { params: PARAMS });
+    expect(res.status).toBe(400);
+    expect(mockedStorage.getMember).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for an invalid before cursor", async () => {
+    const res = await GET(makeGet(`?sessionId=${SESSION_ID}&before=not-a-date`), { params: PARAMS });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("Invalid before cursor");
   });
 
   it("returns 200 with rolls from listCampaignRolls", async () => {

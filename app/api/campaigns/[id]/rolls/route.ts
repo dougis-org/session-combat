@@ -4,49 +4,37 @@ import { storage } from '@/lib/storage';
 import { emitFiltered } from '@/lib/server/transport';
 import { canSeeRoll } from '@/lib/utils/campaignRolls';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
-import type { CampaignRoll, RollVisibility } from '@/lib/types';
+import { readBoundedJson } from '@/lib/server/readBoundedJson';
+import { rollSubmissionSchema } from '@/lib/validation/rollSubmission';
+import { listRollsQuerySchema } from '@/lib/validation/rollQuery';
+import type { CampaignRoll } from '@/lib/types';
 
 type Params = { id: string };
 
+/** JSON-only endpoint; a well-formed roll payload is well under 2 KiB, so 16 KiB gives large headroom. */
+export const ROLL_BODY_MAX_BYTES = 16 * 1024;
+
 export const POST = withAuthAndParams<Params>(async (request, auth, { id: campaignId }) => {
   try {
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    const read = await readBoundedJson(request, ROLL_BODY_MAX_BYTES);
+    if (!read.ok) {
+      if (read.reason === 'oversize') {
+        return NextResponse.json({ error: 'Request body is too large' }, { status: 413 });
+      }
+      if (read.reason === 'invalid-json') {
+        return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+      }
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 
-    if (body === null || typeof body !== 'object' || Array.isArray(body)) {
-      return NextResponse.json({ error: 'Request body must be an object' }, { status: 400 });
+    const parsed = rollSubmissionSchema.safeParse(read.value);
+    if (!parsed.success) {
+      const firstIssue = parsed.error.issues[0];
+      const field = firstIssue?.path?.length ? `${firstIssue.path.join('.')}: ` : '';
+      return NextResponse.json({ error: `${field}${firstIssue?.message ?? 'Invalid roll payload'}` }, { status: 400 });
     }
 
-    const b = body as Record<string, unknown>;
-    const { formula, rolls, total, label, visibility } = b;
-
-    if (typeof formula !== 'string' || formula.trim() === '') {
-      return NextResponse.json({ error: 'formula is required' }, { status: 400 });
-    }
-
-    if (!Array.isArray(rolls) || !rolls.every((v) => typeof v === 'number' && Number.isFinite(v))) {
-      return NextResponse.json({ error: 'rolls must be an array of finite numbers' }, { status: 400 });
-    }
-
-    if (typeof total !== 'number' || !Number.isFinite(total)) {
-      return NextResponse.json({ error: 'total must be a finite number' }, { status: 400 });
-    }
-
-    if (!visibility || typeof visibility !== 'object') {
-      return NextResponse.json({ error: 'visibility is required' }, { status: 400 });
-    }
-
-    const vis = visibility as Record<string, unknown>;
-    const scope = vis['scope'];
-    if (scope !== 'group' && scope !== 'dm-only') {
-      return NextResponse.json({ error: 'visibility.scope must be group or dm-only' }, { status: 400 });
-    }
-
-    const rollVisibility: RollVisibility = { scope };
+    const { formula, rolls, total, label, visibility } = parsed.data;
 
     const caller = await storage.getMember(campaignId, auth.userId);
     if (!caller || caller.status !== 'active') {
@@ -70,11 +58,11 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       sessionId: campaign.activeSessionId,
       rollerId: auth.userId,
       rollerName,
-      formula: formula.trim(),
-      rolls: rolls as number[],
+      formula,
+      rolls,
       total,
-      ...(typeof label === 'string' && label.trim() ? { label: label.trim() } : {}),
-      visibility: rollVisibility,
+      ...(label?.trim() ? { label: label.trim() } : {}),
+      visibility,
       createdAt: new Date(),
     };
 
@@ -98,33 +86,30 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
 
 export const GET = withAuthAndParams<Params>(async (request, auth, { id: campaignId }) => {
   try {
+    // Validate query input before any database lookup — malformed requests
+    // are rejected without spending a `getMember` round-trip.
+    const { searchParams } = new URL(request.url);
+    const parsedQuery = listRollsQuerySchema.safeParse({
+      sessionId: searchParams.get('sessionId'),
+      limit: searchParams.get('limit'),
+      before: searchParams.get('before'),
+    });
+    if (!parsedQuery.success) {
+      const firstIssue = parsedQuery.error.issues[0];
+      const message =
+        firstIssue?.path[0] === 'before' ? 'Invalid before cursor' : 'sessionId is required';
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+    const { sessionId, limit, before } = parsedQuery.data;
+
     const caller = await storage.getMember(campaignId, auth.userId);
     if (!caller || caller.status !== 'active') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const sessionId = searchParams.get('sessionId');
-    if (!sessionId || sessionId.trim() === '') {
-      return NextResponse.json({ error: 'sessionId is required' }, { status: 400 });
-    }
-
-    const rawLimit = parseInt(searchParams.get('limit') ?? '50', 10);
-    const limit = Math.min(isNaN(rawLimit) || rawLimit < 1 ? 50 : rawLimit, 100);
-
-    const beforeParam = searchParams.get('before');
-    let before: Date | undefined;
-    if (beforeParam) {
-      const parsed = new Date(beforeParam);
-      if (isNaN(parsed.getTime())) {
-        return NextResponse.json({ error: 'Invalid before cursor' }, { status: 400 });
-      }
-      before = parsed;
-    }
-
     const result = await storage.listCampaignRolls(
       campaignId,
-      sessionId.trim(),
+      sessionId,
       auth.userId,
       caller.role,
       { limit, before }
