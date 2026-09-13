@@ -14,7 +14,6 @@ import {
   SessionLogInput,
   SavedContent,
   CampaignMember,
-  CampaignMemberSummary,
   CampaignCharacterShare,
   CampaignRoll,
   MemberRole,
@@ -100,7 +99,7 @@ export const storage = {
   async deleteCampaignTemplate(id: string): Promise<boolean> { return campaignTemplateRepo.deleteCampaignTemplate(id); },
 
   // Load campaigns for a user
-  async loadCampaigns(userId: string): Promise<Campaign[]> { return campaignRepo.loadCampaigns(userId); },
+  async loadCampaigns(userId: string): Promise<campaignRepo.CampaignWithMembership[]> { return campaignRepo.loadCampaigns(userId); },
 
   // Load single campaign by ID
   async loadCampaignById(id: string, userId: string): Promise<Campaign | null> { return campaignRepo.loadCampaignById(id, userId); },
@@ -309,8 +308,6 @@ export const storage = {
   async getMember(campaignId: string, userId: string): Promise<CampaignMember | null> { return membershipRepo.getMember(campaignId, userId); },
 
   async loadCampaignByIdAny(id: string): Promise<Campaign | null> { return campaignRepo.loadCampaignByIdAny(id); },
-
-  async listCampaignsForMember(userId: string): Promise<CampaignMemberSummary[]> { return campaignRepo.listCampaignsForMember(userId); },
 
   async getUserById(userId: string): Promise<PublicUser | null> { return membershipRepo.getUserById(userId); },
 

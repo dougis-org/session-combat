@@ -19,7 +19,7 @@ import { storage } from "@/lib/storage";
 
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 
-const OWN_KEY_COUNT = 75;
+const OWN_KEY_COUNT = 74;
 
 describe("storage facade shape", () => {
   it("exposes the expected number of own-enumerable keys", () => {
@@ -39,7 +39,7 @@ describe("storage facade shape", () => {
     ]);
   });
 
-  it("exposes all 27 migrated methods as functions with unchanged names", () => {
+  it("exposes all 26 migrated methods as functions with unchanged names", () => {
     const migrated = [
       "loadMonsterTemplates", "loadGlobalMonsterTemplates", "loadAllMonsterTemplates",
       "saveMonsterTemplate", "deleteMonsterTemplate", "monsterExistsByNameAndSource",
@@ -47,11 +47,11 @@ describe("storage facade shape", () => {
       "loadGlobalCampaignTemplateById", "saveCampaignTemplate", "deleteCampaignTemplate",
       "loadCampaigns", "loadCampaignById", "saveCampaign", "deleteCampaign",
       "setActiveCampaignSession", "claimActiveCampaignSession", "loadCampaignByIdAny",
-      "listCampaignsForMember", "getCampaignsByIds", "addMember", "updateMemberStatus",
+      "getCampaignsByIds", "addMember", "updateMemberStatus",
       "listMembersForCampaign", "getMember", "listInvitationsForUser", "getUserById",
       "getUsersByIds",
     ];
-    expect(migrated).toHaveLength(27);
+    expect(migrated).toHaveLength(26);
     for (const name of migrated) {
       expect(typeof (storage as Record<string, unknown>)[name]).toBe("function");
     }

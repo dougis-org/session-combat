@@ -2,8 +2,9 @@ import { getDatabase } from "@/lib/db";
 import { runStorageOp } from "@/lib/storage/runOp";
 import {
   Campaign,
-  CampaignMemberSummary,
   CampaignCharacterShare,
+  MemberRole,
+  MemberStatus,
   SavedContent,
   SessionLog,
 } from "@/lib/types";
@@ -20,16 +21,35 @@ export function normalizeCampaign(campaign: Campaign): Campaign {
   };
 }
 
-export async function loadCampaigns(userId: string): Promise<Campaign[]> {
+export type CampaignWithMembership = Campaign & {
+  memberRole: MemberRole;
+  memberStatus: MemberStatus;
+};
+
+export async function loadCampaigns(userId: string): Promise<CampaignWithMembership[]> {
   return runStorageOp(
     { name: "loadCampaigns", collection: "campaigns", isEmpty: (res) => res.length === 0 },
     async () => {
       const db = await getDatabase();
+      const memberships = await db
+        .collection<{ campaignId: string; role: MemberRole; status: MemberStatus }>(
+          "campaignMembers",
+        )
+        .find({ userId, status: { $in: ["active", "invited"] } })
+        .toArray();
+      if (memberships.length === 0) {
+        return [];
+      }
+      const membershipByCampaignId = new Map(memberships.map((m) => [m.campaignId, m]));
       const campaigns = await db
         .collection<Campaign>("campaigns")
-        .find({ userId })
+        .find({ id: { $in: [...membershipByCampaignId.keys()] } })
         .toArray();
-      return campaigns.map(normalizeStoredEntityId).map(normalizeCampaign);
+      return campaigns.map((campaign) => {
+        const normalized = normalizeCampaign(normalizeStoredEntityId(campaign));
+        const membership = membershipByCampaignId.get(normalized.id)!;
+        return { ...normalized, memberRole: membership.role, memberStatus: membership.status };
+      });
     },
   );
 }
@@ -146,35 +166,6 @@ export async function loadCampaignByIdAny(id: string): Promise<Campaign | null> 
         .collection<Campaign>("campaigns")
         .findOne({ id });
       return campaign ? normalizeCampaign(normalizeStoredEntityId(campaign)) : null;
-    },
-  );
-}
-
-export async function listCampaignsForMember(userId: string): Promise<CampaignMemberSummary[]> {
-  return runStorageOp(
-    {
-      name: "listCampaignsForMember",
-      collection: "campaignMembers",
-      isEmpty: (res) => res.length === 0,
-    },
-    async () => {
-      const db = await getDatabase();
-      const memberships = await db
-        .collection<{ campaignId: string }>("campaignMembers")
-        .find({ userId })
-        .toArray();
-      if (memberships.length === 0) {
-        return [];
-      }
-      const campaignIds = memberships.map((m) => m.campaignId);
-      const campaigns = await db
-        .collection<Campaign>("campaigns")
-        .find({ id: { $in: campaignIds } }, { projection: { id: 1, name: 1 } })
-        .toArray();
-      return campaigns.map((c) => ({
-        id: c.id,
-        name: c.name,
-      }));
     },
   );
 }
