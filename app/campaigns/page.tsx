@@ -202,7 +202,7 @@ export function CampaignsContent() {
   const respondToInvitation = async (campaignId: string, action: 'accept' | 'decline') => {
     try {
       setError(null);
-      const response = await fetch(`/api/campaigns/${campaignId}/members/me`, {
+      const response = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/members/me`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),

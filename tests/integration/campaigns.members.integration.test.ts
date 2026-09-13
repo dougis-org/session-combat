@@ -210,7 +210,7 @@ describe("Campaign Members Integration Tests", () => {
     });
 
     async function seedCampaign(label: string, ownerId: string): Promise<string> {
-      const id = `camp-list-${label}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const id = `camp-list-${label}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
       const db = await getDatabase();
       await db.collection("campaigns").insertOne({
         id,
