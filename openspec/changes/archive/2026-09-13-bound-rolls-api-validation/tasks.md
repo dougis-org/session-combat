@@ -76,10 +76,10 @@ If any step fails, iterate and fix before pushing. Use the commands documented i
 - [x] Commit all changes to `bound-rolls-api-validation` and push
 - [x] Open PR → `main`. **PR body MUST include `Closes #577`** (and note "Follow-up tracked in #712 — client-side defense-in-depth, out of scope here"). Use the repo PR template if present.
 - [x] **Issue lifecycle: mark in-review** — `gh issue edit 577 --add-label "in-review" --remove-label "in-progress"`, then move the project item to the "In Review" column (same discovery as in-progress; warn and skip if not found)
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, run [Remote push validation], push, re-run) until zero findings remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
-- [ ] **After the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (main is squash-only; NEVER `--admin`)
-- [ ] **Iterate until merged** — loop until `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and notify the user); never wait for a human, never force-merge:
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, run [Remote push validation], push, re-run) until zero findings remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
+- [x] **After the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (main is squash-only; NEVER `--admin`)
+- [x] **Iterate until merged** — loop until `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and notify the user); never wait for a human, never force-merge:
   1. **Build and tests** — run [Remote push validation]; fix failures, commit, push first
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address each unresolved thread, commit, validate, push, wait 180s; repeat until all resolved
   3. **CI check failures** — after comments are clear, poll `gh pr checks <PR-URL>`; fix failing required checks (`ci-gate`, Codacy), commit, validate, push, wait 180s; restart from step 1
@@ -93,12 +93,12 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update any repo documentation impacted (API notes / route docs if present)
-- [ ] Sync approved spec delta into the global spec: copy `openspec/changes/bound-rolls-api-validation/specs/roll-submission-validation/spec.md` to `openspec/specs/roll-submission-validation/spec.md`, updating relative links to point into `../../changes/archive/YYYY-MM-DD-bound-rolls-api-validation/` (design.md, tasks.md)
-- [ ] Archive: move `openspec/changes/bound-rolls-api-validation/` to `openspec/changes/archive/YYYY-MM-DD-bound-rolls-api-validation/`, staging both the new location and the deletion in a **single** commit
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update any repo documentation impacted (API notes / route docs if present)
+- [x] Sync approved spec delta into the global spec: copy `openspec/changes/bound-rolls-api-validation/specs/roll-submission-validation/spec.md` to `openspec/specs/roll-submission-validation/spec.md`, updating relative links to point into `../../changes/archive/YYYY-MM-DD-bound-rolls-api-validation/` (design.md, tasks.md)
+- [x] Archive: move `openspec/changes/bound-rolls-api-validation/` to `openspec/changes/archive/YYYY-MM-DD-bound-rolls-api-validation/`, staging both the new location and the deletion in a **single** commit
 - [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-bound-rolls-api-validation/` exists and the original is gone
 - [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-bound-rolls-api-validation` and `git push -u origin doc/archive-YYYY-MM-DD-bound-rolls-api-validation`
 - [ ] Open PR → `main`, title `docs: archive bound-rolls-api-validation (YYYY-MM-DD)`; do NOT push directly to `main`
