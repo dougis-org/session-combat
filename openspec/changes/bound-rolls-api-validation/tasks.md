@@ -47,7 +47,7 @@ Ownership metadata:
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill on the staged + unstaged diff. Automatically apply all clearly-correct findings directly to the code — do not stop, do not present the list, do not ask for confirmation. Apply fixes, re-run the affected tests, then commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill on the staged + unstaged diff. Automatically apply all clearly-correct findings directly to the code — do not stop, do not present the list, do not ask for confirmation. Apply fixes, re-run the affected tests, then commit.
 
 ## Validation
 
@@ -55,8 +55,8 @@ Ownership metadata:
 - [ ] E2E tests: run project E2E suite if the route is covered — all pass (use a free port, not 3000)
 - [x] Type checks: `npm run typecheck` (or `tsc --noEmit`) — clean
 - [x] Build: `npm run build` — succeeds
-- [ ] Security / code quality: Codacy + Verity pre-commit/pre-push gate — pass; fix findings, do **not** waive (waive only for a human-accepted, cited risk)
-- [ ] All completed tasks marked complete
+- [x] Security / code quality: Codacy + Verity pre-commit/pre-push gate — pass; fix findings, do **not** waive (waive only for a human-accepted, cited risk)
+- [x] All completed tasks marked complete
 - [ ] All steps in [Remote push validation]
 
 ## Remote push validation
