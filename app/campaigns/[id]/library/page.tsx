@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { ErrorBanner } from '@/lib/components/ui';
+import { ErrorBanner, Chevron } from '@/lib/components/ui';
 import type { SavedContent } from '@/lib/types';
 
 const TYPE_LABELS: Record<SavedContent['type'], string> = {
@@ -137,7 +137,7 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
         {hasSavedResult && (
           <span className="text-green-400 text-sm" title="Response saved">✓</span>
         )}
-        <span className="text-gray-400 ml-2">{expanded ? '▲' : '▼'}</span>
+        <Chevron expanded={expanded} className="text-gray-400 ml-2" />
       </button>
 
       {expanded && (
@@ -193,7 +193,7 @@ function LibraryContent({ campaignId }: { campaignId: string }) {
     let active = true;
     async function load() {
       try {
-        const res = await fetch(`/api/content?campaignId=${campaignId}`);
+        const res = await fetch(`/api/content?campaignId=${encodeURIComponent(campaignId)}`);
         if (!res.ok) throw new Error('Failed to load library');
         const data = await res.json() as SavedContent[];
         if (active) setItems(data);

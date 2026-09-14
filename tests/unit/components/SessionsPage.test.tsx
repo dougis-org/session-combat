@@ -25,6 +25,8 @@ jest.mock('@/lib/components/ui', () => ({
   FormField: ({ label, children }: { label: string; children: React.ReactNode }) =>
     React.createElement('div', null, React.createElement('label', null, label), children),
   textInputClass: () => '',
+  Chevron: ({ expanded }: { expanded: boolean }) =>
+    React.createElement('svg', { 'data-testid': 'chevron', className: expanded ? 'rotate-90' : '' }),
 }));
 
 jest.mock('@/lib/utils/sessionEvents', () => ({
@@ -152,6 +154,35 @@ describe('SessionsPage — session log display', () => {
     await screen.findByText('Into the Mines');
     // useCampaignContext is mocked, so only the sessions fetch is real
     expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  test('collapsed session entry shows a closed chevron and aria-expanded false', async () => {
+    await renderWithData([MOCK_LOG]);
+    await screen.findByText('Into the Mines');
+    const titleButton = screen.getByText('Into the Mines').closest('button')!;
+    expect(titleButton).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('chevron')).not.toHaveClass('rotate-90');
+  });
+
+  test('clicking the title expands the entry and rotates the chevron', async () => {
+    await renderWithData([MOCK_LOG]);
+    await screen.findByText('Into the Mines');
+    const titleButton = screen.getByText('Into the Mines').closest('button')!;
+    await user.click(titleButton);
+    expect(titleButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('chevron')).toHaveClass('rotate-90');
+    expect(await screen.findByText('The party explored the mines.')).toBeInTheDocument();
+  });
+
+  test('clicking an expanded entry title collapses it and rotates the chevron back', async () => {
+    await renderWithData([MOCK_LOG]);
+    await screen.findByText('Into the Mines');
+    const titleButton = screen.getByText('Into the Mines').closest('button')!;
+    await user.click(titleButton);
+    await user.click(titleButton);
+    expect(titleButton).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('chevron')).not.toHaveClass('rotate-90');
+    expect(screen.queryByText('The party explored the mines.')).not.toBeInTheDocument();
   });
 });
 

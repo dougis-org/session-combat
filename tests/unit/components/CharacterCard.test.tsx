@@ -66,12 +66,25 @@ describe('CharacterCard', () => {
     expect(screen.queryByText(/STR/)).not.toBeInTheDocument();
 
     // Expand
-    fireEvent.click(screen.getByText('Expand'));
-    expect(screen.getByText('Collapse')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Stat Block'));
     expect(screen.getByText(/STR/)).toBeInTheDocument();
 
     // Collapse
-    fireEvent.click(screen.getByText('Collapse'));
-    expect(screen.getByText('Expand')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Stat Block'));
+    expect(screen.queryByText(/STR/)).not.toBeInTheDocument();
+  });
+
+  it('renders the stat-block toggle via Disclosure with aria-expanded and a chevron', () => {
+    const onEdit = jest.fn();
+    const onDelete = jest.fn();
+    render(<CharacterCard character={mockCharacter} onEdit={onEdit} onDelete={onDelete} />);
+
+    const toggle = screen.getByRole('button', { name: /stat block/i });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle.querySelector('svg')).not.toHaveClass('rotate-90');
+
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(toggle.querySelector('svg')).toHaveClass('rotate-90');
   });
 });

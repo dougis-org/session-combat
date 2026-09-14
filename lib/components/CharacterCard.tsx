@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { CreatureStatBlock } from '@/lib/components/CreatureStatBlock';
 import { CharacterDescription } from '@/lib/components/CharacterDescription';
+import { Disclosure } from '@/lib/components/ui';
 import { Character } from '@/lib/types';
 
 export function CharacterCard({
@@ -51,12 +52,12 @@ export function CharacterCard({
       </div>
 
       <div className="mb-2">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-gray-300 hover:text-white underline text-sm"
-        >
-          {isExpanded ? 'Collapse' : 'Expand'}
-        </button>
+        <Disclosure
+          label="Stat Block"
+          open={isExpanded}
+          onToggle={() => setIsExpanded(!isExpanded)}
+          className="text-gray-300 hover:text-white underline text-sm inline-flex items-center gap-1"
+        />
       </div>
 
       {isExpanded && (

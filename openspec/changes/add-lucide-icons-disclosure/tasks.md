@@ -10,7 +10,7 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available
   skills list for `pr-review-toolkit:review-pr`. If the skill is not listed,
   halt immediately, inform the user that the plugin is required, provide
   installation guidance, and do not proceed until the user confirms it is
@@ -18,7 +18,7 @@
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — this change is issue-driven
+- [x] **Issue lifecycle: mark in-progress** — this change is issue-driven
   (#726). Run `gh issue edit 726 --add-label "in-progress"`. Then discover the
   GitHub Project linked to `dougis-org/session-combat`
   (`gh project list --owner dougis-org --format json`), resolve the status
@@ -29,14 +29,14 @@
   instruct the user to run `gh auth refresh -s project` and skip the
   project-item update (issue label update still proceeds).
 
-- [ ] **Task 1 — Add `lucide-react` dependency**
+- [x] **Task 1 — Add `lucide-react` dependency**
   - Run `npm install lucide-react` from project root.
   - Verify: `package.json`/`package-lock.json` show the new dependency;
     `npm run typecheck` still passes.
   - Covers: NFAC "Lucide import stays limited to the chevron icon" (verified
     at Task 2, where the only import is added).
 
-- [ ] **Task 2 — Add `Chevron` and `Disclosure` to `lib/components/ui.tsx`**
+- [x] **Task 2 — Add `Chevron` and `Disclosure` to `lib/components/ui.tsx`**
   - Add `Chevron({ expanded, className? })`: renders lucide's `ChevronRight`,
     applying a `rotate-90` (or equivalent) Tailwind class plus
     `transition-transform` when `expanded` is `true`. Import only
@@ -51,7 +51,7 @@
     component" scenarios from `specs/disclosure-indicator/spec.md`.
   - Verify: `npm run test:unit -- ui.test` passes; `npm run typecheck` passes.
 
-- [ ] **Task 3 — Migrate `SessionEntryCard` (closes #726)**
+- [x] **Task 3 — Migrate `SessionEntryCard` (closes #726)**
   - File: `app/campaigns/[id]/sessions/page.tsx`.
   - Embed `Chevron` (not the full `Disclosure` wrapper, per Design Decision 2)
     at the trailing end of the existing title button's content, after the
@@ -62,7 +62,7 @@
     scenarios (collapsed state, expand rotates chevron, collapse rotates back).
   - Verify: `npm run test:unit -- SessionsPage` passes.
 
-- [ ] **Task 4 — Migrate `ConditionControls`**
+- [x] **Task 4 — Migrate `ConditionControls`**
   - File: `lib/components/combatant-card/ConditionControls.tsx`.
   - Embed `Chevron` after the "Conditions (N)" label inside the existing
     toggle button; add `aria-expanded` to that button. Preserve the existing
@@ -74,7 +74,7 @@
     chevron both absent).
   - Verify: `npm run test:unit -- ConditionControls` passes.
 
-- [ ] **Task 5 — Migrate `CharacterCard`**
+- [x] **Task 5 — Migrate `CharacterCard`**
   - File: `lib/components/CharacterCard.tsx`.
   - Replace the text-only "Expand"/"Collapse" `<button>` with `Disclosure`,
     passing `open={isExpanded}` and `onToggle={() => setIsExpanded(!isExpanded)}`.
@@ -86,7 +86,7 @@
     component" scenarios.
   - Verify: `npm run test:unit -- CharacterCard` passes.
 
-- [ ] **Task 6 — Migrate `CampaignEditor` chapters section**
+- [x] **Task 6 — Migrate `CampaignEditor` chapters section**
   - File: `app/campaigns/CampaignEditor.tsx`.
   - Replace the unicode `▲`/`▼` `<span>` with `Chevron` (keeping the existing
     "📖 Chapters (N)" label and surrounding button/layout, per Design Decision 2
@@ -97,7 +97,7 @@
     component" scenarios.
   - Verify: `npm run test:unit -- CampaignEditor` passes.
 
-- [ ] **Task 7 — Migrate campaign library entries**
+- [x] **Task 7 — Migrate campaign library entries**
   - File: `app/campaigns/[id]/library/page.tsx`.
   - Replace the unicode `▲`/`▼` `<span>` with `Chevron` inside the existing
     entry button (keeping the type label, title, chapter, date, and saved-result
@@ -107,7 +107,7 @@
     Campaign library entries use the shared disclosure component" scenarios.
   - Verify: `npm run test:unit -- libraryPage` passes.
 
-- [ ] **Task 8 — Migrate `CreatureStatsForm` (5 sections)**
+- [x] **Task 8 — Migrate `CreatureStatsForm` (5 sections)**
   - File: `lib/components/CreatureStatsForm.tsx`.
   - For each of the 5 sections (abilities, skills, resistances, senses, and
     the fifth independently-toggled section), replace the leading `▶`/`▼`
@@ -125,12 +125,12 @@
     intentional visual change per Design Decision 4) looks correct in a
     running dev server for all 5 sections.
 
-- [ ] Look for existing tooling or functions in the codebase that can be
+- [x] Look for existing tooling or functions in the codebase that can be
   reused or extended before writing new logic from scratch (in particular:
   confirm no other shared chevron/disclosure helper already exists elsewhere
   before adding a new one — repo-wide grep performed during proposal found
   none, but re-check at implementation time).
-- [ ] Confirm all acceptance criteria in `specs/disclosure-indicator/spec.md`
+- [x] Confirm all acceptance criteria in `specs/disclosure-indicator/spec.md`
   are covered by the tests added/extended in Tasks 2–8.
 
 ## Pre-Commit Code Review

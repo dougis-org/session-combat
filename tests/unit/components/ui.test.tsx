@@ -9,6 +9,8 @@ import {
   EditorShell,
   textInputClass,
   TextInputField,
+  Chevron,
+  Disclosure,
 } from '@/lib/components/ui';
 
 // ---------------------------------------------------------------------------
@@ -167,5 +169,61 @@ describe('TextInputField', () => {
   it('wires id to input and label htmlFor when provided', () => {
     rtlRender(<TextInputField id="my-field" label="My Field" value="" onChange={jest.fn()} />);
     screen.getByLabelText('My Field');
+  });
+});
+
+describe('Chevron', () => {
+  it('renders with no rotation class when expanded is false', () => {
+    const { container } = rtlRender(<Chevron expanded={false} />);
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
+    expect(svg).not.toHaveClass('rotate-90');
+  });
+
+  it('renders with a 90-degree rotation class when expanded is true', () => {
+    const { container } = rtlRender(<Chevron expanded={true} />);
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveClass('rotate-90');
+  });
+
+  it('imports only ChevronRight from lucide-react', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const source = fs.readFileSync(path.join(process.cwd(), 'lib/components/ui.tsx'), 'utf8');
+    const lucideImportLines = source
+      .split('\n')
+      .filter((line: string) => line.includes("from 'lucide-react'"));
+    expect(lucideImportLines).toHaveLength(1);
+    expect(lucideImportLines[0]).toMatch(/^import\s*\{\s*ChevronRight\s*\}\s*from 'lucide-react';?$/);
+  });
+});
+
+describe('Disclosure', () => {
+  it('reflects open=true with aria-expanded="true" and a rotated chevron', () => {
+    const { container } = rtlRender(
+      <Disclosure label="Section" open={true} onToggle={jest.fn()} />
+    );
+    const button = screen.getByRole('button', { name: /section/i });
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    expect(container.querySelector('svg')).toHaveClass('rotate-90');
+  });
+
+  it('reflects open=false with aria-expanded="false" and no rotation', () => {
+    const { container } = rtlRender(
+      <Disclosure label="Section" open={false} onToggle={jest.fn()} />
+    );
+    const button = screen.getByRole('button', { name: /section/i });
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(container.querySelector('svg')).not.toHaveClass('rotate-90');
+  });
+
+  it('calls onToggle exactly once on click without managing its own state', async () => {
+    const onToggle = jest.fn();
+    const user = userEvent.setup();
+    rtlRender(<Disclosure label="Section" open={false} onToggle={onToggle} />);
+    const button = screen.getByRole('button', { name: /section/i });
+    await user.click(button);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(button).toHaveAttribute('aria-expanded', 'false');
   });
 });

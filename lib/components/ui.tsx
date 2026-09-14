@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode, useId } from 'react';
+import { ChevronRight } from 'lucide-react';
 
 export function ErrorBanner({ message }: { message: string | null }) {
   if (!message) return null;
@@ -98,6 +99,39 @@ export function SubmitButton({ isLoading, label, loadingLabel }: { isLoading: bo
       className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold rounded transition-colors"
     >
       {isLoading ? loadingLabel : label}
+    </button>
+  );
+}
+
+export function Chevron({ expanded, className }: { expanded: boolean; className?: string }) {
+  return (
+    <ChevronRight
+      className={[
+        'transition-transform duration-300',
+        expanded ? 'rotate-90' : '',
+        className ?? '',
+      ].filter(Boolean).join(' ')}
+    />
+  );
+}
+
+export function Disclosure({
+  label,
+  open,
+  onToggle,
+  className,
+  contentClassName,
+}: {
+  label: string;
+  open: boolean;
+  onToggle: () => void;
+  className?: string;
+  contentClassName?: string;
+}) {
+  return (
+    <button type="button" onClick={onToggle} aria-expanded={open} className={className}>
+      <span className={contentClassName}>{label}</span>
+      <Chevron expanded={open} />
     </button>
   );
 }

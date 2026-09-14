@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { ErrorBanner, LoadingState, FormField, textInputClass } from '@/lib/components/ui';
+import { ErrorBanner, LoadingState, FormField, textInputClass, Chevron } from '@/lib/components/ui';
 import { SessionControl } from '@/lib/components/SessionControl';
 import { SessionLog, SessionEvent, PartyMember } from '@/lib/types';
 import { useCampaignContext } from '@/lib/hooks/useCampaignContext';
@@ -38,8 +38,9 @@ function SessionEntryCard({
   return (
     <div className="bg-gray-800 rounded-lg p-4 shadow">
       <div className="flex justify-between items-start">
-        <button 
+        <button
           onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
           className="flex-1 text-left flex justify-between items-start group"
         >
           <div className="flex items-center gap-2 flex-wrap">
@@ -52,6 +53,7 @@ function SessionEntryCard({
               </span>
             )}
           </div>
+          <Chevron expanded={expanded} />
         </button>
         {isDMLoading ? (
           <div className="flex gap-2 ml-2" title="Verifying permissions...">

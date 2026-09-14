@@ -105,6 +105,24 @@ describe('Library Page', () => {
     expect(container.textContent).not.toContain('Location One');
   });
 
+  it('renders a Chevron (not a unicode glyph) reflecting collapsed/expanded state', async () => {
+    const item = makeItem({ title: 'Grigor the Innkeeper' });
+    mockFetch([item]);
+    await render();
+
+    const cardBtn = container.querySelector('button[aria-expanded="false"]') as HTMLButtonElement;
+    expect(cardBtn).toBeTruthy();
+    expect(cardBtn.textContent).not.toContain('▲');
+    expect(cardBtn.textContent).not.toContain('▼');
+    const chevron = cardBtn.querySelector('svg') as SVGElement;
+    expect(chevron).toBeTruthy();
+    expect(chevron).not.toHaveClass('rotate-90');
+
+    await expandFirstCard();
+    const expandedBtn = container.querySelector('button[aria-expanded="true"]') as HTMLButtonElement;
+    expect(expandedBtn.querySelector('svg')).toHaveClass('rotate-90');
+  });
+
   it('clicking a card expands it and shows systemPrompt in muted section, userMessage in bright section', async () => {
     const item = makeItem({
       systemPrompt: 'SYSTEM_TEXT_HERE',

@@ -67,4 +67,23 @@ describe('ConditionControls', () => {
     expect(screen.queryByTestId('condition-form-modal')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Conditions/ })).not.toBeInTheDocument();
   });
+
+  test('toggle button shows a closed chevron and aria-expanded false when collapsed', () => {
+    setup({
+      conditions: [{ id: 'x1', name: 'Poisoned', description: '' }],
+    });
+    const toggle = screen.getByRole('button', { name: /Conditions \(1\)/ });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle.querySelector('svg')).not.toHaveClass('rotate-90');
+  });
+
+  test('expanding the conditions list rotates the chevron and sets aria-expanded true', async () => {
+    const { user } = setup({
+      conditions: [{ id: 'x1', name: 'Poisoned', description: '' }],
+    });
+    const toggle = screen.getByRole('button', { name: /Conditions \(1\)/ });
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(toggle.querySelector('svg')).toHaveClass('rotate-90');
+  });
 });

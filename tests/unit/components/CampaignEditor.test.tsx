@@ -222,6 +222,19 @@ describe('CampaignEditor', () => {
       await user.click(screen.getByRole('button', { name: 'Save Campaign' }));
       expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ chapters: [] }));
     });
+
+    it('renders a Chevron (not a unicode glyph) reflecting the chapters section state', async () => {
+      const { user } = renderEditor();
+      const header = screen.getByRole('button', { name: /chapters/i });
+      expect(header).toHaveAttribute('aria-expanded', 'false');
+      expect(header.querySelector('svg')).not.toHaveClass('rotate-90');
+      expect(header).not.toHaveTextContent('▲');
+      expect(header).not.toHaveTextContent('▼');
+
+      await user.click(header);
+      expect(header).toHaveAttribute('aria-expanded', 'true');
+      expect(header.querySelector('svg')).toHaveClass('rotate-90');
+    });
   });
 
   describe('chapters editing', () => {
