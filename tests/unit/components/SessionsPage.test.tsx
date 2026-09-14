@@ -40,6 +40,13 @@ jest.mock('@/lib/hooks/useCampaignContext', () => ({
   })),
 }));
 
+jest.mock('@/lib/hooks/useIsDM', () => ({
+  useIsDM: jest.fn(() => ({
+    isDM: true,
+    loading: false,
+  })),
+}));
+
 const MOCK_LOG = {
   id: 'log-1',
   userId: 'u1',

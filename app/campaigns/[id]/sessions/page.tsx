@@ -8,6 +8,7 @@ import { ErrorBanner, LoadingState, FormField, textInputClass } from '@/lib/comp
 import { SessionControl } from '@/lib/components/SessionControl';
 import { SessionLog, SessionEvent, PartyMember } from '@/lib/types';
 import { useCampaignContext } from '@/lib/hooks/useCampaignContext';
+import { useIsDM } from '@/lib/hooks/useIsDM';
 import { buildNpcEventsFromMemberChanges } from '@/lib/utils/sessionEvents';
 
 function formatDate(d: Date | string): string {
@@ -22,10 +23,12 @@ function formatDate(d: Date | string): string {
 
 function SessionEntryCard({
   log,
+  isDM,
   onEdit,
   onDelete,
 }: {
   log: SessionLog;
+  isDM: boolean;
   onEdit: (log: SessionLog) => void;
   onDelete: (id: string) => void;
 }) {
@@ -48,20 +51,22 @@ function SessionEntryCard({
             )}
           </div>
         </button>
-        <div className="flex gap-2 ml-2">
-          <button
-            onClick={() => onEdit(log)}
-            className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => onDelete(log.id)}
-            className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
-          >
-            Delete
-          </button>
-        </div>
+        {isDM && (
+          <div className="flex gap-2 ml-2">
+            <button
+              onClick={() => onEdit(log)}
+              className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => onDelete(log.id)}
+              className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
+            >
+              Delete
+            </button>
+          </div>
+        )}
       </div>
 
       {expanded && (
@@ -334,6 +339,8 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
   const [logsError, setLogsError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingLog, setEditingLog] = useState<SessionLog | null>(null);
+  
+  const { isDM } = useIsDM(campaignId);
 
   const { context, loading: contextLoading, error: contextError } = useCampaignContext(campaignId);
 
@@ -399,7 +406,7 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
 
       <ErrorBanner message={error} />
 
-      {!showForm && !editingLog && (
+      {isDM && !showForm && !editingLog && (
         <button
           onClick={() => setShowForm(true)}
           disabled={loading}
@@ -436,6 +443,7 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
             <SessionEntryCard
               key={log.id}
               log={log}
+              isDM={isDM}
               onEdit={l => { setEditingLog(l); setShowForm(false); }}
               onDelete={handleDelete}
             />
