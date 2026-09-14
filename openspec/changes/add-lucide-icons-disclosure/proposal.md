@@ -81,7 +81,13 @@
 
 - Any new disclosure/expand-collapse UI not already present in the app today.
 - Visual/behavioral redesign of the content revealed by these disclosures (only
-  the toggle affordance changes).
+  the toggle affordance changes). Note: implementation surfaced a small set of
+  incidental, low-risk fixes directly adjacent to the migrated call sites
+  (missing `encodeURIComponent` on two library-page fetch URLs, a more
+  specific library-page error message, and removal of an `any` type in
+  `CreatureStatsForm`'s `updateBasicStat`) — each is covered by its own test
+  and disclosed in the PR body rather than reverted, since splitting them out
+  would have meant re-touching the same lines twice.
 - `CampaignChat` dock expand/collapse (pill ⇄ drawer) — different interaction
   pattern, not a list-item disclosure.
 
