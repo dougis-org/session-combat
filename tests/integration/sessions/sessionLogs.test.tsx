@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { act } from 'react';
+import { screen } from '@testing-library/react';
 import { createRoot, Root } from 'react-dom/client';
 import SessionsPage from '@/app/campaigns/[id]/sessions/page';
 
@@ -38,12 +39,20 @@ jest.mock('@/lib/hooks/useCampaignContext', () => ({
   useCampaignContext: jest.fn(),
 }));
 
+jest.mock('@/lib/hooks/useIsDM', () => ({
+  useIsDM: jest.fn(() => ({ isDM: true, loading: false })),
+}));
+
 const { buildNpcEventsFromMemberChanges } = require('@/lib/utils/sessionEvents') as {
   buildNpcEventsFromMemberChanges: jest.Mock;
 };
 
 const { useCampaignContext } = require('@/lib/hooks/useCampaignContext') as {
   useCampaignContext: jest.Mock;
+};
+
+const { useIsDM } = require('@/lib/hooks/useIsDM') as {
+  useIsDM: jest.Mock;
 };
 
 const MOCK_LOG = {
@@ -108,6 +117,7 @@ beforeEach(() => {
   root = createRoot(container);
   jest.clearAllMocks();
   buildNpcEventsFromMemberChanges.mockReturnValue([]);
+  useIsDM.mockReturnValue({ isDM: true, loading: false });
 });
 
 afterEach(() => {
@@ -169,5 +179,35 @@ describe('Session Logs — D2 multi-party test (fails until D3 refactor)', () =>
       ]),
       null,
     );
+  });
+});
+
+describe('Session Logs — Role-Based Access (DM vs Player)', () => {
+  test('DM sees Edit and Delete controls, and New Session button', async () => {
+    useIsDM.mockReturnValue({ isDM: true, loading: false });
+    await renderSessions([MOCK_LOG], [PARTY_ALICE_BOB]);
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /\+ New Session/i })).toBeInTheDocument();
+  });
+
+  test('Player (non-DM) does not see Edit, Delete, or New Session', async () => {
+    useIsDM.mockReturnValue({ isDM: false, loading: false });
+    await renderSessions([MOCK_LOG], [PARTY_ALICE_BOB]);
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /\+ New Session/i })).not.toBeInTheDocument();
+    
+    // Expand/collapse should still work
+    await clickButton(container, '#3');
+    expect(container.textContent).toContain('The party explored the mines.');
+  });
+
+  test('Controls fail-closed while DM status is loading', async () => {
+    useIsDM.mockReturnValue({ isDM: false, loading: true });
+    await renderSessions([MOCK_LOG], [PARTY_ALICE_BOB]);
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /\+ New Session/i })).toBeDisabled();
   });
 });

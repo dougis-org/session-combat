@@ -9,11 +9,12 @@ interface CurrentMember {
   status: MemberStatus;
 }
 
-export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean } {
+export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean; error: Error | null } {
   const { user, loading: authLoading } = useAuth();
   const userId = user?.userId ?? null;
   const [isDM, setIsDM] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const fetchedKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
 
     async function load() {
       setLoading(true);
+      setError(null);
       try {
         // Use the current-member endpoint (not the full /members list) so this
         // hook doesn't duplicate CampaignChat's full-roster fetch just to learn
@@ -50,6 +52,7 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
             // Transient failure (not "not a member") — allow a retry on the next
             // auth re-check instead of getting stuck on this fetch key.
             fetchedKeyRef.current = null;
+            if (!cancelled) setError(new Error(`Network error: ${res.status}`));
           }
           if (!cancelled) setIsDM(false);
           return;
@@ -62,7 +65,10 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
         console.error(`useIsDM: failed to fetch/parse current member for campaign ${campaignId}`, err);
         // Network error or bad JSON — allow a retry on the next auth re-check.
         fetchedKeyRef.current = null;
-        if (!cancelled) setIsDM(false);
+        if (!cancelled) {
+          setIsDM(false);
+          setError(err instanceof Error ? err : new Error('Failed to verify DM status'));
+        }
       } finally {
         settled = true;
         if (!cancelled) setLoading(false);
@@ -82,5 +88,5 @@ export function useIsDM(campaignId: string): { isDM: boolean; loading: boolean }
     };
   }, [campaignId, userId, authLoading]);
 
-  return { isDM, loading: authLoading || loading };
+  return { isDM, loading: authLoading || loading, error };
 }

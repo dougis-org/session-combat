@@ -12,7 +12,7 @@ type HookResult = ReturnType<typeof useIsDM>;
 
 function renderHook(campaignId: string): { result: { current: HookResult }; unmount: () => void } {
   const { container, root } = createReactRoot();
-  const resultRef: { current: HookResult } = { current: { isDM: false, loading: true } };
+  const resultRef: { current: HookResult } = { current: { isDM: false, loading: true, error: null } };
 
   function Probe() {
     const hookResult = useIsDM(campaignId);
@@ -45,7 +45,7 @@ describe('useIsDM', () => {
     await act(async () => {});
 
     expect(global.fetch).toHaveBeenCalledWith('/api/campaigns/camp-1/members/me');
-    expect(result.current).toEqual({ isDM: true, loading: false });
+    expect(result.current).toEqual({ isDM: true, loading: false, error: null });
     unmount();
   });
 
@@ -58,7 +58,7 @@ describe('useIsDM', () => {
     const { result, unmount } = renderHook('camp-1');
     await act(async () => {});
 
-    expect(result.current).toEqual({ isDM: false, loading: false });
+    expect(result.current).toEqual({ isDM: false, loading: false, error: null });
     unmount();
   });
 
@@ -71,7 +71,7 @@ describe('useIsDM', () => {
     const { result, unmount } = renderHook('camp-1');
     await act(async () => {});
 
-    expect(result.current).toEqual({ isDM: false, loading: false });
+    expect(result.current).toEqual({ isDM: false, loading: false, error: null });
     unmount();
   });
 
@@ -81,7 +81,7 @@ describe('useIsDM', () => {
     const { result, unmount } = renderHook('camp-1');
     await act(async () => {});
 
-    expect(result.current).toEqual({ isDM: false, loading: false });
+    expect(result.current).toEqual({ isDM: false, loading: false, error: null });
     unmount();
   });
 
@@ -91,7 +91,7 @@ describe('useIsDM', () => {
 
     const { result, unmount } = renderHook('camp-1');
 
-    expect(result.current).toEqual({ isDM: false, loading: true });
+    expect(result.current).toEqual({ isDM: false, loading: true, error: null });
 
     await act(async () => {
       resolve({ ok: true, json: async () => ({ role: 'player', status: 'active' }) });
@@ -106,7 +106,7 @@ describe('useIsDM', () => {
     const { result, unmount } = renderHook('camp-1');
     await act(async () => {});
 
-    expect(result.current).toEqual({ isDM: false, loading: true });
+    expect(result.current).toEqual({ isDM: false, loading: true, error: null });
     expect(global.fetch).not.toHaveBeenCalled();
     unmount();
   });
@@ -117,7 +117,7 @@ describe('useIsDM', () => {
     const { result, unmount } = renderHook('camp-1');
     await act(async () => {});
 
-    expect(result.current).toEqual({ isDM: false, loading: false });
+    expect(result.current).toEqual({ isDM: false, loading: false, error: null });
     expect(global.fetch).not.toHaveBeenCalled();
     unmount();
   });
@@ -177,7 +177,7 @@ describe('useIsDM', () => {
     (global.fetch as jest.Mock).mockReturnValueOnce(new Promise(() => {})); // never settles
 
     const { container, root } = createReactRoot();
-    const resultRef: { current: HookResult } = { current: { isDM: false, loading: true } };
+    const resultRef: { current: HookResult } = { current: { isDM: false, loading: true, error: null } };
     function Probe({ campaignId }: { campaignId: string }) {
       const hookResult = useIsDM(campaignId);
       React.useEffect(() => { resultRef.current = hookResult; }, [hookResult]);
@@ -203,7 +203,7 @@ describe('useIsDM', () => {
     await act(async () => {});
 
     expect(global.fetch).toHaveBeenCalledTimes(2);
-    expect(resultRef.current).toEqual({ isDM: true, loading: false });
+    expect(resultRef.current).toEqual({ isDM: true, loading: false, error: null });
     unmountReactRoot(container, root);
   });
 
