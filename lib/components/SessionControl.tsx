@@ -1,18 +1,16 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useIsDM } from '@/lib/hooks/useIsDM'
-import { useCampaignStream } from '@/lib/hooks/useCampaignStream'
-import type { CampaignStreamEvent } from '@/lib/types'
+import { useActiveSessionId } from '@/lib/hooks/useActiveSessionId'
 
 interface SessionControlProps {
   campaignId: string
-  initialSessionId: string | null
 }
 
-export function SessionControl({ campaignId, initialSessionId }: SessionControlProps) {
+export function SessionControl({ campaignId }: SessionControlProps) {
   const { isDM, loading } = useIsDM(campaignId)
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(initialSessionId)
+  const { activeSessionId, setActiveSessionId } = useActiveSessionId(campaignId)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const safeCampaignId = encodeURIComponent(campaignId)
@@ -22,15 +20,7 @@ export function SessionControl({ campaignId, initialSessionId }: SessionControlP
     setError(null)
   }, [activeSessionId])
 
-  const handleEvent = useCallback((event: CampaignStreamEvent) => {
-    if (event.type === 'session') {
-      setActiveSessionId(event.data.activeSessionId)
-    }
-  }, [])
-
-  useCampaignStream(campaignId, handleEvent)
-
-  if (loading || !isDM) return null
+  if (loading || !isDM || activeSessionId === undefined) return null
 
   async function reconcileFromCampaign() {
     const res = await fetch(`/api/campaigns/${safeCampaignId}`)

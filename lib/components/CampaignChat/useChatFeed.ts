@@ -20,14 +20,14 @@ function safeSet(key: string, val: unknown): boolean {
 
 interface UseChatFeedArgs {
   campaignId: string
-  activeSessionId: string | null
+  activeSessionId: string | null | undefined // undefined = not yet loaded
   isExpanded: boolean
   currentUserId: string | undefined
   feedRef: React.RefObject<HTMLDivElement | null>
-  onSessionChange?: (activeSessionId: string | null) => void
+  handleSessionStreamEvent: (e: CampaignStreamEvent) => void
 }
 
-export function useChatFeed({ campaignId, activeSessionId, isExpanded, currentUserId, feedRef, onSessionChange }: UseChatFeedArgs) {
+export function useChatFeed({ campaignId, activeSessionId, isExpanded, currentUserId, feedRef, handleSessionStreamEvent }: UseChatFeedArgs) {
   const [feed, setFeed] = useState<FeedItem[]>([])
   const seenIds = useRef<Set<string>>(new Set())
 
@@ -62,6 +62,7 @@ export function useChatFeed({ campaignId, activeSessionId, isExpanded, currentUs
 
   // ── SSE stream ──
   function onStreamEvent(e: CampaignStreamEvent) {
+    handleSessionStreamEvent(e)
     if (e.type === 'message') {
       const msg = e.data
       if (seenIds.current.has(msg.id)) return
@@ -79,8 +80,6 @@ export function useChatFeed({ campaignId, activeSessionId, isExpanded, currentUs
       // force-scroll when it's the local user's own roll, matching the
       // behavior previously provided by the now-removed optimistic append.
       scrollToBottom(roll.rollerId === currentUserId)
-    } else if (e.type === 'session') {
-      onSessionChange?.(e.data.activeSessionId)
     }
   }
 

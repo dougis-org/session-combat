@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useActiveSessionIdCore } from '@/lib/hooks/useActiveSessionId'
 import { announcePresence, clearPresence } from '@/lib/dice/diceSessionBridge'
 import { SceneComposer } from '@/lib/components/SceneComposer'
 import type { CampaignMessage } from '@/lib/types'
@@ -15,22 +16,24 @@ import { DragHandle } from './DragHandle'
 
 interface CampaignChatProps {
   campaignId: string
-  activeSessionId?: string | null
-  onSessionChange?: (activeSessionId: string | null) => void
   onSizeChange?: (isLarge: boolean) => void
 }
 
-export function CampaignChat({ campaignId, activeSessionId = null, onSessionChange, onSizeChange }: CampaignChatProps) {
+export function CampaignChat({ campaignId, onSizeChange }: CampaignChatProps) {
   const { user } = useAuth()
   const triggerRef = useRef<HTMLButtonElement>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
   const feedRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  // Non-subscribing core (design.md Decision 3): fed from useChatFeed's own
+  // useCampaignStream subscription below, rather than opening a second one.
+  const { activeSessionId, handleStreamEvent } = useActiveSessionIdCore(campaignId)
+
   const dock = useDockState({ triggerRef, drawerRef, onSizeChange })
   const chatFeed = useChatFeed({
     campaignId, activeSessionId, isExpanded: dock.isExpanded,
-    currentUserId: user?.userId, feedRef, onSessionChange,
+    currentUserId: user?.userId, feedRef, handleSessionStreamEvent: handleStreamEvent,
   })
 
   const members = useMembers(campaignId)
@@ -46,7 +49,7 @@ export function CampaignChat({ campaignId, activeSessionId = null, onSessionChan
 
   // ── Dice session bridge: announce/clear presence in lockstep with our own active session ──
   useEffect(() => {
-    if (activeSessionId === null) return
+    if (activeSessionId === null || activeSessionId === undefined) return
     announcePresence({ campaignId, sessionId: activeSessionId })
     return () => { clearPresence() }
   }, [campaignId, activeSessionId])

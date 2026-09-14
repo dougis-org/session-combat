@@ -22,6 +22,10 @@ jest.mock('@/lib/hooks/useAuth', () => ({
   })),
 }))
 
+jest.mock('@/lib/hooks/useActiveSessionId', () => ({
+  useActiveSessionIdCore: jest.fn(() => ({ activeSessionId: null, setActiveSessionId: jest.fn(), handleStreamEvent: jest.fn() })),
+}))
+
 describe('CampaignChat — roll feed / RollFeedItem rendering', () => {
   beforeEach(() => {
     jest.clearAllMocks()

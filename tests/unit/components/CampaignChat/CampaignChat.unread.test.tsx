@@ -27,6 +27,10 @@ jest.mock('@/lib/hooks/useAuth', () => ({
   })),
 }))
 
+jest.mock('@/lib/hooks/useActiveSessionId', () => ({
+  useActiveSessionIdCore: jest.fn(() => ({ activeSessionId: null, setActiveSessionId: jest.fn(), handleStreamEvent: jest.fn() })),
+}))
+
 const mockedLocalStore = LocalStore as jest.Mocked<typeof LocalStore>
 
 describe('CampaignChat — unread badge', () => {

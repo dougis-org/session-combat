@@ -1,6 +1,8 @@
+import React from 'react'
 import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CampaignChat } from '@/lib/components/CampaignChat'
+import { useActiveSessionIdCore } from '@/lib/hooks/useActiveSessionId'
 import type { CampaignStreamEvent, CampaignMessage, CampaignRoll, MessageVisibility } from '@/lib/types'
 
 export const CAMPAIGN_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
@@ -11,6 +13,26 @@ export const sharedTestState: {
 } = {
   capturedOnEvent: null,
   fetchSpy: jest.fn(),
+}
+
+// Every CampaignChat test file must declare
+// `jest.mock('@/lib/hooks/useActiveSessionId', () => ({ useActiveSessionIdCore: jest.fn() }))`
+// itself (jest.mock hoisting is per-file) before this helper is used. This
+// backs the mock with real React state so that CampaignChat's own
+// setActiveSessionId/handleStreamEvent calls re-render it exactly as the
+// real (non-subscribing) core hook would — without opening any subscription.
+export function mockActiveSessionIdCore(initial: string | null | undefined) {
+  const setActiveSessionId = jest.fn()
+  const handleStreamEvent = jest.fn()
+  ;(useActiveSessionIdCore as jest.Mock).mockImplementation(() => {
+    const [value, setValue] = React.useState(initial)
+    setActiveSessionId.mockImplementation((id: string | null) => setValue(id))
+    handleStreamEvent.mockImplementation((e: CampaignStreamEvent) => {
+      if (e.type === 'session') setValue(e.data.activeSessionId)
+    })
+    return { activeSessionId: value, setActiveSessionId, handleStreamEvent }
+  })
+  return { setActiveSessionId, handleStreamEvent }
 }
 
 const originalFetch = global.fetch
@@ -54,6 +76,7 @@ export function restoreFetch() {
 }
 
 export async function openDock() {
+  mockActiveSessionIdCore(null)
   const user = userEvent.setup()
   render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await user.click(screen.getByRole('button', { name: /chat/i }))
@@ -61,10 +84,36 @@ export async function openDock() {
 }
 
 export async function openDockWithSession(activeSessionId: string | null = 'session-1') {
+  const { setActiveSessionId } = mockActiveSessionIdCore(activeSessionId)
   const user = userEvent.setup()
-  const { rerender } = render(<CampaignChat campaignId={CAMPAIGN_ID} activeSessionId={activeSessionId} />)
+  const { rerender } = render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await user.click(screen.getByRole('button', { name: /chat/i }))
-  return { user, rerender }
+  return { user, rerender, setActiveSessionId }
+}
+
+// Like openDockWithSession, but drives the REAL (unmocked) useActiveSessionIdCore
+// via a mocked fetch instead of mocking the hook module directly — for tests
+// that need to exercise the actual fetch -> hook -> render path. Pass 'error'
+// to simulate a failed campaign fetch instead of a resolved activeSessionId.
+export async function openDockWithSessionViaRealFetch(activeSessionId: string | null | 'error') {
+  const spy = jest.fn().mockImplementation((url: string, options?: RequestInit) => {
+    if (url === `/api/campaigns/${CAMPAIGN_ID}`) {
+      if (activeSessionId === 'error') {
+        return Promise.resolve({ ok: false, status: 500, json: () => Promise.resolve({}) })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ activeSessionId }) })
+    }
+    if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
+    if (url.includes('/rolls')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ rolls: [] }) })
+    return Promise.resolve({ ok: true, json: () => Promise.resolve(options?.method === 'POST' ? {} : { messages: [] }) })
+  })
+  sharedTestState.fetchSpy = spy
+  global.fetch = spy as unknown as typeof global.fetch
+
+  const user = userEvent.setup()
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+  await user.click(screen.getByRole('button', { name: /chat/i }))
+  return { user }
 }
 
 export function fireMsg(

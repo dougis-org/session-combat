@@ -24,7 +24,7 @@ describe('CampaignChat — SSR safety', () => {
 
     expect(() =>
       renderToString(
-        React.createElement(CampaignChat, { campaignId: 'campaign-1', activeSessionId: null }),
+        React.createElement(CampaignChat, { campaignId: 'campaign-1' }),
       ),
     ).not.toThrow()
   })

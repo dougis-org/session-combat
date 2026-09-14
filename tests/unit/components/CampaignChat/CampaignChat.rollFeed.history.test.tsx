@@ -1,7 +1,7 @@
 import { render, screen, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CampaignChat } from '@/lib/components/CampaignChat'
-import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDockWithSession, makeRoll } from './helpers'
+import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDockWithSession, mockActiveSessionIdCore, makeRoll } from './helpers'
 
 // ── Mocks ─────────────────────────────────────────────────────────
 
@@ -22,6 +22,10 @@ jest.mock('@/lib/hooks/useAuth', () => ({
     user: { userId: 'user-1', email: 'test@example.com', username: 'tester' },
     loading: false,
   })),
+}))
+
+jest.mock('@/lib/hooks/useActiveSessionId', () => ({
+  useActiveSessionIdCore: jest.fn(() => ({ activeSessionId: null, setActiveSessionId: jest.fn(), handleStreamEvent: jest.fn() })),
 }))
 
 describe('CampaignChat — roll feed / history fetch on expand', () => {
@@ -90,8 +94,9 @@ describe('CampaignChat — roll feed / history fetch on expand', () => {
       },
     })
 
+    mockActiveSessionIdCore('session-1')
     const user = userEvent.setup()
-    render(<CampaignChat campaignId={CAMPAIGN_ID} activeSessionId="session-1" />)
+    render(<CampaignChat campaignId={CAMPAIGN_ID} />)
 
     // Stream event arrives before history loads
     act(() => {

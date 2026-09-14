@@ -10,21 +10,25 @@ jest.mock('next/navigation', () => ({
   usePathname: () => mockPathname,
 }));
 
-// Mock CampaignChat to capture the onSessionChange and onSizeChange props
+// Mock CampaignChat to capture every prop CampaignLayout wires it with, so
+// we can assert no session-related prop is passed (the coupling this change
+// removes) while still capturing onSizeChange, which legitimately remains.
+let capturedCampaignChatProps: Record<string, unknown> = {}
 let capturedOnSizeChange: ((isLarge: boolean) => void) | undefined
 jest.mock('@/lib/components/CampaignChat', () => ({
-  CampaignChat: ({ activeSessionId, onSessionChange, onSizeChange }: { activeSessionId?: string | null; onSessionChange?: any; onSizeChange?: (isLarge: boolean) => void }) => {
-        capturedOnSizeChange = onSizeChange
-    return <div data-testid="campaign-chat" data-active-session={activeSessionId ?? ''} />
+  CampaignChat: (props: { onSizeChange?: (isLarge: boolean) => void }) => {
+    capturedCampaignChatProps = props
+    capturedOnSizeChange = props.onSizeChange
+    return <div data-testid="campaign-chat" />
   },
 }));
 
-// Mock SessionControl to capture the props CampaignLayout wires it with
-let capturedSessionControlProps: { campaignId?: string; initialSessionId?: string | null } = {}
+// Mock SessionControl to capture every prop CampaignLayout wires it with
+let capturedSessionControlProps: Record<string, unknown> = {}
 jest.mock('@/lib/components/SessionControl', () => ({
-  SessionControl: ({ campaignId, initialSessionId }: { campaignId?: string; initialSessionId?: string | null }) => {
-    capturedSessionControlProps = { campaignId, initialSessionId }
-    return <div data-testid="session-control" data-initial-session={initialSessionId ?? ''} />
+  SessionControl: (props: { campaignId?: string }) => {
+    capturedSessionControlProps = props
+    return <div data-testid="session-control" />
   },
 }));
 
@@ -41,6 +45,7 @@ jest.mock('next/link', () => {
 describe('CampaignLayout', () => {
   beforeEach(() => {
     capturedOnSizeChange = undefined;
+    capturedCampaignChatProps = {};
     capturedSessionControlProps = {};
     mockPathname = '/campaigns/test-id';
     global.fetch = jest.fn(() =>
@@ -237,7 +242,20 @@ describe('CampaignLayout', () => {
     const header = screen.getByRole('heading', { level: 1 }).closest('header');
     expect(header).toContainElement(screen.getByTestId('session-control'));
     expect(capturedSessionControlProps.campaignId).toBe('test-id');
-    expect(capturedSessionControlProps.initialSessionId).toBe('session-123');
+  });
+
+  test('T9: CampaignLayout passes no session-related props to SessionControl or CampaignChat', async () => {
+    render(
+      <CampaignLayout>
+        <div>Children content</div>
+      </CampaignLayout>
+    );
+
+    await waitFor(() => screen.getByRole('heading'));
+    expect(Object.keys(capturedSessionControlProps).sort()).toEqual(['campaignId']);
+    expect(capturedCampaignChatProps).not.toHaveProperty('activeSessionId');
+    expect(capturedCampaignChatProps).not.toHaveProperty('onSessionChange');
+    expect(capturedSessionControlProps).not.toHaveProperty('initialSessionId');
   });
 
   test('T3-2: SessionControl renders in the header for the isLarge branch', async () => {

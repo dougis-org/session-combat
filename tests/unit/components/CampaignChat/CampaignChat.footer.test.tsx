@@ -1,8 +1,7 @@
-import { screen } from '@testing-library/react'
-import { CampaignChat } from '@/lib/components/CampaignChat'
+import { act, screen } from '@testing-library/react'
 import { LocalStore } from '@/lib/offline/LocalStore'
 import {
-  CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch,
+  sharedTestState, setupFetchMock, restoreFetch,
   openDockWithSession,
 } from './helpers'
 
@@ -27,6 +26,10 @@ jest.mock('@/lib/hooks/useAuth', () => ({
     user: { userId: 'user-1', email: 'test@example.com', username: 'tester' },
     loading: false,
   })),
+}))
+
+jest.mock('@/lib/hooks/useActiveSessionId', () => ({
+  useActiveSessionIdCore: jest.fn(() => ({ activeSessionId: null, setActiveSessionId: jest.fn(), handleStreamEvent: jest.fn() })),
 }))
 
 const mockedLocalStore = LocalStore as jest.Mocked<typeof LocalStore>
@@ -70,13 +73,13 @@ describe('CampaignChat — session-gated footer', () => {
   })
 
   it('toggles the footer as activeSessionId changes while the drawer is open', async () => {
-    const { rerender } = await openDockWithSession('session-abc')
+    const { setActiveSessionId } = await openDockWithSession('session-abc')
     expect(screen.queryByText('No active session')).toBeNull()
 
-    rerender(<CampaignChat campaignId={CAMPAIGN_ID} activeSessionId={null} />)
+    act(() => { setActiveSessionId(null) })
     expect(screen.getByText('No active session')).toBeInTheDocument()
 
-    rerender(<CampaignChat campaignId={CAMPAIGN_ID} activeSessionId="session-xyz" />)
+    act(() => { setActiveSessionId('session-xyz') })
     expect(screen.queryByText('No active session')).toBeNull()
   })
 
