@@ -86,5 +86,9 @@ describe('CharacterCard', () => {
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(toggle.querySelector('svg')).toHaveClass('rotate-90');
+
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle.querySelector('svg')).not.toHaveClass('rotate-90');
   });
 });

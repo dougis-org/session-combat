@@ -1,4 +1,6 @@
 import React from 'react';
+import fs from 'fs';
+import path from 'path';
 import { render as rtlRender, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -169,6 +171,17 @@ describe('TextInputField', () => {
   it('wires id to input and label htmlFor when provided', () => {
     rtlRender(<TextInputField id="my-field" label="My Field" value="" onChange={jest.fn()} />);
     screen.getByLabelText('My Field');
+  });
+});
+
+describe('lucide-react import scope', () => {
+  it('imports only ChevronRight from lucide-react, not the full icon set', () => {
+    const source = fs.readFileSync(
+      path.join(__dirname, '../../../lib/components/ui.tsx'),
+      'utf8'
+    );
+    const lucideImports = source.match(/^import\s+.*from\s+'lucide-react';?$/gm) ?? [];
+    expect(lucideImports).toEqual(["import { ChevronRight } from 'lucide-react';"]);
   });
 });
 

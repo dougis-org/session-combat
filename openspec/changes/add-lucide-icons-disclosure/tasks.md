@@ -135,7 +135,7 @@
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the
   `openspec-review-code` skill. The primary agent must automatically apply all
   clearly-correct findings directly to the code — without stopping, without
   presenting the findings list to the user, and without asking for
@@ -144,17 +144,17 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests: `npm run test:unit`, `npm run test:ci`
-- [ ] Run E2E tests (if applicable): existing session-log/campaign-library/
+- [x] Run unit/integration tests: `npm run test:unit`, `npm run test:ci`
+- [x] Run E2E tests (if applicable): existing session-log/campaign-library/
   character/combatant E2E specs under `tests/e2e/`, if any exercise these
   components — `npm run test:e2e` (or a filtered subset)
-- [ ] Run type checks: `npm run typecheck`
-- [ ] Run build: `npm run build`
-- [ ] Run security/code quality checks required by project standards (Verity
+- [x] Run type checks: `npm run typecheck`
+- [x] Run build: `npm run build`
+- [x] Run security/code quality checks required by project standards (Verity
   gate runs automatically on commit/push per project CLAUDE.md; address
   findings rather than waiving unless a human has explicitly accepted a risk)
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -187,7 +187,7 @@ pushing.
   Then move the project item to the status column semantically matching
   "In Review" via `gh project item-edit` (same project/field/option discovery
   as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
+- [x] Wait 60 seconds for CI to start
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
   findings (commit, push, re-run) until zero findings remain. If findings
   persist after three or more iterations with no progress, report the stall

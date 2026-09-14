@@ -221,4 +221,19 @@ describe('CreatureStatsForm – ability editor section chevrons', () => {
       expect(btn.querySelector('svg')).not.toHaveClass('rotate-90');
     }
   );
+
+  test('expanding one ability editor section does not affect the others', async () => {
+    const { user } = renderForm(BASE_STATS, jest.fn<void, [CreatureStats]>());
+    const traitsBtn = screen.getByRole('button', { name: /^Traits$/i });
+    const actionsBtn = screen.getByRole('button', { name: /^Actions$/i });
+    const bonusActionsBtn = screen.getByRole('button', { name: /^Bonus Actions$/i });
+    const reactionsBtn = screen.getByRole('button', { name: /^Reactions$/i });
+
+    await user.click(actionsBtn);
+
+    expect(actionsBtn).toHaveAttribute('aria-expanded', 'true');
+    expect(traitsBtn).toHaveAttribute('aria-expanded', 'false');
+    expect(bonusActionsBtn).toHaveAttribute('aria-expanded', 'false');
+    expect(reactionsBtn).toHaveAttribute('aria-expanded', 'false');
+  });
 });
