@@ -19,16 +19,21 @@ For each task in `tasks.md`:
 
 ## Test Cases
 
-### T1/T2 — `useActiveSessionId` hook (new: `tests/unit/hooks/useActiveSessionId.test.tsx`)
+### T1/T2 — `useActiveSessionId` / `useActiveSessionIdCore` (new: `tests/unit/hooks/useActiveSessionId.test.tsx`)
 
-- [ ] Initial fetch resolves `activeSessionId` from `GET /api/campaigns/:id` when no stream event has occurred → maps to `specs/session-controls/spec.md`: "An already-active session is visible without a prior stream event"
-- [ ] A `session` stream event updates `activeSessionId` after the initial value is already known → maps to `specs/session-controls/spec.md`: "A stream event updates both components independently and consistently"
-- [ ] `setActiveSessionId(id)` updates `activeSessionId` immediately, synchronously with the call → maps to `specs/session-controls/spec.md`: "An optimistic update is not reverted by a stale in-flight fetch" (setup half)
-- [ ] A fetch that resolves *after* `setActiveSessionId` was already called does not overwrite the optimistic value → maps to `specs/session-controls/spec.md`: "An optimistic update is not reverted by a stale in-flight fetch"
-- [ ] A fetch that resolves *after* a `session` stream event was already received does not overwrite the stream-driven value → maps to `specs/session-controls/spec.md`: "An already-active session is visible without a prior stream event" (race variant) / Decision 1 in `design.md`
-- [ ] A `session` stream event confirming the same value as a prior optimistic `setActiveSessionId` call causes no additional state change/flicker (assert render count or value stability) → maps to `specs/session-controls/spec.md`: "A duplicate confirming stream event does not revert an optimistic update"
-- [ ] Changing `campaignId` on a mounted hook instance resets `activeSessionId` to `undefined` and triggers a fresh fetch/subscription scoped to the new id, with no leaked value from the previous campaign → maps to `specs/session-controls/spec.md`: "Hook state resets when campaignId changes"
-- [ ] Hook does not open more than one `EventSource`/`useCampaignStream` subscription per mount, and issues no polling — maps to `specs/session-controls/spec.md` NFAC: "No new SSE connections or polling introduced"
+Per `design.md` Decision 1's revision (core/wrapper split, adopted specifically to avoid a third SSE subscription from `CampaignChat` — see the design-review finding recorded there):
+
+- [ ] `useActiveSessionIdCore`: initial fetch resolves `activeSessionId` from `GET /api/campaigns/:id` when `handleStreamEvent` has not yet been called → maps to `specs/session-controls/spec.md`: "An already-active session is visible without a prior stream event"
+- [ ] `useActiveSessionIdCore`: calling `handleStreamEvent` with a `session`-typed event updates `activeSessionId` after the initial value is already known → maps to `specs/session-controls/spec.md`: "A stream event updates both components independently and consistently"
+- [ ] `useActiveSessionIdCore`: calling `handleStreamEvent` with a non-`session`-typed event (`message`/`roll`/`change`/`heartbeat`) is a no-op — `activeSessionId` is unchanged
+- [ ] `useActiveSessionIdCore`: `setActiveSessionId(id)` updates `activeSessionId` immediately, synchronously with the call → maps to `specs/session-controls/spec.md`: "An optimistic update is not reverted by a stale in-flight fetch" (setup half)
+- [ ] `useActiveSessionIdCore`: a fetch that resolves *after* `setActiveSessionId` was already called does not overwrite the optimistic value → maps to `specs/session-controls/spec.md`: "An optimistic update is not reverted by a stale in-flight fetch"
+- [ ] `useActiveSessionIdCore`: a fetch that resolves *after* `handleStreamEvent` already ran once does not overwrite the stream-driven value → maps to `specs/session-controls/spec.md`: "An already-active session is visible without a prior stream event" (race variant) / Decision 1 in `design.md`
+- [ ] `useActiveSessionIdCore`: a `handleStreamEvent` call confirming the same value as a prior optimistic `setActiveSessionId` call causes no additional state change/flicker (assert render count or value stability) → maps to `specs/session-controls/spec.md`: "A duplicate confirming stream event does not revert an optimistic update"
+- [ ] `useActiveSessionIdCore`: changing `campaignId` on a mounted hook instance resets `activeSessionId` to `undefined` and re-fetches scoped to the new id, with no leaked value from the previous campaign → maps to `specs/session-controls/spec.md`: "Hook state resets when campaignId changes"
+- [ ] **`useActiveSessionIdCore` never calls `useCampaignStream`/opens an `EventSource`** — assert directly (e.g. by mocking `useCampaignStream` and asserting zero calls when only the core is used) → this is the specific regression guard for the design-review finding: a component using only the core must not gain a hidden subscription
+- [ ] `useActiveSessionId` (self-subscribing wrapper): calls `useCampaignStream` exactly once per mount, forwards every received event into the core's `handleStreamEvent`, and re-subscribes when `campaignId` changes; behaves identically to the core for all fetch/race/reset scenarios above when driven end-to-end through a mocked `useCampaignStream`
+- [ ] Neither export issues polling (no `setInterval`/fixed-delay retry loop) → maps to `specs/session-controls/spec.md` NFAC: "No new SSE connections or polling introduced"
 
 ### T3/T4 — `SessionControl` new contract (`tests/unit/components/SessionControl.test.tsx`, `tests/unit/components/SessionControlReactive.test.tsx`)
 
@@ -46,11 +51,12 @@ For each task in `tasks.md`:
 
 ### T6/T7/T8 — `CampaignChat` new contract (`tests/unit/components/CampaignChat/**`)
 
-- [ ] `CampaignChat` rendered with only `{ campaignId, onSizeChange }` (no `activeSessionId`/`onSessionChange` on the prop type) reflects a mocked `useActiveSessionId` returning a non-null `activeSessionId` on first render, with no stream event required → maps to `specs/roll-share-ui/spec.md`: "An already-active session is reflected without an external prop" (regression guard for GitHub issue #721; adapted from deleted `TC-3.11`)
-- [ ] `activeSessionId === null` from the mocked hook disables roll-history fetch and dice-session presence, shows "No active session" footer, feed still loads → maps to `specs/roll-share-ui/spec.md`: "activeSessionId null disables roll history and presence, feed still loads" (unchanged scenario, new data source)
-- [ ] `activeSessionId` non-null from the mocked hook enables roll-history fetch and dice-session presence announcement → maps to `specs/roll-share-ui/spec.md`: "activeSessionId non-null enables roll history and presence" (unchanged scenario, new data source)
-- [ ] Simulating the mocked hook's `activeSessionId` transitioning from non-null to `null` (session end) updates `CampaignChat`'s rendered footer/gating without remount → adapted from deleted `TC-3.12`
-- [ ] `useChatFeed`'s `onStreamEvent` no longer has a `session`-type branch and accepts no `onSessionChange` param (type-level check / unit test asserting a `session` event passed to `useChatFeed`'s internal handler, if reachable in isolation, does not throw and has no observable side effect on the feed)
+- [ ] `CampaignChat` rendered with only `{ campaignId, onSizeChange }` (no `activeSessionId`/`onSessionChange` on the prop type) reflects a mocked `useActiveSessionIdCore` returning a non-null `activeSessionId` on first render, with no stream event required → maps to `specs/roll-share-ui/spec.md`: "An already-active session is reflected without an external prop" (regression guard for GitHub issue #721; adapted from deleted `TC-3.11`)
+- [ ] `activeSessionId === null` from the mocked `useActiveSessionIdCore` disables roll-history fetch and dice-session presence, shows "No active session" footer, feed still loads → maps to `specs/roll-share-ui/spec.md`: "activeSessionId null disables roll history and presence, feed still loads" (unchanged scenario, new data source)
+- [ ] `activeSessionId` non-null from the mocked `useActiveSessionIdCore` enables roll-history fetch and dice-session presence announcement → maps to `specs/roll-share-ui/spec.md`: "activeSessionId non-null enables roll history and presence" (unchanged scenario, new data source)
+- [ ] Simulating a `session`-typed event delivered through `useChatFeed`'s mocked `useCampaignStream` call, forwarded into the core's `handleStreamEvent`, transitions `activeSessionId` from non-null to `null` (session end) and updates `CampaignChat`'s rendered footer/gating without remount → adapted from deleted `TC-3.12`
+- [ ] `useChatFeed`'s `onStreamEvent` no longer has an `onSessionChange`-calling branch; instead it calls the injected `handleSessionStreamEvent` (the core's `handleStreamEvent`, passed down from `CampaignChat`) unconditionally for every event, and `UseChatFeedArgs` no longer has an `onSessionChange` field
+- [ ] **`useChatFeed` calls `useCampaignStream` exactly once** — assert via a mock spy that mounting `CampaignChat` results in a single `useCampaignStream` call total (not one for message/roll and a second one for session state) → this is the specific regression guard for the design-review finding that an earlier draft would have added a second subscription here
 
 ### T9/T10 — `CampaignLayout` simplified wiring (`tests/unit/components/CampaignLayout.test.tsx`)
 
@@ -62,6 +68,7 @@ For each task in `tasks.md`:
 
 - [ ] `grep -rn "<CampaignChat" --include="*.tsx" --include="*.ts" . | grep -v tests/ | grep -v node_modules` returns exactly one match (`app/campaigns/[id]/layout.tsx`) using the new prop contract
 - [ ] `grep -rn "<SessionControl" --include="*.tsx" . | grep -v tests/ | grep -v node_modules` returns exactly the two known matches (`app/campaigns/[id]/layout.tsx`, `app/campaigns/[id]/sessions/page.tsx`), both using the new prop contract
+- [ ] `grep -rn "useCampaignStream(" --include="*.ts" --include="*.tsx" lib/ | grep -v tests/` returns exactly two production call sites (inside `lib/hooks/useActiveSessionId.ts`'s wrapper, and inside `lib/components/CampaignChat/useChatFeed.ts`) — confirms no net-new SSE subscription was introduced by this change, closing out the design-review finding tracked in `design.md`'s Risks/Trade-offs section
 
 ## Acceptance Scenario Coverage Cross-Check
 
