@@ -76,6 +76,21 @@ async function expandFirstCard() {
 }
 
 describe('Library Page', () => {
+  it('shows an error banner including the HTTP status when the load request fails', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    global.fetch = jest.fn(async () => ({
+      ok: false,
+      status: 500,
+      json: async () => ({}),
+    }) as unknown as Response) as typeof fetch;
+
+    await render();
+
+    expect(container.textContent).toContain('Failed to load library (500)');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to load library', expect.any(Error));
+    consoleErrorSpy.mockRestore();
+  });
+
   it('renders all items when GET returns mixed-type items', async () => {
     const items = [
       makeItem({ type: 'npc', title: 'Grigor the Innkeeper' }),

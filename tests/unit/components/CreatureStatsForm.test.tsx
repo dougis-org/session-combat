@@ -164,4 +164,61 @@ describe('CreatureStatsForm – disclosure chevron per section', () => {
     expect(resistancesBtn).toHaveAttribute('aria-expanded', 'false');
     expect(sensesBtn).toHaveAttribute('aria-expanded', 'false');
   });
+
+  test('Resistances section toggles through expand and collapse', async () => {
+    const { user } = renderForm(BASE_STATS, jest.fn<void, [CreatureStats]>());
+    const resistancesBtn = screen.getByRole('button', { name: /resistances/i });
+
+    expect(resistancesBtn).toHaveAttribute('aria-expanded', 'false');
+    expect(resistancesBtn.querySelector('svg')).not.toHaveClass('rotate-90');
+
+    await user.click(resistancesBtn);
+    expect(resistancesBtn).toHaveAttribute('aria-expanded', 'true');
+    expect(resistancesBtn.querySelector('svg')).toHaveClass('rotate-90');
+
+    await user.click(resistancesBtn);
+    expect(resistancesBtn).toHaveAttribute('aria-expanded', 'false');
+    expect(resistancesBtn.querySelector('svg')).not.toHaveClass('rotate-90');
+  });
+
+  test('Senses section toggles through expand and collapse', async () => {
+    const { user } = renderForm(BASE_STATS, jest.fn<void, [CreatureStats]>());
+    const sensesBtn = screen.getByRole('button', { name: /senses/i });
+
+    expect(sensesBtn).toHaveAttribute('aria-expanded', 'false');
+    expect(sensesBtn.querySelector('svg')).not.toHaveClass('rotate-90');
+
+    await user.click(sensesBtn);
+    expect(sensesBtn).toHaveAttribute('aria-expanded', 'true');
+    expect(sensesBtn.querySelector('svg')).toHaveClass('rotate-90');
+
+    await user.click(sensesBtn);
+    expect(sensesBtn).toHaveAttribute('aria-expanded', 'false');
+    expect(sensesBtn.querySelector('svg')).not.toHaveClass('rotate-90');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AbilityEditorSection chevron (Traits / Actions / Bonus Actions / Reactions)
+// ---------------------------------------------------------------------------
+
+describe('CreatureStatsForm – ability editor section chevrons', () => {
+  test.each(['Traits', 'Actions', 'Bonus Actions', 'Reactions'])(
+    '%s section toggles through expand and collapse',
+    async title => {
+      const { user } = renderForm(BASE_STATS, jest.fn<void, [CreatureStats]>());
+      const btn = screen.getByRole('button', { name: new RegExp(`^${title}$`, 'i') });
+
+      expect(btn).toHaveAttribute('aria-expanded', 'false');
+      expect(btn.querySelector('svg')).not.toHaveClass('rotate-90');
+
+      await user.click(btn);
+      expect(btn).toHaveAttribute('aria-expanded', 'true');
+      expect(btn.querySelector('svg')).toHaveClass('rotate-90');
+
+      await user.click(btn);
+      expect(btn).toHaveAttribute('aria-expanded', 'false');
+      expect(btn.querySelector('svg')).not.toHaveClass('rotate-90');
+    }
+  );
 });
