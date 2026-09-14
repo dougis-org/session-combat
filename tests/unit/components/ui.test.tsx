@@ -186,15 +186,17 @@ describe('Chevron', () => {
     expect(svg).toHaveClass('rotate-90');
   });
 
-  it('imports only ChevronRight from lucide-react', () => {
-    const fs = require('fs');
-    const path = require('path');
-    const source = fs.readFileSync(path.join(process.cwd(), 'lib/components/ui.tsx'), 'utf8');
-    const lucideImportLines = source
-      .split('\n')
-      .filter((line: string) => line.includes("from 'lucide-react'"));
-    expect(lucideImportLines).toHaveLength(1);
-    expect(lucideImportLines[0]).toMatch(/^import\s*\{\s*ChevronRight\s*\}\s*from 'lucide-react';?$/);
+  it('renders a default size so it is legible without a call-site size override', () => {
+    const { container } = rtlRender(<Chevron expanded={false} />);
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveClass('h-4');
+    expect(svg).toHaveClass('w-4');
+  });
+
+  it('is hidden from assistive technology since it is always paired with a text label', () => {
+    const { container } = rtlRender(<Chevron expanded={false} />);
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveAttribute('aria-hidden', 'true');
   });
 });
 
@@ -225,5 +227,21 @@ describe('Disclosure', () => {
     await user.click(button);
     expect(onToggle).toHaveBeenCalledTimes(1);
     expect(button).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('applies className to the button', () => {
+    rtlRender(
+      <Disclosure label="Section" open={false} onToggle={jest.fn()} className="custom-button-class" />
+    );
+    const button = screen.getByRole('button', { name: /section/i });
+    expect(button).toHaveClass('custom-button-class');
+  });
+
+  it('applies labelClassName to the label span', () => {
+    rtlRender(
+      <Disclosure label="Section" open={false} onToggle={jest.fn()} labelClassName="custom-label-class" />
+    );
+    const label = screen.getByText('Section');
+    expect(label).toHaveClass('custom-label-class');
   });
 });

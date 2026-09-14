@@ -234,6 +234,10 @@ describe('CampaignEditor', () => {
       await user.click(header);
       expect(header).toHaveAttribute('aria-expanded', 'true');
       expect(header.querySelector('svg')).toHaveClass('rotate-90');
+
+      await user.click(header);
+      expect(header).toHaveAttribute('aria-expanded', 'false');
+      expect(header.querySelector('svg')).not.toHaveClass('rotate-90');
     });
   });
 

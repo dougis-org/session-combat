@@ -41,7 +41,7 @@
     applying a `rotate-90` (or equivalent) Tailwind class plus
     `transition-transform` when `expanded` is `true`. Import only
     `ChevronRight` from `lucide-react`.
-  - Add `Disclosure({ label, open, onToggle, className?, contentClassName? })`:
+  - Add `Disclosure({ label, open, onToggle, className?, labelClassName? })`:
     a controlled `<button>` (no internal `useState`) rendering `label` and a
     trailing `Chevron`, with `onClick={onToggle}` and
     `aria-expanded={open}`.
@@ -177,12 +177,12 @@ pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings
   were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `add-lucide-icons-disclosure` to `main`. The PR body MUST
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `add-lucide-icons-disclosure` to `main`. The PR body MUST
   include `Closes #726`.
-- [ ] **Issue lifecycle: mark in-review** — run
+- [x] **Issue lifecycle: mark in-review** — run
   `gh issue edit 726 --add-label "in-review" --remove-label "in-progress"`.
   Then move the project item to the status column semantically matching
   "In Review" via `gh project item-edit` (same project/field/option discovery

@@ -106,8 +106,10 @@ export function SubmitButton({ isLoading, label, loadingLabel }: { isLoading: bo
 export function Chevron({ expanded, className }: { expanded: boolean; className?: string }) {
   return (
     <ChevronRight
+      aria-hidden="true"
+      focusable="false"
       className={[
-        'transition-transform duration-300',
+        'h-4 w-4 transition-transform duration-300',
         expanded ? 'rotate-90' : '',
         className ?? '',
       ].filter(Boolean).join(' ')}
@@ -120,17 +122,17 @@ export function Disclosure({
   open,
   onToggle,
   className,
-  contentClassName,
+  labelClassName,
 }: {
   label: string;
   open: boolean;
   onToggle: () => void;
   className?: string;
-  contentClassName?: string;
+  labelClassName?: string;
 }) {
   return (
     <button type="button" onClick={onToggle} aria-expanded={open} className={className}>
-      <span className={contentClassName}>{label}</span>
+      <span className={labelClassName}>{label}</span>
       <Chevron expanded={open} />
     </button>
   );

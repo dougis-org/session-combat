@@ -86,4 +86,16 @@ describe('ConditionControls', () => {
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(toggle.querySelector('svg')).toHaveClass('rotate-90');
   });
+
+  test('collapsing the conditions list again un-rotates the chevron and sets aria-expanded false', async () => {
+    const { user } = setup({
+      conditions: [{ id: 'x1', name: 'Poisoned', description: '' }],
+    });
+    const toggle = screen.getByRole('button', { name: /Conditions \(1\)/ });
+    await user.click(toggle);
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle.querySelector('svg')).not.toHaveClass('rotate-90');
+    expect(screen.queryByText('Poisoned')).not.toBeInTheDocument();
+  });
 });

@@ -70,7 +70,7 @@
     (lucide `ChevronRight` + rotation), no button/state of its own. For call
     sites whose clickable button already renders complex custom content
     (title, badges, dates, counts) and only needs the icon dropped in.
-  - `Disclosure({ label, open, onToggle, className?, contentClassName? })` (as
+  - `Disclosure({ label, open, onToggle, className?, labelClassName? })` (as
     a controlled component — see Decision 3) — a full `<button>` wrapping a
     label and a trailing `Chevron`, with `aria-expanded` wired up, for call
     sites that are a plain "label + indicator" row.
