@@ -95,6 +95,51 @@ describe('useActiveSessionIdCore', () => {
     unmount();
   });
 
+  test('handleStreamEvent ignores a session event for a different campaignId', async () => {
+    (global.fetch as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+    const { result, unmount } = renderCoreHook('camp-1');
+    await act(async () => {});
+
+    act(() => {
+      result.current.handleStreamEvent({ type: 'session', campaignId: 'some-other-campaign', data: { activeSessionId: 'log-sse' } } as CampaignStreamEvent);
+    });
+    expect(result.current.activeSessionId).toBeUndefined();
+    unmount();
+  });
+
+  test.each([
+    { label: 'null', value: null },
+    { label: 'a primitive string', value: 'not-an-event' },
+    { label: 'missing data', value: { type: 'session', campaignId: 'camp-1' } },
+  ])('handleStreamEvent discards a malformed event envelope ($label) without throwing', async ({ value }) => {
+    (global.fetch as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+    const { result, unmount } = renderCoreHook('camp-1');
+    await act(async () => {});
+
+    expect(() => {
+      act(() => {
+        result.current.handleStreamEvent(value as unknown as CampaignStreamEvent);
+      });
+    }).not.toThrow();
+    expect(result.current.activeSessionId).toBeUndefined();
+    unmount();
+  });
+
+  test('handleStreamEvent discards a session event with a malformed activeSessionId', async () => {
+    (global.fetch as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+    const { result, unmount } = renderCoreHook('camp-1');
+    await act(async () => {});
+
+    act(() => {
+      result.current.handleStreamEvent({ type: 'session', campaignId: 'camp-1', data: { activeSessionId: 42 } } as unknown as CampaignStreamEvent);
+    });
+    expect(result.current.activeSessionId).toBeUndefined();
+    unmount();
+  });
+
   test('setActiveSessionId updates immediately', async () => {
     (global.fetch as jest.Mock).mockReturnValue(new Promise(() => {}));
 
@@ -198,31 +243,35 @@ describe('useActiveSessionId (self-subscribing wrapper)', () => {
     global.fetch = jest.fn();
   });
 
-  test('calls useCampaignStream exactly once and forwards received events into the core logic', async () => {
+  test('opens exactly one subscription (connection lifecycle, not render count) and forwards received events into the core logic', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => ({ activeSessionId: null }) });
     let capturedHandler: ((e: CampaignStreamEvent) => void) | undefined;
-    useCampaignStreamMock.mockImplementation((_campaignId: string, onEvent: (e: CampaignStreamEvent) => void) => {
+    let connectionsOpened = 0;
+    // Mirrors the real useCampaignStream: the render-time call itself may
+    // happen every render, but the connection is owned by an effect keyed
+    // only on campaignId, so it opens exactly once regardless of render
+    // count — assert that lifecycle, not the render-call count.
+    useCampaignStreamMock.mockImplementation((campaignId: string, onEvent: (e: CampaignStreamEvent) => void) => {
       capturedHandler = onEvent;
+      React.useEffect(() => {
+        connectionsOpened += 1;
+        return () => {};
+      }, [campaignId]);
       return { status: 'open' };
     });
 
     const { result, unmount } = renderWrapperHook('camp-1');
     await act(async () => {});
 
-    // useCampaignStream is a per-render call whose own internal effect (keyed
-    // only on campaignId) is what actually owns the single EventSource
-    // subscription — every render-time call here must be for the same
-    // campaignId, i.e. no second/different subscription is ever requested.
-    expect(useCampaignStreamMock.mock.calls.length).toBeGreaterThan(0);
-    for (const call of useCampaignStreamMock.mock.calls) {
-      expect(call[0]).toBe('camp-1');
-    }
+    expect(connectionsOpened).toBe(1);
     expect(result.current.activeSessionId).toBeNull();
 
     act(() => {
       capturedHandler?.({ type: 'session', campaignId: 'camp-1', data: { activeSessionId: 'log-live' } } as CampaignStreamEvent);
     });
     expect(result.current.activeSessionId).toBe('log-live');
+    // The stream-driven re-render must not have reopened the connection.
+    expect(connectionsOpened).toBe(1);
 
     unmount();
   });

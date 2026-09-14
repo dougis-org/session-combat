@@ -68,9 +68,26 @@ export function useActiveSessionIdCore(campaignId: string): UseActiveSessionIdCo
   }
 
   function handleStreamEvent(e: CampaignStreamEvent) {
-    if (e.type !== 'session') return;
+    // The parsed SSE payload crosses a network boundary (see
+    // useCampaignStream's JSON.parse) with only a type-level cast, not
+    // runtime validation — guard the whole envelope before reading into it.
+    if (!e || typeof e !== 'object' || e.type !== 'session') return;
+    if (!e.data || typeof e.data !== 'object') return;
+    // Defense in depth: the subscription is already scoped to this
+    // campaignId server-side, but don't trust a payload for a different
+    // campaign (e.g. a stale handler still attached during a campaignId
+    // transition) to update this hook's state.
+    if (e.campaignId !== campaignId) return;
+    const id = e.data.activeSessionId;
+    // Same validation as the fetch path: a non-null/undefined value must be
+    // a string. A malformed event is discarded (state left as-is) rather
+    // than trusted, since the stream payload crosses a network boundary.
+    if (id !== null && id !== undefined && typeof id !== 'string') {
+      console.error(`useActiveSessionIdCore: malformed activeSessionId in session stream event for campaign ${campaignId}`, id);
+      return;
+    }
     receivedAuthoritativeRef.current = true;
-    setActiveSessionIdState(e.data.activeSessionId);
+    setActiveSessionIdState(id ?? null);
   }
 
   return { activeSessionId, setActiveSessionId, handleStreamEvent };
