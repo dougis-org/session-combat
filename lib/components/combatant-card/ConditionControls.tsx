@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { CombatantState, StatusCondition } from '@/lib/types';
 import { ConditionFormModal } from '@/lib/components/combatant-card/ConditionFormModal';
+import { Chevron } from '@/lib/components/ui';
 
 interface ConditionControlsProps {
   combatant: CombatantState;
@@ -34,9 +35,11 @@ export function ConditionControls({ combatant, onUpdate, modalOpen, onModalClose
         <div className="mb-2">
           <button
             onClick={() => setShowConditions(!showConditions)}
-            className="text-sm text-blue-400 hover:text-blue-300"
+            aria-expanded={showConditions}
+            className="text-sm text-blue-400 hover:text-blue-300 inline-flex items-center gap-1"
           >
             Conditions ({combatant.conditions.length})
+            <Chevron expanded={showConditions} />
           </button>
           {showConditions && (
             <div className="mt-2 space-y-1">

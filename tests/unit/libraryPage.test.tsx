@@ -9,8 +9,9 @@ jest.mock('next/link', () => ({
     React.createElement('a', { href, ...props }, children),
 }));
 
+let mockCampaignId = 'campaign-123';
 jest.mock('next/navigation', () => ({
-  useParams: () => ({ id: 'campaign-123' }),
+  useParams: () => ({ id: mockCampaignId }),
 }));
 
 jest.mock('@/lib/components/ProtectedRoute', () => ({
@@ -45,6 +46,7 @@ beforeEach(() => {
   container = document.createElement('div');
   document.body.appendChild(container);
   originalFetch = global.fetch;
+  mockCampaignId = 'campaign-123';
 });
 
 afterEach(() => {
@@ -74,6 +76,21 @@ async function expandFirstCard() {
 }
 
 describe('Library Page', () => {
+  it('shows an error banner including the HTTP status when the load request fails', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    global.fetch = jest.fn(async () => ({
+      ok: false,
+      status: 500,
+      json: async () => ({}),
+    }) as unknown as Response) as typeof fetch;
+
+    await render();
+
+    expect(container.textContent).toContain('Failed to load library (500)');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to load library', expect.any(Error));
+    consoleErrorSpy.mockRestore();
+  });
+
   it('renders all items when GET returns mixed-type items', async () => {
     const items = [
       makeItem({ type: 'npc', title: 'Grigor the Innkeeper' }),
@@ -103,6 +120,24 @@ describe('Library Page', () => {
 
     expect(container.textContent).toContain('NPC One');
     expect(container.textContent).not.toContain('Location One');
+  });
+
+  it('renders a Chevron (not a unicode glyph) reflecting collapsed/expanded state', async () => {
+    const item = makeItem({ title: 'Grigor the Innkeeper' });
+    mockFetch([item]);
+    await render();
+
+    const cardBtn = container.querySelector('button[aria-expanded="false"]') as HTMLButtonElement;
+    expect(cardBtn).toBeTruthy();
+    expect(cardBtn.textContent).not.toContain('▲');
+    expect(cardBtn.textContent).not.toContain('▼');
+    const chevron = cardBtn.querySelector('svg') as SVGElement;
+    expect(chevron).toBeTruthy();
+    expect(chevron).not.toHaveClass('rotate-90');
+
+    await expandFirstCard();
+    const expandedBtn = container.querySelector('button[aria-expanded="true"]') as HTMLButtonElement;
+    expect(expandedBtn.querySelector('svg')).toHaveClass('rotate-90');
   });
 
   it('clicking a card expands it and shows systemPrompt in muted section, userMessage in bright section', async () => {
@@ -212,5 +247,72 @@ describe('Library Page', () => {
     mockFetch([]);
     await render();
     expect(container.textContent).toContain('No saved content yet');
+  });
+
+  it('URL-encodes the campaign ID route param when fetching content', async () => {
+    mockCampaignId = 'campaign 123&foo';
+
+    let capturedUrl: string | undefined;
+    global.fetch = jest.fn(async (input: unknown) => {
+      capturedUrl = String(input);
+      return { ok: true, json: async () => [] } as unknown as Response;
+    }) as typeof fetch;
+
+    await render();
+
+    expect(capturedUrl).toBe(
+      `/api/content?campaignId=${encodeURIComponent('campaign 123&foo')}`
+    );
+    expect(capturedUrl).not.toContain('campaign 123&foo');
+  });
+
+  it('URL-encodes the item ID when saving (PUT)', async () => {
+    const item = makeItem({ id: 'item id/with?chars' });
+
+    let capturedUrl: string | undefined;
+    global.fetch = jest.fn(async (input: unknown, init?: unknown) => {
+      const url = String(input);
+      const method = (init as RequestInit | undefined)?.method;
+      if (method === 'PUT') {
+        capturedUrl = url;
+        return { ok: true, json: async () => ({}) } as unknown as Response;
+      }
+      return { ok: true, json: async () => [item] } as unknown as Response;
+    }) as typeof fetch;
+
+    await render();
+    await expandFirstCard();
+
+    const saveBtn = Array.from(container.querySelectorAll('button'))
+      .find(b => b.textContent?.trim() === 'Save') as HTMLButtonElement;
+    await act(async () => { saveBtn.click(); });
+    await act(async () => { await new Promise(r => setTimeout(r, 0)); });
+
+    expect(capturedUrl).toBe(`/api/content/${encodeURIComponent(item.id)}`);
+  });
+
+  it('URL-encodes the item ID when deleting', async () => {
+    const item = makeItem({ id: 'item id/with?chars' });
+
+    let capturedUrl: string | undefined;
+    global.fetch = jest.fn(async (input: unknown, init?: unknown) => {
+      const url = String(input);
+      const method = (init as RequestInit | undefined)?.method;
+      if (method === 'DELETE') {
+        capturedUrl = url;
+        return { ok: true } as unknown as Response;
+      }
+      return { ok: true, json: async () => [item] } as unknown as Response;
+    }) as typeof fetch;
+
+    await render();
+    await expandFirstCard();
+
+    const deleteBtn = Array.from(container.querySelectorAll('button'))
+      .find(b => b.textContent?.trim() === 'Delete');
+    await act(async () => { (deleteBtn as HTMLButtonElement).click(); });
+    await act(async () => { await new Promise(r => setTimeout(r, 0)); });
+
+    expect(capturedUrl).toBe(`/api/content/${encodeURIComponent(item.id)}`);
   });
 });

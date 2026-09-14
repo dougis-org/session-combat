@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
-import { ErrorBanner } from '@/lib/components/ui';
+import { ErrorBanner, Chevron } from '@/lib/components/ui';
 import type { SavedContent } from '@/lib/types';
 
 const TYPE_LABELS: Record<SavedContent['type'], string> = {
@@ -79,7 +79,7 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
     setActionError(null);
     setSaveSuccess(false);
     try {
-      const res = await fetch(`/api/content/${item.id}`, {
+      const res = await fetch(`/api/content/${encodeURIComponent(item.id)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ result, notes }),
@@ -99,7 +99,7 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
   async function handleDelete() {
     setActionError(null);
     try {
-      const res = await fetch(`/api/content/${item.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/content/${encodeURIComponent(item.id)}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed');
       onDelete(item.id);
     } catch {
@@ -137,7 +137,7 @@ function ContentCard({ item, onDelete }: { item: SavedContent; onDelete: (id: st
         {hasSavedResult && (
           <span className="text-green-400 text-sm" title="Response saved">✓</span>
         )}
-        <span className="text-gray-400 ml-2">{expanded ? '▲' : '▼'}</span>
+        <Chevron expanded={expanded} className="text-gray-400 ml-2" />
       </button>
 
       {expanded && (
@@ -193,12 +193,16 @@ function LibraryContent({ campaignId }: { campaignId: string }) {
     let active = true;
     async function load() {
       try {
-        const res = await fetch(`/api/content?campaignId=${campaignId}`);
-        if (!res.ok) throw new Error('Failed to load library');
+        const res = await fetch(`/api/content?campaignId=${encodeURIComponent(campaignId)}`);
+        if (!res.ok) throw new Error(`Failed to load library (${res.status})`);
         const data = await res.json() as SavedContent[];
         if (active) setItems(data);
       } catch (err) {
-        if (active) setError(err instanceof Error ? err.message : 'Failed to load library');
+        if (active) {
+          const message = err instanceof Error ? err.message : 'Failed to load library';
+          console.error('Failed to load library', err);
+          setError(message);
+        }
       } finally {
         if (active) setLoading(false);
       }

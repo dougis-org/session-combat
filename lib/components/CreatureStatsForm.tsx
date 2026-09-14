@@ -3,6 +3,7 @@
 import { AbilityScores, CreatureStats, CreatureAbility } from '@/lib/types';
 import { ABILITY_SCORE_KEYS, SKILL_NAMES } from '@/lib/characterReference';
 import { DAMAGE_TYPE_GROUPS, DamageType } from '@/lib/constants';
+import { Disclosure } from '@/lib/components/ui';
 import { useState } from 'react';
 
 interface CreatureStatsFormProps {
@@ -11,12 +12,11 @@ interface CreatureStatsFormProps {
 }
 
 export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
-  const [expandedSections, setExpandedSections] = useState<Record<'abilities' | 'skills' | 'resistances' | 'senses' | 'abilities_section', boolean>>({
+  const [expandedSections, setExpandedSections] = useState<Record<'abilities' | 'skills' | 'resistances' | 'senses', boolean>>({
     abilities: true,
     skills: false,
     resistances: false,
     senses: false,
-    abilities_section: false,
   });
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -36,7 +36,10 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
     });
   };
 
-  const updateBasicStat = (field: keyof Omit<CreatureStats, 'abilityScores'>, value: any) => {
+  const updateBasicStat = <K extends keyof Omit<CreatureStats, 'abilityScores'>>(
+    field: K,
+    value: CreatureStats[K],
+  ) => {
     onChange({
       ...stats,
       [field]: value,
@@ -120,13 +123,12 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
 
       {/* Ability Scores */}
       <div className="border-t border-gray-700 pt-4">
-        <button
-          onClick={() => toggleSection('abilities')}
-          className="font-bold text-gray-300 hover:text-white mb-2 flex items-center gap-2"
-        >
-          <span>{expandedSections.abilities ? '▼' : '▶'}</span>
-          Ability Scores
-        </button>
+        <Disclosure
+          label="Ability Scores"
+          open={expandedSections.abilities}
+          onToggle={() => toggleSection('abilities')}
+          className="font-bold text-gray-300 hover:text-white mb-2 inline-flex items-center gap-2"
+        />
         {expandedSections.abilities && (
           <div className="grid grid-cols-6 gap-2">
             {ABILITY_SCORE_KEYS.map(ability => (
@@ -149,13 +151,12 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
 
       {/* Skills */}
       <div className="border-t border-gray-700 pt-4">
-        <button
-          onClick={() => toggleSection('skills')}
-          className="font-bold text-gray-300 hover:text-white mb-2 flex items-center gap-2"
-        >
-          <span>{expandedSections.skills ? '▼' : '▶'}</span>
-          Skills
-        </button>
+        <Disclosure
+          label="Skills"
+          open={expandedSections.skills}
+          onToggle={() => toggleSection('skills')}
+          className="font-bold text-gray-300 hover:text-white mb-2 inline-flex items-center gap-2"
+        />
         {expandedSections.skills && (
           <div className="grid grid-cols-2 gap-2">
             {SKILL_NAMES.map(skill => (
@@ -176,13 +177,12 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
 
       {/* Resistances & Immunities */}
       <div className="border-t border-gray-700 pt-4">
-        <button
-          onClick={() => toggleSection('resistances')}
-          className="font-bold text-gray-300 hover:text-white mb-2 flex items-center gap-2"
-        >
-          <span>{expandedSections.resistances ? '▼' : '▶'}</span>
-          Resistances & Immunities
-        </button>
+        <Disclosure
+          label="Resistances & Immunities"
+          open={expandedSections.resistances}
+          onToggle={() => toggleSection('resistances')}
+          className="font-bold text-gray-300 hover:text-white mb-2 inline-flex items-center gap-2"
+        />
         {expandedSections.resistances && (
           <div className="space-y-3">
             {(
@@ -243,13 +243,12 @@ export function CreatureStatsForm({ stats, onChange }: CreatureStatsFormProps) {
 
       {/* Senses & Languages */}
       <div className="border-t border-gray-700 pt-4">
-        <button
-          onClick={() => toggleSection('senses')}
-          className="font-bold text-gray-300 hover:text-white mb-2 flex items-center gap-2"
-        >
-          <span>{expandedSections.senses ? '▼' : '▶'}</span>
-          Senses & Languages
-        </button>
+        <Disclosure
+          label="Senses & Languages"
+          open={expandedSections.senses}
+          onToggle={() => toggleSection('senses')}
+          className="font-bold text-gray-300 hover:text-white mb-2 inline-flex items-center gap-2"
+        />
         {expandedSections.senses && (
           <div className="space-y-2">
             <div>
@@ -350,13 +349,12 @@ function AbilityEditorSection({ title, abilities, onAdd, onRemove, onUpdate }: A
 
   return (
     <div className="border-t border-gray-700 pt-4">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="font-bold text-gray-300 hover:text-white mb-2 flex items-center gap-2"
-      >
-        <span>{expanded ? '▼' : '▶'}</span>
-        {title}
-      </button>
+      <Disclosure
+        label={title}
+        open={expanded}
+        onToggle={() => setExpanded(!expanded)}
+        className="font-bold text-gray-300 hover:text-white mb-2 inline-flex items-center gap-2"
+      />
       {expanded && (
         <div className="space-y-2">
           {abilities.map((ability, idx) => (

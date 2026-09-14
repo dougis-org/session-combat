@@ -1,4 +1,6 @@
 import React from 'react';
+import fs from 'fs';
+import path from 'path';
 import { render as rtlRender, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -9,6 +11,8 @@ import {
   EditorShell,
   textInputClass,
   TextInputField,
+  Chevron,
+  Disclosure,
 } from '@/lib/components/ui';
 
 // ---------------------------------------------------------------------------
@@ -167,5 +171,90 @@ describe('TextInputField', () => {
   it('wires id to input and label htmlFor when provided', () => {
     rtlRender(<TextInputField id="my-field" label="My Field" value="" onChange={jest.fn()} />);
     screen.getByLabelText('My Field');
+  });
+});
+
+describe('lucide-react import scope', () => {
+  it('imports only ChevronRight from lucide-react, not the full icon set', () => {
+    const source = fs.readFileSync(
+      path.join(__dirname, '../../../lib/components/ui.tsx'),
+      'utf8'
+    );
+    const lucideImports = source.match(/^import\s+.*from\s+'lucide-react';?$/gm) ?? [];
+    expect(lucideImports).toEqual(["import { ChevronRight } from 'lucide-react';"]);
+  });
+});
+
+describe('Chevron', () => {
+  it('renders with no rotation class when expanded is false', () => {
+    const { container } = rtlRender(<Chevron expanded={false} />);
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
+    expect(svg).not.toHaveClass('rotate-90');
+  });
+
+  it('renders with a 90-degree rotation class when expanded is true', () => {
+    const { container } = rtlRender(<Chevron expanded={true} />);
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveClass('rotate-90');
+  });
+
+  it('renders a default size so it is legible without a call-site size override', () => {
+    const { container } = rtlRender(<Chevron expanded={false} />);
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveClass('h-4');
+    expect(svg).toHaveClass('w-4');
+  });
+
+  it('is hidden from assistive technology since it is always paired with a text label', () => {
+    const { container } = rtlRender(<Chevron expanded={false} />);
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveAttribute('aria-hidden', 'true');
+  });
+});
+
+describe('Disclosure', () => {
+  it('reflects open=true with aria-expanded="true" and a rotated chevron', () => {
+    const { container } = rtlRender(
+      <Disclosure label="Section" open={true} onToggle={jest.fn()} />
+    );
+    const button = screen.getByRole('button', { name: /section/i });
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    expect(container.querySelector('svg')).toHaveClass('rotate-90');
+  });
+
+  it('reflects open=false with aria-expanded="false" and no rotation', () => {
+    const { container } = rtlRender(
+      <Disclosure label="Section" open={false} onToggle={jest.fn()} />
+    );
+    const button = screen.getByRole('button', { name: /section/i });
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(container.querySelector('svg')).not.toHaveClass('rotate-90');
+  });
+
+  it('calls onToggle exactly once on click without managing its own state', async () => {
+    const onToggle = jest.fn();
+    const user = userEvent.setup();
+    rtlRender(<Disclosure label="Section" open={false} onToggle={onToggle} />);
+    const button = screen.getByRole('button', { name: /section/i });
+    await user.click(button);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('applies className to the button', () => {
+    rtlRender(
+      <Disclosure label="Section" open={false} onToggle={jest.fn()} className="custom-button-class" />
+    );
+    const button = screen.getByRole('button', { name: /section/i });
+    expect(button).toHaveClass('custom-button-class');
+  });
+
+  it('applies labelClassName to the label span', () => {
+    rtlRender(
+      <Disclosure label="Section" open={false} onToggle={jest.fn()} labelClassName="custom-label-class" />
+    );
+    const label = screen.getByText('Section');
+    expect(label).toHaveClass('custom-label-class');
   });
 });

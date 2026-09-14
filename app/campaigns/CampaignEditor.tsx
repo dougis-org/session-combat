@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TextInputField, EditorShell } from '@/lib/components/ui';
+import { TextInputField, EditorShell, Chevron } from '@/lib/components/ui';
 import type { Campaign } from '@/lib/types';
 import {
   DndContext,
@@ -274,9 +274,7 @@ export function CampaignEditor({
           <span className="flex items-center gap-2">
             📖 Chapters ({chapters.length})
           </span>
-          <span className="text-gray-400 text-xs transition-transform duration-300">
-            {chaptersExpanded ? '▲' : '▼'}
-          </span>
+          <Chevron expanded={chaptersExpanded} className="text-gray-400" />
         </button>
 
         {chaptersExpanded && (
