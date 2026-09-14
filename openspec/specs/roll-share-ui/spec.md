@@ -77,15 +77,17 @@ stream" requirement below for the current behavior.
 
 ### Requirement: MODIFIED CampaignChat accepts activeSessionId prop
 
-The system SHALL accept an `activeSessionId: string | null` prop on `CampaignChat` and use
-it to gate roll-history fetching and dice-session presence announcement (see
-`dice-session-bridge` capability). It SHALL NOT gate any dice-rolling control, because the
-chat dock no longer renders one; all dice rolling is provided by `GlobalDiceFab` (see
-`global-dice-fab` capability).
+_(Modified 2026-09-14, `fix-chat-session-awareness` — issue #721.)_ `CampaignChat` SHALL NOT accept `activeSessionId` or `onSessionChange` as props. It SHALL derive `activeSessionId` internally via the non-subscribing `useActiveSessionIdCore(campaignId)` (see `session-controls` capability) — fed `session`-typed events from the single `useCampaignStream` subscription its message/roll feed already holds, NOT via a second, independent subscription — and use that value to gate roll-history fetching and dice-session presence announcement (see `dice-session-bridge` capability), exactly as it previously did with the externally-supplied value. It SHALL NOT gate any dice-rolling control, because the chat dock does not render one; all dice rolling is provided by `GlobalDiceFab` (see `global-dice-fab` capability).
+
+#### Scenario: An already-active session is reflected without an external prop
+
+- **Given** a campaign's `activeSessionId` is already "session-abc" when `CampaignChat` mounts (no `session` stream event has occurred during this page visit)
+- **When** the dock is expanded
+- **Then** roll history is fetched for "session-abc" and dice-session presence is announced, exactly as if `activeSessionId="session-abc"` had been passed as a prop under the prior contract
 
 #### Scenario: activeSessionId null disables roll history and presence, feed still loads
 
-- **Given** `CampaignChat` is rendered with `activeSessionId={null}`
+- **Given** `useActiveSessionIdCore(campaignId)` has resolved to `null` for the campaign `CampaignChat` is mounted for
 - **When** the dock is expanded
 - **Then** no roll-history fetch to `/api/campaigns/[id]/rolls` is attempted
 - **And** no dice-session presence is announced
@@ -94,7 +96,7 @@ chat dock no longer renders one; all dice rolling is provided by `GlobalDiceFab`
 
 #### Scenario: activeSessionId non-null enables roll history and presence
 
-- **Given** `CampaignChat` is rendered with `activeSessionId="session-abc"`
+- **Given** `useActiveSessionIdCore(campaignId)` has resolved to "session-abc" for the campaign `CampaignChat` is mounted for
 - **When** the dock is expanded
 - **Then** roll history is fetched for "session-abc"
 - **And** dice-session presence `{ campaignId, sessionId: "session-abc" }` is announced while the component owns that active session
@@ -283,6 +285,7 @@ corresponding archived changes. They are retained here only as a pointer.
 - Proposal element "SSE stream extended to consume roll events" → Requirements: Interleaved feed (stream scenario), Duplicate dedup scenario
 - Proposal element "Roll history fetch on expand" → Requirements: Roll history loaded on dock expand
 - Proposal element "activeSessionId as prop" → Requirements: MODIFIED CampaignChat accepts activeSessionId prop
+- (2026-09-14, `fix-chat-session-awareness`) Proposal element "CampaignChat/useChatFeed: adopt the shared useActiveSessionIdCore hook internally instead of accepting props from the caller" → Requirement: MODIFIED CampaignChat accepts activeSessionId prop (props removed, hook-derived)
 
 - Design decision 1 (FeedItem local type) → Requirements: Interleaved feed of messages and rolls
 - Design decision 2 (activeSessionId prop) → Requirements: MODIFIED CampaignChat accepts activeSessionId prop

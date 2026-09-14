@@ -126,6 +126,42 @@ None.
 - Requirement "onSessionChange callback" → Task: Update `lib/components/CampaignChat.tsx`
 - Requirement "layout reactive update" → Task: Update `app/campaigns/[id]/layout.tsx`
 
+## REMOVED Requirements (fix-chat-session-awareness — 2026-09-14, issue #721)
+
+This section is additive to the [`design.md`](../../changes/archive/2026-09-14-fix-chat-session-awareness/design.md) document, not a replacement.
+
+### Requirement: REMOVED `CampaignChat` forwards `session` events via `onSessionChange` callback
+
+Reason for removal: `CampaignChat` no longer accepts an `onSessionChange` prop. It calls the shared `useActiveSessionIdCore(campaignId)` hook internally (see `session-controls` capability, "ADDED Shared active-session-tracking logic") and derives its own `activeSessionId` directly from that hook's handling of `session` stream events. There is no longer a callback for a parent to receive session changes through — `CampaignChat` needs none, since it no longer depends on a parent for this state at all. Supersedes the "ADDED `CampaignChat` forwards `session` events via `onSessionChange` callback" and "MODIFIED `CampaignChat` component props" requirements above.
+
+### Requirement: REMOVED layout updates `activeSessionId` reactively from `session` events
+
+Reason for removal: `CampaignLayout` no longer holds `activeSessionId` state at all (it was already partially retired by the `surface-start-session-button` change for `SessionControl`'s side; this removal retires the remainder, which had gone stale/unused for `CampaignChat`'s side since commit `3c53030` and was the root cause of GitHub issue #721). Each of `SessionControl` and `CampaignChat` now independently derives `activeSessionId` via `useActiveSessionId(campaignId)`/`useActiveSessionIdCore(campaignId)` (see `session-controls` capability). There is no "layout's `activeSessionId` state" left to update. Supersedes the "ADDED layout updates `activeSessionId` reactively from `session` events" requirement above.
+
+## MODIFIED Requirements (fix-chat-session-awareness — 2026-09-14, issue #721)
+
+### Requirement: MODIFIED `session` event type in `CampaignStreamEvent` (confirmed unchanged)
+
+The system SHALL continue to emit the `session` event with its existing shape (`{ type: "session"; campaignId: string; data: { activeSessionId: string | null } }`) on session start/end, unchanged by this client-side-only change. All scenarios under "ADDED `session` event type in `CampaignStreamEvent`", "ADDED `session` event emitted on session start", and "ADDED `session` event emitted on session end" remain in force unchanged.
+
+#### Scenario: Event shape and emission are unaffected by this change
+
+- **Given** the existing `session` event scenarios in this capability (session start, session end, shape validation)
+- **When** this change (centralizing client-side consumption into `useActiveSessionId`/`useActiveSessionIdCore`) is applied
+- **Then** none of those server-side scenarios' behavior changes; only how clients consume the event changes (see `session-controls` capability)
+
+## Traceability (fix-chat-session-awareness — 2026-09-14)
+
+- Proposal element: "CampaignChat/useChatFeed: adopt the shared hook internally instead of accepting props from the caller" → Requirement: REMOVED `CampaignChat` forwards `session` events via `onSessionChange` callback
+- Proposal element: "CampaignLayout: stop threading activeSessionId/onSessionChange/initialSessionId between its children" → Requirement: REMOVED layout updates `activeSessionId` reactively from `session` events
+- Requirements → Task(s): see `openspec/changes/archive/2026-09-14-fix-chat-session-awareness/tasks.md`
+
+## Non-Functional Acceptance Criteria (fix-chat-session-awareness — 2026-09-14)
+
+### Requirement: Reliability
+
+See `session-controls` capability's "No new SSE connections or polling introduced" and "Hook state resets when campaignId changes" scenarios — this capability's own event-shape and emission reliability scenarios (unaffected by this change) remain those already documented under "ADDED `session` event emitted on session start"/"...end".
+
 ## Non-Functional Acceptance Criteria
 
 ### Requirement: Performance
