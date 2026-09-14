@@ -136,3 +136,34 @@ describe('SessionsPage — session log display', () => {
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('SessionsPage — non-DM behavior', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+  beforeEach(() => { 
+    user = userEvent.setup();
+    const { useIsDM } = require('@/lib/hooks/useIsDM');
+    useIsDM.mockReturnValue({ isDM: false, loading: false });
+  });
+  afterEach(() => {
+    const { useIsDM } = require('@/lib/hooks/useIsDM');
+    useIsDM.mockReturnValue({ isDM: true, loading: false });
+  });
+
+  test('does not render edit/delete controls or new session button', async () => {
+    await renderWithData([MOCK_LOG]);
+    expect(await screen.findByText('Into the Mines')).toBeInTheDocument();
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
+    expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /new session/i })).not.toBeInTheDocument();
+  });
+
+  test('does not render controls while loading', async () => {
+    const { useIsDM } = require('@/lib/hooks/useIsDM');
+    useIsDM.mockReturnValue({ isDM: false, loading: true });
+    await renderWithData([MOCK_LOG]);
+    expect(await screen.findByText('Into the Mines')).toBeInTheDocument();
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
+    expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /new session/i })).not.toBeInTheDocument();
+  });
+});
