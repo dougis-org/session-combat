@@ -36,6 +36,16 @@ export function useActiveSessionIdCore(campaignId: string): UseActiveSessionIdCo
         const res = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}`);
         if (!res.ok) {
           console.error(`useActiveSessionIdCore: /api/campaigns/${campaignId} returned ${res.status}`);
+          // Fall back to "no active session" rather than leaving state stuck
+          // at undefined forever: a DM control gated on `undefined` (see
+          // SessionControl) would otherwise disappear permanently on a
+          // transient failure, with no retry path since this effect only
+          // reruns on a campaignId change. "No session" is the safe default
+          // (worst case a Start Session click 409s and reconciles) — matches
+          // this hook's pre-existing behavior for a malformed activeSessionId
+          // below, and the prior CampaignLayout fetch's `data?.foo ?? null`
+          // degradation for a non-ok response.
+          if (!cancelled && !receivedAuthoritativeRef.current) setActiveSessionIdState(null);
           return;
         }
         const data = await res.json();
@@ -44,6 +54,7 @@ export function useActiveSessionIdCore(campaignId: string): UseActiveSessionIdCo
         // of this same field: a non-null/undefined value must be a string.
         if (fetchedId !== null && fetchedId !== undefined && typeof fetchedId !== 'string') {
           console.error(`useActiveSessionIdCore: malformed activeSessionId in /api/campaigns/${campaignId} response`, fetchedId);
+          if (!cancelled && !receivedAuthoritativeRef.current) setActiveSessionIdState(null);
           return;
         }
         // A stream event or optimistic set that arrived while this fetch was
@@ -54,6 +65,7 @@ export function useActiveSessionIdCore(campaignId: string): UseActiveSessionIdCo
         }
       } catch (err) {
         console.error(`useActiveSessionIdCore: failed to fetch/parse campaign ${campaignId}`, err);
+        if (!cancelled && !receivedAuthoritativeRef.current) setActiveSessionIdState(null);
       }
     }
 
@@ -71,12 +83,17 @@ export function useActiveSessionIdCore(campaignId: string): UseActiveSessionIdCo
     // The parsed SSE payload crosses a network boundary (see
     // useCampaignStream's JSON.parse) with only a type-level cast, not
     // runtime validation — guard the whole envelope before reading into it.
-    if (!e || typeof e !== 'object' || Array.isArray(e) || e.type !== 'session') return;
-    if (!e.data || typeof e.data !== 'object' || Array.isArray(e.data)) return;
+    if (!e || typeof e !== 'object' || Array.isArray(e)) return; // not an event at all: no-op, not an error
+    if (e.type !== 'session') return; // a different event type: routine, not an error
+    if (!e.data || typeof e.data !== 'object' || Array.isArray(e.data)) {
+      console.error(`useActiveSessionIdCore: malformed session stream event data for campaign ${campaignId}`, e.data);
+      return;
+    }
     // Defense in depth: the subscription is already scoped to this
     // campaignId server-side, but don't trust a payload for a different
     // campaign (e.g. a stale handler still attached during a campaignId
-    // transition) to update this hook's state.
+    // transition) to update this hook's state. Not logged as an error: this
+    // is the expected shape of a benign in-flight-during-transition event.
     if (e.campaignId !== campaignId) return;
     const id = e.data.activeSessionId;
     // Same validation as the fetch path: a non-null/undefined value must be

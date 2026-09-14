@@ -91,6 +91,31 @@ export async function openDockWithSession(activeSessionId: string | null = 'sess
   return { user, rerender, setActiveSessionId }
 }
 
+// Like openDockWithSession, but drives the REAL (unmocked) useActiveSessionIdCore
+// via a mocked fetch instead of mocking the hook module directly — for tests
+// that need to exercise the actual fetch -> hook -> render path. Pass 'error'
+// to simulate a failed campaign fetch instead of a resolved activeSessionId.
+export async function openDockWithSessionViaRealFetch(activeSessionId: string | null | 'error') {
+  const spy = jest.fn().mockImplementation((url: string, options?: RequestInit) => {
+    if (url === `/api/campaigns/${CAMPAIGN_ID}`) {
+      if (activeSessionId === 'error') {
+        return Promise.resolve({ ok: false, status: 500, json: () => Promise.resolve({}) })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ activeSessionId }) })
+    }
+    if (url.includes('/members')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ members: [] }) })
+    if (url.includes('/rolls')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ rolls: [] }) })
+    return Promise.resolve({ ok: true, json: () => Promise.resolve(options?.method === 'POST' ? {} : { messages: [] }) })
+  })
+  sharedTestState.fetchSpy = spy
+  global.fetch = spy as unknown as typeof global.fetch
+
+  const user = userEvent.setup()
+  render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+  await user.click(screen.getByRole('button', { name: /chat/i }))
+  return { user }
+}
+
 export function fireMsg(
   overrides: Partial<{
     id: string

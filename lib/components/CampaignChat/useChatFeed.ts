@@ -20,7 +20,7 @@ function safeSet(key: string, val: unknown): boolean {
 
 interface UseChatFeedArgs {
   campaignId: string
-  activeSessionId: string | null
+  activeSessionId: string | null | undefined // undefined = not yet loaded
   isExpanded: boolean
   currentUserId: string | undefined
   feedRef: React.RefObject<HTMLDivElement | null>

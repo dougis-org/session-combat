@@ -77,6 +77,43 @@ describe('useActiveSessionIdCore', () => {
     unmount();
   });
 
+  test.each([
+    { label: 'a non-ok HTTP status', setup: () => (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 500 }) },
+    { label: 'a malformed activeSessionId in the response', setup: () => (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => ({ activeSessionId: 42 }) }) },
+    { label: 'a network/parse exception', setup: () => (global.fetch as jest.Mock).mockRejectedValue(new Error('network down')) },
+  ])('falls back to null (not stuck at undefined) when the initial fetch fails with $label', async ({ setup }) => {
+    setup();
+
+    const { result, unmount } = renderCoreHook('camp-1');
+    expect(result.current.activeSessionId).toBeUndefined();
+
+    await act(async () => {});
+
+    // Falling back to null (not leaving state stuck at undefined forever)
+    // matches the pre-existing CampaignLayout fetch's graceful-degradation
+    // behavior and keeps SessionControl (gated on `undefined`) from
+    // permanently disappearing after one transient failure.
+    expect(result.current.activeSessionId).toBeNull();
+    unmount();
+  });
+
+  test('a fetch failure does not override a value already set by a stream event or optimistic set', async () => {
+    let rejectFetch!: (err: unknown) => void;
+    (global.fetch as jest.Mock).mockReturnValue(new Promise((_resolve, reject) => { rejectFetch = reject; }));
+
+    const { result, unmount } = renderCoreHook('camp-1');
+
+    act(() => { result.current.setActiveSessionId('log-optimistic'); });
+    expect(result.current.activeSessionId).toBe('log-optimistic');
+
+    await act(async () => {
+      rejectFetch(new Error('network down'));
+    });
+
+    expect(result.current.activeSessionId).toBe('log-optimistic');
+    unmount();
+  });
+
   test('handleStreamEvent updates activeSessionId on session-typed event, no-ops otherwise', async () => {
     (global.fetch as jest.Mock).mockReturnValue(new Promise(() => {})); // never resolves
 

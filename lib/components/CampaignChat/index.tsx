@@ -32,7 +32,7 @@ export function CampaignChat({ campaignId, onSizeChange }: CampaignChatProps) {
 
   const dock = useDockState({ triggerRef, drawerRef, onSizeChange })
   const chatFeed = useChatFeed({
-    campaignId, activeSessionId: activeSessionId ?? null, isExpanded: dock.isExpanded,
+    campaignId, activeSessionId, isExpanded: dock.isExpanded,
     currentUserId: user?.userId, feedRef, handleSessionStreamEvent: handleStreamEvent,
   })
 

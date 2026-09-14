@@ -1,7 +1,8 @@
+import React from 'react'
 import { render, screen, act } from '@testing-library/react'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import { LocalStore } from '@/lib/offline/LocalStore'
-import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDock, fireMsg, mockActiveSessionIdCore } from './helpers'
+import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDock, openDockWithSession, fireMsg, mockActiveSessionIdCore } from './helpers'
 
 jest.mock('@/lib/offline/LocalStore', () => ({
   LocalStore: {
@@ -81,20 +82,18 @@ describe('CampaignChat — SSE stream', () => {
   // be visible to chat without waiting on a stream event).
 
   // Regression guard for #721: an already-active session, known only via the
-  // core's own initial fetch, is reflected with no prior stream event.
+  // core's own initial fetch, is reflected with no prior stream event. Open
+  // the drawer (the footer this asserts on only renders when expanded) so
+  // this actually distinguishes the active-session case from the
+  // no-session case below, rather than trivially passing either way.
   it('reflects an already-active session on load with no prior stream event', async () => {
-    mockActiveSessionIdCore('ses-preexisting')
-    render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+    await openDockWithSession('ses-preexisting')
     expect(screen.queryByText('No active session')).toBeNull()
   })
 
   it('reflects no active session on load when the core resolves null', async () => {
-    mockActiveSessionIdCore(null)
-    render(<CampaignChat campaignId={CAMPAIGN_ID} />)
-    // Footer only renders once the drawer is expanded; assert via the
-    // documented no-throw + settled-state path instead of the footer text
-    // (footer.test.tsx covers footer rendering specifically).
-    expect(screen.queryByText('No active session')).toBeNull()
+    await openDockWithSession(null)
+    expect(screen.getByText('No active session')).toBeInTheDocument()
   })
 
   it('a session stream event is forwarded to handleStreamEvent and updates rendered state on session start', async () => {
@@ -133,15 +132,26 @@ describe('CampaignChat — SSE stream', () => {
     }).not.toThrow()
   })
 
-  it('useCampaignStream is called exactly once from within CampaignChat\'s render tree', async () => {
+  it('opens exactly one subscription from within CampaignChat\'s render tree (connection lifecycle, not render count)', async () => {
     mockActiveSessionIdCore(null)
+    let connectionsOpened = 0
+    // Mirrors the real useCampaignStream: the render-time call may happen
+    // every render, but the connection is owned by an effect keyed only on
+    // campaignId, so it opens exactly once regardless of render count. This
+    // is the assertion that would actually catch a future regression where
+    // CampaignChat accidentally also called the self-subscribing
+    // useActiveSessionId wrapper (see design.md Decision 1's revision note) —
+    // a render-call-count assertion would not, since both calls would still
+    // carry the same campaignId.
+    useCampaignStreamMock.mockImplementation((campaignId: string, onEvent: (e: unknown) => void) => {
+      sharedTestState.capturedOnEvent = onEvent
+      React.useEffect(() => {
+        connectionsOpened += 1
+        return () => {}
+      }, [campaignId])
+      return { status: 'open' }
+    })
     await openDock()
-    // Every render-time call must be for the same campaignId — the single
-    // subscription useChatFeed already holds; useActiveSessionIdCore itself
-    // never calls useCampaignStream (see useActiveSessionId.test.tsx).
-    expect(useCampaignStreamMock.mock.calls.length).toBeGreaterThan(0)
-    for (const call of useCampaignStreamMock.mock.calls) {
-      expect(call[0]).toBe(CAMPAIGN_ID)
-    }
+    expect(connectionsOpened).toBe(1)
   })
 })

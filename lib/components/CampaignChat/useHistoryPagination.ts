@@ -6,7 +6,7 @@ import type { FeedItem } from './useChatFeed'
 
 interface UseHistoryPaginationArgs {
   campaignId: string
-  activeSessionId: string | null
+  activeSessionId: string | null | undefined // undefined = not yet loaded
   isExpanded: boolean
   feedRef: React.RefObject<HTMLDivElement | null>
   seenIds: React.RefObject<Set<string>>
@@ -36,7 +36,13 @@ export function useHistoryPagination({
 
   // ── History load on expand ──
   useEffect(() => {
-    if (!isExpanded || historyLoadedRef.current) return
+    // Wait for activeSessionId to resolve past its initial "not yet loaded"
+    // state before latching historyLoadedRef — otherwise an expand that
+    // happens before useActiveSessionIdCore's fetch resolves would fetch
+    // message history with rolls permanently skipped (activeSessionId
+    // treated as "no session"), with no later retry once the real id
+    // arrives, since this effect wouldn't rerun until campaignId changes.
+    if (!isExpanded || historyLoadedRef.current || activeSessionId === undefined) return
     historyLoadedRef.current = true
     setIsLoadingHistory(true)
     isLoadingHistoryRef.current = true
@@ -90,7 +96,7 @@ export function useHistoryPagination({
         isLoadingHistoryRef.current = false
       })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isExpanded, campaignId])
+  }, [isExpanded, campaignId, activeSessionId])
 
   // ── Infinite scroll: prepend older pages ──
   useEffect(() => {
