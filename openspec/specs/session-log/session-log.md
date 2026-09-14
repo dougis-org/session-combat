@@ -100,7 +100,7 @@ The system SHALL allow a DM to delete a session log entry by id.
 
 ### Requirement: ADDED Session journal UI
 
-The system SHALL provide a page at `/campaigns/[id]/sessions` listing all session logs for the campaign with inline create/edit capability.
+The system SHALL provide a page at `/campaigns/[id]/sessions` listing all session logs for the campaign with inline create/edit capability restricted to the campaign's active DM. Non-DM campaign members (including inactive/removed members and members whose DM status has not yet resolved) SHALL be able to view the list and expand any entry to read its summary and events, but SHALL NOT be shown the "+ New Session" button or any "Edit"/"Delete" controls.
 
 #### Scenario: Empty state
 
@@ -125,6 +125,32 @@ The system SHALL provide a page at `/campaigns/[id]/sessions` listing all sessio
 - **Given** a session log with `milestone: true` and `newLevel: 8`
 - **When** the session list is rendered
 - **Then** the entry shows a milestone badge displaying the new level
+
+#### Scenario: DM sees full create/edit/delete controls
+
+- **Given** an authenticated campaign member whose role is `dm` and status is `active`
+- **When** they navigate to `/campaigns/[id]/sessions`
+- **Then** the "+ New Session" button is shown, and each session card shows "Edit" and "Delete" buttons
+
+#### Scenario: Non-DM member sees no write controls
+
+- **Given** an authenticated campaign member whose role is not `dm` (or whose status is not `active`)
+- **When** they navigate to `/campaigns/[id]/sessions`
+- **Then** the "+ New Session" button is not rendered
+- **And** no session card renders an "Edit" or "Delete" button
+
+#### Scenario: Non-DM member can still read session details
+
+- **Given** an authenticated non-DM campaign member viewing `/campaigns/[id]/sessions`
+- **When** they click a session card to expand it
+- **Then** the card expands and shows its summary and events exactly as it would for a DM
+
+#### Scenario: Write controls stay hidden while DM status is still resolving
+
+- **Given** an authenticated campaign member whose DM-status check (`useIsDM`) has not yet resolved (still loading)
+- **When** the page renders
+- **Then** the "+ New Session" button and all "Edit"/"Delete" buttons are hidden, the same as for a confirmed non-DM member
+- **And** if the member is confirmed as an active DM once the check resolves, the controls then appear without a page reload
 
 ### Requirement: ADDED Session Log link on campaign cards
 
