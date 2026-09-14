@@ -211,3 +211,23 @@ describe('Session Logs — Role-Based Access (DM vs Player)', () => {
     expect(screen.queryByRole('button', { name: /\+ New Session/i })).toBeDisabled();
   });
 });
+
+describe('Session Logs — Inline Editing', () => {
+  test('Editing a session shows the form inline and hides New Session', async () => {
+    useIsDM.mockReturnValue({ isDM: true, loading: false });
+    await renderSessions([MOCK_LOG], [PARTY_ALICE_BOB]);
+    
+    // New Session button is visible initially
+    expect(screen.getByRole('button', { name: /\+ New Session/i })).toBeInTheDocument();
+    
+    // Click Edit on the log
+    await clickButton(container, 'Edit');
+    
+    // The inline form should appear (SessionForm mocked above)
+    expect(container.textContent).toContain('Session #');
+    expect(container.textContent).toContain('Date Played');
+    
+    // The + New Session button is hidden while editing
+    expect(screen.queryByRole('button', { name: /\+ New Session/i })).not.toBeInTheDocument();
+  });
+});
