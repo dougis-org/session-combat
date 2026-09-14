@@ -71,8 +71,8 @@ export function useActiveSessionIdCore(campaignId: string): UseActiveSessionIdCo
     // The parsed SSE payload crosses a network boundary (see
     // useCampaignStream's JSON.parse) with only a type-level cast, not
     // runtime validation — guard the whole envelope before reading into it.
-    if (!e || typeof e !== 'object' || e.type !== 'session') return;
-    if (!e.data || typeof e.data !== 'object') return;
+    if (!e || typeof e !== 'object' || Array.isArray(e) || e.type !== 'session') return;
+    if (!e.data || typeof e.data !== 'object' || Array.isArray(e.data)) return;
     // Defense in depth: the subscription is already scoped to this
     // campaignId server-side, but don't trust a payload for a different
     // campaign (e.g. a stale handler still attached during a campaignId

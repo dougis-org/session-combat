@@ -112,6 +112,8 @@ describe('useActiveSessionIdCore', () => {
     { label: 'null', value: null },
     { label: 'a primitive string', value: 'not-an-event' },
     { label: 'missing data', value: { type: 'session', campaignId: 'camp-1' } },
+    { label: 'an array envelope', value: [] },
+    { label: 'an array data field', value: { type: 'session', campaignId: 'camp-1', data: [] } },
   ])('handleStreamEvent discards a malformed event envelope ($label) without throwing', async ({ value }) => {
     (global.fetch as jest.Mock).mockReturnValue(new Promise(() => {}));
 
