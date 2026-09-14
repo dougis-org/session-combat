@@ -188,15 +188,15 @@ pushing.
   "In Review" via `gh project item-edit` (same project/field/option discovery
   as the in-progress lifecycle step above; warn and skip if not found).
 - [x] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
   findings (commit, push, re-run) until zero findings remain. If findings
   persist after three or more iterations with no progress, report the stall
   with remaining findings listed and wait for human guidance before
   continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):**
+- [x] **Enable auto-merge only after the review gate passes (zero findings):**
   `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the
   merge)
-- [ ] **Iterate until merged** — repeat the following priority loop
+- [x] **Iterate until merged** — repeat the following priority loop
   continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if
   it returns `CLOSED` exit and notify the user — never wait for a human to
   report the merge; never force-merge:
@@ -234,11 +234,11 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from the primary checkout,
+- [x] `git checkout main` and `git pull --ff-only` (from the primary checkout,
   not the worktree)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none expected —
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none expected —
   this is a purely internal UI/component change with no user-facing docs)
 - [ ] Sync approved spec deltas into `openspec/specs/`: copy
   `specs/disclosure-indicator/spec.md` to
