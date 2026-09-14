@@ -9,18 +9,16 @@ import Link from 'next/link'
 export default function CampaignLayout({ children }: { children: React.ReactNode }) {
   const { id } = useParams<{ id: string }>()
   const pathname = usePathname()
-  const [initialSessionId, setInitialSessionId] = useState<string | null | undefined>(undefined)
   const [campaignName, setCampaignName] = useState<string | null>(null)
   const [isChatLarge, setIsChatLarge] = useState(false)
 
   useEffect(() => {
     if (!id) return
     let cancelled = false
-    fetch(`/api/campaigns/${id}`)
+    fetch(`/api/campaigns/${encodeURIComponent(id)}`)
       .then(r => (r.ok ? r.json() : null))
       .then(data => {
         if (!cancelled) {
-          setInitialSessionId(data?.activeSessionId ?? null)
           setCampaignName(data?.name ?? null)
         }
       })
@@ -31,7 +29,7 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
   const header = campaignName && (
     <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
       <h1 className="text-3xl font-bold text-white">{campaignName}</h1>
-      {initialSessionId !== undefined && <SessionControl campaignId={id} initialSessionId={initialSessionId} />}
+      <SessionControl campaignId={id} />
     </header>
   )
 

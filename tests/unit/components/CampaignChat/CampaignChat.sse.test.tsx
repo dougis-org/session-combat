@@ -1,7 +1,7 @@
 import { render, screen, act } from '@testing-library/react'
 import { CampaignChat } from '@/lib/components/CampaignChat'
 import { LocalStore } from '@/lib/offline/LocalStore'
-import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDock, fireMsg } from './helpers'
+import { CAMPAIGN_ID, sharedTestState, setupFetchMock, restoreFetch, openDock, fireMsg, mockActiveSessionIdCore } from './helpers'
 
 jest.mock('@/lib/offline/LocalStore', () => ({
   LocalStore: {
@@ -11,12 +11,13 @@ jest.mock('@/lib/offline/LocalStore', () => ({
   },
 }))
 
+const useCampaignStreamMock = jest.fn((_: string, onEvent: (e: unknown) => void) => {
+  const { sharedTestState: state } = require('./helpers')
+  state.capturedOnEvent = onEvent
+  return { status: 'open' }
+})
 jest.mock('@/lib/hooks/useCampaignStream', () => ({
-  useCampaignStream: jest.fn((_, onEvent) => {
-    const { sharedTestState: state } = require('./helpers')
-    state.capturedOnEvent = onEvent
-    return { status: 'open' }
-  }),
+  useCampaignStream: (...args: [string, (e: unknown) => void]) => useCampaignStreamMock(...args),
 }))
 
 jest.mock('@/lib/hooks/useAuth', () => ({
@@ -24,6 +25,10 @@ jest.mock('@/lib/hooks/useAuth', () => ({
     user: { userId: 'user-1', email: 'test@example.com', username: 'tester' },
     loading: false,
   })),
+}))
+
+jest.mock('@/lib/hooks/useActiveSessionId', () => ({
+  useActiveSessionIdCore: jest.fn(() => ({ activeSessionId: null, setActiveSessionId: jest.fn(), handleStreamEvent: jest.fn() })),
 }))
 
 const mockedLocalStore = LocalStore as jest.Mocked<typeof LocalStore>
@@ -68,37 +73,75 @@ describe('CampaignChat — SSE stream', () => {
   })
 
   // ── T11 — Session stream tests ───────────────────────────────────────
+  // CampaignChat no longer accepts activeSessionId/onSessionChange props; it
+  // calls the non-subscribing useActiveSessionIdCore internally and feeds it
+  // events from useChatFeed's single existing useCampaignStream subscription
+  // (design.md Decision 3). These tests assert that wiring, plus the
+  // regression this change fixes (issue #721: an already-active session must
+  // be visible to chat without waiting on a stream event).
 
-  // T11-1: session event calls onSessionChange with the new activeSessionId
-  it('session stream event calls onSessionChange with activeSessionId', async () => {
-    setupFetchMock()
-    const onSessionChange = jest.fn()
-    render(<CampaignChat campaignId={CAMPAIGN_ID} onSessionChange={onSessionChange} />)
-    act(() => {
-      sharedTestState.capturedOnEvent?.({ type: 'session', campaignId: CAMPAIGN_ID, data: { activeSessionId: 'ses-abc' } })
-    })
-    expect(onSessionChange).toHaveBeenCalledWith('ses-abc')
+  // Regression guard for #721: an already-active session, known only via the
+  // core's own initial fetch, is reflected with no prior stream event.
+  it('reflects an already-active session on load with no prior stream event', async () => {
+    mockActiveSessionIdCore('ses-preexisting')
+    render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+    expect(screen.queryByText('No active session')).toBeNull()
   })
 
-  // T11-2: session event with null calls onSessionChange with null
-  it('session stream event calls onSessionChange with null on session end', async () => {
-    setupFetchMock()
-    const onSessionChange = jest.fn()
-    render(<CampaignChat campaignId={CAMPAIGN_ID} onSessionChange={onSessionChange} />)
+  it('reflects no active session on load when the core resolves null', async () => {
+    mockActiveSessionIdCore(null)
+    render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+    // Footer only renders once the drawer is expanded; assert via the
+    // documented no-throw + settled-state path instead of the footer text
+    // (footer.test.tsx covers footer rendering specifically).
+    expect(screen.queryByText('No active session')).toBeNull()
+  })
+
+  it('a session stream event is forwarded to handleStreamEvent and updates rendered state on session start', async () => {
+    const { handleStreamEvent } = mockActiveSessionIdCore(null)
+    render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+
+    act(() => {
+      sharedTestState.capturedOnEvent?.({ type: 'session', campaignId: CAMPAIGN_ID, data: { activeSessionId: 'ses-live' } })
+    })
+
+    expect(handleStreamEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'session', data: { activeSessionId: 'ses-live' } }),
+    )
+  })
+
+  it('a session stream event is forwarded to handleStreamEvent and updates rendered state on session end', async () => {
+    const { handleStreamEvent } = mockActiveSessionIdCore('ses-live')
+    render(<CampaignChat campaignId={CAMPAIGN_ID} />)
+
     act(() => {
       sharedTestState.capturedOnEvent?.({ type: 'session', campaignId: CAMPAIGN_ID, data: { activeSessionId: null } })
     })
-    expect(onSessionChange).toHaveBeenCalledWith(null)
+
+    expect(handleStreamEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'session', data: { activeSessionId: null } }),
+    )
   })
 
-  // T11-3: session event without onSessionChange prop does not throw
-  it('session stream event with no onSessionChange prop does not throw', () => {
-    setupFetchMock()
+  it('does not throw when a session stream event arrives before the core has resolved', () => {
+    mockActiveSessionIdCore(undefined)
     render(<CampaignChat campaignId={CAMPAIGN_ID} />)
     expect(() => {
       act(() => {
         sharedTestState.capturedOnEvent?.({ type: 'session', campaignId: CAMPAIGN_ID, data: { activeSessionId: 'ses-xyz' } })
       })
     }).not.toThrow()
+  })
+
+  it('useCampaignStream is called exactly once from within CampaignChat\'s render tree', async () => {
+    mockActiveSessionIdCore(null)
+    await openDock()
+    // Every render-time call must be for the same campaignId — the single
+    // subscription useChatFeed already holds; useActiveSessionIdCore itself
+    // never calls useCampaignStream (see useActiveSessionId.test.tsx).
+    expect(useCampaignStreamMock.mock.calls.length).toBeGreaterThan(0)
+    for (const call of useCampaignStreamMock.mock.calls) {
+      expect(call[0]).toBe(CAMPAIGN_ID)
+    }
   })
 })

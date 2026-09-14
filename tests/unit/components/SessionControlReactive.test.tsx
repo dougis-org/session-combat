@@ -53,7 +53,10 @@ describe('SessionControl — reactive SSE integration', () => {
     render(<CampaignLayout><div>children</div></CampaignLayout>);
     await waitFor(() => screen.getByRole('heading'));
 
-    expect(screen.getByText('Start Session')).toBeInTheDocument();
+    // SessionControl now self-fetches its own activeSessionId via
+    // useActiveSessionId, independently of CampaignLayout's campaignName
+    // fetch — wait for that resolution too before asserting its state.
+    await waitFor(() => expect(screen.getByText('Start Session')).toBeInTheDocument());
 
     const fetchCallsBefore = (global.fetch as jest.Mock).mock.calls.length;
 
@@ -78,7 +81,7 @@ describe('SessionControl — reactive SSE integration', () => {
     render(<CampaignLayout><div>children</div></CampaignLayout>);
     await waitFor(() => screen.getByRole('heading'));
 
-    expect(screen.getByText('End Session')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('End Session')).toBeInTheDocument());
 
     const fetchCallsBefore = (global.fetch as jest.Mock).mock.calls.length;
 

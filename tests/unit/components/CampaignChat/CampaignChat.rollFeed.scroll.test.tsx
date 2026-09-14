@@ -22,6 +22,10 @@ jest.mock('@/lib/hooks/useAuth', () => ({
   })),
 }))
 
+jest.mock('@/lib/hooks/useActiveSessionId', () => ({
+  useActiveSessionIdCore: jest.fn(() => ({ activeSessionId: null, setActiveSessionId: jest.fn(), handleStreamEvent: jest.fn() })),
+}))
+
 // ── Feed auto-scroll on a stream 'roll' event ────────────────────
 // Ported from the removed CampaignChat.dicePool.scroll.test.tsx: rolls now
 // reach the feed only via the SSE 'roll' stream event (GlobalDiceFab is the

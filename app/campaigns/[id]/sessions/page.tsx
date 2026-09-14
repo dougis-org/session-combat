@@ -389,7 +389,7 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
         <h1 className="text-3xl font-bold">Session Journal</h1>
         <div className="flex gap-4 items-center">
           {context?.campaign && !context.campaign.activeSessionId && (
-            <SessionControl campaignId={campaignId} initialSessionId={null} />
+            <SessionControl campaignId={campaignId} />
           )}
           <Link href="/campaigns" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
             Back to Campaigns
