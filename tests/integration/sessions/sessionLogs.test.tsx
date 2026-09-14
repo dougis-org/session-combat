@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { act } from 'react';
+import { screen } from '@testing-library/react';
 import { createRoot, Root } from 'react-dom/client';
 import SessionsPage from '@/app/campaigns/[id]/sessions/page';
 
@@ -185,17 +186,17 @@ describe('Session Logs — Role-Based Access (DM vs Player)', () => {
   test('DM sees Edit and Delete controls, and New Session button', async () => {
     useIsDM.mockReturnValue({ isDM: true, loading: false });
     await renderSessions([MOCK_LOG], [PARTY_ALICE_BOB]);
-    expect(container.textContent).toContain('Edit');
-    expect(container.textContent).toContain('Delete');
-    expect(container.textContent).toContain('+ New Session');
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /\+ New Session/i })).toBeInTheDocument();
   });
 
   test('Player (non-DM) does not see Edit, Delete, or New Session', async () => {
     useIsDM.mockReturnValue({ isDM: false, loading: false });
     await renderSessions([MOCK_LOG], [PARTY_ALICE_BOB]);
-    expect(container.textContent).not.toContain('Edit');
-    expect(container.textContent).not.toContain('Delete');
-    expect(container.textContent).not.toContain('+ New Session');
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /\+ New Session/i })).not.toBeInTheDocument();
     
     // Expand/collapse should still work
     await clickButton(container, '#3');
@@ -205,8 +206,8 @@ describe('Session Logs — Role-Based Access (DM vs Player)', () => {
   test('Controls fail-closed while DM status is loading', async () => {
     useIsDM.mockReturnValue({ isDM: false, loading: true });
     await renderSessions([MOCK_LOG], [PARTY_ALICE_BOB]);
-    expect(container.textContent).not.toContain('Edit');
-    expect(container.textContent).not.toContain('Delete');
-    expect(container.textContent).not.toContain('+ New Session');
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /\+ New Session/i })).toBeDisabled();
   });
 });

@@ -24,21 +24,23 @@ function formatDate(d: Date | string): string {
 function SessionEntryCard({
   log,
   isDM,
+  isDMLoading,
   onEdit,
   onDelete,
 }: {
   log: SessionLog;
   isDM: boolean;
+  isDMLoading?: boolean;
   onEdit: (log: SessionLog) => void;
   onDelete: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="bg-gray-800 rounded-lg p-4">
+    <div className="bg-gray-800 rounded-lg p-4 shadow">
       <div className="flex justify-between items-start">
-        <button
-          className="flex-1 text-left"
-          onClick={() => setExpanded(e => !e)}
+        <button 
+          onClick={() => setExpanded(!expanded)}
+          className="flex-1 text-left flex justify-between items-start group"
         >
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-gray-400 text-sm font-mono">#{log.sessionNumber}</span>
@@ -51,7 +53,16 @@ function SessionEntryCard({
             )}
           </div>
         </button>
-        {isDM && (
+        {isDMLoading ? (
+          <div className="flex gap-2 ml-2" title="Verifying permissions...">
+            <button disabled className="bg-blue-600 opacity-50 cursor-wait px-2 py-1 rounded text-xs">
+              Edit
+            </button>
+            <button disabled className="bg-red-600 opacity-50 cursor-wait px-2 py-1 rounded text-xs">
+              Delete
+            </button>
+          </div>
+        ) : isDM ? (
           <div className="flex gap-2 ml-2">
             <button
               onClick={() => onEdit(log)}
@@ -66,7 +77,7 @@ function SessionEntryCard({
               Delete
             </button>
           </div>
-        )}
+        ) : null}
       </div>
 
       {expanded && (
@@ -340,7 +351,7 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
   const [showForm, setShowForm] = useState(false);
   const [editingLog, setEditingLog] = useState<SessionLog | null>(null);
   
-  const { isDM } = useIsDM(campaignId);
+  const { isDM, loading: isDMLoading, error: dmError } = useIsDM(campaignId);
 
   const { context, loading: contextLoading, error: contextError } = useCampaignContext(campaignId);
 
@@ -363,7 +374,7 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
   }, [fetchLogs]);
 
   const loading = logsLoading || contextLoading;
-  const error = logsError ?? contextError;
+  const error = logsError ?? contextError ?? dmError?.message ?? null;
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this session log?')) return;
@@ -406,7 +417,15 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
 
       <ErrorBanner message={error} />
 
-      {isDM && !showForm && !editingLog && (
+      {isDMLoading ? (
+        <button
+          disabled
+          title="Verifying permissions..."
+          className="bg-green-600 opacity-50 cursor-wait px-4 py-2 rounded mb-6"
+        >
+          + New Session
+        </button>
+      ) : isDM && !showForm && !editingLog ? (
         <button
           onClick={() => setShowForm(true)}
           disabled={loading}
@@ -414,7 +433,7 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
         >
           + New Session
         </button>
-      )}
+      ) : null}
 
       {(showForm || editingLog) && (
         <SessionForm
@@ -444,6 +463,7 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
               key={log.id}
               log={log}
               isDM={isDM}
+              isDMLoading={isDMLoading}
               onEdit={l => { setEditingLog(l); setShowForm(false); }}
               onDelete={handleDelete}
             />

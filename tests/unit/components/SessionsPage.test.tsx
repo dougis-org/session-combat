@@ -121,6 +121,24 @@ describe('SessionsPage — session log display', () => {
     expect(screen.getByText('Date Played')).toBeInTheDocument();
   });
 
+  test('clicking edit button sets the editing log and shows form', async () => {
+    await renderWithData([MOCK_LOG]);
+    const editBtn = await screen.findByRole('button', { name: 'Edit' });
+    await user.click(editBtn);
+    // When editing, form appears and "New Session" changes to "Edit Session"
+    expect(await screen.findByText(/Edit Session/)).toBeInTheDocument();
+  });
+
+  test('clicking delete button triggers delete API', async () => {
+    window.confirm = jest.fn().mockReturnValue(true);
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+    await renderWithData([MOCK_LOG]);
+    const delBtn = await screen.findByRole('button', { name: 'Delete' });
+    await user.click(delBtn);
+    expect(window.confirm).toHaveBeenCalledWith('Delete this session log?');
+    expect(global.fetch).toHaveBeenCalledWith(`/api/campaigns/camp-1/sessions/${MOCK_LOG.id}`, { method: 'DELETE' });
+  });
+
   test('shows no-linked-party notice when no party found', async () => {
     // useCampaignContext mock returns no parties by default (context: null)
     await renderWithData([]);
@@ -142,11 +160,11 @@ describe('SessionsPage — non-DM behavior', () => {
   beforeEach(() => { 
     user = userEvent.setup();
     const { useIsDM } = require('@/lib/hooks/useIsDM');
-    useIsDM.mockReturnValue({ isDM: false, loading: false });
+    useIsDM.mockReturnValue({ isDM: false, loading: false, error: null });
   });
   afterEach(() => {
     const { useIsDM } = require('@/lib/hooks/useIsDM');
-    useIsDM.mockReturnValue({ isDM: true, loading: false });
+    useIsDM.mockReturnValue({ isDM: true, loading: false, error: null });
   });
 
   test('does not render edit/delete controls or new session button', async () => {
@@ -162,8 +180,35 @@ describe('SessionsPage — non-DM behavior', () => {
     useIsDM.mockReturnValue({ isDM: false, loading: true });
     await renderWithData([MOCK_LOG]);
     expect(await screen.findByText('Into the Mines')).toBeInTheDocument();
-    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
-    expect(screen.queryByText('Delete')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /new session/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /\+ New Session/i })).toBeDisabled();
+  });
+
+  test('calls useIsDM with the correct campaignId', async () => {
+    const { useIsDM } = require('@/lib/hooks/useIsDM');
+    await renderWithData([MOCK_LOG]);
+    expect(useIsDM).toHaveBeenCalledWith('camp-1');
+  });
+
+  test('dynamically renders controls when loading completes and user is DM', async () => {
+    const { useIsDM } = require('@/lib/hooks/useIsDM');
+    let triggerRerender: () => void = () => {};
+    // Start as loading/false
+    useIsDM.mockImplementation(() => {
+      const [state, setState] = require('react').useState({ isDM: false, loading: true });
+      triggerRerender = () => setState({ isDM: true, loading: false });
+      return state;
+    });
+
+    await renderWithData([MOCK_LOG]);
+    expect(await screen.findByText('Into the Mines')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /\+ New Session/i })).toBeDisabled();
+    
+    // Complete loading as DM
+    require('react').act(() => triggerRerender());
+    
+    expect(screen.getByRole('button', { name: /\+ New Session/i })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Edit' })).not.toBeDisabled();
   });
 });
