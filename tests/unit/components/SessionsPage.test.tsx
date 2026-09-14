@@ -113,20 +113,27 @@ describe('SessionsPage — session log display', () => {
     expect(await screen.findByRole('button', { name: /new session/i })).toBeInTheDocument();
   });
 
-  test('renders session form when button clicked', async () => {
+  test('renders session form when button clicked and can cancel', async () => {
     await renderWithData([]);
     const btn = await screen.findByRole('button', { name: /new session/i });
     await user.click(btn);
     expect(await screen.findByText(/Session #/)).toBeInTheDocument();
-    expect(screen.getByText('Date Played')).toBeInTheDocument();
+    
+    const cancelBtn = screen.getByRole('button', { name: 'Cancel' });
+    await user.click(cancelBtn);
+    expect(screen.queryByText(/Session #/)).not.toBeInTheDocument();
   });
 
-  test('clicking edit button sets the editing log and shows form', async () => {
+  test('clicking edit button sets the editing log, shows form, and can cancel', async () => {
     await renderWithData([MOCK_LOG]);
     const editBtn = await screen.findByRole('button', { name: 'Edit' });
     await user.click(editBtn);
     // When editing, form appears and "New Session" changes to "Edit Session"
     expect(await screen.findByText(/Edit Session/)).toBeInTheDocument();
+    
+    const cancelBtn = screen.getByRole('button', { name: 'Cancel' });
+    await user.click(cancelBtn);
+    expect(screen.queryByText(/Edit Session/)).not.toBeInTheDocument();
   });
 
   test('clicking delete button triggers delete API', async () => {

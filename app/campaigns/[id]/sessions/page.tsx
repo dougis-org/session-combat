@@ -401,6 +401,16 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
     : 1;
   const sinceCombatDate = lastSessionDate ?? (context?.campaign?.createdAt ? new Date(context.campaign.createdAt) : null);
 
+  const commonFormProps = {
+    campaignId,
+    allMembers: context?.allMembers ?? [],
+    hasParty: (context?.parties.length ?? 0) > 0,
+    lastSessionDate,
+    sinceCombatDate,
+    nextSessionNumber,
+    onSave: handleSaved,
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -435,17 +445,11 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
         </button>
       ) : null}
 
-      {(showForm || editingLog) && (
+      {(showForm && !editingLog) && (
         <SessionForm
-          campaignId={campaignId}
-          existing={editingLog ?? undefined}
-          allMembers={context?.allMembers ?? []}
-          hasParty={(context?.parties.length ?? 0) > 0}
-          lastSessionDate={lastSessionDate}
-          sinceCombatDate={sinceCombatDate}
-          nextSessionNumber={nextSessionNumber}
-          onSave={handleSaved}
-          onCancel={() => { setShowForm(false); setEditingLog(null); }}
+          {...commonFormProps}
+          existing={undefined}
+          onCancel={() => setShowForm(false)}
         />
       )}
 
@@ -459,14 +463,23 @@ function SessionsContent({ campaignId }: { campaignId: string }) {
       ) : (
         <div className="space-y-3">
           {logs.map(log => (
-            <SessionEntryCard
-              key={log.id}
-              log={log}
-              isDM={isDM}
-              isDMLoading={isDMLoading}
-              onEdit={l => { setEditingLog(l); setShowForm(false); }}
-              onDelete={handleDelete}
-            />
+            editingLog?.id === log.id ? (
+              <SessionForm
+                key={log.id}
+                {...commonFormProps}
+                existing={log}
+                onCancel={() => setEditingLog(null)}
+              />
+            ) : (
+              <SessionEntryCard
+                key={log.id}
+                log={log}
+                isDM={isDM}
+                isDMLoading={isDMLoading}
+                onEdit={l => { setEditingLog(l); setShowForm(false); }}
+                onDelete={handleDelete}
+              />
+            )
           ))}
         </div>
       )}
