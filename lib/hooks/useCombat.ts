@@ -372,7 +372,12 @@ export function useCombat(options: UseCombatOptions = {}) {
         baseCombatants = updatedCombatants;
       }
 
-      if (!isDownedMonster(baseCombatants[nextIndex])) {
+      // baseCombatants is only ever reassigned to processRoundEnd's output, which
+      // preserves length (it maps over the input), so this index is always in bounds.
+      const candidate = baseCombatants[nextIndex];
+      if (!candidate) break;
+
+      if (!isDownedMonster(candidate)) {
         found = true;
         break;
       }

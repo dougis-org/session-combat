@@ -5,7 +5,11 @@ import { useCombat } from '@/lib/hooks/useCombat';
 import type { CombatState, CombatantState } from '@/lib/types';
 
 const clearCombatHistoryMock = jest.fn();
-const processRoundEndMock = jest.fn((combatants: unknown[]) => ({ updatedCombatants: combatants, expiring: [] }));
+type ExpiringCondition = { combatantName: string; conditionName: string };
+const processRoundEndMock = jest.fn((combatants: unknown[]) => ({
+  updatedCombatants: combatants,
+  expiring: [] as ExpiringCondition[],
+}));
 
 jest.mock('@/lib/utils/partySelection', () => ({
   resolveCharactersForCombat: (_selectedPartyId: string | null, _parties: unknown[], characters: unknown[]) => characters,
@@ -672,6 +676,77 @@ describe('useCombat', () => {
       });
 
       expect(getLastPutBody(fetchMock).currentTurnIndex).toBe(1);
+    });
+  });
+
+  test('nextTurn alerts expired conditions and persists them when landing on a live combatant', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          makeCombatant('a', 'Fighter', 'player'),
+          { ...makeCombatant('b', 'Orc', 'monster'), hp: 0 },
+        ]));
+      });
+
+      processRoundEndMock.mockImplementationOnce((combatants: unknown[]) => ({
+        updatedCombatants: combatants,
+        expiring: [{ combatantName: 'Fighter', conditionName: 'Poisoned' }],
+      }));
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      const lastBody = getLastPutBody(fetchMock);
+      expect(lastBody.currentTurnIndex).toBe(0);
+      expect(lastBody.currentRound).toBe(2);
+      expect(global.alert).toHaveBeenCalledWith(expect.stringMatching(/Conditions expired[\s\S]*Fighter[\s\S]*Poisoned/));
+    });
+  });
+
+  test('nextTurn does not alert expired conditions when no combatant can take the turn', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          { ...makeCombatant('a', 'Orc', 'monster'), hp: 0 },
+        ]));
+      });
+
+      processRoundEndMock.mockImplementationOnce((combatants: unknown[]) => ({
+        updatedCombatants: combatants,
+        expiring: [{ combatantName: 'Orc', conditionName: 'Poisoned' }],
+      }));
+
+      const putCallsBefore = getPutCallCount(fetchMock);
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      expect(getPutCallCount(fetchMock)).toBe(putCallsBefore);
+      expect(global.alert).toHaveBeenCalledTimes(1);
+      expect(global.alert).toHaveBeenCalledWith(expect.stringMatching(/no combatant/i));
+      expect(global.alert).not.toHaveBeenCalledWith(expect.stringMatching(/Conditions expired/));
+    });
+  });
+
+  test('nextTurn does not hang on an empty combatants array', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([]));
+      });
+
+      const putCallsBefore = getPutCallCount(fetchMock);
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      expect(getPutCallCount(fetchMock)).toBe(putCallsBefore);
+      expect(global.alert).toHaveBeenCalledWith(expect.stringMatching(/no combatant/i));
     });
   });
 
