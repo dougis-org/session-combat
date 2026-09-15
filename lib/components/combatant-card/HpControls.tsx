@@ -40,7 +40,7 @@ export function HpControls({
   undoHpChange,
 }: HpControlsProps) {
   return (
-    <>
+    <div data-card-section="hp-controls" className="flex items-center gap-2">
       <input
         type="number"
         placeholder="0"
@@ -105,7 +105,7 @@ export function HpControls({
       >
         Undo HP
       </button>
-    </>
+    </div>
   );
 }
 

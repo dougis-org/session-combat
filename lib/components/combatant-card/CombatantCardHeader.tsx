@@ -39,7 +39,7 @@ export function CombatantCardHeader({
   const hpColor = healthBarColor(combatant.hp, combatant.maxHp);
 
   return (
-    <>
+    <div data-card-section="identity-stats" className="flex items-center gap-4 flex-wrap">
       <div className="flex items-center gap-2">
         <button
           onClick={(e) => {
@@ -93,15 +93,17 @@ export function CombatantCardHeader({
           </button>
         )}
       </div>
-      {!isActive && <div className="w-40"></div>}
+      {!isActive && <div className="w-40 hidden sm:block"></div>}
       <div className="flex items-center gap-2">
         <p className="text-xs text-gray-400">AC</p>
         <p className="text-lg font-bold">{combatant.ac}</p>
       </div>
-      <span className="text-sm text-gray-400 whitespace-nowrap">Hit Points:</span>
-      <span className="text-lg font-bold">
-        Current: <span className={hpColor === 'bg-green-500' ? 'text-green-500' : hpColor === 'bg-yellow-500' ? 'text-yellow-500' : 'text-red-500'}>{combatant.hp}</span> Max: {combatant.maxHp}{tempHp > 0 && <span className="text-blue-400"> +{tempHp} tmp</span>}
-      </span>
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-gray-400 whitespace-nowrap">Hit Points:</span>
+        <span className="text-lg font-bold">
+          Current: <span className={hpColor === 'bg-green-500' ? 'text-green-500' : hpColor === 'bg-yellow-500' ? 'text-yellow-500' : 'text-red-500'}>{combatant.hp}</span> Max: {combatant.maxHp}{tempHp > 0 && <span className="text-blue-400"> +{tempHp} tmp</span>}
+        </span>
+      </div>
       {(combatant.legendaryActionCount ?? 0) > 0 && (
         <button
           type="button"
@@ -120,7 +122,7 @@ export function CombatantCardHeader({
           ⚡ {combatant.legendaryActionsRemaining ?? combatant.legendaryActionCount}/{combatant.legendaryActionCount}
         </button>
       )}
-    </>
+    </div>
   );
 }
 
@@ -137,7 +139,7 @@ export function InitiativeControl({
   onSetInitiative?: (combatantId: string) => void;
 }) {
   return (
-    <div className="flex items-center gap-2 ml-auto pr-4">
+    <div data-card-section="initiative" className="flex items-center gap-2 ml-auto pr-4">
       <button
         onClick={() => onSetInitiative?.(combatant.id)}
         className="flex items-center gap-1 hover:opacity-80 cursor-pointer transition-opacity"
