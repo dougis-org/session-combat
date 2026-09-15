@@ -26,13 +26,13 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests
-- [ ] Run E2E tests (if applicable)
-- [ ] Run type checks
-- [ ] Run build
-- [ ] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests
+- [x] Run E2E tests (if applicable)
+- [x] Run type checks
+- [x] Run build
+- [x] Run security/code quality checks required by project standards
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -56,10 +56,10 @@ Use the project's documented commands for each of the above (see project README 
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from working branch to `main`. **If this change is issue-driven, the PR body MUST include `Closes #732` for each linked issue** (unconditionally, not as an optional conditional).
-- [ ] **Issue lifecycle: mark in-review**: run `gh issue edit #732 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from working branch to `main`. **If this change is issue-driven, the PR body MUST include `Closes #732` for each linked issue** (unconditionally, not as an optional conditional).
+- [x] **Issue lifecycle: mark in-review**: run `gh issue edit #732 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
 - [ ] Wait 60 seconds for CI to start
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
 - [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
@@ -84,17 +84,17 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec). After copying each `spec.md` to `openspec/specs/<cap>/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-<name>/design.md`, and similarly for `../../tasks.md` and any other relative paths into the change directory.
-- [ ] Archive the change: move `openspec/changes/combatant-card-semantic-grouping/` to `openspec/changes/archive/YYYY-MM-DD-combatant-card-semantic-grouping/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-combatant-card-semantic-grouping/` exists and `openspec/changes/combatant-card-semantic-grouping/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-combatant-card-semantic-grouping` then `git push -u origin doc/archive-YYYY-MM-DD-combatant-card-semantic-grouping`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-combatant-card-semantic-grouping` to `main` with title `docs: archive combatant-card-semantic-grouping (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D combatant-card-semantic-grouping doc/archive-YYYY-MM-DD-combatant-card-semantic-grouping`
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec). After copying each `spec.md` to `openspec/specs/<cap>/spec.md`, update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-<name>/design.md`, and similarly for `../../tasks.md` and any other relative paths into the change directory.
+- [x] Archive the change: move `openspec/changes/combatant-card-semantic-grouping/` to `openspec/changes/archive/YYYY-MM-DD-combatant-card-semantic-grouping/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-combatant-card-semantic-grouping/` exists and `openspec/changes/combatant-card-semantic-grouping/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-combatant-card-semantic-grouping` then `git push -u origin doc/archive-YYYY-MM-DD-combatant-card-semantic-grouping`
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-combatant-card-semantic-grouping` to `main` with title `docs: archive combatant-card-semantic-grouping (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D combatant-card-semantic-grouping doc/archive-YYYY-MM-DD-combatant-card-semantic-grouping`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D combatant-card-semantic-grouping doc/archive-YYYY-MM-DD-combatant-card-semantic-grouping`
