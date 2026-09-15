@@ -84,8 +84,8 @@ export function CombatantCard(props: CombatantCardProps) {
   return (
     <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'} ${life.greyed ? 'opacity-50' : ''}`} data-testid="combatant-card" data-life-state={combatant.lifeState ?? 'active'} aria-current={isActive ? 'step' : undefined}>
       <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <div className="flex items-center gap-4 mb-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-4 mb-2">
             <CombatantCardHeader
               combatant={combatant}
               isActive={isActive}
@@ -106,6 +106,7 @@ export function CombatantCard(props: CombatantCardProps) {
               applySetTemp={hp.applySetTemp}
               undoHpChange={hp.undoHpChange}
             />
+            <div data-card-section="quick-rolls" className="hidden empty:block"></div>
             <InitiativeControl combatant={combatant} onSetInitiative={onSetInitiative} />
           </div>
 

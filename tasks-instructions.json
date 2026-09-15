@@ -1,9 +1,17 @@
 {
-  "changeName": "add-character-source-url-and-update",
+  "changeName": "combatant-card-semantic-grouping",
   "artifactId": "tasks",
   "schemaName": "sdd-with-feedback-loop",
-  "changeDir": "/home/doug/dev2/session-combat/.worktrees/add-character-source-url-and-update/openspec/changes/add-character-source-url-and-update",
+  "changeDir": "/home/doug/dev2/session-combat/.worktrees/combatant-card-semantic-grouping/openspec/changes/combatant-card-semantic-grouping",
+  "planningHome": {
+    "kind": "repo",
+    "root": "/home/doug/dev2/session-combat/.worktrees/combatant-card-semantic-grouping",
+    "changesDir": "/home/doug/dev2/session-combat/.worktrees/combatant-card-semantic-grouping/openspec/changes",
+    "defaultSchema": "spec-driven"
+  },
   "outputPath": "tasks.md",
+  "resolvedOutputPath": "/home/doug/dev2/session-combat/.worktrees/combatant-card-semantic-grouping/openspec/changes/combatant-card-semantic-grouping/tasks.md",
+  "existingOutputPaths": [],
   "description": "Implementation task checklist with Preparation through Post-Merge steps",
   "instruction": "Create task list with sections: Preparation, Preflight, Execution, Pre-Commit Code Review,\nValidation, PR and Merge, and Post-Merge. Follow strict BDD/TDD.\nInclude ownership metadata and a blocking resolution flow.\nRequire the `openspec-review-code` sub-agent to be run before every commit, and require the primary agent to automatically address all findings from the sub-agent before committing.\nIn Preflight: verify `pr-review-toolkit:review-pr` is available; halt and prompt the user to install it if not found.\nIn Execution: as the first step (before implementation begins), if the change is issue-driven, run `gh issue edit #N --add-label \"in-progress\"` and move the GitHub Project item to the \"In Progress\" status column via runtime-discovered field option IDs (discover via `gh project list --owner <owner> --format json` and `gh project field-list --format json`); warn and skip if project item not found or `gh` token lacks `project` scope.\nIn PR and Merge: when opening the PR, if issue-driven, include `Closes #N` unconditionally in the PR body, run `gh issue edit #N --add-label \"in-review\" --remove-label \"in-progress\"`, and move the project item to the \"In Review\" column. After opening the PR, wait 60 seconds, spawn a sub-agent to run `pr-review-toolkit:review-pr`, address all findings (commit, push, re-run) until zero findings remain, then enable auto-merge via `gh pr merge <PR-URL> --auto --merge`. Do not enable auto-merge before the review gate passes. If findings persist after three or more iterations with no progress, report the stall and wait for human guidance.\nAll paths must be relative to project root.\n",
   "context": "Use default OpenSpec sdd-with-feedback-loop flow (proposal -> design -> specs -> tasks -> apply -> archive).\nKeep artifacts concise and implementation-ready.\nPreserve default OpenSpec artifact lifecycle and dependency ordering.\nAll file and folder references must be project-root-relative paths (for example, openspec/changes/my-change/proposal.md).\nAll work on a change — from the first proposal artifact through apply and archive — happens inside a dedicated git worktree at `.worktrees/<change-name>`, never in the primary checkout. This lets multiple agents work on different changes from the same repo clone in parallel without one agent's branch checkout disrupting another's in-progress files.",
@@ -38,5 +46,9 @@
   ],
   "unlocks": [
     "tests"
-  ]
+  ],
+  "root": {
+    "path": "/home/doug/dev2/session-combat/.worktrees/combatant-card-semantic-grouping",
+    "source": "nearest"
+  }
 }
