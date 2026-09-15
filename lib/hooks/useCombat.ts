@@ -372,8 +372,9 @@ export function useCombat(options: UseCombatOptions = {}) {
         baseCombatants = updatedCombatants;
       }
 
-      // baseCombatants is only ever reassigned to processRoundEnd's output, which
-      // preserves length (it maps over the input), so this index is always in bounds.
+      // processRoundEnd preserves array length (it only maps over the input), so
+      // this index should always be in bounds; guard defensively against a
+      // malformed/unexpected state rather than throwing.
       const candidate = baseCombatants[nextIndex];
       if (!candidate) break;
 
