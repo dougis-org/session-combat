@@ -127,26 +127,29 @@ Use the project's documented commands for each of the above (see
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings
   were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `skip-downed-monster-turn` to `main`. The PR body
-  **MUST include `Closes #730`** (this change is issue-driven).
-- [ ] **Issue lifecycle: mark in-review** — run
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `skip-downed-monster-turn` to `main`. The PR body
+  **MUST include `Closes #730`** (this change is issue-driven). — PR #735
+- [x] **Issue lifecycle: mark in-review** — run
   `gh issue edit 730 --add-label "in-review" --remove-label
   "in-progress"`. Then move the project item to the status column
   semantically matching "In Review" via `gh project item-edit` (same
   project/field/option discovery as the in-progress lifecycle step above;
-  warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
+  warn and skip if not found). — project item auto-moved to "In review"
+  on PR link.
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all
   findings (commit, push, re-run) until zero findings remain. If findings
   persist after three or more iterations with no progress, report the
   stall with remaining findings listed and wait for human guidance before
-  continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero
+  continuing. — converged after 2 iterations (commits b88611d, 2f7dad3),
+  zero Critical/Important findings remain.
+- [x] **Enable auto-merge only after the review gate passes (zero
   findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin`
   to force the merge — see project feedback memory: no admin merge
   bypass, and note `main` is a squash-only ruleset requiring `--squash`
-  with the `ci-gate` + Codacy required checks)
+  with the `ci-gate` + Codacy required checks) — enabled via
+  `gh pr merge 735 --auto --squash`.
 - [ ] **Iterate until merged** — repeat the following priority loop
   continuously until `gh pr view <PR-URL> --json state` returns `MERGED`;
   if it returns `CLOSED` exit and notify the user — **never wait for a
@@ -187,14 +190,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from the primary
+- [x] `git checkout main` and `git pull --ff-only` (from the primary
   checkout, not the worktree)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none
   expected beyond this change's own artifacts — `nextTurn()` has no
   external docs describing its behavior)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy
+- [x] Sync approved spec deltas into `openspec/specs/`: copy
   `openspec/changes/skip-downed-monster-turn/specs/turn-order-advancement/spec.md`
   to `openspec/specs/turn-order-advancement/spec.md` (new capability —
   first sync, no prior spec.md to merge into). Update relative links that
@@ -202,15 +205,15 @@ Blocking resolution flow:
   location — replace `../../design.md` with
   `../../changes/archive/YYYY-MM-DD-skip-downed-monster-turn/design.md`
   and similarly for `../../tasks.md`.
-- [ ] Archive the change: move
+- [x] Archive the change: move
   `openspec/changes/skip-downed-monster-turn/` to
   `openspec/changes/archive/YYYY-MM-DD-skip-downed-monster-turn/` **and
   stage both the new location and the deletion of the old location in a
   single commit** — do not commit the copy and delete separately
-- [ ] Confirm
+- [x] Confirm
   `openspec/changes/archive/YYYY-MM-DD-skip-downed-monster-turn/` exists
   and `openspec/changes/skip-downed-monster-turn/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates:
+- [x] **Create a doc branch** for the archive and spec updates:
   `git checkout -b doc/archive-YYYY-MM-DD-skip-downed-monster-turn` then
   `git push -u origin doc/archive-YYYY-MM-DD-skip-downed-monster-turn`
 - [ ] Open a PR from `doc/archive-YYYY-MM-DD-skip-downed-monster-turn` to
