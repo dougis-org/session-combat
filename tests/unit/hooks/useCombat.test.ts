@@ -5,13 +5,14 @@ import { useCombat } from '@/lib/hooks/useCombat';
 import type { CombatState, CombatantState } from '@/lib/types';
 
 const clearCombatHistoryMock = jest.fn();
+const processRoundEndMock = jest.fn((combatants: unknown[]) => ({ updatedCombatants: combatants, expiring: [] }));
 
 jest.mock('@/lib/utils/partySelection', () => ({
   resolveCharactersForCombat: (_selectedPartyId: string | null, _parties: unknown[], characters: unknown[]) => characters,
 }));
 
 jest.mock('@/lib/combat/conditionExpiry', () => ({
-  processRoundEnd: (combatants: unknown[]) => ({ updatedCombatants: combatants, expiring: [] }),
+  processRoundEnd: (combatants: unknown[]) => processRoundEndMock(combatants),
 }));
 
 jest.mock('@/lib/utils/hpHistory', () => ({
@@ -29,7 +30,10 @@ jest.mock('@/lib/utils/combat', () => ({
   },
   applyHealing: (hp: number, maxHp: number, heal: number) => ({ hp: Math.min(maxHp, hp + heal) }),
   setTempHp: (_tempHp: number, value: number) => ({ tempHp: value }),
-  resetIncomingLegendaryPool: (combatants: unknown[]) => combatants,
+  resetIncomingLegendaryPool: (combatants: Array<{ legendaryActionCount?: number; legendaryActionsRemaining?: number }>, nextIndex: number) =>
+    combatants.map((c, i) => (i === nextIndex && (c.legendaryActionCount ?? 0) > 0
+      ? { ...c, legendaryActionsRemaining: c.legendaryActionCount }
+      : c)),
   sortCombatants: (combatants: Array<{ initiative: number; name: string }>) =>
     [...combatants].sort((a, b) => (b.initiative - a.initiative) || a.name.localeCompare(b.name)),
   buildLairCombatant: (name: string) => ({
@@ -454,6 +458,220 @@ describe('useCombat', () => {
       const lastBody = getLastPutBody(fetchMock);
       expect(lastBody.currentTurnIndex).toBe(0);
       expect(lastBody.currentRound).toBe(2);
+    });
+  });
+
+  test('nextTurn skips a downed monster (TC1)', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          makeCombatant('a', 'Fighter', 'player'),
+          { ...makeCombatant('b', 'Orc', 'monster'), hp: 0 },
+          makeCombatant('c', 'Cleric', 'player'),
+        ]));
+      });
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      expect(getLastPutBody(fetchMock).currentTurnIndex).toBe(2);
+    });
+  });
+
+  test('nextTurn skips consecutive downed monsters (TC2)', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          makeCombatant('a', 'Fighter', 'player'),
+          { ...makeCombatant('b', 'Orc', 'monster'), hp: 0 },
+          { ...makeCombatant('c', 'Goblin', 'monster'), hp: 0 },
+          makeCombatant('d', 'Cleric', 'player'),
+        ]));
+      });
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      expect(getLastPutBody(fetchMock).currentTurnIndex).toBe(3);
+    });
+  });
+
+  test('nextTurn keeps a dying player\'s turn at 0 HP (TC3)', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          makeCombatant('a', 'Fighter', 'player'),
+          { ...makeCombatant('b', 'Cleric', 'player'), hp: 0, lifeState: 'dying' },
+        ]));
+      });
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      expect(getLastPutBody(fetchMock).currentTurnIndex).toBe(1);
+    });
+  });
+
+  test('nextTurn never skips a lair combatant (TC4)', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          makeCombatant('a', 'Fighter', 'player'),
+          { ...makeCombatant('lair-1', 'Cave', 'lair'), hp: 0 },
+          makeCombatant('b', 'Cleric', 'player'),
+        ]));
+      });
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      expect(getLastPutBody(fetchMock).currentTurnIndex).toBe(1);
+    });
+  });
+
+  test('nextTurn skip crossing the round wrap runs round-end processing exactly once (TC5)', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          makeCombatant('a', 'Fighter', 'player'),
+          { ...makeCombatant('b', 'Orc', 'monster'), hp: 0 },
+        ]));
+      });
+
+      processRoundEndMock.mockClear();
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      const lastBody = getLastPutBody(fetchMock);
+      expect(lastBody.currentTurnIndex).toBe(0);
+      expect(lastBody.currentRound).toBe(2);
+      expect(processRoundEndMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test('nextTurn is a no-op with a DM alert when every combatant is a downed monster (TC6)', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          { ...makeCombatant('a', 'Orc', 'monster'), hp: 0 },
+          { ...makeCombatant('b', 'Goblin', 'monster'), hp: 0 },
+        ]));
+      });
+
+      const putCallsBefore = getPutCallCount(fetchMock);
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      expect(getPutCallCount(fetchMock)).toBe(putCallsBefore);
+      expect(global.alert).toHaveBeenCalledWith(expect.stringMatching(/no combatant/i));
+    });
+  });
+
+  test('nextTurn resets the legendary pool only for the landing combatant (TC7)', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          makeCombatant('a', 'Fighter', 'player'),
+          {
+            ...makeCombatant('b', 'Downed Dragon', 'monster'),
+            hp: 0,
+            legendaryActionCount: 2,
+            legendaryActionsRemaining: 0,
+          },
+          {
+            ...makeCombatant('c', 'Live Dragon', 'monster'),
+            legendaryActionCount: 3,
+            legendaryActionsRemaining: 1,
+          },
+        ]));
+      });
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      const lastBody = getLastPutBody(fetchMock);
+      expect(lastBody.currentTurnIndex).toBe(2);
+      const landing = lastBody.combatants.find((c: CombatantState) => c.id === 'c');
+      const skipped = lastBody.combatants.find((c: CombatantState) => c.id === 'b');
+      expect(landing.legendaryActionsRemaining).toBe(3);
+      expect(skipped.legendaryActionsRemaining).toBe(0);
+    });
+  });
+
+  test('nextTurn lands on a monster that was healed above 0 HP (TC8)', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          makeCombatant('a', 'Fighter', 'player'),
+          { ...makeCombatant('b', 'Orc', 'monster'), hp: 0 },
+        ]));
+      });
+
+      await act(async () => {
+        result.current.updateCombatant('b', { hp: 5 });
+      });
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      expect(getLastPutBody(fetchMock).currentTurnIndex).toBe(1);
+    });
+  });
+
+  test('nextTurn does not hang on an all-downed-monster list of one (TC9)', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          { ...makeCombatant('a', 'Orc', 'monster'), hp: 0 },
+        ]));
+      });
+
+      const putCallsBefore = getPutCallCount(fetchMock);
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      expect(getPutCallCount(fetchMock)).toBe(putCallsBefore);
+      expect(global.alert).toHaveBeenCalledWith(expect.stringMatching(/no combatant/i));
+    });
+  });
+
+  test('nextTurn baseline: normal advance among all-live combatants is unchanged (TC10)', async () => {
+    await testHook(async (result, fetchMock) => {
+      await act(async () => {
+        await result.current.saveCombatState(makeCombatState([
+          makeCombatant('a', 'Fighter', 'player'),
+          makeCombatant('b', 'Cleric', 'player'),
+          makeCombatant('c', 'Orc', 'monster'),
+        ]));
+      });
+
+      await act(async () => {
+        result.current.nextTurn();
+        await Promise.resolve();
+      });
+
+      expect(getLastPutBody(fetchMock).currentTurnIndex).toBe(1);
     });
   });
 

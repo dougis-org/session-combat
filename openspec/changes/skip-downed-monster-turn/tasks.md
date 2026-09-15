@@ -12,7 +12,7 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the
   available skills list for `pr-review-toolkit:review-pr`. If the skill is
   not listed, halt immediately, inform the user that the plugin is
   required, provide installation guidance, and do not proceed until the
@@ -20,7 +20,7 @@
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — this change is issue-driven
+- [x] **Issue lifecycle: mark in-progress** — this change is issue-driven
   (GitHub issue #730). Run `gh issue edit 730 --add-label "in-progress"`.
   Then discover the GitHub Project linked to `dougis-org/session-combat`
   via `gh project list --owner dougis-org --format json`, resolve the
@@ -30,14 +30,14 @@
   is found, log a warning and continue. If the `gh` token lacks the
   `project` scope, instruct the user to run `gh auth refresh -s project`
   and skip the project-item update (issue label update still proceeds).
-- [ ] **Confirm working location:** confirm the current shell is inside
+- [x] **Confirm working location:** confirm the current shell is inside
   `.worktrees/skip-downed-monster-turn` and the branch is
   `skip-downed-monster-turn` before making any code edit.
-- [ ] **T1 — Extract/inline the skip predicate.** In
+- [x] **T1 — Extract/inline the skip predicate.** In
   `lib/hooks/useCombat.ts`, add the downed-monster predicate used by
   `nextTurn()`: a combatant is skippable iff `type === 'monster' && hp <=
   0`. (Design decision 1.)
-- [ ] **T2 — Rework `nextTurn()`'s index-advance into a bounded skip
+- [x] **T2 — Rework `nextTurn()`'s index-advance into a bounded skip
   loop.** Replace the single `if (nextIndex >= combatState.combatants.length)`
   block (currently `lib/hooks/useCombat.ts:349-378`) with a loop bounded at
   `combatState.combatants.length` iterations that: advances the index by
@@ -46,19 +46,19 @@
   and stops as soon as the candidate at the new index is not skippable per
   T1. Reuse the existing `resetIncomingLegendaryPool` call, applied only to
   the final landing index. (Design decision 2.)
-- [ ] **T3 — Handle the all-skippable exhaustion case.** If the bounded
+- [x] **T3 — Handle the all-skippable exhaustion case.** If the bounded
   loop in T2 completes `combatState.combatants.length` iterations without
   finding a non-skippable combatant, return without calling
   `saveCombatState` (no state mutation) and call
   `alert('No combatants remain able to take a turn.')`. (Design decision
   3.)
-- [ ] **T4 — Look for existing tooling/functions to reuse.** Confirm no
+- [x] **T4 — Look for existing tooling/functions to reuse.** Confirm no
   other helper already implements "find next combatant able to act"
   elsewhere in `lib/combat/` or `lib/hooks/` before adding T1-T3 (checked
   during design: `usesDeathSaves`, `lifeStateDisplay` inform the predicate
   but do not implement it; no existing turn-order helper was found to
   reuse).
-- [ ] **T5 — Write/extend unit tests in the `useCombat` test suite**
+- [x] **T5 — Write/extend unit tests in the `useCombat` test suite**
   (colocated with existing `nextTurn` coverage) for every scenario in
   `openspec/changes/skip-downed-monster-turn/specs/turn-order-advancement/spec.md`:
   - Monster at 0 HP is skipped
@@ -73,13 +73,13 @@
     skipped monster's pool is untouched
   - Healed monster (hp raised above 0 after being skipped) resumes its
     normal turn on its next natural turn
-- [ ] Confirm all acceptance criteria in
+- [x] Confirm all acceptance criteria in
   `openspec/changes/skip-downed-monster-turn/specs/turn-order-advancement/spec.md`
   are covered by the tests written in T5.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the
   `openspec-review-code` skill. Automatically apply all clearly-correct
   findings directly to the code — without stopping, without presenting the
   findings list to the user, and without asking for confirmation. Apply
@@ -87,12 +87,13 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests (`npm test` or project-standard command)
-- [ ] Run E2E tests if any cover active-combat turn advancement
+- [x] Run unit/integration tests (`npm test` or project-standard command)
+- [x] Run E2E tests if any cover active-combat turn advancement
   (`active-combat-view` integration specs) — not expected to need new
-  cases, but must still pass unchanged
-- [ ] Run type checks (`npm run typecheck` or project-standard command)
-- [ ] Run build (`npm run build`)
+  cases, but must still pass unchanged (none found: no `e2e`/`integration`
+  spec references `ActiveCombatView`)
+- [x] Run type checks (`npm run typecheck` or project-standard command)
+- [x] Run build (`npm run build`)
 - [ ] Run security/code quality checks required by project standards
   (Codacy / Verity gate)
 - [ ] All completed tasks marked as complete
@@ -124,7 +125,7 @@ Use the project's documented commands for each of the above (see
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings
   were automatically addressed before the final commit
 - [ ] Commit all changes to the working branch and push to remote
 - [ ] Open PR from `skip-downed-monster-turn` to `main`. The PR body

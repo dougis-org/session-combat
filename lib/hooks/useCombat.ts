@@ -349,21 +349,43 @@ export function useCombat(options: UseCombatOptions = {}) {
   const nextTurn = () => {
     if (!combatState) return;
 
-    let nextIndex = combatState.currentTurnIndex + 1;
+    const isDownedMonster = (c: CombatantState) => c.type === 'monster' && c.hp <= 0;
+
+    let nextIndex = combatState.currentTurnIndex;
     let nextRound = combatState.currentRound;
     let baseCombatants = combatState.combatants;
+    let found = false;
+    let expiringLines: string | null = null;
 
-    if (nextIndex >= combatState.combatants.length) {
-      nextIndex = 0;
-      nextRound += 1;
+    for (let steps = 0; steps < combatState.combatants.length; steps++) {
+      nextIndex += 1;
 
-      // Decrement condition durations, collect expiring conditions, and remove expired ones (single pass)
-      const { updatedCombatants, expiring } = processRoundEnd(combatState.combatants);
-      if (expiring.length > 0) {
-        const lines = expiring.map(e => `• ${e.combatantName}: ${e.conditionName}`).join('\n');
-        alert(`Conditions expired:\n${lines}`);
+      if (nextIndex >= baseCombatants.length) {
+        nextIndex = 0;
+        nextRound += 1;
+
+        // Decrement condition durations, collect expiring conditions, and remove expired ones (single pass)
+        const { updatedCombatants, expiring } = processRoundEnd(baseCombatants);
+        if (expiring.length > 0) {
+          expiringLines = expiring.map(e => `• ${e.combatantName}: ${e.conditionName}`).join('\n');
+        }
+        baseCombatants = updatedCombatants;
       }
-      baseCombatants = updatedCombatants;
+
+      if (!isDownedMonster(baseCombatants[nextIndex])) {
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      alert('No combatants remain able to take a turn.');
+      return;
+    }
+
+    // Alert on expired conditions only now that we know the round-end changes will be persisted
+    if (expiringLines) {
+      alert(`Conditions expired:\n${expiringLines}`);
     }
 
     // Reset legendary action pool for the incoming combatant (both mid-round and round-end paths)
