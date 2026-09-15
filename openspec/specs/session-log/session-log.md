@@ -126,6 +126,19 @@ The system SHALL provide a page at `/campaigns/[id]/sessions` listing all sessio
 - **When** the session list is rendered
 - **Then** the entry shows a milestone badge displaying the new level
 
+#### Scenario: Editing an existing session log
+
+- **Given** a user is viewing a list of session logs for a campaign
+- **When** the user clicks "Edit" on a specific session log
+- **Then** the session log's card is replaced with the session edit form
+- **And** the session edit form does not appear at the top of the page
+
+#### Scenario: Creating a new session log
+
+- **Given** a user is viewing a list of session logs for a campaign
+- **When** the user clicks "+ New Session"
+- **Then** the session edit form is rendered at the top of the page (above the list of existing logs)
+
 #### Scenario: DM sees full create/edit/delete controls
 
 - **Given** an authenticated campaign member whose role is `dm` and status is `active`
