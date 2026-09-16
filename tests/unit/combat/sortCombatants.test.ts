@@ -81,4 +81,20 @@ describe('sortCombatants', () => {
     expect(sorted[0].type).toBe('lair');
     expect(sorted[1].type).toBe('player');
   });
+
+  test('unrolled combatant sorts above a rolled combatant regardless of initiative value', () => {
+    const rolled = { ...make('r', 'Rolled', 'monster', 18), initiativeRoll: { roll: 18, bonus: 0, total: 18, method: 'rolled' as const } };
+    const unrolled = make('u', 'Unrolled', 'monster', 0);
+    const sorted = sortCombatants([rolled, unrolled]);
+    expect(sorted[0].id).toBe('u');
+    expect(sorted[1].id).toBe('r');
+  });
+
+  test('rolled combatant sorts below an unrolled combatant when compared in the other order', () => {
+    const rolled = { ...make('r', 'Rolled', 'monster', 18), initiativeRoll: { roll: 18, bonus: 0, total: 18, method: 'rolled' as const } };
+    const unrolled = make('u', 'Unrolled', 'monster', 0);
+    const sorted = sortCombatants([unrolled, rolled]);
+    expect(sorted[0].id).toBe('u');
+    expect(sorted[1].id).toBe('r');
+  });
 });

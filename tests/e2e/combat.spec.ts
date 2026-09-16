@@ -20,7 +20,7 @@ import {
 import { createTestIdentity } from "./helpers/isolation";
 import type { Page, TestInfo } from "@playwright/test";
 
-const STRONG_PASSWORD = "TestPassword123!";
+const STRONG_PASSWORD = `TestPw${crypto.randomUUID().replace(/-/g, "")}!1`;
 
 async function registerTestUser(page: Page, testInfo: TestInfo) {
   const identity = createTestIdentity(testInfo);
@@ -290,7 +290,7 @@ test.describe("Combat flows", () => {
     await page.locator('button[type="submit"]').click();
     await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
     await page.locator('[data-testid="start-combat-quick"]').click();
-    await page.waitForSelector('[data-testid="combatants-list"]', { timeout: 15000 });
+    await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
 
     // Find the combatant card's HP input — one combatant, one number input
     const hpInput = page.locator('input[placeholder="0"]').first();
@@ -385,7 +385,7 @@ test.describe("Combat flows", () => {
     await page.getByRole("button", { name: "Add Aboleth to encounter" }).click();
     await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
     await page.locator('[data-testid="start-combat-quick"]').click();
-    await page.waitForSelector('[data-testid="combatants-list"]', { timeout: 15000 });
+    await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
   }
 
   test("legendary monster badge visible in combatant row with correct count", async ({
@@ -494,10 +494,11 @@ test.describe("Combat flows", () => {
     // Start combat
     await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
     await page.locator('[data-testid="start-combat-quick"]').click();
-    await page.waitForSelector('[data-testid="combatants-list"]', { timeout: 15000 });
+    await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
 
     // Open Aboleth detail panel and use 2 actions
-    const detailToggle = page.locator('[data-testid="combatant-detail-toggle"]').first();
+    const aboletCard = page.locator('[data-testid="initiative-order"] > *').filter({ hasText: "Aboleth" });
+    const detailToggle = aboletCard.locator('[data-testid="combatant-detail-toggle"]');
     await detailToggle.click();
     const useBtn = page.locator('[data-testid="legendary-action-use-0"]').first();
     await expect(useBtn).toBeVisible({ timeout: 5000 });
@@ -603,7 +604,7 @@ test.describe("Combat flows", () => {
     await page.getByRole("button", { name: "Add Ancient Dragon to encounter" }).click();
     await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
     await page.locator('[data-testid="start-combat-quick"]').click();
-    await page.waitForSelector('[data-testid="combatants-list"]', { timeout: 15000 });
+    await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
   }
 
   async function addLairSlot(page: Page, name: string, seedMonster?: string) {
@@ -771,7 +772,7 @@ test.describe("Combat flows", () => {
     await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
     await expect(page.getByText("Ancient Dragon")).toBeVisible({ timeout: 10000 });
     await page.getByRole("button", { name: "Add Ancient Dragon to encounter" }).click();
-    await startCombatQuick(page, "combatants-list");
+    await startCombatQuick(page, "initiative-order");
 
     await addLairSlot(page, "Dragon Lair", "Ancient Dragon");
     await advanceToActiveLair(page);

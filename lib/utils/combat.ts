@@ -288,8 +288,16 @@ export function buildInitiativeRoll(combatant: CombatantState): InitiativeRoll {
   };
 }
 
+/** Convert a DOM element's bounding rect into a page-relative { top, left } anchor. */
+export function rectToPosition(rect: DOMRect): { top: number; left: number } {
+  return { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX };
+}
+
 export function sortCombatants(combatants: CombatantState[]): CombatantState[] {
   return [...combatants].sort((a, b) => {
+    const aUnrolled = !a.initiativeRoll;
+    const bUnrolled = !b.initiativeRoll;
+    if (aUnrolled !== bUnrolled) return aUnrolled ? -1 : 1;
     if (a.initiative !== b.initiative) return b.initiative - a.initiative;
     if (a.type !== b.type) return TYPE_ORDER[a.type] - TYPE_ORDER[b.type];
     const aDex = a.abilityScores?.dexterity ?? 10;
@@ -337,11 +345,15 @@ export function buildCombatantFromSource(
   idPrefix: string,
 ): CombatantState {
   const lacCount = 'legendaryActionCount' in source ? source.legendaryActionCount : undefined;
+  const manualInitiative = ('initiative' in source && typeof source.initiative === 'number') ? source.initiative : undefined;
   return {
     id: `${idPrefix}-${source.id}-${crypto.randomUUID()}`,
     name: source.name,
     type,
-    initiative: ('initiative' in source && typeof source.initiative === 'number') ? source.initiative : 0,
+    initiative: manualInitiative ?? 0,
+    ...(manualInitiative !== undefined && {
+      initiativeRoll: { roll: manualInitiative, bonus: 0, total: manualInitiative, method: 'manual' },
+    }),
     abilityScores: source.abilityScores ?? { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
     hp: source.hp,
     maxHp: source.maxHp,

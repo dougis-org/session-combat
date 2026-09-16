@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { AuthUser } from '@/lib/hooks/useAuth';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { CombatantCard } from '@/lib/components/CombatantCard';
@@ -9,8 +9,9 @@ import { CombatantDetailPanel } from '@/lib/components/CombatantDetailPanel';
 import { InitiativeEntry } from '@/lib/components/InitiativeEntry';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import { CombatSetupAndActiveModals } from '@/lib/components/CombatSetupAndActiveModals';
-import { CombatantState } from '@/lib/types';
+import { CombatantState, InitiativeRoll } from '@/lib/types';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
+import { rectToPosition, sortCombatants } from '@/lib/utils/combat';
 import { Toast } from '@/lib/components/Toast';
 
 function EncounterDescriptionModal({ description, onClose }: { description: string; onClose: () => void }) {
@@ -79,6 +80,9 @@ export interface ActiveCombatViewProps {
   user: AuthUser | null;
 }
 
+// Must stay in sync with the InitiativeModal's `w-80` Tailwind class below.
+const INITIATIVE_MODAL_WIDTH = 320;
+
 export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
   const {
     combatState,
@@ -94,13 +98,9 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     selectedDetailCombatantId,
     detailPosition,
     detailFocusSection,
-    initiativeFilter,
-    zeroInitiative,
-    filteredZeroInitiative,
     loadingTemplates,
     monsterTemplates,
     characters,
-    setInitiativeFilter,
     setShowCombatantModal,
     setShowLairForm,
     setLairFormName,
@@ -119,23 +119,36 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     updateCombatantInitiativeSettings,
     removeCombatant,
     setInitiativeRoll,
-    hasInitiativeBeenRolled,
     getDisplayCombatants,
     confirmAddLair,
     cancelLairForm,
   } = combat;
 
   const [initiativeEditId, setInitiativeEditId] = useState<string | null>(null);
-  const initiativePanelRef = useRef<HTMLDivElement>(null);
+  const [initiativeEditPosition, setInitiativeEditPosition] = useState<{top: number, left: number} | null>(null);
 
-  useEffect(() => {
-    if (initiativeEditId && initiativePanelRef.current) {
-      initiativePanelRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
+  const handleSetInitiative = (id: string, roll: InitiativeRoll) => {
+    setInitiativeRoll(id, roll);
+    if (!combatState) return;
+
+    // React state updates aren't visible until the next render, so simulate the
+    // post-update list locally instead of reading combatState after the call above.
+    const updatedCombatants = combatState.combatants.map(c => c.id === id ? { ...c, initiative: roll.total, initiativeRoll: roll } : c);
+    const sorted = sortCombatants(updatedCombatants);
+
+    // Using the same list as getDisplayCombatants to find the next one
+    const nextUnrolled = sorted.find(c => !c.initiativeRoll);
+
+    if (nextUnrolled) {
+      const el = document.querySelector(`[data-combatant-id="${nextUnrolled.id}"] [data-card-section="initiative"] button`);
+      setInitiativeEditId(nextUnrolled.id);
+      setInitiativeEditPosition(el ? rectToPosition(el.getBoundingClientRect()) : null);
+    } else {
+      setInitiativeEditId(null);
+      setInitiativeEditPosition(null);
     }
-  }, [initiativeEditId]);
+  };
+
 
   const characterMap = useMemo(
     () => new Map((characters ?? []).map(c => [c.id, c])),
@@ -177,7 +190,10 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
         setDetailPosition(pos);
         setDetailFocusSection(options?.focusSection);
       }}
-      onSetInitiative={setInitiativeEditId}
+      onSetInitiative={(id, pos) => {
+        setInitiativeEditId(id);
+        setInitiativeEditPosition(pos);
+      }}
       onShowRemoveConfirm={(id, pos) => {
         setRemoveConfirmId(id);
         setRemoveConfirmPosition(pos);
@@ -263,66 +279,21 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
           <div className="p-4 bg-red-900 border border-red-700 rounded text-red-200 mb-6">{error}</div>
         )}
 
-        {zeroInitiative.length > 0 && (
-          <div ref={initiativePanelRef} className="mb-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <p className="text-sm text-gray-400">Show:</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setInitiativeFilter('all')}
-                    className={`px-3 py-1 rounded text-sm ${initiativeFilter === 'all' ? 'bg-gray-700 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}`}
-                  >
-                    All
-                  </button>
-                  <button
-                    onClick={() => setInitiativeFilter('player')}
-                    className={`px-3 py-1 rounded text-sm ${initiativeFilter === 'player' ? 'bg-gray-700 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}`}
-                  >
-                    Players
-                  </button>
-                  <button
-                    onClick={() => setInitiativeFilter('monster')}
-                    className={`px-3 py-1 rounded text-sm ${initiativeFilter === 'monster' ? 'bg-gray-700 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}`}
-                  >
-                    Monsters
-                  </button>
-                </div>
-              </div>
-              <p className="text-sm text-gray-400">{zeroInitiative.length} need initiative</p>
-            </div>
-
-            {filteredZeroInitiative.length === 0 ? (
-              <div className="p-4 bg-gray-800 rounded text-gray-400">
-                No combatants match the selected filter.
-              </div>
-            ) : (
-              filteredZeroInitiative.map((combatant) => (
-                <div key={combatant.id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                  <InitiativeEntry
-                    combatant={combatant}
-                    onSet={(initiativeRoll) => setInitiativeRoll(combatant.id, initiativeRoll)}
-                    onSettingsChange={(adv, fb) =>
-                      updateCombatantInitiativeSettings(combatant.id, adv, fb)
-                    }
-                  />
-                </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {initiativeEditId && !combatState.combatants.some(c => c.initiative === 0) && (() => {
+        {initiativeEditId && initiativeEditPosition && (() => {
           const combatant = combatState.combatants.find(c => c.id === initiativeEditId);
           return combatant ? (
-            <div className="mb-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div
+              className="absolute z-50 p-4 bg-gray-800 rounded-lg shadow-2xl border border-gray-600 w-80 max-w-[calc(100vw-2rem)]"
+              style={{
+                top: initiativeEditPosition.top,
+                left: Math.max(16, initiativeEditPosition.left - INITIATIVE_MODAL_WIDTH)
+              }}
+              data-testid="initiative-modal"
+            >
               <InitiativeEntry
                 key={initiativeEditId}
                 combatant={combatant}
-                onSet={(initiativeRoll) => {
-                  setInitiativeRoll(initiativeEditId, initiativeRoll);
-                  setInitiativeEditId(null);
-                }}
+                onSet={(initiativeRoll) => handleSetInitiative(initiativeEditId, initiativeRoll)}
                 onClose={() => setInitiativeEditId(null)}
                 onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeEditId, adv, fb)}
               />
@@ -330,62 +301,42 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
           ) : null;
         })()}
 
-        {hasInitiativeBeenRolled() ? (
-          <div className="space-y-2" data-testid="initiative-order">
-            <h2 className="text-xl font-semibold text-yellow-400 mb-4">Initiative Order</h2>
-            {getDisplayCombatants().map((combatant) => {
-              const actualIdx = combatState.combatants.findIndex(c => c.id === combatant.id);
-              const isActive = actualIdx === combatState.currentTurnIndex;
+        <div className="space-y-2" data-testid="initiative-order">
+          <h2 className="text-xl font-semibold text-yellow-400 mb-4">Initiative Order</h2>
+          {getDisplayCombatants().map((combatant) => {
+            const actualIdx = combatState.combatants.findIndex(c => c.id === combatant.id);
+            const isActive = actualIdx === combatState.currentTurnIndex;
 
-              if (combatant.type === 'lair') {
-                return (
-                  <div key={combatant.id} data-testid={isActive ? 'lair-active' : 'lair-slot-badge'}>
-                    <LairActionsSlot
-                      combatant={combatant}
-                      isActive={isActive}
-                      onUpdate={(updates) => updateCombatant(combatant.id, updates)}
-                      onNextTurn={nextTurn}
-                    />
-                    {!isActive && (
-                      <button
-                        type="button"
-                        data-testid="lair-slot-remove"
-                        className="text-xs text-red-400 hover:text-red-300 mt-1 ml-2"
-                        onClick={(e) => {
-                          const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
-                          setRemoveConfirmId(combatant.id);
-                          setRemoveConfirmPosition({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
-                        }}
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                );
-              }
+            if (combatant.type === 'lair') {
+              return (
+                <div key={combatant.id} data-testid={isActive ? 'lair-active' : 'lair-slot-badge'}>
+                  <LairActionsSlot
+                    combatant={combatant}
+                    isActive={isActive}
+                    onUpdate={(updates) => updateCombatant(combatant.id, updates)}
+                    onNextTurn={nextTurn}
+                  />
+                  {!isActive && (
+                    <button
+                      type="button"
+                      data-testid="lair-slot-remove"
+                      className="text-xs text-red-400 hover:text-red-300 mt-1 ml-2"
+                      onClick={(e) => {
+                        const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                        setRemoveConfirmId(combatant.id);
+                        setRemoveConfirmPosition({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+                      }}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              );
+            }
 
-              return renderCard(combatant);
-            })}
-          </div>
-        ) : (
-          <div className="space-y-6" data-testid="combatants-list">
-            <div>
-              <h2 className="text-xl font-semibold text-blue-400 mb-3">Party</h2>
-              <div className="space-y-2">
-                {getDisplayCombatants()
-                  .filter(c => c.type === 'player').map(renderCard)}
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-xl font-semibold text-red-400 mb-3">Enemies</h2>
-              <div className="space-y-2">
-                {getDisplayCombatants()
-                  .filter(c => c.type === 'monster').map(renderCard)}
-              </div>
-            </div>
-          </div>
-        )}
+            return renderCard(combatant);
+          })}
+        </div>
 
         <CombatSetupAndActiveModals
           combat={combat}
