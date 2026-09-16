@@ -110,6 +110,30 @@ describe('CombatantCard — quick d20 roll', () => {
     }
   });
 
+  test('repeated clicks with the same roll value still remount the overlay', async () => {
+    // A same-value repeat is the case that would silently fail to re-announce the result to
+    // screen readers if the overlay were not remounted per roll (DiceRollOverlay's live region
+    // effect is keyed on `[formula, total]`, which would not change between two identical
+    // rolls). Asserting the dialog is replaced (not just present) after a same-value repeat
+    // guards the `key={rollSeq}` remount rather than only the visible total.
+    const rollSpy = jest.spyOn(dice, 'rollDie').mockReturnValue([11]);
+    try {
+      const user = userEvent.setup();
+      renderCard({ type: 'monster' });
+      const button = within(getQuickRollSection()).getByRole('button', { name: /roll/i });
+      await user.click(button);
+      const firstDialog = screen.getByRole('dialog', { name: 'Dice roll result' });
+
+      await user.click(button);
+      const secondDialog = screen.getByRole('dialog', { name: 'Dice roll result' });
+
+      expect(secondDialog).not.toBe(firstDialog);
+      expect(secondDialog.querySelector('#dice-roll-result-total')).toHaveTextContent('11');
+    } finally {
+      rollSpy.mockRestore();
+    }
+  });
+
   test('two sibling monster cards have independent quick-roll state', async () => {
     const rollSpy = jest.spyOn(dice, 'rollDie').mockReturnValue([6]);
     try {

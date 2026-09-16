@@ -57,6 +57,7 @@ export function CombatantCard(props: CombatantCardProps) {
   const [showTargeting, setShowTargeting] = useState(false);
   const [addConditionOpen, setAddConditionOpen] = useState(false);
   const [activeRoll, setActiveRoll] = useState<BuiltRoll | null>(null);
+  const [rollSeq, setRollSeq] = useState(0);
 
   const hp = useCombatantHp({
     combatId,
@@ -81,6 +82,7 @@ export function CombatantCard(props: CombatantCardProps) {
 
   const handleQuickRoll = () => {
     const value = rollDie(20)[0];
+    setRollSeq(seq => seq + 1);
     setActiveRoll({
       formula: '1d20',
       rolls: [value],
@@ -95,6 +97,7 @@ export function CombatantCard(props: CombatantCardProps) {
     : { backgroundImage: 'linear-gradient(to right, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.02))' };
 
   const life = lifeStateDisplay(combatant);
+  const isMonster = combatant.type === 'monster';
 
   return (
     <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'} ${life.greyed ? 'opacity-50' : ''}`} data-testid="combatant-card" data-life-state={combatant.lifeState ?? 'active'} aria-current={isActive ? 'step' : undefined}>
@@ -121,12 +124,13 @@ export function CombatantCard(props: CombatantCardProps) {
               applySetTemp={hp.applySetTemp}
               undoHpChange={hp.undoHpChange}
             />
-            <div data-card-section="quick-rolls" className={combatant.type === 'monster' ? undefined : 'hidden empty:block'}>
-              {combatant.type === 'monster' && (
+            <div data-card-section="quick-rolls" className={isMonster ? undefined : 'hidden empty:block'}>
+              {isMonster && (
                 <button
                   type="button"
                   onClick={handleQuickRoll}
-                  aria-label="Roll d20"
+                  aria-label={`Roll d20 for ${combatant.name}`}
+                  title="Roll a d20"
                   className="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-white w-8 h-8 rounded-full flex items-center justify-center"
                 >
                   <DiceD20Icon width={18} height={18} aria-hidden="true" />
@@ -224,7 +228,7 @@ export function CombatantCard(props: CombatantCardProps) {
         </div>
       </div>
       {activeRoll && (
-        <DiceRollOverlay built={activeRoll} disableAnimation onClose={() => setActiveRoll(null)} />
+        <DiceRollOverlay key={rollSeq} built={activeRoll} disableAnimation onClose={() => setActiveRoll(null)} />
       )}
     </div>
   );
