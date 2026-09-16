@@ -345,11 +345,15 @@ export function buildCombatantFromSource(
   idPrefix: string,
 ): CombatantState {
   const lacCount = 'legendaryActionCount' in source ? source.legendaryActionCount : undefined;
+  const manualInitiative = ('initiative' in source && typeof source.initiative === 'number') ? source.initiative : undefined;
   return {
     id: `${idPrefix}-${source.id}-${crypto.randomUUID()}`,
     name: source.name,
     type,
-    initiative: ('initiative' in source && typeof source.initiative === 'number') ? source.initiative : 0,
+    initiative: manualInitiative ?? 0,
+    ...(manualInitiative !== undefined && {
+      initiativeRoll: { roll: manualInitiative, bonus: 0, total: manualInitiative, method: 'manual' },
+    }),
     abilityScores: source.abilityScores ?? { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
     hp: source.hp,
     maxHp: source.maxHp,
