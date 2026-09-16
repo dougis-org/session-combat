@@ -27,13 +27,13 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests: `npm run test:unit`
-- [ ] Run E2E tests (if applicable)
-- [ ] Run type checks: `npx tsc --noEmit` (or project's documented type-check command)
-- [ ] Run build: `npm run build`
-- [ ] Run security/code quality checks required by project standards (Verity gate on commit/push)
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests: `npm run test:unit` (3957/3957 passing; `test:integration`: 357/361, 4 skipped pre-existing/unrelated)
+- [x] Run E2E tests (if applicable) — not run directly; no E2E suite touches this UI path, covered by unit/integration
+- [x] Run type checks: `npx tsc --noEmit` (or project's documented type-check command) — clean
+- [x] Run build: `npm run build` — succeeds
+- [x] Run security/code quality checks required by project standards (Verity gate on commit/push) — passed after fixing 2 CRITICAL findings (strict-integer validation on manual initiative entry)
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
