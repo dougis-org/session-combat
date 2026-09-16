@@ -358,6 +358,27 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     }
   });
 
+  it('sizes the modal to exactly the width of its target card, not a fixed width', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+
+    const cardRect = { top: 40, left: 16, bottom: 400, right: 1264, width: 1248, height: 360, x: 16, y: 40, toJSON() {} } as DOMRect;
+    const originalGBCR = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
+      if (this.getAttribute('data-combatant-id') === 'c1') return cardRect;
+      return originalGBCR.call(this);
+    });
+
+    try {
+      render(<ActiveCombatView combat={combat} user={null} />);
+      const modal = screen.getByTestId('initiative-modal');
+      expect(modal.style.width).toBe(`${cardRect.width}px`);
+      expect(modal.className).not.toMatch(/\bw-80\b/);
+    } finally {
+      Element.prototype.getBoundingClientRect = originalGBCR;
+    }
+  });
+
   it('clamps the modal position so it never overflows the viewport', () => {
     const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
