@@ -393,6 +393,43 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     }
   });
 
+  it('clamps the minimum position to the visible viewport edge, not the document origin, when the page is scrolled', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+
+    const originalScrollX = window.scrollX;
+    const originalScrollY = window.scrollY;
+    Object.defineProperty(window, 'scrollX', { value: 500, configurable: true });
+    Object.defineProperty(window, 'scrollY', { value: 1000, configurable: true });
+
+    // Card rect is in page coordinates that land above/left of the current visible
+    // viewport (e.g. the DM scrolled down after the card was anchored).
+    const cardRect = { top: -900, left: -450, bottom: -880, right: -400, width: 50, height: 20, x: -450, y: -900, toJSON() {} } as DOMRect;
+    const modalRect = { top: -880, left: -450, bottom: -680, right: -130, width: 320, height: 200, x: -450, y: -880, toJSON() {} } as DOMRect;
+
+    const originalGBCR = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
+      if (this.getAttribute('data-testid') === 'initiative-modal') return modalRect;
+      if (this.getAttribute('data-combatant-id') === 'c1') return cardRect;
+      return originalGBCR.call(this);
+    });
+
+    try {
+      render(<ActiveCombatView combat={combat} user={null} />);
+      const modal = screen.getByTestId('initiative-modal');
+      const left = parseFloat(modal.style.left);
+      const top = parseFloat(modal.style.top);
+      // Must clamp to the scrolled viewport's edge (scrollX/scrollY + margin), not
+      // the bare 16px margin from the document origin.
+      expect(left).toBe(500 + 16);
+      expect(top).toBe(1000 + 16);
+    } finally {
+      Element.prototype.getBoundingClientRect = originalGBCR;
+      Object.defineProperty(window, 'scrollX', { value: originalScrollX, configurable: true });
+      Object.defineProperty(window, 'scrollY', { value: originalScrollY, configurable: true });
+    }
+  });
+
   it('does not clamp when the card is comfortably within the viewport', () => {
     const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
@@ -442,6 +479,41 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
 
     const combat2 = makeCombat({ combatState: makeCombatState({ combatants: [] }) }, []);
     expect(() => rerender(<ActiveCombatView combat={combat2} user={null} />)).not.toThrow();
+    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
+  });
+
+  it('recovers auto-open for a remaining unrolled combatant after the open combatant is removed mid-session', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin, orc] }) }, [goblin, orc]);
+    const { rerender } = render(<ActiveCombatView combat={combat} user={null} />);
+    expect(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Goblin' })).toBeInTheDocument();
+
+    // Goblin (the combatant the modal is currently anchored to) is removed, but Orc
+    // is still unrolled and still present. Without clearing the stale
+    // initiativeEditId, auto-open would stay permanently blocked for Orc too.
+    const combat2 = makeCombat({ combatState: makeCombatState({ combatants: [orc] }) }, [orc]);
+    rerender(<ActiveCombatView combat={combat2} user={null} />);
+
+    expect(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Orc' })).toBeInTheDocument();
+  });
+
+  it('clicking outside the modal closes it and marks the combatant dismissed', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc', initiativeRoll: ROLLED });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin, orc] }) }, [goblin, orc]);
+    const { rerender } = render(<ActiveCombatView combat={combat} user={null} />);
+    expect(screen.getByTestId('initiative-modal')).toBeInTheDocument();
+
+    await user.click(document.body);
+    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
+
+    // Re-render triggered by unrelated state; goblin must stay closed (same
+    // dismissal tracking as the Escape-key path).
+    const orc2 = makeCombatant({ id: 'c3', name: 'Orc2', initiativeRoll: ROLLED });
+    const combat2 = makeCombat({ combatState: makeCombatState({ combatants: [goblin, orc, orc2] }) }, [goblin, orc, orc2]);
+    rerender(<ActiveCombatView combat={combat2} user={null} />);
     expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
   });
 });

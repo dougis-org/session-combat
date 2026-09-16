@@ -141,6 +141,18 @@ describe('InitiativeEntry', () => {
       expect(window.alert).toHaveBeenCalled();
       expect(onSet).not.toHaveBeenCalled();
     });
+
+    it('negative value is rejected rather than silently truncated', async () => {
+      const user = userEvent.setup();
+      const { onSet } = renderEntry();
+      await user.click(screen.getByText('Enter Dice Roll'));
+      const input = screen.getByPlaceholderText('1-20');
+      await user.clear(input);
+      await user.type(input, '-5');
+      await user.click(screen.getByText('Set'));
+      expect(window.alert).toHaveBeenCalled();
+      expect(onSet).not.toHaveBeenCalled();
+    });
   });
 
   describe('total mode', () => {
@@ -177,12 +189,54 @@ describe('InitiativeEntry', () => {
       expect(window.alert).toHaveBeenCalled();
       expect(onSet).not.toHaveBeenCalled();
     });
+
+    it('negative value is rejected rather than silently truncated', async () => {
+      const user = userEvent.setup();
+      const { onSet } = renderEntry();
+      await user.click(screen.getByText('Enter Total'));
+      const input = screen.getByPlaceholderText('Total initiative');
+      await user.clear(input);
+      await user.type(input, '-5');
+      await user.click(screen.getByText('Set'));
+      expect(window.alert).toHaveBeenCalled();
+      expect(onSet).not.toHaveBeenCalled();
+    });
+
+    it('0 is accepted as a valid total (the lower boundary, not rejected like negative values)', async () => {
+      const user = userEvent.setup();
+      const { onSet } = renderEntry();
+      await user.click(screen.getByText('Enter Total'));
+      const input = screen.getByPlaceholderText('Total initiative');
+      await user.clear(input);
+      await user.type(input, '0');
+      await user.click(screen.getByText('Set'));
+      expect(window.alert).not.toHaveBeenCalled();
+      expect(onSet).toHaveBeenCalledWith(expect.objectContaining({ total: 0 }));
+    });
   });
 
   describe('close button', () => {
     it('does not embed the combatant name in its accessible name, to avoid colliding with role-based button queries elsewhere on the page', () => {
       renderEntry({ name: 'Test Fighter [temp-hp-absorbs-damage-correctly]' });
       expect(screen.getByRole('button', { name: 'Close initiative editor' })).toBeInTheDocument();
+    });
+  });
+
+  describe('click-outside behavior', () => {
+    it('mousedown outside the modal calls onClose', () => {
+      const { onClose } = renderEntry();
+      const outside = document.createElement('div');
+      document.body.appendChild(outside);
+      outside.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(onClose).toHaveBeenCalledTimes(1);
+      document.body.removeChild(outside);
+    });
+
+    it('mousedown inside the modal does not call onClose', async () => {
+      const user = userEvent.setup();
+      const { onClose } = renderEntry();
+      await user.click(screen.getByText('Roll d20'));
+      expect(onClose).not.toHaveBeenCalled();
     });
   });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CombatantState, InitiativeRoll } from '@/lib/types';
 import { buildInitiativeRoll, getDexInitiativeBonus } from '@/lib/utils/combat';
 
@@ -17,15 +17,25 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
   const [totalValue, setTotalValue] = useState('');
   const [advantage, setAdvantage] = useState(combatant.initiativeAdvantage ?? false);
   const [flatBonus, setFlatBonus] = useState(combatant.initiativeFlatBonus ?? 0);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
-  // Close with Escape whenever an onClose handler is provided
+  // Close with Escape or a click outside the modal's own bounds, whenever an
+  // onClose handler is provided.
   useEffect(() => {
     if (!onClose) return;
-    const handler = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    const handlePointerDown = (e: MouseEvent) => {
+      if (rootRef.current?.contains(e.target as Node)) return;
+      onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handlePointerDown);
+    };
   }, [onClose]);
 
   const handleRoll = () => {
@@ -33,8 +43,12 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
   };
 
   const handleDiceEntry = () => {
-    const roll = Number(diceRoll);
-    if (diceRoll.trim() === '' || !Number.isSafeInteger(roll) || roll < 1 || roll > 20) {
+    const trimmed = diceRoll.trim();
+    const roll = Number(trimmed);
+    // Require plain decimal digits so exotic-but-numeric literals (hex, exponential,
+    // leading '+') that `Number()`/`Number.isSafeInteger` would otherwise accept are
+    // rejected as not being a "whole number" in the plain sense the alert describes.
+    if (!/^\d+$/.test(trimmed) || !Number.isSafeInteger(roll) || roll < 1 || roll > 20) {
       alert('Dice roll must be a whole number between 1 and 20');
       return;
     }
@@ -53,8 +67,9 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
   };
 
   const handleTotalEntry = () => {
-    const total = Number(totalValue);
-    if (totalValue.trim() === '' || !Number.isSafeInteger(total) || total < 0) {
+    const trimmed = totalValue.trim();
+    const total = Number(trimmed);
+    if (!/^\d+$/.test(trimmed) || !Number.isSafeInteger(total) || total < 0) {
       alert('Initiative must be a whole number 0 or greater');
       return;
     }
@@ -71,7 +86,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
   };
 
   return (
-    <div className="relative bg-gray-800 rounded-lg p-4 border border-gray-700">
+    <div ref={rootRef} className="relative bg-gray-800 rounded-lg p-4 border border-gray-700">
       {/* Close button whenever the parent provided an onClose handler */}
       {onClose && (
         <button

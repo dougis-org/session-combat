@@ -133,7 +133,11 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
   const getCardAnchorPosition = (id: string): { top: number; left: number } | null => {
     const el = document.querySelector(`[data-combatant-id="${id}"]`);
-    return el ? rectToPosition(el.getBoundingClientRect()) : null;
+    if (!el) {
+      console.warn(`ActiveCombatView: no card element found for combatant ${id} while anchoring the initiative modal`);
+      return null;
+    }
+    return rectToPosition(el.getBoundingClientRect());
   };
 
   // Single place that updates the (id, position) pair together so the two
@@ -172,9 +176,9 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     openInitiativeModal(null, null);
   };
 
-  // Auto-open the initiative modal for the first unrolled, non-dismissed combatant
-  // whenever no modal is currently open — fires on mount and whenever a newly
-  // added combatant has no initiativeRoll.
+  // Re-evaluates whenever the set of unrolled combatants changes (added, rolled,
+  // or removed) or the modal closes, and opens the first eligible (unrolled,
+  // non-dismissed) combatant found, provided no modal is currently open.
   const unrolledCombatantIds = (combatState?.combatants ?? [])
     .filter(c => !c.initiativeRoll)
     .map(c => c.id)
@@ -196,6 +200,16 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unrolledCombatantIds, initiativeEditId]);
 
+  // Recovery for the "combatant removed while its initiative modal is open" race:
+  // the render guard below already hides the modal (no matching combatant), but
+  // without this, `initiativeEditId` would stay non-null forever and permanently
+  // block the auto-open effect above from ever firing again for anyone else.
+  useEffect(() => {
+    if (!initiativeEditId || !combatState) return;
+    const stillExists = combatState.combatants.some(c => c.id === initiativeEditId);
+    if (!stillExists) openInitiativeModal(null, null);
+  }, [initiativeEditId, combatState]);
+
   // Measure the rendered modal and clamp its position so it never overflows the
   // viewport, replacing the old hardcoded-width offset.
   useLayoutEffect(() => {
@@ -210,8 +224,12 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     if (overflowRight > 0) left -= overflowRight;
     const overflowBottom = (top + rect.height) - maxTop;
     if (overflowBottom > 0) top -= overflowBottom;
-    left = Math.max(MODAL_VIEWPORT_MARGIN, left);
-    top = Math.max(MODAL_VIEWPORT_MARGIN, top);
+    // Positions are page coordinates (rect + scrollX/scrollY), so the minimum
+    // clamp must also be scroll-aware — clamping to the bare margin would pin
+    // the modal to the document origin instead of the visible viewport edge
+    // when the page is scrolled.
+    left = Math.max(window.scrollX + MODAL_VIEWPORT_MARGIN, left);
+    top = Math.max(window.scrollY + MODAL_VIEWPORT_MARGIN, top);
 
     el.style.left = `${left}px`;
     el.style.top = `${top}px`;
