@@ -84,18 +84,18 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on the default branch
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (e.g. note the new `seed:conditions` step in any deploy/setup docs)
-- [ ] Sync approved spec deltas into `openspec/specs/condition-catalog/spec.md`. After copying `spec.md`, update relative links that pointed into the change directory: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-default-condition-catalog/design.md`, and similarly for `../../tasks.md`.
-- [ ] Archive the change: move `openspec/changes/default-condition-catalog/` to `openspec/changes/archive/YYYY-MM-DD-default-condition-catalog/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-default-condition-catalog/` exists and `openspec/changes/default-condition-catalog/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-default-condition-catalog` then `git push -u origin doc/archive-YYYY-MM-DD-default-condition-catalog`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-default-condition-catalog` to `main` with title `docs: archive default-condition-catalog (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D default-condition-catalog doc/archive-YYYY-MM-DD-default-condition-catalog`
-- [ ] Remove the change's dedicated worktree: `git worktree remove .worktrees/default-condition-catalog` (from the primary checkout)
+- [x] `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on the default branch
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (e.g. note the new `seed:conditions` step in any deploy/setup docs) — N/A: no such doc exists in this repo (not even for the analogous `seed:monsters` script)
+- [x] Sync approved spec deltas into `openspec/specs/condition-catalog/spec.md`. After copying `spec.md`, update relative links that pointed into the change directory: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-default-condition-catalog/design.md`, and similarly for `../../tasks.md`.
+- [x] Archive the change: move `openspec/changes/default-condition-catalog/` to `openspec/changes/archive/YYYY-MM-DD-default-condition-catalog/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-default-condition-catalog/` exists and `openspec/changes/default-condition-catalog/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-default-condition-catalog` then `git push -u origin doc/archive-YYYY-MM-DD-default-condition-catalog`
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-default-condition-catalog` to `main` with title `docs: archive default-condition-catalog (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D default-condition-catalog doc/archive-YYYY-MM-DD-default-condition-catalog`
+- [x] Remove the change's dedicated worktree: `git worktree remove .worktrees/default-condition-catalog` (from the primary checkout)
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D default-condition-catalog doc/archive-YYYY-MM-DD-default-condition-catalog`
