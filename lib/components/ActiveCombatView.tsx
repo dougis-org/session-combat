@@ -124,25 +124,31 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
   } = combat;
 
   const [initiativeEditId, setInitiativeEditId] = useState<string | null>(null);
-  const [initiativeEditPosition, setInitiativeEditPosition] = useState<{top: number, left: number} | null>(null);
+  const [initiativeEditPosition, setInitiativeEditPosition] = useState<{top: number, left: number, width: number} | null>(null);
   const initiativeModalRef = useRef<HTMLDivElement | null>(null);
   // Combatants whose auto-opened initiative modal the DM has manually dismissed
   // this session; they stay eligible for the manual click-to-open flow, just not
   // for auto-reopen. Resets on remount (e.g. full page reload).
   const dismissedInitiativeIds = useRef<Set<string>>(new Set());
 
-  const getCardAnchorPosition = (id: string): { top: number; left: number } | null => {
+  // The modal takes the same shape as its target card: same width, same left
+  // edge, sitting directly below it. That means it can only ever overflow the
+  // bottom of the viewport (the card itself is already constrained
+  // horizontally by the page layout), so only vertical clamping is needed.
+  const getCardAnchorPosition = (id: string): { top: number; left: number; width: number } | null => {
     const el = document.querySelector(`[data-combatant-id="${id}"]`);
     if (!el) {
       console.warn(`ActiveCombatView: no card element found for combatant ${id} while anchoring the initiative modal`);
       return null;
     }
-    return rectToPosition(el.getBoundingClientRect());
+    const rect = el.getBoundingClientRect();
+    const { top, left } = rectToPosition(rect);
+    return { top, left, width: rect.width };
   };
 
   // Single place that updates the (id, position) pair together so the two
   // pieces of state never drift out of sync.
-  const openInitiativeModal = (id: string | null, position: { top: number; left: number } | null) => {
+  const openInitiativeModal = (id: string | null, position: { top: number; left: number; width: number } | null) => {
     setInitiativeEditId(id);
     setInitiativeEditPosition(position);
   };
@@ -211,10 +217,14 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
   }, [initiativeEditId, combatState]);
 
   // Measure the rendered modal and clamp its position so it never overflows the
-  // viewport, replacing the old hardcoded-width offset.
+  // viewport. The modal is always exactly as wide as its target card and
+  // shares its left edge, so it can only overflow vertically (below the
+  // viewport) — the horizontal clamp is a defensive no-op for that shape.
   useLayoutEffect(() => {
     if (!initiativeEditId || !initiativeEditPosition || !initiativeModalRef.current) return;
     const el = initiativeModalRef.current;
+    el.style.width = `${initiativeEditPosition.width}px`;
+
     const rect = el.getBoundingClientRect();
     const maxLeft = window.scrollX + window.innerWidth - MODAL_VIEWPORT_MARGIN;
     const maxTop = window.scrollY + window.innerHeight - MODAL_VIEWPORT_MARGIN;
@@ -369,10 +379,11 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
           return combatant ? (
             <div
               ref={initiativeModalRef}
-              className="absolute z-50 p-4 bg-gray-800 rounded-lg shadow-2xl border border-gray-600 w-80 max-w-[calc(100vw-2rem)]"
+              className="absolute z-50 p-4 bg-gray-800 rounded-lg shadow-2xl border border-gray-600"
               style={{
                 top: initiativeEditPosition.top,
                 left: initiativeEditPosition.left,
+                width: initiativeEditPosition.width,
               }}
               data-testid="initiative-modal"
             >
