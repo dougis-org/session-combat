@@ -26,28 +26,34 @@ beforeEach(() => {
 });
 
 describe("seedConditionCatalog", () => {
-  it("inserts exactly 15 entries into an empty collection", async () => {
+  it("inserts exactly 18 entries into an empty collection", async () => {
     const { store } = mockCollection();
     const result = await seedConditionCatalog();
-    expect(store.size).toBe(15);
-    expect(result.inserted).toBe(15);
+    expect(store.size).toBe(18);
+    expect(result.inserted).toBe(18);
     expect(result.updated).toBe(0);
   });
 
-  it("is idempotent: running twice still results in exactly 15 entries", async () => {
+  it("is idempotent: running twice still results in exactly 18 entries", async () => {
     const { store } = mockCollection();
     await seedConditionCatalog();
     const second = await seedConditionCatalog();
-    expect(store.size).toBe(15);
+    expect(store.size).toBe(18);
     expect(second.inserted).toBe(0);
-    expect(second.updated).toBe(15);
+    expect(second.updated).toBe(18);
   });
 
   it("every seeded entry has a non-empty name and description", () => {
-    expect(CONDITION_CATALOG).toHaveLength(15);
+    expect(CONDITION_CATALOG).toHaveLength(18);
     for (const entry of CONDITION_CATALOG) {
       expect(entry.name.length).toBeGreaterThan(0);
       expect(entry.description.length).toBeGreaterThan(0);
     }
+  });
+
+  it("includes Slowed, Confused, and Turned", () => {
+    expect(CONDITION_CATALOG.map((c) => c.name)).toEqual(
+      expect.arrayContaining(["Slowed", "Confused", "Turned"])
+    );
   });
 });

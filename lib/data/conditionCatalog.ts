@@ -1,6 +1,10 @@
 import { StatusConditionCatalogEntry } from "@/lib/types";
 
-/** The 15 standard D&D 5e conditions and their SRD rules-text descriptions. */
+/**
+ * The 15 standard D&D 5e conditions plus Slowed, Confused, and Turned —
+ * commonly-needed spell/feature-inflicted status effects — with their
+ * SRD-style rules-text descriptions.
+ */
 export const CONDITION_CATALOG: StatusConditionCatalogEntry[] = [
   {
     name: "Blinded",
@@ -11,6 +15,11 @@ export const CONDITION_CATALOG: StatusConditionCatalogEntry[] = [
     name: "Charmed",
     description:
       "A charmed creature can't attack the charmer or target the charmer with harmful abilities or magical effects. The charmer has advantage on any ability check to interact socially with the creature.",
+  },
+  {
+    name: "Confused",
+    description:
+      "A confused creature can't willingly move or take actions except on its own initiative, and it must roll to determine its unpredictable behavior each turn: wandering in a random direction, remaining in place, attacking the nearest creature, or babbling incoherently and taking no action.",
   },
   {
     name: "Deafened",
@@ -66,9 +75,19 @@ export const CONDITION_CATALOG: StatusConditionCatalogEntry[] = [
       "A restrained creature's speed becomes 0, and it can't benefit from any bonus to its speed. Attack rolls against the creature have advantage, and the creature's attack rolls have disadvantage. The creature has disadvantage on Dexterity saving throws.",
   },
   {
+    name: "Slowed",
+    description:
+      "A slowed creature's speed is halved, it takes a -2 penalty to AC and Dexterity saving throws, and it can't use reactions. On its turn, it can use either an action or a bonus action, not both, and it can't make more than one melee or ranged attack.",
+  },
+  {
     name: "Stunned",
     description:
       "A stunned creature is incapacitated, can't move, and can speak only falteringly. It automatically fails Strength and Dexterity saving throws. Attack rolls against the creature have advantage.",
+  },
+  {
+    name: "Turned",
+    description:
+      "A turned creature must spend its turns trying to move as far away from the source of the effect as it can, and it can't willingly move to a space within 30 feet of that source. It also can't take reactions and can use its action only to Dash or try to escape from an effect that prevents it from moving.",
   },
   {
     name: "Unconscious",
