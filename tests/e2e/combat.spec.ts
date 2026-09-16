@@ -497,7 +497,8 @@ test.describe("Combat flows", () => {
     await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
 
     // Open Aboleth detail panel and use 2 actions
-    const detailToggle = page.locator('[data-testid="combatant-detail-toggle"]').first();
+    const aboletCard = page.locator('[data-testid="initiative-order"] > *').filter({ hasText: "Aboleth" });
+    const detailToggle = aboletCard.locator('[data-testid="combatant-detail-toggle"]');
     await detailToggle.click();
     const useBtn = page.locator('[data-testid="legendary-action-use-0"]').first();
     await expect(useBtn).toBeVisible({ timeout: 5000 });
