@@ -14,12 +14,15 @@
  * monster-json-import-modal (#626) adds three monster-import methods
  * (`saveManyMonsterTemplates`, `deleteMonsterTemplatesByIds`,
  * `findExistingMonsterKeys`), taking the count to 75.
+ *
+ * default-condition-catalog (#733) adds `loadConditionCatalog`, taking the
+ * count to 75.
  */
 import { storage } from "@/lib/storage";
 
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 
-const OWN_KEY_COUNT = 74;
+const OWN_KEY_COUNT = 75;
 
 describe("storage facade shape", () => {
   it("exposes the expected number of own-enumerable keys", () => {

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import type { StatusCondition } from '@/lib/types';
+import { useEffect, useState } from 'react';
+import type { StatusCondition, StatusConditionCatalogEntry } from '@/lib/types';
 
 const MAX_CONDITION_NAME_LENGTH = 100;
 const MAX_CONDITION_DURATION = 10_000;
+const CUSTOM_OPTION = 'custom';
 
 /**
  * Parse the free-text condition form, applying the same limits the old
@@ -40,14 +41,41 @@ interface ConditionFormModalProps {
 export function ConditionFormModal({ combatantName, onSubmit, onClose }: ConditionFormModalProps) {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
+  const [selection, setSelection] = useState(CUSTOM_OPTION);
+  const [catalog, setCatalog] = useState<StatusConditionCatalogEntry[]>([]);
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/conditions/catalog')
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('catalog fetch failed'))))
+      .then((entries: StatusConditionCatalogEntry[]) => {
+        if (!cancelled) setCatalog(Array.isArray(entries) ? entries : []);
+      })
+      .catch((err) => {
+        console.error('condition catalog fetch failed, falling back to custom entry', err);
+        if (!cancelled) setCatalog([]);
+      })
+      .finally(() => {
+        if (!cancelled) setCatalogLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const showDropdown = catalog.length > 0;
+  const showEmptyNote = catalogLoaded && catalog.length === 0;
+  const selectedEntry = catalog.find((c) => c.name === selection);
+  const usingCustom = !selectedEntry;
 
   const handleAdd = () => {
-    const parsed = parseConditionForm(name, duration);
+    const parsed = parseConditionForm(selectedEntry ? selectedEntry.name : name, duration);
     if (!parsed) return;
     onSubmit({
       id: crypto.randomUUID(),
       name: parsed.name,
-      description: '',
+      description: selectedEntry ? selectedEntry.description : '',
       duration: parsed.duration,
     });
     onClose();
@@ -61,19 +89,46 @@ export function ConditionFormModal({ combatantName, onSubmit, onClose }: Conditi
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-sm mx-auto w-full">
         <h3 className="text-lg font-semibold mb-4 text-white">Add condition — {combatantName}</h3>
         <div className="space-y-3">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Condition name"
-            aria-label="Condition name"
-            data-testid="condition-name-input"
-            className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleAdd();
-            }}
-          />
+          {showDropdown && (
+            <select
+              value={selection}
+              onChange={(e) => setSelection(e.target.value)}
+              aria-label="Condition"
+              data-testid="condition-catalog-select"
+              className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              {catalog.map((entry) => (
+                <option key={entry.name} value={entry.name}>
+                  {entry.name}
+                </option>
+              ))}
+              <option value={CUSTOM_OPTION}>Custom…</option>
+            </select>
+          )}
+          {showEmptyNote && (
+            <p className="text-xs text-gray-400" data-testid="condition-catalog-empty-note">
+              No default conditions loaded — enter a custom one.
+            </p>
+          )}
+          {usingCustom ? (
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Condition name"
+              aria-label="Condition name"
+              data-testid="condition-name-input"
+              className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAdd();
+              }}
+            />
+          ) : (
+            <p className="text-xs text-gray-300" data-testid="condition-catalog-description">
+              {selectedEntry.description}
+            </p>
+          )}
           <input
             type="text"
             inputMode="numeric"

@@ -16,6 +16,13 @@ const BASE: CombatantState = {
   abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
 };
 
+beforeEach(() => {
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    json: jest.fn().mockResolvedValue([]),
+  }) as never;
+});
+
 function setup(overrides: Partial<CombatantState> = {}, extra: Partial<React.ComponentProps<typeof ConditionControls>> = {}) {
   const onUpdate = jest.fn();
   const onModalClose = jest.fn();
@@ -97,5 +104,31 @@ describe('ConditionControls', () => {
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     expect(toggle.querySelector('svg')).not.toHaveClass('rotate-90');
     expect(screen.queryByText('Poisoned')).not.toBeInTheDocument();
+  });
+
+  test('shows the description text when a condition has a non-empty description', async () => {
+    const { user } = setup({
+      conditions: [{ id: 'x1', name: 'Poisoned', description: 'Disadvantage on attacks and ability checks.' }],
+    });
+    await user.click(screen.getByRole('button', { name: /Conditions \(1\)/ }));
+    expect(screen.getByText('Disadvantage on attacks and ability checks.')).toBeInTheDocument();
+  });
+
+  test('renders no extra description line when the condition description is empty', async () => {
+    const { user } = setup({
+      conditions: [{ id: 'x1', name: 'Prone', description: '' }],
+    });
+    await user.click(screen.getByRole('button', { name: /Conditions \(1\)/ }));
+    expect(screen.queryByTestId('condition-description')).not.toBeInTheDocument();
+  });
+
+  test('a condition description containing HTML-like text renders literally, not as markup', async () => {
+    const { user } = setup({
+      conditions: [{ id: 'x1', name: 'Weird', description: '<b>bold</b>' }],
+    });
+    await user.click(screen.getByRole('button', { name: /Conditions \(1\)/ }));
+    const desc = screen.getByTestId('condition-description');
+    expect(desc.textContent).toBe('<b>bold</b>');
+    expect(desc.querySelector('b')).toBeNull();
   });
 });

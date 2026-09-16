@@ -33,7 +33,13 @@ function renderCard(overrides: Partial<CombatantState> = {}, extra: Record<strin
   return { onUpdate, user: userEvent.setup() };
 }
 
-beforeEach(() => localStorage.clear());
+beforeEach(() => {
+  localStorage.clear();
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    json: jest.fn().mockResolvedValue([]),
+  }) as never;
+});
 
 describe('CombatantCard composition — action column', () => {
   test('the action column keeps Add Target(s) and Add Condition triggers', () => {

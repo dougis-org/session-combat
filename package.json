@@ -22,7 +22,8 @@
     "migrate:encounters": "npx tsx lib/scripts/backfillCampaignEncounters.ts",
     "seed": "npx tsx lib/scripts/seedCampaignTemplates.ts",
     "seed:force": "npx tsx lib/scripts/seedCampaignTemplates.ts --force",
-    "seed:monsters": "npx tsx lib/scripts/seedGlobalMonsters.ts"
+    "seed:monsters": "npx tsx lib/scripts/seedGlobalMonsters.ts",
+    "seed:conditions": "npx tsx lib/scripts/seedConditionCatalog.ts"
   },
   "keywords": [],
   "author": "",

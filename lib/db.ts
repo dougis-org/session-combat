@@ -82,6 +82,15 @@ async function initializeDatabase(db: Db): Promise<void> {
     }
 
     try {
+      await db.collection("conditionCatalog").createIndex({ name: 1 }, { unique: true });
+      console.log("Created index on conditionCatalog.name");
+    } catch (indexError) {
+      if (indexError instanceof Error && !indexError.message.includes("already exists")) {
+        console.warn("Warning creating conditionCatalog.name index:", indexError.message);
+      }
+    }
+
+    try {
       await db
         .collection("campaignCharacterShares")
         .createIndex({ campaignId: 1, characterId: 1 }, { unique: true });

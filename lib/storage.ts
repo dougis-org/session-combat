@@ -20,6 +20,7 @@ import {
   MemberStatus,
   PublicUser,
   SharedCharacterEntry,
+  StatusConditionCatalogEntry,
 } from "./types";
 import { runStorageOp } from "@/lib/storage/runOp";
 
@@ -48,6 +49,7 @@ import * as shareRepo from "./storage/shareRepo";
 import * as spellRepo from "./storage/spellRepo";
 import * as rollRepo from "./storage/rollRepo";
 import * as storageMisc from "./storage/storageMisc";
+import * as conditionCatalogRepo from "./storage/conditionCatalogRepo";
 
 export const storage = {
   // Load encounters for a user
@@ -85,6 +87,9 @@ export const storage = {
 
   // Load all monster templates (user + global)
   async loadAllMonsterTemplates(userId: string): Promise<MonsterTemplate[]> { return monsterTemplateRepo.loadAllMonsterTemplates(userId); },
+
+  // Load the default condition catalog (global, read-only reference data)
+  async loadConditionCatalog(): Promise<StatusConditionCatalogEntry[]> { return conditionCatalogRepo.loadConditionCatalog(); },
 
   // Load global campaign templates (admin-controlled)
   async loadGlobalCampaignTemplates(): Promise<CampaignTemplate[]> { return campaignTemplateRepo.loadGlobalCampaignTemplates(); },
