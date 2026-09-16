@@ -5,7 +5,7 @@ jest.mock('next/link', () => ({
 }));
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ActiveCombatView } from '@/lib/components/ActiveCombatView';
 import { makeUseCombat } from '@/tests/unit/fixtures/useCombat';
@@ -187,6 +187,53 @@ describe('ActiveCombatView', () => {
     await user.click(screen.getByRole('button', { name: /cancel/i }));
     expect(removeCombatant).not.toHaveBeenCalled();
     expect(setRemoveConfirmId).toHaveBeenCalledWith(null);
+  });
+
+  it('saving initiative auto-advances the modal to the next unrolled combatant', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc' });
+    const setInitiativeRoll = jest.fn();
+    const combat = makeCombat(
+      { combatState: makeCombatState({ combatants: [goblin, orc] }), setInitiativeRoll },
+      [goblin, orc],
+    );
+    render(<ActiveCombatView combat={combat} user={null} />);
+
+    const goblinInitiativeButton = document.querySelector(
+      '[data-combatant-id="c1"] [data-card-section="initiative"] button',
+    ) as HTMLElement;
+    await user.click(goblinInitiativeButton);
+    const modal = screen.getByTestId('initiative-modal');
+    expect(within(modal).getByRole('heading', { name: 'Goblin' })).toBeInTheDocument();
+
+    await user.click(within(modal).getByRole('button', { name: 'Roll d20' }));
+
+    expect(setInitiativeRoll).toHaveBeenCalledWith('c1', expect.any(Object));
+    expect(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Orc' })).toBeInTheDocument();
+  });
+
+  it('saving the last unrolled combatant closes the initiative modal', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const setInitiativeRoll = jest.fn();
+    const combat = makeCombat(
+      { combatState: makeCombatState({ combatants: [goblin] }), setInitiativeRoll },
+      [goblin],
+    );
+    render(<ActiveCombatView combat={combat} user={null} />);
+
+    const goblinInitiativeButton = document.querySelector(
+      '[data-combatant-id="c1"] [data-card-section="initiative"] button',
+    ) as HTMLElement;
+    await user.click(goblinInitiativeButton);
+    const modal = screen.getByTestId('initiative-modal');
+    expect(within(modal).getByRole('heading', { name: 'Goblin' })).toBeInTheDocument();
+
+    await user.click(within(modal).getByRole('button', { name: 'Roll d20' }));
+
+    expect(setInitiativeRoll).toHaveBeenCalledWith('c1', expect.any(Object));
+    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
   });
 });
 

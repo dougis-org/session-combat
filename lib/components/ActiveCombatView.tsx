@@ -137,7 +137,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     const sorted = sortCombatants(updatedCombatants);
 
     // Using the same list as getDisplayCombatants to find the next one
-    const nextUnrolled = sorted.find(c => c.initiative === 0);
+    const nextUnrolled = sorted.find(c => !c.initiativeRoll);
 
     if (nextUnrolled) {
       const el = document.querySelector(`[data-combatant-id="${nextUnrolled.id}"] [data-card-section="initiative"] button`);
