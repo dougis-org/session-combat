@@ -52,7 +52,8 @@ export function ConditionFormModal({ combatantName, onSubmit, onClose }: Conditi
       .then((entries: StatusConditionCatalogEntry[]) => {
         if (!cancelled) setCatalog(Array.isArray(entries) ? entries : []);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('condition catalog fetch failed, falling back to custom entry', err);
         if (!cancelled) setCatalog([]);
       })
       .finally(() => {

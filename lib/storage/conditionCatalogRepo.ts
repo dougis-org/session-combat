@@ -10,6 +10,7 @@ export async function loadConditionCatalog(): Promise<StatusConditionCatalogEntr
       const entries = await db
         .collection<StatusConditionCatalogEntry>("conditionCatalog")
         .find({})
+        .sort({ name: 1 })
         .toArray();
       return entries.map(({ name, description }) => ({ name, description }));
     },
