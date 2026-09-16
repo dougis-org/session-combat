@@ -23,7 +23,7 @@
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
@@ -50,14 +50,14 @@ If **ANY** required step fails, you **MUST** iterate and address the failure bef
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `fix-initiative-modal-overlay` to `main`. **PR body MUST include `Closes #747`.**
-- [ ] **Issue lifecycle: mark in-review**: run `gh issue edit 747 --repo dougis-org/session-combat --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (this repo's ruleset only allows squash merges — NEVER use `--admin` to force the merge)
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `fix-initiative-modal-overlay` to `main`. **PR body MUST include `Closes #747`.**
+- [x] **Issue lifecycle: mark in-review**: run `gh issue edit 747 --repo dougis-org/session-combat --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (this repo's ruleset only allows squash merges — NEVER use `--admin` to force the merge)
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, reply, then resolve via the GraphQL `resolveReviewThread` mutation, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -78,13 +78,13 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from primary checkout)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (if any)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy `openspec/changes/fix-initiative-modal-overlay/specs/modal-initiative-entry/spec.md` into `openspec/specs/modal-initiative-entry/spec.md`, merging ADDED/MODIFIED requirements into the existing spec. Update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-fix-initiative-modal-overlay/design.md`, and similarly for `../../tasks.md`.
-- [ ] Archive the change: move `openspec/changes/fix-initiative-modal-overlay/` to `openspec/changes/archive/YYYY-MM-DD-fix-initiative-modal-overlay/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-initiative-modal-overlay/` exists and `openspec/changes/fix-initiative-modal-overlay/` is gone
+- [x] `git checkout main` and `git pull --ff-only` (from primary checkout)
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (if any)
+- [x] Sync approved spec deltas into `openspec/specs/`: copy `openspec/changes/fix-initiative-modal-overlay/specs/modal-initiative-entry/spec.md` into `openspec/specs/modal-initiative-entry/spec.md`, merging ADDED/MODIFIED requirements into the existing spec. Update all relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-fix-initiative-modal-overlay/design.md`, and similarly for `../../tasks.md`.
+- [x] Archive the change: move `openspec/changes/fix-initiative-modal-overlay/` to `openspec/changes/archive/YYYY-MM-DD-fix-initiative-modal-overlay/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-initiative-modal-overlay/` exists and `openspec/changes/fix-initiative-modal-overlay/` is gone
 - [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-fix-initiative-modal-overlay` then `git push -u origin doc/archive-YYYY-MM-DD-fix-initiative-modal-overlay`
 - [ ] Open a PR from `doc/archive-YYYY-MM-DD-fix-initiative-modal-overlay` to `main` with title `docs: archive fix-initiative-modal-overlay (YYYY-MM-DD)` — **do NOT push directly to `main`**
 - [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
