@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import {
@@ -127,6 +127,10 @@ export function DiceRollOverlay({
   const canvasReadyFiredRef = useRef(false)
   const [fallbackElapsed, setFallbackElapsed] = useState(false)
   const [liveResult, setLiveResult] = useState('')
+  // Per-instance so two overlays mounted at once (one per combatant's quick roll) each
+  // describe their own dialog — a shared static id would make both `aria-describedby`s
+  // resolve to whichever total rendered first in the DOM.
+  const totalId = useId()
 
   // The result modal stays hidden until the animation reports completion; it is shown
   // straight away on the non-animated paths, and unconditionally once the fallback timeout
@@ -242,13 +246,13 @@ export function DiceRollOverlay({
             role="dialog"
             aria-modal="true"
             aria-label="Dice roll result"
-            aria-describedby="dice-roll-result-total"
+            aria-describedby={totalId}
             tabIndex={-1}
             className="relative bg-gray-800 border border-gray-700 rounded-lg shadow-xl px-10 py-8 text-center"
           >
             <p className="text-2xl font-bold uppercase tracking-wide text-gray-400">{built.formula}</p>
             <StaticRollResult built={built} />
-            <p id="dice-roll-result-total" className="mt-1 text-5xl font-bold text-white">{built.total}</p>
+            <p id={totalId} data-testid="dice-roll-result-total" className="mt-1 text-5xl font-bold text-white">{built.total}</p>
           </div>
         )}
       </div>

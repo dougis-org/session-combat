@@ -32,16 +32,20 @@ describe('CombatantCard — quick d20 roll', () => {
     expect(within(section).getByRole('button', { name: /roll/i })).toBeInTheDocument();
   });
 
-  test('does not render the quick-roll button for a player combatant', () => {
+  test('does not render the quick-roll section for a player combatant', () => {
     renderCard({ type: 'player' });
-    const section = getQuickRollSection();
-    expect(within(section).queryByRole('button')).not.toBeInTheDocument();
+    expect(getQuickRollSection()).toBeNull();
   });
 
-  test('does not render the quick-roll button for a lair combatant', () => {
+  test('does not render the quick-roll section for a lair combatant', () => {
     renderCard({ type: 'lair' });
+    expect(getQuickRollSection()).toBeNull();
+  });
+
+  test('scopes the button aria-label to the combatant name', () => {
+    renderCard({ type: 'monster', name: 'Ogre #2' });
     const section = getQuickRollSection();
-    expect(within(section).queryByRole('button')).not.toBeInTheDocument();
+    expect(within(section).getByRole('button', { name: 'Roll d20 for Ogre #2' })).toBeInTheDocument();
   });
 
   test('clicking the button rolls and immediately shows an unmodified d20 result', async () => {
@@ -53,7 +57,7 @@ describe('CombatantCard — quick d20 roll', () => {
 
       const dialog = screen.getByRole('dialog', { name: 'Dice roll result' });
       expect(within(dialog).getByText('1d20')).toBeInTheDocument();
-      expect(dialog.querySelector('#dice-roll-result-total')).toHaveTextContent('14');
+      expect(within(dialog).getByTestId('dice-roll-result-total')).toHaveTextContent('14');
       expect(screen.queryByTestId('dice-roll-canvas')).not.toBeInTheDocument();
     } finally {
       rollSpy.mockRestore();
@@ -87,7 +91,7 @@ describe('CombatantCard — quick d20 roll', () => {
 
       const dialogs = screen.getAllByRole('dialog', { name: 'Dice roll result' });
       expect(dialogs).toHaveLength(1);
-      expect(dialogs[0].querySelector('#dice-roll-result-total')).toHaveTextContent('17');
+      expect(within(dialogs[0]).getByTestId('dice-roll-result-total')).toHaveTextContent('17');
     } finally {
       rollSpy.mockRestore();
     }
@@ -128,7 +132,28 @@ describe('CombatantCard — quick d20 roll', () => {
       const secondDialog = screen.getByRole('dialog', { name: 'Dice roll result' });
 
       expect(secondDialog).not.toBe(firstDialog);
-      expect(secondDialog.querySelector('#dice-roll-result-total')).toHaveTextContent('11');
+      expect(within(secondDialog).getByTestId('dice-roll-result-total')).toHaveTextContent('11');
+    } finally {
+      rollSpy.mockRestore();
+    }
+  });
+
+  test('closing the overlay resets state so the button can be clicked again for a fresh roll', async () => {
+    const rollSpy = jest.spyOn(dice, 'rollDie').mockReturnValueOnce([5]).mockReturnValueOnce([19]);
+    try {
+      const user = userEvent.setup();
+      renderCard({ type: 'monster' });
+      const button = within(getQuickRollSection()).getByRole('button', { name: /roll/i });
+
+      await user.click(button);
+      expect(screen.getByRole('dialog', { name: 'Dice roll result' })).toHaveTextContent('5');
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(screen.queryByRole('dialog', { name: 'Dice roll result' })).not.toBeInTheDocument();
+
+      await user.click(button);
+      const dialog = screen.getByRole('dialog', { name: 'Dice roll result' });
+      expect(within(dialog).getByTestId('dice-roll-result-total')).toHaveTextContent('19');
     } finally {
       rollSpy.mockRestore();
     }

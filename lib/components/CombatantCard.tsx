@@ -35,8 +35,9 @@ export interface CombatantCardProps {
  * Composition layer for one combatant in an active combat. Holds no HP, damage,
  * condition, or targeting business logic of its own: transition logic lives in
  * `lib/combat/`, HP-adjustment UI state in `useCombatantHp`, and the sub-panels
- * in `lib/components/combatant-card/`. It owns only the two "open panel" toggles
- * whose trigger buttons sit in the top-right action column.
+ * in `lib/components/combatant-card/`. It owns the two "open panel" toggles whose
+ * trigger buttons sit in the top-right action column, plus the monster-only quick
+ * d20 roll (`activeRoll`/`rollSeq`) triggered from the header row.
  */
 export function CombatantCard(props: CombatantCardProps) {
   const {
@@ -124,8 +125,8 @@ export function CombatantCard(props: CombatantCardProps) {
               applySetTemp={hp.applySetTemp}
               undoHpChange={hp.undoHpChange}
             />
-            <div data-card-section="quick-rolls" className={isMonster ? undefined : 'hidden empty:block'}>
-              {isMonster && (
+            {isMonster && (
+              <div data-card-section="quick-rolls">
                 <button
                   type="button"
                   onClick={handleQuickRoll}
@@ -135,8 +136,8 @@ export function CombatantCard(props: CombatantCardProps) {
                 >
                   <DiceD20Icon width={18} height={18} aria-hidden="true" />
                 </button>
-              )}
-            </div>
+              </div>
+            )}
             <InitiativeControl combatant={combatant} onSetInitiative={onSetInitiative} />
           </div>
 
