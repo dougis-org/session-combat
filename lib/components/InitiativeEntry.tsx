@@ -86,7 +86,10 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
   };
 
   return (
-    <div ref={rootRef} className="relative bg-gray-800 rounded-lg p-4 border border-gray-700">
+    <div
+      ref={rootRef}
+      className="relative bg-gray-800 rounded-lg p-4 border border-gray-700"
+    >
       {/* Close button whenever the parent provided an onClose handler */}
       {onClose && (
         <button
@@ -99,25 +102,26 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
         </button>
       )}
 
+      <h2 className="text-lg font-semibold text-red-400 mb-4">Set Initiative</h2>
+
       <div className="flex justify-between items-start mb-4">
         <div className="flex flex-col md:flex-row items-start gap-4">
-              <div>
+          <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-400">Set Initiative:</span>
               <h3 className="text-lg font-semibold">{combatant.name}</h3>
             </div>
             <div className="flex justify-end mt-2">
               <span
                 className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                combatant.type === "player"
-                  ? "bg-blue-600 text-blue-100"
-                  : "bg-red-600 text-red-100"
+                  combatant.type === "player"
+                    ? "bg-blue-600 text-blue-100"
+                    : "bg-red-600 text-red-100"
                 }`}
               >
                 {combatant.type === "player" ? "Character" : "Monster"}
               </span>
             </div>
-            </div>
+          </div>
 
           {/* Buttons: stacked on mobile (full width), horizontal on md+ */}
           <div className="flex flex-col md:flex-row gap-2 md:pl-3 w-full md:w-auto">
@@ -179,14 +183,17 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
               value={flatBonus}
               onChange={(e) => {
                 const truncated = Math.trunc(e.target.valueAsNumber);
-                const next = e.target.value === '' || !Number.isFinite(e.target.valueAsNumber) || !Number.isSafeInteger(truncated)
-                  ? 0
-                  : truncated;
+                const next =
+                  e.target.value === "" ||
+                  !Number.isFinite(e.target.valueAsNumber) ||
+                  !Number.isSafeInteger(truncated)
+                    ? 0
+                    : truncated;
                 setFlatBonus(next);
                 onSettingsChange?.(advantage, next);
               }}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.currentTarget.blur();
                 }
               }}
@@ -237,7 +244,11 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
                 min="0"
                 value={totalValue}
                 onChange={(e) => setTotalValue(e.target.value)}
-                placeholder={flatBonus !== 0 ? `Value (${flatBonus > 0 ? '+' : ''}${flatBonus} bonus applied)` : "Total initiative"}
+                placeholder={
+                  flatBonus !== 0
+                    ? `Value (${flatBonus > 0 ? "+" : ""}${flatBonus} bonus applied)`
+                    : "Total initiative"
+                }
                 className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
               />
               <button
@@ -260,21 +271,33 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
               {combatant.initiativeRoll.method === "rolled" && (
                 <p className="text-gray-500 text-xs">
                   {combatant.initiativeRoll.advantage ? (
-                    <>d20: {combatant.initiativeRoll.roll}↑{combatant.initiativeRoll.altRoll != null ? ` (dropped: ${combatant.initiativeRoll.altRoll})` : ''}</>
+                    <>
+                      d20: {combatant.initiativeRoll.roll}↑
+                      {combatant.initiativeRoll.altRoll != null
+                        ? ` (dropped: ${combatant.initiativeRoll.altRoll})`
+                        : ""}
+                    </>
                   ) : (
                     <>d20: {combatant.initiativeRoll.roll}</>
                   )}{" "}
                   + {combatant.initiativeRoll.bonus}
-                  {combatant.initiativeRoll.flatBonus ? ` ${combatant.initiativeRoll.flatBonus > 0 ? '+' : ''}${combatant.initiativeRoll.flatBonus}` : ""}{" "}
+                  {combatant.initiativeRoll.flatBonus
+                    ? ` ${combatant.initiativeRoll.flatBonus > 0 ? "+" : ""}${combatant.initiativeRoll.flatBonus}`
+                    : ""}{" "}
                   = {combatant.initiativeRoll.total}
                 </p>
               )}
-              {combatant.initiativeRoll.method === "manual" && (combatant.initiativeRoll.bonus !== 0 || combatant.initiativeRoll.flatBonus) ? (
+              {combatant.initiativeRoll.method === "manual" &&
+              (combatant.initiativeRoll.bonus !== 0 ||
+                combatant.initiativeRoll.flatBonus) ? (
                 <p className="text-gray-500 text-xs">
                   {combatant.initiativeRoll.roll}
-                  {combatant.initiativeRoll.bonus !== 0 && ` + ${combatant.initiativeRoll.bonus}`}
-                  {combatant.initiativeRoll.flatBonus ? ` ${combatant.initiativeRoll.flatBonus > 0 ? '+' : ''}${combatant.initiativeRoll.flatBonus}` : ""}
-                  {" "}= {combatant.initiativeRoll.total}
+                  {combatant.initiativeRoll.bonus !== 0 &&
+                    ` + ${combatant.initiativeRoll.bonus}`}
+                  {combatant.initiativeRoll.flatBonus
+                    ? ` ${combatant.initiativeRoll.flatBonus > 0 ? "+" : ""}${combatant.initiativeRoll.flatBonus}`
+                    : ""}{" "}
+                  = {combatant.initiativeRoll.total}
                 </p>
               ) : null}
             </div>
