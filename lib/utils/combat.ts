@@ -288,8 +288,16 @@ export function buildInitiativeRoll(combatant: CombatantState): InitiativeRoll {
   };
 }
 
+/** Convert a DOM element's bounding rect into a page-relative { top, left } anchor. */
+export function rectToPosition(rect: DOMRect): { top: number; left: number } {
+  return { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX };
+}
+
 export function sortCombatants(combatants: CombatantState[]): CombatantState[] {
   return [...combatants].sort((a, b) => {
+    const aUnrolled = !a.initiativeRoll;
+    const bUnrolled = !b.initiativeRoll;
+    if (aUnrolled !== bUnrolled) return aUnrolled ? -1 : 1;
     if (a.initiative !== b.initiative) return b.initiative - a.initiative;
     if (a.type !== b.type) return TYPE_ORDER[a.type] - TYPE_ORDER[b.type];
     const aDex = a.abilityScores?.dexterity ?? 10;

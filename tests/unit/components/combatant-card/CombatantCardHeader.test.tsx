@@ -50,7 +50,7 @@ describe('CombatantCardHeader', () => {
     const onSetInitiative = jest.fn();
     render(<InitiativeControl combatant={BASE} onSetInitiative={onSetInitiative} />);
     await userEvent.setup().click(screen.getByRole('button'));
-    expect(onSetInitiative).toHaveBeenCalledWith('c1');
+    expect(onSetInitiative).toHaveBeenCalledWith('c1', expect.objectContaining({ top: expect.any(Number), left: expect.any(Number) }));
   });
 
   test('InitiativeControl renders a rolled roll with advantage and a dropped die', () => {

@@ -22,7 +22,6 @@ export function useCombat(options: UseCombatOptions = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [initiativeMode, setInitiativeMode] = useState(false);
-  const [initiativeFilter, setInitiativeFilter] = useState<'all' | 'player' | 'monster'>('all');
   const [showCombatantModal, setShowCombatantModal] = useState(false);
   const [setupCombatants, setSetupCombatants] = useState<CombatantState[]>([]);
   const [parties, setParties] = useState<Party[]>([]);
@@ -216,10 +215,7 @@ export function useCombat(options: UseCombatOptions = {}) {
     // Track the current combatant's ID to maintain turn pointer
     const currentCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
     
-    // Only sort if initiative has been rolled; otherwise just append
-    const sortedCombatants = hasInitiativeBeenRolled()
-      ? sortCombatants(updatedCombatantsList)
-      : updatedCombatantsList;
+    const sortedCombatants = sortCombatants(updatedCombatantsList);
 
     // Find the index of the current combatant in the new list to preserve turn continuity
     const newTurnIndex = currentCombatantId
@@ -458,31 +454,11 @@ export function useCombat(options: UseCombatOptions = {}) {
     });
   };
 
-  const hasInitiativeBeenRolled = () => {
-    return !!combatState?.combatants.some(c => c.initiativeRoll);
-  };
 
   const getDisplayCombatants = () => {
     if (!combatState) return [];
-
-    if (hasInitiativeBeenRolled()) {
-      return sortCombatants([...combatState.combatants]);
-    } else {
-      // Before initiative, group players at top, monsters at bottom
-      const players = combatState.combatants.filter(c => c.type === 'player');
-      const monsters = combatState.combatants.filter(c => c.type === 'monster');
-      return [...players, ...monsters];
-    }
+    return sortCombatants(combatState.combatants);
   };
-
-  // Combatants that still need initiative (initiative === 0) sorted alphabetically by name
-  const zeroInitiative = useMemo(() => {
-    if (!combatState) return [] as CombatantState[];
-    return [...combatState.combatants.filter(c => c.initiative === 0)].sort((a, b) => a.name.localeCompare(b.name));
-  }, [combatState]);
-
-  // Filtered view for zero-initiative list (all/player/monster)
-  const filteredZeroInitiative = zeroInitiative.filter(c => initiativeFilter === 'all' || c.type === initiativeFilter);
 
   return {
     loading,
@@ -497,7 +473,6 @@ export function useCombat(options: UseCombatOptions = {}) {
     selectedEncounterId,
     selectedPartyId,
     initiativeMode,
-    initiativeFilter,
     showCombatantModal,
     loadingTemplates,
     selectedDetailCombatantId,
@@ -510,13 +485,10 @@ export function useCombat(options: UseCombatOptions = {}) {
     showLairForm,
     lairFormName,
     lairFormSeedMonster,
-    zeroInitiative,
-    filteredZeroInitiative,
 
     setSelectedEncounterId,
     selectParty,
     setInitiativeMode,
-    setInitiativeFilter,
     setShowCombatantModal,
     setSelectedDetailCombatantId,
     setDetailPosition,
@@ -546,7 +518,6 @@ export function useCombat(options: UseCombatOptions = {}) {
     updateCombatantInitiativeSettings,
     removeCombatant,
     setInitiativeRoll,
-    hasInitiativeBeenRolled,
     getDisplayCombatants
   };
 }
@@ -565,7 +536,6 @@ export interface UseCombatReturn {
   selectedEncounterId: string;
   selectedPartyId: string | null;
   initiativeMode: boolean;
-  initiativeFilter: 'all' | 'player' | 'monster';
   showCombatantModal: boolean;
   loadingTemplates: boolean;
   selectedDetailCombatantId: string | null;
@@ -578,13 +548,10 @@ export interface UseCombatReturn {
   showLairForm: boolean;
   lairFormName: string;
   lairFormSeedMonster: string;
-  zeroInitiative: CombatantState[];
-  filteredZeroInitiative: CombatantState[];
   
   setSelectedEncounterId: (id: string) => void;
   selectParty: (id: string | null) => void;
   setInitiativeMode: (mode: boolean) => void;
-  setInitiativeFilter: (filter: 'all' | 'player' | 'monster') => void;
   setShowCombatantModal: (show: boolean) => void;
   setSelectedDetailCombatantId: (id: string | null) => void;
   setDetailPosition: (pos: {top: number, left: number} | null) => void;
@@ -614,6 +581,5 @@ export interface UseCombatReturn {
   updateCombatantInitiativeSettings: (id: string, adv: boolean, fb: number) => void;
   removeCombatant: (id: string) => void;
   setInitiativeRoll: (combatantId: string, initiativeRoll: InitiativeRoll) => void;
-  hasInitiativeBeenRolled: () => boolean;
   getDisplayCombatants: () => CombatantState[];
 }

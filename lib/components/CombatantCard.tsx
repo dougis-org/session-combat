@@ -21,7 +21,7 @@ export interface CombatantCardProps {
   onRemove: () => void;
   onNextTurn?: () => void;
   onShowDetails?: (combatantId: string, position: { top: number; left: number }, options?: { focusSection?: 'legendary' }) => void;
-  onSetInitiative?: (combatantId: string) => void;
+  onSetInitiative?: (combatantId: string, position: { top: number; left: number }) => void;
   onShowRemoveConfirm?: (combatantId: string, position: { top: number; left: number }) => void;
   allCombatants?: CombatantState[];
   onUpdateCombatant?: (combatantId: string, updates: Partial<CombatantState>) => void;
@@ -82,7 +82,7 @@ export function CombatantCard(props: CombatantCardProps) {
   const life = lifeStateDisplay(combatant);
 
   return (
-    <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'} ${life.greyed ? 'opacity-50' : ''}`} data-testid="combatant-card" data-life-state={combatant.lifeState ?? 'active'} aria-current={isActive ? 'step' : undefined}>
+    <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'} ${life.greyed ? 'opacity-50' : ''}`} data-testid="combatant-card" data-life-state={combatant.lifeState ?? 'active'} aria-current={isActive ? 'step' : undefined} data-combatant-id={combatant.id}>
       <div className="flex justify-between items-start">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-4 mb-2">

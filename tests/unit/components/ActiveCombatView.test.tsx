@@ -58,20 +58,6 @@ describe('ActiveCombatView', () => {
     expect(screen.getByText('Aria')).toBeInTheDocument();
   });
 
-  it('shows zero-initiative panel when combatants need initiative', () => {
-    const goblin = makeCombatant({ initiative: 0 });
-    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }), zeroInitiative: [goblin], filteredZeroInitiative: [goblin] });
-    render(<ActiveCombatView combat={combat} user={null} />);
-    expect(screen.getByText('1 need initiative')).toBeInTheDocument();
-  });
-
-  it('shows "no combatants match" when filteredZeroInitiative is empty but zeroInitiative is not', () => {
-    const goblin = makeCombatant({ initiative: 0 });
-    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }), zeroInitiative: [goblin], filteredZeroInitiative: [] });
-    render(<ActiveCombatView combat={combat} user={null} />);
-    expect(screen.getByText(/no combatants match/i)).toBeInTheDocument();
-  });
-
   it('clicking "Add Party Member" calls setShowCombatantModal with true', async () => {
     const user = userEvent.setup();
     const setShowCombatantModal = jest.fn();
@@ -130,7 +116,7 @@ describe('ActiveCombatView', () => {
     const goblin = makeCombatant();
     const nextTurn = jest.fn();
     const combat = makeCombat(
-      { combatState: makeCombatState({ combatants: [goblin], currentTurnIndex: 0 }), hasInitiativeBeenRolled: jest.fn().mockReturnValue(true), nextTurn },
+      { combatState: makeCombatState({ combatants: [goblin], currentTurnIndex: 0 }), nextTurn },
       [goblin],
     );
     render(<ActiveCombatView combat={combat} user={null} />);
@@ -141,7 +127,7 @@ describe('ActiveCombatView', () => {
   it('active combatant card has aria-current="step"', () => {
     const goblin = makeCombatant();
     const combat = makeCombat(
-      { combatState: makeCombatState({ combatants: [goblin], currentTurnIndex: 0 }), hasInitiativeBeenRolled: jest.fn().mockReturnValue(true) },
+      { combatState: makeCombatState({ combatants: [goblin], currentTurnIndex: 0 }), },
       [goblin],
     );
     render(<ActiveCombatView combat={combat} user={null} />);
@@ -151,7 +137,7 @@ describe('ActiveCombatView', () => {
   it('renders lair slot in initiative order when lair combatant is active', () => {
     const lairCombatant = makeCombatant({ id: 'lair-1', name: 'Dragon Lair', type: 'lair' });
     const combat = makeCombat(
-      { combatState: makeCombatState({ combatants: [lairCombatant], currentTurnIndex: 0 }), hasInitiativeBeenRolled: jest.fn().mockReturnValue(true) },
+      { combatState: makeCombatState({ combatants: [lairCombatant], currentTurnIndex: 0 }), },
       [lairCombatant],
     );
     render(<ActiveCombatView combat={combat} user={null} />);
@@ -162,7 +148,7 @@ describe('ActiveCombatView', () => {
     const goblin = makeCombatant();
     const lairCombatant = makeCombatant({ id: 'lair-1', name: 'Dragon Lair', type: 'lair' });
     const combat = makeCombat(
-      { combatState: makeCombatState({ combatants: [goblin, lairCombatant], currentTurnIndex: 0 }), hasInitiativeBeenRolled: jest.fn().mockReturnValue(true) },
+      { combatState: makeCombatState({ combatants: [goblin, lairCombatant], currentTurnIndex: 0 }), },
       [goblin, lairCombatant],
     );
     render(<ActiveCombatView combat={combat} user={null} />);
