@@ -351,7 +351,7 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     try {
       render(<ActiveCombatView combat={combat} user={null} />);
       const modal = screen.getByTestId('initiative-modal');
-      expect(modal.style.top).toBe(`${cardRect.bottom}px`);
+      expect(modal.style.top).toBe(`${cardRect.top}px`);
       expect(modal.style.left).toBe(`${cardRect.left}px`);
     } finally {
       Element.prototype.getBoundingClientRect = originalGBCR;
@@ -456,7 +456,7 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
 
     const cardRect = { top: 40, left: 20, bottom: 100, right: 320, width: 300, height: 60, x: 20, y: 40, toJSON() {} } as DOMRect;
-    const modalRect = { top: 100, left: 20, bottom: 300, right: 340, width: 320, height: 200, x: 20, y: 100, toJSON() {} } as DOMRect;
+    const modalRect = { top: 40, left: 20, bottom: 240, right: 340, width: 320, height: 200, x: 20, y: 40, toJSON() {} } as DOMRect;
 
     const originalGBCR = Element.prototype.getBoundingClientRect;
     Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
@@ -468,7 +468,7 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     try {
       render(<ActiveCombatView combat={combat} user={null} />);
       const modal = screen.getByTestId('initiative-modal');
-      expect(modal.style.top).toBe(`${cardRect.bottom}px`);
+      expect(modal.style.top).toBe(`${cardRect.top}px`);
       expect(modal.style.left).toBe(`${cardRect.left}px`);
     } finally {
       Element.prototype.getBoundingClientRect = originalGBCR;
