@@ -68,8 +68,11 @@ describe('DiceRollOverlay — modal gated on animation completion', () => {
   it('names the revealed dialog with the rolled total via aria-describedby', () => {
     render(<DiceRollOverlay built={built} disableAnimation animationSettled onClose={jest.fn()} />)
     const dialog = screen.getByRole('dialog')
-    expect(dialog).toHaveAttribute('aria-describedby', 'dice-roll-result-total')
-    expect(document.getElementById('dice-roll-result-total')).toHaveTextContent('14')
+    const total = screen.getByTestId('dice-roll-result-total')
+    // id is generated per-instance (useId) so two simultaneous overlays each describe
+    // their own dialog — assert the link, not a specific literal id.
+    expect(dialog.getAttribute('aria-describedby')).toBe(total.getAttribute('id'))
+    expect(total).toHaveTextContent('14')
   })
 
   it('a click on the dice area during the tumble dismisses neither the overlay nor the panel behind it', () => {

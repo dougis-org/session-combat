@@ -6,6 +6,9 @@ import { usesDeathSaves, applyDeathSaveRoll, toggleDeathSaveSlot, lifeStateDispl
 import type { DeathSaveKind, DeathSaveSlotIndex } from '@/lib/combat/deathSaves';
 import { DeathSaveTracker } from '@/lib/components/DeathSaveTracker';
 import { rollDie } from '@/lib/utils/dice';
+import { DiceD20Icon } from '@/lib/components/icons/dice';
+import { DiceRollOverlay } from '@/lib/components/dice/DiceRollOverlay';
+import type { BuiltRoll } from '@/lib/dice/useDicePoolState';
 import { useCombatantHp } from '@/lib/hooks/useCombatantHp';
 import { CombatantCardHeader, InitiativeControl } from '@/lib/components/combatant-card/CombatantCardHeader';
 import { HpControls, HealthBar } from '@/lib/components/combatant-card/HpControls';
@@ -32,8 +35,9 @@ export interface CombatantCardProps {
  * Composition layer for one combatant in an active combat. Holds no HP, damage,
  * condition, or targeting business logic of its own: transition logic lives in
  * `lib/combat/`, HP-adjustment UI state in `useCombatantHp`, and the sub-panels
- * in `lib/components/combatant-card/`. It owns only the two "open panel" toggles
- * whose trigger buttons sit in the top-right action column.
+ * in `lib/components/combatant-card/`. It owns the two "open panel" toggles whose
+ * trigger buttons sit in the top-right action column, plus the monster-only quick
+ * d20 roll (`activeRoll`/`rollSeq`) triggered from the header row.
  */
 export function CombatantCard(props: CombatantCardProps) {
   const {
@@ -53,6 +57,8 @@ export function CombatantCard(props: CombatantCardProps) {
   const [deathSaveNote, setDeathSaveNote] = useState<string | null>(null);
   const [showTargeting, setShowTargeting] = useState(false);
   const [addConditionOpen, setAddConditionOpen] = useState(false);
+  const [activeRoll, setActiveRoll] = useState<BuiltRoll | null>(null);
+  const [rollSeq, setRollSeq] = useState(0);
 
   const hp = useCombatantHp({
     combatId,
@@ -75,11 +81,24 @@ export function CombatantCard(props: CombatantCardProps) {
     return d20;
   };
 
+  const handleQuickRoll = () => {
+    const value = rollDie(20)[0];
+    setRollSeq(seq => seq + 1);
+    setActiveRoll({
+      formula: '1d20',
+      rolls: [value],
+      total: value,
+      breakdown: [{ sides: 20, value }],
+      modifier: 0,
+    });
+  };
+
   const bgStyle = combatant.type === 'player'
     ? { backgroundImage: 'linear-gradient(to right, rgba(96, 165, 250, 0.18), rgba(96, 165, 250, 0.02))' }
     : { backgroundImage: 'linear-gradient(to right, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.02))' };
 
   const life = lifeStateDisplay(combatant);
+  const isMonster = combatant.type === 'monster';
 
   return (
     <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'} ${life.greyed ? 'opacity-50' : ''}`} data-testid="combatant-card" data-life-state={combatant.lifeState ?? 'active'} aria-current={isActive ? 'step' : undefined}>
@@ -106,7 +125,19 @@ export function CombatantCard(props: CombatantCardProps) {
               applySetTemp={hp.applySetTemp}
               undoHpChange={hp.undoHpChange}
             />
-            <div data-card-section="quick-rolls" className="hidden empty:block"></div>
+            {isMonster && (
+              <div data-card-section="quick-rolls">
+                <button
+                  type="button"
+                  onClick={handleQuickRoll}
+                  aria-label={`Roll d20 for ${combatant.name}`}
+                  title="Roll a d20"
+                  className="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-white w-8 h-8 rounded-full flex items-center justify-center"
+                >
+                  <DiceD20Icon width={18} height={18} aria-hidden="true" />
+                </button>
+              </div>
+            )}
             <InitiativeControl combatant={combatant} onSetInitiative={onSetInitiative} />
           </div>
 
@@ -197,6 +228,9 @@ export function CombatantCard(props: CombatantCardProps) {
           </button>
         </div>
       </div>
+      {activeRoll && (
+        <DiceRollOverlay key={rollSeq} built={activeRoll} disableAnimation onClose={() => setActiveRoll(null)} />
+      )}
     </div>
   );
 }
