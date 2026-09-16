@@ -178,9 +178,10 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
               step={1}
               value={flatBonus}
               onChange={(e) => {
-                const next = e.target.value === '' || !Number.isFinite(e.target.valueAsNumber)
+                const truncated = Math.trunc(e.target.valueAsNumber);
+                const next = e.target.value === '' || !Number.isFinite(e.target.valueAsNumber) || !Number.isSafeInteger(truncated)
                   ? 0
-                  : Math.trunc(e.target.valueAsNumber);
+                  : truncated;
                 setFlatBonus(next);
                 onSettingsChange?.(advantage, next);
               }}
