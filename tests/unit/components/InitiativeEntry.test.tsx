@@ -179,6 +179,13 @@ describe('InitiativeEntry', () => {
     });
   });
 
+  describe('close button', () => {
+    it('does not embed the combatant name in its accessible name, to avoid colliding with role-based button queries elsewhere on the page', () => {
+      renderEntry({ name: 'Test Fighter [temp-hp-absorbs-damage-correctly]' });
+      expect(screen.getByRole('button', { name: 'Close initiative editor' })).toBeInTheDocument();
+    });
+  });
+
   describe('Escape key behavior', () => {
     it('Escape key calls onClose when initiativeRoll is set', async () => {
       const user = userEvent.setup();

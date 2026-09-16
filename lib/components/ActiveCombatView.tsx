@@ -188,8 +188,13 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     const position = getCardAnchorPosition(target.id);
     if (!position) return;
     openInitiativeModal(target.id, position);
+    // Intentionally excludes `combatState`: it gets a new object reference on
+    // every unrelated combat update (HP, damage, etc.), and re-running this
+    // effect on those churns can race with in-flight input/HP-adjustment state
+    // elsewhere in the tree. `unrolledCombatantIds` already captures every
+    // change this effect actually needs to react to.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unrolledCombatantIds, initiativeEditId, combatState]);
+  }, [unrolledCombatantIds, initiativeEditId]);
 
   // Measure the rendered modal and clamp its position so it never overflows the
   // viewport, replacing the old hardcoded-width offset.

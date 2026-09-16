@@ -76,7 +76,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
       {onClose && (
         <button
           onClick={onClose}
-          aria-label={`Close initiative editor for ${combatant.name}`}
+          aria-label="Close initiative editor"
           className="absolute -top-3 -right-3 w-7 h-7 rounded-full bg-gray-800 border border-gray-700 text-gray-400 hover:text-gray-200 flex items-center justify-center text-lg"
           type="button"
         >
