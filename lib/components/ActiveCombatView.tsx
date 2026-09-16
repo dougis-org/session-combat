@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { AuthUser } from '@/lib/hooks/useAuth';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { CombatantCard } from '@/lib/components/CombatantCard';
@@ -80,8 +80,7 @@ export interface ActiveCombatViewProps {
   user: AuthUser | null;
 }
 
-// Must stay in sync with the InitiativeModal's `w-80` Tailwind class below.
-const INITIATIVE_MODAL_WIDTH = 320;
+const MODAL_VIEWPORT_MARGIN = 16;
 
 export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
   const {
@@ -126,9 +125,32 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
   const [initiativeEditId, setInitiativeEditId] = useState<string | null>(null);
   const [initiativeEditPosition, setInitiativeEditPosition] = useState<{top: number, left: number} | null>(null);
+  const initiativeModalRef = useRef<HTMLDivElement | null>(null);
+  // Combatants whose auto-opened initiative modal the DM has manually dismissed
+  // this session; they stay eligible for the manual click-to-open flow, just not
+  // for auto-reopen. Resets on remount (e.g. full page reload).
+  const dismissedInitiativeIds = useRef<Set<string>>(new Set());
+
+  const getCardAnchorPosition = (id: string): { top: number; left: number } | null => {
+    const el = document.querySelector(`[data-combatant-id="${id}"]`);
+    if (!el) {
+      console.warn(`ActiveCombatView: no card element found for combatant ${id} while anchoring the initiative modal`);
+      return null;
+    }
+    return rectToPosition(el.getBoundingClientRect());
+  };
+
+  // Single place that updates the (id, position) pair together so the two
+  // pieces of state never drift out of sync.
+  const openInitiativeModal = (id: string | null, position: { top: number; left: number } | null) => {
+    setInitiativeEditId(id);
+    setInitiativeEditPosition(position);
+  };
 
   const handleSetInitiative = (id: string, roll: InitiativeRoll) => {
     setInitiativeRoll(id, roll);
+    // A saved combatant is no longer "unrolled" and must never trigger auto-open again.
+    dismissedInitiativeIds.current.add(id);
     if (!combatState) return;
 
     // React state updates aren't visible until the next render, so simulate the
@@ -138,17 +160,80 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
     // Using the same list as getDisplayCombatants to find the next one
     const nextUnrolled = sorted.find(c => !c.initiativeRoll);
+    const nextPosition = nextUnrolled ? getCardAnchorPosition(nextUnrolled.id) : null;
 
-    if (nextUnrolled) {
-      const el = document.querySelector(`[data-combatant-id="${nextUnrolled.id}"] [data-card-section="initiative"] button`);
-      setInitiativeEditId(nextUnrolled.id);
-      setInitiativeEditPosition(el ? rectToPosition(el.getBoundingClientRect()) : null);
+    if (nextUnrolled && nextPosition) {
+      openInitiativeModal(nextUnrolled.id, nextPosition);
     } else {
-      setInitiativeEditId(null);
-      setInitiativeEditPosition(null);
+      openInitiativeModal(null, null);
     }
   };
 
+  const closeInitiativeModal = (dismissed: boolean) => {
+    if (dismissed && initiativeEditId) {
+      dismissedInitiativeIds.current.add(initiativeEditId);
+    }
+    openInitiativeModal(null, null);
+  };
+
+  // Re-evaluates whenever the set of unrolled combatants changes (added, rolled,
+  // or removed) or the modal closes, and opens the first eligible (unrolled,
+  // non-dismissed) combatant found, provided no modal is currently open.
+  const unrolledCombatantIds = (combatState?.combatants ?? [])
+    .filter(c => !c.initiativeRoll)
+    .map(c => c.id)
+    .join(',');
+
+  useEffect(() => {
+    if (!combatState || initiativeEditId !== null) return;
+    const sorted = sortCombatants(combatState.combatants);
+    const target = sorted.find(c => !c.initiativeRoll && !dismissedInitiativeIds.current.has(c.id));
+    if (!target) return;
+    const position = getCardAnchorPosition(target.id);
+    if (!position) return;
+    openInitiativeModal(target.id, position);
+    // Intentionally excludes `combatState`: it gets a new object reference on
+    // every unrelated combat update (HP, damage, etc.), and re-running this
+    // effect on those churns can race with in-flight input/HP-adjustment state
+    // elsewhere in the tree. `unrolledCombatantIds` already captures every
+    // change this effect actually needs to react to.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unrolledCombatantIds, initiativeEditId]);
+
+  // Recovery for the "combatant removed while its initiative modal is open" race:
+  // the render guard below already hides the modal (no matching combatant), but
+  // without this, `initiativeEditId` would stay non-null forever and permanently
+  // block the auto-open effect above from ever firing again for anyone else.
+  useEffect(() => {
+    if (!initiativeEditId || !combatState) return;
+    const stillExists = combatState.combatants.some(c => c.id === initiativeEditId);
+    if (!stillExists) openInitiativeModal(null, null);
+  }, [initiativeEditId, combatState]);
+
+  // Measure the rendered modal and clamp its position so it never overflows the
+  // viewport, replacing the old hardcoded-width offset.
+  useLayoutEffect(() => {
+    if (!initiativeEditId || !initiativeEditPosition || !initiativeModalRef.current) return;
+    const el = initiativeModalRef.current;
+    const rect = el.getBoundingClientRect();
+    const maxLeft = window.scrollX + window.innerWidth - MODAL_VIEWPORT_MARGIN;
+    const maxTop = window.scrollY + window.innerHeight - MODAL_VIEWPORT_MARGIN;
+
+    let { top, left } = initiativeEditPosition;
+    const overflowRight = (left + rect.width) - maxLeft;
+    if (overflowRight > 0) left -= overflowRight;
+    const overflowBottom = (top + rect.height) - maxTop;
+    if (overflowBottom > 0) top -= overflowBottom;
+    // Positions are page coordinates (rect + scrollX/scrollY), so the minimum
+    // clamp must also be scroll-aware — clamping to the bare margin would pin
+    // the modal to the document origin instead of the visible viewport edge
+    // when the page is scrolled.
+    left = Math.max(window.scrollX + MODAL_VIEWPORT_MARGIN, left);
+    top = Math.max(window.scrollY + MODAL_VIEWPORT_MARGIN, top);
+
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
+  }, [initiativeEditId, initiativeEditPosition]);
 
   const characterMap = useMemo(
     () => new Map((characters ?? []).map(c => [c.id, c])),
@@ -190,9 +275,9 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
         setDetailPosition(pos);
         setDetailFocusSection(options?.focusSection);
       }}
-      onSetInitiative={(id, pos) => {
-        setInitiativeEditId(id);
-        setInitiativeEditPosition(pos);
+      onSetInitiative={(id) => {
+        const position = getCardAnchorPosition(id);
+        if (position) openInitiativeModal(id, position);
       }}
       onShowRemoveConfirm={(id, pos) => {
         setRemoveConfirmId(id);
@@ -283,10 +368,11 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
           const combatant = combatState.combatants.find(c => c.id === initiativeEditId);
           return combatant ? (
             <div
+              ref={initiativeModalRef}
               className="absolute z-50 p-4 bg-gray-800 rounded-lg shadow-2xl border border-gray-600 w-80 max-w-[calc(100vw-2rem)]"
               style={{
                 top: initiativeEditPosition.top,
-                left: Math.max(16, initiativeEditPosition.left - INITIATIVE_MODAL_WIDTH)
+                left: initiativeEditPosition.left,
               }}
               data-testid="initiative-modal"
             >
@@ -294,7 +380,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
                 key={initiativeEditId}
                 combatant={combatant}
                 onSet={(initiativeRoll) => handleSetInitiative(initiativeEditId, initiativeRoll)}
-                onClose={() => setInitiativeEditId(null)}
+                onClose={() => closeInitiativeModal(!combatant.initiativeRoll)}
                 onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeEditId, adv, fb)}
               />
             </div>

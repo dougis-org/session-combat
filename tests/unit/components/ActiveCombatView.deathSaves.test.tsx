@@ -32,17 +32,21 @@ function renderView(combatants: CombatantState[]) {
 const cardFor = (name: string) =>
   screen.getByText(name).closest('[data-testid="combatant-card"]') as HTMLElement;
 
+// Not under test here: prevents the initiative-entry modal from auto-opening
+// (and duplicating a combatant's name in the DOM) for these unrelated assertions.
+const ROLLED = { method: 'manual' as const, roll: 10, bonus: 0, total: 10 };
+
 describe('ActiveCombatView — life-state styling', () => {
-  const active = makeCombatant({ id: 'p1', name: 'Active One', type: 'player', hp: 10, maxHp: 10 });
+  const active = makeCombatant({ id: 'p1', name: 'Active One', type: 'player', hp: 10, maxHp: 10, initiativeRoll: ROLLED });
   const dying = makeCombatant({
     id: 'p2', name: 'Dying One', type: 'player', hp: 0, maxHp: 10,
-    lifeState: 'dying', deathSaves: { successes: 0, failures: 0 },
+    lifeState: 'dying', deathSaves: { successes: 0, failures: 0 }, initiativeRoll: ROLLED,
   });
   const stable = makeCombatant({
-    id: 'p3', name: 'Stable One', type: 'player', hp: 0, maxHp: 10, lifeState: 'stable',
+    id: 'p3', name: 'Stable One', type: 'player', hp: 0, maxHp: 10, lifeState: 'stable', initiativeRoll: ROLLED,
   });
   const dead = makeCombatant({
-    id: 'p4', name: 'Dead One', type: 'player', hp: 0, maxHp: 10, lifeState: 'dead',
+    id: 'p4', name: 'Dead One', type: 'player', hp: 0, maxHp: 10, lifeState: 'dead', initiativeRoll: ROLLED,
   });
 
   test('active player renders with no life-state badge and not greyed', () => {

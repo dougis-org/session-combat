@@ -50,7 +50,25 @@ describe('CombatantCardHeader', () => {
     const onSetInitiative = jest.fn();
     render(<InitiativeControl combatant={BASE} onSetInitiative={onSetInitiative} />);
     await userEvent.setup().click(screen.getByRole('button'));
-    expect(onSetInitiative).toHaveBeenCalledWith('c1', expect.objectContaining({ top: expect.any(Number), left: expect.any(Number) }));
+    expect(onSetInitiative).toHaveBeenCalledWith('c1');
+  });
+
+  test('InitiativeControl shows "N/A" in a warning color when initiativeRoll is unset', () => {
+    render(<InitiativeControl combatant={{ ...BASE, initiativeRoll: undefined }} />);
+    const readout = screen.getByText('N/A');
+    expect(readout).toBeInTheDocument();
+    expect(readout).toHaveClass('text-red-400');
+  });
+
+  test('InitiativeControl shows the numeric total in normal style once initiativeRoll is set, including a total of 0', () => {
+    const { container } = render(
+      <InitiativeControl
+        combatant={{ ...BASE, initiative: 0, initiativeRoll: { method: 'manual', roll: 0, bonus: 0, total: 0 } }}
+      />
+    );
+    const readout = container.querySelector('p.text-lg.font-bold') as HTMLElement;
+    expect(readout).toHaveTextContent('0');
+    expect(readout).not.toHaveClass('text-red-400');
   });
 
   test('InitiativeControl renders a rolled roll with advantage and a dropped die', () => {

@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CombatantState, InitiativeRoll } from '@/lib/types';
 import { buildInitiativeRoll, getDexInitiativeBonus } from '@/lib/utils/combat';
 
 interface InitiativeEntryProps {
   combatant: CombatantState;
   onSet: (initiativeRoll: InitiativeRoll) => void;
-  onClose?: () => void; // optional: close the edit form (only valid when initiative exists)
+  onClose?: () => void; // optional: close the edit form
   onSettingsChange?: (advantage: boolean, flatBonus: number) => void;
 }
 
@@ -17,25 +17,39 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
   const [totalValue, setTotalValue] = useState('');
   const [advantage, setAdvantage] = useState(combatant.initiativeAdvantage ?? false);
   const [flatBonus, setFlatBonus] = useState(combatant.initiativeFlatBonus ?? 0);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
-  // Close with Escape only when there is an existing initiative and an onClose handler
+  // Close with Escape or a click outside the modal's own bounds, whenever an
+  // onClose handler is provided.
   useEffect(() => {
-    if (!combatant.initiativeRoll || !onClose) return;
-    const handler = (e: KeyboardEvent) => {
+    if (!onClose) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [combatant.initiativeRoll, onClose]);
+    const handlePointerDown = (e: MouseEvent) => {
+      if (rootRef.current?.contains(e.target as Node)) return;
+      onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handlePointerDown);
+    };
+  }, [onClose]);
 
   const handleRoll = () => {
     onSet(buildInitiativeRoll({ ...combatant, initiativeAdvantage: advantage, initiativeFlatBonus: flatBonus }));
   };
 
   const handleDiceEntry = () => {
-    const roll = parseInt(diceRoll) || 0;
-    if (roll < 1 || roll > 20) {
-      alert('Dice roll must be between 1 and 20');
+    const trimmed = diceRoll.trim();
+    const roll = Number(trimmed);
+    // Require plain decimal digits so exotic-but-numeric literals (hex, exponential,
+    // leading '+') that `Number()`/`Number.isSafeInteger` would otherwise accept are
+    // rejected as not being a "whole number" in the plain sense the alert describes.
+    if (!/^\d+$/.test(trimmed) || !Number.isSafeInteger(roll) || roll < 1 || roll > 20) {
+      alert('Dice roll must be a whole number between 1 and 20');
       return;
     }
 
@@ -53,9 +67,10 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
   };
 
   const handleTotalEntry = () => {
-    const total = parseInt(totalValue) || 0;
-    if (total < 0) {
-      alert('Initiative must be 0 or greater');
+    const trimmed = totalValue.trim();
+    const total = Number(trimmed);
+    if (!/^\d+$/.test(trimmed) || !Number.isSafeInteger(total) || total < 0) {
+      alert('Initiative must be a whole number 0 or greater');
       return;
     }
 
@@ -71,12 +86,12 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
   };
 
   return (
-    <div className="relative bg-gray-800 rounded-lg p-4 border border-gray-700">
-      {/* Close button only for entries that already have an initiative and when parent provided onClose */}
-      {combatant.initiativeRoll && onClose && (
+    <div ref={rootRef} className="relative bg-gray-800 rounded-lg p-4 border border-gray-700">
+      {/* Close button whenever the parent provided an onClose handler */}
+      {onClose && (
         <button
           onClick={onClose}
-          aria-label={`Close initiative editor for ${combatant.name}`}
+          aria-label="Close initiative editor"
           className="absolute -top-3 -right-3 w-7 h-7 rounded-full bg-gray-800 border border-gray-700 text-gray-400 hover:text-gray-200 flex items-center justify-center text-lg"
           type="button"
         >
@@ -163,9 +178,10 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
               step={1}
               value={flatBonus}
               onChange={(e) => {
-                const next = e.target.value === '' || !Number.isFinite(e.target.valueAsNumber)
+                const truncated = Math.trunc(e.target.valueAsNumber);
+                const next = e.target.value === '' || !Number.isFinite(e.target.valueAsNumber) || !Number.isSafeInteger(truncated)
                   ? 0
-                  : Math.trunc(e.target.valueAsNumber);
+                  : truncated;
                 setFlatBonus(next);
                 onSettingsChange?.(advantage, next);
               }}

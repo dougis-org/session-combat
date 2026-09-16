@@ -296,7 +296,7 @@ test.describe("Combat flows", () => {
     const hpInput = page.locator('input[placeholder="0"]').first();
 
     // Enable Temp mode, enter 14, click "Set Temp"
-    await page.getByLabel("Temp").first().check();
+    await page.getByLabel("Temp", { exact: true }).first().check();
     await hpInput.fill("14");
     await page.getByRole("button", { name: "Set Temp" }).first().click();
 
@@ -305,7 +305,7 @@ test.describe("Combat flows", () => {
     await expect(page.locator('[data-testid="temp-hp-bar"]').first()).toBeVisible();
 
     // Enter 10 damage → 10 absorbed by temp HP (4 remaining), regular HP unchanged at 30
-    await page.getByLabel("Temp").first().uncheck();
+    await page.getByLabel("Temp", { exact: true }).first().uncheck();
     await hpInput.fill("10");
     await page.getByRole("button", { name: "Damage" }).first().click();
     await expect(page.getByText("4 tmp", { exact: false })).toBeVisible();
