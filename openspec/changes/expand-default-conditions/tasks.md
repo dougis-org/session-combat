@@ -7,17 +7,17 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress**: run `gh issue edit 742 --repo dougis-org/session-combat --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] Confirm working directory is `.worktrees/expand-default-conditions` (never the primary checkout) for every remaining step
-- [ ] **T1 — Add the three catalog entries**: edit `lib/data/conditionCatalog.ts`, appending `Slowed`, `Confused`, `Turned` to `CONDITION_CATALOG` after `Unconscious`, per the descriptions drafted in `design.md` Decision 1. Update the file's doc comment (currently "The 15 standard D&D 5e conditions...") to reflect 18 entries / the new composition.
-- [ ] **T2 — Update the hardcoded-length test**: in `tests/unit/lib/scripts/seedConditionCatalog.test.ts`, change `expect(CONDITION_CATALOG).toHaveLength(15)` to `toHaveLength(18)`; add an assertion that `CONDITION_CATALOG.map(c => c.name)` contains `"Slowed"`, `"Confused"`, and `"Turned"` (per design.md Decision 3).
-- [ ] **T3 — Grep for other hardcoded assumptions**: search the full test suite for other references to the literal `15`/catalog length or an enumerated list of all condition names that might also need updating (e.g. `grep -rn "toHaveLength(15)\|CONDITION_CATALOG" tests/`) — reuse/extend existing tests rather than adding new ones if found, per design.md's minimal-diff approach.
-- [ ] **T4 — Reuse-before-build check**: confirm no changes are needed to `lib/storage/conditionCatalogRepo.ts`, `app/api/conditions/catalog/route.ts`, `ConditionFormModal.tsx`, or `ConditionControls.tsx` — these are shape/count-agnostic per design.md Goals; if any test there fails after T1/T2, investigate before adding new code (it likely indicates an undiscovered assumption, not a required feature change).
-- [ ] Confirm acceptance criteria are covered: all scenarios in `specs/condition-catalog/spec.md` (both ADDED and MODIFIED sections) map to a concrete assertion added/updated in T2/T3
+- [x] **Issue lifecycle: mark in-progress**: run `gh issue edit 742 --repo dougis-org/session-combat --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] Confirm working directory is `.worktrees/expand-default-conditions` (never the primary checkout) for every remaining step
+- [x] **T1 — Add the three catalog entries**: edit `lib/data/conditionCatalog.ts`, appending `Slowed`, `Confused`, `Turned` to `CONDITION_CATALOG` after `Unconscious`, per the descriptions drafted in `design.md` Decision 1. Update the file's doc comment (currently "The 15 standard D&D 5e conditions...") to reflect 18 entries / the new composition.
+- [x] **T2 — Update the hardcoded-length test**: in `tests/unit/lib/scripts/seedConditionCatalog.test.ts`, change `expect(CONDITION_CATALOG).toHaveLength(15)` to `toHaveLength(18)`; add an assertion that `CONDITION_CATALOG.map(c => c.name)` contains `"Slowed"`, `"Confused"`, and `"Turned"` (per design.md Decision 3).
+- [x] **T3 — Grep for other hardcoded assumptions**: search the full test suite for other references to the literal `15`/catalog length or an enumerated list of all condition names that might also need updating (e.g. `grep -rn "toHaveLength(15)\|CONDITION_CATALOG" tests/`) — reuse/extend existing tests rather than adding new ones if found, per design.md's minimal-diff approach.
+- [x] **T4 — Reuse-before-build check**: confirm no changes are needed to `lib/storage/conditionCatalogRepo.ts`, `app/api/conditions/catalog/route.ts`, `ConditionFormModal.tsx`, or `ConditionControls.tsx` — these are shape/count-agnostic per design.md Goals; if any test there fails after T1/T2, investigate before adding new code (it likely indicates an undiscovered assumption, not a required feature change).
+- [x] Confirm acceptance criteria are covered: all scenarios in `specs/condition-catalog/spec.md` (both ADDED and MODIFIED sections) map to a concrete assertion added/updated in T2/T3
 
 ## Pre-Commit Code Review
 
@@ -25,10 +25,10 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests: `npm test -- tests/unit/lib/data tests/unit/lib/scripts/seedConditionCatalog.test.ts tests/unit/lib/storage/conditionCatalogRepo.test.ts`, then the full suite `npm test`
-- [ ] Run E2E tests (if applicable) — not expected to be affected (no UI/API contract change), but run the combatant-card/conditions E2E suite if one exists, to confirm no regression
-- [ ] Run type checks: `npm run typecheck` (or project's equivalent, e.g. `tsc --noEmit`)
-- [ ] Run build: `npm run build`
+- [x] Run unit/integration tests: targeted catalog tests (42 passed) + full unit suite (3940/3940 passed) + integration suite (357/357 passed, 4 pre-existing skips)
+- [x] Run E2E tests (if applicable) — no dedicated combatant-card/conditions E2E suite exists in `tests/e2e`; no UI/API contract change, so none needed
+- [x] Run type checks: `npx tsc --noEmit` — clean
+- [x] Run build: `npm run build` — succeeded (worktree needed its own `npm install`; none existed before)
 - [ ] Run security/code quality checks required by project standards (Verity gate, Codacy as configured)
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
