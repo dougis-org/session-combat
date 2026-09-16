@@ -13,6 +13,10 @@ import { makeCombatant, makeCombatState } from '@/tests/unit/fixtures/combatHelp
 import type { UseCombatReturn } from '@/lib/hooks/useCombat';
 import type { CombatantState, Character } from '@/lib/types';
 
+// Fixture default for tests unrelated to the initiative-entry feature — keeps the
+// auto-open effect from targeting these combatants and interfering with assertions.
+const ROLLED = { method: 'manual' as const, roll: 10, bonus: 0, total: 10 };
+
 const mockFetch = jest.fn().mockResolvedValue({ ok: true } as Response);
 const originalFetch = global.fetch;
 beforeEach(() => {
@@ -52,7 +56,7 @@ describe('ActiveCombatView', () => {
   });
 
   it('renders player combatants in the Party section', () => {
-    const fighter = makeCombatant({ id: 'p1', name: 'Aria', type: 'player' });
+    const fighter = makeCombatant({ id: 'p1', name: 'Aria', type: 'player', initiativeRoll: ROLLED });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [fighter] }) }, [fighter]);
     render(<ActiveCombatView combat={combat} user={null} />);
     expect(screen.getByText('Aria')).toBeInTheDocument();
@@ -86,15 +90,15 @@ describe('ActiveCombatView', () => {
   });
 
   it('shows combatant detail panel when selectedDetailCombatantId and detailPosition are set', () => {
-    const goblin = makeCombatant();
+    const goblin = makeCombatant({ initiativeRoll: ROLLED });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }), selectedDetailCombatantId: 'c1', detailPosition: { top: 100, left: 200 } });
     render(<ActiveCombatView combat={combat} user={null} />);
     expect(screen.getByText('Goblin')).toBeInTheDocument();
   });
 
   it('renders combatant names from getDisplayCombatants', () => {
-    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', type: 'monster' });
-    const orc = makeCombatant({ id: 'c2', name: 'Orc', type: 'monster' });
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', type: 'monster', initiativeRoll: ROLLED });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc', type: 'monster', initiativeRoll: ROLLED });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin, orc] }) }, [goblin, orc]);
     render(<ActiveCombatView combat={combat} user={null} />);
     expect(screen.getByText('Goblin')).toBeInTheDocument();
@@ -113,7 +117,7 @@ describe('ActiveCombatView', () => {
 
   it('clicking "Current Turn (done)" calls nextTurn once', async () => {
     const user = userEvent.setup();
-    const goblin = makeCombatant();
+    const goblin = makeCombatant({ initiativeRoll: ROLLED });
     const nextTurn = jest.fn();
     const combat = makeCombat(
       { combatState: makeCombatState({ combatants: [goblin], currentTurnIndex: 0 }), nextTurn },
@@ -125,7 +129,7 @@ describe('ActiveCombatView', () => {
   });
 
   it('active combatant card has aria-current="step"', () => {
-    const goblin = makeCombatant();
+    const goblin = makeCombatant({ initiativeRoll: ROLLED });
     const combat = makeCombat(
       { combatState: makeCombatState({ combatants: [goblin], currentTurnIndex: 0 }), },
       [goblin],
@@ -145,7 +149,7 @@ describe('ActiveCombatView', () => {
   });
 
   it('renders lair slot remove button when lair combatant is not active', () => {
-    const goblin = makeCombatant();
+    const goblin = makeCombatant({ initiativeRoll: ROLLED });
     const lairCombatant = makeCombatant({ id: 'lair-1', name: 'Dragon Lair', type: 'lair' });
     const combat = makeCombat(
       { combatState: makeCombatState({ combatants: [goblin, lairCombatant], currentTurnIndex: 0 }), },
@@ -169,7 +173,7 @@ describe('ActiveCombatView', () => {
 
   it('confirming remove calls removeCombatant with correct ID', async () => {
     const user = userEvent.setup();
-    const goblin = makeCombatant();
+    const goblin = makeCombatant({ initiativeRoll: ROLLED });
     const removeCombatant = jest.fn();
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }), removeConfirmId: 'c1', removeConfirmPosition: { top: 0, left: 0 }, removeCombatant });
     render(<ActiveCombatView combat={combat} user={null} />);
@@ -179,7 +183,7 @@ describe('ActiveCombatView', () => {
 
   it('clicking cancel in remove confirm popup does not call removeCombatant', async () => {
     const user = userEvent.setup();
-    const goblin = makeCombatant();
+    const goblin = makeCombatant({ initiativeRoll: ROLLED });
     const removeCombatant = jest.fn();
     const setRemoveConfirmId = jest.fn();
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }), removeConfirmId: 'c1', removeConfirmPosition: { top: 0, left: 0 }, removeCombatant, setRemoveConfirmId });
@@ -237,6 +241,211 @@ describe('ActiveCombatView', () => {
   });
 });
 
+describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', () => {
+  it('auto-opens the initiative modal on mount for the first unrolled combatant, no click required', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    render(<ActiveCombatView combat={combat} user={null} />);
+    const modal = screen.getByTestId('initiative-modal');
+    expect(within(modal).getByRole('heading', { name: 'Goblin' })).toBeInTheDocument();
+  });
+
+  it('does not auto-open when every combatant already has an initiativeRoll', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', initiativeRoll: ROLLED });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    render(<ActiveCombatView combat={combat} user={null} />);
+    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
+  });
+
+  it('auto-opens for a newly added unrolled combatant', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', initiativeRoll: ROLLED });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    const { rerender } = render(<ActiveCombatView combat={combat} user={null} />);
+    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
+
+    const orc = makeCombatant({ id: 'c2', name: 'Orc' });
+    const combat2 = makeCombat({ combatState: makeCombatState({ combatants: [goblin, orc] }) }, [goblin, orc]);
+    rerender(<ActiveCombatView combat={combat2} user={null} />);
+
+    const modal = screen.getByTestId('initiative-modal');
+    expect(within(modal).getByRole('heading', { name: 'Orc' })).toBeInTheDocument();
+  });
+
+  it('dismissing the auto-opened modal via Escape does not reopen it for that combatant', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc', initiativeRoll: ROLLED });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin, orc] }) }, [goblin, orc]);
+    const { rerender } = render(<ActiveCombatView combat={combat} user={null} />);
+
+    expect(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Goblin' })).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
+
+    // Re-render triggered by unrelated state (e.g. adding a different combatant); goblin must stay closed.
+    const orc2 = makeCombatant({ id: 'c3', name: 'Orc2', initiativeRoll: ROLLED });
+    const combat2 = makeCombat({ combatState: makeCombatState({ combatants: [goblin, orc, orc2] }) }, [goblin, orc, orc2]);
+    rerender(<ActiveCombatView combat={combat2} user={null} />);
+    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
+  });
+
+  it('a combatant dismissed from auto-open remains manually openable via the Initiative control', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    render(<ActiveCombatView combat={combat} user={null} />);
+
+    expect(screen.getByTestId('initiative-modal')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
+
+    const initiativeButton = document.querySelector(
+      '[data-combatant-id="c1"] [data-card-section="initiative"] button',
+    ) as HTMLElement;
+    await user.click(initiativeButton);
+    expect(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Goblin' })).toBeInTheDocument();
+  });
+
+  it('dismissal tracking does not suppress the post-save auto-advance to another unrolled combatant', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc' });
+    const setInitiativeRoll = jest.fn();
+    const combat = makeCombat(
+      { combatState: makeCombatState({ combatants: [goblin, orc] }), setInitiativeRoll },
+      [goblin, orc],
+    );
+    render(<ActiveCombatView combat={combat} user={null} />);
+
+    // Dismiss goblin (auto-opened first); orc is also unrolled and eligible so the
+    // auto-open effect advances to it — that's expected and separate from what's
+    // under test here.
+    await user.keyboard('{Escape}');
+
+    // Manually reopen goblin (still allowed post-dismissal) and save it.
+    const goblinInitiativeButton = document.querySelector(
+      '[data-combatant-id="c1"] [data-card-section="initiative"] button',
+    ) as HTMLElement;
+    await user.click(goblinInitiativeButton);
+    expect(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Goblin' })).toBeInTheDocument();
+    await user.click(within(screen.getByTestId('initiative-modal')).getByRole('button', { name: 'Roll d20' }));
+
+    // Dismissal tracking must not suppress the post-save auto-advance to orc.
+    expect(setInitiativeRoll).toHaveBeenCalledWith('c1', expect.any(Object));
+    expect(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Orc' })).toBeInTheDocument();
+  });
+
+  it('anchors the modal to the combatant card rect, not the Initiative button rect', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+
+    const cardRect = { top: 40, left: 40, bottom: 400, right: 300, width: 260, height: 360, x: 40, y: 40, toJSON() {} } as DOMRect;
+    const buttonRect = { top: 60, left: 250, bottom: 80, right: 300, width: 50, height: 20, x: 250, y: 60, toJSON() {} } as DOMRect;
+    const originalGBCR = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
+      if (this.getAttribute('data-combatant-id') === 'c1') return cardRect;
+      if (this.matches('[data-card-section="initiative"] button')) return buttonRect;
+      return originalGBCR.call(this);
+    });
+
+    try {
+      render(<ActiveCombatView combat={combat} user={null} />);
+      const modal = screen.getByTestId('initiative-modal');
+      expect(modal.style.top).toBe(`${cardRect.bottom}px`);
+      expect(modal.style.left).toBe(`${cardRect.left}px`);
+    } finally {
+      Element.prototype.getBoundingClientRect = originalGBCR;
+    }
+  });
+
+  it('clamps the modal position so it never overflows the viewport', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+
+    const originalInnerWidth = window.innerWidth;
+    const originalInnerHeight = window.innerHeight;
+    Object.defineProperty(window, 'innerWidth', { value: 400, configurable: true });
+    Object.defineProperty(window, 'innerHeight', { value: 300, configurable: true });
+
+    const cardRect = { top: 250, left: 380, bottom: 260, right: 400, width: 20, height: 10, x: 380, y: 250, toJSON() {} } as DOMRect;
+    const modalRect = { top: 260, left: 380, bottom: 460, right: 700, width: 320, height: 200, x: 380, y: 260, toJSON() {} } as DOMRect;
+
+    const originalGBCR = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
+      if (this.getAttribute('data-testid') === 'initiative-modal') return modalRect;
+      if (this.getAttribute('data-combatant-id') === 'c1') return cardRect;
+      return originalGBCR.call(this);
+    });
+
+    try {
+      render(<ActiveCombatView combat={combat} user={null} />);
+      const modal = screen.getByTestId('initiative-modal');
+      const left = parseFloat(modal.style.left);
+      const top = parseFloat(modal.style.top);
+      expect(left + modalRect.width).toBeLessThanOrEqual(400 - 16);
+      expect(top + modalRect.height).toBeLessThanOrEqual(300 - 16);
+      expect(left).toBeGreaterThanOrEqual(16);
+      expect(top).toBeGreaterThanOrEqual(16);
+    } finally {
+      Element.prototype.getBoundingClientRect = originalGBCR;
+      Object.defineProperty(window, 'innerWidth', { value: originalInnerWidth, configurable: true });
+      Object.defineProperty(window, 'innerHeight', { value: originalInnerHeight, configurable: true });
+    }
+  });
+
+  it('does not clamp when the card is comfortably within the viewport', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+
+    const cardRect = { top: 40, left: 20, bottom: 100, right: 320, width: 300, height: 60, x: 20, y: 40, toJSON() {} } as DOMRect;
+    const modalRect = { top: 100, left: 20, bottom: 300, right: 340, width: 320, height: 200, x: 20, y: 100, toJSON() {} } as DOMRect;
+
+    const originalGBCR = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
+      if (this.getAttribute('data-testid') === 'initiative-modal') return modalRect;
+      if (this.getAttribute('data-combatant-id') === 'c1') return cardRect;
+      return originalGBCR.call(this);
+    });
+
+    try {
+      render(<ActiveCombatView combat={combat} user={null} />);
+      const modal = screen.getByTestId('initiative-modal');
+      expect(modal.style.top).toBe(`${cardRect.bottom}px`);
+      expect(modal.style.left).toBe(`${cardRect.left}px`);
+    } finally {
+      Element.prototype.getBoundingClientRect = originalGBCR;
+    }
+  });
+
+  it('the INITIATIVE_MODAL_WIDTH constant and its left-offset subtraction no longer exist', () => {
+    const source = require('fs').readFileSync(
+      require.resolve('@/lib/components/ActiveCombatView'),
+      'utf8',
+    );
+    expect(source).not.toMatch(/INITIATIVE_MODAL_WIDTH/);
+  });
+
+  it('does not throw and shows no modal when the auto-open target has no rendered card', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    // combatState has an unrolled combatant, but getDisplayCombatants filters it out
+    // so no card (and no [data-combatant-id]) is ever rendered for it.
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, []);
+    expect(() => render(<ActiveCombatView combat={combat} user={null} />)).not.toThrow();
+    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
+  });
+
+  it('closes gracefully without throwing when the open modal target combatant is removed mid-session', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    const { rerender } = render(<ActiveCombatView combat={combat} user={null} />);
+    expect(screen.getByTestId('initiative-modal')).toBeInTheDocument();
+
+    const combat2 = makeCombat({ combatState: makeCombatState({ combatants: [] }) }, []);
+    expect(() => rerender(<ActiveCombatView combat={combat2} user={null} />)).not.toThrow();
+    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
+  });
+});
+
 describe('ActiveCombatView — CON save notification', () => {
   const CHARACTER_ID = 'char-abc';
   const CHARACTER_USER_ID = 'user-xyz';
@@ -261,6 +470,7 @@ describe('ActiveCombatView — CON save notification', () => {
       hp: 30,
       maxHp: 30,
       concentratingOn: 'Bless',
+      initiativeRoll: ROLLED,
       ...overrides,
     });
   }
@@ -298,6 +508,7 @@ describe('ActiveCombatView — CON save notification', () => {
       hp: 30,
       maxHp: 30,
       concentratingOn: 'Hold Person',
+      initiativeRoll: ROLLED,
     });
     const combat = makeCombat(
       {

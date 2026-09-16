@@ -118,6 +118,29 @@ describe('InitiativeEntry', () => {
       expect(window.alert).toHaveBeenCalled();
       expect(onSet).not.toHaveBeenCalled();
     });
+
+    it('decimal value is rejected rather than silently truncated', async () => {
+      const user = userEvent.setup();
+      const { onSet } = renderEntry();
+      await user.click(screen.getByText('Enter Dice Roll'));
+      const input = screen.getByPlaceholderText('1-20');
+      await user.clear(input);
+      await user.type(input, '15.9');
+      await user.click(screen.getByText('Set'));
+      expect(window.alert).toHaveBeenCalled();
+      expect(onSet).not.toHaveBeenCalled();
+    });
+
+    it('blank value is rejected rather than silently treated as 0', async () => {
+      const user = userEvent.setup();
+      const { onSet } = renderEntry();
+      await user.click(screen.getByText('Enter Dice Roll'));
+      const input = screen.getByPlaceholderText('1-20');
+      await user.clear(input);
+      await user.click(screen.getByText('Set'));
+      expect(window.alert).toHaveBeenCalled();
+      expect(onSet).not.toHaveBeenCalled();
+    });
   });
 
   describe('total mode', () => {
@@ -131,6 +154,29 @@ describe('InitiativeEntry', () => {
       await user.click(screen.getByText('Set'));
       expect(onSet).toHaveBeenCalledWith(expect.objectContaining({ total: 15 }));
     });
+
+    it('decimal value is rejected rather than silently truncated', async () => {
+      const user = userEvent.setup();
+      const { onSet } = renderEntry();
+      await user.click(screen.getByText('Enter Total'));
+      const input = screen.getByPlaceholderText('Total initiative');
+      await user.clear(input);
+      await user.type(input, '15.9');
+      await user.click(screen.getByText('Set'));
+      expect(window.alert).toHaveBeenCalled();
+      expect(onSet).not.toHaveBeenCalled();
+    });
+
+    it('blank value is rejected rather than silently treated as 0', async () => {
+      const user = userEvent.setup();
+      const { onSet } = renderEntry();
+      await user.click(screen.getByText('Enter Total'));
+      const input = screen.getByPlaceholderText('Total initiative');
+      await user.clear(input);
+      await user.click(screen.getByText('Set'));
+      expect(window.alert).toHaveBeenCalled();
+      expect(onSet).not.toHaveBeenCalled();
+    });
   });
 
   describe('Escape key behavior', () => {
@@ -143,11 +189,11 @@ describe('InitiativeEntry', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
-    it('Escape key does NOT call onClose when no initiativeRoll', async () => {
+    it('Escape key calls onClose even when no initiativeRoll', async () => {
       const user = userEvent.setup();
       const { onClose } = renderEntry({ initiativeRoll: undefined });
       await user.keyboard('{Escape}');
-      expect(onClose).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
 

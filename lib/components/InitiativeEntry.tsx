@@ -7,7 +7,7 @@ import { buildInitiativeRoll, getDexInitiativeBonus } from '@/lib/utils/combat';
 interface InitiativeEntryProps {
   combatant: CombatantState;
   onSet: (initiativeRoll: InitiativeRoll) => void;
-  onClose?: () => void; // optional: close the edit form (only valid when initiative exists)
+  onClose?: () => void; // optional: close the edit form
   onSettingsChange?: (advantage: boolean, flatBonus: number) => void;
 }
 
@@ -18,24 +18,24 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
   const [advantage, setAdvantage] = useState(combatant.initiativeAdvantage ?? false);
   const [flatBonus, setFlatBonus] = useState(combatant.initiativeFlatBonus ?? 0);
 
-  // Close with Escape only when there is an existing initiative and an onClose handler
+  // Close with Escape whenever an onClose handler is provided
   useEffect(() => {
-    if (!combatant.initiativeRoll || !onClose) return;
+    if (!onClose) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [combatant.initiativeRoll, onClose]);
+  }, [onClose]);
 
   const handleRoll = () => {
     onSet(buildInitiativeRoll({ ...combatant, initiativeAdvantage: advantage, initiativeFlatBonus: flatBonus }));
   };
 
   const handleDiceEntry = () => {
-    const roll = parseInt(diceRoll) || 0;
-    if (roll < 1 || roll > 20) {
-      alert('Dice roll must be between 1 and 20');
+    const roll = Number(diceRoll);
+    if (diceRoll.trim() === '' || !Number.isSafeInteger(roll) || roll < 1 || roll > 20) {
+      alert('Dice roll must be a whole number between 1 and 20');
       return;
     }
 
@@ -53,9 +53,9 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
   };
 
   const handleTotalEntry = () => {
-    const total = parseInt(totalValue) || 0;
-    if (total < 0) {
-      alert('Initiative must be 0 or greater');
+    const total = Number(totalValue);
+    if (totalValue.trim() === '' || !Number.isSafeInteger(total) || total < 0) {
+      alert('Initiative must be a whole number 0 or greater');
       return;
     }
 
@@ -72,8 +72,8 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
 
   return (
     <div className="relative bg-gray-800 rounded-lg p-4 border border-gray-700">
-      {/* Close button only for entries that already have an initiative and when parent provided onClose */}
-      {combatant.initiativeRoll && onClose && (
+      {/* Close button whenever the parent provided an onClose handler */}
+      {onClose && (
         <button
           onClick={onClose}
           aria-label={`Close initiative editor for ${combatant.name}`}

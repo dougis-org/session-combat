@@ -3,7 +3,6 @@
 import type { CombatantState } from '@/lib/types';
 import { lifeStateDisplay } from '@/lib/combat/deathSaves';
 import { healthBarColor } from '@/lib/components/combatant-card/healthBarColor';
-import { rectToPosition } from '@/lib/utils/combat';
 import { formatInitiativeRoll } from '@/lib/components/combatant-card/formatInitiativeRoll';
 
 interface CombatantCardHeaderProps {
@@ -137,18 +136,20 @@ export function InitiativeControl({
   onSetInitiative,
 }: {
   combatant: CombatantState;
-  onSetInitiative?: (combatantId: string, position: { top: number; left: number }) => void;
+  onSetInitiative?: (combatantId: string) => void;
 }) {
   return (
     <div data-card-section="initiative" className="flex items-center gap-2 ml-auto pr-4">
       <button
-        onClick={(e) => {
-          onSetInitiative?.(combatant.id, rectToPosition(e.currentTarget.getBoundingClientRect()));
+        onClick={() => {
+          onSetInitiative?.(combatant.id);
         }}
         className="flex items-center gap-1 hover:opacity-80 cursor-pointer transition-opacity"
       >
         <p className="text-xs text-gray-400">Initiative</p>
-        <p className="text-lg font-bold">{combatant.initiative}</p>
+        <p className={`text-lg font-bold ${combatant.initiativeRoll ? '' : 'text-red-400'}`}>
+          {combatant.initiativeRoll ? combatant.initiative : 'N/A'}
+        </p>
         {combatant.initiativeRoll && (
           <p className="text-xs text-gray-500 whitespace-nowrap">
             {formatInitiativeRoll(combatant.initiativeRoll)}

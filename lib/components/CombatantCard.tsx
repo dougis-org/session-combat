@@ -24,7 +24,7 @@ export interface CombatantCardProps {
   onRemove: () => void;
   onNextTurn?: () => void;
   onShowDetails?: (combatantId: string, position: { top: number; left: number }, options?: { focusSection?: 'legendary' }) => void;
-  onSetInitiative?: (combatantId: string, position: { top: number; left: number }) => void;
+  onSetInitiative?: (combatantId: string) => void;
   onShowRemoveConfirm?: (combatantId: string, position: { top: number; left: number }) => void;
   allCombatants?: CombatantState[];
   onUpdateCombatant?: (combatantId: string, updates: Partial<CombatantState>) => void;
