@@ -6,6 +6,9 @@ import { usesDeathSaves, applyDeathSaveRoll, toggleDeathSaveSlot, lifeStateDispl
 import type { DeathSaveKind, DeathSaveSlotIndex } from '@/lib/combat/deathSaves';
 import { DeathSaveTracker } from '@/lib/components/DeathSaveTracker';
 import { rollDie } from '@/lib/utils/dice';
+import { DiceD20Icon } from '@/lib/components/icons/dice';
+import { DiceRollOverlay } from '@/lib/components/dice/DiceRollOverlay';
+import type { BuiltRoll } from '@/lib/dice/useDicePoolState';
 import { useCombatantHp } from '@/lib/hooks/useCombatantHp';
 import { CombatantCardHeader, InitiativeControl } from '@/lib/components/combatant-card/CombatantCardHeader';
 import { HpControls, HealthBar } from '@/lib/components/combatant-card/HpControls';
@@ -53,6 +56,7 @@ export function CombatantCard(props: CombatantCardProps) {
   const [deathSaveNote, setDeathSaveNote] = useState<string | null>(null);
   const [showTargeting, setShowTargeting] = useState(false);
   const [addConditionOpen, setAddConditionOpen] = useState(false);
+  const [activeRoll, setActiveRoll] = useState<BuiltRoll | null>(null);
 
   const hp = useCombatantHp({
     combatId,
@@ -73,6 +77,17 @@ export function CombatantCard(props: CombatantCardProps) {
     setDeathSaveNote(note ?? null);
     onUpdate(updates);
     return d20;
+  };
+
+  const handleQuickRoll = () => {
+    const value = rollDie(20)[0];
+    setActiveRoll({
+      formula: '1d20',
+      rolls: [value],
+      total: value,
+      breakdown: [{ sides: 20, value }],
+      modifier: 0,
+    });
   };
 
   const bgStyle = combatant.type === 'player'
@@ -106,7 +121,18 @@ export function CombatantCard(props: CombatantCardProps) {
               applySetTemp={hp.applySetTemp}
               undoHpChange={hp.undoHpChange}
             />
-            <div data-card-section="quick-rolls" className="hidden empty:block"></div>
+            <div data-card-section="quick-rolls" className={combatant.type === 'monster' ? undefined : 'hidden empty:block'}>
+              {combatant.type === 'monster' && (
+                <button
+                  type="button"
+                  onClick={handleQuickRoll}
+                  aria-label="Roll d20"
+                  className="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-white w-8 h-8 rounded-full flex items-center justify-center"
+                >
+                  <DiceD20Icon width={18} height={18} aria-hidden="true" />
+                </button>
+              )}
+            </div>
             <InitiativeControl combatant={combatant} onSetInitiative={onSetInitiative} />
           </div>
 
@@ -197,6 +223,9 @@ export function CombatantCard(props: CombatantCardProps) {
           </button>
         </div>
       </div>
+      {activeRoll && (
+        <DiceRollOverlay built={activeRoll} disableAnimation onClose={() => setActiveRoll(null)} />
+      )}
     </div>
   );
 }

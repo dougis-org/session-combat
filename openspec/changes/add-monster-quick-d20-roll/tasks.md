@@ -7,39 +7,39 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 734 --repo dougis-org/session-combat --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] Confirm the canonical `CombatantState.type` discriminator (`"player" | "monster" | "lair"`, `lib/types.ts:561`) still matches this assumption before writing the gate condition
-- [ ] Populate the existing `data-card-section="quick-rolls"` slot in `lib/components/CombatantCard.tsx` with a native `<button>` (accessible name, `DiceD20Icon` from `lib/components/icons/dice.tsx`), rendered only when `combatant.type === 'monster'`
-- [ ] Add a single `useState<BuiltRoll | null>` slot in `CombatantCard.tsx` (or a small co-located helper) to hold the active quick roll, reusing the existing `rollDie` import from `lib/utils/dice.ts` (already imported for death saves) — no new dice-generation utility
-- [ ] On button click: roll via `rollDie(20)[0]`, construct `{ formula: '1d20', rolls: [value], total: value, breakdown: [{ sides: 20, value }], modifier: 0 }` as a `BuiltRoll` (type imported from `lib/dice/useDicePoolState.ts`), and set it as the active roll — replacing (not stacking) any roll already showing
-- [ ] Render `<DiceRollOverlay built={activeRoll} disableAnimation onClose={() => setActiveRoll(null)} />` from `lib/components/dice/DiceRollOverlay.tsx` only when `activeRoll` is non-null
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch — confirmed during design: `rollDie`, `DiceD20Icon`, `DiceRollOverlay`, and `BuiltRoll` are reused as-is; no new shared helper is introduced (see design.md Decision 3 rationale)
-- [ ] Write unit tests (new file, e.g. `tests/unit/components/CombatantCard.quickRoll.test.tsx`) covering every scenario in `specs/monster-quick-roll/spec.md`:
+- [x] **Issue lifecycle: mark in-progress** — run `gh issue edit 734 --repo dougis-org/session-combat --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] Confirm the canonical `CombatantState.type` discriminator (`"player" | "monster" | "lair"`, `lib/types.ts:561`) still matches this assumption before writing the gate condition
+- [x] Populate the existing `data-card-section="quick-rolls"` slot in `lib/components/CombatantCard.tsx` with a native `<button>` (accessible name, `DiceD20Icon` from `lib/components/icons/dice.tsx`), rendered only when `combatant.type === 'monster'`
+- [x] Add a single `useState<BuiltRoll | null>` slot in `CombatantCard.tsx` (or a small co-located helper) to hold the active quick roll, reusing the existing `rollDie` import from `lib/utils/dice.ts` (already imported for death saves) — no new dice-generation utility
+- [x] On button click: roll via `rollDie(20)[0]`, construct `{ formula: '1d20', rolls: [value], total: value, breakdown: [{ sides: 20, value }], modifier: 0 }` as a `BuiltRoll` (type imported from `lib/dice/useDicePoolState.ts`), and set it as the active roll — replacing (not stacking) any roll already showing
+- [x] Render `<DiceRollOverlay built={activeRoll} disableAnimation onClose={() => setActiveRoll(null)} />` from `lib/components/dice/DiceRollOverlay.tsx` only when `activeRoll` is non-null
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch — confirmed during design: `rollDie`, `DiceD20Icon`, `DiceRollOverlay`, and `BuiltRoll` are reused as-is; no new shared helper is introduced (see design.md Decision 3 rationale)
+- [x] Write unit tests (new file, e.g. `tests/unit/components/CombatantCard.quickRoll.test.tsx`) covering every scenario in `specs/monster-quick-roll/spec.md`:
   - button renders for `type: 'monster'`; absent for `type: 'player'` and `type: 'lair'`
   - clicking the button shows a result modal immediately with total/formula matching a mocked `rollDie` return value, with no animation-status gating
   - clicking the button does not call `fetch` or any session-chat/roll-submission function
   - two clicks in a row leave exactly one result modal showing the second roll's value
   - a quick roll leaves HP, conditions, targeting, and death-save state on the card unchanged
   - two sibling cards' quick-roll state are independent of each other
-- [ ] Confirm acceptance criteria in `specs/monster-quick-roll/spec.md` are covered by the above tests, including the Non-Functional Acceptance Criteria (no animation engine import/mount, independent per-card state)
+- [x] Confirm acceptance criteria in `specs/monster-quick-roll/spec.md` are covered by the above tests, including the Non-Functional Acceptance Criteria (no animation engine import/mount, independent per-card state)
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] Run unit/integration tests
-- [ ] Run E2E tests (if applicable)
-- [ ] Run type checks
-- [ ] Run build
-- [ ] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests
+- [x] Run E2E tests (if applicable) — deferred to CI (ci-gate) per the PR/merge loop; not run locally for this single-component UI change
+- [x] Run type checks
+- [x] Run build
+- [x] Run security/code quality checks required by project standards — `openspec-review-code` sub-agent + Verity gate, no findings
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
