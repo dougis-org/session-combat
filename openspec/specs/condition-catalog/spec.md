@@ -4,19 +4,35 @@ This document details *changes* to requirements and is additive to the [`design.
 
 ### Requirement: ADDED Default condition catalog storage
 
-The system SHALL persist a catalog of standard D&D 5e conditions (name + description) in a dedicated MongoDB collection, seeded by a script rather than hardcoded in application code.
+The system SHALL persist a catalog of standard D&D 5e conditions plus commonly-needed spell/feature-inflicted status effects (name + description) in a dedicated MongoDB collection, seeded by a script rather than hardcoded in application code. The catalog contains 18 entries: the 15 standard conditions plus Slowed, Confused, and Turned.
 
 #### Scenario: Catalog is readable after seeding
 
-- **Given** the `conditionCatalog` collection has been populated by the seed script with the 15 standard conditions
+- **Given** the `conditionCatalog` collection has been populated by the seed script with all 18 default conditions
 - **When** `storage.loadConditionCatalog()` is called
-- **Then** it returns all 15 entries, each with a non-empty `name` and `description`
+- **Then** it returns all 18 entries, each with a non-empty `name` and `description`
 
 #### Scenario: Re-running the seed script is idempotent
 
-- **Given** the `conditionCatalog` collection already contains the seeded 15 conditions
+- **Given** the `conditionCatalog` collection already contains the seeded 18 conditions
 - **When** the seed script is run again
-- **Then** the collection still contains exactly 15 entries (upserted by name, not duplicated)
+- **Then** the collection still contains exactly 18 entries (upserted by name, not duplicated)
+
+### Requirement: ADDED Slowed, Confused, and Turned in the default condition catalog
+
+The system SHALL include Slowed, Confused, and Turned as default catalog conditions, each with a non-empty SRD-style `name` and `description`, sourced from `CONDITION_CATALOG` alongside the existing 15 standard conditions. See [`design.md`](../../changes/archive/2026-09-16-expand-default-conditions/design.md) and [`tasks.md`](../../changes/archive/2026-09-16-expand-default-conditions/tasks.md) for the change that introduced these three entries.
+
+#### Scenario: New conditions present after seeding
+
+- **Given** the seed script has been run against `CONDITION_CATALOG`
+- **When** `storage.loadConditionCatalog()` is called
+- **Then** the result includes entries named "Slowed", "Confused", and "Turned", each with a non-empty `description`
+
+#### Scenario: New conditions selectable from the condition dropdown
+
+- **Given** the Add Condition modal is open for a combatant and the catalog has loaded successfully
+- **When** the user selects "Slowed" (or "Confused", or "Turned") from the condition dropdown and clicks Add
+- **Then** the combatant's conditions list includes a new `StatusCondition` with that `name` and `description` equal to the catalog's stored description for it — identical behavior to selecting any existing catalog condition (e.g. "Poisoned")
 
 ### Requirement: ADDED Condition dropdown with catalog descriptions
 
@@ -71,6 +87,8 @@ The system SHALL show each applied condition's description inline in the combata
 - Design decision: Decisions 3, 4 (dropdown + graceful fallback) -> Requirement: ADDED Condition dropdown with catalog descriptions
 - Design decision: Decision 5 (inline, conditional rendering) -> Requirement: ADDED Inline condition descriptions in the combatant card's expanded list
 - Requirement: ADDED Default condition catalog storage -> Task(s): create collection/repo, write seed script
+- Proposal element (expand-default-conditions): "Add three entries to `CONDITION_CATALOG`... Slowed, Confused, Turned" -> Requirement: ADDED Slowed, Confused, and Turned in the default condition catalog
+- Requirement: ADDED Slowed, Confused, and Turned in the default condition catalog -> Task(s): edit `lib/data/conditionCatalog.ts`, update/add unit test assertions
 - Requirement: ADDED Condition dropdown with catalog descriptions -> Task(s): catalog API route, ConditionFormModal changes
 - Requirement: ADDED Inline condition descriptions in the combatant card's expanded list -> Task(s): ConditionControls changes
 
