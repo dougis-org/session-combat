@@ -7,37 +7,37 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 733 --add-label "in-progress"`. Then discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] Confirm the `.github/openspec-shared` submodule is checked out in this worktree (`git submodule update --init --force .github/openspec-shared`) before relying on any shared schema tooling.
-- [ ] **Types**: add `StatusConditionCatalogEntry` (`{ name: string; description: string }`) to `lib/types.ts` near `StatusCondition`.
-- [ ] **Repo (write test first)**: add `tests/unit/lib/storage/conditionCatalogRepo.test.ts` covering `loadConditionCatalog()` shape and the empty-collection case; then implement `lib/storage/conditionCatalogRepo.ts` (`loadConditionCatalog(): Promise<StatusConditionCatalogEntry[]>` via `db.collection<StatusConditionCatalogEntry>("conditionCatalog").find({}).toArray()`, wrapped in `runStorageOp({ name: "loadConditionCatalog", collection: "conditionCatalog", isEmpty: (res) => res.length === 0 })`), returning only the typed `{ name, description }` fields (strip any other stored fields/`_id`).
-- [ ] Register `storage.loadConditionCatalog()` in `lib/storage.ts` façade, delegating to `conditionCatalogRepo`.
-- [ ] Add a `conditionCatalog` index/setup entry in `lib/db.ts` `initializeDatabase` if a uniqueness constraint on `name` is warranted (prevents duplicate seed rows).
-- [ ] **Seed script (write test first)**: add `tests/unit/lib/scripts/seedConditionCatalog.test.ts` asserting idempotent upsert-by-name (running twice yields 15 rows, not 30); then implement `lib/scripts/seedConditionCatalog.ts` (mirrors `lib/scripts/seedGlobalMonsters.ts` shape: `seedConditionCatalog()` + `runCli()`) with the 15 standard 5e conditions and their SRD descriptions (Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, Unconscious).
-- [ ] Add an npm script (e.g. `seed:conditions`) to `package.json` invoking the new seed script's CLI entry, matching the existing seed script conventions.
-- [ ] **API route (write test first)**: add a route test asserting an authenticated `GET /api/conditions/catalog` returns 200 and a `{ name, description }[]` payload with no extra fields even if the stored document has extras; then implement `app/api/conditions/catalog/route.ts` using the existing `withAuth` wrapper and `storage.loadConditionCatalog()`.
-- [ ] **ConditionFormModal (write/extend tests first)**: extend `tests/unit/components/combatant-card/ConditionFormModal.test.tsx` with cases for: catalog populated → selecting an entry sets `description`; "Custom…" selected → free-text path unchanged (`parseConditionForm` behavior untouched); fetch failure/empty catalog → dropdown hidden/limited to Custom with a muted "No default conditions loaded — enter a custom one." note; modal usable (Custom path available) before the fetch resolves. Then implement the dropdown + "Custom…" option in `lib/components/combatant-card/ConditionFormModal.tsx`, fetching `GET /api/conditions/catalog` on mount, wiring selected catalog entries to `{ name, description }` and "Custom…" to today's existing free-text inputs.
-- [ ] **ConditionControls (write/extend tests first)**: extend `tests/unit/components/combatant-card/ConditionControls.test.tsx` with cases for description shown when non-empty and no extra line when empty. Then implement the inline description line in `lib/components/combatant-card/ConditionControls.tsx`'s expanded row (`{condition.description && (<span>...</span>)}`), styled as small/muted text.
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (e.g. reuse `runStorageOp`, `withAuth`, existing seed-script CLI scaffolding, existing modal fetch/loading-state patterns) rather than introducing new helpers.
-- [ ] Confirm acceptance criteria in `openspec/changes/default-condition-catalog/specs/condition-catalog/spec.md` are covered by the tests above (one test per scenario, minimum).
+- [x] **Issue lifecycle: mark in-progress** — run `gh issue edit 733 --add-label "in-progress"`. Then discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] Confirm the `.github/openspec-shared` submodule is checked out in this worktree (`git submodule update --init --force .github/openspec-shared`) before relying on any shared schema tooling.
+- [x] **Types**: add `StatusConditionCatalogEntry` (`{ name: string; description: string }`) to `lib/types.ts` near `StatusCondition`.
+- [x] **Repo (write test first)**: add `tests/unit/lib/storage/conditionCatalogRepo.test.ts` covering `loadConditionCatalog()` shape and the empty-collection case; then implement `lib/storage/conditionCatalogRepo.ts` (`loadConditionCatalog(): Promise<StatusConditionCatalogEntry[]>` via `db.collection<StatusConditionCatalogEntry>("conditionCatalog").find({}).toArray()`, wrapped in `runStorageOp({ name: "loadConditionCatalog", collection: "conditionCatalog", isEmpty: (res) => res.length === 0 })`), returning only the typed `{ name, description }` fields (strip any other stored fields/`_id`).
+- [x] Register `storage.loadConditionCatalog()` in `lib/storage.ts` façade, delegating to `conditionCatalogRepo`.
+- [x] Add a `conditionCatalog` index/setup entry in `lib/db.ts` `initializeDatabase` if a uniqueness constraint on `name` is warranted (prevents duplicate seed rows).
+- [x] **Seed script (write test first)**: add `tests/unit/lib/scripts/seedConditionCatalog.test.ts` asserting idempotent upsert-by-name (running twice yields 15 rows, not 30); then implement `lib/scripts/seedConditionCatalog.ts` (mirrors `lib/scripts/seedGlobalMonsters.ts` shape: `seedConditionCatalog()` + `runCli()`) with the 15 standard 5e conditions and their SRD descriptions (Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, Unconscious).
+- [x] Add an npm script (e.g. `seed:conditions`) to `package.json` invoking the new seed script's CLI entry, matching the existing seed script conventions.
+- [x] **API route (write test first)**: add a route test asserting an authenticated `GET /api/conditions/catalog` returns 200 and a `{ name, description }[]` payload with no extra fields even if the stored document has extras; then implement `app/api/conditions/catalog/route.ts` using the existing `withAuth` wrapper and `storage.loadConditionCatalog()`.
+- [x] **ConditionFormModal (write/extend tests first)**: extend `tests/unit/components/combatant-card/ConditionFormModal.test.tsx` with cases for: catalog populated → selecting an entry sets `description`; "Custom…" selected → free-text path unchanged (`parseConditionForm` behavior untouched); fetch failure/empty catalog → dropdown hidden/limited to Custom with a muted "No default conditions loaded — enter a custom one." note; modal usable (Custom path available) before the fetch resolves. Then implement the dropdown + "Custom…" option in `lib/components/combatant-card/ConditionFormModal.tsx`, fetching `GET /api/conditions/catalog` on mount, wiring selected catalog entries to `{ name, description }` and "Custom…" to today's existing free-text inputs.
+- [x] **ConditionControls (write/extend tests first)**: extend `tests/unit/components/combatant-card/ConditionControls.test.tsx` with cases for description shown when non-empty and no extra line when empty. Then implement the inline description line in `lib/components/combatant-card/ConditionControls.tsx`'s expanded row (`{condition.description && (<span>...</span>)}`), styled as small/muted text.
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (e.g. reuse `runStorageOp`, `withAuth`, existing seed-script CLI scaffolding, existing modal fetch/loading-state patterns) rather than introducing new helpers.
+- [x] Confirm acceptance criteria in `openspec/changes/default-condition-catalog/specs/condition-catalog/spec.md` are covered by the tests above (one test per scenario, minimum).
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] Run unit/integration tests
+- [x] Run unit/integration tests
 - [ ] Run E2E tests (if applicable)
-- [ ] Run type checks
-- [ ] Run build
-- [ ] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run type checks
+- [x] Run build
+- [x] Run security/code quality checks required by project standards
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -56,7 +56,7 @@ Use the project's documented commands for each of the above (see project README 
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
 - [ ] Commit all changes to the working branch and push to remote
 - [ ] Open PR from `default-condition-catalog` to `main`. The PR body MUST include `Closes #733`.
 - [ ] **Issue lifecycle: mark in-review**: run `gh issue edit 733 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).

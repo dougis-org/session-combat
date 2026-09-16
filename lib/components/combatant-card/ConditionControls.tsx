@@ -44,17 +44,24 @@ export function ConditionControls({ combatant, onUpdate, modalOpen, onModalClose
           {showConditions && (
             <div className="mt-2 space-y-1">
               {combatant.conditions.map(condition => (
-                <div key={condition.id} className="bg-gray-700 rounded px-2 py-1 text-sm flex justify-between items-center">
-                  <span>
-                    {condition.name}
-                    {condition.duration && ` (${condition.duration} rounds)`}
-                  </span>
-                  <button
-                    onClick={() => removeCondition(condition.id)}
-                    className="text-red-400 hover:text-red-300 text-xs"
-                  >
-                    Remove
-                  </button>
+                <div key={condition.id} className="bg-gray-700 rounded px-2 py-1 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span>
+                      {condition.name}
+                      {condition.duration && ` (${condition.duration} rounds)`}
+                    </span>
+                    <button
+                      onClick={() => removeCondition(condition.id)}
+                      className="text-red-400 hover:text-red-300 text-xs"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  {condition.description && (
+                    <span className="block text-xs text-gray-400 mt-0.5" data-testid="condition-description">
+                      {condition.description}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>

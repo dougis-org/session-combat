@@ -526,6 +526,11 @@ export interface StatusCondition {
   duration?: number; // in rounds
 }
 
+export interface StatusConditionCatalogEntry {
+  name: string;
+  description: string;
+}
+
 export interface CombatantStatus {
   combatantId: string;
   conditions: StatusCondition[];
