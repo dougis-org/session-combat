@@ -7,7 +7,7 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
@@ -92,10 +92,10 @@ Blocking resolution flow:
 - [x] Archive the change: move `openspec/changes/auto-scroll-next-combatant/` to `openspec/changes/archive/YYYY-MM-DD-auto-scroll-next-combatant/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
 - [x] Confirm `openspec/changes/archive/YYYY-MM-DD-auto-scroll-next-combatant/` exists and `openspec/changes/auto-scroll-next-combatant/` is gone
 - [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-auto-scroll-next-combatant` then `git push -u origin doc/archive-YYYY-MM-DD-auto-scroll-next-combatant`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-auto-scroll-next-combatant` to `main` with title `docs: archive auto-scroll-next-combatant (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D auto-scroll-next-combatant doc/archive-YYYY-MM-DD-auto-scroll-next-combatant`
-- [ ] Remove the change's dedicated worktree: `git worktree remove .worktrees/auto-scroll-next-combatant` (from the primary checkout)
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-auto-scroll-next-combatant` to `main` with title `docs: archive auto-scroll-next-combatant (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D auto-scroll-next-combatant doc/archive-YYYY-MM-DD-auto-scroll-next-combatant`
+- [x] Remove the change's dedicated worktree: `git worktree remove .worktrees/auto-scroll-next-combatant` (from the primary checkout)
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D auto-scroll-next-combatant doc/archive-YYYY-MM-DD-auto-scroll-next-combatant`
