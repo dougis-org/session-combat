@@ -102,8 +102,10 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
         </button>
       )}
 
-      <h2 className="shrink-0 self-stretch text-lg font-semibold text-red-400 [writing-mode:vertical-rl] rotate-180">
-        Set Initiative
+      <h2 className="shrink-0 w-24 self-stretch flex flex-col justify-center text-lg font-semibold text-red-400">
+        Set
+        <br />
+        Initiative
       </h2>
 
       <div className="min-w-0 flex-1 max-h-[70vh] overflow-y-auto pr-1 flex justify-between items-start mb-4">
