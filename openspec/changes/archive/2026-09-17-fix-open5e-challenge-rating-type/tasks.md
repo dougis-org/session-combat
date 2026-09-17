@@ -89,8 +89,8 @@ Blocking resolution flow:
 - [x] Archive the change: moved `openspec/changes/fix-open5e-challenge-rating-type/` to `openspec/changes/archive/2026-09-17-fix-open5e-challenge-rating-type/` via `git mv`, staged in a single commit
 - [x] Confirm `openspec/changes/archive/2026-09-17-fix-open5e-challenge-rating-type/` exists and `openspec/changes/fix-open5e-challenge-rating-type/` is gone
 - [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-09-17-fix-open5e-challenge-rating-type` then push to origin
-- [ ] Open a PR from `doc/archive-2026-09-17-fix-open5e-challenge-rating-type` to `main` with title `docs: archive fix-open5e-challenge-rating-type (2026-09-17)` — do NOT push directly to `main`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] Open a PR from `doc/archive-2026-09-17-fix-open5e-challenge-rating-type` to `main` with title `docs: archive fix-open5e-challenge-rating-type (2026-09-17)` — do NOT push directly to `main` (PR #758)
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge) — squash auto-merge enabled
 - [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
 - [ ] Prune merged local branches: `git fetch --prune` and `git branch -D fix-open5e-challenge-rating-type doc/archive-2026-09-17-fix-open5e-challenge-rating-type`
 - [ ] Remove the change's dedicated worktree: `git worktree remove .worktrees/fix-open5e-challenge-rating-type`
