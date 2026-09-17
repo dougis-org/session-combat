@@ -103,3 +103,5 @@ regression-test-output.txt
 # A stale `/public/assets/` dir may linger from the previously used
 # @3d-dice/dice-box postinstall copier; it is not served and is ignored here.
 /public/assets/
+
+.verity/

@@ -52,6 +52,12 @@ beforeEach(() => {
 afterEach(() => jest.restoreAllMocks());
 
 describe('InitiativeEntry', () => {
+  it('shows Set Initiative as the modal title', () => {
+    renderEntry();
+
+    expect(screen.getByRole('heading', { name: 'Set Initiative', level: 2 })).toBeInTheDocument();
+  });
+
   describe('roll mode', () => {
     it('clicking Roll d20 calls onSet with { roll, bonus, total, method: "rolled" } in valid range', async () => {
       const user = userEvent.setup();
