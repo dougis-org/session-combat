@@ -31,6 +31,7 @@ export type PreferencePath =
   | 'dice.surface'
   | 'chat.pinned'
   | 'chat.size'
+  | 'combat.autoScrollToNextCombatant'
 
 /** Legacy per-hook keys read exactly once, during first-login adoption. */
 const LEGACY_KEYS: ReadonlyArray<{ legacy: string; path: PreferencePath }> = [
@@ -87,6 +88,7 @@ const ALL_PATHS: readonly PreferencePath[] = [
   'dice.surface',
   'chat.pinned',
   'chat.size',
+  'combat.autoScrollToNextCombatant',
 ]
 
 /**

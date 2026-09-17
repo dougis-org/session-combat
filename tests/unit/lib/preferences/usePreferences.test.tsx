@@ -65,6 +65,26 @@ describe('usePreferences — logged out', () => {
     expect(LocalStore.get(PREFERENCES_MIRROR_KEY)).toMatchObject({ dice: { sendToChat: true } })
     expect(spy).not.toHaveBeenCalled()
   })
+
+  it('round-trips combat.autoScrollToNextCombatant through setPreference and the local mirror', async () => {
+    okServer()
+    const { result } = renderHook(() => usePreferences(), {
+      wrapper: makePreferencesWrapper(null),
+    })
+    await waitFor(() => expect(result.current.ready).toBe(true))
+
+    act(() => result.current.setPreference('combat.autoScrollToNextCombatant', false))
+
+    expect(result.current.preferences.combat.autoScrollToNextCombatant).toBe(false)
+    expect(LocalStore.get(PREFERENCES_MIRROR_KEY)).toMatchObject({ combat: { autoScrollToNextCombatant: false } })
+  })
+})
+
+describe('usePreferences — fallback (no provider)', () => {
+  it('resolves combat.autoScrollToNextCombatant to the schema default true', () => {
+    const { result } = renderHook(() => usePreferences())
+    expect(result.current.preferences.combat.autoScrollToNextCombatant).toBe(true)
+  })
 })
 
 describe('usePreferences — authenticated hydration', () => {

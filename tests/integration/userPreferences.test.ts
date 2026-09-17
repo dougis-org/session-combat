@@ -45,6 +45,19 @@ describe("userPreferencesRepo integration", () => {
     expect(read.values.dice.disableAnimation).toBeNull();
   });
 
+  it("persists combat.autoScrollToNextCombatant and unsets it back to default", async () => {
+    const userId = await newUser();
+    await updateUserPreferences(userId, { combat: { autoScrollToNextCombatant: false } });
+    const read = await getUserPreferences(userId);
+    expect(read.values.combat.autoScrollToNextCombatant).toBe(false);
+    expect(read.stored).toEqual({ combat: { autoScrollToNextCombatant: false } });
+
+    await updateUserPreferences(userId, { combat: { autoScrollToNextCombatant: true } });
+    const afterUnset = await getUserPreferences(userId);
+    expect(afterUnset.values.combat.autoScrollToNextCombatant).toBe(true);
+    expect(afterUnset.stored).toEqual({});
+  });
+
   it("merges successive updates rather than replacing them", async () => {
     const userId = await newUser();
     await updateUserPreferences(userId, { dice: { sendToChat: true } });

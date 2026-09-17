@@ -95,6 +95,15 @@ describe("/api/me/preferences Integration Tests", () => {
     expect((await patch({ chat: { size: { height: 5, screenWidth: 1, screenHeight: 1 } } }, cookieB)).status).toBe(400);
   });
 
+  it("PATCH combat.autoScrollToNextCombatant persists and round-trips via GET", async () => {
+    const user = (await registerTestUser(baseUrl, "meprefs-autoscroll")).cookie;
+    const res = await patch({ combat: { autoScrollToNextCombatant: false } }, user);
+    expect(res.status).toBe(200);
+    expect((await res.json()).values.combat.autoScrollToNextCombatant).toBe(false);
+    const after = await (await get(user)).json();
+    expect(after.values.combat.autoScrollToNextCombatant).toBe(false);
+  });
+
   it("PATCH unknown keys are stripped, known keys persisted", async () => {
     const res = await patch({ chat: { pinned: true }, bogusKey: 5 }, cookieB);
     expect(res.status).toBe(200);

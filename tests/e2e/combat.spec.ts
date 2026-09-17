@@ -810,4 +810,25 @@ test.describe("Combat flows", () => {
     // Description text should be plain text (not editable input)
     await expect(page.locator('[data-testid="lair-active"] input[type="text"]')).toHaveCount(0);
   });
+
+  // ────────────────────────────────────────────────────────────
+  // Auto-scroll to next combatant (#754)
+  // ────────────────────────────────────────────────────────────
+
+  test("clicking Current Turn (done) auto-scrolls the new active combatant's card into view", async ({ page }, testInfo) => {
+    await setupEmptyCombat(page, testInfo);
+
+    // Enough combatants to exceed one viewport height.
+    for (let i = 0; i < 12; i++) {
+      await createCustomCombatant(page, `Combatant ${i}`, 10);
+    }
+    await startCombatQuick(page);
+
+    const currentTurnBtn = page.getByRole("button", { name: /Current Turn \(done\)/i });
+    await currentTurnBtn.click();
+
+    const newActiveCard = page.locator('[aria-current="step"]');
+    await expect(newActiveCard).toBeVisible();
+    await expect(newActiveCard).toBeInViewport();
+  });
 });

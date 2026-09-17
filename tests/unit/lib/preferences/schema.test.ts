@@ -6,6 +6,7 @@ import {
   resolvePreferences,
   partitionPreferenceDelta,
   validatePreferencePatch,
+  sparseKnownValues,
 } from '@/lib/preferences/schema'
 
 const dockSize = (over: Partial<{ height: number; screenWidth: number; screenHeight: number }> = {}) => ({
@@ -39,8 +40,59 @@ describe('DEFAULT_PREFERENCES', () => {
     expect(DEFAULT_PREFERENCES).toEqual({
       dice: { sendToChat: false, disableAnimation: null, color: null, surface: null },
       chat: { pinned: false, size: null },
+      combat: { autoScrollToNextCombatant: true },
     })
     expect(PREFERENCES_SCHEMA_VERSION).toBe(1)
+  })
+})
+
+describe('combat.autoScrollToNextCombatant', () => {
+  it('accepts true and false', () => {
+    expect(isValidPreferenceValue('combat.autoScrollToNextCombatant', true)).toBe(true)
+    expect(isValidPreferenceValue('combat.autoScrollToNextCombatant', false)).toBe(true)
+  })
+
+  it('rejects non-boolean values', () => {
+    for (const v of ['yes', 1, null, {}]) {
+      expect(isValidPreferenceValue('combat.autoScrollToNextCombatant', v)).toBe(false)
+    }
+  })
+
+  it('resolves to the default true when nothing is stored', () => {
+    expect(resolvePreferences({}).combat.autoScrollToNextCombatant).toBe(true)
+  })
+
+  it('degrades a malformed stored value to the default', () => {
+    expect(resolvePreferences({ combat: { autoScrollToNextCombatant: 'yes' } }).combat.autoScrollToNextCombatant).toBe(true)
+  })
+
+  it('resolves a valid stored false value', () => {
+    expect(resolvePreferences({ combat: { autoScrollToNextCombatant: false } }).combat.autoScrollToNextCombatant).toBe(false)
+  })
+
+  it('sparseKnownValues includes an explicit stored value', () => {
+    expect(sparseKnownValues({ combat: { autoScrollToNextCombatant: false } })).toEqual({
+      combat: { autoScrollToNextCombatant: false },
+    })
+  })
+
+  it('validatePreferencePatch accepts a boolean and rejects a non-boolean', () => {
+    expect(validatePreferencePatch({ combat: { autoScrollToNextCombatant: true } })).toEqual({
+      ok: true,
+      values: { combat: { autoScrollToNextCombatant: true } },
+    })
+    expect(validatePreferencePatch({ combat: { autoScrollToNextCombatant: 'true' } }).ok).toBe(false)
+  })
+
+  it('partitionPreferenceDelta unsets the default and sets a non-default value', () => {
+    expect(partitionPreferenceDelta({ combat: { autoScrollToNextCombatant: true } })).toEqual({
+      set: {},
+      unset: { 'preferences.values.combat.autoScrollToNextCombatant': '' },
+    })
+    expect(partitionPreferenceDelta({ combat: { autoScrollToNextCombatant: false } })).toEqual({
+      set: { 'preferences.values.combat.autoScrollToNextCombatant': false },
+      unset: {},
+    })
   })
 })
 

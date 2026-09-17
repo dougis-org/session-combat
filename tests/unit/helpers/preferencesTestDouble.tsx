@@ -4,6 +4,7 @@ import { DeepPartial, DEFAULT_PREFERENCES, PreferenceValues } from '@/lib/prefer
 const freshDefaults = (): PreferenceValues => ({
   dice: { ...DEFAULT_PREFERENCES.dice },
   chat: { ...DEFAULT_PREFERENCES.chat },
+  combat: { ...DEFAULT_PREFERENCES.combat },
 })
 
 /**
@@ -25,6 +26,7 @@ export function __setPreferences(patch: DeepPartial<PreferenceValues>): void {
   current = {
     dice: { ...current.dice, ...(patch.dice ?? {}) },
     chat: { ...current.chat, ...(patch.chat ?? {}) },
+    combat: { ...current.combat, ...(patch.combat ?? {}) },
   } as PreferenceValues
 }
 
