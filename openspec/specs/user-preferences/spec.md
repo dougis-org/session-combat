@@ -11,7 +11,8 @@ Persist each authenticated user's non-default UI preferences (dice-fab and chat-
 The system SHALL persist each authenticated user's non-default preference values in a
 server-side `preferences` sub-document on that user's record, storing only values that
 differ from the schema defaults, so the values are available on any later session or
-device.
+device — including the `combat.autoScrollToNextCombatant` boolean, which follows
+exactly the same sparse-storage rule as every other known preference key.
 
 #### Scenario: Preference survives logout and re-login on another device
 
@@ -28,6 +29,23 @@ device.
 - **When** the stored preference document is inspected
 - **Then** `preferences.values` contains `chat.size` and does not contain any key
   whose value equals the schema default
+
+#### Scenario: Auto-scroll preference survives logout and re-login on another device
+
+- **Given** an authenticated user who has set `combat.autoScrollToNextCombatant` to
+  `false`
+- **When** the user logs out, clears local browser storage, and logs in again from a
+  different browser
+- **Then** `GET /api/me/preferences` returns `combat.autoScrollToNextCombatant` as
+  `false`
+
+#### Scenario: Default auto-scroll value is not persisted
+
+- **Given** a user who has never changed `combat.autoScrollToNextCombatant` (it remains
+  at its schema default of `true`)
+- **When** the stored preference document is inspected
+- **Then** `preferences.values` does not contain a `combat.autoScrollToNextCombatant`
+  key
 
 ### Requirement: Preferences load on authentication
 
@@ -291,6 +309,15 @@ The system SHALL re-send a failed preference delta on the next hydration or chan
 - **When** preferences are resolved on the server or client
 - **Then** resolution returns current defaults merged with only the valid known deltas,
   and no error is raised
+
+#### Scenario: Malformed stored value degrades to default
+
+- **Given** a stored preferences document where `combat.autoScrollToNextCombatant` is
+  present but not a boolean (e.g. corrupted or from a future incompatible schema
+  version)
+- **When** `resolvePreferences` reads the document
+- **Then** the resolved value falls back to the schema default (`true`) rather than
+  throwing or propagating the invalid value
 
 ### Requirement: Operability
 

@@ -62,8 +62,8 @@ Use the project's documented commands for each of the above (see project README 
 - [x] **Issue lifecycle: mark in-review** — run `gh issue edit 754 --repo dougis-org/session-combat --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
 - [x] Wait 60 seconds for CI to start
 - [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -84,14 +84,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from the primary checkout, not this worktree)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none expected beyond specs)
-- [ ] Sync approved spec deltas into `openspec/specs/`: create `openspec/specs/combat-turn-auto-scroll/spec.md` (new capability) from the delta, and merge the `MODIFIED Requirements` in this change's `specs/user-preferences/spec.md` and `specs/profile-settings/spec.md` into `openspec/specs/user-preferences/spec.md` and `openspec/specs/profile-settings/spec.md` respectively. Update relative links that pointed into the change directory — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-auto-scroll-next-combatant/design.md`, and similarly for `../../tasks.md`
-- [ ] Archive the change: move `openspec/changes/auto-scroll-next-combatant/` to `openspec/changes/archive/YYYY-MM-DD-auto-scroll-next-combatant/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-auto-scroll-next-combatant/` exists and `openspec/changes/auto-scroll-next-combatant/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-auto-scroll-next-combatant` then `git push -u origin doc/archive-YYYY-MM-DD-auto-scroll-next-combatant`
+- [x] `git checkout main` and `git pull --ff-only` (from the primary checkout, not this worktree)
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none expected beyond specs)
+- [x] Sync approved spec deltas into `openspec/specs/`: create `openspec/specs/combat-turn-auto-scroll/spec.md` (new capability) from the delta, and merge the `MODIFIED Requirements` in this change's `specs/user-preferences/spec.md` and `specs/profile-settings/spec.md` into `openspec/specs/user-preferences/spec.md` and `openspec/specs/profile-settings/spec.md` respectively. Update relative links that pointed into the change directory — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-auto-scroll-next-combatant/design.md`, and similarly for `../../tasks.md`
+- [x] Archive the change: move `openspec/changes/auto-scroll-next-combatant/` to `openspec/changes/archive/YYYY-MM-DD-auto-scroll-next-combatant/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-auto-scroll-next-combatant/` exists and `openspec/changes/auto-scroll-next-combatant/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-auto-scroll-next-combatant` then `git push -u origin doc/archive-YYYY-MM-DD-auto-scroll-next-combatant`
 - [ ] Open a PR from `doc/archive-YYYY-MM-DD-auto-scroll-next-combatant` to `main` with title `docs: archive auto-scroll-next-combatant (YYYY-MM-DD)` — **do NOT push directly to `main`**
 - [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)

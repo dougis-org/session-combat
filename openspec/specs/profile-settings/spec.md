@@ -16,7 +16,8 @@ path. Implementation: `app/profile/page.tsx`, `lib/components/UserMenu.tsx`,
 ### Requirement: Profile Page
 
 The system SHALL provide a profile settings page that allows authenticated users to view
-and modify their preferences.
+and modify their preferences, including a toggle for `combat.autoScrollToNextCombatant`
+presented alongside the existing dice and chat preference controls.
 
 #### Scenario: Navigate to profile page
 
@@ -29,6 +30,13 @@ and modify their preferences.
 - **Given** an authenticated user is on the `/profile` page
 - **When** they toggle "Send rolls to chat" or change the "Dice Surface" setting
 - **Then** the `usePreferences` context updates immediately and syncs with the server.
+
+#### Scenario: Edit combat auto-scroll preference
+
+- **Given** an authenticated user is on the `/profile` page
+- **When** they toggle "Auto-scroll to next combatant"
+- **Then** the `usePreferences` context updates immediately and syncs with the server,
+  matching the existing dice/chat toggle behavior.
 
 #### Scenario: Access control
 
