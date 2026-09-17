@@ -7,36 +7,36 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed. (Confirmed present in this environment's skill list as of proposal time; re-verify at apply time.)
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed. (Confirmed present in this environment's skill list as of proposal time; re-verify at apply time.)
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 161 --add-label "in-progress"`. Then discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] Widen `Open5ECreature.challenge_rating` type from `number` to `number | string` in `lib/import/open5eAdapter.ts`
-- [ ] Confirm no other consumer of `Open5ECreature.challenge_rating` needs a code change (searched: only `parseChallengeRating(raw.challenge_rating)` in `lib/import/transformMonster.ts`, which already takes `unknown` — no change needed there)
-- [ ] Add unit test: `transformMonster` with `challenge_rating: "1/2"` → `monster.challengeRating === 0.5` (`tests/unit/import/transformMonster.test.ts`)
-- [ ] Add unit test: `transformMonster` with `challenge_rating: "1/4"` → `monster.challengeRating === 0.25`
-- [ ] Add unit test: `transformMonster` with `challenge_rating: "1/8"` → `monster.challengeRating === 0.125`
-- [ ] Add unit test: `transformMonster` with `challenge_rating: "1/0"` → `monster.challengeRating === 0` (no throw, no `NaN`/`Infinity`)
-- [ ] Add unit test: `transformMonster` with `challenge_rating: "CR5"` (non-numeric string) → `monster.challengeRating === 0`
-- [ ] Add unit test: `transformMonster` with `challenge_rating: "5"` (bare numeric string) → `monster.challengeRating === 5`
-- [ ] Confirm existing numeric `challenge_rating` tests (`0.25`, `10`, `0`) still pass unchanged
-- [ ] Look for existing tooling or functions in the codebase that can be reused before writing new logic — confirmed `parseChallengeRating` already exists and needs no logic change, only test coverage (Decision 2 in design.md)
-- [ ] Confirm acceptance criteria in `specs/open5e-adapter/spec.md` are covered by the new tests
+- [x] **Issue lifecycle: mark in-progress** — run `gh issue edit 161 --add-label "in-progress"`. Then discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] Widen `Open5ECreature.challenge_rating` type from `number` to `number | string` in `lib/import/open5eAdapter.ts`
+- [x] Confirm no other consumer of `Open5ECreature.challenge_rating` needs a code change (searched: only `parseChallengeRating(raw.challenge_rating)` in `lib/import/transformMonster.ts`, which already takes `unknown` — no change needed there)
+- [x] Add unit test: `transformMonster` with `challenge_rating: "1/2"` → `monster.challengeRating === 0.5` (`tests/unit/import/transformMonster.test.ts`)
+- [x] Add unit test: `transformMonster` with `challenge_rating: "1/4"` → `monster.challengeRating === 0.25`
+- [x] Add unit test: `transformMonster` with `challenge_rating: "1/8"` → `monster.challengeRating === 0.125`
+- [x] Add unit test: `transformMonster` with `challenge_rating: "1/0"` → `monster.challengeRating === 0` (no throw, no `NaN`/`Infinity`)
+- [x] Add unit test: `transformMonster` with `challenge_rating: "CR5"` (non-numeric string) → `monster.challengeRating === 0`
+- [x] Add unit test: `transformMonster` with `challenge_rating: "5"` (bare numeric string) → `monster.challengeRating === 5`
+- [x] Confirm existing numeric `challenge_rating` tests (`0.25`, `10`, `0`) still pass unchanged
+- [x] Look for existing tooling or functions in the codebase that can be reused before writing new logic — confirmed `parseChallengeRating` already exists and needs no logic change, only test coverage (Decision 2 in design.md)
+- [x] Confirm acceptance criteria in `specs/open5e-adapter/spec.md` are covered by the new tests
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit. (Sub-agent ran; zero findings, no fixes needed.)
 
 ## Validation
 
-- [ ] Run unit/integration tests: `npm run test:unit`
-- [ ] Run E2E tests: not applicable — no UI/route touched by this change
-- [ ] Run type checks (project's `tsc`/typecheck script)
-- [ ] Run build
-- [ ] Run security/code quality checks required by project standards (Verity gate)
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests: `npm run test:unit` (3976 passed) and `npm run test:integration` (357 passed, 4 pre-existing skipped)
+- [x] Run E2E tests: `npm run test:regression` — exited 0 (full suite passed)
+- [x] Run type checks (project's `tsc`/typecheck script) — clean
+- [x] Run build — succeeded
+- [x] Run security/code quality checks required by project standards (Verity gate) — advisory Stop-hook review ran automatically; flagged 3 pre-existing/out-of-scope items (test length, type-only import, optional chaining) unrelated to `challenge_rating`; no in-scope findings
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -53,7 +53,7 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
 - [ ] Commit all changes to the working branch and push to remote
 - [ ] Open PR from `fix-open5e-challenge-rating-type` to `main`. PR body **MUST include `Closes #161`**.
 - [ ] **Issue lifecycle: mark in-review** — run `gh issue edit 161 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
