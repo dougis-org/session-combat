@@ -13,6 +13,7 @@ import { CombatantState, InitiativeRoll } from '@/lib/types';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
 import { sortCombatants } from '@/lib/utils/combat';
 import { Toast } from '@/lib/components/Toast';
+import { usePreferences } from '@/lib/preferences/usePreferences';
 
 function EncounterDescriptionModal({ description, onClose }: { description: string; onClose: () => void }) {
   return (
@@ -252,9 +253,37 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     [characters],
   );
 
-  if (!combatState) return null;
+  const activeCombatantId = combatState?.combatants[combatState.currentTurnIndex]?.id;
+  // Round is part of the key (not just turn index) so a single-combatant combat —
+  // where nextTurn() wraps back to the same combatant every click, advancing only
+  // the round — still produces a fresh key per click instead of leaving the
+  // effect below un-fired and pendingAutoScrollRef stuck armed for a later,
+  // unrelated activeCombatantId change (e.g. a combatant removal).
+  const turnKey = combatState ? `${combatState.currentRound}-${combatState.currentTurnIndex}` : null;
 
-  const activeCombatantId = combatState.combatants[combatState.currentTurnIndex]?.id;
+  const { preferences } = usePreferences();
+  // Armed only by handleNextTurn, immediately before calling nextTurn(); the effect
+  // below then fires exactly once for that click and never for restartRound or
+  // combatant-removal-driven turnKey changes.
+  const pendingAutoScrollRef = useRef(false);
+
+  useEffect(() => {
+    if (!pendingAutoScrollRef.current) return;
+    pendingAutoScrollRef.current = false;
+    if (!activeCombatantId) return;
+    document
+      .querySelector(`[data-combatant-id="${activeCombatantId}"]`)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [turnKey, activeCombatantId]);
+
+  const handleNextTurn = () => {
+    if (combatState && preferences.combat.autoScrollToNextCombatant) {
+      pendingAutoScrollRef.current = true;
+    }
+    nextTurn();
+  };
+
+  if (!combatState) return null;
 
   const handleConSaveRequired = (combatant: CombatantState, dc: number) => {
     const campaignId = combatState.campaignId;
@@ -281,7 +310,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
       isActive={combatant.id === activeCombatantId}
       onUpdate={(updates) => updateCombatant(combatant.id, updates)}
       onRemove={() => removeCombatant(combatant.id)}
-      onNextTurn={nextTurn}
+      onNextTurn={handleNextTurn}
       onShowDetails={(id, pos, options) => {
         setSelectedDetailCombatantId(id);
         setDetailPosition(pos);
@@ -413,7 +442,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
                     combatant={combatant}
                     isActive={isActive}
                     onUpdate={(updates) => updateCombatant(combatant.id, updates)}
-                    onNextTurn={nextTurn}
+                    onNextTurn={handleNextTurn}
                   />
                   {!isActive && (
                     <button

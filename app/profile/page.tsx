@@ -121,6 +121,22 @@ export default function ProfilePage() {
                 </label>
               </div>
             </section>
+
+            <section>
+              <h2 className="mb-4 text-xl font-semibold border-b border-gray-800 pb-2">Combat Settings</h2>
+
+              <div className="space-y-4">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-5 w-5 rounded border-gray-700 bg-gray-900 text-blue-600 focus:ring-blue-500"
+                    checked={preferences.combat.autoScrollToNextCombatant}
+                    onChange={(e) => setPreference('combat.autoScrollToNextCombatant', e.target.checked)}
+                  />
+                  <span className="text-gray-200">Auto-scroll to next combatant</span>
+                </label>
+              </div>
+            </section>
           </div>
         </main>
       </div>

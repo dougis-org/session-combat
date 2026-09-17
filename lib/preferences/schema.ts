@@ -38,11 +38,16 @@ export interface PreferenceValues {
     /** Custom dock height, or `null` for the default. */
     size: DockSize | null;
   };
+  combat: {
+    /** Scroll the newly-active combatant's card into view after "Current Turn (done)". */
+    autoScrollToNextCombatant: boolean;
+  };
 }
 
 export const DEFAULT_PREFERENCES: PreferenceValues = Object.freeze({
   dice: Object.freeze({ sendToChat: false, disableAnimation: null, color: null, surface: null }),
   chat: Object.freeze({ pinned: false, size: null }),
+  combat: Object.freeze({ autoScrollToNextCombatant: true }),
 }) as PreferenceValues;
 
 const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
@@ -82,6 +87,7 @@ const KEY_VALIDATORS = {
     v === null || typeof v === "string",
   "chat.pinned": (v: unknown): v is boolean => typeof v === "boolean",
   "chat.size": isValidDockSizeOrNull,
+  "combat.autoScrollToNextCombatant": (v: unknown): v is boolean => typeof v === "boolean",
 } as const;
 
 type KnownPath = keyof typeof KEY_VALIDATORS;
@@ -101,6 +107,7 @@ export function isValidPreferenceValue(path: string, value: unknown): boolean {
 const cloneDefaults = (): PreferenceValues => ({
   dice: { ...DEFAULT_PREFERENCES.dice },
   chat: { ...DEFAULT_PREFERENCES.chat },
+  combat: { ...DEFAULT_PREFERENCES.combat },
 });
 
 const getPath = (obj: unknown, path: KnownPath): unknown => {

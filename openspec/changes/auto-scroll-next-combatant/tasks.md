@@ -11,33 +11,33 @@
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 754 --repo dougis-org/session-combat --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] Confirm working directory is `.worktrees/auto-scroll-next-combatant` before any edit
-- [ ] **Schema (design Decision 3):** in `lib/preferences/schema.ts`, add `combat: { autoScrollToNextCombatant: boolean }` to `PreferenceValues`, `DEFAULT_PREFERENCES` (default `true`), `KEY_VALIDATORS["combat.autoScrollToNextCombatant"]` (`typeof v === "boolean"`), and `cloneDefaults()` — mirror the existing `chat.pinned` entry exactly
-- [ ] **Schema tests:** extend `lib/preferences/schema.ts`'s existing unit test file with cases for the new key: valid boolean accepted, invalid type rejected/dropped, default resolution when absent, sparse-delta omission when equal to default (covers specs `user-preferences` scenarios "Auto-scroll preference survives logout and re-login on another device", "Default auto-scroll value is not persisted", "Malformed stored value degrades to default")
-- [ ] **Client provider:** confirm `lib/preferences/usePreferences.tsx` requires no logic changes (it is generic over `KNOWN_PATHS`) — add a passthrough unit-test assertion that `combat.autoScrollToNextCombatant` round-trips through `setPreference`/local mirror like existing keys
-- [ ] **API route / repo:** confirm `app/api/me/preferences/route.ts` and `lib/storage/userPreferencesRepo.ts` require no logic changes (generic patch/partition functions) — extend their existing test suites with one request/response case covering the new key
-- [ ] **Combat view scroll wrapper (design Decisions 1 & 2):** in `lib/components/ActiveCombatView.tsx`, add a small isolated helper (e.g. `scrollToActiveCombatant`) plus a guard ref (e.g. `pendingAutoScrollRef`) and a `useEffect` on `[activeCombatantId]` that only acts when the ref is armed; wrap the `onNextTurn` passed to `CombatantCard`/`LairActionsSlot` so it arms the ref (only when `combat.autoScrollToNextCombatant` preference resolves `true`) immediately before calling `nextTurn()`. On fire, `document.querySelector('[data-combatant-id="<activeCombatantId>"]')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })`. Do NOT modify `lib/hooks/useCombat.ts`
-- [ ] **Combat view unit tests:** extend `tests/unit/components/ActiveCombatView.test.tsx` (or the relevant CombatantCard test file) with: (1) click "Current Turn (done)" with preference enabled → `scrollIntoView` called once on the new active combatant's element (mock `Element.prototype.scrollIntoView`, jsdom doesn't implement it); (2) preference disabled → not called; (3) downed combatant interposed between current and next-eligible → target is the eligible one, not the immediate DOM sibling (covers specs `combat-turn-auto-scroll` "Turn advances past a downed combatant"); (4) round wrap → target is the first eligible combatant of the new round (covers "Turn wraps to the start of the round"); (5) `restartRound` click → `scrollIntoView` NOT called; (6) combatant removal shifting indices → `scrollIntoView` NOT called
-- [ ] **Profile page toggle (design Decision 4):** in `app/profile/page.tsx`, add a toggle control for `combat.autoScrollToNextCombatant` in the same section/pattern as the existing dice/chat toggles, wired through `usePreferences()`
-- [ ] **Profile page tests:** extend `tests/unit/app/profile/page.test.tsx` with a scenario toggling the new preference and asserting it calls through to `usePreferences` the same way the existing dice/chat toggle tests do (covers specs `profile-settings` "Edit combat auto-scroll preference")
-- [ ] **E2E:** extend `tests/e2e/combat.spec.ts` with a scenario that clicks "Current Turn (done)" in a combat with enough combatants to require scrolling, and asserts the new active combatant's card is within the viewport afterward
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (done during design — reuses `data-combatant-id`, the `handleSetInitiative` forward-looking-state pattern, and the generic preference pipeline; no new mechanisms introduced)
-- [ ] Confirm acceptance criteria are covered: cross-check every scenario in `openspec/changes/auto-scroll-next-combatant/specs/**/*.md` against the test added for it
+- [x] **Issue lifecycle: mark in-progress** — run `gh issue edit 754 --repo dougis-org/session-combat --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] Confirm working directory is `.worktrees/auto-scroll-next-combatant` before any edit
+- [x] **Schema (design Decision 3):** in `lib/preferences/schema.ts`, add `combat: { autoScrollToNextCombatant: boolean }` to `PreferenceValues`, `DEFAULT_PREFERENCES` (default `true`), `KEY_VALIDATORS["combat.autoScrollToNextCombatant"]` (`typeof v === "boolean"`), and `cloneDefaults()` — mirror the existing `chat.pinned` entry exactly
+- [x] **Schema tests:** extend `lib/preferences/schema.ts`'s existing unit test file with cases for the new key: valid boolean accepted, invalid type rejected/dropped, default resolution when absent, sparse-delta omission when equal to default (covers specs `user-preferences` scenarios "Auto-scroll preference survives logout and re-login on another device", "Default auto-scroll value is not persisted", "Malformed stored value degrades to default")
+- [x] **Client provider:** confirm `lib/preferences/usePreferences.tsx` requires no logic changes (it is generic over `KNOWN_PATHS`) — add a passthrough unit-test assertion that `combat.autoScrollToNextCombatant` round-trips through `setPreference`/local mirror like existing keys
+- [x] **API route / repo:** confirm `app/api/me/preferences/route.ts` and `lib/storage/userPreferencesRepo.ts` require no logic changes (generic patch/partition functions) — extend their existing test suites with one request/response case covering the new key
+- [x] **Combat view scroll wrapper (design Decisions 1 & 2):** in `lib/components/ActiveCombatView.tsx`, add a small isolated helper (e.g. `scrollToActiveCombatant`) plus a guard ref (e.g. `pendingAutoScrollRef`) and a `useEffect` on `[activeCombatantId]` that only acts when the ref is armed; wrap the `onNextTurn` passed to `CombatantCard`/`LairActionsSlot` so it arms the ref (only when `combat.autoScrollToNextCombatant` preference resolves `true`) immediately before calling `nextTurn()`. On fire, `document.querySelector('[data-combatant-id="<activeCombatantId>"]')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })`. Do NOT modify `lib/hooks/useCombat.ts`
+- [x] **Combat view unit tests:** extend `tests/unit/components/ActiveCombatView.test.tsx` (or the relevant CombatantCard test file) with: (1) click "Current Turn (done)" with preference enabled → `scrollIntoView` called once on the new active combatant's element (mock `Element.prototype.scrollIntoView`, jsdom doesn't implement it); (2) preference disabled → not called; (3) downed combatant interposed between current and next-eligible → target is the eligible one, not the immediate DOM sibling (covers specs `combat-turn-auto-scroll` "Turn advances past a downed combatant"); (4) round wrap → target is the first eligible combatant of the new round (covers "Turn wraps to the start of the round"); (5) `restartRound` click → `scrollIntoView` NOT called; (6) combatant removal shifting indices → `scrollIntoView` NOT called
+- [x] **Profile page toggle (design Decision 4):** in `app/profile/page.tsx`, add a toggle control for `combat.autoScrollToNextCombatant` in the same section/pattern as the existing dice/chat toggles, wired through `usePreferences()`
+- [x] **Profile page tests:** extend `tests/unit/app/profile/page.test.tsx` with a scenario toggling the new preference and asserting it calls through to `usePreferences` the same way the existing dice/chat toggle tests do (covers specs `profile-settings` "Edit combat auto-scroll preference")
+- [x] **E2E:** extend `tests/e2e/combat.spec.ts` with a scenario that clicks "Current Turn (done)" in a combat with enough combatants to require scrolling, and asserts the new active combatant's card is within the viewport afterward
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (done during design — reuses `data-combatant-id`, the `handleSetInitiative` forward-looking-state pattern, and the generic preference pipeline; no new mechanisms introduced)
+- [x] Confirm acceptance criteria are covered: cross-check every scenario in `openspec/changes/auto-scroll-next-combatant/specs/**/*.md` against the test added for it
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] Run unit/integration tests
-- [ ] Run E2E tests (if applicable)
-- [ ] Run type checks
-- [ ] Run build
-- [ ] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests
+- [x] Run E2E tests (if applicable)
+- [x] Run type checks
+- [x] Run build
+- [x] Run security/code quality checks required by project standards
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -56,7 +56,7 @@ Use the project's documented commands for each of the above (see project README 
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
 - [ ] Commit all changes to the working branch and push to remote
 - [ ] Open PR from `auto-scroll-next-combatant` to `main`. PR body MUST include `Closes #754`
 - [ ] **Issue lifecycle: mark in-review** — run `gh issue edit 754 --repo dougis-org/session-combat --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).

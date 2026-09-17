@@ -47,6 +47,7 @@ function mockAuth(overrides: Partial<ReturnType<typeof useAuth>>) {
 type DeepPartialPrefs = {
   dice?: Partial<PreferenceValues['dice']>;
   chat?: Partial<PreferenceValues['chat']>;
+  combat?: Partial<PreferenceValues['combat']>;
 };
 
 /** Seed usePreferences() with defaults + overrides and return the setPreference spy. */
@@ -56,6 +57,7 @@ function mockPreferences(prefOverrides: DeepPartialPrefs = {}): jest.Mock {
     preferences: {
       dice: { ...DEFAULT_PREFERENCES.dice, ...prefOverrides.dice },
       chat: { ...DEFAULT_PREFERENCES.chat, ...prefOverrides.chat },
+      combat: { ...DEFAULT_PREFERENCES.combat, ...prefOverrides.combat },
     },
     setPreference,
     ready: true,
@@ -87,6 +89,7 @@ describe('ProfilePage', () => {
     expect(screen.getByLabelText('Dice Color (Hex)')).toBeInTheDocument();
     expect(screen.getByLabelText('Dice Surface')).toBeInTheDocument();
     expect(screen.getByLabelText(/Pin chat by default/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Auto-scroll to next combatant/i)).toBeInTheDocument();
   });
 
   describe('dice.sendToChat', () => {
@@ -225,6 +228,28 @@ describe('ProfilePage', () => {
       mockPreferences({ chat: { pinned: true } });
       render(<ProfilePage />);
       expect(screen.getByLabelText(/Pin chat by default/i)).toBeChecked();
+    });
+  });
+
+  describe('combat.autoScrollToNextCombatant', () => {
+    it('binds the checkbox to setPreference', async () => {
+      const user = userEvent.setup();
+      const setPreference = mockPreferences({ combat: { autoScrollToNextCombatant: false } });
+      render(<ProfilePage />);
+      await user.click(screen.getByLabelText(/Auto-scroll to next combatant/i));
+      expect(setPreference).toHaveBeenCalledWith('combat.autoScrollToNextCombatant', true);
+    });
+
+    it('reflects the default true value as checked', () => {
+      mockPreferences();
+      render(<ProfilePage />);
+      expect(screen.getByLabelText(/Auto-scroll to next combatant/i)).toBeChecked();
+    });
+
+    it('reflects a stored false value as unchecked', () => {
+      mockPreferences({ combat: { autoScrollToNextCombatant: false } });
+      render(<ProfilePage />);
+      expect(screen.getByLabelText(/Auto-scroll to next combatant/i)).not.toBeChecked();
     });
   });
 });
