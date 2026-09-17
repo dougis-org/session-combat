@@ -38,7 +38,7 @@
 - [x] Create `tests/e2e/combat-lair.spec.ts`: lair-action tests (current lines ~678–834).
 - [x] Verify every test from the original file appears in exactly one new file, with an unchanged name and body (mechanical move, no assertion edits). Confirmed: 28 `test(...)` calls in the original file, 28 across the four new files (7+3+6+12), names match 1:1 via `playwright test --list`.
 - [x] Delete `tests/e2e/combat.spec.ts` once all tests are confirmed migrated.
-- [ ] Check each new spec file's line count against the same Verity gate threshold used in Sub-task 2; split further if any file still trips it.
+- [x] Check each new spec file's line count against the same Verity gate threshold used in Sub-task 2; split further if any file still trips it. All four files (94–275 lines) passed Verity's pre-commit/pre-push gate without further splitting.
 
 ## Pre-Commit Code Review
 
@@ -52,9 +52,9 @@
 - [x] Run build: `npm run build` — succeeded.
 - [x] Run lint: `npm run lint` — no violations on changed files.
 - [x] Diff the new e2e run's pass/fail counts against a baseline run of the original `combat.spec.ts` (captured before deleting it) — same test count (28), same names, all green.
-- [ ] Confirm Verity's file-length/comprehensibility gate passes for `lib/components/ActiveCombatView.tsx` and every new `tests/e2e/combat-*.spec.ts` file — pending actual pre-commit gate run.
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Confirm Verity's file-length/comprehensibility gate passes for `lib/components/ActiveCombatView.tsx` and every new `tests/e2e/combat-*.spec.ts` file — Verity's pre-commit/pre-push gate reported WARN (not FAIL) after the `useCombatantPopups` fallback extraction; the one CRITICAL finding (pre-existing `STRONG_PASSWORD`) was waived (see Pre-Commit Code Review section).
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -75,10 +75,10 @@ If **ANY** required step fails, iterate and fix before pushing.
 - [x] Commit all changes to the working branch and push to remote
 - [x] Open PR from `decompose-active-combat-view` to `main`. PR body **must** include `Closes #761`. → PR #763
 - [x] **Issue lifecycle: mark in-review** — ran `gh issue edit 761 --add-label "in-review" --remove-label "in-progress"`; moved project item to "In review".
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (never `--admin`)
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (or `CLOSED`, in which case exit and notify the user):
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance. 3 iterations: dropped unused `updateCombatantInitiativeSettings` hook arg, corrected stale "29 tests" doc references (should be 28) across design.md/tasks.md/tests.md → zero findings.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (never `--admin`) — used `--squash` (repo ruleset requires squash-merge).
+- [x] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (or `CLOSED`, in which case exit and notify the user): PR #763 merged as `bac0ace7` after build/lint/Codacy/unit/integration/regression/ci-gate all passed.
   1. **Build and tests** — run all steps in [Remote push validation]; fix failures, commit, push before anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address every unresolved thread, commit, validate, push, wait 180 seconds
   3. **CI check failures** — after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks, commit, validate, push, wait 180 seconds; restart from step 1
@@ -99,18 +99,18 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from the primary checkout, not this worktree)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none expected — pure structural refactor; confirm no `.wolf/anatomy.md` or similar file references the old single-file locations if such docs exist)
-- [ ] `skip_specs: true` — no spec deltas to sync into `openspec/specs/`
-- [ ] Archive the change: move `openspec/changes/decompose-active-combat-view/` to `openspec/changes/archive/YYYY-MM-DD-decompose-active-combat-view/`, staging both the new location and the deletion of the old location in a single commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-decompose-active-combat-view/` exists and `openspec/changes/decompose-active-combat-view/` is gone
-- [ ] Create a doc branch: `git checkout -b doc/archive-YYYY-MM-DD-decompose-active-combat-view` then `git push -u origin doc/archive-YYYY-MM-DD-decompose-active-combat-view`
-- [ ] Open a PR from that branch to `main` titled `docs: archive decompose-active-combat-view (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] `git checkout main` and `git pull --ff-only` (from the primary checkout, not this worktree)
+- [x] Verify the merged changes appear on `main` — commit `bac0ace7`, 15 files, `ActiveCombatView.tsx` at 322 lines, four `combat-*.spec.ts` files present.
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none expected — pure structural refactor; confirm no `.wolf/anatomy.md` or similar file references the old single-file locations if such docs exist) — no `.wolf/` directory exists in this worktree/branch; nothing to update.
+- [x] `skip_specs: true` — no spec deltas to sync into `openspec/specs/`
+- [x] Archive the change: move `openspec/changes/decompose-active-combat-view/` to `openspec/changes/archive/2026-09-17-decompose-active-combat-view/`, staging both the new location and the deletion of the old location in a single commit
+- [x] Confirm `openspec/changes/archive/2026-09-17-decompose-active-combat-view/` exists and `openspec/changes/decompose-active-combat-view/` is gone
+- [x] Create a doc branch: `git checkout -b doc/archive-2026-09-17-decompose-active-combat-view` then `git push -u origin doc/archive-2026-09-17-decompose-active-combat-view`
+- [ ] Open a PR from that branch to `main` titled `docs: archive decompose-active-combat-view (2026-09-17)` — do NOT push directly to `main`
 - [ ] Immediately enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (never `--admin`)
 - [ ] Monitor the doc PR until merged (same loop as the implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D decompose-active-combat-view doc/archive-YYYY-MM-DD-decompose-active-combat-view`
+- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D decompose-active-combat-view doc/archive-2026-09-17-decompose-active-combat-view`
 - [ ] Remove the change's dedicated worktree: `git worktree remove .worktrees/decompose-active-combat-view`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D decompose-active-combat-view doc/archive-YYYY-MM-DD-decompose-active-combat-view`
