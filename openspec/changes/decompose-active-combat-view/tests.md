@@ -46,7 +46,7 @@ For each extraction sub-task in `tasks.md`:
 
 ### Sub-task 3 — `combat.spec.ts` split
 
-- [ ] Baseline: full `npx playwright test tests/e2e/combat.spec.ts` run captured before deletion — record exact test names and total count (expected 29, per the pre-change file).
+- [ ] Baseline: full `npx playwright test tests/e2e/combat.spec.ts` run captured before deletion — record exact test names and total count (expected 28, per the pre-change file).
 - [ ] After creating `combat-import.spec.ts`, `combat-core.spec.ts`, `combat-legendary.spec.ts`, `combat-lair.spec.ts`: run `npx playwright test tests/e2e/combat-import.spec.ts tests/e2e/combat-core.spec.ts tests/e2e/combat-legendary.spec.ts tests/e2e/combat-lair.spec.ts` — total test count and names must match the baseline exactly (no test silently dropped, none duplicated).
 - [ ] Confirm the promoted `registerTestUser` helper in `tests/e2e/helpers/actions.ts` produces the same registration behavior as the original file-scoped version (all four split files' import/registration-dependent tests still pass).
 - [ ] Confirm the existing `STRONG_PASSWORD` export in `tests/e2e/helpers/actions.ts` is unchanged, and that other spec files depending on it (`parties.spec.ts`, `characters.spec.ts`, `auth.spec.ts`, `campaigns.spec.ts`, `encounters.spec.ts`, `monsters.spec.ts`, `dice-appearance.spec.ts`, `dice-roll-animation.spec.ts`, `campaign-combat-linking.spec.ts`) still pass unmodified — run `npx playwright test tests/e2e/parties.spec.ts tests/e2e/characters.spec.ts tests/e2e/auth.spec.ts` as a spot-check.
