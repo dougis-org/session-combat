@@ -54,13 +54,13 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `fix-open5e-challenge-rating-type` to `main`. PR body **MUST include `Closes #161`**.
-- [ ] **Issue lifecycle: mark in-review** — run `gh issue edit 161 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge; use squash per repo ruleset)
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — never wait for a human to report the merge; never force-merge:
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `fix-open5e-challenge-rating-type` to `main`. PR body **MUST include `Closes #161`**. (PR #755)
+- [x] **Issue lifecycle: mark in-review** — run `gh issue edit 161 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing. (Zero blocking findings; one pre-existing out-of-scope gap filed as issue #757.)
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (NEVER use `--admin` to force the merge; use squash per repo ruleset) — squash auto-merge enabled
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — never wait for a human to report the merge; never force-merge: (all checks passed cleanly, no review threads opened, merged automatically)
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved (per project convention, replies alone don't resolve threads — use the `resolveReviewThread` GraphQL mutation after replying)
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -81,18 +81,18 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from the primary checkout, not the worktree)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none expected — internal type/test-only change)
-- [ ] Sync approved spec delta from `openspec/changes/fix-open5e-challenge-rating-type/specs/open5e-adapter/spec.md` into `openspec/specs/open5e-adapter/spec.md` (merge the MODIFIED "Transform monster data" requirement into the existing spec). Update any relative links that pointed into the change directory so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-fix-open5e-challenge-rating-type/design.md`, and similarly for `../../tasks.md`.
-- [ ] Archive the change: move `openspec/changes/fix-open5e-challenge-rating-type/` to `openspec/changes/archive/YYYY-MM-DD-fix-open5e-challenge-rating-type/` and stage both the new location and the deletion of the old location in a single commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-fix-open5e-challenge-rating-type/` exists and `openspec/changes/fix-open5e-challenge-rating-type/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-fix-open5e-challenge-rating-type` then `git push -u origin doc/archive-YYYY-MM-DD-fix-open5e-challenge-rating-type`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-fix-open5e-challenge-rating-type` to `main` with title `docs: archive fix-open5e-challenge-rating-type (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] `git checkout main` and `git pull --ff-only` (from the primary checkout, not the worktree)
+- [x] Verify the merged changes appear on `main` — commit `1be0f8c8` present
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none expected — internal type/test-only change)
+- [x] Sync approved spec delta from `openspec/changes/fix-open5e-challenge-rating-type/specs/open5e-adapter/spec.md` into `openspec/specs/open5e-adapter/spec.md` (merged the "Transform monster data" scenarios into the existing spec). Relative links (`../../design.md`) were verified to still resolve correctly at the new nesting depth (`archive/2026-09-17-.../specs/open5e-adapter/spec.md` → `../..` → `archive/2026-09-17-.../design.md`) — no rewrite needed.
+- [x] Archive the change: moved `openspec/changes/fix-open5e-challenge-rating-type/` to `openspec/changes/archive/2026-09-17-fix-open5e-challenge-rating-type/` via `git mv`, staged in a single commit
+- [x] Confirm `openspec/changes/archive/2026-09-17-fix-open5e-challenge-rating-type/` exists and `openspec/changes/fix-open5e-challenge-rating-type/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-09-17-fix-open5e-challenge-rating-type` then push to origin
+- [ ] Open a PR from `doc/archive-2026-09-17-fix-open5e-challenge-rating-type` to `main` with title `docs: archive fix-open5e-challenge-rating-type (2026-09-17)` — do NOT push directly to `main`
 - [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --merge` (NEVER use `--admin` to force the merge)
 - [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D fix-open5e-challenge-rating-type doc/archive-YYYY-MM-DD-fix-open5e-challenge-rating-type`
+- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D fix-open5e-challenge-rating-type doc/archive-2026-09-17-fix-open5e-challenge-rating-type`
 - [ ] Remove the change's dedicated worktree: `git worktree remove .worktrees/fix-open5e-challenge-rating-type`
 
-Required cleanup after archive: `git fetch --prune` and `git branch -D fix-open5e-challenge-rating-type doc/archive-YYYY-MM-DD-fix-open5e-challenge-rating-type`
+Required cleanup after archive: `git fetch --prune` and `git branch -D fix-open5e-challenge-rating-type doc/archive-2026-09-17-fix-open5e-challenge-rating-type`
