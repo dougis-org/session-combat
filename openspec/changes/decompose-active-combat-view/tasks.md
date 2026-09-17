@@ -71,10 +71,10 @@ If **ANY** required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `decompose-active-combat-view` to `main`. PR body **must** include `Closes #761`.
-- [ ] **Issue lifecycle: mark in-review** — run `gh issue edit 761 --add-label "in-review" --remove-label "in-progress"`. Move the project item to the "In Review" status column via `gh project item-edit` (same discovery pattern as above; warn and skip if not found).
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `decompose-active-combat-view` to `main`. PR body **must** include `Closes #761`. → PR #763
+- [x] **Issue lifecycle: mark in-review** — ran `gh issue edit 761 --add-label "in-review" --remove-label "in-progress"`; moved project item to "In review".
 - [ ] Wait 60 seconds for CI to start
 - [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after 3+ iterations with no progress, report the stall with remaining findings and wait for human guidance.
 - [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --merge` (never `--admin`)
