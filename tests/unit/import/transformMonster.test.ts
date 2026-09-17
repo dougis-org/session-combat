@@ -49,6 +49,25 @@ describe("transformMonster", () => {
     });
   });
 
+  describe("challenge rating parsing", () => {
+    const CASES: Array<{ input: number | string; expected: number }> = [
+      { input: "1/2", expected: 0.5 },
+      { input: "1/4", expected: 0.25 },
+      { input: "1/8", expected: 0.125 },
+      { input: "1/0", expected: 0 },
+      { input: "CR5", expected: 0 },
+      { input: "", expected: 0 },
+      { input: "5", expected: 5 },
+    ];
+
+    test.each(CASES)("parses challenge_rating '$input' to $expected", ({ input, expected }) => {
+      const raw = createBaseCreature({ challenge_rating: input });
+      const { monster } = transformMonster(raw);
+      expect(monster.challengeRating).toBe(expected);
+      expect(Number.isFinite(monster.challengeRating)).toBe(true);
+    });
+  });
+
   describe("speed normalization", () => {
     it("handles record format with walk and fly", () => {
       const raw = createBaseCreature({ speed: { walk: 30, fly: 60 } });

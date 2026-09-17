@@ -41,7 +41,7 @@ export interface Open5ECreature {
   };
   hit_points: number;
   armor_class: number;
-  challenge_rating: number;
+  challenge_rating: number | string;
   actions: Array<{ name: string; desc: string }>;
   traits?: Array<{ name: string; desc: string }>;
 }
