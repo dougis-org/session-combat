@@ -1,7 +1,17 @@
 import { randomUUID } from "node:crypto";
-import { expect, Page } from "@playwright/test";
+import { expect, Page, TestInfo } from "@playwright/test";
+import { createTestIdentity } from "./isolation";
 
 export const STRONG_PASSWORD = "TestPassword123!";
+
+/**
+ * Generate a fresh randomized strong password. Distinct from `STRONG_PASSWORD`
+ * (a static value other specs depend on) — used by `registerTestUser`, which
+ * needs a unique password per registered test user.
+ */
+export function randomStrongPassword(): string {
+  return `TestPw${randomUUID().replace(/-/g, "")}!1`;
+}
 
 /**
  * Generate a unique email address for test purposes using UUID
@@ -73,6 +83,17 @@ export async function registerUser(
   await expect(page.locator('[data-testid="user-menu-trigger"]')).toBeVisible({
     timeout: 15000,
   });
+}
+
+/**
+ * Register a uniquely-namespaced test user (via `createTestIdentity`) with a
+ * freshly-generated random password, and return the identity for naming
+ * further test fixtures.
+ */
+export async function registerTestUser(page: Page, testInfo: TestInfo) {
+  const identity = createTestIdentity(testInfo);
+  await registerUser(page, identity.email, randomStrongPassword());
+  return identity;
 }
 
 /**

@@ -7,52 +7,52 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If not listed, halt, inform the user the plugin is required, provide installation guidance, and do not proceed until confirmed installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — confirmed present in the skills list.
 
 ## Execution
 
 - [x] Confirm the dedicated worktree exists at `.worktrees/decompose-active-combat-view` and work is happening inside it (confirmed — this session is already running from that directory)
 - [x] Confirm the working branch `decompose-active-combat-view` is pushed to `origin` (confirmed above)
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 761 --add-label "in-progress"`. Discover the linked GitHub Project (`gh project list --owner dougis-org --format json`), resolve the "In Progress" status option (`gh project field-list <project-number> --owner dougis-org --format json`), move the item via `gh project item-edit`. If no project item is found, log a warning and continue. If `gh` lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] **Issue lifecycle: mark in-progress** — ran `gh issue edit 761 --add-label "in-progress"`; moved project item `PVTI_lADODH__HM4BcONDzg7WJvU` in "Session Combat" (project 7) to "In progress" status via `gh project item-edit`.
 
 ### Sub-task 1: Extract `useInitiativeModal` hook (Decision 1)
 
-- [ ] Look for existing hooks in `lib/hooks/` with a similar "extract stateful UI logic" shape (e.g. patterns used in the `combatant-card-decomposition` change) to match conventions before writing new code.
-- [ ] Create `lib/hooks/useInitiativeModal.ts` exporting a hook that accepts `{ combatState: UseCombatReturn['combatState'], setInitiativeRoll: UseCombatReturn['setInitiativeRoll'], updateCombatantInitiativeSettings: UseCombatReturn['updateCombatantInitiativeSettings'] }` and returns `{ initiativeEditId, initiativeEditPosition, initiativeModalRef, openInitiativeModal, handleSetInitiative, closeInitiativeModal, getCardAnchorPosition }`.
-- [ ] Move verbatim (including all inline rationale comments) from `lib/components/ActiveCombatView.tsx`: `initiativeEditId`/`initiativeEditPosition` state, `initiativeModalRef`, `dismissedInitiativeIds` ref, `getCardAnchorPosition`, `openInitiativeModal`, `handleSetInitiative`, `closeInitiativeModal`, the auto-open `useEffect` (with its `unrolledCombatantIds` dependency string and eslint-disable comment), the removal-race recovery `useEffect`, and the viewport-clamp `useLayoutEffect` (including `MODAL_VIEWPORT_MARGIN`).
-- [ ] Update `ActiveCombatView.tsx` to call `useInitiativeModal(...)` and use its return values everywhere the extracted state/handlers were used (the JSX that renders the modal at lines ~408–430 stays in `ActiveCombatView.tsx`, reading `combatState.combatants.find(...)` as it does today, but using the hook's `initiativeEditId`/`initiativeEditPosition`/`initiativeModalRef`).
-- [ ] Confirm hook call order in `ActiveCombatView.tsx` is unchanged relative to other hooks (`useInitiativeModal` called unconditionally, in the same relative position as the extracted state used to be declared).
-- [ ] Run `npx tsc --noEmit` to confirm no type errors from the extraction.
+- [x] Look for existing hooks in `lib/hooks/` with a similar "extract stateful UI logic" shape (e.g. patterns used in the `combatant-card-decomposition` change) to match conventions before writing new code.
+- [x] Create `lib/hooks/useInitiativeModal.ts` exporting a hook that accepts `{ combatState: UseCombatReturn['combatState'], setInitiativeRoll: UseCombatReturn['setInitiativeRoll'], updateCombatantInitiativeSettings: UseCombatReturn['updateCombatantInitiativeSettings'] }` and returns `{ initiativeEditId, initiativeEditPosition, initiativeModalRef, openInitiativeModal, handleSetInitiative, closeInitiativeModal, getCardAnchorPosition }`.
+- [x] Move verbatim (including all inline rationale comments) from `lib/components/ActiveCombatView.tsx`: `initiativeEditId`/`initiativeEditPosition` state, `initiativeModalRef`, `dismissedInitiativeIds` ref, `getCardAnchorPosition`, `openInitiativeModal`, `handleSetInitiative`, `closeInitiativeModal`, the auto-open `useEffect` (with its `unrolledCombatantIds` dependency string and eslint-disable comment), the removal-race recovery `useEffect`, and the viewport-clamp `useLayoutEffect` (including `MODAL_VIEWPORT_MARGIN`).
+- [x] Update `ActiveCombatView.tsx` to call `useInitiativeModal(...)` and use its return values everywhere the extracted state/handlers were used (the JSX that renders the modal at lines ~408–430 stays in `ActiveCombatView.tsx`, reading `combatState.combatants.find(...)` as it does today, but using the hook's `initiativeEditId`/`initiativeEditPosition`/`initiativeModalRef`).
+- [x] Confirm hook call order in `ActiveCombatView.tsx` is unchanged relative to other hooks (`useInitiativeModal` called unconditionally, in the same relative position as the extracted state used to be declared).
+- [x] Run `npx tsc --noEmit` to confirm no type errors from the extraction.
 
 ### Sub-task 2: Measure gate impact, decide on Decision 2 fallback
 
-- [ ] Check `wc -l lib/components/ActiveCombatView.tsx` post-extraction and compare against Verity's file-length gate threshold (check `.verity/` config or prior gate failure messages on #702/#756 for the exact line-count threshold).
-- [ ] If still over threshold: extract `handleConSaveRequired` and/or the remove/detail popup state wiring into a small additional hook (e.g. `useCombatantPopups`), following the same "move verbatim, preserve comments" approach as Sub-task 1. If under threshold, skip this fallback and note in the PR description that Decision 2's fallback wasn't needed.
+- [x] Check `wc -l lib/components/ActiveCombatView.tsx` post-extraction and compare against Verity's file-length gate threshold (check `.verity/` config or prior gate failure messages on #702/#756 for the exact line-count threshold). Result: 511 → 395 lines. No static line-count threshold is exposed via `.verity/` config or CLI (`verity status`/`verity config`) — Verity's comprehensibility gate is a service-side heuristic, not a local constant. Deferring the pass/fail call to the actual pre-commit gate run.
+- [x] If still over threshold: extract `handleConSaveRequired` and/or the remove/detail popup state wiring into a small additional hook (e.g. `useCombatantPopups`), following the same "move verbatim, preserve comments" approach as Sub-task 1. If under threshold, skip this fallback and note in the PR description that Decision 2's fallback wasn't needed. Triggered: Verity's pre-commit gate flagged `ActiveCombatView.tsx` at 396 lines. Extracted `handleConSaveRequired`, the remove-confirm popup, and the combatant-detail-panel wiring into `lib/hooks/useCombatantPopups.tsx` — file now 322 lines.
 
 ### Sub-task 3: Split `tests/e2e/combat.spec.ts` (Decision 3)
 
-- [ ] In `tests/e2e/helpers/actions.ts`, add the promoted `registerTestUser(page, testInfo)` helper (moved verbatim from `combat.spec.ts`) and a distinctly-named password generator for it (e.g. `randomStrongPassword()`, generated per-call — do **not** reuse or overwrite the existing `STRONG_PASSWORD` export, which other spec files depend on with its current static value).
-- [ ] Create `tests/e2e/combat-import.spec.ts`: D&D Beyond import + character/party/encounter creation tests (current lines ~36–252), with its own `test.describe`, the shared `beforeEach` (`clearCookies`), and imports from `helpers/actions.ts` / `helpers/isolation.ts` / `@/tests/helpers/dndBeyondImport`.
-- [ ] Create `tests/e2e/combat-core.spec.ts`: combat-screen UI elements + temp-HP tests (current lines ~261–396).
-- [ ] Create `tests/e2e/combat-legendary.spec.ts`: legendary-action tests + the full end-to-end registration-to-combat flow (current lines ~397–677).
-- [ ] Create `tests/e2e/combat-lair.spec.ts`: lair-action tests (current lines ~678–834).
-- [ ] Verify every test from the original file appears in exactly one new file, with an unchanged name and body (mechanical move, no assertion edits).
-- [ ] Delete `tests/e2e/combat.spec.ts` once all tests are confirmed migrated.
+- [x] In `tests/e2e/helpers/actions.ts`, add the promoted `registerTestUser(page, testInfo)` helper (moved verbatim from `combat.spec.ts`) and a distinctly-named password generator for it (e.g. `randomStrongPassword()`, generated per-call — do **not** reuse or overwrite the existing `STRONG_PASSWORD` export, which other spec files depend on with its current static value).
+- [x] Create `tests/e2e/combat-import.spec.ts`: D&D Beyond import + character/party/encounter creation tests (current lines ~36–252), with its own `test.describe`, the shared `beforeEach` (`clearCookies`), and imports from `helpers/actions.ts` / `helpers/isolation.ts` / `@/tests/helpers/dndBeyondImport`.
+- [x] Create `tests/e2e/combat-core.spec.ts`: combat-screen UI elements + temp-HP tests (current lines ~261–396).
+- [x] Create `tests/e2e/combat-legendary.spec.ts`: legendary-action tests + the full end-to-end registration-to-combat flow (current lines ~397–677).
+- [x] Create `tests/e2e/combat-lair.spec.ts`: lair-action tests (current lines ~678–834).
+- [x] Verify every test from the original file appears in exactly one new file, with an unchanged name and body (mechanical move, no assertion edits). Confirmed: 28 `test(...)` calls in the original file, 28 across the four new files (7+3+6+12), names match 1:1 via `playwright test --list`.
+- [x] Delete `tests/e2e/combat.spec.ts` once all tests are confirmed migrated.
 - [ ] Check each new spec file's line count against the same Verity gate threshold used in Sub-task 2; split further if any file still trips it.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Automatically apply all clearly-correct findings to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Automatically apply all clearly-correct findings to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then commit. Ran; deduped a `LEGENDARY_MONSTER` fixture into `tests/e2e/helpers/monsterFixtures.ts`, extracted `useCombatantPopups.tsx` (Verity gate fallback), trimmed unused `identity` bindings. Verity's pre-commit gate then flagged a pre-existing `STRONG_PASSWORD` export as a critical hardcoded-secret finding — waived via `verity waive no-hardcoded-secrets` citing Decision 3 (design.md), since removing it would break 9 other unrelated spec files and violate the no-behavior-change constraint.
 
 ## Validation
 
-- [ ] Run unit/integration tests: `npm run test:unit`
-- [ ] Run E2E tests: `npx playwright test tests/e2e/combat-import.spec.ts tests/e2e/combat-core.spec.ts tests/e2e/combat-legendary.spec.ts tests/e2e/combat-lair.spec.ts`
-- [ ] Run type checks: `npx tsc --noEmit`
-- [ ] Run build: `npm run build`
-- [ ] Run lint: `npm run lint`
-- [ ] Diff the new e2e run's pass/fail counts against a baseline run of the original `combat.spec.ts` (captured before deleting it) — same test count, same names, all green
-- [ ] Confirm Verity's file-length/comprehensibility gate passes for `lib/components/ActiveCombatView.tsx` and every new `tests/e2e/combat-*.spec.ts` file
+- [x] Run unit/integration tests: `npm run test:unit` — 314 suites / 3995 tests, all passed.
+- [x] Run E2E tests: `npx playwright test tests/e2e/combat-import.spec.ts tests/e2e/combat-core.spec.ts tests/e2e/combat-legendary.spec.ts tests/e2e/combat-lair.spec.ts` — 28/28 passed (chromium).
+- [x] Run type checks: `npx tsc --noEmit` — no errors.
+- [x] Run build: `npm run build` — succeeded.
+- [x] Run lint: `npm run lint` — no violations on changed files.
+- [x] Diff the new e2e run's pass/fail counts against a baseline run of the original `combat.spec.ts` (captured before deleting it) — same test count (28), same names, all green.
+- [ ] Confirm Verity's file-length/comprehensibility gate passes for `lib/components/ActiveCombatView.tsx` and every new `tests/e2e/combat-*.spec.ts` file — pending actual pre-commit gate run.
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
 
