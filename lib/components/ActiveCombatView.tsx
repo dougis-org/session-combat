@@ -1,17 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { AuthUser } from '@/lib/hooks/useAuth';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { CombatantCard } from '@/lib/components/CombatantCard';
-import { CombatantDetailPanel } from '@/lib/components/CombatantDetailPanel';
 import { InitiativeEntry } from '@/lib/components/InitiativeEntry';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import { CombatSetupAndActiveModals } from '@/lib/components/CombatSetupAndActiveModals';
-import { CombatantState, InitiativeRoll } from '@/lib/types';
+import { CombatantState } from '@/lib/types';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
-import { sortCombatants } from '@/lib/utils/combat';
+import { useInitiativeModal } from '@/lib/hooks/useInitiativeModal';
+import { useCombatantPopups } from '@/lib/hooks/useCombatantPopups';
 import { Toast } from '@/lib/components/Toast';
 import { usePreferences } from '@/lib/preferences/usePreferences';
 
@@ -37,51 +37,10 @@ function EncounterDescriptionModal({ description, onClose }: { description: stri
   );
 }
 
-function RemoveConfirmPopup({
-  combatant,
-  position,
-  onConfirm,
-  onCancel,
-}: {
-  combatant: CombatantState;
-  position: { top: number; left: number };
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <div
-      className="absolute bg-gray-800 rounded-lg p-6 max-w-sm w-80 shadow-xl border border-gray-700 z-50"
-      style={{ top: `${position.top}px`, left: `${position.left}px` }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <p className="text-lg font-semibold mb-4">
-        Remove <span className="text-red-400">{combatant.name}</span> from combat?
-      </p>
-      <div className="flex gap-3">
-        <button
-          onClick={onConfirm}
-          data-testid="remove-confirm-button"
-          className="flex-1 bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-semibold"
-        >
-          Remove
-        </button>
-        <button
-          onClick={onCancel}
-          className="flex-1 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded font-semibold"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export interface ActiveCombatViewProps {
   combat: UseCombatReturn;
   user: AuthUser | null;
 }
-
-const MODAL_VIEWPORT_MARGIN = 16;
 
 export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
   const {
@@ -113,134 +72,43 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     getDisplayCombatants,
   } = combat;
 
-  const [initiativeEditId, setInitiativeEditId] = useState<string | null>(null);
-  const [initiativeEditPosition, setInitiativeEditPosition] = useState<{top: number, left: number, width: number} | null>(null);
-  const initiativeModalRef = useRef<HTMLDivElement | null>(null);
-  // Combatants whose auto-opened initiative modal the DM has manually dismissed
-  // this session; they stay eligible for the manual click-to-open flow, just not
-  // for auto-reopen. Resets on remount (e.g. full page reload).
-  const dismissedInitiativeIds = useRef<Set<string>>(new Set());
-
-  // The modal takes the same shape as its target card: same width, same left
-  // edge, sitting directly below it. That means it can only ever overflow the
-  // bottom of the viewport (the card itself is already constrained
-  // horizontally by the page layout), so only vertical clamping is needed.
-  const getCardAnchorPosition = (id: string): { top: number; left: number; width: number } | null => {
-    const el = document.querySelector(`[data-combatant-id="${id}"]`);
-    if (!el) {
-      console.warn(`ActiveCombatView: no card element found for combatant ${id} while anchoring the initiative modal`);
-      return null;
-    }
-    const rect = el.getBoundingClientRect();
-    // Pinned to the card's own top-left corner (not rectToPosition's
-    // bottom-edge convention used elsewhere) so the modal overlays the card
-    // it belongs to instead of floating below it.
-    return { top: rect.top + window.scrollY, left: rect.left + window.scrollX, width: rect.width };
-  };
-
-  // Single place that updates the (id, position) pair together so the two
-  // pieces of state never drift out of sync.
-  const openInitiativeModal = (id: string | null, position: { top: number; left: number; width: number } | null) => {
-    setInitiativeEditId(id);
-    setInitiativeEditPosition(position);
-  };
-
-  const handleSetInitiative = (id: string, roll: InitiativeRoll) => {
-    setInitiativeRoll(id, roll);
-    // A saved combatant is no longer "unrolled" and must never trigger auto-open again.
-    dismissedInitiativeIds.current.add(id);
-    if (!combatState) return;
-
-    // React state updates aren't visible until the next render, so simulate the
-    // post-update list locally instead of reading combatState after the call above.
-    const updatedCombatants = combatState.combatants.map(c => c.id === id ? { ...c, initiative: roll.total, initiativeRoll: roll } : c);
-    const sorted = sortCombatants(updatedCombatants);
-
-    // Using the same list as getDisplayCombatants to find the next one
-    const nextUnrolled = sorted.find(c => !c.initiativeRoll);
-    const nextPosition = nextUnrolled ? getCardAnchorPosition(nextUnrolled.id) : null;
-
-    if (nextUnrolled && nextPosition) {
-      openInitiativeModal(nextUnrolled.id, nextPosition);
-    } else {
-      openInitiativeModal(null, null);
-    }
-  };
-
-  const closeInitiativeModal = (dismissed: boolean) => {
-    if (dismissed && initiativeEditId) {
-      dismissedInitiativeIds.current.add(initiativeEditId);
-    }
-    openInitiativeModal(null, null);
-  };
-
-  // Re-evaluates whenever the set of unrolled combatants changes (added, rolled,
-  // or removed) or the modal closes, and opens the first eligible (unrolled,
-  // non-dismissed) combatant found, provided no modal is currently open.
-  const unrolledCombatantIds = (combatState?.combatants ?? [])
-    .filter(c => !c.initiativeRoll)
-    .map(c => c.id)
-    .join(',');
-
-  useEffect(() => {
-    if (!combatState || initiativeEditId !== null) return;
-    const sorted = sortCombatants(combatState.combatants);
-    const target = sorted.find(c => !c.initiativeRoll && !dismissedInitiativeIds.current.has(c.id));
-    if (!target) return;
-    const position = getCardAnchorPosition(target.id);
-    if (!position) return;
-    openInitiativeModal(target.id, position);
-    // Intentionally excludes `combatState`: it gets a new object reference on
-    // every unrelated combat update (HP, damage, etc.), and re-running this
-    // effect on those churns can race with in-flight input/HP-adjustment state
-    // elsewhere in the tree. `unrolledCombatantIds` already captures every
-    // change this effect actually needs to react to.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unrolledCombatantIds, initiativeEditId]);
-
-  // Recovery for the "combatant removed while its initiative modal is open" race:
-  // the render guard below already hides the modal (no matching combatant), but
-  // without this, `initiativeEditId` would stay non-null forever and permanently
-  // block the auto-open effect above from ever firing again for anyone else.
-  useEffect(() => {
-    if (!initiativeEditId || !combatState) return;
-    const stillExists = combatState.combatants.some(c => c.id === initiativeEditId);
-    if (!stillExists) openInitiativeModal(null, null);
-  }, [initiativeEditId, combatState]);
-
-  // Measure the rendered modal and clamp its position so it never overflows the
-  // viewport. The modal is always exactly as wide as its target card and
-  // shares its left edge, so it can only overflow vertically (below the
-  // viewport) — the horizontal clamp is a defensive no-op for that shape.
-  useLayoutEffect(() => {
-    if (!initiativeEditId || !initiativeEditPosition || !initiativeModalRef.current) return;
-    const el = initiativeModalRef.current;
-    el.style.width = `${initiativeEditPosition.width}px`;
-
-    const rect = el.getBoundingClientRect();
-    const maxLeft = window.scrollX + window.innerWidth - MODAL_VIEWPORT_MARGIN;
-    const maxTop = window.scrollY + window.innerHeight - MODAL_VIEWPORT_MARGIN;
-
-    let { top, left } = initiativeEditPosition;
-    const overflowRight = (left + rect.width) - maxLeft;
-    if (overflowRight > 0) left -= overflowRight;
-    const overflowBottom = (top + rect.height) - maxTop;
-    if (overflowBottom > 0) top -= overflowBottom;
-    // Positions are page coordinates (rect + scrollX/scrollY), so the minimum
-    // clamp must also be scroll-aware — clamping to the bare margin would pin
-    // the modal to the document origin instead of the visible viewport edge
-    // when the page is scrolled.
-    left = Math.max(window.scrollX + MODAL_VIEWPORT_MARGIN, left);
-    top = Math.max(window.scrollY + MODAL_VIEWPORT_MARGIN, top);
-
-    el.style.left = `${left}px`;
-    el.style.top = `${top}px`;
-  }, [initiativeEditId, initiativeEditPosition]);
+  const {
+    initiativeEditId,
+    initiativeEditPosition,
+    initiativeModalRef,
+    openInitiativeModal,
+    handleSetInitiative,
+    closeInitiativeModal,
+    getCardAnchorPosition,
+  } = useInitiativeModal({ combatState, setInitiativeRoll });
 
   const characterMap = useMemo(
     () => new Map((characters ?? []).map(c => [c.id, c])),
     [characters],
   );
+
+  const {
+    handleConSaveRequired,
+    onShowDetails,
+    onShowRemoveConfirm,
+    detailPanel,
+    removeConfirmPopup,
+  } = useCombatantPopups({
+    combatState,
+    characterMap,
+    removeConfirmId,
+    removeConfirmPosition,
+    selectedDetailCombatantId,
+    detailPosition,
+    detailFocusSection,
+    setSelectedDetailCombatantId,
+    setDetailPosition,
+    setDetailFocusSection,
+    setRemoveConfirmId,
+    setRemoveConfirmPosition,
+    updateCombatant,
+    removeCombatant,
+  });
 
   const activeCombatantId = combatState?.combatants[combatState.currentTurnIndex]?.id;
   // Round is part of the key (not just turn index) so a single-combatant combat —
@@ -274,23 +142,6 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
   if (!combatState) return null;
 
-  const handleConSaveRequired = (combatant: CombatantState, dc: number) => {
-    const campaignId = combatState.campaignId;
-    if (!campaignId) return;
-    if (!combatant.id.startsWith('character-')) return;
-    const characterId = combatant.id.slice('character-'.length);
-    const character = characterMap.get(characterId);
-    if (!character) return;
-    fetch(`/api/campaigns/${campaignId}/messages`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text: `${combatant.name} must make a CON saving throw (DC ${dc}) to maintain concentration on ${combatant.concentratingOn ?? 'their spell'}.`,
-        visibility: { scope: 'direct', toUserId: character.userId },
-      }),
-    }).catch(() => {});
-  };
-
   const renderCard = (combatant: CombatantState) => (
     <CombatantCard
       key={combatant.id}
@@ -300,19 +151,12 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
       onUpdate={(updates) => updateCombatant(combatant.id, updates)}
       onRemove={() => removeCombatant(combatant.id)}
       onNextTurn={handleNextTurn}
-      onShowDetails={(id, pos, options) => {
-        setSelectedDetailCombatantId(id);
-        setDetailPosition(pos);
-        setDetailFocusSection(options?.focusSection);
-      }}
+      onShowDetails={onShowDetails}
       onSetInitiative={(id) => {
         const position = getCardAnchorPosition(id);
         if (position) openInitiativeModal(id, position);
       }}
-      onShowRemoveConfirm={(id, pos) => {
-        setRemoveConfirmId(id);
-        setRemoveConfirmPosition(pos);
-      }}
+      onShowRemoveConfirm={onShowRemoveConfirm}
       allCombatants={combatState.combatants}
       onUpdateCombatant={(id, updates) => updateCombatant(id, updates)}
       onConSaveRequired={(dc) => handleConSaveRequired(combatant, dc)}
@@ -461,22 +305,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
           seedOptions={combatState.combatants.filter(c => c.type !== 'lair' && (c.lairActions ?? []).length > 0).map(c => c.name)}
         />
 
-        {selectedDetailCombatantId && detailPosition && (() => {
-          const combatant = combatState.combatants.find(c => c.id === selectedDetailCombatantId);
-          if (!combatant) return null;
-          return (
-            <CombatantDetailPanel
-              combatant={combatant}
-              detailPosition={detailPosition}
-              onClose={() => {
-                setSelectedDetailCombatantId(null);
-                setDetailFocusSection(undefined);
-              }}
-              onUpdate={updateCombatant}
-              focusSection={detailFocusSection}
-            />
-          );
-        })()}
+        {detailPanel}
 
         {showEncounterDescription && combatState.encounterDescription && (
           <EncounterDescriptionModal
@@ -485,25 +314,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
           />
         )}
 
-        {removeConfirmId && removeConfirmPosition && (() => {
-          const combatant = combatState.combatants.find(c => c.id === removeConfirmId);
-          if (!combatant) return null;
-          return (
-            <RemoveConfirmPopup
-              combatant={combatant}
-              position={removeConfirmPosition}
-              onConfirm={() => {
-                removeCombatant(removeConfirmId);
-                setRemoveConfirmId(null);
-                setRemoveConfirmPosition(null);
-              }}
-              onCancel={() => {
-                setRemoveConfirmId(null);
-                setRemoveConfirmPosition(null);
-              }}
-            />
-          );
-        })()}
+        {removeConfirmPopup}
       </div>
 
       <Toast toast={toast} />
