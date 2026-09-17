@@ -11,7 +11,7 @@ import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import { CombatSetupAndActiveModals } from '@/lib/components/CombatSetupAndActiveModals';
 import { CombatantState, InitiativeRoll } from '@/lib/types';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
-import { rectToPosition, sortCombatants } from '@/lib/utils/combat';
+import { sortCombatants } from '@/lib/utils/combat';
 import { Toast } from '@/lib/components/Toast';
 
 function EncounterDescriptionModal({ description, onClose }: { description: string; onClose: () => void }) {
@@ -142,8 +142,10 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
       return null;
     }
     const rect = el.getBoundingClientRect();
-    const { top, left } = rectToPosition(rect);
-    return { top, left, width: rect.width };
+    // Pinned to the card's own top-left corner (not rectToPosition's
+    // bottom-edge convention used elsewhere) so the modal overlays the card
+    // it belongs to instead of floating below it.
+    return { top: rect.top + window.scrollY, left: rect.left + window.scrollX, width: rect.width };
   };
 
   // Single place that updates the (id, position) pair together so the two

@@ -6,12 +6,12 @@ Defines how the DM sets and reviews per-combatant initiative during active comba
 
 ### Requirement: Pinned Initiative Modal Overlay
 
-The system SHALL render the `InitiativeEntry` UI as an absolute-positioned modal overlay anchored to the target `CombatantCard`'s own bounding rect (not an inner control's rect), matching that card's width and left edge exactly (not a fixed pixel width) so it reads as directly attached to the card, clamped so the modal's actual rendered bounding box stays fully within the viewport with at least a 16px margin.
+The system SHALL render the `InitiativeEntry` UI as an absolute-positioned modal overlay anchored to the target `CombatantCard`'s own bounding rect (not an inner control's rect), with its top-left corner coinciding with the card's top-left corner and matching that card's width exactly (not a fixed pixel width), clamped so the modal's actual rendered bounding box stays fully within the viewport with at least a 16px margin.
 
 #### Scenario: User clicks to set initiative
 - **Given** an active combat session with combatants in the list
 - **When** the DM clicks the "Initiative" section in the header of a `CombatantCard`
-- **Then** a modal opens directly below that specific card, matching its width and left edge, containing the `InitiativeEntry` UI.
+- **Then** a modal opens overlaying that specific card, its top-left corner aligned with the card's top-left corner and matching its width, containing the `InitiativeEntry` UI.
 
 #### Scenario: User clicks outside the modal
 - **Given** the Initiative modal is open over a `CombatantCard`

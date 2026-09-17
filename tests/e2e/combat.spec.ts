@@ -292,6 +292,12 @@ test.describe("Combat flows", () => {
     await page.locator('[data-testid="start-combat-quick"]').click();
     await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
 
+    // The combatant has no initiativeRoll yet, so the initiative modal
+    // auto-opens overlaying the card; dismiss it before interacting with the
+    // card's own HP controls underneath.
+    await page.keyboard.press("Escape");
+    await page.locator('[data-testid="initiative-modal"]').waitFor({ state: "hidden", timeout: 5000 });
+
     // Find the combatant card's HP input — one combatant, one number input
     const hpInput = page.locator('input[placeholder="0"]').first();
 
