@@ -59,7 +59,7 @@
   - Design element: `useInitiativeModal` hook (Decision 1) — all three effects and their documented dependency-array rationale move verbatim.
   - Acceptance criteria reference: issue #761 "No behavior change intended."
   - Testability notes: covered by existing e2e turn-order/legendary tests that exercise initiative entry; no new tests needed, just confirm none regress.
-- Requirement: All 29 existing e2e tests in `combat.spec.ts` continue to pass, unchanged in assertions, after the split.
+- Requirement: All 28 existing e2e tests in `combat.spec.ts` continue to pass, unchanged in assertions, after the split.
   - Design element: mechanical file split (Decision 3) with promoted shared helpers.
   - Acceptance criteria reference: issue #761 "All existing unit and e2e coverage still passes, unchanged in behavior."
   - Testability notes: run full suite before split (baseline) and after (comparison); test names and counts must match 1:1 across the new files.

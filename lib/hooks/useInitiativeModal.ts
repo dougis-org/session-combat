@@ -8,7 +8,6 @@ import { sortCombatants } from '@/lib/utils/combat';
 export interface UseInitiativeModalArgs {
   combatState: UseCombatReturn['combatState'];
   setInitiativeRoll: UseCombatReturn['setInitiativeRoll'];
-  updateCombatantInitiativeSettings: UseCombatReturn['updateCombatantInitiativeSettings'];
 }
 
 export interface UseInitiativeModalResult {

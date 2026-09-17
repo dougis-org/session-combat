@@ -80,7 +80,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     handleSetInitiative,
     closeInitiativeModal,
     getCardAnchorPosition,
-  } = useInitiativeModal({ combatState, setInitiativeRoll, updateCombatantInitiativeSettings });
+  } = useInitiativeModal({ combatState, setInitiativeRoll });
 
   const characterMap = useMemo(
     () => new Map((characters ?? []).map(c => [c.id, c])),
