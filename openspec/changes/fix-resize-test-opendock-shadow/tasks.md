@@ -12,11 +12,11 @@
 ## Execution
 
 - [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 568 --add-label "in-progress"`. Discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] In `tests/unit/components/CampaignChat/CampaignChat.resize.test.tsx`: rename the local `async function openDock()` (line 68) to `async function openDockLocal()`
-- [ ] Update the 4 call sites in the same file (lines 132, 168, 174, 197) from `openDock()` to `openDockLocal()`
-- [ ] In `tests/unit/components/CampaignChat/helpers.tsx`: add a one-line comment near the exported helpers (e.g. above `openDock` at line 78, or as a file-level note near the top of the exports) stating that local test-file helpers in sibling `CampaignChat.*.test.tsx` files must not reuse a `helpers.tsx` export name
-- [ ] Confirm no existing tooling/lint already covers this (checked during exploration — no ESLint rule for this exists in the repo; confirmed no reuse opportunity)
-- [ ] Confirm acceptance criteria in `openspec/changes/fix-resize-test-opendock-shadow/specs/testing-conventions/spec.md` are covered by the above edits
+- [x] In `tests/unit/components/CampaignChat/CampaignChat.resize.test.tsx`: rename the local `async function openDock()` (line 68) to `async function openDockLocal()`
+- [x] Update the 4 call sites in the same file (lines 132, 168, 174, 197) from `openDock()` to `openDockLocal()`
+- [x] In `tests/unit/components/CampaignChat/helpers.tsx`: add a one-line comment near the exported helpers (e.g. above `openDock` at line 78, or as a file-level note near the top of the exports) stating that local test-file helpers in sibling `CampaignChat.*.test.tsx` files must not reuse a `helpers.tsx` export name
+- [x] Confirm no existing tooling/lint already covers this (checked during exploration — no ESLint rule for this exists in the repo; confirmed no reuse opportunity)
+- [x] Confirm acceptance criteria in `openspec/changes/fix-resize-test-opendock-shadow/specs/testing-conventions/spec.md` are covered by the above edits
 
 ## Pre-Commit Code Review
 
@@ -24,11 +24,11 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests: `npx jest tests/unit/components/CampaignChat/CampaignChat.resize.test.tsx` — all 7 tests must pass
-- [ ] Run the full `CampaignChat` test directory to confirm no other file references the renamed local function: `npx jest tests/unit/components/CampaignChat/`
-- [ ] Run E2E tests (not applicable — no runtime/UI behavior changed)
-- [ ] Run type checks: `npm run type-check` (or project-equivalent)
-- [ ] Run build: `npm run build`
+- [x] Run unit/integration tests: `npx jest tests/unit/components/CampaignChat/CampaignChat.resize.test.tsx` — all 7 tests must pass (13 tests in this file now pass; count grew since the spec was written, none failing)
+- [x] Run the full `CampaignChat` test directory to confirm no other file references the renamed local function: `npx jest tests/unit/components/CampaignChat/` (91 passed)
+- [x] Run E2E tests (not applicable — no runtime/UI behavior changed)
+- [x] Run type checks: `npm run typecheck` (clean)
+- [x] Run build: `npm run build` (succeeded)
 - [ ] Run security/code quality checks required by project standards (Codacy/Verity gate)
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
