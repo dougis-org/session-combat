@@ -33,7 +33,7 @@
 
 - Chosen: keep `resize.test.tsx`'s existing static `jest.mock('@/lib/hooks/useActiveSessionId', ...)` block (lines 39-41) untouched.
 - Alternatives considered: replace it with `helpers.tsx`'s `mockActiveSessionIdCore`, which backs the hook with real `React.useState` so tests that mutate `activeSessionId` (via `setActiveSessionId`/`handleStreamEvent`) re-render correctly.
-- Rationale: none of `resize.test.tsx`'s 7 tests mutate `activeSessionId` — they test drag/resize/persistence behavior only. The stateful mock exists to support tests that actually change session state (e.g. `sse.test.tsx`, the `rollFeed.*` files). Adopting it here would add an unused dependency on session-tracking mock machinery with zero behavioral benefit.
+- Rationale: none of `resize.test.tsx`'s tests mutate `activeSessionId` — they test drag/resize/persistence behavior only. The stateful mock exists to support tests that actually change session state (e.g. `sse.test.tsx`, the `rollFeed.*` files). Adopting it here would add an unused dependency on session-tracking mock machinery with zero behavioral benefit.
 - Trade-offs: `resize.test.tsx` remains the one file with a bespoke mock for this hook, rather than converging on a single mock strategy across the suite. Accepted, because the divergence reflects a genuine difference in what each file's tests need, not oversight.
 
 ### Decision 3: Guardrail via a comment, not tooling
@@ -47,7 +47,7 @@
 
 - Proposal element: rename `resize.test.tsx`'s local `openDock` to `openDockLocal` and update 4 call sites
   - Design decision: Decision 1
-  - Validation approach: run `tests/unit/components/CampaignChat/CampaignChat.resize.test.tsx` and confirm all 7 existing tests still pass with no assertion changes
+  - Validation approach: run `tests/unit/components/CampaignChat/CampaignChat.resize.test.tsx` and confirm all existing tests still pass with no assertion changes
 - Proposal element: do not consolidate onto shared `mockActiveSessionIdCore`
   - Design decision: Decision 2
   - Validation approach: no code change to validate; confirmed by design rationale and by re-running `resize.test.tsx` unchanged in mock setup

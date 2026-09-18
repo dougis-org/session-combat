@@ -11,7 +11,7 @@
 ## Problem Space
 
 - Current behavior: `resize.test.tsx` mocks `useActiveSessionIdCore` statically via a module-level `jest.mock(...)` returning a fixed object, and defines its own `openDock()` (render + click the chat toggle) used at 4 call sites (lines 132, 168, 174, 197). This local function shadows, by name only, `helpers.tsx`'s exported `openDock()`, which additionally invokes `mockActiveSessionIdCore(null)` to back the hook with real React state.
-- Desired behavior: the local helper is renamed to something unambiguous (e.g. `openDockLocal`) so no name in `resize.test.tsx` collides with a `helpers.tsx` export, while all 7 existing tests continue to pass unchanged in behavior.
+- Desired behavior: the local helper is renamed to something unambiguous (e.g. `openDockLocal`) so no name in `resize.test.tsx` collides with a `helpers.tsx` export, while all existing tests (13) continue to pass unchanged in behavior.
 - Constraints: `resize.test.tsx` tests (drag/resize/persistence) never mutate `activeSessionId`, so they do not need `helpers.tsx`'s stateful `mockActiveSessionIdCore` mock — the two mocking strategies are legitimately different, not accidentally duplicated.
 - Assumptions: no other file in `tests/unit/components/CampaignChat/` has this collision (verified below); the fix is a pure rename with no behavior change.
 - Edge cases considered: none — this is a mechanical rename with no logic change, so there are no new edge cases to cover. Existing test assertions are unaffected.
@@ -38,8 +38,8 @@
 ## Risks
 
 - Risk: rename typo missing one of the 4 call sites, causing a `ReferenceError` in that test.
-  - Impact: one or more of the 7 tests in `resize.test.tsx` fail.
-  - Mitigation: run the full `resize.test.tsx` file after the rename and confirm all 7 tests still pass before considering the task done.
+  - Impact: one or more of the tests in `resize.test.tsx` fail.
+  - Mitigation: run the full `resize.test.tsx` file after the rename and confirm all tests still pass before considering the task done.
 - Risk: none identified for the `helpers.tsx` comment addition (comment-only change, no executable code touched).
   - Impact: none.
   - Mitigation: n/a.

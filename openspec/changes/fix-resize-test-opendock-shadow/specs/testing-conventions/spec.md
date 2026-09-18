@@ -24,9 +24,9 @@ The system SHALL preserve all existing `CampaignChat.resize.test.tsx` test behav
 
 #### Scenario: All resize tests continue to pass with unchanged assertions
 
-- **Given** `CampaignChat.resize.test.tsx` has 7 passing tests prior to this change, exercising expand/collapse, drag-resize clamping, height resolution, and persistence save/load logic
+- **Given** `CampaignChat.resize.test.tsx` has 13 passing tests prior to this change, exercising expand/collapse, drag-resize clamping, height resolution, and persistence save/load logic
 - **When** the local helper is renamed from `openDock` to `openDockLocal` and its 4 call sites are updated
-- **Then** all 7 tests in the file still pass, with no changes to any test's assertions, rendered output expectations, or mock setup
+- **Then** all tests in the file still pass, with no changes to any test's assertions, rendered output expectations, or mock setup
 
 ### Requirement: ADDED `helpers.tsx` documents the naming-collision risk for local test helpers
 

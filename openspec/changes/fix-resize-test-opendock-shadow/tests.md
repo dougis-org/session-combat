@@ -21,7 +21,7 @@ For each task in `tasks.md`:
 
 ### Task: rename local `openDock` to `openDockLocal` in `CampaignChat.resize.test.tsx`
 
-- [ ] **Baseline (pre-change):** run `npx jest tests/unit/components/CampaignChat/CampaignChat.resize.test.tsx` and confirm all 7 existing tests pass under the current (colliding) name. This is the pre-existing green state the rename must not break.
+- [ ] **Baseline (pre-change):** run `npx jest tests/unit/components/CampaignChat/CampaignChat.resize.test.tsx` and confirm all existing tests (13) pass under the current (colliding) name. This is the pre-existing green state the rename must not break.
 - [ ] **Structural check (post-change):** `grep -n "^async function openDock\b" tests/unit/components/CampaignChat/CampaignChat.resize.test.tsx` returns no match; `grep -n "^async function openDockLocal\b"` returns exactly one match at the renamed declaration.
   - Maps to task: "rename the local `async function openDock()` ... to `async function openDockLocal()`"
   - Maps to acceptance scenario: "Local resize-drag helper no longer collides with the shared `openDock` export" (`specs/testing-conventions/spec.md`)
@@ -34,7 +34,7 @@ For each task in `tasks.md`:
 
 ### Task: verify existing test behavior is unchanged
 
-- [ ] **Regression run (post-change):** run `npx jest tests/unit/components/CampaignChat/CampaignChat.resize.test.tsx` and confirm all 7 tests still pass, with the same test names and same assertions as the pre-change baseline (no test added, removed, or altered — diff the test file outside the renamed identifier and confirm no other lines changed).
+- [ ] **Regression run (post-change):** run `npx jest tests/unit/components/CampaignChat/CampaignChat.resize.test.tsx` and confirm all tests still pass, with the same test names and same assertions as the pre-change baseline (no test added, removed, or altered — diff the test file outside the renamed identifier and confirm no other lines changed).
   - Maps to task: "Confirm acceptance criteria in ... spec.md are covered"
   - Maps to acceptance scenario: "All resize tests continue to pass with unchanged assertions"
 - [ ] **Suite-wide regression run:** run `npx jest tests/unit/components/CampaignChat/` and confirm no other file in the directory is affected (none import from `resize.test.tsx`, so this should be a no-op check, but confirms isolation).
