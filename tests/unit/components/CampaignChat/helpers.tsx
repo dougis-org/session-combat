@@ -75,6 +75,9 @@ export function restoreFetch() {
   global.fetch = originalFetch
 }
 
+// Local test-file helpers in sibling CampaignChat.*.test.tsx files must not
+// reuse any of the export names below (openDock, openDockWithSession, etc.) —
+// pick a distinct name to avoid shadowing.
 export async function openDock() {
   mockActiveSessionIdCore(null)
   const user = userEvent.setup()

@@ -65,7 +65,7 @@ afterEach(() => {
   global.fetch = originalFetch
 })
 
-async function openDock() {
+async function openDockLocal() {
   const user = userEvent.setup()
   render(<CampaignChat campaignId={CAMPAIGN_ID} />)
   await user.click(screen.getByRole('button', { name: /chat/i }))
@@ -129,7 +129,7 @@ describe('collapse from large mode', () => {
 
 describe('drag handle minimum clamp', () => {
   it('drag resulting in height < 150 clamps to 150px', async () => {
-    await openDock()
+    await openDockLocal()
 
     const handle = screen.getByRole('separator', { name: /resize chat panel/i })
 
@@ -165,13 +165,13 @@ describe('drag handle not shown in large mode', () => {
 
 describe('height resolution helper', () => {
   it('resolves to 33vh by default', async () => {
-    await openDock()
+    await openDockLocal()
     const panel = screen.getByRole('complementary', { name: /campaign chat/i })
     expect(panel).toHaveStyle({ height: '33vh' })
   })
 
   it('resolves to customHeight when set via drag', async () => {
-    await openDock()
+    await openDockLocal()
     const handle = screen.getByRole('separator', { name: /resize chat panel/i })
 
     act(() => {
@@ -194,7 +194,7 @@ describe('height resolution helper', () => {
 
 describe('persistence save logic', () => {
   it('persists new height via LocalStore.set on mouseup', async () => {
-    await openDock()
+    await openDockLocal()
     const handle = screen.getByRole('separator', { name: /resize chat panel/i })
 
     act(() => {
