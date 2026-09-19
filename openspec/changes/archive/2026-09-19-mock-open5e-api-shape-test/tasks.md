@@ -84,18 +84,18 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from the primary checkout, not this worktree)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none anticipated beyond this change's own artifacts)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy `specs/open5e-api-shape-verification/spec.md` to `openspec/specs/open5e-api-shape-verification/spec.md`, updating relative links to point at the archived location (`../../changes/archive/YYYY-MM-DD-mock-open5e-api-shape-test/design.md` and `.../tasks.md`)
-- [ ] Archive the change: move `openspec/changes/mock-open5e-api-shape-test/` to `openspec/changes/archive/YYYY-MM-DD-mock-open5e-api-shape-test/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-mock-open5e-api-shape-test/` exists and `openspec/changes/mock-open5e-api-shape-test/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-mock-open5e-api-shape-test` then `git push -u origin doc/archive-YYYY-MM-DD-mock-open5e-api-shape-test`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-mock-open5e-api-shape-test` to `main` with title `docs: archive mock-open5e-api-shape-test (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D mock-open5e-api-shape-test doc/archive-YYYY-MM-DD-mock-open5e-api-shape-test`
-- [ ] Remove this change's dedicated worktree: `git worktree remove .worktrees/mock-open5e-api-shape-test` (from the primary checkout)
+- [x] `git checkout main` and `git pull --ff-only` (from the primary checkout, not this worktree)
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none anticipated beyond this change's own artifacts)
+- [x] Sync approved spec deltas into `openspec/specs/`: `openspec archive` copied `specs/open5e-api-shape-verification/spec.md` to `openspec/specs/open5e-api-shape-verification/spec.md` as a fresh main spec (no design.md/tasks.md relative links to update — the generated file has none)
+- [x] Archive the change: `openspec archive mock-open5e-api-shape-test --yes` moved `openspec/changes/mock-open5e-api-shape-test/` to `openspec/changes/archive/2026-09-19-mock-open5e-api-shape-test/`
+- [x] Confirm `openspec/changes/archive/2026-09-19-mock-open5e-api-shape-test/` exists and `openspec/changes/mock-open5e-api-shape-test/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-09-19-mock-open5e-api-shape-test` then `git push -u origin doc/archive-2026-09-19-mock-open5e-api-shape-test`
+- [x] Open a PR from `doc/archive-2026-09-19-mock-open5e-api-shape-test` to `main` with title `docs: archive mock-open5e-api-shape-test (2026-09-19)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D mock-open5e-api-shape-test doc/archive-2026-09-19-mock-open5e-api-shape-test`
+- [x] Remove this change's dedicated worktree: `git worktree remove .worktrees/mock-open5e-api-shape-test` (from the primary checkout)
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D mock-open5e-api-shape-test doc/archive-YYYY-MM-DD-mock-open5e-api-shape-test`
