@@ -9,7 +9,7 @@
  * field — `Open5EClient` already normalizes/types around that, so this
  * script asserts against the adapter-parsed shape rather than raw JSON.
  */
-import { Open5EClient, Open5ECreature, Open5ESpell } from "@/lib/import/open5eAdapter";
+import { Open5EClient, Open5ECreature, Open5ESpell } from "../import/open5eAdapter";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) {
@@ -17,11 +17,19 @@ function assert(condition: boolean, message: string): void {
   }
 }
 
+function assertNamedObject(value: unknown, field: string): void {
+  assert(
+    typeof value === "object" && value !== null && typeof (value as { key?: unknown }).key === "string",
+    `${field} must be an object with a string 'key'`
+  );
+}
+
 function checkCreatureShape(creature: Open5ECreature): void {
   assert(typeof creature.key === "string", "creature.key must be a string");
+  assert(!("slug" in creature), "creature must not have a 'slug' field (raw API uses 'key')");
   assert(typeof creature.name === "string", "creature.name must be a string");
-  assert(creature.size !== undefined, "creature.size must be present");
-  assert(creature.type !== undefined, "creature.type must be present");
+  assertNamedObject(creature.size, "creature.size");
+  assertNamedObject(creature.type, "creature.type");
   assert(
     typeof creature.challenge_rating === "number" ||
       typeof creature.challenge_rating === "string",
@@ -35,6 +43,14 @@ function checkCreatureShape(creature: Open5ECreature): void {
     typeof creature.hit_points === "number",
     "creature.hit_points must be a number"
   );
+  assert(
+    typeof creature.ability_scores === "object" && creature.ability_scores !== null,
+    "creature.ability_scores must be an object"
+  );
+  assert(
+    typeof creature.speed === "object" && creature.speed !== null,
+    "creature.speed must be an object"
+  );
   assert(Array.isArray(creature.actions), "creature.actions must be an array");
   if (creature.traits !== undefined) {
     assert(Array.isArray(creature.traits), "creature.traits must be an array when present");
@@ -43,11 +59,12 @@ function checkCreatureShape(creature: Open5ECreature): void {
 
 function checkSpellShape(spell: Open5ESpell): void {
   assert(typeof spell.key === "string", "spell.key must be a string");
+  assert(!("slug" in spell), "spell must not have a 'slug' field (raw API uses 'key')");
   assert(typeof spell.name === "string", "spell.name must be a string");
   assert(typeof spell.level === "number", "spell.level must be a number");
-  assert(spell.school !== undefined, "spell.school must be present");
+  assertNamedObject(spell.school, "spell.school");
   assert(typeof spell.casting_time === "string", "spell.casting_time must be a string");
-  assert(spell.range !== undefined, "spell.range must be present");
+  assert(typeof spell.range === "number", "spell.range must be a number");
   assert(typeof spell.duration === "string", "spell.duration must be a string");
   assert(
     typeof spell.concentration === "boolean",
@@ -61,21 +78,32 @@ export async function checkOpen5eApiShape(): Promise<void> {
 
   const creatures = await client.fetchMonsters(1);
   assert(creatures.results.length > 0, "creatures response had no results");
-  checkCreatureShape(creatures.results[0]);
-  console.log(`Creatures OK (checked "${creatures.results[0].name}")`);
+  for (const creature of creatures.results) {
+    checkCreatureShape(creature);
+  }
+  console.log(`Creatures OK (checked ${creatures.results.length} results)`);
 
   const spells = await client.fetchSpells(1);
   assert(spells.results.length > 0, "spells response had no results");
-  checkSpellShape(spells.results[0]);
-  console.log(`Spells OK (checked "${spells.results[0].name}")`);
+  for (const spell of spells.results) {
+    checkSpellShape(spell);
+  }
+  console.log(`Spells OK (checked ${spells.results.length} results)`);
 
   console.log("Open5E API shape check passed.");
 }
 
+export async function runCli(): Promise<void> {
+  await checkOpen5eApiShape();
+  process.exit(0);
+}
+
+export function handleCliError(error: unknown): never {
+  console.error("Open5E API shape check failed:", error instanceof Error ? error.stack ?? error.message : error);
+  process.exit(1);
+}
+
 /* istanbul ignore next */
 if (require.main === module) {
-  checkOpen5eApiShape().catch((error) => {
-    console.error(error instanceof Error ? error.message : error);
-    process.exit(1);
-  });
+  runCli().catch(handleCliError);
 }

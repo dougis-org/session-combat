@@ -39,14 +39,14 @@
 - Chosen: `new Open5EClient()` (default constructor argument is the global `fetch`), calling `fetchMonsters(1)` and `fetchSpells(1)` — the same entry points `open5eAdapter.test.ts` exercises against a mock.
 - Alternatives considered: keep a bespoke retry wrapper around raw `fetch` (status quo in the deleted file); add retry/backoff to `Open5EClient` itself.
 - Rationale: the issue explicitly asks to "use the same 5e client other places do." `Open5EClient` already centralizes the base URL, pagination, and error-on-non-ok-response logic (`fetchPage`, `lib/import/open5eAdapter.ts:100-125`), so reusing it removes ~15 lines of duplicated fetch/timeout/retry logic from the test file for free.
-- Trade-offs: `Open5EClient` has no retry/backoff, so a single transient network blip will fail the script outright (see Decision 4) rather than retrying up to 3 times as the old `fetchWithRetry` did.
+- Trade-offs: none material — `Open5EClient` already retries transient failures internally (see Decision 4), so the script inherits that behavior for free by using the client directly.
 
-### Decision 4: No retry/backoff added anywhere; script fails fast and reports the error
+### Decision 4: No script-local retry/backoff added; the script relies on `Open5EClient`'s existing retry and fails fast once that's exhausted
 
-- Chosen: the script performs one `fetchMonsters(1)` and one `fetchSpells(1)` call each; on failure it lets the error propagate (non-zero exit) with the underlying error message intact (`fetchPage` already throws `Failed to fetch ${endpoint}: ${status} ${statusText}`).
-- Alternatives considered: reimplement retry in the script (matching old behavior); add retry to `Open5EClient` (out of scope — would change production behavior for all callers, including real imports, which is a bigger and unrelated decision).
-- Rationale: this is a human-triggered, on-demand check (per proposal Non-Goals — no scheduled re-verification). A human re-running the command after a transient failure is an acceptable cost; silently retrying inside a manual diagnostic script adds complexity for a rare case. If retry is later wanted for `Open5EClient` broadly, that is a separate proposal.
-- Trade-offs: manual reruns needed on flaky networks; explicitly accepted since this script never runs unattended.
+- Chosen: the script performs one `fetchMonsters(1)` and one `fetchSpells(1)` call each. `Open5EClient.fetchWithBackoff` (`lib/import/open5eAdapter.ts:74-106`) already retries a failed attempt up to 3 times with exponential backoff and 429-aware `Retry-After` handling before giving up; only once that's exhausted does the error propagate (non-zero exit) with the underlying error message intact (`fetchPage` already throws `Failed to fetch ${endpoint}: ${status} ${statusText}`).
+- Alternatives considered: add a second, script-local retry loop on top of the client's own (redundant); add different/more aggressive retry to `Open5EClient` itself (out of scope — would change production behavior for all callers, including real imports, which is a bigger and unrelated decision).
+- Rationale: this is a human-triggered, on-demand check (per proposal Non-Goals — no scheduled re-verification). `Open5EClient`'s existing retry already covers ordinary transient blips; a human re-running the command after retries are exhausted is an acceptable cost for the rare case, and adding a second retry layer in the script would just duplicate what the client already does.
+- Trade-offs: manual reruns needed if the API stays down beyond the client's built-in retry budget; explicitly accepted since this script never runs unattended.
 
 ### Decision 5: Assert against `Open5ECreature`/`Open5ESpell` (adapter/parsed shape), not raw JSON
 
@@ -103,7 +103,7 @@
 
 ## Risks / Trade-offs
 
-- Risk/trade-off: No retry means a single transient network hiccup fails the manual run (Decision 4).
+- Risk/trade-off: no script-local retry on top of `Open5EClient`'s built-in retry, so an outage longer than its retry budget fails the manual run (Decision 4).
   - Impact: minor annoyance to whoever runs the script; no production or CI impact since nothing depends on this script succeeding automatically.
   - Mitigation: documented in the script's own output/header; rerun manually.
 - Risk/trade-off: Deleting the old file loses inline historical raw-JSON assertions.
