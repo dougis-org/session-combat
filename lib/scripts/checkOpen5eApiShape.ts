@@ -9,7 +9,8 @@
  * field — `Open5EClient` already normalizes/types around that, so this
  * script asserts against the adapter-parsed shape rather than raw JSON.
  */
-import { Open5EClient, Open5ECreature, Open5ESpell } from "../import/open5eAdapter";
+import { Open5EClient } from "../import/open5eAdapter";
+import type { Open5ECreature, Open5ESpell } from "../import/open5eAdapter";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) {
