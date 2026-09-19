@@ -7,38 +7,38 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — confirmed present in the available skills list for this session (`pr-review-toolkit:review-pr: Comprehensive PR review using specialized agents`). If a future session does not list it, halt, inform the user the plugin is required, and do not proceed until confirmed installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — not present in this session's skill list; user confirmed substituting the available `pr-reviewer` skill for tasks 3/31 instead of halting.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 639 --add-label "in-progress"` (repo: `dougis-org/session-combat`). Discover the linked GitHub Project via `gh project list --owner dougis-org --format json`, resolve the status option matching "In Progress" via `gh project field-list <project-number> --owner dougis-org --format json`, and move the item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, instruct the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] Confirm working directory is `.worktrees/jest-30-upgrade` (never the primary checkout) before making any edits.
-- [ ] Bump `jest` 29.7.0 → 30.x, `jest-environment-jsdom` 29 → 30, `@types/jest` 29 → 30, `@testing-library/jest-dom` 6.9.1 → 7.x in `package.json`.
-- [ ] Remove `@swc/jest` from `package.json` devDependencies.
-- [ ] Rename `--testPathPattern` to `--testPathPatterns` in the `test:unit` script in `package.json`.
-- [ ] Run `npm install` and inspect for peer-dependency warnings/errors involving `ts-jest` and `jest@30`.
-- [ ] **If** `ts-jest@^29.4.12` conflicts with `jest@30`'s peer range (per Design Decision 2), bump `ts-jest` to the minimum version that resolves the conflict; otherwise leave it unchanged.
-- [ ] Run `npm run test:unit`; if failures trace to the `jest-environment-jsdom` version bump, fix them at the test-file level only (never in `app/` or `lib/`). If a fix would require application code changes, stop and flag for scope re-approval per Change Control rather than expanding scope.
-- [ ] Run `npm run test:integration`; apply the same test-file-only fix policy as above.
-- [ ] **If** either test run surfaces a Jest 30 config-key rename/removal (per Design Decision 3), update only the specific key in `jest.config.js` and/or `jest.integration.config.js` needed to restore compatibility — do not proactively rewrite either config beyond what's required.
-- [ ] Confirm `git diff --stat` against `origin/main` shows changes limited to `package.json`, `package-lock.json`, and (only if required) `jest.config.js` / `jest.integration.config.js` — no files under `app/` or `lib/`.
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch — n/a for this change (dependency/config bump only, no new logic).
-- [ ] Confirm acceptance criteria in `specs/test-infrastructure/spec.md` are covered: dependency baseline installs cleanly, `@swc/jest` removed, unit/integration suites pass, `test:unit` uses `--testPathPatterns`, coverage output unchanged, no application code touched.
+- [x] **Issue lifecycle: mark in-progress** — ran `gh issue edit 639 --add-label "in-progress"` (repo: `dougis-org/session-combat`). Project #7 "Session Combat" item found and Status moved to "In progress" via `gh project item-edit`.
+- [x] Confirm working directory is `.worktrees/jest-30-upgrade` (never the primary checkout) before making any edits.
+- [x] Bump `jest` 29.7.0 → 30.x, `jest-environment-jsdom` 29 → 30, `@types/jest` 29 → 30, `@testing-library/jest-dom` 6.9.1 → 7.x in `package.json`.
+- [x] Remove `@swc/jest` from `package.json` devDependencies.
+- [x] Rename `--testPathPattern` to `--testPathPatterns` in the `test:unit` script in `package.json`.
+- [x] Run `npm install` and inspect for peer-dependency warnings/errors involving `ts-jest` and `jest@30`. — clean install, no peer conflicts.
+- [x] **If** `ts-jest@^29.4.12` conflicts with `jest@30`'s peer range (per Design Decision 2), bump `ts-jest` to the minimum version that resolves the conflict; otherwise leave it unchanged. — `ts-jest@^29.4.12` already declares `jest: ^29.0.0 || ^30.0.0`; left unchanged.
+- [x] Run `npm run test:unit`; if failures trace to the `jest-environment-jsdom` version bump, fix them at the test-file level only (never in `app/` or `lib/`). If a fix would require application code changes, stop and flag for scope re-approval per Change Control rather than expanding scope. — 314/314 suites, 3995/3995 tests passed, no fixes needed.
+- [x] Run `npm run test:integration`; apply the same test-file-only fix policy as above. — 39/40 suites passed (1 pre-existing skip), 359/363 tests passed (4 pre-existing skips), no fixes needed. Required a prior `npm run build` (missing `.next` dir), unrelated to the Jest bump.
+- [x] **If** either test run surfaces a Jest 30 config-key rename/removal (per Design Decision 3), update only the specific key in `jest.config.js` and/or `jest.integration.config.js` needed to restore compatibility — do not proactively rewrite either config beyond what's required. — no config-key issues surfaced; configs untouched.
+- [x] Confirm `git diff --stat` against `origin/main` shows changes limited to `package.json`, `package-lock.json`, and (only if required) `jest.config.js` / `jest.integration.config.js` — no files under `app/` or `lib/`. — confirmed (plus openspec change docs).
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch — n/a for this change (dependency/config bump only, no new logic).
+- [x] Confirm acceptance criteria in `specs/test-infrastructure/spec.md` are covered: dependency baseline installs cleanly, `@swc/jest` removed, unit/integration suites pass, `test:unit` uses `--testPathPatterns`, coverage output unchanged, no application code touched. — all confirmed via `npm ls`, test runs, and diff scope.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] Run unit/integration tests: `npm run test:unit && npm run test:integration`
-- [ ] Run E2E tests — not applicable; this change does not touch application code or behavior that E2E suites exercise differently, but run `npm run test:ci` if available/relevant per CI parity.
-- [ ] Run type checks: `npm run typecheck`
-- [ ] Run build: `npm run build` (confirm the Next.js build is unaffected by devDependency-only changes)
-- [ ] Run lint: `npm run lint`
-- [ ] Confirm `coverage/lcov.info` is produced by both `npm run test:unit` and `npm run test:integration -- --coverage` (per NFAC: Reliability)
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests: `npm run test:unit && npm run test:integration`
+- [x] Run E2E tests — not applicable; this change does not touch application code or behavior that E2E suites exercise differently, but run `npm run test:ci` if available/relevant per CI parity.
+- [x] Run type checks: `npm run typecheck` — clean.
+- [x] Run build: `npm run build` (confirm the Next.js build is unaffected by devDependency-only changes) — succeeded.
+- [x] Run lint: `npm run lint` — 0 errors, 3 pre-existing warnings unrelated to this change.
+- [x] Confirm `coverage/lcov.info` is produced by both `npm run test:unit` and `npm run test:integration -- --coverage` (per NFAC: Reliability) — confirmed, 359.2K.
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
