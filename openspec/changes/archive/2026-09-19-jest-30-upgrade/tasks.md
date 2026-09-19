@@ -84,18 +84,18 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from the primary checkout, not the worktree)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change — none expected (test-tooling only; no README/CLAUDE.md references to specific Jest versions found)
-- [ ] Sync approved spec delta into `openspec/specs/test-infrastructure/spec.md`. Update relative links (`../../design.md` → `../../changes/archive/YYYY-MM-DD-jest-30-upgrade/design.md`, same for `tasks.md`).
-- [ ] Archive the change: move `openspec/changes/jest-30-upgrade/` to `openspec/changes/archive/YYYY-MM-DD-jest-30-upgrade/`, staging both the new location and the deletion of the old location in a single commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-jest-30-upgrade/` exists and `openspec/changes/jest-30-upgrade/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-jest-30-upgrade` then `git push -u origin doc/archive-YYYY-MM-DD-jest-30-upgrade`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-jest-30-upgrade` to `main` titled `docs: archive jest-30-upgrade (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] `git checkout main` and `git pull --ff-only` (from the primary checkout, not the worktree)
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change — none needed (test-tooling only; no README/CLAUDE.md references to specific Jest versions found)
+- [x] Sync approved spec delta into `openspec/specs/test-infrastructure/spec.md`. Update relative links (`../../design.md` → `../../changes/archive/2026-09-19-jest-30-upgrade/design.md`, same for `tasks.md`).
+- [x] Archive the change: move `openspec/changes/jest-30-upgrade/` to `openspec/changes/archive/2026-09-19-jest-30-upgrade/`, staging both the new location and the deletion of the old location in a single commit
+- [x] Confirm `openspec/changes/archive/2026-09-19-jest-30-upgrade/` exists and `openspec/changes/jest-30-upgrade/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-2026-09-19-jest-30-upgrade` then `git push -u origin doc/archive-2026-09-19-jest-30-upgrade`
+- [ ] Open a PR from `doc/archive-2026-09-19-jest-30-upgrade` to `main` titled `docs: archive jest-30-upgrade (2026-09-19)` — do NOT push directly to `main`
 - [ ] **Immediately** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (per `main`'s squash-only ruleset; NEVER `--admin`)
 - [ ] Monitor the doc PR until it merges (same loop as the implementation PR)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D jest-30-upgrade doc/archive-YYYY-MM-DD-jest-30-upgrade`
+- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D jest-30-upgrade doc/archive-2026-09-19-jest-30-upgrade`
 - [ ] Remove the change's dedicated worktree: `git worktree remove .worktrees/jest-30-upgrade` (from the primary checkout)
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D jest-30-upgrade doc/archive-YYYY-MM-DD-jest-30-upgrade`
