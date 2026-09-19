@@ -7,38 +7,38 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — this change is issue-driven (issue #162). Run `gh issue edit 162 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] **Delete `tests/integration/api/open5eApiShape.test.ts`** — remove the file entirely (not renamed, not re-skipped). Confirms REMOVED requirement in `specs/open5e-api-shape-verification/spec.md`.
-- [ ] **Add `lib/scripts/checkOpen5eApiShape.ts`** implementing:
+- [x] **Issue lifecycle: mark in-progress** — this change is issue-driven (issue #162). Run `gh issue edit 162 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] **Delete `tests/integration/api/open5eApiShape.test.ts`** — remove the file entirely (not renamed, not re-skipped). Confirms REMOVED requirement in `specs/open5e-api-shape-verification/spec.md`.
+- [x] **Add `lib/scripts/checkOpen5eApiShape.ts`** implementing:
   - Import `Open5EClient`, `Open5ECreature`, `Open5ESpell` from `@/lib/import/open5eAdapter`.
   - Instantiate `new Open5EClient()` (default real `fetch`); no local `fetchWithRetry` or raw `fetch` calls (design Decision 3).
   - Call `fetchMonsters(1)` and `fetchSpells(1)`; let a failed call's error (from `fetchPage`) propagate unhandled/rethrown to produce a non-zero exit with the endpoint/status in the message — no retry logic (design Decision 4).
   - Assert against the returned `Open5ECreature`/`Open5ESpell`-typed values, e.g.: creature has `key` (string), `size`, `type`, `challenge_rating`, `armor_class`, `hit_points`, `actions` (array), `traits` (array, when present); spell has `key` (string), `name`, `level` (number), `school`, `casting_time`, `range`, `duration`, `concentration` (boolean), `desc` (string) — mirroring the assertions from the deleted test but against the adapter-parsed shape (design Decision 5).
   - On success, print a clear pass message for both creatures and spells and exit 0. On any assertion failure, print which field/assertion failed and exit non-zero.
   - Add a short header comment noting this is a manual/on-demand check (not run by CI) and briefly noting the raw-vs-parsed shape context (e.g., raw API uses `key` not `slug`) per design's Risk mitigation.
-- [ ] **Add `check:open5e-api-shape` to `package.json` `scripts`**: `"check:open5e-api-shape": "npx tsx lib/scripts/checkOpen5eApiShape.ts"`, following the existing `seed:monsters`/`migrate:encounters` convention.
-- [ ] **Manually run the script once against the live API** (`npm run check:open5e-api-shape`) to confirm it actually exercises the network path and reports pass/fail correctly. This is exploratory verification, not part of any automated suite.
-- [ ] Confirm no other file references the deleted test path (`grep -r "open5eApiShape" tests/ lib/ app/` — expect only the new script and this change's artifacts to match).
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (done during design: reused `Open5EClient`, `Open5ECreature`/`Open5ESpell` types, and the `lib/scripts/*.ts` + `npx tsx` convention — no new shared utilities needed).
-- [ ] Confirm acceptance criteria in `specs/open5e-api-shape-verification/spec.md` are covered by the above.
+- [x] **Add `check:open5e-api-shape` to `package.json` `scripts`**: `"check:open5e-api-shape": "npx tsx lib/scripts/checkOpen5eApiShape.ts"`, following the existing `seed:monsters`/`migrate:encounters` convention.
+- [x] **Manually run the script once against the live API** (`npm run check:open5e-api-shape`) to confirm it actually exercises the network path and reports pass/fail correctly. This is exploratory verification, not part of any automated suite.
+- [x] Confirm no other file references the deleted test path (`grep -r "open5eApiShape" tests/ lib/ app/` — expect only the new script and this change's artifacts to match).
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (done during design: reused `Open5EClient`, `Open5ECreature`/`Open5ESpell` types, and the `lib/scripts/*.ts` + `npx tsx` convention — no new shared utilities needed).
+- [x] Confirm acceptance criteria in `specs/open5e-api-shape-verification/spec.md` are covered by the above.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] Run unit/integration tests
-- [ ] Run E2E tests (if applicable — not expected to be affected by this change)
-- [ ] Run type checks
-- [ ] Run build
-- [ ] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests
+- [x] Run E2E tests (14 pre-existing failures unrelated to this change, tracked in #767; see task notes)
+- [x] Run type checks
+- [x] Run build
+- [x] Run security/code quality checks required by project standards
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 

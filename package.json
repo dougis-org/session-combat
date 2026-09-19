@@ -23,7 +23,8 @@
     "seed": "npx tsx lib/scripts/seedCampaignTemplates.ts",
     "seed:force": "npx tsx lib/scripts/seedCampaignTemplates.ts --force",
     "seed:monsters": "npx tsx lib/scripts/seedGlobalMonsters.ts",
-    "seed:conditions": "npx tsx lib/scripts/seedConditionCatalog.ts"
+    "seed:conditions": "npx tsx lib/scripts/seedConditionCatalog.ts",
+    "check:open5e-api-shape": "npx tsx lib/scripts/checkOpen5eApiShape.ts"
   },
   "keywords": [],
   "author": "",
