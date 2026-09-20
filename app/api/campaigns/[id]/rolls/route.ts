@@ -4,7 +4,8 @@ import { storage } from '@/lib/storage';
 import { emitFiltered } from '@/lib/server/transport';
 import { canSeeRoll } from '@/lib/utils/campaignRolls';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
-import { readBoundedJson } from '@/lib/server/readBoundedJson';
+import { readBoundedJson, boundedJsonErrorResponse } from '@/lib/server/readBoundedJson';
+import { zodErrorResponse } from '@/lib/server/zodErrorResponse';
 import { rollSubmissionSchema } from '@/lib/validation/rollSubmission';
 import { listRollsQuerySchema } from '@/lib/validation/rollQuery';
 import type { CampaignRoll } from '@/lib/types';
@@ -18,20 +19,12 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   try {
     const read = await readBoundedJson(request, ROLL_BODY_MAX_BYTES);
     if (!read.ok) {
-      if (read.reason === 'oversize') {
-        return NextResponse.json({ error: 'Request body is too large' }, { status: 413 });
-      }
-      if (read.reason === 'invalid-json') {
-        return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
-      }
-      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+      return boundedJsonErrorResponse(read.reason);
     }
 
     const parsed = rollSubmissionSchema.safeParse(read.value);
     if (!parsed.success) {
-      const firstIssue = parsed.error.issues[0];
-      const field = firstIssue?.path?.length ? `${firstIssue.path.join('.')}: ` : '';
-      return NextResponse.json({ error: `${field}${firstIssue?.message ?? 'Invalid roll payload'}` }, { status: 400 });
+      return zodErrorResponse(parsed.error, 'Invalid roll payload');
     }
 
     const { formula, rolls, total, label, visibility } = parsed.data;
