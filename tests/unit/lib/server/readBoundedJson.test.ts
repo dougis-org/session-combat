@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { readBoundedJson } from '@/lib/server/readBoundedJson';
+import { readBoundedJson, boundedJsonErrorResponse } from '@/lib/server/readBoundedJson';
 import { NextRequest } from 'next/server';
 
 function makeRequest(body: string, headers: Record<string, string> = {}) {
@@ -88,5 +88,25 @@ describe('readBoundedJson', () => {
 
     const result = await readBoundedJson(request, maxBytes);
     expect(result).toEqual({ ok: false, reason: 'oversize' });
+  });
+});
+
+describe('boundedJsonErrorResponse', () => {
+  it('maps "oversize" to a 413', async () => {
+    const res = boundedJsonErrorResponse('oversize');
+    expect(res.status).toBe(413);
+    expect((await res.json()).error).toBe('Request body is too large');
+  });
+
+  it('maps "invalid-json" to a 400', async () => {
+    const res = boundedJsonErrorResponse('invalid-json');
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe('Invalid JSON');
+  });
+
+  it('maps "error" to a 500', async () => {
+    const res = boundedJsonErrorResponse('error');
+    expect(res.status).toBe(500);
+    expect((await res.json()).error).toBe('Internal server error');
   });
 });

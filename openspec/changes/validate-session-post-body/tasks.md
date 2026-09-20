@@ -12,39 +12,40 @@
 ## Execution
 
 - [ ] **Issue lifecycle: mark in-progress** — this change is issue-driven (GitHub #562). Run `gh issue edit 562 --add-label "in-progress"`. Then discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, instruct the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] **1. `zodErrorResponse` shared helper (TDD)**
-  - [ ] Write failing tests at `tests/unit/lib/server/zodErrorResponse.test.ts`: given a `ZodError` with issues (with and without a `path`), assert the returned `NextResponse` has `status: 400` and body `{ error: "<field>: <message>" }` or `{ error: "<fallbackMessage>" }` when no path — matching today's inline logic in `app/api/campaigns/[id]/rolls/route.ts:30-35` exactly
-  - [ ] Implement `lib/server/zodErrorResponse.ts` exporting `zodErrorResponse(error: z.ZodError, fallbackMessage: string): NextResponse`
-  - [ ] Confirm new tests pass
-- [ ] **2. Refactor `rolls/route.ts` to use `zodErrorResponse` (no behavior change)**
-  - [ ] Replace the inline block at `app/api/campaigns/[id]/rolls/route.ts:31-35` (POST) with `zodErrorResponse(parsed.error, 'Invalid roll payload')`
-  - [ ] Replace the inline block at `app/api/campaigns/[id]/rolls/route.ts:97-101` (GET) with `zodErrorResponse(parsedQuery.error, 'sessionId is required')`
-  - [ ] Run existing `tests/unit/api/campaigns/[id]/rolls.route.test.ts` — must pass unmodified (proves byte-identical extraction); do not edit this test file as part of this step
-- [ ] **3. `sessionLogSubmissionSchema` (TDD)**
-  - [ ] Write failing tests at `tests/unit/lib/validation/sessionLog.test.ts` covering every scenario in `openspec/changes/validate-session-post-body/specs/session-log-validation/spec.md`: missing/unparseable `datePlayed`; valid ISO `datePlayed`; oversized/at-bound/omitted `title` (200-char bound); oversized/at-bound/omitted `summary` (10,000-char bound); event with invalid `type`; event missing `description`; event with oversized `description` (2,000-char bound); non-array `events`; full-shape `combat_completed` event accepted; minimal `custom` event accepted; omitted `events` defaults to `[]`; oversized/at-bound `events` array (200-element bound)
-  - [ ] Implement `lib/validation/sessionLog.ts`: `sessionEventSchema` (mirrors `SessionEvent` in `lib/types.ts:689-700` field-for-field) and `sessionLogSubmissionSchema` (`datePlayed`, `title`, `summary`, `events` only — per design.md Decision 1, does NOT include `sessionNumber`/`milestone`/`newLevel`), following `lib/validation/rollSubmission.ts`'s style (bound constants as named, documented exports; `zod`-only imports, no `next/*` or storage imports)
-  - [ ] Confirm new tests pass
-- [ ] **4. Rewrite `sessions/route.ts` POST body handling (TDD)**
-  - [ ] Write failing tests at `tests/unit/api/campaigns/[id]/sessions.route.test.ts` (extend existing file if present) covering: 413 on oversized body; 400 on each validation failure from step 3, surfaced through the actual route; 201 on a valid payload with the full event shape; 201 on a valid payload with a minimal custom event; **regression** — invalid/missing `sessionNumber` still resolves via `getNextSessionNumber` fallback (unchanged); **regression** — `getNextSessionNumber` throwing still returns `503`/`SESSION_NUMBER_UNAVAILABLE` (unchanged)
-  - [ ] Add `SESSION_BODY_MAX_BYTES = 64 * 1024` constant to `app/api/campaigns/[id]/sessions/route.ts` (mirrors `ROLL_BODY_MAX_BYTES` in `rolls/route.ts:15`)
-  - [ ] Replace `const body = await request.json();` and the inline `datePlayed`/`title`/`summary`/`events` handling with: `readBoundedJson(request, SESSION_BODY_MAX_BYTES)` → on failure, mirror `rolls/route.ts`'s 413/400/500 handling for `oversize`/`invalid-json`/other → `sessionLogSubmissionSchema.safeParse(read.value)` → on failure, `zodErrorResponse(parsed.error, 'Invalid session log payload')`
-  - [ ] Leave the `sessionNumber`/`getNextSessionNumber`/`SESSION_NUMBER_UNAVAILABLE` block (current lines ~34-46) and the `milestone`/`newLevel` handling completely untouched — only the surrounding field extraction changes from destructuring raw `body` to destructuring `parsed.data` plus the still-raw `sessionNumber`/`milestone`/`newLevel` from `read.value`
-  - [ ] Confirm new and existing session-route tests pass
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch — confirmed during design: reuse `readBoundedJson`, `zod`, and the `rollSubmission.ts`/`rolls/route.ts` pattern rather than introducing new validation machinery
-- [ ] Confirm acceptance criteria are covered — cross-check every scenario in `openspec/changes/validate-session-post-body/specs/session-log-validation/spec.md` against the tests written in steps 1-4
+- [x] **1. `zodErrorResponse` shared helper (TDD)**
+  - [x] Write failing tests at `tests/unit/lib/server/zodErrorResponse.test.ts`: given a `ZodError` with issues (with and without a `path`), assert the returned `NextResponse` has `status: 400` and body `{ error: "<field>: <message>" }` or `{ error: "<fallbackMessage>" }` when no path — matching today's inline logic in `app/api/campaigns/[id]/rolls/route.ts:30-35` exactly
+  - [x] Implement `lib/server/zodErrorResponse.ts` exporting `zodErrorResponse(error: z.ZodError, fallbackMessage: string): NextResponse`
+  - [x] Confirm new tests pass
+- [x] **2. Refactor `rolls/route.ts` to use `zodErrorResponse` (no behavior change)**
+  - [x] Replace the inline block at `app/api/campaigns/[id]/rolls/route.ts:31-35` (POST) with `zodErrorResponse(parsed.error, 'Invalid roll payload')`
+  - [x] ~~Replace the inline block at `app/api/campaigns/[id]/rolls/route.ts:97-101` (GET)~~ — **deviation:** left GET's inline logic untouched. Its `before`-cursor issue has zod path `['before']`; the generic helper would render `"before: Invalid before cursor"`, breaking the existing unmodifiable assertion `expect(body.error).toBe("Invalid before cursor")` in `rolls.route.test.ts:509`. Preserving "pass unmodified" took priority over uniform GET refactor.
+  - [x] Run existing `tests/unit/api/campaigns/[id]/rolls.route.test.ts` — passes unmodified (53/53); did not edit this test file
+- [x] **3. `sessionLogSubmissionSchema` (TDD)**
+  - [x] Write failing tests at `tests/unit/lib/validation/sessionLog.test.ts` covering every scenario in `openspec/changes/validate-session-post-body/specs/session-log-validation/spec.md`
+  - [x] Implement `lib/validation/sessionLog.ts`: `sessionEventSchema` + `sessionLogSubmissionSchema` (`datePlayed`, `title`, `summary`, `events` only)
+  - [x] Confirm new tests pass (16/16)
+- [x] **4. Rewrite `sessions/route.ts` POST body handling (TDD)**
+  - [x] Write failing tests at `tests/unit/api/campaigns/[id]/sessions.route.test.ts`
+  - [x] Add `SESSION_BODY_MAX_BYTES = 64 * 1024` constant
+  - [x] Replace body parsing with `readBoundedJson` → `sessionLogSubmissionSchema.safeParse` → `zodErrorResponse`
+  - [x] `sessionNumber`/`getNextSessionNumber`/`SESSION_NUMBER_UNAVAILABLE` and `milestone`/`newLevel` handling untouched
+  - [x] Confirm new and existing session-route tests pass (32/32)
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch — reused `readBoundedJson`, `zod`, and the `rollSubmission.ts`/`rolls/route.ts` pattern
+- [x] Confirm acceptance criteria are covered — cross-checked every scenario in the spec against the tests written in steps 1-4
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+  - Findings: duplication in `readBoundedJson` error-handling between `rolls/route.ts` and `sessions/route.ts` — fixed by extracting `boundedJsonErrorResponse` into `lib/server/readBoundedJson.ts`, used by both routes; quality note about the `as Record<string, unknown>` cast for `sessionNumber`/`milestone`/`newLevel` — not applied, the suggested fix (folding those fields into the schema) would contradict design.md Decision 1's explicit rationale for keeping them out of `safeParse`-or-400 scope.
 
 ## Validation
 
-- [ ] Run unit/integration tests — `npm run test:unit` (per project convention; do not use `npm test`, no such script exists)
-- [ ] Run E2E tests (if applicable) — not applicable; this change is server-side validation logic with no UI surface change
-- [ ] Run type checks
-- [ ] Run build
+- [x] Run unit/integration tests — `npm run test:unit` (4035/4035 passed)
+- [x] Run E2E tests (if applicable) — not applicable; this change is server-side validation logic with no UI surface change
+- [x] Run type checks — `npm run typecheck` clean
+- [x] Run build — `npm run build` succeeded
 - [ ] Run security/code quality checks required by project standards — Verity gate must pass without a waive (this change exists specifically to resolve a Verity finding)
-- [ ] All completed tasks marked as complete
+- [x] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
 
 ## Remote push validation

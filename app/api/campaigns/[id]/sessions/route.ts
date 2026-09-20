@@ -3,8 +3,31 @@ import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import { SessionLog } from '@/lib/types';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
+import { readBoundedJson, boundedJsonErrorResponse } from '@/lib/server/readBoundedJson';
+import { zodErrorResponse } from '@/lib/server/zodErrorResponse';
+import { sessionLogSubmissionSchema } from '@/lib/validation/sessionLog';
 
 type Params = { id: string };
+
+/** Session logs carry more free text than a roll payload (summary up to 10,000 chars, up to 200 events); 64 KiB gives comfortable headroom over the max-bounded shape. */
+export const SESSION_BODY_MAX_BYTES = 64 * 1024;
+
+async function resolveSessionNumber(
+  campaignUserId: string,
+  campaignId: string,
+  sessionNumber: number | undefined,
+): Promise<number | NextResponse> {
+  if (sessionNumber !== undefined) return sessionNumber;
+  try {
+    return await storage.getNextSessionNumber(campaignUserId, campaignId);
+  } catch (error) {
+    console.error('Error determining next session number:', error);
+    return NextResponse.json(
+      { error: 'Failed to determine next session number', code: 'SESSION_NUMBER_UNAVAILABLE' },
+      { status: 503 },
+    );
+  }
+}
 
 export const GET = withAuthAndParams<Params>(async (request, auth, { id: campaignId }) => {
   try {
@@ -30,27 +53,19 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
 
     if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
-    const body = await request.json();
-    const { datePlayed, sessionNumber, title, summary, events, milestone, newLevel } = body;
-
-    if (!datePlayed) {
-      return NextResponse.json({ error: 'datePlayed is required' }, { status: 400 });
+    const read = await readBoundedJson(request, SESSION_BODY_MAX_BYTES);
+    if (!read.ok) {
+      return boundedJsonErrorResponse(read.reason);
     }
 
-    let resolvedSessionNumber: number;
-    if (typeof sessionNumber === 'number' && Number.isInteger(sessionNumber) && sessionNumber >= 0) {
-      resolvedSessionNumber = sessionNumber;
-    } else {
-      try {
-        resolvedSessionNumber = await storage.getNextSessionNumber(campaign.userId, campaignId);
-      } catch (error) {
-        console.error('Error determining next session number:', error);
-        return NextResponse.json(
-          { error: 'Failed to determine next session number', code: 'SESSION_NUMBER_UNAVAILABLE' },
-          { status: 503 },
-        );
-      }
+    const parsed = sessionLogSubmissionSchema.safeParse(read.value);
+    if (!parsed.success) {
+      return zodErrorResponse(parsed.error, 'Invalid session log payload');
     }
+    const { datePlayed, title, summary, events, sessionNumber, milestone, newLevel } = parsed.data;
+
+    const resolvedSessionNumber = await resolveSessionNumber(campaign.userId, campaignId, sessionNumber);
+    if (resolvedSessionNumber instanceof NextResponse) return resolvedSessionNumber;
 
     const now = new Date();
     const log: SessionLog = {
@@ -58,12 +73,12 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       userId: campaign.userId,
       campaignId,
       sessionNumber: resolvedSessionNumber,
-      title: typeof title === 'string' ? title.trim() || undefined : undefined,
-      datePlayed: new Date(datePlayed),
-      summary: typeof summary === 'string' ? summary : undefined,
-      events: Array.isArray(events) ? events : [],
-      milestone: milestone === true,
-      ...(milestone === true && typeof newLevel === 'number' && Number.isInteger(newLevel) && newLevel > 0 && { newLevel }),
+      title: title || undefined,
+      datePlayed,
+      summary,
+      events,
+      milestone,
+      ...(milestone && newLevel !== undefined && { newLevel }),
       createdAt: now,
       updatedAt: now,
     };

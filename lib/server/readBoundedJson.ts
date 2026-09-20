@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
@@ -70,4 +71,18 @@ export async function readBoundedJson(
   } catch {
     return { ok: false, reason: 'invalid-json' };
   }
+}
+
+/**
+ * Maps a failed `readBoundedJson` result to the standard error response for
+ * each failure reason, shared across every route that calls `readBoundedJson`.
+ */
+export function boundedJsonErrorResponse(reason: 'oversize' | 'invalid-json' | 'error'): NextResponse {
+  if (reason === 'oversize') {
+    return NextResponse.json({ error: 'Request body is too large' }, { status: 413 });
+  }
+  if (reason === 'invalid-json') {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+  return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 }
