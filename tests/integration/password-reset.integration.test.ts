@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId } from "mongodb";
-import { TEST_MONGO_CLIENT_OPTIONS } from "../shared/mongo";
+import { TEST_MONGO_CLIENT_OPTIONS } from "@/tests/shared/mongo";
 import {
   createTestEmail,
   VALID_PASSWORD,

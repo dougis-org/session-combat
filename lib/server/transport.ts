@@ -40,13 +40,16 @@ async function detectReplicaSet(): Promise<boolean> {
         // rejection would go unobserved and this would silently misdetect as a replica set.
         // tryNext() forces that first command (without blocking indefinitely — unlike hasNext(),
         // it resolves once the maxAwaitTimeMS window elapses even with no document available).
-        // timeoutMS must be explicit and > maxAwaitTimeMS here: v7's CSOT cursor validation
-        // rejects maxAwaitTimeMS >= timeoutMS on a tailable awaitData cursor, including against
-        // the client's own default when one applies — this keeps the probe itself bounded.
         const { client } = await connectToDatabase();
-        const probe = client.db().collection('campaigns').watch([], { maxAwaitTimeMS: 100, timeoutMS: 5000 });
-        await probe.tryNext();
-        await probe.close();
+        const probe = client.db().collection('campaigns').watch([], { maxAwaitTimeMS: 100 });
+        try {
+          await probe.tryNext();
+        } finally {
+          // Always close, even when tryNext() rejects — otherwise a server-side cursor from
+          // a transient (non-standalone-signature) failure leaks and gets re-created on every
+          // retried subscribe() until the server's own cursor timeout reclaims it.
+          await probe.close().catch(() => {});
+        }
         isReplicaSet = true;
       } catch (err) {
         const isNotReplicaSetError =
@@ -59,7 +62,9 @@ async function detectReplicaSet(): Promise<boolean> {
         if (isNotReplicaSetError) {
           isReplicaSet = false;
         } else {
-          // Transient error — don't cache, retry next time
+          // Transient error (network, auth, the probe's own timeoutMS budget, etc.) — not one
+          // of the recognized standalone-mode signatures, so don't cache; retry on next call.
+          console.error('detectReplicaSet probe failed (not a recognized standalone-mode error), will retry:', err);
           detectPromise = null;
           return false;
         }
@@ -236,15 +241,9 @@ async function openStream(): Promise<ChangeStream> {
   if (openPromise) return openPromise;
   const promise = (async () => {
     const { client } = await connectToDatabase();
-    // timeoutMS: 0 disables driver v7's Client-Side Operation Timeout for this specific
-    // long-lived cursor. CSOT's default per-operation timeout is sized for ordinary
-    // commands, not a cursor that intentionally blocks between getMores for as long as
-    // change events take to arrive — under that default, an idle stream is torn down by
-    // the driver itself (surfacing as a local "ChangeStream is closed" error, no server
-    // error involved) well before any real invalidation or network failure occurs.
     const cursor = client.db().watch(
       [{ $match: { $or: [{ 'ns.coll': { $in: WATCHED_COLLECTIONS } }, { operationType: 'invalidate' }] } }],
-      { fullDocument: 'updateLookup', timeoutMS: 0 }
+      { fullDocument: 'updateLookup' }
     ) as ChangeStream;
     sharedCursor = cursor;
 
@@ -286,7 +285,9 @@ async function openStream(): Promise<ChangeStream> {
         );
 
         // Close the cursor before clearing references to release server-side resources.
-        try { await cursor.close(); } catch { /* ignore */ }
+        try { await cursor.close(); } catch (closeErr) {
+          console.warn('transport: cursor.close() after stream termination failed:', closeErr);
+        }
 
         // Clear state so the next subscribe() can retry opening the stream.
         openPromise = null;
@@ -295,8 +296,14 @@ async function openStream(): Promise<ChangeStream> {
         if (isInvalidated) {
           try {
             await openStream();
-          } catch {
-            // Fall through — stream stays closed; subscribers receive no further events.
+          } catch (reopenErr) {
+            // Stream stays closed; subscribers receive no further events until the next
+            // subscribe() call retries — log so an operator can see recovery was attempted
+            // and failed, not just that the original invalidation happened.
+            console.error(
+              'transport change stream reopen-after-invalidate failed; stream stays closed until next subscribe():',
+              reopenErr
+            );
           }
         }
         // Non-invalidation errors (network, transient): state is cleared above so the

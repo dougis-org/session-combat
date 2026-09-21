@@ -189,13 +189,6 @@ export async function connectToDatabase(): Promise<{
         // integration-test harness. Supplying the adapter synchronously here sidesteps
         // the dynamic import for every environment (test and production alike).
         runtimeAdapters: { os },
-        // See lib/server/transport.ts's openStream(): driver v7's default Client-Side
-        // Operation Timeout is sized for ordinary commands, not a change-stream cursor that
-        // intentionally blocks between getMores for as long as events take to arrive — under
-        // that default, an idle stream gets torn down by the driver itself. Disabling CSOT
-        // client-wide restores v6's effectively-unbounded-per-operation behavior; per-call
-        // overrides (e.g. the replica-set-detection probe) still apply on top of this.
-        timeoutMS: 0,
       };
 
       const client = new MongoClient(MONGODB_URI, options);

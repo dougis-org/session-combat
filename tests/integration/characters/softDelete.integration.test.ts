@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 import { registerTestUser } from "../helpers/users";
-import { TEST_MONGO_CLIENT_OPTIONS } from "../../shared/mongo";
+import { TEST_MONGO_CLIENT_OPTIONS } from "@/tests/shared/mongo";
 
 describe("Character Soft Delete API Integration", () => {
   let baseUrl: string;

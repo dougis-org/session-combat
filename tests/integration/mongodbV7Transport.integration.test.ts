@@ -60,7 +60,7 @@ describe("mongodb v7 upgrade: standalone-mode detection (issue #638)", () => {
         const cursor = client
           .db("session-combat-test")
           .collection("campaigns")
-          .watch([], { maxAwaitTimeMS: 100, timeoutMS: 5000 });
+          .watch([], { maxAwaitTimeMS: 100 });
         await cursor.tryNext();
         await cursor.close();
         throw new Error("watch() unexpectedly succeeded against a standalone instance");
@@ -213,6 +213,44 @@ describe("mongodb v7 upgrade: change-stream pipeline + invalidation recovery (is
         expect(events.some((e) => (e.data as { junk?: boolean })?.junk === true)).toBe(false);
       } finally {
         unsubscribe();
+        await closeDatabase();
+      }
+    });
+  }, 20000);
+
+  it("survives an idle gap between change events with no premature teardown", async () => {
+    await withEnv(uri, "session-combat-test", async () => {
+      jest.resetModules();
+      const { subscribe } = await import("@/lib/server/transport");
+      const { closeDatabase, getDatabase } = await import("@/lib/db");
+      const liveDb = await getDatabase();
+      const campaignId = `idle-${Date.now()}`;
+
+      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const events: Array<{ type: string }> = [];
+      const unsubscribe = await subscribe(campaignId, "user-idle", (e) => events.push(e));
+
+      try {
+        // Holds the stream open with zero writes for a meaningfully longer gap than the
+        // other tests' sub-2s windows, so this proves the stream survives genuine idle
+        // time rather than only proving events propagate quickly when they happen right away.
+        await new Promise((r) => setTimeout(r, 10000));
+
+        const prematureTermination = errorSpy.mock.calls.some(
+          ([msg]) => msg === "transport change stream terminated:"
+        );
+        expect(prematureTermination).toBe(false);
+
+        await liveDb.collection("campaigns").insertOne({
+          id: campaignId,
+          campaignId,
+          updatedAt: new Date(),
+        });
+        await new Promise((r) => setTimeout(r, 1500));
+        expect(events.some((e) => e.type === "change")).toBe(true);
+      } finally {
+        unsubscribe();
+        errorSpy.mockRestore();
         await closeDatabase();
       }
     });

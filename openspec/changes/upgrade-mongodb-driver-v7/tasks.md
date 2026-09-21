@@ -57,12 +57,12 @@ If **ANY** required step fails, iterate and address the failure before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `upgrade-mongodb-driver-v7` to `main`. PR body **must** include `Closes #638`.
-- [ ] **Issue lifecycle: mark in-review** — run `gh issue edit 638 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `upgrade-mongodb-driver-v7` to `main`. PR body **must** include `Closes #638`.
+- [x] **Issue lifecycle: mark in-review** — run `gh issue edit 638 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
 - [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` — **use `--squash`, per this repo's branch-protection ruleset which only allows squash merges; `--merge` causes a BLOCKED state. Never use `--admin` to force past a blocking check — fix the underlying check instead.**
 - [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — never wait for a human to report the merge; never force-merge:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
