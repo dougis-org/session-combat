@@ -73,7 +73,7 @@ For each task in `tasks.md`:
 
 ### Task: Confirm acceptance criteria are covered
 
-- [ ] Test case: Cross-check that all 5 "ADDED Requirement" scenarios in `specs/mongodb-driver-upgrade/spec.md` have at least one corresponding test case above with a passing result before this checklist item is marked complete.
+- [ ] Test case: Cross-check that all 6 scenarios across the 5 "ADDED Requirement" sections in `specs/mongodb-driver-upgrade/spec.md` have at least one corresponding test case above with a passing result before this checklist item is marked complete.
 
 ### Cross-cutting: Full gate (per issue #638)
 
