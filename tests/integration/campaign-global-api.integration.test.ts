@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import { registerTestUser, makeUserAdmin } from "./helpers/users";
+import { TEST_MONGO_CLIENT_OPTIONS } from "@/tests/shared/mongo";
 
 interface TemplateResponse {
   id: string;
@@ -45,7 +46,7 @@ describe("Campaign Global API Integration Tests", () => {
 
     await makeUserAdmin(adminUser.userId);
 
-    mongoClient = new MongoClient(process.env.MONGODB_URI!);
+    mongoClient = new MongoClient(process.env.MONGODB_URI!, TEST_MONGO_CLIENT_OPTIONS);
     await mongoClient.connect();
   }, 30000);
 

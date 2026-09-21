@@ -1,4 +1,5 @@
 import { MongoClient, ObjectId } from "mongodb";
+import { TEST_MONGO_CLIENT_OPTIONS } from "@/tests/shared/mongo";
 import {
   createTestEmail,
   VALID_PASSWORD,
@@ -62,7 +63,7 @@ describe("Password Reset API Integration Tests", () => {
       expect(data.message).toBe(GENERIC_MSG);
 
       // Poll until fire-and-forget token write completes (avoids flaky fixed-delay)
-      const client = new MongoClient(mongoUri);
+      const client = new MongoClient(mongoUri, TEST_MONGO_CLIENT_OPTIONS);
       try {
         await client.connect();
         const db = client.db(process.env.MONGODB_DB ?? "session-combat-test");
@@ -145,7 +146,7 @@ describe("Password Reset API Integration Tests", () => {
       });
       expect(res.status).toBe(200);
 
-      const client = new MongoClient(mongoUri);
+      const client = new MongoClient(mongoUri, TEST_MONGO_CLIENT_OPTIONS);
       try {
         await client.connect();
         const db = client.db(process.env.MONGODB_DB ?? "session-combat-test");
@@ -163,7 +164,7 @@ describe("Password Reset API Integration Tests", () => {
       const { userId } = await registerTestUser(baseUrl, "reset-tv");
       const { token } = await seedToken(userId);
 
-      const client = new MongoClient(mongoUri);
+      const client = new MongoClient(mongoUri, TEST_MONGO_CLIENT_OPTIONS);
       try {
         await client.connect();
         const db = client.db(process.env.MONGODB_DB ?? "session-combat-test");
@@ -240,7 +241,7 @@ describe("Password Reset API Integration Tests", () => {
       const { token, tokenHash } = await seedToken(userId);
 
       // Manually expire the token in the DB
-      const client = new MongoClient(mongoUri);
+      const client = new MongoClient(mongoUri, TEST_MONGO_CLIENT_OPTIONS);
       try {
         await client.connect();
         const db = client.db(process.env.MONGODB_DB ?? "session-combat-test");

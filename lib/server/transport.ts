@@ -35,9 +35,21 @@ async function detectReplicaSet(): Promise<boolean> {
     detectPromise = (async () => {
       try {
         // Probe by opening a change stream — avoids needing admin privileges for replSetGetStatus.
+        // Driver v7 constructs the underlying cursor lazily: unlike v6, close() alone no longer
+        // forces the initial aggregate to actually reach the server, so a standalone instance's
+        // rejection would go unobserved and this would silently misdetect as a replica set.
+        // tryNext() forces that first command (without blocking indefinitely — unlike hasNext(),
+        // it resolves once the maxAwaitTimeMS window elapses even with no document available).
         const { client } = await connectToDatabase();
         const probe = client.db().collection('campaigns').watch([], { maxAwaitTimeMS: 100 });
-        await probe.close();
+        try {
+          await probe.tryNext();
+        } finally {
+          // Always close, even when tryNext() rejects — otherwise a server-side cursor from
+          // a transient (non-standalone-signature) failure leaks and gets re-created on every
+          // retried subscribe() until the server's own cursor timeout reclaims it.
+          await probe.close().catch(() => {});
+        }
         isReplicaSet = true;
       } catch (err) {
         const isNotReplicaSetError =
@@ -50,7 +62,9 @@ async function detectReplicaSet(): Promise<boolean> {
         if (isNotReplicaSetError) {
           isReplicaSet = false;
         } else {
-          // Transient error — don't cache, retry next time
+          // Transient error (network, auth, the probe's own timeoutMS budget, etc.) — not one
+          // of the recognized standalone-mode signatures, so don't cache; retry on next call.
+          console.error('detectReplicaSet probe failed (not a recognized standalone-mode error), will retry:', err);
           detectPromise = null;
           return false;
         }
@@ -124,6 +138,7 @@ type ChangeDoc = {
   ns?: { coll?: string };
   fullDocument?: Record<string, unknown>;
   updateDescription?: { updatedFields?: Record<string, unknown> };
+  operationType?: string;
 };
 
 async function demuxCampaignDoc(doc: ChangeDoc, campaignId: string, fullDocument: Record<string, unknown>) {
@@ -210,6 +225,16 @@ async function closeStream() {
 // serves, so Mongo itself filters out irrelevant collections instead of every document
 // in the database being shipped to this process just to be discarded by demux()'s
 // in-process ns.coll allowlist.
+//
+// The `operationType: 'invalidate'` clause is required for invalidation-recovery to work
+// at all: an invalidate control event has no `ns.coll` (it isn't scoped to any collection),
+// so without this clause the first condition alone would silently filter every invalidate
+// event out server-side — the client would never see it, only find the cursor abruptly
+// closed on the next getMore, with no way to distinguish that from any other closure. This
+// was masked pre-v7 by a driver-internal ChangeStreamInvalidatedError the client could
+// catch without ever needing the raw event; v7 removed that class entirely (invalidation is
+// now delivered purely via this event, per the standard change-events spec), so this
+// pipeline must actually let it through for openStream()'s invalidate detection to fire.
 const WATCHED_COLLECTIONS = ['campaigns', 'campaignMessages', 'campaignRolls'];
 
 async function openStream(): Promise<ChangeStream> {
@@ -217,15 +242,27 @@ async function openStream(): Promise<ChangeStream> {
   const promise = (async () => {
     const { client } = await connectToDatabase();
     const cursor = client.db().watch(
-      [{ $match: { 'ns.coll': { $in: WATCHED_COLLECTIONS } } }],
+      [{ $match: { $or: [{ 'ns.coll': { $in: WATCHED_COLLECTIONS } }, { operationType: 'invalidate' }] } }],
       { fullDocument: 'updateLookup' }
     ) as ChangeStream;
     sharedCursor = cursor;
+
+    // Sentinel thrown to route the invalidate case through the same catch-driven cleanup
+    // and reopen path as any other stream termination, below.
+    const INVALIDATE_SENTINEL = new Error('__changeStreamInvalidateSentinel__');
 
     // Start async iteration in background
     (async () => {
       try {
         for await (const doc of cursor as AsyncIterable<ChangeDoc>) {
+          // Driver v7 removed the distinct ChangeStreamInvalidatedError class entirely —
+          // invalidation now arrives as an ordinary `{ operationType: 'invalidate' }`
+          // document through iteration (per the change-events spec), and the server closes
+          // the cursor immediately afterward. Detecting it here is what makes the
+          // reopen-on-invalidation behavior possible under v7 at all.
+          if (doc.operationType === 'invalidate') {
+            throw INVALIDATE_SENTINEL;
+          }
           // A single malformed/unexpected document (e.g. a members lookup or visibility
           // predicate throwing on unexpected shape) must not tear down the shared cursor
           // — that would kill cross-instance delivery for every campaign, not just the
@@ -237,17 +274,20 @@ async function openStream(): Promise<ChangeStream> {
           }
         }
       } catch (err) {
-        const isInvalidated =
-          err instanceof Error &&
-          (err.name === 'ChangeStreamInvalidatedError' || err.message.includes('ChangeStreamInvalidated'));
+        const isInvalidated = err === INVALIDATE_SENTINEL;
 
         // Log even the expected-invalidation case (not just genuine failures) — this is
         // the shared cursor for every campaign on the instance dying, silently or not,
         // and an operator needs to see it happened even if a reconnect follows.
-        console.error('transport change stream terminated:', err);
+        console.error(
+          'transport change stream terminated:',
+          isInvalidated ? 'invalidate event received' : err
+        );
 
         // Close the cursor before clearing references to release server-side resources.
-        try { await cursor.close(); } catch { /* ignore */ }
+        try { await cursor.close(); } catch (closeErr) {
+          console.warn('transport: cursor.close() after stream termination failed:', closeErr);
+        }
 
         // Clear state so the next subscribe() can retry opening the stream.
         openPromise = null;
@@ -256,8 +296,14 @@ async function openStream(): Promise<ChangeStream> {
         if (isInvalidated) {
           try {
             await openStream();
-          } catch {
-            // Fall through — stream stays closed; subscribers receive no further events.
+          } catch (reopenErr) {
+            // Stream stays closed; subscribers receive no further events until the next
+            // subscribe() call retries — log so an operator can see recovery was attempted
+            // and failed, not just that the original invalidation happened.
+            console.error(
+              'transport change stream reopen-after-invalidate failed; stream stays closed until next subscribe():',
+              reopenErr
+            );
           }
         }
         // Non-invalidation errors (network, transient): state is cleared above so the

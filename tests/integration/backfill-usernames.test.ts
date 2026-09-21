@@ -2,6 +2,7 @@ import { MongoClient } from "mongodb";
 import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
+import { TEST_MONGO_CLIENT_OPTIONS } from "@/tests/shared/mongo";
 
 const execAsync = promisify(exec);
 
@@ -16,7 +17,7 @@ describe("Username Backfill Script Integration Tests", () => {
     dbName = "session-combat-test-backfill";
     if (!mongoUri) throw new Error("MONGODB_URI not set");
 
-    client = new MongoClient(mongoUri);
+    client = new MongoClient(mongoUri, TEST_MONGO_CLIENT_OPTIONS);
     await client.connect();
   });
 
