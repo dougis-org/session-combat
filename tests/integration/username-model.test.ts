@@ -3,6 +3,7 @@ process.env.MONGODB_DB = "session-combat-test-username-model";
 import { MongoClient, Collection } from "mongodb";
 import { User } from "@/lib/types";
 import { connectToDatabase, closeDatabase } from "@/lib/db";
+import { TEST_MONGO_CLIENT_OPTIONS } from "@/tests/shared/mongo";
 
 describe("User Model & Index Integration Tests", () => {
   let mongoUri: string;
@@ -18,7 +19,7 @@ describe("User Model & Index Integration Tests", () => {
     // Clear connection cache first
     await closeDatabase();
     
-    client = new MongoClient(mongoUri);
+    client = new MongoClient(mongoUri, TEST_MONGO_CLIENT_OPTIONS);
     await client.connect();
     
     // Call connectToDatabase to trigger initializeDatabase and create indexes

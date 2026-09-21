@@ -16,8 +16,10 @@ async function* makeCursorIterator(this: { pendingEvents?: Array<unknown>; shoul
 }
 
 // Returns a cursor stub used for the detection probe (closed immediately).
+// tryNext() mirrors driver v7's requirement that detectReplicaSet() force the probe's
+// first command to actually execute (see lib/server/transport.ts) before closing.
 function makeProbeCursor() {
-  return { close: jest.fn().mockResolvedValue(undefined) };
+  return { tryNext: jest.fn().mockResolvedValue(null), close: jest.fn().mockResolvedValue(undefined) };
 }
 
 // Returns a full cursor stub used for the real change stream.
@@ -386,15 +388,17 @@ it('T3-13: cursor invalidation triggers one reconnect attempt', async () => {
   mockWatch = jest.fn().mockImplementation((_, opts: Record<string, unknown> | undefined) => {
     // Probe call (detection): options include maxAwaitTimeMS
     if (opts && 'maxAwaitTimeMS' in opts) {
-      return { close: jest.fn().mockResolvedValue(undefined) };
+      return { tryNext: jest.fn().mockResolvedValue(null), close: jest.fn().mockResolvedValue(undefined) };
     }
     // Real stream call
     const currentCall = ++streamCallCount;
     async function* cursorIter() {
       if (currentCall === 1) {
-        throw Object.assign(new Error('ChangeStreamInvalidated'), {
-          name: 'ChangeStreamInvalidatedError',
-        });
+        // Driver v7 delivers invalidation as an ordinary `{ operationType: 'invalidate' }`
+        // document through iteration (per the change-events spec), not as a distinctly-named
+        // thrown error — see lib/server/transport.ts's openStream() for the v7 adaptation.
+        yield { operationType: 'invalidate' };
+        return;
       }
       await new Promise(() => {}); // second cursor hangs open
     }

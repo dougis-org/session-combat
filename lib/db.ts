@@ -1,4 +1,5 @@
 import { MongoClient, Db, MongoClientOptions } from "mongodb";
+import * as os from "os";
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017";
 const DB_NAME = process.env.MONGODB_DB || "session-combat";
@@ -179,6 +180,22 @@ export async function connectToDatabase(): Promise<{
     try {
       const options: MongoClientOptions = {
         maxPoolSize: 10,
+        // Driver v7 resolves the `os` adapter used for client-metadata (handshake)
+        // construction via a dynamic `import('os')`. Jest's default VM-based `node`
+        // test environment can't service that dynamic import without
+        // --experimental-vm-modules, so it silently rejects; the driver swallows the
+        // rejection and sends empty metadata, which MongoDB 8 then rejects with
+        // "Missing required sub-document 'driver'" on every connection under the
+        // integration-test harness. Supplying the adapter synchronously here sidesteps
+        // the dynamic import for every environment (test and production alike).
+        runtimeAdapters: { os },
+        // See lib/server/transport.ts's openStream(): driver v7's default Client-Side
+        // Operation Timeout is sized for ordinary commands, not a change-stream cursor that
+        // intentionally blocks between getMores for as long as events take to arrive — under
+        // that default, an idle stream gets torn down by the driver itself. Disabling CSOT
+        // client-wide restores v6's effectively-unbounded-per-operation behavior; per-call
+        // overrides (e.g. the replica-set-detection probe) still apply on top of this.
+        timeoutMS: 0,
       };
 
       const client = new MongoClient(MONGODB_URI, options);

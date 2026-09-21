@@ -35,8 +35,17 @@ async function detectReplicaSet(): Promise<boolean> {
     detectPromise = (async () => {
       try {
         // Probe by opening a change stream — avoids needing admin privileges for replSetGetStatus.
+        // Driver v7 constructs the underlying cursor lazily: unlike v6, close() alone no longer
+        // forces the initial aggregate to actually reach the server, so a standalone instance's
+        // rejection would go unobserved and this would silently misdetect as a replica set.
+        // tryNext() forces that first command (without blocking indefinitely — unlike hasNext(),
+        // it resolves once the maxAwaitTimeMS window elapses even with no document available).
+        // timeoutMS must be explicit and > maxAwaitTimeMS here: v7's CSOT cursor validation
+        // rejects maxAwaitTimeMS >= timeoutMS on a tailable awaitData cursor, including against
+        // the client's own default when one applies — this keeps the probe itself bounded.
         const { client } = await connectToDatabase();
-        const probe = client.db().collection('campaigns').watch([], { maxAwaitTimeMS: 100 });
+        const probe = client.db().collection('campaigns').watch([], { maxAwaitTimeMS: 100, timeoutMS: 5000 });
+        await probe.tryNext();
         await probe.close();
         isReplicaSet = true;
       } catch (err) {
@@ -124,6 +133,7 @@ type ChangeDoc = {
   ns?: { coll?: string };
   fullDocument?: Record<string, unknown>;
   updateDescription?: { updatedFields?: Record<string, unknown> };
+  operationType?: string;
 };
 
 async function demuxCampaignDoc(doc: ChangeDoc, campaignId: string, fullDocument: Record<string, unknown>) {
@@ -210,22 +220,50 @@ async function closeStream() {
 // serves, so Mongo itself filters out irrelevant collections instead of every document
 // in the database being shipped to this process just to be discarded by demux()'s
 // in-process ns.coll allowlist.
+//
+// The `operationType: 'invalidate'` clause is required for invalidation-recovery to work
+// at all: an invalidate control event has no `ns.coll` (it isn't scoped to any collection),
+// so without this clause the first condition alone would silently filter every invalidate
+// event out server-side — the client would never see it, only find the cursor abruptly
+// closed on the next getMore, with no way to distinguish that from any other closure. This
+// was masked pre-v7 by a driver-internal ChangeStreamInvalidatedError the client could
+// catch without ever needing the raw event; v7 removed that class entirely (invalidation is
+// now delivered purely via this event, per the standard change-events spec), so this
+// pipeline must actually let it through for openStream()'s invalidate detection to fire.
 const WATCHED_COLLECTIONS = ['campaigns', 'campaignMessages', 'campaignRolls'];
 
 async function openStream(): Promise<ChangeStream> {
   if (openPromise) return openPromise;
   const promise = (async () => {
     const { client } = await connectToDatabase();
+    // timeoutMS: 0 disables driver v7's Client-Side Operation Timeout for this specific
+    // long-lived cursor. CSOT's default per-operation timeout is sized for ordinary
+    // commands, not a cursor that intentionally blocks between getMores for as long as
+    // change events take to arrive — under that default, an idle stream is torn down by
+    // the driver itself (surfacing as a local "ChangeStream is closed" error, no server
+    // error involved) well before any real invalidation or network failure occurs.
     const cursor = client.db().watch(
-      [{ $match: { 'ns.coll': { $in: WATCHED_COLLECTIONS } } }],
-      { fullDocument: 'updateLookup' }
+      [{ $match: { $or: [{ 'ns.coll': { $in: WATCHED_COLLECTIONS } }, { operationType: 'invalidate' }] } }],
+      { fullDocument: 'updateLookup', timeoutMS: 0 }
     ) as ChangeStream;
     sharedCursor = cursor;
+
+    // Sentinel thrown to route the invalidate case through the same catch-driven cleanup
+    // and reopen path as any other stream termination, below.
+    const INVALIDATE_SENTINEL = new Error('__changeStreamInvalidateSentinel__');
 
     // Start async iteration in background
     (async () => {
       try {
         for await (const doc of cursor as AsyncIterable<ChangeDoc>) {
+          // Driver v7 removed the distinct ChangeStreamInvalidatedError class entirely —
+          // invalidation now arrives as an ordinary `{ operationType: 'invalidate' }`
+          // document through iteration (per the change-events spec), and the server closes
+          // the cursor immediately afterward. Detecting it here is what makes the
+          // reopen-on-invalidation behavior possible under v7 at all.
+          if (doc.operationType === 'invalidate') {
+            throw INVALIDATE_SENTINEL;
+          }
           // A single malformed/unexpected document (e.g. a members lookup or visibility
           // predicate throwing on unexpected shape) must not tear down the shared cursor
           // — that would kill cross-instance delivery for every campaign, not just the
@@ -237,14 +275,15 @@ async function openStream(): Promise<ChangeStream> {
           }
         }
       } catch (err) {
-        const isInvalidated =
-          err instanceof Error &&
-          (err.name === 'ChangeStreamInvalidatedError' || err.message.includes('ChangeStreamInvalidated'));
+        const isInvalidated = err === INVALIDATE_SENTINEL;
 
         // Log even the expected-invalidation case (not just genuine failures) — this is
         // the shared cursor for every campaign on the instance dying, silently or not,
         // and an operator needs to see it happened even if a reconnect follows.
-        console.error('transport change stream terminated:', err);
+        console.error(
+          'transport change stream terminated:',
+          isInvalidated ? 'invalidate event received' : err
+        );
 
         // Close the cursor before clearing references to release server-side resources.
         try { await cursor.close(); } catch { /* ignore */ }

@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import { registerTestUser } from "../helpers/users";
+import { TEST_MONGO_CLIENT_OPTIONS } from "../../shared/mongo";
 
 describe("Character Soft Delete API Integration", () => {
   let baseUrl: string;
@@ -152,7 +153,7 @@ describe("Character Soft Delete API Integration", () => {
       expect(deleteRes.status).toBe(200);
 
       // Verify character data is preserved in the raw collection with deletedAt set
-      const mongoClient = new MongoClient(process.env.MONGODB_URI!);
+      const mongoClient = new MongoClient(process.env.MONGODB_URI!, TEST_MONGO_CLIENT_OPTIONS);
       await mongoClient.connect();
       try {
         const db = mongoClient.db(process.env.MONGODB_DB || "session-combat-test");

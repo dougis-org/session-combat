@@ -1,5 +1,6 @@
 import { MongoClient, ObjectId } from "mongodb";
 import { createTestUser } from "@/tests/integration/auth.test.helpers";
+import { TEST_MONGO_CLIENT_OPTIONS } from "@/tests/shared/mongo";
 
 export async function makeUserAdmin(
   userId: string,
@@ -16,7 +17,7 @@ export async function makeUserAdmin(
     throw new Error(`Failed to promote user to admin: invalid userId format "${userId}"`);
   }
 
-  const client = new MongoClient(mongoUri);
+  const client = new MongoClient(mongoUri, TEST_MONGO_CLIENT_OPTIONS);
   let primaryError: unknown;
   try {
     await client.connect();
