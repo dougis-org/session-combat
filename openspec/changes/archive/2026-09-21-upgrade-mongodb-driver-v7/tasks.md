@@ -85,18 +85,18 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from the primary checkout, not the worktree)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (if any — expected minimal, since this is an internal dependency bump with no public API change)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy `specs/mongodb-driver-upgrade/spec.md` to `openspec/specs/mongodb-driver-upgrade/spec.md`. After copying, update its relative links so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-upgrade-mongodb-driver-v7/design.md`, and similarly for `../../tasks.md`.
-- [ ] Archive the change: move `openspec/changes/upgrade-mongodb-driver-v7/` to `openspec/changes/archive/YYYY-MM-DD-upgrade-mongodb-driver-v7/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately (per this repo's convention: doc/archive branches must be docs-only, no code changes mixed in)
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-upgrade-mongodb-driver-v7/` exists and `openspec/changes/upgrade-mongodb-driver-v7/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-upgrade-mongodb-driver-v7` then `git push -u origin doc/archive-YYYY-MM-DD-upgrade-mongodb-driver-v7`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-upgrade-mongodb-driver-v7` to `main` with title `docs: archive upgrade-mongodb-driver-v7 (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] `git checkout main` and `git pull --ff-only` (from the primary checkout, not the worktree)
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (if any — expected minimal, since this is an internal dependency bump with no public API change) — none needed
+- [x] Sync approved spec deltas into `openspec/specs/`: copy `specs/mongodb-driver-upgrade/spec.md` to `openspec/specs/mongodb-driver-upgrade/spec.md`. After copying, update its relative links so they resolve from the archive location — replace `../../design.md` with `../../changes/archive/2026-09-21-upgrade-mongodb-driver-v7/design.md`, and similarly for `../../tasks.md`.
+- [x] Archive the change: move `openspec/changes/upgrade-mongodb-driver-v7/` to `openspec/changes/archive/2026-09-21-upgrade-mongodb-driver-v7/` **and stage both the new location and the deletion of the old location in a single commit** — do not commit the copy and delete separately (per this repo's convention: doc/archive branches must be docs-only, no code changes mixed in)
+- [x] Confirm `openspec/changes/archive/2026-09-21-upgrade-mongodb-driver-v7/` exists and `openspec/changes/upgrade-mongodb-driver-v7/` is gone
+- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-2026-09-21-upgrade-mongodb-driver-v7` then `git push -u origin doc/archive-2026-09-21-upgrade-mongodb-driver-v7`
+- [ ] Open a PR from `doc/archive-2026-09-21-upgrade-mongodb-driver-v7` to `main` with title `docs: archive upgrade-mongodb-driver-v7 (2026-09-21)` — **do NOT push directly to `main`**
 - [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (squash-only per repo ruleset; never `--admin`)
 - [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D upgrade-mongodb-driver-v7 doc/archive-YYYY-MM-DD-upgrade-mongodb-driver-v7`
+- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D upgrade-mongodb-driver-v7 doc/archive-2026-09-21-upgrade-mongodb-driver-v7`
 - [ ] Remove the change's dedicated worktree: `git worktree remove .worktrees/upgrade-mongodb-driver-v7`
 
 Required cleanup after archive: `git fetch --prune`, `git worktree remove .worktrees/upgrade-mongodb-driver-v7`, and `git branch -D upgrade-mongodb-driver-v7 doc/archive-YYYY-MM-DD-upgrade-mongodb-driver-v7`.
