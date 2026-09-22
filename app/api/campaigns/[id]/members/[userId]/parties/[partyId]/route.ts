@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import { loadCharacters } from '@/lib/storage/characterRepo';
 import type { PartyMember } from '@/lib/types';
 import { validateStringArray } from '@/lib/validation/core';
 
@@ -89,7 +90,7 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
       return NextResponse.json({ error: 'Party not found in campaign' }, { status: 404 });
     }
 
-    const memberCharacters = await storage.loadCharacters(memberId);
+    const memberCharacters = await loadCharacters(memberId);
     const memberCharacterIds = new Set(memberCharacters.map(c => c.id));
 
     const newIdSet = resolveCharacterIds(characterIdsResult.value, memberCharacterIds);

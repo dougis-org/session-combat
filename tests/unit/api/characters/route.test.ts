@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { GET, POST } from "@/app/api/characters/route";
-import { storage } from "@/lib/storage";
+import * as characterRepo from "@/lib/storage/characterRepo";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -13,14 +13,12 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    loadCharacters: jest.fn(),
-    saveCharacter: jest.fn(),
-  },
+jest.mock("@/lib/storage/characterRepo", () => ({
+  loadCharacters: jest.fn(),
+  saveCharacter: jest.fn(),
 }));
 
-const mockedStorage = jest.mocked(storage);
+const mockedCharacterRepo = jest.mocked(characterRepo);
 
 const MOCK_CHARACTERS = [{ id: "char-1", name: "Thorin", userId: "user-123" }];
 
@@ -35,7 +33,7 @@ describe("GET /api/characters", () => {
 
   it("returns list of characters", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARACTERS as any);
+    mockedCharacterRepo.loadCharacters.mockResolvedValue(MOCK_CHARACTERS as any);
 
     const response = await GET(makeRequest());
     expect(response.status).toBe(200);
@@ -47,7 +45,7 @@ describe("GET /api/characters", () => {
   itReturns500(
     GET,
     () => makeRequest(),
-    () => mockedStorage.loadCharacters.mockRejectedValue(new Error("Storage error"))
+    () => mockedCharacterRepo.loadCharacters.mockRejectedValue(new Error("Storage error"))
   );
 });
 
@@ -55,7 +53,7 @@ describe("POST /api/characters", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.saveCharacter.mockResolvedValue(undefined as any);
+    mockedCharacterRepo.saveCharacter.mockResolvedValue(undefined as any);
   });
 
   itReturns401(POST, () => makeRequest({ name: "Hero" }));
@@ -109,7 +107,7 @@ describe("POST /api/characters", () => {
     expect(body.name).toBe("Gandalf");
     expect(body.userId).toBe("user-123");
     expect(body.classes).toEqual([{ class: "Fighter", level: 1 }]);
-    expect(mockedStorage.saveCharacter).toHaveBeenCalledTimes(1);
+    expect(mockedCharacterRepo.saveCharacter).toHaveBeenCalledTimes(1);
   });
 
   it("creates character with provided classes", async () => {
@@ -125,7 +123,7 @@ describe("POST /api/characters", () => {
   itReturns500(
     POST,
     () => makeRequest({ name: "Doomed Hero" }),
-    () => mockedStorage.saveCharacter.mockRejectedValue(new Error("Storage error"))
+    () => mockedCharacterRepo.saveCharacter.mockRejectedValue(new Error("Storage error"))
   );
 
   itValidatesAlignmentField(
@@ -190,7 +188,7 @@ describe("GET /api/characters — characterType filter", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadCharacters.mockResolvedValue(MOCK_CHARS as any);
+    mockedCharacterRepo.loadCharacters.mockResolvedValue(MOCK_CHARS as any);
   });
 
   it("returns all characters when no filter provided", async () => {
@@ -223,7 +221,7 @@ describe("GET /api/characters — characterType filter", () => {
   });
 
   it("coerces missing characterType to 'character' for legacy documents", async () => {
-    mockedStorage.loadCharacters.mockResolvedValue([CHAR_WITHOUT_TYPE] as any);
+    mockedCharacterRepo.loadCharacters.mockResolvedValue([CHAR_WITHOUT_TYPE] as any);
     const response = await GET(makeGetRequest("/api/characters"));
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -231,7 +229,7 @@ describe("GET /api/characters — characterType filter", () => {
   });
 
   it("legacy document without characterType is included in 'character' filter", async () => {
-    mockedStorage.loadCharacters.mockResolvedValue([CHAR_WITHOUT_TYPE] as any);
+    mockedCharacterRepo.loadCharacters.mockResolvedValue([CHAR_WITHOUT_TYPE] as any);
     const response = await GET(makeGetRequest("/api/characters?characterType=character"));
     expect(response.status).toBe(200);
     const body = await response.json();

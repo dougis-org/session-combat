@@ -3,6 +3,7 @@
  */
 import { DELETE } from "@/app/api/campaigns/[id]/characters/[cid]/route";
 import { storage } from "@/lib/storage";
+import * as characterRepo from "@/lib/storage/characterRepo";
 import { CampaignMember, Character } from "@/lib/types";
 import {
   MOCK_AUTH,
@@ -19,17 +20,20 @@ jest.mock("@/lib/storage", () => ({
   storage: {
     getMember: jest.fn(),
     removeShare: jest.fn(),
-    loadCharacterById: jest.fn(),
     setPartyMemberLeftAt: jest.fn(),
   },
+}));
+
+jest.mock("@/lib/storage/characterRepo", () => ({
+  loadCharacterById: jest.fn(),
 }));
 
 const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
   removeShare: jest.MockedFunction<typeof storage.removeShare>;
-  loadCharacterById: jest.MockedFunction<typeof storage.loadCharacterById>;
   setPartyMemberLeftAt: jest.MockedFunction<typeof storage.setPartyMemberLeftAt>;
 };
+const mockedCharacterRepo = jest.mocked(characterRepo);
 
 const CAMPAIGN_ID = "camp-1";
 const CHARACTER_ID = "char-1";
@@ -80,14 +84,14 @@ describe("DELETE /api/campaigns/[id]/characters/[cid]", () => {
 
   it("T5-2: returns 404 when character not found", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCharacterById.mockResolvedValue(null);
+    mockedCharacterRepo.loadCharacterById.mockResolvedValue(null);
     const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
     expect(response.status).toBe(404);
   });
 
   it("T5-3: returns 403 when character is owned by someone else", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCharacterById.mockResolvedValue({
+    mockedCharacterRepo.loadCharacterById.mockResolvedValue({
       ...OWN_CHARACTER,
       userId: "other-user",
     });
@@ -97,7 +101,7 @@ describe("DELETE /api/campaigns/[id]/characters/[cid]", () => {
 
   it("T5-4: returns 404 when removeShare returns false", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
+    mockedCharacterRepo.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
     mockedStorage.removeShare.mockResolvedValue(false);
     const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
     expect(response.status).toBe(404);
@@ -105,7 +109,7 @@ describe("DELETE /api/campaigns/[id]/characters/[cid]", () => {
 
   it("T5-5: returns 204 on successful unshare", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
+    mockedCharacterRepo.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
     mockedStorage.removeShare.mockResolvedValue(true);
     mockedStorage.setPartyMemberLeftAt.mockResolvedValue();
     const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
@@ -114,7 +118,7 @@ describe("DELETE /api/campaigns/[id]/characters/[cid]", () => {
 
   it("B4-1: calls setPartyMemberLeftAt after successful unshare", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
+    mockedCharacterRepo.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
     mockedStorage.removeShare.mockResolvedValue(true);
     mockedStorage.setPartyMemberLeftAt.mockResolvedValue();
     await DELETE(makeDeleteRequest(), { params: PARAMS });
@@ -127,7 +131,7 @@ describe("DELETE /api/campaigns/[id]/characters/[cid]", () => {
 
   it("B4-2: cleanup error does not change 204 response", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
+    mockedCharacterRepo.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
     mockedStorage.removeShare.mockResolvedValue(true);
     mockedStorage.setPartyMemberLeftAt.mockRejectedValue(new Error("cleanup failed"));
     const response = await DELETE(makeDeleteRequest(), { params: PARAMS });

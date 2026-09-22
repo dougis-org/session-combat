@@ -1,23 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthAndParams } from "@/lib/middleware";
-import { storage } from "@/lib/storage";
-import {
-  Character,
-  isValidRace,
-  VALID_RACES,
-  VALID_CLASSES,
-  CharacterClass,
-  CharacterType,
-  validateCharacterClasses,
-  normalizeAlignment,
-  isValidCharacterType,
-  getCharacterType,
-} from "@/lib/types";
+import { loadCharacters, saveCharacter, deleteCharacter } from "@/lib/storage/characterRepo";
+import { parseCharacterUpdateBody, validateCharacterId } from "@/lib/validation/character";
+import { filterToDamageTypes } from "@/lib/constants";
+import { Character, CharacterType, getCharacterType } from "@/lib/types";
 
 export const GET = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
-    const characters = await storage.loadCharacters(auth.userId);
-    const character = characters.find((c) => c.id === id);
+    const idValidation = validateCharacterId(id);
+    if (!idValidation.valid) {
+      return NextResponse.json({ error: "Character not found" }, { status: 404 });
+    }
+
+    const characters = await loadCharacters(auth.userId);
+    const character = characters.find((c) => c.id === idValidation.value);
 
     if (!character) {
       return NextResponse.json(
@@ -41,37 +37,24 @@ export const GET = withAuthAndParams<{ id: string }>(async (request, auth, { id 
 
 export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
+    const idValidation = validateCharacterId(id);
+    if (!idValidation.valid) {
+      return NextResponse.json({ error: "Character not found" }, { status: 404 });
+    }
+
     const body = await request.json();
+    const parsed = parseCharacterUpdateBody(body);
+    if (!parsed.valid) {
+      return NextResponse.json(parsed.failure.body, { status: parsed.failure.status });
+    }
     const {
-      name,
-      hp,
-      maxHp,
-      ac,
-      acNote,
-      abilityScores,
-      savingThrows,
-      skills,
-      damageResistances,
-      damageImmunities,
-      damageVulnerabilities,
-      conditionImmunities,
-      senses,
-      languages,
-      traits,
-      actions,
-      bonusActions,
-      reactions,
-      classes,
-      race,
-      background,
-      alignment,
-      gender,
-      characterType,
-    } = body;
+      name, classes, race, raceProvided, gender, genderProvided,
+      background, backgroundProvided, alignment, alignmentProvided, characterType, stats,
+    } = parsed.value;
 
     // Get the existing character to verify ownership
-    const characters = await storage.loadCharacters(auth.userId);
-    const existingCharacter = characters.find((c) => c.id === id);
+    const characters = await loadCharacters(auth.userId);
+    const existingCharacter = characters.find((c) => c.id === idValidation.value);
 
     if (!existingCharacter) {
       return NextResponse.json(
@@ -80,130 +63,61 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
       );
     }
 
-    if (name !== undefined && name.trim() === "") {
-      return NextResponse.json(
-        { error: "Character name is required" },
-        { status: 400 },
-      );
-    }
-
-    if (characterType !== undefined && !isValidCharacterType(characterType)) {
-      return NextResponse.json(
-        { error: "Invalid characterType. Must be one of: character, npc, companion" },
-        { status: 400 },
-      );
-    }
-
-    // Validate gender if provided
-    if (gender != null && (typeof gender !== 'string' || gender.trim().length > 50)) {
-      return NextResponse.json(
-        { error: "Gender must be a string of 50 characters or fewer" },
-        { status: 400 },
-      );
-    }
-
-    const normalizedAlignment = normalizeAlignment(alignment);
-
-    // Validate alignment if provided
-    if (alignment !== undefined && alignment !== null && alignment !== '' && !normalizedAlignment) {
-      return NextResponse.json({ error: 'Invalid alignment' }, { status: 400 });
-    }
-
-    // Validate race if provided
-    if (
-      race !== undefined &&
-      race !== null &&
-      race !== "" &&
-      !isValidRace(race)
-    ) {
-      return NextResponse.json(
-        {
-          error: "Invalid race. Must be one of: " + VALID_RACES.join(", "),
-          validRaces: VALID_RACES,
-        },
-        { status: 400 },
-      );
-    }
-
-    // Validate and normalize classes if provided
-    let characterClasses = existingCharacter.classes;
-    if (classes !== undefined && classes !== null) {
-      const validationResult = validateCharacterClasses(classes, {
-        allowEmpty: false,
-      });
-      if (!validationResult.valid) {
-        return NextResponse.json(
-          {
-            error: validationResult.error,
-            validClasses: VALID_CLASSES,
-          },
-          { status: 400 },
-        );
-      }
-
-      characterClasses = (classes as CharacterClass[]).map((c) => ({
-        class: c.class,
-        level: c.level,
-      }));
-    }
-
     const updatedCharacter: Character = {
       ...existingCharacter,
-      name: name !== undefined ? name.trim() : existingCharacter.name,
-      hp: hp !== undefined ? hp : existingCharacter.hp,
-      maxHp: maxHp !== undefined ? maxHp : existingCharacter.maxHp,
-      ac: ac !== undefined ? ac : existingCharacter.ac,
-      acNote: acNote !== undefined ? acNote : existingCharacter.acNote,
+      name: name !== undefined ? name : existingCharacter.name,
+      hp: stats.hp !== undefined ? stats.hp : existingCharacter.hp,
+      maxHp: stats.maxHp !== undefined ? stats.maxHp : existingCharacter.maxHp,
+      ac: stats.ac !== undefined ? stats.ac : existingCharacter.ac,
+      acNote: stats.acNote !== undefined ? stats.acNote : existingCharacter.acNote,
       abilityScores:
-        abilityScores !== undefined
-          ? abilityScores
+        stats.abilityScores !== undefined
+          ? stats.abilityScores
           : existingCharacter.abilityScores,
       savingThrows:
-        savingThrows !== undefined
-          ? savingThrows
+        stats.savingThrows !== undefined
+          ? stats.savingThrows
           : existingCharacter.savingThrows,
-      skills: skills !== undefined ? skills : existingCharacter.skills,
+      skills: stats.skills !== undefined ? stats.skills : existingCharacter.skills,
       damageResistances:
-        damageResistances !== undefined
-          ? damageResistances
+        stats.damageResistances !== undefined
+          ? filterToDamageTypes(stats.damageResistances)
           : existingCharacter.damageResistances,
       damageImmunities:
-        damageImmunities !== undefined
-          ? damageImmunities
+        stats.damageImmunities !== undefined
+          ? filterToDamageTypes(stats.damageImmunities)
           : existingCharacter.damageImmunities,
       damageVulnerabilities:
-        damageVulnerabilities !== undefined
-          ? damageVulnerabilities
+        stats.damageVulnerabilities !== undefined
+          ? filterToDamageTypes(stats.damageVulnerabilities)
           : existingCharacter.damageVulnerabilities,
       conditionImmunities:
-        conditionImmunities !== undefined
-          ? conditionImmunities
+        stats.conditionImmunities !== undefined
+          ? stats.conditionImmunities
           : existingCharacter.conditionImmunities,
-      senses: senses !== undefined ? senses : existingCharacter.senses,
+      senses: stats.senses !== undefined ? stats.senses : existingCharacter.senses,
       languages:
-        languages !== undefined ? languages : existingCharacter.languages,
-      traits: traits !== undefined ? traits : existingCharacter.traits,
-      actions: actions !== undefined ? actions : existingCharacter.actions,
+        stats.languages !== undefined ? stats.languages : existingCharacter.languages,
+      traits: stats.traits !== undefined ? stats.traits : existingCharacter.traits,
+      actions: stats.actions !== undefined ? stats.actions : existingCharacter.actions,
       bonusActions:
-        bonusActions !== undefined
-          ? bonusActions
+        stats.bonusActions !== undefined
+          ? stats.bonusActions
           : existingCharacter.bonusActions,
       reactions:
-        reactions !== undefined ? reactions : existingCharacter.reactions,
-      classes: characterClasses,
-      race: race !== undefined ? race : existingCharacter.race,
-      gender: gender !== undefined ? (gender?.trim() || undefined) : existingCharacter.gender,
-      background:
-        background !== undefined ? background : existingCharacter.background,
-      alignment:
-        alignment !== undefined ? normalizedAlignment : existingCharacter.alignment,
+        stats.reactions !== undefined ? stats.reactions : existingCharacter.reactions,
+      classes: classes !== undefined ? classes : existingCharacter.classes,
+      race: raceProvided ? race : existingCharacter.race,
+      gender: genderProvided ? gender : existingCharacter.gender,
+      background: backgroundProvided ? background : existingCharacter.background,
+      alignment: alignmentProvided ? alignment : existingCharacter.alignment,
       characterType: characterType !== undefined
         ? (characterType as CharacterType)
         : getCharacterType(existingCharacter.characterType),
       updatedAt: new Date(),
     };
 
-    await storage.saveCharacter(updatedCharacter);
+    await saveCharacter(updatedCharacter);
 
     return NextResponse.json(updatedCharacter);
   } catch (error) {
@@ -217,9 +131,14 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
 
 export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
+    const idValidation = validateCharacterId(id);
+    if (!idValidation.valid) {
+      return NextResponse.json({ error: "Character not found" }, { status: 404 });
+    }
+
     // Verify ownership before deleting
     const db = await (await import("@/lib/db")).getDatabase();
-    const character = await db.collection("characters").findOne({ id, userId: auth.userId, deletedAt: { $exists: false } });
+    const character = await db.collection("characters").findOne({ id: idValidation.value, userId: auth.userId, deletedAt: { $exists: false } });
 
     if (!character) {
       return NextResponse.json(
@@ -228,7 +147,7 @@ export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { 
       );
     }
 
-    await storage.deleteCharacter(id, auth.userId);
+    await deleteCharacter(idValidation.value, auth.userId);
 
     return NextResponse.json({ message: "Character deleted successfully" });
   } catch (error) {

@@ -1,25 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DndBeyondImportError } from "@/lib/dndBeyondCharacterImport";
 import { withAuth } from "@/lib/middleware";
-import { storage } from "@/lib/storage";
+import { loadCharacters, saveCharacter } from "@/lib/storage/characterRepo";
 import { importDndBeyondCharacter } from "@/lib/server/dndBeyondCharacterImport";
 import { Character } from "@/lib/types";
+import { characterImportRequestSchema, validateWithSchema } from "@/lib/validation/character";
 
 export const POST = withAuth(async (request, auth) => {
   try {
     const body = await request.json();
-    const url = typeof body?.url === "string" ? body.url.trim() : "";
-    const overwrite = body?.overwrite === true;
-
-    if (!url) {
+    const validation = validateWithSchema(characterImportRequestSchema, body);
+    if (!validation.valid) {
       return NextResponse.json(
         { error: "A D&D Beyond character URL is required." },
         { status: 400 },
       );
     }
+    const { url, overwrite = false } = validation.value;
 
     const imported = await importDndBeyondCharacter(url);
-    const existingCharacters = await storage.loadCharacters(auth.userId);
+    const existingCharacters = await loadCharacters(auth.userId);
     const existingCharacter = existingCharacters.find(
       (character) =>
         character.name.trim().toLowerCase() ===
@@ -59,7 +59,7 @@ export const POST = withAuth(async (request, auth) => {
       },
     };
 
-    await storage.saveCharacter(characterToSave);
+    await saveCharacter(characterToSave);
 
     return NextResponse.json({
       character: characterToSave,

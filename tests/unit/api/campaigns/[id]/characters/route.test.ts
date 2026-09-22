@@ -3,6 +3,7 @@
  */
 import { POST, GET } from "@/app/api/campaigns/[id]/characters/route";
 import { storage } from "@/lib/storage";
+import * as characterRepo from "@/lib/storage/characterRepo";
 import { DuplicateShareError } from "@/lib/errors";
 import { CampaignMember, CampaignCharacterShare, Character } from "@/lib/types";
 import {
@@ -21,18 +22,21 @@ jest.mock("@/lib/storage", () => ({
     getMember: jest.fn(),
     addShare: jest.fn(),
     listSharesForCampaign: jest.fn(),
-    loadCharacterById: jest.fn(),
     buildSharedCharacterEntries: jest.fn(),
   },
+}));
+
+jest.mock("@/lib/storage/characterRepo", () => ({
+  loadCharacterById: jest.fn(),
 }));
 
 const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
   addShare: jest.MockedFunction<typeof storage.addShare>;
   listSharesForCampaign: jest.MockedFunction<typeof storage.listSharesForCampaign>;
-  loadCharacterById: jest.MockedFunction<typeof storage.loadCharacterById>;
   buildSharedCharacterEntries: jest.MockedFunction<typeof storage.buildSharedCharacterEntries>;
 };
+const mockedCharacterRepo = jest.mocked(characterRepo);
 
 const CAMPAIGN_ID = "camp-1";
 const CHARACTER_ID = "char-1";
@@ -114,14 +118,14 @@ describe("POST /api/campaigns/[id]/characters", () => {
 
   it("T4-6: returns 404 when character not found", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCharacterById.mockResolvedValue(null);
+    mockedCharacterRepo.loadCharacterById.mockResolvedValue(null);
     const response = await POST(makePostRequest({ characterId: CHARACTER_ID }), { params: PARAMS });
     expect(response.status).toBe(404);
   });
 
   it("T4-7: returns 403 when character is owned by someone else", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCharacterById.mockResolvedValue({
+    mockedCharacterRepo.loadCharacterById.mockResolvedValue({
       ...OWN_CHARACTER,
       userId: "other-user",
     });
@@ -131,7 +135,7 @@ describe("POST /api/campaigns/[id]/characters", () => {
 
   it("T4-8: returns 409 on duplicate share", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
+    mockedCharacterRepo.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
     mockedStorage.addShare.mockRejectedValue(
       new DuplicateShareError(CAMPAIGN_ID, CHARACTER_ID)
     );
@@ -141,7 +145,7 @@ describe("POST /api/campaigns/[id]/characters", () => {
 
   it("T4-9: returns 201 with { id, characterId } on success", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
-    mockedStorage.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
+    mockedCharacterRepo.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
     mockedStorage.addShare.mockResolvedValue(undefined);
     const response = await POST(makePostRequest({ characterId: CHARACTER_ID }), { params: PARAMS });
     expect(response.status).toBe(201);
