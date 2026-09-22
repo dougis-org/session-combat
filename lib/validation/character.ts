@@ -205,6 +205,13 @@ function parseCommonFields(body: Record<string, unknown>): CharacterFieldParseRe
     };
   }
 
+  if (background != null && (typeof background !== 'string' || background.length > MAX_STRING_LENGTH)) {
+    return {
+      valid: false,
+      failure: { status: 400, body: { error: `background must be a string of ${MAX_STRING_LENGTH} characters or fewer` } },
+    };
+  }
+
   const statsValidation = validateWithSchema(creatureStatsBodySchema, {
     hp: body.hp, maxHp: body.maxHp, ac: body.ac, acNote: body.acNote,
     abilityScores: body.abilityScores, savingThrows: body.savingThrows, skills: body.skills,
@@ -239,9 +246,16 @@ export interface ParsedCharacterCreateBody extends CharacterCommonFields {
   classes: CharacterClass[];
 }
 
+function isPlainRequestBody(body: unknown): body is Record<string, unknown> {
+  return body !== null && typeof body === 'object' && !Array.isArray(body);
+}
+
 /** Validates a full POST /api/characters body. Mirrors the route's prior inline checks verbatim (same error messages/shapes) so behavior is unchanged, just centralized and run before any storage access. */
 export function parseCharacterCreateBody(body: unknown): CharacterFieldParseResult<ParsedCharacterCreateBody> {
-  const bodyObj = body !== null && typeof body === 'object' ? (body as Record<string, unknown>) : {};
+  if (!isPlainRequestBody(body)) {
+    return { valid: false, failure: { status: 400, body: { error: 'Character name is required' } } };
+  }
+  const bodyObj = body;
   const { name } = bodyObj;
 
   if (typeof name !== 'string' || name.trim() === '') {
@@ -280,7 +294,10 @@ export interface ParsedCharacterUpdateBody extends CharacterCommonFields {
 
 /** Validates a full PUT /api/characters/[id] body. Mirrors the route's prior inline checks verbatim. All fields optional (partial update); `undefined` means "not provided, keep existing". */
 export function parseCharacterUpdateBody(body: unknown): CharacterFieldParseResult<ParsedCharacterUpdateBody> {
-  const bodyObj = body !== null && typeof body === 'object' ? (body as Record<string, unknown>) : {};
+  if (!isPlainRequestBody(body)) {
+    return { valid: false, failure: { status: 400, body: { error: 'Request body must be a JSON object' } } };
+  }
+  const bodyObj = body;
   const { name } = bodyObj;
 
   if (name !== undefined && (typeof name !== 'string' || name.trim() === '')) {
