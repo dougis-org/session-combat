@@ -3,6 +3,7 @@
  */
 import { PUT } from "@/app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route";
 import { storage } from "@/lib/storage";
+import * as characterRepo from "@/lib/storage/characterRepo";
 import {
   makeRouteRequest,
   itReturns401WithParams,
@@ -15,12 +16,16 @@ jest.mock("@/lib/storage", () => ({
   storage: {
     getMember: jest.fn(),
     loadPartiesByCampaign: jest.fn(),
-    loadCharacters: jest.fn(),
     saveParty: jest.fn(),
   },
 }));
 
+jest.mock("@/lib/storage/characterRepo", () => ({
+  loadCharacters: jest.fn(),
+}));
+
 const mockedStorage = jest.mocked(storage);
+const mockedCharacterRepo = jest.mocked(characterRepo);
 
 const BASE_URL = "http://localhost/api/campaigns/camp-1/members/user-1/parties/party-1";
 const makePutRequest = (body: unknown) => makeRouteRequest(BASE_URL, "PUT", body);
@@ -33,7 +38,7 @@ describe("PUT /api/campaigns/[id]/members/[userId]/parties/[partyId]", () => {
     mockedStorage.loadPartiesByCampaign.mockResolvedValue([
       { id: "party-1", userId: "user-1", members: [{ characterId: "char-1" }] }
     ] as any);
-    mockedStorage.loadCharacters.mockResolvedValue([{ id: "char-2" }] as any);
+    mockedCharacterRepo.loadCharacters.mockResolvedValue([{ id: "char-2" }] as any);
     mockedStorage.saveParty.mockResolvedValue(undefined as any);
   });
 

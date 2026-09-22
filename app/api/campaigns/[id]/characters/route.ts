@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import { loadCharacterById } from '@/lib/storage/characterRepo';
 import { DuplicateShareError } from '@/lib/errors';
+import { validateString } from '@/lib/validation/core';
 import type { SharedCharacterEntry } from '@/lib/types';
 
 type Params = { id: string };
@@ -15,11 +17,11 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   }
 
   const bodyObj = body !== null && typeof body === 'object' ? body as Record<string, unknown> : {};
-  const { characterId: rawCharacterId } = bodyObj;
-  if (typeof rawCharacterId !== 'string' || rawCharacterId.trim() === '') {
+  const characterIdResult = validateString(bodyObj.characterId, 'characterId', { required: true, minLength: 1 });
+  if (!characterIdResult.valid) {
     return NextResponse.json({ error: 'characterId is required' }, { status: 400 });
   }
-  const characterId = rawCharacterId.trim();
+  const characterId = characterIdResult.value;
 
   try {
     const member = await storage.getMember(campaignId, auth.userId);
@@ -27,7 +29,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const character = await storage.loadCharacterById(characterId);
+    const character = await loadCharacterById(characterId);
     if (!character) {
       return NextResponse.json({ error: 'Character not found' }, { status: 404 });
     }

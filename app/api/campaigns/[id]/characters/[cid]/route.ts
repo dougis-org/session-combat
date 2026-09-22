@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import { loadCharacterById } from '@/lib/storage/characterRepo';
 
 type Params = { id: string; cid: string };
 
@@ -11,7 +12,7 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: cam
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const character = await storage.loadCharacterById(characterId);
+    const character = await loadCharacterById(characterId);
     if (!character) {
       return NextResponse.json({ error: 'Character not found' }, { status: 404 });
     }

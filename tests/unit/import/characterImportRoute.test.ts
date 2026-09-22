@@ -4,7 +4,7 @@
 import { NextRequest } from "next/server";
 import { POST } from "@/app/api/characters/import/route";
 import { DndBeyondImportError } from "@/lib/dndBeyondCharacterImport";
-import { storage } from "@/lib/storage";
+import * as characterRepo from "@/lib/storage/characterRepo";
 import { importDndBeyondCharacter } from "@/lib/server/dndBeyondCharacterImport";
 import {
   createNormalizedImportResult,
@@ -17,19 +17,17 @@ import { MOCK_AUTH, mockAuthState } from "@/tests/unit/helpers/route.test.helper
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    loadCharacters: jest.fn(),
-    saveCharacter: jest.fn(),
-  },
+jest.mock("@/lib/storage/characterRepo", () => ({
+  loadCharacters: jest.fn(),
+  saveCharacter: jest.fn(),
 }));
 
 jest.mock("@/lib/server/dndBeyondCharacterImport", () => ({
   importDndBeyondCharacter: jest.fn(),
 }));
 
-const mockedLoadCharacters = jest.mocked(storage.loadCharacters);
-const mockedSaveCharacter = jest.mocked(storage.saveCharacter);
+const mockedLoadCharacters = jest.mocked(characterRepo.loadCharacters);
+const mockedSaveCharacter = jest.mocked(characterRepo.saveCharacter);
 const mockedImportCharacter = jest.mocked(importDndBeyondCharacter);
 
 function createRequest(body: unknown): NextRequest {
