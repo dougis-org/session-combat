@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthAndParams } from "@/lib/middleware";
-import { loadCharacters, saveCharacter, deleteCharacter } from "@/lib/storage/characterRepo";
+import { loadCharacters, saveCharacter, deleteCharacter, findOwnedActiveCharacter } from "@/lib/storage/characterRepo";
 import { parseCharacterUpdateBody, validateCharacterId } from "@/lib/validation/character";
 import { filterToDamageTypes } from "@/lib/constants";
 import { Character, CharacterType, getCharacterType } from "@/lib/types";
@@ -42,7 +42,12 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
       return NextResponse.json({ error: "Character not found" }, { status: 404 });
     }
 
-    const body = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
     const parsed = parseCharacterUpdateBody(body);
     if (!parsed.valid) {
       return NextResponse.json(parsed.failure.body, { status: parsed.failure.status });
@@ -137,8 +142,7 @@ export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { 
     }
 
     // Verify ownership before deleting
-    const db = await (await import("@/lib/db")).getDatabase();
-    const character = await db.collection("characters").findOne({ id: idValidation.value, userId: auth.userId, deletedAt: { $exists: false } });
+    const character = await findOwnedActiveCharacter(idValidation.value, auth.userId);
 
     if (!character) {
       return NextResponse.json(

@@ -75,6 +75,20 @@ export async function saveCharacters(characters: Character[]): Promise<void> {
   );
 }
 
+/** Finds a non-deleted character owned by userId, or null. Used to verify ownership before a mutation without a second full loadCharacters(userId) scan. */
+export async function findOwnedActiveCharacter(id: string, userId: string): Promise<Character | null> {
+  return runStorageOp(
+    { name: "findOwnedActiveCharacter", collection: "characters", isEmpty: (res) => !res },
+    async () => {
+      const db = await getDatabase();
+      const character = await db
+        .collection<Character>("characters")
+        .findOne({ id, userId, deletedAt: { $exists: false } });
+      return character ? normalizeStoredEntityId(character) : null;
+    }
+  );
+}
+
 export async function deleteCharacter(id: string, userId: string): Promise<void> {
   return runStorageOp(
     { name: "deleteCharacter", collection: "characters" },

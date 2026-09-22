@@ -3,6 +3,7 @@
  */
 import { PUT } from "@/app/api/characters/[id]/route";
 import * as characterRepo from "@/lib/storage/characterRepo";
+import type { Character } from "@/lib/types";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -16,20 +17,12 @@ jest.mock("@/lib/storage/characterRepo", () => ({
   loadCharacters: jest.fn(),
   saveCharacter: jest.fn(),
   deleteCharacter: jest.fn(),
-}));
-
-const mockFindOne = jest.fn();
-jest.mock("@/lib/db", () => ({
-  getDatabase: jest.fn().mockResolvedValue({
-    collection: jest.fn().mockReturnValue({
-      findOne: mockFindOne,
-    }),
-  }),
+  findOwnedActiveCharacter: jest.fn(),
 }));
 
 const mockedCharacterRepo = jest.mocked(characterRepo);
 
-const EXISTING_CHARACTER = {
+const EXISTING_CHARACTER: Character = {
   id: "char-1",
   userId: "user-123",
   name: "Lyra",
@@ -64,8 +57,8 @@ const makeRequest = (body: unknown) =>
 beforeEach(() => {
   jest.clearAllMocks();
   mockAuthState.payload = MOCK_AUTH;
-  mockedCharacterRepo.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
-  mockedCharacterRepo.saveCharacter.mockResolvedValue(undefined as any);
+  mockedCharacterRepo.loadCharacters.mockResolvedValue([EXISTING_CHARACTER]);
+  mockedCharacterRepo.saveCharacter.mockResolvedValue(undefined);
 });
 
 describe("PUT /api/characters/[id] — gender validation", () => {
@@ -108,7 +101,7 @@ describe("GET /api/characters/[id] — backward compat coercion", () => {
 
   it("coerces missing characterType to 'character' for legacy document", async () => {
     // EXISTING_CHARACTER has no characterType — simulates a legacy BSON document
-    mockedCharacterRepo.loadCharacters.mockResolvedValue([EXISTING_CHARACTER] as any);
+    mockedCharacterRepo.loadCharacters.mockResolvedValue([EXISTING_CHARACTER]);
 
     const { GET } = await import("@/app/api/characters/[id]/route");
     const req = makeRouteRequest("http://localhost/api/characters/char-1", "GET");
@@ -140,6 +133,17 @@ describe("PUT /api/characters/[id] — auth/ownership", () => {
     const response = await PUT(makeRequest({ name: "Lyra" }), { params: PARAMS });
     expect(response.status).toBe(404);
   });
+
+  it("returns 400 for malformed JSON body", async () => {
+    const { NextRequest } = require("next/server");
+    const req = new NextRequest("http://localhost/api/characters/char-1", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", cookie: "auth-token=t" },
+      body: "{not valid json",
+    });
+    const response = await PUT(req, { params: PARAMS });
+    expect(response.status).toBe(400);
+  });
 });
 
 describe("PUT /api/characters/[id] — characterType", () => {
@@ -159,8 +163,8 @@ describe("PUT /api/characters/[id] — characterType", () => {
   });
 
   it("preserves existing characterType when field omitted", async () => {
-    const charWithType = { ...EXISTING_CHARACTER, characterType: "companion" as const };
-    mockedCharacterRepo.loadCharacters.mockResolvedValue([charWithType] as any);
+    const charWithType: Character = { ...EXISTING_CHARACTER, characterType: "companion" };
+    mockedCharacterRepo.loadCharacters.mockResolvedValue([charWithType]);
 
     const response = await PUT(makeRequest({ name: "Lyra Renamed" }), { params: PARAMS });
     expect(response.status).toBe(200);
@@ -190,7 +194,7 @@ describe("DELETE /api/characters/[id]", () => {
   const { DELETE } = require("@/app/api/characters/[id]/route");
 
   beforeEach(() => {
-    mockFindOne.mockReset();
+    mockedCharacterRepo.findOwnedActiveCharacter.mockReset();
     mockedCharacterRepo.deleteCharacter.mockReset();
   });
 
@@ -201,7 +205,7 @@ describe("DELETE /api/characters/[id]", () => {
   );
 
   it("returns 404 for a character not owned by auth.userId (does not delete it)", async () => {
-    mockFindOne.mockResolvedValue(null);
+    mockedCharacterRepo.findOwnedActiveCharacter.mockResolvedValue(null);
 
     const req = makeRouteRequest("http://localhost/api/characters/char-1", "DELETE");
     const response = await DELETE(req, { params: PARAMS });
@@ -211,8 +215,8 @@ describe("DELETE /api/characters/[id]", () => {
   });
 
   it("deletes character successfully", async () => {
-    mockFindOne.mockResolvedValue(EXISTING_CHARACTER);
-    mockedCharacterRepo.deleteCharacter.mockResolvedValue(undefined as any);
+    mockedCharacterRepo.findOwnedActiveCharacter.mockResolvedValue(EXISTING_CHARACTER);
+    mockedCharacterRepo.deleteCharacter.mockResolvedValue(undefined);
 
     const req = makeRouteRequest("http://localhost/api/characters/char-1", "DELETE");
     const response = await DELETE(req, { params: PARAMS });
@@ -222,7 +226,7 @@ describe("DELETE /api/characters/[id]", () => {
   });
 
   it("returns 404 if character not found", async () => {
-    mockFindOne.mockResolvedValue(null);
+    mockedCharacterRepo.findOwnedActiveCharacter.mockResolvedValue(null);
 
     const req = makeRouteRequest("http://localhost/api/characters/char-1", "DELETE");
     const response = await DELETE(req, { params: PARAMS });
@@ -232,7 +236,7 @@ describe("DELETE /api/characters/[id]", () => {
   });
 
   it("returns 500 on database error", async () => {
-    mockFindOne.mockRejectedValue(new Error("DB error"));
+    mockedCharacterRepo.findOwnedActiveCharacter.mockRejectedValue(new Error("DB error"));
 
     const req = makeRouteRequest("http://localhost/api/characters/char-1", "DELETE");
     const response = await DELETE(req, { params: PARAMS });

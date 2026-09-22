@@ -63,6 +63,17 @@ describe("POST /api/characters", () => {
     expect(response.status).toBe(400);
   });
 
+  it("returns 400 for malformed JSON body", async () => {
+    const { NextRequest } = require("next/server");
+    const req = new NextRequest(BASE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie: "auth-token=t" },
+      body: "{not valid json",
+    });
+    const response = await POST(req);
+    expect(response.status).toBe(400);
+  });
+
   it("returns 400 when name is empty string", async () => {
     const response = await POST(makeRequest({ name: "  " }));
     expect(response.status).toBe(400);
