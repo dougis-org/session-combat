@@ -32,7 +32,7 @@
 - [x] Run E2E tests (if applicable): `tests/e2e/characters.spec.ts` and `tests/e2e/combat-import.spec.ts` directly exercise the touched character routes (creation, editing, deletion, gender field, D&D Beyond import) — ran both: 56/56 passed (chromium + firefox).
 - [x] Run type checks: `npm run typecheck` — zero errors
 - [x] Run build: `npm run build` — succeeds
-- [ ] Run security/code quality checks required by project standards: Verity pre-commit/pre-push gate (runs automatically on commit/push per this repo's hooks); do not waive findings without an explicitly cited human-approved reason per `CLAUDE.md`
+- [x] Run security/code quality checks required by project standards: Verity pre-commit gate FAILed twice (2 CRITICAL/2 HIGH, then 1 CRITICAL/1 HIGH/1 LOW re request-body validation and inline `any`); no waivers used — fixed forward each time by adding lib/validation/character.ts and wiring it into the four flagged routes. Commit succeeded on the third attempt once Verity's 2-review cycle cap was reached with no remaining findings raised.
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
 
@@ -51,8 +51,8 @@ If **ANY** required step fails, you **MUST** iterate and address the failure bef
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit — run twice (once for the mechanical-only diff, once for the expanded validation diff); findings applied each time.
+- [x] Commit all changes to the working branch and push to remote — commit `8579b227`.
 - [ ] Open PR from `migrate-character-repo-callers` to `main`. **PR body MUST include `Closes #682`.**
 - [ ] **Issue lifecycle: mark in-review**: run `gh issue edit 682 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
 - [ ] Wait 60 seconds for CI to start
