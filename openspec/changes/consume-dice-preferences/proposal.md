@@ -39,7 +39,7 @@
 
 ### Out of Scope
 
-- Any change to `theme_colorset` named-preset selection (the curated `DICE_COLORSETS` registry in `lib/dice/diceAppearance.ts`) beyond removing its only remaining consumer (`DiceAppearanceModal`); the registry data itself is left in place in case a future change wants a preset picker built on `preferences.dice.color`.
+- Building a new named-preset picker on top of `preferences.dice.color`. `lib/dice/diceAppearance.ts`'s `DICE_COLORSETS`/`DICE_MATERIALS` registry and `resolveDiceAppearance` are removed along with their only consumer (`DiceAppearanceModal`) — see design.md Decision 6 — not retained as reference data; a future preset picker would need to reintroduce this data from scratch.
 - Renaming the engine's colliding `'metal'` value between `theme_surface` and `theme_material` — out of our control, handled by keeping the two preferences on visibly distinct UI controls with distinct labels.
 - Any backend/API changes beyond what `usePreferences`'s existing sync mechanism already provides for new/changed preference shapes.
 - Migrating LocalStore gallery values into the new preferences (explicitly decided against).
@@ -50,9 +50,9 @@
 - `lib/preferences/usePreferences.tsx`: `PreferencePath` gains `'dice.material'`; `ALL_PATHS` updated.
 - `lib/dice/useDiceAnimation.ts`: `DiceBox` construction reads `theme_customColorset` / `theme_surface` / `theme_material` from `preferences.dice.*` instead of the `appearance` prop sourced from `useDiceFabPreferences`.
 - `lib/dice/useDiceFabPreferences.ts`: `diceColorset` / `diceMaterial` state, the `appearanceReducer`, and `LocalStore` read/write helpers for `dice-fab-colorset` / `dice-fab-material` are removed; the hook's remaining responsibilities (`sendToChat`, `disableAnimation`) are preserved.
-- `lib/components/dice/DiceAppearanceModal.tsx`: removed (or repurposed, TBD in design) along with its call site.
+- `lib/components/dice/DiceAppearanceModal.tsx`: removed, along with its "Dice appearance" trigger and call site in `lib/components/GlobalDiceFab.tsx` (design.md Decision 6).
 - `app/profile/page.tsx`: dice appearance section reworked for the new color-object and enum-based surface/material controls.
-- `lib/dice/diceAppearance.ts`: `DICE_COLORSETS` / `DICE_MATERIALS` registries and `resolveDiceAppearance` either removed or retained as inert reference data (decided in design.md) since their only consumer goes away.
+- `lib/dice/diceAppearance.ts`: `DICE_COLORSETS` / `DICE_COLORSET_CATEGORIES` / `DICE_MATERIALS` / `resolveDiceAppearance` / `DEFAULT_COLORSET` / `DEFAULT_MATERIAL` removed, since their only consumers (`DiceAppearanceModal` and the old `useDiceAnimation` default) go away; the file itself is deleted if nothing else imports it (design.md Decision 6).
 
 ## Risks
 
