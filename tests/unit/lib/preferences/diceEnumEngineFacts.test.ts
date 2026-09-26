@@ -20,10 +20,12 @@ describe('dice.surface / dice.material enums match the vendored engine bundle', 
   it('every DICE_SURFACE_VALUES member is a real theme_surface key in the engine bundle', () => {
     for (const v of DICE_SURFACE_VALUES) {
       // Each theme key appears as a quoted object key ("blue-felt": {…) or bare identifier
-      // (default: {…) in the j_ table literal.
-      const quoted = new RegExp(`["']${v}["']\\s*:\\s*\\{`)
-      const bare = new RegExp(`(?:^|[,{\\s])${v}\\s*:\\s*\\{`)
-      expect(quoted.test(bundle) || bare.test(bundle)).toBe(true)
+      // (default: {…) in the j_ table literal. Plain substring checks (not a dynamically
+      // built RegExp — `v` is always a hardcoded DICE_SURFACE_VALUES member, but a
+      // non-literal RegExp is still flagged as a DoS-pattern smell by static analysis).
+      const quoted = bundle.includes(`"${v}": {`) || bundle.includes(`'${v}': {`)
+      const bare = bundle.includes(`${v}: {`)
+      expect(quoted || bare).toBe(true)
     }
   })
 
