@@ -15,44 +15,44 @@
 
 ### 1. Schema (design.md Decisions 1, 2, 3)
 
-- [ ] **1.1** In `lib/preferences/schema.ts`: change `PreferenceValues.dice.color` to `{ foreground: string; background: string } | null`; add a `DiceColor` (or similarly named) exported type for the object shape.
-- [ ] **1.2** In `lib/preferences/schema.ts`: change `PreferenceValues.dice.surface` to `'green-felt' | 'wood-table' | 'wood-tray' | 'metal' | null`; export `DICE_SURFACE_VALUES` as the backing tuple (design.md Decision 7).
-- [ ] **1.3** In `lib/preferences/schema.ts`: add `PreferenceValues.dice.material: 'glass' | 'none' | 'metal' | 'wood' | null`; export `DICE_MATERIAL_VALUES` as the backing tuple.
-- [ ] **1.4** Update `DEFAULT_PREFERENCES.dice` to include `material: null` alongside the existing `color: null, surface: null`.
-- [ ] **1.5** Replace `isValidColor` (or add a new validator) so `KEY_VALIDATORS["dice.color"]` accepts only `null` or a plain object with both `foreground` and `background` matching `HEX_COLOR`, rejecting the whole value on any other shape (no partial repair).
-- [ ] **1.6** Replace `KEY_VALIDATORS["dice.surface"]`'s `typeof v === "string"` check with a closed-set check against `DICE_SURFACE_VALUES` (plus `null`).
-- [ ] **1.7** Add `KEY_VALIDATORS["dice.material"]` as a closed-set check against `DICE_MATERIAL_VALUES` (plus `null`).
-- [ ] **1.8 (test-first)** In `tests/unit/lib/preferences/schema.test.ts`: write/update tests for `isValidPreferenceValue('dice.color', ...)` (valid object, `null`, missing field, invalid hex on one field, extra-field object with valid required fields), `isValidPreferenceValue('dice.surface', ...)` (each of the 4 values, `null`, an old free-string value now rejected, e.g. `'stone'`), `isValidPreferenceValue('dice.material', ...)` (each of the 4 values, `null`, invalid string), `resolvePreferences` repair for out-of-enum/malformed stored values, `validatePreferencePatch` rejection cases, `sparseKnownValues`/`partitionPreferenceDelta` coverage for the new `dice.material` key. Confirm these tests fail against the current (pre-1.1–1.7) code, then implement 1.1–1.7 to make them pass.
-- [ ] **1.9** In `lib/preferences/usePreferences.tsx`: add `'dice.material'` to the `PreferencePath` union and `ALL_PATHS` array.
+- [x] **1.1** In `lib/preferences/schema.ts`: change `PreferenceValues.dice.color` to `{ foreground: string; background: string } | null`; add a `DiceColor` (or similarly named) exported type for the object shape.
+- [x] **1.2** In `lib/preferences/schema.ts`: change `PreferenceValues.dice.surface` to `'green-felt' | 'wood-table' | 'wood-tray' | 'metal' | null`; export `DICE_SURFACE_VALUES` as the backing tuple (design.md Decision 7).
+- [x] **1.3** In `lib/preferences/schema.ts`: add `PreferenceValues.dice.material: 'glass' | 'none' | 'metal' | 'wood' | null`; export `DICE_MATERIAL_VALUES` as the backing tuple.
+- [x] **1.4** Update `DEFAULT_PREFERENCES.dice` to include `material: null` alongside the existing `color: null, surface: null`.
+- [x] **1.5** Replace `isValidColor` (or add a new validator) so `KEY_VALIDATORS["dice.color"]` accepts only `null` or a plain object with both `foreground` and `background` matching `HEX_COLOR`, rejecting the whole value on any other shape (no partial repair).
+- [x] **1.6** Replace `KEY_VALIDATORS["dice.surface"]`'s `typeof v === "string"` check with a closed-set check against `DICE_SURFACE_VALUES` (plus `null`).
+- [x] **1.7** Add `KEY_VALIDATORS["dice.material"]` as a closed-set check against `DICE_MATERIAL_VALUES` (plus `null`).
+- [x] **1.8 (test-first)** In `tests/unit/lib/preferences/schema.test.ts`: write/update tests for `isValidPreferenceValue('dice.color', ...)` (valid object, `null`, missing field, invalid hex on one field, extra-field object with valid required fields), `isValidPreferenceValue('dice.surface', ...)` (each of the 4 values, `null`, an old free-string value now rejected, e.g. `'stone'`), `isValidPreferenceValue('dice.material', ...)` (each of the 4 values, `null`, invalid string), `resolvePreferences` repair for out-of-enum/malformed stored values, `validatePreferencePatch` rejection cases, `sparseKnownValues`/`partitionPreferenceDelta` coverage for the new `dice.material` key. Confirm these tests fail against the current (pre-1.1–1.7) code, then implement 1.1–1.7 to make them pass.
+- [x] **1.9** In `lib/preferences/usePreferences.tsx`: add `'dice.material'` to the `PreferencePath` union and `ALL_PATHS` array.
 
 ### 2. Engine wiring (design.md Decisions 4, 5)
 
-- [ ] **2.1** In `lib/dice/useDiceAnimation.ts`: reshape the exported `DiceAppearanceOptions` interface to `{ customColorset: { foreground: string; background: string } | null; material: 'glass' | 'none' | 'metal' | 'wood' | null; surface: 'green-felt' | 'wood-table' | 'wood-tray' | 'metal' | null }`; remove the `DEFAULT_APPEARANCE` constant's dependency on `DEFAULT_COLORSET`/`DEFAULT_MATERIAL` (replace with an all-`null` default object).
-- [ ] **2.2** Update the `new DiceBox(container, { ... })` call: pass `theme_customColorset: appearanceRef.current.customColorset` only when non-`null` (otherwise omit the key entirely); same pattern for `theme_material` and `theme_surface`; remove `theme_colorset` entirely (no longer sourced from preferences).
-- [ ] **2.3 (test-first)** In the `useDiceAnimation` test suite (using `tests/unit/lib/dice/__helpers__/diceAnimationHarness.ts`'s `diceBoxMockFactory`): write/update tests asserting (a) a set `customColorset`/`material`/`surface` appear verbatim in the constructed `DiceConfig`, (b) all three are absent from the constructed config when the appearance object is all-`null`, (c) `theme_colorset` is never passed. Confirm these fail against current code, then implement 2.1–2.2.
-- [ ] **2.4** In `lib/components/GlobalDiceFab.tsx`: replace the `useDiceFabPreferences()`-sourced `{ colorset: prefs.diceColorset, material: prefs.diceMaterial }` object passed to `useDiceAnimation(...)` with an object built from `usePreferences().preferences.dice` (`{ customColorset: dice.color, material: dice.material, surface: dice.surface }`).
+- [x] **2.1** In `lib/dice/useDiceAnimation.ts`: reshape the exported `DiceAppearanceOptions` interface to `{ customColorset: { foreground: string; background: string } | null; material: 'glass' | 'none' | 'metal' | 'wood' | null; surface: 'green-felt' | 'wood-table' | 'wood-tray' | 'metal' | null }`; remove the `DEFAULT_APPEARANCE` constant's dependency on `DEFAULT_COLORSET`/`DEFAULT_MATERIAL` (replace with an all-`null` default object).
+- [x] **2.2** Update the `new DiceBox(container, { ... })` call: pass `theme_customColorset: appearanceRef.current.customColorset` only when non-`null` (otherwise omit the key entirely); same pattern for `theme_material` and `theme_surface`; remove `theme_colorset` entirely (no longer sourced from preferences).
+- [x] **2.3 (test-first)** In the `useDiceAnimation` test suite (using `tests/unit/lib/dice/__helpers__/diceAnimationHarness.ts`'s `diceBoxMockFactory`): write/update tests asserting (a) a set `customColorset`/`material`/`surface` appear verbatim in the constructed `DiceConfig`, (b) all three are absent from the constructed config when the appearance object is all-`null`, (c) `theme_colorset` is never passed. Confirm these fail against current code, then implement 2.1–2.2.
+- [x] **2.4** In `lib/components/GlobalDiceFab.tsx`: replace the `useDiceFabPreferences()`-sourced `{ colorset: prefs.diceColorset, material: prefs.diceMaterial }` object passed to `useDiceAnimation(...)` with an object built from `usePreferences().preferences.dice` (`{ customColorset: dice.color, material: dice.material, surface: dice.surface }`).
 
 ### 3. Retire the LocalStore gallery path (design.md Decision 6)
 
-- [ ] **3.1** In `lib/dice/useDiceFabPreferences.ts`: remove `diceColorset`/`diceMaterial` state, `appearanceReducer`, `AppearanceState`/`AppearanceAction` types, `COLORSET_KEY`/`MATERIAL_KEY` constants, and the `safeGet`/`safeSet` calls tied to them; remove `diceColorset`/`setDiceColorset`/`diceMaterial`/`setDiceMaterial` from the returned `DiceFabPreferences` interface and implementation. Keep `sendToChat`/`disableAnimation` and their existing helpers unchanged.
-- [ ] **3.2** In `lib/components/GlobalDiceFab.tsx`: remove the "Dice appearance" trigger button, `appearanceOpen` state, the focus-restore effect tied to it, the `<DiceAppearanceModal ... />` render block, and the now-unused import of `DiceAppearanceModal`.
-- [ ] **3.3** Delete `lib/components/dice/DiceAppearanceModal.tsx` and its test file(s).
-- [ ] **3.4** In `lib/dice/diceAppearance.ts`: remove `DICE_COLORSETS`, `DICE_COLORSET_CATEGORIES`, `DICE_MATERIALS`, `resolveDiceAppearance`, `DEFAULT_COLORSET`, `DEFAULT_MATERIAL`. If no remaining code imports anything from this file, delete it and its associated fixture/asset tests (`tests/unit/lib/dice/diceAppearance*.test.ts`, `tests/unit/lib/dice/__fixtures__/diceBoxEngineFacts.ts` if solely used by those tests).
-- [ ] **3.5 (test-first)** Update/remove `GlobalDiceFab` component tests to assert no "Dice appearance" trigger renders and no `DiceAppearanceModal` is reachable, before completing 3.2–3.3.
+- [x] **3.1** In `lib/dice/useDiceFabPreferences.ts`: remove `diceColorset`/`diceMaterial` state, `appearanceReducer`, `AppearanceState`/`AppearanceAction` types, `COLORSET_KEY`/`MATERIAL_KEY` constants, and the `safeGet`/`safeSet` calls tied to them; remove `diceColorset`/`setDiceColorset`/`diceMaterial`/`setDiceMaterial` from the returned `DiceFabPreferences` interface and implementation. Keep `sendToChat`/`disableAnimation` and their existing helpers unchanged.
+- [x] **3.2** In `lib/components/GlobalDiceFab.tsx`: remove the "Dice appearance" trigger button, `appearanceOpen` state, the focus-restore effect tied to it, the `<DiceAppearanceModal ... />` render block, and the now-unused import of `DiceAppearanceModal`.
+- [x] **3.3** Delete `lib/components/dice/DiceAppearanceModal.tsx` and its test file(s).
+- [x] **3.4** In `lib/dice/diceAppearance.ts`: remove `DICE_COLORSETS`, `DICE_COLORSET_CATEGORIES`, `DICE_MATERIALS`, `resolveDiceAppearance`, `DEFAULT_COLORSET`, `DEFAULT_MATERIAL`. If no remaining code imports anything from this file, delete it and its associated fixture/asset tests (`tests/unit/lib/dice/diceAppearance*.test.ts`, `tests/unit/lib/dice/__fixtures__/diceBoxEngineFacts.ts` if solely used by those tests).
+- [x] **3.5 (test-first)** Update/remove `GlobalDiceFab` component tests to assert no "Dice appearance" trigger renders and no `DiceAppearanceModal` is reachable, before completing 3.2–3.3.
 
 ### 4. `/profile` UI rework (design.md Decision 7)
 
-- [ ] **4.1 (test-first)** Update `tests/unit/app/profile/page.test.tsx` (or equivalent) for the new UI: foreground/background hex inputs writing `dice.color` as an object, a "Dice Surface" `<select>` populated from `DICE_SURFACE_VALUES` with friendly labels, a new "Dice Material" `<select>` populated from `DICE_MATERIAL_VALUES`. Confirm these fail against the current single-hex-field UI.
-- [ ] **4.2** In `app/profile/page.tsx`: replace the single "Dice Color (Hex)" input with a foreground/background hex pair, each with its own local draft + `aria-invalid`/`role="alert"` validation (mirroring the existing FU-3 pattern, applied per field); only push a complete, valid `{ foreground, background }` object to `setPreference('dice.color', ...)`, or `null` when both are cleared.
-- [ ] **4.3** In `app/profile/page.tsx`: update the "Dice Surface" `<select>` to use `DICE_SURFACE_VALUES` (`green-felt`/`wood-table`/`wood-tray`/`metal`) with friendly `<option>` labels (e.g. "Green Felt", "Wood Table", "Wood Tray", "Metal"), replacing the current `wood`/`metal`/`stone`/`felt` options.
-- [ ] **4.4** In `app/profile/page.tsx`: add a new "Dice Material" `<select>` using `DICE_MATERIAL_VALUES` (`glass`/`none`/`metal`/`wood`) with friendly labels ("Glass", "Plastic", "Metal", "Wood"), following the same `<select>` pattern as "Dice Animation"/"Dice Surface".
+- [x] **4.1 (test-first)** Update `tests/unit/app/profile/page.test.tsx` (or equivalent) for the new UI: foreground/background hex inputs writing `dice.color` as an object, a "Dice Surface" `<select>` populated from `DICE_SURFACE_VALUES` with friendly labels, a new "Dice Material" `<select>` populated from `DICE_MATERIAL_VALUES`. Confirm these fail against the current single-hex-field UI.
+- [x] **4.2** In `app/profile/page.tsx`: replace the single "Dice Color (Hex)" input with a foreground/background hex pair, each with its own local draft + `aria-invalid`/`role="alert"` validation (mirroring the existing FU-3 pattern, applied per field); only push a complete, valid `{ foreground, background }` object to `setPreference('dice.color', ...)`, or `null` when both are cleared.
+- [x] **4.3** In `app/profile/page.tsx`: update the "Dice Surface" `<select>` to use `DICE_SURFACE_VALUES` (`green-felt`/`wood-table`/`wood-tray`/`metal`) with friendly `<option>` labels (e.g. "Green Felt", "Wood Table", "Wood Tray", "Metal"), replacing the current `wood`/`metal`/`stone`/`felt` options.
+- [x] **4.4** In `app/profile/page.tsx`: add a new "Dice Material" `<select>` using `DICE_MATERIAL_VALUES` (`glass`/`none`/`metal`/`wood`) with friendly labels ("Glass", "Plastic", "Metal", "Wood"), following the same `<select>` pattern as "Dice Animation"/"Dice Surface".
 
 ### 5. Manual verification
 
 - [ ] **5.1** Run the app locally, set a custom `dice.color`, `dice.surface`, and `dice.material` on `/profile`, then roll dice via the fab and visually confirm the rendered die/tray reflect the chosen values (covers the risk noted in proposal.md/design.md that `theme_customColorset`'s shape is inferred from the vendored engine bundle, not documented types).
 
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (e.g. the FU-3 hex-draft-validation pattern in `app/profile/page.tsx` — reuse for the new foreground/background fields rather than writing a new pattern).
-- [ ] Confirm acceptance criteria in `openspec/changes/consume-dice-preferences/specs/profile-settings/spec.md` and `openspec/changes/consume-dice-preferences/specs/dice-appearance/spec.md` are covered by the tests written in 1.8, 2.3, 3.5, and 4.1.
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (e.g. the FU-3 hex-draft-validation pattern in `app/profile/page.tsx` — reuse for the new foreground/background fields rather than writing a new pattern).
+- [x] Confirm acceptance criteria in `openspec/changes/consume-dice-preferences/specs/profile-settings/spec.md` and `openspec/changes/consume-dice-preferences/specs/dice-appearance/spec.md` are covered by the tests written in 1.8, 2.3, 3.5, and 4.1.
 
 ## Pre-Commit Code Review
 
@@ -60,10 +60,10 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests: `node node_modules/.bin/jest` (per project convention — `npm test` has no script; see `tests/unit/lib/preferences/schema.test.ts`, `tests/unit/lib/dice/**`, profile page tests)
+- [x] Run unit/integration tests: `node node_modules/.bin/jest` (per project convention — `npm test` has no script; see `tests/unit/lib/preferences/schema.test.ts`, `tests/unit/lib/dice/**`, profile page tests)
 - [ ] Run E2E tests (if applicable) per project convention
-- [ ] Run type checks: `npm run typecheck` (or project's equivalent)
-- [ ] Run build: `npm run build`
+- [x] Run type checks: `npm run typecheck` (or project's equivalent)
+- [x] Run build: `npm run build`
 - [ ] Run security/code quality checks required by project standards (Codacy / Verity gate per `CLAUDE.md`)
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]

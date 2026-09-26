@@ -6,17 +6,20 @@ import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { animatedDiceCount, toDiceBoxNotation } from '@/lib/dice/toDiceBoxNotation'
 import { diceAnimationScale } from '@/lib/dice/diceAnimationScale'
 import { reconcileDiceFaces, type SettledDie } from '@/lib/dice/reconcileDiceFaces'
-import { DEFAULT_COLORSET, DEFAULT_MATERIAL } from '@/lib/dice/diceAppearance'
+import type { DiceColor, DiceMaterial, DiceSurface } from '@/lib/preferences/schema'
 
-/** Resolved 3D dice appearance passed through to the engine's `theme_*` options. */
+/** Resolved 3D dice appearance passed through to the engine's `theme_*` options. `null`
+ *  means "omit this key", letting the engine apply its own internal default. */
 export interface DiceAppearanceOptions {
-  colorset: string
-  material: string
+  customColorset: DiceColor | null
+  material: DiceMaterial | null
+  surface: DiceSurface | null
 }
 
 const DEFAULT_APPEARANCE: DiceAppearanceOptions = {
-  colorset: DEFAULT_COLORSET,
-  material: DEFAULT_MATERIAL,
+  customColorset: null,
+  material: null,
+  surface: null,
 }
 
 /** `'idle'` while the 3D path is (or may be) usable; `'unsupported'` once it has failed. */
@@ -180,15 +183,18 @@ export function useDiceAnimation(
         )
         if (runIdRef.current !== myRun) return false
         const DiceBox = mod.default
+        const appearance = appearanceRef.current
         box = new DiceBox(container, {
           assetPath: ASSET_PATH,
           baseScale: diceAnimationScale(animatedDiceCount(built)),
           sounds: false,
           shadows: false,
           iterationLimit: ITERATION_LIMIT,
-          theme_colorset: appearanceRef.current.colorset,
-          theme_customColorset: null,
-          theme_material: appearanceRef.current.material,
+          ...(appearance.customColorset !== null && {
+            theme_customColorset: appearance.customColorset,
+          }),
+          ...(appearance.material !== null && { theme_material: appearance.material }),
+          ...(appearance.surface !== null && { theme_surface: appearance.surface }),
         }) as unknown as DiceBoxLike
         await withTimeout(box.initialize(), INIT_TIMEOUT_MS)
       } catch (err) {

@@ -22,16 +22,32 @@ export interface DockSize {
   screenHeight: number;
 }
 
+/** Custom dice colorset, matching the engine's `theme_customColorset` shape. */
+export interface DiceColor {
+  foreground: string;
+  background: string;
+}
+
+/** Backing tuple for `PreferenceValues.dice.surface` — matches the engine's `theme_surface`. */
+export const DICE_SURFACE_VALUES = ['green-felt', 'wood-table', 'wood-tray', 'metal'] as const;
+export type DiceSurface = (typeof DICE_SURFACE_VALUES)[number];
+
+/** Backing tuple for `PreferenceValues.dice.material` — matches the engine's `theme_material`. */
+export const DICE_MATERIAL_VALUES = ['glass', 'none', 'metal', 'wood'] as const;
+export type DiceMaterial = (typeof DICE_MATERIAL_VALUES)[number];
+
 export interface PreferenceValues {
   dice: {
     /** Auto-submit a roll to session chat when a session is present. */
     sendToChat: boolean;
     /** Tri-state: `true|false` once chosen, `null` = follow `prefers-reduced-motion`. */
     disableAnimation: boolean | null;
-    /** Reserved slot for a future dice colour picker. Short hex string or `null`. */
-    color: string | null;
-    /** Surface material for dice rolls. String or `null`. */
-    surface: string | null;
+    /** Custom dice colorset (`theme_customColorset`), or `null` for the engine default. */
+    color: DiceColor | null;
+    /** Tray/table surface (`theme_surface`), or `null` for the engine default. */
+    surface: DiceSurface | null;
+    /** Die material (`theme_material`), or `null` for the engine default. */
+    material: DiceMaterial | null;
   };
   chat: {
     pinned: boolean;
@@ -45,7 +61,13 @@ export interface PreferenceValues {
 }
 
 export const DEFAULT_PREFERENCES: PreferenceValues = Object.freeze({
-  dice: Object.freeze({ sendToChat: false, disableAnimation: null, color: null, surface: null }),
+  dice: Object.freeze({
+    sendToChat: false,
+    disableAnimation: null,
+    color: null,
+    surface: null,
+    material: null,
+  }),
   chat: Object.freeze({ pinned: false, size: null }),
   combat: Object.freeze({ autoScrollToNextCombatant: true }),
 }) as PreferenceValues;
@@ -58,8 +80,26 @@ const isPlainObject = (v: unknown): v is Record<string, unknown> =>
 const isFiniteNumber = (v: unknown): v is number =>
   typeof v === "number" && Number.isFinite(v);
 
-const isValidColor = (v: unknown): v is string | null =>
-  v === null || (typeof v === "string" && HEX_COLOR.test(v));
+/** Accepts only `null` or a plain object with both fields matching `HEX_COLOR` — no partial repair. */
+const isValidDiceColor = (v: unknown): v is DiceColor | null => {
+  if (v === null) return true;
+  if (!isPlainObject(v)) return false;
+  return (
+    typeof v.foreground === "string" &&
+    HEX_COLOR.test(v.foreground) &&
+    typeof v.background === "string" &&
+    HEX_COLOR.test(v.background)
+  );
+};
+
+/** Builds a `null | <closed-set member>` validator from a backing tuple. */
+const isValidEnumOrNull = <T extends string>(values: readonly T[]) =>
+  (v: unknown): v is T | null =>
+    v === null || (typeof v === "string" && (values as readonly string[]).includes(v));
+
+const isValidDiceSurface = isValidEnumOrNull(DICE_SURFACE_VALUES);
+
+const isValidDiceMaterial = isValidEnumOrNull(DICE_MATERIAL_VALUES);
 
 const isValidDockSize = (v: unknown): v is DockSize => {
   if (!isPlainObject(v)) return false;
@@ -82,9 +122,9 @@ const KEY_VALIDATORS = {
   "dice.sendToChat": (v: unknown): v is boolean => typeof v === "boolean",
   "dice.disableAnimation": (v: unknown): v is boolean | null =>
     v === null || typeof v === "boolean",
-  "dice.color": isValidColor,
-  "dice.surface": (v: unknown): v is string | null =>
-    v === null || typeof v === "string",
+  "dice.color": isValidDiceColor,
+  "dice.surface": isValidDiceSurface,
+  "dice.material": isValidDiceMaterial,
   "chat.pinned": (v: unknown): v is boolean => typeof v === "boolean",
   "chat.size": isValidDockSizeOrNull,
   "combat.autoScrollToNextCombatant": (v: unknown): v is boolean => typeof v === "boolean",

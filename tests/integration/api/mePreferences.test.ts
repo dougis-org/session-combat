@@ -50,19 +50,19 @@ describe("/api/me/preferences Integration Tests", () => {
     expect(after.values.dice.sendToChat).toBe(true);
   });
 
-  it("PATCH dice.surface persists a string and round-trips via GET", async () => {
+  it("PATCH dice.surface persists a supported value and round-trips via GET", async () => {
     const user = (await registerTestUser(baseUrl, "meprefs-surface")).cookie;
-    const res = await patch({ dice: { surface: "wood" } }, user);
+    const res = await patch({ dice: { surface: "wood-table" } }, user);
     expect(res.status).toBe(200);
-    expect((await res.json()).values.dice.surface).toBe("wood");
+    expect((await res.json()).values.dice.surface).toBe("wood-table");
     const after = await (await get(user)).json();
-    expect(after.values.dice.surface).toBe("wood");
-    expect(after.stored.dice.surface).toBe("wood");
+    expect(after.values.dice.surface).toBe("wood-table");
+    expect(after.stored.dice.surface).toBe("wood-table");
   });
 
   it("PATCH dice.surface null clears a stored value", async () => {
     const user = (await registerTestUser(baseUrl, "meprefs-surface-clear")).cookie;
-    await patch({ dice: { surface: "felt" } }, user);
+    await patch({ dice: { surface: "wood-tray" } }, user);
     const res = await patch({ dice: { surface: null } }, user);
     expect(res.status).toBe(200);
     const after = await (await get(user)).json();
@@ -70,9 +70,45 @@ describe("/api/me/preferences Integration Tests", () => {
     expect(after.stored).toEqual({});
   });
 
-  it("PATCH wrongly-typed dice.surface → 400, no write", async () => {
+  it("PATCH wrongly-typed / unsupported dice.surface → 400, no write", async () => {
     const user = (await registerTestUser(baseUrl, "meprefs-surface-bad")).cookie;
     expect((await patch({ dice: { surface: 123 } }, user)).status).toBe(400);
+    expect((await patch({ dice: { surface: "felt" } }, user)).status).toBe(400);
+    const after = await (await get(user)).json();
+    expect(after.stored).toEqual({});
+  });
+
+  it("PATCH dice.color persists a { foreground, background } object and round-trips via GET", async () => {
+    const user = (await registerTestUser(baseUrl, "meprefs-color")).cookie;
+    const color = { foreground: "#000000", background: "#ff0000" };
+    const res = await patch({ dice: { color } }, user);
+    expect(res.status).toBe(200);
+    expect((await res.json()).values.dice.color).toEqual(color);
+    const after = await (await get(user)).json();
+    expect(after.values.dice.color).toEqual(color);
+  });
+
+  it("PATCH dice.color with a missing field → 400, no write", async () => {
+    const user = (await registerTestUser(baseUrl, "meprefs-color-bad")).cookie;
+    expect(
+      (await patch({ dice: { color: { foreground: "#000000" } } }, user)).status,
+    ).toBe(400);
+    const after = await (await get(user)).json();
+    expect(after.stored).toEqual({});
+  });
+
+  it("PATCH dice.material persists a supported value and round-trips via GET", async () => {
+    const user = (await registerTestUser(baseUrl, "meprefs-material")).cookie;
+    const res = await patch({ dice: { material: "wood" } }, user);
+    expect(res.status).toBe(200);
+    expect((await res.json()).values.dice.material).toBe("wood");
+    const after = await (await get(user)).json();
+    expect(after.values.dice.material).toBe("wood");
+  });
+
+  it("PATCH unsupported dice.material → 400, no write", async () => {
+    const user = (await registerTestUser(baseUrl, "meprefs-material-bad")).cookie;
+    expect((await patch({ dice: { material: "plastic" } }, user)).status).toBe(400);
     const after = await (await get(user)).json();
     expect(after.stored).toEqual({});
   });

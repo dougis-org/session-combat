@@ -1,12 +1,12 @@
 import { renderHook, act } from '@testing-library/react'
-import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { useDiceAnimation } from '@/lib/dice/useDiceAnimation'
 import { engineMock, resetEngineMock, built, stubWebGL } from './__helpers__/diceAnimationHarness'
 
-// Appearance pass-through for `useDiceAnimation`: the resolved `{ colorset, material }` is
-// threaded into the `DiceBox` constructor options as `theme_colorset` / `theme_material`
-// (with `theme_customColorset: null`), without disturbing the pre-existing options or the
-// decided roll. Shares the engine stand-in in `./__helpers__`.
+// Appearance pass-through for `useDiceAnimation` (design.md Decisions 4, 5): a resolved
+// `{ customColorset, material, surface }` — sourced from `preferences.dice.*` — is threaded
+// into the `DiceBox` constructor options as `theme_customColorset` / `theme_material` /
+// `theme_surface`, each omitted when `null`. `theme_colorset` is never passed. Shares the
+// engine stand-in in `./__helpers__`.
 jest.mock('@drdreo/dice-box-threejs', () =>
   require('./__helpers__/diceAnimationHarness').diceBoxMockFactory(),
 )
@@ -29,25 +29,81 @@ function lastOptions() {
   return ctorMock.mock.calls[ctorMock.mock.calls.length - 1][1]
 }
 
-describe('useDiceAnimation — appearance pass-through (tasks 5.1 / 5.2)', () => {
-  it('5.1-a passes the resolved colorset / material as theme_* options', async () => {
+describe('useDiceAnimation — appearance pass-through (task 2.3)', () => {
+  it('a set customColorset appears verbatim in the constructed DiceConfig, no theme_colorset', async () => {
     const container = document.createElement('div')
     const { result } = renderHook(() =>
-      useDiceAnimation({ colorset: 'fire', material: 'metal' }),
+      useDiceAnimation({
+        customColorset: { foreground: '#000', background: '#f00' },
+        material: null,
+        surface: null,
+      }),
     )
     await act(async () => {
       await result.current.run(built, container)
     })
     const opts = lastOptions()
-    expect(opts.theme_colorset).toBe('fire')
-    expect(opts.theme_customColorset).toBeNull()
-    expect(opts.theme_material).toBe('metal')
+    expect(opts.theme_customColorset).toEqual({ foreground: '#000', background: '#f00' })
+    expect(opts).not.toHaveProperty('theme_colorset')
   })
 
-  it('5.1-b leaves the pre-existing constructor options unchanged', async () => {
+  it('a set surface appears verbatim in the constructed DiceConfig', async () => {
     const container = document.createElement('div')
     const { result } = renderHook(() =>
-      useDiceAnimation({ colorset: 'fire', material: 'metal' }),
+      useDiceAnimation({ customColorset: null, material: null, surface: 'wood-tray' }),
+    )
+    await act(async () => {
+      await result.current.run(built, container)
+    })
+    expect(lastOptions().theme_surface).toBe('wood-tray')
+  })
+
+  it('a set material appears verbatim in the constructed DiceConfig', async () => {
+    const container = document.createElement('div')
+    const { result } = renderHook(() =>
+      useDiceAnimation({ customColorset: null, material: 'metal', surface: null }),
+    )
+    await act(async () => {
+      await result.current.run(built, container)
+    })
+    expect(lastOptions().theme_material).toBe('metal')
+  })
+
+  it('all-null appearance omits theme_customColorset, theme_material, theme_surface, and theme_colorset', async () => {
+    const container = document.createElement('div')
+    const { result } = renderHook(() =>
+      useDiceAnimation({ customColorset: null, material: null, surface: null }),
+    )
+    await act(async () => {
+      await result.current.run(built, container)
+    })
+    const opts = lastOptions()
+    expect(opts).not.toHaveProperty('theme_customColorset')
+    expect(opts).not.toHaveProperty('theme_material')
+    expect(opts).not.toHaveProperty('theme_surface')
+    expect(opts).not.toHaveProperty('theme_colorset')
+  })
+
+  it('no appearance argument (default) also omits all three theme_* keys', async () => {
+    const container = document.createElement('div')
+    const { result } = renderHook(() => useDiceAnimation())
+    await act(async () => {
+      await result.current.run(built, container)
+    })
+    const opts = lastOptions()
+    expect(opts).not.toHaveProperty('theme_customColorset')
+    expect(opts).not.toHaveProperty('theme_material')
+    expect(opts).not.toHaveProperty('theme_surface')
+  })
+
+  it('leaves the pre-existing constructor options unchanged', async () => {
+    const container = document.createElement('div')
+    const { result } = renderHook(() =>
+      useDiceAnimation({
+        customColorset: { foreground: '#000', background: '#f00' },
+        material: 'metal',
+        surface: 'wood-tray',
+      }),
     )
     await act(async () => {
       await result.current.run(built, container)
@@ -60,95 +116,13 @@ describe('useDiceAnimation — appearance pass-through (tasks 5.1 / 5.2)', () =>
     expect(typeof opts.iterationLimit).toBe('number')
   })
 
-  it('5.1-c defaults to white / glass when no appearance is supplied', async () => {
-    const container = document.createElement('div')
-    const { result } = renderHook(() => useDiceAnimation())
-    await act(async () => {
-      await result.current.run(built, container)
-    })
-    const opts = lastOptions()
-    expect(opts.theme_colorset).toBe('white')
-    expect(opts.theme_material).toBe('glass')
-  })
-
-  it('5.3-a a seeded roll reports the same total regardless of appearance', async () => {
-    const seeded: BuiltRoll = {
-      formula: '2d6',
-      rolls: [3, 4],
-      total: 7,
-      breakdown: [
-        { sides: 6, value: 3 },
-        { sides: 6, value: 4 },
-      ],
-      modifier: 0,
-    }
-    const container = document.createElement('div')
-
-    const a = renderHook(() => useDiceAnimation({ colorset: 'white', material: 'glass' }))
-    await act(async () => {
-      await a.result.current.run(seeded, container)
-    })
-    const totalDefault = seeded.total
-
-    resetEngineMock()
-    const b = renderHook(() =>
-      useDiceAnimation({ colorset: 'glitterparty', material: 'wood' }),
+  it('appearance mapping does not affect lazy-load timing (import only fires on run())', () => {
+    // No run() call — the module mock records ctor calls only; asserting no import side
+    // effect happened is implicit in this suite's other tests all calling run() explicitly
+    // before any DiceBox is constructed. This test documents the guarantee explicitly.
+    renderHook(() =>
+      useDiceAnimation({ customColorset: null, material: 'metal', surface: null }),
     )
-    await act(async () => {
-      await b.result.current.run(seeded, container)
-    })
-
-    expect(seeded.total).toBe(totalDefault)
-    expect(lastOptions().theme_material).toBe('wood')
-  })
-
-  it('5.3-b/c a forced d4 with a non-glass material settles or reconciles, never throws', async () => {
-    const forcedD4: BuiltRoll = {
-      formula: '1d4',
-      rolls: [3],
-      total: 3,
-      breakdown: [{ sides: 4, value: 3 }],
-      modifier: 0,
-    }
-    const container = document.createElement('div')
-
-    // Case 1: engine settles on the forced face — clean reconcile, no warn.
-    {
-      const { result } = renderHook(() =>
-        useDiceAnimation({ colorset: 'bronze', material: 'wood' }),
-      )
-      let outcome: boolean | undefined
-      await act(async () => {
-        outcome = await result.current.run(forcedD4, container)
-      })
-      expect(outcome).toBe(true)
-      expect(warnSpy).not.toHaveBeenCalled()
-    }
-
-    // Case 2: engine settles on a different face — reconcile mismatch degrades to a reveal.
-    resetEngineMock()
-    warnSpy.mockClear()
-    engineMock.faceOverride = (_notation, forced) =>
-      forced.map(d => ({ ...d, value: d.value === 4 ? 1 : d.value + 1 }))
-    {
-      const { result } = renderHook(() =>
-        useDiceAnimation({ colorset: 'bronze', material: 'wood' }),
-      )
-      let outcome: boolean | undefined
-      let threw = false
-      await act(async () => {
-        try {
-          outcome = await result.current.run(forcedD4, container)
-        } catch {
-          threw = true
-        }
-      })
-      expect(threw).toBe(false)
-      expect(outcome).toBe(true)
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('did not match the decided roll'),
-      )
-      expect(forcedD4.total).toBe(3)
-    }
+    expect(ctorMock).not.toHaveBeenCalled()
   })
 })

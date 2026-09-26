@@ -1,7 +1,9 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GlobalDiceFab } from '@/lib/components/GlobalDiceFab'
 import { LocalStore } from '@/lib/offline/LocalStore'
+import { PREFERENCES_MIRROR_KEY } from '@/lib/preferences/usePreferences'
+import { DEFAULT_PREFERENCES } from '@/lib/preferences/schema'
 import { mockAuthed, open } from './__helpers__/globalDiceFabHarness'
 
 jest.mock('@/lib/hooks/useAuth', () => ({
@@ -21,7 +23,11 @@ jest.mock('@/lib/dice/useDiceAnimation', () => ({
   useDiceAnimation: (...args: unknown[]) => useDiceAnimationMock(...(args as [])),
 }))
 
-describe('GlobalDiceFab — dice appearance (task 4.3 / 5.1-d)', () => {
+// The gallery appearance picker is retired (design.md Decision 6): /profile is the sole
+// control surface for dice.color/.surface/.material, wired through preferences.dice.* into
+// useDiceAnimation (Decision 5). This suite covers both: no in-panel appearance control, and
+// the preferences → useDiceAnimation wiring.
+describe('GlobalDiceFab — appearance retired, wired from preferences (task 2.4 / 3.5)', () => {
   async function openPanel() {
     const user = userEvent.setup()
     mockAuthed()
@@ -30,70 +36,44 @@ describe('GlobalDiceFab — dice appearance (task 4.3 / 5.1-d)', () => {
     return user
   }
 
-  it('4.3-a/b the panel exposes a "Dice appearance" control that opens the modal', async () => {
-    const user = await openPanel()
-    const trigger = screen.getByRole('button', { name: /dice appearance/i })
-    expect(trigger).toBeInTheDocument()
-    await user.click(trigger)
-    expect(screen.getByRole('dialog', { name: /dice appearance/i })).toBeInTheDocument()
+  it('the panel exposes no "Dice appearance" trigger', async () => {
+    await openPanel()
+    expect(screen.queryByRole('button', { name: /dice appearance/i })).not.toBeInTheDocument()
   })
 
-  it('4.3-c Escape closes only the appearance modal, the panel stays open', async () => {
-    const user = await openPanel()
-    await user.click(screen.getByRole('button', { name: /dice appearance/i }))
-    expect(screen.getByRole('dialog', { name: /dice appearance/i })).toBeInTheDocument()
-    await user.keyboard('{Escape}')
+  it('no appearance modal is reachable from the panel', async () => {
+    await openPanel()
     expect(screen.queryByRole('dialog', { name: /dice appearance/i })).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog', { name: 'Roll dice' })).toBeInTheDocument()
   })
 
-  it('4.3-d outside-click closes only the appearance modal, the panel stays open', async () => {
-    const user = await openPanel()
-    await user.click(screen.getByRole('button', { name: /dice appearance/i }))
-    const backdrop = screen.getByRole('dialog', { name: /dice appearance/i }).parentElement!
-    await user.click(backdrop)
-    expect(screen.queryByRole('dialog', { name: /dice appearance/i })).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog', { name: 'Roll dice' })).toBeInTheDocument()
-  })
-
-  it('4.3-e focus returns to the "Dice appearance" trigger on close', async () => {
-    const user = await openPanel()
-    const trigger = screen.getByRole('button', { name: /dice appearance/i })
-    await user.click(trigger)
-    await user.keyboard('{Escape}')
-    expect(trigger).toHaveFocus()
-  })
-
-  it('4.3-f selecting a colorset + material persists both keys', async () => {
-    const setSpy = jest.spyOn(LocalStore, 'set')
-    const user = await openPanel()
-    await user.click(screen.getByRole('button', { name: /dice appearance/i }))
-    const modal = screen.getByRole('dialog', { name: /dice appearance/i })
-    await user.click(within(modal).getByRole('radio', { name: /blood moon|bloodmoon/i }))
-    await user.click(within(modal).getByRole('radio', { name: 'Metal' }))
-    expect(setSpy).toHaveBeenCalledWith('dice-fab-colorset', 'bloodmoon')
-    expect(setSpy).toHaveBeenCalledWith('dice-fab-material', 'metal')
-  })
-
-  it('closing then re-opening the panel does not re-show the appearance modal', async () => {
-    const user = await openPanel()
-    await user.click(screen.getByRole('button', { name: /dice appearance/i }))
-    expect(screen.getByRole('dialog', { name: /dice appearance/i })).toBeInTheDocument()
-    // Close the modal, then close the panel, then re-open the panel.
-    await user.keyboard('{Escape}')
-    await user.keyboard('{Escape}')
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    await open(user)
-    expect(screen.queryByRole('dialog', { name: /dice appearance/i })).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog', { name: 'Roll dice' })).toBeInTheDocument()
-  })
-
-  it('5.1-d passes the persisted appearance into useDiceAnimation', async () => {
-    LocalStore.set('dice-fab-colorset', 'fire')
-    LocalStore.set('dice-fab-material', 'wood')
+  it('calls useDiceAnimation with customColorset/material/surface built from preferences.dice', async () => {
+    LocalStore.set(PREFERENCES_MIRROR_KEY, {
+      ...DEFAULT_PREFERENCES,
+      dice: {
+        ...DEFAULT_PREFERENCES.dice,
+        color: { foreground: '#000', background: '#fff' },
+        material: 'wood',
+        surface: 'metal',
+      },
+    })
     await openPanel()
     await waitFor(() =>
-      expect(useDiceAnimationMock).toHaveBeenLastCalledWith({ colorset: 'fire', material: 'wood' }),
+      expect(useDiceAnimationMock).toHaveBeenLastCalledWith({
+        customColorset: { foreground: '#000', background: '#fff' },
+        material: 'wood',
+        surface: 'metal',
+      }),
+    )
+  })
+
+  it('calls useDiceAnimation with all-null appearance when no dice.* preference is set', async () => {
+    await openPanel()
+    await waitFor(() =>
+      expect(useDiceAnimationMock).toHaveBeenLastCalledWith({
+        customColorset: null,
+        material: null,
+        surface: null,
+      }),
     )
   })
 })
