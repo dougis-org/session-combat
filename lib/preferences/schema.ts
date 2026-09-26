@@ -22,16 +22,51 @@ export interface DockSize {
   screenHeight: number;
 }
 
+/** Custom dice colorset, matching the engine's `theme_customColorset` shape. */
+export interface DiceColor {
+  foreground: string;
+  background: string;
+}
+
+/**
+ * Backing tuple for `PreferenceValues.dice.surface` — the engine's `theme_surface` table
+ * (`j_` in the vendored bundle, `node_modules/@drdreo/dice-box-threejs/dist/dice-box-threejs.es.js`).
+ * The package's shipped `.d.ts` claims `'green-felt' | 'wood-table' | 'wood-tray' | 'metal'`,
+ * but those last three are not valid keys (an unguarded `j_[theme_surface]` lookup throws for
+ * them) — this tuple is the real key set, verified against the bundle, not the `.d.ts`.
+ */
+export const DICE_SURFACE_VALUES = [
+  'default',
+  'blue-felt',
+  'red-felt',
+  'green-felt',
+  'taverntable',
+  'mahogany',
+  'stainless',
+  'cyberpunk',
+  'cagetown',
+] as const;
+export type DiceSurface = (typeof DICE_SURFACE_VALUES)[number];
+
+/** Backing tuple for `PreferenceValues.dice.material` — matches the engine's `theme_material`
+ *  (verified against `MATERIAL_PRESET_KEYS` in the vendored bundle). `'none'` is the engine's
+ *  own literal value for "no material" (its display label is "Plastic") — distinct from this
+ *  preference being `null`, which means "unset, use the engine's default material" instead. */
+export const DICE_MATERIAL_VALUES = ['glass', 'none', 'metal', 'wood'] as const;
+export type DiceMaterial = (typeof DICE_MATERIAL_VALUES)[number];
+
 export interface PreferenceValues {
   dice: {
     /** Auto-submit a roll to session chat when a session is present. */
     sendToChat: boolean;
     /** Tri-state: `true|false` once chosen, `null` = follow `prefers-reduced-motion`. */
     disableAnimation: boolean | null;
-    /** Reserved slot for a future dice colour picker. Short hex string or `null`. */
-    color: string | null;
-    /** Surface material for dice rolls. String or `null`. */
-    surface: string | null;
+    /** Custom dice colorset (`theme_customColorset`), or `null` for the engine default. */
+    color: DiceColor | null;
+    /** Tray/table surface (`theme_surface`), or `null` for the engine default. */
+    surface: DiceSurface | null;
+    /** Die material (`theme_material`), or `null` for the engine default. */
+    material: DiceMaterial | null;
   };
   chat: {
     pinned: boolean;
@@ -45,12 +80,20 @@ export interface PreferenceValues {
 }
 
 export const DEFAULT_PREFERENCES: PreferenceValues = Object.freeze({
-  dice: Object.freeze({ sendToChat: false, disableAnimation: null, color: null, surface: null }),
+  dice: Object.freeze({
+    sendToChat: false,
+    disableAnimation: null,
+    color: null,
+    surface: null,
+    material: null,
+  }),
   chat: Object.freeze({ pinned: false, size: null }),
   combat: Object.freeze({ autoScrollToNextCombatant: true }),
 }) as PreferenceValues;
 
-const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+/** Short/long hex color, e.g. `#f00` or `#ff0000`. Single source of truth for the pattern —
+ *  exported so `/profile`'s per-field UI validation stays in sync with schema validation. */
+export const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 const isPlainObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -58,11 +101,48 @@ const isPlainObject = (v: unknown): v is Record<string, unknown> =>
 const isFiniteNumber = (v: unknown): v is number =>
   typeof v === "number" && Number.isFinite(v);
 
-const isValidColor = (v: unknown): v is string | null =>
-  v === null || (typeof v === "string" && HEX_COLOR.test(v));
+/** Accepts only `null` or a plain object with exactly `foreground`/`background`, both
+ *  matching `HEX_COLOR` — no partial repair, and no extra keys. Rejecting extra keys matters
+ *  beyond input hygiene: `useDiceAnimation.ts` spreads this object verbatim into the engine's
+ *  `theme_customColorset` construction option, so an unvalidated extra key would reach the
+ *  rendering engine unfiltered. */
+const isValidDiceColor = (v: unknown): v is DiceColor | null => {
+  if (v === null) return true;
+  if (!isPlainObject(v)) return false;
+  const keys = Object.keys(v);
+  if (keys.length !== 2 || !keys.includes("foreground") || !keys.includes("background")) {
+    return false;
+  }
+  return (
+    typeof v.foreground === "string" &&
+    HEX_COLOR.test(v.foreground) &&
+    typeof v.background === "string" &&
+    HEX_COLOR.test(v.background)
+  );
+};
+
+/** Builds a `null | <closed-set member>` validator from a backing tuple. The cast to
+ *  `readonly string[]` is required only because `Array.prototype.includes` isn't
+ *  contravariant-friendly with a generic `T` — it does not weaken the runtime check. */
+const isValidEnumOrNull = <T extends string>(values: readonly T[]) =>
+  (v: unknown): v is T | null =>
+    v === null || (typeof v === "string" && (values as readonly string[]).includes(v));
+
+const isValidDiceSurface = isValidEnumOrNull(DICE_SURFACE_VALUES);
+
+const isValidDiceMaterial = isValidEnumOrNull(DICE_MATERIAL_VALUES);
 
 const isValidDockSize = (v: unknown): v is DockSize => {
   if (!isPlainObject(v)) return false;
+  const keys = Object.keys(v);
+  if (
+    keys.length !== 3 ||
+    !keys.includes("height") ||
+    !keys.includes("screenWidth") ||
+    !keys.includes("screenHeight")
+  ) {
+    return false;
+  }
   return (
     isFiniteNumber(v.height) &&
     v.height >= DOCK_MIN_HEIGHT &&
@@ -82,9 +162,9 @@ const KEY_VALIDATORS = {
   "dice.sendToChat": (v: unknown): v is boolean => typeof v === "boolean",
   "dice.disableAnimation": (v: unknown): v is boolean | null =>
     v === null || typeof v === "boolean",
-  "dice.color": isValidColor,
-  "dice.surface": (v: unknown): v is string | null =>
-    v === null || typeof v === "string",
+  "dice.color": isValidDiceColor,
+  "dice.surface": isValidDiceSurface,
+  "dice.material": isValidDiceMaterial,
   "chat.pinned": (v: unknown): v is boolean => typeof v === "boolean",
   "chat.size": isValidDockSizeOrNull,
   "combat.autoScrollToNextCombatant": (v: unknown): v is boolean => typeof v === "boolean",

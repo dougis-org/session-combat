@@ -1,38 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useReducer, useSyncExternalStore } from 'react'
-import { LocalStore } from '@/lib/offline/LocalStore'
-import {
-  DEFAULT_COLORSET,
-  DEFAULT_MATERIAL,
-  resolveDiceAppearance,
-} from '@/lib/dice/diceAppearance'
+import { useCallback, useSyncExternalStore } from 'react'
 import { usePreferences } from '@/lib/preferences/usePreferences'
-
-// localStorage key names (not secrets) for the 3D dice appearance.
-// TODO(add-user-preference-persistence): these two map onto `PreferenceValues.dice.colorset`
-// / `.material`; a later change can copy the scalar string values forward without a migration.
-const COLORSET_KEY = 'dice-fab-colorset' // nosemgrep
-const MATERIAL_KEY = 'dice-fab-material' // nosemgrep
-
-function safeGet<T>(key: string): T | null {
-  try {
-    return LocalStore.get<T>(key)
-  } catch (err) {
-    // Degrade to defaults, but keep the failure observable (matches lib/clientStorage).
-    console.warn(`[dice-fab-prefs] localStorage read failed for "${key}"`, err)
-    return null
-  }
-}
-
-function safeSet(key: string, val: unknown): void {
-  try {
-    LocalStore.set(key, val)
-  } catch (err) {
-    // Storage unavailable — degrade to an in-session value, but log it.
-    console.warn(`[dice-fab-prefs] localStorage write failed for "${key}"`, err)
-  }
-}
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 
@@ -54,34 +23,6 @@ function subscribeReducedMotion(onChange: () => void): () => void {
   return () => mq.removeEventListener('change', onChange)
 }
 
-interface AppearanceState {
-  /** Resolved (registry-validated) 3D dice appearance. */
-  diceColorset: string
-  diceMaterial: string
-}
-
-type AppearanceAction =
-  | { type: 'INIT'; diceColorset: string; diceMaterial: string }
-  | { type: 'SET_DICE_COLORSET'; value: string }
-  | { type: 'SET_DICE_MATERIAL'; value: string }
-
-function appearanceReducer(state: AppearanceState, action: AppearanceAction): AppearanceState {
-  switch (action.type) {
-    case 'INIT':
-      return { diceColorset: action.diceColorset, diceMaterial: action.diceMaterial }
-    case 'SET_DICE_COLORSET':
-      return {
-        ...state,
-        diceColorset: resolveDiceAppearance(action.value, state.diceMaterial).colorset,
-      }
-    case 'SET_DICE_MATERIAL':
-      return {
-        ...state,
-        diceMaterial: resolveDiceAppearance(state.diceColorset, action.value).material,
-      }
-  }
-}
-
 export interface DiceFabPreferences {
   /** Whether a roll should auto-submit to session chat (when a session is present). */
   sendToChat: boolean
@@ -91,12 +32,6 @@ export interface DiceFabPreferences {
   /** The raw stored tri-state: `true | false` once chosen, `null` while never chosen. */
   disableAnimationChoice: boolean | null
   setDisableAnimation: (value: boolean) => void
-  /** Resolved 3D dice colorset id (`theme_colorset`); defaults to `white`. */
-  diceColorset: string
-  setDiceColorset: (value: string) => void
-  /** Resolved 3D dice material id (`theme_material`); defaults to `glass`. */
-  diceMaterial: string
-  setDiceMaterial: (value: string) => void
 }
 
 /**
@@ -105,12 +40,6 @@ export interface DiceFabPreferences {
  * authenticated users. `disableAnimation` remains tri-state so "never chosen" falls back to
  * `prefers-reduced-motion`; the first explicit toggle wins from then on even if the media
  * query later changes.
- *
- * The 3D dice appearance (`diceColorset` / `diceMaterial`) is not yet part of the v1
- * preference schema, so it stays on the local `LocalStore` + `safeGet`/`safeSet` +
- * `useReducer` INIT pattern and is resolved through the appearance registry so a stale or
- * hand-edited id degrades to the engine default. Storage being unavailable degrades to an
- * in-session value without throwing. The public shape is unchanged.
  */
 export function useDiceFabPreferences(): DiceFabPreferences {
   const { preferences, setPreference } = usePreferences()
@@ -124,23 +53,6 @@ export function useDiceFabPreferences(): DiceFabPreferences {
     () => false,
   )
 
-  const [appearance, dispatch] = useReducer(appearanceReducer, {
-    diceColorset: DEFAULT_COLORSET,
-    diceMaterial: DEFAULT_MATERIAL,
-  })
-
-  useEffect(() => {
-    const resolved = resolveDiceAppearance(
-      safeGet<unknown>(COLORSET_KEY),
-      safeGet<unknown>(MATERIAL_KEY),
-    )
-    dispatch({
-      type: 'INIT',
-      diceColorset: resolved.colorset,
-      diceMaterial: resolved.material,
-    })
-  }, [])
-
   const setSendToChat = useCallback(
     (value: boolean) => setPreference('dice.sendToChat', value),
     [setPreference],
@@ -149,16 +61,6 @@ export function useDiceFabPreferences(): DiceFabPreferences {
     (value: boolean) => setPreference('dice.disableAnimation', value),
     [setPreference],
   )
-
-  const setDiceColorset = useCallback((value: string) => {
-    dispatch({ type: 'SET_DICE_COLORSET', value })
-    safeSet(COLORSET_KEY, value)
-  }, [])
-
-  const setDiceMaterial = useCallback((value: string) => {
-    dispatch({ type: 'SET_DICE_MATERIAL', value })
-    safeSet(MATERIAL_KEY, value)
-  }, [])
 
   const disableAnimationChoice = preferences.dice.disableAnimation
   const disableAnimation =
@@ -170,9 +72,5 @@ export function useDiceFabPreferences(): DiceFabPreferences {
     disableAnimation,
     disableAnimationChoice,
     setDisableAnimation,
-    diceColorset: appearance.diceColorset,
-    setDiceColorset,
-    diceMaterial: appearance.diceMaterial,
-    setDiceMaterial,
   }
 }

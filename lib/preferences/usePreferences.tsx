@@ -29,6 +29,7 @@ export type PreferencePath =
   | 'dice.disableAnimation'
   | 'dice.color'
   | 'dice.surface'
+  | 'dice.material'
   | 'chat.pinned'
   | 'chat.size'
   | 'combat.autoScrollToNextCombatant'
@@ -86,6 +87,7 @@ const ALL_PATHS: readonly PreferencePath[] = [
   'dice.disableAnimation',
   'dice.color',
   'dice.surface',
+  'dice.material',
   'chat.pinned',
   'chat.size',
   'combat.autoScrollToNextCombatant',

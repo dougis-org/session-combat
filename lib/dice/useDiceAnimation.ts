@@ -6,17 +6,20 @@ import type { BuiltRoll } from '@/lib/dice/useDicePoolState'
 import { animatedDiceCount, toDiceBoxNotation } from '@/lib/dice/toDiceBoxNotation'
 import { diceAnimationScale } from '@/lib/dice/diceAnimationScale'
 import { reconcileDiceFaces, type SettledDie } from '@/lib/dice/reconcileDiceFaces'
-import { DEFAULT_COLORSET, DEFAULT_MATERIAL } from '@/lib/dice/diceAppearance'
+import type { DiceColor, DiceMaterial, DiceSurface } from '@/lib/preferences/schema'
 
-/** Resolved 3D dice appearance passed through to the engine's `theme_*` options. */
+/** Resolved 3D dice appearance passed through to the engine's `theme_*` options. `null`
+ *  means "omit this key", letting the engine apply its own internal default. */
 export interface DiceAppearanceOptions {
-  colorset: string
-  material: string
+  customColorset: DiceColor | null
+  material: DiceMaterial | null
+  surface: DiceSurface | null
 }
 
 const DEFAULT_APPEARANCE: DiceAppearanceOptions = {
-  colorset: DEFAULT_COLORSET,
-  material: DEFAULT_MATERIAL,
+  customColorset: null,
+  material: null,
+  surface: null,
 }
 
 /** `'idle'` while the 3D path is (or may be) usable; `'unsupported'` once it has failed. */
@@ -180,15 +183,34 @@ export function useDiceAnimation(
         )
         if (runIdRef.current !== myRun) return false
         const DiceBox = mod.default
+        const appearance = appearanceRef.current
         box = new DiceBox(container, {
           assetPath: ASSET_PATH,
           baseScale: diceAnimationScale(animatedDiceCount(built)),
           sounds: false,
           shadows: false,
           iterationLimit: ITERATION_LIMIT,
-          theme_colorset: appearanceRef.current.colorset,
-          theme_customColorset: null,
-          theme_material: appearanceRef.current.material,
+          // The engine's loadTheme() only consults theme_material via its getColorSet(e)
+          // branch (named colorsets); a set theme_customColorset instead goes through
+          // makeColorSet(theme_customColorset), which reads `material` off that object
+          // itself. So theme_material must be folded into theme_customColorset here, or it
+          // is silently ignored whenever a custom colorset is also set.
+          ...(appearance.customColorset !== null && {
+            theme_customColorset: {
+              ...appearance.customColorset,
+              ...(appearance.material !== null && { material: appearance.material }),
+            },
+          }),
+          ...(appearance.material !== null && { theme_material: appearance.material }),
+          // Cast: @drdreo/dice-box-threejs's shipped .d.ts declares theme_surface as
+          // 'green-felt' | 'wood-table' | 'wood-tray' | 'metal', but those last three are
+          // not real keys in the engine's theme table (verified against the vendored
+          // bundle — see DICE_SURFACE_VALUES in lib/preferences/schema.ts and the tripwire
+          // test in tests/unit/lib/preferences/diceEnumEngineFacts.test.ts). Our DiceSurface
+          // type is the correct one; the cast bridges past the wrong .d.ts.
+          ...(appearance.surface !== null && {
+            theme_surface: appearance.surface as unknown as 'green-felt',
+          }),
         }) as unknown as DiceBoxLike
         await withTimeout(box.initialize(), INIT_TIMEOUT_MS)
       } catch (err) {

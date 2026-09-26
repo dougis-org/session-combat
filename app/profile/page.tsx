@@ -3,24 +3,75 @@
 import React from 'react';
 import { ProtectedRoute } from '@/lib/components/ProtectedRoute';
 import { usePreferences } from '@/lib/preferences/usePreferences';
-import { isValidPreferenceValue } from '@/lib/preferences/schema';
+import {
+  DICE_SURFACE_VALUES,
+  DICE_MATERIAL_VALUES,
+  HEX_COLOR,
+  isValidPreferenceValue,
+  type DiceSurface,
+  type DiceMaterial,
+} from '@/lib/preferences/schema';
 import { NavBar } from '@/lib/components/NavBar';
+
+const SURFACE_LABELS: Record<DiceSurface, string> = {
+  default: 'Default',
+  'blue-felt': 'Blue Felt',
+  'red-felt': 'Red Felt',
+  'green-felt': 'Green Felt',
+  taverntable: 'Old Tavern Table',
+  mahogany: 'Mahogany',
+  stainless: 'Stainless Steel',
+  cyberpunk: 'Cyberpunk',
+  cagetown: 'Cage Town',
+};
+
+const MATERIAL_LABELS: Record<DiceMaterial, string> = {
+  glass: 'Glass',
+  none: 'Plastic',
+  metal: 'Metal',
+  wood: 'Wood',
+};
 
 export default function ProfilePage() {
   const { preferences, setPreference } = usePreferences();
 
-  // Local draft for the free-text colour field: only a valid short hex (or empty)
-  // is pushed to the preference store; anything else is held locally and flagged.
-  const [colorDraft, setColorDraft] = React.useState<string | null>(null);
-  const storedColor = preferences.dice.color ?? '';
-  const colorValue = colorDraft ?? storedColor;
-  const colorInvalid = colorValue !== '' && !isValidPreferenceValue('dice.color', colorValue);
+  // Local drafts for the foreground/background hex fields: only a valid short hex (or
+  // empty) commits to the preference store; anything else is held locally and flagged.
+  const [foregroundDraft, setForegroundDraft] = React.useState<string | null>(null);
+  const [backgroundDraft, setBackgroundDraft] = React.useState<string | null>(null);
+  const storedColor = preferences.dice.color;
+  const foregroundValue = foregroundDraft ?? storedColor?.foreground ?? '';
+  const backgroundValue = backgroundDraft ?? storedColor?.background ?? '';
+  // Exactly one field filled (and otherwise hex-valid) is also invalid: isValidDiceColor
+  // requires both fields or neither, with no partial repair — without this, that state
+  // silently fails to commit with no visible feedback.
+  const pairIncomplete = (foregroundValue === '') !== (backgroundValue === '');
+  const foregroundInvalid =
+    (foregroundValue !== '' && !HEX_COLOR.test(foregroundValue)) ||
+    (pairIncomplete && foregroundValue === '');
+  const backgroundInvalid =
+    (backgroundValue !== '' && !HEX_COLOR.test(backgroundValue)) ||
+    (pairIncomplete && backgroundValue === '');
 
-  const onColorChange = (raw: string) => {
+  const commitColor = (foreground: string, background: string) => {
+    if (foreground === '' && background === '') {
+      setPreference('dice.color', null);
+      return;
+    }
+    const candidate = { foreground, background };
+    if (isValidPreferenceValue('dice.color', candidate)) setPreference('dice.color', candidate);
+  };
+
+  const onForegroundChange = (raw: string) => {
     const val = raw.trim();
-    setColorDraft(val);
-    if (val === '') setPreference('dice.color', null);
-    else if (isValidPreferenceValue('dice.color', val)) setPreference('dice.color', val);
+    setForegroundDraft(val);
+    commitColor(val, backgroundValue);
+  };
+
+  const onBackgroundChange = (raw: string) => {
+    const val = raw.trim();
+    setBackgroundDraft(val);
+    commitColor(foregroundValue, val);
   };
 
   const inputClass = "w-full sm:w-64 rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-200 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500";
@@ -66,21 +117,45 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="flex flex-col space-y-1">
-                  <label htmlFor="dice-color" className="text-gray-200 block mb-1">Dice Color (Hex)</label>
+                  <label htmlFor="dice-color-foreground" className="text-gray-200 block mb-1">Dice Color — Foreground (Hex)</label>
                   <input
-                    id="dice-color"
+                    id="dice-color-foreground"
+                    type="text"
+                    inputMode="text"
+                    placeholder="e.g. #ffffff"
+                    aria-invalid={foregroundInvalid}
+                    aria-describedby={foregroundInvalid ? 'dice-color-foreground-error' : undefined}
+                    className={`${inputClass} ${foregroundInvalid ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    value={foregroundValue}
+                    onChange={(e) => onForegroundChange(e.target.value)}
+                  />
+                  {foregroundInvalid && (
+                    <p id="dice-color-foreground-error" role="alert" className="text-sm text-red-400">
+                      {pairIncomplete && foregroundValue === ''
+                        ? 'Set both foreground and background, or clear both.'
+                        : <>Enter a short hex colour like <code>#f00</code> or <code>#ff0000</code>.</>}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="dice-color-background" className="text-gray-200 block mb-1">Dice Color — Background (Hex)</label>
+                  <input
+                    id="dice-color-background"
                     type="text"
                     inputMode="text"
                     placeholder="e.g. #ff0000"
-                    aria-invalid={colorInvalid}
-                    aria-describedby={colorInvalid ? 'dice-color-error' : undefined}
-                    className={`${inputClass} ${colorInvalid ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                    value={colorValue}
-                    onChange={(e) => onColorChange(e.target.value)}
+                    aria-invalid={backgroundInvalid}
+                    aria-describedby={backgroundInvalid ? 'dice-color-background-error' : undefined}
+                    className={`${inputClass} ${backgroundInvalid ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    value={backgroundValue}
+                    onChange={(e) => onBackgroundChange(e.target.value)}
                   />
-                  {colorInvalid && (
-                    <p id="dice-color-error" role="alert" className="text-sm text-red-400">
-                      Enter a short hex colour like <code>#f00</code> or <code>#ff0000</code>.
+                  {backgroundInvalid && (
+                    <p id="dice-color-background-error" role="alert" className="text-sm text-red-400">
+                      {pairIncomplete && backgroundValue === ''
+                        ? 'Set both foreground and background, or clear both.'
+                        : <>Enter a short hex colour like <code>#f00</code> or <code>#ff0000</code>.</>}
                     </p>
                   )}
                 </div>
@@ -90,17 +165,36 @@ export default function ProfilePage() {
                   <select
                     id="dice-surface"
                     className={inputClass}
-                    value={preferences.dice.surface || 'default'}
+                    value={preferences.dice.surface ?? ''}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setPreference('dice.surface', val === 'default' ? null : val);
+                      setPreference('dice.surface', val === '' ? null : val);
                     }}
                   >
-                    <option value="default">Default</option>
-                    <option value="wood">Wood</option>
-                    <option value="metal">Metal</option>
-                    <option value="stone">Stone</option>
-                    <option value="felt">Felt</option>
+                    {/* Empty-string sentinel for "no preference" — 'default' is itself a real,
+                        selectable engine theme (DICE_SURFACE_VALUES), so it can't double as this. */}
+                    <option value="">No preference (engine default)</option>
+                    {DICE_SURFACE_VALUES.map((v) => (
+                      <option key={v} value={v}>{SURFACE_LABELS[v]}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="dice-material" className="text-gray-200 block mb-1">Dice Material</label>
+                  <select
+                    id="dice-material"
+                    className={inputClass}
+                    value={preferences.dice.material ?? ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setPreference('dice.material', val === '' ? null : val);
+                    }}
+                  >
+                    <option value="">No preference (engine default)</option>
+                    {DICE_MATERIAL_VALUES.map((v) => (
+                      <option key={v} value={v}>{MATERIAL_LABELS[v]}</option>
+                    ))}
                   </select>
                 </div>
               </div>
