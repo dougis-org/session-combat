@@ -7,11 +7,11 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 701 --repo dougis-org/session-combat --add-label "in-progress"`. Discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found for issue #701, log a warning and continue. If the `gh` token lacks the `project` scope, instruct the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] **Issue lifecycle: mark in-progress** — run `gh issue edit 701 --repo dougis-org/session-combat --add-label "in-progress"`. Discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found for issue #701, log a warning and continue. If the `gh` token lacks the `project` scope, instruct the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
 
 ### 1. Schema (design.md Decisions 1, 2, 3)
 
@@ -49,24 +49,24 @@
 
 ### 5. Manual verification
 
-- [ ] **5.1** Run the app locally, set a custom `dice.color`, `dice.surface`, and `dice.material` on `/profile`, then roll dice via the fab and visually confirm the rendered die/tray reflect the chosen values (covers the risk noted in proposal.md/design.md that `theme_customColorset`'s shape is inferred from the vendored engine bundle, not documented types).
+- [x] **5.1** Run the app locally, set a custom `dice.color`, `dice.surface`, and `dice.material` on `/profile`, then roll dice via the fab and visually confirm the rendered die/tray reflect the chosen values (covers the risk noted in proposal.md/design.md that `theme_customColorset`'s shape is inferred from the vendored engine bundle, not documented types).
 
 - [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (e.g. the FU-3 hex-draft-validation pattern in `app/profile/page.tsx` — reuse for the new foreground/background fields rather than writing a new pattern).
 - [x] Confirm acceptance criteria in `openspec/changes/consume-dice-preferences/specs/profile-settings/spec.md` and `openspec/changes/consume-dice-preferences/specs/dice-appearance/spec.md` are covered by the tests written in 1.8, 2.3, 3.5, and 4.1.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
 - [x] Run unit/integration tests: `node node_modules/.bin/jest` (per project convention — `npm test` has no script; see `tests/unit/lib/preferences/schema.test.ts`, `tests/unit/lib/dice/**`, profile page tests)
-- [ ] Run E2E tests (if applicable) per project convention
+- [x] Run E2E tests (if applicable) per project convention
 - [x] Run type checks: `npm run typecheck` (or project's equivalent)
 - [x] Run build: `npm run build`
-- [ ] Run security/code quality checks required by project standards (Codacy / Verity gate per `CLAUDE.md`)
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run security/code quality checks required by project standards (Codacy / Verity gate per `CLAUDE.md`)
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -81,14 +81,14 @@ If **ANY** required step fails, you **MUST** iterate and address the failure bef
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `consume-dice-preferences` to `main`. The PR body **MUST include `Closes #701`**.
-- [ ] **Issue lifecycle: mark in-review** — run `gh issue edit 701 --repo dougis-org/session-combat --add-label "in-review" --remove-label "in-progress"`. Move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (this repo's branch ruleset only allows squash merges — never `--merge`; NEVER use `--admin` to force the merge)
-- [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `consume-dice-preferences` to `main`. The PR body **MUST include `Closes #701`**.
+- [x] **Issue lifecycle: mark in-review** — run `gh issue edit 701 --repo dougis-org/session-combat --add-label "in-review" --remove-label "in-progress"`. Move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (this repo's branch ruleset only allows squash merges — never `--merge`; NEVER use `--admin` to force the merge)
+- [x] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, reply, resolve via the `resolveReviewThread` GraphQL mutation (per project convention — replying alone does not resolve a thread), commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix any failing required checks, commit, run [Remote push validation], push, wait 180 seconds; then restart this loop from step 1
@@ -109,18 +109,18 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from the primary checkout, not the worktree)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none expected beyond the specs themselves; confirm no README/CLAUDE.md references the removed `DiceAppearanceModal`/gallery flow)
-- [ ] Sync approved spec deltas into `openspec/specs/`: copy `openspec/changes/consume-dice-preferences/specs/profile-settings/spec.md` and `openspec/changes/consume-dice-preferences/specs/dice-appearance/spec.md` onto `openspec/specs/profile-settings/spec.md` and `openspec/specs/dice-appearance/spec.md` respectively, merging MODIFIED/REMOVED requirements into the existing base spec text (not a raw overwrite — the base spec's `## Purpose` and unaffected requirements are preserved). Update relative links: `../../design.md` → `../../changes/archive/YYYY-MM-DD-consume-dice-preferences/design.md`, `../../tasks.md` → `../../changes/archive/YYYY-MM-DD-consume-dice-preferences/tasks.md`.
-- [ ] Archive the change: move `openspec/changes/consume-dice-preferences/` to `openspec/changes/archive/YYYY-MM-DD-consume-dice-preferences/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-consume-dice-preferences/` exists and `openspec/changes/consume-dice-preferences/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-consume-dice-preferences` then `git push -u origin doc/archive-YYYY-MM-DD-consume-dice-preferences`
-- [ ] Open a PR from `doc/archive-YYYY-MM-DD-consume-dice-preferences` to `main` with title `docs: archive consume-dice-preferences (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
-- [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
-- [ ] Prune merged local branches: `git fetch --prune` and `git branch -D consume-dice-preferences doc/archive-YYYY-MM-DD-consume-dice-preferences`
-- [ ] Remove the change's dedicated worktree: `git worktree remove .worktrees/consume-dice-preferences`
+- [x] `git checkout main` and `git pull --ff-only` (from the primary checkout, not the worktree)
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none expected beyond the specs themselves; confirm no README/CLAUDE.md references the removed `DiceAppearanceModal`/gallery flow)
+- [x] Sync approved spec deltas into `openspec/specs/`: copy `openspec/changes/consume-dice-preferences/specs/profile-settings/spec.md` and `openspec/changes/consume-dice-preferences/specs/dice-appearance/spec.md` onto `openspec/specs/profile-settings/spec.md` and `openspec/specs/dice-appearance/spec.md` respectively, merging MODIFIED/REMOVED requirements into the existing base spec text (not a raw overwrite — the base spec's `## Purpose` and unaffected requirements are preserved). Update relative links: `../../design.md` → `../../changes/archive/YYYY-MM-DD-consume-dice-preferences/design.md`, `../../tasks.md` → `../../changes/archive/YYYY-MM-DD-consume-dice-preferences/tasks.md`.
+- [x] Archive the change: move `openspec/changes/consume-dice-preferences/` to `openspec/changes/archive/YYYY-MM-DD-consume-dice-preferences/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-consume-dice-preferences/` exists and `openspec/changes/consume-dice-preferences/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-consume-dice-preferences` then `git push -u origin doc/archive-YYYY-MM-DD-consume-dice-preferences`
+- [x] Open a PR from `doc/archive-YYYY-MM-DD-consume-dice-preferences` to `main` with title `docs: archive consume-dice-preferences (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin` to force the merge)
+- [x] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)
+- [x] Prune merged local branches: `git fetch --prune` and `git branch -D consume-dice-preferences doc/archive-YYYY-MM-DD-consume-dice-preferences`
+- [x] Remove the change's dedicated worktree: `git worktree remove .worktrees/consume-dice-preferences`
 
 Required cleanup after archive: `git fetch --prune` and `git branch -D consume-dice-preferences doc/archive-YYYY-MM-DD-consume-dice-preferences`
